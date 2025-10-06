@@ -10,6 +10,7 @@ public class TrashCanViewModel : ObservableRecipient, INavigable
     // StoryElement data
 
     private Guid _uuid;
+
     public Guid Uuid
     {
         get => _uuid;
@@ -17,6 +18,7 @@ public class TrashCanViewModel : ObservableRecipient, INavigable
     }
 
     private string _name;
+
     public string Name
     {
         get => _name;
@@ -27,6 +29,7 @@ public class TrashCanViewModel : ObservableRecipient, INavigable
 
     // The StoryModel is passed when TrashCanPage is navigated to
     private TrashCanModel _model;
+
     public TrashCanModel Model
     {
         get => _model;
@@ -43,13 +46,15 @@ public class TrashCanViewModel : ObservableRecipient, INavigable
         LoadModel();
     }
 
-    public void Deactivate(object parameter) { }
+    public void Deactivate(object parameter)
+    {
+    }
 
     private void LoadModel()
     {
         Uuid = Model.Uuid;
         Name = Model.Name;
-
     }
+
     #endregion
 }

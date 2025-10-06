@@ -1,20 +1,69 @@
-    using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
-using StoryCAD.Services;
 using StoryCAD.Services.Messages;
 using StoryCAD.ViewModels;
-using StoryCAD.ViewModels.SubViewModels;
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace StoryCADTests.ViewModels;
 
 [TestClass]
 public class SceneViewModelTests
 {
+    #region Priority 3: Special Property Behaviors (STUBBED)
+
+    [TestMethod]
+    public void Name_WhenChanged_SendsNameChangedMessage()
+    {
+        // Arrange - Setup ViewModel and register for NameChangedMessage
+        _viewModel.Activate(_sceneModel);
+
+        var messageReceived = false;
+        NameChangedMessage capturedMessage = null;
+
+        // Register to receive NameChangedMessage
+        WeakReferenceMessenger.Default.Register<NameChangedMessage>(this, (r, m) =>
+        {
+            messageReceived = true;
+            capturedMessage = m;
+        });
+
+        var oldName = _viewModel.Name;
+        var newName = "Updated Scene Name";
+
+        // Act - Change the Name property
+        _viewModel.Name = newName;
+
+        // Assert - Verify NameChangedMessage was sent with correct values
+        Assert.IsTrue(messageReceived, "NameChangedMessage should be sent when Name changes");
+        Assert.IsNotNull(capturedMessage, "Captured message should not be null");
+        Assert.IsNotNull(capturedMessage.Value, "Message value should not be null");
+        Assert.AreEqual(oldName, capturedMessage.Value.OldName, "Message should contain old name");
+        Assert.AreEqual(newName, capturedMessage.Value.NewName, "Message should contain new name");
+
+        // Cleanup - Unregister from messenger
+        WeakReferenceMessenger.Default.UnregisterAll(this);
+    }
+
+    // TODO: Priority 3 - Name Property Tests
+    // - Name_WhenSetToSameValue_DoesNotSendMessage
+    // - Name_WhenChangeable_LogsNameChange
+
+    // TODO: Priority 3 - ViewpointCharacter Property Tests
+    // - ViewpointCharacter_WhenSet_AddsCharacterToCast
+    // - ViewpointCharacter_WithEmptyGuid_DoesNotAddToCast
+    // - SelectedViewpointCharacter_WhenSet_UpdatesViewpointCharacterGuid
+    // - SelectedViewpointCharacter_WhenSetToNull_ClearsViewpointCharacter
+
+    // TODO: Priority 3 - Setting Property Tests
+    // - SelectedSetting_WhenSet_UpdatesSettingGuid
+    // - SelectedSetting_WhenSetToNull_ClearsSettingGuid
+
+    // TODO: Priority 3 - Protagonist/Antagonist Property Tests
+    // - SelectedProtagonist_WhenSet_UpdatesProtagonistGuid
+    // - SelectedAntagonist_WhenSet_UpdatesAntagonistGuid
+
+    #endregion
+
     #region Test Infrastructure Fields
 
     // Primary test subjects
@@ -115,9 +164,9 @@ public class SceneViewModelTests
         _viewModel.Activate(_sceneModel);
 
         // Verify initial state
-        string originalName = _sceneModel.Name;
-        string originalDescription = _sceneModel.SceneDescription;
-        string originalDate = _sceneModel.Date;
+        var originalName = _sceneModel.Name;
+        var originalDescription = _sceneModel.SceneDescription;
+        var originalDate = _sceneModel.Date;
 
         // Act - Modify properties in ViewModel
         _viewModel.Name = "Modified Scene Name";
@@ -148,7 +197,7 @@ public class SceneViewModelTests
     {
         // Arrange - Activate and modify ViewModel
         _viewModel.Activate(_sceneModel);
-        string modifiedName = "Changed Scene Name";
+        var modifiedName = "Changed Scene Name";
         _viewModel.Name = modifiedName;
 
         // Act - Deactivate triggers SaveModel
@@ -169,7 +218,7 @@ public class SceneViewModelTests
         var character = CreateTestCharacter("John Doe");
         _storyModel.StoryElements.Characters.Add(character);
         _viewModel.Activate(_sceneModel);
-        int initialCount = _viewModel.CastList.Count;
+        var initialCount = _viewModel.CastList.Count;
 
         // Act - Add character to cast
         _viewModel.AddCastMember(character);
@@ -177,7 +226,8 @@ public class SceneViewModelTests
         // Assert - Verify character was added
         Assert.AreEqual(initialCount + 1, _viewModel.CastList.Count, "CastList count should increase");
         Assert.IsTrue(_viewModel.CastList.Contains(character), "CastList should contain the added character");
-        Assert.IsTrue(_viewModel.CastList.Any(c => c.Uuid == character.Uuid), "CastList should contain character by Uuid");
+        Assert.IsTrue(_viewModel.CastList.Any(c => c.Uuid == character.Uuid),
+            "CastList should contain character by Uuid");
     }
 
     [TestMethod]
@@ -188,7 +238,7 @@ public class SceneViewModelTests
         _storyModel.StoryElements.Characters.Add(character);
         _viewModel.Activate(_sceneModel);
         _viewModel.AddCastMember(character);
-        int countAfterAdd = _viewModel.CastList.Count;
+        var countAfterAdd = _viewModel.CastList.Count;
 
         // Act - Remove the character
         _viewModel.RemoveCastMember(character);
@@ -205,7 +255,7 @@ public class SceneViewModelTests
         var character = CreateTestCharacter("Invalid Character");
         character.Uuid = Guid.Empty; // This simulates a placeholder character
         _viewModel.Activate(_sceneModel);
-        int initialCount = _viewModel.CastList.Count;
+        var initialCount = _viewModel.CastList.Count;
 
         // Act - Attempt to add invalid character
         _viewModel.AddCastMember(character);
@@ -222,61 +272,6 @@ public class SceneViewModelTests
     // - SwitchCastView_ToCastList_ShowsOnlyCastMembers
     // - CastMemberExists_WithExistingCharacter_ReturnsTrue
     // - CastMemberExists_WithNonExistentCharacter_ReturnsFalse
-
-    #endregion
-
-    #region Priority 3: Special Property Behaviors (STUBBED)
-
-    [TestMethod]
-    public void Name_WhenChanged_SendsNameChangedMessage()
-    {
-        // Arrange - Setup ViewModel and register for NameChangedMessage
-        _viewModel.Activate(_sceneModel);
-
-        bool messageReceived = false;
-        NameChangedMessage capturedMessage = null;
-
-        // Register to receive NameChangedMessage
-        WeakReferenceMessenger.Default.Register<NameChangedMessage>(this, (r, m) =>
-        {
-            messageReceived = true;
-            capturedMessage = m;
-        });
-
-        string oldName = _viewModel.Name;
-        string newName = "Updated Scene Name";
-
-        // Act - Change the Name property
-        _viewModel.Name = newName;
-
-        // Assert - Verify NameChangedMessage was sent with correct values
-        Assert.IsTrue(messageReceived, "NameChangedMessage should be sent when Name changes");
-        Assert.IsNotNull(capturedMessage, "Captured message should not be null");
-        Assert.IsNotNull(capturedMessage.Value, "Message value should not be null");
-        Assert.AreEqual(oldName, capturedMessage.Value.OldName, "Message should contain old name");
-        Assert.AreEqual(newName, capturedMessage.Value.NewName, "Message should contain new name");
-
-        // Cleanup - Unregister from messenger
-        WeakReferenceMessenger.Default.UnregisterAll(this);
-    }
-
-    // TODO: Priority 3 - Name Property Tests
-    // - Name_WhenSetToSameValue_DoesNotSendMessage
-    // - Name_WhenChangeable_LogsNameChange
-
-    // TODO: Priority 3 - ViewpointCharacter Property Tests
-    // - ViewpointCharacter_WhenSet_AddsCharacterToCast
-    // - ViewpointCharacter_WithEmptyGuid_DoesNotAddToCast
-    // - SelectedViewpointCharacter_WhenSet_UpdatesViewpointCharacterGuid
-    // - SelectedViewpointCharacter_WhenSetToNull_ClearsViewpointCharacter
-
-    // TODO: Priority 3 - Setting Property Tests
-    // - SelectedSetting_WhenSet_UpdatesSettingGuid
-    // - SelectedSetting_WhenSetToNull_ClearsSettingGuid
-
-    // TODO: Priority 3 - Protagonist/Antagonist Property Tests
-    // - SelectedProtagonist_WhenSet_UpdatesProtagonistGuid
-    // - SelectedAntagonist_WhenSet_UpdatesAntagonistGuid
 
     #endregion
 
@@ -331,8 +326,8 @@ public class SceneViewModelTests
     #region Helper Methods
 
     /// <summary>
-    /// Creates a SceneViewModel with a properly configured StoryModel in AppState.
-    /// This follows the pattern from ProblemViewModelTests using IoC container.
+    ///     Creates a SceneViewModel with a properly configured StoryModel in AppState.
+    ///     This follows the pattern from ProblemViewModelTests using IoC container.
     /// </summary>
     private SceneViewModel SetupViewModelWithStory()
     {
@@ -349,8 +344,8 @@ public class SceneViewModelTests
     }
 
     /// <summary>
-    /// Creates a test StoryModel populated with characters and settings.
-    /// This provides realistic test data for ViewModel operations.
+    ///     Creates a test StoryModel populated with characters and settings.
+    ///     This provides realistic test data for ViewModel operations.
     /// </summary>
     private StoryModel CreateTestStoryModel()
     {
@@ -371,8 +366,8 @@ public class SceneViewModelTests
     }
 
     /// <summary>
-    /// Creates a test SceneModel with realistic default values.
-    /// Uses the pattern: new SceneModel(name, parent, null)
+    ///     Creates a test SceneModel with realistic default values.
+    ///     Uses the pattern: new SceneModel(name, parent, null)
     /// </summary>
     private SceneModel CreateTestSceneModel(StoryModel parent = null)
     {
@@ -395,8 +390,8 @@ public class SceneViewModelTests
     }
 
     /// <summary>
-    /// Creates a test CharacterModel with the specified name.
-    /// Character is created as a child of a StoryModel.
+    ///     Creates a test CharacterModel with the specified name.
+    ///     Character is created as a child of a StoryModel.
     /// </summary>
     private CharacterModel CreateTestCharacter(string name)
     {
@@ -407,8 +402,8 @@ public class SceneViewModelTests
     }
 
     /// <summary>
-    /// Creates a test SettingModel with the specified name.
-    /// Setting is created as a child of a StoryModel.
+    ///     Creates a test SettingModel with the specified name.
+    ///     Setting is created as a child of a StoryModel.
     /// </summary>
     private SettingModel CreateTestSetting(string name)
     {
@@ -419,7 +414,7 @@ public class SceneViewModelTests
     }
 
     /// <summary>
-    /// Creates a test StringSelection for scene purposes testing.
+    ///     Creates a test StringSelection for scene purposes testing.
     /// </summary>
     private StringSelection CreateTestStringSelection(string text, bool isSelected = false)
     {

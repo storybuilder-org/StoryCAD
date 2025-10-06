@@ -6,6 +6,14 @@ public sealed partial class NewRelationshipPage : Page
 {
     public CharacterViewModel CharVM = Ioc.Default.GetService<CharacterViewModel>();
     public NewRelationshipViewModel NewRelVM;
+
+    public NewRelationshipPage(NewRelationshipViewModel vm)
+    {
+        InitializeComponent();
+        RelationTypes = new ObservableCollection<RelationType>();
+        NewRelVM = vm;
+    }
+
     #region public Properties
 
     public StoryElementCollection StoryElements;
@@ -20,11 +28,5 @@ public sealed partial class NewRelationshipPage : Page
     public ObservableCollection<RelationType> RelationTypes;
     public ObservableCollection<string> SimpleRelationTypes;
 
-    #endregion  
-    public NewRelationshipPage(NewRelationshipViewModel vm)
-    {
-        InitializeComponent();
-        RelationTypes = new ObservableCollection<RelationType>();
-        NewRelVM = vm;
-    }
+    #endregion
 }

@@ -1,15 +1,12 @@
-using StoryCAD.Models;
-using System.Threading.Tasks;
-
 namespace StoryCAD.Services.Collaborator.Contracts;
 
 /// <summary>
-/// Public interface for workflow execution
+///     Public interface for workflow execution
 /// </summary>
 public interface IWorkflowRunner
 {
     /// <summary>
-    /// Runs a workflow asynchronously
+    ///     Runs a workflow asynchronously
     /// </summary>
     /// <param name="workflow">The workflow model to execute</param>
     /// <param name="element">The story element being processed</param>
@@ -18,7 +15,7 @@ public interface IWorkflowRunner
     Task<WorkflowResult> RunAsync(WorkflowModel workflow, StoryElement element, object viewModel);
 
     /// <summary>
-    /// Validates the output of a workflow
+    ///     Validates the output of a workflow
     /// </summary>
     /// <param name="jsonOutput">The JSON output to validate</param>
     /// <param name="workflow">The workflow model for validation context</param>

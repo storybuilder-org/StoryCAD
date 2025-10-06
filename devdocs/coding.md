@@ -222,4 +222,80 @@ public class StoryService
 - Methods: May be slow, have side effects, or throw exceptions
 - When in doubt, use a method
 
+## Code Quality Analyzers
+
+StoryCAD uses Roslyn analyzers configured in `.editorconfig` to enforce code quality standards and detect potential issues.
+
+### Configured Analyzer Rules
+
+**Dead Code Detection**
+- `CS0169` - Field is never used
+- `CS0414` - Field is assigned but its value is never used
+- `CS0168` - Variable is declared but never used
+- `IDE0051` - Private member is unused
+- `IDE0052` - Private member is unread
+- `IDE0060` - Remove unused parameter
+
+**Code Cleanliness**
+- `CS0105` - Using directive appeared previously (duplicate usings)
+
+**API Modernization**
+- `CS0618` - Member is obsolete (use newer APIs)
+
+All rules are set to `severity = warning` in `.editorconfig` to ensure they appear in build output and IDE error lists.
+
+### Using Analyzers in Development
+
+**Visual Studio / Rider**
+- Warnings appear with green squiggles in the editor
+- Quick fixes (light bulb icon) available for most issues
+- View all warnings: Build → Error List → Warnings tab
+- Fix all in scope: Right-click → Quick Actions → Fix all in document/project/solution
+
+**Command Line Build**
+```bash
+msbuild StoryCAD.sln /t:Build /p:Configuration=Debug
+# Analyzer warnings appear in build output
+```
+
+**Suppressing Warnings (Use Sparingly)**
+```csharp
+#pragma warning disable CS0618 // Obsolete API
+var result = LegacyMethod();
+#pragma warning restore CS0618
+```
+Only suppress warnings when:
+- False positive confirmed
+- Temporary workaround documented with TODO
+- Platform-specific code requires it
+
+### ReSharper Code Cleanup
+
+For comprehensive code cleanup beyond basic analyzers, use ReSharper/Rider:
+
+**Quick Cleanup** (current file):
+- Visual Studio: `Ctrl+E, C`
+- Rider: `Ctrl+Alt+Enter` → "Code Cleanup"
+
+**Bulk Cleanup** (entire solution):
+- Right-click solution → "Code Cleanup"
+- Profile: "Built-in: Full Cleanup"
+- Review git diff before committing
+
+**Command Line** (CI/CD or scripting):
+```bash
+jb inspectcode StoryCAD.sln --output=inspection.xml
+jb cleanupcode StoryCAD.sln --profile="Built-in: Full Cleanup"
+```
+
+For detailed ReSharper workflows, see `/devdocs/issue_1134_resharper_guide.md`.
+
+### Analyzer Best Practices
+
+1. **Fix warnings immediately** - Don't let them accumulate
+2. **Run builds locally** - Catch issues before committing
+3. **Review analyzer suggestions** - They often reveal design issues
+4. **Update .editorconfig** - Add new rules as patterns emerge
+5. **Document suppressions** - Explain why warning is suppressed
+
 Remember: Consistency is more important than personal preference. When modifying existing code, follow its conventions.

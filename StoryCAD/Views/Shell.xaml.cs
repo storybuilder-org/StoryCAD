@@ -1,32 +1,25 @@
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.UI.ViewManagement;
+using Microsoft.UI;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using StoryCAD.Models.Tools;
-using StoryCAD.Services.Logging;
-using Windows.UI.ViewManagement;
-using Windows.ApplicationModel.DataTransfer;
-using Microsoft.UI;
-using StoryCAD.Services.Collaborator;
-using StoryCAD.Exceptions;
 using StoryCAD.Services;
+using StoryCAD.Services.Backup;
+using StoryCAD.Services.Collaborator;
 using StoryCAD.Services.Dialogs;
+using StoryCAD.Services.Locking;
+using StoryCAD.Services.Logging;
 using StoryCAD.Services.Ratings;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Locking;
 
 namespace StoryCAD.Views;
 
 public sealed partial class Shell : Page
 {
-    public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
-    public Windowing Windowing => Ioc.Default.GetService<Windowing>();
-    public OutlineViewModel OutlineVM => Ioc.Default.GetService<OutlineViewModel>();
-    public AppState AppState => Ioc.Default.GetService<AppState>();
     public LogService Logger;
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
 
@@ -39,7 +32,7 @@ public sealed partial class Shell : Page
             AllowDrop = false;
             Logger = Ioc.Default.GetService<LogService>();
             DataContext = ShellVm;
-            Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+            Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher = DispatcherQueue.GetForCurrentThread();
             Loaded += Shell_Loaded;
             AppState.CurrentDocumentChanged += (_, __) => UpdateDocumentBindings();
             SerializationLock.CanExecuteStateChanged += (_, __) => ShellVm.RefreshAllCommands();
@@ -49,12 +42,18 @@ public sealed partial class Shell : Page
             // A shell initialization error is fatal
             Logger!.LogException(LogLevel.Error, ex, ex.Message);
             Logger.Flush();
-            Application.Current.Exit();  // Win32
+            Application.Current.Exit(); // Win32
         }
+
         ShellVm.SplitViewFrame = SplitViewFrame;
     }
 
-	private async void Shell_Loaded(object sender, RoutedEventArgs e)
+    public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
+    public Windowing Windowing => Ioc.Default.GetService<Windowing>();
+    public OutlineViewModel OutlineVM => Ioc.Default.GetService<OutlineViewModel>();
+    public AppState AppState => Ioc.Default.GetService<AppState>();
+
+    private async void Shell_Loaded(object sender, RoutedEventArgs e)
     {
         Windowing.XamlRoot = XamlRoot;
         Ioc.Default.GetService<AppState>()!.StartUpTimer.Stop();
@@ -65,7 +64,9 @@ public sealed partial class Shell : Page
             ShellVm.CollaboratorVisibility = Visibility.Visible;
         }
         else
+        {
             ShellVm.CollaboratorVisibility = Visibility.Collapsed;
+        }
 
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();
@@ -85,45 +86,52 @@ public sealed partial class Shell : Page
             {
                 await Ioc.Default.GetRequiredService<WebViewModel>().ShowWebViewDialog();
             }
-
         }
+
         //Shows changelog if the app has been updated since the last launch.
         if (Ioc.Default.GetRequiredService<AppState>().LoadedWithVersionChange)
         {
-			Ioc.Default.GetService<PreferenceService>()!.Model.HideRatingPrompt = false;  //rating prompt re-enabled on updates.
-			var logger = Ioc.Default.GetService<ILogService>();
-			var appState = Ioc.Default.GetService<AppState>();
-			await new Changelog(logger, appState).ShowChangeLog();
+            Ioc.Default.GetService<PreferenceService>()!.Model.HideRatingPrompt =
+                false; //rating prompt re-enabled on updates.
+            var logger = Ioc.Default.GetService<ILogService>();
+            var appState = Ioc.Default.GetService<AppState>();
+            await new Changelog(logger, appState).ShowChangeLog();
         }
 
         if (Preferences.ShowStartupDialog)
         {
-                ContentDialog cd = new()
-                {
-                        Title = "Need help getting started?",
-                        Content = new HelpPage(),
-                        PrimaryButtonText = "Close",
-                };
-                await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
-                }
+            ContentDialog cd = new()
+            {
+                Title = "Need help getting started?",
+                Content = new HelpPage(),
+                PrimaryButtonText = "Close"
+            };
+            await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
+        }
 
         AdjustSplitViewPane(ShellPage.ActualWidth);
 
         //If StoryCAD was loaded from a .STBX File then instead of showing the file open menu
         //We will instead load the file instead.
         Logger.Log(LogLevel.Info, $"Filepath to launch {ShellVm.FilePathToLaunch}");
-        if (ShellVm.FilePathToLaunch == null) { await ShellVm.OutlineManager.OpenFileOpenMenu(); }
-        else { await ShellVm.OutlineManager.OpenFile(ShellVm.FilePathToLaunch); }
+        if (ShellVm.FilePathToLaunch == null)
+        {
+            await ShellVm.OutlineManager.OpenFileOpenMenu();
+        }
+        else
+        {
+            await ShellVm.OutlineManager.OpenFile(ShellVm.FilePathToLaunch);
+        }
 
-		//Ask user for review if appropriate.
-		RatingService rateService = Ioc.Default.GetService<RatingService>();
-		if (rateService!.AskForRatings())
-		{
-			rateService.OpenRatingPrompt();
-		}
+        //Ask user for review if appropriate.
+        var rateService = Ioc.Default.GetService<RatingService>();
+        if (rateService!.AskForRatings())
+        {
+            rateService.OpenRatingPrompt();
+        }
 
         // Track when the application is shutting down
-        
+
         // Hook up the Closing event for cleanup before window destruction
         if (Windowing.MainWindow.AppWindow != null)
         {
@@ -132,9 +140,9 @@ public sealed partial class Shell : Page
     }
 
     /// <summary>
-    /// Handles the main window closing event. Calls ShellViewModel to perform cleanup.
+    ///     Handles the main window closing event. Calls ShellViewModel to perform cleanup.
     /// </summary>
-    private async void OnMainWindowClosing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
+    private async void OnMainWindowClosing(AppWindow sender, AppWindowClosingEventArgs args)
     {
         try
         {
@@ -148,21 +156,23 @@ public sealed partial class Shell : Page
     }
 
     /// <summary>
-    /// Makes the TreeView lose its selection when there is no corresponding main menu item.
+    ///     Makes the TreeView lose its selection when there is no corresponding main menu item.
     /// </summary>
     /// <remarks>But I don't know why...</remarks>
     private void SplitViewFrame_OnNavigated(object sender, NavigationEventArgs e)
     {
-        ((SplitViewFrame.Content as FrameworkElement)!).RequestedTheme = Windowing.RequestedTheme;
-        SplitViewFrame.Background = Windowing.RequestedTheme == ElementTheme.Light ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Black);
+        (SplitViewFrame.Content as FrameworkElement)!.RequestedTheme = Windowing.RequestedTheme;
+        SplitViewFrame.Background = Windowing.RequestedTheme == ElementTheme.Light
+            ? new SolidColorBrush(Colors.White)
+            : new SolidColorBrush(Colors.Black);
         if (!((FrameworkElement)SplitViewFrame.Content).BaseUri.ToString().Contains("HomePage"))
         {
-            ((Page)SplitViewFrame.Content).Margin = new(0, 0, 0, 5);
+            ((Page)SplitViewFrame.Content).Margin = new Thickness(0, 0, 0, 5);
         }
     }
 
     /// <summary>
-    /// Navigates to the specified source page type.
+    ///     Navigates to the specified source page type.
     /// </summary>
     public bool Navigate(Type sourcePageType, object parameter = null)
     {
@@ -177,20 +187,21 @@ public sealed partial class Shell : Page
             ShellVm.LastClickedTreeviewItem.IsSelected = false;
             ShellVm.LastClickedTreeviewItem.BorderBrush = null;
         }
+
         //Remove old right-clicked node's background
-        TreeViewItem item = (TreeViewItem)sender;
+        var item = (TreeViewItem)sender;
         item.Background = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
 
         ShellVm.RightTappedNode = (StoryNodeItem)item.DataContext;
         ShellVm.LastClickedTreeviewItem = item; //We can't set the background through RightTappedNode so
-                                                //we set a reference to the node itself to reset the background later
+        //we set a reference to the node itself to reset the background later
         ShellVm.ShowFlyoutButtons();
     }
 
     /// <summary>
-    /// Updates the bindings when the document changes.
-    /// Called when AppState.CurrentDocument is set to refresh x:Bind bindings
-    /// for the tree views (CurrentView and TrashView) in the Shell UI.
+    ///     Updates the bindings when the document changes.
+    ///     Called when AppState.CurrentDocument is set to refresh x:Bind bindings
+    ///     for the tree views (CurrentView and TrashView) in the Shell UI.
     /// </summary>
     public void UpdateDocumentBindings()
     {
@@ -198,7 +209,7 @@ public sealed partial class Shell : Page
     }
 
     /// <summary>
-    /// Treat a treeview item as if it were a button
+    ///     Treat a treeview item as if it were a button
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="args"></param>
@@ -228,8 +239,15 @@ public sealed partial class Shell : Page
     private void ClearNodes(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
         var storyModel = Ioc.Default.GetService<AppState>()!.CurrentDocument.Model;
-        if (storyModel?.CurrentView == null || storyModel.CurrentView.Count == 0) { return; }
-        foreach (StoryNodeItem node in storyModel.CurrentView[0]) { node.Background = null; }
+        if (storyModel?.CurrentView == null || storyModel.CurrentView.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var node in storyModel.CurrentView[0])
+        {
+            node.Background = null;
+        }
     }
 
     private void TreeViewItem_Tapped(object sender, TappedRoutedEventArgs e)
@@ -240,24 +258,26 @@ public sealed partial class Shell : Page
             ShellVm.LastClickedTreeviewItem.IsSelected = false;
             ShellVm.LastClickedTreeviewItem.BorderBrush = null;
         }
+
         ShellVm.LastClickedTreeviewItem = (TreeViewItem)sender;
     }
 
     private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
     {
-	    var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
-	    {
-		    Content = new FeedbackDialog(),
-		    PrimaryButtonText = "Submit Feedback",
-			SecondaryButtonText = "Discard",
-		    Title = "Submit",
-	    });
+        var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new ContentDialog
+        {
+            Content = new FeedbackDialog(),
+            PrimaryButtonText = "Submit Feedback",
+            SecondaryButtonText = "Discard",
+            Title = "Submit"
+        });
 
-	    if (result == ContentDialogResult.Primary)
-	    {
-		    Ioc.Default.GetRequiredService<FeedbackViewModel>().CreateFeedback();
-	    }
+        if (result == ContentDialogResult.Primary)
+        {
+            Ioc.Default.GetRequiredService<FeedbackViewModel>().CreateFeedback();
+        }
     }
+
     private void ShellPage_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         AdjustSplitViewPane(e.NewSize.Width);
@@ -267,7 +287,7 @@ public sealed partial class Shell : Page
     {
         if (ShellSplitView != null && ShellSplitView.IsPaneOpen)
         {
-            double pane = Math.Max(200, width * 0.3);
+            var pane = Math.Max(200, width * 0.3);
             ShellSplitView.OpenPaneLength = pane;
         }
     }
@@ -284,30 +304,34 @@ public sealed partial class Shell : Page
     */
 
     /// <summary>
-    /// Ran when root nodes are clicked.
-    /// This is because you can't attach the TreViewItem_Invoked event 
-    /// to the root nodes as they are not within a tree view,
-    /// so this just forwards the click so it can run normally.
+    ///     Ran when root nodes are clicked.
+    ///     This is because you can't attach the TreViewItem_Invoked event
+    ///     to the root nodes as they are not within a tree view,
+    ///     so this just forwards the click so it can run normally.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private void RootClick(object s, RoutedEventArgs e) => ShellVm.TreeViewNodeClicked((s as FrameworkElement).DataContext);
+    private void RootClick(object s, RoutedEventArgs e) =>
+        ShellVm.TreeViewNodeClicked((s as FrameworkElement).DataContext);
 
     /// <summary>
-    /// This updates the parent of a node in a drag and drop to correctly update backing store (story model)
-    /// when the parent of the item being moved is supposed to be the root of the tree view.
+    ///     This updates the parent of a node in a drag and drop to correctly update backing store (story model)
+    ///     when the parent of the item being moved is supposed to be the root of the tree view.
     /// </summary>
     private void NavigationTree_DragItemsCompleted(TreeView sender, TreeViewDragItemsCompletedEventArgs args)
     {
         try
         {
             //Block all other operations
-            if (args.DropResult != DataPackageOperation.Move) return;
+            if (args.DropResult != DataPackageOperation.Move)
+            {
+                return;
+            }
 
             //Update parent field of item in storymodel so it's correct
             var movedItem = (StoryNodeItem)args.Items[0];
             var parent = args.NewParentItem as StoryNodeItem;
-            
+
             // If parent is null, use the CurrentView view's root node
             if (parent == null)
             {
@@ -331,5 +355,4 @@ public sealed partial class Shell : Page
             Logger.LogException(LogLevel.Error, ex, "Error during drag and drop operation.");
         }
     }
-
 }

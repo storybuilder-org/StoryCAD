@@ -6,11 +6,18 @@ namespace StoryCAD.ViewModels.Tools;
 
 public class StockScenesViewModel : ObservableRecipient
 {
+    #region Combobox and ListBox sources
+
+    private readonly SortedDictionary<string, ObservableCollection<string>> _stockScenes;
+
+    #endregion
+
     #region Properties
 
     public ObservableCollection<string> StockSceneCategories;
 
     private string _categoryName;
+
     public string CategoryName
     {
         get => _categoryName;
@@ -22,6 +29,7 @@ public class StockScenesViewModel : ObservableRecipient
     }
 
     private ObservableCollection<string> _stockSceneList;
+
     public ObservableCollection<string> StockSceneList
     {
         get => _stockSceneList;
@@ -29,17 +37,12 @@ public class StockScenesViewModel : ObservableRecipient
     }
 
     private string _sceneName;
+
     public string SceneName
     {
         get => _sceneName;
         set => SetProperty(ref _sceneName, value);
     }
-
-    #endregion
-
-    #region Combobox and ListBox sources
-
-    private readonly SortedDictionary<string, ObservableCollection<string>> _stockScenes;
 
     #endregion
 
@@ -57,7 +60,10 @@ public class StockScenesViewModel : ObservableRecipient
         _toolsData = toolsData;
         StockSceneCategories = new ObservableCollection<string>();
         _stockScenes = _toolsData.StockScenesSource;
-        foreach (string _category in _stockScenes.Keys) { StockSceneCategories.Add(_category); }
+        foreach (var _category in _stockScenes.Keys)
+        {
+            StockSceneCategories.Add(_category);
+        }
     }
 
     #endregion

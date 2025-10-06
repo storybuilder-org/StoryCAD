@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <Page
     x:Class="StoryCAD.Services.Dialogs.BackupNow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -9,8 +10,8 @@
     mc:Ignorable="d" Width="600">
 
     <StackPanel HorizontalAlignment="Left">
-		<TextBox Header="Backup Name" Width="450" Text="{x:Bind BackupVM.Name, Mode=TwoWay}" Margin="10"/>
-		<controls:BrowseTextBox Header="Backup Location" PlaceholderText="Where do you want to store your backup?"
-                                Width="450" Path="{x:Bind BackupVM.Location, Mode=TwoWay}"/>
+        <TextBox Header="Backup Name" Width="450" Text="{x:Bind BackupVM.Name, Mode=TwoWay}" Margin="10" />
+        <controls:BrowseTextBox Header="Backup Location" PlaceholderText="Where do you want to store your backup?"
+                                Width="450" Path="{x:Bind BackupVM.Location, Mode=TwoWay}" />
     </StackPanel>
 </Page>

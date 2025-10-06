@@ -6,6 +6,12 @@ namespace StoryCAD.ViewModels.Tools;
 
 public class KeyQuestionsViewModel : ObservableRecipient
 {
+    #region ComboBox and ListBox sources
+
+    public readonly ObservableCollection<string> KeyQuestionElements;
+
+    #endregion
+
     #region Fields
 
     private List<KeyQuestionModel> _questions;
@@ -17,6 +23,7 @@ public class KeyQuestionsViewModel : ObservableRecipient
     #region Properties
 
     private string _storyElementName;
+
     public string StoryElementName
     {
         get => _storyElementName;
@@ -30,6 +37,7 @@ public class KeyQuestionsViewModel : ObservableRecipient
     }
 
     private string _topic;
+
     public string Topic
     {
         get => _topic;
@@ -37,6 +45,7 @@ public class KeyQuestionsViewModel : ObservableRecipient
     }
 
     private string _question;
+
     public string Question
     {
         get => _question;
@@ -45,15 +54,16 @@ public class KeyQuestionsViewModel : ObservableRecipient
 
     #endregion
 
-    #region ComboBox and ListBox sources
-    public readonly ObservableCollection<string> KeyQuestionElements;
-    #endregion
-
     #region Public Methods
+
     public void NextQuestion()
     {
         _index++;
-        if (_index >= _questions.Count) { _index = 0; }
+        if (_index >= _questions.Count)
+        {
+            _index = 0;
+        }
+
         _questionModel = _questions[_index];
         Topic = _questionModel.Topic;
         Question = _questionModel.Question;
@@ -62,7 +72,11 @@ public class KeyQuestionsViewModel : ObservableRecipient
     public void PreviousQuestion()
     {
         _index--;
-        if (_index < 0) { _index = _questions.Count - 1; }
+        if (_index < 0)
+        {
+            _index = _questions.Count - 1;
+        }
+
         _questionModel = _questions[_index];
         Topic = _questionModel.Topic;
         Question = _questionModel.Question;
@@ -84,8 +98,13 @@ public class KeyQuestionsViewModel : ObservableRecipient
         _toolsData = toolsData;
         KeyQuestionElements = new ObservableCollection<string>();
 
-        foreach (string _element in _toolsData.KeyQuestionsSource.Keys) { KeyQuestionElements.Add(_element); }
+        foreach (var _element in _toolsData.KeyQuestionsSource.Keys)
+        {
+            KeyQuestionElements.Add(_element);
+        }
+
         StoryElementName = KeyQuestionElements[0];
     }
+
     #endregion
 }

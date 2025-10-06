@@ -1,25 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Printing;
-using StoryCAD.Services.Messages;
-using StoryCAD.Services.Logging;
 using Windows.Graphics.Printing;
-using Windows.Graphics.Printing.PrintSupport;
-using Windows.UI;
+using Microsoft.UI;
+using Microsoft.UI.Xaml.Printing;
 
 namespace StoryCAD.ViewModels.Tools;
 
 public partial class PrintReportDialogVM
 {
-    private PrintManager _printManager;
     private bool _printHandlerAttached;
+    private PrintManager _printManager;
     private volatile bool _printTaskCreated;
 
     public PrintDocument? Document;
@@ -27,7 +15,11 @@ public partial class PrintReportDialogVM
 
     private async void StartPrintMenu()
     {
-        if (_isPrinting) return;
+        if (_isPrinting)
+        {
+            return;
+        }
+
         _isPrinting = true;
         _printTaskCreated = false;
 
@@ -65,7 +57,7 @@ public partial class PrintReportDialogVM
         finally
         {
             _isPrinting = false;
-            UnregisterForPrint();  // Always cleanup, regardless of what happened
+            UnregisterForPrint(); // Always cleanup, regardless of what happened
         }
     }
 
@@ -87,10 +79,10 @@ public partial class PrintReportDialogVM
             _printHandlerAttached = false;
         }
     }
-    
+
     /// <summary>
-    /// Public method to check if PrintManager is registered and clean up if needed.
-    /// Used during window shutdown to prevent Win32 exceptions.
+    ///     Public method to check if PrintManager is registered and clean up if needed.
+    ///     Used during window shutdown to prevent Win32 exceptions.
     /// </summary>
     public void EnsurePrintManagerCleanup()
     {
@@ -112,7 +104,9 @@ public partial class PrintReportDialogVM
                 sourceArgs =>
                 {
                     if (PrintDocSource is not null)
+                    {
                         sourceArgs.SetSource(PrintDocSource);
+                    }
                 });
 
             _printTaskCreated = true;
@@ -150,33 +144,49 @@ public partial class PrintReportDialogVM
 
     private void Paginate(object sender, PaginateEventArgs e)
     {
-        if (Document is null) return;
+        if (Document is null)
+        {
+            return;
+        }
+
         var count = Math.Max(1, _printPreviewCache.Count);
         Document.SetPreviewPageCount(count, PreviewPageCountType.Intermediate);
     }
 
     private void GetPreviewPage(object sender, GetPreviewPageEventArgs e)
     {
-        if (Document is null) return;
+        if (Document is null)
+        {
+            return;
+        }
 
         try
         {
             Document.SetPreviewPage(e.PageNumber, _printPreviewCache[e.PageNumber - 1]); // 1-based
         }
-        catch { }
+        catch
+        {
+        }
     }
 
     private void AddPages(object sender, AddPagesEventArgs e)
     {
-        if (Document is null) return;
+        if (Document is null)
+        {
+            return;
+        }
 
-        foreach (StackPanel page in _printPreviewCache)
+        foreach (var page in _printPreviewCache)
+        {
             Document.AddPage(page);
+        }
 
         Document.AddPagesComplete();
 
         if (_printPreviewCache.Count > 0)
+        {
             Document.SetPreviewPage(1, _printPreviewCache[0]);
+        }
 
         Document.SetPreviewPageCount(_printPreviewCache.Count, PreviewPageCountType.Final);
     }
@@ -199,8 +209,8 @@ public partial class PrintReportDialogVM
 
         await RunOnUIAsync(() =>
         {
-            Document = new();
-            _printPreviewCache = new();
+            Document = new PrintDocument();
+            _printPreviewCache = new List<StackPanel>();
 
             foreach (var pageLines in pages)
             {
@@ -209,9 +219,10 @@ public partial class PrintReportDialogVM
                 {
                     Children =
                     {
-                        new TextBlock {
+                        new TextBlock
+                        {
                             Text = displayText,
-                            Foreground = new SolidColorBrush(Microsoft.UI.Colors.Black),
+                            Foreground = new SolidColorBrush(Colors.Black),
                             Margin = new Thickness(120, 50, 0, 0),
                             HorizontalAlignment = HorizontalAlignment.Left,
                             FontSize = 10
@@ -228,9 +239,10 @@ public partial class PrintReportDialogVM
                 {
                     Children =
                     {
-                        new TextBlock {
+                        new TextBlock
+                        {
                             Text = "(Empty report)",
-                            Foreground = new SolidColorBrush(Microsoft.UI.Colors.Black),
+                            Foreground = new SolidColorBrush(Colors.Black),
                             Margin = new Thickness(120, 50, 0, 0),
                             HorizontalAlignment = HorizontalAlignment.Left,
                             FontSize = 10

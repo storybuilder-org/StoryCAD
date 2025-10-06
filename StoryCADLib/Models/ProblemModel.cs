@@ -1,278 +1,259 @@
-﻿using StoryCAD.ViewModels.Tools;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
+using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Models;
 
 public class ProblemModel : StoryElement
 {
-	#region Properties
-	[JsonIgnore]
-	private string _problemType;
+    #region Properties
 
-	[JsonInclude]
-	[JsonPropertyName("ProblemType")]
-	public string ProblemType
-	{
-		get => _problemType;
-		set => _problemType = value;
-	}
+    [JsonIgnore] private string _problemType;
 
-	[JsonIgnore]
-	private string _conflictType;
+    [JsonInclude]
+    [JsonPropertyName("ProblemType")]
+    public string ProblemType
+    {
+        get => _problemType;
+        set => _problemType = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("ConflictType")]
-	public string ConflictType
-	{
-		get => _conflictType;
-		set => _conflictType = value;
-	}
+    [JsonIgnore] private string _conflictType;
 
-	[JsonIgnore]
-	private string _problemCategory;
+    [JsonInclude]
+    [JsonPropertyName("ConflictType")]
+    public string ConflictType
+    {
+        get => _conflictType;
+        set => _conflictType = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("ProblemCategory")]
-	public string ProblemCategory
-	{
-		get => _problemCategory;
-		set => _problemCategory = value;
-	}
+    [JsonIgnore] private string _problemCategory;
 
-	[JsonIgnore]
-	private string _subject;
+    [JsonInclude]
+    [JsonPropertyName("ProblemCategory")]
+    public string ProblemCategory
+    {
+        get => _problemCategory;
+        set => _problemCategory = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("Subject")]
-	public string Subject
-	{
-		get => _subject;
-		set => _subject = value;
-	}
+    [JsonIgnore] private string _subject;
 
-	[JsonIgnore]
-	private string _problemSource;
+    [JsonInclude]
+    [JsonPropertyName("Subject")]
+    public string Subject
+    {
+        get => _subject;
+        set => _subject = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("ProblemSource")]
-	public string ProblemSource
-	{
-		get => _problemSource;
-		set => _problemSource = value;
-	}
-	// Problem protagonist data
+    [JsonIgnore] private string _problemSource;
 
-	[JsonIgnore]
-	private Guid _protagonist;
+    [JsonInclude]
+    [JsonPropertyName("ProblemSource")]
+    public string ProblemSource
+    {
+        get => _problemSource;
+        set => _problemSource = value;
+    }
+    // Problem protagonist data
 
-	[JsonInclude]
-	[JsonPropertyName("Protagonist")]
-	public Guid Protagonist
-	{
-		get => _protagonist;
-		set => _protagonist = value;
-	}
+    [JsonIgnore] private Guid _protagonist;
 
-	[JsonIgnore]
-	private string _protGoal;
+    [JsonInclude]
+    [JsonPropertyName("Protagonist")]
+    public Guid Protagonist
+    {
+        get => _protagonist;
+        set => _protagonist = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("ProtGoal")]
-	public string ProtGoal
-	{
-		get => _protGoal;
-		set => _protGoal = value;
-	}
+    [JsonIgnore] private string _protGoal;
 
-	[JsonIgnore]
-	private string _protMotive;
+    [JsonInclude]
+    [JsonPropertyName("ProtGoal")]
+    public string ProtGoal
+    {
+        get => _protGoal;
+        set => _protGoal = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("ProtMotive")]
-	public string ProtMotive
-	{
-		get => _protMotive;
-		set => _protMotive = value;
-	}
+    [JsonIgnore] private string _protMotive;
 
-	[JsonIgnore]
-	private string _protConflict;
+    [JsonInclude]
+    [JsonPropertyName("ProtMotive")]
+    public string ProtMotive
+    {
+        get => _protMotive;
+        set => _protMotive = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("ProtConflict")]
-	public string ProtConflict
-	{
-		get => _protConflict;
-		set => _protConflict = value;
-	}
+    [JsonIgnore] private string _protConflict;
 
-	// Problem antagonist data
+    [JsonInclude]
+    [JsonPropertyName("ProtConflict")]
+    public string ProtConflict
+    {
+        get => _protConflict;
+        set => _protConflict = value;
+    }
 
-	[JsonIgnore]
-	private Guid _antagonist;
+    // Problem antagonist data
 
-	[JsonInclude]
-	[JsonPropertyName("Antagonist")]
-	public Guid Antagonist
-	{
-		get => _antagonist;
-		set => _antagonist = value;
-	}
+    [JsonIgnore] private Guid _antagonist;
 
-	[JsonIgnore]
-	private string _antagGoal;
+    [JsonInclude]
+    [JsonPropertyName("Antagonist")]
+    public Guid Antagonist
+    {
+        get => _antagonist;
+        set => _antagonist = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("AntagGoal")]
-	public string AntagGoal
-	{
-		get => _antagGoal;
-		set => _antagGoal = value;
-	}
+    [JsonIgnore] private string _antagGoal;
 
-	[JsonIgnore]
-	private string _antagMotive;
+    [JsonInclude]
+    [JsonPropertyName("AntagGoal")]
+    public string AntagGoal
+    {
+        get => _antagGoal;
+        set => _antagGoal = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("AntagMotive")]
-	public string AntagMotive
-	{
-		get => _antagMotive;
-		set => _antagMotive = value;
-	}
+    [JsonIgnore] private string _antagMotive;
 
-	[JsonIgnore]
-	private string _antagConflict;
+    [JsonInclude]
+    [JsonPropertyName("AntagMotive")]
+    public string AntagMotive
+    {
+        get => _antagMotive;
+        set => _antagMotive = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("AntagConflict")]
-	public string AntagConflict
-	{
-		get => _antagConflict;
-		set => _antagConflict = value;
-	}
+    [JsonIgnore] private string _antagConflict;
 
-	// Problem resolution data
+    [JsonInclude]
+    [JsonPropertyName("AntagConflict")]
+    public string AntagConflict
+    {
+        get => _antagConflict;
+        set => _antagConflict = value;
+    }
 
-	[JsonIgnore]
-	private string _outcome;
+    // Problem resolution data
 
-	[JsonInclude]
-	[JsonPropertyName("Outcome")]
-	public string Outcome
-	{
-		get => _outcome;
-		set => _outcome = value;
-	}
+    [JsonIgnore] private string _outcome;
 
-	[JsonIgnore]
-	private string _method;
+    [JsonInclude]
+    [JsonPropertyName("Outcome")]
+    public string Outcome
+    {
+        get => _outcome;
+        set => _outcome = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("Method")]
-	public string Method
-	{
-		get => _method;
-		set => _method = value;
-	}
+    [JsonIgnore] private string _method;
 
-	[JsonIgnore]
-	private string _theme;
+    [JsonInclude]
+    [JsonPropertyName("Method")]
+    public string Method
+    {
+        get => _method;
+        set => _method = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("Theme")]
-	public string Theme
-	{
-		get => _theme;
-		set => _theme = value;
-	}
+    [JsonIgnore] private string _theme;
 
-	[JsonIgnore]
-	private string _premise;
+    [JsonInclude]
+    [JsonPropertyName("Theme")]
+    public string Theme
+    {
+        get => _theme;
+        set => _theme = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("Premise")]
-	public string Premise
-	{
-		get => _premise;
-		set => _premise = value;
-	}
+    [JsonIgnore] private string _premise;
 
-	// Problem notes data
+    [JsonInclude]
+    [JsonPropertyName("Premise")]
+    public string Premise
+    {
+        get => _premise;
+        set => _premise = value;
+    }
 
-	[JsonIgnore]
-	private string _notes;
+    // Problem notes data
 
-	[JsonInclude]
-	[JsonPropertyName("Notes")]
-	public string Notes
-	{
-		get => _notes;
-		set => _notes = value;
-	}
+    [JsonIgnore] private string _notes;
 
-	// StructureModelTitle Tab Data
+    [JsonInclude]
+    [JsonPropertyName("Notes")]
+    public string Notes
+    {
+        get => _notes;
+        set => _notes = value;
+    }
 
-	[JsonIgnore]
-	private string _structureTitle;
+    // StructureModelTitle Tab Data
 
-	/// <summary>
-	/// Name of StructureBeatsModel used in structure tab
-	/// </summary>
-	[JsonInclude]
-	[JsonPropertyName("StructureTitle")]
-	public string StructureTitle
-	{
-		get => _structureTitle;
-		set => _structureTitle = value;
-	}
+    [JsonIgnore] private string _structureTitle;
 
-	[JsonIgnore]
-	private string _structureDescription;
+    /// <summary>
+    ///     Name of StructureBeatsModel used in structure tab
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("StructureTitle")]
+    public string StructureTitle
+    {
+        get => _structureTitle;
+        set => _structureTitle = value;
+    }
 
-	/// <summary>
-	/// Description of StructureBeatsModel used in structure tab
-	/// </summary>
-	[JsonInclude]
-	[JsonPropertyName("StructureDescription")]
-	public string StructureDescription
-	{
-		get => _structureDescription;
-		set => _structureDescription = value;
-	}
+    [JsonIgnore] private string _structureDescription;
 
-	[JsonIgnore]
-	private ObservableCollection<StructureBeatViewModel> structureBeats;
+    /// <summary>
+    ///     Description of StructureBeatsModel used in structure tab
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("StructureDescription")]
+    public string StructureDescription
+    {
+        get => _structureDescription;
+        set => _structureDescription = value;
+    }
 
-	/// <summary>
-	/// Beat nodes of the structure
-	/// </summary>
-	[JsonInclude]
-	[JsonPropertyName("StructureBeats")]
-	public ObservableCollection<StructureBeatViewModel> StructureBeats
-	{
-		get => structureBeats;
-		set => structureBeats = value;
-	}
+    [JsonIgnore] private ObservableCollection<StructureBeatViewModel> structureBeats;
 
-	[JsonIgnore]
-	private string _boundStructure;
+    /// <summary>
+    ///     Beat nodes of the structure
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("StructureBeats")]
+    public ObservableCollection<StructureBeatViewModel> StructureBeats
+    {
+        get => structureBeats;
+        set => structureBeats = value;
+    }
 
-	/// <summary>
-	/// A problem cannot be bound to more than one structure
-	/// </summary>
-	[JsonInclude]
-	[JsonPropertyName("BoundStructure")]
-	public string BoundStructure
-	{
-		get => _boundStructure;
-		set => _boundStructure = value;
-	}
-	#endregion
+    [JsonIgnore] private string _boundStructure;
 
-	#region Constructors
-	public ProblemModel(StoryModel model, StoryNodeItem Node) : base("New Problem", StoryItemType.Problem, model, Node)
+    /// <summary>
+    ///     A problem cannot be bound to more than one structure
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("BoundStructure")]
+    public string BoundStructure
+    {
+        get => _boundStructure;
+        set => _boundStructure = value;
+    }
+
+    #endregion
+
+    #region Constructors
+
+    public ProblemModel(StoryModel model, StoryNodeItem Node) : base("New Problem", StoryItemType.Problem, model, Node)
     {
         ProblemType = string.Empty;
         ConflictType = string.Empty;
@@ -280,11 +261,11 @@ public class ProblemModel : StoryElement
         Subject = string.Empty;
         ProblemSource = string.Empty;
         Description = string.Empty;
-        Protagonist = Guid.Empty;     // Protagonist Guid 
+        Protagonist = Guid.Empty; // Protagonist Guid 
         ProtGoal = string.Empty;
         ProtMotive = string.Empty;
         ProtConflict = string.Empty;
-        Antagonist = Guid.Empty;      // Antagonist Guid 
+        Antagonist = Guid.Empty; // Antagonist Guid 
         AntagGoal = string.Empty;
         AntagMotive = string.Empty;
         AntagConflict = string.Empty;
@@ -295,10 +276,12 @@ public class ProblemModel : StoryElement
         Notes = string.Empty;
         StructureTitle = string.Empty;
         StructureDescription = string.Empty;
-		StructureBeats = new();
-		BoundStructure = string.Empty;
-	}
-    public ProblemModel(string name, StoryModel model, StoryNodeItem Node) : base(name, StoryItemType.Problem, model, Node)
+        StructureBeats = new ObservableCollection<StructureBeatViewModel>();
+        BoundStructure = string.Empty;
+    }
+
+    public ProblemModel(string name, StoryModel model, StoryNodeItem Node) : base(name, StoryItemType.Problem, model,
+        Node)
     {
         ProblemType = string.Empty;
         ConflictType = string.Empty;
@@ -321,10 +304,13 @@ public class ProblemModel : StoryElement
         Notes = string.Empty;
         StructureTitle = string.Empty;
         StructureDescription = string.Empty;
-		StructureBeats = new();
-		BoundStructure = string.Empty;
-	}
-	public ProblemModel(){}
+        StructureBeats = new ObservableCollection<StructureBeatViewModel>();
+        BoundStructure = string.Empty;
+    }
 
-	#endregion
+    public ProblemModel()
+    {
+    }
+
+    #endregion
 }

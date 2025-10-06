@@ -8,6 +8,7 @@ public class FlawViewModel : ObservableRecipient
     #region Properties
 
     private string _woundCategory;
+
     public string WoundCategory
     {
         get => _woundCategory;
@@ -15,11 +16,13 @@ public class FlawViewModel : ObservableRecipient
     }
 
     private string _woundSummary;
+
     public string WoundSummary
     {
         get => _woundSummary;
         set => SetProperty(ref _woundSummary, value);
     }
+
     #endregion
 
     #region ComboBox sources
@@ -41,7 +44,7 @@ public class FlawViewModel : ObservableRecipient
     public FlawViewModel(ListData listData)
     {
         _listData = listData;
-        Dictionary<string, ObservableCollection<string>> _lists = _listData.ListControlSource;
+        var _lists = _listData.ListControlSource;
 
         WoundCategoryList = _lists["WoundCategory"];
         WoundSummaryList = _lists["Wound"];

@@ -16,7 +16,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     private readonly ListData _listData;
     private readonly Windowing _windowing;
     private bool _changeable; // process property changes for this story element
-    private bool _changed;    // this story element has changed
+    private bool _changed; // this story element has changed
 
     #endregion
 
@@ -25,6 +25,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     // StoryElement data
 
     private Guid _uuid;
+
     public Guid Uuid
     {
         get => _uuid;
@@ -32,6 +33,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _name;
+
     public string Name
     {
         get => _name;
@@ -43,11 +45,13 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
                 NameChangeMessage _msg = new(_name, value);
                 Messenger.Send(new NameChangedMessage(_msg));
             }
+
             SetProperty(ref _name, value);
         }
     }
 
     private bool _isTextBoxFocused;
+
     public bool IsTextBoxFocused
     {
         get => _isTextBoxFocused;
@@ -57,6 +61,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     // Setting (General) data
 
     private string _locale;
+
     public string Locale
     {
         get => _locale;
@@ -64,6 +69,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _season;
+
     public string Season
     {
         get => _season;
@@ -71,6 +77,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _period;
+
     public string Period
     {
         get => _period;
@@ -78,6 +85,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _lighting;
+
     public string Lighting
     {
         get => _lighting;
@@ -85,6 +93,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _weather;
+
     public string Weather
     {
         get => _weather;
@@ -92,6 +101,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _temperature;
+
     public string Temperature
     {
         get => _temperature;
@@ -99,6 +109,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _props;
+
     public string Props
     {
         get => _props;
@@ -107,6 +118,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
 
     // Description property (migrated from Summary)
     private string _description;
+
     public string Description
     {
         get => _description;
@@ -116,6 +128,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     // Setting Sense data
 
     private string _sights;
+
     public string Sights
     {
         get => _sights;
@@ -123,6 +136,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _sounds;
+
     public string Sounds
     {
         get => _sounds;
@@ -130,6 +144,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _touch;
+
     public string Touch
     {
         get => _touch;
@@ -137,6 +152,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _smellTaste;
+
     public string SmellTaste
     {
         get => _smellTaste;
@@ -146,6 +162,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     // Setting notes data
 
     private string _notes;
+
     public string Notes
     {
         get => _notes;
@@ -154,6 +171,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
 
     // The StoryModel is passed when CharacterPage is navigated to
     private SettingModel _model;
+
     public SettingModel Model
     {
         get => _model;
@@ -172,7 +190,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
 
     public void Deactivate(object parameter)
     {
-        SaveModel();    // Save the ViewModel back to the Story
+        SaveModel(); // Save the ViewModel back to the Story
     }
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
@@ -180,7 +198,10 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
         if (_changeable)
         {
             if (!_changed)
+            {
                 _logger.Log(LogLevel.Info, $"SettingViewModel.OnPropertyChanged: {args.PropertyName} changed");
+            }
+
             _changed = true;
             ShellViewModel.ShowChange();
         }
@@ -194,7 +215,10 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
         Uuid = Model.Uuid;
         Name = Model.Name;
         if (Name.Equals("New Setting"))
+        {
             IsTextBoxFocused = true;
+        }
+
         Locale = Model.Locale;
         Season = Model.Season;
         Period = Model.Period;
@@ -240,7 +264,6 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
             _logger.LogException(LogLevel.Error,
                 ex, $"Failed to save setting model - {ex.Message}");
         }
-
     }
 
     #endregion
@@ -253,7 +276,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
     #endregion
 
     #region Constructor
-    
+
     // Constructor for XAML compatibility - will be removed later
     public SettingViewModel() : this(
         Ioc.Default.GetRequiredService<ILogService>(),
@@ -261,7 +284,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
         Ioc.Default.GetRequiredService<Windowing>())
     {
     }
-    
+
     public SettingViewModel(ILogService logger, ListData listData, Windowing windowing)
     {
         _logger = logger;
@@ -284,7 +307,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
 
         try
         {
-            Dictionary<string, ObservableCollection<string>> _lists = _listData.ListControlSource;
+            var _lists = _listData.ListControlSource;
             LocaleList = _lists["Locale"];
             SeasonList = _lists["Season"];
         }
@@ -297,5 +320,6 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
 
         PropertyChanged += OnPropertyChanged;
     }
+
     #endregion
 }

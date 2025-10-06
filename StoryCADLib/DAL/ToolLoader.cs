@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
-using StoryCAD.Models.Tools;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using StoryCAD.Models.Tools;
 
 namespace StoryCAD.DAL;
 
@@ -15,11 +15,13 @@ public class ToolLoader
     {
         _logger = logger;
     }
+
     public async Task<List<object>> Init()
     {
         try
         {
-            await using Stream internalResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StoryCADLib.Assets.Install.Tools.json");
+            await using var internalResourceStream = Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream("StoryCADLib.Assets.Install.Tools.json");
             using StreamReader reader = new(internalResourceStream);
             var json = await reader.ReadToEndAsync();
             _toolsData = JsonSerializer.Deserialize<ToolsJsonData>(json);
@@ -42,17 +44,18 @@ public class ToolLoader
             Clear();
             return Tools;
         }
-        catch (Exception _ex) 
-        { 
-            _logger.LogException(LogLevel.Error, _ex, "Error Initializing tool loader"); 
+        catch (Exception _ex)
+        {
+            _logger.LogException(LogLevel.Error, _ex, "Error Initializing tool loader");
         }
+
         return null;
     }
 
     public Dictionary<string, List<KeyQuestionModel>> LoadKeyQuestions()
     {
         var questions = new Dictionary<string, List<KeyQuestionModel>>();
-        
+
         if (_toolsData?.KeyQuestions != null)
         {
             foreach (var kvp in _toolsData.KeyQuestions)
@@ -70,14 +73,14 @@ public class ToolLoader
                 }
             }
         }
-        
+
         return questions;
     }
 
     public SortedDictionary<string, ObservableCollection<string>> LoadStockScenes()
     {
         var stockScenes = new SortedDictionary<string, ObservableCollection<string>>();
-        
+
         if (_toolsData?.StockScenes != null)
         {
             foreach (var kvp in _toolsData.StockScenes)
@@ -85,24 +88,24 @@ public class ToolLoader
                 stockScenes[kvp.Key] = new ObservableCollection<string>(kvp.Value);
             }
         }
-        
+
         return stockScenes;
     }
 
     public SortedDictionary<string, TopicModel> LoadTopics()
     {
         var topics = new SortedDictionary<string, TopicModel>();
-        
+
         if (_toolsData?.Topics != null)
         {
             foreach (var kvp in _toolsData.Topics)
             {
                 var topicData = kvp.Value;
-                
+
                 if (topicData.Type == "notepad")
                 {
-                    string path = topicData.Filename.IndexOf('\\') >= 0 
-                        ? topicData.Filename 
+                    var path = topicData.Filename.IndexOf('\\') >= 0
+                        ? topicData.Filename
                         : Path.Combine(Path.GetTempPath(), topicData.Filename);
                     topics[kvp.Key] = new TopicModel(kvp.Key, path);
                 }
@@ -116,18 +119,19 @@ public class ToolLoader
                             SubTopicNotes = subTopic.Notes ?? string.Empty
                         });
                     }
+
                     topics[kvp.Key] = topicModel;
                 }
             }
         }
-        
+
         return topics;
     }
 
     public List<PlotPatternModel> LoadMasterPlots()
     {
         var masterPlots = new List<PlotPatternModel>();
-        
+
         if (_toolsData?.MasterPlots != null)
         {
             foreach (var plot in _toolsData.MasterPlots)
@@ -136,7 +140,7 @@ public class ToolLoader
                 {
                     PlotPatternNotes = plot.Notes ?? string.Empty
                 };
-                
+
                 if (plot.Scenes != null)
                 {
                     foreach (var scene in plot.Scenes)
@@ -147,18 +151,18 @@ public class ToolLoader
                         });
                     }
                 }
-                
+
                 masterPlots.Add(plotModel);
             }
         }
-        
+
         return masterPlots;
     }
 
     public List<PlotPatternModel> LoadBeatsheets()
     {
         var beatSheets = new List<PlotPatternModel>();
-        
+
         if (_toolsData?.BeatSheets != null)
         {
             foreach (var beat in _toolsData.BeatSheets)
@@ -167,7 +171,7 @@ public class ToolLoader
                 {
                     PlotPatternNotes = beat.Notes ?? string.Empty
                 };
-                
+
                 if (beat.Scenes != null)
                 {
                     foreach (var scene in beat.Scenes)
@@ -178,18 +182,18 @@ public class ToolLoader
                         });
                     }
                 }
-                
+
                 beatSheets.Add(beatModel);
             }
         }
-        
+
         return beatSheets;
     }
 
     public SortedDictionary<string, DramaticSituationModel> LoadDramaticSituations()
     {
         var dramaticSituations = new SortedDictionary<string, DramaticSituationModel>();
-        
+
         if (_toolsData?.DramaticSituations != null)
         {
             foreach (var kvp in _toolsData.DramaticSituations)
@@ -199,31 +203,61 @@ public class ToolLoader
                 {
                     Notes = situation.Notes ?? string.Empty
                 };
-                
+
                 // Assign roles
                 if (situation.Roles != null && situation.Roles.Count > 0)
                 {
-                    if (situation.Roles.Count > 0) model.Role1 = situation.Roles[0];
-                    if (situation.Roles.Count > 1) model.Role2 = situation.Roles[1];
-                    if (situation.Roles.Count > 2) model.Role3 = situation.Roles[2];
-                    if (situation.Roles.Count > 3) model.Role4 = situation.Roles[3];
+                    if (situation.Roles.Count > 0)
+                    {
+                        model.Role1 = situation.Roles[0];
+                    }
+
+                    if (situation.Roles.Count > 1)
+                    {
+                        model.Role2 = situation.Roles[1];
+                    }
+
+                    if (situation.Roles.Count > 2)
+                    {
+                        model.Role3 = situation.Roles[2];
+                    }
+
+                    if (situation.Roles.Count > 3)
+                    {
+                        model.Role4 = situation.Roles[3];
+                    }
                 }
-                
+
                 // Assign descriptions
                 if (situation.Descriptions != null && situation.Descriptions.Count > 0)
                 {
-                    if (situation.Descriptions.Count > 0) model.Description1 = situation.Descriptions[0];
-                    if (situation.Descriptions.Count > 1) model.Description2 = situation.Descriptions[1];
-                    if (situation.Descriptions.Count > 2) model.Description3 = situation.Descriptions[2];
-                    if (situation.Descriptions.Count > 3) model.Description4 = situation.Descriptions[3];
+                    if (situation.Descriptions.Count > 0)
+                    {
+                        model.Description1 = situation.Descriptions[0];
+                    }
+
+                    if (situation.Descriptions.Count > 1)
+                    {
+                        model.Description2 = situation.Descriptions[1];
+                    }
+
+                    if (situation.Descriptions.Count > 2)
+                    {
+                        model.Description3 = situation.Descriptions[2];
+                    }
+
+                    if (situation.Descriptions.Count > 3)
+                    {
+                        model.Description4 = situation.Descriptions[3];
+                    }
                 }
-                
+
                 // Examples are stored in Notes for now (the model doesn't have an Examples property)
-                
+
                 dramaticSituations[kvp.Key] = model;
             }
         }
-        
+
         return dramaticSituations;
     }
 
@@ -233,6 +267,7 @@ public class ToolLoader
         {
             return new ObservableCollection<string>(_toolsData.MaleFirstNames);
         }
+
         return new ObservableCollection<string>();
     }
 
@@ -242,6 +277,7 @@ public class ToolLoader
         {
             return new ObservableCollection<string>(_toolsData.FemaleFirstNames);
         }
+
         return new ObservableCollection<string>();
     }
 
@@ -251,6 +287,7 @@ public class ToolLoader
         {
             return new ObservableCollection<string>(_toolsData.LastNames);
         }
+
         return new ObservableCollection<string>();
     }
 
@@ -260,114 +297,91 @@ public class ToolLoader
         {
             return new ObservableCollection<string>(_toolsData.Relationships);
         }
+
         return new ObservableCollection<string>();
     }
 
-    public void Clear() { _toolsData = null; }
+    public void Clear()
+    {
+        _toolsData = null;
+    }
 
     // JSON data classes
     private class ToolsJsonData
     {
-        [JsonPropertyName("keyQuestions")]
-        public Dictionary<string, List<KeyQuestionData>> KeyQuestions { get; set; }
-        
-        [JsonPropertyName("stockScenes")]
-        public Dictionary<string, List<string>> StockScenes { get; set; }
-        
-        [JsonPropertyName("topics")]
-        public Dictionary<string, TopicData> Topics { get; set; }
-        
-        [JsonPropertyName("masterPlots")]
-        public List<PlotPatternData> MasterPlots { get; set; }
-        
-        [JsonPropertyName("beatSheets")]
-        public List<PlotPatternData> BeatSheets { get; set; }
-        
+        [JsonPropertyName("keyQuestions")] public Dictionary<string, List<KeyQuestionData>> KeyQuestions { get; set; }
+
+        [JsonPropertyName("stockScenes")] public Dictionary<string, List<string>> StockScenes { get; set; }
+
+        [JsonPropertyName("topics")] public Dictionary<string, TopicData> Topics { get; set; }
+
+        [JsonPropertyName("masterPlots")] public List<PlotPatternData> MasterPlots { get; set; }
+
+        [JsonPropertyName("beatSheets")] public List<PlotPatternData> BeatSheets { get; set; }
+
         [JsonPropertyName("dramaticSituations")]
         public Dictionary<string, DramaticSituationData> DramaticSituations { get; set; }
-        
-        [JsonPropertyName("MaleFirstNames")]
-        public List<string> MaleFirstNames { get; set; }
-        
-        [JsonPropertyName("FemaleFirstNames")]
-        public List<string> FemaleFirstNames { get; set; }
-        
-        [JsonPropertyName("LastNames")]
-        public List<string> LastNames { get; set; }
-        
-        [JsonPropertyName("Relationships")]
-        public List<string> Relationships { get; set; }
+
+        [JsonPropertyName("MaleFirstNames")] public List<string> MaleFirstNames { get; set; }
+
+        [JsonPropertyName("FemaleFirstNames")] public List<string> FemaleFirstNames { get; set; }
+
+        [JsonPropertyName("LastNames")] public List<string> LastNames { get; set; }
+
+        [JsonPropertyName("Relationships")] public List<string> Relationships { get; set; }
     }
-    
+
     private class KeyQuestionData
     {
-        [JsonPropertyName("key")]
-        public string Key { get; set; }
-        
-        [JsonPropertyName("topic")]
-        public string Topic { get; set; }
-        
-        [JsonPropertyName("question")]
-        public string Question { get; set; }
+        [JsonPropertyName("key")] public string Key { get; set; }
+
+        [JsonPropertyName("topic")] public string Topic { get; set; }
+
+        [JsonPropertyName("question")] public string Question { get; set; }
     }
-    
+
     private class TopicData
     {
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
-        
-        [JsonPropertyName("filename")]
-        public string Filename { get; set; }
-        
-        [JsonPropertyName("subTopics")]
-        public List<SubTopicData> SubTopics { get; set; }
+        [JsonPropertyName("type")] public string Type { get; set; }
+
+        [JsonPropertyName("filename")] public string Filename { get; set; }
+
+        [JsonPropertyName("subTopics")] public List<SubTopicData> SubTopics { get; set; }
     }
-    
+
     private class SubTopicData
     {
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-        
-        [JsonPropertyName("notes")]
-        public string Notes { get; set; }
+        [JsonPropertyName("name")] public string Name { get; set; }
+
+        [JsonPropertyName("notes")] public string Notes { get; set; }
     }
-    
+
     private class PlotPatternData
     {
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-        
-        [JsonPropertyName("notes")]
-        public string Notes { get; set; }
-        
-        [JsonPropertyName("scenes")]
-        public List<PlotPointData> Scenes { get; set; }
+        [JsonPropertyName("name")] public string Name { get; set; }
+
+        [JsonPropertyName("notes")] public string Notes { get; set; }
+
+        [JsonPropertyName("scenes")] public List<PlotPointData> Scenes { get; set; }
     }
-    
+
     private class PlotPointData
     {
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-        
-        [JsonPropertyName("notes")]
-        public string Notes { get; set; }
+        [JsonPropertyName("name")] public string Name { get; set; }
+
+        [JsonPropertyName("notes")] public string Notes { get; set; }
     }
-    
+
     private class DramaticSituationData
     {
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-        
-        [JsonPropertyName("roles")]
-        public List<string> Roles { get; set; }
-        
-        [JsonPropertyName("descriptions")]
-        public List<string> Descriptions { get; set; }
-        
-        [JsonPropertyName("examples")]
-        public List<string> Examples { get; set; }
-        
-        [JsonPropertyName("notes")]
-        public string Notes { get; set; }
+        [JsonPropertyName("name")] public string Name { get; set; }
+
+        [JsonPropertyName("roles")] public List<string> Roles { get; set; }
+
+        [JsonPropertyName("descriptions")] public List<string> Descriptions { get; set; }
+
+        [JsonPropertyName("examples")] public List<string> Examples { get; set; }
+
+        [JsonPropertyName("notes")] public string Notes { get; set; }
     }
 }

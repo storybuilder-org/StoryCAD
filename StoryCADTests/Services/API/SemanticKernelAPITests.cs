@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 using StoryCAD.Services.API;
-using StoryCAD.Services.IoC;
 using StoryCAD.Services.Outline;
 
 namespace StoryCADTests.Services.API;
@@ -18,22 +9,22 @@ namespace StoryCADTests.Services.API;
 [TestClass]
 public class SemanticKernelApiTests
 {
-    private SemanticKernelApi _api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+    private readonly SemanticKernelApi _api = new(Ioc.Default.GetRequiredService<OutlineService>());
 
     [TestMethod]
     public async Task CreateOutlineWithInvalidTemplate()
     {
         // Arrange
-        string name = "Test Outline";
-        string author = "Test Author";
-        string invalidTemplateIndex = "abc";
+        var name = "Test Outline";
+        var author = "Test Author";
+        var invalidTemplateIndex = "abc";
 
         // Act
         var result = await _api.CreateEmptyOutline(name, author, invalidTemplateIndex);
 
         // Assert
         Assert.IsFalse(result.IsSuccess, "Result should be a failure for an invalid template index.");
-        Assert.IsTrue(result.ErrorMessage.Contains("is not a valid template index"), 
+        Assert.IsTrue(result.ErrorMessage.Contains("is not a valid template index"),
             "Error message should indicate the template index is invalid.");
     }
 
@@ -41,9 +32,9 @@ public class SemanticKernelApiTests
     public async Task CreateEmptyOutlineWithValidTemplate()
     {
         // Arrange
-        string name = "Test Outline";
-        string author = "Test Author";
-        string validTemplateIndex = "0";
+        var name = "Test Outline";
+        var author = "Test Author";
+        var validTemplateIndex = "0";
 
         // Act
         var result = await _api.CreateEmptyOutline(name, author, validTemplateIndex);
@@ -63,25 +54,26 @@ public class SemanticKernelApiTests
     {
         // Arrange
         // Do not create a model before writing.
-        string filePath = Path.Combine(App.InputDir, "NoModel.stbx");
+        var filePath = Path.Combine(App.InputDir, "NoModel.stbx");
 
         // Act
         var result = await _api.WriteOutline(filePath);
 
         // Assert
         Assert.IsFalse(result.IsSuccess, "WriteOutline should fail if no model is available.");
-        Assert.IsTrue(result.ErrorMessage.Contains("Deserialized StoryModel is null"), "Error message should indicate a missing model.");
+        Assert.IsTrue(result.ErrorMessage.Contains("Deserialized StoryModel is null"),
+            "Error message should indicate a missing model.");
     }
 
     [TestMethod]
     public async Task WriteOutline_WithModel_WritesFileSuccessfully()
     {
         // Arrange
-        string outlineName = "Test Outline";
-        string author = "Test Author";
+        var outlineName = "Test Outline";
+        var author = "Test Author";
         var createResult = await _api.CreateEmptyOutline(outlineName, author, "0");
         Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
-        string filePath = Path.Combine(App.InputDir, "Outline.stbx");
+        var filePath = Path.Combine(App.InputDir, "Outline.stbx");
 
         // Act
         var writeResult = await _api.WriteOutline(filePath);
@@ -89,7 +81,7 @@ public class SemanticKernelApiTests
         // Assert
         Assert.IsTrue(writeResult.IsSuccess, "WriteOutline should succeed when a model is available.");
         Assert.IsTrue(File.Exists(filePath), "The outline file should exist after writing.");
-        string fileContent = File.ReadAllText(filePath);
+        var fileContent = File.ReadAllText(filePath);
         Assert.IsTrue(fileContent.Contains(outlineName), "The file content should include the outline name.");
     }
 
@@ -98,7 +90,7 @@ public class SemanticKernelApiTests
     {
         // Act
         var result = _api.GetAllElements();
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "GetAllElements should fail without a model");
         Assert.IsNull(result.Payload, "Payload should be null");
@@ -109,8 +101,8 @@ public class SemanticKernelApiTests
     public async Task GetAllElements_WithModel_ReturnsElementsCollection()
     {
         // Arrange
-        string outlineName = "Test Outline";
-        string author = "Test Author";
+        var outlineName = "Test Outline";
+        var author = "Test Author";
         var createResult = await _api.CreateEmptyOutline(outlineName, author, "0");
         Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
 
@@ -129,21 +121,21 @@ public class SemanticKernelApiTests
     public async Task UpdateStoryElement_UpdatesElementNameSuccessfully()
     {
         // Arrange
-        string originalName = "Original Outline";
-        string updatedName = "Updated Outline";
-        string author = "Test Author";
+        var originalName = "Original Outline";
+        var updatedName = "Updated Outline";
+        var author = "Test Author";
         var createResult = await _api.CreateEmptyOutline(originalName, author, "0");
         Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
-        Guid elementGuid = createResult.Payload.First();
+        var elementGuid = createResult.Payload.First();
 
         // Retrieve current element JSON.
         var getResult = _api.GetElement(elementGuid);
         Assert.IsTrue(getResult.IsSuccess, "GetElement should succeed");
-        string elementJson = (string)getResult.Payload;
+        var elementJson = (string)getResult.Payload;
         // Deserialize to get element type information.
-        StoryElement element = JsonSerializer.Deserialize<StoryElement>(elementJson);
+        var element = JsonSerializer.Deserialize<StoryElement>(elementJson);
         // Create updated JSON with the same GUID and type but a new Name.
-        string updatedJson = JsonSerializer.Serialize(new
+        var updatedJson = JsonSerializer.Serialize(new
         {
             GUID = element.Uuid,
             Name = updatedName,
@@ -157,8 +149,8 @@ public class SemanticKernelApiTests
         // Assert: Retrieve element again and verify its name.
         var getUpdatedResult = _api.GetElement(elementGuid);
         Assert.IsTrue(getUpdatedResult.IsSuccess, "GetElement should succeed");
-        string updatedElementJson = (string)getUpdatedResult.Payload;
-        StoryElement updatedElement = JsonSerializer.Deserialize<StoryElement>(updatedElementJson);
+        var updatedElementJson = (string)getUpdatedResult.Payload;
+        var updatedElement = JsonSerializer.Deserialize<StoryElement>(updatedElementJson);
         Assert.AreEqual(updatedName, updatedElement.Name, "The element's name should have been updated.");
     }
 
@@ -166,12 +158,12 @@ public class SemanticKernelApiTests
     public async Task UpdateElementProperties_UpdatesElementNameSuccessfully()
     {
         // Arrange
-        string originalName = "Original Outline";
-        string updatedName = "Updated via Properties";
-        string author = "Test Author";
+        var originalName = "Original Outline";
+        var updatedName = "Updated via Properties";
+        var author = "Test Author";
         var createResult = await _api.CreateEmptyOutline(originalName, author, "0");
         Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
-        Guid elementGuid = createResult.Payload.First();
+        var elementGuid = createResult.Payload.First();
 
         // Act: Update the "Name" property using the dictionary wrapper.
         var propertiesToUpdate = new Dictionary<string, object>
@@ -184,20 +176,21 @@ public class SemanticKernelApiTests
         // Assert: Verify that the element's name is updated.
         var getResult = _api.GetElement(elementGuid);
         Assert.IsTrue(getResult.IsSuccess, "GetElement should succeed");
-        string updatedElementJson = (string)getResult.Payload;
-        StoryElement updatedElement = JsonSerializer.Deserialize<StoryElement>(updatedElementJson);
-        Assert.AreEqual(updatedName, updatedElement.Name, "The element's name should be updated via UpdateElementProperties.");
+        var updatedElementJson = (string)getResult.Payload;
+        var updatedElement = JsonSerializer.Deserialize<StoryElement>(updatedElementJson);
+        Assert.AreEqual(updatedName, updatedElement.Name,
+            "The element's name should be updated via UpdateElementProperties.");
     }
 
     [TestMethod]
     public async Task GetElement_ReturnsSerializedElement()
     {
         // Arrange
-        string outlineName = "Test Outline";
-        string author = "Test Author";
+        var outlineName = "Test Outline";
+        var author = "Test Author";
         var createResult = await _api.CreateEmptyOutline(outlineName, author, "0");
         Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
-        Guid elementGuid = createResult.Payload.First();
+        var elementGuid = createResult.Payload.First();
 
         // Act
         var getResult = _api.GetElement(elementGuid);
@@ -205,10 +198,11 @@ public class SemanticKernelApiTests
         // Assert
         Assert.IsTrue(getResult.IsSuccess, "GetElement should succeed");
         Assert.IsNotNull(getResult.Payload, "GetElement should return a non-null payload");
-        string elementJson = getResult.Payload as string;
+        var elementJson = getResult.Payload as string;
         Assert.IsNotNull(elementJson, "GetElement should return a JSON string.");
         Assert.IsTrue(elementJson.Contains(outlineName), "The returned JSON should include the element's name.");
-        Assert.IsTrue(elementJson.Contains(elementGuid.ToString()), "The returned JSON should include the element's GUID.");
+        Assert.IsTrue(elementJson.Contains(elementGuid.ToString()),
+            "The returned JSON should include the element's GUID.");
     }
 
     [TestMethod]
@@ -216,10 +210,10 @@ public class SemanticKernelApiTests
     {
         // Arrange
         // Provide an invalid GUID string as parent.
-        string invalidParentGuid = "not-a-guid";
+        var invalidParentGuid = "not-a-guid";
 
         //open file first
-        string file = Path.Combine(App.InputDir, "AddElement.stbx");
+        var file = Path.Combine(App.InputDir, "AddElement.stbx");
         Assert.IsTrue(File.Exists(file));
         await _api.OpenOutline(file);
 
@@ -228,19 +222,20 @@ public class SemanticKernelApiTests
 
         // Assert
         Assert.IsFalse(addResult.IsSuccess, "AddElement should fail with an invalid parent GUID.");
-        Assert.IsTrue(addResult.ErrorMessage.Contains("Invalid parent GUID"), "Error message should indicate invalid parent GUID.");
+        Assert.IsTrue(addResult.ErrorMessage.Contains("Invalid parent GUID"),
+            "Error message should indicate invalid parent GUID.");
     }
 
     [TestMethod]
     public async Task AddElementWithValidParent()
     {
         // Arrange
-        string outlineName = "Test Outline";
-        string author = "Test Author";
+        var outlineName = "Test Outline";
+        var author = "Test Author";
         var createResult = await _api.CreateEmptyOutline(outlineName, author, "0");
         Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
         // Use one of the existing element GUIDs as the parent.
-        Guid parentGuid = createResult.Payload.First();
+        var parentGuid = createResult.Payload.First();
 
         // Act
         var addResult = _api.AddElement(StoryItemType.Folder, parentGuid.ToString(), "Added Section");
@@ -250,10 +245,10 @@ public class SemanticKernelApiTests
         Assert.IsNotNull(addResult.Payload, "The payload should not be null for a successfully added element.");
 
         // Optionally verify that the added element's type is Section.
-        StoryElement newElement = _api.CurrentModel.StoryElements.StoryElementGuids[addResult.Payload];
+        var newElement = _api.CurrentModel.StoryElements.StoryElementGuids[addResult.Payload];
         Assert.AreEqual(StoryItemType.Folder, newElement.ElementType, "The new element should be of type Section.");
 
-        Guid elementGuid = createResult.Payload.First();
+        var elementGuid = createResult.Payload.First();
 
         // Act: Update the "Name" property using the dictionary wrapper.
         var propertiesToUpdate = new Dictionary<string, object>
@@ -266,21 +261,22 @@ public class SemanticKernelApiTests
         // Assert: Verify that the element's name is updated.
         var getResult = _api.GetElement(elementGuid);
         Assert.IsTrue(getResult.IsSuccess, "GetElement should succeed");
-        string updatedElementJson = (string)getResult.Payload;
-        StoryElement updatedElement = JsonSerializer.Deserialize<StoryElement>(updatedElementJson);
-        Assert.AreEqual("Renamed Section", updatedElement.Name, "The element's name should be updated via UpdateElementProperties.");
+        var updatedElementJson = (string)getResult.Payload;
+        var updatedElement = JsonSerializer.Deserialize<StoryElement>(updatedElementJson);
+        Assert.AreEqual("Renamed Section", updatedElement.Name,
+            "The element's name should be updated via UpdateElementProperties.");
     }
 
     [TestMethod]
     public async Task UpdateElementProperty()
     {
         // Arrange
-        string originalName = "Original Outline";
-        string updatedName = "Updated via Property Method";
-        string author = "Test Author";
+        var originalName = "Original Outline";
+        var updatedName = "Updated via Property Method";
+        var author = "Test Author";
         var createResult = await _api.CreateEmptyOutline(originalName, author, "0");
         Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
-        Guid elementGuid = createResult.Payload.First();
+        var elementGuid = createResult.Payload.First();
 
         // Act
         var updateResult = _api.UpdateElementProperty(elementGuid, "Name", updatedName);
@@ -294,7 +290,7 @@ public class SemanticKernelApiTests
     public async Task OpenOutlineWithInvalidPath()
     {
         // Arrange
-        string invalidPath = ""; // empty path
+        var invalidPath = ""; // empty path
 
         // Act
         var result = await _api.OpenOutline(invalidPath);
@@ -308,11 +304,11 @@ public class SemanticKernelApiTests
     public async Task OpenOutline_ValidFile_OpensModelSuccessfully()
     {
         // Arrange: Create and write a model file using WriteOutline.
-        string outlineName = "Test Outline";
-        string author = "Test Author";
+        var outlineName = "Test Outline";
+        var author = "Test Author";
         var createResult = await _api.CreateEmptyOutline(outlineName, author, "0");
         Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
-        string filePath = Path.Combine(App.InputDir, "OpenedOutline.stbx");
+        var filePath = Path.Combine(App.InputDir, "OpenedOutline.stbx");
         var writeResult = await _api.WriteOutline(filePath);
         Assert.IsTrue(writeResult.IsSuccess, "WriteOutline should succeed.");
 
@@ -329,16 +325,16 @@ public class SemanticKernelApiTests
     public async Task DeleteElementTest()
     {
         // Arrange
-        string outlineName = "Test Outline";
-        string author = "Test Author";
+        var outlineName = "Test Outline";
+        var author = "Test Author";
         var createResult = await _api.CreateEmptyOutline(outlineName, author, "0");
         Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
-        
+
         // Add a deletable element (character)
         var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
         var addResult = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Test Character");
         Assert.IsTrue(addResult.IsSuccess, "Adding character should succeed.");
-        Guid elementGuid = addResult.Payload;
+        var elementGuid = addResult.Payload;
 
         // Act
         // Assume deletion from ExplorerView.
@@ -353,21 +349,22 @@ public class SemanticKernelApiTests
     public async Task AddCastMember()
     {
         // Arrange
-        string outlineName = "Test Outline";
-        string author = "Test Author";
+        var outlineName = "Test Outline";
+        var author = "Test Author";
         var createResult = await _api.CreateEmptyOutline(outlineName, author, "0");
         Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
-        Guid parentGuid = createResult.Payload.First();
+        var parentGuid = createResult.Payload.First();
 
         // Add a Scene element.
         var sceneResult = _api.AddElement(StoryItemType.Scene, parentGuid.ToString(), "Added Scene");
         Assert.IsTrue(sceneResult.IsSuccess, "Scene element should be added successfully.");
-        StoryElement sceneElement = _api.CurrentModel.StoryElements.StoryElementGuids[sceneResult.Payload];
+        var sceneElement = _api.CurrentModel.StoryElements.StoryElementGuids[sceneResult.Payload];
 
         // Add a Character element.
-        Guid characterGuid = _api.AddElement(StoryItemType.Character, parentGuid.ToString(), "Added Character").Payload;
+        var characterGuid = _api.AddElement(StoryItemType.Character, parentGuid.ToString(), "Added Character").Payload;
         var characterResult = _api.CurrentModel.StoryElements.StoryElementGuids[characterGuid];
-        Assert.IsTrue(characterResult.ElementType == StoryItemType.Character, "Character element should be added successfully.");
+        Assert.IsTrue(characterResult.ElementType == StoryItemType.Character,
+            "Character element should be added successfully.");
 
         // Act: Add the character as a cast member to the scene.
         var castResult = _api.AddCastMember(sceneElement.Uuid, characterResult.Uuid);
@@ -381,23 +378,23 @@ public class SemanticKernelApiTests
     public async Task AddRelationship()
     {
         // Arrange
-        string outlineName = "Test Outline";
-        string author = "Test Author";
+        var outlineName = "Test Outline";
+        var author = "Test Author";
         var createResult = await _api.CreateEmptyOutline(outlineName, author, "0");
         Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
-        Guid parentGuid = createResult.Payload.First();
+        var parentGuid = createResult.Payload.First();
 
         // Add two Character elements.
         var charResult1 = _api.AddElement(StoryItemType.Character, parentGuid.ToString(), "Character 1");
         var charResult2 = _api.AddElement(StoryItemType.Character, parentGuid.ToString(), "Character 2");
-        Assert.IsTrue(charResult1.IsSuccess && charResult2.IsSuccess, 
+        Assert.IsTrue(charResult1.IsSuccess && charResult2.IsSuccess,
             "Both character elements should be added successfully.");
 
-        StoryElement charElement1 = _api.CurrentModel.StoryElements.StoryElementGuids[charResult1.Payload];
-        StoryElement charElement2 = _api.CurrentModel.StoryElements.StoryElementGuids[charResult2.Payload];
+        var charElement1 = _api.CurrentModel.StoryElements.StoryElementGuids[charResult1.Payload];
+        var charElement2 = _api.CurrentModel.StoryElements.StoryElementGuids[charResult2.Payload];
 
         // Act: Add a relationship between the two characters.
-        var relationshipResult = _api.AddRelationship(charElement1.Uuid, 
+        var relationshipResult = _api.AddRelationship(charElement1.Uuid,
             charElement2.Uuid, "Friendship");
 
         // Assert
@@ -410,30 +407,30 @@ public class SemanticKernelApiTests
     }
 
     /// <summary>
-    /// Tests that SetCurrentModel correctly sets the CurrentModel property
+    ///     Tests that SetCurrentModel correctly sets the CurrentModel property
     /// </summary>
     [TestMethod]
     public async Task SetCurrentModel_WithValidModel_SetsCurrentModel()
     {
         // Arrange
         var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
-        
+
         // Create a test model
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed");
-        
+
         // Get the created model
         var originalModel = api.CurrentModel;
         Assert.IsNotNull(originalModel, "Model should be created");
-        
+
         // Create a second model to switch to
         var secondResult = await api.CreateEmptyOutline("Second Story", "Another Author", "1");
         Assert.IsTrue(secondResult.IsSuccess, "Second model creation should succeed");
         var secondModel = api.CurrentModel;
-        
+
         // Act - Set back to the first model
         api.SetCurrentModel(originalModel);
-        
+
         // Assert
         Assert.AreSame(originalModel, api.CurrentModel, "CurrentModel should be set to the original model");
         Assert.AreNotSame(secondModel, api.CurrentModel, "CurrentModel should not be the second model");
@@ -442,61 +439,64 @@ public class SemanticKernelApiTests
     }
 
     /// <summary>
-    /// Tests that SetCurrentModel handles null model gracefully
+    ///     Tests that SetCurrentModel handles null model gracefully
     /// </summary>
     [TestMethod]
     public void SetCurrentModel_WithNullModel_SetsCurrentModelToNull()
     {
         // Arrange
         var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
-        
+
         // Act
         api.SetCurrentModel(null);
-        
+
         // Assert
         Assert.IsNull(api.CurrentModel, "CurrentModel should be null");
     }
 
     /// <summary>
-    /// Tests that API operations work correctly after SetCurrentModel
+    ///     Tests that API operations work correctly after SetCurrentModel
     /// </summary>
     [TestMethod]
     public async Task SetCurrentModel_AllowsOperationsOnNewModel()
     {
         // Arrange
         var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
-        
+
         // Create first model
         var firstResult = await api.CreateEmptyOutline("First Story", "Author 1", "0");
         Assert.IsTrue(firstResult.IsSuccess);
         var firstModel = api.CurrentModel;
         var firstOverviewGuid = firstResult.Payload.First();
-        
+
         // Add an element to the first model
-        var firstElementResult = api.AddElement(StoryItemType.Character, firstOverviewGuid.ToString(), "First Character");
+        var firstElementResult =
+            api.AddElement(StoryItemType.Character, firstOverviewGuid.ToString(), "First Character");
         Assert.IsTrue(firstElementResult.IsSuccess);
-        
+
         // Create second model
         var secondResult = await api.CreateEmptyOutline("Second Story", "Author 2", "0");
         Assert.IsTrue(secondResult.IsSuccess);
         var secondModel = api.CurrentModel;
         var secondOverviewGuid = secondResult.Payload.First();
-        
+
         // Add an element to the second model
         var secondElementResult = api.AddElement(StoryItemType.Scene, secondOverviewGuid.ToString(), "Second Scene");
         Assert.IsTrue(secondElementResult.IsSuccess);
-        
+
         // Act - Switch back to first model
         api.SetCurrentModel(firstModel);
-        
+
         // Add another element to verify we're working with the first model
         var thirdElementResult = api.AddElement(StoryItemType.Problem, firstOverviewGuid.ToString(), "First Problem");
-        
+
         // Assert
         Assert.IsTrue(thirdElementResult.IsSuccess, "Should be able to add element after SetCurrentModel");
-        Assert.AreEqual(5, firstModel.StoryElements.Count, "First model should have 5 elements (overview, trash, narrative folder, character, problem)");
-        Assert.AreEqual(4, secondModel.StoryElements.Count, "Second model should still have 4 elements (overview, trash, narrative folder, scene)");
-        
+        Assert.AreEqual(5, firstModel.StoryElements.Count,
+            "First model should have 5 elements (overview, trash, narrative folder, character, problem)");
+        Assert.AreEqual(4, secondModel.StoryElements.Count,
+            "Second model should still have 4 elements (overview, trash, narrative folder, scene)");
+
         // Verify the new element is in the first model
         var problemElement = firstModel.StoryElements.StoryElementGuids[thirdElementResult.Payload];
         Assert.IsNotNull(problemElement);
@@ -505,7 +505,7 @@ public class SemanticKernelApiTests
     }
 
     /// <summary>
-    /// Tests that DeleteStoryElement moves an element to trash
+    ///     Tests that DeleteStoryElement moves an element to trash
     /// </summary>
     [TestMethod]
     public async Task DeleteStoryElement_WithValidElement_MovesToTrash()
@@ -513,15 +513,15 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
         var addResult = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Test Character");
         Assert.IsTrue(addResult.IsSuccess);
         var characterGuid = addResult.Payload;
-        
+
         // Act
         var deleteResult = _api.DeleteStoryElement(characterGuid.ToString());
-        
+
         // Assert
         Assert.IsTrue(deleteResult.IsSuccess, "DeleteStoryElement should succeed");
         var trashNode = _api.CurrentModel.TrashView.First();
@@ -531,7 +531,7 @@ public class SemanticKernelApiTests
     }
 
     /// <summary>
-    /// Tests that DeleteStoryElement throws exception for invalid UUID
+    ///     Tests that DeleteStoryElement throws exception for invalid UUID
     /// </summary>
     [TestMethod]
     public async Task DeleteStoryElement_WithInvalidUuid_ReturnsFailure()
@@ -539,34 +539,34 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         // Act
         var result = _api.DeleteStoryElement("invalid-uuid");
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "DeleteStoryElement should fail with invalid UUID");
         Assert.IsTrue(result.ErrorMessage.Contains("Invalid UUID"), "Error message should indicate invalid UUID");
     }
 
     /// <summary>
-    /// Tests that DeleteStoryElement throws exception when no model is loaded
+    ///     Tests that DeleteStoryElement throws exception when no model is loaded
     /// </summary>
     [TestMethod]
     public void DeleteStoryElement_WithNoModel_ReturnsFailure()
     {
         // Arrange
         var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
-        
+
         // Act
         var result = api.DeleteStoryElement(Guid.NewGuid().ToString());
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "DeleteStoryElement should fail with no model");
         Assert.AreEqual("No StoryModel available. Create a model first.", result.ErrorMessage);
     }
 
     /// <summary>
-    /// Tests that DeleteElement moves an element to trash using OperationResult
+    ///     Tests that DeleteElement moves an element to trash using OperationResult
     /// </summary>
     [TestMethod]
     public async Task DeleteElement_WithValidElement_ReturnsSuccess()
@@ -574,15 +574,15 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
         var addResult = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Test Scene");
         Assert.IsTrue(addResult.IsSuccess);
         var sceneGuid = addResult.Payload;
-        
+
         // Act
         var deleteResult = await _api.DeleteElement(sceneGuid, StoryViewType.ExplorerView);
-        
+
         // Assert
         Assert.IsTrue(deleteResult.IsSuccess, "DeleteElement should succeed");
         var trashNode = _api.CurrentModel.TrashView.First();
@@ -590,24 +590,24 @@ public class SemanticKernelApiTests
     }
 
     /// <summary>
-    /// Tests that DeleteElement returns failure when no model is loaded
+    ///     Tests that DeleteElement returns failure when no model is loaded
     /// </summary>
     [TestMethod]
     public async Task DeleteElement_WithNoModel_ReturnsFailure()
     {
         // Arrange
         var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
-        
+
         // Act
         var result = await api.DeleteElement(Guid.NewGuid(), StoryViewType.ExplorerView);
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "DeleteElement should fail");
         Assert.AreEqual("No outline is opened", result.ErrorMessage);
     }
 
     /// <summary>
-    /// Tests that RestoreFromTrash restores an element from trash
+    ///     Tests that RestoreFromTrash restores an element from trash
     /// </summary>
     [TestMethod]
     public async Task RestoreFromTrash_WithValidElement_ReturnsSuccess()
@@ -615,18 +615,18 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
         var addResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
         Assert.IsTrue(addResult.IsSuccess);
         var problemGuid = addResult.Payload;
-        
+
         // Move to trash first
         await _api.DeleteElement(problemGuid, StoryViewType.ExplorerView);
-        
+
         // Act
         var restoreResult = await _api.RestoreFromTrash(problemGuid);
-        
+
         // Assert
         Assert.IsTrue(restoreResult.IsSuccess, "RestoreFromTrash should succeed");
         var overviewNode = _api.CurrentModel.ExplorerView.First();
@@ -636,7 +636,7 @@ public class SemanticKernelApiTests
     }
 
     /// <summary>
-    /// Tests that RestoreFromTrash returns failure for element not in trash
+    ///     Tests that RestoreFromTrash returns failure for element not in trash
     /// </summary>
     [TestMethod]
     public async Task RestoreFromTrash_WithElementNotInTrash_ReturnsFailure()
@@ -644,34 +644,34 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         // Act
         var result = await _api.RestoreFromTrash(Guid.NewGuid());
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "RestoreFromTrash should fail");
         Assert.AreEqual("Element not found in trash", result.ErrorMessage);
     }
 
     /// <summary>
-    /// Tests that RestoreFromTrash returns failure when no model is loaded
+    ///     Tests that RestoreFromTrash returns failure when no model is loaded
     /// </summary>
     [TestMethod]
     public async Task RestoreFromTrash_WithNoModel_ReturnsFailure()
     {
         // Arrange
         var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
-        
+
         // Act
         var result = await api.RestoreFromTrash(Guid.NewGuid());
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "RestoreFromTrash should fail");
         Assert.AreEqual("No outline is opened", result.ErrorMessage);
     }
 
     /// <summary>
-    /// Tests that EmptyTrash removes all items from trash
+    ///     Tests that EmptyTrash removes all items from trash
     /// </summary>
     [TestMethod]
     public async Task EmptyTrash_WithItemsInTrash_ReturnsSuccess()
@@ -679,30 +679,30 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
         var addResult1 = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Character 1");
         var addResult2 = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Scene 1");
         Assert.IsTrue(addResult1.IsSuccess);
         Assert.IsTrue(addResult2.IsSuccess);
-        
+
         // Move both to trash
         await _api.DeleteElement(addResult1.Payload, StoryViewType.ExplorerView);
         await _api.DeleteElement(addResult2.Payload, StoryViewType.ExplorerView);
-        
+
         var trashNode = _api.CurrentModel.TrashView.First();
         Assert.AreEqual(2, trashNode.Children.Count, "Should have 2 items in trash");
-        
+
         // Act
         var emptyResult = await _api.EmptyTrash();
-        
+
         // Assert
         Assert.IsTrue(emptyResult.IsSuccess, "EmptyTrash should succeed");
         Assert.AreEqual(0, trashNode.Children.Count, "Trash should be empty");
     }
 
     /// <summary>
-    /// Tests that EmptyTrash succeeds even when trash is already empty
+    ///     Tests that EmptyTrash succeeds even when trash is already empty
     /// </summary>
     [TestMethod]
     public async Task EmptyTrash_WithNoItemsInTrash_ReturnsSuccess()
@@ -710,10 +710,10 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         // Act
         var result = await _api.EmptyTrash();
-        
+
         // Assert
         Assert.IsTrue(result.IsSuccess, "EmptyTrash should succeed even when empty");
         var trashNode = _api.CurrentModel.TrashView.First();
@@ -721,17 +721,17 @@ public class SemanticKernelApiTests
     }
 
     /// <summary>
-    /// Tests that EmptyTrash returns failure when no model is loaded
+    ///     Tests that EmptyTrash returns failure when no model is loaded
     /// </summary>
     [TestMethod]
     public async Task EmptyTrash_WithNoModel_ReturnsFailure()
     {
         // Arrange
         var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
-        
+
         // Act
         var result = await api.EmptyTrash();
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "EmptyTrash should fail");
         Assert.AreEqual("No outline is opened", result.ErrorMessage);
@@ -740,22 +740,23 @@ public class SemanticKernelApiTests
     #region GetStoryElement Tests
 
     /// <summary>
-    /// Tests that GetStoryElement returns success with the correct element for a valid GUID
+    ///     Tests that GetStoryElement returns success with the correct element for a valid GUID
     /// </summary>
     [TestMethod]
     public async Task GetStoryElement_WithValidGuid_ReturnsSuccess()
     {
         // Arrange
-        var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "1");  // Use template 1 to get a character
+        var createResult =
+            await _api.CreateEmptyOutline("Test Story", "Test Author", "1"); // Use template 1 to get a character
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         // Get a character element from the model
         var character = _api.CurrentModel.StoryElements.FirstOrDefault(e => e.ElementType == StoryItemType.Character);
         Assert.IsNotNull(character, "Should have at least one character in the model");
-        
+
         // Act
         var result = _api.GetStoryElement(character.Uuid);
-        
+
         // Assert
         Assert.IsTrue(result.IsSuccess, "Should return success");
         Assert.IsNotNull(result.Payload, "Should return a story element");
@@ -765,7 +766,7 @@ public class SemanticKernelApiTests
     }
 
     /// <summary>
-    /// Tests that GetStoryElement returns failure when no model is loaded
+    ///     Tests that GetStoryElement returns failure when no model is loaded
     /// </summary>
     [TestMethod]
     public void GetStoryElement_WithNoCurrentModel_ReturnsFailure()
@@ -773,10 +774,10 @@ public class SemanticKernelApiTests
         // Arrange
         var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         var someGuid = Guid.NewGuid();
-        
+
         // Act
         var result = api.GetStoryElement(someGuid);
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "Should return failure");
         Assert.IsNull(result.Payload, "Payload should be null");
@@ -784,7 +785,7 @@ public class SemanticKernelApiTests
     }
 
     /// <summary>
-    /// Tests that GetStoryElement returns failure for empty GUID
+    ///     Tests that GetStoryElement returns failure for empty GUID
     /// </summary>
     [TestMethod]
     public async Task GetStoryElement_WithEmptyGuid_ReturnsFailure()
@@ -792,10 +793,10 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         // Act
         var result = _api.GetStoryElement(Guid.Empty);
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "Should return failure");
         Assert.IsNull(result.Payload, "Payload should be null");
@@ -803,7 +804,7 @@ public class SemanticKernelApiTests
     }
 
     /// <summary>
-    /// Tests that GetStoryElement returns failure for non-existent GUID
+    ///     Tests that GetStoryElement returns failure for non-existent GUID
     /// </summary>
     [TestMethod]
     public async Task GetStoryElement_WithNonExistentGuid_ReturnsFailure()
@@ -812,10 +813,10 @@ public class SemanticKernelApiTests
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
         var nonExistentGuid = Guid.NewGuid();
-        
+
         // Act
         var result = _api.GetStoryElement(nonExistentGuid);
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "Should return failure");
         Assert.IsNull(result.Payload, "Payload should be null");
@@ -831,10 +832,10 @@ public class SemanticKernelApiTests
     {
         // Arrange
         var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
-        
+
         // Act
         var result = api.SearchForText("test");
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "SearchForText should fail with no model");
         Assert.IsNull(result.Payload, "Payload should be null");
@@ -847,10 +848,10 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         // Act
         var result = _api.SearchForText("");
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "SearchForText should fail with empty text");
         Assert.IsNull(result.Payload, "Payload should be null");
@@ -863,10 +864,10 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         // Act
         var result = _api.SearchForText(null);
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "SearchForText should fail with null text");
         Assert.IsNull(result.Payload, "Payload should be null");
@@ -879,29 +880,29 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
         var addCharResult = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Hero Character");
         Assert.IsTrue(addCharResult.IsSuccess);
-        
+
         var addSceneResult = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Hero's Journey");
         Assert.IsTrue(addSceneResult.IsSuccess);
-        
+
         // Act
         var result = _api.SearchForText("Hero");
-        
+
         // Assert
         Assert.IsTrue(result.IsSuccess, "SearchForText should succeed");
         Assert.IsNotNull(result.Payload, "Payload should not be null");
         Assert.AreEqual(2, result.Payload.Count, "Should find 2 elements containing 'Hero'");
-        
+
         // Verify the format of returned data
         foreach (var item in result.Payload)
         {
             Assert.IsTrue(item.ContainsKey("Guid"), "Each result should have a Guid");
             Assert.IsTrue(item.ContainsKey("Name"), "Each result should have a Name");
             Assert.IsTrue(item.ContainsKey("Type"), "Each result should have a Type");
-            
+
             var name = item["Name"].ToString();
             Assert.IsTrue(name.Contains("Hero"), $"Name '{name}' should contain 'Hero'");
         }
@@ -913,14 +914,14 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
         var addResult = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "HERO CHARACTER");
         Assert.IsTrue(addResult.IsSuccess);
-        
+
         // Act
         var result = _api.SearchForText("hero");
-        
+
         // Assert
         Assert.IsTrue(result.IsSuccess, "SearchForText should succeed");
         Assert.IsNotNull(result.Payload, "Payload should not be null");
@@ -933,10 +934,10 @@ public class SemanticKernelApiTests
     {
         // Arrange
         var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
-        
+
         // Act
         var result = api.SearchForReferences(Guid.NewGuid());
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "SearchForReferences should fail with no model");
         Assert.IsNull(result.Payload, "Payload should be null");
@@ -949,10 +950,10 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         // Act
         var result = _api.SearchForReferences(Guid.Empty);
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "SearchForReferences should fail with empty GUID");
         Assert.IsNull(result.Payload, "Payload should be null");
@@ -966,10 +967,10 @@ public class SemanticKernelApiTests
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
         var randomUuid = Guid.NewGuid();
-        
+
         // Act
         var result = _api.SearchForReferences(randomUuid);
-        
+
         // Assert
         Assert.IsTrue(result.IsSuccess, "SearchForReferences should succeed even with no matches");
         Assert.IsNotNull(result.Payload, "Payload should not be null");
@@ -982,31 +983,31 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
-        
+
         // Add a character
         var addCharResult = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Hero");
         Assert.IsTrue(addCharResult.IsSuccess);
         var characterGuid = addCharResult.Payload;
-        
+
         // Add a scene that references the character
         var addSceneResult = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Battle Scene");
         Assert.IsTrue(addSceneResult.IsSuccess);
         var sceneGuid = addSceneResult.Payload;
-        
+
         // Add the character to the scene's cast
         var sceneElement = _api.CurrentModel.StoryElements.First(e => e.Uuid == sceneGuid);
         ((SceneModel)sceneElement).CastMembers.Add(characterGuid);
-        
+
         // Act
         var result = _api.SearchForReferences(characterGuid);
-        
+
         // Assert
         Assert.IsTrue(result.IsSuccess, "SearchForReferences should succeed");
         Assert.IsNotNull(result.Payload, "Payload should not be null");
         Assert.AreEqual(1, result.Payload.Count, "Should find 1 element referencing the character");
-        
+
         var reference = result.Payload[0];
         Assert.IsTrue(reference.ContainsKey("Guid"), "Result should have a Guid");
         Assert.IsTrue(reference.ContainsKey("Name"), "Result should have a Name");
@@ -1020,10 +1021,10 @@ public class SemanticKernelApiTests
     {
         // Arrange
         var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
-        
+
         // Act
         var result = api.RemoveReferences(Guid.NewGuid());
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "RemoveReferences should fail with no model");
         Assert.AreEqual(0, result.Payload, "Payload should be 0");
@@ -1036,10 +1037,10 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         // Act
         var result = _api.RemoveReferences(Guid.Empty);
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "RemoveReferences should fail with empty GUID");
         Assert.AreEqual(0, result.Payload, "Payload should be 0");
@@ -1053,10 +1054,10 @@ public class SemanticKernelApiTests
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
         var randomUuid = Guid.NewGuid();
-        
+
         // Act
         var result = _api.RemoveReferences(randomUuid);
-        
+
         // Assert
         Assert.IsTrue(result.IsSuccess, "RemoveReferences should succeed even with no matches");
         Assert.AreEqual(0, result.Payload, "Should return 0 for UUID with no references");
@@ -1068,41 +1069,41 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
-        
+
         // Add a character
         var addCharResult = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Hero");
         Assert.IsTrue(addCharResult.IsSuccess);
         var characterGuid = addCharResult.Payload;
-        
+
         // Add two scenes that reference the character
         var addScene1Result = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Scene 1");
         Assert.IsTrue(addScene1Result.IsSuccess);
         var scene1Guid = addScene1Result.Payload;
-        
+
         var addScene2Result = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Scene 2");
         Assert.IsTrue(addScene2Result.IsSuccess);
         var scene2Guid = addScene2Result.Payload;
-        
+
         // Add the character to both scenes' cast
         var scene1Element = _api.CurrentModel.StoryElements.First(e => e.Uuid == scene1Guid);
         ((SceneModel)scene1Element).CastMembers.Add(characterGuid);
-        
+
         var scene2Element = _api.CurrentModel.StoryElements.First(e => e.Uuid == scene2Guid);
         ((SceneModel)scene2Element).CastMembers.Add(characterGuid);
-        
+
         // Act
         var result = _api.RemoveReferences(characterGuid);
-        
+
         // Assert
         Assert.IsTrue(result.IsSuccess, "RemoveReferences should succeed");
         Assert.AreEqual(2, result.Payload, "Should return 2 affected elements");
-        
+
         // Verify references were actually removed
-        Assert.IsFalse(((SceneModel)scene1Element).CastMembers.Contains(characterGuid), 
+        Assert.IsFalse(((SceneModel)scene1Element).CastMembers.Contains(characterGuid),
             "Character should be removed from scene 1 cast");
-        Assert.IsFalse(((SceneModel)scene2Element).CastMembers.Contains(characterGuid), 
+        Assert.IsFalse(((SceneModel)scene2Element).CastMembers.Contains(characterGuid),
             "Character should be removed from scene 2 cast");
     }
 
@@ -1111,10 +1112,10 @@ public class SemanticKernelApiTests
     {
         // Arrange
         var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
-        
+
         // Act
         var result = api.SearchInSubtree(Guid.NewGuid(), "test");
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "SearchInSubtree should fail with no model");
         Assert.IsNull(result.Payload, "Payload should be null");
@@ -1127,10 +1128,10 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         // Act
         var result = _api.SearchInSubtree(Guid.Empty, "test");
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "SearchInSubtree should fail with empty root GUID");
         Assert.IsNull(result.Payload, "Payload should be null");
@@ -1143,12 +1144,12 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
-        
+
         // Act
         var result = _api.SearchInSubtree(overviewGuid, "");
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "SearchInSubtree should fail with empty search text");
         Assert.IsNull(result.Payload, "Payload should be null");
@@ -1161,16 +1162,16 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         var randomGuid = Guid.NewGuid();
-        
+
         // Act
         var result = _api.SearchInSubtree(randomGuid, "test");
-        
+
         // Assert
         Assert.IsFalse(result.IsSuccess, "SearchInSubtree should fail with non-existent root");
         Assert.IsNull(result.Payload, "Payload should be null");
-        Assert.IsTrue(result.ErrorMessage.Contains("not found"), 
+        Assert.IsTrue(result.ErrorMessage.Contains("not found"),
             $"Error message should indicate element not found, but was: {result.ErrorMessage}");
     }
 
@@ -1180,38 +1181,38 @@ public class SemanticKernelApiTests
         // Arrange
         var createResult = await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
-        
+
         // Add a folder as subtree root
         var addFolderResult = _api.AddElement(StoryItemType.Folder, overviewGuid.ToString(), "Hero Folder");
         Assert.IsTrue(addFolderResult.IsSuccess);
         var folderGuid = addFolderResult.Payload;
-        
+
         // Add items inside the folder (should be found)
         var addChar1Result = _api.AddElement(StoryItemType.Character, folderGuid.ToString(), "Hero Character");
         Assert.IsTrue(addChar1Result.IsSuccess);
-        
+
         var addChar2Result = _api.AddElement(StoryItemType.Character, folderGuid.ToString(), "Sidekick");
         Assert.IsTrue(addChar2Result.IsSuccess);
         var sidekickGuid = addChar2Result.Payload;
-        
+
         // Add notes to sidekick that contain "hero"
         var sidekickElement = _api.CurrentModel.StoryElements.First(e => e.Uuid == sidekickGuid);
         ((CharacterModel)sidekickElement).Notes = "Helps the hero";
-        
+
         // Add item outside the folder (should NOT be found)
         var addChar3Result = _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Another Hero");
         Assert.IsTrue(addChar3Result.IsSuccess);
-        
+
         // Act
         var result = _api.SearchInSubtree(folderGuid, "hero");
-        
+
         // Assert
         Assert.IsTrue(result.IsSuccess, "SearchInSubtree should succeed");
         Assert.IsNotNull(result.Payload, "Payload should not be null");
         Assert.AreEqual(3, result.Payload.Count, "Should find 3 elements (folder itself + 2 characters inside)");
-        
+
         // Verify results are formatted correctly
         foreach (var item in result.Payload)
         {
@@ -1219,7 +1220,7 @@ public class SemanticKernelApiTests
             Assert.IsTrue(item.ContainsKey("Name"), "Each result should have a Name");
             Assert.IsTrue(item.ContainsKey("Type"), "Each result should have a Type");
         }
-        
+
         // Verify the correct items were found
         var names = result.Payload.Select(r => r["Name"].ToString()).ToList();
         Assert.IsTrue(names.Contains("Hero Folder"), "Should find the folder itself");

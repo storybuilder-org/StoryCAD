@@ -8,30 +8,41 @@
         <Pivot Name="PivotView" Height="381" Width="500" VerticalAlignment="Stretch">
             <PivotItem Header="General" VerticalContentAlignment="Stretch" VerticalAlignment="Center">
                 <StackPanel>
-                    <TextBox Header="Your first name:" PlaceholderText="Put the first name want to publish under here" HorizontalAlignment="Center" Margin="8" Width="300" Text="{x:Bind PreferencesVm.FirstName, Mode=TwoWay}"/>
-                    <TextBox Header="Your surname:" PlaceholderText="Put the surname want to publish under here" HorizontalAlignment="Center" Margin="8" Width="300" Text="{x:Bind PreferencesVm.LastName, Mode=TwoWay}"/>
-                    <TextBox Header="Your email:" PlaceholderText="Put your email here" Margin="8" Width="300" Text="{x:Bind PreferencesVm.Email, Mode=TwoWay}"/>
+                    <TextBox Header="Your first name:" PlaceholderText="Put the first name want to publish under here"
+                             HorizontalAlignment="Center" Margin="8" Width="300"
+                             Text="{x:Bind PreferencesVm.FirstName, Mode=TwoWay}" />
+                    <TextBox Header="Your surname:" PlaceholderText="Put the surname want to publish under here"
+                             HorizontalAlignment="Center" Margin="8" Width="300"
+                             Text="{x:Bind PreferencesVm.LastName, Mode=TwoWay}" />
+                    <TextBox Header="Your email:" PlaceholderText="Put your email here" Margin="8" Width="300"
+                             Text="{x:Bind PreferencesVm.Email, Mode=TwoWay}" />
                     <controls:BrowseTextBox
                         HorizontalAlignment="Right"
                         Header="Project directory:"
                         PlaceholderText="Where do you want to store your stories?"
                         Path="{x:Bind PreferencesVm.ProjectDirectory, Mode=TwoWay}"
                         BrowseMode="Folder"
-                        PathSelected="OnProjectPathSelected"/>
+                        PathSelected="OnProjectPathSelected" />
                 </StackPanel>
             </PivotItem>
             <PivotItem Header="Backup" VerticalAlignment="Stretch" VerticalContentAlignment="Center">
                 <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
-	                <StackPanel Orientation="Horizontal">
-		                <CheckBox Content="Automatically Save every" IsChecked="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" HorizontalAlignment="Left" Margin="4"/>
-		                <NumberBox Minimum="15" Maximum="60" IsEnabled="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" 
-		                           PlaceholderText="Enter a value (Seconds)"  HorizontalAlignment="Left" Margin="8"
-		                           Value="{x:Bind PreferencesVm.AutoSaveInterval, Mode=TwoWay}"/>
-		                <TextBlock Text="Seconds" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-	                </StackPanel>
-					<CheckBox Content="Make a backup of the story when opened" Margin="4" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.BackupOnOpen, Mode=TwoWay}"/>
-                    <CheckBox Content="Make timed backups" Margin="4" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.TimedBackup, Mode=TwoWay}"/>
-                    <NumberBox Header="How often should backups be made? (Minutes)" Maximum="300" Minimum="1" Margin="4" Width="300" HorizontalAlignment="Left" Value="{x:Bind PreferencesVm.TimedBackupInterval, Mode=TwoWay}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox Content="Automatically Save every"
+                                  IsChecked="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" HorizontalAlignment="Left"
+                                  Margin="4" />
+                        <NumberBox Minimum="15" Maximum="60" IsEnabled="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}"
+                                   PlaceholderText="Enter a value (Seconds)" HorizontalAlignment="Left" Margin="8"
+                                   Value="{x:Bind PreferencesVm.AutoSaveInterval, Mode=TwoWay}" />
+                        <TextBlock Text="Seconds" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    </StackPanel>
+                    <CheckBox Content="Make a backup of the story when opened" Margin="4" HorizontalAlignment="Left"
+                              IsChecked="{x:Bind PreferencesVm.BackupOnOpen, Mode=TwoWay}" />
+                    <CheckBox Content="Make timed backups" Margin="4" HorizontalAlignment="Left"
+                              IsChecked="{x:Bind PreferencesVm.TimedBackup, Mode=TwoWay}" />
+                    <NumberBox Header="How often should backups be made? (Minutes)" Maximum="300" Minimum="1"
+                               Margin="4" Width="300" HorizontalAlignment="Left"
+                               Value="{x:Bind PreferencesVm.TimedBackupInterval, Mode=TwoWay}" />
                     <controls:BrowseTextBox
                         x:Name="BackupDirBrowse"
                         HorizontalAlignment="Right"
@@ -39,93 +50,106 @@
                         PlaceholderText="Where do you want to store your backups?"
                         Path="{x:Bind PreferencesVm.BackupDirectory, Mode=TwoWay}"
                         BrowseMode="Folder"
-                        PathSelected="OnBackupPathSelected"/>
+                        PathSelected="OnBackupPathSelected" />
                 </StackPanel>
             </PivotItem>
             <PivotItem Header="Other" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch">
                 <Grid HorizontalAlignment="Center">
-					<Grid.RowDefinitions>
-						<RowDefinition Height="Auto"/>
-						<RowDefinition Height="Auto"/>
-						<RowDefinition Height="Auto"/>
-						<RowDefinition Height="Auto"/>
-						<RowDefinition Height="Auto"/>
-					</Grid.RowDefinitions>
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="Auto"/>
-						<ColumnDefinition Width="Auto"/>
-					</Grid.ColumnDefinitions>
-	                <CheckBox Grid.Row="0" Grid.Column="0" Content="Send error logs" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.ErrorCollectionConsent, Mode=TwoWay}"/>
-					<CheckBox Grid.Row="0" Grid.Column="1" Content="Send me StoryCAD newsletters" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.Newsletter, Mode=TwoWay}"/>
-                    <CheckBox Grid.Row="1" Grid.Column="0" Content="Wrap node names" Margin="8" HorizontalAlignment="Left" Click="ToggleWrapping" Name="TextWrap"/>
-					<CheckBox Grid.Row="1" Grid.Column="1" Content="Advanced logging" Margin="8" HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.AdvancedLogging, Mode=TwoWay}"/>
-					<CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"
-					          Content="Show startup page" Margin="8" IsChecked="{x:Bind PreferencesVm.ShowStartupPage, Mode=TwoWay}" />
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Grid.Row="0" Grid.Column="0" Content="Send error logs" Margin="8"
+                              HorizontalAlignment="Left"
+                              IsChecked="{x:Bind PreferencesVm.ErrorCollectionConsent, Mode=TwoWay}" />
+                    <CheckBox Grid.Row="0" Grid.Column="1" Content="Send me StoryCAD newsletters" Margin="8"
+                              HorizontalAlignment="Left" IsChecked="{x:Bind PreferencesVm.Newsletter, Mode=TwoWay}" />
+                    <CheckBox Grid.Row="1" Grid.Column="0" Content="Wrap node names" Margin="8"
+                              HorizontalAlignment="Left" Click="ToggleWrapping" Name="TextWrap" />
+                    <CheckBox Grid.Row="1" Grid.Column="1" Content="Advanced logging" Margin="8"
+                              HorizontalAlignment="Left"
+                              IsChecked="{x:Bind PreferencesVm.AdvancedLogging, Mode=TwoWay}" />
+                    <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"
+                              Content="Show startup page" Margin="8"
+                              IsChecked="{x:Bind PreferencesVm.ShowStartupPage, Mode=TwoWay}" />
 
-					<ComboBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Width="300"
-					          Header="Preferred Theme" HorizontalAlignment="Stretch"
-					          SelectedIndex="{x:Bind PreferencesVm.PreferredThemeIndex, Mode=TwoWay}" Margin="8">
-                        <ComboBoxItem Content="Use system theme"/>
-                        <ComboBoxItem Content="Light Theme"/>
-                        <ComboBoxItem Content="Dark Theme"/>
+                    <ComboBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Width="300"
+                              Header="Preferred Theme" HorizontalAlignment="Stretch"
+                              SelectedIndex="{x:Bind PreferencesVm.PreferredThemeIndex, Mode=TwoWay}" Margin="8">
+                        <ComboBoxItem Content="Use system theme" />
+                        <ComboBoxItem Content="Light Theme" />
+                        <ComboBoxItem Content="Dark Theme" />
                     </ComboBox>
-					<ComboBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Width="300"
-					          Header="Preferred Search Engine" HorizontalAlignment="Stretch" 
-					          Name="SearchEngine" SelectedIndex="{x:Bind PreferencesVm.SearchEngineIndex, Mode=TwoWay}" Margin="0,4,0,0">
-                        <ComboBoxItem Content="DuckDuckGo"/>
-                        <ComboBoxItem Content="Google"/>
-                        <ComboBoxItem Content="Bing"/>
-                        <ComboBoxItem Content="Yahoo"/>
+                    <ComboBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Width="300"
+                              Header="Preferred Search Engine" HorizontalAlignment="Stretch"
+                              Name="SearchEngine" SelectedIndex="{x:Bind PreferencesVm.SearchEngineIndex, Mode=TwoWay}"
+                              Margin="0,4,0,0">
+                        <ComboBoxItem Content="DuckDuckGo" />
+                        <ComboBoxItem Content="Google" />
+                        <ComboBoxItem Content="Bing" />
+                        <ComboBoxItem Content="Yahoo" />
                     </ComboBox>
                 </Grid>
             </PivotItem>
             <PivotItem Header="About" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
                 <StackPanel>
-                    <TextBlock HorizontalAlignment="Center" Margin="5,0,0,20" Text="{x:Bind State.Version}"/>
-                    <Button Content="Open Logs folder" HorizontalAlignment="Center" Click="OpenLogFolder" Margin="20" Width="200"/>
-                    <HyperlinkButton Content="StoryCAD was created by Terry Cox, Jake Shaw and Contributors"  HorizontalAlignment="Center" NavigateUri="https://github.com/StoryBuilder-org/StoryCAD/graphs/contributors" Margin="5" FontSize="13"/>
-					<HyperlinkButton Content="Review StoryCAD on the Microsoft Store"  HorizontalAlignment="Center" Click="{x:Bind PreferencesVm.ShowRatingPrompt}" Margin="5" FontSize="13"/>
-					<TextBlock Text="Keep up with StoryCAD news:" Margin="0,10"/>
+                    <TextBlock HorizontalAlignment="Center" Margin="5,0,0,20" Text="{x:Bind State.Version}" />
+                    <Button Content="Open Logs folder" HorizontalAlignment="Center" Click="OpenLogFolder" Margin="20"
+                            Width="200" />
+                    <HyperlinkButton Content="StoryCAD was created by Terry Cox, Jake Shaw and Contributors"
+                                     HorizontalAlignment="Center"
+                                     NavigateUri="https://github.com/StoryBuilder-org/StoryCAD/graphs/contributors"
+                                     Margin="5" FontSize="13" />
+                    <HyperlinkButton Content="Review StoryCAD on the Microsoft Store" HorizontalAlignment="Center"
+                                     Click="{x:Bind PreferencesVm.ShowRatingPrompt}" Margin="5" FontSize="13" />
+                    <TextBlock Text="Keep up with StoryCAD news:" Margin="0,10" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Discord">
                             <Button.Content>
-                                <Image Source="/Assets/Icons/DiscordIcon.png"/>
+                                <Image Source="/Assets/Icons/DiscordIcon.png" />
                             </Button.Content>
                         </Button>
 
                         <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="FaceBook">
                             <Button.Content>
-                                <Image Source="/Assets/Icons/FaceBookIcon.png"/>
+                                <Image Source="/Assets/Icons/FaceBookIcon.png" />
                             </Button.Content>
                         </Button>
 
-						<Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Twitter">
-							<Button.Content>
-								<Image Source="/Assets/Icons/TwitterIcon.png"/>
-							</Button.Content>
-						</Button>
-
-						<Button Width="50" Height="50" Margin="5"  Click="OpenURL" Tag="Youtube">
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Twitter">
                             <Button.Content>
-                                <Image Source="/Assets/Icons/YoutubeIcon.png"/>
+                                <Image Source="/Assets/Icons/TwitterIcon.png" />
                             </Button.Content>
                         </Button>
 
-                        <Button Width="50" Height="50" Margin="5"  Click="OpenURL" Tag="Mail">
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Youtube">
                             <Button.Content>
-                                <Image Source="/Assets/Icons/BootstrapEmailIcon.png"/>
+                                <Image Source="/Assets/Icons/YoutubeIcon.png" />
+                            </Button.Content>
+                        </Button>
+
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Mail">
+                            <Button.Content>
+                                <Image Source="/Assets/Icons/BootstrapEmailIcon.png" />
                             </Button.Content>
                         </Button>
 
                         <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Github">
                             <Button.Content>
-                                <Image Source="/Assets/Icons/GithubIcon.png"/>
+                                <Image Source="/Assets/Icons/GithubIcon.png" />
                             </Button.Content>
                         </Button>
 
                         <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Website">
                             <Button.Content>
-                                <Image Source="/Assets/Logo.png"/>
+                                <Image Source="/Assets/Logo.png" />
                             </Button.Content>
                         </Button>
                     </StackPanel>
@@ -133,38 +157,39 @@
             </PivotItem>
             <PivotItem Header="What's new">
                 <ScrollViewer VerticalScrollBarVisibility="Visible" Height="450">
-                    <TextBlock Name="Changelog" TextWrapping="Wrap"/>
+                    <TextBlock Name="Changelog" TextWrapping="Wrap" />
                 </ScrollViewer>
             </PivotItem>
             <PivotItem Header="Dev" Name="Dev">
                 <StackPanel Orientation="Horizontal">
                     <StackPanel>
-                        <Button Content="Set Init to false" Click="SetInitToFalse" Width="150" Margin="0,5"/>
-                        <Button Content="Throw exception" Click="ThrowException" Width="150" Margin="0,5"/>
-                        <Button Content="Attach Elmah" Click="{x:Bind Logger.AddElmahTarget}" Width="150" Margin="0,5"/>
-                        <Button Content="Refresh Dev Stats" Click="RefreshDevStats" Width="150" Margin="0,5"/>
+                        <Button Content="Set Init to false" Click="SetInitToFalse" Width="150" Margin="0,5" />
+                        <Button Content="Throw exception" Click="ThrowException" Width="150" Margin="0,5" />
+                        <Button Content="Attach Elmah" Click="{x:Bind Logger.AddElmahTarget}" Width="150" Margin="0,5" />
+                        <Button Content="Refresh Dev Stats" Click="RefreshDevStats" Width="150" Margin="0,5" />
                         <CheckBox Content="Hide key file warning"
                                   IsChecked="{x:Bind PreferencesVm.HideKeyFileWarning, Mode=TwoWay}"
-                                  Width="150" Margin="0,5"/>
+                                  Width="150" Margin="0,5" />
                     </StackPanel>
                     <ScrollViewer MaxHeight="400">
                         <StackPanel>
-                            <TextBlock Name="DevInfo"  Width="300" Height="250" Margin="5,0" />
+                            <TextBlock Name="DevInfo" Width="300" Height="250" Margin="5,0" />
                         </StackPanel>
                     </ScrollViewer>
                 </StackPanel>
             </PivotItem>
         </Pivot>
-          <SymbolIcon Symbol="ReportHacked"
-                        Foreground="Red"
-                        Visibility="{x:Bind PreferencesVm.HasErrors, Mode=OneWay}"
-                        HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                        Margin="0">
-                <ToolTipService.ToolTip>
-                    <TextBlock Text="{x:Bind PreferencesVm.Errors, Mode=OneWay}" MaxWidth="350"
-                               Foreground="Red" />
-                </ToolTipService.ToolTip>
-          </SymbolIcon>
-        <TextBlock Text="Changing some preferences may require a restart to take effect." HorizontalAlignment="Center" Margin="0,10,0,0"/>
+        <SymbolIcon Symbol="ReportHacked"
+                    Foreground="Red"
+                    Visibility="{x:Bind PreferencesVm.HasErrors, Mode=OneWay}"
+                    HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                    Margin="0">
+            <ToolTipService.ToolTip>
+                <TextBlock Text="{x:Bind PreferencesVm.Errors, Mode=OneWay}" MaxWidth="350"
+                           Foreground="Red" />
+            </ToolTipService.ToolTip>
+        </SymbolIcon>
+        <TextBlock Text="Changing some preferences may require a restart to take effect." HorizontalAlignment="Center"
+                   Margin="0,10,0,0" />
     </StackPanel>
 </Page>

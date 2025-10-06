@@ -1,3 +1,8 @@
 ﻿namespace StoryCAD.Services.Dialogs;
 
-public enum FindFolderResult { FolderFound, FolderNotFound, AccessError }
+public enum FindFolderResult
+{
+    FolderFound,
+    FolderNotFound,
+    AccessError
+}

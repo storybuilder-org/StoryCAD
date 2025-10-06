@@ -7,5 +7,4 @@ public class NameChangedMessage : ValueChangedMessage<NameChangeMessage>
     public NameChangedMessage(NameChangeMessage value) : base(value)
     {
     }
-
 }

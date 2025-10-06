@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 using StoryCAD.Services.Reports;
 
@@ -14,11 +13,11 @@ public class ReportFormatterTests
         // Arrange
         var appState = Ioc.Default.GetRequiredService<AppState>();
         var storyModel = new StoryModel();
-        appState.CurrentDocument = new StoryDocument(storyModel, null);
+        appState.CurrentDocument = new StoryDocument(storyModel);
 
         // Act
         var formatter = new ReportFormatter(appState);
-        string result = formatter.GetText(null);
+        var result = formatter.GetText(null);
 
         // Assert
         Assert.AreEqual(string.Empty, result);

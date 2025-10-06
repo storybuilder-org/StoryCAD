@@ -1,4 +1,5 @@
 // Windowing.desktop.cs
+
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Windows.Graphics;
@@ -45,7 +46,7 @@ public partial class Windowing
         w = System.Math.Clamp(w, minW, wa.Width);
         h = System.Math.Clamp(h, minH, wa.Height);
 
-        int x = wa.X + (wa.Width  - w) / 2;
+        int x = wa.X + (wa.Width - w) / 2;
         int y = wa.Y + (wa.Height - h) / 2;
 
         appWindow.MoveAndResize(new RectInt32 { X = x, Y = y, Width = w, Height = h });
@@ -55,10 +56,12 @@ public partial class Windowing
     {
         if (GetAppWindow(window).Presenter is OverlappedPresenter p) p.Maximize();
     }
+
     public void Minimize(Window window)
     {
         if (GetAppWindow(window).Presenter is OverlappedPresenter p) p.Minimize();
     }
+
     public void Restore(Window window)
     {
         if (GetAppWindow(window).Presenter is OverlappedPresenter p) p.Restore();
@@ -72,7 +75,7 @@ public partial class Windowing
             p.IsResizable = true;
             p.IsMinimizable = true;
             p.IsMaximizable = true;
-            p.PreferredMinimumWidth  = (int)System.Math.Round(minWidthDip  * s);
+            p.PreferredMinimumWidth = (int)System.Math.Round(minWidthDip * s);
             p.PreferredMinimumHeight = (int)System.Math.Round(minHeightDip * s);
         }
     }

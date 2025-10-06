@@ -1,19 +1,17 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
 using StoryCAD.ViewModels;
 using StoryCAD.ViewModels.Tools;
-using System;
-using System.Linq;
 
 namespace StoryCADTests.ViewModels;
 
 [TestClass]
 public class ProblemViewModelTests
 {
-    private ProblemViewModel _viewModel;
     private ProblemModel _problemModel;
     private StoryModel _storyModel;
+    private ProblemViewModel _viewModel;
 
     [TestInitialize]
     public void TestInitialize()
@@ -25,7 +23,7 @@ public class ProblemViewModelTests
         // Initialize the view model
         _viewModel = Ioc.Default.GetService<ProblemViewModel>();
         _viewModel.Model = _problemModel;
-        _viewModel.StructureBeats = new();
+        _viewModel.StructureBeats = new ObservableCollection<StructureBeatViewModel>();
         _viewModel.StructureModelTitle = "Custom Beat Sheet"; // Enable editing
     }
 
@@ -33,7 +31,7 @@ public class ProblemViewModelTests
     public void CreateBeat_ShouldAddNewBeatToCollection()
     {
         // Arrange
-        int initialCount = _viewModel.StructureBeats.Count;
+        var initialCount = _viewModel.StructureBeats.Count;
 
         // Act
         _viewModel.CreateBeat(null, null);
@@ -49,7 +47,7 @@ public class ProblemViewModelTests
     public void CreateBeat_MultipleCalls_ShouldAddMultipleBeats()
     {
         // Arrange
-        int initialCount = _viewModel.StructureBeats.Count;
+        var initialCount = _viewModel.StructureBeats.Count;
 
         // Act
         _viewModel.CreateBeat(null, null);
@@ -66,7 +64,7 @@ public class ProblemViewModelTests
         // Arrange
         _viewModel.StructureBeats.Add(CreateTestBeat("Test Beat"));
         _viewModel.SelectedBeat = null;
-        int initialCount = _viewModel.StructureBeats.Count;
+        var initialCount = _viewModel.StructureBeats.Count;
 
         // Act
         _viewModel.DeleteBeat(null, null);
@@ -263,22 +261,24 @@ public class ProblemViewModelTests
     public void StructureBeats_PropertyChanges_ShouldNotifyPropertyChanged()
     {
         // Arrange
-        bool propertyChangedFired = false;
+        var propertyChangedFired = false;
         _viewModel.PropertyChanged += (sender, e) =>
         {
             if (e.PropertyName == nameof(_viewModel.StructureBeats))
+            {
                 propertyChangedFired = true;
+            }
         };
 
         // Act
-        _viewModel.StructureBeats = new();
+        _viewModel.StructureBeats = new ObservableCollection<StructureBeatViewModel>();
 
         // Assert
         Assert.IsTrue(propertyChangedFired);
     }
 
     /// <summary>
-    /// Helper method to create test beats without relying on IoC container
+    ///     Helper method to create test beats without relying on IoC container
     /// </summary>
     private StructureBeatViewModel CreateTestBeat(string title, string description = "Test Description")
     {
@@ -295,6 +295,7 @@ public class ProblemViewModelTests
         {
             _viewModel.PropertyChanged -= _viewModel.OnPropertyChanged;
         }
+
         _viewModel = null;
         _problemModel = null;
         _storyModel = null;

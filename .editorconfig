@@ -165,3 +165,17 @@ csharp_style_expression_bodied_indexers = true:silent
 csharp_style_expression_bodied_accessors = true:silent
 csharp_style_expression_bodied_lambdas = true:silent
 csharp_style_expression_bodied_local_functions = false:silent
+
+# Code Quality - Dead Code Detection (Issue #1134)
+dotnet_diagnostic.CS0169.severity = warning  # Field is never used
+dotnet_diagnostic.CS0414.severity = warning  # Field is assigned but its value is never used
+dotnet_diagnostic.CS0168.severity = warning  # Variable is declared but never used
+dotnet_diagnostic.IDE0051.severity = warning # Private member is unused
+dotnet_diagnostic.IDE0052.severity = warning # Private member is unread
+dotnet_diagnostic.IDE0060.severity = warning # Remove unused parameter
+
+# Code Quality - Duplicate Using Directives (Issue #1134)
+dotnet_diagnostic.CS0105.severity = warning  # Using directive appeared previously
+
+# Code Quality - Obsolete API Usage (Issue #1134)
+dotnet_diagnostic.CS0618.severity = warning  # Member is obsolete

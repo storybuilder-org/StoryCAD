@@ -1,61 +1,50 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.DAL;
 using StoryCAD.Models;
-using StoryCAD.Services;
-using StoryCAD.Services.Logging;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Windows.Storage;
-using StoryCAD.ViewModels;
-using StoryCAD.Services.Outline;
 using StoryCAD.Services.API;
+using StoryCAD.Services.Logging;
+using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
-using StoryCADTests;
 
 namespace StoryCADTests.DAL;
 
 [TestClass]
 public class StoryIOTests
 {
-    private StoryIO _storyIO;
     private AppState _appState;
     private ILogService _logService;
-    
+    private StoryIO _storyIO;
+
     [TestInitialize]
     public void Initialize()
     {
         _appState = Ioc.Default.GetRequiredService<AppState>();
         _logService = Ioc.Default.GetRequiredService<ILogService>();
         _storyIO = new StoryIO(_logService, _appState);
-        
+
         // Reset app state to ensure clean start for each test
         _appState.CurrentDocument = null;
     }
-    
+
     [TestMethod]
     public void ReadStory_UpdatesCurrentDocumentFilePath()
     {
         // This test verifies that StoryIO no longer depends on OutlineViewModel
         // and can be constructed with just ILogService and AppState
-        
+
         // Act - verify it compiles with new constructor
         var storyIO = new StoryIO(_logService, _appState);
-        
+
         // Assert
         Assert.IsNotNull(storyIO);
     }
-    
+
     [TestMethod]
     public void Constructor_AcceptsAppStateWithoutOutlineViewModel()
     {
         // Arrange & Act
         var storyIO = new StoryIO(_logService, _appState);
-        
+
         // Assert
         Assert.IsNotNull(storyIO);
     }
@@ -68,8 +57,8 @@ public class StoryIOTests
         var filePath = Path.Combine(App.ResultsDir, "WriteStoryTest.stbx");
         var storyModel = new StoryModel();
         _appState.CurrentDocument = new StoryDocument(storyModel, filePath);
-        string name = Path.GetFileNameWithoutExtension(filePath);
-        
+        var name = Path.GetFileNameWithoutExtension(filePath);
+
         OverviewModel overview = new(name, storyModel, null)
         {
             DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
@@ -81,11 +70,11 @@ public class StoryIOTests
         storyModel.ExplorerView.Add(trash.Node);
         FolderModel narrative = new("Narrative View", storyModel, StoryItemType.Folder, null);
         storyModel.NarratorView.Add(narrative.Node);
-        
+
         // Add three test nodes
         StoryElement problem = new ProblemModel("TestProblem", storyModel, overview.Node);
-        CharacterModel character = new CharacterModel("TestCharacter", storyModel, overview.Node);
-        SceneModel scene = new SceneModel("TestScene", storyModel, overview.Node);
+        var character = new CharacterModel("TestCharacter", storyModel, overview.Node);
+        var scene = new SceneModel("TestScene", storyModel, overview.Node);
 
         // Assert model is set up correctly
         Assert.AreEqual(6, storyModel.StoryElements.Count);
@@ -105,7 +94,7 @@ public class StoryIOTests
 
         // Assert file was written
         Assert.IsTrue(File.Exists(filePath));
-        
+
         // Cleanup
         if (File.Exists(filePath))
         {
@@ -117,13 +106,13 @@ public class StoryIOTests
     public async Task ReadStory_LoadsModelCorrectly()
     {
         // Arrange
-        string filePath = Path.Combine(App.InputDir, "OpenTest.stbx");
+        var filePath = Path.Combine(App.InputDir, "OpenTest.stbx");
         Assert.IsTrue(File.Exists(filePath), "Test file does not exist.");
 
-        StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
+        var file = await StorageFile.GetFileFromPathAsync(filePath);
 
         // Act
-        StoryModel storyModel = await _storyIO.ReadStory(file);
+        var storyModel = await _storyIO.ReadStory(file);
 
         // Assert
         Assert.AreEqual(7, storyModel.StoryElements.Count, "Story elements count mismatch.");
@@ -136,16 +125,22 @@ public class StoryIOTests
     public void IsValidPath_WithValidPath_ReturnsTrue()
     {
         // Arrange - Use cross-platform temp path
-        string validPath = Path.Combine(Path.GetTempPath(), "mytestpath", "test.stbx");
+        var validPath = Path.Combine(Path.GetTempPath(), "mytestpath", "test.stbx");
 
         // Act & Assert
         Assert.IsTrue(StoryIO.IsValidPath(validPath));
 
         // Cleanup - Remove created directory
-        string dir = Path.GetDirectoryName(validPath);
+        var dir = Path.GetDirectoryName(validPath);
         if (Directory.Exists(dir))
         {
-            try { Directory.Delete(dir, true); } catch { }
+            try
+            {
+                Directory.Delete(dir, true);
+            }
+            catch
+            {
+            }
         }
     }
 
@@ -162,7 +157,7 @@ public class StoryIOTests
         }
 
         // Arrange - Windows doesn't allow these characters in filenames
-        string invalidPath = Path.Combine(Path.GetTempPath(), "test<>:|?.stbx");
+        var invalidPath = Path.Combine(Path.GetTempPath(), "test<>:|?.stbx");
 
         // Act & Assert
         Assert.IsFalse(StoryIO.IsValidPath(invalidPath));
@@ -172,11 +167,11 @@ public class StoryIOTests
     public async Task ReadStory_FullFile_LoadsAllProperties()
     {
         // Arrange
-        string filePath = Path.Combine(App.InputDir, "Full.stbx");
-        StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
-        
+        var filePath = Path.Combine(App.InputDir, "Full.stbx");
+        var file = await StorageFile.GetFileFromPathAsync(filePath);
+
         // Act
-        StoryModel model = await _storyIO.ReadStory(file);
+        var model = await _storyIO.ReadStory(file);
 
         // Assert - Overview Model Tests
         var overview = (OverviewModel)model.StoryElements[0];
@@ -199,14 +194,14 @@ public class StoryIOTests
     public async Task ReadStory_StructureFile_LoadsCorrectStructure()
     {
         // Arrange: load the STBX file that contains the Hero's Journey beats
-        string filePath = Path.Combine(App.InputDir, "StructureTests.stbx");
+        var filePath = Path.Combine(App.InputDir, "StructureTests.stbx");
         Assert.IsTrue(File.Exists(filePath), "Test file does not exist at the given path.");
 
-        StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
+        var file = await StorageFile.GetFileFromPathAsync(filePath);
 
         // Act: read the story and find the "Main Problem" that has the Hero's Journey data
-        StoryModel model = await _storyIO.ReadStory(file);
-        ProblemModel mainProblem = model.StoryElements
+        var model = await _storyIO.ReadStory(file);
+        var mainProblem = model.StoryElements
             .OfType<ProblemModel>()
             .FirstOrDefault(p => p.Name == "Main Problem");
 
@@ -220,20 +215,22 @@ public class StoryIOTests
 
         // Quick sample checks on beat data
         Assert.AreEqual("Ordinary World", mainProblem.StructureBeats[0].Title, "First beat title mismatch.");
-        Assert.AreEqual(Guid.Parse("ea818c91-0dd4-47f2-8bcc-7c5841030e09"), mainProblem.StructureBeats[0].Guid, "First bound Beat GUID mismatch");
+        Assert.AreEqual(Guid.Parse("ea818c91-0dd4-47f2-8bcc-7c5841030e09"), mainProblem.StructureBeats[0].Guid,
+            "First bound Beat GUID mismatch");
         Assert.AreEqual("Refusal of the Call", mainProblem.StructureBeats[2].Title, "Third beat title mismatch.");
-        Assert.AreEqual(Guid.Parse("4e7c0217-64e8-4c74-8438-debb584cf3b8"), mainProblem.StructureBeats[2].Guid, "Third bound Beat GUID mismatch");
+        Assert.AreEqual(Guid.Parse("4e7c0217-64e8-4c74-8438-debb584cf3b8"), mainProblem.StructureBeats[2].Guid,
+            "Third bound Beat GUID mismatch");
     }
 
     [TestMethod]
     public async Task CheckFileAvailability_WithExistingFile_ReturnsTrue()
     {
         // Arrange
-        string filePath = Path.Combine(App.InputDir, "AddElement.stbx");
-        
+        var filePath = Path.Combine(App.InputDir, "AddElement.stbx");
+
         // Act
-        bool result = await _storyIO.CheckFileAvailability(filePath);
-        
+        var result = await _storyIO.CheckFileAvailability(filePath);
+
         // Assert
         Assert.IsTrue(result, $"Expected file at {filePath} to be available.");
     }
@@ -248,18 +245,19 @@ public class StoryIOTests
         // All templates create the legacy dual-root structure automatically
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         var model = api.CurrentModel;
 
         // Act - The new structure has TrashCan in TrashView, not ExplorerView
-        bool hasNewStructure = model.ExplorerView.Count == 1 && 
-            model.TrashView.Count == 1 && 
-            model.TrashView[0].Type == StoryItemType.TrashCan;
+        var hasNewStructure = model.ExplorerView.Count == 1 &&
+                              model.TrashView.Count == 1 &&
+                              model.TrashView[0].Type == StoryItemType.TrashCan;
 
         // Assert
         Assert.IsTrue(hasNewStructure, "Should have new structure with TrashCan in TrashView");
         Assert.AreEqual(1, model.ExplorerView.Count, "ExplorerView should have only Overview");
-        Assert.AreEqual(StoryItemType.StoryOverview, model.ExplorerView[0].Type, "ExplorerView root should be Overview");
+        Assert.AreEqual(StoryItemType.StoryOverview, model.ExplorerView[0].Type,
+            "ExplorerView root should be Overview");
         Assert.AreEqual(1, model.TrashView.Count, "TrashView should have TrashCan");
         Assert.AreEqual(StoryItemType.TrashCan, model.TrashView[0].Type, "TrashView root should be TrashCan");
     }
@@ -271,22 +269,22 @@ public class StoryIOTests
         var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         var model = api.CurrentModel;
         var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
         var trashCan = model.TrashView.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
         Assert.IsNotNull(trashCan, "TrashCan should exist in TrashView");
-        
+
         // Add a scene to overview
         var sceneResult = api.AddElement(StoryItemType.Scene, overview.Uuid.ToString(), "Deleted Scene");
         Assert.IsTrue(sceneResult.IsSuccess);
         var scene = model.StoryElements.StoryElementGuids[sceneResult.Payload];
-        
+
         // Delete the scene (move to trash) - manually because we're testing legacy structure
         overview.Node.Children.Remove(scene.Node);
         scene.Node.Parent = trashCan;
         trashCan.Children.Add(scene.Node);
-        
+
         // Verify setup
         Assert.AreEqual(1, trashCan.Children.Count, "TrashCan should have one deleted item");
 
@@ -302,6 +300,7 @@ public class StoryIOTests
                     child.Parent = null;
                     model.TrashView.Add(child);
                 }
+
                 // Remove TrashCan from ExplorerView
                 model.ExplorerView.Remove(trashRoot);
             }
@@ -315,7 +314,8 @@ public class StoryIOTests
         var trashCanInView = model.TrashView[0];
         Assert.AreEqual(StoryItemType.TrashCan, trashCanInView.Type, "TrashView root should be TrashCan");
         Assert.AreEqual(1, trashCanInView.Children.Count, "TrashCan should contain one deleted item");
-        Assert.AreEqual(scene.Node.Uuid, trashCanInView.Children[0].Uuid, "TrashCan should contain the same scene that was deleted");
+        Assert.AreEqual(scene.Node.Uuid, trashCanInView.Children[0].Uuid,
+            "TrashCan should contain the same scene that was deleted");
     }
 
     [TestMethod]
@@ -325,27 +325,27 @@ public class StoryIOTests
         var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
-        
+
         var model = api.CurrentModel;
         var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
         var trashCan = model.TrashView.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
         Assert.IsNotNull(trashCan, "TrashCan should exist in TrashView");
-        
+
         // Add folder to overview
         var folderResult = api.AddElement(StoryItemType.Folder, overview.Uuid.ToString(), "Deleted Folder");
         Assert.IsTrue(folderResult.IsSuccess);
         var folder = model.StoryElements.StoryElementGuids[folderResult.Payload];
-        
+
         // Add scene to folder
         var sceneResult = api.AddElement(StoryItemType.Scene, folder.Uuid.ToString(), "Scene in Folder");
         Assert.IsTrue(sceneResult.IsSuccess);
         var scene = model.StoryElements.StoryElementGuids[sceneResult.Payload];
-        
+
         // Delete entire folder hierarchy (move to trash) - manually because we're testing legacy structure
         overview.Node.Children.Remove(folder.Node);
         folder.Node.Parent = trashCan;
         trashCan.Children.Add(folder.Node);
-        
+
         // Verify setup
         Assert.AreEqual(1, trashCan.Children.Count, "TrashCan should have one deleted folder");
         Assert.AreEqual(1, folder.Node.Children.Count, "Deleted folder should still have its child");
@@ -362,6 +362,7 @@ public class StoryIOTests
                     child.Parent = null;
                     model.TrashView.Add(child);
                 }
+
                 // Remove empty TrashCan from ExplorerView
                 model.ExplorerView.Remove(trashRoot);
             }
@@ -378,7 +379,8 @@ public class StoryIOTests
         var movedFolder = trashCanInView.Children[0];
         Assert.AreEqual(folder.Node.Uuid, movedFolder.Uuid, "TrashCan should contain the same folder that was deleted");
         Assert.AreEqual(1, movedFolder.Children.Count, "Folder should still have its child");
-        Assert.AreEqual(scene.Node.Uuid, movedFolder.Children[0].Uuid, "Child scene should be preserved with same UUID");
+        Assert.AreEqual(scene.Node.Uuid, movedFolder.Children[0].Uuid,
+            "Child scene should be preserved with same UUID");
     }
 
     #endregion

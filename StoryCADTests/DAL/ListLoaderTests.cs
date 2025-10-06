@@ -1,8 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 
 namespace StoryCADTests.DAL;
@@ -10,12 +7,13 @@ namespace StoryCADTests.DAL;
 [TestClass]
 public class ListLoaderTests
 {
-    private Dictionary<string, ObservableCollection<string>> lists = Ioc.Default.GetService<ListData>().ListControlSource;
+    private readonly Dictionary<string, ObservableCollection<string>> lists = Ioc.Default.GetService<ListData>()
+        .ListControlSource;
 
     [TestMethod]
     public void TestListLoaderLists()
     {
-        Assert.AreEqual(66,lists.Count);
+        Assert.AreEqual(66, lists.Count);
         // OverViewModel lists
         Assert.IsTrue(lists.ContainsKey("StoryType"));
         Assert.IsTrue(lists.ContainsKey("Voice"));
@@ -86,20 +84,21 @@ public class ListLoaderTests
     [TestMethod]
     public void CheckForDuplicates()
     {
-        string FailedLists = "";
+        var FailedLists = "";
         foreach (var list in lists.Values)
         {
             if (list.Distinct().Count() != list.Count)
             {
                 //names list error and thows exception to mark test as failed.
-                FailedLists += "\n -" + lists.Keys.ToList()[lists.Values.ToList().IndexOf(list)]; //gets key (name) of invalid list.
+                FailedLists +=
+                    "\n -" + lists.Keys.ToList()[
+                        lists.Values.ToList().IndexOf(list)]; //gets key (name) of invalid list.
             }
         }
-        
-        if ( FailedLists != "" ) 
+
+        if (FailedLists != "")
         {
             throw new AssertFailedException("Lists.ini contains duplicate values in the following lists" + FailedLists);
         }
-
     }
 }

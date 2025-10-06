@@ -1,23 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-using System.Linq;
+using Windows.Graphics.Printing;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.UI;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Printing;
-using StoryCAD.Services.Reports;
-using Windows.Graphics.Printing;
+using SkiaSharp;
+using StoryCAD.Services;
 using StoryCAD.Services.Dialogs.Tools;
-using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.Services.Locking;
 using StoryCAD.Services.Messages;
-using StoryCAD.Services;
-using SkiaSharp;
+using StoryCAD.Services.Reports;
 
 namespace StoryCAD.ViewModels.Tools;
 
@@ -46,7 +35,9 @@ public partial class PrintReportDialogVM : ObservableRecipient
     private const float PdfMarginLeft = 90f;
     private const float PdfMarginTop = 38f;
     private const float PdfMarginBottom = 38f;
+
     private const float PdfFontSize = 10f;
+
     // Constructor for XAML compatibility
     public PrintReportDialogVM() : this(
         Ioc.Default.GetRequiredService<AppState>(),
@@ -56,55 +47,170 @@ public partial class PrintReportDialogVM : ObservableRecipient
     {
     }
 
-    public PrintReportDialogVM(AppState appState, Windowing window, EditFlushService editFlushService, ILogService logService)
+    public PrintReportDialogVM(AppState appState, Windowing window, EditFlushService editFlushService,
+        ILogService logService)
     {
         _appState = appState;
         Window = window;
         _editFlushService = editFlushService;
         _logService = logService;
-        _printPreviewCache = new();
+        _printPreviewCache = new List<StackPanel>();
     }
 
     #region Properties
+
     private bool _createSummary;
-    public bool CreateSummary { get => _createSummary; set => SetProperty(ref _createSummary, value); }
+
+    public bool CreateSummary
+    {
+        get => _createSummary;
+        set => SetProperty(ref _createSummary, value);
+    }
+
     private bool _createStructure;
-    public bool CreateStructure { get => _createStructure; set => SetProperty(ref _createStructure, value); }
+
+    public bool CreateStructure
+    {
+        get => _createStructure;
+        set => SetProperty(ref _createStructure, value);
+    }
+
     private bool _selectAllProblems;
-    public bool SelectAllProblems { get => _selectAllProblems; set => SetProperty(ref _selectAllProblems, value); }
+
+    public bool SelectAllProblems
+    {
+        get => _selectAllProblems;
+        set => SetProperty(ref _selectAllProblems, value);
+    }
+
     private bool _selectAllCharacters;
-    public bool SelectAllCharacters { get => _selectAllCharacters; set => SetProperty(ref _selectAllCharacters, value); }
+
+    public bool SelectAllCharacters
+    {
+        get => _selectAllCharacters;
+        set => SetProperty(ref _selectAllCharacters, value);
+    }
+
     private bool _selectAllScenes;
-    public bool SelectAllScenes { get => _selectAllScenes; set => SetProperty(ref _selectAllScenes, value); }
+
+    public bool SelectAllScenes
+    {
+        get => _selectAllScenes;
+        set => SetProperty(ref _selectAllScenes, value);
+    }
+
     private bool _selectAllWeb;
-    public bool SelectAllWeb { get => _selectAllWeb; set => SetProperty(ref _selectAllWeb, value); }
+
+    public bool SelectAllWeb
+    {
+        get => _selectAllWeb;
+        set => SetProperty(ref _selectAllWeb, value);
+    }
+
     private bool _selectAllSetting;
-    public bool SelectAllSettings { get => _selectAllSetting; set => SetProperty(ref _selectAllSetting, value); }
+
+    public bool SelectAllSettings
+    {
+        get => _selectAllSetting;
+        set => SetProperty(ref _selectAllSetting, value);
+    }
+
     private bool _createOverview;
-    public bool CreateOverview { get => _createOverview; set => SetProperty(ref _createOverview, value); }
+
+    public bool CreateOverview
+    {
+        get => _createOverview;
+        set => SetProperty(ref _createOverview, value);
+    }
+
     private bool _problemList;
-    public bool ProblemList { get => _problemList; set => SetProperty(ref _problemList, value); }
+
+    public bool ProblemList
+    {
+        get => _problemList;
+        set => SetProperty(ref _problemList, value);
+    }
+
     private bool _characterList;
-    public bool CharacterList { get => _characterList; set => SetProperty(ref _characterList, value); }
+
+    public bool CharacterList
+    {
+        get => _characterList;
+        set => SetProperty(ref _characterList, value);
+    }
+
     private bool _settingList;
-    public bool SettingList { get => _settingList; set => SetProperty(ref _settingList, value); }
+
+    public bool SettingList
+    {
+        get => _settingList;
+        set => SetProperty(ref _settingList, value);
+    }
+
     private bool _sceneList;
-    public bool SceneList { get => _sceneList; set => SetProperty(ref _sceneList, value); }
+
+    public bool SceneList
+    {
+        get => _sceneList;
+        set => SetProperty(ref _sceneList, value);
+    }
+
     private bool _webList;
-    public bool WebList { get => _webList; set => SetProperty(ref _webList, value); }
+
+    public bool WebList
+    {
+        get => _webList;
+        set => SetProperty(ref _webList, value);
+    }
 
     private List<StoryNodeItem> _selectedNodes = new();
-    public List<StoryNodeItem> SelectedNodes { get => _selectedNodes; set => SetProperty(ref _selectedNodes, value); }
+
+    public List<StoryNodeItem> SelectedNodes
+    {
+        get => _selectedNodes;
+        set => SetProperty(ref _selectedNodes, value);
+    }
+
     private List<StoryNodeItem> _problemNodes = new();
-    public List<StoryNodeItem> ProblemNodes { get => _problemNodes; set => SetProperty(ref _problemNodes, value); }
+
+    public List<StoryNodeItem> ProblemNodes
+    {
+        get => _problemNodes;
+        set => SetProperty(ref _problemNodes, value);
+    }
+
     private List<StoryNodeItem> _characterNodes = new();
-    public List<StoryNodeItem> CharacterNodes { get => _characterNodes; set => SetProperty(ref _characterNodes, value); }
+
+    public List<StoryNodeItem> CharacterNodes
+    {
+        get => _characterNodes;
+        set => SetProperty(ref _characterNodes, value);
+    }
+
     private List<StoryNodeItem> _settingNodes = new();
-    public List<StoryNodeItem> SettingNodes { get => _settingNodes; set => SetProperty(ref _settingNodes, value); }
+
+    public List<StoryNodeItem> SettingNodes
+    {
+        get => _settingNodes;
+        set => SetProperty(ref _settingNodes, value);
+    }
+
     private List<StoryNodeItem> _sceneNodes = new();
-    public List<StoryNodeItem> SceneNodes { get => _sceneNodes; set => SetProperty(ref _sceneNodes, value); }
+
+    public List<StoryNodeItem> SceneNodes
+    {
+        get => _sceneNodes;
+        set => SetProperty(ref _sceneNodes, value);
+    }
+
     private List<StoryNodeItem> _webNodes = new();
-    public List<StoryNodeItem> WebNodes { get => _webNodes; set => SetProperty(ref _webNodes, value); }
+
+    public List<StoryNodeItem> WebNodes
+    {
+        get => _webNodes;
+        set => SetProperty(ref _webNodes, value);
+    }
+
     #endregion
 
     public Task OpenPrintReportDialog() => OpenPrintReportDialog(ReportOutputMode.Print);
@@ -115,19 +221,21 @@ public partial class PrintReportDialogVM : ObservableRecipient
         {
             if (_appState.CurrentDocument.Model?.CurrentView == null)
             {
-                Messenger.Send(new StatusChangedMessage(new("You need to load a Story first!", LogLevel.Warn)));
+                Messenger.Send(
+                    new StatusChangedMessage(new StatusMessage("You need to load a Story first!", LogLevel.Warn)));
                 return;
             }
 
-            Messenger.Send(new StatusChangedMessage(new("Generate reports executing", LogLevel.Info, true)));
+            Messenger.Send(
+                new StatusChangedMessage(new StatusMessage("Generate reports executing", LogLevel.Info, true)));
             _editFlushService.FlushCurrentEdits();
 
-            var result = await Window.ShowContentDialog(new()
+            var result = await Window.ShowContentDialog(new ContentDialog
             {
                 Title = "Generate Reports",
                 Content = new PrintReportsDialog(this, _appState, _logService),
                 PrimaryButtonText = "Confirm",
-                SecondaryButtonText = "Cancel",
+                SecondaryButtonText = "Cancel"
             });
 
             if (result == ContentDialogResult.Primary)
@@ -158,7 +266,8 @@ public partial class PrintReportDialogVM : ObservableRecipient
         return BuildReportPages(report, linesPerPageOverride);
     }
 
-    private static IReadOnlyList<IReadOnlyList<string>> BuildReportPages(string report, int? linesPerPageOverride = null)
+    private static IReadOnlyList<IReadOnlyList<string>> BuildReportPages(string report,
+        int? linesPerPageOverride = null)
     {
         var pages = new List<IReadOnlyList<string>>();
         var linesPerPage = Math.Max(1, linesPerPageOverride ?? LinesPerPage);
@@ -225,7 +334,7 @@ public partial class PrintReportDialogVM : ObservableRecipient
             var exportFile = await Window.ShowFileSavePicker("Export", ".pdf");
             if (exportFile is null)
             {
-                Messenger.Send(new StatusChangedMessage(new("PDF export cancelled", LogLevel.Info)));
+                Messenger.Send(new StatusChangedMessage(new StatusMessage("PDF export cancelled", LogLevel.Info)));
                 return;
             }
 
@@ -234,7 +343,8 @@ public partial class PrintReportDialogVM : ObservableRecipient
             {
                 if (document is null)
                 {
-                    Messenger.Send(new StatusChangedMessage(new("Unable to create a PDF document for export.", LogLevel.Error)));
+                    Messenger.Send(new StatusChangedMessage(
+                        new StatusMessage("Unable to create a PDF document for export.", LogLevel.Error)));
                     await Window.ShowContentDialog(new ContentDialog
                     {
                         Title = "Export error",
@@ -314,12 +424,13 @@ public partial class PrintReportDialogVM : ObservableRecipient
             }
 
             await FileIO.WriteBytesAsync(exportFile, memoryStream.ToArray());
-            Messenger.Send(new StatusChangedMessage(new($"Reports exported to PDF: {exportFile.Path}", LogLevel.Info)));
+            Messenger.Send(new StatusChangedMessage(new StatusMessage($"Reports exported to PDF: {exportFile.Path}",
+                LogLevel.Info)));
         }
         catch (Exception ex)
         {
             _logService.LogException(LogLevel.Error, ex, "Failed to export reports to PDF.");
-            Messenger.Send(new StatusChangedMessage(new("PDF export failed", LogLevel.Error)));
+            Messenger.Send(new StatusChangedMessage(new StatusMessage("PDF export failed", LogLevel.Error)));
             await Window.ShowContentDialog(new ContentDialog
             {
                 Title = "Export error",
@@ -328,7 +439,6 @@ public partial class PrintReportDialogVM : ObservableRecipient
             }, true);
         }
     }
-
 
 
     /// <summary>Traverse a node and add it to the relevant list.</summary>
@@ -343,8 +453,10 @@ public partial class PrintReportDialogVM : ObservableRecipient
             case StoryItemType.Web: WebNodes.Add(node); break;
         }
 
-        foreach (StoryNodeItem child in node.Children)
+        foreach (var child in node.Children)
+        {
             TraverseNode(child);
+        }
     }
 
     /// <summary>Print only the passed node.</summary>
@@ -354,13 +466,18 @@ public partial class PrintReportDialogVM : ObservableRecipient
 
         var _ = new PrintReports(this, _appState);
 
-        if (elementItem.Type == StoryItemType.StoryOverview) { CreateOverview = true; }
-        else { SelectedNodes.Add(elementItem); }
+        if (elementItem.Type == StoryItemType.StoryOverview)
+        {
+            CreateOverview = true;
+        }
+        else
+        {
+            SelectedNodes.Add(elementItem);
+        }
 
         StartPrintMenu();
 
         SelectedNodes.Clear();
         CreateOverview = false;
     }
-
 }

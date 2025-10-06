@@ -1,12 +1,12 @@
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using Windows.UI;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
 using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.DAL;
-using StoryCAD.Models;
 using StoryCAD.Services;
 using StoryCAD.Services.Backup;
 using StoryCAD.Services.Collaborator;
@@ -20,27 +20,11 @@ using StoryCAD.Services.Outline;
 using StoryCAD.Services.Search;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Reflection;
-using Windows.Storage;
-using StoryCAD.Services;
-using Application = Microsoft.UI.Xaml.Application;
-using StoryCAD.Collaborator.ViewModels;
-using StoryCAD.Services.Outline;
-using StoryCAD.ViewModels.SubViewModels;
-using StoryCAD.Services.Locking;
 
 namespace StoryCAD.ViewModels;
 
 public class ShellViewModel : ObservableRecipient
 {
-    #region SubViewModels
-    // ShellViewModel uses 'sub viewmodels' for different aspects in order
-    // to break this very large viewmodel into more manageable pieces.
-    public OutlineViewModel OutlineManager { get; }   
-    #endregion
-
     private const string HomePage = "HomePage";
     private const string OverviewPage = "OverviewPage";
     private const string ProblemPage = "ProblemPage";
@@ -50,71 +34,356 @@ public class ShellViewModel : ObservableRecipient
     private const string SettingPage = "SettingPage";
     private const string TrashCanPage = "TrashCanPage";
     private const string WebPage = "WebPage";
+    public readonly AutoSaveService _autoSaveService;
+    public readonly BackupService _BackupService;
+    private readonly NavigationService _navigationService;
+    private readonly SceneViewModel _sceneViewModel;
+
+    private readonly DispatcherTimer _statusTimer;
 
     // Required services 
     private readonly ILogService Logger;
-    private readonly SearchService Search;
-    public readonly AutoSaveService _autoSaveService;
-    public readonly BackupService _BackupService;
-    private readonly Windowing Window;
-    private readonly AppState State;
-    private readonly PreferenceService Preferences;
     private readonly OutlineService outlineService;
-    private readonly SceneViewModel _sceneViewModel;
-    private readonly NavigationService _navigationService;
-    private readonly PrintReportDialogVM _printReportDialogVM;
+    private readonly PreferenceService Preferences;
 
-    // Public property for debugging PrintManager state
-    public PrintReportDialogVM PrintReportDialog => _printReportDialogVM;
-    
-    // Navigation navigation landmark nodes
-    public StoryNodeItem CurrentNode { get; set; }
-    public StoryNodeItem RightTappedNode;
+    public readonly ScrivenerIo Scrivener;
+    private readonly SearchService Search;
+    private readonly AppState State;
+    private readonly Windowing Window;
+    public ContentDialog _contentDialog;
+    public ObservableCollection<StoryNodeItem> _sourceChildren;
+    private int _sourceIndex;
+    private ObservableCollection<StoryNodeItem> _targetCollection;
+    private int _targetIndex;
+
+    public CollaboratorArgs CollabArgs;
+
+    public StoryViewType CurrentViewType;
+
+    //File opened (if StoryCAD was opened via an STBX file)
+    public string FilePathToLaunch;
+    public bool IsClosing;
     public TreeViewItem LastClickedTreeviewItem;
 
     //List of new nodes that have a background, these are cleared on navigation
     public List<StoryNodeItem> NewNodeHighlightCache = new();
-
-    public StoryViewType CurrentViewType;
-    public ContentDialog _contentDialog;
-    private int _sourceIndex;
-    public ObservableCollection<StoryNodeItem> _sourceChildren;
-    private int _targetIndex;
-    private ObservableCollection<StoryNodeItem> _targetCollection;
-
-    private readonly DispatcherTimer _statusTimer;
-    public bool IsClosing;
-    public DateTime AppStartTime { get; set; } = DateTime.Now;
-
-    public CollaboratorArgs CollabArgs;
-   
-    public readonly ScrivenerIo Scrivener;
-
-    //File opened (if StoryCAD was opened via an STBX file)
-    public string FilePathToLaunch;
+    public StoryNodeItem RightTappedNode;
 
     // The right-hand (detail) side of ShellView
     public Frame SplitViewFrame;
-    
+
+    #region Constructor(s)
+
+    //// Constructor for XAML compatibility - will be removed later
+    //public ShellViewModel() : this(
+    //    Ioc.Default.GetRequiredService<SceneViewModel>(),
+    //    Ioc.Default.GetRequiredService<ILogService>(),
+    //    Ioc.Default.GetRequiredService<SearchService>(),
+    //    Ioc.Default.GetRequiredService<AutoSaveService>(),
+    //    Ioc.Default.GetRequiredService<BackupService>(),
+    //    Ioc.Default.GetRequiredService<Windowing>(),
+    //    Ioc.Default.GetRequiredService<AppState>(),
+    //    Ioc.Default.GetRequiredService<ScrivenerIo>(),
+    //    Ioc.Default.GetRequiredService<PreferenceService>(),
+    //    Ioc.Default.GetRequiredService<OutlineViewModel>(),
+    //    Ioc.Default.GetRequiredService<OutlineService>(),
+    //    Ioc.Default.GetRequiredService<NavigationService>())
+    //{
+    //}
+
+    public ShellViewModel(SceneViewModel sceneViewModel, ILogService logger, SearchService search,
+        AutoSaveService autoSaveService, BackupService backupService, Windowing window,
+        AppState appState, ScrivenerIo scrivener, PreferenceService preferenceService,
+        OutlineViewModel outlineViewModel, OutlineService outlineService, NavigationService navigationService,
+        PrintReportDialogVM printReportDialogVM)
+    {
+        // Store injected services
+        _sceneViewModel = sceneViewModel;
+        Logger = logger;
+        Search = search;
+        _autoSaveService = autoSaveService;
+        _BackupService = backupService;
+        Window = window;
+        State = appState;
+        Scrivener = scrivener;
+        Preferences = preferenceService;
+        _navigationService = navigationService;
+        PrintReportDialog = printReportDialogVM;
+        // Store sub ViewModels
+        OutlineManager = outlineViewModel;
+        this.outlineService = outlineService;
+
+        // Register inter-MVVM messaging
+        Messenger.Register<IsChangedRequestMessage>(this,
+            (_, m) => { m.Reply(State.CurrentDocument?.Model?.Changed ?? false); });
+        Messenger.Register<ShellViewModel, IsChangedMessage>(this, static (r, m) => r.IsChangedMessageReceived(m));
+        Messenger.Register<ShellViewModel, IsBackupStatusMessage>(this,
+            static (r, m) => r.BackupStatusMessageReceived(m));
+        Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
+        Messenger.Register<ShellViewModel, NameChangedMessage>(this, static (r, m) => r.NameMessageReceived(m));
+
+        State.CurrentDocument = new StoryDocument(new StoryModel());
+
+        //Skip status timer initialization in Tests.
+        if (!State.Headless)
+        {
+            _statusTimer = new DispatcherTimer();
+            _statusTimer.Tick += statusTimer_Tick;
+            ChangeStatusColor = Colors.Green;
+            BackupStatusColor = Colors.Green;
+        }
+
+        Messenger.Send(new StatusChangedMessage(new StatusMessage("Ready", LogLevel.Info)));
+
+        TogglePaneCommand = new RelayCommand(TogglePane, SerializationLock.CanExecuteCommands);
+        OpenFileOpenMenuCommand =
+            new AsyncRelayCommand(OutlineManager.OpenFileOpenMenu, SerializationLock.CanExecuteCommands);
+        NarrativeToolCommand =
+            new RelayCommand(async () => await Ioc.Default.GetRequiredService<NarrativeToolVM>().OpenNarrativeTool(),
+                SerializationLock.CanExecuteCommands);
+        PrintNodeCommand = new RelayCommand(async () => await OutlineManager.PrintCurrentNodeAsync(),
+            SerializationLock.CanExecuteCommands);
+        OpenFileCommand = new RelayCommand(async () => await OutlineManager.OpenFile(),
+            SerializationLock.CanExecuteCommands);
+        SaveFileCommand = new RelayCommand(async () => await OutlineManager.SaveFile(),
+            SerializationLock.CanExecuteCommands);
+        SaveAsCommand = new RelayCommand(async () => await OutlineManager.SaveFileAs(),
+            SerializationLock.CanExecuteCommands);
+        CreateBackupCommand =
+            new RelayCommand(async () => await CreateBackupNow(), SerializationLock.CanExecuteCommands);
+        CloseCommand = new RelayCommand(async () => await OutlineManager.CloseFile(),
+            SerializationLock.CanExecuteCommands);
+        ExitCommand =
+            new RelayCommand(async () => await OutlineManager.ExitApp(), SerializationLock.CanExecuteCommands);
+
+        // StoryCAD Collaborator
+        CollaboratorCommand = new RelayCommand(LaunchCollaborator, SerializationLock.CanExecuteCommands);
+
+        // Tools commands
+        KeyQuestionsCommand = new RelayCommand(async () => await OutlineManager.KeyQuestionsTool(),
+            SerializationLock.CanExecuteCommands);
+        TopicsCommand = new RelayCommand(async () => await OutlineManager.TopicsTool(),
+            SerializationLock.CanExecuteCommands);
+        MasterPlotsCommand = new RelayCommand(async () => await OutlineManager.MasterPlotTool(),
+            SerializationLock.CanExecuteCommands);
+        DramaticSituationsCommand = new RelayCommand(async () => await OutlineManager.DramaticSituationsTool(),
+            SerializationLock.CanExecuteCommands);
+        StockScenesCommand = new RelayCommand(async () => await OutlineManager.StockScenesTool(),
+            SerializationLock.CanExecuteCommands);
+
+        PreferencesCommand = new RelayCommand(OpenPreferences, SerializationLock.CanExecuteCommands);
+
+        PrintReportsCommand = new RelayCommand(OpenPrintMenu, SerializationLock.CanExecuteCommands);
+        ExportReportsToPdfCommand = new RelayCommand(OpenExportPdfMenu, SerializationLock.CanExecuteCommands);
+        ScrivenerReportsCommand = new RelayCommand(async () => await OutlineManager.GenerateScrivenerReports(),
+            SerializationLock.CanExecuteCommands);
+
+        HelpCommand = new RelayCommand(LaunchGitHubPages);
+
+        // Move StoryElement commands
+        MoveLeftCommand = new RelayCommand(MoveTreeViewItemLeft, SerializationLock.CanExecuteCommands);
+        MoveRightCommand = new RelayCommand(MoveTreeViewItemRight, SerializationLock.CanExecuteCommands);
+        MoveUpCommand = new RelayCommand(MoveTreeViewItemUp, SerializationLock.CanExecuteCommands);
+        MoveDownCommand = new RelayCommand(MoveTreeViewItemDown, SerializationLock.CanExecuteCommands);
+
+        // Add StoryElement commands
+        AddFolderCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Folder),
+            SerializationLock.CanExecuteCommands);
+        AddSectionCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Section),
+            SerializationLock.CanExecuteCommands);
+        AddProblemCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Problem),
+            SerializationLock.CanExecuteCommands);
+        AddCharacterCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Character),
+            SerializationLock.CanExecuteCommands);
+        AddWebCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Web),
+            SerializationLock.CanExecuteCommands);
+        AddNotesCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Notes),
+            SerializationLock.CanExecuteCommands);
+        AddSettingCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Setting),
+            SerializationLock.CanExecuteCommands);
+        AddSceneCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Scene),
+            SerializationLock.CanExecuteCommands);
+        ConvertToSceneCommand =
+            new RelayCommand(OutlineManager.ConvertProblemToScene, SerializationLock.CanExecuteCommands);
+        ConvertToProblemCommand =
+            new RelayCommand(OutlineManager.ConvertSceneToProblem, SerializationLock.CanExecuteCommands);
+
+        // Remove Story Element command (move to trash)
+        RemoveStoryElementCommand =
+            new AsyncRelayCommand(OutlineManager.RemoveStoryElement, SerializationLock.CanExecuteCommands);
+        RestoreStoryElementCommand =
+            new RelayCommand(OutlineManager.RestoreStoryElement, SerializationLock.CanExecuteCommands);
+        EmptyTrashCommand = new RelayCommand(OutlineManager.EmptyTrash, SerializationLock.CanExecuteCommands);
+        // Copy to Narrative command
+        AddToNarrativeCommand = new RelayCommand(OutlineManager.CopyToNarrative, SerializationLock.CanExecuteCommands);
+        RemoveFromNarrativeCommand =
+            new RelayCommand(OutlineManager.RemoveFromNarrative, SerializationLock.CanExecuteCommands);
+
+        ViewList.Add("Story Explorer View");
+        ViewList.Add("Story Narrator View");
+
+        CurrentView = "Story Explorer View";
+        SelectedView = "Story Explorer View";
+
+        ShellInstance = this;
+    }
+
+    #endregion
+
+    #region SubViewModels
+
+    // ShellViewModel uses 'sub viewmodels' for different aspects in order
+    // to break this very large viewmodel into more manageable pieces.
+    public OutlineViewModel OutlineManager { get; }
+
+    #endregion
+
+    // Public property for debugging PrintManager state
+    public PrintReportDialogVM PrintReportDialog { get; }
+
+    // Navigation navigation landmark nodes
+    public StoryNodeItem CurrentNode { get; set; }
+    public DateTime AppStartTime { get; set; } = DateTime.Now;
+
     // Track the current page type for SaveModel (testable without UI)
     public string CurrentPageType { get; set; }
+
+    public void ViewChanged()
+    {
+        if (State.CurrentDocument?.Model?.CurrentView == null || State.CurrentDocument.Model.CurrentView.Count == 0)
+        {
+            Messenger.Send(
+                new StatusChangedMessage(new StatusMessage("You need to load a story first!", LogLevel.Warn)));
+            Logger.Log(LogLevel.Info, "Failed to switch views as CurrentView is null or empty. (Is a story loaded?)");
+            return;
+        }
+
+        if (!SelectedView.Equals(CurrentView))
+        {
+            CurrentView = SelectedView;
+            var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+            switch (CurrentView)
+            {
+                case "Story Explorer View":
+                    outlineService.SetCurrentView(State.CurrentDocument.Model, StoryViewType.ExplorerView);
+                    break;
+                case "Story Narrator View":
+                    outlineService.SetCurrentView(State.CurrentDocument.Model, StoryViewType.NarratorView);
+                    break;
+            }
+
+            CurrentViewType = State.CurrentDocument.Model.CurrentViewType;
+            TreeViewNodeClicked(State.CurrentDocument.Model.CurrentView[0]);
+        }
+    }
+
+    /// <summary>
+    ///     This method is called when one of NavigationTree's
+    ///     TreeViewItem nodes is right-tapped.
+    ///     It alters the visibility of the command bar flyout
+    ///     AppBarButtons depending on which portion of the tree
+    ///     is tapped and which view (ExplorerView or Navigator) is selected.
+    /// </summary>
+    public void ShowFlyoutButtons()
+    {
+        try
+        {
+            //Trash Can - View Hide all buttons except Empty Trash.
+            if (StoryNodeItem.RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
+            {
+                ExplorerVisibility = Visibility.Collapsed;
+                NarratorVisibility = Visibility.Collapsed;
+                AddButtonVisibility = Visibility.Collapsed;
+                PrintNodeVisibility = Visibility.Collapsed;
+                AddButtonVisibility = Visibility.Collapsed;
+                TrashButtonVisibility = Visibility.Visible;
+            }
+            else
+            {
+                //Explorer tree, show everything but empty trash and add section
+                if (SelectedView == ViewList[0])
+                {
+                    ExplorerVisibility = Visibility.Visible;
+                    NarratorVisibility = Visibility.Collapsed;
+                    AddButtonVisibility = Visibility.Visible;
+                    PrintNodeVisibility = Visibility.Visible;
+                    TrashButtonVisibility = Visibility.Collapsed;
+                }
+                else //Narrator Tree, hide most things.
+                {
+                    ExplorerVisibility = Visibility.Collapsed;
+                    NarratorVisibility = Visibility.Visible;
+                    AddButtonVisibility = Visibility.Collapsed;
+                    PrintNodeVisibility = Visibility.Visible;
+                    TrashButtonVisibility = Visibility.Collapsed;
+                }
+
+                AddButtonVisibility = Visibility.Visible;
+            }
+        }
+        catch (Exception e) //errors (is RightTappedNode null?
+        {
+            Logger.Log(LogLevel.Error, $"An error occurred in ShowFlyoutButtons() \n{e.Message}\n" +
+                                       $"- For reference RightTappedNode is " + RightTappedNode);
+        }
+    }
+
+    /// <summary>
+    ///     Opens help menu in the users default browser.
+    /// </summary>
+    public void LaunchGitHubPages()
+    {
+        Messenger.Send(
+            new StatusChangedMessage(new StatusMessage("Launching GitHub Pages User Manual", LogLevel.Info, true)));
+
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = "https://Storybuilder-org.github.io/StoryCAD/",
+            UseShellExecute = true
+        });
+
+        Messenger.Send(
+            new StatusChangedMessage(new StatusMessage("Launch default browser completed", LogLevel.Info, true)));
+    }
+
+    public void ShowConnectionStatus()
+    {
+        StatusMessage _msg;
+        if (!Doppler.DopplerConnection | !Logger.ElmahLogging)
+        {
+            _msg = new StatusMessage("Connection not established", LogLevel.Warn, true);
+        }
+        else
+        {
+            _msg = new StatusMessage("Connection established", LogLevel.Info, true);
+        }
+
+        Messenger.Send(new StatusChangedMessage(_msg));
+    }
 
 
     #region CommandBar Relay Commands
 
     // Open/Close Navigation pane (Hamburger menu)
     public RelayCommand TogglePaneCommand { get; }
+
     // Open file
     public RelayCommand OpenFileCommand { get; }
+
     // Save command
     public RelayCommand SaveFileCommand { get; }
+
     // SaveAs command
     public RelayCommand SaveAsCommand { get; }
+
     public RelayCommand CreateBackupCommand { get; }
+
     // CloseCommand
     public RelayCommand CloseCommand { get; }
+
     // ExitCommand
     public RelayCommand ExitCommand { get; }
+
     //Open/Closes FileOpen menu
     public AsyncRelayCommand OpenFileOpenMenuCommand { get; }
 
@@ -123,7 +392,7 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand MoveRightCommand { get; }
     public RelayCommand MoveUpCommand { get; }
     public RelayCommand MoveDownCommand { get; }
-    
+
     // Launch Collaborator
     public RelayCommand CollaboratorCommand { get; }
     public RelayCommand HelpCommand { get; }
@@ -140,6 +409,7 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand PreferencesCommand { get; }
 
     private Visibility _collaboratorVisibility;
+
     public Visibility CollaboratorVisibility
     {
         get => _collaboratorVisibility;
@@ -177,14 +447,14 @@ public class ShellViewModel : ObservableRecipient
 
     #region Shell binding properties
 
-
     /// <summary>
-    /// IsPaneOpen is bound to ShellSplitView's IsPaneOpen property with
-    /// two-way binding, so that it can read and update the property.
-    /// If set to true, the left pane (TreeView) is expanded to its full width;
-    /// otherwise, the left pane is collapsed. Default to true (expanded).
+    ///     IsPaneOpen is bound to ShellSplitView's IsPaneOpen property with
+    ///     two-way binding, so that it can read and update the property.
+    ///     If set to true, the left pane (TreeView) is expanded to its full width;
+    ///     otherwise, the left pane is collapsed. Default to true (expanded).
     /// </summary>
     private bool _isPaneOpen = true;
+
     public bool IsPaneOpen
     {
         get => _isPaneOpen;
@@ -193,8 +463,9 @@ public class ShellViewModel : ObservableRecipient
 
 
     private Visibility _explorerVisibility;
+
     /// <summary>
-    /// Controls visibility for elements that should only be shown in the Explorer view.
+    ///     Controls visibility for elements that should only be shown in the Explorer view.
     /// </summary>
     public Visibility ExplorerVisibility
     {
@@ -203,8 +474,9 @@ public class ShellViewModel : ObservableRecipient
     }
 
     private Visibility _narratorVisibility;
+
     /// <summary>
-    /// Controls visibility for elements that should only be shown in the Narrator view.
+    ///     Controls visibility for elements that should only be shown in the Narrator view.
     /// </summary>
     public Visibility NarratorVisibility
     {
@@ -213,8 +485,9 @@ public class ShellViewModel : ObservableRecipient
     }
 
     private Visibility _trashButtonVisibility;
+
     /// <summary>
-    /// Controls visibility for elements that should only be shown in the Trash view.
+    ///     Controls visibility for elements that should only be shown in the Trash view.
     /// </summary
     public Visibility TrashButtonVisibility
     {
@@ -223,6 +496,7 @@ public class ShellViewModel : ObservableRecipient
     }
 
     private Visibility _addButtonVisibility;
+
     public Visibility AddButtonVisibility
     {
         get => _addButtonVisibility;
@@ -230,6 +504,7 @@ public class ShellViewModel : ObservableRecipient
     }
 
     private Visibility _printNodeVisibility;
+
     public Visibility PrintNodeVisibility
     {
         get => _printNodeVisibility;
@@ -241,26 +516,25 @@ public class ShellViewModel : ObservableRecipient
     public readonly ObservableCollection<string> ViewList = new();
 
     private string _selectedView;
+
     public string SelectedView
     {
         get => _selectedView;
         set => SetProperty(ref _selectedView, value);
     }
 
-    private string _currentView;
-    public string CurrentView
-    {
-        get => _currentView;
-        set => _currentView = value;
-    }
+    public string CurrentView { get; set; }
 
     private string _statusMessage;
+
     public string StatusMessage
     {
         get => _statusMessage;
         set => SetProperty(ref _statusMessage, value);
     }
+
     private SolidColorBrush _statusColor;
+
     public SolidColorBrush StatusColor
     {
         get => _statusColor;
@@ -269,84 +543,98 @@ public class ShellViewModel : ObservableRecipient
 
 
     private string _filterText;
+
     public string FilterText
     {
         get => _filterText;
         set => SetProperty(ref _filterText, value);
     }
 
-    private Windows.UI.Color _changeStatusColor;
-    public Windows.UI.Color ChangeStatusColor
+    private Color _changeStatusColor;
+
+    public Color ChangeStatusColor
     {
         get => _changeStatusColor;
         set => SetProperty(ref _changeStatusColor, value);
     }
 
-    private Windows.UI.Color _backupStatusColor;
-    public Windows.UI.Color BackupStatusColor
+    private Color _backupStatusColor;
+
+    public Color BackupStatusColor
     {
         get => _backupStatusColor;
         set => SetProperty(ref _backupStatusColor, value);
     }
+
     #endregion
 
-    #region Static members  
+    #region Static members
 
     // Static access to the ShellViewModel singleton for
     // change tracking at the application level
     public static ShellViewModel ShellInstance;
 
     /// <summary>
-    /// If a story element is changed, identify that the StoryModel is changed and needs written 
-    /// to the backing store. Also, provide a visual traffic light on the Shell status bar that 
-    /// a save is needed.
+    ///     If a story element is changed, identify that the StoryModel is changed and needs written
+    ///     to the backing store. Also, provide a visual traffic light on the Shell status bar that
+    ///     a save is needed.
     /// </summary>
     public static void ShowChange()
     {
         // TODO: Static method requires service locator - consider making non-static in future refactoring
-        AppState appState = Ioc.Default.GetRequiredService<AppState>();
-        StoryModel Model = appState.CurrentDocument?.Model;
-        if (appState.Headless) { return; }
-        if (Model?.Changed == true) { return; }
-        
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var Model = appState.CurrentDocument?.Model;
+        if (appState.Headless)
+        {
+            return;
+        }
+
+        if (Model?.Changed == true)
+        {
+            return;
+        }
+
         // Use OutlineService to set changed status with proper separation of concerns
         var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
         outlineService.SetChanged(Model, true);
         ShellInstance.ChangeStatusColor = Colors.Red;
     }
 
-	#endregion
+    #endregion
 
-	#region Public Methods
-	/// <summary>
-	/// Creates a backup of the current project
-	/// </summary>
-	public async Task CreateBackupNow()
-	{
+    #region Public Methods
+
+    /// <summary>
+    ///     Creates a backup of the current project
+    /// </summary>
+    public async Task CreateBackupNow()
+    {
         if (State.CurrentDocument?.Model?.CurrentView == null || State.CurrentDocument.Model.CurrentView.Count == 0)
         {
-            Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
-            Logger.Log(LogLevel.Info, "Failed to open backup menu as CurrentView is null or empty. (Is a story loaded?)");
+            Messenger.Send(
+                new StatusChangedMessage(new StatusMessage("You need to load a story first!", LogLevel.Warn)));
+            Logger.Log(LogLevel.Info,
+                "Failed to open backup menu as CurrentView is null or empty. (Is a story loaded?)");
             return;
         }
 
         //Show dialog
-        var result = await Window.ShowContentDialog(new ContentDialog()
-		{
-			Title = "Create backup now",
-			PrimaryButtonText = "Create Backup",
-			SecondaryButtonText = "Cancel",
-			DefaultButton = ContentDialogButton.Primary,
-			Content = new BackupNow(Path.GetFileNameWithoutExtension(State.CurrentDocument?.FilePath))
-		});
+        var result = await Window.ShowContentDialog(new ContentDialog
+        {
+            Title = "Create backup now",
+            PrimaryButtonText = "Create Backup",
+            SecondaryButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+            Content = new BackupNow(Path.GetFileNameWithoutExtension(State.CurrentDocument?.FilePath))
+        });
 
-		//Check result
-		if (result == ContentDialogResult.Primary)
-		{
-			BackupNowVM vm = Ioc.Default.GetRequiredService<BackupNowVM>();
-			await Ioc.Default.GetRequiredService<BackupService>().BackupProject(vm.Name, vm.Location);
-		}
-	}
+        //Check result
+        if (result == ContentDialogResult.Primary)
+        {
+            var vm = Ioc.Default.GetRequiredService<BackupNowVM>();
+            await Ioc.Default.GetRequiredService<BackupService>().BackupProject(vm.Name, vm.Location);
+        }
+    }
 
     public async Task MakeBackup()
     {
@@ -360,6 +648,7 @@ public class ShellViewModel : ObservableRecipient
             Logger.Log(LogLevel.Info, "TreeViewNodeClicked for null node, event ignored");
             return;
         }
+
         Logger.Log(LogLevel.Info, $"TreeViewNodeClicked for {selectedItem}");
 
         try
@@ -367,7 +656,7 @@ public class ShellViewModel : ObservableRecipient
             if (selectedItem is StoryNodeItem node)
             {
                 CurrentNode = node;
-                StoryElement element = outlineService.GetStoryElementByGuid(State.CurrentDocument!.Model, node.Uuid);
+                var element = outlineService.GetStoryElementByGuid(State.CurrentDocument!.Model, node.Uuid);
                 switch (element.ElementType)
                 {
                     case StoryItemType.Character:
@@ -411,14 +700,22 @@ public class ShellViewModel : ObservableRecipient
                         _navigationService.NavigateTo(SplitViewFrame, TrashCanPage, element);
                         break;
                 }
+
                 CurrentNode.IsExpanded = true;
             }
 
             //Clears background of new nodes on navigation as well as the last node.
             if (clearHighlightCache)
             {
-                foreach (var item in NewNodeHighlightCache) { item.Background = null; }
-                if (LastClickedTreeviewItem != null) { LastClickedTreeviewItem.Background = null; }
+                foreach (var item in NewNodeHighlightCache)
+                {
+                    item.Background = null;
+                }
+
+                if (LastClickedTreeviewItem != null)
+                {
+                    LastClickedTreeviewItem.Background = null;
+                }
             }
         }
         catch (Exception e)
@@ -428,7 +725,7 @@ public class ShellViewModel : ObservableRecipient
     }
 
     /// <summary>
-    /// Shows missing env warning.
+    ///     Shows missing env warning.
     /// </summary>
     public async Task ShowDotEnvWarningAsync()
     {
@@ -439,7 +736,7 @@ public class ShellViewModel : ObservableRecipient
                       Your version of StoryCAD is missing a key file.
                       If you are a developer you can safely ignore this message.
                       If you are a user you should report this as you are not supposed to see this message.
-                      
+
                       Things such as logging and elmah.io will not work without the key file.
                       You can disable this warning in the dev menu.
                       """,
@@ -459,6 +756,7 @@ public class ShellViewModel : ObservableRecipient
             _navigationService.NavigateTo(SplitViewFrame, HomePage);
         }
     }
+
     private void TogglePane()
     {
         Logger.Log(LogLevel.Trace, $"TogglePane from {IsPaneOpen} to {!IsPaneOpen}");
@@ -466,17 +764,17 @@ public class ShellViewModel : ObservableRecipient
     }
 
     /// <summary>
-    /// When an AppBar command button is pressed, the currently active StoryElement ViewModel
-    /// displayed in SplitViewFrame's Content doesn't go through Deactivate() and hence doesn't
-    /// call its WritePreferences() method. Hence this method, which determines which Content
-    /// frame's page type is active, and calls its SaveModel() method. If there are changes,
-    /// the viewmodel is copied back to its corresponding active StoryElement Model.
+    ///     When an AppBar command button is pressed, the currently active StoryElement ViewModel
+    ///     displayed in SplitViewFrame's Content doesn't go through Deactivate() and hence doesn't
+    ///     call its WritePreferences() method. Hence this method, which determines which Content
+    ///     frame's page type is active, and calls its SaveModel() method. If there are changes,
+    ///     the viewmodel is copied back to its corresponding active StoryElement Model.
     /// </summary>
     public void SaveModel()
     {
         // Use CurrentPageType if available, fall back to Frame for backwards compatibility
-        string pageType = CurrentPageType;
-        
+        var pageType = CurrentPageType;
+
         // Validate that CurrentPageType matches Frame if both are available
         if (!string.IsNullOrEmpty(pageType) && SplitViewFrame?.CurrentSourcePageType != null)
         {
@@ -485,29 +783,30 @@ public class ShellViewModel : ObservableRecipient
             {
                 framePageType = framePageType.Replace("StoryCAD.Views.", "");
             }
-            
+
             if (pageType != framePageType)
             {
-                Logger.Log(LogLevel.Error, $"SaveModel: CurrentPageType '{pageType}' doesn't match Frame page type '{framePageType}'. Using Frame type.");
+                Logger.Log(LogLevel.Error,
+                    $"SaveModel: CurrentPageType '{pageType}' doesn't match Frame page type '{framePageType}'. Using Frame type.");
                 pageType = framePageType;
             }
         }
-        
+
         if (string.IsNullOrEmpty(pageType))
         {
             // Fall back to Frame-based detection if CurrentPageType not set
-            if (SplitViewFrame == null) 
-            { 
+            if (SplitViewFrame == null)
+            {
                 Logger.Log(LogLevel.Warn, "SaveModel called but SplitViewFrame is null and CurrentPageType not set");
-                return; 
+                return;
             }
 
-            if (SplitViewFrame.CurrentSourcePageType is null) 
-            { 
+            if (SplitViewFrame.CurrentSourcePageType is null)
+            {
                 Logger.Log(LogLevel.Warn, "SaveModel called but no active page type");
-                return; 
+                return;
             }
-            
+
             pageType = SplitViewFrame.CurrentSourcePageType.ToString();
             // Extract just the page name from the full type name
             if (pageType.StartsWith("StoryCAD.Views."))
@@ -521,30 +820,30 @@ public class ShellViewModel : ObservableRecipient
         switch (pageType)
         {
             case OverviewPage:
-                OverviewViewModel ovm = Ioc.Default.GetRequiredService<OverviewViewModel>();
+                var ovm = Ioc.Default.GetRequiredService<OverviewViewModel>();
                 ovm.SaveModel();
                 break;
             case ProblemPage:
-                ProblemViewModel pvm = Ioc.Default.GetRequiredService<ProblemViewModel>();
+                var pvm = Ioc.Default.GetRequiredService<ProblemViewModel>();
                 pvm.SaveModel();
                 break;
             case CharacterPage:
-                CharacterViewModel cvm = Ioc.Default.GetRequiredService<CharacterViewModel>();
+                var cvm = Ioc.Default.GetRequiredService<CharacterViewModel>();
                 cvm.SaveModel();
                 break;
             case ScenePage:
                 _sceneViewModel.SaveModel();
                 break;
             case FolderPage:
-                FolderViewModel folderVm = Ioc.Default.GetRequiredService<FolderViewModel>();
+                var folderVm = Ioc.Default.GetRequiredService<FolderViewModel>();
                 folderVm.SaveModel();
                 break;
             case SettingPage:
-                SettingViewModel settingVm = Ioc.Default.GetRequiredService<SettingViewModel>();
+                var settingVm = Ioc.Default.GetRequiredService<SettingViewModel>();
                 settingVm.SaveModel();
                 break;
             case WebPage:
-                WebViewModel webVm = Ioc.Default.GetRequiredService<WebViewModel>();
+                var webVm = Ioc.Default.GetRequiredService<WebViewModel>();
                 webVm.SaveModel();
                 break;
             case HomePage:
@@ -560,9 +859,10 @@ public class ShellViewModel : ObservableRecipient
                 break;
         }
     }
+
     public void ResetModel()
     {
-        State.CurrentDocument = new StoryDocument(new StoryModel(), null);
+        State.CurrentDocument = new StoryDocument(new StoryModel());
         //TODO: Raise event for StoryModel change?
     }
 
@@ -570,7 +870,7 @@ public class ShellViewModel : ObservableRecipient
 
     #region Tool and Report Commands
 
-  public void RefreshAllCommands()
+    public void RefreshAllCommands()
     {
         TogglePaneCommand.NotifyCanExecuteChanged();
         OpenFileOpenMenuCommand.NotifyCanExecuteChanged();
@@ -614,10 +914,9 @@ public class ShellViewModel : ObservableRecipient
     }
 
 
-
     private async void OpenPreferences()
     {
-        Messenger.Send(new StatusChangedMessage(new("Updating Preferences", LogLevel.Info, true)));
+        Messenger.Send(new StatusChangedMessage(new StatusMessage("Updating Preferences", LogLevel.Info, true)));
 
 
         //Creates and shows dialog
@@ -630,27 +929,26 @@ public class ShellViewModel : ObservableRecipient
             CloseButtonText = "Cancel"
         };
 
-        ContentDialogResult result = await Window.ShowContentDialog(preferencesDialog);
+        var result = await Window.ShowContentDialog(preferencesDialog);
         switch (result)
         {
             // Save changes
             case ContentDialogResult.Primary:
                 Ioc.Default.GetRequiredService<PreferencesViewModel>().SaveModel();
                 await Ioc.Default.GetRequiredService<PreferencesViewModel>().SaveAsync();
-                Messenger.Send(new StatusChangedMessage(new("Preferences updated", LogLevel.Info, true)));
+                Messenger.Send(new StatusChangedMessage(new StatusMessage("Preferences updated", LogLevel.Info, true)));
 
                 break;
             //don't save changes
             default:
-                Messenger.Send(new StatusChangedMessage(new("Preferences closed", LogLevel.Info, true)));
+                Messenger.Send(new StatusChangedMessage(new StatusMessage("Preferences closed", LogLevel.Info, true)));
                 break;
         }
-
     }
 
     /// <summary>
-    /// This method is invoked when the user clicks the Collaborator AppBarButton
-    /// on the Shell CommandBar. It Activates and displays the WizardShell. 
+    ///     This method is invoked when the user clicks the Collaborator AppBarButton
+    ///     on the Shell CommandBar. It Activates and displays the WizardShell.
     /// </summary>
     private void LaunchCollaborator()
     {
@@ -663,7 +961,7 @@ public class ShellViewModel : ObservableRecipient
             //}
 
             //TODO: Logging???
-            
+
             CollabArgs.StoryModel = State.CurrentDocument?.Model;
             Ioc.Default.GetService<CollaboratorService>()!.LoadWorkflows(CollabArgs);
             Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Activate();
@@ -672,41 +970,52 @@ public class ShellViewModel : ObservableRecipient
     }
 
     /// <summary>
-    /// This function just calls print reports dialog.
+    ///     This function just calls print reports dialog.
     /// </summary>
-    private async void OpenPrintMenu() 
+    private async void OpenPrintMenu()
     {
-        await _printReportDialogVM.OpenPrintReportDialog();
+        await PrintReportDialog.OpenPrintReportDialog();
     }
-    
+
     /// <summary>
-    /// Opens PDF UI Flow.
+    ///     Opens PDF UI Flow.
     /// </summary>
-    private async void OpenExportPdfMenu() 
+    private async void OpenExportPdfMenu()
     {
-        await _printReportDialogVM.OpenPrintReportDialog(PrintReportDialogVM.ReportOutputMode.Pdf);
+        await PrintReportDialog.OpenPrintReportDialog(PrintReportDialogVM.ReportOutputMode.Pdf);
     }
-    #endregion  
+
+    #endregion
 
     #region Move TreeViewItem Commands
 
     private void MoveTreeViewItemLeft()
     {
         StatusMessage = string.Empty;
-        if (!MoveLeftIsValid()) return;
+        if (!MoveLeftIsValid())
+        {
+            return;
+        }
 
         _sourceChildren = CurrentNode.Parent.Children;
         _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
         _targetCollection = null;
         _targetIndex = -1;
-        StoryNodeItem targetParent = CurrentNode.Parent.Parent;
+        var targetParent = CurrentNode.Parent.Parent;
         // The source must become the parent's successor
         _targetCollection = CurrentNode.Parent.Parent.Children;
         _targetIndex = _targetCollection.IndexOf(CurrentNode.Parent) + 1;
 
         _sourceChildren.RemoveAt(_sourceIndex);
-        if (_targetIndex == -1) { _targetCollection.Add(CurrentNode); }
-        else { _targetCollection.Insert(_targetIndex, CurrentNode); }
+        if (_targetIndex == -1)
+        {
+            _targetCollection.Add(CurrentNode);
+        }
+        else
+        {
+            _targetCollection.Insert(_targetIndex, CurrentNode);
+        }
+
         CurrentNode.Parent = targetParent;
         ShowChange();
         Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} left to parent {CurrentNode.Parent.Name}");
@@ -716,19 +1025,19 @@ public class ShellViewModel : ObservableRecipient
     {
         if (CurrentNode == null)
         {
-            Messenger.Send(new StatusChangedMessage(new("Click or touch a node to move", LogLevel.Warn)));
+            Messenger.Send(new StatusChangedMessage(new StatusMessage("Click or touch a node to move", LogLevel.Warn)));
             return false;
         }
 
         if (CurrentNode.Parent != null && CurrentNode.Parent.IsRoot)
         {
-            Messenger.Send(new StatusChangedMessage(new("Cannot move further left", LogLevel.Warn)));
+            Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot move further left", LogLevel.Warn)));
             return false;
         }
 
         if (CurrentNode.Parent == null)
         {
-            Messenger.Send(new StatusChangedMessage(new("Cannot move root node.", LogLevel.Warn)));
+            Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot move root node.", LogLevel.Warn)));
             return false;
         }
 
@@ -737,13 +1046,16 @@ public class ShellViewModel : ObservableRecipient
 
     private void ShowStatusMessage(string message, LogLevel logLevel)
     {
-        Messenger.Send(new StatusChangedMessage(new(message, logLevel)));
+        Messenger.Send(new StatusChangedMessage(new StatusMessage(message, logLevel)));
     }
 
     private void MoveTreeViewItemRight()
     {
         StatusMessage = string.Empty;
-        if (!MoveRightIsValid()) return;
+        if (!MoveRightIsValid())
+        {
+            return;
+        }
 
         if (CurrentNode.Parent != null)
         {
@@ -754,12 +1066,12 @@ public class ShellViewModel : ObservableRecipient
         }
         else
         {
-            Messenger.Send(new StatusChangedMessage(new("Cannot move root node.", LogLevel.Warn)));
+            Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot move root node.", LogLevel.Warn)));
             return;
         }
 
 
-        int sourceIndex = _sourceChildren.IndexOf(CurrentNode);
+        var sourceIndex = _sourceChildren.IndexOf(CurrentNode);
         StoryNodeItem targetParent;
         ObservableCollection<StoryNodeItem> targetCollection;
         int targetIndex;
@@ -772,8 +1084,8 @@ public class ShellViewModel : ObservableRecipient
         }
         else
         {
-            ObservableCollection<StoryNodeItem> grandparentCollection = CurrentNode.Parent.Parent.Children;
-            int siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
+            var grandparentCollection = CurrentNode.Parent.Parent.Children;
+            var siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
 
             if (siblingIndex >= 0)
             {
@@ -833,13 +1145,16 @@ public class ShellViewModel : ObservableRecipient
     private void MoveTreeViewItemUp()
     {
         StatusMessage = string.Empty;
-        if (!MoveUpIsValid()) return;
+        if (!MoveUpIsValid())
+        {
+            return;
+        }
 
         _sourceChildren = CurrentNode.Parent.Children;
         _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
         _targetCollection = null;
         _targetIndex = -1;
-        StoryNodeItem targetParent = CurrentNode.Parent;
+        var targetParent = CurrentNode.Parent;
 
         if (_sourceIndex == 0)
         {
@@ -849,8 +1164,8 @@ public class ShellViewModel : ObservableRecipient
                 return;
             }
 
-            ObservableCollection<StoryNodeItem> grandparentCollection = CurrentNode.Parent.Parent.Children;
-            int siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
+            var grandparentCollection = CurrentNode.Parent.Parent.Children;
+            var siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
 
             if (siblingIndex >= 0)
             {
@@ -874,9 +1189,13 @@ public class ShellViewModel : ObservableRecipient
         _sourceChildren.RemoveAt(_sourceIndex);
 
         if (_targetIndex == -1)
+        {
             _targetCollection.Add(CurrentNode);
+        }
         else
+        {
             _targetCollection.Insert(_targetIndex, CurrentNode);
+        }
 
         CurrentNode.Parent = targetParent;
         ShowChange();
@@ -903,20 +1222,23 @@ public class ShellViewModel : ObservableRecipient
     private void MoveTreeViewItemDown()
     {
         StatusMessage = string.Empty;
-        if (!MoveDownIsValid()) return;
+        if (!MoveDownIsValid())
+        {
+            return;
+        }
 
         _sourceChildren = CurrentNode.Parent.Children;
         _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
         _targetCollection = null;
         _targetIndex = 0;
-        StoryNodeItem targetParent = CurrentNode.Parent;
+        var targetParent = CurrentNode.Parent;
 
         // If last child, must move to end parent's successor (sibling node).
         // If there are no siblings, we're at the bottom of the tree?
         if (_sourceIndex == _sourceChildren.Count - 1)
         {
             // Find the next sibling of the parent.
-            StoryNodeItem nextParentSibling = GetNextSibling(CurrentNode.Parent);
+            var nextParentSibling = GetNextSibling(CurrentNode.Parent);
 
             // If there's no next sibling, then we're at the bottom of the first root's children.
             if (nextParentSibling == null)
@@ -942,6 +1264,7 @@ public class ShellViewModel : ObservableRecipient
             _targetCollection = _sourceChildren;
             _targetIndex = _sourceIndex + 1;
         }
+
         _sourceChildren.RemoveAt(_sourceIndex);
         _targetCollection.Insert(_targetIndex, CurrentNode);
         CurrentNode.Parent = targetParent;
@@ -953,15 +1276,19 @@ public class ShellViewModel : ObservableRecipient
     public StoryNodeItem GetNextSibling(StoryNodeItem node)
     {
         if (node.Parent == null)
+        {
             return null;
+        }
 
-        ObservableCollection<StoryNodeItem> parentChildren = node.Parent.Children;
-        int currentIndex = parentChildren.IndexOf(node);
+        var parentChildren = node.Parent.Children;
+        var currentIndex = parentChildren.IndexOf(node);
 
         if (currentIndex < parentChildren.Count - 1)
+        {
             return parentChildren[currentIndex + 1];
-        else
-            return null;
+        }
+
+        return null;
     }
 
     private bool MoveDownIsValid()
@@ -981,154 +1308,62 @@ public class ShellViewModel : ObservableRecipient
         return true;
     }
 
-
     #endregion
-
-    public void ViewChanged()
-    {
-        if (State.CurrentDocument?.Model?.CurrentView == null || State.CurrentDocument.Model.CurrentView.Count == 0)
-        {
-            Messenger.Send(new StatusChangedMessage(new("You need to load a story first!", LogLevel.Warn)));
-            Logger.Log(LogLevel.Info, "Failed to switch views as CurrentView is null or empty. (Is a story loaded?)");
-            return;
-        }
-        if (!SelectedView.Equals(CurrentView))
-        {
-            CurrentView = SelectedView;
-            var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-            switch (CurrentView)
-            {
-                case "Story Explorer View":
-                    outlineService.SetCurrentView(State.CurrentDocument.Model, StoryViewType.ExplorerView);
-                    break;
-                case "Story Narrator View":
-                    outlineService.SetCurrentView(State.CurrentDocument.Model, StoryViewType.NarratorView);
-                    break;
-            }
-            CurrentViewType = State.CurrentDocument.Model.CurrentViewType;
-            TreeViewNodeClicked(State.CurrentDocument.Model.CurrentView[0]);
-        }
-    }
-
-    /// <summary>
-    /// This method is called when one of NavigationTree's
-    /// TreeViewItem nodes is right-tapped.
-    /// 
-    /// It alters the visibility of the command bar flyout 
-    /// AppBarButtons depending on which portion of the tree 
-    /// is tapped and which view (ExplorerView or Navigator) is selected.
-    /// </summary>
-    public void ShowFlyoutButtons()
-    {
-        try
-        {
-            //Trash Can - View Hide all buttons except Empty Trash.
-            if (StoryNodeItem.RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
-            {
-                ExplorerVisibility = Visibility.Collapsed;
-                NarratorVisibility = Visibility.Collapsed;
-                AddButtonVisibility = Visibility.Collapsed;
-                PrintNodeVisibility = Visibility.Collapsed;
-                AddButtonVisibility = Visibility.Collapsed;
-                TrashButtonVisibility = Visibility.Visible;
-            }
-            else
-            {
-                //Explorer tree, show everything but empty trash and add section
-                if (SelectedView == ViewList[0])
-                {
-                    ExplorerVisibility = Visibility.Visible;
-                    NarratorVisibility = Visibility.Collapsed;
-                    AddButtonVisibility = Visibility.Visible;
-                    PrintNodeVisibility = Visibility.Visible;
-                    TrashButtonVisibility = Visibility.Collapsed;
-                }
-                else //Narrator Tree, hide most things.
-                {
-                    ExplorerVisibility = Visibility.Collapsed;
-                    NarratorVisibility = Visibility.Visible;
-                    AddButtonVisibility = Visibility.Collapsed;
-                    PrintNodeVisibility = Visibility.Visible;
-                    TrashButtonVisibility = Visibility.Collapsed;
-                }
-                AddButtonVisibility = Visibility.Visible;
-            }
-        }
-        catch (Exception e) //errors (is RightTappedNode null?
-        {
-            Logger.Log(LogLevel.Error, $"An error occurred in ShowFlyoutButtons() \n{e.Message}\n" +
-                $"- For reference RightTappedNode is " + RightTappedNode);
-        }
-
-    }
-
-    /// <summary>
-    /// Opens help menu in the users default browser.
-    /// </summary>
-    public void LaunchGitHubPages()
-    {
-        Messenger.Send(new StatusChangedMessage(new("Launching GitHub Pages User Manual", LogLevel.Info, true)));
-
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "https://Storybuilder-org.github.io/StoryCAD/",
-            UseShellExecute = true
-        });
-
-        Messenger.Send(new StatusChangedMessage(new("Launch default browser completed", LogLevel.Info, true)));
-    }
-
-    public void ShowConnectionStatus()
-    {
-        StatusMessage _msg;
-        if (!Doppler.DopplerConnection | !Logger.ElmahLogging)
-            _msg = new StatusMessage("Connection not established", LogLevel.Warn, true);
-        else
-            _msg = new StatusMessage("Connection established", LogLevel.Info, true);
-        Messenger.Send(new StatusChangedMessage(_msg));
-    }
 
 
     #region MVVM  processing
+
     private void IsChangedMessageReceived(IsChangedMessage isDirty)
     {
         if (State.CurrentDocument?.Model != null)
         {
-            State.CurrentDocument.Model.Changed =  isDirty.Value;
+            State.CurrentDocument.Model.Changed = isDirty.Value;
         }
+
         if (State.CurrentDocument?.Model?.Changed == true)
         {
             ChangeStatusColor = Colors.Red;
         }
-        else { ChangeStatusColor = Colors.Green; }
+        else
+        {
+            ChangeStatusColor = Colors.Green;
+        }
     }
 
     private void BackupStatusMessageReceived(IsBackupStatusMessage isGood)
     {
         if (isGood.Value)
-        {  BackupStatusColor = Colors.Green; }
-        else { BackupStatusColor = Colors.Red; }
+        {
+            BackupStatusColor = Colors.Green;
+        }
+        else
+        {
+            BackupStatusColor = Colors.Red;
+        }
     }
 
     /// <summary>
-    /// Sends message
+    ///     Sends message
     /// </summary>
     /// <param name="level">Is this message an error, warning, info ect</param>
     /// <param name="message">What message should be shown to the user?</param>
     /// <param name="sendToLog">Should this message be sent to the log as well?</param>
     public void ShowMessage(LogLevel level, string message, bool sendToLog)
     {
-        Messenger.Send(new StatusChangedMessage(new(message, level, sendToLog)));
+        Messenger.Send(new StatusChangedMessage(new StatusMessage(message, level, sendToLog)));
     }
 
     /// <summary>
-    /// This displays a status message and starts a timer for it to be cleared (If Warning or Info.)
+    ///     This displays a status message and starts a timer for it to be cleared (If Warning or Info.)
     /// </summary>
     /// <param name="statusMessage"></param>
     private void StatusMessageReceived(StatusChangedMessage statusMessage)
     {
         // Bypass if in headless mode or if the app is closing
-        if (State.Headless || IsClosing) return;
+        if (State.Headless || IsClosing)
+        {
+            return;
+        }
 
         try
         {
@@ -1141,7 +1376,9 @@ public class ShellViewModel : ObservableRecipient
             }
 
             if (_statusTimer.IsEnabled)
+            {
                 _statusTimer.Stop();
+            }
 
             StatusMessage = statusMessage.Value.Status;
             switch (statusMessage.Value.Level)
@@ -1174,9 +1411,8 @@ public class ShellViewModel : ObservableRecipient
     }
 
 
-
     /// <summary>
-    /// This clears the status message when the timer has ended.
+    ///     This clears the status message when the timer has ended.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
@@ -1187,8 +1423,8 @@ public class ShellViewModel : ObservableRecipient
     }
 
     /// <summary>
-    /// Handles application shutdown cleanup. This method is called when the application
-    /// is closing to ensure all resources are properly released and state is saved.
+    ///     Handles application shutdown cleanup. This method is called when the application
+    ///     is closing to ensure all resources are properly released and state is saved.
     /// </summary>
     public async Task OnApplicationClosing()
     {
@@ -1200,7 +1436,8 @@ public class ShellViewModel : ObservableRecipient
             var prefs = Ioc.Default.GetRequiredService<PreferenceService>();
             var sessionTime = (DateTime.Now - AppStartTime).TotalSeconds;
             prefs.Model.CumulativeTimeUsed += Convert.ToInt64(sessionTime);
-            Logger.Log(LogLevel.Info, $"Session time: {sessionTime} seconds, Total time: {prefs.Model.CumulativeTimeUsed} seconds");
+            Logger.Log(LogLevel.Info,
+                $"Session time: {sessionTime} seconds, Total time: {prefs.Model.CumulativeTimeUsed} seconds");
             PreferencesIo prfIo = new();
             await prfIo.WritePreferences(prefs.Model);
             Logger.Log(LogLevel.Info, "Preferences saved");
@@ -1245,17 +1482,17 @@ public class ShellViewModel : ObservableRecipient
     }
 
     /// <summary>
-    /// When a Story Element page's name changes the corresponding
-    /// StoryNodeItem, which is bound to a TreeViewItem, must
-    /// also change. The way this is done is to have the Name field's
-    /// setter send a message here. ShellViewModel knows which
-    /// StoryNodeItem instance is selected (via OnSelectionChanged) and
-    /// alters its Name as well.
-    /// <param name="name"></param>
+    ///     When a Story Element page's name changes the corresponding
+    ///     StoryNodeItem, which is bound to a TreeViewItem, must
+    ///     also change. The way this is done is to have the Name field's
+    ///     setter send a message here. ShellViewModel knows which
+    ///     StoryNodeItem instance is selected (via OnSelectionChanged) and
+    ///     alters its Name as well.
+    ///     <param name="name"></param>
     /// </summary>
     private void NameMessageReceived(NameChangedMessage name)
     {
-        NameChangeMessage _msg = name.Value;
+        var _msg = name.Value;
         CurrentNode.Name = _msg.NewName;
         switch (CurrentNode.Type)
         {
@@ -1264,136 +1501,10 @@ public class ShellViewModel : ObservableRecipient
                 //CharacterModel.CharacterNames[charIndex] = msg.NewName;
                 break;
             case StoryItemType.Setting:
-                int _settingIndex = SettingModel.SettingNames.IndexOf(_msg.OldName);
+                var _settingIndex = SettingModel.SettingNames.IndexOf(_msg.OldName);
                 SettingModel.SettingNames[_settingIndex] = _msg.NewName;
                 break;
         }
-    }
-    #endregion
-
-    #region Constructor(s)
-
-    //// Constructor for XAML compatibility - will be removed later
-    //public ShellViewModel() : this(
-    //    Ioc.Default.GetRequiredService<SceneViewModel>(),
-    //    Ioc.Default.GetRequiredService<ILogService>(),
-    //    Ioc.Default.GetRequiredService<SearchService>(),
-    //    Ioc.Default.GetRequiredService<AutoSaveService>(),
-    //    Ioc.Default.GetRequiredService<BackupService>(),
-    //    Ioc.Default.GetRequiredService<Windowing>(),
-    //    Ioc.Default.GetRequiredService<AppState>(),
-    //    Ioc.Default.GetRequiredService<ScrivenerIo>(),
-    //    Ioc.Default.GetRequiredService<PreferenceService>(),
-    //    Ioc.Default.GetRequiredService<OutlineViewModel>(),
-    //    Ioc.Default.GetRequiredService<OutlineService>(),
-    //    Ioc.Default.GetRequiredService<NavigationService>())
-    //{
-    //}
-
-    public ShellViewModel(SceneViewModel sceneViewModel, ILogService logger, SearchService search,
-        AutoSaveService autoSaveService, BackupService backupService, Windowing window,
-        AppState appState, ScrivenerIo scrivener, PreferenceService preferenceService,
-        OutlineViewModel outlineViewModel, OutlineService outlineService, NavigationService navigationService,
-        PrintReportDialogVM printReportDialogVM)
-    {
-        // Store injected services
-        _sceneViewModel = sceneViewModel;
-        Logger = logger;
-        Search = search;
-        _autoSaveService = autoSaveService;
-        _BackupService = backupService;
-        Window = window;
-        State = appState;
-        Scrivener = scrivener;
-        Preferences = preferenceService;
-        _navigationService = navigationService;
-        _printReportDialogVM = printReportDialogVM;
-        // Store sub ViewModels
-        OutlineManager = outlineViewModel;
-        this.outlineService = outlineService;
-
-        // Register inter-MVVM messaging
-        Messenger.Register<IsChangedRequestMessage>(this, (_, m) => { m.Reply(State.CurrentDocument?.Model?.Changed ?? false); });
-        Messenger.Register<ShellViewModel, IsChangedMessage>(this, static (r, m) => r.IsChangedMessageReceived(m));
-        Messenger.Register<ShellViewModel, IsBackupStatusMessage>(this, static (r, m) => r.BackupStatusMessageReceived(m));
-        Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
-        Messenger.Register<ShellViewModel, NameChangedMessage>(this, static (r, m) => r.NameMessageReceived(m));
-
-        State.CurrentDocument = new StoryDocument(new StoryModel(), null);
-
-        //Skip status timer initialization in Tests.
-        if (!State.Headless)
-        {
-            _statusTimer = new DispatcherTimer();
-            _statusTimer.Tick += statusTimer_Tick;
-            ChangeStatusColor = Colors.Green;
-            BackupStatusColor = Colors.Green;
-        }
-
-        Messenger.Send(new StatusChangedMessage(new("Ready", LogLevel.Info)));
-
-        TogglePaneCommand = new RelayCommand(TogglePane, SerializationLock.CanExecuteCommands);
-        OpenFileOpenMenuCommand = new AsyncRelayCommand(OutlineManager.OpenFileOpenMenu, canExecute: SerializationLock.CanExecuteCommands);  
-        NarrativeToolCommand = new RelayCommand(async () => await Ioc.Default.GetRequiredService<NarrativeToolVM>().OpenNarrativeTool(), SerializationLock.CanExecuteCommands);
-        PrintNodeCommand = new RelayCommand(async () => await OutlineManager.PrintCurrentNodeAsync(), SerializationLock.CanExecuteCommands);
-        OpenFileCommand = new RelayCommand(async () => await OutlineManager.OpenFile(), SerializationLock.CanExecuteCommands);
-        SaveFileCommand = new RelayCommand(async () => await OutlineManager.SaveFile(), SerializationLock.CanExecuteCommands);
-        SaveAsCommand = new RelayCommand(async () => await OutlineManager.SaveFileAs(), SerializationLock.CanExecuteCommands);
-        CreateBackupCommand = new RelayCommand(async () => await CreateBackupNow(), SerializationLock.CanExecuteCommands);
-        CloseCommand = new RelayCommand(async () => await OutlineManager.CloseFile(), SerializationLock.CanExecuteCommands);
-        ExitCommand = new RelayCommand(async () => await OutlineManager.ExitApp(), SerializationLock.CanExecuteCommands);
-
-        // StoryCAD Collaborator
-        CollaboratorCommand = new RelayCommand(LaunchCollaborator, SerializationLock.CanExecuteCommands);
-
-        // Tools commands
-        KeyQuestionsCommand = new RelayCommand(async () => await OutlineManager.KeyQuestionsTool(), SerializationLock.CanExecuteCommands);
-        TopicsCommand = new RelayCommand(async () => await OutlineManager.TopicsTool(), SerializationLock.CanExecuteCommands);
-        MasterPlotsCommand = new RelayCommand(async () => await OutlineManager.MasterPlotTool(), SerializationLock.CanExecuteCommands);
-        DramaticSituationsCommand = new RelayCommand(async () => await OutlineManager.DramaticSituationsTool(), SerializationLock.CanExecuteCommands);
-        StockScenesCommand = new RelayCommand(async () => await OutlineManager.StockScenesTool(), SerializationLock.CanExecuteCommands);
-
-        PreferencesCommand = new RelayCommand(OpenPreferences, SerializationLock.CanExecuteCommands);
-
-        PrintReportsCommand = new RelayCommand(OpenPrintMenu, SerializationLock.CanExecuteCommands);
-        ExportReportsToPdfCommand = new RelayCommand(OpenExportPdfMenu, SerializationLock.CanExecuteCommands);
-        ScrivenerReportsCommand = new RelayCommand(async () => await OutlineManager.GenerateScrivenerReports(), SerializationLock.CanExecuteCommands);
-
-        HelpCommand = new RelayCommand(LaunchGitHubPages);
-
-        // Move StoryElement commands
-        MoveLeftCommand = new RelayCommand(MoveTreeViewItemLeft, SerializationLock.CanExecuteCommands);
-        MoveRightCommand = new RelayCommand(MoveTreeViewItemRight, SerializationLock.CanExecuteCommands);
-        MoveUpCommand = new RelayCommand(MoveTreeViewItemUp, SerializationLock.CanExecuteCommands);
-        MoveDownCommand = new RelayCommand(MoveTreeViewItemDown, SerializationLock.CanExecuteCommands);
-
-        // Add StoryElement commands
-        AddFolderCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Folder), SerializationLock.CanExecuteCommands);
-        AddSectionCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Section), SerializationLock.CanExecuteCommands);
-        AddProblemCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Problem), SerializationLock.CanExecuteCommands);
-        AddCharacterCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Character), SerializationLock.CanExecuteCommands);
-        AddWebCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Web), SerializationLock.CanExecuteCommands);
-        AddNotesCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Notes), SerializationLock.CanExecuteCommands);
-        AddSettingCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Setting), SerializationLock.CanExecuteCommands);
-        AddSceneCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Scene), SerializationLock.CanExecuteCommands);
-        ConvertToSceneCommand = new RelayCommand(OutlineManager.ConvertProblemToScene, SerializationLock.CanExecuteCommands);
-        ConvertToProblemCommand = new RelayCommand(OutlineManager.ConvertSceneToProblem, SerializationLock.CanExecuteCommands);
-
-        // Remove Story Element command (move to trash)
-        RemoveStoryElementCommand = new AsyncRelayCommand(OutlineManager.RemoveStoryElement, canExecute: SerializationLock.CanExecuteCommands);
-        RestoreStoryElementCommand = new RelayCommand(OutlineManager.RestoreStoryElement, SerializationLock.CanExecuteCommands);
-        EmptyTrashCommand = new RelayCommand(OutlineManager.EmptyTrash, SerializationLock.CanExecuteCommands);
-        // Copy to Narrative command
-        AddToNarrativeCommand = new RelayCommand(OutlineManager.CopyToNarrative, SerializationLock.CanExecuteCommands);
-        RemoveFromNarrativeCommand = new RelayCommand(OutlineManager.RemoveFromNarrative, SerializationLock.CanExecuteCommands);
-
-        ViewList.Add("Story Explorer View");
-        ViewList.Add("Story Narrator View");
-
-        CurrentView = "Story Explorer View";
-        SelectedView = "Story Explorer View";
-
-        ShellInstance = this;
     }
 
     #endregion

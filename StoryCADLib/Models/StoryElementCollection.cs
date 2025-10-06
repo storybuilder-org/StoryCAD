@@ -4,19 +4,18 @@ using System.Collections.Specialized;
 namespace StoryCAD.Models;
 
 /// <summary>
-/// StoryElementCollection is an ObservableCollection of StoryElement
-/// instances, which automatically maintains several derivative 
-/// collections when StoryElementCollection has elements added or
-/// removed.
+///     StoryElementCollection is an ObservableCollection of StoryElement
+///     instances, which automatically maintains several derivative
+///     collections when StoryElementCollection has elements added or
+///     removed.
 /// </summary>
 public class StoryElementCollection : ObservableCollection<StoryElement>
 {
-    public Dictionary<Guid, StoryElement> StoryElementGuids;
     public ObservableCollection<StoryElement> Characters;
-    public ObservableCollection<StoryElement> Settings;
-    public ObservableCollection<StoryElement> Problems { get; } = new ObservableCollection<StoryElement>();
 
     public ObservableCollection<StoryElement> Scenes;
+    public ObservableCollection<StoryElement> Settings;
+    public Dictionary<Guid, StoryElement> StoryElementGuids;
 
     public StoryElementCollection()
     {
@@ -25,16 +24,18 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
         Characters = new ObservableCollection<StoryElement>();
         Settings = new ObservableCollection<StoryElement>();
         Scenes = new ObservableCollection<StoryElement>();
-        Problems!.Add(new StoryElement {ElementType = StoryItemType.Problem,Name="(none)"});
-        Characters!.Add(new StoryElement {ElementType = StoryItemType.Character,Name="(none)"});
-        Settings!.Add(new StoryElement {ElementType = StoryItemType.Setting,Name="(none)"});
-        Scenes!.Add(new StoryElement {ElementType = StoryItemType.Scene,Name="(none)"});
+        Problems!.Add(new StoryElement { ElementType = StoryItemType.Problem, Name = "(none)" });
+        Characters!.Add(new StoryElement { ElementType = StoryItemType.Character, Name = "(none)" });
+        Settings!.Add(new StoryElement { ElementType = StoryItemType.Setting, Name = "(none)" });
+        Scenes!.Add(new StoryElement { ElementType = StoryItemType.Scene, Name = "(none)" });
     }
 
+    public ObservableCollection<StoryElement> Problems { get; } = new();
+
     /// <summary>
-    /// The CollectionChanged event updates StoryElementGuids, Characters,
-    /// Settings, and Problems whenever adds, deletes, or resets of the
-    /// StoryElementCollection itself occurs.
+    ///     The CollectionChanged event updates StoryElementGuids, Characters,
+    ///     Settings, and Problems whenever adds, deletes, or resets of the
+    ///     StoryElementCollection itself occurs.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
@@ -64,6 +65,7 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
                         Scenes.Add(_element);
                         break;
                 }
+
                 break;
 
             case NotifyCollectionChangedAction.Move:
@@ -91,6 +93,7 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
                         Problems.RemoveAt(_i);
                         break;
                 }
+
                 break;
 
             case NotifyCollectionChangedAction.Replace:
@@ -103,5 +106,4 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
                 throw new NotImplementedException();
         }
     }
-
 }

@@ -1,13 +1,12 @@
-using Microsoft.UI.Xaml;
 using StoryCAD.ViewModels.Tools;
-using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.Services.Dialogs.Tools;
+
 public sealed partial class PrintReportsDialog
 {
-    public PrintReportDialogVM PrintVM;
     private readonly AppState _appState;
     private readonly ILogService _logService;
+    public PrintReportDialogVM PrintVM;
 
     public PrintReportsDialog(PrintReportDialogVM printVM, AppState appState, ILogService logService)
     {
@@ -37,7 +36,7 @@ public sealed partial class PrintReportsDialog
         //Gets all nodes that aren't deleted
         try
         {
-            foreach (StoryNodeItem rootChild in _appState.CurrentDocument!.Model.ExplorerView[0].Children)
+            foreach (var rootChild in _appState.CurrentDocument!.Model.ExplorerView[0].Children)
             {
                 PrintVM.TraverseNode(rootChild);
             }
@@ -49,8 +48,8 @@ public sealed partial class PrintReportsDialog
     }
 
     /// <summary>
-    /// You can't bind selected items so when the values change 
-    /// this function is ran which updates the values in the VM accordingly
+    ///     You can't bind selected items so when the values change
+    ///     this function is ran which updates the values in the VM accordingly
     /// </summary>
     private void UpdateSelection(object sender, SelectionChangedEventArgs e)
     {
@@ -58,33 +57,63 @@ public sealed partial class PrintReportsDialog
 
         if (!PrintVM.SelectAllProblems)
         {
-            foreach (StoryNodeItem item in ProblemsList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+            foreach (StoryNodeItem item in ProblemsList.SelectedItems)
+            {
+                PrintVM.SelectedNodes.Add(item);
+            }
         }
-        else { PrintVM.SelectedNodes.AddRange(PrintVM.ProblemNodes); }
+        else
+        {
+            PrintVM.SelectedNodes.AddRange(PrintVM.ProblemNodes);
+        }
 
         if (!PrintVM.SelectAllCharacters)
         {
-            foreach (StoryNodeItem item in CharactersList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+            foreach (StoryNodeItem item in CharactersList.SelectedItems)
+            {
+                PrintVM.SelectedNodes.Add(item);
+            }
         }
-        else { PrintVM.SelectedNodes.AddRange(PrintVM.CharacterNodes); }
+        else
+        {
+            PrintVM.SelectedNodes.AddRange(PrintVM.CharacterNodes);
+        }
 
         if (!PrintVM.SelectAllScenes)
         {
-            foreach (StoryNodeItem item in ScenesList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+            foreach (StoryNodeItem item in ScenesList.SelectedItems)
+            {
+                PrintVM.SelectedNodes.Add(item);
+            }
         }
-        else { PrintVM.SelectedNodes.AddRange(PrintVM.SceneNodes); }
+        else
+        {
+            PrintVM.SelectedNodes.AddRange(PrintVM.SceneNodes);
+        }
 
         if (!PrintVM.SelectAllSettings)
         {
-            foreach (StoryNodeItem item in SettingsList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+            foreach (StoryNodeItem item in SettingsList.SelectedItems)
+            {
+                PrintVM.SelectedNodes.Add(item);
+            }
         }
-        else { PrintVM.SelectedNodes.AddRange(PrintVM.SettingNodes); }
+        else
+        {
+            PrintVM.SelectedNodes.AddRange(PrintVM.SettingNodes);
+        }
 
         if (!PrintVM.SelectAllWeb)
         {
-            foreach (StoryNodeItem item in WebList.SelectedItems) { PrintVM.SelectedNodes.Add(item); }
+            foreach (StoryNodeItem item in WebList.SelectedItems)
+            {
+                PrintVM.SelectedNodes.Add(item);
+            }
         }
-        else { PrintVM.SelectedNodes.AddRange(PrintVM.WebNodes); }
+        else
+        {
+            PrintVM.SelectedNodes.AddRange(PrintVM.WebNodes);
+        }
 
         ProblemsList.IsEnabled = !PrintVM.SelectAllProblems;
         CharactersList.IsEnabled = !PrintVM.SelectAllCharacters;
@@ -104,12 +133,13 @@ public sealed partial class PrintReportsDialog
             case "Print all settings": SettingsList.SelectedItems.Clear(); break;
             case "Print all websites": WebList.SelectedItems.Clear(); break;
         }
-        UpdateSelection(null,null);
+
+        UpdateSelection(null, null);
     }
 
     /// <summary>
-    /// This will show the user a warning if synopsis is checked but
-    /// narrative view, which is used to build a synopsis, is empty.
+    ///     This will show the user a warning if synopsis is checked but
+    ///     narrative view, which is used to build a synopsis, is empty.
     /// </summary>
     private void EmptySynopsisWarningCheck(object sender, RoutedEventArgs e)
     {

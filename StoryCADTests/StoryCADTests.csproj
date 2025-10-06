@@ -1,114 +1,114 @@
 <Project Sdk="Uno.Sdk">
-	<PropertyGroup>
-		<OutputType>Exe</OutputType>
-		<UnoSingleProject>true</UnoSingleProject>
-		<LangVersion>latest</LangVersion>
-		<RootNamespace>StoryCADTests</RootNamespace>
-		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-		<IsTestProject>true</IsTestProject>
-		<TestProjectType>UnitTest</TestProjectType>
-		<EnableMSTestRunner>true</EnableMSTestRunner>
-		<GenerateLibraryLayout>true</GenerateLibraryLayout>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		
-		<!-- Test features -->
-		<UnoFeatures>
-			Toolkit;
-		</UnoFeatures>
-	</PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <UnoSingleProject>true</UnoSingleProject>
+        <LangVersion>latest</LangVersion>
+        <RootNamespace>StoryCADTests</RootNamespace>
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+        <IsTestProject>true</IsTestProject>
+        <TestProjectType>UnitTest</TestProjectType>
+        <EnableMSTestRunner>true</EnableMSTestRunner>
+        <GenerateLibraryLayout>true</GenerateLibraryLayout>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
 
-	<!-- Target frameworks based on OS -->
-	<PropertyGroup Condition="'$(OS)'=='Windows_NT'">
-		<TargetFrameworks>net9.0-windows10.0.22621;net9.0-desktop</TargetFrameworks>
-	</PropertyGroup>
+        <!-- Test features -->
+        <UnoFeatures>
+            Toolkit;
+        </UnoFeatures>
+    </PropertyGroup>
 
-	<PropertyGroup Condition="'$(OS)'!='Windows_NT'">
-		<TargetFrameworks>net9.0-desktop</TargetFrameworks>
-	</PropertyGroup>
+    <!-- Target frameworks based on OS -->
+    <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
+        <TargetFrameworks>net9.0-windows10.0.22621;net9.0-desktop</TargetFrameworks>
+    </PropertyGroup>
 
-	<!-- Windows-specific settings -->
-	<PropertyGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
-		<UseWinUI>true</UseWinUI>
-		<EnableMsixTooling>false</EnableMsixTooling>
-		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<Platforms>x86;x64;arm64</Platforms>
-		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
-	</PropertyGroup>
+    <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
+        <TargetFrameworks>net9.0-desktop</TargetFrameworks>
+    </PropertyGroup>
 
-	<!-- Desktop-specific settings -->
-	<PropertyGroup Condition="'$(TargetFramework)'=='net9.0-desktop'">
-		<UseWinUI>false</UseWinUI>
-	</PropertyGroup>
+    <!-- Windows-specific settings -->
+    <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
+        <UseWinUI>true</UseWinUI>
+        <EnableMsixTooling>false</EnableMsixTooling>
+        <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <Platforms>x86;x64;arm64</Platforms>
+        <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<Compile Remove="SceneViewModelTests.cs" />
-	</ItemGroup>
-	
-	<ItemGroup>
-		<Content Remove="Assets\OpenFromDesktopTest.stbx" />
-	</ItemGroup>
+    <!-- Desktop-specific settings -->
+    <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-desktop'">
+        <UseWinUI>false</UseWinUI>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<None Update=".env">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\AddElement.stbx">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\CloseFileTest.stbx">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\Full.stbx">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\OpenFromDesktopTest.stbx">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\OpenTest.stbx">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\StructureTests.stbx">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
+    <ItemGroup>
+        <Compile Remove="SceneViewModelTests.cs" />
+    </ItemGroup>
 
-	<!-- Windows-specific content -->
-	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
-		<AppxManifest Include="Package.appxmanifest">
-			<SubType>Designer</SubType>
-		</AppxManifest>
-		<Content Include="Assets\LockScreenLogo.scale-200.png" />
-		<Content Include="Assets\SplashScreen.scale-200.png" />
-		<Content Include="Assets\Square150x150Logo.scale-200.png" />
-		<Content Include="Assets\Square44x44Logo.scale-200.png" />
-		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-		<Content Include="Assets\StoreLogo.png" />
-		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
-		<Manifest Include="$(ApplicationManifest)" />
-	</ItemGroup>
+    <ItemGroup>
+        <Content Remove="Assets\OpenFromDesktopTest.stbx" />
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectCapability Include="TestContainer" />
-	</ItemGroup>
-	
-	<!-- Test packages -->
-	<ItemGroup>
-		<PackageReference Include="MSTest.TestAdapter" />
-		<PackageReference Include="MSTest.TestFramework" />
-		<PackageReference Include="Microsoft.TestPlatform.TestHost">
-			<ExcludeAssets>build</ExcludeAssets>
-		</PackageReference>
-		<PackageReference Include="CommunityToolkit.Mvvm" />
-	</ItemGroup>
+    <ItemGroup>
+        <None Update=".env">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="TestInputs\AddElement.stbx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="TestInputs\CloseFileTest.stbx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="TestInputs\Full.stbx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="TestInputs\OpenFromDesktopTest.stbx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="TestInputs\OpenTest.stbx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="TestInputs\StructureTests.stbx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 
-	<ItemGroup>
-		<None Include="SceneViewModelTests.cs" />
-	</ItemGroup>
+    <!-- Windows-specific content -->
+    <ItemGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
+        <AppxManifest Include="Package.appxmanifest">
+            <SubType>Designer</SubType>
+        </AppxManifest>
+        <Content Include="Assets\LockScreenLogo.scale-200.png" />
+        <Content Include="Assets\SplashScreen.scale-200.png" />
+        <Content Include="Assets\Square150x150Logo.scale-200.png" />
+        <Content Include="Assets\Square44x44Logo.scale-200.png" />
+        <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+        <Content Include="Assets\StoreLogo.png" />
+        <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+        <Manifest Include="$(ApplicationManifest)" />
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectCapability Include="TestContainer" />
+    </ItemGroup>
+
+    <!-- Test packages -->
+    <ItemGroup>
+        <PackageReference Include="MSTest.TestAdapter" />
+        <PackageReference Include="MSTest.TestFramework" />
+        <PackageReference Include="Microsoft.TestPlatform.TestHost">
+            <ExcludeAssets>build</ExcludeAssets>
+        </PackageReference>
+        <PackageReference Include="CommunityToolkit.Mvvm" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="SceneViewModelTests.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
+    </ItemGroup>
 
 </Project>

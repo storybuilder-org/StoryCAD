@@ -2,6 +2,6 @@
 
 namespace StoryCAD.Services.Messages;
 
-class StatusRequestMessage : RequestMessage<StatusMessage>
+internal class StatusRequestMessage : RequestMessage<StatusMessage>
 {
 }

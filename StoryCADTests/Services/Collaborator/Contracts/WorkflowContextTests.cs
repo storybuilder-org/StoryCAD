@@ -1,8 +1,5 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
 using StoryCAD.Services.Collaborator.Contracts;
-using System;
-using System.Collections.Generic;
 
 namespace StoryCADTests.Services.Collaborator.Contracts;
 
@@ -10,7 +7,7 @@ namespace StoryCADTests.Services.Collaborator.Contracts;
 public class WorkflowContextTests
 {
     /// <summary>
-    /// Test that WorkflowContext can be created and contains required properties
+    ///     Test that WorkflowContext can be created and contains required properties
     /// </summary>
     [TestMethod]
     public void WorkflowContext_CanBeCreated()
@@ -27,7 +24,7 @@ public class WorkflowContextTests
                 { "param2", 42 }
             }
         };
-        
+
         // Assert
         Assert.IsNotNull(context);
         Assert.IsNotNull(context.CurrentElement);
@@ -39,7 +36,7 @@ public class WorkflowContextTests
     }
 
     /// <summary>
-    /// Test that WorkflowStep can be created
+    ///     Test that WorkflowStep can be created
     /// </summary>
     [TestMethod]
     public void WorkflowStep_CanBeCreated()
@@ -52,7 +49,7 @@ public class WorkflowContextTests
             Description = "Generate story content based on input",
             InputFields = new List<WorkflowInputField>
             {
-                new WorkflowInputField
+                new()
                 {
                     Name = "premise",
                     Label = "Story Premise",
@@ -62,7 +59,7 @@ public class WorkflowContextTests
             },
             OutputFields = new List<WorkflowOutputField>
             {
-                new WorkflowOutputField
+                new()
                 {
                     Name = "generatedContent",
                     Label = "Generated Content",
@@ -70,7 +67,7 @@ public class WorkflowContextTests
                 }
             }
         };
-        
+
         // Assert
         Assert.IsNotNull(step);
         Assert.AreEqual(1, step.StepNumber);
@@ -82,7 +79,7 @@ public class WorkflowContextTests
     }
 
     /// <summary>
-    /// Test that WorkflowConfiguration can be created
+    ///     Test that WorkflowConfiguration can be created
     /// </summary>
     [TestMethod]
     public void WorkflowConfiguration_CanBeCreated()
@@ -96,11 +93,11 @@ public class WorkflowContextTests
             ElementType = StoryItemType.Character,
             Steps = new List<WorkflowStep>
             {
-                new WorkflowStep { StepNumber = 1, Name = "Step 1" },
-                new WorkflowStep { StepNumber = 2, Name = "Step 2" }
+                new() { StepNumber = 1, Name = "Step 1" },
+                new() { StepNumber = 2, Name = "Step 2" }
             }
         };
-        
+
         // Assert
         Assert.IsNotNull(config);
         Assert.AreEqual("character-development", config.WorkflowId);

@@ -1,9 +1,7 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
 using StoryCAD.Services.Collaborator;
 using StoryCAD.Services.Logging;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace StoryCADTests.Collaborator;
 
@@ -11,7 +9,7 @@ namespace StoryCADTests.Collaborator;
 public class MockCollaboratorTests
 {
     /// <summary>
-    /// Test that MockCollaborator can be created
+    ///     Test that MockCollaborator can be created
     /// </summary>
     [TestMethod]
     public void MockCollaborator_CanBeCreated()
@@ -19,13 +17,13 @@ public class MockCollaboratorTests
         // Arrange & Act
         var logger = Ioc.Default.GetRequiredService<ILogService>();
         var mock = new MockCollaborator(logger);
-        
+
         // Assert
         Assert.IsNotNull(mock);
     }
 
     /// <summary>
-    /// Test that MockCollaborator tracks state correctly
+    ///     Test that MockCollaborator tracks state correctly
     /// </summary>
     [TestMethod]
     public void MockCollaborator_TracksState()
@@ -34,13 +32,13 @@ public class MockCollaboratorTests
         var logger = Ioc.Default.GetRequiredService<ILogService>();
         var mock = new MockCollaborator(logger);
         var element = new StoryElement { Name = "Test Character", ElementType = StoryItemType.Character };
-        
+
         // Act
         mock.LoadWorkflowViewModel(StoryItemType.Character);
         mock.LoadWorkflowModel(element, "character-development");
-        
+
         var state = mock.GetCurrentState();
-        
+
         // Assert
         Assert.AreEqual(element, state.element);
         Assert.AreEqual("character-development", state.workflow);
@@ -48,7 +46,7 @@ public class MockCollaboratorTests
     }
 
     /// <summary>
-    /// Test that MockCollaborator async methods work
+    ///     Test that MockCollaborator async methods work
     /// </summary>
     [TestMethod]
     public async Task MockCollaborator_AsyncMethodsWork()
@@ -58,14 +56,14 @@ public class MockCollaboratorTests
         var mock = new MockCollaborator(logger);
         var element = new StoryElement { Name = "Test Scene" };
         mock.LoadWorkflowModel(element, "scene-builder");
-        
+
         // Act & Assert - should not throw
         await mock.ProcessWorkflowAsync();
         await mock.SendButtonClickedAsync();
     }
 
     /// <summary>
-    /// Test that MockCollaborator can be used with CollaboratorService
+    ///     Test that MockCollaborator can be used with CollaboratorService
     /// </summary>
     [TestMethod]
     public void MockCollaborator_WorksWithService()
@@ -74,15 +72,15 @@ public class MockCollaboratorTests
         var logger = Ioc.Default.GetRequiredService<ILogService>();
         var mock = new MockCollaborator(logger);
         var service = Ioc.Default.GetRequiredService<CollaboratorService>();
-        
+
         // Act
         service.SetCollaborator(mock);
         var element = new StoryElement { Name = "Test Problem" };
-        
+
         service.LoadWorkflowViewModel(StoryItemType.Problem);
         service.LoadWorkflowModel(element, "problem-solver");
         service.SaveOutputs();
-        
+
         // Assert
         var state = mock.GetCurrentState();
         Assert.AreEqual(element, state.element);

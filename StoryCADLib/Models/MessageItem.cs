@@ -1,6 +1,4 @@
-﻿using Microsoft.UI.Xaml.Media;
-
-namespace StoryCAD.Models;
+﻿namespace StoryCAD.Models;
 
 public class MessageItem
 {

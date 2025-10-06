@@ -9,9 +9,11 @@ public class DramaticSituationsViewModel : ObservableRecipient
     #region Fields
 
     private bool _changed;
+
     #endregion
 
     #region Properties
+
     public bool Changed
     {
         get => _changed;
@@ -28,6 +30,7 @@ public class DramaticSituationsViewModel : ObservableRecipient
     }
 
     private string _situationName;
+
     public string SituationName
     {
         get => _situationName;
@@ -37,7 +40,9 @@ public class DramaticSituationsViewModel : ObservableRecipient
             Situation = _situations[value];
         }
     }
+
     private string _notes;
+
     public string Notes
     {
         get => _notes;
@@ -69,5 +74,6 @@ public class DramaticSituationsViewModel : ObservableRecipient
         _situations = _toolsData.DramaticSituationsSource;
         SituationsSource = new ObservableCollection<string>(_situations.Keys);
     }
+
     #endregion
 }

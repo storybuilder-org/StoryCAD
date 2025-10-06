@@ -2,9 +2,10 @@
 
 public class ConflictCategoryModel
 {
-    public string TopicName;
-    public List<string> SubCategories;
     public SortedDictionary<string, List<string>> Examples;
+    public List<string> SubCategories;
+    public string TopicName;
+
     public ConflictCategoryModel(string topic)
     {
         TopicName = topic;

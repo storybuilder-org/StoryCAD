@@ -13,5 +13,8 @@ public class RelationType : ObservableObject
         PartnerRole = partnerRole;
     }
 
-    public override string ToString() { return MemberRole+ " => " + PartnerRole; }
+    public override string ToString()
+    {
+        return MemberRole + " => " + PartnerRole;
+    }
 }

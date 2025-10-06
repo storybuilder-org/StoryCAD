@@ -3,12 +3,14 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"      
-    mc:Ignorable="d"
-    >
-  
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
     <StackPanel Width="500" Height="400">
-        <ComboBox Margin="20" HorizontalAlignment="Center" Header="Master Plot" Width="300" ItemsSource="{x:Bind MasterPlotsVm.PlotPatternNames}" SelectedItem="{x:Bind MasterPlotsVm.PlotPatternName, Mode=TwoWay}" />
-        <TextBlock Margin="20" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="{x:Bind MasterPlotsVm.PlotPatternNotes, Mode=TwoWay}" />
+        <ComboBox Margin="20" HorizontalAlignment="Center" Header="Master Plot" Width="300"
+                  ItemsSource="{x:Bind MasterPlotsVm.PlotPatternNames}"
+                  SelectedItem="{x:Bind MasterPlotsVm.PlotPatternName, Mode=TwoWay}" />
+        <TextBlock Margin="20" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextWrapping="Wrap"
+                   Text="{x:Bind MasterPlotsVm.PlotPatternNotes, Mode=TwoWay}" />
     </StackPanel>
 </Page>

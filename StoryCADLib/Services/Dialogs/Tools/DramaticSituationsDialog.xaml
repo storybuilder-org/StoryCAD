@@ -6,6 +6,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-        <ComboBox Width="400" ItemsSource="{x:Bind DramaticSituationsVm.SituationsSource, Mode=TwoWay}" 
-                  SelectedItem="{x:Bind DramaticSituationsVm.SituationName, Mode=TwoWay}" />
+    <ComboBox Width="400" ItemsSource="{x:Bind DramaticSituationsVm.SituationsSource, Mode=TwoWay}"
+              SelectedItem="{x:Bind DramaticSituationsVm.SituationName, Mode=TwoWay}" />
 </Page>

@@ -1,45 +1,45 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.DAL;
+using StoryCAD.Models.Tools;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Backup;
+using StoryCAD.Services.Collaborator;
 using StoryCAD.Services.Dialogs;
 using StoryCAD.Services.Navigation;
-using StoryCAD.Services.Search;
-using StoryCAD.ViewModels.Tools;
-using StoryCAD.Collaborator.ViewModels;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services.API;
-using StoryCAD.Services.Collaborator;
 using StoryCAD.Services.Outline;
 using StoryCAD.Services.Ratings;
+using StoryCAD.Services.Search;
 using StoryCAD.ViewModels.SubViewModels;
-using System;
-using System.Drawing;
+using StoryCAD.ViewModels.Tools;
 
 namespace StoryCAD.Services.IoC;
+
 /// <summary>
-/// Handles initialisation of StoryCADLib.
+///     Handles initialisation of StoryCADLib.
 /// </summary>
 public static class BootStrapper
 {
-
     /// <summary>
-    /// Tracks if we already initialised StoryCADLib 
+    ///     Tracks if we already initialised StoryCADLib
     /// </summary>
     private static bool Initalised;
 
-    public static ServiceCollection Services { get; private set; }
-
     static BootStrapper()
     {
-        Services = new();
+        Services = new ServiceCollection();
         Initalised = false;
     }
+
+    public static ServiceCollection Services { get; private set; }
 
     public static void Initialise(bool headless = true, ServiceCollection additionalServices = null)
     {
         //Prevent running this twice.
-        if (Initalised) { return; }
+        if (Initalised)
+        {
+            return;
+        }
 
         //TODO: Support replacing the base services.
         //Add any additional services
@@ -53,12 +53,12 @@ public static class BootStrapper
         Ioc.Default.ConfigureServices(Services.BuildServiceProvider());
 
         // Set headless mode
-        AppState state = Ioc.Default.GetRequiredService<AppState>();
+        var state = Ioc.Default.GetRequiredService<AppState>();
         state.Headless = headless;
 
         //Setup prefs.
-        PreferenceService prefs = Ioc.Default.GetRequiredService<PreferenceService>();
-        prefs.Model = new();
+        var prefs = Ioc.Default.GetRequiredService<PreferenceService>();
+        prefs.Model = new PreferencesModel();
 
         //Set default preferences for headless mode
         if (headless)

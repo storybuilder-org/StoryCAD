@@ -1,30 +1,30 @@
 using System.Reflection;
 using System.Runtime.Loader;
+using Windows.ApplicationModel.AppExtensions;
 using Microsoft.UI.Windowing;
 using StoryCAD.Collaborator;
 using StoryCAD.Collaborator.ViewModels;
 using StoryCAD.Services.Backup;
-using Windows.ApplicationModel.AppExtensions;
 using StoryCAD.Services.Collaborator.Contracts;
 
 namespace StoryCAD.Services.Collaborator;
 
 public class CollaboratorService
 {
-    private bool dllExists;
-    private string dllPath;
-    private readonly AppState _appState;
-    private readonly ILogService _logService;
-    private readonly PreferenceService _preferenceService;
-    private readonly AutoSaveService _autoSaveService;
-    private readonly BackupService _backupService;
-    private Assembly CollabAssembly;
-    public Window CollaboratorWindow;  // The secondary window for Collaborator
-    private Type collaboratorType;
-    private object collaborator;
-    private ICollaborator _collaboratorInterface;  // Interface-based reference
     private const string PluginFileName = "CollaboratorLib.dll";
     private const string EnvPluginDirVar = "STORYCAD_PLUGIN_DIR";
+    private readonly AppState _appState;
+    private readonly AutoSaveService _autoSaveService;
+    private readonly BackupService _backupService;
+    private readonly ILogService _logService;
+    private readonly PreferenceService _preferenceService;
+    private ICollaborator _collaboratorInterface; // Interface-based reference
+    private Assembly CollabAssembly;
+    private object collaborator;
+    private Type collaboratorType;
+    public Window CollaboratorWindow; // The secondary window for Collaborator
+    private bool dllExists;
+    private string dllPath;
 
     public CollaboratorService(AppState appState, ILogService logService, PreferenceService preferenceService,
         AutoSaveService autoSaveService, BackupService backupService)
@@ -37,20 +37,20 @@ public class CollaboratorService
     }
 
     #region Collaborator calls
-    
+
     /// <summary>
-    /// Gets whether a collaborator is available
+    ///     Gets whether a collaborator is available
     /// </summary>
     public bool HasCollaborator => _collaboratorInterface != null;
-    
+
     /// <summary>
-    /// Sets the collaborator instance (for testing or direct injection)
+    ///     Sets the collaborator instance (for testing or direct injection)
     /// </summary>
     public void SetCollaborator(ICollaborator collaboratorInstance)
     {
         _collaboratorInterface = collaboratorInstance;
     }
-    
+
     public void LoadWorkflows(CollaboratorArgs args)
     {
         // Load the workflow navigation menu for user selection
@@ -63,9 +63,9 @@ public class CollaboratorService
             _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
         }
     }
-    
+
     /// <summary>
-    /// Load the workflow view model for a specific element type
+    ///     Load the workflow view model for a specific element type
     /// </summary>
     public void LoadWorkflowViewModel(StoryItemType elementType)
     {
@@ -80,10 +80,9 @@ public class CollaboratorService
     }
 
     /// <summary>
-    /// Load the WizardViewModel (WizardShell's VM) with the high level
-    /// NavigationView menu.
-    ///
-    /// This is a proxy for Collaborator's LoadWizardViewModel.
+    ///     Load the WizardViewModel (WizardShell's VM) with the high level
+    ///     NavigationView menu.
+    ///     This is a proxy for Collaborator's LoadWizardViewModel.
     /// </summary>
     public void LoadWizardViewModel()
     {
@@ -98,10 +97,9 @@ public class CollaboratorService
     }
 
     /// <summary>
-    /// Load the WorkflowViewModel with the currently selected 
-    /// Workflow Model.
-    ///
-    /// This is a proxy for Collaborator's LoadWorkflowModel method.
+    ///     Load the WorkflowViewModel with the currently selected
+    ///     Workflow Model.
+    ///     This is a proxy for Collaborator's LoadWorkflowModel method.
     /// </summary>
     public void LoadWorkflowModel(StoryElement element, string workflow)
     {
@@ -116,9 +114,8 @@ public class CollaboratorService
     }
 
     /// <summary>
-    /// Process the Workflow we've loaded.
-    /// 
-    /// This is a proxy for Collaborator's ProcessWorkflow method.
+    ///     Process the Workflow we've loaded.
+    ///     This is a proxy for Collaborator's ProcessWorkflow method.
     /// </summary>
     public void ProcessWorkflow()
     {
@@ -132,9 +129,9 @@ public class CollaboratorService
             _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
         }
     }
-    
+
     /// <summary>
-    /// Process the Workflow we've loaded asynchronously.
+    ///     Process the Workflow we've loaded asynchronously.
     /// </summary>
     public async Task ProcessWorkflowAsync()
     {
@@ -160,9 +157,9 @@ public class CollaboratorService
             _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
         }
     }
-    
+
     /// <summary>
-    /// Handle send button click asynchronously.
+    ///     Handle send button click asynchronously.
     /// </summary>
     public async Task SendButtonClickedAsync()
     {
@@ -177,9 +174,8 @@ public class CollaboratorService
     }
 
     /// <summary>
-    /// Save any unchanged OutputProperty values to their StoryElement.
-    ///
-    /// This is a proxy for Collaborator's SaveOutputs() method.
+    ///     Save any unchanged OutputProperty values to their StoryElement.
+    ///     This is a proxy for Collaborator's SaveOutputs() method.
     /// </summary>
     public void SaveOutputs()
     {
@@ -198,11 +194,11 @@ public class CollaboratorService
     #region Collaboratorlib connection
 
     /// <summary>
-    /// If the plugin is active, connect to CollaboratorLib and create an instance
-    /// of Collaborator. 
+    ///     If the plugin is active, connect to CollaboratorLib and create an instance
+    ///     of Collaborator.
     /// </summary>
     public void ConnectCollaborator()
-     {
+    {
         // Use the custom context to load the assembly
         CollabAssembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dllPath);
         _logService.Log(LogLevel.Info, "Loaded CollaboratorLib.dll");
@@ -229,10 +225,10 @@ public class CollaboratorService
             _logService.Log(LogLevel.Error, "Could not find Collaborator type in assembly");
             return;
         }
-        
+
         // Create an instance of the Collaborator class
         _logService.Log(LogLevel.Info, "Calling Collaborator constructor.");
-        var collabArgs = Ioc.Default.GetService<ShellViewModel>()!.CollabArgs = new();
+        var collabArgs = Ioc.Default.GetService<ShellViewModel>()!.CollabArgs = new CollaboratorArgs();
         collabArgs.WorkflowVm = Ioc.Default.GetService<WorkflowViewModel>();
         collabArgs.CollaboratorWindow = CollaboratorWindow;
         object[] methodArgs = { collabArgs };
@@ -244,9 +240,10 @@ public class CollaboratorService
             _logService.Log(LogLevel.Error, "Could not find Collaborator constructor that takes CollaboratorArgs");
             throw new InvalidOperationException("Collaborator must have a constructor that takes CollaboratorArgs");
         }
+
         var collaborator = constructor.Invoke(methodArgs);
         _logService.Log(LogLevel.Info, "Collaborator Constructor finished.");
-        
+
         // Cast to interface - this is now required
         _collaboratorInterface = collaborator as ICollaborator;
         if (_collaboratorInterface != null)
@@ -259,6 +256,7 @@ public class CollaboratorService
             throw new InvalidOperationException("CollaboratorLib must implement ICollaborator interface");
         }
     }
+
     public async Task<bool> CollaboratorEnabled()
     {
         // Check COLLAB_DEBUG environment variable to bypass collaborator loading
@@ -268,29 +266,29 @@ public class CollaboratorService
             _logService.Log(LogLevel.Info, "Collaborator disabled by COLLAB_DEBUG=0");
             return false;
         }
-        
+
         // Allow loading if:
         // 1. Developer build AND plugin found
         // 2. OR if STORYCAD_PLUGIN_DIR is set (for JIT debugging without F5)
         var hasPluginDir = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(EnvPluginDirVar));
-        
+
         return (_appState.DeveloperBuild || hasPluginDir)
                && await FindDll();
     }
 
     /// <summary>
-    /// Checks if CollaboratorLib.dll exists.
+    ///     Checks if CollaboratorLib.dll exists.
     /// </summary>
     /// <returns>True if CollaboratorLib.dll exists, false otherwise.</returns>
     private async Task<bool> FindDll()
     {
 #if !HAS_UNO
         _logService.Log(LogLevel.Info, "Locating Collaborator Package...");
-        
-		//Find all installed extensions
-	    AppExtensionCatalog _catalog = AppExtensionCatalog.Open("org.storybuilder");
-	    var InstalledExtensions = await _catalog.FindAllAsync();
-	    _logService.Log(LogLevel.Info, $"Found {InstalledExtensions} installed extensions");
+
+        //Find all installed extensions
+        var _catalog = AppExtensionCatalog.Open("org.storybuilder");
+        var InstalledExtensions = await _catalog.FindAllAsync();
+        _logService.Log(LogLevel.Info, $"Found {InstalledExtensions} installed extensions");
         _logService.Log(LogLevel.Info, "Locating CollaboratorLib...");
 
         // 1) DEV: explicit override — deterministic
@@ -312,6 +310,7 @@ public class CollaboratorService
                 _logService.Log(LogLevel.Info, $"Found dev DLL: {dllPath}");
                 return true;
             }
+
             _logService.Log(LogLevel.Warn, "Dev paths not found, falling back to package lookup.");
         }
 
@@ -339,7 +338,10 @@ public class CollaboratorService
     {
         path = null;
         var dir = Environment.GetEnvironmentVariable(EnvPluginDirVar);
-        if (string.IsNullOrWhiteSpace(dir)) return false;
+        if (string.IsNullOrWhiteSpace(dir))
+        {
+            return false;
+        }
 
         var candidate = Path.Combine(dir, PluginFileName);
         if (!File.Exists(candidate))
@@ -347,9 +349,12 @@ public class CollaboratorService
             _logService.Log(LogLevel.Warn, $"{EnvPluginDirVar} set but file missing: {candidate}");
             return false;
         }
+
         var pdb = Path.ChangeExtension(candidate, ".pdb");
         if (!File.Exists(pdb))
+        {
             _logService.Log(LogLevel.Warn, $"PDB missing next to DLL: {pdb}");
+        }
 
         path = candidate;
         return true;
@@ -360,16 +365,25 @@ public class CollaboratorService
     {
         path = null;
 
-        var exeDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!;
+        var exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
 
         var cursor = exeDir;
-        for (int i = 0; i < 10 && cursor != null; i++)
+        for (var i = 0; i < 10 && cursor != null; i++)
+        {
             cursor = Path.GetDirectoryName(cursor);
-        if (cursor == null) return false;
+        }
+
+        if (cursor == null)
+        {
+            return false;
+        }
 
         var baseDebug = Path.Combine(cursor,
             "StoryBuilderCollaborator", "CollaboratorLib", "bin", "x64", "Debug");
-        if (!Directory.Exists(baseDebug)) return false;
+        if (!Directory.Exists(baseDebug))
+        {
+            return false;
+        }
 
         var tfmCandidates = Directory.EnumerateDirectories(baseDebug, "net*-windows*")
             .OrderByDescending(d => Directory.GetLastWriteTimeUtc(d))
@@ -381,7 +395,10 @@ public class CollaboratorService
             {
                 var pdb = Path.ChangeExtension(candidate, ".pdb");
                 if (!File.Exists(pdb))
+                {
                     _logService.Log(LogLevel.Warn, $"PDB missing next to DLL: {pdb}");
+                }
+
                 path = candidate;
                 return true;
             }
@@ -394,14 +411,15 @@ public class CollaboratorService
     {
         try
         {
-            AppExtensionCatalog catalog = AppExtensionCatalog.Open("org.storybuilder");
+            var catalog = AppExtensionCatalog.Open("org.storybuilder");
             var exts = await catalog.FindAllAsync();
 
             _logService.Log(LogLevel.Info, $"Found {exts.Count} installed extensions for org.storybuilder");
 
             var collab = exts.FirstOrDefault(e =>
                 string.Equals(e.Package.Id.Name, "StoryCADCollaborator", StringComparison.OrdinalIgnoreCase) ||
-                (e.Package.DisplayName?.Contains("StoryCAD Collaborator", StringComparison.OrdinalIgnoreCase) ?? false));
+                (e.Package.DisplayName?.Contains("StoryCAD Collaborator", StringComparison.OrdinalIgnoreCase) ??
+                 false));
 
             if (collab == null)
             {
@@ -429,19 +447,20 @@ public class CollaboratorService
             return (false, null);
         }
     }
+
     #endregion
 
     #region Show/Hide window
+
     //TODO: Use Show and hide properly
     //CollaboratorWindow.Show();
     //CollaboratorWindow.Activate();
     //Logger.Log(LogLevel.Debug, "Collaborator window opened and focused");
     /// <summary>
-    /// This closes, disposes and full removes collaborator from memory.
+    ///     This closes, disposes and full removes collaborator from memory.
     /// </summary>
-
     /// <summary>
-    /// This will hide the collaborator window.
+    ///     This will hide the collaborator window.
     /// </summary>
     private void HideCollaborator(AppWindow appWindow, AppWindowClosingEventArgs e)
     {
@@ -455,8 +474,8 @@ public class CollaboratorService
     }
 
     /// <summary>
-    /// This is called when collaborator has finished doing stuff.
-    /// Note: This is invoked from the Collaborator side via a Delegate named onDoneCallback
+    ///     This is called when collaborator has finished doing stuff.
+    ///     Note: This is invoked from the Collaborator side via a Delegate named onDoneCallback
     /// </summary>
     private void FinishedCallback()
     {
@@ -466,11 +485,13 @@ public class CollaboratorService
         {
             _backupService.StartTimedBackup();
         }
+
         //Reenable auto save if needed.
         if (_preferenceService.Model.AutoSave)
         {
             _autoSaveService.StartAutoSave();
         }
+
         //Reenable StoryCAD buttons
         //TODO: Use lock here.
         //Ioc.Default.GetRequiredService<OutlineViewModel>()._canExecuteCommands = true;
@@ -494,7 +515,6 @@ public class CollaboratorService
             GC.Collect();
             GC.WaitForPendingFinalizers();
             _logService.Log(LogLevel.Info, "Garbage collection finished.");
-
         }
     }
 
@@ -502,13 +522,10 @@ public class CollaboratorService
     {
         _logService.Log(LogLevel.Debug, "Closing Collaborator.");
         //TODO: Add FTP upload code here.
-
     }
+
     #endregion
-
 }
-
-
 
 //TODO: On calls, set callback delegate
 //args.onDoneCallback = FinishedCallback;
@@ -523,6 +540,5 @@ public class CollaboratorService
 //     Story Element Type  - {args.SelectedElement.Type}
 //     """);
 //TODO: On calls, set model etc.
-
 
 //CollaboratorWindow.Content = page;  // was WizardShell

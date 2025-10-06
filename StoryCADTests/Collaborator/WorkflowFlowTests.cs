@@ -1,12 +1,7 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.UI.Xaml;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCAD.Models;
 using StoryCAD.Services.Collaborator;
 using StoryCAD.Services.Collaborator.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace StoryCADTests.Collaborator;
 
@@ -14,7 +9,7 @@ namespace StoryCADTests.Collaborator;
 public class WorkflowFlowTests
 {
     /// <summary>
-    /// Test the workflow loading sequence
+    ///     Test the workflow loading sequence
     /// </summary>
     [TestMethod]
     public void Workflow_LoadingSequence_WorksCorrectly()
@@ -23,23 +18,23 @@ public class WorkflowFlowTests
         var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         var mock = new TestWorkflowCollaborator();
         service.SetCollaborator(mock);
-        
-        var element = new StoryElement 
-        { 
+
+        var element = new StoryElement
+        {
             Name = "Test Scene",
             ElementType = StoryItemType.Scene
         };
-        
+
         // Act - Simulate workflow loading sequence
         // 1. Load workflow view model for element type
         service.LoadWorkflowViewModel(StoryItemType.Scene);
-        
+
         // 2. Load wizard view model
         service.LoadWizardViewModel();
-        
+
         // 3. Load specific workflow model
         service.LoadWorkflowModel(element, "scene-builder");
-        
+
         // Assert - Verify the sequence was executed
         Assert.AreEqual(1, mock.LoadWorkflowViewModelCallCount);
         Assert.AreEqual(1, mock.LoadWizardViewModelCallCount);
@@ -48,7 +43,7 @@ public class WorkflowFlowTests
     }
 
     /// <summary>
-    /// Test workflow processing flow
+    ///     Test workflow processing flow
     /// </summary>
     [TestMethod]
     public async Task Workflow_ProcessingFlow_ExecutesInOrder()
@@ -57,32 +52,32 @@ public class WorkflowFlowTests
         var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         var mock = new TestWorkflowCollaborator();
         service.SetCollaborator(mock);
-        
-        var element = new StoryElement 
-        { 
+
+        var element = new StoryElement
+        {
             Name = "Test Problem",
             ElementType = StoryItemType.Problem
         };
-        
+
         // Act - Execute full workflow
         service.LoadWorkflowViewModel(StoryItemType.Problem);
         service.LoadWorkflowModel(element, "problem-solver");
         await service.ProcessWorkflowAsync();
         await service.SendButtonClickedAsync();
         service.SaveOutputs();
-        
+
         // Assert - Verify execution order
         Assert.IsTrue(mock.ProcessWorkflowExecuted);
         Assert.IsTrue(mock.SendButtonClickedExecuted);
         Assert.IsTrue(mock.SaveOutputsExecuted);
-        
+
         // Verify order
         Assert.IsTrue(mock.ProcessWorkflowTime < mock.SendButtonClickedTime);
         Assert.IsTrue(mock.SendButtonClickedTime < mock.SaveOutputsTime);
     }
 
     /// <summary>
-    /// Test workflow with multiple elements
+    ///     Test workflow with multiple elements
     /// </summary>
     [TestMethod]
     public void Workflow_MultipleElements_HandledCorrectly()
@@ -91,21 +86,21 @@ public class WorkflowFlowTests
         var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         var mock = new TestWorkflowCollaborator();
         service.SetCollaborator(mock);
-        
+
         var elements = new List<StoryElement>
         {
-            new StoryElement { Name = "Hero", ElementType = StoryItemType.Character },
-            new StoryElement { Name = "Villain", ElementType = StoryItemType.Character },
-            new StoryElement { Name = "Opening", ElementType = StoryItemType.Scene }
+            new() { Name = "Hero", ElementType = StoryItemType.Character },
+            new() { Name = "Villain", ElementType = StoryItemType.Character },
+            new() { Name = "Opening", ElementType = StoryItemType.Scene }
         };
-        
+
         // Act - Process multiple elements
         foreach (var element in elements)
         {
             service.LoadWorkflowViewModel(element.ElementType);
             service.LoadWorkflowModel(element, $"{element.ElementType.ToString().ToLower()}-workflow");
         }
-        
+
         // Assert
         Assert.AreEqual(3, mock.LoadWorkflowViewModelCallCount);
         Assert.AreEqual(3, mock.LoadWorkflowModelCallCount);
@@ -113,7 +108,7 @@ public class WorkflowFlowTests
     }
 
     /// <summary>
-    /// Test workflow cancellation and recovery
+    ///     Test workflow cancellation and recovery
     /// </summary>
     [TestMethod]
     public async Task Workflow_ErrorHandling_RecoversProperly()
@@ -122,12 +117,12 @@ public class WorkflowFlowTests
         var service = Ioc.Default.GetRequiredService<CollaboratorService>();
         var mock = new TestWorkflowCollaborator { ShouldFailProcessWorkflow = true };
         service.SetCollaborator(mock);
-        
+
         var element = new StoryElement { Name = "Test", ElementType = StoryItemType.Character };
-        
+
         // Act
         service.LoadWorkflowModel(element, "test-workflow");
-        
+
         try
         {
             await service.ProcessWorkflowAsync();
@@ -136,17 +131,17 @@ public class WorkflowFlowTests
         {
             // Expected to fail
         }
-        
+
         // Recovery - Try again without failure
         mock.ShouldFailProcessWorkflow = false;
         await service.ProcessWorkflowAsync();
-        
+
         // Assert - Should recover and complete
         Assert.IsTrue(mock.ProcessWorkflowExecuted);
     }
 
     /// <summary>
-    /// Extended mock collaborator for workflow testing
+    ///     Extended mock collaborator for workflow testing
     /// </summary>
     private class TestWorkflowCollaborator : ICollaborator
     {
@@ -154,15 +149,15 @@ public class WorkflowFlowTests
         public int LoadWizardViewModelCallCount { get; private set; }
         public int LoadWorkflowModelCallCount { get; private set; }
         public string LastWorkflowLoaded { get; private set; }
-        
+
         public bool ProcessWorkflowExecuted { get; private set; }
         public bool SendButtonClickedExecuted { get; private set; }
         public bool SaveOutputsExecuted { get; private set; }
-        
+
         public DateTime ProcessWorkflowTime { get; private set; }
         public DateTime SendButtonClickedTime { get; private set; }
         public DateTime SaveOutputsTime { get; private set; }
-        
+
         public bool ShouldFailProcessWorkflow { get; set; }
 
         public Window CreateWindow(object context) => null;
@@ -186,8 +181,10 @@ public class WorkflowFlowTests
         public async Task ProcessWorkflowAsync()
         {
             if (ShouldFailProcessWorkflow)
+            {
                 throw new Exception("Test failure");
-                
+            }
+
             ProcessWorkflowExecuted = true;
             ProcessWorkflowTime = DateTime.Now;
             await Task.Delay(10); // Small delay to ensure time difference

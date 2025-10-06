@@ -8,7 +8,7 @@
     mc:Ignorable="d">
 
     <StackPanel Padding="14,14,14,24">
-        <TextBox x:Name="ProjectName" Margin="10"  x:FieldModifier="public" Width="400"
+        <TextBox x:Name="ProjectName" Margin="10" x:FieldModifier="public" Width="400"
                  HorizontalAlignment="Left" Header="New project Name" Text="{x:Bind SaveAsVm.ProjectName, Mode=TwoWay}" />
         <controls:BrowseTextBox
             x:Name="ProjectPathBrowse"
@@ -19,6 +19,6 @@
             BrowseMode="Folder"
             ButtonVerticalAlignment="Bottom"
             ButtonMargin="0,0,0,0"
-            PathSelected="OnPathSelected"/>
+            PathSelected="OnPathSelected" />
     </StackPanel>
 </Page>

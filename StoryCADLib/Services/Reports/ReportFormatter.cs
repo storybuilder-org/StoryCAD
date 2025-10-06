@@ -1,6 +1,6 @@
+using System.Reflection;
 using System.Text;
 using NRtfTree.Util;
-using System.Reflection;
 using StoryCAD.Services.Outline;
 using StoryCAD.ViewModels.SubViewModels;
 using StoryCAD.ViewModels.Tools;
@@ -9,31 +9,69 @@ namespace StoryCAD.Services.Reports;
 
 public class ReportFormatter
 {
-    private Dictionary<string, string[]> _templates = new();
-    private StoryModel _storyModel;
+    private readonly StoryModel _storyModel;
+    private readonly Dictionary<string, string[]> _templates = new();
+
+    public string FormatListReport(StoryItemType elementType)
+    {
+        //Get element (override web for websites.)
+        var name = elementType == StoryItemType.Web ? "Websites" : elementType + "s";
+
+        string[] lines =
+        [
+            $"                        StoryCAD - List of {name}",
+            "",
+            "                        @Description"
+        ];
+        RtfDocument doc = new(string.Empty);
+
+        // Parse and write the report
+        foreach (var line in lines)
+        {
+            if (line.Contains("@Description"))
+            {
+                var elements = _storyModel.StoryElements.Where(e => e.ElementType == elementType);
+                foreach (var element in elements)
+                {
+                    StringBuilder sb = new(line);
+                    sb.Replace("@Description", element.Name);
+                    doc.AddText(sb.ToString());
+                    doc.AddNewLine();
+                }
+            }
+            else
+            {
+                doc.AddText(line);
+                doc.AddNewLine();
+            }
+        }
+
+        return doc.GetRtf();
+    }
 
     #region Public methods
 
     public string FormatStoryOverviewReport()
     {
-        OverviewModel overview = (OverviewModel)_storyModel.StoryElements.
-            FirstOrDefault(element => element.ElementType == StoryItemType.StoryOverview);
-        string[] lines = _templates["Story Overview"]; 
+        var overview =
+            (OverviewModel)_storyModel.StoryElements.FirstOrDefault(element =>
+                element.ElementType == StoryItemType.StoryOverview);
+        var lines = _templates["Story Overview"];
         RtfDocument doc = new(string.Empty);
 
-        string vpName = StoryElement.GetByGuid(overview.ViewpointCharacter).Name;
-        string problemName = string.Empty;
-        string premise = string.Empty;
+        var vpName = StoryElement.GetByGuid(overview.ViewpointCharacter).Name;
+        var problemName = string.Empty;
+        var premise = string.Empty;
         if (overview.StoryProblem != Guid.Empty)
         {
             var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-            ProblemModel problem = (ProblemModel)outlineService.GetStoryElementByGuid(_storyModel, overview.StoryProblem);
+            var problem = (ProblemModel)outlineService.GetStoryElementByGuid(_storyModel, overview.StoryProblem);
             problemName = problem.Name;
             premise = problem.Premise;
         }
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (var line in lines)
         {
             // Parse the report
             StringBuilder sb = new(line);
@@ -61,156 +99,301 @@ public class ReportFormatter
             doc.AddText(sb.ToString());
             doc.AddNewLine();
         }
+
         return doc.GetRtf();
     }
 
     public string FormatProblemReport(StoryElement element)
-    { 
-        ProblemModel problem = (ProblemModel)element;
-        string[] lines = _templates["Problem Description"];
+    {
+        var problem = (ProblemModel)element;
+        var lines = _templates["Problem Description"];
         RtfDocument doc = new(string.Empty);
-		
+
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (var line in lines)
         {
             StringBuilder sb = new(line);
-            if (String.IsNullOrEmpty(problem.Name)) { sb.Replace("@Title", ""); }
-            else { sb.Replace("@Title", problem.Name); }
-
-            if (String.IsNullOrEmpty(problem.ProblemType)) { sb.Replace("@ProblemType", ""); }
-            else { sb.Replace("@ProblemType", problem.ProblemType); }
-
-            if (String.IsNullOrEmpty(problem.ConflictType)) { sb.Replace("@ConflictType", ""); }
-            else { sb.Replace("@ConflictType", problem.ConflictType); }
-
-            if (String.IsNullOrEmpty(problem.ProblemCategory)) { sb.Replace("@ProblemCategory", ""); }
-            else { sb.Replace("@ProblemCategory", problem.ProblemCategory); }
-
-            if (String.IsNullOrEmpty(problem.Subject)) { sb.Replace("@Subject", ""); }
-            else { sb.Replace("@Subject", problem.Subject); }
-
-            if (String.IsNullOrEmpty(problem.Description)) { sb.Replace("@StoryQuestion", ""); } 
-            else { sb.Replace("@StoryQuestion", GetText(problem.Description)); }
-            
-            if (String.IsNullOrEmpty(problem.ProblemSource)) { sb.Replace("@ProblemSource", ""); }
-            else { sb.Replace("@ProblemSource", problem.ProblemSource); }
-
-            if (String.IsNullOrEmpty(problem.ProtMotive)) { sb.Replace("@ProtagMotive", ""); }
-            else { sb.Replace("@ProtagMotive", problem.ProtMotive); }
-
-            if (String.IsNullOrEmpty(problem.ProtGoal)) { sb.Replace("@ProtagGoal", ""); }
-            else { sb.Replace("@ProtagGoal", problem.ProtGoal); }
-            
-            if (problem.Protagonist != Guid.Empty)
-			{
-				StoryElement vpProtagonist = (CharacterModel)StoryElement.GetByGuid(problem.Protagonist);
-				if (String.IsNullOrEmpty(vpProtagonist.Name)) { sb.Replace("@ProtagName", ""); }
-                else { sb.Replace("@ProtagName", vpProtagonist.Name); }
+            if (string.IsNullOrEmpty(problem.Name))
+            {
+                sb.Replace("@Title", "");
             }
-            else { sb.Replace("@ProtagName", ""); }
+            else
+            {
+                sb.Replace("@Title", problem.Name);
+            }
 
-            if (String.IsNullOrEmpty(problem.ProtConflict)) { sb.Replace("@ProtagConflict", ""); }
-            else { sb.Replace("@ProtagConflict", problem.ProtConflict); }
+            if (string.IsNullOrEmpty(problem.ProblemType))
+            {
+                sb.Replace("@ProblemType", "");
+            }
+            else
+            {
+                sb.Replace("@ProblemType", problem.ProblemType);
+            }
+
+            if (string.IsNullOrEmpty(problem.ConflictType))
+            {
+                sb.Replace("@ConflictType", "");
+            }
+            else
+            {
+                sb.Replace("@ConflictType", problem.ConflictType);
+            }
+
+            if (string.IsNullOrEmpty(problem.ProblemCategory))
+            {
+                sb.Replace("@ProblemCategory", "");
+            }
+            else
+            {
+                sb.Replace("@ProblemCategory", problem.ProblemCategory);
+            }
+
+            if (string.IsNullOrEmpty(problem.Subject))
+            {
+                sb.Replace("@Subject", "");
+            }
+            else
+            {
+                sb.Replace("@Subject", problem.Subject);
+            }
+
+            if (string.IsNullOrEmpty(problem.Description))
+            {
+                sb.Replace("@StoryQuestion", "");
+            }
+            else
+            {
+                sb.Replace("@StoryQuestion", GetText(problem.Description));
+            }
+
+            if (string.IsNullOrEmpty(problem.ProblemSource))
+            {
+                sb.Replace("@ProblemSource", "");
+            }
+            else
+            {
+                sb.Replace("@ProblemSource", problem.ProblemSource);
+            }
+
+            if (string.IsNullOrEmpty(problem.ProtMotive))
+            {
+                sb.Replace("@ProtagMotive", "");
+            }
+            else
+            {
+                sb.Replace("@ProtagMotive", problem.ProtMotive);
+            }
+
+            if (string.IsNullOrEmpty(problem.ProtGoal))
+            {
+                sb.Replace("@ProtagGoal", "");
+            }
+            else
+            {
+                sb.Replace("@ProtagGoal", problem.ProtGoal);
+            }
+
+            if (problem.Protagonist != Guid.Empty)
+            {
+                StoryElement vpProtagonist = (CharacterModel)StoryElement.GetByGuid(problem.Protagonist);
+                if (string.IsNullOrEmpty(vpProtagonist.Name))
+                {
+                    sb.Replace("@ProtagName", "");
+                }
+                else
+                {
+                    sb.Replace("@ProtagName", vpProtagonist.Name);
+                }
+            }
+            else
+            {
+                sb.Replace("@ProtagName", "");
+            }
+
+            if (string.IsNullOrEmpty(problem.ProtConflict))
+            {
+                sb.Replace("@ProtagConflict", "");
+            }
+            else
+            {
+                sb.Replace("@ProtagConflict", problem.ProtConflict);
+            }
 
             if (problem.Antagonist != Guid.Empty)
             {
-	            StoryElement vpAntagonist = (CharacterModel)StoryElement.GetByGuid(problem.Antagonist);
+                StoryElement vpAntagonist = (CharacterModel)StoryElement.GetByGuid(problem.Antagonist);
 
-				if (String.IsNullOrEmpty(vpAntagonist.Name)) { sb.Replace("@AntagName", ""); }
-                else { sb.Replace("@AntagName", vpAntagonist.Name); }
+                if (string.IsNullOrEmpty(vpAntagonist.Name))
+                {
+                    sb.Replace("@AntagName", "");
+                }
+                else
+                {
+                    sb.Replace("@AntagName", vpAntagonist.Name);
+                }
             }
-            else { sb.Replace("@AntagName", ""); }
-            
-            if (String.IsNullOrEmpty(problem.AntagMotive)) { sb.Replace("@AntagMotive", ""); }
-            else { sb.Replace("@AntagMotive", problem.AntagMotive); }
-
-            if (String.IsNullOrEmpty(problem.AntagGoal)) { sb.Replace("@AntagGoal", ""); }
-            else { sb.Replace("@AntagGoal", problem.AntagGoal); }
-
-            if (String.IsNullOrEmpty(problem.AntagConflict)) { sb.Replace("@AntagConflict", ""); }
-            else { sb.Replace("@AntagConflict", problem.AntagConflict); }
-
-            if (String.IsNullOrEmpty(problem.Outcome)) { sb.Replace("@Outcome", ""); }
-            else { sb.Replace("@Outcome", problem.Outcome); }
-
-            if (String.IsNullOrEmpty(problem.Method)) { sb.Replace("@Method", ""); }
-            else { sb.Replace("@Method", problem.Method); }
-            
-            if (String.IsNullOrEmpty(problem.Theme)) { sb.Replace("@Theme", ""); }
-            else { sb.Replace("@Theme", problem.Theme); }
-
-            if (String.IsNullOrEmpty(problem.Premise)) { sb.Replace("@Premise", ""); }
-            else { sb.Replace("@Premise", GetText(problem.Premise)); }
-            
-            if (String.IsNullOrEmpty(problem.Notes)) { sb.Replace("@Notes", ""); }
-            else { sb.Replace("@Notes", GetText(problem.Notes)); }
-
-			//Structure Tab
-            if (String.IsNullOrEmpty(problem.StructureTitle)) { sb.Replace("@StructTitle", ""); }
-            else { sb.Replace("@StructTitle", GetText(problem.StructureTitle)); }
-
-            if (String.IsNullOrEmpty(problem.StructureDescription)) { sb.Replace("@StructDescription", ""); }
-            else { sb.Replace("@StructDescription", GetText(problem.StructureDescription)); }
-
-            if (problem.StructureBeats.Count == 0) { sb.Replace("@StructBeats", ""); }
             else
             {
-				string beats = FormatStructureBeatsElements(problem);
-				sb.Replace("@StructBeats", beats);
-			}
+                sb.Replace("@AntagName", "");
+            }
 
-			doc.AddText(sb.ToString());
+            if (string.IsNullOrEmpty(problem.AntagMotive))
+            {
+                sb.Replace("@AntagMotive", "");
+            }
+            else
+            {
+                sb.Replace("@AntagMotive", problem.AntagMotive);
+            }
+
+            if (string.IsNullOrEmpty(problem.AntagGoal))
+            {
+                sb.Replace("@AntagGoal", "");
+            }
+            else
+            {
+                sb.Replace("@AntagGoal", problem.AntagGoal);
+            }
+
+            if (string.IsNullOrEmpty(problem.AntagConflict))
+            {
+                sb.Replace("@AntagConflict", "");
+            }
+            else
+            {
+                sb.Replace("@AntagConflict", problem.AntagConflict);
+            }
+
+            if (string.IsNullOrEmpty(problem.Outcome))
+            {
+                sb.Replace("@Outcome", "");
+            }
+            else
+            {
+                sb.Replace("@Outcome", problem.Outcome);
+            }
+
+            if (string.IsNullOrEmpty(problem.Method))
+            {
+                sb.Replace("@Method", "");
+            }
+            else
+            {
+                sb.Replace("@Method", problem.Method);
+            }
+
+            if (string.IsNullOrEmpty(problem.Theme))
+            {
+                sb.Replace("@Theme", "");
+            }
+            else
+            {
+                sb.Replace("@Theme", problem.Theme);
+            }
+
+            if (string.IsNullOrEmpty(problem.Premise))
+            {
+                sb.Replace("@Premise", "");
+            }
+            else
+            {
+                sb.Replace("@Premise", GetText(problem.Premise));
+            }
+
+            if (string.IsNullOrEmpty(problem.Notes))
+            {
+                sb.Replace("@Notes", "");
+            }
+            else
+            {
+                sb.Replace("@Notes", GetText(problem.Notes));
+            }
+
+            //Structure Tab
+            if (string.IsNullOrEmpty(problem.StructureTitle))
+            {
+                sb.Replace("@StructTitle", "");
+            }
+            else
+            {
+                sb.Replace("@StructTitle", GetText(problem.StructureTitle));
+            }
+
+            if (string.IsNullOrEmpty(problem.StructureDescription))
+            {
+                sb.Replace("@StructDescription", "");
+            }
+            else
+            {
+                sb.Replace("@StructDescription", GetText(problem.StructureDescription));
+            }
+
+            if (problem.StructureBeats.Count == 0)
+            {
+                sb.Replace("@StructBeats", "");
+            }
+            else
+            {
+                var beats = FormatStructureBeatsElements(problem);
+                sb.Replace("@StructBeats", beats);
+            }
+
+            doc.AddText(sb.ToString());
             doc.AddNewLine();
         }
 
         return doc.GetRtf();
     }
-	public string FormatStoryProblemStructureReport()
-	{
-		var output = new StringBuilder();
 
-		// Retrieve the ShellViewModel once
-		var outlineViewModel = Ioc.Default.GetRequiredService<OutlineViewModel>();
-		if (_storyModel?.StoryElements == null)
-		{
-			// StoryElements not available
-			return string.Empty;
-		}
+    public string FormatStoryProblemStructureReport()
+    {
+        var output = new StringBuilder();
 
-		// Retrieve the Overview element
-		var overview = _storyModel.StoryElements
-			.OfType<OverviewModel>()
-			.FirstOrDefault(e => e.ElementType == StoryItemType.StoryOverview);
+        // Retrieve the ShellViewModel once
+        var outlineViewModel = Ioc.Default.GetRequiredService<OutlineViewModel>();
+        if (_storyModel?.StoryElements == null)
+        {
+            // StoryElements not available
+            return string.Empty;
+        }
 
-		if (overview == null)
-		{
-			// Overview element not found
-			return string.Empty;
-		}
+        // Retrieve the Overview element
+        var overview = _storyModel.StoryElements
+            .OfType<OverviewModel>()
+            .FirstOrDefault(e => e.ElementType == StoryItemType.StoryOverview);
 
-		// Retrieve the StoryProblem GUID from Overview
-		if (overview.StoryProblem ==  Guid.Empty)
-		{
-			// StoryProblem is null or empty
-			return string.Empty;
-		}
-        
+        if (overview == null)
+        {
+            // Overview element not found
+            return string.Empty;
+        }
+
+        // Retrieve the StoryProblem GUID from Overview
+        if (overview.StoryProblem == Guid.Empty)
+        {
+            // StoryProblem is null or empty
+            return string.Empty;
+        }
+
         var storyProblem = (ProblemModel)_storyModel.StoryElements
             .StoryElementGuids[overview.StoryProblem];
 
-		// Start building the tree with a separate root heading
-		output.AppendLine("StoryCAD - Story Problem Structure Report");
+        // Start building the tree with a separate root heading
+        output.AppendLine("StoryCAD - Story Problem Structure Report");
 
-		// Process each beat in the StoryProblem
-		var processedElements = new HashSet<Guid>(); // Keep track of processed elements
-		foreach (var beat in storyProblem.StructureBeats)
-		{
-			ProcessBeat(beat, output, _storyModel, 1, processedElements);
-		}
+        // Process each beat in the StoryProblem
+        var processedElements = new HashSet<Guid>(); // Keep track of processed elements
+        foreach (var beat in storyProblem.StructureBeats)
+        {
+            ProcessBeat(beat, output, _storyModel, 1, processedElements);
+        }
 
-		return output.ToString();
-	}
-    private void ProcessBeat(StructureBeatViewModel beat, StringBuilder output, StoryModel storyModel, int indentLevel, HashSet<Guid> processedElements)
+        return output.ToString();
+    }
+
+    private void ProcessBeat(StructureBeatViewModel beat, StringBuilder output, StoryModel storyModel, int indentLevel,
+        HashSet<Guid> processedElements)
     {
         var indent = new string('\t', indentLevel);
         var prefix = "- "; // Prefix to denote a beat
@@ -249,43 +432,47 @@ public class ReportFormatter
                         }
                     }
                 }
+
                 // Append separator with proper indentation
                 output.AppendLine($"{indent}\t-------------");
             }
         }
     }
-	private string FormatStructureBeatsElements(ProblemModel problem)
-    {
-	    StringBuilder beats = new();
-	    foreach (StructureBeatViewModel beat in problem.StructureBeats)
-	    {
-		    beats.AppendLine(beat.Title);
-		    beats.AppendLine(beat.Description);
 
-		    //Don't print element stuff if one is unassigned.
+    private string FormatStructureBeatsElements(ProblemModel problem)
+    {
+        StringBuilder beats = new();
+        foreach (var beat in problem.StructureBeats)
+        {
+            beats.AppendLine(beat.Title);
+            beats.AppendLine(beat.Description);
+
+            //Don't print element stuff if one is unassigned.
             // Don't print element stuff if one is unassigned.
             if (beat.Guid != Guid.Empty)
             {
                 beats.AppendLine(beat.ElementName);
                 beats.AppendLine(beat.ElementDescription);
             }
-		    beats.AppendLine("\t\t-------------");
-	    }
-		return beats.ToString();
-	}
 
-	public string FormatCharacterRelationshipReport(StoryElement element)
+            beats.AppendLine("\t\t-------------");
+        }
+
+        return beats.ToString();
+    }
+
+    public string FormatCharacterRelationshipReport(StoryElement element)
     {
-        CharacterModel character = (CharacterModel)element;
+        var character = (CharacterModel)element;
         RtfDocument doc = new(string.Empty);
-        foreach (RelationshipModel rel in character.RelationshipList)
+        foreach (var rel in character.RelationshipList)
         {
-            foreach (string line in _templates["Character Relationship Description"])
+            foreach (var line in _templates["Character Relationship Description"])
             {
                 StringBuilder sb = new(line);
                 if (rel.Partner == null)
                 {
-                    foreach (StoryElement otherCharacter in _storyModel.StoryElements.Characters)
+                    foreach (var otherCharacter in _storyModel.StoryElements.Characters)
                     {
                         if (otherCharacter.Uuid == rel.PartnerUuid)
                         {
@@ -297,7 +484,6 @@ public class ReportFormatter
                 else
                 {
                     sb.Replace("@Relationship", rel.Partner.Name);
-
                 }
 
                 sb.Replace("@relationType", rel.RelationType);
@@ -308,6 +494,7 @@ public class ReportFormatter
                 doc.AddText(sb.ToString());
                 doc.AddNewLine();
             }
+
             doc.AddNewLine();
             doc.AddNewLine();
         }
@@ -317,13 +504,13 @@ public class ReportFormatter
 
     public string FormatCharacterReport(StoryElement element)
     {
-        CharacterModel character = (CharacterModel)element;
-        string[] lines = _templates["Character Description"];
+        var character = (CharacterModel)element;
+        var lines = _templates["Character Description"];
         RtfDocument doc = new(string.Empty);
 
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (var line in lines)
         {
             StringBuilder sb = new(line);
             //Story Role section
@@ -383,11 +570,12 @@ public class ReportFormatter
             sb.Replace("@Sociability", character.Sociability);
             sb.Replace("@Stability", character.Stability);
             //Outer Traits section
-            string traits = "";
-            foreach (string trait in character.TraitList)
+            var traits = "";
+            foreach (var trait in character.TraitList)
             {
                 traits += trait + "\n";
             }
+
             sb.Replace("@Traits", traits);
             // Notes section
             sb.Replace("@Notes", GetText(character.Notes));
@@ -395,18 +583,18 @@ public class ReportFormatter
             doc.AddText(sb.ToString());
             doc.AddNewLine();
         }
-         
+
         return doc.GetRtf();
     }
 
     public string FormatSettingReport(StoryElement element)
     {
-        SettingModel setting = (SettingModel)element;
-        string[] lines = _templates["Setting Description"];
+        var setting = (SettingModel)element;
+        var lines = _templates["Setting Description"];
         RtfDocument doc = new(string.Empty);
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (var line in lines)
         {
             StringBuilder sb = new(line);
             sb.Replace("@Title", setting.Name);
@@ -426,48 +614,54 @@ public class ReportFormatter
             doc.AddText(sb.ToString());
             doc.AddNewLine();
         }
+
         return doc.GetRtf();
     }
 
     public string FormatSceneReport(StoryElement element)
     {
-        SceneModel scene = (SceneModel)element;
-        string[] lines = _templates["Scene Description"];
+        var scene = (SceneModel)element;
+        var lines = _templates["Scene Description"];
         RtfDocument doc = new(string.Empty);
 
-        StoryElement vpCharacter = StoryElement.GetByGuid(scene.ViewpointCharacter);
-        string vpCharacterName = vpCharacter?.Name ?? string.Empty;
-        StoryElement antagonist = StoryElement.GetByGuid(scene.Antagonist);
-        string antagonistName = antagonist?.Name ?? string.Empty;
-        StoryElement protagonist = StoryElement.GetByGuid(scene.Protagonist);
-        string protagonistName = protagonist?.Name ?? string.Empty;
-        StoryElement setting = StoryElement.GetByGuid(scene.Setting);
-        string settingName = setting?.Name ?? string.Empty;
+        var vpCharacter = StoryElement.GetByGuid(scene.ViewpointCharacter);
+        var vpCharacterName = vpCharacter?.Name ?? string.Empty;
+        var antagonist = StoryElement.GetByGuid(scene.Antagonist);
+        var antagonistName = antagonist?.Name ?? string.Empty;
+        var protagonist = StoryElement.GetByGuid(scene.Protagonist);
+        var protagonistName = protagonist?.Name ?? string.Empty;
+        var setting = StoryElement.GetByGuid(scene.Setting);
+        var settingName = setting?.Name ?? string.Empty;
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (var line in lines)
         {
             StringBuilder sb = new(line);
             //SCENE OVERVIEW SECTION
             sb.Replace("@Title", scene.Name);
             sb.Replace("@Date", scene.Date);
             sb.Replace("@Time", scene.Time);
-            if (line.Contains("@ViewpointCharacter")) {sb.Replace("@ViewpointCharacter", vpCharacterName);}
+            if (line.Contains("@ViewpointCharacter"))
+            {
+                sb.Replace("@ViewpointCharacter", vpCharacterName);
+            }
+
             sb.Replace("@Setting", settingName);
             sb.Replace("@SceneType", scene.SceneType);
-            
+
             if (line.Contains("@CastMember"))
             {
-                foreach (Guid seCastMember in scene.CastMembers)
+                foreach (var seCastMember in scene.CastMembers)
                 {
-                    StoryElement castMember = StoryElement.GetByGuid(seCastMember);
-                    string castMemberName = castMember?.Name ?? "Unknown Character";
+                    var castMember = StoryElement.GetByGuid(seCastMember);
+                    var castMemberName = castMember?.Name ?? "Unknown Character";
                     StringBuilder sbCast = new(line);
-                            
+
                     sbCast.Replace("@CastMember", castMemberName);
                     doc.AddText(sbCast.ToString());
                     doc.AddNewLine();
                 }
+
                 sb.Clear();
             }
 
@@ -475,12 +669,16 @@ public class ReportFormatter
             //DEVELOPMENT SECTION
             if (line.Contains("@PurposeOfScene"))
             {
-                string PurposeString = "";
-                foreach (string Purpose in scene.ScenePurpose) { PurposeString += Purpose + ", "; }
+                var PurposeString = "";
+                foreach (var Purpose in scene.ScenePurpose)
+                {
+                    PurposeString += Purpose + ", ";
+                }
+
                 sb.Replace("@PurposeOfScene", PurposeString);
                 doc.AddText(sb.ToString());
                 sb.Clear();
-                /*              
+                /*
                                 foreach (string sePurpose in scene.ScenePurpose)
                                 {
                                     StoryElement Purpose = StringToStoryElement(sePurpose);
@@ -521,11 +719,11 @@ public class ReportFormatter
         return doc.GetRtf();
     }
 
-    public string FormatWebReport (StoryElement element)
+    public string FormatWebReport(StoryElement element)
     {
         RtfDocument doc = new(string.Empty);
         StringBuilder sb = new();
-        WebModel model = element as WebModel;
+        var model = element as WebModel;
         sb.AppendLine(model!.Name);
         sb.AppendLine(model.URL.ToString());
         doc.AddText(sb.ToString());
@@ -534,7 +732,7 @@ public class ReportFormatter
 
         // STUB: Reimpliment this code at a later date, because
         /*
-        //Create new Webview, then initalise corewebview and configure URL. 
+        //Create new Webview, then initalise corewebview and configure URL.
         var _webview = new WebView2();
         _webview.Source = ((WebModel)element).URL;
         _webview.Height = 1080;
@@ -545,7 +743,7 @@ public class ReportFormatter
         StorageFolder ParentFolder = ApplicationData.Current.RoamingFolder;
         ParentFolder = await ParentFolder.CreateFolderAsync("Cache",CreationCollisionOption.OpenIfExists);
         StorageFile imgfile = await ParentFolder.CreateFileAsync(Guid.NewGuid().ToString() + ".png");
-        
+
         //Screenshot site
         MemoryStream _buffer = new();
         var x = _buffer.AsRandomAccessStream();
@@ -559,34 +757,34 @@ public class ReportFormatter
         //Add image
         doc.AddImage(imgfile.Path, 1920, 1080);
         */
-
     }
 
     public string FormatFolderReport(StoryElement element)
     {
-        FolderModel folder = (FolderModel)element;
-        string[] lines = _templates["Folder Description"];
+        var folder = (FolderModel)element;
+        var lines = _templates["Folder Description"];
         RtfDocument doc = new(string.Empty);
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (var line in lines)
         {
             StringBuilder sb = new(line);
             sb.Replace("@Name", folder.Name);
             sb.Replace("@Notes", GetText(folder.Description));
-            doc.AddText(sb.ToString());  //,format);
+            doc.AddText(sb.ToString()); //,format);
             doc.AddNewLine();
         }
+
         return doc.GetRtf();
     }
 
     public string FormatSectionReport(StoryElement element)
     {
-        FolderModel section = (FolderModel)element;
-        string[] lines = _templates["Section Description"];
+        var section = (FolderModel)element;
+        var lines = _templates["Section Description"];
         RtfDocument doc = new(string.Empty);
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (var line in lines)
         {
             StringBuilder sb = new(line);
             sb.Replace("@Name", section.Name);
@@ -594,31 +792,34 @@ public class ReportFormatter
             doc.AddText(sb.ToString()); // , format);
             doc.AddNewLine();
         }
+
         return doc.GetRtf();
     }
 
     public string FormatSynopsisReport()
     {
-
-        string[] lines = _templates["Story Synopsis"];
+        var lines = _templates["Story Synopsis"];
         RtfDocument doc = new(string.Empty);
 
         // Pre-process RTF properties to preserve [FILE:x.rtf] tag for long fields
         // and then load long fields from their corresponding file in its subfolder
 
         // Parse and write the report
-        foreach (string line in lines)
+        foreach (var line in lines)
         {
             if (line.Contains("@Synopsis"))
             {
                 // Find StoryNarrator' Scenes
-                foreach (StoryNodeItem child in _storyModel.NarratorView[0].Children)
+                foreach (var child in _storyModel.NarratorView[0].Children)
                 {
                     var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-                    StoryElement scn = outlineService.GetStoryElementByGuid(_storyModel, child.Uuid);
+                    var scn = outlineService.GetStoryElementByGuid(_storyModel, child.Uuid);
                     if (scn.ElementType != StoryItemType.Scene)
+                    {
                         continue;
-                    SceneModel scene = (SceneModel)scn;
+                    }
+
+                    var scene = (SceneModel)scn;
                     StringBuilder sb = new(line);
                     sb.Replace("@Synopsis", $"[{scene.Name}] {scene.Description}");
                     doc.AddText(sb.ToString());
@@ -639,6 +840,7 @@ public class ReportFormatter
                 doc.AddNewLine();
             }
         }
+
         return doc.GetRtf();
     }
 
@@ -648,17 +850,17 @@ public class ReportFormatter
         {
             _templates.Clear();
             var tex = Assembly.GetExecutingAssembly().GetManifestResourceNames();
-            IEnumerable<string> Files = Assembly.GetExecutingAssembly().GetManifestResourceNames()
+            var Files = Assembly.GetExecutingAssembly().GetManifestResourceNames()
                 .Where(name => name.Contains("StoryCADLib.Assets.Install.reports"));
-            foreach (string FileName in Files.ToList())
+            foreach (var FileName in Files.ToList())
             {
                 //Read from manifest stream
-                await using Stream streams = Assembly.GetExecutingAssembly().GetManifestResourceStream(FileName);
+                await using var streams = Assembly.GetExecutingAssembly().GetManifestResourceStream(FileName);
                 using StreamReader reader = new(streams!);
 
                 //Gets the stream, then formats it into line by line.
-                string[] lines = (await reader.ReadToEndAsync())
-                    .Split(new[] { Environment.NewLine }, StringSplitOptions.None );
+                var lines = (await reader.ReadToEndAsync())
+                    .Split(new[] { Environment.NewLine }, StringSplitOptions.None);
 
 
                 _templates.Add(FileName.Split(".")[4], lines);
@@ -675,28 +877,31 @@ public class ReportFormatter
     #region Private methods
 
     /// <summary>
-    /// A RichEditBox property is a wrapper for an RTF 
-    /// document, with its header, font table, color table, etc.,
-    /// and which can be read or written. This causes format problems
-    /// when it's a cell on a StoryCAD report.  This function
-    /// returns only the text, but does preserve newlines as 
-    /// paragraph breaks.
+    ///     A RichEditBox property is a wrapper for an RTF
+    ///     document, with its header, font table, color table, etc.,
+    ///     and which can be read or written. This causes format problems
+    ///     when it's a cell on a StoryCAD report.  This function
+    ///     returns only the text, but does preserve newlines as
+    ///     paragraph breaks.
     /// </summary>
     public string GetText(string rtfInput, bool formatNewLines = true)
     {
-        string text = rtfInput ?? string.Empty;
+        var text = rtfInput ?? string.Empty;
         if (text.Equals(string.Empty))
+        {
             return string.Empty;
+        }
+
         RichTextStripper rts = new();
-        text =  rts.StripRichTextFormat(text);
+        text = rts.StripRichTextFormat(text);
         text = text.Replace("\'0d", "");
         text = text.Replace("\'0a", "");
-        text = text.Replace("\\","");
+        text = text.Replace("\\", "");
         return text;
     }
 
     /// <summary>
-    /// Generate a UUID in the Scrivener format (i.e., without curly braces)
+    ///     Generate a UUID in the Scrivener format (i.e., without curly braces)
     /// </summary>
     /// <returns>string UUID representation</returns>
 
@@ -710,38 +915,4 @@ public class ReportFormatter
     }
 
     #endregion
-
-    public string FormatListReport(StoryItemType elementType)
-    {
-        //Get element (override web for websites.)
-        string name = elementType == StoryItemType.Web ? "Websites" : elementType + "s";
-
-        string[] lines = [
-        $"                        StoryCAD - List of {name}",
-        "",
-        "                        @Description"];
-        RtfDocument doc = new(string.Empty);
-
-        // Parse and write the report
-        foreach (string line in lines)
-        {
-            if (line.Contains("@Description"))
-            {
-                var elements = _storyModel.StoryElements.Where(e => e.ElementType == elementType);
-                foreach (StoryElement element in elements)
-                {
-                    StringBuilder sb = new(line);
-                    sb.Replace("@Description", element.Name);
-                    doc.AddText(sb.ToString());
-                    doc.AddNewLine();
-                }
-            }
-            else
-            {
-                doc.AddText(line);
-                doc.AddNewLine();
-            }
-        }
-        return doc.GetRtf();
-    }
 }

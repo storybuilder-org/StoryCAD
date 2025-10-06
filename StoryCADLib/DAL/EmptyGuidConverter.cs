@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace StoryCAD.DAL;
 
 /// <summary>
-/// Custom converter to handle empty GUID strings.
+///     Custom converter to handle empty GUID strings.
 /// </summary>
 public class EmptyGuidConverter : JsonConverter<Guid>
 {
@@ -12,13 +12,13 @@ public class EmptyGuidConverter : JsonConverter<Guid>
     {
         if (reader.TokenType == JsonTokenType.String)
         {
-            string guidString = reader.GetString();
+            var guidString = reader.GetString();
             if (string.IsNullOrWhiteSpace(guidString))
             {
                 return Guid.Empty;
             }
 
-            if (Guid.TryParse(guidString, out Guid guid))
+            if (Guid.TryParse(guidString, out var guid))
             {
                 return guid;
             }

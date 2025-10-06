@@ -7,20 +7,50 @@ namespace StoryCAD.ViewModels.Tools;
 public class BeatSheetsViewModel : ObservableRecipient
 {
     private readonly ToolsData ToolSource = Ioc.Default.GetService<ToolsData>();
+
+    #region Constructor
+
+    public BeatSheetsViewModel()
+    {
+        List<string> _beatSheetNames = new();
+        BeatSheets = new Dictionary<string, PlotPatternModel>();
+        foreach (var _plot in ToolSource.BeatSheetSource)
+        {
+            _beatSheetNames.Add(_plot.PlotPatternName);
+            BeatSheets.Add(_plot.PlotPatternName, _plot);
+        }
+
+        _beatSheetNames.Sort();
+        PlotPatternNames = new ObservableCollection<string>();
+        foreach (var _name in _beatSheetNames)
+        {
+            PlotPatternNames.Add(_name);
+        }
+
+        PlotPatternName = ToolSource.MasterPlotsSource[0].PlotPatternName;
+    }
+
+    #endregion
+
     #region Properties
 
     private string _PlotPatternName;
+
     public string PlotPatternName
     {
         get => _PlotPatternName;
         set
         {
             SetProperty(ref _PlotPatternName, value);
-            if (BeatSheets.ContainsKey(value)) { PlotPatternNotes = BeatSheets[value].PlotPatternNotes; }
+            if (BeatSheets.ContainsKey(value))
+            {
+                PlotPatternNotes = BeatSheets[value].PlotPatternNotes;
+            }
         }
     }
 
     private string _PlotPatternNotes;
+
     public string PlotPatternNotes
     {
         get => _PlotPatternNotes;
@@ -34,26 +64,6 @@ public class BeatSheetsViewModel : ObservableRecipient
     public readonly ObservableCollection<string> PlotPatternNames;
 
     public readonly Dictionary<string, PlotPatternModel> BeatSheets;
-
-    #endregion
-
-    #region Constructor
-
-    public BeatSheetsViewModel()
-    {
-        List<string> _beatSheetNames = new();
-        BeatSheets = new Dictionary<string, PlotPatternModel>();
-        foreach (PlotPatternModel _plot in ToolSource.BeatSheetSource)
-        {
-            _beatSheetNames.Add(_plot.PlotPatternName);
-            BeatSheets.Add(_plot.PlotPatternName, _plot);
-        }
-
-        _beatSheetNames.Sort();
-        PlotPatternNames = new ObservableCollection<string>();
-        foreach (string _name in _beatSheetNames) { PlotPatternNames.Add(_name); }
-        PlotPatternName = ToolSource.MasterPlotsSource[0].PlotPatternName;
-    }
 
     #endregion
 }

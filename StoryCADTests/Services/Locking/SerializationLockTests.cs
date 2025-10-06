@@ -1,10 +1,8 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.ViewModels.SubViewModels;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Logging;
-using StoryCAD.Services.Locking;
 using StoryCAD.Services;
+using StoryCAD.Services.Backup;
+using StoryCAD.Services.Locking;
+using StoryCAD.Services.Logging;
 
 namespace StoryCADTests.Services.Locking;
 
@@ -50,13 +48,13 @@ public class SerializationLockTests
         {
             // Within the lock, commands should be disabled and both services stopped.
             Assert.IsFalse(SerializationLock.CanExecuteCommands(), "During lock: Commands should be disabled.");
-            
+
             // Note: The new SerializationLock doesn't stop services, it just prevents concurrent operations
             // So these assertions will fail with the new implementation
             // Assert.IsFalse(_autoSaveService.IsRunning, "During lock: AutoSave should be stopped.");
             // Assert.IsFalse(_backupService.IsRunning, "During lock: BackupService should be stopped.");
-            
-            System.Threading.Thread.Sleep(100); // Reduced from 10000ms - no need for 10 seconds!
+
+            Thread.Sleep(100); // Reduced from 10000ms - no need for 10 seconds!
         }
 
         // Assert: After disposing the lock, commands should be restored.

@@ -8,41 +8,41 @@
 
     <StackPanel>
 
-		<!-- ElementType Picker -->
-	    <ComboBox SelectedItem="{x:Bind PickerVM.SelectedType, Mode=TwoWay}"
-				  Name="TypeBox"
-	              PlaceholderText="Click here to select an element type" HorizontalAlignment="Center"
-	              MinWidth="200" SelectionChanged="Selector_OnSelectionChanged">
-			<ComboBoxItem Content="Problem"/>
-			<ComboBoxItem Content="Character"/>
-			<ComboBoxItem Content="Setting"/>
-			<ComboBoxItem Content="Scene"/>
-		</ComboBox>
+        <!-- ElementType Picker -->
+        <ComboBox SelectedItem="{x:Bind PickerVM.SelectedType, Mode=TwoWay}"
+                  Name="TypeBox"
+                  PlaceholderText="Click here to select an element type" HorizontalAlignment="Center"
+                  MinWidth="200" SelectionChanged="Selector_OnSelectionChanged">
+            <ComboBoxItem Content="Problem" />
+            <ComboBoxItem Content="Character" />
+            <ComboBoxItem Content="Setting" />
+            <ComboBoxItem Content="Scene" />
+        </ComboBox>
 
-		<!-- Element Picker -->
-		<ScrollViewer Height="450">
-			<ListBox Name="ElementBox" IsEnabled="False" HorizontalAlignment="Center"
-			         SelectedItem="{x:Bind PickerVM.SelectedElement, Mode=TwoWay}" 
-			         DisplayMemberPath="Name" Margin="0,10,0,0"
-			         MinWidth="200"/>
-		</ScrollViewer>
+        <!-- Element Picker -->
+        <ScrollViewer Height="450">
+            <ListBox Name="ElementBox" IsEnabled="False" HorizontalAlignment="Center"
+                     SelectedItem="{x:Bind PickerVM.SelectedElement, Mode=TwoWay}"
+                     DisplayMemberPath="Name" Margin="0,10,0,0"
+                     MinWidth="200" />
+        </ScrollViewer>
 
-		<Border Margin="30,10" HorizontalAlignment="Stretch"
-		        BorderBrush="Gray" BorderThickness="1"/>
+        <Border Margin="30,10" HorizontalAlignment="Stretch"
+                BorderBrush="Gray" BorderThickness="1" />
 
-		<!-- Create new element UI -->
-		<Button  HorizontalAlignment="Center" Content="+ Create a new element" 
-		         Name="NewButton" IsEnabled="False">
-			<Button.Flyout>
-				<Flyout>
-					<StackPanel>
-						<TextBox Header="Element name:" Width="200"
-						         Text="{x:Bind PickerVM.NewNodeName, Mode=TwoWay}"/>
-						<Button Content="Create" HorizontalAlignment="Center"
-						        Margin="0,20,0,0" Click="{x:Bind PickerVM.CreateNode}"/>
-					</StackPanel>
-				</Flyout>
-			</Button.Flyout>
-		</Button>
-	</StackPanel>
+        <!-- Create new element UI -->
+        <Button HorizontalAlignment="Center" Content="+ Create a new element"
+                Name="NewButton" IsEnabled="False">
+            <Button.Flyout>
+                <Flyout>
+                    <StackPanel>
+                        <TextBox Header="Element name:" Width="200"
+                                 Text="{x:Bind PickerVM.NewNodeName, Mode=TwoWay}" />
+                        <Button Content="Create" HorizontalAlignment="Center"
+                                Margin="0,20,0,0" Click="{x:Bind PickerVM.CreateNode}" />
+                    </StackPanel>
+                </Flyout>
+            </Button.Flyout>
+        </Button>
+    </StackPanel>
 </Page>

@@ -1,6 +1,5 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using StoryCAD.ViewModels;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryCAD.ViewModels;
 
 namespace StoryCADTests.ViewModels;
 
@@ -12,17 +11,17 @@ public class FileOpenVMTests
     {
         // Arrange & Act
         var fileOpenVM = Ioc.Default.GetRequiredService<FileOpenVM>();
-        
+
         // Assert
         Assert.IsNotNull(fileOpenVM);
     }
-    
+
     [TestMethod]
     public void FileOpenVM_InitializesPropertiesCorrectly()
     {
         // Arrange & Act
         var fileOpenVM = Ioc.Default.GetRequiredService<FileOpenVM>();
-        
+
         // Assert
         Assert.IsNotNull(fileOpenVM.SampleNames);
         Assert.IsTrue(fileOpenVM.SampleNames.Count > 0, "Should have sample stories loaded");
@@ -47,7 +46,7 @@ public class FileOpenVMTests
         fileOpenVM.SelectedRecentIndex = -1;
 
         // Set up CurrentTab to simulate "Recent" tab selected
-        var recentTab = new Microsoft.UI.Xaml.Controls.NavigationViewItem { Tag = "Recent" };
+        var recentTab = new NavigationViewItem { Tag = "Recent" };
         fileOpenVM.CurrentTab = recentTab;
 
         // Act & Assert - Should not throw (should return early when SelectedRecentIndex is -1)

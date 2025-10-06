@@ -5,16 +5,14 @@ using CommunityToolkit.Mvvm.Messaging;
 using StoryCAD.Services;
 using StoryCAD.Services.Messages;
 using StoryCAD.Services.Navigation;
-using StoryCAD.ViewModels.SubViewModels;
 
 namespace StoryCAD.ViewModels;
 
 /// <summary>
-/// OverviewModel contains overview information for the entire story, such as title, author, and so on.
-/// It's a good place to capture the original idea which prompted the story.
-///
-/// There is only one OverviewModel instance for each story. It's also the root of the Shell Page's
-/// StoryExplorer TreeView.
+///     OverviewModel contains overview information for the entire story, such as title, author, and so on.
+///     It's a good place to capture the original idea which prompted the story.
+///     There is only one OverviewModel instance for each story. It's also the root of the Shell Page's
+///     StoryExplorer TreeView.
 /// </summary>
 public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
 {
@@ -24,7 +22,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     private readonly AppState _appState;
     private StoryModel _storyModel;
     private bool _changeable; // process property changes for this story element
-    private bool _changed;    // this story element has changed
+    private bool _changed; // this story element has changed
 
     // Premise synchronization fields
 
@@ -40,6 +38,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     // StoryElement data
 
     private Guid _uuid;
+
     public Guid Uuid
     {
         get => _uuid;
@@ -47,6 +46,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _name;
+
     public string Name
     {
         get => _name;
@@ -58,11 +58,13 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
                 NameChangeMessage msg = new(_name, value);
                 Messenger.Send(new NameChangedMessage(msg));
             }
+
             SetProperty(ref _name, value);
         }
     }
 
     private bool _isTextBoxFocused;
+
     public bool IsTextBoxFocused
     {
         get => _isTextBoxFocused;
@@ -72,6 +74,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     // Overview data
 
     private string _dateCreated;
+
     public string DateCreated
     {
         get => _dateCreated;
@@ -79,14 +82,15 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _author;
+
     public string Author
     {
         get => _author;
         set => SetProperty(ref _author, value);
-
     }
 
     private string _dateModified;
+
     public string DateModified
     {
         get => _dateModified;
@@ -96,6 +100,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
 
     // Description property (migrated from StoryIdea)
     private string _description;
+
     public string Description
     {
         get => _description;
@@ -105,6 +110,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     // Concept data
 
     private string _concept;
+
     public string Concept
     {
         get => _concept;
@@ -121,7 +127,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
         set => SetProperty(ref _premise, value);
     }
 
-    private Guid _storyProblem;  // The Guid of a Problem StoryElement
+    private Guid _storyProblem; // The Guid of a Problem StoryElement
 
     public Guid StoryProblem
     {
@@ -148,6 +154,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
 
 
     private StoryElement _selectedProblem;
+
     public StoryElement SelectedProblem
     {
         get => _selectedProblem;
@@ -163,6 +170,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
 
     // Structure data
     private string _storyType;
+
     public string StoryType
     {
         get => _storyType;
@@ -170,6 +178,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _storyGenre;
+
     public string StoryGenre
     {
         get => _storyGenre;
@@ -177,6 +186,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _viewpoint;
+
     public string Viewpoint
     {
         get => _viewpoint;
@@ -184,6 +194,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private Guid _viewpointCharacter;
+
     public Guid ViewpointCharacter
     {
         get => _viewpointCharacter;
@@ -191,6 +202,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private StoryElement _selectedViewpointCharacter;
+
     public StoryElement SelectedViewpointCharacter
     {
         get => _selectedViewpointCharacter;
@@ -205,6 +217,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _voice;
+
     public string Voice
     {
         get => _voice;
@@ -212,6 +225,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _literaryTechnique;
+
     public string LiteraryTechnique
     {
         get => _literaryTechnique;
@@ -219,6 +233,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _tense;
+
     public string Tense
     {
         get => _tense;
@@ -226,6 +241,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _style;
+
     public string Style
     {
         get => _style;
@@ -233,6 +249,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _structureNotes;
+
     public string StructureNotes
     {
         get => _structureNotes;
@@ -240,6 +257,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _tone;
+
     public string Tone
     {
         get => _tone;
@@ -249,6 +267,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     // Notes data
 
     private string _notes;
+
     public string Notes
     {
         get => _notes;
@@ -257,6 +276,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
 
     // The StoryModel is passed when OverviewPage is navigated to
     private OverviewModel _model;
+
     public OverviewModel Model
     {
         get => _model;
@@ -283,7 +303,10 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
         if (_changeable)
         {
             if (!_changed)
+            {
                 _logger.Log(LogLevel.Info, $"OverviewViewModel.OnPropertyChanged: {args.PropertyName} changed");
+            }
+
             _changed = true;
             ShellViewModel.ShowChange();
         }
@@ -330,28 +353,28 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     {
         try
         {
-	        if (Model != null) //ensure model isn't null.
-	        {
-		        // Story.Uuid is read-only and cannot be assigned
-		        Model.Name = Name ?? "";
-		        IsTextBoxFocused = false;
-		        Model.DateCreated = DateCreated ?? "";
-		        Model.Author = Author ?? "";
-		        Model.DateModified = DateModified;
-		        Model.StoryType = StoryType ?? "";
-		        Model.StoryGenre = StoryGenre ?? "";
-		        Model.Viewpoint = Viewpoint ?? "";
+            if (Model != null) //ensure model isn't null.
+            {
+                // Story.Uuid is read-only and cannot be assigned
+                Model.Name = Name ?? "";
+                IsTextBoxFocused = false;
+                Model.DateCreated = DateCreated ?? "";
+                Model.Author = Author ?? "";
+                Model.DateModified = DateModified;
+                Model.StoryType = StoryType ?? "";
+                Model.StoryGenre = StoryGenre ?? "";
+                Model.Viewpoint = Viewpoint ?? "";
                 Model.ViewpointCharacter = ViewpointCharacter;
-		        Model.Voice = Voice ?? "";
-		        Model.LiteraryDevice = LiteraryTechnique ?? "";
-		        Model.Style = Style ?? "";
-		        Model.Tense = Tense ?? "";
-		        Model.Style = Style ?? "";
-		        Model.Tone = Tone ?? "";
-		        Model.StoryProblem = StoryProblem;
-		        Model.Description = Description ?? "";
-		        Model.Concept = Concept ?? "";
-		        Model.Premise = Premise ?? "";
+                Model.Voice = Voice ?? "";
+                Model.LiteraryDevice = LiteraryTechnique ?? "";
+                Model.Style = Style ?? "";
+                Model.Tense = Tense ?? "";
+                Model.Style = Style ?? "";
+                Model.Tone = Tone ?? "";
+                Model.StoryProblem = StoryProblem;
+                Model.Description = Description ?? "";
+                Model.Concept = Concept ?? "";
+                Model.Premise = Premise ?? "";
                 if (_syncPremise)
                 {
                     if (StoryElement.GetByGuid(StoryProblem) is ProblemModel sync_problem)
@@ -367,17 +390,16 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
                 }
 
                 Model.StructureNotes = StructureNotes ?? "";
-		        Model.Notes = Notes ?? "";
-			}
+                Model.Notes = Notes ?? "";
+            }
         }
         catch (Exception ex)
         {
             _logger.LogException(LogLevel.Error,
                 ex, $"Failed to save overview model - {ex.Message}");
         }
-
     }
-    
+
     #endregion
 
     #region ComboBox ItemsSource collections
@@ -391,12 +413,15 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
     public ObservableCollection<string> StyleList;
     public ObservableCollection<string> ToneList;
     private ObservableCollection<StoryElement> _problems;
+
     public ObservableCollection<StoryElement> Problems
     {
         get => _problems;
         set => SetProperty(ref _problems, value);
     }
+
     private ObservableCollection<StoryElement> _characters;
+
     public ObservableCollection<StoryElement> Characters
     {
         get => _characters;
@@ -419,16 +444,16 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
         _logger = logger;
         _appState = appState;
         _storyModel = _appState.CurrentDocument.Model;
-        
+
         try
         {
             Problems = _storyModel.StoryElements.Problems;
             Characters = _storyModel.StoryElements.Characters;
-            StoryProblem = Problems[0].Uuid;          // Set to "(none") (first Problem)
-            ViewpointCharacter = Characters[0].Uuid;  // Set to "(none") (first Character)
+            StoryProblem = Problems[0].Uuid; // Set to "(none") (first Problem)
+            ViewpointCharacter = Characters[0].Uuid; // Set to "(none") (first Character)
 
 
-            Dictionary<string, ObservableCollection<string>> lists= Ioc.Default.GetService<ListData>()!.ListControlSource;
+            var lists = Ioc.Default.GetService<ListData>()!.ListControlSource;
             StoryTypeList = lists["StoryType"];
             GenreList = lists["Genre"];
             ViewpointList = lists["Viewpoint"];
@@ -456,11 +481,12 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
         Description = string.Empty;
         Concept = string.Empty;
         Premise = string.Empty;
-        _syncPremise = false;     
+        _syncPremise = false;
         StructureNotes = string.Empty;
         Notes = string.Empty;
 
         PropertyChanged += OnPropertyChanged;
     }
+
     #endregion
 }

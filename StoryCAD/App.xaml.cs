@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Windows.UI.ViewManagement;
 using dotenv.net;
 using StoryCAD.DAL;
 using StoryCAD.Models.Tools;
@@ -10,8 +9,12 @@ using StoryCAD.Services.Json;
 using StoryCAD.Services.Logging;
 using StoryCAD.Services.Navigation;
 using StoryCAD.Views;
+using Uno.Extensions;
+using WinRT.Interop;
+using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 
 namespace StoryCAD;
+
 public partial class App : Application
 {
     private const string HomePage = "HomePage";
@@ -24,21 +27,22 @@ public partial class App : Application
     private const string TrashCanPage = "TrashCanPage";
     private const string WebPage = "WebPage";
 
-    private ILogService _log;
+    private readonly ILogService _log;
 
     /// <summary>
-    /// This is the path to the STBX file that StoryCAD was launched with,
-    /// if StoryCAD wasn't launched with a file this will be null.
+    ///     This is the path to the STBX file that StoryCAD was launched with,
+    ///     if StoryCAD wasn't launched with a file this will be null.
     /// </summary>
-    string LaunchPath = null;
+    private string LaunchPath = null;
 
     /// <summary>
-    /// Used to track uptime of app
+    ///     Used to track uptime of app
     /// </summary>
-    DateTime StartTime = DateTime.Now;
+    private DateTime StartTime = DateTime.Now;
+
     /// <summary>
-    /// Initializes the singleton application object. This is the first line of authored code
-    /// executed, and as such is the logical equivalent of main() or WinMain().
+    ///     Initializes the singleton application object. This is the first line of authored code
+    ///     executed, and as such is the logical equivalent of main() or WinMain().
     /// </summary>
     public App()
     {
@@ -48,15 +52,17 @@ public partial class App : Application
         try
         {
             // Determine if running as packaged or unpackaged
-            bool isPackaged = false;
+            var isPackaged = false;
             try
             {
                 var package = Package.Current;
                 isPackaged = package != null;
             }
-            catch { }
+            catch
+            {
+            }
 
-            string path = isPackaged
+            var path = isPackaged
                 ? Path.Combine(Package.Current.InstalledLocation.Path, ".env")
                 : Path.Combine(AppContext.BaseDirectory, ".env");
 
@@ -64,7 +70,9 @@ public partial class App : Application
             DotEnv.Load(options);
             Ioc.Default.GetRequiredService<AppState>().EnvPresent = true;
         }
-        catch { }
+        catch
+        {
+        }
 
         InitializeComponent();
 
@@ -74,12 +82,15 @@ public partial class App : Application
         _log = Ioc.Default.GetService<ILogService>();
         Current.UnhandledException += OnUnhandledException;
     }
+
+    protected Window? MainWindow { get; private set; }
+
     private void ConfigureNavigation()
     {
         try
         {
             _log.Log(LogLevel.Info, "Configuring page navigation");
-            NavigationService nav = Ioc.Default.GetService<NavigationService>();
+            var nav = Ioc.Default.GetService<NavigationService>();
             nav.Configure(HomePage, typeof(HomePage));
             nav.Configure(OverviewPage, typeof(OverviewPage));
             nav.Configure(ProblemPage, typeof(ProblemPage));
@@ -97,7 +108,7 @@ public partial class App : Application
         }
     }
 
-    private void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+    private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
         _log.LogException(LogLevel.Fatal, e.Exception, e.Message);
         _log.Flush();
@@ -105,10 +116,12 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Closes the app
+    ///     Closes the app
     /// </summary>
-    private static void AbortApp() { Current.Exit(); }
-    protected Window? MainWindow { get; private set; }
+    private static void AbortApp()
+    {
+        Current.Exit();
+    }
 
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
@@ -116,21 +129,24 @@ public partial class App : Application
         // Note: Shell_Loaded in Shell.xaml.cs will display a
         // connection status message as soon as it's displayable.
 
-        PreferenceService Preferences = Ioc.Default.GetRequiredService<PreferenceService>();
+        var Preferences = Ioc.Default.GetRequiredService<PreferenceService>();
 
         // Obtain keys if defined
         try
         {
             Doppler doppler = new();
-            Doppler keys = await doppler.FetchSecretsAsync();
-            BackendService backend = Ioc.Default.GetService<BackendService>();
+            var keys = await doppler.FetchSecretsAsync();
+            var backend = Ioc.Default.GetService<BackendService>();
             await backend.SetConnectionString(keys);
             _log.SetElmahTokens(keys);
         }
-        catch (Exception ex) { _log.LogException(LogLevel.Error, ex, ex.Message); }
+        catch (Exception ex)
+        {
+            _log.LogException(LogLevel.Error, ex, ex.Message);
+        }
 
-        AppState AppDat = Ioc.Default.GetRequiredService<AppState>();
-        string pathMsg = string.Format("Configuration data location = " + AppDat.RootDirectory);
+        var AppDat = Ioc.Default.GetRequiredService<AppState>();
+        var pathMsg = string.Format("Configuration data location = " + AppDat.RootDirectory);
         _log.Log(LogLevel.Info, pathMsg);
 
         Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
@@ -146,16 +162,25 @@ public partial class App : Application
         MainWindow.UseStudio();
 #endif
 
-        if (Debugger.IsAttached) {_log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");}
+        if (Debugger.IsAttached)
+        {
+            _log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");
+        }
         else
         {
             if (Preferences.Model.ErrorCollectionConsent)
             {
                 _log.AddElmahTarget();
-                if (_log.ElmahLogging) { _log.Log(LogLevel.Info, "elmah successfully added."); }
-                else { _log.Log(LogLevel.Info, "Couldn't add elmah."); }
+                if (_log.ElmahLogging)
+                {
+                    _log.Log(LogLevel.Info, "elmah successfully added.");
+                }
+                else
+                {
+                    _log.Log(LogLevel.Info, "Couldn't add elmah.");
+                }
             }
-            else  // can have several reasons (no doppler, or an error adding the target){
+            else // can have several reasons (no doppler, or an error adding the target){
             {
                 _log.Log(LogLevel.Info, "elmah.io log target bypassed");
             }
@@ -190,20 +215,23 @@ public partial class App : Application
             {
                 rootFrame.Navigate(typeof(PreferencesInitialization));
             }
-            else { rootFrame.Navigate(typeof(Shell)); }
+            else
+            {
+                rootFrame.Navigate(typeof(Shell));
+            }
         }
 
-        Windowing window = Ioc.Default.GetRequiredService<Windowing>();
+        var window = Ioc.Default.GetRequiredService<Windowing>();
         // Preserve both the Window and its Handle for future use
         window.MainWindow = MainWindow;
 
         //Get the Window's HWND
-        window.WindowHandle = WinRT.Interop.WindowNative.GetWindowHandle(window.MainWindow);
+        window.WindowHandle = WindowNative.GetWindowHandle(window.MainWindow);
 
         // Use new Windowing service to set window size and position
-        window.SetMinimumSize(MainWindow, 1000, 700);  // Prevent manual resize below minimum
+        window.SetMinimumSize(MainWindow); // Prevent manual resize below minimum
         window.CenterOnScreen(MainWindow, 1200, 800);
-        
+
         _log.Log(LogLevel.Info, "StoryCAD App loaded and launched");
 
 
@@ -212,17 +240,17 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Invoked when Navigation to a certain page fails
+    ///     Invoked when Navigation to a certain page fails
     /// </summary>
     /// <param name="sender">The Frame which failed navigation</param>
     /// <param name="e">Details about the navigation failure</param>
-    void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
+    private void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
     {
         throw new InvalidOperationException($"Failed to load {e.SourcePageType.FullName}: {e.Exception}");
     }
 
     /// <summary>
-    /// Configures global Uno Platform logging
+    ///     Configures global Uno Platform logging
     /// </summary>
     public static void InitializeLogging()
     {
@@ -280,7 +308,7 @@ public partial class App : Application
             // builder.AddFilter("Uno.Foundation.WebAssemblyRuntime", LogLevel.Debug );
         });
 
-        global::Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory = factory;
+        LogExtensionPoint.AmbientLoggerFactory = factory;
 
 #if HAS_UNO
         global::Uno.UI.Adapter.Microsoft.Extensions.Logging.LoggingAdapter.Initialize();

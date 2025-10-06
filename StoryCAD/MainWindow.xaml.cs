@@ -1,8 +1,6 @@
-﻿using Microsoft.UI.Xaml;
+﻿namespace StoryCAD;
 
-namespace StoryCAD;
-
-public sealed partial class MainWindow : Window 
+public sealed partial class MainWindow : Window
 {
     public MainWindow()
     {

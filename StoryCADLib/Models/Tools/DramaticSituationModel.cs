@@ -2,21 +2,6 @@
 
 public class DramaticSituationModel
 {
-    #region Properties
-
-    public string SituationName { get; set; }
-    public string Role1 { get; set; }
-    public string Role2 { get; set; }
-    public string Role3 { get; set; }
-    public string Role4 { get; set; }
-    public string Description1 { get; set; }
-    public string Description2 { get; set; }
-    public string Description3 { get; set; }
-    public string Description4 { get; set; }
-    public string Notes { get; set; }
-
-    #endregion
-
     #region Constructor
 
     public DramaticSituationModel(string situationName)
@@ -32,6 +17,21 @@ public class DramaticSituationModel
         Description4 = string.Empty;
         Notes = string.Empty;
     }
+
+    #endregion
+
+    #region Properties
+
+    public string SituationName { get; set; }
+    public string Role1 { get; set; }
+    public string Role2 { get; set; }
+    public string Role3 { get; set; }
+    public string Role4 { get; set; }
+    public string Description1 { get; set; }
+    public string Description2 { get; set; }
+    public string Description3 { get; set; }
+    public string Description4 { get; set; }
+    public string Notes { get; set; }
 
     #endregion
 }

@@ -7,41 +7,42 @@
     mc:Ignorable="d">
 
     <Grid>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="*" MaxWidth="150"/>
-			<ColumnDefinition Width="*"/>
-		</Grid.ColumnDefinitions>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="*" MaxHeight="150"/>
-			<RowDefinition Height="*"/>
-		</Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MaxWidth="150" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MaxHeight="150" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-	    <!-- Warning to users to only submit meaningful feedback -->
-	    <InfoBar Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
+        <!-- Warning to users to only submit meaningful feedback -->
+        <InfoBar Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                  Severity="Informational" HorizontalAlignment="Stretch"
-	             Title="Detailed feedback is addressed quicker"
-	             IsOpen="True" IsClosable="False" Margin="10,0,10,10"/>
+                 Title="Detailed feedback is addressed quicker"
+                 IsOpen="True" IsClosable="False" Margin="10,0,10,10" />
 
-	    <TextBox Grid.Row="1" Grid.Column="1" Header="Issue Title"
-	             Margin="10,0,0,0"
-	             Height="60" Text="{x:Bind FeedbackVM.Title, Mode=TwoWay}"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Header="Issue Title"
+                 Margin="10,0,0,0"
+                 Height="60" Text="{x:Bind FeedbackVM.Title, Mode=TwoWay}" />
 
-		<ComboBox Grid.Row="1" Grid.Column="0" Header="Type" SelectedIndex="{x:Bind FeedbackVM.FeedbackType, Mode=TwoWay}" 
-		          HorizontalAlignment="Stretch" SelectionChanged="ChangeUIText">
-			<ComboBoxItem Content="Bug Report"/>
-			<ComboBoxItem Content="Feature Request"/>
-		</ComboBox>
+        <ComboBox Grid.Row="1" Grid.Column="0" Header="Type"
+                  SelectedIndex="{x:Bind FeedbackVM.FeedbackType, Mode=TwoWay}"
+                  HorizontalAlignment="Stretch" SelectionChanged="ChangeUIText">
+            <ComboBoxItem Content="Bug Report" />
+            <ComboBoxItem Content="Feature Request" />
+        </ComboBox>
 
-		<TextBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Stretch"
-		         Header="{x:Bind FeedbackVM.DescriptionTitle, Mode=TwoWay}"
-		         Text="{x:Bind FeedbackVM.Body, Mode=TwoWay}" TextWrapping="Wrap"
-		         PlaceholderText="{x:Bind FeedbackVM.DescriptionPlaceholderText, Mode=TwoWay}"/>
+        <TextBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Stretch"
+                 Header="{x:Bind FeedbackVM.DescriptionTitle, Mode=TwoWay}"
+                 Text="{x:Bind FeedbackVM.Body, Mode=TwoWay}" TextWrapping="Wrap"
+                 PlaceholderText="{x:Bind FeedbackVM.DescriptionPlaceholderText, Mode=TwoWay}" />
 
-		<TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Stretch"
-		         Header="{x:Bind FeedbackVM.ExtraStepsTitle, Mode=TwoWay}" MinHeight="50"
-				 Text="{x:Bind FeedbackVM.ExtraStepsText, Mode=TwoWay}" TextWrapping="Wrap"
-		         PlaceholderText="{x:Bind FeedbackVM.ExtraStepsPlaceholderText, Mode=TwoWay}"/>
-	</Grid>
+        <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Stretch"
+                 Header="{x:Bind FeedbackVM.ExtraStepsTitle, Mode=TwoWay}" MinHeight="50"
+                 Text="{x:Bind FeedbackVM.ExtraStepsText, Mode=TwoWay}" TextWrapping="Wrap"
+                 PlaceholderText="{x:Bind FeedbackVM.ExtraStepsPlaceholderText, Mode=TwoWay}" />
+    </Grid>
 </Page>

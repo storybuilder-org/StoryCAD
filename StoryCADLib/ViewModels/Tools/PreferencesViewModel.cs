@@ -1,47 +1,62 @@
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StoryCAD.DAL;
 using StoryCAD.Models.Tools;
-using StoryCAD.Services.Backend;
-using Microsoft.UI.Xaml;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using StoryCAD.Services.Ratings;
 using StoryCAD.Services;
+using StoryCAD.Services.Backend;
+using StoryCAD.Services.Ratings;
 
 namespace StoryCAD.ViewModels.Tools;
 
 /// <summary>
-/// This view model handles the Services.Dialogs.Tools.PreferencesDialog.
-/// It'S based on ObservableValidator, a Community.Toolkit.Mvvm class
-/// which adds validation support to the ObservableRecipient class:
-///
-/// https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/observablevalidator
-///
-/// See also:
-/// https://xamlbrewer.wordpress.com/2021/06/07/data-validation-with-the-microsoft-mvvm-toolkit/
-/// https://learn.microsoft.com/en-us/dotnet/api/system.componentmodel.dataannotations?view=net-7.0
-/// 
+///     This view model handles the Services.Dialogs.Tools.PreferencesDialog.
+///     It'S based on ObservableValidator, a Community.Toolkit.Mvvm class
+///     which adds validation support to the ObservableRecipient class:
+///     https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/observablevalidator
+///     See also:
+///     https://xamlbrewer.wordpress.com/2021/06/07/data-validation-with-the-microsoft-mvvm-toolkit/
+///     https://learn.microsoft.com/en-us/dotnet/api/system.componentmodel.dataannotations?view=net-7.0
 /// </summary>
 public class PreferencesViewModel : ObservableValidator
 {
-    private readonly PreferenceService _preferenceService;
     private readonly BackendService _backendService;
+    private readonly PreferenceService _preferenceService;
     private readonly RatingService _ratingService;
     private readonly Windowing _windowing;
-    
+
     public PreferencesModel CurrentModel;
-    public string Errors => string.Join(Environment.NewLine, from ValidationResult e in GetErrors(null) select e.ErrorMessage);
+
+    #region Constructor
+
+    public PreferencesViewModel(PreferenceService preferenceService, BackendService backendService,
+        RatingService ratingService, Windowing windowing)
+    {
+        _preferenceService = preferenceService;
+        _backendService = backendService;
+        _ratingService = ratingService;
+        _windowing = windowing;
+        CurrentModel = _preferenceService.Model;
+        ErrorsChanged += Preferences_ErrorsChanged;
+    }
+
+    #endregion
+
+    public string Errors =>
+        string.Join(Environment.NewLine, from ValidationResult e in GetErrors() select e.ErrorMessage);
 
     #region Fields
+
     private bool _changed { get; set; }
 
     #endregion
 
     #region Properties
-    
+
     //User information tab
 
     private string _firstName;
+
     [Required(ErrorMessage = "First name is required.")]
     [MinLength(2, ErrorMessage = "First name should be longer than one character")]
     public string FirstName
@@ -51,6 +66,7 @@ public class PreferencesViewModel : ObservableValidator
     }
 
     private string _lastName;
+
     [Required(ErrorMessage = "First name is required.")]
     [MinLength(2, ErrorMessage = "First name should be longer than one character")]
     public string LastName
@@ -62,6 +78,7 @@ public class PreferencesViewModel : ObservableValidator
     [EmailAddress(ErrorMessage = "Must be a valid email address")]
     [MinLength(2, ErrorMessage = "Name should be longer than one character")]
     private string _email;
+
     public string Email
     {
         get => _email;
@@ -69,6 +86,7 @@ public class PreferencesViewModel : ObservableValidator
     }
 
     private bool _errorCollectionConsent;
+
     public bool ErrorCollectionConsent
     {
         get => _errorCollectionConsent;
@@ -76,22 +94,24 @@ public class PreferencesViewModel : ObservableValidator
     }
 
     private bool _newsletter;
+
     public bool Newsletter
     {
         get => _newsletter;
         set => SetProperty(ref _newsletter, value);
     }
-   
+
     /// <summary>
-    /// This switch tracks whether this is a new 
-    /// installation and if Initialization should be shown.
+    ///     This switch tracks whether this is a new
+    ///     installation and if Initialization should be shown.
     /// </summary>
     public bool PreferencesInitialized { get; set; }
 
     /// <summary>
-    /// This is the Last Template Selected by the user.
+    ///     This is the Last Template Selected by the user.
     /// </summary>
     private int _lastSelectedTemplate;
+
     public int LastSelectedTemplate
     {
         get => _lastSelectedTemplate;
@@ -103,16 +123,18 @@ public class PreferencesViewModel : ObservableValidator
     // Backup Information
 
     public bool _autoSave;
+
     public bool AutoSave
     {
         get => _autoSave;
         set => SetProperty(ref _autoSave, value);
     }
 
-    
+
     private int _autoSaveInterval;
+
     /// <summary>
-    /// AutoSaveInterval in seconds
+    ///     AutoSaveInterval in seconds
     /// </summary>
     [Range(15, 60, ErrorMessage = "Value for {0} must be between {1} and {2} seconds.")]
     public int AutoSaveInterval
@@ -120,12 +142,14 @@ public class PreferencesViewModel : ObservableValidator
         get => _autoSaveInterval;
         set => SetProperty(ref _autoSaveInterval, value, false);
     }
+
     public bool BackupOnOpen { get; set; }
     public bool TimedBackup { get; set; }
 
     private int _timedBackupInterval;
+
     /// <summary>
-    /// TimedBackupInterval in minutes
+    ///     TimedBackupInterval in minutes
     /// </summary>
     [Range(10, 60, ErrorMessage = "Value for {0} must be between {1} and {2} minutes.")]
     public int TimedBackupInterval
@@ -137,6 +161,7 @@ public class PreferencesViewModel : ObservableValidator
     //Directories
 
     private string _projectDirectory;
+
     [FilePath(ErrorMessage = "Project Directory must be a valid filepath")]
     public string ProjectDirectory
     {
@@ -146,24 +171,25 @@ public class PreferencesViewModel : ObservableValidator
 
 
     private string _backupDirectory;
+
     [FilePath(ErrorMessage = "Backup Directory must be a valid filepath")]
     public string BackupDirectory
     {
         get => _backupDirectory;
         set => SetProperty(ref _backupDirectory, value, false);
     }
-    
+
     // Recent files (set automatically)
-    
+
     public List<string> RecentFiles { get; set; }
 
     //Version Tracking
     public string Version { get; set; }
 
     // Backend server log status
-    public bool RecordPreferencesStatus { get; set; }  // Last preferences change was logged successfully or not
-    public bool RecordVersionStatus { get; set; }      // Last version change was logged successfully or not
-    public BrowserType PreferredSearchEngine { get; set; }      // Last version change was logged successfully or not
+    public bool RecordPreferencesStatus { get; set; } // Last preferences change was logged successfully or not
+    public bool RecordVersionStatus { get; set; } // Last version change was logged successfully or not
+    public BrowserType PreferredSearchEngine { get; set; } // Last version change was logged successfully or not
 
     public int SearchEngineIndex
     {
@@ -172,6 +198,7 @@ public class PreferencesViewModel : ObservableValidator
     } // Last version change was logged successfully or not
 
     private ElementTheme PreferedTheme;
+
     public int PreferredThemeIndex
     {
         get => (int)PreferedTheme;
@@ -180,33 +207,36 @@ public class PreferencesViewModel : ObservableValidator
 
     // Logging Information
     public bool _advancedLogging;
+
     public bool AdvancedLogging
     {
-            get => _advancedLogging;
-            set => SetProperty(ref _advancedLogging, value);
+        get => _advancedLogging;
+        set => SetProperty(ref _advancedLogging, value);
     }
 
     // Hide missing key file warning
     public bool _hideKeyFileWarning;
+
     public bool HideKeyFileWarning
     {
-            get => _hideKeyFileWarning;
-            set => SetProperty(ref _hideKeyFileWarning, value);
+        get => _hideKeyFileWarning;
+        set => SetProperty(ref _hideKeyFileWarning, value);
     }
 
-        // Show startup page.
+    // Show startup page.
     private bool _ShowStartupPage;
-        public bool ShowStartupPage
+
+    public bool ShowStartupPage
     {
-	    get => _ShowStartupPage;
-	    set => SetProperty(ref _ShowStartupPage, value);
-	}
+        get => _ShowStartupPage;
+        set => SetProperty(ref _ShowStartupPage, value);
+    }
 
-	#endregion
+    #endregion
 
-	#region Methods
+    #region Methods
 
-	internal void LoadModel()
+    internal void LoadModel()
     {
         FirstName = CurrentModel.FirstName;
         LastName = CurrentModel.LastName;
@@ -220,7 +250,7 @@ public class PreferencesViewModel : ObservableValidator
         RecentFiles = CurrentModel.RecentFiles;
 
         ProjectDirectory = CurrentModel.ProjectDirectory;
-        BackupDirectory = CurrentModel.BackupDirectory;  
+        BackupDirectory = CurrentModel.BackupDirectory;
         AutoSave = CurrentModel.AutoSave;
         AutoSaveInterval = CurrentModel.AutoSaveInterval;
         BackupOnOpen = CurrentModel.BackupOnOpen;
@@ -269,12 +299,13 @@ public class PreferencesViewModel : ObservableValidator
             _windowing.RequestedTheme = CurrentModel.ThemePreference;
             _windowing.UpdateUIToTheme();
         }
+
         CurrentModel.ThemePreference = PreferedTheme;
         CurrentModel.ShowStartupDialog = ShowStartupPage;
     }
 
     /// <summary>
-    /// Saves the users preferences to disk.
+    ///     Saves the users preferences to disk.
     /// </summary>
     public async Task SaveAsync()
     {
@@ -283,7 +314,7 @@ public class PreferencesViewModel : ObservableValidator
         await _prfIo.ReadPreferences();
         _preferenceService.Model = CurrentModel;
 
-        _preferenceService.Model.RecordPreferencesStatus = false;  // indicate need to update
+        _preferenceService.Model.RecordPreferencesStatus = false; // indicate need to update
         await _backendService.PostPreferences(_preferenceService.Model);
     }
 
@@ -297,27 +328,12 @@ public class PreferencesViewModel : ObservableValidator
         OnPropertyChanged(nameof(Errors)); // Update Errors on every Error change, so I can bind to it.
     }
 
-	/// <summary>
-	/// Shows the MS Store prompt
-	/// </summary>
+    /// <summary>
+    ///     Shows the MS Store prompt
+    /// </summary>
     public void ShowRatingPrompt(object sender, RoutedEventArgs e)
     {
-	    _ratingService.OpenRatingPrompt();
-    }
-
-	#endregion
-
-	#region Constructor
-
-	public PreferencesViewModel(PreferenceService preferenceService, BackendService backendService,
-        RatingService ratingService, Windowing windowing)
-    {
-        _preferenceService = preferenceService;
-        _backendService = backendService;
-        _ratingService = ratingService;
-        _windowing = windowing;
-        CurrentModel = _preferenceService.Model;
-        this.ErrorsChanged += Preferences_ErrorsChanged;
+        _ratingService.OpenRatingPrompt();
     }
 
     #endregion

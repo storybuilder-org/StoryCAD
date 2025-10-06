@@ -5,152 +5,141 @@ namespace StoryCAD.Models;
 
 public class SettingModel : StoryElement
 {
-	#region Static Properties
-	[JsonIgnore]
-    public static ObservableCollection<string> SettingNames = new();
+    #region Static Properties
 
-	#endregion
+    [JsonIgnore] public static ObservableCollection<string> SettingNames = new();
 
-	#region Properties
+    #endregion
 
-	// Setting (General) data
+    #region Properties
 
-	[JsonIgnore]
-	private string _locale;
+    // Setting (General) data
 
-	[JsonInclude]
-	[JsonPropertyName("Locale")]
-	public string Locale
-	{
-		get => _locale;
-		set => _locale = value;
-	}
+    [JsonIgnore] private string _locale;
 
-	[JsonIgnore]
-	private string _season;
+    [JsonInclude]
+    [JsonPropertyName("Locale")]
+    public string Locale
+    {
+        get => _locale;
+        set => _locale = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("Season")]
-	public string Season
-	{
-		get => _season;
-		set => _season = value;
-	}
+    [JsonIgnore] private string _season;
 
-	[JsonIgnore]
-	private string _period;
+    [JsonInclude]
+    [JsonPropertyName("Season")]
+    public string Season
+    {
+        get => _season;
+        set => _season = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("Period")]
-	public string Period
-	{
-		get => _period;
-		set => _period = value;
-	}
+    [JsonIgnore] private string _period;
 
-	[JsonIgnore]
-	private string _lighting;
+    [JsonInclude]
+    [JsonPropertyName("Period")]
+    public string Period
+    {
+        get => _period;
+        set => _period = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("Lighting")]
-	public string Lighting
-	{
-		get => _lighting;
-		set => _lighting = value;
-	}
+    [JsonIgnore] private string _lighting;
 
-	[JsonIgnore]
-	private string _weather;
+    [JsonInclude]
+    [JsonPropertyName("Lighting")]
+    public string Lighting
+    {
+        get => _lighting;
+        set => _lighting = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("Weather")]
-	public string Weather
-	{
-		get => _weather;
-		set => _weather = value;
-	}
+    [JsonIgnore] private string _weather;
 
-	[JsonIgnore]
-	private string _temperature;
+    [JsonInclude]
+    [JsonPropertyName("Weather")]
+    public string Weather
+    {
+        get => _weather;
+        set => _weather = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("Temperature")]
-	public string Temperature
-	{
-		get => _temperature;
-		set => _temperature = value;
-	}
+    [JsonIgnore] private string _temperature;
 
-	[JsonIgnore]
-	private string _props;
+    [JsonInclude]
+    [JsonPropertyName("Temperature")]
+    public string Temperature
+    {
+        get => _temperature;
+        set => _temperature = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("Props")]
-	public string Props
-	{
-		get => _props;
-		set => _props = value;
-	}
+    [JsonIgnore] private string _props;
 
-	[JsonIgnore]
-	private string _sights;
+    [JsonInclude]
+    [JsonPropertyName("Props")]
+    public string Props
+    {
+        get => _props;
+        set => _props = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("Sights")]
-	public string Sights
-	{
-		get => _sights;
-		set => _sights = value;
-	}
+    [JsonIgnore] private string _sights;
 
-	[JsonIgnore]
-	private string _sounds;
+    [JsonInclude]
+    [JsonPropertyName("Sights")]
+    public string Sights
+    {
+        get => _sights;
+        set => _sights = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("Sounds")]
-	public string Sounds
-	{
-		get => _sounds;
-		set => _sounds = value;
-	}
+    [JsonIgnore] private string _sounds;
 
-	[JsonIgnore]
-	private string _touch;
+    [JsonInclude]
+    [JsonPropertyName("Sounds")]
+    public string Sounds
+    {
+        get => _sounds;
+        set => _sounds = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("Touch")]
-	public string Touch
-	{
-		get => _touch;
-		set => _touch = value;
-	}
+    [JsonIgnore] private string _touch;
 
-	[JsonIgnore]
-	private string _smellTaste;
+    [JsonInclude]
+    [JsonPropertyName("Touch")]
+    public string Touch
+    {
+        get => _touch;
+        set => _touch = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("SmellTaste")]
-	public string SmellTaste
-	{
-		get => _smellTaste;
-		set => _smellTaste = value;
-	}
+    [JsonIgnore] private string _smellTaste;
 
-	[JsonIgnore]
-	private string _notes;
+    [JsonInclude]
+    [JsonPropertyName("SmellTaste")]
+    public string SmellTaste
+    {
+        get => _smellTaste;
+        set => _smellTaste = value;
+    }
 
-	[JsonInclude]
-	[JsonPropertyName("Notes")]
-	public string Notes
-	{
-		get => _notes;
-		set => _notes = value;
-	}
+    [JsonIgnore] private string _notes;
 
-	#endregion
+    [JsonInclude]
+    [JsonPropertyName("Notes")]
+    public string Notes
+    {
+        get => _notes;
+        set => _notes = value;
+    }
 
-	#region Constructors
-	public SettingModel(StoryModel model, StoryNodeItem node) : base("New Setting", StoryItemType.Setting, model, node)
+    #endregion
+
+    #region Constructors
+
+    public SettingModel(StoryModel model, StoryNodeItem node) : base("New Setting", StoryItemType.Setting, model, node)
     {
         Locale = string.Empty;
         Season = string.Empty;
@@ -167,25 +156,30 @@ public class SettingModel : StoryElement
         Notes = string.Empty;
         SettingNames.Add(Name);
     }
-    public SettingModel(string name, StoryModel model, StoryNodeItem Node) : base(name, StoryItemType.Setting, model, Node)
+
+    public SettingModel(string name, StoryModel model, StoryNodeItem Node) : base(name, StoryItemType.Setting, model,
+        Node)
     {
-	    Locale = string.Empty;
-	    Season = string.Empty;
-	    Period = string.Empty;
-	    Lighting = string.Empty;
-	    Weather = string.Empty;
-	    Temperature = string.Empty;
-	    Props = string.Empty;
-	    Description = string.Empty;
-	    Sights = string.Empty;
-	    Sounds = string.Empty;
-	    Touch = string.Empty;
-	    SmellTaste = string.Empty;
-	    Notes = string.Empty;
-	    SettingNames.Add(Name);
+        Locale = string.Empty;
+        Season = string.Empty;
+        Period = string.Empty;
+        Lighting = string.Empty;
+        Weather = string.Empty;
+        Temperature = string.Empty;
+        Props = string.Empty;
+        Description = string.Empty;
+        Sights = string.Empty;
+        Sounds = string.Empty;
+        Touch = string.Empty;
+        SmellTaste = string.Empty;
+        Notes = string.Empty;
+        SettingNames.Add(Name);
     }
 
 
-	public SettingModel(){}
+    public SettingModel()
+    {
+    }
+
     #endregion
 }

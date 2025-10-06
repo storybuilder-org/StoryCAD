@@ -1,21 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCAD.Models;
-using StoryCAD.ViewModels.SubViewModels;
-using System.ComponentModel;
 using StoryCAD.ViewModels;
-using Windows.UI;
-using StoryCAD.Services.Logging;
-using StoryCAD.Services;
-using StoryCAD.Services.Outline;
 
 namespace StoryCADTests.Models;
 
 [TestClass]
 public class StoryModelTests
 {
+    private static bool _iocInitialized;
     private StoryModel _storyModel;
-    private static bool _iocInitialized = false;
 
     [TestInitialize]
     public void Setup()
@@ -36,6 +29,7 @@ public class StoryModelTests
             {
                 // IoC not fully initialized for this test run
             }
+
             _iocInitialized = true;
         }
     }
@@ -54,6 +48,21 @@ public class StoryModelTests
         Assert.IsFalse(_storyModel.Changed);
     }
 
+    #region TrashView Tests
+
+    [TestMethod]
+    public void TrashView_Initialized_IsNotNull()
+    {
+        // Arrange & Act
+        _storyModel = new StoryModel();
+
+        // Assert
+        Assert.IsNotNull(_storyModel.TrashView, "TrashView should be initialized");
+        Assert.AreEqual(0, _storyModel.TrashView.Count, "TrashView should be empty initially");
+    }
+
+    #endregion
+
     #region Changed Property Tests
 
     [TestMethod]
@@ -61,9 +70,9 @@ public class StoryModelTests
     {
         // Arrange
         _storyModel = new StoryModel();
-        bool propertyChangedRaised = false;
+        var propertyChangedRaised = false;
         string propertyName = null;
-        
+
         _storyModel.PropertyChanged += (sender, e) =>
         {
             propertyChangedRaised = true;
@@ -85,12 +94,9 @@ public class StoryModelTests
         // Arrange
         _storyModel = new StoryModel();
         _storyModel.Changed = true; // Set initial value
-        
-        bool propertyChangedRaised = false;
-        _storyModel.PropertyChanged += (sender, e) =>
-        {
-            propertyChangedRaised = true;
-        };
+
+        var propertyChangedRaised = false;
+        _storyModel.PropertyChanged += (sender, e) => { propertyChangedRaised = true; };
 
         // Act
         _storyModel.Changed = true; // Set to same value
@@ -105,12 +111,9 @@ public class StoryModelTests
         // Arrange
         _storyModel = new StoryModel();
         _storyModel.Changed = true; // Start with true
-        
-        bool propertyChangedRaised = false;
-        _storyModel.PropertyChanged += (sender, e) =>
-        {
-            propertyChangedRaised = true;
-        };
+
+        var propertyChangedRaised = false;
+        _storyModel.PropertyChanged += (sender, e) => { propertyChangedRaised = true; };
 
         // Act
         _storyModel.Changed = false;
@@ -124,14 +127,14 @@ public class StoryModelTests
     public void Changed_WhenSet_UpdatesValue()
     {
         // Basic test that works with current StoryModel
-        
+
         // Arrange
         _storyModel = new StoryModel();
-        
+
         // Act & Assert - Setting to true
         _storyModel.Changed = true;
         Assert.IsTrue(_storyModel.Changed);
-        
+
         // Act & Assert - Setting to false
         _storyModel.Changed = false;
         Assert.IsFalse(_storyModel.Changed);
@@ -148,10 +151,10 @@ public class StoryModelTests
         _storyModel = new StoryModel();
         // Start with NarratorView so we can test changing to ExplorerView
         _storyModel.CurrentView = _storyModel.NarratorView;
-        
-        bool propertyChangedRaised = false;
+
+        var propertyChangedRaised = false;
         string propertyName = null;
-        
+
         _storyModel.PropertyChanged += (sender, e) =>
         {
             propertyChangedRaised = true;
@@ -173,12 +176,9 @@ public class StoryModelTests
         // Arrange
         _storyModel = new StoryModel();
         _storyModel.CurrentView = _storyModel.ExplorerView; // Start with Explorer
-        
-        bool propertyChangedRaised = false;
-        _storyModel.PropertyChanged += (sender, e) =>
-        {
-            propertyChangedRaised = true;
-        };
+
+        var propertyChangedRaised = false;
+        _storyModel.PropertyChanged += (sender, e) => { propertyChangedRaised = true; };
 
         // Act
         _storyModel.CurrentView = _storyModel.NarratorView;
@@ -194,33 +194,15 @@ public class StoryModelTests
         // Arrange
         _storyModel = new StoryModel();
         _storyModel.CurrentView = _storyModel.ExplorerView;
-        
-        bool propertyChangedRaised = false;
-        _storyModel.PropertyChanged += (sender, e) =>
-        {
-            propertyChangedRaised = true;
-        };
+
+        var propertyChangedRaised = false;
+        _storyModel.PropertyChanged += (sender, e) => { propertyChangedRaised = true; };
 
         // Act
         _storyModel.CurrentView = _storyModel.ExplorerView; // Same value
 
         // Assert
         Assert.IsFalse(propertyChangedRaised, "PropertyChanged should not be raised when setting same value");
-    }
-
-    #endregion
-
-    #region TrashView Tests
-
-    [TestMethod]
-    public void TrashView_Initialized_IsNotNull()
-    {
-        // Arrange & Act
-        _storyModel = new StoryModel();
-
-        // Assert
-        Assert.IsNotNull(_storyModel.TrashView, "TrashView should be initialized");
-        Assert.AreEqual(0, _storyModel.TrashView.Count, "TrashView should be empty initially");
     }
 
     #endregion
@@ -301,10 +283,11 @@ public class StoryModelTests
         _storyModel.TrashView.Clear(); // Ensure empty
 
         // Act
-        string json = _storyModel.Serialize();
+        var json = _storyModel.Serialize();
 
         // Assert
-        Assert.IsTrue(json.Contains("\"FlattenedTrashView\""), "Serialized JSON should contain FlattenedTrashView property");
+        Assert.IsTrue(json.Contains("\"FlattenedTrashView\""),
+            "Serialized JSON should contain FlattenedTrashView property");
         // Note: FlattenedTrashView should exist but implementation may need to be added
     }
 
@@ -317,7 +300,7 @@ public class StoryModelTests
         _storyModel.TrashView.Add(deletedScene);
 
         // Act
-        string json = _storyModel.Serialize();
+        var json = _storyModel.Serialize();
 
         // Assert
         Assert.IsTrue(json.Contains("\"FlattenedTrashView\""), "Serialized JSON should contain FlattenedTrashView");
@@ -334,7 +317,7 @@ public class StoryModelTests
         _storyModel.Changed = true;
 
         // Act
-        string json = _storyModel.Serialize();
+        var json = _storyModel.Serialize();
 
         // Assert
         Assert.IsFalse(json.Contains("\"CurrentView\""), "CurrentView should not be serialized");
@@ -351,18 +334,20 @@ public class StoryModelTests
     {
         // This test verifies that TrashView is a separate collection
         // from ExplorerView and NarratorView
-        
+
         // Arrange
         var storyModel = new StoryModel();
-        
+
         // Act & Assert
         Assert.IsNotNull(storyModel.TrashView, "TrashView collection should be initialized");
         Assert.IsNotNull(storyModel.ExplorerView, "ExplorerView collection should be initialized");
         Assert.IsNotNull(storyModel.NarratorView, "NarratorView collection should be initialized");
-        
+
         // Verify they are separate collections
-        Assert.AreNotSame(storyModel.TrashView, storyModel.ExplorerView, "TrashView should be separate from ExplorerView");
-        Assert.AreNotSame(storyModel.TrashView, storyModel.NarratorView, "TrashView should be separate from NarratorView");
+        Assert.AreNotSame(storyModel.TrashView, storyModel.ExplorerView,
+            "TrashView should be separate from ExplorerView");
+        Assert.AreNotSame(storyModel.TrashView, storyModel.NarratorView,
+            "TrashView should be separate from NarratorView");
     }
 
     [TestMethod]
@@ -372,13 +357,13 @@ public class StoryModelTests
         var storyModel = new StoryModel();
         var deletedScene = new SceneModel("Deleted Scene", storyModel, null);
         var deletedItem = new StoryNodeItem(deletedScene, null);
-        
+
         // Reset changed flag
         storyModel.Changed = false;
-        
+
         // Act
         storyModel.TrashView.Add(deletedItem);
-        
+
         // Assert
         Assert.IsTrue(storyModel.Changed, "Adding to TrashView should set Changed flag");
     }
@@ -402,7 +387,7 @@ public class StoryModelTests
         //    - Not possible because TreeViews are separate controls
         //    - Move to trash: Use context menu "Delete" command
         //    - Restore from trash: Use context menu "Restore" command
-        
+
         Assert.IsTrue(true, "Drag-and-drop constraints are enforced through XAML properties");
     }
 

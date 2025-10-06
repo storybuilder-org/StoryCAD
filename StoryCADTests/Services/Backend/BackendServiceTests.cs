@@ -1,28 +1,22 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using StoryCAD.Models;
+using StoryCAD.Services;
 using StoryCAD.Services.Backend;
 using StoryCAD.Services.Json;
-using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using StoryCAD.Services;
 
 namespace StoryCADTests.Services.Backend;
 
 [TestClass]
 public class BackendTests
 {
-
     /// <summary>
-    /// This checks that the Backend Server connection
-    /// works correctly. (Requires .ENV)
+    ///     This checks that the Backend Server connection
+    ///     works correctly. (Requires .ENV)
     /// </summary>
     [TestMethod]
     public void CheckConnection()
     {
-        PreferenceService Prefs = Ioc.Default.GetService<PreferenceService>();
-        
+        var Prefs = Ioc.Default.GetService<PreferenceService>();
+
         //Load keys.
         Doppler doppler = new();
         Doppler keys = new();
@@ -37,7 +31,7 @@ public class BackendTests
         Prefs.Model.FirstName = "StoryCAD";
         Prefs.Model.LastName = "Tests";
         Prefs.Model.Email = "sysadmin@storybuilder.org";
-        
+
         //Call backend service to check connection
         Task.Run(async () =>
         {
@@ -48,5 +42,4 @@ public class BackendTests
         //Check if test passed (RecordVersionStatus should be true now)
         Assert.IsTrue(Prefs.Model.RecordVersionStatus);
     }
-
 }

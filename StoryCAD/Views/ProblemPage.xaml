@@ -1,187 +1,192 @@
 ﻿<Page NavigationCacheMode="Required"
- x:Class="StoryCAD.Views.ProblemPage"
- xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
- xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
- xmlns:usercontrols="using:StoryCAD.Controls"
- xmlns:viewModels="using:StoryCAD.ViewModels"
- xmlns:tools="using:StoryCAD.ViewModels.Tools">
+      x:Class="StoryCAD.Views.ProblemPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:usercontrols="using:StoryCAD.Controls"
+      xmlns:viewModels="using:StoryCAD.ViewModels"
+      xmlns:tools="using:StoryCAD.ViewModels.Tools">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <TextBox Header="Name" Text="{x:Bind ProblemVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
- viewModels:TextBoxFocus.IsFocused="{x:Bind ProblemVm.IsTextBoxFocused, Mode=TwoWay}"
- Margin="10,10,10,0"/>
+                 viewModels:TextBoxFocus.IsFocused="{x:Bind ProblemVm.IsTextBoxFocused, Mode=TwoWay}"
+                 Margin="10,10,10,0" />
         <Pivot Grid.Row="1">
             <PivotItem Header="Problem">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="2*" />
                         </Grid.ColumnDefinitions>
                         <ComboBox Grid.Column="0" IsEditable="True" Header="Problem Type" Grid.Row="0" MinWidth="200"
- ItemsSource="{x:Bind ProblemVm.ProblemTypeList}"
- Text="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}"
- PlaceholderText="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}"/>
+                                  ItemsSource="{x:Bind ProblemVm.ProblemTypeList}"
+                                  Text="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}"
+                                  PlaceholderText="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}" />
                         <ComboBox Grid.Column="2" IsEditable="True" Header="Conflict Type" Grid.Row="0" MinWidth="200"
- Margin="20,0,0,0"
- ItemsSource="{x:Bind ProblemVm.ConflictTypeList}"
- Text="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}"
- PlaceholderText="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}"/>
+                                  Margin="20,0,0,0"
+                                  ItemsSource="{x:Bind ProblemVm.ConflictTypeList}"
+                                  Text="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}"
+                                  PlaceholderText="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}" />
                     </Grid>
                     <ComboBox IsEditable="True" Header="Problem Category" Grid.Row="1" MinWidth="300"
- ItemsSource="{x:Bind ProblemVm.ProblemCategoryList}"
- Text="{x:Bind ProblemVm.ProblemCategory, Mode=TwoWay}"
- PlaceholderText="{x:Bind ProblemVm.ProblemCategory, Mode=TwoWay}"/>
+                              ItemsSource="{x:Bind ProblemVm.ProblemCategoryList}"
+                              Text="{x:Bind ProblemVm.ProblemCategory, Mode=TwoWay}"
+                              PlaceholderText="{x:Bind ProblemVm.ProblemCategory, Mode=TwoWay}" />
                     <ComboBox IsEditable="True" Header="Subject" Grid.Row="2" MinWidth="300"
- ItemsSource="{x:Bind ProblemVm.SubjectList}"
- Text="{x:Bind ProblemVm.Subject, Mode=TwoWay}"
- PlaceholderText="{x:Bind ProblemVm.Subject, Mode=TwoWay}"/>
+                              ItemsSource="{x:Bind ProblemVm.SubjectList}"
+                              Text="{x:Bind ProblemVm.Subject, Mode=TwoWay}"
+                              PlaceholderText="{x:Bind ProblemVm.Subject, Mode=TwoWay}" />
                     <usercontrols:RichEditBoxExtended Header="Story Question" Grid.Row="3"
- RtfText="{x:Bind ProblemVm.Description, Mode=TwoWay}" AcceptsReturn="True"
- IsSpellCheckEnabled="True" TextWrapping="Wrap"
- ScrollViewer.VerticalScrollBarVisibility="Visible"/>
+                                                      RtfText="{x:Bind ProblemVm.Description, Mode=TwoWay}"
+                                                      AcceptsReturn="True"
+                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
                     <ComboBox IsEditable="True" Header="Problem Source" Grid.Row="4" MinWidth="300"
- ItemsSource="{x:Bind ProblemVm.ProblemSourceList}"
- Text="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}"
- PlaceholderText="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}"/>
+                              ItemsSource="{x:Bind ProblemVm.ProblemSourceList}"
+                              Text="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}"
+                              PlaceholderText="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Protagonist">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <ComboBox Header="Protagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
- DisplayMemberPath="Name"
- SelectedItem="{x:Bind ProblemVm.SelectedProtagonist, Mode=TwoWay}"
- ItemsSource="{x:Bind ProblemVm.Characters, Mode=OneWay}"/>
+                              DisplayMemberPath="Name"
+                              SelectedItem="{x:Bind ProblemVm.SelectedProtagonist, Mode=TwoWay}"
+                              ItemsSource="{x:Bind ProblemVm.Characters, Mode=OneWay}" />
                     <ComboBox IsEditable="True" Header="Goal" Grid.Row="1"
- MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
- Text="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}"
- PlaceholderText="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}"/>
+                              MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
+                              Text="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}"
+                              PlaceholderText="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}" />
                     <ComboBox IsEditable="True" Header="Motivation" Grid.Row="2"
- MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
- Text="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}"
- PlaceholderText="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}"/>
+                              MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
+                              Text="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}"
+                              PlaceholderText="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}" />
                     <Button Content="Conflict Builder" Grid.Row="3" HorizontalAlignment="Left" Margin="0,10,10,10"
- Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}"/>
+                            Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}" />
                     <usercontrols:RichEditBoxExtended Header="Conflict" Grid.Row="4"
- RtfText="{x:Bind ProblemVm.ProtConflict, Mode=TwoWay}" AcceptsReturn="True"
- IsSpellCheckEnabled="True" TextWrapping="Wrap"
- ScrollViewer.VerticalScrollBarVisibility="Visible"/>
+                                                      RtfText="{x:Bind ProblemVm.ProtConflict, Mode=TwoWay}"
+                                                      AcceptsReturn="True"
+                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Antagonist">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <ComboBox Header="Antagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
- DisplayMemberPath="Name"
- SelectedItem="{x:Bind ProblemVm.SelectedAntagonist, Mode=TwoWay}"
- SelectedValuePath="Uuid"
- ItemsSource="{x:Bind ProblemVm.Characters, Mode=OneWay}"/>
+                              DisplayMemberPath="Name"
+                              SelectedItem="{x:Bind ProblemVm.SelectedAntagonist, Mode=TwoWay}"
+                              SelectedValuePath="Uuid"
+                              ItemsSource="{x:Bind ProblemVm.Characters, Mode=OneWay}" />
                     <ComboBox IsEditable="True" Header="Goal" Grid.Row="1"
- MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
- Text="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}"
- PlaceholderText="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}"/>
+                              MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
+                              Text="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}"
+                              PlaceholderText="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}" />
                     <ComboBox IsEditable="True" Header="Motivation" Grid.Row="2"
- MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
- Text="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}"
- PlaceholderText="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}"/>
+                              MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
+                              Text="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}"
+                              PlaceholderText="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}" />
                     <Button Content="Conflict Builder" Grid.Row="3" HorizontalAlignment="Left" Margin="0,10,10,10"
- Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}"/>
+                            Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}" />
                     <usercontrols:RichEditBoxExtended Header="Conflict" Grid.Row="4"
- RtfText="{x:Bind ProblemVm.AntagConflict, Mode=TwoWay}" AcceptsReturn="True"
- IsSpellCheckEnabled="True" TextWrapping="Wrap"
- ScrollViewer.VerticalScrollBarVisibility="Visible"/>
+                                                      RtfText="{x:Bind ProblemVm.AntagConflict, Mode=TwoWay}"
+                                                      AcceptsReturn="True"
+                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Resolution">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <ComboBox IsEditable="True" Header="Outcome" Grid.Row="0"
- MinWidth="400" ItemsSource="{x:Bind ProblemVm.OutcomeList}"
- Text="{x:Bind ProblemVm.Outcome, Mode=TwoWay}"
- PlaceholderText="{x:Bind ProblemVm.Outcome, Mode=TwoWay}"/>
+                              MinWidth="400" ItemsSource="{x:Bind ProblemVm.OutcomeList}"
+                              Text="{x:Bind ProblemVm.Outcome, Mode=TwoWay}"
+                              PlaceholderText="{x:Bind ProblemVm.Outcome, Mode=TwoWay}" />
                     <ComboBox IsEditable="True" Header="Method" Grid.Row="1"
- MinWidth="400" ItemsSource="{x:Bind ProblemVm.MethodList}"
- Text="{x:Bind ProblemVm.Method, Mode=TwoWay}"
- PlaceholderText="{x:Bind ProblemVm.Method, Mode=TwoWay}"/>
+                              MinWidth="400" ItemsSource="{x:Bind ProblemVm.MethodList}"
+                              Text="{x:Bind ProblemVm.Method, Mode=TwoWay}"
+                              PlaceholderText="{x:Bind ProblemVm.Method, Mode=TwoWay}" />
                     <ComboBox IsEditable="True" Header="Theme" Grid.Row="2"
- MinWidth="400" ItemsSource="{x:Bind ProblemVm.ThemeList}"
- Text="{x:Bind ProblemVm.Theme, Mode=TwoWay}"
- PlaceholderText="{x:Bind ProblemVm.Theme, Mode=TwoWay}"/>
+                              MinWidth="400" ItemsSource="{x:Bind ProblemVm.ThemeList}"
+                              Text="{x:Bind ProblemVm.Theme, Mode=TwoWay}"
+                              PlaceholderText="{x:Bind ProblemVm.Theme, Mode=TwoWay}" />
                     <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="3"
- RtfText="{x:Bind ProblemVm.Premise, Mode=TwoWay}" AcceptsReturn="True"
- IsSpellCheckEnabled="True" TextWrapping="Wrap"
- ScrollViewer.VerticalScrollBarVisibility="Visible"
- PlaceholderText="A [character] in a situation [genre, setting] wants something [goal], which brings him into [conflict] with a second character [opposition]. After [a series of conflicts], the [final battle] erupts, and [the protagonist] finally [resolves] the conflict. "/>
+                                                      RtfText="{x:Bind ProblemVm.Premise, Mode=TwoWay}"
+                                                      AcceptsReturn="True"
+                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                                      PlaceholderText="A [character] in a situation [genre, setting] wants something [goal], which brings him into [conflict] with a second character [opposition]. After [a series of conflicts], the [final battle] erupts, and [the protagonist] finally [resolves] the conflict. " />
                 </Grid>
             </PivotItem>
             <PivotItem Header="Structure">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
 
                     <Grid Grid.Row="0">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-
 
 
                         <Expander Margin="0,0,0,20" HorizontalAlignment="Stretch">
                             <Expander.Header>
                                 <ComboBox Header="Beat Sheet (Click to show description)"
- ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
- SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}"
- PlaceholderText="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
- SelectedValue="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
- Text="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}" Grid.Row="0"/>
+                                          ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
+                                          SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}"
+                                          PlaceholderText="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
+                                          SelectedValue="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
+                                          Text="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}" Grid.Row="0" />
                             </Expander.Header>
                             <Expander.Content>
-                                <usercontrols:RichEditBoxExtended RtfText="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3"
- TextWrapping="Wrap" IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}" Header="Beat Sheet Description:"
- HorizontalAlignment="Stretch"/>
+                                <usercontrols:RichEditBoxExtended
+                                    RtfText="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3"
+                                    TextWrapping="Wrap" IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}"
+                                    Header="Beat Sheet Description:"
+                                    HorizontalAlignment="Stretch" />
                             </Expander.Content>
                         </Expander>
 
 
                         <CommandBar DefaultLabelPosition="Right" FlowDirection="LeftToRight" HorizontalAlignment="Left"
- Grid.Row="1">
+                                    Grid.Row="1">
 
-                            <AppBarButton Grid.Column="1" HorizontalAlignment="Right" Label="Assign">
+                            <AppBarButton HorizontalAlignment="Right" Label="Assign">
                                 <AppBarButton.Content>
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71B;"/>
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71B;" />
                                 </AppBarButton.Content>
                                 <AppBarButton.Flyout>
                                     <Flyout>
@@ -189,12 +194,16 @@
 
                                             <Pivot>
                                                 <PivotItem Header="Scenes">
-                                                    <ListView ItemsSource="{x:Bind ProblemVm.Scenes, Mode=TwoWay}" IsItemClickEnabled="True"
- ItemClick="{x:Bind ProblemVm.AssignBeat}" DisplayMemberPath="Name"/>
+                                                    <ListView ItemsSource="{x:Bind ProblemVm.Scenes, Mode=TwoWay}"
+                                                              IsItemClickEnabled="True"
+                                                              ItemClick="{x:Bind ProblemVm.AssignBeat}"
+                                                              DisplayMemberPath="Name" />
                                                 </PivotItem>
                                                 <PivotItem Header="Problems">
-                                                    <ListView ItemsSource="{x:Bind ProblemVm.Problems, Mode=TwoWay}" IsItemClickEnabled="True"
- ItemClick="{x:Bind ProblemVm.AssignBeat}" DisplayMemberPath="Name"/>
+                                                    <ListView ItemsSource="{x:Bind ProblemVm.Problems, Mode=TwoWay}"
+                                                              IsItemClickEnabled="True"
+                                                              ItemClick="{x:Bind ProblemVm.AssignBeat}"
+                                                              DisplayMemberPath="Name" />
                                                 </PivotItem>
                                             </Pivot>
                                         </StackPanel>
@@ -203,22 +212,22 @@
                             </AppBarButton>
 
                             <AppBarButton Label="Unassign" HorizontalAlignment="Left" Icon="Remove"
- Click="{x:Bind ProblemVm.UnbindElement}" DataContext="{x:Bind}"/>
+                                          Click="{x:Bind ProblemVm.UnbindElement}" DataContext="{x:Bind}" />
 
 
                             <AppBarButton Icon="Add" Label="Beat" Click="{x:Bind ProblemVm.CreateBeat}"
- Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}"/>
+                                          Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}" />
                             <AppBarButton Icon="Delete" Label="Delete" Click="{x:Bind ProblemVm.DeleteBeat}"
- Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}"/>
+                                          Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}" />
                             <AppBarButton Icon="Up" Label="Move Up" Click="{x:Bind ProblemVm.MoveUp}"
- Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}"/>
+                                          Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}" />
                             <AppBarButton Label="Move Down" Click="{x:Bind ProblemVm.MoveDown}"
- Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}">
-                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74B;"/>
+                                          Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}">
+                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74B;" />
                             </AppBarButton>
                             <AppBarButton Label="Save Beatsheet to file" Click="{x:Bind ProblemVm.SaveBeatSheet}"
- Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}">
-                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;"/>
+                                          Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}">
+                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;" />
                             </AppBarButton>
                         </CommandBar>
                     </Grid>
@@ -226,46 +235,52 @@
                     <ScrollViewer Grid.Row="1">
 
                         <ListView ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}"
- SelectedItem="{x:Bind ProblemVm.SelectedBeat, Mode=TwoWay}"
- SelectedIndex="{x:Bind ProblemVm.SelectedBeatIndex, Mode=TwoWay}"
- HorizontalAlignment="Stretch">
+                                  SelectedItem="{x:Bind ProblemVm.SelectedBeat, Mode=TwoWay}"
+                                  SelectedIndex="{x:Bind ProblemVm.SelectedBeatIndex, Mode=TwoWay}"
+                                  HorizontalAlignment="Stretch">
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem">
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                 </Style>
                             </ListView.ItemContainerStyle>
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="tools:StructureBeatViewModel">
-                                    <Expander HorizontalAlignment="Stretch" DataContext="{x:Bind}" Expanding="ExpanderSet">
+                                    <Expander HorizontalAlignment="Stretch" DataContext="{x:Bind}"
+                                              Expanding="ExpanderSet">
                                         <Expander.Header>
 
                                             <Grid VerticalAlignment="Center">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="auto"/>
+                                                    <ColumnDefinition Width="auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="auto" />
                                                 </Grid.ColumnDefinitions>
-                                                <SymbolIcon Symbol="{x:Bind ElementIcon, Mode=OneWay}" Grid.Column="0"/>
-                                                <TextBox Text="{x:Bind Title, Mode=TwoWay}" TextWrapping="NoWrap" Grid.Column="1"
- IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}" Margin="10,0"
- Padding="5,0,20,0"/>
-                                                <TextBlock Text="{x:Bind ElementName, Mode=OneWay}" TextWrapping="Wrap" Grid.Column="2"
- VerticalAlignment="Center"/>
+                                                <SymbolIcon Symbol="{x:Bind ElementIcon, Mode=OneWay}" Grid.Column="0" />
+                                                <TextBox Text="{x:Bind Title, Mode=TwoWay}" TextWrapping="NoWrap"
+                                                         Grid.Column="1"
+                                                         IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}"
+                                                         Margin="10,0"
+                                                         Padding="5,0,20,0" />
+                                                <TextBlock Text="{x:Bind ElementName, Mode=OneWay}" TextWrapping="Wrap"
+                                                           Grid.Column="2"
+                                                           VerticalAlignment="Center" />
                                             </Grid>
                                         </Expander.Header>
                                         <Expander.Content>
                                             <StackPanel>
 
                                                 <TextBox Text="{x:Bind Description, Mode=TwoWay}" TextWrapping="Wrap"
- Header="Beat Description" HorizontalAlignment="Stretch"
- IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}"/>
+                                                         Header="Beat Description" HorizontalAlignment="Stretch"
+                                                         IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}" />
 
-                                                <Border Background="{ThemeResource SystemControlForegroundBaseLowBrush}" Height="1"/>
+                                                <Border
+                                                    Background="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                                                    Height="1" />
 
                                                 <usercontrols:RichEditBoxExtended HorizontalAlignment="Stretch"
- Header="Element Desription"
- RtfText="{x:Bind ElementDescription, Mode=OneWay}"
- IsReadOnly="True" TextWrapping="Wrap" TextAlignment="Left"/>
+                                                        Header="Element Desription"
+                                                        RtfText="{x:Bind ElementDescription, Mode=OneWay}"
+                                                        IsReadOnly="True" TextWrapping="Wrap" TextAlignment="Left" />
                                             </StackPanel>
                                         </Expander.Content>
                                     </Expander>
@@ -277,8 +292,8 @@
             </PivotItem>
             <PivotItem Header="Notes">
                 <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind ProblemVm.Notes, Mode=TwoWay}"
- AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
- ScrollViewer.VerticalScrollBarVisibility="Visible"/>
+                                                  AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                                                  ScrollViewer.VerticalScrollBarVisibility="Visible" />
             </PivotItem>
         </Pivot>
     </Grid>
