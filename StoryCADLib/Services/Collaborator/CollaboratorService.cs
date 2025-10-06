@@ -25,10 +25,10 @@ public class CollaboratorService
     private Type collaboratorType;
 #pragma warning restore CS0169
     public Window CollaboratorWindow; // The secondary window for Collaborator
-#pragma warning disable CS0649 // Field is assigned in platform-specific code
-    private bool dllExists;
-    private string dllPath;
-#pragma warning restore CS0649
+#pragma warning disable CS0169 // Fields used in platform-specific code (!HAS_UNO only - see Issue #1126 for macOS support)
+    private bool dllExists;     // Used in Windows-only FindDll() method
+#pragma warning restore CS0169
+    private string dllPath;     // Used in ConnectCollaborator() - will be needed for macOS (Issue #1126)
 
     public CollaboratorService(AppState appState, ILogService logService, PreferenceService preferenceService,
         AutoSaveService autoSaveService, BackupService backupService)
@@ -333,6 +333,9 @@ public class CollaboratorService
         dllExists = false;
         return false;
 #else
+        // TODO: Issue #1126 - Implement macOS Collaborator plugin loading
+        // Will use async/await for plugin discovery/loading (same pattern as Windows)
+        await Task.CompletedTask;  // Placeholder until macOS implementation
         _logService.Log(LogLevel.Error, "Collaborator is not supported on this platform.");
         return false;
 #endif

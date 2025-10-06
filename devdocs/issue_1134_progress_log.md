@@ -8,6 +8,7 @@ This log tracks all work completed for issue #1134 code cleanup.
 **Current Phase**: Phase 1 (Compiler Warnings Cleanup) - 🔄 IN PROGRESS
 **Branch**: UNOTestBranch
 **Latest Commits**:
+- [pending]: CollaboratorService warning fixes (CS0169, CS1998)
 - 9823489f: Nullable warnings suppression in test files (24 files)
 - 199fd383: Workflow order fix
 - 8d8ec8e8: Progress log update
@@ -19,8 +20,9 @@ This log tracks all work completed for issue #1134 code cleanup.
 
 **What's Left**:
 1. ~~More CS8632 warnings to suppress (nullable annotations)~~ ✅ DONE - suppressed in test files
-2. CS0618 warnings (SkiaSharp deprecation - needs research)
-3. Namespace/folder mismatch cleanup (new item)
+2. ~~CS0169/CS1998 warnings (CollaboratorService platform-specific code)~~ ✅ DONE - fixed with correct pragmas and await placeholder
+3. CS0618 warnings (SkiaSharp deprecation - needs research)
+4. Namespace/folder mismatch cleanup (new item)
 
 **Key Commands** (from `/devdocs/build_commands.md`):
 ```bash
@@ -185,6 +187,68 @@ cat msbuild_warnings.log | grep "CS8632" | sed 's/.*\\//' | sed 's/(.*//' | sort
 
 **Commits**:
 - 9823489f: "fix: Suppress nullable warnings in test files with #nullable disable - Issue #1134"
+
+---
+
+## Phase 1 Continued: CollaboratorService Platform-Specific Warning Fixes
+
+**Date**: 2025-10-06
+**Status**: ✅ COMPLETED
+
+**Problem Identified**:
+- CS0169: Field 'dllExists' never used (line 29)
+- CS1998: Async method 'FindDll()' without await (line 287)
+- Both warnings caused by platform-specific conditional compilation (`#if !HAS_UNO`)
+
+**Root Cause**:
+1. **CS0169**: Wrong pragma warning code used (CS0649 instead of CS0169)
+   - Field `dllExists` is only used in Windows code path (`#if !HAS_UNO`)
+   - On macOS/UNO builds (HAS_UNO defined), field declared but never referenced
+
+2. **CS1998**: Async method with platform-specific branches
+   - Windows branch has `await` calls (lines 294, 322) ✅
+   - UNO/macOS branch had no `await` operations ❌
+
+**Actions Taken**:
+1. Fixed CS0169 pragma from CS0649 → CS0169 (line 28)
+2. Added explanatory comments referencing Issue #1126 (macOS Collaborator support)
+3. Added `await Task.CompletedTask;` placeholder in UNO/macOS branch (line 338)
+4. Documented that dllPath will be needed for future macOS implementation
+
+**Files Modified**:
+- StoryCADLib/Services/Collaborator/CollaboratorService.cs
+
+**Code Changes**:
+```csharp
+// Line 28-31: Fixed pragma code
+#pragma warning disable CS0169 // Fields used in platform-specific code (!HAS_UNO only - see Issue #1126 for macOS support)
+    private bool dllExists;     // Used in Windows-only FindDll() method
+#pragma warning restore CS0169
+    private string dllPath;     // Used in ConnectCollaborator() - will be needed for macOS (Issue #1126)
+
+// Line 335-341: Added await placeholder in UNO/macOS branch
+#else
+    // TODO: Issue #1126 - Implement macOS Collaborator plugin loading
+    // Will use async/await for plugin discovery/loading (same pattern as Windows)
+    await Task.CompletedTask;  // Placeholder until macOS implementation
+    _logService.Log(LogLevel.Error, "Collaborator is not supported on this platform.");
+    return false;
+#endif
+```
+
+**Results**:
+- Build: ✅ Success (0 errors)
+- Tests: ✅ 417 passed, 3 skipped
+- CS0169: ✅ Fixed (correct pragma code)
+- CS1998: ✅ Fixed (await placeholder added)
+
+**Commits**:
+- [pending]: "fix: Fix CollaboratorService platform-specific warnings (CS0169, CS1998) - Issue #1134"
+
+**Notes**:
+- async/await works identically on macOS as on Windows - this is just a stub until Issue #1126
+- `await Task.CompletedTask` is idiomatic placeholder for future async work
+- Maintains proper async method signature for both platform branches
 
 ---
 
