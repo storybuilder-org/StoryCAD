@@ -54,6 +54,17 @@ public class FileOpenVM : ObservableRecipient
         //User friendly names
         SampleNames = _samplePaths.Select(name => name.Split('.')[4].Replace('_', ' '))
             .ToList();
+
+        //Initialize project template names
+        ProjectTemplateNames =
+        [
+            "Blank Outline",
+            "Overview and Story Problem",
+            "Folders",
+            "External and Internal Problems",
+            "Protagonist and Antagonist",
+            "Problems and Characters"
+        ];
     }
 
     /// <summary>
@@ -275,6 +286,17 @@ public class FileOpenVM : ObservableRecipient
     {
         get => _sampleNames;
         set => SetProperty(ref _sampleNames, value);
+    }
+
+    private List<string> _projectTemplateNames;
+
+    /// <summary>
+    ///     List of project template names for creating new outlines
+    /// </summary>
+    public List<string> ProjectTemplateNames
+    {
+        get => _projectTemplateNames;
+        set => SetProperty(ref _projectTemplateNames, value);
     }
 
     private string _titleText;

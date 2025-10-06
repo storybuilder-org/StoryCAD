@@ -111,14 +111,8 @@
                         </Grid.RowDefinitions>
 
                         <ComboBox Grid.Row="0" Header="Template:" HorizontalAlignment="Stretch" Margin="20"
-                                  SelectedIndex="{x:Bind FileOpenVM.SelectedTemplateIndex, Mode=TwoWay}">
-                            <x:String>Blank Outline</x:String>
-                            <x:String>Overview and Story Problem</x:String>
-                            <x:String>Folders</x:String>
-                            <x:String>External and Internal Problems</x:String>
-                            <x:String>Protagonist and Antagonist</x:String>
-                            <x:String>Problems and Characters</x:String>
-                        </ComboBox>
+                                  ItemsSource="{x:Bind FileOpenVM.ProjectTemplateNames}"
+                                  SelectedIndex="{x:Bind FileOpenVM.SelectedTemplateIndex, Mode=TwoWay}" />
 
                         <TextBox Grid.Row="1" HorizontalContentAlignment="Center"
                                  PlaceholderText="You can't put files here"

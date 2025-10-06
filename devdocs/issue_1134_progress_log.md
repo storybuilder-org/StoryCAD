@@ -8,6 +8,7 @@ This log tracks all work completed for issue #1134 code cleanup.
 **Current Phase**: Phase 1 (Compiler Warnings Cleanup) - 🔄 IN PROGRESS
 **Branch**: UNOTestBranch
 **Latest Commits**:
+- [pending]: FileOpenMenu XAML errors fix (x:String to ItemsSource binding)
 - 3c0611a5: Phase 1 summary update (final status)
 - 18191f54: Progress log commit hash update
 - a3a33059: CollaboratorService warning fixes (CS0169, CS1998)
@@ -16,7 +17,7 @@ This log tracks all work completed for issue #1134 code cleanup.
 - 199fd383: Workflow order fix
 
 **Build Status**: ✅ 0 errors
-**Test Status**: ✅ 417 passed, 3 skipped
+**Test Status**: ✅ 418 passed, 3 skipped
 
 **What's Left**:
 1. ~~More CS8632 warnings to suppress (nullable annotations)~~ ✅ DONE - suppressed in test files
@@ -252,6 +253,81 @@ cat msbuild_warnings.log | grep "CS8632" | sed 's/.*\\//' | sed 's/(.*//' | sort
 - async/await works identically on macOS as on Windows - this is just a stub until Issue #1126
 - `await Task.CompletedTask` is idiomatic placeholder for future async work
 - Maintains proper async method signature for both platform branches
+
+---
+
+## Phase 1 Continued: FileOpenMenu XAML Errors Fix
+
+**Date**: 2025-10-06
+**Status**: ✅ COMPLETED
+
+**Problem Identified**:
+- 12 XAML errors in FileOpenMenu.xaml (lines 115-120)
+- Error: "XAML 2009 language construct is not allowed here"
+- Cause: `x:String` inline elements not supported with compiled bindings (`x:Bind`)
+
+**Root Cause**:
+- ComboBox used inline `<x:String>` elements for template names
+- XAML 2009 language features incompatible with compiled bindings
+- Other controls (RecentsUI, BackupUI, SampleNames) already used proper ItemsSource binding pattern
+
+**Solution (TDD Approach)**:
+1. Created failing test for `ProjectTemplateNames` property
+2. Added `ProjectTemplateNames` collection to FileOpenVM
+3. Updated XAML to bind ComboBox ItemsSource to collection
+4. Verified test passes and XAML errors resolved
+
+**Files Modified**:
+- StoryCADLib/ViewModels/FileOpenVM.cs:59-67 (constructor initialization)
+- StoryCADLib/ViewModels/FileOpenVM.cs:291-300 (property definition)
+- StoryCADLib/Services/Dialogs/FileOpenMenu.xaml:113-115 (XAML binding)
+- StoryCADTests/ViewModels/FileOpenVMTests.cs:32-47 (test)
+
+**Code Changes**:
+```csharp
+// FileOpenVM.cs constructor (lines 58-67)
+//Initialize project template names
+ProjectTemplateNames =
+[
+    "Blank Outline",
+    "Overview and Story Problem",
+    "Folders",
+    "External and Internal Problems",
+    "Protagonist and Antagonist",
+    "Problems and Characters"
+];
+
+// FileOpenVM.cs property (lines 291-300)
+private List<string> _projectTemplateNames;
+
+/// <summary>
+///     List of project template names for creating new outlines
+/// </summary>
+public List<string> ProjectTemplateNames
+{
+    get => _projectTemplateNames;
+    set => SetProperty(ref _projectTemplateNames, value);
+}
+```
+
+```xaml
+<!-- FileOpenMenu.xaml (lines 113-115) -->
+<ComboBox Grid.Row="0" Header="Template:" HorizontalAlignment="Stretch" Margin="20"
+          ItemsSource="{x:Bind FileOpenVM.ProjectTemplateNames}"
+          SelectedIndex="{x:Bind FileOpenVM.SelectedTemplateIndex, Mode=TwoWay}" />
+```
+
+**Test Added**:
+- FileOpenVMTests.ProjectTemplateNames_IsInitialized
+- Verifies collection not null, contains 6 items, all names correct
+
+**Results**:
+- Build: ✅ Success (0 errors)
+- Tests: ✅ 418 passed, 3 skipped (1 new test added)
+- XAML errors: ✅ Fixed (12 errors eliminated)
+
+**Commits**:
+- [pending]: "fix: Replace x:String XAML elements with ItemsSource binding - Issue #1134"
 
 ---
 
