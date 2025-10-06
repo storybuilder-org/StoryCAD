@@ -1,7 +1,7 @@
-using StoryCAD.Models;
-using StoryCAD.Services.Dialogs;
-using StoryCAD.Services.Logging;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.Models;
+using StoryCADLib.Services.Dialogs;
+using StoryCADLib.Services.Logging;
+using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADTests.ViewModels.Tools;
 

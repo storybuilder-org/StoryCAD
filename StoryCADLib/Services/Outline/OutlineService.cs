@@ -1,12 +1,12 @@
 ﻿#pragma warning disable CS8632 // Nullable annotations used without nullable context
 using System.Collections.ObjectModel;
 using System.Text.Json;
-using StoryCAD.DAL;
-using StoryCAD.Services.Locking;
-using StoryCAD.Services.Search;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.DAL;
+using StoryCADLib.Services.Locking;
+using StoryCADLib.Services.Search;
+using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.Services.Outline;
+namespace StoryCADLib.Services.Outline;
 
 /// <summary>
 ///     Service for interfacing with outlines at a low level.

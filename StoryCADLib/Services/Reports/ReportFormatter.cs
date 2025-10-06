@@ -1,11 +1,11 @@
 using System.Reflection;
 using System.Text;
 using NRtfTree.Util;
-using StoryCAD.Services.Outline;
-using StoryCAD.ViewModels.SubViewModels;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels.SubViewModels;
+using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.Services.Reports;
+namespace StoryCADLib.Services.Reports;
 
 public class ReportFormatter
 {

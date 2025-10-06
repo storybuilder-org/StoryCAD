@@ -1,4 +1,4 @@
-﻿namespace StoryCAD.Services.Dialogs;
+﻿namespace StoryCADLib.Services.Dialogs;
 
 /// <summary>
 ///     A simple picker allowing a user to pick the

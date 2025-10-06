@@ -2,12 +2,12 @@ using System.Reflection;
 using System.Runtime.Loader;
 using Windows.ApplicationModel.AppExtensions;
 using Microsoft.UI.Windowing;
-using StoryCAD.Collaborator;
-using StoryCAD.Collaborator.ViewModels;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Collaborator.Contracts;
+using StoryCADLib.Collaborator;
+using StoryCADLib.Collaborator.ViewModels;
+using StoryCADLib.Services.Backup;
+using StoryCADLib.Services.Collaborator.Contracts;
 
-namespace StoryCAD.Services.Collaborator;
+namespace StoryCADLib.Services.Collaborator;
 
 public class CollaboratorService
 {

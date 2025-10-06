@@ -1,8 +1,8 @@
 ﻿using System.Text;
-using StoryCAD.Services.Outline;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.Services.Reports;
+namespace StoryCADLib.Services.Reports;
 
 public class PrintReports
 {

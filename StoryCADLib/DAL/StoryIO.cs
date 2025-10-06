@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using FileAttributes = System.IO.FileAttributes;
 
-namespace StoryCAD.DAL;
+namespace StoryCADLib.DAL;
 
 /// <summary>
 ///     Handles Reading and Writing of Story Data

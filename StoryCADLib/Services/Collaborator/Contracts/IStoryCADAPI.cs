@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
-using StoryCAD.Services.API;
+using StoryCADLib.Services.API;
 
-namespace StoryCAD.Services.Collaborator.Contracts;
+namespace StoryCADLib.Services.Collaborator.Contracts;
 
 /// <summary>
 ///     Interface for existing SemanticKernelAPI methods that Collaborator uses

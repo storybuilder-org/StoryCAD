@@ -1,11 +1,11 @@
 ﻿using System.Text;
 using Windows.Data.Xml.Dom;
 using NRtfTree.Util;
-using StoryCAD.DAL;
-using StoryCAD.Models.Scrivener;
-using StoryCAD.Services.Outline;
+using StoryCADLib.DAL;
+using StoryCADLib.Models.Scrivener;
+using StoryCADLib.Services.Outline;
 
-namespace StoryCAD.Services.Reports;
+namespace StoryCADLib.Services.Reports;
 
 public class ScrivenerReports
 {

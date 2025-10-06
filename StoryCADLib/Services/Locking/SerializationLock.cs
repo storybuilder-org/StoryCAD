@@ -1,7 +1,7 @@
 #pragma warning disable CS8632 // Nullable annotations used without nullable context
 using System.Runtime.CompilerServices;
 
-namespace StoryCAD.Services.Locking;
+namespace StoryCADLib.Services.Locking;
 
 /// <summary>
 ///     A single shared gate used to serialize saves, backups, and manual commands.

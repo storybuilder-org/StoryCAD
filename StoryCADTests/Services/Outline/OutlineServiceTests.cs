@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Models;
-using StoryCAD.Services.Outline;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.Models;
+using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels.Tools;
 
 #nullable disable
 

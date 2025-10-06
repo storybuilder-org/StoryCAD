@@ -1,21 +1,21 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI;
-using StoryCAD.DAL;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services;
-using StoryCAD.Services.Backend;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Dialogs;
-using StoryCAD.Services.Dialogs.Tools;
-using StoryCAD.Services.Locking;
-using StoryCAD.Services.Messages;
-using StoryCAD.Services.Outline;
-using StoryCAD.Services.Reports;
-using StoryCAD.Services.Search;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.DAL;
+using StoryCADLib.Models.Tools;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Backend;
+using StoryCADLib.Services.Backup;
+using StoryCADLib.Services.Dialogs;
+using StoryCADLib.Services.Dialogs.Tools;
+using StoryCADLib.Services.Locking;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Outline;
+using StoryCADLib.Services.Reports;
+using StoryCADLib.Services.Search;
+using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.ViewModels.SubViewModels;
+namespace StoryCADLib.ViewModels.SubViewModels;
 
 public class OutlineViewModel : ObservableRecipient
 {

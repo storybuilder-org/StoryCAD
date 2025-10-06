@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using MySql.Data.MySqlClient;
 
-namespace StoryCAD.DAL;
+namespace StoryCADLib.DAL;
 
 public class MySqlIo
 {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace StoryCAD.ViewModels.Tools;
+namespace StoryCADLib.ViewModels.Tools;
 
 public class TraitsViewModel : ObservableRecipient
 {

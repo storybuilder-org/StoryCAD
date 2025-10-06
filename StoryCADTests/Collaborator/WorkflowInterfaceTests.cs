@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
-using StoryCAD.Models;
-using StoryCAD.Services.API;
-using StoryCAD.Services.Collaborator.Contracts;
+using StoryCADLib.Models;
+using StoryCADLib.Services.API;
+using StoryCADLib.Services.Collaborator.Contracts;
 
 namespace StoryCADTests.Collaborator;
 

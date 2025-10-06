@@ -1,9 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using StoryCAD.Services;
-using LogLevel = StoryCAD.Services.Logging.LogLevel;
+using StoryCADLib.Services;
+using LogLevel = StoryCADLib.Services.Logging.LogLevel;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 /// <summary>
 ///     StoryNodeItem is the equivalent of a ViewModel for a single TreeViewItem in the

@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using StoryCAD.Services;
+using StoryCADLib.Services;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 public class NewProjectViewModel : ObservableRecipient
 {

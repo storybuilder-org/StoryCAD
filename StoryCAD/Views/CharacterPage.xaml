@@ -2,8 +2,8 @@
       x:Class="StoryCAD.Views.CharacterPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:usercontrols="using:StoryCAD.Controls"
-      xmlns:viewModels="using:StoryCAD.ViewModels">
+      xmlns:usercontrols="using:StoryCADLib.Controls"
+      xmlns:viewModels="using:StoryCADLib.ViewModels">
 
     <Grid>
         <Grid.RowDefinitions>

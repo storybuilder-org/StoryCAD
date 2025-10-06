@@ -1,11 +1,11 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryCAD.Models;
-using StoryCAD.Services;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Logging;
-using StoryCAD.Services.Messages;
-using StoryCAD.Services.Outline;
+using StoryCADLib.Models;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Backup;
+using StoryCADLib.Services.Logging;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Outline;
 
 #nullable disable
 

@@ -2,9 +2,9 @@
 using System.Diagnostics;
 using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
-using StoryCAD.Models.Tools;
+using StoryCADLib.Models.Tools;
 
-namespace StoryCAD.ViewModels.Tools;
+namespace StoryCADLib.ViewModels.Tools;
 
 public class TopicsViewModel : ObservableRecipient
 {

@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using LogLevel = StoryCAD.Services.Logging.LogLevel;
+using LogLevel = StoryCADLib.Services.Logging.LogLevel;
 
-namespace StoryCAD.DAL;
+namespace StoryCADLib.DAL;
 
 /// <summary>
 ///     Custom converter for StoryElement with Type discriminator.

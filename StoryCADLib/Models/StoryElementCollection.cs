@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 /// <summary>
 ///     StoryElementCollection is an ObservableCollection of StoryElement

@@ -1,8 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 public class ProblemModel : StoryElement
 {

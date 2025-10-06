@@ -1,12 +1,12 @@
 using System.Text.Json;
 using Microsoft.UI;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Locking;
+using StoryCADLib.Models.Tools;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Backup;
+using StoryCADLib.Services.Locking;
 using Application = Microsoft.UI.Xaml.Application;
 
-namespace StoryCAD.DAL;
+namespace StoryCADLib.DAL;
 
 /// <summary>
 ///     Object that reads/writes StoryCAD Preference Files

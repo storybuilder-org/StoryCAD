@@ -1,6 +1,6 @@
-using StoryCAD.Services.Collaborator.Contracts;
+using StoryCADLib.Services.Collaborator.Contracts;
 
-namespace StoryCAD.Services.Collaborator;
+namespace StoryCADLib.Services.Collaborator;
 
 /// <summary>
 ///     Mock implementation of ICollaborator for testing purposes.

@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Text.Json;
 
-namespace StoryCAD.DAL;
+namespace StoryCADLib.DAL;
 
 public class ListLoader
 {

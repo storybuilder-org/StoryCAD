@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
-using StoryCAD.Services.Outline;
+using StoryCADLib.Services.Outline;
 
-namespace StoryCAD.ViewModels.Tools;
+namespace StoryCADLib.ViewModels.Tools;
 
 /// <summary>
 ///     Model for how the StructureModelTitle Tab works in problem.

@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Reflection;
-using StoryCAD.Collaborator.Views;
+using StoryCADLib.Collaborator.Views;
 
-namespace StoryCAD.Collaborator;
+namespace StoryCADLib.Collaborator;
 
 public interface IWizardViewModel
 {

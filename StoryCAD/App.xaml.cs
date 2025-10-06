@@ -1,14 +1,14 @@
 #pragma warning disable CS8632 // Nullable annotations used without nullable context
 using System.Diagnostics;
 using dotenv.net;
-using StoryCAD.DAL;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services;
-using StoryCAD.Services.Backend;
-using StoryCAD.Services.IoC;
-using StoryCAD.Services.Json;
-using StoryCAD.Services.Logging;
-using StoryCAD.Services.Navigation;
+using StoryCADLib.DAL;
+using StoryCADLib.Models.Tools;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Backend;
+using StoryCADLib.Services.IoC;
+using StoryCADLib.Services.Json;
+using StoryCADLib.Services.Logging;
+using StoryCADLib.Services.Navigation;
 using StoryCAD.Views;
 using Uno.Extensions;
 using WinRT.Interop;

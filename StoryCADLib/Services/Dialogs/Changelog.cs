@@ -1,6 +1,6 @@
 ﻿using Octokit;
 
-namespace StoryCAD.Services.Dialogs;
+namespace StoryCADLib.Services.Dialogs;
 
 /// <summary>
 ///     This class handles showing Change logs for the app

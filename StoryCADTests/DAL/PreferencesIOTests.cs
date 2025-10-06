@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.DAL;
-using StoryCAD.Models;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services;
+using StoryCADLib.DAL;
+using StoryCADLib.Models;
+using StoryCADLib.Models.Tools;
+using StoryCADLib.Services;
 
 namespace StoryCADTests.DAL;
 

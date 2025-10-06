@@ -1,6 +1,6 @@
-﻿using StoryCAD.ViewModels.Tools;
+﻿using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.Controls;
+namespace StoryCADLib.Controls;
 
 public sealed partial class Traits
 {

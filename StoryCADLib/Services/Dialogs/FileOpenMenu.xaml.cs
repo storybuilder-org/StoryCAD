@@ -1,4 +1,4 @@
-namespace StoryCAD.Services.Dialogs;
+namespace StoryCADLib.Services.Dialogs;
 
 /// <summary>
 ///     File open menu page, allows user to open and create outlines/samples

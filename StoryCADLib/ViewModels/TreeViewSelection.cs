@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 public partial class TreeViewSelection : DependencyObject, INotifyPropertyChanged
 {

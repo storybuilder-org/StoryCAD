@@ -5,9 +5,9 @@ using Elmah.Io.NLog;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
-using StoryCAD.Services.Json;
+using StoryCADLib.Services.Json;
 
-namespace StoryCAD.Services.Logging;
+namespace StoryCADLib.Services.Logging;
 
 /// <summary>
 ///     Manage the Task Log file.

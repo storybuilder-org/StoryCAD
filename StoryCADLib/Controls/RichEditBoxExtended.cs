@@ -1,8 +1,8 @@
 using Microsoft.UI;
 using Microsoft.UI.Text;
-using StoryCAD.Services.Reports;
+using StoryCADLib.Services.Reports;
 
-namespace StoryCAD.Controls;
+namespace StoryCADLib.Controls;
 #if !HAS_UNO
 public partial class RichEditBoxExtended : RichEditBox
 {

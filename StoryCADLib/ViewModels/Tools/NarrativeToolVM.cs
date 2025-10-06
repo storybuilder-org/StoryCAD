@@ -1,12 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using StoryCAD.Services.Dialogs;
-using StoryCAD.Services.Dialogs.Tools;
-using StoryCAD.Services.Locking;
-using StoryCAD.Services.Outline;
+using StoryCADLib.Services.Dialogs;
+using StoryCADLib.Services.Dialogs.Tools;
+using StoryCADLib.Services.Locking;
+using StoryCADLib.Services.Outline;
 
-namespace StoryCAD.ViewModels.Tools;
+namespace StoryCADLib.ViewModels.Tools;
 
 /// <summary>
 ///     This is the ViewModel for the Narrative tool.

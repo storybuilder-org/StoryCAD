@@ -1,5 +1,5 @@
 #pragma warning disable CS8632 // Nullable annotations used without nullable context
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 /// <summary>
 ///     Encapsulates a story document, combining the model and its file path.

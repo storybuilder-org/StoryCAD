@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
-using StoryCAD.Services;
+using StoryCADLib.Services;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 public class WebModel : StoryElement
 {

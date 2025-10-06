@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Services;
-using StoryCAD.Services.Backend;
-using StoryCAD.Services.Json;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Backend;
+using StoryCADLib.Services.Json;
 
 #nullable disable
 

@@ -4,11 +4,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Web.WebView2.Core;
-using StoryCAD.Services;
-using StoryCAD.Services.Messages;
-using StoryCAD.Services.Navigation;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Navigation;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 public class WebViewModel : ObservableRecipient, INavigable, ISaveable
 {

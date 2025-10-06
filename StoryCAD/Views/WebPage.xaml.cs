@@ -1,6 +1,6 @@
 using Microsoft.Web.WebView2.Core;
-using StoryCAD.Services;
-using StoryCAD.Services.Logging;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Logging;
 
 namespace StoryCAD.Views;
 

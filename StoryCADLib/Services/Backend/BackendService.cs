@@ -1,9 +1,9 @@
 ﻿using MySql.Data.MySqlClient;
-using StoryCAD.DAL;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services.Json;
+using StoryCADLib.DAL;
+using StoryCADLib.Models.Tools;
+using StoryCADLib.Services.Json;
 
-namespace StoryCAD.Services.Backend;
+namespace StoryCADLib.Services.Backend;
 
 /// <summary>
 ///     BackendService is StoryCAD's interface to our backend server

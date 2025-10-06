@@ -1,8 +1,8 @@
 ﻿using Windows.Data.Xml.Dom;
 using NRtfTree.Core;
-using StoryCAD.Models.Scrivener;
+using StoryCADLib.Models.Scrivener;
 
-namespace StoryCAD.DAL;
+namespace StoryCADLib.DAL;
 
 /// <summary>
 ///     A data source that provides methods to read, parse,

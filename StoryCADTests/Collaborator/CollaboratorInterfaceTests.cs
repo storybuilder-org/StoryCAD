@@ -1,5 +1,5 @@
-using StoryCAD.Models;
-using StoryCAD.Services.Collaborator.Contracts;
+using StoryCADLib.Models;
+using StoryCADLib.Services.Collaborator.Contracts;
 #if WINDOWS10_0_22621_0_OR_GREATER
 #endif
 

@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using dotenv.net.Utilities;
 
-namespace StoryCAD.Services.Json;
+namespace StoryCADLib.Services.Json;
 
 public class Doppler
 {

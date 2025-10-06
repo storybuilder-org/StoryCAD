@@ -1,6 +1,6 @@
-using StoryCAD.Models.Tools;
+using StoryCADLib.Models.Tools;
 
-namespace StoryCAD.Controls;
+namespace StoryCADLib.Controls;
 
 public sealed partial class Conflict
 {

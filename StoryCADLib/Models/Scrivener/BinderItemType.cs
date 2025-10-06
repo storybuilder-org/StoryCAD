@@ -1,4 +1,4 @@
-﻿namespace StoryCAD.Models.Scrivener;
+﻿namespace StoryCADLib.Models.Scrivener;
 
 public enum BinderItemType
 {

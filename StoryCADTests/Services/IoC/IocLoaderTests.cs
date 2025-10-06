@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Services.Backend;
-using StoryCAD.ViewModels;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.Services.Backend;
+using StoryCADLib.ViewModels;
+using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADTests.Services.IoC;
 

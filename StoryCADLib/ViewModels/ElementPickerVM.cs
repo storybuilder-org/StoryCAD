@@ -1,6 +1,6 @@
-﻿using StoryCAD.Services.Dialogs;
+﻿using StoryCADLib.Services.Dialogs;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 /// <summary>
 ///     ViewModel for the Element Picker

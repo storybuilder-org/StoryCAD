@@ -1,13 +1,13 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using CommunityToolkit.Mvvm.ComponentModel;
-using StoryCAD.DAL;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services;
-using StoryCAD.Services.Backend;
-using StoryCAD.Services.Ratings;
+using StoryCADLib.DAL;
+using StoryCADLib.Models.Tools;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Backend;
+using StoryCADLib.Services.Ratings;
 
-namespace StoryCAD.ViewModels.Tools;
+namespace StoryCADLib.ViewModels.Tools;
 
 /// <summary>
 ///     This view model handles the Services.Dialogs.Tools.PreferencesDialog.

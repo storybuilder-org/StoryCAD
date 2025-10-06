@@ -2,10 +2,10 @@
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 using Microsoft.SemanticKernel;
-using StoryCAD.Services.Collaborator.Contracts;
-using StoryCAD.Services.Outline;
+using StoryCADLib.Services.Collaborator.Contracts;
+using StoryCADLib.Services.Outline;
 
-namespace StoryCAD.Services.API;
+namespace StoryCADLib.Services.API;
 
 /// <summary>
 ///     The StoryCAD API—a powerful interface that combines human and AI interactions for generating and managing

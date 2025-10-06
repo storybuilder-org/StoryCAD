@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Models;
-using StoryCAD.Services.Reports;
+using StoryCADLib.Models;
+using StoryCADLib.Services.Reports;
 
 namespace StoryCADTests.Services.Reports;
 

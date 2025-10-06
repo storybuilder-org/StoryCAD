@@ -1,6 +1,6 @@
-﻿using StoryCAD.Services.Json;
+﻿using StoryCADLib.Services.Json;
 
-namespace StoryCAD.Services.Logging;
+namespace StoryCADLib.Services.Logging;
 
 public interface ILogService
 {

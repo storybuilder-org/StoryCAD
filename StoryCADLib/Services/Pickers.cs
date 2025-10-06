@@ -3,7 +3,7 @@
 using Windows.Storage.Pickers;
 using WinRT.Interop;
 
-namespace StoryCAD.Services;
+namespace StoryCADLib.Services;
 
 public static class Pickers
 {

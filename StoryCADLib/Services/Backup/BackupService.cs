@@ -1,11 +1,11 @@
 ﻿using System.IO.Compression;
 using System.Timers;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryCAD.Services.Locking;
-using StoryCAD.Services.Messages;
+using StoryCADLib.Services.Locking;
+using StoryCADLib.Services.Messages;
 using Timer = System.Timers.Timer;
 
-namespace StoryCAD.Services.Backup;
+namespace StoryCADLib.Services.Backup;
 
 public class BackupService
 {

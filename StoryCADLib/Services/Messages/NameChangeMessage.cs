@@ -1,4 +1,4 @@
-﻿namespace StoryCAD.Services.Messages;
+﻿namespace StoryCADLib.Services.Messages;
 
 public class NameChangeMessage
 {

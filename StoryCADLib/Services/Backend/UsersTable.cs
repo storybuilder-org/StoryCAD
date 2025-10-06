@@ -1,4 +1,4 @@
-﻿namespace StoryCAD.Services.Backend;
+﻿namespace StoryCADLib.Services.Backend;
 
 public class UsersTable
 {

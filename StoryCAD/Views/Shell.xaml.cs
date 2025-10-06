@@ -5,16 +5,16 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Collaborator;
-using StoryCAD.Services.Dialogs;
-using StoryCAD.Services.Locking;
-using StoryCAD.Services.Logging;
-using StoryCAD.Services.Ratings;
-using StoryCAD.ViewModels.SubViewModels;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.Models.Tools;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Backup;
+using StoryCADLib.Services.Collaborator;
+using StoryCADLib.Services.Dialogs;
+using StoryCADLib.Services.Locking;
+using StoryCADLib.Services.Logging;
+using StoryCADLib.Services.Ratings;
+using StoryCADLib.ViewModels.SubViewModels;
+using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCAD.Views;
 

@@ -1,11 +1,11 @@
 using CommunityToolkit.Mvvm.Messaging;
-using StoryCAD.DAL;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Locking;
-using StoryCAD.Services.Messages;
+using StoryCADLib.DAL;
+using StoryCADLib.Services.Backup;
+using StoryCADLib.Services.Locking;
+using StoryCADLib.Services.Messages;
 using static CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger;
 
-namespace StoryCAD.Services.Outline;
+namespace StoryCADLib.Services.Outline;
 
 /// <summary>
 ///     Service for creating new story files without dependencies on ViewModels

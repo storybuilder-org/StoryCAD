@@ -1,11 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using StoryCAD.Collaborator.Views;
-using StoryCAD.Services.Collaborator;
-using StoryCAD.Services.Navigation;
+using StoryCADLib.Collaborator.Views;
+using StoryCADLib.Services.Collaborator;
+using StoryCADLib.Services.Navigation;
 
-namespace StoryCAD.Collaborator.ViewModels;
+namespace StoryCADLib.Collaborator.ViewModels;
 
 public partial class WorkflowViewModel : ObservableRecipient
 {

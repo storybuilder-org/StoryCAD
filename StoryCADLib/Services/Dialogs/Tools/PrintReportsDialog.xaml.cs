@@ -1,6 +1,6 @@
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.Services.Dialogs.Tools;
+namespace StoryCADLib.Services.Dialogs.Tools;
 
 public sealed partial class PrintReportsDialog
 {

@@ -1,9 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Octokit;
-using StoryCAD.Services;
-using StoryCAD.Services.Json;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Json;
 
-namespace StoryCAD.ViewModels.Tools;
+namespace StoryCADLib.ViewModels.Tools;
 
 public class FeedbackViewModel : ObservableRecipient
 {

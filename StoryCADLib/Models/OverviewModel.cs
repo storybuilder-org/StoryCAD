@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 /// <summary>
 ///     OverviewModel contains overview information for the entire story, such as title, author, and so on.

@@ -1,6 +1,6 @@
-﻿using StoryCAD.Models.Tools;
+﻿using StoryCADLib.Models.Tools;
 
-namespace StoryCAD.Services;
+namespace StoryCADLib.Services;
 
 /// <summary>
 ///     This service provides the users preferences.

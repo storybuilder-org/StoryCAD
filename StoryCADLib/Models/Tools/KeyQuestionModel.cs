@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace StoryCAD.Models.Tools;
+namespace StoryCADLib.Models.Tools;
 
 public class KeyQuestionModel : ObservableObject
 {

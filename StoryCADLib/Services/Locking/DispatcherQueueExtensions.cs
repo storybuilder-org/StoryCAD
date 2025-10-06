@@ -1,7 +1,7 @@
 #pragma warning disable CS8632 // Nullable annotations used without nullable context
 using Microsoft.UI.Dispatching;
 
-namespace StoryCAD.Services.Locking;
+namespace StoryCADLib.Services.Locking;
 
 public static class DispatcherQueueExtensions
 {

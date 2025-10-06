@@ -1,5 +1,5 @@
-using StoryCAD.Models;
-using StoryCAD.Services.Collaborator.Contracts;
+using StoryCADLib.Models;
+using StoryCADLib.Services.Collaborator.Contracts;
 
 namespace StoryCADTests.Services.Collaborator.Contracts;
 

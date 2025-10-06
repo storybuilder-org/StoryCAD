@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.Loader;
 
-namespace StoryCAD.Services.Collaborator;
+namespace StoryCADLib.Services.Collaborator;
 
 public class CustomLoadContext : AssemblyLoadContext
 {

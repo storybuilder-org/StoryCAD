@@ -1,4 +1,4 @@
-namespace StoryCAD.Services.Collaborator.Contracts;
+namespace StoryCADLib.Services.Collaborator.Contracts;
 
 /// <summary>
 ///     Workflow definition (no implementation details)

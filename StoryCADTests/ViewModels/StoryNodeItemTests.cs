@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Models;
-using StoryCAD.ViewModels.SubViewModels;
+using StoryCADLib.Models;
+using StoryCADLib.ViewModels.SubViewModels;
 
 namespace StoryCADTests.ViewModels;
 

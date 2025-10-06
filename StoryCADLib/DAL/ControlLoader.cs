@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using StoryCAD.Models.Tools;
+using StoryCADLib.Models.Tools;
 
-namespace StoryCAD.DAL;
+namespace StoryCADLib.DAL;
 
 public class ControlLoader
 {

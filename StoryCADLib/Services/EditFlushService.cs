@@ -1,4 +1,4 @@
-namespace StoryCAD.Services;
+namespace StoryCADLib.Services;
 
 /// <summary>
 ///     Service responsible for flushing UI edits from ViewModels to the Model.

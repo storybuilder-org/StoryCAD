@@ -1,4 +1,4 @@
-﻿namespace StoryCAD.Services.API;
+﻿namespace StoryCADLib.Services.API;
 
 /// <summary>
 ///     Result of API Operation

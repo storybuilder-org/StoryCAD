@@ -2,7 +2,7 @@
       x:Class="StoryCAD.Views.OverviewPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:usercontrols="using:StoryCAD.Controls">
+      xmlns:usercontrols="using:StoryCADLib.Controls">
 
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.RowDefinitions>

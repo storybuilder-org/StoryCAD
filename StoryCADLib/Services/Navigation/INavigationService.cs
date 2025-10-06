@@ -1,4 +1,4 @@
-﻿namespace StoryCAD.Services.Navigation;
+﻿namespace StoryCADLib.Services.Navigation;
 
 // ****************************************************************************
 // <copyright file="INavigationService.cs" company="GalaSoft Laurent Bugnion">

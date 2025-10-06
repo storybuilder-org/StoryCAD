@@ -1,4 +1,4 @@
-using StoryCAD.Models;
+using StoryCADLib.Models;
 
 namespace StoryCADTests.Models;
 

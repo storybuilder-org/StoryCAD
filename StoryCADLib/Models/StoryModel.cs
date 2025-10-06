@@ -3,9 +3,9 @@ using System.Collections.Specialized;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
-using StoryCAD.DAL;
+using StoryCADLib.DAL;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 // TODO: Move StoryModel to ViewModels namespace in a future refactoring
 // This class implements ObservableObject and contains view-specific logic

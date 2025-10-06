@@ -1,19 +1,19 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using StoryCAD.Collaborator.ViewModels;
-using StoryCAD.DAL;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services.Backend;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Collaborator;
-using StoryCAD.Services.Dialogs;
-using StoryCAD.Services.Navigation;
-using StoryCAD.Services.Outline;
-using StoryCAD.Services.Ratings;
-using StoryCAD.Services.Search;
-using StoryCAD.ViewModels.SubViewModels;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.Collaborator.ViewModels;
+using StoryCADLib.DAL;
+using StoryCADLib.Models.Tools;
+using StoryCADLib.Services.Backend;
+using StoryCADLib.Services.Backup;
+using StoryCADLib.Services.Collaborator;
+using StoryCADLib.Services.Dialogs;
+using StoryCADLib.Services.Navigation;
+using StoryCADLib.Services.Outline;
+using StoryCADLib.Services.Ratings;
+using StoryCADLib.Services.Search;
+using StoryCADLib.ViewModels.SubViewModels;
+using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.Services.IoC;
+namespace StoryCADLib.Services.IoC;
 
 /// <summary>
 ///     Handles initialisation of StoryCADLib.

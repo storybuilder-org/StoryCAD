@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Models;
-using StoryCAD.Services.API;
-using StoryCAD.Services.Outline;
+using StoryCADLib.Models;
+using StoryCADLib.Services.API;
+using StoryCADLib.Services.Outline;
 
 #nullable disable
 

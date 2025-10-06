@@ -1,4 +1,4 @@
-﻿namespace StoryCAD.Models.Tools;
+namespace StoryCADLib.Models.Tools;
 
 public class PlotPatternScene
 {

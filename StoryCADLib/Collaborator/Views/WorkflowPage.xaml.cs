@@ -1,10 +1,10 @@
 using System.Collections.ObjectModel;
 using Windows.System;
 using Microsoft.UI.Xaml.Input;
-using StoryCAD.Collaborator.ViewModels;
-using StoryCAD.Services.Collaborator;
+using StoryCADLib.Collaborator.ViewModels;
+using StoryCADLib.Services.Collaborator;
 
-namespace StoryCAD.Collaborator.Views;
+namespace StoryCADLib.Collaborator.Views;
 
 /// <summary>
 ///     Updated version of WorkflowPage

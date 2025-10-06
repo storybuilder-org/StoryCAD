@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 public class SaveAsViewModel : ObservableRecipient
 {

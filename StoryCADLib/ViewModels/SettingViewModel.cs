@@ -2,11 +2,11 @@
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryCAD.Services;
-using StoryCAD.Services.Messages;
-using StoryCAD.Services.Navigation;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Navigation;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
 {

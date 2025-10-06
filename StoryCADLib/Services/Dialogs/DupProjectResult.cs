@@ -1,4 +1,4 @@
-﻿namespace StoryCAD.Services.Dialogs;
+﻿namespace StoryCADLib.Services.Dialogs;
 
 public enum DupProjectResult
 {

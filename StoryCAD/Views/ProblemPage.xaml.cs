@@ -1,7 +1,7 @@
-﻿using StoryCAD.Services;
-using StoryCAD.Services.Logging;
-using StoryCAD.ViewModels.SubViewModels;
-using StoryCAD.ViewModels.Tools;
+﻿using StoryCADLib.Services;
+using StoryCADLib.Services.Logging;
+using StoryCADLib.ViewModels.SubViewModels;
+using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCAD.Views;
 

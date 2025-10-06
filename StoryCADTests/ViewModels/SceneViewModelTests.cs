@@ -1,8 +1,8 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryCAD.Models;
-using StoryCAD.Services.Messages;
-using StoryCAD.ViewModels;
+using StoryCADLib.Models;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.ViewModels;
 
 #nullable disable
 

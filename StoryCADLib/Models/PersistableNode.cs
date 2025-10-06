@@ -1,4 +1,4 @@
-﻿namespace StoryCAD.Models;
+﻿namespace StoryCADLib.Models;
 
 /// <summary>
 ///     Node that can be persisted to JSON

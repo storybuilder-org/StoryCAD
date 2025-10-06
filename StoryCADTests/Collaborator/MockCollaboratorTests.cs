@@ -1,7 +1,7 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Models;
-using StoryCAD.Services.Collaborator;
-using StoryCAD.Services.Logging;
+using StoryCADLib.Models;
+using StoryCADLib.Services.Collaborator;
+using StoryCADLib.Services.Logging;
 
 namespace StoryCADTests.Collaborator;
 

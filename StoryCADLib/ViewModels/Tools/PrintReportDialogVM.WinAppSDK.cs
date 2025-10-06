@@ -3,7 +3,7 @@ using Windows.Graphics.Printing;
 using Microsoft.UI;
 using Microsoft.UI.Xaml.Printing;
 
-namespace StoryCAD.ViewModels.Tools;
+namespace StoryCADLib.ViewModels.Tools;
 
 public partial class PrintReportDialogVM
 {

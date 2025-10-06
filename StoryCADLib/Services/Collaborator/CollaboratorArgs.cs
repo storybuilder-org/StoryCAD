@@ -1,6 +1,6 @@
-using StoryCAD.Collaborator.ViewModels;
+using StoryCADLib.Collaborator.ViewModels;
 
-namespace StoryCAD.Services.Collaborator;
+namespace StoryCADLib.Services.Collaborator;
 
 public class CollaboratorArgs
 {

@@ -1,8 +1,8 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Services;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Locking;
-using StoryCAD.Services.Logging;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Backup;
+using StoryCADLib.Services.Locking;
+using StoryCADLib.Services.Logging;
 
 #nullable disable
 

@@ -1,4 +1,4 @@
-﻿namespace StoryCAD.Exceptions;
+﻿namespace StoryCADLib.Exceptions;
 
 public class ResourceLoadingException : Exception
 {

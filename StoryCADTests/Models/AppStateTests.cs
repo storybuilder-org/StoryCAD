@@ -1,5 +1,5 @@
-using StoryCAD.Models;
-using StoryCAD.Services;
+using StoryCADLib.Models;
+using StoryCADLib.Services;
 
 namespace StoryCADTests.Models;
 

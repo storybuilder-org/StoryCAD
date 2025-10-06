@@ -1,4 +1,4 @@
-﻿namespace StoryCAD.ViewModels;
+﻿namespace StoryCADLib.ViewModels;
 
 public static class TextBoxFocus
 {

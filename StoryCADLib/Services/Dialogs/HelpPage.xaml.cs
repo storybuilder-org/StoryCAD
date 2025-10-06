@@ -1,6 +1,6 @@
-using StoryCAD.DAL;
+using StoryCADLib.DAL;
 
-namespace StoryCAD.Services.Dialogs;
+namespace StoryCADLib.Services.Dialogs;
 
 public sealed partial class HelpPage : Page
 {

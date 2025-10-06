@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.VisualStudio.TestPlatform.TestExecutor;
-using StoryCAD.DAL;
-using StoryCAD.Models;
-using StoryCAD.Services.Logging;
+using StoryCADLib.DAL;
+using StoryCADLib.Models;
+using StoryCADLib.Services.Logging;
 
 #nullable disable
 

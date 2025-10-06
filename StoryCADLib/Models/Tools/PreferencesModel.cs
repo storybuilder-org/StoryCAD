@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace StoryCAD.Models.Tools;
+namespace StoryCADLib.Models.Tools;
 
 /// <summary>
 ///     PreferencesModel contains StoryCAD User preferences.

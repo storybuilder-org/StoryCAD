@@ -2,7 +2,7 @@
       x:Class="StoryCAD.Views.WebPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:viewModels="using:StoryCAD.ViewModels">
+      xmlns:viewModels="using:StoryCADLib.ViewModels">
 
     <Grid Margin="8,10">
         <Grid.RowDefinitions>

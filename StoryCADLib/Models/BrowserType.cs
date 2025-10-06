@@ -1,4 +1,4 @@
-﻿namespace StoryCAD.Models;
+﻿namespace StoryCADLib.Models;
 
 public enum BrowserType
 {

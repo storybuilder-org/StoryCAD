@@ -1,10 +1,10 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.DAL;
-using StoryCAD.Models;
-using StoryCAD.Services.API;
-using StoryCAD.Services.Logging;
-using StoryCAD.Services.Outline;
-using StoryCAD.ViewModels.SubViewModels;
+using StoryCADLib.DAL;
+using StoryCADLib.Models;
+using StoryCADLib.Services.API;
+using StoryCADLib.Services.Logging;
+using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels.SubViewModels;
 
 #nullable disable
 

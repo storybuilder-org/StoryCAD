@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 /// <summary>
 ///     Viewmodel for the backup view model.

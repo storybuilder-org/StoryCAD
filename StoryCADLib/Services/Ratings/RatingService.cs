@@ -1,7 +1,7 @@
 ﻿using Windows.Services.Store;
 using WinRT.Interop;
 
-namespace StoryCAD.Services.Ratings;
+namespace StoryCADLib.Services.Ratings;
 
 /// <summary>
 ///     Service for spawning the ratings prompt.

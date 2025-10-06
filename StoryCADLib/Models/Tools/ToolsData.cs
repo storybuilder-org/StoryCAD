@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
-using StoryCAD.DAL;
+using StoryCADLib.DAL;
 
-namespace StoryCAD.Models.Tools;
+namespace StoryCADLib.Models.Tools;
 
 /// <summary>
 ///     This stores the tools for StoryCAD's Lists.ini.

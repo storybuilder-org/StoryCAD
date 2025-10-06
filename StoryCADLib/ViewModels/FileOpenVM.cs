@@ -2,12 +2,12 @@
 using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryCAD.DAL;
-using StoryCAD.Services;
-using StoryCAD.Services.Messages;
-using StoryCAD.Services.Outline;
+using StoryCADLib.DAL;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Outline;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 /// <summary>
 ///     FileOpenMenu is the file open menu for StoryCAD.

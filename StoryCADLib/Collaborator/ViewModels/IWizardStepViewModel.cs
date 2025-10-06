@@ -1,4 +1,4 @@
-namespace StoryCAD.Collaborator.Views;
+namespace StoryCADLib.Collaborator.Views;
 
 public interface IWizardStepViewModel
 {

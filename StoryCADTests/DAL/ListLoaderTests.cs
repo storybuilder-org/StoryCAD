@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Models;
+using StoryCADLib.Models;
 
 #nullable disable
 

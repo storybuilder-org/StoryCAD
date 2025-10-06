@@ -3,14 +3,14 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryCAD.Controls;
-using StoryCAD.Services;
-using StoryCAD.Services.Dialogs;
-using StoryCAD.Services.Messages;
-using StoryCAD.Services.Navigation;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.Controls;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Dialogs;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Navigation;
+using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
 {

@@ -1,7 +1,7 @@
 using Windows.Storage.Pickers;
 using WinRT.Interop;
 
-namespace StoryCAD.Controls;
+namespace StoryCADLib.Controls;
 
 public sealed partial class BrowseTextBox : UserControl
 {

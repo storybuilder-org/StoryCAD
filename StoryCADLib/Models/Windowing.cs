@@ -5,14 +5,14 @@ using Windows.UI;
 using Windows.UI.ViewManagement;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
-using StoryCAD.Exceptions;
-using StoryCAD.ViewModels.SubViewModels;
+using StoryCADLib.Exceptions;
+using StoryCADLib.ViewModels.SubViewModels;
 using WinRT.Interop;
-using LogLevel = StoryCAD.Services.Logging.LogLevel;
+using LogLevel = StoryCADLib.Services.Logging.LogLevel;
 #if WINDOWS
 #endif
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 /// <summary>
 ///     This class contains window (MainWindow) related items etc.

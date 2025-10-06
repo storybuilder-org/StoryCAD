@@ -2,13 +2,13 @@ using Windows.Graphics.Printing;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using SkiaSharp;
-using StoryCAD.Services;
-using StoryCAD.Services.Dialogs.Tools;
-using StoryCAD.Services.Locking;
-using StoryCAD.Services.Messages;
-using StoryCAD.Services.Reports;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Dialogs.Tools;
+using StoryCADLib.Services.Locking;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Reports;
 
-namespace StoryCAD.ViewModels.Tools;
+namespace StoryCADLib.ViewModels.Tools;
 
 public partial class PrintReportDialogVM : ObservableRecipient
 {

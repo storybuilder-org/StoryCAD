@@ -1,11 +1,11 @@
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using StoryCAD.DAL;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services;
-using StoryCAD.Services.Backend;
+using StoryCADLib.DAL;
+using StoryCADLib.Models.Tools;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Backend;
 
-namespace StoryCAD.ViewModels.Tools;
+namespace StoryCADLib.ViewModels.Tools;
 
 /// <summary>
 ///     This is the PreferencesInitialization ViewModel, this data

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 public class FilePathAttribute : ValidationAttribute
 {

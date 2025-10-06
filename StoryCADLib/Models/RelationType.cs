@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 public class RelationType : ObservableObject
 {

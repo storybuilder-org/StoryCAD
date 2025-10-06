@@ -1,8 +1,8 @@
 ﻿<Page
-    x:Class="StoryCAD.Services.Dialogs.Tools.PreferencesDialog"
+    x:Class="StoryCADLib.Services.Dialogs.Tools.PreferencesDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="using:StoryCAD.Controls">
+    xmlns:controls="using:StoryCADLib.Controls">
 
     <StackPanel Width="500" Height="410">
         <Pivot Name="PivotView" Height="381" Width="500" VerticalAlignment="Stretch">

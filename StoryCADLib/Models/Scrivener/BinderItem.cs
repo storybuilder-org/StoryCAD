@@ -1,6 +1,6 @@
 ﻿using Windows.Data.Xml.Dom;
 
-namespace StoryCAD.Models.Scrivener;
+namespace StoryCADLib.Models.Scrivener;
 
 /// <summary>
 ///     A simple data transfer object (DTO) that contains raw data about a BinderItem

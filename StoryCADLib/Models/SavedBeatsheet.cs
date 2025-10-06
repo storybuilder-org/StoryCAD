@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 /// <summary>
 ///     Beatsheet model that is able to be saved/loaded from a file.

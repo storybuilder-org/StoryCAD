@@ -5,23 +5,23 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI;
-using StoryCAD.Collaborator.ViewModels;
-using StoryCAD.DAL;
-using StoryCAD.Services;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Collaborator;
-using StoryCAD.Services.Dialogs;
-using StoryCAD.Services.Dialogs.Tools;
-using StoryCAD.Services.Json;
-using StoryCAD.Services.Locking;
-using StoryCAD.Services.Messages;
-using StoryCAD.Services.Navigation;
-using StoryCAD.Services.Outline;
-using StoryCAD.Services.Search;
-using StoryCAD.ViewModels.SubViewModels;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.Collaborator.ViewModels;
+using StoryCADLib.DAL;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Backup;
+using StoryCADLib.Services.Collaborator;
+using StoryCADLib.Services.Dialogs;
+using StoryCADLib.Services.Dialogs.Tools;
+using StoryCADLib.Services.Json;
+using StoryCADLib.Services.Locking;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Navigation;
+using StoryCADLib.Services.Outline;
+using StoryCADLib.Services.Search;
+using StoryCADLib.ViewModels.SubViewModels;
+using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 public class ShellViewModel : ObservableRecipient
 {

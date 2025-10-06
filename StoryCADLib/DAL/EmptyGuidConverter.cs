@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace StoryCAD.DAL;
+namespace StoryCADLib.DAL;
 
 /// <summary>
 ///     Custom converter to handle empty GUID strings.

@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using StoryCAD.Services.Navigation;
+using StoryCADLib.Services.Navigation;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 public class TrashCanViewModel : ObservableRecipient, INavigable
 {

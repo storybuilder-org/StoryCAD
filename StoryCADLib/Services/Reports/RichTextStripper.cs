@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace StoryCAD.Services.Reports;
+namespace StoryCADLib.Services.Reports;
 
 public class RichTextStripper
 {

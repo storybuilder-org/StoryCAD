@@ -1,4 +1,4 @@
-namespace StoryCAD.Services;
+namespace StoryCADLib.Services;
 
 /// <summary>
 ///     Interface for ViewModels that can save their edits back to the Model.

@@ -1,7 +1,7 @@
-﻿using StoryCAD.DAL;
-using StoryCAD.Models.Tools;
+﻿using StoryCADLib.DAL;
+using StoryCADLib.Models.Tools;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 /// <summary>
 ///     This contains controls data

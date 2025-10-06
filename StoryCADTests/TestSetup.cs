@@ -1,8 +1,8 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using dotenv.net;
-using StoryCAD.Services;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.IoC;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Backup;
+using StoryCADLib.Services.IoC;
 
 namespace StoryCADTests;
 

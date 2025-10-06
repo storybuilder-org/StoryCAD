@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 public class RelationshipModel
 {

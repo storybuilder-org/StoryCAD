@@ -3,16 +3,16 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryCAD.Controls;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services;
-using StoryCAD.Services.Messages;
-using StoryCAD.Services.Navigation;
-using StoryCAD.Services.Outline;
-using StoryCAD.ViewModels.SubViewModels;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.Controls;
+using StoryCADLib.Models.Tools;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Navigation;
+using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels.SubViewModels;
+using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
 {

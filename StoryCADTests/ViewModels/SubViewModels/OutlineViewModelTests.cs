@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Models;
-using StoryCAD.Services;
-using StoryCAD.Services.Outline;
-using StoryCAD.ViewModels;
-using StoryCAD.ViewModels.SubViewModels;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.Models;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels;
+using StoryCADLib.ViewModels.SubViewModels;
+using StoryCADLib.ViewModels.Tools;
 
 #nullable disable
 

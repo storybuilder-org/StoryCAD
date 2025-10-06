@@ -1,6 +1,6 @@
 using Microsoft.UI.Xaml.Input;
 
-namespace StoryCAD.Controls;
+namespace StoryCADLib.Controls;
 
 public sealed partial class RelationshipView
 {

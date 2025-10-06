@@ -1,5 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.ViewModels;
+using StoryCADLib.ViewModels;
 
 #nullable disable
 

@@ -1,8 +1,8 @@
 using CommunityToolkit.Mvvm.Messaging;
-using StoryCAD.Services.Messages;
+using StoryCADLib.Services.Messages;
 using static CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger;
 
-namespace StoryCAD.Services.Dialogs;
+namespace StoryCADLib.Services.Dialogs;
 
 /// <summary>
 ///     Service for validating tool usage prerequisites.

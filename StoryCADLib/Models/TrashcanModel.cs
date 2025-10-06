@@ -1,4 +1,4 @@
-﻿namespace StoryCAD.Models;
+﻿namespace StoryCADLib.Models;
 
 /// <summary>
 ///     The TrashCanModel is a container for deleted StoryElements. It's the second root node

@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
-using StoryCAD.DAL;
+using StoryCADLib.DAL;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 public class StoryElement : ObservableObject
 {

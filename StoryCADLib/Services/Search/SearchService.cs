@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Reflection;
 //using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
-namespace StoryCAD.Services.Search;
+namespace StoryCADLib.Services.Search;
 
 /// <summary>
 ///     Service responsible for searching and managing references to StoryElements within the StoryModel.

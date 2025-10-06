@@ -1,9 +1,9 @@
 ﻿#pragma warning disable CS8632 // Nullable annotations used without nullable context
 using System.Diagnostics;
 using System.Reflection;
-using StoryCAD.Services;
+using StoryCADLib.Services;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 /// <summary>
 ///     This class holds developer tools and app data.

@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 public class SettingModel : StoryElement
 {
