@@ -50,11 +50,6 @@ public class StockScenesViewModel : ObservableRecipient
 
     private readonly ToolsData _toolsData;
 
-    // Constructor for XAML compatibility - will be removed later
-    public StockScenesViewModel() : this(Ioc.Default.GetRequiredService<ToolsData>())
-    {
-    }
-
     public StockScenesViewModel(ToolsData toolsData)
     {
         _toolsData = toolsData;

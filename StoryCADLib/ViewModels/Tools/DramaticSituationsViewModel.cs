@@ -63,11 +63,6 @@ public class DramaticSituationsViewModel : ObservableRecipient
 
     private readonly ToolsData _toolsData;
 
-    // Constructor for XAML compatibility - will be removed later
-    public DramaticSituationsViewModel() : this(Ioc.Default.GetRequiredService<ToolsData>())
-    {
-    }
-
     public DramaticSituationsViewModel(ToolsData toolsData)
     {
         _toolsData = toolsData;

@@ -45,11 +45,6 @@ public class MasterPlotsViewModel : ObservableRecipient
 
     #region Constructor
 
-    // Constructor for XAML compatibility - will be removed later
-    public MasterPlotsViewModel() : this(Ioc.Default.GetRequiredService<ToolsData>())
-    {
-    }
-
     public MasterPlotsViewModel(ToolsData toolsData)
     {
         _toolsData = toolsData;

@@ -36,16 +36,6 @@ public class NarrativeToolVM : ObservableRecipient
     public bool IsNarratorSelected = false;
     public StoryNodeItem SelectedNode; //Currently selected node
 
-    // Constructor for XAML compatibility - will be removed later
-    public NarrativeToolVM() : this(
-        Ioc.Default.GetRequiredService<ShellViewModel>(),
-        Ioc.Default.GetRequiredService<AppState>(),
-        Ioc.Default.GetRequiredService<Windowing>(),
-        Ioc.Default.GetRequiredService<ToolValidationService>(),
-        Ioc.Default.GetRequiredService<ILogService>())
-    {
-    }
-
     public NarrativeToolVM(ShellViewModel shellVM, AppState appState, Windowing windowing,
         ToolValidationService toolValidationService, ILogService logger)
     {

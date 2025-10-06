@@ -40,15 +40,6 @@ public partial class PrintReportDialogVM : ObservableRecipient
 
     private const float PdfFontSize = 10f;
 
-    // Constructor for XAML compatibility
-    public PrintReportDialogVM() : this(
-        Ioc.Default.GetRequiredService<AppState>(),
-        Ioc.Default.GetRequiredService<Windowing>(),
-        Ioc.Default.GetRequiredService<EditFlushService>(),
-        Ioc.Default.GetRequiredService<ILogService>())
-    {
-    }
-
     public PrintReportDialogVM(AppState appState, Windowing window, EditFlushService editFlushService,
         ILogService logService)
     {

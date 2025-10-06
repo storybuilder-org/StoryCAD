@@ -984,7 +984,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
 
     #region Constructors
 
-    // Constructor for XAML compatibility - will be removed later
     public CharacterViewModel(ILogService logger, AppState appState, Windowing windowing)
     {
         _logger = logger;

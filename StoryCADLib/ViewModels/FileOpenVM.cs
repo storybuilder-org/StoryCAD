@@ -24,16 +24,6 @@ public class FileOpenVM : ObservableRecipient
     private readonly PreferenceService _preferences;
     private readonly Windowing _windowing;
 
-    // Constructor for XAML compatibility - will be removed later
-    public FileOpenVM() : this(
-        Ioc.Default.GetRequiredService<ILogService>(),
-        Ioc.Default.GetRequiredService<FileOpenService>(),
-        Ioc.Default.GetRequiredService<FileCreateService>(),
-        Ioc.Default.GetRequiredService<PreferenceService>(),
-        Ioc.Default.GetRequiredService<Windowing>())
-    {
-    }
-
     public FileOpenVM(ILogService logger, FileOpenService fileOpenService, FileCreateService fileCreateService,
         PreferenceService preferences, Windowing windowing)
     {
