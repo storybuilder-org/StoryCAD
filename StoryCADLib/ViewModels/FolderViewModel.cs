@@ -148,12 +148,6 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
 
     #region Constructor
 
-    // Constructor for XAML compatibility - will be removed later
-    public FolderViewModel() : this(
-        Ioc.Default.GetRequiredService<ILogService>())
-    {
-    }
-
     public FolderViewModel(ILogService logger)
     {
         _logger = logger;
