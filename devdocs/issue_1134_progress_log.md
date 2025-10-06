@@ -2,6 +2,34 @@
 
 This log tracks all work completed for issue #1134 code cleanup.
 
+## Current Status
+
+**Last Updated**: 2025-10-06
+**Current Phase**: Phase 1 (Compiler Warnings Cleanup) - 🔄 IN PROGRESS
+**Branch**: UNOTestBranch
+**Latest Commits**:
+- 199fd383: Workflow order fix
+- 8d8ec8e8: Progress log update
+- e99083ae: CS8632 suppression (9 files)
+- b548810f: Dead code fixes
+
+**Build Status**: ✅ 0 errors
+**Test Status**: ✅ 417 passed, 3 skipped
+
+**What's Left**:
+1. More CS8632 warnings to suppress (nullable annotations)
+2. CS0618 warnings (SkiaSharp deprecation - needs research)
+3. Namespace/folder mismatch cleanup (new item)
+
+**Key Commands** (from `/devdocs/build_commands.md`):
+```bash
+# Build solution
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64
+
+# Build tests + run tests
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCADTests/StoryCADTests.csproj -t:Build -p:Configuration=Debug -p:Platform=x64 && "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621/StoryCADTests.dll"
+```
+
 ---
 
 ## Phase 0: ReSharper Code Cleanup ✅ COMPLETED
@@ -83,10 +111,23 @@ This log tracks all work completed for issue #1134 code cleanup.
 - ✅ CS0414: Fixed (2 removed, 1 suppressed)
 - ✅ CS0162: Suppressed (1 intentional unreachable code)
 - ✅ CS0105: Already clean (ReSharper removed duplicates)
-- ✅ CS8632: Suppressed (9 files - kept nullable markers)
+- 🔄 CS8632: Partially done (suppressed in 9 files, but MORE remain - user noted "many nullable-related issues in the compile yet")
 - ⏳ CS0618: Deferred (SkiaSharp obsolete APIs - user wants research first)
 
-**Next Phase**: CS0618 (SkiaSharp deprecation warnings) - research alternatives before fixing
+**Outstanding Work in Phase 1**:
+1. **CS8632 (Nullable warnings)**: More files need `#pragma warning disable CS8632` - run build with warnings to identify remaining files
+2. **CS0618 (SkiaSharp)**: Research alternatives before fixing
+3. **Namespace/folder mismatch**: User noted "namespace declarations don't match folder structure for many source files" - add to cleanup plan
+
+**To Resume Phase 1**:
+```bash
+# 1. Identify remaining CS8632 warnings
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64 /flp:WarningsOnly /flp1:logfile=msbuild_warnings.log
+cat msbuild_warnings.log | grep "CS8632" | sed 's/.*\\//' | sed 's/(.*//' | sort | uniq
+
+# 2. Add #pragma warning disable CS8632 to each file (keep ? markers)
+# 3. Update progress log FIRST, then commit code + log together
+```
 
 ---
 
