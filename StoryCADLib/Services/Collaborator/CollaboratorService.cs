@@ -20,11 +20,15 @@ public class CollaboratorService
     private readonly PreferenceService _preferenceService;
     private ICollaborator _collaboratorInterface; // Interface-based reference
     private Assembly CollabAssembly;
+#pragma warning disable CS0169 // Field is used in platform-specific code
     private object collaborator;
     private Type collaboratorType;
+#pragma warning restore CS0169
     public Window CollaboratorWindow; // The secondary window for Collaborator
+#pragma warning disable CS0649 // Field is assigned in platform-specific code
     private bool dllExists;
     private string dllPath;
+#pragma warning restore CS0649
 
     public CollaboratorService(AppState appState, ILogService logService, PreferenceService preferenceService,
         AutoSaveService autoSaveService, BackupService backupService)

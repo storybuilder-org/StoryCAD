@@ -8,7 +8,9 @@ public partial class PrintReportDialogVM
 {
     private bool _printHandlerAttached;
     private PrintManager _printManager;
+#pragma warning disable CS0414 // Field is used for coordination between async operations
     private volatile bool _printTaskCreated;
+#pragma warning restore CS0414
 
     public PrintDocument? Document;
     public IPrintDocumentSource? PrintDocSource;

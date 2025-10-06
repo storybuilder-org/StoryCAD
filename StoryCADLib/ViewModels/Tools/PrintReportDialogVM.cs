@@ -15,7 +15,9 @@ public partial class PrintReportDialogVM : ObservableRecipient
     public ContentDialog Dialog;
     public PrintTask PrintJobManager;
 
+#pragma warning disable CS0169 // Field is used in WinAppSDK platform-specific partial class
     private bool _isPrinting;
+#pragma warning restore CS0169
 
     private readonly AppState _appState;
     private readonly Windowing Window;

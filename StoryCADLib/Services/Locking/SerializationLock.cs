@@ -17,7 +17,6 @@ public sealed class SerializationLock : IDisposable
     // execution context already holds the lock, allowing reentrant acquisition without deadlock.
     private static readonly AsyncLocal<int> Depth = new();
     private readonly string _caller;
-    private readonly bool _isNested;
     private readonly ILogService _logger;
 
     private bool _held;
@@ -40,7 +39,6 @@ public sealed class SerializationLock : IDisposable
             }
 
             _held = true;
-            _isNested = true;
             return;
         }
 
@@ -49,7 +47,6 @@ public sealed class SerializationLock : IDisposable
         Gate.Wait();
         Depth.Value = 1;
         _held = true;
-        _isNested = false;
         _logger?.Log(LogLevel.Info, $"[CallerMemberName] {_caller} acquired lock (depth: 1)");
 
         // Only fire event for outermost lock acquisition

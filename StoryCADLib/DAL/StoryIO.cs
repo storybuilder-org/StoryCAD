@@ -235,6 +235,7 @@ public class StoryIO
         return true;
 #endif
 
+#pragma warning disable CS0162 // Unreachable code detected - intentional, Windows-only code below
         if (!File.Exists(filePath))
         {
             return false;
@@ -299,6 +300,7 @@ public class StoryIO
         }
 
         return !showOfflineError;
+#pragma warning restore CS0162
     }
 
 

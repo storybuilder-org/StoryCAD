@@ -30,12 +30,6 @@ public partial class App : Application
     private readonly ILogService _log;
 
     /// <summary>
-    ///     This is the path to the STBX file that StoryCAD was launched with,
-    ///     if StoryCAD wasn't launched with a file this will be null.
-    /// </summary>
-    private string LaunchPath = null;
-
-    /// <summary>
     ///     Used to track uptime of app
     /// </summary>
     private DateTime StartTime = DateTime.Now;

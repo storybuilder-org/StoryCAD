@@ -570,8 +570,8 @@ public class OutlineViewModel : ObservableRecipient
             }
             catch (Exception ex)
             {
-                // Ignore logging exceptions during shutdown
-                // The important work (saving) is already done
+                logger.LogException(LogLevel.Error, ex, "Error flushing log during shutdown");
+                Messenger.Send(new StatusChangedMessage(new StatusMessage("Error flushing log during shutdown", LogLevel.Warn)));
             }
         }
 
