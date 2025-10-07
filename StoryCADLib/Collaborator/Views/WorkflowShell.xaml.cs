@@ -22,7 +22,6 @@ public sealed partial class WorkflowShell : Page
 
     private void StepFrame_OnNavigated(object sender, NavigationEventArgs e)
     {
-        //TODO: this
         /*
          * Navigation to a step in our Semantic Kernel application
          * will be quite different. A semantic function (plugin) is
@@ -35,7 +34,6 @@ public sealed partial class WorkflowShell : Page
          * I'm not even sure if these are needed at this point.
          */
     }
-
 
     private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {

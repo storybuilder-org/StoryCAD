@@ -1,4 +1,4 @@
-﻿using Windows.Data.Xml.Dom;
+using Windows.Data.Xml.Dom;
 using NRtfTree.Core;
 using StoryCADLib.Models.Scrivener;
 
@@ -269,7 +269,6 @@ public class ScrivenerIo
     /// <returns>A string representation of the enum value.</returns>
     private static string GetType(BinderItemType type)
     {
-        //TODO: Handle Unknown and default cases in switch (and hence remove the following Resharper ignore commend)
         var _value = string.Empty;
         // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
         switch (type)
@@ -298,8 +297,10 @@ public class ScrivenerIo
             case BinderItemType.Root:
                 _value = "Root";
                 break;
+            case BinderItemType.Unknown:
+                _value = "Unknown";
+                break;
         }
-
         return _value;
     }
 
