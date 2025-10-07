@@ -30,7 +30,7 @@ Generated for issue #1134 - Code cleanup
 ## Data Access Layer (DAL)
 
 ### StoryIO.cs
-- **Line 231**: Investigate alternatives on other platforms
+- **Line 231**: ~~Investigate alternatives on other platforms~~ **RESOLVED** - Implemented cross-platform CheckFileAvailability with IsAvailableAsync and TryTinyReadAsync helper methods
 
 ### ScrivenerIO.cs
 - **Line 245**: Handle Unknown and default cases in switch (and hence remove the following Resharper ignore comment)
