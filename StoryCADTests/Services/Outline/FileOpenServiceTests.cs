@@ -7,6 +7,7 @@ using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Logging;
 using StoryCADLib.Services.Messages;
 using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels;
 
 #nullable disable
 
@@ -25,6 +26,7 @@ public class FileOpenServiceTests
     private PreferenceService _preferences;
     private StoryIO _storyIO;
     private Windowing _windowing;
+    private ShellViewModel _shellVM;
 
     [TestInitialize]
     public void Setup()
@@ -39,6 +41,7 @@ public class FileOpenServiceTests
         _backupService = Ioc.Default.GetRequiredService<BackupService>();
         _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
         _storyIO = Ioc.Default.GetRequiredService<StoryIO>();
+        _shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
 
         _fileOpenService = new FileOpenService(
             _logger,
@@ -49,7 +52,8 @@ public class FileOpenServiceTests
             _windowing,
             _backupService,
             _autoSaveService,
-            _storyIO);
+            _storyIO,
+            _shellVM);
 
         // Reset app state
         _appState.CurrentDocument = null;

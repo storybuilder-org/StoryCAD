@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
 using FileAttributes = System.IO.FileAttributes;
 
 #if WINDOWS
@@ -31,7 +30,7 @@ public class StoryIO
     public async Task WriteStory(string output_path, StoryModel model)
     {
         var parent = Path.GetDirectoryName(output_path);
-        Directory.CreateDirectory(parent);
+        Directory.CreateDirectory(parent!);
 
         var folder = await StorageFolder.GetFolderFromPathAsync(parent);
         var output =
@@ -65,7 +64,6 @@ public class StoryIO
                 _logService.Log(LogLevel.Info, "File is legacy XML format");
 
                 // Show dialog informing user about legacy format
-                // TODO: Circular dependency - StoryIO ↔ OutlineViewModel prevents injecting Windowing
                 var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new ContentDialog
                 {
                     Title = "Legacy Outline format detected!",

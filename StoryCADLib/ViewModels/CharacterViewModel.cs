@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -559,7 +559,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
     {
         _changeable = false;
         _changed = false;
-        _storyModel = _appState.CurrentDocument.Model;
+        _storyModel = _appState.CurrentDocument!.Model;
 
         Uuid = Model.Uuid;
         Name = Model.Name;
@@ -984,7 +984,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
 
     #region Constructors
 
-    public CharacterViewModel(ILogService logger, AppState appState, Windowing windowing)
+    public CharacterViewModel(ILogService logger, AppState appState, Windowing windowing, ListData listData)
     {
         _logger = logger;
         _appState = appState;
@@ -998,7 +998,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
             ArchetypeList = _lists["Archetype"];
             BuildList = _lists["Build"];
             NationalityList = _lists["Country"];
-            // TODO: How do I bind to Sex option buttons?
             EyesList = _lists["EyeColor"];
             HairList = _lists["HairColor"];
             SkinList = _lists["Complexion"];
