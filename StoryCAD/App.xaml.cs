@@ -39,8 +39,8 @@ public partial class App : Application
     {
         //Set up IOC and the services.
         BootStrapper.Initialise(false);
-
-        Debugger.Launch();
+        
+        #if WINDOWS10_0_18362_0_OR_GREATER
         //Check how app was invoked and handle file activation if necessary.
         var activationArgs = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().GetActivatedEventArgs();
         if (activationArgs != null && activationArgs.Kind == Microsoft.Windows.AppLifecycle.ExtendedActivationKind.File)
@@ -54,7 +54,7 @@ public partial class App : Application
                 }
             }
         }
-
+        #endif
         try
         {
             // Determine if running as packaged or unpackaged

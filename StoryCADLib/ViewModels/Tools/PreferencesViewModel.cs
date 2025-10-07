@@ -232,6 +232,15 @@ public class PreferencesViewModel : ObservableValidator
         set => SetProperty(ref _ShowStartupPage, value);
     }
 
+    // Show file picker on startup.
+    private bool _ShowFilePickerOnStartup;
+
+    public bool ShowFilePickerOnStartup
+    {
+        get => _ShowFilePickerOnStartup;
+        set => SetProperty(ref _ShowFilePickerOnStartup, value);
+    }
+
     #endregion
 
     #region Methods
@@ -265,6 +274,7 @@ public class PreferencesViewModel : ObservableValidator
         AdvancedLogging = CurrentModel.AdvancedLogging;
         HideKeyFileWarning = CurrentModel.HideKeyFileWarning;
         ShowStartupPage = CurrentModel.ShowStartupDialog;
+        ShowFilePickerOnStartup = CurrentModel.ShowFilePickerOnStartup;
     }
 
     internal void SaveModel()
@@ -302,6 +312,7 @@ public class PreferencesViewModel : ObservableValidator
 
         CurrentModel.ThemePreference = PreferedTheme;
         CurrentModel.ShowStartupDialog = ShowStartupPage;
+        CurrentModel.ShowFilePickerOnStartup = ShowFilePickerOnStartup;
     }
 
     /// <summary>

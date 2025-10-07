@@ -44,8 +44,5 @@
         <AppxManifest Include="Package.appxmanifest" />
     </ItemGroup>
     <ItemGroup>
-      <Content Include=".env">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
     </ItemGroup>
 </Project>

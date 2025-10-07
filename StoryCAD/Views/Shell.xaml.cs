@@ -116,7 +116,11 @@ public sealed partial class Shell : Page
         Logger.Log(LogLevel.Info, $"Filepath to launch {ShellVm.FilePathToLaunch}");
         if (ShellVm.FilePathToLaunch == null)
         {
-            await ShellVm.OutlineManager.OpenFileOpenMenu();
+            // Only show the file open menu if the preference is enabled
+            if (Preferences.ShowFilePickerOnStartup)
+            {
+                await ShellVm.OutlineManager.OpenFileOpenMenu();
+            }
         }
         else
         {

@@ -73,24 +73,6 @@ public class ShellViewModel : ObservableRecipient
     public Frame SplitViewFrame;
 
     #region Constructor(s)
-
-    //// Constructor for XAML compatibility - will be removed later
-    //public ShellViewModel() : this(
-    //    Ioc.Default.GetRequiredService<SceneViewModel>(),
-    //    Ioc.Default.GetRequiredService<ILogService>(),
-    //    Ioc.Default.GetRequiredService<SearchService>(),
-    //    Ioc.Default.GetRequiredService<AutoSaveService>(),
-    //    Ioc.Default.GetRequiredService<BackupService>(),
-    //    Ioc.Default.GetRequiredService<Windowing>(),
-    //    Ioc.Default.GetRequiredService<AppState>(),
-    //    Ioc.Default.GetRequiredService<ScrivenerIo>(),
-    //    Ioc.Default.GetRequiredService<PreferenceService>(),
-    //    Ioc.Default.GetRequiredService<OutlineViewModel>(),
-    //    Ioc.Default.GetRequiredService<OutlineService>(),
-    //    Ioc.Default.GetRequiredService<NavigationService>())
-    //{
-    //}
-
     public ShellViewModel(SceneViewModel sceneViewModel, ILogService logger, SearchService search,
         AutoSaveService autoSaveService, BackupService backupService, Windowing window,
         AppState appState, ScrivenerIo scrivener, PreferenceService preferenceService,

@@ -46,6 +46,7 @@ public class PreferencesModel : ObservableObject
         HideKeyFileWarning = false;
         LastReviewDate = DateTime.MinValue;
         ShowStartupDialog = true;
+        ShowFilePickerOnStartup = true;
     }
 
     #endregion
@@ -244,6 +245,13 @@ public class PreferencesModel : ObservableObject
     [JsonInclude]
     [JsonPropertyName("HideKeyFileWarning")]
     public bool HideKeyFileWarning { get; set; }
+
+    /// <summary>
+    ///     Should the file picker be shown on startup
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("ShowFilePickerOnStartup")]
+    public bool ShowFilePickerOnStartup { get; set; }
 
     #endregion
 }

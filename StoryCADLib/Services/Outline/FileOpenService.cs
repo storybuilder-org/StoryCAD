@@ -21,6 +21,7 @@ public class FileOpenService
     private readonly PreferenceService _preferences;
     private readonly StoryIO _storyIO;
     private readonly Windowing _windowing;
+    private readonly ShellViewModel _shellVM;
 
     public FileOpenService(
         ILogService logger,
@@ -31,7 +32,7 @@ public class FileOpenService
         Windowing windowing,
         BackupService backupService,
         AutoSaveService autoSaveService,
-        StoryIO storyIO)
+        StoryIO storyIO, ShellViewModel shellVM)
     {
         _logger = logger;
         _outlineService = outlineService;
@@ -42,6 +43,7 @@ public class FileOpenService
         _backupService = backupService;
         _autoSaveService = autoSaveService;
         _storyIO = storyIO;
+        _shellVM = shellVM;
     }
 
     /// <summary>
@@ -143,6 +145,7 @@ public class FileOpenService
             {
                 _outlineService.SetCurrentView(_appState.CurrentDocument.Model, StoryViewType.ExplorerView);
                 Default.Send(new StatusChangedMessage(new StatusMessage("Open Story completed", LogLevel.Info)));
+                
             }
 
             _windowing.UpdateWindowTitle();
@@ -157,7 +160,7 @@ public class FileOpenService
             {
                 _autoSaveService.StartAutoSave();
             }
-
+            _shellVM.TreeViewNodeClicked(_appState.CurrentDocument.Model.CurrentView[0]);
             _logger.Log(LogLevel.Info, $"Opened project {_appState.CurrentDocument?.FilePath}");
         }
         catch (Exception ex)

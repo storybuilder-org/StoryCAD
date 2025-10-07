@@ -61,6 +61,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -79,15 +80,18 @@
                     <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"
                               Content="Show startup page" Margin="8"
                               IsChecked="{x:Bind PreferencesVm.ShowStartupPage, Mode=TwoWay}" />
+                    <CheckBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"
+                              Content="Show file picker on startup" Margin="8"
+                              IsChecked="{x:Bind PreferencesVm.ShowFilePickerOnStartup, Mode=TwoWay}" />
 
-                    <ComboBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Width="300"
+                    <ComboBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Width="300"
                               Header="Preferred Theme" HorizontalAlignment="Stretch"
                               SelectedIndex="{x:Bind PreferencesVm.PreferredThemeIndex, Mode=TwoWay}" Margin="8">
                         <ComboBoxItem Content="Use system theme" />
                         <ComboBoxItem Content="Light Theme" />
                         <ComboBoxItem Content="Dark Theme" />
                     </ComboBox>
-                    <ComboBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Width="300"
+                    <ComboBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" Width="300"
                               Header="Preferred Search Engine" HorizontalAlignment="Stretch"
                               Name="SearchEngine" SelectedIndex="{x:Bind PreferencesVm.SearchEngineIndex, Mode=TwoWay}"
                               Margin="0,4,0,0">
