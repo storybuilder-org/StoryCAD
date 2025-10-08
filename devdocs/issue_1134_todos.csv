@@ -1,0 +1,37 @@
+File,Line,,TODO
+StoryCADLib/Models/StoryElement.cs,128,,// TODO: Examine this more closely. Called from OutlineViewModel.DeleteNode() and other ViewModels
+StoryCADLib/Models/StoryElementCollection.cs,49,,"//TODO: Assert that NewItems count is always 1, or make this a loop"
+StoryCADLib/Models/StoryElementCollection.cs,75,,"//TODO: Assert that OldItems count is always 1, or make this a loop"
+StoryCADLib/Models/StoryElementCollection.cs,76,,//TODO: Maybe replace the index of with just remove
+StoryCADLib/Models/StoryModel.cs,10,,// TODO: Move StoryModel to ViewModels namespace in a future refactoring
+StoryCADLib/Models/StoryModel.cs,14,,// TODO: Note sorting filtering and grouping depend on ICollectionView (for TreeView?)
+StoryCADLib/Models/StoryModel.cs,15,,// TODO: See http://msdn.microsoft.com/en-us/library/ms752347.aspx#binding_to_collections
+StoryCADLib/Models/StoryModel.cs,16,,// TODO: Maybe http://stackoverflow.com/questions/15593166/binding-treeview-with-a-observablecollection
+StoryCADLib/Models/Windowing.cs,163,,// TODO: ARCHITECTURAL ISSUE - Windowing (UI layer) should not depend on OutlineViewModel (business logic)
+StoryCADLib/Models/Windowing.cs,193,,// TODO: ARCHITECTURAL ISSUE - Same as UpdateWindowTitle above
+StoryCADLib/Services/API/SemanticKernelAPI.cs,187,,//TODO: force set uuid somehow.
+StoryCADLib/Services/Backend/BackendService.cs,61,,// TODO: This try/catch swallows all exceptions silently. Consider 
+StoryCADLib/Services/Collaborator/CollaboratorService.cs,338,,// TODO: Issue #1126 - Implement macOS Collaborator plugin loading
+StoryCADLib/Services/Collaborator/CollaboratorService.cs,464,,//TODO: Use Show and hide properly
+StoryCADLib/Services/Messages/WindowsMessageChannelService.cs,33,,// TODO: Feature #1137 - Add UDP listener for FTP upload notification
+StoryCADLib/Services/Messages/WindowsMessageChannelService.cs,34,,// TODO: Feature #1138 - Add clipboard monitoring for external paste support
+StoryCADLib/Services/Outline/OutlineService.cs,277,,"//TODO: OutlineService should use IElementTypeService, and we should"
+StoryCADLib/Services/Outline/OutlineService.cs,278,,// TODO: possibly return null here if we want to require clients to check
+StoryCADLib/Services/PreferenceService.cs,72,,"// TODO: Validate preference data before saving (check types, ranges, required fields)"
+StoryCADLib/Services/Search/SearchService.cs,26,,// TODO: Add search result highlighting in UI (requires ViewModel changes)
+StoryCADLib/Services/Search/SearchService.cs,27,,// TODO: Consider adding fuzzy search support (Levenshtein distance)
+StoryCADLib/ViewModels/CharacterViewModel.cs,68,,// TODO: This is a temporary workaround. Should be injected via constructor.
+StoryCADLib/ViewModels/CharacterViewModel.cs,93,,// TODO: Factor this out into a reusable control
+StoryCADLib/ViewModels/OverviewViewModel.cs,251,,// TODO: Factor this out into a reusable control
+StoryCADLib/ViewModels/ProblemViewModel.cs,56,,// TODO: This is a temporary workaround. Should be injected via constructor.
+StoryCADLib/ViewModels/ProblemViewModel.cs,74,,// TODO: Factor this out into a reusable control
+StoryCADLib/ViewModels/SceneViewModel.cs,70,,// TODO: This is a temporary workaround. Should be injected via constructor.
+StoryCADLib/ViewModels/SceneViewModel.cs,87,,// TODO: Factor this out into a reusable control
+StoryCADLib/ViewModels/SettingViewModel.cs,52,,// TODO: This is a temporary workaround. Should be injected via constructor.
+StoryCADLib/ViewModels/SettingViewModel.cs,70,,// TODO: Factor this out into a reusable control
+StoryCADLib/ViewModels/ShellViewModel.cs,196,,// TODO: Investigate state access pattern
+StoryCADLib/ViewModels/SubViewModels/OutlineViewModel.cs,31,,// TODO: Issue #1136 - Circular dependency OutlineViewModel ↔ StoryIO prevents proper DI
+StoryCADLib/ViewModels/SubViewModels/OutlineViewModel.cs,66,,// TODO: Investigate state access pattern
+StoryCADLib/ViewModels/Tools/NarrativeToolVM.cs,20,,// TODO: Test this code
+StoryCADLib/ViewModels/Tools/PrintReportDialogVM.cs,30,,// TODO: Research SkiaSharp migration to SKFont (Issue #1134 Phase 5)
+StoryCADLib/ViewModels/WebViewModel.cs,20,,// TODO: This is a temporary workaround. Should be injected via constructor.
