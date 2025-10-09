@@ -116,7 +116,7 @@ public class StoryElement : ObservableObject
             return new StoryElement();
         }
 
-        // Get the StoryElementsCollection from the provided storyModel or from OutlineViewModel
+        // Get the StoryElementsCollection from the provided storyModel or from AppState
         StoryElementCollection elements;
         if (storyModel != null)
         {
@@ -124,9 +124,9 @@ public class StoryElement : ObservableObject
         }
         else
         {
-            // Fallback to current behavior - get from AppState
-            // TODO: Examine this more closely. Called from OutlineViewModel.DeleteNode() and other ViewModels
-            // where OutlineViewModel context is available. Consider if this global state dependency is appropriate.
+            // Fallback to AppState when storyModel is not provided
+            // This global state dependency is acceptable for UI scenarios
+            // API consumers should always provide storyModel explicitly
             var appState = Ioc.Default.GetRequiredService<AppState>();
             elements = appState.CurrentDocument.Model.StoryElements;
         }
