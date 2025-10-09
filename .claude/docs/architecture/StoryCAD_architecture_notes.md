@@ -52,6 +52,415 @@ StoryCAD is a cross-platform desktop application for fiction writers that provid
 
 ---
 
+## StoryBuilder Organization & Repository Ecosystem
+
+### GitHub Organization
+
+**Organization**: [github.com/storybuilder-org](https://github.com/storybuilder-org)
+
+StoryCAD is part of a larger ecosystem of repositories under the StoryBuilder organization. This section documents all repositories, their purposes, and relationships.
+
+---
+
+### Core Application Repositories
+
+#### 1. StoryCAD (Main Repository)
+- **GitHub**: [github.com/storybuilder-org/StoryCAD](https://github.com/storybuilder-org/StoryCAD)
+- **Local Path**: `/mnt/d/dev/src/StoryCAD/`
+- **Visibility**: Public
+- **Purpose**: Main StoryCAD application - cross-platform fiction writing tool
+- **Technology**: .NET 9.0, UNO Platform 6.2.36, WinUI 3
+- **Targets**: Windows (WinAppSDK), macOS (Desktop head)
+- **Key Components**:
+  - `StoryCAD/` - Main WinUI 3 application
+  - `StoryCADLib/` - Core business logic library (NuGet package)
+  - `StoryCADTests/` - MSTest test project
+  - `.claude/docs/` - LLM/AI agent documentation
+  - `devdocs/` - Active issue documentation
+
+**Branches**:
+- `main` - Production Windows-only version (3.x)
+- `UNOTestBranch` - Cross-platform development (4.0)
+
+---
+
+#### 2. StoryBuilderCollaborator
+- **GitHub**: [github.com/storybuilder-org/StoryBuilderCollaborator](https://github.com/storybuilder-org/StoryBuilderCollaborator)
+- **Local Path**: `/mnt/d/dev/src/StoryBuilderCollaborator/`
+- **Visibility**: Private
+- **Purpose**: AI collaboration features for StoryCAD using Microsoft Semantic Kernel
+- **Technology**: .NET 9.0, Semantic Kernel 1.41.0
+- **Integration**: Loaded as plugin DLL by StoryCAD's CollaboratorService
+- **Key Components**:
+  - `CollaboratorLib/` - Plugin library implementing ICollaborator interface
+  - Semantic Kernel workflows for character development, plot suggestions, etc.
+  - AI-assisted writing wizards
+
+**Relationship to StoryCAD**:
+- Separate assembly loaded dynamically at runtime
+- StoryCAD → CollaboratorService → CollaboratorLib.dll
+- Optional feature (enabled for developer builds)
+- See: `StoryCADLib/Services/Collaborator/CollaboratorService.cs`
+
+---
+
+### Documentation Repositories
+
+#### 3. ManualTest
+- **GitHub**: [github.com/storybuilder-org/ManualTest](https://github.com/storybuilder-org/ManualTest)
+- **Local Path**: `/mnt/d/dev/src/ManualTest/`
+- **Visibility**: Public
+- **Purpose**: End-user documentation for StoryCAD
+- **Technology**: Jekyll with Just the Docs theme
+- **URL**: [User Manual](https://storybuilder-org.github.io/ManualTest/) (if published)
+
+**Content Structure**:
+```
+ManualTest/docs/
+├── Front Matter/          # Getting started, license, help
+├── Quick Start/           # UI basics, navigation
+├── Story Elements/        # Element-by-element documentation
+├── Tools/                 # Plot tools, conflict builder
+├── Writing with StoryCAD/ # Workflows and techniques
+├── Tutorial Creating a Story/
+├── Preferences/           # Settings and configuration
+├── Reports/               # Report generation
+├── Researching your story/
+├── For Developers/        # API documentation
+├── Back Matter/           # Appendices
+└── Miscellaneous/
+```
+
+**Usage**:
+- Reference via CLAUDE.md "User Manual Navigation"
+- Search with Glob/Grep rather than reading all files
+- See: `CLAUDE.md` for navigation guidance
+
+---
+
+### Support & Utility Repositories
+
+#### 4. StoryCAD-Legacy-STBX-Conversion-Tool
+- **GitHub**: [github.com/storybuilder-org/StoryCAD-Legacy-STBX-Conversion-Tool](https://github.com/storybuilder-org/StoryCAD-Legacy-STBX-Conversion-Tool)
+- **Local Path**: `/mnt/d/dev/src/StoryCAD-Legacy-STBX-Conversion-Tool/`
+- **Visibility**: Public
+- **Purpose**: Convert legacy XML-based .stbx files to JSON-based format
+- **Technology**: .NET
+- **Status**: Maintenance mode (conversion tool for legacy users)
+
+**Background**:
+- StoryCAD evolved from StoryBuilder
+- File format changed from XML to JSON
+- This tool enables migration of old user files
+
+---
+
+#### 5. NRTFTree-Async
+- **GitHub**: [github.com/storybuilder-org/NRTFTree-Async](https://github.com/storybuilder-org/NRTFTree-Async)
+- **Local Path**: (NuGet package dependency)
+- **Visibility**: Public
+- **Purpose**: Forked RTF processing library with async support
+- **Technology**: .NET
+- **Integration**: Used by StoryCAD for RTF text editing features
+- **Fork Note**: Modified from original NRTFTree to add async/await support
+
+**Usage in StoryCAD**:
+- Referenced as NuGet package: NRTFTree-Async 1.0.1
+- See: `Directory.Packages.props`
+- RTF text boxes in story element forms (Problem, Scene, etc.)
+
+---
+
+#### 6. API-Samples
+- **GitHub**: [github.com/storybuilder-org/API-Samples](https://github.com/storybuilder-org/API-Samples)
+- **Local Path**: `/mnt/d/dev/src/API-Samples/`
+- **Visibility**: Private
+- **Purpose**: Sample code and examples for StoryCAD API
+- **Technology**: .NET, C#
+- **Audience**: External developers using StoryCAD API
+
+**Content**:
+- Example API usage patterns
+- Integration examples
+- Test scenarios for API consumers
+
+**Note**: StoryCAD has a public API (SemanticKernelAPI) that external tools can use
+
+---
+
+#### 7. storybuilder-miscellaneous
+- **GitHub**: [github.com/storybuilder-org/storybuilder-miscellaneous](https://github.com/storybuilder-org/storybuilder-miscellaneous)
+- **Local Path**: `/mnt/d/dev/src/storybuilder-miscellaneous/`
+- **Visibility**: Private
+- **Purpose**: Private repository for sysadmin material, secrets, archived docs
+- **Content**: Confidential/administrative material
+- **Usage**: Archive location for closed issue documentation from `devdocs/`
+
+---
+
+### Repository Relationships
+
+#### Dependency Graph
+
+```
+StoryCAD (Main App)
+├── StoryCADLib (Core Logic - same repo)
+│   └── NRTFTree-Async (NuGet package)
+├── StoryBuilderCollaborator (Plugin - separate repo)
+│   └── Semantic Kernel 1.41.0
+└── ManualTest (Documentation - separate repo)
+
+StoryCAD-Legacy-STBX-Conversion-Tool
+└── (standalone utility for users)
+
+API-Samples
+└── StoryCAD API (references main app)
+```
+
+#### Runtime Architecture
+
+```
+┌─────────────────────────────────────────┐
+│         StoryCAD Main App               │
+│  (StoryCAD.exe / StoryCAD.app)          │
+└────────────┬────────────────────────────┘
+             │
+             ├─► StoryCADLib (in-process)
+             │   └─► NRTFTree-Async
+             │
+             └─► CollaboratorLib.dll (plugin)
+                 └─► Semantic Kernel → OpenAI/Azure
+```
+
+---
+
+### Development Workflows
+
+#### Working on StoryCAD Core
+1. Clone: `github.com/storybuilder-org/StoryCAD`
+2. Branch: `main` (Windows) or `UNOTestBranch` (cross-platform)
+3. Documentation: `.claude/docs/` for LLMs, `devdocs/` for active issues
+4. Tests: `StoryCADTests/`
+
+#### Working on AI Features
+1. Clone: `github.com/storybuilder-org/StoryBuilderCollaborator` (private)
+2. Build CollaboratorLib.dll
+3. Set `STORYCAD_PLUGIN_DIR` environment variable
+4. StoryCAD loads plugin at runtime
+
+#### Writing Documentation
+**For End Users**:
+- Repository: `ManualTest`
+- Format: Markdown with Jekyll/Just the Docs
+- Build: `bundle exec jekyll serve`
+
+**For Developers/LLMs**:
+- Repository: `StoryCAD/.claude/docs/`
+- Format: Plain Markdown
+- No build required
+
+**For Active Issues**:
+- Location: `StoryCAD/devdocs/issue_NNNN_*.md`
+- Archive: Move to `storybuilder-miscellaneous` when issue closes
+
+---
+
+### Repository Management
+
+#### Issue Tracking
+- **Main Issues**: [github.com/storybuilder-org/StoryCAD/issues](https://github.com/storybuilder-org/StoryCAD/issues)
+- **Documentation**: `devdocs/issue_NNNN_*.md` for active issues
+- **Archive**: `storybuilder-miscellaneous/devdocs/` for closed issues
+- **Tool**: `ListStoryCADIssues` for issue management
+
+#### Release Process
+1. Development in feature branches (e.g., `issue-1143-remove-cyclic-dependency`)
+2. Pull request to `main` or `UNOTestBranch`
+3. Review and merge
+4. Package with MSIX (Windows) or .app bundle (macOS)
+5. Publish releases on GitHub
+
+#### Documentation Updates
+- **User Manual**: Update `ManualTest` when user-facing features change
+- **Developer Docs**: Update `.claude/docs/` when architecture/patterns change
+- **Issue Docs**: Create `devdocs/issue_NNNN_*.md` for implementation notes
+
+---
+
+### Quick Reference: Repository URLs
+
+| Repository | URL | Visibility |
+|------------|-----|------------|
+| StoryCAD | https://github.com/storybuilder-org/StoryCAD | Public |
+| StoryBuilderCollaborator | https://github.com/storybuilder-org/StoryBuilderCollaborator | Private |
+| ManualTest | https://github.com/storybuilder-org/ManualTest | Public |
+| StoryCAD-Legacy-STBX-Conversion-Tool | https://github.com/storybuilder-org/StoryCAD-Legacy-STBX-Conversion-Tool | Public |
+| NRTFTree-Async | https://github.com/storybuilder-org/NRTFTree-Async | Public |
+| API-Samples | https://github.com/storybuilder-org/API-Samples | Private |
+| storybuilder-miscellaneous | https://github.com/storybuilder-org/storybuilder-miscellaneous | Private |
+
+---
+
+### External Dependencies vs Internal Repositories
+
+**External Dependencies** (NuGet packages):
+- UNO Platform (6.2.36)
+- Microsoft.SemanticKernel (1.41.0)
+- CommunityToolkit.Mvvm (8.4.0)
+- NLog, MySQL.Data, Octokit, etc.
+- See: `Directory.Packages.props` for complete list
+
+**Internal Repositories** (StoryBuilder org):
+- CollaboratorLib (plugin)
+- NRTFTree-Async (forked/customized library)
+
+**Distinction**: Internal repos are maintained by StoryBuilder org, external are third-party packages.
+
+---
+
+## User Documentation
+
+### Location and Purpose
+
+StoryCAD's user-facing documentation is maintained in the **ManualTest repository**:
+
+- **Repository**: [github.com/storybuilder-org/ManualTest](https://github.com/storybuilder-org/ManualTest)
+- **Local Path**: `/mnt/d/dev/src/ManualTest/`
+- **Published (Staging)**: https://storybuilder-org.github.io/StoryBuilder-Manual/
+- **Format**: Jekyll static site with Just the Docs theme
+- **Content**: 115 markdown files organized in 11 thematic sections
+- **Audience**: Fiction writers (non-technical users)
+
+**For AI Agent Guidance**: See `/mnt/d/dev/src/ManualTest/CLAUDE.md`
+
+### Documentation Structure
+
+1. **Front Matter** (4 files) - Introduction, legal, help resources
+2. **Quick Start** (23 files) - UI basics, navigation, file operations
+3. **Story Elements** (30 files) - Forms and tabs for each element type
+4. **Tools** (10 files) - Plot aids, conflict builder, dramatic situations
+5. **Writing with StoryCAD** (17 files) - Outlining workflows and techniques
+6. **Tutorial Creating a Story** (10 files) - Step-by-step guide
+7. **Reports** (4 files) - Print and Scrivener integration
+8. **Researching your story** (3 files) - Notes and web research
+9. **Preferences** (1 file) - Application settings
+10. **For Developers** (6 files) - API docs, changelog, developer notes
+11. **Back Matter** (2 files) - Glossary, appendices
+
+### Finding Relevant User Documentation
+
+**Index File**: `/mnt/c/temp/user_manual.md` contains summaries of all 115 documentation files.
+
+**Search Strategy**:
+```bash
+# Quick lookup - find which file documents a feature
+grep -i "scene" /mnt/c/temp/user_manual.md
+
+# Search specific section
+grep -r "conflict" /mnt/d/dev/src/ManualTest/docs/"Story Elements"/
+```
+
+### Cross-Referencing: Technical ↔ User Documentation
+
+#### When Implementing Features
+
+Before implementing a feature, **read the relevant user documentation** to understand:
+- User expectations and mental models
+- Current UI workflows
+- Terminology users are familiar with
+- Related features that may be affected
+
+**Example**: Implementing changes to Scene elements?
+- Read: `/mnt/d/dev/src/ManualTest/docs/Story Elements/Scene_Form.md`
+- Read: `/mnt/d/dev/src/ManualTest/docs/Story Elements/Scene_Tab.md`
+- Read: `/mnt/d/dev/src/ManualTest/docs/Story Elements/Conflict_Tab.md`
+- Read: `/mnt/d/dev/src/ManualTest/docs/Story Elements/Sequel_Tab.md`
+
+#### When Features Change
+
+**Documentation updates are required** when code changes affect:
+- UI layout or navigation (Quick Start)
+- Story element forms or tabs (Story Elements)
+- Tools or wizards (Tools)
+- Workflows or processes (Writing with StoryCAD)
+- API surface (For Developers)
+- Settings or preferences (Preferences)
+
+**Documentation Workflow**:
+1. Make code changes in StoryCAD repository
+2. Update corresponding documentation in ManualTest repository (staging)
+3. Test documentation locally: `cd ManualTest && bundle exec jekyll serve`
+4. Push to ManualTest to publish to staging site
+5. Notify maintainer to copy `/docs/` to StoryCAD repo for production
+
+#### Bidirectional Linking
+
+**From User Docs → Technical Docs**:
+User manual "For Developers" section links to:
+- StoryCAD CLAUDE.md
+- Architecture documentation (`.claude/docs/architecture/`)
+- API implementation details
+
+**From Technical Docs → User Docs**:
+Architecture documentation links to:
+- User workflows and feature documentation
+- API usage examples in "For Developers"
+- UI element descriptions
+
+### Feature-to-Documentation Mapping
+
+| Feature Area | Technical Code Location | User Documentation Section |
+|--------------|------------------------|---------------------------|
+| Story Elements (Character, Problem, etc.) | `StoryCADLib/Models/`, `StoryCAD/ViewModels/` | `Story Elements/` (30 files) |
+| Plot Tools (Master Plots, Dramatic Situations) | `StoryCAD/Views/Tools/` | `Tools/` (10 files) |
+| File Operations | `StoryCADLib/Services/OutlineService.cs` | `Quick Start/Reading_and_Writing_Outlines.md` |
+| Navigation | `StoryCAD/Views/Shell.xaml` | `Quick Start/Navigating_in_StoryCAD.md` |
+| Reports | `StoryCADLib/Services/Reports/` | `Reports/` (4 files) |
+| Preferences | `StoryCAD/Views/Preferences.xaml` | `Preferences/Preferences.md` |
+| API | `StoryCADLib/SemanticKernelAPI.cs` | `For Developers/Using_the_API.md` |
+| Collaborator (AI features) | `CollaboratorLib/` (separate repo) | User docs TBD (feature in development) |
+
+### Documentation Standards for Developers
+
+When updating user documentation:
+
+1. **Write for non-technical audience**: Fiction writers, not programmers
+2. **Use screenshots**: Visual guides for UI elements (store in `/docs/media/`)
+3. **Task-oriented**: Explain "how to accomplish X" not "how X works internally"
+4. **Plain language**: Avoid technical jargon (use "story outline" not "document object model")
+5. **Include examples**: Show concrete examples of feature usage
+6. **Test locally**: Verify Jekyll site builds and navigation works
+7. **Front matter required**: All pages need front matter or they won't publish
+
+**Jekyll Front Matter Template**:
+```yaml
+---
+title: Page Title
+layout: default
+nav_enabled: true
+nav_order: 33
+parent: Section Name  # Optional
+has_toc: false
+---
+```
+
+### Documentation Quality Checklist
+
+Before marking documentation updates complete:
+
+- [ ] Updated relevant user documentation pages in ManualTest
+- [ ] Screenshots updated (if UI changed)
+- [ ] Front matter correct on all modified pages
+- [ ] Links tested (internal and external)
+- [ ] Tested locally with Jekyll
+- [ ] Navigation logical and discoverable
+- [ ] Terminology consistent with glossary
+- [ ] Examples accurate and current
+- [ ] Cross-references to related pages added
+- [ ] Staging site verified
+
+---
+
 ## UNO Platform Architecture
 
 ### What is UNO Platform?
@@ -1483,6 +1892,322 @@ public class OutlineService
 - Clearer dependencies (explicit parameters)
 - Prevents stale state bugs
 
+### 8. MVVM Messenger Pattern
+
+**Purpose**: Loosely-coupled communication between ViewModels and components
+
+StoryCAD uses the `IMessenger` interface from CommunityToolkit.Mvvm to enable ViewModels, services, and UI components to communicate without direct dependencies. This pattern is particularly important in a complex application where components need to notify each other of state changes without creating tight coupling.
+
+**Core Implementation**:
+
+The messenger pattern uses a publish-subscribe model where components can:
+- **Register** to receive specific message types
+- **Send** messages that registered recipients will receive
+- **Request** information using request/response messages
+
+**Key Components**:
+
+**ShellViewModel** (Primary Message Hub):
+```csharp
+public class ShellViewModel : ObservableRecipient
+{
+    public ShellViewModel(...)
+    {
+        // Register message handlers in constructor
+        Messenger.Register<IsChangedRequestMessage>(this,
+            (_, m) => { m.Reply(State.CurrentDocument?.Model?.Changed ?? false); });
+
+        Messenger.Register<ShellViewModel, IsChangedMessage>(this,
+            static (r, m) => r.IsChangedMessageReceived(m));
+
+        Messenger.Register<ShellViewModel, IsBackupStatusMessage>(this,
+            static (r, m) => r.BackupStatusMessageReceived(m));
+
+        Messenger.Register<ShellViewModel, StatusChangedMessage>(this,
+            static (r, m) => r.StatusMessageReceived(m));
+
+        Messenger.Register<ShellViewModel, NameChangedMessage>(this,
+            static (r, m) => r.NameMessageReceived(m));
+    }
+
+    private void StatusMessageReceived(StatusChangedMessage statusMessage)
+    {
+        // Update UI with status message
+        StatusMessage = statusMessage.Value.Status;
+        switch (statusMessage.Value.Level)
+        {
+            case LogLevel.Info:
+                StatusColor = Window.SecondaryColor;
+                _statusTimer.Interval = TimeSpan.FromSeconds(15);
+                _statusTimer.Start();
+                break;
+            case LogLevel.Warn:
+                StatusColor = new SolidColorBrush(Colors.Goldenrod);
+                _statusTimer.Interval = TimeSpan.FromSeconds(30);
+                _statusTimer.Start();
+                break;
+            case LogLevel.Error:
+                StatusColor = new SolidColorBrush(Colors.Red);
+                break;
+        }
+    }
+
+    private void IsChangedMessageReceived(IsChangedMessage isDirty)
+    {
+        if (State.CurrentDocument?.Model != null)
+        {
+            State.CurrentDocument.Model.Changed = isDirty.Value;
+        }
+
+        // Update visual indicator
+        ChangeStatusColor = isDirty.Value ? Colors.Red : Colors.Green;
+    }
+
+    private void NameMessageReceived(NameChangedMessage name)
+    {
+        // Synchronize TreeView node name with element name
+        CurrentNode.Name = name.Value.NewName;
+        switch (CurrentNode.Type)
+        {
+            case StoryItemType.Setting:
+                var settingIndex = SettingModel.SettingNames.IndexOf(name.Value.OldName);
+                SettingModel.SettingNames[settingIndex] = name.Value.NewName;
+                break;
+        }
+    }
+}
+```
+
+**Message Types**:
+
+StoryCAD uses several message types for different communication needs:
+
+1. **StatusChangedMessage**: Updates status bar with user feedback
+   ```csharp
+   public class StatusChangedMessage : ValueChangedMessage<StatusMessage>
+   {
+       public StatusChangedMessage(StatusMessage value) : base(value) { }
+   }
+
+   // Usage - sending from any ViewModel or service:
+   Messenger.Send(new StatusChangedMessage(
+       new StatusMessage("File saved successfully", LogLevel.Info, true)));
+   ```
+
+2. **IsChangedMessage**: Notifies when document has unsaved changes
+   ```csharp
+   public class IsChangedMessage : ValueChangedMessage<bool>
+   {
+       public IsChangedMessage(bool value) : base(value) { }
+   }
+
+   // Usage - notifying document changed:
+   Messenger.Send(new IsChangedMessage(true));
+   ```
+
+3. **IsChangedRequestMessage**: Request current changed state (request/response pattern)
+   ```csharp
+   public class IsChangedRequestMessage : RequestMessage<bool> { }
+
+   // Usage - requesting information:
+   var isChanged = Messenger.Send(new IsChangedRequestMessage());
+   ```
+
+4. **NameChangedMessage**: Synchronizes element name changes across UI
+   ```csharp
+   public class NameChangedMessage : ValueChangedMessage<NameChangeMessage>
+   {
+       public NameChangedMessage(NameChangeMessage value) : base(value) { }
+   }
+
+   // Usage - from OverviewViewModel when name changes:
+   NameChangeMessage msg = new(oldName, newName);
+   Messenger.Send(new NameChangedMessage(msg));
+   ```
+
+5. **IsBackupStatusMessage**: Updates backup status indicator
+   ```csharp
+   public class IsBackupStatusMessage : ValueChangedMessage<bool>
+   {
+       public IsBackupStatusMessage(bool value) : base(value) { }
+   }
+   ```
+
+**Sending Messages**:
+
+Any component can send messages using the static `Messenger.Send()` method:
+
+```csharp
+// From ViewModel - notify status change
+Messenger.Send(new StatusChangedMessage(
+    new StatusMessage("Loading file...", LogLevel.Info)));
+
+// From service - notify error
+Messenger.Send(new StatusChangedMessage(
+    new StatusMessage("Failed to save file", LogLevel.Error)));
+
+// From business logic - notify document changed
+Messenger.Send(new IsChangedMessage(true));
+```
+
+**Registering for Messages**:
+
+Components register for messages in their constructor or initialization:
+
+```csharp
+// Register with instance method handler
+Messenger.Register<IsChangedRequestMessage>(this,
+    (recipient, message) => {
+        message.Reply(State.CurrentDocument?.Model?.Changed ?? false);
+    });
+
+// Register with static method for better performance
+Messenger.Register<ShellViewModel, StatusChangedMessage>(this,
+    static (recipient, message) => recipient.StatusMessageReceived(message));
+```
+
+**Message Flow Examples**:
+
+**Example 1: User Edits Story Element Name**
+```
+User types in OverviewViewModel.Name property
+    ↓
+OverviewViewModel.Name setter sends NameChangedMessage
+    ↓
+ShellViewModel receives message (registered handler)
+    ↓
+ShellViewModel.NameMessageReceived() updates TreeView node name
+    ↓
+UI automatically updates via data binding
+```
+
+**Example 2: Document Save Operation**
+```
+User clicks Save button
+    ↓
+OutlineViewModel.SaveFile() sends StatusChangedMessage("Saving...", Info)
+    ↓
+ShellViewModel.StatusMessageReceived() updates status bar
+    ↓
+Save operation completes
+    ↓
+OutlineViewModel sends IsChangedMessage(false)
+    ↓
+ShellViewModel.IsChangedMessageReceived() updates change indicator (red → green)
+    ↓
+OutlineViewModel sends StatusChangedMessage("File saved", Info)
+    ↓
+ShellViewModel displays success message
+```
+
+**Example 3: Request/Response Pattern**
+```
+Service needs to check if document has changes
+    ↓
+Service sends IsChangedRequestMessage
+    ↓
+ShellViewModel receives request
+    ↓
+ShellViewModel replies with current changed state
+    ↓
+Service receives response and proceeds accordingly
+```
+
+**Benefits of the Messenger Pattern**:
+
+1. **Loose Coupling**: Components don't need direct references to each other
+   - ViewModels can communicate without circular dependencies
+   - Services can notify UI without knowing about ViewModels
+   - Easy to add new message recipients without modifying senders
+
+2. **Centralized Communication**: All inter-component messages flow through one system
+   - Easy to trace message flow for debugging
+   - Single point of control for communication
+   - Simplified testing with message interception
+
+3. **Separation of Concerns**: Each component focuses on its responsibility
+   - ShellViewModel handles UI updates
+   - Element ViewModels handle business logic
+   - Services handle data operations
+   - All communicate via well-defined messages
+
+4. **Testability**: Easy to test message handling in isolation
+   - Mock message sending/receiving in unit tests
+   - Verify correct messages are sent for specific actions
+   - Test message handlers independently
+
+5. **Type Safety**: Compile-time checking of message types
+   - Messages are strongly typed classes
+   - No string-based events or magic values
+   - IDE autocomplete and refactoring support
+
+**Common Usage Patterns**:
+
+**Status Updates**: Keep users informed of operations
+```csharp
+Messenger.Send(new StatusChangedMessage(
+    new StatusMessage("Opening file...", LogLevel.Info)));
+// ... perform operation ...
+Messenger.Send(new StatusChangedMessage(
+    new StatusMessage("File opened successfully", LogLevel.Info)));
+```
+
+**Change Tracking**: Update UI indicators when data changes
+```csharp
+// After modifying data
+State.CurrentDocument.Model.Changed = true;
+Messenger.Send(new IsChangedMessage(true));
+```
+
+**Name Synchronization**: Keep TreeView and element names in sync
+```csharp
+// In element ViewModel when name changes
+if (_name != value)
+{
+    NameChangeMessage msg = new(_name, value);
+    Messenger.Send(new NameChangedMessage(msg));
+    _name = value;
+}
+```
+
+**Important Considerations**:
+
+1. **Message Registration Lifecycle**: Always register in constructor, unregister when disposed
+2. **Thread Safety**: Messages can be sent from any thread; handlers may need UI thread marshaling
+3. **Performance**: Use static handlers when possible for better performance
+4. **Message Design**: Keep messages simple and focused on single purpose
+5. **Documentation**: Document which components send/receive which messages
+
+**Comparison with Direct Method Calls**:
+
+**Without Messenger (Tight Coupling)**:
+```csharp
+public class ElementViewModel
+{
+    private ShellViewModel _shell; // Direct dependency
+
+    public void UpdateName(string newName)
+    {
+        _shell.UpdateTreeNodeName(newName); // Direct call
+    }
+}
+```
+
+**With Messenger (Loose Coupling)**:
+```csharp
+public class ElementViewModel
+{
+    // No dependency on ShellViewModel
+
+    public void UpdateName(string newName)
+    {
+        Messenger.Send(new NameChangedMessage(new(oldName, newName)));
+    }
+}
+```
+
+The Messenger pattern is fundamental to StoryCAD's architecture, enabling clean separation between UI, business logic, and services while maintaining responsive user feedback and proper state synchronization.
+
 ---
 
 ## Data Management
@@ -2664,7 +3389,8 @@ catch (Exception ex)
 | 2025-01-24 | 1.1 | Updated with Issue #1100 refactoring |
 | 2025-10-08 | 2.0 | **Major revision**: Added UNO Platform architecture, complete folder structures, multi-targeting strategy, platform-specific code patterns, cross-platform considerations, build/deployment, dependency management, enhanced diagrams |
 | 2025-10-08 | 2.1 | **Corrections and additions**: Updated Dependency Injection description, expanded Element Conversion explanation, corrected file format from XML to JSON, updated file operations (6 templates, 15-second auto-save default, 3 backup types), added test folder structure mirroring convention, expanded elmah.io description, corrected name synchronization to two-way, added comprehensive CI/CD Process section |
+| 2025-10-09 | 2.2 | **MVVM Messenger Pattern documentation**: Added comprehensive section 8 on MVVM Messenger Pattern (after Stateless Services Pattern). Documents IMessenger interface from CommunityToolkit.Mvvm, message types (StatusChangedMessage, IsChangedMessage, IsChangedRequestMessage, NameChangedMessage, IsBackupStatusMessage), registration and sending patterns, message flow examples, benefits, and usage patterns. Based on ShellViewModel.cs implementation analysis. |
 
 ---
 
-*This document represents the current understanding of StoryCAD architecture as of 2025-10-08, incorporating the UNO Platform migration and all architectural refactorings through Issue #1100. For questions or corrections, please consult the development team.*
+*This document represents the current understanding of StoryCAD architecture as of 2025-10-09, incorporating the UNO Platform migration and all architectural refactorings through Issue #1100. For questions or corrections, please consult the development team.*
