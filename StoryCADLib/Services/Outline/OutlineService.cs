@@ -1243,7 +1243,70 @@ public class OutlineService
     #region Trash Operations
 
     /// <summary>
-    ///     Moves a story element to the trash.
+    ///     Recursively collects all GUIDs for an element and its children.
+    /// </summary>
+    /// <param name="node">The node to start from</param>
+    /// <param name="model">The story model</param>
+    /// <returns>List of all GUIDs (parent and all descendants)</returns>
+    internal List<Guid> CollectAllDescendantGuids(StoryNodeItem node, StoryModel model)
+    {
+        var guids = new List<Guid> { node.Uuid };
+
+        foreach (var child in node.Children)
+        {
+            guids.AddRange(CollectAllDescendantGuids(child, model));
+        }
+
+        return guids;
+    }
+
+    /// <summary>
+    ///     Recursively removes nodes from a tree view if their GUID is in the deletion list.
+    ///     This cleans up orphaned references that might exist in other views (like NarratorView).
+    /// </summary>
+    /// <param name="view">The view collection to clean</param>
+    /// <param name="guidsToRemove">List of GUIDs that should be removed</param>
+    private void RemoveOrphanedNodesFromView(ObservableCollection<StoryNodeItem> view, List<Guid> guidsToRemove)
+    {
+        // First, recursively clean children of all root nodes
+        foreach (var rootNode in view.ToList())
+        {
+            RemoveOrphanedNodesRecursive(rootNode, guidsToRemove, null);
+        }
+
+        // Then remove any root nodes that match
+        foreach (var rootNode in view.ToList())
+        {
+            if (guidsToRemove.Contains(rootNode.Uuid))
+            {
+                view.Remove(rootNode);
+                _log.Log(LogLevel.Trace, $"Removed orphaned root node {rootNode.Uuid} from view");
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Recursively removes nodes if their GUID matches the deletion list.
+    /// </summary>
+    private void RemoveOrphanedNodesRecursive(StoryNodeItem node, List<Guid> guidsToRemove, StoryNodeItem parent)
+    {
+        // Check children first (depth-first to avoid parent issues)
+        foreach (var child in node.Children.ToList())
+        {
+            RemoveOrphanedNodesRecursive(child, guidsToRemove, node);
+        }
+
+        // If this node should be removed, remove it from its parent
+        if (guidsToRemove.Contains(node.Uuid) && parent != null)
+        {
+            parent.Children.Remove(node);
+            _log.Log(LogLevel.Trace, $"Removed orphaned node {node.Uuid} from view");
+        }
+    }
+
+    /// <summary>
+    ///     Moves a story element and its children to the trash.
+    ///     Removes all references but keeps elements in collection for restore.
     /// </summary>
     /// <param name="element">The element to move to trash</param>
     /// <param name="model">The story model</param>
@@ -1282,8 +1345,19 @@ public class OutlineService
 
         using (var serializationLock = new SerializationLock(_log))
         {
-            // Remove references to this element from other elements
-            RemoveReferenceToElement(element.Uuid, model);
+            // Collect all GUIDs (element + all descendants)
+            var allGuids = CollectAllDescendantGuids(element.Node, model);
+            _log.Log(LogLevel.Info, $"Trashing {allGuids.Count} elements (including children)");
+
+            // Remove references to all elements (parent and children) from other elements
+            foreach (var guid in allGuids)
+            {
+                RemoveReferenceToElement(guid, model);
+            }
+
+            // NOTE: We do NOT remove elements from StoryElements collection
+            // This keeps them accessible via GUID lookups and makes restore simple
+            // Elements are just hidden by being in the trash tree structure
 
             // Get the trash node
             var trashNode = model.TrashView.FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
@@ -1307,7 +1381,7 @@ public class OutlineService
             // Mark model as changed
             model.Changed = true;
 
-            _log.Log(LogLevel.Info, $"Successfully moved element {element.Uuid} to trash");
+            _log.Log(LogLevel.Info, $"Successfully moved element {element.Uuid} and {allGuids.Count - 1} children to trash");
         }
     }
 
@@ -1367,12 +1441,13 @@ public class OutlineService
             // Mark model as changed
             model.Changed = true;
 
-            _log.Log(LogLevel.Info, $"Successfully restored element {trashNode.Uuid} from trash");
+            var childCount = CollectAllDescendantGuids(trashNode, model).Count - 1;
+            _log.Log(LogLevel.Info, $"Successfully restored element {trashNode.Uuid} and {childCount} children from trash");
         }
     }
 
     /// <summary>
-    ///     Empties the trash, permanently removing all items.
+    ///     Permanently deletes all trash items from the model.
     /// </summary>
     /// <param name="model">The story model</param>
     /// <exception cref="ArgumentNullException">Thrown when model is null</exception>
@@ -1397,7 +1472,32 @@ public class OutlineService
                 throw new InvalidOperationException("TrashCan node not found");
             }
 
-            // Clear all children
+            // Collect all GUIDs to permanently delete (all elements in trash)
+            var allGuids = new List<Guid>();
+            foreach (var child in trashNode.Children.ToList()) // ToList to avoid modification during iteration
+            {
+                allGuids.AddRange(CollectAllDescendantGuids(child, model));
+            }
+
+            _log.Log(LogLevel.Info, $"Permanently deleting {allGuids.Count} elements from trash");
+
+            // Remove all elements from StoryElements collection
+            // This permanently deletes them from the model
+            foreach (var guid in allGuids)
+            {
+                var elementToRemove = model.StoryElements.StoryElementGuids.GetValueOrDefault(guid);
+                if (elementToRemove != null)
+                {
+                    model.StoryElements.Remove(elementToRemove);
+                    _log.Log(LogLevel.Trace, $"Permanently deleted element {guid}");
+                }
+            }
+
+            // Remove any orphaned nodes from NarratorView
+            // Elements might exist in NarratorView if they were added there before deletion
+            RemoveOrphanedNodesFromView(model.NarratorView, allGuids);
+
+            // Clear all children from trash tree
             var itemCount = trashNode.Children.Count;
             trashNode.Children.Clear();
 
@@ -1407,7 +1507,7 @@ public class OutlineService
                 model.Changed = true;
             }
 
-            _log.Log(LogLevel.Info, $"Successfully emptied trash, removed {itemCount} items");
+            _log.Log(LogLevel.Info, $"Successfully emptied trash, permanently removed {itemCount} items");
         }
     }
 

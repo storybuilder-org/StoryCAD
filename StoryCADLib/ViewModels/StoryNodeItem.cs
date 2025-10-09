@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using StoryCADLib.Services;
+using StoryCADLib.Services.Outline;
 using LogLevel = StoryCADLib.Services.Logging.LogLevel;
 
 namespace StoryCADLib.ViewModels;
@@ -36,6 +37,13 @@ public class StoryNodeItem : INotifyPropertyChanged
     // is it INavigable?
     public event PropertyChangedEventHandler PropertyChanged;
 
+    /// <summary>
+    ///     Deletes a node from a view. Behavior depends on the view type:
+    ///     - ExplorerView: Moves element to trash using OutlineService.MoveToTrash()
+    ///     - NarratorView: Just removes from narrative view (element remains in ExplorerView)
+    /// </summary>
+    /// <param name="view">The view type from which to delete</param>
+    /// <returns>True if delete was successful, false if element cannot be deleted</returns>
     public bool Delete(StoryViewType view)
     {
         if (Type is StoryItemType.TrashCan || IsRoot)
@@ -43,17 +51,30 @@ public class StoryNodeItem : INotifyPropertyChanged
             return false;
         }
 
-        MoveToTrash(view);
+        if (view == StoryViewType.ExplorerView)
+        {
+            // For Explorer view: delegate to OutlineService for proper trash handling
+            // This ensures reference cleanup, locking, and change tracking
+            var element = _appState.CurrentDocument!.Model.StoryElements.StoryElementGuids[Uuid];
+            var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+            outlineService.MoveToTrash(element, _appState.CurrentDocument.Model);
+        }
+        else if (view == StoryViewType.NarratorView)
+        {
+            // For Narrator view: just remove from this logical view
+            // The node remains in its original location in Explorer view
+            RemoveFromNarratorView();
+        }
+
         return true;
     }
 
     /// <summary>
-    ///     Moves this node to the trash.
+    ///     Removes this node from the Narrator view without trashing it.
+    ///     The element remains in its original location in Explorer view.
     /// </summary>
-    /// <param name="view"></param>
-    private void MoveToTrash(StoryViewType view)
+    private void RemoveFromNarratorView()
     {
-        //Remove from current parent
         if (IsRoot || Parent is null)
         {
             throw new InvalidOperationException("Root cannot be detached.");
@@ -64,25 +85,8 @@ public class StoryNodeItem : INotifyPropertyChanged
             throw new InvalidOperationException("Parent/child link out of sync.");
         }
 
-        // Handle different view types
-        if (view == StoryViewType.ExplorerView)
-        {
-            // For Explorer view: actually move to trash
-            Parent = null;
-
-            var trash = _appState.CurrentDocument!.Model.StoryElements
-                .First(e => e.ElementType == StoryItemType.TrashCan)
-                .Node;
-
-            trash.Children.Add(this);
-            Parent = trash;
-        }
-        else if (view == StoryViewType.NarratorView)
-        {
-            // For Narrator view: just remove from this logical view
-            // The node remains in its original location in Explorer view
-            // No parent relationship changes needed
-        }
+        // No parent reassignment needed - this just removes from the NarratorView tree
+        // The element still exists in ExplorerView
     }
 
 
