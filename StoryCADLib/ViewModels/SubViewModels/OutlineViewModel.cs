@@ -209,6 +209,12 @@ public class OutlineViewModel : ObservableRecipient
                 _autoSaveService.StartAutoSave();
             }
 
+            // Navigate to Overview node after successful open
+            if (appState.CurrentDocument?.Model?.ExplorerView?.Count > 0)
+            {
+                shellVm.TreeViewNodeClicked(appState.CurrentDocument.Model.ExplorerView[0]);
+            }
+
             logger.Log(LogLevel.Info, $"Opened project {appState.CurrentDocument?.FilePath}");
         }
         catch (Exception ex)
