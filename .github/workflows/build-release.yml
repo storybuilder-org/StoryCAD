@@ -122,9 +122,9 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore StoryCAD.sln
 
-      # 9 ─ Run tests (all platforms)
-      - name: Run all tests (Windows)
-        if: matrix.os == 'windows-latest'
+      # 9 ─ Run tests (x64 only for Windows, all for macOS)
+      - name: Run all tests (Windows x64 only)
+        if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
         run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:Platform=${{ matrix.platform }}
 
       - name: Run all tests (macOS)
