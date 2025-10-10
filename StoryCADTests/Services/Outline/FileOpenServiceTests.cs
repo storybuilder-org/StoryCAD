@@ -7,6 +7,7 @@ using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Logging;
 using StoryCADLib.Services.Messages;
 using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels;
 
 #nullable disable
 

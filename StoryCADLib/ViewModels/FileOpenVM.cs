@@ -1,4 +1,4 @@
-﻿using System.IO.Compression;
+using System.IO.Compression;
 using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
@@ -23,16 +23,6 @@ public class FileOpenVM : ObservableRecipient
     private readonly ILogService _logger;
     private readonly PreferenceService _preferences;
     private readonly Windowing _windowing;
-
-    // Constructor for XAML compatibility - will be removed later
-    public FileOpenVM() : this(
-        Ioc.Default.GetRequiredService<ILogService>(),
-        Ioc.Default.GetRequiredService<FileOpenService>(),
-        Ioc.Default.GetRequiredService<FileCreateService>(),
-        Ioc.Default.GetRequiredService<PreferenceService>(),
-        Ioc.Default.GetRequiredService<Windowing>())
-    {
-    }
 
     public FileOpenVM(ILogService logger, FileOpenService fileOpenService, FileCreateService fileCreateService,
         PreferenceService preferences, Windowing windowing)
@@ -90,6 +80,7 @@ public class FileOpenVM : ObservableRecipient
 
         //Open sample
         await _fileOpenService.OpenFile(filePath);
+        NavigateToOverview();
         return filePath;
     }
 
@@ -101,6 +92,7 @@ public class FileOpenVM : ObservableRecipient
     {
         Close();
         await _fileOpenService.OpenFile();
+        NavigateToOverview();
     }
 
 
@@ -156,6 +148,7 @@ public class FileOpenVM : ObservableRecipient
                 {
                     filePath = _preferences.Model.RecentFiles[SelectedRecentIndex];
                     await _fileOpenService.OpenFile(filePath);
+                    NavigateToOverview();
                 }
                 else
                 {
@@ -174,6 +167,7 @@ public class FileOpenVM : ObservableRecipient
                     return;
                 }
 
+                NavigateToOverview();
                 break;
 
             case "Sample": //Open Sample
@@ -218,6 +212,19 @@ public class FileOpenVM : ObservableRecipient
 
     public void Close() => Ioc.Default.GetRequiredService<Windowing>().CloseContentDialog();
 
+    /// <summary>
+    ///     Navigate to the Overview node after successfully opening a file
+    /// </summary>
+    private void NavigateToOverview()
+    {
+        var shellVm = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        if (appState.CurrentDocument?.Model?.ExplorerView?.Count > 0)
+        {
+            shellVm.TreeViewNodeClicked(appState.CurrentDocument.Model.ExplorerView[0]);
+        }
+    }
+
     private async void OpenBackup(string zipPath)
     {
         // make a timestamped temp folder
@@ -248,6 +255,7 @@ public class FileOpenVM : ObservableRecipient
 
             //Open backup
             await _fileOpenService.OpenFile(files[0]);
+            NavigateToOverview();
         }
         catch (Exception ex)
         {

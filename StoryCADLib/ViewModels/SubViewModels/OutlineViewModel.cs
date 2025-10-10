@@ -209,6 +209,12 @@ public class OutlineViewModel : ObservableRecipient
                 _autoSaveService.StartAutoSave();
             }
 
+            // Navigate to Overview node after successful open
+            if (appState.CurrentDocument?.Model?.ExplorerView?.Count > 0)
+            {
+                shellVm.TreeViewNodeClicked(appState.CurrentDocument.Model.ExplorerView[0]);
+            }
+
             logger.Log(LogLevel.Info, $"Opened project {appState.CurrentDocument?.FilePath}");
         }
         catch (Exception ex)
@@ -1141,7 +1147,23 @@ public class OutlineViewModel : ObservableRecipient
 
             var _delete = true;
             var elementToDelete = shellVm.RightTappedNode.Uuid;
-            var _foundElements = outlineService.FindElementReferences(appState.CurrentDocument.Model, elementToDelete);
+
+            // Collect all GUIDs (element + all children)
+            var allGuids = outlineService.CollectAllDescendantGuids(shellVm.RightTappedNode, appState.CurrentDocument.Model);
+
+            // Find references to ANY of these GUIDs
+            var _foundElements = new List<StoryElement>();
+            foreach (var guid in allGuids)
+            {
+                var refs = outlineService.FindElementReferences(appState.CurrentDocument.Model, guid);
+                foreach (var refElement in refs)
+                {
+                    if (!_foundElements.Contains(refElement))
+                    {
+                        _foundElements.Add(refElement);
+                    }
+                }
+            }
 
             var state = appState;
             //Only warns if it finds a node its referenced in
@@ -1225,7 +1247,6 @@ public class OutlineViewModel : ObservableRecipient
                 }
             }
         }
-        //TODO: This suppresses API calls on failure and needs to be handled.
         catch (InvalidOperationException)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("You cannot delete this node", LogLevel.Warn)));

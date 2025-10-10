@@ -1,6 +1,6 @@
 # StoryCAD Development Guide
 
-This file provides project-specific guidance for StoryCAD development. Universal development standards are defined in `/dev/src/CLAUDE.md` and automatically included.
+This file provides project-specific guidance for StoryCAD development.
 
 ## Primary Directive: Simplicity First
 
@@ -80,29 +80,73 @@ StoryCAD is a free, open-source application for fiction writers that provides st
 2. **StoryCADLib** - Core business logic library (NuGet package)
 3. **StoryCADTests** - MSTest test project
 
-## Development Guides
+## Documentation Resources
 
-### Core Documentation
-- [Architecture Guide](./devdocs/architecture.md) - MVVM patterns, data binding, services
-- [Build & Test Commands](./devdocs/build_commands.md) - WSL/Windows build instructions
-- [Testing Guide](./devdocs/testing.md) - Test patterns and data creation
-- [Coding Standards](./devdocs/coding.md) - Naming conventions, layout, SOLID principles
-- [Debugging Configuration](./devdocs/debugging_configuration.md) - Visual Studio and IDE debugging setup
+### Developer Documentation (`.claude/docs/`)
 
-### Workflow Documentation
-- [AI Workflow](./devdocs/AI_workflow.md) - Issue-centric development process
+StoryCAD has comprehensive documentation for AI/LLM agents and developers in `.claude/docs/`:
 
-### User Manual Navigation
-- **Entry Point**: [User Manual Index](/mnt/d/dev/src/ManualTest/index.md) - Start here for overview
-- **Documentation Structure**: Organized by topic in subdirectories (Just the Docs format)
-- **Efficient Search**: Use Glob/Grep to search specific topics rather than reading all files
-- **Key Sections**:
-  - `Front Matter/` - Getting started, legal matters, help
-  - `Quick Start/` - UI, navigation, basic operations
-  - `Story Elements/` - Forms and tabs for each story element type
-  - `Tools/` - Plotting aids, conflict builder, dramatic situations
-  - `Writing with StoryCAD/` - Workflows, plotting, character development
-  - `Tutorial Creating a Story/` - Step-by-step story creation guide
+#### Architecture Documentation (`.claude/docs/architecture/`)
+- **[StoryCAD_architecture_notes.md](./.claude/docs/architecture/StoryCAD_architecture_notes.md)** - Comprehensive architecture reference covering all 9 architectural patterns, UNO Platform integration, repository ecosystem, and service layers
+- **[patterns-quick-ref.md](./.claude/docs/architecture/patterns-quick-ref.md)** - Quick reference for StoryCAD patterns (MVVM, ISaveable, SerializationLock, OperationResult, Stateless Services, etc.)
+- **[coding-standards.md](./.claude/docs/architecture/coding-standards.md)** - Naming conventions, code layout, SOLID principles
+- **[testing-guide.md](./.claude/docs/architecture/testing-guide.md)** - Test patterns, MSTest usage, test data creation
+- **[debugging-guide.md](./.claude/docs/architecture/debugging-guide.md)** - Visual Studio and IDE debugging setup
+- **[build-commands.md](./.claude/docs/architecture/build-commands.md)** - WSL/Windows build and test commands
+- **[ai-workflow.md](./.claude/docs/architecture/ai-workflow.md)** - Issue-centric development process for AI agents
+
+#### Dependency Guides (`.claude/docs/dependencies/`)
+- **[uno-platform-guide.md](./.claude/docs/dependencies/uno-platform-guide.md)** - UNO Platform 6.2.36 usage, platform heads, conditional compilation, file naming conventions
+- **[mvvm-toolkit-guide.md](./.claude/docs/dependencies/mvvm-toolkit-guide.md)** - CommunityToolkit.Mvvm 8.4.0 patterns, source generators, IMessenger, Ioc container
+- **[semantic-kernel-guide.md](./.claude/docs/dependencies/semantic-kernel-guide.md)** - Microsoft Semantic Kernel 1.41.0 integration in CollaboratorLib plugin
+
+#### Code Examples (`.claude/docs/examples/`)
+- **[new-viewmodel-template.md](./.claude/docs/examples/new-viewmodel-template.md)** - Copy-paste template for creating ViewModels with ISaveable pattern
+- **[new-service-template.md](./.claude/docs/examples/new-service-template.md)** - Template for stateless services with SerializationLock
+- **[platform-specific-code.md](./.claude/docs/examples/platform-specific-code.md)** - Examples for handling Windows vs macOS differences
+
+#### Troubleshooting (`.claude/docs/troubleshooting/`)
+- **[common-errors.md](./.claude/docs/troubleshooting/common-errors.md)** - Quick troubleshooting guide for build errors, runtime errors, platform-specific issues, messaging errors, and test failures
+
+### User Manual (ManualTest Repository)
+
+- **Repository**: [github.com/storybuilder-org/ManualTest](https://github.com/storybuilder-org/ManualTest)
+- **AI Agent Guide**: [ManualTest/CLAUDE.md](/mnt/d/dev/src/ManualTest/CLAUDE.md) - Comprehensive guidance for working with user documentation
+- **Location**: `/mnt/d/dev/src/ManualTest/docs/`
+- **Published (Staging)**: https://storybuilder-org.github.io/StoryBuilder-Manual/
+- **Format**: Jekyll with Just the Docs theme (115 markdown files)
+- **Index**: `/mnt/c/temp/user_manual.md` - Complete index with file summaries
+- **Audience**: Fiction writers (non-technical users)
+
+**Search Strategy**:
+- **DO NOT** read all 115 files sequentially
+- **DO** use index file for quick lookup
+- **DO** use Grep to search specific sections
+- **DO** read ManualTest/CLAUDE.md for detailed search guidance
+
+**Key Manual Sections**:
+- `Front Matter/` - Introduction, help resources, legal information (4 files)
+- `Quick Start/` - UI basics, navigation, file operations, keyboard shortcuts (23 files)
+- `Story Elements/` - Forms and tabs for each story element type (30 files)
+- `Tools/` - Master Plots, Dramatic Situations, Stock Scenes, Conflict Builder (10 files)
+- `Writing with StoryCAD/` - Outlining philosophy, workflow, plotting techniques (17 files)
+- `Tutorial Creating a Story/` - Step-by-step story creation guide (10 files)
+- `Reports/` - Print reports and Scrivener integration (4 files)
+- `Preferences/` - Application settings and configuration (1 file)
+- `For Developers/` - API documentation, changelog, developer notes (6 files)
+
+**When to Reference User Documentation**:
+- Before implementing UI changes (understand user workflows)
+- When adding new story elements (follow established patterns)
+- When changing features (update corresponding user docs)
+- See architecture notes for feature-to-documentation mapping
+
+### Context7 MCP Server
+
+StoryCAD uses Context7 MCP server for up-to-date documentation of public dependencies:
+- **Status**: Configured in `/home/tcox/.claude.json`
+- **Provides**: Latest docs for UNO Platform, Semantic Kernel, MVVM Toolkit, and other NuGet packages
+- **Usage**: Query Context7 for dependency-specific questions
 
 ## Quick Start
 

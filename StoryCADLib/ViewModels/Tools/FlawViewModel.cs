@@ -36,11 +36,6 @@ public class FlawViewModel : ObservableRecipient
 
     private readonly ListData _listData;
 
-    // Constructor for XAML compatibility - will be removed later
-    public FlawViewModel() : this(Ioc.Default.GetRequiredService<ListData>())
-    {
-    }
-
     public FlawViewModel(ListData listData)
     {
         _listData = listData;

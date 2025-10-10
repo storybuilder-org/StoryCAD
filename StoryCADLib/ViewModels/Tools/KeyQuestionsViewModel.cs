@@ -88,11 +88,6 @@ public class KeyQuestionsViewModel : ObservableRecipient
 
     private readonly ToolsData _toolsData;
 
-    // Constructor for XAML compatibility - will be removed later
-    public KeyQuestionsViewModel() : this(Ioc.Default.GetRequiredService<ToolsData>())
-    {
-    }
-
     public KeyQuestionsViewModel(ToolsData toolsData)
     {
         _toolsData = toolsData;

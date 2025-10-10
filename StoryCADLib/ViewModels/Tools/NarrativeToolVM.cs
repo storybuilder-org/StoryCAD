@@ -36,16 +36,6 @@ public class NarrativeToolVM : ObservableRecipient
     public bool IsNarratorSelected = false;
     public StoryNodeItem SelectedNode; //Currently selected node
 
-    // Constructor for XAML compatibility - will be removed later
-    public NarrativeToolVM() : this(
-        Ioc.Default.GetRequiredService<ShellViewModel>(),
-        Ioc.Default.GetRequiredService<AppState>(),
-        Ioc.Default.GetRequiredService<Windowing>(),
-        Ioc.Default.GetRequiredService<ToolValidationService>(),
-        Ioc.Default.GetRequiredService<ILogService>())
-    {
-    }
-
     public NarrativeToolVM(ShellViewModel shellVM, AppState appState, Windowing windowing,
         ToolValidationService toolValidationService, ILogService logger)
     {
@@ -117,8 +107,10 @@ public class NarrativeToolVM : ObservableRecipient
 
 
     /// <summary>
-    ///     Deletes a node from the tree.
-    ///     TODO: Possibly Merge with StoryElement.Delete() Method
+    ///     Removes a node from the Narrator view.
+    ///     Note: This does NOT trash the element - it only removes it from the narrative sequence.
+    ///     The element remains in its original location in the Explorer view.
+    ///     Uses StoryNodeItem.Delete(NarratorView) which handles view-specific removal.
     /// </summary>
     public void Delete()
     {

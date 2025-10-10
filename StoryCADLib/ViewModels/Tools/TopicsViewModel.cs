@@ -127,11 +127,6 @@ public class TopicsViewModel : ObservableRecipient
 
     #region Constructor
 
-    // Constructor for XAML compatibility - will be removed later
-    public TopicsViewModel() : this(Ioc.Default.GetRequiredService<ToolsData>())
-    {
-    }
-
     public TopicsViewModel(ToolsData toolsData)
     {
         _toolsData = toolsData;

@@ -186,12 +186,6 @@ public partial class WorkflowViewModel : ObservableRecipient
 
     #region Constructor(s)
 
-    // Constructor for XAML compatibility - will be removed later
-    public WorkflowViewModel() : this(
-        Ioc.Default.GetRequiredService<NavigationService>())
-    {
-    }
-
     public WorkflowViewModel(NavigationService navigationService)
     {
         _navigationService = navigationService;

@@ -237,6 +237,58 @@ public class StoryIOTests
         Assert.IsTrue(result, $"Expected file at {filePath} to be available.");
     }
 
+    [TestMethod]
+    public async Task CheckFileAvailability_WithNonExistentFile_ReturnsFalse()
+    {
+        // Arrange
+        var filePath = Path.Combine(App.ResultsDir, "NonExistentFile_" + Guid.NewGuid() + ".stbx");
+
+        // Act
+        var result = await _storyIO.CheckFileAvailability(filePath);
+
+        // Assert
+        Assert.IsFalse(result, $"Expected non-existent file at {filePath} to be unavailable.");
+    }
+
+    [TestMethod]
+    public async Task CheckFileAvailability_WithNullPath_ReturnsFalse()
+    {
+        // Arrange
+        string filePath = null;
+
+        // Act
+        var result = await _storyIO.CheckFileAvailability(filePath);
+
+        // Assert
+        Assert.IsFalse(result, "Expected null path to return false.");
+    }
+
+    [TestMethod]
+    public async Task CheckFileAvailability_WithEmptyPath_ReturnsFalse()
+    {
+        // Arrange
+        var filePath = string.Empty;
+
+        // Act
+        var result = await _storyIO.CheckFileAvailability(filePath);
+
+        // Assert
+        Assert.IsFalse(result, "Expected empty path to return false.");
+    }
+
+    [TestMethod]
+    public async Task CheckFileAvailability_WithWhitespacePath_ReturnsFalse()
+    {
+        // Arrange
+        var filePath = "   ";
+
+        // Act
+        var result = await _storyIO.CheckFileAvailability(filePath);
+
+        // Assert
+        Assert.IsFalse(result, "Expected whitespace path to return false.");
+    }
+
     #region Migration Tests
 
     [TestMethod]

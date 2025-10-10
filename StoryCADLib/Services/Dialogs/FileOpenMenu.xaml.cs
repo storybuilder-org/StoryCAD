@@ -9,7 +9,7 @@ public sealed partial class FileOpenMenuPage
 
     public FileOpenMenuPage()
     {
-        InitializeComponent();
+         InitializeComponent();
         FileOpenVM.RecentsTabContentVisibility = Visibility.Collapsed;
         FileOpenVM.SamplesTabContentVisibility = Visibility.Collapsed;
         FileOpenVM.BackupTabContentVisibility = Visibility.Collapsed;

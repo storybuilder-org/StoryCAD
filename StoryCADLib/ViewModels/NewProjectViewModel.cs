@@ -10,11 +10,6 @@ public class NewProjectViewModel : ObservableRecipient
     private string _parentPathName;
     private string _projectName;
 
-    // Constructor for XAML compatibility - will be removed later
-    public NewProjectViewModel() : this(Ioc.Default.GetRequiredService<PreferenceService>())
-    {
-    }
-
     public NewProjectViewModel(PreferenceService preferenceService)
     {
         _preferenceService = preferenceService;

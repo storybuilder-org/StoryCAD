@@ -1305,6 +1305,84 @@ public class OutlineServiceTests
         Assert.ThrowsExactly<ArgumentNullException>(() => { _outlineService.EmptyTrash(null); });
     }
 
+    [TestMethod]
+    public async Task EmptyTrash_RemovesFromCollection()
+    {
+        var model = await _outlineService.CreateModel("Test", "Author", 0);
+        var overview = model.ExplorerView.First();
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview);
+        var initialCount = model.StoryElements.StoryElementGuids.Count;
+
+        _outlineService.MoveToTrash(character, model);
+        Assert.AreEqual(initialCount, model.StoryElements.StoryElementGuids.Count, "Should stay in collection");
+
+        _outlineService.EmptyTrash(model);
+        Assert.AreEqual(initialCount - 1, model.StoryElements.StoryElementGuids.Count, "Should be removed");
+    }
+
+    [TestMethod]
+    public async Task EmptyTrash_CleansNarratorOrphans()
+    {
+        var model = await _outlineService.CreateModel("Test", "Author", 0);
+        var overview = model.ExplorerView.First();
+        var scene = _outlineService.AddStoryElement(model, StoryItemType.Scene, overview);
+
+        model.NarratorView.Add(scene.Node);
+        _outlineService.MoveToTrash(scene, model);
+
+        Assert.IsTrue(model.NarratorView.Any(n => n.Uuid == scene.Uuid), "Orphan should exist before empty");
+        _outlineService.EmptyTrash(model);
+        Assert.IsFalse(model.NarratorView.Any(n => n.Uuid == scene.Uuid), "Orphan should be removed");
+    }
+
+    [TestMethod]
+    public async Task MoveToTrash_RemovesChildRefs()
+    {
+        var model = await _outlineService.CreateModel("Test", "Author", 0);
+        var overview = model.ExplorerView.First();
+        var folder = _outlineService.AddStoryElement(model, StoryItemType.Folder, overview);
+        var child = _outlineService.AddStoryElement(model, StoryItemType.Character, folder.Node);
+        var problem = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview);
+
+        ((ProblemModel)problem).Protagonist = child.Uuid;
+        _outlineService.MoveToTrash(folder, model);
+
+        Assert.AreEqual(Guid.Empty, ((ProblemModel)problem).Protagonist, "Child refs should be removed");
+    }
+
+    [TestMethod]
+    public async Task MoveToTrash_DeepHierarchy()
+    {
+        var model = await _outlineService.CreateModel("Test", "Author", 0);
+        var overview = model.ExplorerView.First();
+        var level1 = _outlineService.AddStoryElement(model, StoryItemType.Folder, overview);
+        var level2 = _outlineService.AddStoryElement(model, StoryItemType.Folder, level1.Node);
+        var level3 = _outlineService.AddStoryElement(model, StoryItemType.Character, level2.Node);
+
+        var trashNode = model.TrashView.First();
+        _outlineService.MoveToTrash(level1, model);
+
+        Assert.IsTrue(trashNode.Children.Any(n => n.Uuid == level1.Uuid), "Top level in trash");
+        Assert.AreEqual(1, level1.Node.Children.Count, "Level 1 should have one child");
+        Assert.IsTrue(level1.Node.Children.Any(n => n.Uuid == level2.Uuid), "Level 2 under level 1");
+        Assert.AreEqual(1, level2.Node.Children.Count, "Level 2 should have one child");
+        Assert.IsTrue(level2.Node.Children.Any(n => n.Uuid == level3.Uuid), "Level 3 under level 2");
+    }
+
+    [TestMethod]
+    public async Task MoveToTrash_StaysInCollection()
+    {
+        var model = await _outlineService.CreateModel("Test", "Author", 0);
+        var overview = model.ExplorerView.First();
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview);
+        var initialCount = model.StoryElements.StoryElementGuids.Count;
+
+        _outlineService.MoveToTrash(character, model);
+
+        Assert.AreEqual(initialCount, model.StoryElements.StoryElementGuids.Count, "Should stay in collection");
+        Assert.IsTrue(model.StoryElements.StoryElementGuids.ContainsKey(character.Uuid), "Element should be accessible");
+    }
+
     #endregion
 
     #region Search Methods Tests

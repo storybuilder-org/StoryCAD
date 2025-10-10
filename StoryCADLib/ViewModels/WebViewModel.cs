@@ -41,15 +41,6 @@ public class WebViewModel : ObservableRecipient, INavigable, ISaveable
         GoForwardCommand = new RelayCommand(ExecuteGoForward, () => true);
     }
 
-    // Constructor for XAML compatibility - will be removed later
-    public WebViewModel() : this(
-        Ioc.Default.GetRequiredService<Windowing>(),
-        Ioc.Default.GetRequiredService<AppState>(),
-        Ioc.Default.GetRequiredService<ILogService>(),
-        Ioc.Default.GetRequiredService<PreferenceService>())
-    {
-    }
-
     public void Activate(object parameter)
     {
         Model = (WebModel)parameter;

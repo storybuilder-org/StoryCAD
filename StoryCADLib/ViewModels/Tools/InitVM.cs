@@ -23,13 +23,6 @@ public class InitVM : ObservableRecipient
 
     public PreferencesModel Preferences = new();
 
-    // Constructor for XAML compatibility - will be removed later
-    public InitVM() : this(
-        Ioc.Default.GetRequiredService<PreferenceService>(),
-        Ioc.Default.GetRequiredService<BackendService>())
-    {
-    }
-
     /// <summary>
     ///     This is the constructor for InitVM.
     ///     It sets the paths for Path and Backup Path to

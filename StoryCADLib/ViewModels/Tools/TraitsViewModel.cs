@@ -74,11 +74,6 @@ public class TraitsViewModel : ObservableRecipient
 
     private readonly ListData _listData;
 
-    // Constructor for XAML compatibility - will be removed later
-    public TraitsViewModel() : this(Ioc.Default.GetRequiredService<ListData>())
-    {
-    }
-
     public TraitsViewModel(ListData listData)
     {
         _listData = listData;

@@ -59,13 +59,6 @@ public class FeedbackViewModel : ObservableRecipient
     private readonly ILogService _logService;
     private readonly PreferenceService _preferenceService;
 
-    // Constructor for XAML compatibility - will be removed later
-    public FeedbackViewModel() : this(
-        Ioc.Default.GetRequiredService<ILogService>(),
-        Ioc.Default.GetRequiredService<PreferenceService>())
-    {
-    }
-
     public FeedbackViewModel(ILogService logService, PreferenceService preferenceService)
     {
         _logService = logService;

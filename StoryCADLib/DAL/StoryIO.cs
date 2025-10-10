@@ -1,8 +1,12 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FileAttributes = System.IO.FileAttributes;
+
+#if WINDOWS
+using Windows.Storage;
+#endif
 
 namespace StoryCADLib.DAL;
 
@@ -26,7 +30,7 @@ public class StoryIO
     public async Task WriteStory(string output_path, StoryModel model)
     {
         var parent = Path.GetDirectoryName(output_path);
-        Directory.CreateDirectory(parent);
+        Directory.CreateDirectory(parent!);
 
         var folder = await StorageFolder.GetFolderFromPathAsync(parent);
         var output =
@@ -60,7 +64,6 @@ public class StoryIO
                 _logService.Log(LogLevel.Info, "File is legacy XML format");
 
                 // Show dialog informing user about legacy format
-                // TODO: Circular dependency - StoryIO ↔ OutlineViewModel prevents injecting Windowing
                 var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new ContentDialog
                 {
                     Title = "Legacy Outline format detected!",
@@ -221,6 +224,92 @@ public class StoryIO
 
 
     /// <summary>
+    /// Checks if a file is available for reading across platforms.
+    /// </summary>
+    /// <param name="filePath">Full path to the file to check</param>
+    /// <param name="probeBytes">Number of bytes to attempt reading (default 1024)</param>
+    /// <param name="timeoutMs">Timeout in milliseconds for the availability check (default 1500)</param>
+    /// <returns>True if file exists and is readable, false otherwise</returns>
+    private async Task<bool> IsAvailableAsync(string filePath, int probeBytes = 1024, int timeoutMs = 1500)
+    {
+        if (string.IsNullOrWhiteSpace(filePath)) return false;
+
+        // Fast fail if the path doesn't exist on this platform
+        if (!File.Exists(filePath)) return false;
+
+#if WINDOWS
+        // 1) Heuristics that often catch dehydrated cloud placeholders
+        var attrs = File.GetAttributes(filePath);
+        if ((attrs & FileAttributes.Offline) != 0) return false;
+
+        // 2) Windows StorageFile view (can still hydrate on demand, so not definitive)
+        try
+        {
+            var sf = await StorageFile.GetFileFromPathAsync(filePath).AsTask().ConfigureAwait(false);
+            if (sf is null || !sf.IsAvailable) return false;
+        }
+        catch
+        {
+            return false;
+        }
+#endif
+
+        // 3) Final arbiter everywhere: a tiny, timed async read off the UI thread
+        return await TryTinyReadAsync(filePath, probeBytes, timeoutMs).ConfigureAwait(false);
+    }
+
+
+    /// <summary>
+    /// Attempts to read a small portion of a file to verify it's actually accessible.
+    /// </summary>
+    /// <param name="path">Full path to the file</param>
+    /// <param name="probeBytes">Number of bytes to attempt reading</param>
+    /// <param name="timeoutMs">Timeout in milliseconds</param>
+    /// <returns>True if the read succeeds within the timeout, false otherwise</returns>
+    private async Task<bool> TryTinyReadAsync(string path, int probeBytes, int timeoutMs)
+    {
+        if (probeBytes <= 0) probeBytes = 1;
+        if (timeoutMs <= 0) timeoutMs = 1500;
+
+        using var cts = new CancellationTokenSource(timeoutMs);
+        try
+        {
+            // Use small buffer + async stream. Avoid locking the file for writes: Read/ShareRead
+            var buffer = new byte[probeBytes];
+
+#if WINDOWS
+            // Windows: async FileStream honors CancellationToken on ReadAsync
+            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true);
+            var read = await fs.ReadAsync(buffer.AsMemory(0, buffer.Length), cts.Token).ConfigureAwait(false);
+            return read > 0 || fs.Length >= 0; // opened and readable
+#else
+            // Other Uno targets (Android, iOS, macOS, WebAssembly, Linux):
+            // System.IO async works; still use timeout to guard cloud-provider stalls
+            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true);
+            var readTask = fs.ReadAsync(buffer, 0, buffer.Length, cts.Token);
+            var completed = await Task.WhenAny(readTask, Task.Delay(Timeout.Infinite, cts.Token)).ConfigureAwait(false);
+            if (completed != readTask) return false; // timed out
+            var n = await readTask.ConfigureAwait(false);
+            return n > 0 || fs.Length >= 0;
+#endif
+        }
+        catch (OperationCanceledException)
+        {
+            return false; // timed out
+        }
+        catch (IOException)
+        {
+            return false; // dehydrated/unavailable/networked file not ready
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Permission issues = not available for our purposes
+            return false;
+        }
+    }
+
+
+    /// <summary>
     ///     Checks if a file exists and is genuinely available.
     /// </summary>
     /// <remarks>
@@ -229,56 +318,33 @@ public class StoryIO
     /// <returns></returns>
     public async Task<bool> CheckFileAvailability(string filePath)
     {
-        //TODO: investigate alternatives on other platforms.
-#if HAS_UNO
-        _logService.Log(LogLevel.Warn, $"Checking file availability is not supported on non-windows platforms");
-        return true;
-#endif
+        // Validate input
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            return false;
+        }
 
-#pragma warning disable CS0162 // Unreachable code detected - intentional, Windows-only code below
+        // First check if file exists at all
         if (!File.Exists(filePath))
         {
             return false;
         }
 
-        var fileAttributes = File.GetAttributes(filePath);
-        var file = await StorageFile.GetFileFromPathAsync(filePath);
-        var showOfflineError = false;
-        if (file.IsAvailable) // Microsoft thinks the file is accessible
-        {
-            try
-            {
-                //Test read file before continuing.
-                //If the file is saved on a cloud provider and not locally this should force
-                //the file to be pulled locally if possible. A file could be unavailable for
-                //many reasons, such as the user being offline, server outage, etc.
-                //Windows might pause StoryCAD while it syncs the file.
-                File.ReadAllText(file.Path);
-            }
-            catch (IOException)
-            {
-                showOfflineError = true;
-            }
-        }
-        else
-        {
-            showOfflineError = true;
-        }
+        // Check if file is available using cross-platform helper
+        var isAvailable = await IsAvailableAsync(filePath);
 
-        //Failed to access network file
-        if (showOfflineError && (fileAttributes & FileAttributes.Offline) == 0)
+        // If file exists but is not available, show error dialog (cloud storage scenario)
+        if (!isAvailable)
         {
-            //The file is actually inaccessible and microsoft is wrong.
-            _logService.Log(LogLevel.Error, $"File {file.Path} is unavailable.");
+            _logService.Log(LogLevel.Error, $"File {filePath} is unavailable.");
 
-            //Show warning so user knows their file isn't lost and is just on onedrive.
-            // TODO: Circular dependency - StoryIO ↔ OutlineViewModel prevents injecting Windowing
+            // Show warning so user knows their file isn't lost and is just on cloud storage
             var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new ContentDialog
             {
                 Title = "File unavailable.",
                 Content = """
                           The story outline you are trying to open is stored on a cloud service, and isn't available currently.
-                          Try going online and syncing the file, then try again. 
+                          Try going online and syncing the file, then try again.
 
                           Click show help article for more information.
                           """,
@@ -286,7 +352,7 @@ public class StoryIO
                 SecondaryButtonText = "Close"
             }, true);
 
-            //Open help article in default browser
+            // Open help article in default browser
             if (result == ContentDialogResult.Primary)
             {
                 Process.Start(new ProcessStartInfo
@@ -299,8 +365,7 @@ public class StoryIO
             }
         }
 
-        return !showOfflineError;
-#pragma warning restore CS0162
+        return isAvailable;
     }
 
 
@@ -311,8 +376,6 @@ public class StoryIO
     /// <returns>True if path is valid, false otherwise</returns>
     public static bool IsValidPath(string path)
     {
-        // TODO: Static method requires Ioc.Default until refactored to instance method or removed logging
-        var logger = Ioc.Default.GetRequiredService<ILogService>();
         //Checks file name validity
         try
         {
@@ -334,12 +397,10 @@ public class StoryIO
         }
         catch (UnauthorizedAccessException) //Invalid access
         {
-            logger.Log(LogLevel.Warn, "User can't access this path");
             return false;
         }
         catch //Different IO error
         {
-            logger.Log(LogLevel.Warn, "Invalid file name");
             return false;
         }
 
