@@ -3,10 +3,10 @@ name: Build & Release
 on:
   push:
     branches:
-      - main
+      - UNOTestBranch
   pull_request:
     branches:
-      - main
+      - UNOTestBranch
   workflow_dispatch:
     inputs:
       version:
@@ -62,20 +62,65 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      # 3 ─ Install required workloads for UNO
+      # 3 ─ Cache NuGet packages
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      # 4 ─ Install required workloads for UNO
       - name: Install .NET workloads
         run: dotnet workload install macos
 
-      # 4 ─ Extract version from input
-      - name: Extract version number
-        id: extract_version
-        run: echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+      # 5 ─ Generate version number
+      - name: Generate version number
+        id: version
+        shell: pwsh
+        run: |
+          if ("${{ github.event.inputs.version }}" -ne "") {
+            # Manual trigger with version input
+            $inputVersion = "${{ github.event.inputs.version }}"
+            $parts = $inputVersion.TrimStart('v').Split('.')
+            $newVersion = "$($parts[0]).$($parts[1]).${{ github.run_number }}.65534"
+          } else {
+            # Automatic trigger - use version from csproj
+            $newVersion = "1.0.${{ github.run_number }}.65534"
+          }
+          echo "version=$newVersion" >> $env:GITHUB_OUTPUT
+          echo "tag_version=v$newVersion" >> $env:GITHUB_OUTPUT
+          Write-Host "Generated version: $newVersion"
 
-      # 5 ─ Restore dependencies
+      # 6 ─ Update Package.appxmanifest version (Windows only)
+      - name: Update Package.appxmanifest version
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $manifestPath = "${{ github.workspace }}\StoryCAD\Package.appxmanifest"
+          $content = Get-Content $manifestPath -Raw
+          $versionRegex = ' Version="\d+\.\d+\.\d+\.\d+"'
+          $newVersionAttr = ' Version="${{ steps.version.outputs.version }}"'
+          $content = $content -replace $versionRegex, $newVersionAttr
+          Set-Content -Path $manifestPath -Value $content -NoNewline
+          Write-Host "Updated manifest version to ${{ steps.version.outputs.version }}"
+
+      # 7 ─ Decode PFX certificate (Windows only)
+      - name: Decode PFX certificate
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $bytes = [Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
+          $pfxPath = "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx"
+          [IO.File]::WriteAllBytes($pfxPath, $bytes)
+          Write-Host "PFX certificate decoded"
+
+      # 8 ─ Restore dependencies
       - name: Restore dependencies
         run: dotnet restore StoryCAD.sln
 
-      # 6 ─ Run tests (all platforms)
+      # 9 ─ Run tests (all platforms)
       - name: Run all tests (Windows)
         if: matrix.os == 'windows-latest'
         run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:Platform=${{ matrix.platform }}
@@ -84,26 +129,46 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore
 
-      # 7 ─ Clean publish directory
-      - name: Clean publish directory (macOS/Linux)
-        if: matrix.os != 'windows-latest'
+      # 10 ─ Setup MSBuild (Windows only)
+      - name: Setup MSBuild
+        if: matrix.os == 'windows-latest'
+        uses: microsoft/setup-msbuild@v2
+
+      # 11 ─ Build MSIX package (Windows only)
+      - name: Create MSIX package
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          msbuild StoryCAD.sln `
+            /p:Configuration=Release `
+            /p:Platform=${{ matrix.platform }} `
+            /p:UapAppxPackageBuildMode=SideloadOnly `
+            /p:AppxBundle=Never `
+            /p:PackageCertificateKeyFile="${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx" `
+            /p:AppxPackageDir="${{ github.workspace }}\StoryCAD\Packages\" `
+            /p:GenerateAppxPackageOnBuild=true
+
+      # 12 ─ Run MSIX Cleaner (Windows only)
+      - name: Run MSIX Cleaner
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          ${{ github.workspace }}\.github\workflows\MSIX.ps1 -TargetDirectory "${{ github.workspace }}\StoryCAD\Packages"
+
+      # 13 ─ Remove PFX certificate (Windows only)
+      - name: Remove PFX certificate
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          Remove-Item -Path "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx" -Force
+          Write-Host "PFX certificate removed"
+
+      # 14 ─ Clean publish directory (macOS)
+      - name: Clean publish directory (macOS)
+        if: matrix.os == 'macos-latest'
         run: rm -rf publish
 
-      - name: Clean publish directory (Windows)
-        if: matrix.os == 'windows-latest'
-        run: Remove-Item -Path publish -Recurse -Force -ErrorAction SilentlyContinue
-
-      # 8 ─ Build and publish
-      - name: Publish (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          dotnet publish StoryCAD/StoryCAD.csproj `
-            -c Release `
-            -f ${{ matrix.fw }} `
-            -r ${{ matrix.rid }} `
-            --self-contained `
-            -o publish
-
+      # 15 ─ Publish (macOS)
       - name: Publish (macOS)
         if: matrix.os == 'macos-latest'
         run: |
@@ -114,7 +179,7 @@ jobs:
             --self-contained \
             -o publish
 
-      # 9 ─ Apply font fix for macOS (UNO Platform)
+      # 16 ─ Apply font fix for macOS (UNO Platform)
       - name: Apply font fix for macOS
         if: matrix.os == 'macos-latest'
         run: |
@@ -149,7 +214,7 @@ jobs:
           echo "MacOS contents:"
           ls -la publish/StoryCAD.app/Contents/MacOS/ | head -10
 
-      # 10 ─ Create custom PKG with font fix for macOS
+      # 17 ─ Create custom PKG with font fix for macOS
       - name: Create macOS PKG
         if: matrix.os == 'macos-latest'
         run: |
@@ -160,24 +225,26 @@ jobs:
           # Create the PKG installer
           pkgbuild --root pkg-build \
             --identifier org.storybuilder.storycad \
-            --version ${{ steps.extract_version.outputs.version }} \
+            --version ${{ steps.version.outputs.version }} \
             --install-location / \
             storycad-${{ matrix.art }}.pkg
 
-      # 11 ─ Package artifacts
-      - name: Package Windows artifact
+      # 18 ─ Package Windows MSIX artifacts
+      - name: Package Windows MSIX artifact
         if: matrix.os == 'windows-latest'
+        shell: pwsh
         run: |
-          cd publish
-          Compress-Archive -Path * -DestinationPath ../storycad-${{ matrix.art }}.zip
+          $zipName = "storycad-msix-${{ matrix.art }}.zip"
+          Compress-Archive -Path "${{ github.workspace }}\StoryCAD\Packages\*" -DestinationPath $zipName -Force
+          Write-Host "Created $zipName"
 
-      # 12 ─ Upload artifacts
-      - name: Upload build artifacts (Windows)
+      # 19 ─ Upload artifacts
+      - name: Upload MSIX artifacts (Windows)
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: storycad-${{ matrix.art }}
-          path: storycad-${{ matrix.art }}.zip
+          name: storycad-msix-${{ matrix.art }}
+          path: storycad-msix-${{ matrix.art }}.zip
 
       - name: Upload build artifacts (macOS)
         if: matrix.os == 'macos-latest'
@@ -194,18 +261,38 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout for version calculation
+        uses: actions/checkout@v4
+
+      - name: Calculate release version
+        id: release_version
+        shell: pwsh
+        run: |
+          if ("${{ github.event.inputs.version }}" -ne "") {
+            $inputVersion = "${{ github.event.inputs.version }}"
+            $parts = $inputVersion.TrimStart('v').Split('.')
+            $version = "$($parts[0]).$($parts[1]).${{ github.run_number }}.65534"
+            $tagVersion = "v$version"
+          } else {
+            $version = "1.0.${{ github.run_number }}.65534"
+            $tagVersion = "v$version"
+          }
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "tag_version=$tagVersion" >> $env:GITHUB_OUTPUT
+          Write-Host "Release version: $tagVersion"
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.version }}
-          name: Release ${{ github.event.inputs.version }}
+          tag_name: ${{ steps.release_version.outputs.tag_version }}
+          name: Release ${{ steps.release_version.outputs.tag_version }}
           files: |
-            storycad-win-x64/storycad-win-x64.zip
-            storycad-win-arm64/storycad-win-arm64.zip
-            storycad-win-x86/storycad-win-x86.zip
+            storycad-msix-win-x64/storycad-msix-win-x64.zip
+            storycad-msix-win-arm64/storycad-msix-win-arm64.zip
+            storycad-msix-win-x86/storycad-msix-win-x86.zip
             storycad-osx-arm64/storycad-osx-arm64.pkg
           draft: false
           prerelease: false
