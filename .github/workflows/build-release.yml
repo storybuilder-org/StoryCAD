@@ -106,15 +106,17 @@ jobs:
           Set-Content -Path $manifestPath -Value $content -NoNewline
           Write-Host "Updated manifest version to ${{ steps.version.outputs.version }}"
 
-      # 7 ─ Decode PFX certificate (Windows only)
-      - name: Decode PFX certificate
+      # 7 ─ Decode PFX certificate and create .env files (Windows only)
+      - name: Decode PFX certificate and create .env files
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
           $bytes = [Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
           $pfxPath = "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx"
           [IO.File]::WriteAllBytes($pfxPath, $bytes)
-          Write-Host "PFX certificate decoded"
+          [IO.File]::WriteAllText("${{ github.workspace }}\StoryCAD\.env", "${{ secrets.ENV }}")
+          [IO.File]::WriteAllText("${{ github.workspace }}\StoryCADTests\.env", "${{ secrets.ENV }}")
+          Write-Host "PFX certificate decoded and .env files created"
 
       # 8 ─ Restore dependencies
       - name: Restore dependencies
@@ -155,13 +157,15 @@ jobs:
         run: |
           ${{ github.workspace }}\.github\workflows\MSIX.ps1 -TargetDirectory "${{ github.workspace }}\StoryCAD\Packages"
 
-      # 13 ─ Remove PFX certificate (Windows only)
-      - name: Remove PFX certificate
+      # 13 ─ Remove PFX certificate and .env files (Windows only)
+      - name: Remove PFX certificate and .env files
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
           Remove-Item -Path "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx" -Force
-          Write-Host "PFX certificate removed"
+          Remove-Item -Path "${{ github.workspace }}\StoryCAD\.env" -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "${{ github.workspace }}\StoryCADTests\.env" -Force -ErrorAction SilentlyContinue
+          Write-Host "PFX certificate and .env files removed"
 
       # 14 ─ Clean publish directory (macOS)
       - name: Clean publish directory (macOS)
