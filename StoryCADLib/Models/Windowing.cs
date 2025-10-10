@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Windows.Storage.Pickers;
 using Windows.UI;
@@ -17,11 +16,8 @@ namespace StoryCADLib.Models;
 /// <summary>
 ///     This class contains window (MainWindow) related items etc.
 /// </summary>
-public partial class Windowing : ObservableRecipient
+public partial class Windowing(AppState appState, ILogService logService) : ObservableRecipient
 {
-    private readonly AppState _appState;
-    private readonly ILogService _logService;
-
     /// <summary>
     ///     This is used to track if a ContentDialog is already open
     ///     within ShowContentDialog() as spwaning two at once will
@@ -62,25 +58,12 @@ public partial class Windowing : ObservableRecipient
     public IntPtr WindowHandle;
 
     /// <summary>
-    // A defect in early WinUI 3 Win32 code is that ContentDialog
-    // controls don't have an established XamlRoot. A workaround
-    // is to assign the dialog's XamlRoot to the root of a visible
-    // Page. The Shell page's XamlRoot is stored here and accessed wherever needed. 
+    /// A defect in early WinUI 3 Win32 code is that ContentDialog
+    /// controls don't have an established XamlRoot. A workaround
+    /// is to assign the dialog's XamlRoot to the root of a visible
+    /// Page. The Shell page's XamlRoot is stored here and accessed wherever needed. 
     /// </summary>
     public XamlRoot XamlRoot;
-
-    public Windowing(AppState appState, ILogService logService)
-    {
-        _appState = appState;
-        _logService = logService;
-    }
-
-    // Constructor for backward compatibility - will be removed later
-    public Windowing() : this(
-        Ioc.Default.GetRequiredService<AppState>(),
-        Ioc.Default.GetRequiredService<ILogService>())
-    {
-    }
 
     public ElementTheme RequestedTheme
     {
@@ -128,17 +111,13 @@ public partial class Windowing : ObservableRecipient
         }
     }
 
-    private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
-    {
-    }
-
     /// <summary>
     ///     This will dynamically update the title based
     ///     on the current conditions of the app.
     /// </summary>
     public void UpdateWindowTitle()
     {
-        if (_appState.Headless)
+        if (appState.Headless)
         {
             return;
         }
@@ -146,7 +125,7 @@ public partial class Windowing : ObservableRecipient
         // Check if window is still valid before attempting to set title
         if (MainWindow == null)
         {
-            _logService.Log(LogLevel.Debug, "UpdateWindowTitle called but MainWindow is null");
+            logService.Log(LogLevel.Debug, "UpdateWindowTitle called but MainWindow is null");
             return;
         }
 
@@ -155,21 +134,16 @@ public partial class Windowing : ObservableRecipient
             var BaseTitle = "StoryCAD ";
 
             //Developer Build title warning
-            if (_appState.DeveloperBuild)
+            if (appState.DeveloperBuild)
             {
                 BaseTitle += "(DEV BUILD) ";
             }
 
-            // TODO: ARCHITECTURAL ISSUE - Windowing (UI layer) should not depend on OutlineViewModel (business logic)
-            // This creates a circular dependency: OutlineViewModel -> Windowing -> OutlineViewModel
-            // Proper fix (SRP): Move UpdateWindowTitle logic to OutlineViewModel (which knows about file changes)
-            // and have it set the title on Windowing. OutlineViewModel already has Windowing reference.
-            // Current workaround: Use service locator to break the circular dependency
-            var appState = Ioc.Default.GetRequiredService<AppState>();
-            if (!string.IsNullOrEmpty(appState.CurrentDocument?.FilePath))
+            var state = Ioc.Default.GetRequiredService<AppState>();
+            if (!string.IsNullOrEmpty(state.CurrentDocument?.FilePath))
             {
                 BaseTitle +=
-                    $"- Currently editing {Path.GetFileNameWithoutExtension(appState.CurrentDocument.FilePath)}";
+                    $"- Currently editing {Path.GetFileNameWithoutExtension(state.CurrentDocument.FilePath)}";
             }
 
             //Set window Title.
@@ -178,23 +152,17 @@ public partial class Windowing : ObservableRecipient
         catch (Exception ex)
         {
             // Window may have been closed during shutdown
-            _logService.Log(LogLevel.Debug, $"Could not set window title (window may be closed): {ex.Message}");
+            logService.Log(LogLevel.Debug, $"Could not set window title (window may be closed): {ex.Message}");
         }
     }
 
     /// <summary>
-    ///     This will update the elements of the UI to
-    ///     match the theme set in RequestedTheme.
+    ///     This will update the elements of the UI to match the theme set in RequestedTheme.
     /// </summary>
     public async void UpdateUIToTheme()
     {
-        (MainWindow.Content as FrameworkElement).RequestedTheme = RequestedTheme;
+        ((MainWindow.Content as FrameworkElement)!).RequestedTheme = RequestedTheme;
 
-        // TODO: ARCHITECTURAL ISSUE - Same as UpdateWindowTitle above
-        // Proper fix (SRP): Move UpdateUIToTheme logic to ShellViewModel (which manages navigation/UI state)
-        // ShellViewModel can coordinate the save and navigation when theme changes
-        // Current workaround: Use service locator to break the circular dependency
-        var appState = Ioc.Default.GetRequiredService<AppState>();
         //Save file, close current node since it won't be the right theme.
         if (!string.IsNullOrEmpty(appState.CurrentDocument?.FilePath))
         {
@@ -216,10 +184,10 @@ public partial class Windowing : ObservableRecipient
     /// <returns>A ContentDialogResult value</returns>
     public async Task<ContentDialogResult> ShowContentDialog(ContentDialog Dialog, bool force = false)
     {
-        var logger = _logService;
+        var logger = logService;
 
         // Don't show dialog if headless
-        var state = _appState;
+        var state = appState;
         if (state.Headless)
         {
             return ContentDialogResult.Primary;
@@ -312,7 +280,7 @@ public partial class Windowing : ObservableRecipient
     /// <returns>A StorageFile object, of the file picked.</returns>
     public async Task<StorageFile> ShowFilePicker(string buttonText = "Open", string filter = "*")
     {
-        var logger = _logService;
+        var logger = logService;
 
         try
         {
@@ -358,7 +326,7 @@ public partial class Windowing : ObservableRecipient
     /// <returns>A StorageFile object, of the file picked.</returns>
     public async Task<StorageFile> ShowFileSavePicker(string buttonText, string extension)
     {
-        var logger = _logService;
+        var logger = logService;
 
         try
         {
@@ -411,7 +379,7 @@ public partial class Windowing : ObservableRecipient
     /// <returns></returns>
     public async Task<StorageFolder> ShowFolderPicker(string buttonText = "Select folder", string filter = "*")
     {
-        var logger = _logService;
+        var logger = logService;
 
         try
         {
