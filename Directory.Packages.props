@@ -17,7 +17,7 @@
         <PackageVersion Include="NLog.Extensions.Logging" Version="5.4.0" />
         <PackageVersion Include="NRTFTree-Async" Version="1.0.1" />
         <PackageVersion Include="Octokit" Version="14.0.0" />
-        <PackageVersion Include="SkiaSharp" Version="3.119.0" />
+        <PackageVersion Include="SkiaSharp" Version="3.119.1" />
         <PackageVersion Include="MSTest.TestAdapter" Version="3.10.1" />
         <PackageVersion Include="MSTest.TestFramework" Version="3.10.1" />
         <PackageVersion Include="Microsoft.TestPlatform.TestHost" Version="17.14.1" />
