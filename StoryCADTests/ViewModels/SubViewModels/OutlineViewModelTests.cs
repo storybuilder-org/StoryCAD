@@ -250,7 +250,10 @@ public class OutlineViewModelTests
         Assert.IsTrue(appState.CurrentDocument.Model.StoryElements.Count != 0, "Story not loaded.");
         Thread.Sleep(2500);
         await outlineVM.CloseFile();
-        Assert.IsNull(appState.CurrentDocument, "Document should be null after close.");
+        // After close, document should be reset to empty model, not null
+        Assert.IsNotNull(appState.CurrentDocument, "CurrentDocument should be reset to empty model, not null");
+        Assert.IsNotNull(appState.CurrentDocument.Model, "Model should be valid empty model");
+        Assert.IsNull(appState.CurrentDocument.FilePath, "FilePath should be null after close");
     }
 
     [TestMethod]

@@ -157,21 +157,6 @@ public partial class Windowing(AppState appState, ILogService logService) : Obse
     }
 
     /// <summary>
-    ///     This will update the elements of the UI to match the theme set in RequestedTheme.
-    /// </summary>
-    public async void UpdateUIToTheme()
-    {
-        ((MainWindow.Content as FrameworkElement)!).RequestedTheme = RequestedTheme;
-
-        //Save file, close current node since it won't be the right theme.
-        if (!string.IsNullOrEmpty(appState.CurrentDocument?.FilePath))
-        {
-            await Ioc.Default.GetRequiredService<OutlineViewModel>().SaveFile();
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowHomePage();
-        }
-    }
-
-    /// <summary>
     ///     This takes a ContentDialog and shows it to the user
     ///     It will handle theming, XAMLRoot and showing the dialog.
     /// </summary>

@@ -533,7 +533,6 @@ public class OutlineViewModel : ObservableRecipient
             }
 
             shellVm.ResetModel();
-            appState.CurrentDocument = null;
             shellVm.RightTappedNode = null; //Null right tapped node to prevent possible issues.
             window.UpdateWindowTitle();
             Ioc.Default.GetRequiredService<BackupService>().StopTimedBackup();

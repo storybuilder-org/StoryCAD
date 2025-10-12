@@ -1228,8 +1228,10 @@ public class ShellViewModelTests
         // Act
         await shellViewModel.OnApplicationClosing();
 
-        // Assert
-        Assert.IsNull(appState.CurrentDocument, "CloseFile should have been called and set CurrentDocument to null");
+        // Assert - CloseFile should reset to empty model, not null
+        Assert.IsNotNull(appState.CurrentDocument, "CurrentDocument should be reset to empty model, not null");
+        Assert.IsNotNull(appState.CurrentDocument.Model, "Model should be valid empty model");
+        Assert.IsNull(appState.CurrentDocument.FilePath, "FilePath should be null after close");
     }
 
     [TestMethod]
@@ -1354,8 +1356,10 @@ public class ShellViewModelTests
         // Act
         await shellViewModel.OnApplicationClosing();
 
-        // Assert - Document should be closed (which stops AutoSave)
-        Assert.IsNull(appState.CurrentDocument, "Document should be closed");
+        // Assert - Document should be reset to empty model (which stops AutoSave)
+        Assert.IsNotNull(appState.CurrentDocument, "CurrentDocument should be reset to empty model");
+        Assert.IsNotNull(appState.CurrentDocument.Model, "Model should be valid empty model");
+        Assert.IsNull(appState.CurrentDocument.FilePath, "FilePath should be null after close");
     }
 
     #endregion

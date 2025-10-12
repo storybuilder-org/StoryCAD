@@ -241,6 +241,11 @@ public class PreferencesViewModel : ObservableValidator
         set => SetProperty(ref _ShowFilePickerOnStartup, value);
     }
 
+    /// <summary>
+    /// Tracks if theme preference changed during this save (requires restart)
+    /// </summary>
+    public bool ThemeChanged { get; private set; }
+
     #endregion
 
     #region Methods
@@ -304,12 +309,10 @@ public class PreferencesViewModel : ObservableValidator
         CurrentModel.AdvancedLogging = AdvancedLogging;
         CurrentModel.HideKeyFileWarning = HideKeyFileWarning;
 
-        if (CurrentModel.ThemePreference != PreferedTheme)
-        {
-            _windowing.RequestedTheme = CurrentModel.ThemePreference;
-            _windowing.UpdateUIToTheme();
-        }
+        // Track if theme changed (for restart notification)
+        ThemeChanged = (CurrentModel.ThemePreference != PreferedTheme);
 
+        // Update preference
         CurrentModel.ThemePreference = PreferedTheme;
         CurrentModel.ShowStartupDialog = ShowStartupPage;
         CurrentModel.ShowFilePickerOnStartup = ShowFilePickerOnStartup;

@@ -845,7 +845,6 @@ public class ShellViewModel : ObservableRecipient
     public void ResetModel()
     {
         State.CurrentDocument = new StoryDocument(new StoryModel());
-        //TODO: Raise event for StoryModel change?
     }
 
     #endregion
@@ -916,9 +915,21 @@ public class ShellViewModel : ObservableRecipient
         {
             // Save changes
             case ContentDialogResult.Primary:
-                Ioc.Default.GetRequiredService<PreferencesViewModel>().SaveModel();
-                await Ioc.Default.GetRequiredService<PreferencesViewModel>().SaveAsync();
-                Messenger.Send(new StatusChangedMessage(new StatusMessage("Preferences updated", LogLevel.Info, true)));
+                var prefsVm = Ioc.Default.GetRequiredService<PreferencesViewModel>();
+                prefsVm.SaveModel();
+                await prefsVm.SaveAsync();
+
+                // Notify user if theme changed
+                if (prefsVm.ThemeChanged)
+                {
+                    Messenger.Send(new StatusChangedMessage(
+                        new StatusMessage("Theme will be applied when you restart.",
+                        LogLevel.Warn, true)));
+                }
+                else
+                {
+                    Messenger.Send(new StatusChangedMessage(new StatusMessage("Preferences updated", LogLevel.Info, true)));
+                }
 
                 break;
             //don't save changes
