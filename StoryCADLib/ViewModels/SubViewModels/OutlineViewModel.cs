@@ -903,13 +903,21 @@ public class OutlineViewModel : ObservableRecipient
 
                 if (result == ContentDialogResult.Primary)
                 {
-                    // Insert the new Problem as the target's child
+                    // Create and insert the new Problem as the target's child
+                    ProblemModel problem = new(situationModel.SituationName, appState.CurrentDocument.Model, shellVm.RightTappedNode)
+                    {
+                        Notes = situationModel.Notes
+                    };
                     msg = $"Problem {situationModel.SituationName} inserted";
                     Messenger.Send(new IsChangedMessage(true));
                 }
                 else if (result == ContentDialogResult.Secondary)
                 {
-                    // Insert the new Scene as the target's child
+                    // Create and insert the new Scene as the target's child
+                    SceneModel sceneVar = new(situationModel.SituationName, appState.CurrentDocument.Model, shellVm.RightTappedNode)
+                    {
+                        Notes = situationModel.Notes
+                    };
                     msg = $"Scene {situationModel.SituationName} inserted";
                     Messenger.Send(new IsChangedMessage(true));
                 }
