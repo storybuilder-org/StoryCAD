@@ -563,22 +563,21 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public static void ShowChange()
     {
-        // TODO: Static method requires service locator - consider making non-static in future refactoring
         var appState = Ioc.Default.GetRequiredService<AppState>();
-        var Model = appState.CurrentDocument?.Model;
+        var model = appState.CurrentDocument?.Model;
         if (appState.Headless)
         {
             return;
         }
 
-        if (Model?.Changed == true)
+        if (model?.Changed == true)
         {
             return;
         }
 
         // Use OutlineService to set changed status with proper separation of concerns
         var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-        outlineService.SetChanged(Model, true);
+        outlineService.SetChanged(model, true);
         ShellInstance.ChangeStatusColor = Colors.Red;
     }
 
@@ -953,12 +952,14 @@ public class ShellViewModel : ObservableRecipient
             //    return;
             //}
 
-            //TODO: Logging???
 
+            Logger.Log(LogLevel.Info, "Launching collaborator");
             CollabArgs.StoryModel = State.CurrentDocument?.Model;
             Ioc.Default.GetService<CollaboratorService>()!.LoadWorkflows(CollabArgs);
             Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Activate();
             Ioc.Default.GetService<WorkflowViewModel>()!.EnableNavigation();
+            Logger.Log(LogLevel.Info, "Collaborator opened");
+
         }
     }
 

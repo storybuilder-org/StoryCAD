@@ -956,7 +956,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
     public ObservableCollection<string> RelationshipTraitList;
     public ObservableCollection<string> RelationshipAttitudeList;
 
-    // TODO: How do I bind to Sex option buttons?
     public ObservableCollection<string> EyesList;
     public ObservableCollection<string> HairList;
     public ObservableCollection<string> SkinList;

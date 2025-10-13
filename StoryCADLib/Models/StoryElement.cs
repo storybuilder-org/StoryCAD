@@ -108,6 +108,7 @@ public class StoryElement : ObservableObject
     ///     a blank name, simplifies that code.
     /// </summary>
     /// <param name="guid">The Guid of the StoryElement to retrieve</param>
+    /// <param name="storyModel">optional story model override, defaults to current app state model.</param>
     /// <returns></returns>
     public static StoryElement GetByGuid(Guid guid, StoryModel storyModel = null)
     {
@@ -128,7 +129,7 @@ public class StoryElement : ObservableObject
             // This global state dependency is acceptable for UI scenarios
             // API consumers should always provide storyModel explicitly
             var appState = Ioc.Default.GetRequiredService<AppState>();
-            elements = appState.CurrentDocument.Model.StoryElements;
+            elements = appState.CurrentDocument?.Model.StoryElements ?? new();
         }
 
         // Look for the StoryElement corresponding to the passed guid
@@ -177,10 +178,7 @@ public class StoryElement : ObservableObject
         });
     }
 
-    public override string ToString()
-    {
-        return _uuid.ToString();
-    }
+    public override string ToString() => _uuid.ToString();
 
     #endregion
 

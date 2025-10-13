@@ -89,6 +89,111 @@ public class StoryNodeItem : INotifyPropertyChanged
         // The element still exists in ExplorerView
     }
 
+    /// <summary>
+    ///     Copies this node to the Narrator view. Only scenes can be copied.
+    ///     If the scene already exists in the narrator view, no action is taken.
+    /// </summary>
+    /// <param name="model">The story model containing the narrator view</param>
+    /// <returns>True if copied, false if already exists or node is not a scene</returns>
+    public bool CopyToNarratorView(StoryModel model)
+    {
+        if (Type != StoryItemType.Scene)
+        {
+            _logger?.Log(LogLevel.Warn, $"Cannot copy non-scene node '{Name}' to narrator view");
+            return false;
+        }
+
+        if (IsInNarratorView(model))
+        {
+            _logger?.Log(LogLevel.Info, $"Scene '{Name}' already exists in narrator view");
+            return false;
+        }
+
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        var sceneElement = (SceneModel)outlineService.GetStoryElementByGuid(model, Uuid);
+        _ = new StoryNodeItem(sceneElement, model.NarratorView[0]);
+
+        _logger?.Log(LogLevel.Info, $"Copied scene '{Name}' to narrator view");
+        return true;
+    }
+
+    /// <summary>
+    ///     Checks if this node exists in the narrator view by searching for its UUID.
+    /// </summary>
+    /// <param name="model">The story model containing the narrator view</param>
+    /// <returns>True if this node exists in narrator view</returns>
+    public bool IsInNarratorView(StoryModel model)
+    {
+        if (model?.NarratorView == null || model.NarratorView.Count == 0)
+        {
+            return false;
+        }
+
+        return GetAllNodesFlat(model.NarratorView[0]).Any(node => node.Uuid == Uuid);
+    }
+
+    /// <summary>
+    ///     Gets all scene nodes in this subtree (recursive depth-first search).
+    /// </summary>
+    /// <returns>List of all scene nodes under this node (including this node if it's a scene)</returns>
+    public List<StoryNodeItem> GetAllScenes()
+    {
+        var scenes = new List<StoryNodeItem>();
+
+        if (Type == StoryItemType.Scene)
+        {
+            scenes.Add(this);
+        }
+
+        foreach (var child in Children)
+        {
+            scenes.AddRange(child.GetAllScenes());
+        }
+
+        return scenes;
+    }
+
+    /// <summary>
+    ///     Copies all scene children of this node to the narrator view.
+    ///     Only copies scenes that don't already exist in the narrator view.
+    /// </summary>
+    /// <param name="model">The story model</param>
+    /// <returns>Number of scenes copied</returns>
+    public int CopyAllScenesToNarratorView(StoryModel model)
+    {
+        var copied = 0;
+        var scenes = GetAllScenes();
+
+        foreach (var scene in scenes)
+        {
+            if (scene.CopyToNarratorView(model))
+            {
+                copied++;
+            }
+        }
+
+        _logger?.Log(LogLevel.Info, $"Copied {copied} scenes from '{Name}' to narrator view");
+        return copied;
+    }
+
+    /// <summary>
+    ///     Flattens a tree structure into a list (depth-first traversal).
+    ///     Helper method for searching through node hierarchies.
+    /// </summary>
+    /// <param name="root">The root node to start from</param>
+    /// <returns>Flattened list of all nodes in the subtree</returns>
+    private static List<StoryNodeItem> GetAllNodesFlat(StoryNodeItem root)
+    {
+        var nodes = new List<StoryNodeItem> { root };
+
+        foreach (var child in root.Children)
+        {
+            nodes.AddRange(GetAllNodesFlat(child));
+        }
+
+        return nodes;
+    }
+
 
     private void NotifyPropertyChanged(string propertyName)
     {
