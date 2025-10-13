@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 using Microsoft.SemanticKernel;
@@ -184,7 +184,6 @@ public class SemanticKernelApi : IStoryCADAPI
 
             //Deserialize and update.
             var updated = StoryElement.Deserialize(newElement.ToString());
-            //TODO: force set uuid somehow.
             updated.Uuid = guid;
             _outlineService.UpdateStoryElement(CurrentModel, updated);
 

@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
 namespace StoryCADLib.Models;
@@ -46,7 +46,6 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
         switch (e.Action)
         {
             case NotifyCollectionChangedAction.Add:
-                //TODO: Assert that NewItems count is always 1, or make this a loop
                 _element = (StoryElement)e.NewItems![0];
                 StoryElementGuids.Add(_element!.Uuid, _element);
                 // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
@@ -72,8 +71,6 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
                 break;
 
             case NotifyCollectionChangedAction.Remove:
-                //TODO: Assert that OldItems count is always 1, or make this a loop
-                //TODO: Maybe replace the index of with just remove
                 _element = (StoryElement)e.OldItems![0];
                 StoryElementGuids.Remove(_element!.Uuid);
                 int _i;

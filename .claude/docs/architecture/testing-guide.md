@@ -35,7 +35,7 @@ Both approaches are valid TDD. StoryCAD uses both:
 ### File Structure
 - One test class per production class
 - Test class naming: `[ClassName]Tests`
-- Test files mirror production structure
+- Test file folders mirror production structure
 - Test data in `/TestInputs/` directory
 
 ### Test Method Naming
@@ -90,6 +90,8 @@ public void Collection_AddItem_SetsModelChanged()
 
 ### UI Testing with MSTest
 ```csharp
+We prefer testing viewmodels over UI testing. 
+
 [UITestMethod]
 public async Task UIElement_Action_ExpectedResult()
 {

@@ -82,31 +82,27 @@ StoryCAD is a free, open-source application for fiction writers that provides st
 
 ## Documentation Resources
 
-### Developer Documentation (`.claude/docs/`)
+### Core Memory Files (`/home/tcox/.claude/memory/`)
 
-StoryCAD has comprehensive documentation for AI/LLM agents and developers in `.claude/docs/`:
+Essential architecture and development documentation accessible to all sessions:
 
-#### Architecture Documentation (`.claude/docs/architecture/`)
-- **[StoryCAD_architecture_notes.md](./.claude/docs/architecture/StoryCAD_architecture_notes.md)** - Comprehensive architecture reference covering all 9 architectural patterns, UNO Platform integration, repository ecosystem, and service layers
-- **[patterns-quick-ref.md](./.claude/docs/architecture/patterns-quick-ref.md)** - Quick reference for StoryCAD patterns (MVVM, ISaveable, SerializationLock, OperationResult, Stateless Services, etc.)
-- **[coding-standards.md](./.claude/docs/architecture/coding-standards.md)** - Naming conventions, code layout, SOLID principles
-- **[testing-guide.md](./.claude/docs/architecture/testing-guide.md)** - Test patterns, MSTest usage, test data creation
-- **[debugging-guide.md](./.claude/docs/architecture/debugging-guide.md)** - Visual Studio and IDE debugging setup
-- **[build-commands.md](./.claude/docs/architecture/build-commands.md)** - WSL/Windows build and test commands
-- **[ai-workflow.md](./.claude/docs/architecture/ai-workflow.md)** - Issue-centric development process for AI agents
+- **[patterns.md](/home/tcox/.claude/memory/patterns.md)** - 9 architectural patterns (MVVM, ISaveable, SerializationLock, OperationResult, Stateless Services, IMessenger, Platform-Specific Code, StoryDocument, DI)
+- **[architecture.md](/home/tcox/.claude/memory/architecture.md)** - Critical dated decisions (2025-10-12), circular dependencies, navigation lifecycle, StoryDocument never-null rule, theme management
+- **[gotchas.md](/home/tcox/.claude/memory/gotchas.md)** - Common pitfalls, headless mode behavior, platform-specific gotchas, ISaveable registration, navigation timing
+- **[testing.md](/home/tcox/.claude/memory/testing.md)** - Test patterns, naming conventions (MethodName_Scenario_ExpectedResult), TDD workflow, test data creation
+- **[build-commands.md](/home/tcox/.claude/memory/build-commands.md)** - WSL/Windows build and test commands, TDD red-green-refactor cycle
+- **[dependencies.md](/home/tcox/.claude/memory/dependencies.md)** - UNO Platform 6.2.36, MVVM Toolkit 8.4.0, Semantic Kernel 1.41.0 usage patterns
 
-#### Dependency Guides (`.claude/docs/dependencies/`)
-- **[uno-platform-guide.md](./.claude/docs/dependencies/uno-platform-guide.md)** - UNO Platform 6.2.36 usage, platform heads, conditional compilation, file naming conventions
-- **[mvvm-toolkit-guide.md](./.claude/docs/dependencies/mvvm-toolkit-guide.md)** - CommunityToolkit.Mvvm 8.4.0 patterns, source generators, IMessenger, Ioc container
-- **[semantic-kernel-guide.md](./.claude/docs/dependencies/semantic-kernel-guide.md)** - Microsoft Semantic Kernel 1.41.0 integration in CollaboratorLib plugin
+**Usage**: All memory files cross-reference each other. Start with patterns.md for quick lookup, then drill into specific topics.
 
-#### Code Examples (`.claude/docs/examples/`)
-- **[new-viewmodel-template.md](./.claude/docs/examples/new-viewmodel-template.md)** - Copy-paste template for creating ViewModels with ISaveable pattern
-- **[new-service-template.md](./.claude/docs/examples/new-service-template.md)** - Template for stateless services with SerializationLock
-- **[platform-specific-code.md](./.claude/docs/examples/platform-specific-code.md)** - Examples for handling Windows vs macOS differences
+### Comprehensive Documentation (`.claude/docs/`)
 
-#### Troubleshooting (`.claude/docs/troubleshooting/`)
-- **[common-errors.md](./.claude/docs/troubleshooting/common-errors.md)** - Quick troubleshooting guide for build errors, runtime errors, platform-specific issues, messaging errors, and test failures
+Detailed technical documentation (memory files provide condensed versions):
+
+- **Architecture**: `.claude/docs/architecture/` - StoryCAD_architecture_notes.md (comprehensive), coding-standards.md, debugging-guide.md, ai-workflow.md
+- **Dependencies**: `.claude/docs/dependencies/` - Full dependency guides with complete API examples
+- **Code Examples**: `.claude/docs/examples/` - Copy-paste templates for ViewModels, Services, platform-specific code
+- **Troubleshooting**: `.claude/docs/troubleshooting/` - Common errors with solutions
 
 ### User Manual (ManualTest Repository)
 
@@ -159,7 +155,7 @@ StoryCAD uses Context7 MCP server for up-to-date documentation of public depende
 "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
 ```
 
-For detailed commands, see [Build & Test Commands](./devdocs/build_commands.md).
+For detailed commands, see [Build & Test Commands](/home/tcox/.claude/memory/build-commands.md).
 
 ## Key Services
 
@@ -171,7 +167,7 @@ For detailed commands, see [Build & Test Commands](./devdocs/build_commands.md).
 - **SearchService**: Full-text search across story content
 - **LogService**: Comprehensive logging with NLog and elmah.io integration
 
-For detailed architecture information, see [Architecture Guide](./devdocs/architecture.md).
+For detailed architecture information, see [Architecture Memory](/home/tcox/.claude/memory/architecture.md) and [Patterns](/home/tcox/.claude/memory/patterns.md).
 
 ## Important Notes
 
@@ -189,6 +185,8 @@ For detailed architecture information, see [Architecture Guide](./devdocs/archit
 ## Working with GitHub Issues
 
 Claude Code can interact with GitHub issues using the `gh` CLI tool. This is essential for following the AI Issue-Centric Workflow.
+
+**PIE Workflow Implementation**: The enterprise PIE policy (Plan-Implement-Evaluate) from `/etc/claude-code/CLAUDE.md` is implemented for StoryCAD via **`.claude/docs/architecture/ai-workflow.md`**. This issue-centric workflow defines how to plan, implement, and evaluate work within GitHub issues.
 
 ### Viewing Issues
 ```bash
@@ -209,12 +207,22 @@ gh issue comment 1067 --body "Planning complete" --repo storybuilder-org/StoryCA
 ```
 
 ### AI Workflow Integration
-When following AI_workflow.md:
+When following AI_workflow.md (PIE implementation):
+
+**Plan Phase**:
 1. Read issue to understand current state
-2. Update issue body with planned tasks between checkboxes
-3. Check off tasks as completed
-4. Add comments as specified in the workflow
-5. Include design documents in PR comments (not in repository files)
+2. Recommend specialized agents for complex tasks in the plan
+3. Update issue body with planned tasks between checkboxes (include agent recommendations)
+4. Get plan approval before proceeding
+
+**Implement Phase**:
+5. Use specialized agents proactively for approved tasks (no additional approval needed)
+6. Check off tasks as completed
+7. Add comments as specified in the workflow
+
+**Evaluate Phase**:
+8. Include design documents in PR comments (not in repository files)
+9. Document agent effectiveness and lessons learned
 
 Example: Updating Code tasks in issue body:
 ```bash
@@ -348,4 +356,4 @@ git commit -m "message"
 ### Circular Dependencies
 - Watch for circular dependencies when adding constructor parameters
 - If encountered, document with TODO and leave specific Ioc.Default calls rather than forcing bad design
-- Example: Windowing ↔ OutlineViewModel (architectural issue documented in /devdocs/StoryCAD_architecture_notes.md)
+- Example: Windowing ↔ OutlineViewModel (documented in /home/tcox/.claude/memory/architecture.md)
