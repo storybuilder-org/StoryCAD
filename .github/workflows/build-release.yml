@@ -166,11 +166,6 @@ jobs:
           }
           & msbuild @msbuildArgs
 
-      - name: MSIX Cleaner (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        run: ${{ github.workspace }}\.github\workflows\MSIX.ps1 -TargetDirectory "${{ github.workspace }}\StoryCAD\Packages"
-
       - name: Remove PFX and .env (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
