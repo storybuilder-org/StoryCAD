@@ -56,19 +56,28 @@ public class OutlineViewModelTests
     ///     Test that deleting a node sets the StoryModel.Changed flag to true
     /// </summary>
     [TestMethod]
-    [Ignore] // TODO: Re-enable after architecture fix in issue #1068
     public async Task DeleteNode_SetsChangedFlag()
     {
-        // TODO: This test is currently disabled because it requires manipulating the Headless state,
-        // which affects other tests. The root cause is that the Changed flag is only set through
-        // ShellViewModel.ShowChange(), which doesn't work in Headless mode (used for tests and API).
-        // 
-        // After issue #1068 is implemented, OutlineService operations should set the Changed flag
-        // directly, making this test work properly in Headless mode without side effects.
-        // See: https://github.com/storybuilder-org/StoryCAD/issues/1068
+        // Arrange - Create outline with a deletable element
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("TestChangedFlag", "StoryBuilder", 0);
+        appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "TestChangedFlag.stbx"));
 
-        await Task.CompletedTask; // Placeholder to avoid compiler warning
-        Assert.Inconclusive("Test disabled pending architecture fix in issue #1068");
+        // Create a character to delete
+        var character = outlineService.AddStoryElement(appState.CurrentDocument.Model, StoryItemType.Character,
+            appState.CurrentDocument.Model.ExplorerView[0]);
+        shell.RightTappedNode = character.Node;
+
+        // Verify Changed is false after model creation (CreateModel sets it to false)
+        Assert.IsFalse(appState.CurrentDocument.Model.Changed, "Changed should be false initially");
+
+        // Act - Delete the character
+        await outlineVM.RemoveStoryElement();
+
+        // Assert - Verify Changed flag is now true
+        Assert.IsTrue(appState.CurrentDocument.Model.Changed,
+            "Changed flag should be true after deleting a node");
     }
 
     /// <summary>

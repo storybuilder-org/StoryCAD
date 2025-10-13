@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Windows.Data.Xml.Dom;
 using NRtfTree.Util;
 using StoryCADLib.DAL;
@@ -51,7 +51,7 @@ public class ScrivenerReports
     {
         await _scrivener.LoadScrivenerProject(); // Load the Scrivener project
         await _formatter.LoadReportTemplates(); // Load text report templates
-        //TODO: load templates from within ReportFOrmatter
+        //TODO: load templates from within ReportFormatter
         _binderNode = _scrivener.BuildBinderItemTree(); // Build a BinderItem model
         UpdateStoryCADOutline(); // Replace or add StoryCAD BinderItems to model
 

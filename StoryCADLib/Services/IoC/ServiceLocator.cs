@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using StoryCADLib.Collaborator.ViewModels;
 using StoryCADLib.DAL;
 using StoryCADLib.Models.Tools;
@@ -41,7 +41,6 @@ public static class BootStrapper
             return;
         }
 
-        //TODO: Support replacing the base services.
         //Add any additional services
         if (additionalServices != null)
         {

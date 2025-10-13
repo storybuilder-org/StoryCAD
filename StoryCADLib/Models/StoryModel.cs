@@ -7,14 +7,9 @@ using StoryCADLib.DAL;
 
 namespace StoryCADLib.Models;
 
-// TODO: Move StoryModel to ViewModels namespace in a future refactoring
 // This class implements ObservableObject and contains view-specific logic
 public class StoryModel : ObservableObject
 {
-    // TODO: Note sorting filtering and grouping depend on ICollectionView (for TreeView?)
-    // TODO: See http://msdn.microsoft.com/en-us/library/ms752347.aspx#binding_to_collections
-    // TODO: Maybe http://stackoverflow.com/questions/15593166/binding-treeview-with-a-observablecollection
-
     /// <summary>
     ///     If any of the story entities have been modified by other than retrieval from the Story
     ///     (that is, by a user modification from a View) 'Changed' is set to true. That is, a change
