@@ -600,9 +600,9 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
         }
     }
 
-    private void InitializeCharacterList()
+    internal void InitializeCharacterList()
     {
-        CastSource = null; // Insure CastList setter invokes OnPropertyChanged   
+        CastSource = null; // Insure CastList setter invokes OnPropertyChanged
         if (AllCharacters) //Display all characters from the StoryModel's character list
         {
             CastSource = CharacterList;
@@ -739,6 +739,11 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
     /// <param name="element"></param>
     public void AddCastMember(StoryElement element)
     {
+        if (element == null)
+        {
+            return;
+        }
+
         if (element.Uuid == Guid.Empty)
         {
             return;

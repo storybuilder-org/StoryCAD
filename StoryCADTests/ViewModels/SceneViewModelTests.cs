@@ -266,14 +266,131 @@ public class SceneViewModelTests
         Assert.AreEqual(initialCount, _viewModel.CastList.Count, "CastList count should not change for empty Guid");
     }
 
-    // TODO: Priority 2 - Additional Cast Management Tests
-    // - AddCastMember_WithDuplicateCharacter_DoesNotAddAgain
-    // - AddCastMember_WithNullElement_HandlesGracefully
-    // - RemoveCastMember_WithNonExistentCharacter_DoesNothing
-    // - SwitchCastView_ToAllCharacters_ShowsAllCharacters
-    // - SwitchCastView_ToCastList_ShowsOnlyCastMembers
-    // - CastMemberExists_WithExistingCharacter_ReturnsTrue
-    // - CastMemberExists_WithNonExistentCharacter_ReturnsFalse
+    [TestMethod]
+    public void AddCastMember_WithDuplicateCharacter_DoesNotAddAgain()
+    {
+        // Arrange - Create character and add it to cast once
+        var character = CreateTestCharacter("Duplicate Character");
+        _storyModel.StoryElements.Characters.Add(character);
+        _viewModel.Activate(_sceneModel);
+        _viewModel.AddCastMember(character);
+        var countAfterFirstAdd = _viewModel.CastList.Count;
+
+        // Act - Try to add the same character again
+        _viewModel.AddCastMember(character);
+
+        // Assert - Verify count did not increase (duplicate prevented)
+        Assert.AreEqual(countAfterFirstAdd, _viewModel.CastList.Count,
+            "CastList count should not increase when adding duplicate character");
+        Assert.AreEqual(1, _viewModel.CastList.Count(c => c.Uuid == character.Uuid),
+            "Character should only appear once in CastList");
+    }
+
+    [TestMethod]
+    public void AddCastMember_WithNullElement_HandlesGracefully()
+    {
+        // Arrange - Setup ViewModel
+        _viewModel.Activate(_sceneModel);
+        var initialCount = _viewModel.CastList.Count;
+
+        // Act - Try to add null (should not throw exception)
+        _viewModel.AddCastMember(null);
+
+        // Assert - Verify no exception thrown and count unchanged
+        Assert.AreEqual(initialCount, _viewModel.CastList.Count,
+            "CastList count should not change when adding null");
+    }
+
+    [TestMethod]
+    public void RemoveCastMember_WithNonExistentCharacter_DoesNothing()
+    {
+        // Arrange - Create character that is NOT in cast list
+        var character = CreateTestCharacter("Non-Existent Character");
+        _storyModel.StoryElements.Characters.Add(character);
+        _viewModel.Activate(_sceneModel);
+        var initialCount = _viewModel.CastList.Count;
+
+        // Act - Try to remove character that's not in cast
+        _viewModel.RemoveCastMember(character);
+
+        // Assert - Verify count unchanged (silent no-op)
+        Assert.AreEqual(initialCount, _viewModel.CastList.Count,
+            "CastList count should not change when removing non-existent character");
+    }
+
+    [TestMethod]
+    public void SwitchCastView_ToAllCharacters_ShowsAllCharacters()
+    {
+        // Arrange
+        _viewModel.Activate(_sceneModel);
+        var totalCharacters = _storyModel.StoryElements.Characters.Count;
+
+        // Act
+        _viewModel.AllCharacters = true;
+        _viewModel.InitializeCharacterList();
+
+        // Assert
+        Assert.AreEqual(_viewModel.CharacterList, _viewModel.CastSource);
+        Assert.AreEqual(totalCharacters, _viewModel.CastSource.Count);
+    }
+
+    [TestMethod]
+    public void SwitchCastView_ToCastList_ShowsOnlyCastMembers()
+    {
+        // Arrange
+        var castMember = CreateTestCharacter("Cast Member");
+        _storyModel.StoryElements.Characters.Add(castMember);
+        _storyModel.StoryElements.Characters.Add(CreateTestCharacter("Not In Cast"));
+        _viewModel.Activate(_sceneModel);
+        _viewModel.AddCastMember(castMember);
+
+        // Act
+        _viewModel.AllCharacters = false;
+        _viewModel.InitializeCharacterList();
+
+        // Assert
+        Assert.AreEqual(_viewModel.CastList, _viewModel.CastSource);
+        Assert.AreEqual(1, _viewModel.CastSource.Count);
+    }
+
+    [TestMethod]
+    public void CastMemberExists_WithExistingCharacter_ReturnsTrue()
+    {
+        // Arrange - Add character to cast
+        var character = CreateTestCharacter("Existing Cast Member");
+        _storyModel.StoryElements.Characters.Add(character);
+        _viewModel.Activate(_sceneModel);
+        _viewModel.AddCastMember(character);
+        var countAfterAdd = _viewModel.CastList.Count;
+
+        // Act - Try to add same character again (tests CastMemberExists indirectly)
+        _viewModel.AddCastMember(character);
+
+        // Assert - Verify duplicate was prevented (proves CastMemberExists returned true)
+        Assert.AreEqual(countAfterAdd, _viewModel.CastList.Count,
+            "Duplicate prevention proves CastMemberExists returned true");
+        Assert.IsTrue(_viewModel.CastList.Contains(character),
+            "Character should be in CastList");
+    }
+
+    [TestMethod]
+    public void CastMemberExists_WithNonExistentCharacter_ReturnsFalse()
+    {
+        // Arrange - Create character but DON'T add to cast
+        var character = CreateTestCharacter("New Character");
+        _storyModel.StoryElements.Characters.Add(character);
+        _viewModel.Activate(_sceneModel);
+        var initialCount = _viewModel.CastList.Count;
+
+        // Act - Add character for first time (tests CastMemberExists indirectly)
+        _viewModel.AddCastMember(character);
+
+        // Assert - Verify character was added (proves CastMemberExists returned false)
+        Assert.AreEqual(initialCount + 1, _viewModel.CastList.Count,
+            "Successful add proves CastMemberExists returned false");
+        Assert.IsTrue(_viewModel.CastList.Contains(character),
+            "Character should now be in CastList");
+    }
 
     #endregion
 
