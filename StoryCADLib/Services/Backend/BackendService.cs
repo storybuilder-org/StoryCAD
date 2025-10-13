@@ -58,10 +58,11 @@ public class BackendService
     /// </summary>
     public async Task StartupRecording()
     {
-        // TODO: This try/catch swallows all exceptions silently. Consider:
-        // 1. Handling specific exceptions (MySqlException, TaskCanceledException) differently
-        // 2. Providing user feedback for connection failures
-        // 3. Whether all exceptions should be silently logged or some should propagate
+        // Exception handling: This method runs during app startup and posts telemetry/version data
+        // to the backend MySQL database. Since this is an optional feature, the app must continue
+        // functioning even if backend communication fails. PostPreferences and PostVersion have
+        // their own exception handling; this catch block handles exceptions from PreferencesIo
+        // and serves as a safety net for any unexpected errors.
         try
         {
             // If the previous attempt to communicate to the back-end server
@@ -93,9 +94,47 @@ public class BackendService
                 await PostVersion();
             }
         }
+        catch (TaskCanceledException ex)
+        {
+            // MySQL connection timeout during startup - transient issue
+            _logService.Log(LogLevel.Warn, $"Backend operation timed out during startup: {ex.Message}");
+            _logService.Log(LogLevel.Info, "Backend telemetry will retry on next startup");
+        }
+        catch (OperationCanceledException ex)
+        {
+            // Broader cancellation (e.g., app shutdown during startup)
+            _logService.Log(LogLevel.Warn, $"Backend operation cancelled during startup: {ex.Message}");
+        }
+        catch (MySqlException ex) when (ex.Number == 2003 || ex.Number == 2013)
+        {
+            // Connection refused or timeout - server temporarily unavailable
+            _logService.Log(LogLevel.Warn, $"Backend server temporarily unavailable (Code {ex.Number}): {ex.Message}");
+            _logService.Log(LogLevel.Info, "Backend telemetry will retry on next startup");
+        }
+        catch (MySqlException ex) when (ex.Number == 1045)
+        {
+            // Authentication failure - configuration issue
+            _logService.LogException(LogLevel.Error, ex, $"Backend authentication failed (Code {ex.Number}): Check credentials");
+        }
+        catch (MySqlException ex)
+        {
+            // Other MySQL errors
+            _logService.LogException(LogLevel.Error, ex, $"Backend MySQL error during startup (Code {ex.Number}): {ex.Message}");
+        }
+        catch (IOException ex)
+        {
+            // File write failure for preferences - likely disk or permission issue
+            _logService.LogException(LogLevel.Error, ex, "Failed to write preferences file during startup recording");
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            // Permission denied on preferences file
+            _logService.LogException(LogLevel.Error, ex, "Permission denied writing preferences file during startup recording");
+        }
         catch (Exception ex)
         {
-            _logService.LogException(LogLevel.Error, ex, "Error in StartupRecording method");
+            // Unexpected errors - catch-all safety net
+            _logService.LogException(LogLevel.Error, ex, "Unexpected error in StartupRecording method");
         }
     }
 
@@ -180,10 +219,45 @@ public class BackendService
             await loader.WritePreferences(_preferenceService.Model);
             _logService.Log(LogLevel.Info, "Version:  Current=" + current + " Previous=" + previous);
         }
-        // May want to use multiple catch clauses
+        catch (TaskCanceledException ex)
+        {
+            // MySQL connection handshake timeout (issue #986) - transient issue
+            _logService.Log(LogLevel.Warn, $"MySQL handshake timed out during version posting: {ex.Message}");
+        }
+        catch (OperationCanceledException ex)
+        {
+            // Broader cancellation scenario (e.g., shutdown during operation) - transient
+            _logService.Log(LogLevel.Warn, $"Operation cancelled during version posting: {ex.Message}");
+        }
+        catch (MySqlException ex) when (ex.Number == 2003 || ex.Number == 2013)
+        {
+            // Connection refused (2003) or timeout (2013) - transient network issues
+            _logService.Log(LogLevel.Warn, $"Transient MySQL error during version posting (Code {ex.Number}): {ex.Message}");
+        }
+        catch (MySqlException ex) when (ex.Number == 1045)
+        {
+            // Authentication failure - configuration problem
+            _logService.LogException(LogLevel.Error, ex, $"MySQL authentication failed (Code {ex.Number}): {ex.Message}");
+        }
+        catch (MySqlException ex)
+        {
+            // Other MySQL errors - log as Error for tracking
+            _logService.LogException(LogLevel.Error, ex, $"MySQL error during version posting (Code {ex.Number}): {ex.Message}");
+        }
+        catch (IOException ex)
+        {
+            // File write failure for preferences
+            _logService.LogException(LogLevel.Error, ex, "Failed to write preferences file during version posting");
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            // Permission denied on preferences file
+            _logService.LogException(LogLevel.Error, ex, "Permission denied writing preferences file during version posting");
+        }
         catch (Exception ex)
         {
-            _logService.LogException(LogLevel.Error, ex, ex.Message);
+            // Unexpected errors - track in elmah.io
+            _logService.LogException(LogLevel.Error, ex, $"Unexpected error during version posting: {ex.Message}");
         }
         finally
         {
