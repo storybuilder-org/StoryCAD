@@ -13,8 +13,6 @@ namespace StoryCADLib.Services.Outline;
 /// </summary>
 public class OutlineService
 {
-    // TODO: Circular dependency - OutlineService ↔ AutoSaveService/BackupService ↔ OutlineViewModel ↔ OutlineService
-    // These services have a complex circular dependency that needs architectural refactoring
     private readonly ILogService _log = Ioc.Default.GetRequiredService<ILogService>();
 
     /// <summary>

@@ -277,14 +277,6 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
 
     #region Constructor
 
-    // Constructor for XAML compatibility - will be removed later
-    public SettingViewModel() : this(
-        Ioc.Default.GetRequiredService<ILogService>(),
-        Ioc.Default.GetRequiredService<ListData>(),
-        Ioc.Default.GetRequiredService<Windowing>())
-    {
-    }
-
     public SettingViewModel(ILogService logger, ListData listData, Windowing windowing)
     {
         _logger = logger;
