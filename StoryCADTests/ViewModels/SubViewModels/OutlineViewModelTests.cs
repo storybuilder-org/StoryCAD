@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
@@ -235,7 +235,6 @@ public class OutlineViewModelTests
     [TestMethod]
     public async Task TestSaveFileAs()
     {
-        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
         var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await outlineService.CreateModel("Test", "StoryBuilder", 0);
         appState.CurrentDocument = new StoryDocument(model);
