@@ -35,6 +35,16 @@
         <Platforms>AnyCPU;x64</Platforms>
     </PropertyGroup>
 
+    <!-- App Icon Configuration -->
+    <ItemGroup>
+        <UnoImage Include="Assets\Icons\icon.png">
+            <Kind>Icon</Kind>
+        </UnoImage>
+        <UnoSplashScreen Include="Assets\Splash\splash.png">
+          <Kind>Icon</Kind>
+        </UnoSplashScreen>
+    </ItemGroup>
+
     <ItemGroup>
         <ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
     </ItemGroup>
@@ -49,5 +59,13 @@
         <None Update=".env">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+    </ItemGroup>
+    <ItemGroup>
+      <UnoIcon Remove="Assets\Icons\icon.svg" />
+      <Content Remove="Assets\Icons\icon.png" />
+      <UnoIcon Include="Assets\Icons\icon.png" />
+    </ItemGroup>
+    <ItemGroup>
+      <UnoSplashScreen Remove="Assets\Splash\splash_screen.svg" />
     </ItemGroup>
 </Project>
