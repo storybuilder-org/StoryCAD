@@ -335,8 +335,7 @@ public class CollaboratorService
         dllExists = false;
         return false;
 #else
-        // TODO: Issue #1126 - Implement macOS Collaborator plugin loading
-        // Will use async/await for plugin discovery/loading (same pattern as Windows)
+        // macOS plugin loading tracked in Issue #1126 and #1135
         await Task.CompletedTask;  // Placeholder until macOS implementation
         _logService.Log(LogLevel.Error, "Collaborator is not supported on this platform.");
         return false;

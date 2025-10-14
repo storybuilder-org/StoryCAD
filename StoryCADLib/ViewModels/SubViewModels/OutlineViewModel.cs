@@ -709,7 +709,6 @@ public class OutlineViewModel : ObservableRecipient
             return;
         }
 
-        //TODO: revamp this to be more user-friendly.
         using (new SerializationLock(logger))
         {
             _editFlushService.FlushCurrentEdits();

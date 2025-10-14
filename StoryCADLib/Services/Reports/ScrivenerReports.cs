@@ -51,7 +51,6 @@ public class ScrivenerReports
     {
         await _scrivener.LoadScrivenerProject(); // Load the Scrivener project
         await _formatter.LoadReportTemplates(); // Load text report templates
-        //TODO: load templates from within ReportFormatter
         _binderNode = _scrivener.BuildBinderItemTree(); // Build a BinderItem model
         UpdateStoryCADOutline(); // Replace or add StoryCAD BinderItems to model
 
@@ -291,7 +290,6 @@ public class ScrivenerReports
     public async Task ProcessPreviousNotes()
     {
         _stbNotes = new StringBuilder(string.Empty);
-        ///TODO: Activate notes collecting
         await LoadPreviousNotes();
         await ReadScrivenerNotes();
         await SaveScrivenerNotes();
@@ -386,7 +384,6 @@ public class ScrivenerReports
     /// </summary>
     public async Task SaveScrivenerNotes()
     {
-        ///TODO: Complete SaveScrivenerNotes code
         await Task.Run(() =>
         {
             // Add a BinderItem for the report under the Miscellaneous folder
@@ -409,7 +406,6 @@ public class ScrivenerReports
             format.bold = false;
             format.underline = false;
             format.italic = false;
-            //TODO: Is this formatting added?
             // Write the report
             doc.AddText(_stbNotes.ToString(), format);
             doc.AddNewLine();
