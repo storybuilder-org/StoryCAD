@@ -134,9 +134,19 @@ jobs:
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
         run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:Platform=${{ matrix.platform }}
 
+      - name: Write .env (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          if [ -n "${{ secrets.ENV }}" ]; then
+            echo "${{ secrets.ENV }}" > "${{ github.workspace }}/StoryCAD/.env"
+            echo "${{ secrets.ENV }}" > "${{ github.workspace }}/StoryCADTests/.env"
+          fi
+
       - name: Run all tests (macOS)
         if: matrix.os == 'macos-latest'
         run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore
+
+
 
       # 10 ─ Setup MSBuild (Windows only)
       - name: Setup MSBuild
@@ -173,7 +183,12 @@ jobs:
         run: |
           Remove-Item "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx" -Force -ErrorAction SilentlyContinue
           Remove-Item "${{ github.workspace }}\StoryCAD\.env","${{ github.workspace }}\StoryCADTests\.env" -Force -ErrorAction SilentlyContinue
-
+      - name: Remove .env (macOS)
+        if: matrix.os == 'macos-latest'
+        continue-on-error: true
+        run: |
+          rm -f "${{ github.workspace }}/StoryCAD/.env"
+          rm -f "${{ github.workspace }}/StoryCADTests/.env"
       - name: Clean publish dir (macOS)
         if: matrix.os == 'macos-latest'
         run: rm -rf publish
