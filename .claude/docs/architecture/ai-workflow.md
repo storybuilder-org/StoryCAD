@@ -1,68 +1,112 @@
 # AI Issue‑Centric Workflow Guide
-_For Claude Code, Copilot, Gemini, or any agent helping on StoryCAD GitHub issues._
+_For Claude Code, Copilot, Gemini, or any agent helping on StoryCAD GitHub issues._
 
 ## 1 · When the agent should act
 The agent acts **only when a human explicitly asks**, for example:
 
-> “Please read and process this issue.”
+> "Please read and process this issue."
 
 No automatic triggers, webhooks, or YAML workflows are assumed.
 
 ## 2 · Read the entire Issue
-1. Ingest everything in the Issue body—problem statement, proposed solution, screenshots, etc.  
-2. Locate the **Lifecycle** headings, which must appear in this order:  
-   - **Design tasks / sign‑off**  
-   - **Code tasks / sign‑off**  
-   - **Test tasks / sign‑off**  
-   - **Final sign‑off**  
+1. Ingest everything in the Issue body—problem statement, proposed solution, screenshots, etc.
+2. Locate the **Lifecycle** headings, which must appear in this order:
+   - **Design tasks / sign‑off**
+   - **Code tasks / sign‑off**
+   - **Test tasks / sign‑off**
+   - **Evaluate tasks / sign‑off**
+   - **Final sign‑off**
 3. Work only on the **first** subsection whose task list is still missing or incomplete.
 
 ## 3 · Mandatory checklist frame for every Lifecycle subsection
 Each subsection must always start and end with these unchecked items
 (the agent must never tick them—humans do that):
 
-- [ ] Plan this section  
-- [ ] Human approves plan  
-  <!-- AI inserts ordered tasks here → `- [ ] Task …` → `- [ ] Task …` etc. -->  
+- [ ] Plan this section
+- [ ] Human approves plan
+  <!-- AI inserts ordered tasks here → `- [ ] Task …` → `- [ ] Task …` etc. -->
 - [ ] Human final approval
 
 The correct order is:
 1. Plan this section (agent creates plan)
 2. Human approves plan (human reviews and approves)
 3. [Generated tasks go here] (agent executes after approval)
-4. Human final approval (human tests and signs off)  
+4. Human final approval (human tests and signs off)
 
 ## 4 · Agent behavior in a subsection
 
-### 4.1 · Planning phase  
+### 4.1 · Planning phase
 **Condition:** "Plan this section" is **unchecked**
 
-1. Generate an ordered, unchecked task list that fully describes what has to be done in this phase.  
-2. Create a markdown document named `[issue_title] #[issue_number].md` (e.g., 'Remove and Replace DataSource #1067.md').  
-3. Ask the user where to save the document (which drive and folder).  
-4. Include the generated task list and all detailed planning in the markdown document.  
+1. Generate an ordered, unchecked task list that fully describes what has to be done in this phase.
+2. Create a markdown document named `[issue_title] #[issue_number].md` (e.g., 'Remove and Replace DataSource #1067.md').
+3. Ask the user where to save the document (which drive and folder).
+4. Include the generated task list and all detailed planning in the markdown document.
 5. Update the issue body by inserting the generated task list between "Plan this section" and "Human approves plan" checkboxes.
-6. Add an Issue comment:  
+6. Add an Issue comment:
    > Planning for **<section name>** complete. Document saved as `[filename]`. Please review and tick **Human approves plan**.
 
-### 4.2 · Execution phase  
+### 4.2 · Execution phase
 **Condition:** "Plan this section" is **checked** **and** "Human final approval" is **unchecked**
 
-1. Perform the listed tasks in order (e.g., draft design, open PR, add tests).  
+1. Perform the listed tasks in order (e.g., draft design, open PR, add tests).
 2. **Check off each individual task** in the issue body as you complete it to show progress. Continue working through all tasks in the section without stopping—only pause at human approval checkpoints.
-3. Document all work, artifacts, and detailed implementations in the markdown document created during planning.  
-4. When every task is done, update the markdown document with all completed work and comment:  
+3. Document all work, artifacts, and detailed implementations in the markdown document created during planning.
+4. When every task is done, update the markdown document with all completed work and comment:
    > Work for **<section name>** finished. All details documented in `[filename]`. Please validate and tick **Human final approval**.
 
 ## 5 · Progressing to the next phase
-After a human checks **Human final approval** for the current section, wait for them to instruct the agent again (“read and process this issue”) and then repeat the process for the next Lifecycle subsection.
+After a human checks **Human final approval** for the current section, wait for them to instruct the agent again ("read and process this issue") and then repeat the process for the next Lifecycle subsection.
 
-## 6 · Pull‑request merge rule
+## 6 · Evaluate Phase
+
+The **Evaluate tasks / sign‑off** phase is MANDATORY for all issues.
+
+### 6.1 · Evaluate Phase Planning
+
+When planning the Evaluate section, include these task categories:
+
+**Build & Test Verification**:
+- [ ] Build solution successfully (zero errors)
+- [ ] Run complete test suite (all tests passing)
+- [ ] Perform manual testing for UI changes
+
+**Requirements Verification**:
+- [ ] Verify all acceptance criteria met
+- [ ] Confirm edge cases handled
+- [ ] Validate error handling
+
+**Code Quality**:
+- [ ] Code review completed (manual or via code-reviewer agent)
+- [ ] Project patterns followed (see project memory files)
+- [ ] No anti-patterns introduced
+
+**Documentation**:
+- [ ] Code comments added where needed
+- [ ] User documentation updated (if applicable)
+- [ ] Technical documentation updated
+
+**Knowledge Capture**:
+- [ ] Document lessons learned in markdown file
+- [ ] Document agent effectiveness (if agents used)
+- [ ] Update memory files if new patterns discovered
+
+See `.claude/docs/templates/evaluation-checklist.md` for full template.
+
+### 6.2 · Agent Effectiveness Documentation
+
+If specialized agents were used, include agent effectiveness report in issue markdown document.
+
+### 6.3 · Lessons Learned Documentation
+
+Include lessons learned section in issue markdown document.
+
+## 7 · Pull‑request merge rule
 Only merge the pull request linked to the Issue after completing every task in Final sign-off and after the Human final approval checkbox is ticked.
 
 _Task checkboxes remain in the Issue body for progress tracking. All detailed work, supporting artifacts (design summaries, code snippets, test results), and documentation should be included in the markdown document rather than as Issue comments._
 
-## 7 · Examples
+## 8 · Examples
 
 ### Example: Planning Design Tasks
 When the agent sees:
