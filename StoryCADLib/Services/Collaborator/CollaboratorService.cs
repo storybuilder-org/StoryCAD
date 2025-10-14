@@ -461,13 +461,6 @@ public class CollaboratorService
 
     #region Show/Hide window
 
-    //TODO: Use Show and hide properly
-    //CollaboratorWindow.Show();
-    //CollaboratorWindow.Activate();
-    //Logger.Log(LogLevel.Debug, "Collaborator window opened and focused");
-    /// <summary>
-    ///     This closes, disposes and full removes collaborator from memory.
-    /// </summary>
     /// <summary>
     ///     This will hide the collaborator window.
     /// </summary>
@@ -502,14 +495,12 @@ public class CollaboratorService
         }
 
         //Reenable StoryCAD buttons
-        //TODO: Use lock here.
         //Ioc.Default.GetRequiredService<OutlineViewModel>()._canExecuteCommands = true;
         _logService.Log(LogLevel.Info, "Async re-enabled.");
     }
 
     public void DestroyCollaborator()
     {
-        //TODO: Absolutely make sure Collaborator is not left in memory after this.
         _logService.Log(LogLevel.Warn, "Destroying collaborator object.");
         if (CollaboratorWindow != null)
         {
@@ -530,24 +521,7 @@ public class CollaboratorService
     public void CollaboratorClosed()
     {
         _logService.Log(LogLevel.Debug, "Closing Collaborator.");
-        //TODO: Add FTP upload code here.
     }
 
     #endregion
 }
-
-//TODO: On calls, set callback delegate
-//args.onDoneCallback = FinishedCallback;
-// Logging
-//Logger.Log(LogLevel.Debug,
-//    $"""
-//     Collaborator Args Information
-//     StoryModel FilePath -  {args.StoryModel.ProjectFile.Path}
-//     StoryModel Elements - {args.StoryModel.StoryElements.Count}
-//     Story Element Name  - {args.SelectedElement.Name}
-//     Story Element GUID  - {args.SelectedElement.Uuid}
-//     Story Element Type  - {args.SelectedElement.Type}
-//     """);
-//TODO: On calls, set model etc.
-
-//CollaboratorWindow.Content = page;  // was WizardShell
