@@ -8,8 +8,8 @@ namespace StoryCADLib.Services.Dialogs;
 ///     Service for validating tool usage prerequisites.
 ///     IMPORTANT: This service is a temporary solution that still requires ShellViewModel parameters.
 ///     This is part of the DI refactoring (Issue #1063) to extract validation logic from ViewModels.
-///     TODO: In a future refactoring, the CurrentViewType, CurrentNode, and RightTappedNode properties
-///     should be moved from ShellViewModel to AppState to eliminate the ViewModel dependency entirely.
+///     Issue #1146 tracks moving CurrentViewType, CurrentNode, and RightTappedNode properties
+///     from ShellViewModel to AppState to eliminate the ViewModel dependency entirely.
 ///     This would require updating ~123 references across the codebase, so it's deferred to a separate task.
 ///     This intermediate step allows us to:
 ///     1. Extract the validation logic to a testable service
