@@ -111,25 +111,18 @@ public class LogService : ILogService
                     msg.Detail = $"Error trying to obtain StackTrace helper Error: {e.Message}";
                 }
 
-                try
-                {
-                    msg.Version = State.Version;
-                }
-                catch (Exception e)
-                {
-                    msg.Version = $"Error trying to obtain version information Error: {e.Message}";
-                }
-
                 var baseException = exceptionHelper?.GetBaseException();
+                msg.Version = State.Version;
 
                 msg.Type = baseException?.GetType().FullName;
-                msg.Data = baseException?.ToDataList();
+                msg.Data = baseException?.ToDataList() ?? new();
                 msg.Source = baseException?.Source;
                 msg.Hostname = Hostname();
                 msg.ServerVariables = new List<Item>
                 {
                     new("User-Agent",
-                        $"X-ELMAHIO-APPLICATION; OS=Windows; OSVERSION={Environment.OSVersion.Version}; ENGINE=WinUI")
+                        $"X-ELMAHIO-APPLICATION; OS={Environment.OSVersion.Platform};" +
+                        $" OSVERSION={Environment.OSVersion.Version}; ENGINE=UNO")
                 };
 
                 try
@@ -275,23 +268,12 @@ public class LogService : ILogService
         try
         {
             var Prefs = PreferenceService.Model;
-            var AppStateLocal = State;
             var AppArch = IntPtr.Size switch
             {
                 4 => "32 bit",
                 8 => "64 bit",
                 _ => "Unknown"
             };
-
-            string WinVer;
-            try
-            {
-                WinVer = Environment.OSVersion.Version.Build >= 22000 ? "11" : "10";
-            }
-            catch
-            {
-                WinVer = "?";
-            }
 
 
             return $"""
@@ -302,34 +284,27 @@ public class LogService : ILogService
                     .NET Ver - {RuntimeInformation.OSArchitecture}
                     Startup  - {State.StartUpTimer.ElapsedMilliseconds} ms
                     Elmah Status - {ElmahLogging}
-                    Windows {WinVer} Build - {Environment.OSVersion.Version.Build}
+                    OS Platform - {Environment.OSVersion.Platform}
+                    OS Build - {Environment.OSVersion.Version.Build}
                     Debugger Attached - {Debugger.IsAttached}
-                    ProcessID - {Environment.ProcessId}
                     Core Count - {Environment.ProcessorCount}
 
                     === User Prefs ===
-                    Name - {Prefs.FirstName}  {Prefs.LastName}
+                    Name - {Prefs.FirstName}
                     Email - {Prefs.Email}
-                    Elmah Consent - {Prefs.ErrorCollectionConsent}
-                    Accent Color - {Ioc.Default.GetRequiredService<Windowing>().AccentColor} 
-                    Last Version Prefs logged - {Prefs.Version}
                     Search Engine - {Prefs.PreferredSearchEngine} 
-                    AutoSave - {Prefs.AutoSave}
-                    AutoSave Interval - {Prefs.AutoSaveInterval} 
-                    Backup - {Prefs.TimedBackup}
-                    Backup Interval - {Prefs.TimedBackupInterval}
+                    AutoSave - {Prefs.AutoSave} ({Prefs.AutoSaveInterval} sec)
+                    Backup - {Prefs.TimedBackup} ({Prefs.TimedBackupInterval} sec)
                     Backup on open - {Prefs.BackupOnOpen} 
                     Project Dir - {Prefs.ProjectDirectory}
                     Backup Dir - {Prefs.BackupDirectory} 
-                    RecordPrefsStatus - {Prefs.RecordPreferencesStatus}
 
                     === CAD Info ===
                     StoryCAD Version - {State.Version}
-                    Developer - {State.DeveloperBuild}
+                    DevBuild? - {State.DeveloperBuild}
                     Env Present - {State.EnvPresent}
                     Doppler Connection - {Doppler.DopplerConnection}
                     Loaded with version change - {State.LoadedWithVersionChange}
-                    Invoked through STBX File - {Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch != ""}
                     """;
         }
         catch (Exception e)

@@ -73,7 +73,9 @@ public class BackendService
             }
 
             // If the StoryCAD version has changed, post the version change
-            if (!_appState.Version.Equals(_preferenceService.Model.Version))
+            // Skip this check if preferences haven't been initialized yet (fresh install)
+            if (_preferenceService.Model.PreferencesInitialized &&
+                !_appState.Version.Equals(_preferenceService.Model.Version))
             {
                 // Process a version change (usually a new release)
                 _logService.Log(LogLevel.Info,
@@ -89,7 +91,8 @@ public class BackendService
                 // Post deployment to backend server
                 await PostVersion();
             }
-            else if (!_preferenceService.Model.RecordVersionStatus)
+            else if (_preferenceService.Model.PreferencesInitialized &&
+                     !_preferenceService.Model.RecordVersionStatus)
             {
                 await PostVersion();
             }

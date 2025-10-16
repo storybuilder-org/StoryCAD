@@ -259,10 +259,17 @@ public class WebViewModel : ObservableRecipient, INavigable, ISaveable
     {
         try
         {
-            if (CoreWebView2Environment.GetAvailableBrowserVersionString() != null)
-            {
+            #if  WINDOWS10_0_18362_0_OR_GREATER
+                if (CoreWebView2Environment.GetAvailableBrowserVersionString() != null)
+                {
+                    return Task.FromResult(true);
+                }       
+            #else 
+            //Bypass on non winappsdk
+                _logger.Log(LogLevel.Warn, "WebView check skipped, not on WAppSDK");
                 return Task.FromResult(true);
-            }
+            #endif
+
         }
         catch
         {

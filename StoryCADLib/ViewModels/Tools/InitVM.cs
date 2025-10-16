@@ -71,9 +71,9 @@ public class InitVM : ObservableRecipient
     ///     This will then be saved and the backup path and project
     ///     path folders will be created.
     /// </summary>
-    public async void Save()
+    public async Task Save()
     {
-        //Create paths 
+        //Create paths
         Directory.CreateDirectory(ProjectDir);
         Directory.CreateDirectory(BackupDir);
 

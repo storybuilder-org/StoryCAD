@@ -44,7 +44,7 @@ public sealed partial class PreferencesInitialization : Page
     /// <summary>
     ///     Checks that the Paths, Name and Email aren't blank or null.
     /// </summary>
-    public void Check(object sender, RoutedEventArgs e)
+    public async void Check(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(_initVM.Preferences.FirstName))
         {
@@ -82,7 +82,7 @@ public sealed partial class PreferencesInitialization : Page
             return;
         }
 
-        _initVM.Save();
+        await _initVM.Save();
         RootFrame.Navigate(typeof(Shell));
     }
 }

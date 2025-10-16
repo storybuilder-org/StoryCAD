@@ -168,7 +168,7 @@ public partial class App : Application
         MainWindow.UseStudio();
 #endif
 
-        if (Debugger.IsAttached)
+        if (!Debugger.IsAttached)
         {
             _log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");
         }

@@ -265,6 +265,12 @@ public class CollaboratorService
 
     public async Task<bool> CollaboratorEnabled()
     {
+        if (!OperatingSystem.IsWindows())
+        {
+            _logService.Log(LogLevel.Warn, "Collaborator interface not supported on this platform");
+            return false;
+        }
+        
         // Check COLLAB_DEBUG environment variable to bypass collaborator loading
         var collabDebug = Environment.GetEnvironmentVariable("COLLAB_DEBUG");
         if (collabDebug == "0")

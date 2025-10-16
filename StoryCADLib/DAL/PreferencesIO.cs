@@ -14,19 +14,15 @@ namespace StoryCADLib.DAL;
 public class PreferencesIo
 {
     private readonly AppState _appState;
-    private readonly AutoSaveService _autoSaveService;
-    private readonly BackupService _backupService;
     private readonly ILogService _log;
     private readonly PreferenceService _preferenceService;
     private readonly Windowing _windowing;
+    private string _preferencesFilePath => Path.Combine(_appState.RootDirectory, "Preferences.json");
 
-    public PreferencesIo(ILogService log, AppState appState, AutoSaveService autoSaveService,
-        BackupService backupService, PreferenceService preferenceService, Windowing windowing)
+    public PreferencesIo(ILogService log, AppState appState, PreferenceService preferenceService, Windowing windowing)
     {
         _log = log;
         _appState = appState;
-        _autoSaveService = autoSaveService;
-        _backupService = backupService;
         _preferenceService = preferenceService;
         _windowing = windowing;
     }
@@ -35,8 +31,6 @@ public class PreferencesIo
     public PreferencesIo() : this(
         Ioc.Default.GetService<ILogService>(),
         Ioc.Default.GetService<AppState>(),
-        Ioc.Default.GetRequiredService<AutoSaveService>(),
-        Ioc.Default.GetRequiredService<BackupService>(),
         Ioc.Default.GetRequiredService<PreferenceService>(),
         Ioc.Default.GetRequiredService<Windowing>())
     {
@@ -46,20 +40,17 @@ public class PreferencesIo
     {
         try
         {
-            using (var serializationLock = new SerializationLock(_log))
+            using (new SerializationLock(_log))
             {
-                var _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_appState.RootDirectory);
-
-                PreferencesModel _model = new();
-
+                PreferencesModel _model;
                 //Check if we have a preferences.json
-                if (File.Exists(Path.Combine(_preferencesFolder.Path, "Preferences.json")))
+                if (File.Exists(_preferencesFilePath))
                 {
                     //Read file into memory
                     _log.Log(LogLevel.Info, "Preferences.json found, reading it.");
-                    var _preferencesFile = await _preferencesFolder.GetFileAsync("Preferences.json");
+                    StorageFile _preferencesFile = await StorageFile.GetFileFromPathAsync(_preferencesFilePath);
                     var _preferencesJson = await FileIO.ReadTextAsync(_preferencesFile);
-                    _log.Log(LogLevel.Info, $"Preferences Contents: {_preferencesJson}");
+                    _log.Log(LogLevel.Debug, $"Preferences Contents: {_preferencesJson}");
 
                     //Update _model, with new values.
                     _model = JsonSerializer.Deserialize<PreferencesModel>(_preferencesJson);
@@ -68,6 +59,7 @@ public class PreferencesIo
                 }
                 else
                 {
+                    _model = new();
                     _log.Log(LogLevel.Info, "Preferences.json not found; default created.");
                 }
 
@@ -112,27 +104,22 @@ public class PreferencesIo
     /// <summary>
     ///     This writes the file to disk using given preferences model.
     /// </summary>
-    public async Task WritePreferences(PreferencesModel Model)
+    public async Task WritePreferences(PreferencesModel _model)
     {
         try
         {
-            using (var serializationLock = new SerializationLock(_log))
+            using (new SerializationLock(_log))
             {
-                //Get/Create file.
-                _log.Log(LogLevel.Info, "Writing preferences model to disk.");
-                var _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_appState.RootDirectory);
-                _log.Log(LogLevel.Info, $"Saving to folder {_preferencesFolder.Path}");
-
-                var _preferencesFile =
-                    await _preferencesFolder.CreateFileAsync("Preferences.json",
-                        CreationCollisionOption.ReplaceExisting);
                 //Write file
-                _log.Log(LogLevel.Info, $"Saving Preferences to file {_preferencesFile.Path}");
-                var _newPreferences = JsonSerializer.Serialize(Model,
-                    new JsonSerializerOptions { WriteIndented = true });
+                _log.Log(LogLevel.Info, $"Saving Preferences to file {_preferencesFilePath}");
+                var _newPreferences = JsonSerializer.Serialize(_model, new JsonSerializerOptions { WriteIndented = true });
 
-                //Log stuff
-                _log.Log(LogLevel.Info, $"Serialised preferences as {_newPreferences}");
+                StorageFolder _localFolder = await StorageFolder.GetFolderFromPathAsync(_appState.RootDirectory);
+                StorageFile _preferencesFile = await _localFolder.CreateFileAsync("Preferences.json",
+                    CreationCollisionOption.OpenIfExists); 
+
+                //Log and write.
+                _log.Log(LogLevel.Debug, $"Serialised preferences as {_newPreferences}");
                 await FileIO.WriteTextAsync(_preferencesFile, _newPreferences); //Writes file to disk
                 _log.Log(LogLevel.Info, "Preferences write complete.");
             }
