@@ -54,10 +54,14 @@ public class FileOpenService
         using (var serializationLock = new SerializationLock(_logger))
         {
             // Check if current StoryModel has been changed, if so, save and write the model.
+            // Fix for issue #1153: Only save if FilePath is not null (ResetModel creates document with null path)
             if (_appState.CurrentDocument?.Model?.Changed ?? false)
             {
-                _editFlushService.FlushCurrentEdits();
-                await _outlineService.WriteModel(_appState.CurrentDocument.Model, _appState.CurrentDocument.FilePath);
+                if (!string.IsNullOrEmpty(_appState.CurrentDocument.FilePath))
+                {
+                    _editFlushService.FlushCurrentEdits();
+                    await _outlineService.WriteModel(_appState.CurrentDocument.Model, _appState.CurrentDocument.FilePath);
+                }
             }
 
             _logger.Log(LogLevel.Info, "Executing OpenFile command");

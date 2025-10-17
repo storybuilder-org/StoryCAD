@@ -377,15 +377,20 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
                 Model.Premise = Premise ?? "";
                 if (_syncPremise)
                 {
-                    if (StoryElement.GetByGuid(StoryProblem) is ProblemModel sync_problem)
+                    // Fix for issue #1154: Check if GUID exists in model before attempting sync
+                    // This prevents errors during CloseFile when model has been reset
+                    if (StoryProblem != Guid.Empty && _storyModel?.StoryElements?.StoryElementGuids != null)
                     {
-                        sync_problem.Premise = Premise;
-                    }
-                    else
-                    {
-                        _logger.Log(LogLevel.Warn,
-                            $"Premise sync skipped – GUID {StoryProblem} is not a ProblemModel.");
-                        StoryProblem = Guid.Empty;
+                        if (StoryElement.GetByGuid(StoryProblem) is ProblemModel sync_problem)
+                        {
+                            sync_problem.Premise = Premise;
+                        }
+                        else
+                        {
+                            _logger.Log(LogLevel.Warn,
+                                $"Premise sync skipped – GUID {StoryProblem} is not a ProblemModel.");
+                            StoryProblem = Guid.Empty;
+                        }
                     }
                 }
 

@@ -194,4 +194,33 @@ public class FileOpenServiceTests
         // Assert
         Assert.AreEqual(initialCount, _preferences.Model.RecentFiles.Count);
     }
+
+    [TestMethod]
+    public async Task OpenFile_ReopenAfterResetModel_DoesNotCrash()
+    {
+        // Regression test for issue #1153
+        // When ResetModel() is called (e.g., during CloseFile()), it creates a
+        // StoryDocument with FilePath = null. If the model has Changed = true,
+        // OpenFile() would attempt to save using the null path, causing a crash.
+        //
+        // This test verifies that OpenFile() handles this scenario gracefully
+        // by checking for null FilePath before attempting to save.
+
+        // Arrange
+        // Simulate the state after ResetModel() is called:
+        // - CurrentDocument exists (not null)
+        // - FilePath is null (no file path set)
+        // - Model.Changed could be true (simulate unsaved changes)
+        var emptyModel = new StoryModel();
+        emptyModel.Changed = true; // Simulate unsaved changes
+        _appState.CurrentDocument = new StoryDocument(emptyModel, null);
+
+        // Act & Assert
+        // This should NOT crash with ArgumentNullException
+        // In headless mode, file picker returns null and method returns early
+        await _fileOpenService.OpenFile(@"C:\test\somefile.stbx");
+
+        // If we get here without exception, the test passes
+        Assert.IsTrue(true);
+    }
 }

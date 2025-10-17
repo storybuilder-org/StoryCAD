@@ -29,6 +29,13 @@ public class StoryIO
     /// </summary>
     public async Task WriteStory(string output_path, StoryModel model)
     {
+        // Fix for issue #1153: Guard against null path
+        if (string.IsNullOrEmpty(output_path))
+        {
+            _logService.Log(LogLevel.Warn, "WriteStory called with null or empty path - skipping save");
+            return;
+        }
+
         var parent = Path.GetDirectoryName(output_path);
         Directory.CreateDirectory(parent!);
 

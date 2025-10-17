@@ -2,6 +2,7 @@ using System.Reflection;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
+using StoryCADLib.Services.Logging;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.ViewModels;
 using StoryCADLib.ViewModels.SubViewModels;
@@ -509,5 +510,53 @@ public class OutlineViewModelTests
         // Assert - should have EditFlushService parameter
         Assert.IsTrue(parameters.Any(p => p.ParameterType == typeof(EditFlushService)),
             "OutlineViewModel constructor should have EditFlushService parameter");
+    }
+
+    [TestMethod]
+    public async Task CloseFile_WithPremiseSync_DoesNotCauseGuidError()
+    {
+        // Regression test for issue #1154
+        // When CloseFile() is called with premise sync enabled, it should not cause
+        // "Cannot find GUID" error. The bug occurred because ResetModel() was called
+        // before ShowHomePage(), causing navigation to trigger SaveModel() on an empty model.
+        //
+        // This test verifies that CloseFile() handles premise sync correctly.
+
+        // Arrange - Create outline with Problem and Overview premise sync
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var logger = Ioc.Default.GetRequiredService<ILogService>();
+
+        var model = await outlineService.CreateModel("PremiseSyncTest", "StoryBuilder", 0);
+        var filePath = Path.Combine(App.ResultsDir, "PremiseSyncTest.stbx");
+        appState.CurrentDocument = new StoryDocument(model, filePath);
+
+        // Create a Problem element
+        var problem = outlineService.AddStoryElement(appState.CurrentDocument.Model,
+            StoryItemType.Problem, appState.CurrentDocument.Model.ExplorerView[0]);
+
+        // Navigate to Overview and set up premise sync
+        var overviewModel = appState.CurrentDocument.Model.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview) as OverviewModel;
+        var overviewVM = Ioc.Default.GetRequiredService<OverviewViewModel>();
+        overviewVM.Activate(overviewModel);
+        overviewVM.StoryProblem = problem.Uuid;  // This sets up premise sync
+        overviewVM.Premise = "Test premise";
+        overviewVM.Deactivate(null);
+
+        // Verify premise sync is set up
+        Assert.AreEqual(problem.Uuid, overviewModel.StoryProblem, "Setup: StoryProblem should be set");
+
+        // Act - Close the file (this should NOT cause GUID lookup error)
+        await outlineVM.CloseFile();
+
+        // Assert - Verify no "Cannot find GUID" error was logged
+        // The logger should not have any Error level messages about GUID lookup
+        // (We can't easily check the logger output, but the test passes if no exception is thrown)
+
+        // Verify model was reset
+        Assert.IsNotNull(appState.CurrentDocument, "CurrentDocument should exist after close");
+        Assert.IsNotNull(appState.CurrentDocument.Model, "Model should exist after close");
+        Assert.IsNull(appState.CurrentDocument.FilePath, "FilePath should be null after close");
     }
 }

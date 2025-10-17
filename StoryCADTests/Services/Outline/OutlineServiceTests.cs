@@ -184,8 +184,12 @@ public class OutlineServiceTests
     ///     An empty string is used here as an example of an invalid file path.
     /// </summary>
     [TestMethod]
-    public async Task WriteModel_InvalidPath_ThrowsException()
+    public async Task WriteModel_InvalidPath_HandlesGracefully()
     {
+        // Fix for issue #1153: WriteModel now handles null/empty paths gracefully
+        // instead of throwing an exception. WriteStory returns early when path is null,
+        // and WriteModel completes successfully (returns true).
+
         // Arrange
         var outlineName = "Edge Case Outline";
         var author = "Test Author";
@@ -194,11 +198,11 @@ public class OutlineServiceTests
         // Use an invalid file path (empty string)
         var invalidPath = string.Empty;
 
-        // Act & Assert
-        await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
-        {
-            await _outlineService.WriteModel(model, invalidPath);
-        });
+        // Act & Assert - Should complete without throwing
+        var result = await _outlineService.WriteModel(model, invalidPath);
+
+        // WriteModel returns true (completes successfully), even though WriteStory skipped the actual write
+        Assert.IsTrue(result);
     }
 
     /// <summary>

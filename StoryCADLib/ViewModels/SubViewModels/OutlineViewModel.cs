@@ -514,13 +514,18 @@ public class OutlineViewModel : ObservableRecipient
                 }
             }
 
+            // Fix for issue #1154: Navigate to home page BEFORE resetting model
+            // This ensures navigation lifecycle (which triggers SaveModel) occurs while model still has valid data
+            shellVm.ShowHomePage();
+
+            // Clear the current saveable to prevent SaveModel from being called after model is reset
+            appState.CurrentSaveable = null;
+
             shellVm.ResetModel();
             shellVm.RightTappedNode = null; //Null right tapped node to prevent possible issues.
             window.UpdateWindowTitle();
             _backupService.StopTimedBackup();
         }
-
-        shellVm.ShowHomePage();
         Messenger.Send(
             new StatusChangedMessage(new StatusMessage("Close story command completed", LogLevel.Info, true)));
     }
