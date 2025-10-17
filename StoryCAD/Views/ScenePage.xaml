@@ -11,7 +11,8 @@
 
     <Page.Resources>
 
-        <TeachingTip x:Name="ViewpointCharacterTip"
+        <TeachingTip x:Key="ViewpointCharacterTip"
+                     x:Name="ViewpointCharacterTip"
                      Title="Reminder:"
                      Subtitle="Pick a scene viewpoint character consistent with your story POV:"
                      PreferredPlacement="Auto"
