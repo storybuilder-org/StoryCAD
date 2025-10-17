@@ -342,13 +342,13 @@
                         <TextBox Header="Other Trait:" Grid.Column="0" MinWidth="0" Margin="0,0,12,0"
                                  Text="{x:Bind CharVm.NewTrait, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  HorizontalAlignment="Stretch" />
-                        <Button Grid.Column="2" FontFamily="Segoe MDL2 Assets" Content="&#xE710;" Margin="0,0,12,0"
+                        <Button Grid.Column="2" FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE710;" Margin="0,0,12,0"
                                 Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}">
                             <ToolTipService.ToolTip>
                                 <ToolTip Content="Add Trait" />
                             </ToolTipService.ToolTip>
                         </Button>
-                        <Button Grid.Column="4" FontFamily="Segoe MDL2 Assets" Content="&#xE738;"
+                        <Button Grid.Column="4" FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE738;"
                                 Command="{x:Bind CharVm.RemoveTraitCommand, Mode=OneWay}">
                             <ToolTipService.ToolTip>
                                 <ToolTip Content="Remove Trait" />

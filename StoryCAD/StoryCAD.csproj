@@ -46,6 +46,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Uno.Fonts.Fluent" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
     </ItemGroup>
 

@@ -586,7 +586,7 @@
             <Button Grid.Column="4" Background="Transparent" Command="{x:Bind ShellVm.CreateBackupCommand}"
                     BorderBrush="Transparent" HorizontalAlignment="Right">
                 <Button.Content>
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE777;" Height="36"
+                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE777;" Height="36"
                               ToolTipService.ToolTip="This icon is green when you or StoryCAD has recently made a backup of your work.">
                         <FontIcon.Foreground>
                             <SolidColorBrush Color="{x:Bind ShellVm.BackupStatusColor, Mode=TwoWay}" />

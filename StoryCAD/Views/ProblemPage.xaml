@@ -186,7 +186,7 @@
 
                             <AppBarButton HorizontalAlignment="Right" Label="Assign">
                                 <AppBarButton.Content>
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71B;" />
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE71B;" />
                                 </AppBarButton.Content>
                                 <AppBarButton.Flyout>
                                     <Flyout>
@@ -223,11 +223,11 @@
                                           Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}" />
                             <AppBarButton Label="Move Down" Click="{x:Bind ProblemVm.MoveDown}"
                                           Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}">
-                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74B;" />
+                                <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74B;" />
                             </AppBarButton>
                             <AppBarButton Label="Save Beatsheet to file" Click="{x:Bind ProblemVm.SaveBeatSheet}"
                                           Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}">
-                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;" />
+                                <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" />
                             </AppBarButton>
                         </CommandBar>
                     </Grid>

@@ -55,6 +55,7 @@
         <PackageReference Include="NRTFTree-Async" />
         <PackageReference Include="Octokit" />
         <PackageReference Include="SkiaSharp" />
+        <PackageReference Include="Uno.Fonts.Fluent" />
     </ItemGroup>
 
     <ItemGroup>
