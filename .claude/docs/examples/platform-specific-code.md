@@ -423,6 +423,125 @@ public partial class FileWatcherService
 
 ---
 
+## Example 10: Multi-Platform Build Matrix
+
+### Understanding What Gets Built Where
+
+This example demonstrates how platform-specific code behaves in different build scenarios.
+
+### Scenario: Cross-Platform Feature with Platform Enhancements
+
+```csharp
+// FilePickerService.cs (shared)
+public partial class FilePickerService
+{
+    // Shared logic
+    public partial Task<string> PickFileAsync();
+
+    public async Task<List<string>> PickMultipleFilesAsync()
+    {
+        // Shared implementation that calls platform-specific code
+        var files = new List<string>();
+        var firstFile = await PickFileAsync();
+        if (firstFile != null)
+        {
+            files.Add(firstFile);
+        }
+        return files;
+    }
+}
+
+// FilePickerService.WinAppSDK.cs (Windows-specific)
+#if HAS_UNO_WINUI
+using Windows.Storage.Pickers;
+
+public partial class FilePickerService
+{
+    public partial async Task<string> PickFileAsync()
+    {
+        var picker = new FileOpenPicker();
+        picker.FileTypeFilter.Add(".stbx");
+
+        // Windows-specific initialization
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+        var file = await picker.PickSingleFileAsync();
+        return file?.Path;
+    }
+}
+#endif
+
+// FilePickerService.desktop.cs (macOS-specific)
+#if __MACOS__
+using AppKit;
+
+public partial class FilePickerService
+{
+    public partial async Task<string> PickFileAsync()
+    {
+        await Task.CompletedTask;
+
+        var panel = NSOpenPanel.OpenPanel;
+        panel.AllowedFileTypes = new[] { "stbx" };
+        panel.CanChooseFiles = true;
+
+        // Mac-specific native dialog
+        if (panel.RunModal() == 1)
+        {
+            return panel.Url?.Path;
+        }
+
+        return null;
+    }
+}
+#endif
+```
+
+### Build Matrix: What Gets Included
+
+| Build Platform | Target Framework | Files Compiled | Result |
+|----------------|------------------|----------------|--------|
+| **Windows** | net9.0-windows10.0.22621 | FilePickerService.cs<br>FilePickerService.WinAppSDK.cs | Windows-optimized binary with WinAppSDK picker |
+| **Windows** | net9.0-desktop | FilePickerService.cs<br>~~FilePickerService.desktop.cs~~ ❌ | Runs on Mac but WITHOUT native Mac picker* |
+| **macOS** | net9.0-desktop | FilePickerService.cs<br>FilePickerService.desktop.cs | Mac-optimized binary with AppKit picker |
+
+*The `#if __MACOS__` symbol is NOT defined when building on Windows, so FilePickerService.desktop.cs code is excluded even though you're building the desktop target.
+
+### Testing Matrix
+
+| Built On | Tested On | File Picker Behavior |
+|----------|-----------|---------------------|
+| Windows (WinAppSDK) | Windows | ✅ Native Windows picker |
+| Windows (Desktop) | Windows | ✅ Native Windows picker |
+| Windows (Desktop) | macOS | ⚠️ Missing Mac picker (fallback behavior) |
+| macOS (Desktop) | macOS | ✅ Native Mac picker |
+| macOS (Desktop) | Windows | ⚠️ Missing Windows picker (fallback behavior) |
+
+### Production Distribution Strategy
+
+**Option 1: Cross-Platform Binary (Limited Features)**
+- Build on Windows for desktop target
+- Ships same binary for Windows and Mac
+- Mac users get fallback file picker (not native)
+
+**Option 2: Platform-Optimized Binaries (Recommended)**
+- Build on Windows → Windows distribution
+- Build on Mac → macOS distribution
+- Each platform gets native file picker
+- Best user experience
+
+### Key Takeaway
+
+The platform you BUILD on determines which platform-specific code is COMPILED, not which platforms the binary CAN run on.
+
+```
+Desktop target runs on: Windows, Mac, Linux
+But includes platform code from: Build platform only
+```
+
+---
+
 ## Quick Reference: Preprocessor Symbols
 
 | Symbol | Platform | Use Case |

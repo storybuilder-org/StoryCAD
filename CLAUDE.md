@@ -13,6 +13,96 @@ This file provides project-specific guidance for StoryCAD development.
 
 ## Platform Development (UNO)
 
+### Multi-Targeting Strategy
+
+**Windows builds both targets**:
+- `net9.0-windows10.0.22621` (WinAppSDK head) - Windows 10/11, Windows Store
+- `net9.0-desktop` (Desktop head) - Windows 7/8/10/11, macOS, Linux
+
+**macOS builds desktop only**:
+- `net9.0-desktop` (Desktop head) - macOS, also runs on Windows/Linux
+
+**Critical Concept - Platform-Specific Code**:
+
+When using **cross-platform APIs only** (standard .NET, UNO controls):
+- ✅ Build on either platform → Universal binary runs everywhere
+
+When using **platform-specific APIs** (AppKit, Win32, etc.):
+- ⚠️ Build on Windows → Excludes Mac-specific code (can't compile AppKit)
+- ⚠️ Build on Mac → Excludes Windows-specific code (can't compile Win32)
+- 📦 Need platform-specific builds for production distribution
+
+**Example**:
+```csharp
+#if __MACOS__
+using AppKit;  // This code ONLY compiles on Mac
+public void SetupMacMenu() { }
+#endif
+```
+
+See `/devdocs/platform_targeting_guidelines.md` for complete workflows and decision trees.
+
+### Cross-Machine Development Workflow
+
+**Primary Strategy**: Develop on Windows (VS2022), test on Mac (Rider)
+
+1. **Code on Windows**:
+   - Write code in VS2022 (familiar environment)
+   - Test on Windows (WinAppSDK head)
+   - Commit and push
+
+2. **Test on Mac**:
+   ```bash
+   git pull
+   dotnet run -f net9.0-desktop  # Quick verification
+   ```
+
+3. **Debug on Mac** (if needed):
+   - Open in Rider on Mac Mini
+   - Debug Mac-specific issues
+   - Commit fixes and pull back to Windows
+
+**Alternative Workflows**:
+- Network share (rapid iteration, must copy to local for build)
+- Separate build folders (simultaneous debugging)
+
+See `devdocs/platform_targeting_guidelines.md` for detailed workflow comparison.
+
+### When to Build on Which Platform
+
+Use this decision tree to determine where to develop:
+
+| Issue Type | Build Platform | Test Platform | Rationale |
+|------------|----------------|---------------|-----------|
+| UNO Platform bugs | Windows | Both | Cross-platform testing required |
+| Pure XAML/UI | Windows | Both | Faster in familiar IDE |
+| Business logic | Windows | Both | No platform-specific code |
+| Mac-specific features | Mac | Mac only | Requires AppKit/Mac APIs |
+| Windows-specific features | Windows | Windows only | Requires Win32/WinAppSDK APIs |
+| Performance optimization | Both | Both | Platform differences matter |
+
+**Key Points**:
+- ~90% of StoryCAD code is shared/cross-platform → Develop on Windows
+- Mac-specific features (AppKit menus, sandboxing) → Must build on Mac
+- Always test on both platforms before merging to UNOTestBranch
+
+### Platform-Specific Testing
+
+**Quick Manual Test (Mac)**:
+```bash
+# No IDE needed:
+dotnet run -f net9.0-desktop
+```
+
+**Debugging (Mac)**:
+```bash
+# Must build on Mac, use Rider:
+rider ~/Documents/dev/src/StoryCAD/StoryCAD.sln
+# Set breakpoints and debug normally
+```
+
+**Important**: Cannot remote debug from Windows to Mac. Use logging for remote troubleshooting or debug locally on Mac.
+
 ### Working with UNO Platform
 When developing on the UNOTestBranch:
 - **Shared Code First**: Write platform-agnostic code whenever possible
@@ -89,8 +179,9 @@ Essential architecture and development documentation accessible to all sessions:
 - **[patterns.md](/home/tcox/.claude/memory/patterns.md)** - 9 architectural patterns (MVVM, ISaveable, SerializationLock, OperationResult, Stateless Services, IMessenger, Platform-Specific Code, StoryDocument, DI)
 - **[architecture.md](/home/tcox/.claude/memory/architecture.md)** - Critical dated decisions (2025-10-12), circular dependencies, navigation lifecycle, StoryDocument never-null rule, theme management
 - **[gotchas.md](/home/tcox/.claude/memory/gotchas.md)** - Common pitfalls, headless mode behavior, platform-specific gotchas, ISaveable registration, navigation timing
+- **[cross-platform.md](/home/tcox/.claude/memory/cross-platform.md)** - Cross-platform development workflows, multi-targeting, when to build where
 - **[testing.md](/home/tcox/.claude/memory/testing.md)** - Test patterns, naming conventions (MethodName_Scenario_ExpectedResult), TDD workflow, test data creation
-- **[build-commands.md](/home/tcox/.claude/memory/build-commands.md)** - WSL/Windows build and test commands, TDD red-green-refactor cycle
+- **[build-commands.md](/home/tcox/.claude/memory/build-commands.md)** - WSL/Windows/Mac build and test commands, TDD red-green-refactor cycle, cross-machine workflow
 - **[dependencies.md](/home/tcox/.claude/memory/dependencies.md)** - UNO Platform 6.2.36, MVVM Toolkit 8.4.0, Semantic Kernel 1.41.0 usage patterns
 
 **Usage**: All memory files cross-reference each other. Start with patterns.md for quick lookup, then drill into specific topics.

@@ -44,6 +44,90 @@ UNO Platform enables StoryCAD to run on multiple operating systems from a single
 
 ---
 
+## Multi-Targeting vs Platform-Specific Builds
+
+### Understanding the Difference
+
+**Multi-Targeting** (what it means):
+- Windows can build for BOTH `net9.0-desktop` and `net9.0-windows10.0.22621` targets
+- macOS can only build for `net9.0-desktop` target
+
+**Platform-Specific Builds** (what gets included):
+- Determines which platform-specific code is compiled
+- Independent of which targets you're building for
+
+### The Critical Concept
+
+**If you only use cross-platform APIs**:
+```
+Windows build → Desktop binary runs on Windows/Mac/Linux ✅
+Mac build → Desktop binary runs on Windows/Mac/Linux ✅
+One universal binary
+```
+
+**If you use platform-specific APIs** (AppKit, Win32):
+```
+Windows build → Desktop binary:
+  - Includes Windows-specific code ✅
+  - EXCLUDES Mac-specific code ❌ (can't compile AppKit on Windows)
+  - Runs on Mac but missing Mac features
+
+Mac build → Desktop binary:
+  - Includes Mac-specific code ✅
+  - EXCLUDES Windows-specific code ❌ (can't compile Win32 on Mac)
+  - Runs on Windows but missing Windows features
+
+Two platform-specific binaries needed for full features
+```
+
+### Real Example from StoryCAD
+
+```csharp
+// Windowing.desktop.cs
+#if __MACOS__
+using AppKit;  // macOS-only namespace
+
+public partial void InitializeWindow()
+{
+    var menu = new NSMenu();
+    NSApplication.SharedApplication.MainMenu = menu;
+}
+#endif
+```
+
+**What happens**:
+
+| Build Platform | `#if __MACOS__` symbol | Result |
+|----------------|------------------------|--------|
+| Windows | ❌ Not defined | AppKit code SKIPPED, binary runs on Mac without menu |
+| macOS | ✅ Defined | AppKit code INCLUDED, binary has full Mac features |
+
+### Distribution Implications
+
+**For development/testing**:
+- Build on Windows (faster, familiar tools)
+- Test on both platforms
+- Cross-platform code works everywhere
+
+**For production releases**:
+- Build on Windows → Windows distribution
+- Build on Mac → macOS distribution
+- Each platform gets optimized binary with platform-specific features
+
+### Quick Decision: Where to Build
+
+| Scenario | Build Where | Why |
+|----------|-------------|-----|
+| Pure XAML UI fix | Either platform | Cross-platform code only |
+| Added Mac menu (AppKit) | Must build on Mac | Uses Mac-specific APIs |
+| Added Windows registry code | Must build on Windows | Uses Windows-specific APIs |
+| Both platform features | Both platforms | Need two optimized binaries |
+| Testing cross-platform code | Windows (faster) | Works everywhere |
+
+See `devdocs/platform_targeting_guidelines.md` for comprehensive workflow guidance.
+
+---
+
 ## Platform-Specific Code Patterns
 
 ### 1. Conditional Compilation (Recommended)

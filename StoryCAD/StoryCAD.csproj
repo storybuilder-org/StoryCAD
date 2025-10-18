@@ -14,20 +14,22 @@
         <ApplicationPublisher>StoryBuilder Foundation</ApplicationPublisher>
         <!-- Package Description -->
         <Description>StoryCAD powered by Uno Platform.</Description>
+    </PropertyGroup>
 
-        <!-- On Windows, build both WinAppSDK and Skia Desktop -->
-        <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
-            <TargetFrameworks>
-                net9.0-desktop;
-                net9.0-windows10.0.22621
-            </TargetFrameworks>
-        </PropertyGroup>
+    <!-- On Windows, build both WinAppSDK and Skia Desktop -->
+    <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
+        <TargetFrameworks>
+            net9.0-desktop;
+            net9.0-windows10.0.22621
+        </TargetFrameworks>
+    </PropertyGroup>
 
-        <!-- On macOS/Linux, build only Skia Desktop -->
-        <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
-            <TargetFramework>net9.0-desktop</TargetFramework>
-        </PropertyGroup>
+    <!-- On macOS/Linux, build only Skia Desktop -->
+    <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
+        <TargetFrameworks>net9.0-desktop</TargetFrameworks>
+    </PropertyGroup>
 
+    <PropertyGroup>
         <!-- MSIX Configuration for Windows -->
         <UseWinUI Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</UseWinUI>
         <EnableMsixTooling Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</EnableMsixTooling>
