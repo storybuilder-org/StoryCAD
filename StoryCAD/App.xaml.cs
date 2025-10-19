@@ -11,7 +11,6 @@ using StoryCADLib.Services.Logging;
 using StoryCADLib.Services.Navigation;
 using StoryCAD.Views;
 using Uno.Extensions;
-using WinRT.Interop;
 using UnhandledExceptionEventArgs = Microsoft.UI.Xaml.UnhandledExceptionEventArgs;
 
 namespace StoryCAD;
@@ -233,21 +232,27 @@ public partial class App : Application
         }
 
         var window = Ioc.Default.GetRequiredService<Windowing>();
-        // Preserve both the Window and its Handle for future use
+// Preserve both the Window and its Handle for future use
         window.MainWindow = MainWindow;
 
-        //Get the Window's HWND
-        window.WindowHandle = WindowNative.GetWindowHandle(window.MainWindow);
+// Size first via AppWindow (safe before HWND exists)
+        window.SetMinimumSize(MainWindow);                // Prevent manual resize below minimum
+        window.SetWindowSize(MainWindow, 1200, 800);      // Initial size via AppWindow
 
-        // Use new Windowing service to set window size and position
-        window.SetMinimumSize(MainWindow); // Prevent manual resize below minimum
-        window.CenterOnScreen(MainWindow, 1200, 800);
+// Realize the native window so a real HWND is created by Uno
+        MainWindow.Activate();
+
+// Get HWND (valid after Activate; OK if sentinel on desktop—Windowing guards it)
+        IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(MainWindow);
+
+// Store it for later interop and Win32 sizing/centering
+        window.WindowHandle = hwnd;
+
+// Now Win32 centering works on a valid HWND
+        window.CenterOnScreen(MainWindow);
 
         _log.Log(LogLevel.Info, "StoryCAD App loaded and launched");
 
-
-        // Ensure the current window is active
-        MainWindow.Activate();
     }
 
     /// <summary>

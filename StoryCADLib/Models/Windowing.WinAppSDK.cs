@@ -46,25 +46,20 @@ public partial class Windowing
         appWindow.Resize(new SizeInt32(w, h));
     }
 
-    public void CenterOnScreen(Window window, int baseWidthDip, int baseHeightDip)
+    public void CenterOnScreen(Window window)
     {
         var appWindow = GetAppWindow(window);
         var wa = DisplayArea.GetFromWindowId(appWindow.Id, DisplayAreaFallback.Nearest).WorkArea;
 
-        var s = GetDpiScale(window);
-        var w = (int)Math.Round(baseWidthDip * s);
-        var h = (int)Math.Round(baseHeightDip * s);
+        // Get current window size
+        var currentSize = appWindow.Size;
 
-        var minW = (int)Math.Round(1000 * s);
-        var minH = (int)Math.Round(700 * s);
+        // Calculate center position
+        var x = wa.X + (wa.Width - currentSize.Width) / 2;
+        var y = wa.Y + (wa.Height - currentSize.Height) / 2;
 
-        w = Math.Clamp(w, minW, wa.Width);
-        h = Math.Clamp(h, minH, wa.Height);
-
-        var x = wa.X + (wa.Width - w) / 2;
-        var y = wa.Y + (wa.Height - h) / 2;
-
-        appWindow.MoveAndResize(new RectInt32(x, y, w, h));
+        // Only move, don't resize (SRP: Single Responsibility Principle)
+        appWindow.Move(new PointInt32(x, y));
     }
 
     public void Maximize(Window window)
