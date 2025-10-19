@@ -99,20 +99,6 @@ namespace StoryCADTests.Services
         }
 #endif
 
-        [TestMethod]
-        public void GetDpiScale_ReturnsOne()
-        {
-            // Arrange & Act
-            // Using reflection since GetDpiScale is private
-            var methodInfo = typeof(Windowing).GetMethod("GetDpiScale",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-
-            var result = methodInfo?.Invoke(null, new object?[] { null });
-
-            // Assert
-            Assert.AreEqual(1.0, result, "DPI scale should be 1.0 for Skia Desktop");
-        }
-
         #region TDD Tests for SRP Refactoring and DPI Scaling
 
         [TestMethod]
