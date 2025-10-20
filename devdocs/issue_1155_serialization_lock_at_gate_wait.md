@@ -62,6 +62,29 @@ OverviewViewModel.OnPropertyChanged() Line 311
 - **Problem**: Synchronous lock during app startup
 - **Async Operations**: `StorageFile.GetFileFromPathAsync()`, `FileIO.ReadTextAsync()`
 - **Impact**: MEDIUM - Can cause startup hangs
+- **Note**: Jake's commit 4c0360da removed AutoSaveService and BackupService dependencies from PreferencesIO constructor to avoid circular dependencies
+
+#### 4. AutoSaveService.AutoSaveProjectAsync() - TIMER-BASED DEADLOCK RISK
+- **Location**: Line 114
+- **Problem**: Synchronous lock in async method, runs on timer
+- **Async Operations**: `_windowing.GlobalDispatcher.EnqueueAsync()`, `_outlineService.WriteModel()`
+- **Impact**: HIGH - Can deadlock when auto-save triggers while other operations hold locks
+- **Timer Interval**: Configurable (typically every few minutes)
+
+#### 5. BackupService.BackupProject() - TIMER-BASED DEADLOCK RISK
+- **Location**: Line 87
+- **Problem**: Synchronous lock in async method, runs on timer
+- **Async Operations**: `rootFolder.CreateFolderAsync()`, `projectFile.CopyAsync()`, `tempFolder.DeleteAsync()`
+- **Impact**: HIGH - Can deadlock when backup triggers during file operations
+- **Timer Interval**: Configurable (typically every 10-30 minutes)
+
+### Cascading Deadlock Scenario
+When multiple timer-based services use synchronous locks:
+1. User opens a file → FileOpenService acquires synchronous lock
+2. AutoSave timer fires → Tries to acquire lock, blocks
+3. BackupService timer fires → Also tries to acquire lock, blocks
+4. UI thread is blocked waiting for file picker
+5. **Result**: Complete application freeze requiring force-quit
 
 ### Other Synchronous Lock Usage in OutlineService
 The following methods use synchronous locks but are lower risk as they don't contain async operations:
@@ -157,6 +180,58 @@ public async Task<PreferencesModel> ReadPreferencesAsync()
     {
         // Error handling
     }
+}
+```
+
+**4. AutoSaveService.AutoSaveProjectAsync()**
+Convert to async lock pattern:
+```csharp
+private async Task AutoSaveProjectAsync()
+{
+    // ... validation checks ...
+
+    await SerializationLock.RunExclusiveAsync(async ct =>
+    {
+        // flush UI edits on the UI thread
+        await _windowing.GlobalDispatcher.EnqueueAsync(() =>
+        {
+            _editFlushService.FlushCurrentEdits();
+        });
+
+        // perform the file write
+        await _outlineService.WriteModel(
+            _appState.CurrentDocument.Model,
+            _appState.CurrentDocument.FilePath);
+
+        // ... update UI ...
+    }, CancellationToken.None, _logger);
+}
+```
+
+**5. BackupService.BackupProject()**
+Convert to async lock pattern:
+```csharp
+public async Task BackupProject(string Filename = null, string FilePath = null)
+{
+    // ... setup code ...
+
+    await SerializationLock.RunExclusiveAsync(async ct =>
+    {
+        var tempFolder = await rootFolder.CreateFolderAsync(
+            "Temp", CreationCollisionOption.ReplaceExisting);
+
+        var projectFile = await StorageFile.GetFileFromPathAsync(
+            _appState.CurrentDocument!.FilePath);
+        await projectFile.CopyAsync(tempFolder, projectFile.Name,
+            NameCollisionOption.ReplaceExisting);
+
+        var zipFilePath = Path.Combine(FilePath, Filename) + ".zip";
+        ZipFile.CreateFromDirectory(tempFolder.Path, zipFilePath);
+
+        await tempFolder.DeleteAsync();
+    }, CancellationToken.None, _logService);
+
+    // ... update UI ...
 }
 ```
 
@@ -256,10 +331,11 @@ using (new SerializationLock(_logger))  // WRONG!
    - Log warnings when locks are held >100ms
    - Track reentrant lock usage
 
-## Related Issues
+## Related Issues and Commits
 - #1116 - UI goes off screen (UNO platform issues)
 - #1139 - UNO Platform API compatibility warnings
 - #1153 - Fixed null FilePath check in FileOpenService
+- Commit 4c0360da - Jake's partial fix removing AutoSaveService and BackupService from PreferencesIO constructor
 
 ## References
 - [Async/Await Best Practices](https://docs.microsoft.com/en-us/archive/msdn-magazine/2013/march/async-await-best-practices-in-asynchronous-programming)
@@ -268,6 +344,23 @@ using (new SerializationLock(_logger))  // WRONG!
 
 ## Conclusion
 
-This is a critical issue affecting basic file operations. The fix is straightforward - convert methods containing async operations to use the async lock pattern (`RunExclusiveAsync`). Priority should be given to FileOpenService.OpenFile() as it directly causes the reported hang.
+This is a critical and widespread issue affecting multiple core services:
+- **FileOpenService** - Causes hangs when opening files
+- **AutoSaveService** - Can cause periodic freezes every few minutes
+- **BackupService** - Can cause periodic freezes during backups
+- **PreferencesIO** - Can cause startup hangs
+- **OutlineService** - Can cause UI freezes during updates
 
-The broader lesson is that mixing synchronous and asynchronous patterns in lock acquisition is dangerous, especially on UI threads. Clear guidelines and patterns should be established for the team to prevent similar issues in the future.
+The problem is systemic: synchronous lock acquisition (`new SerializationLock()`) is being used in async methods throughout the codebase. When these locks are acquired on the UI thread or when multiple timer-based services try to acquire locks simultaneously, cascading deadlocks occur.
+
+The fix is straightforward but must be applied comprehensively:
+1. Convert ALL methods containing async operations to use `RunExclusiveAsync`
+2. Priority should be given to timer-based services (AutoSave, Backup) as they can trigger at any time
+3. FileOpenService.OpenFile() needs immediate attention as it directly causes user-reported hangs
+
+Jake's commit (4c0360da) addressed part of the problem by removing circular dependencies, but the core deadlock pattern remains in these services. This explains the intermittent hangs and freezes users may experience during normal operation.
+
+Clear guidelines and patterns must be established for the team:
+- **Never use synchronous locks with async operations**
+- **Always use RunExclusiveAsync for async methods**
+- **Be especially careful with timer-based services**
