@@ -258,6 +258,109 @@ public class LogService : ILogService
         return Environment.GetEnvironmentVariable("COMPUTERNAME");
     }
 
+    /// <summary>
+    /// Gets the macOS CPU name (e.g., "Apple  M4")
+    /// </summary>
+    private string GetMacOSCpuName()
+    {
+        try
+        {
+            using var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "sysctl",
+                    Arguments = "-n machdep.cpu.brand_string",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            process.Start();
+            var output = process.StandardOutput.ReadToEnd().Trim();
+            process.WaitForExit();
+            return string.IsNullOrWhiteSpace(output) ? "Unknown" : output;
+        }
+        catch
+        {
+            return "Unknown";
+        }
+    }
+
+    /// <summary>
+    /// Gets the macOS version (e.g., "15.0.1")
+    /// </summary>
+    private string GetMacOSVersion()
+    {
+        try
+        {
+            using var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "sw_vers",
+                    Arguments = "-productVersion",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            process.Start();
+            var output = process.StandardOutput.ReadToEnd().Trim();
+            process.WaitForExit();
+            return string.IsNullOrWhiteSpace(output) ? "Unknown" : output;
+        }
+        catch
+        {
+            return "Unknown";
+        }
+    }
+
+#if WINDOWS
+    /// <summary>
+    /// Gets the Windows CPU name from registry
+    /// </summary>
+    private string GetWindowsCpuName()
+    {
+        try
+        {
+            using var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0");
+            var cpuName = key?.GetValue("ProcessorNameString")?.ToString()?.Trim();
+            return string.IsNullOrWhiteSpace(cpuName) ? "Unknown" : cpuName;
+        }
+        catch
+        {
+            return "Unknown";
+        }
+    }
+
+    /// <summary>
+    /// Gets the Windows OS version (e.g., "Windows 11 23H2")
+    /// </summary>
+    private string GetWindowsVersion()
+    {
+        try
+        {
+            using var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+            var productName = key?.GetValue("ProductName")?.ToString() ?? "Windows";
+            var displayVersion = key?.GetValue("DisplayVersion")?.ToString() ?? "";
+            var currentBuild = key?.GetValue("CurrentBuild")?.ToString() ?? "";
+
+            var version = productName;
+            if (!string.IsNullOrWhiteSpace(displayVersion))
+                version += $" {displayVersion}";
+            if (!string.IsNullOrWhiteSpace(currentBuild))
+                version += $" (Build {currentBuild})";
+
+            return version;
+        }
+        catch
+        {
+            return "Unknown";
+        }
+    }
+#endif
+
 
     /// <summary>
     ///     Compiles a small report about the users device, StoryCAD information etc.
@@ -275,11 +378,37 @@ public class LogService : ILogService
                 _ => "Unknown"
             };
 
+            // Detect platform at runtime and get platform-specific info
+            string platformInfo;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                var cpuName = GetMacOSCpuName();
+                var osVersion = GetMacOSVersion();
+                platformInfo = $"""
+                    CPU Name - {cpuName}
+                    macOS Version - {osVersion}
+                    """;
+            }
+#if WINDOWS
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var cpuName = GetWindowsCpuName();
+                var osVersion = GetWindowsVersion();
+                platformInfo = $"""
+                    CPU Name - {cpuName}
+                    Windows Version - {osVersion}
+                    """;
+            }
+#endif
+            else
+            {
+                platformInfo = "";
+            }
 
             return $"""
                     ===== SYSTEM INFO =====
-                    CPU ARCH - {RuntimeInformation.ProcessArchitecture}  
-                    OS  ARCH - {RuntimeInformation.OSArchitecture}  
+                    CPU ARCH - {RuntimeInformation.ProcessArchitecture}
+                    OS  ARCH - {RuntimeInformation.OSArchitecture}
                     App ARCH - {AppArch}
                     .NET Ver - {RuntimeInformation.OSArchitecture}
                     Startup  - {State.StartUpTimer.ElapsedMilliseconds} ms
@@ -288,6 +417,7 @@ public class LogService : ILogService
                     OS Build - {Environment.OSVersion.Version.Build}
                     Debugger Attached - {Debugger.IsAttached}
                     Core Count - {Environment.ProcessorCount}
+                    {platformInfo}
 
                     === User Prefs ===
                     Name - {Prefs.FirstName}
