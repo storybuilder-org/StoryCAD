@@ -1,4 +1,4 @@
-﻿#pragma warning disable CS8632 // Nullable annotations used without nullable context
+#pragma warning disable CS8632 // Nullable annotations used without nullable context
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using StoryCADLib.DAL;
@@ -870,12 +870,14 @@ public class OutlineService
         }
 
 
-        using (var serializationLock = new SerializationLock(_log))
-        {
-            model.Changed = changed;
-            _log.Log(LogLevel.Info, $"Model Changed status set to {changed}");
-        }
+        //using (var serializationLock = new SerializationLock(_log))
+        //{
+        //    model.Changed = changed;
+        //    _log.Log(LogLevel.Info, $"Model Changed status set to {changed}");
+        //}
+        model.Changed = changed;  // lock not needed just to set Changed
     }
+
 
     /// <summary>
     ///     Gets a StoryElement by its GUID from the StoryModel

@@ -7,6 +7,7 @@ using StoryCADLib.Services;
 using StoryCADLib.Services.Backend;
 using StoryCADLib.Services.IoC;
 using StoryCADLib.Services.Json;
+using StoryCADLib.Services.Locking;
 using StoryCADLib.Services.Logging;
 using StoryCADLib.Services.Navigation;
 using StoryCAD.Views;
@@ -234,6 +235,9 @@ public partial class App : Application
         var window = Ioc.Default.GetRequiredService<Windowing>();
 // Preserve both the Window and its Handle for future use
         window.MainWindow = MainWindow;
+
+// Configure SerializationLock to properly detect UI thread
+        SerializationLock.ConfigureUi(() => window.GlobalDispatcher?.HasThreadAccess == true);
 
 // Size first via AppWindow (safe before HWND exists)
         window.SetMinimumSize(MainWindow);                // Prevent manual resize below minimum

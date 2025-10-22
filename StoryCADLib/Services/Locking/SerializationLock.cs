@@ -12,6 +12,11 @@ public sealed class SerializationLock : IDisposable
     // One shared gate for the whole process.
     private static readonly SemaphoreSlim Gate = new(1, 1);
 
+    // NEW: simple UI-thread probe; default = false so headless/tests are safe.
+    // Wire this once at app startup: SerializationLock.ConfigureUi(() => windowing.GlobalDispatcher.HasThreadAccess);
+    private static Func<bool> _uiHasThreadAccess = static () => false;
+    public static void ConfigureUi(Func<bool> uiHasThreadAccess) => _uiHasThreadAccess = uiHasThreadAccess ?? (() => false);
+
     // AsyncLocal persists data across await statements and thread context switches, making it suitable for tracking logical data
     // through an asynchronous call stack. In this case it stores and propagates the current lock depth, which is incremented on
     // each nested lock acquisition and decremented on each release. If the depth is greater than zero, it indicates that the current
@@ -27,6 +32,13 @@ public sealed class SerializationLock : IDisposable
     {
         _caller = caller;
         _logger = logger;
+
+        if (!IsIdle && _uiHasThreadAccess())
+        {
+            _held = false;
+            _logger?.Log(LogLevel.Warn, $"{caller} skipped: UI-thread sync lock while busy.");
+            return;   // prevents deadlock
+        }
 
         // Check if we already hold the lock in this async context
         if (Depth.Value > 0)
@@ -96,6 +108,10 @@ public sealed class SerializationLock : IDisposable
 
     /// <summary>
     ///     Awaitable helper when you want the gate to cover async work end-to-end.
+    ///     TEMPORARY PRODUCTION SAFETY GUARD:
+    ///       - If the UI thread calls while the gate is not idle, return immediately to avoid hangs
+    ///         from re-entrant UI events or invalid nested calls.
+    ///       - Background callers still await the gate normally.
     /// </summary>
     public static async Task RunExclusiveAsync(
         Func<CancellationToken, Task> body,
@@ -103,6 +119,13 @@ public sealed class SerializationLock : IDisposable
         ILogService logger = null,
         [CallerMemberName] string caller = "")
     {
+        // --- TEMP GUARD: centralize Jake’s workaround inside the lock ---
+        if (!IsIdle && _uiHasThreadAccess())
+        {
+            logger?.Log(LogLevel.Warn, $"[CallerMemberName] {caller} skipped: UI-thread call while busy.");
+            return; // ignore UI-triggered work while another op holds the gate
+        }
+
         // Check if we already hold the lock
         if (Depth.Value > 0)
         {
@@ -116,7 +139,7 @@ public sealed class SerializationLock : IDisposable
 
             try
             {
-                await body(ct).ConfigureAwait(false);
+                await body(ct).ConfigureAwait(false); // (left as-is to minimize churn)
             }
             finally
             {
