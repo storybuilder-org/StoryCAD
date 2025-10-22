@@ -381,7 +381,7 @@
                 </AppBarButton>
                 <AppBarButton Width="50" IsCompact="True" Label="Reports" ToolTipService.ToolTip="Reports Menu">
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xF571;" />
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE9F9;" />
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
