@@ -308,19 +308,19 @@
                                     <ColumnDefinition Width="45" />
                                 </Grid.ColumnDefinitions>
                                 <Button ToolTipService.ToolTip="Move Left"
-                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE09A;"
+                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE76B;"
                                         Command="{x:Bind ShellVm.MoveLeftCommand, Mode=OneWay}"
                                         Margin="0,5,0,5" Grid.Row="1" />
                                 <Button ToolTipService.ToolTip="Move Right"
-                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE013;"
+                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE76C;"
                                         Command="{x:Bind ShellVm.MoveRightCommand, Mode=OneWay}"
                                         Margin="0,5,0,5" Grid.Row="1" Grid.Column="2" />
                                 <Button ToolTipService.ToolTip="Move Up"
-                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE09C;"
+                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE70E;"
                                         Command="{x:Bind ShellVm.MoveUpCommand, Mode=OneWay}"
                                         Margin="5,0,5,0" Grid.Row="0" Grid.Column="1" />
                                 <Button ToolTipService.ToolTip="Move Down"
-                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE09D;"
+                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE70D;"
                                         Command="{x:Bind ShellVm.MoveDownCommand, Mode=OneWay}"
                                         Margin="5,0,5,0" Grid.Column="1" Grid.Row="2" />
                             </Grid>
