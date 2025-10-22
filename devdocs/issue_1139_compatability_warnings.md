@@ -2,13 +2,14 @@
 
 **Issue**: [storybuilder-org/StoryCAD#1139](https://github.com/storybuilder-org/StoryCAD/issues/1139)
 **Date**: 2025-10-15
+**Last Updated**: 2025-10-22
 **Status**: Research Complete - Ready for Implementation Planning
 
 ---
 
 ## Executive Summary
 
-This document consolidates research on 11 Uno0001 warnings (10 unique APIs) preventing full cross-platform compatibility in the StoryCAD UNO Platform migration. Analysis includes:
+This document consolidates research on 8 Uno0001 warnings preventing full cross-platform compatibility in the StoryCAD UNO Platform migration. Analysis includes:
 
 - **Code location and context** for each warning
 - **Platform compatibility status** in UNO Platform
@@ -19,10 +20,10 @@ This document consolidates research on 11 Uno0001 warnings (10 unique APIs) prev
 ### Key Findings
 
 **Critical Issues (Must Fix)**:
-- **Windowing.desktop.cs** - DisplayArea APIs may block macOS window management
+- **Shell.xaml** - UIElement.ContextRequested event not implemented
+- **WebPage.xaml** - WebView/WebView2 not implemented for desktop (Skia) targets
 
 **High Priority (Feature Availability)**:
-- **WebViewModel.cs** - WebView2 feature unavailable on macOS
 - **ElementPicker.xaml & FileOpenMenu.xaml** - ListBox controls not implemented
 
 **Medium Priority (Optional Features)**:
@@ -31,227 +32,163 @@ This document consolidates research on 11 Uno0001 warnings (10 unique APIs) prev
 **Low Priority (Quality)**:
 - **FileOpenVM.cs** - StorageDeleteOption parameter ignored on macOS
 
+**Already Fixed**:
+- **Windowing.desktop.cs** - DisplayArea APIs replaced with alternative approaches
+- **WebViewModel.cs** - WebView2 runtime check already handled with conditional compilation
+
 ---
 
 ## Warning Summary Table
 
 | Priority | File | Line(s) | API | Impact | Solution | Effort |
 |----------|------|---------|-----|--------|----------|--------|
-| **CRITICAL** | Windowing.desktop.cs | 19, 37 | DisplayArea.GetFromWindowId(), .WorkArea | Core window management | Test + suppress warning OR NSScreen fallback | 30 min - 2 hrs |
-| **HIGH** | WebViewModel.cs | 262 | CoreWebView2Environment.GetAvailableBrowserVersionString() | Embedded browser feature | Platform-specific partial classes | 15 min |
+| **CRITICAL** | Shell.xaml | 451, 515 | UIElement.ContextRequested | Context menu functionality | Use alternative context menu approach | 30 min |
+| **CRITICAL** | WebPage.xaml | 43 | WebView/WebView2 | Web research feature unavailable | No solution for desktop/Skia targets | N/A |
 | **HIGH** | ElementPicker.xaml | 24 | ListBox control | Element selection dialog | Replace with ListView | 5 min |
 | **HIGH** | FileOpenMenu.xaml | 99 | ListBox control | Backup selection list | Replace with ListView | 5 min |
-| **MEDIUM** | CollaboratorService.cs | 422-442 | AppExtensionCatalog.*, Package.VerifyContentIntegrityAsync() | AI plugin system | Already handled (`#if !HAS_UNO`) | None |
+| **MEDIUM** | CollaboratorService.cs | 428-448 | AppExtensionCatalog.*, Package.VerifyContentIntegrityAsync() | AI plugin system | Already handled (`#if !HAS_UNO`) | None |
 | **LOW** | FileOpenVM.cs | 121 | StorageFile.DeleteAsync(StorageDeleteOption) | Permission test temp file | Accept limitation + comment | 2 min |
 
-**Total Immediate Effort**: ~1 hour (excluding DisplayArea testing)
+**Previously Fixed**:
+- **Windowing.desktop.cs** - DisplayArea APIs replaced with reflection/Win32/AppWindow fallbacks (already implemented)
+- **WebViewModel.cs** - WebView2 runtime check wrapped in `#if WINDOWS10_0_18362_0_OR_GREATER` (already implemented)
+
+**Total Immediate Effort**: ~42 minutes (excluding WebView which has no current solution)
 
 ---
 
 ## Detailed Analysis by API Category
 
-### 1. Windowing: DisplayArea.GetFromWindowId() and WorkArea
+### 1. UIElement.ContextRequested Event
 
 #### Location
-- **File**: `StoryCADLib/Models/Windowing.desktop.cs`
-- **Lines**: 19, 37 (in `SetWindowSize()` and `CenterOnScreen()`)
+- **File**: `StoryCAD/Views/Shell.xaml`
+- **Lines**: 451, 515 (in NavigationTree and TrashView TreeView controls)
 
 #### Current Code
-```csharp
-public void SetWindowSize(Window window, int widthDip, int heightDip)
-{
-    var appWindow = GetAppWindow(window);
-    var wa = DisplayArea.GetFromWindowId(appWindow.Id, DisplayAreaFallback.Nearest).WorkArea;
+```xaml
+<ItemsRepeater x:Name="NavigationTree"
+               ContextFlyout="{StaticResource AddStoryElementFlyout}"
+               ContextRequested="AddButton_ContextRequested">
 
-    double s = GetDpiScale(window);
-    int w = (int)Math.Round(widthDip * s);
-    int h = (int)Math.Round(heightDip * s);
-
-    w = Math.Clamp(w, minW, wa.Width);  // Clamp to screen work area
-    h = Math.Clamp(h, minH, wa.Height);
-
-    appWindow.Resize(new SizeInt32 { Width = w, Height = h });
-}
+<muxc:TreeView ItemsSource="{x:Bind AppState.CurrentDocument.Model.TrashView, Mode=TwoWay}"
+               ContextFlyout="{StaticResource AddStoryElementFlyout}"
+               ContextRequested="AddButton_ContextRequested"
+               ...>
 ```
 
 #### Purpose
-Gets screen work area (usable screen space excluding menu bar, dock, taskbar) to:
-- Size windows appropriately (not larger than available space)
-- Center windows on screen
-- Support multi-monitor scenarios
+The ContextRequested event fires when the user requests a context menu (typically right-click). It provides more control over context menu behavior than ContextFlyout alone, allowing dynamic menu modification based on the element being right-clicked.
 
 #### UNO Platform Status
-- **Multi-window Support**: Added in UNO Platform 5.4.5 (2024)
-- **DisplayArea APIs**: Documented as implemented for desktop platforms
-- **Current Issue**: Generates Uno0001 warnings despite implementation
-- **macOS Equivalent**: Should map to `NSScreen.visibleFrame`
+- **ContextRequested**: Not implemented in UNO Platform desktop head
+- **ContextFlyout**: Fully supported across all UNO targets
+- **Impact**: Context menus still work via ContextFlyout, but without the dynamic capabilities
 
-#### Criticality: **CRITICAL**
-- Called during **every app startup** and window management operation
-- No fallback currently implemented
-- **Potential impact**: App may crash or windows incorrectly sized on macOS
+#### Criticality: **CRITICAL** (User Experience)
+- Context menus are essential for story element management
+- ContextFlyout still works, but may not have full dynamic behavior
+- Users expect right-click functionality for adding/managing story elements
 
 #### Recommended Solution
 
-**STRATEGY A (RECOMMENDED)**: Test existing code + suppress warning if working
+**STRATEGY: Remove ContextRequested, rely on ContextFlyout**
 
-```xml
-<!-- StoryCADLib.csproj -->
-<ItemGroup>
-  <!-- DisplayArea APIs implemented in UNO 5.4.5+ but generate warnings -->
-  <XamlGeneratorAnalyzerSuppressions Include="csharp-Uno0001" />
-</ItemGroup>
+Since ContextFlyout is already specified and fully supported, we can remove the ContextRequested event handler:
+
+```xaml
+<!-- Updated NavigationTree -->
+<ItemsRepeater x:Name="NavigationTree"
+               ContextFlyout="{StaticResource AddStoryElementFlyout}">
+               <!-- ContextRequested removed -->
+
+<!-- Updated TrashView -->
+<muxc:TreeView ItemsSource="{x:Bind AppState.CurrentDocument.Model.TrashView, Mode=TwoWay}"
+               ContextFlyout="{StaticResource AddStoryElementFlyout}"
+               ItemInvoked="TreeViewItem_Invoked"
+               ...>
+               <!-- ContextRequested removed -->
 ```
 
-Add comment in code:
-```csharp
-// DisplayArea.GetFromWindowId is implemented in UNO Platform 5.4.5+
-// but generates Uno0001 warnings (false positive)
-// See: https://platform.uno/blog/exploring-multi-window-support-for-linux-macos-and-windows/
-var wa = DisplayArea.GetFromWindowId(appWindow.Id, DisplayAreaFallback.Nearest).WorkArea;
-```
-
-**STRATEGY B (FALLBACK)**: Platform-specific NSScreen implementation if Strategy A doesn't work
+**Code-Behind Changes**:
+Check if `AddButton_ContextRequested` method contains essential logic that needs to be preserved:
 
 ```csharp
-// Windowing.desktop.cs
-private RectInt32 GetWorkAreaSafe(Window window)
+// In Shell.xaml.cs or ShellViewModel.cs
+// Review and potentially remove or refactor:
+private void AddButton_ContextRequested(UIElement sender, ContextRequestedEventArgs args)
 {
-    try
-    {
-        var appWindow = GetAppWindow(window);
-        return DisplayArea.GetFromWindowId(appWindow.Id, DisplayAreaFallback.Nearest).WorkArea;
-    }
-    catch (Exception)
-    {
-#if __MACOS__
-        var screen = NSScreen.MainScreen;
-        var visibleFrame = screen.VisibleFrame; // Excludes menu bar and dock
-        return new RectInt32
-        {
-            X = (int)visibleFrame.X,
-            Y = (int)visibleFrame.Y,
-            Width = (int)visibleFrame.Width,
-            Height = (int)visibleFrame.Height
-        };
-#endif
-        // Fallback: assume 1920x1040
-        return new RectInt32 { X = 0, Y = 0, Width = 1920, Height = 1040 };
-    }
+    // If this contains dynamic menu logic, consider alternatives:
+    // - Use Opening event of the MenuFlyout
+    // - Implement platform-specific behavior with #if directives
 }
 ```
 
-#### Testing Requirements
-- [ ] Run app on macOS - verify window appears and sizes correctly
-- [ ] Test window centering on macOS
-- [ ] Test multi-monitor scenarios on macOS
-- [ ] Verify minimum size constraints (1000x700 DIPs)
+#### Alternative Solutions
+
+If dynamic context menu behavior is essential:
+
+**Option A: Use MenuFlyout.Opening Event**
+```xaml
+<MenuFlyout x:Name="AddStoryElementFlyout" Opening="OnContextMenuOpening">
+    <!-- Menu items -->
+</MenuFlyout>
+```
+
+**Option B: Platform-Specific Implementation**
+```csharp
+#if WINDOWS10_0_18362_0_OR_GREATER
+    // Use ContextRequested on Windows
+    navigationTree.ContextRequested += AddButton_ContextRequested;
+#else
+    // Use alternative approach on other platforms
+    // e.g., handle PointerPressed for right-click detection
+#endif
+```
 
 ---
 
-### 2. WebView2: CoreWebView2Environment.GetAvailableBrowserVersionString()
+### 2. Windowing: DisplayArea APIs (ALREADY FIXED)
 
-#### Location
-- **File**: `StoryCADLib/ViewModels/WebViewModel.cs`
-- **Line**: 262
+**Status**: ✅ Fixed in Windowing.desktop.cs
 
-#### Current Code
+The DisplayArea.GetFromWindowId() and WorkArea APIs were previously causing warnings. These have been resolved by implementing alternative approaches in `Windowing.desktop.cs`:
+
+- Uses reflection to call UNO's WindowManagerHelper when available
+- Falls back to Win32 APIs on Windows with valid HWND
+- Uses AppWindow methods as final fallback
+- No DisplayArea APIs are called, avoiding the UNO warnings entirely
+
+No further action needed.
+
+---
+
+### 3. WebView2: CoreWebView2Environment (ALREADY FIXED)
+
+**Status**: ✅ Fixed in WebViewModel.cs
+
+The CoreWebView2Environment.GetAvailableBrowserVersionString() API warning has been resolved using conditional compilation:
+
 ```csharp
-public Task<bool> CheckWebViewState()
-{
-    try
+#if WINDOWS10_0_18362_0_OR_GREATER
+    if (CoreWebView2Environment.GetAvailableBrowserVersionString() != null)
     {
-        if (CoreWebView2Environment.GetAvailableBrowserVersionString() != null)
-        {
-            return Task.FromResult(true);
-        }
-    }
-    catch { }
-    return Task.FromResult(false);
-}
-```
-
-#### Purpose
-Checks if Microsoft Edge WebView2 Runtime is installed before showing embedded web browser feature.
-
-#### UNO Platform Status
-- **WebView2 Control**: Supported on Windows (WinAppSDK) and macOS Catalyst
-- **CoreWebView2 APIs**: Marked as `[NotImplemented]` in UNO Platform
-- **macOS Desktop (Skia)**: Not supported - uses native WKWebView instead
-
-#### Criticality: **HIGH** (Optional Feature)
-- WebView functionality allows users to browse web resources within StoryCAD
-- NOT critical for core outlining features
-- Application continues to work without WebView2
-
-#### Recommended Solution
-
-**STRATEGY: Platform-specific partial classes**
-
-**Shared Code** (`WebViewModel.cs`):
-```csharp
-public partial class WebViewModel : ObservableRecipient, INavigable, ISaveable
-{
-    public Task<bool> CheckWebViewState()
-    {
-        return CheckWebViewStatePlatform();
-    }
-
-    // Implemented in platform-specific files
-    partial Task<bool> CheckWebViewStatePlatform();
-}
-```
-
-**Windows** (`WebViewModel.WinAppSDK.cs` - NEW FILE):
-```csharp
-using Microsoft.Web.WebView2.Core;
-
-namespace StoryCADLib.ViewModels;
-
-public partial class WebViewModel
-{
-    partial Task<bool> CheckWebViewStatePlatform()
-    {
-        try
-        {
-            if (CoreWebView2Environment.GetAvailableBrowserVersionString() != null)
-            {
-                return Task.FromResult(true);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogException(LogLevel.Warn, ex, "WebView2 runtime check failed");
-        }
-        return Task.FromResult(false);
-    }
-}
-```
-
-**macOS** (`WebViewModel.desktop.cs` - NEW FILE):
-```csharp
-namespace StoryCADLib.ViewModels;
-
-public partial class WebViewModel
-{
-    partial Task<bool> CheckWebViewStatePlatform()
-    {
-        // macOS/Linux use native web views (WKWebView, WebKitGTK)
-        // No separate runtime installation needed
-        _logger.Log(LogLevel.Info, "Native web view available on this platform");
         return Task.FromResult(true);
     }
-}
+#else
+    // Bypass on non-WinAppSDK
+    _logger.Log(LogLevel.Warn, "WebView check skipped, not on WAppSDK");
+    return Task.FromResult(true);
+#endif
 ```
 
-#### Additional Changes
-WebView installation UI methods should also move to Windows-specific file:
-- `ShowWebViewDialog()` (line 278)
-- `InstallWebView()` (line 304)
+The code only compiles the WebView2-specific code on Windows builds, avoiding the warning on desktop builds.
+
+No further action needed.
 
 ---
 
-### 3. ListBox Control: Not Implemented in UNO
+### 4. ListBox Control: Not Implemented in UNO
 
 #### Locations
 1. **File**: `StoryCADLib/Services/Dialogs/ElementPicker.xaml`
@@ -338,7 +275,7 @@ The "Recents" tab already uses ListView successfully (line 80). This change make
 
 ---
 
-### 4. Storage: StorageFile.DeleteAsync(StorageDeleteOption)
+### 5. Storage: StorageFile.DeleteAsync(StorageDeleteOption)
 
 #### Location
 - **File**: `StoryCADLib/ViewModels/FileOpenVM.cs`
@@ -414,7 +351,7 @@ catch
 
 ---
 
-### 5. App Extensions: AppExtensionCatalog & Package.VerifyContentIntegrityAsync
+### 6. App Extensions: AppExtensionCatalog & Package.VerifyContentIntegrityAsync
 
 #### Location
 - **File**: `StoryCADLib/Services/Collaborator/CollaboratorService.cs`
@@ -490,11 +427,90 @@ Three-stage plugin discovery system:
 
 ---
 
+### 7. WebView/WebView2: Not Implemented for Desktop (Skia)
+
+#### Location
+- **File**: `StoryCAD/Views/WebPage.xaml`
+- **Line**: 43 (WebView2 control)
+- **Code-behind**: `StoryCAD/Views/WebPage.xaml.cs`
+
+#### Current Code
+```xaml
+<WebView2 Name="WebView" Grid.Row="2" Source="{x:Bind WebVM.Url, Mode=TwoWay}"
+          NavigationCompleted="Web_OnNavigationCompleted" />
+```
+
+#### Purpose
+Displays web content for research notes within StoryCAD. Users can navigate to web pages, save URLs with their story elements, and reference online resources.
+
+#### The Problem
+
+**WebView2 and WebView are both NOT IMPLEMENTED for UNO Platform desktop (Skia) targets.**
+
+Despite UNO Platform documentation claiming WebView is "supported on all targets," this is misleading. The actual implementation status:
+
+| Control | Windows (WinAppSDK) | macOS Catalyst | **macOS/Linux Desktop (Skia)** |
+|---------|---------------------|----------------|--------------------------------|
+| WebView | ✅ Works | ✅ Works | **❌ Not Implemented** |
+| WebView2 | ✅ Works | ✅ Works | **❌ Not Implemented** |
+
+The source code explicitly shows:
+```csharp
+#if IS_UNIT_TESTS || __SKIA__ || __NETSTD_REFERENCE__
+[Uno.NotImplemented("IS_UNIT_TESTS", "__SKIA__", "__NETSTD_REFERENCE__")]
+#endif
+public partial class WebView2 : Control
+```
+
+#### Build Configuration Context
+
+StoryCAD currently builds two targets:
+- **Windows**: `net9.0-windows10.0.22621` - WebView2 works correctly
+- **Desktop**: `net9.0-desktop` - This is the Skia target where WebView/WebView2 don't work
+
+The `net9.0-desktop` target uses Skia for cross-platform rendering on Windows, macOS, and Linux. However, Skia-based rendering cannot easily embed native OS controls like web browsers.
+
+#### Alternative Target (Not Currently Used)
+
+`net9.0-maccatalyst` would support WebView on macOS (using iOS/UIKit controls), but:
+- Would require significant project restructuring
+- Creates an iOS-style app rather than native desktop app
+- Different sandboxing and file system access patterns
+- Not a drop-in replacement for desktop target
+
+#### Criticality: **HIGH** (Feature Loss)
+- Web research functionality completely unavailable on macOS/Linux
+- No workaround within the current architecture
+- Affects user workflow for story research
+
+#### Technical Background
+
+GitHub Issue #4681 explains: "The ability to display a system control over a Skia rendered canvas" is the blocking technical challenge. The Skia rendering pipeline draws everything to a graphics surface and cannot easily composite native OS windows/controls.
+
+#### Current Status
+- **No timeline for implementation** from UNO Platform team
+- Issue has been open since 2023
+- Fundamental architectural limitation, not a simple bug
+
+---
+
 ## Implementation Plan
 
-### Phase 1: Immediate Fixes (1 hour total)
+### Phase 1: Immediate Fixes (45 minutes total)
 
-#### Task 1: Replace ListBox with ListView ⏱️ 5 minutes
+#### Task 1: Fix ContextRequested Warning ⏱️ 30 minutes
+**File**: `StoryCAD/Views/Shell.xaml`
+
+1. Remove `ContextRequested="AddButton_ContextRequested"` from lines 451 and 515
+2. Check Shell.xaml.cs for `AddButton_ContextRequested` method
+3. If method contains essential logic, refactor to use MenuFlyout.Opening event or platform-specific code
+4. Test context menus still work on Windows
+
+**Agent Recommendation**: None needed (straightforward XAML/code-behind change)
+
+---
+
+#### Task 2: Replace ListBox with ListView ⏱️ 10 minutes
 **Files**: `ElementPicker.xaml`, `FileOpenMenu.xaml`
 
 1. Find-replace `<ListBox` → `<ListView` in both files
@@ -505,19 +521,7 @@ Three-stage plugin discovery system:
 
 ---
 
-#### Task 2: Split WebViewModel ⏱️ 15 minutes
-**Files**: `WebViewModel.cs` (modify), `WebViewModel.WinAppSDK.cs` (new), `WebViewModel.desktop.cs` (new)
-
-1. Extract `CheckWebViewState()` to partial method
-2. Create platform-specific implementations
-3. Move WebView installation UI to WinAppSDK.cs
-4. Test on Windows (verify WebView2 detection works)
-
-**Agent Recommendation**: **csharp-pro** for refactoring partial classes
-
----
-
-#### Task 3: Add StorageFile Comment ⏱️ 2 minutes
+#### Task 3: Add StorageFile Comment ⏱️ 5 minutes
 **File**: `FileOpenVM.cs`
 
 Add documentation comment explaining parameter limitation on macOS.
@@ -526,35 +530,9 @@ Add documentation comment explaining parameter limitation on macOS.
 
 ---
 
-### Phase 2: Testing & Validation (30 minutes - 2 hours)
+### Phase 2: Deferred (Future Work)
 
-#### Task 4: Test DisplayArea APIs on macOS ⏱️ 30 minutes - 2 hours
-**File**: `Windowing.desktop.cs`
-
-**Testing Steps**:
-1. Run StoryCAD on macOS development machine
-2. Verify app launches without crashes
-3. Test window sizing (not larger than screen, respects menu bar/dock)
-4. Test window centering
-5. Test multi-monitor scenarios (if applicable)
-
-**If DisplayArea APIs work**:
-- Add warning suppression to `StoryCADLib.csproj`
-- Add comment explaining API is implemented but generates warnings
-- ⏱️ 30 minutes
-
-**If DisplayArea APIs don't work**:
-- Implement NSScreen fallback (Strategy B from research)
-- Test fallback implementation
-- ⏱️ 2 hours
-
-**Agent Recommendation**: **debugger** if issues encountered
-
----
-
-### Phase 3: Deferred (Future Work)
-
-#### Task 5: Collaborator Plugin System for macOS
+#### Task 4: Collaborator Plugin System for macOS
 **Tracked in**: Issues #1126, #1135
 **Effort**: 4-8 hours
 **Status**: Deferred - no immediate action needed
@@ -573,20 +551,12 @@ When prioritized:
 
 ### Critical Path Testing (Required Before macOS Release)
 
-**Windowing** (CRITICAL):
-- [ ] macOS: App launches without crashes
-- [ ] macOS: Main window sizes correctly (not larger than screen)
-- [ ] macOS: Main window centers correctly
-- [ ] macOS: Window respects menu bar and dock (work area calculation)
-- [ ] macOS: Multi-monitor support works (if applicable)
-- [ ] Windows: Regression test - window sizing still works
-
-**WebView2** (HIGH):
-- [ ] Windows: WebView2 detection works (with runtime installed)
-- [ ] Windows: Install dialog appears (without runtime)
-- [ ] macOS: Web views load without WebView2 runtime
-- [ ] macOS: No install prompts appear
-- [ ] Both: Web navigation feature works
+**Context Menus** (CRITICAL):
+- [ ] Windows: Context menus appear on right-click in NavigationTree
+- [ ] Windows: Context menus appear on right-click in TrashView
+- [ ] macOS: Context menus appear via ContextFlyout (after ContextRequested removal)
+- [ ] macOS: Menu items function correctly
+- [ ] Both: Story element creation from context menu works
 
 **ListBox → ListView** (HIGH):
 - [ ] Windows: Element picker displays list correctly
@@ -616,19 +586,16 @@ When prioritized:
 ## Risk Assessment
 
 ### High Risk
-- **DisplayArea APIs**: If not working on macOS, window management breaks
-  - **Mitigation**: Test early, have NSScreen fallback ready
-  - **Rollback**: Can implement fallback in <2 hours if needed
-
-### Medium Risk
-- **WebViewModel split**: Risk of breaking existing Windows functionality
-  - **Mitigation**: Keep Windows code identical to current implementation
-  - **Rollback**: Easy to revert partial class changes
+- **ContextRequested Event**: Context menus are critical for user interaction
+  - **Mitigation**: ContextFlyout already in place as fallback
+  - **Rollback**: Can implement MenuFlyout.Opening event if needed
 
 ### Low Risk
 - **ListBox → ListView**: Proven working pattern (Recents tab already uses ListView)
 - **StorageFile comment**: No code changes
-- **Collaborator**: Already disabled on macOS
+- **Collaborator**: Already disabled on macOS with #if guards
+- **DisplayArea**: Already fixed with alternative implementation
+- **WebView2**: Already fixed with conditional compilation
 
 ---
 
@@ -637,20 +604,18 @@ When prioritized:
 ### Definition of Done
 
 **Phase 1 Complete**:
+- [ ] ContextRequested event handlers removed/refactored
 - [ ] All ListBox references replaced with ListView
-- [ ] WebViewModel split into platform-specific files
 - [ ] StorageFile.DeleteAsync documented
 - [ ] Windows builds without errors
 - [ ] All Windows regression tests pass
-
-**Phase 2 Complete**:
-- [ ] macOS app launches successfully
-- [ ] macOS window sizing/centering works correctly
-- [ ] All critical path tests pass on macOS
-- [ ] Uno0001 warnings reduced from 14 to 0 (or suppressed with justification)
+- [ ] Context menus still functional
 
 **Release Ready**:
-- [ ] All Phase 1 and Phase 2 tasks complete
+- [ ] All Phase 1 tasks complete
+- [ ] macOS app launches successfully
+- [ ] All critical path tests pass on macOS
+- [ ] Uno0001 warnings reduced to acceptable levels (CollaboratorService warnings are expected)
 - [ ] User documentation updated (if needed)
 - [ ] Platform differences documented
 - [ ] PR includes testing evidence (screenshots, test results)
@@ -696,15 +661,12 @@ Based on agent expertise and task requirements:
 - Identified cross-platform alternatives
 - Provided solution strategies with rationale
 
-### csharp-pro (Recommended for Phase 1)
-- **Task 2**: WebViewModel refactoring into partial classes
-- **Rationale**: Expert in C# refactoring, MVVM patterns, and modern C# features
-- **Deliverables**: Three files (WebViewModel.cs, .WinAppSDK.cs, .desktop.cs)
+### No Specialized Agents Needed for Remaining Tasks
+- **Task 1** (ContextRequested): Simple XAML/code-behind change
+- **Task 2** (ListBox → ListView): Trivial XAML replacement
+- **Task 3** (StorageFile comment): Documentation only
 
-### debugger (On-call for Phase 2)
-- **Task 4**: DisplayArea API testing on macOS
-- **Rationale**: Expert in debugging cross-platform issues, if problems encountered
-- **Trigger**: Only if DisplayArea testing reveals issues
+All remaining tasks are straightforward and don't require specialized agent assistance.
 
 ---
 
@@ -733,15 +695,16 @@ Based on agent expertise and task requirements:
 
 ## Next Steps
 
-1. **Review this plan** with project stakeholders
-2. **Approve Phase 1 implementation** (1 hour of work)
-3. **Schedule macOS testing** for Phase 2 (requires macOS dev environment)
+1. **Review this updated plan** with project stakeholders
+2. **Approve Phase 1 implementation** (45 minutes of work)
+3. **Schedule macOS testing** (requires macOS dev environment)
 4. **Create implementation branch**: `issue-1139-uno-compatibility`
-5. **Launch csharp-pro agent** for Task 2 (WebViewModel refactoring)
+5. **Execute the three simple tasks** (no specialized agents needed)
 
 ---
 
-**Document Version**: 1.0
+**Document Version**: 1.1
 **Created**: 2025-10-15
-**Agents Used**: search-specialist, research-analyst
-**Status**: ✅ Research Complete - Ready for Implementation Approval
+**Updated**: 2025-10-22
+**Changes**: Updated warning list after building with desktop target; removed fixed warnings (DisplayArea, WebView2); added ContextRequested warning
+**Status**: ✅ Analysis Updated - Ready for Implementation
