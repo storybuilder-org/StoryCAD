@@ -8,25 +8,34 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel>
-        <InfoBar Severity="Informational" IsOpen="True" IsClosable="False">
-            <TextBlock
-                Text="The videos below refer to StoryCAD as StoryBuilder,
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <InfoBar Severity="Informational" IsOpen="True" IsClosable="False">
+                    <TextBlock
+                        Text="The videos below refer to StoryCAD as StoryBuilder,
 however are still a good place to get started"
-                TextWrapping="Wrap" Margin="10,10" />
-        </InfoBar>
-        <TextBlock Text="StoryCAD can be daunting, so here are some resources to help you get started:" Margin="0,10" />
+                        TextWrapping="Wrap" Margin="10,10" />
+                </InfoBar>
+                <TextBlock Text="StoryCAD can be daunting, so here are some resources to help you get started:" Margin="0,10" />
 
-        <HyperlinkButton Content="StoryCAD Concepts (Video)" NavigateUri="https://www.youtube.com/watch?v=Oi7G9TEKsro" />
-        <HyperlinkButton Content="A 5-minute Introduction to StoryCAD (Video)"
-                         NavigateUri="https://www.youtube.com/watch?v=qFpTI15-q7A" />
-        <HyperlinkButton Content="Frequently Asked Questions" NavigateUri="https://www.storybuilder.org/faq" />
-        <HyperlinkButton Content="Tutorial"
-                         NavigateUri="https://storybuilder-org.github.io/StoryCAD/docs/Tutorial%20Creating%20a%20Story/Tutorial_Creating_a_Story.html" />
-        <HyperlinkButton Content="User manual" NavigateUri="https://storybuilder-org.github.io/StoryCAD/" />
-        <HyperlinkButton Content="Events" NavigateUri="https://storybuilder.org/events/" />
+                <HyperlinkButton Content="StoryCAD Concepts (Video)" NavigateUri="https://www.youtube.com/watch?v=Oi7G9TEKsro" />
+                <HyperlinkButton Content="A 5-minute Introduction to StoryCAD (Video)"
+                                 NavigateUri="https://www.youtube.com/watch?v=qFpTI15-q7A" />
+                <HyperlinkButton Content="Frequently Asked Questions" NavigateUri="https://www.storybuilder.org/faq" />
+                <HyperlinkButton Content="Tutorial"
+                                 NavigateUri="https://storybuilder-org.github.io/StoryCAD/docs/Tutorial%20Creating%20a%20Story/Tutorial_Creating_a_Story.html" />
+                <HyperlinkButton Content="User manual" NavigateUri="https://storybuilder-org.github.io/StoryCAD/" />
+                <HyperlinkButton Content="Events" NavigateUri="https://storybuilder.org/events/" />
+            </StackPanel>
+        </ScrollViewer>
 
-        <CheckBox Content="Don't show this again" Click="Clicked"
-                  HorizontalAlignment="Center" VerticalAlignment="Bottom" />
-    </StackPanel>
+        <CheckBox Grid.Row="1" Content="Don't show this again" Click="Clicked"
+                  HorizontalAlignment="Center" Margin="0,10,0,0" />
+    </Grid>
 </Page>
