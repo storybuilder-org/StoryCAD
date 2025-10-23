@@ -425,6 +425,10 @@ public class CollaboratorService
     {
         try
         {
+            #if !WINDOWS10_0_18362_0_OR_GREATER
+            _logService.Log(LogLevel.Warn, "Collaborator is only supported on Windows.");
+            return (false, null);
+            #else
             var catalog = AppExtensionCatalog.Open("org.storybuilder");
             var exts = await catalog.FindAllAsync();
 
@@ -454,6 +458,7 @@ public class CollaboratorService
             var installDir = pkg.InstalledLocation.Path; // StorageFolder → string
             var dll = Path.Combine(installDir, PluginFileName);
             return (true, dll);
+            #endif
         }
         catch (Exception ex)
         {

@@ -10,9 +10,6 @@ using System.Runtime.InteropServices;
 using Microsoft.UI.Xaml;
 using MUW = Microsoft.UI.Windowing; // alias to avoid ambiguity
 using Windows.Graphics;
-#if __MACOS__
-using AppKit;
-#endif
 
 namespace StoryCADLib.Models;
 
@@ -168,34 +165,10 @@ public partial class Windowing
             return;
         }
 
-        // 4) macOS: use NSScreen to get actual screen dimensions
-#if __MACOS__
-        var screen = NSScreen.MainScreen;
-        if (screen != null)
-        {
-            var visibleFrame = screen.VisibleFrame;
-            var aw = GetAppWindow(window);
-            var sz = aw.Size;
-
-            // NSScreen coordinates are in points (logical pixels)
-            // VisibleFrame excludes menu bar and dock
-            int screenWidth = (int)visibleFrame.Width;
-            int screenHeight = (int)visibleFrame.Height;
-
-            int newX = (int)visibleFrame.X + (screenWidth - sz.Width) / 2;
-            int newY = (int)visibleFrame.Y + (screenHeight - sz.Height) / 2;
-
-            aw.Move(new PointInt32 { X = Math.Max(0, newX), Y = Math.Max(0, newY) });
-            return;
-        }
-#endif
-
-        // 5) Final fallback for other platforms: best-effort center (no crash, no DisplayArea)
-        {
-            var aw = GetAppWindow(window);
-            var sz = aw.Size;
-            aw.Move(new PointInt32 { X = Math.Max(0, (1920 - sz.Width) / 2), Y = Math.Max(0, (1080 - sz.Height) / 2) });
-        }
+        // 4) Non-Windows heads without WMH: best-effort center (no crash, no DisplayArea)
+        var aw = GetAppWindow(window);
+        var sz = aw.Size;
+        aw.Move(new PointInt32 { X = Math.Max(0, (1920 - sz.Width) / 2), Y = Math.Max(0, (1080 - sz.Height) / 2) });
     }
 
     public void SetMinimumSize(Window window, int minWidthDip = 1000, int minHeightDip = 700)

@@ -11,6 +11,7 @@
         <GenerateLibraryLayout>true</GenerateLibraryLayout>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <WarningsAsErrors>UNO0001</WarningsAsErrors>
 
         <!-- Test features -->
         <UnoFeatures>
