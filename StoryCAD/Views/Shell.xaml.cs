@@ -223,16 +223,19 @@ public sealed partial class Shell : Page
         args.Handled = true;
     }
 
-    private void AddButton_ContextRequested(UIElement sender, ContextRequestedEventArgs args)
+    /// <summary>
+    /// Handles right-click on NavigationTree and TrashView to show context menu.
+    /// Uses RightTapped instead of ContextRequested for UNO Platform compatibility.
+    /// </summary>
+    private void NavigationTree_RightTapped(object sender, RightTappedRoutedEventArgs e)
     {
         FlyoutShowOptions myOption = new();
         myOption.ShowMode = FlyoutShowMode.Transient;
 
         // x:Name="AddStoryElementCommandBarFlyout" does not work in ResourceDictionary elements on Uno, so
-        // instead of:
-        // AddStoryElementCommandBarFlyout.ShowAt(NavigationTree, myOption);
-        // Do this:
+        // we access it via Resources instead:
         ((CommandBarFlyout)Resources["AddStoryElementFlyout"]).ShowAt(NavigationTree, myOption);
+        e.Handled = true;
     }
 
     private void Search(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)

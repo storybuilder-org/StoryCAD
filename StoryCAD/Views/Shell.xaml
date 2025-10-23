@@ -448,7 +448,7 @@
                         <ItemsRepeater ItemsSource="{x:Bind AppState.CurrentDocument.Model.CurrentView, Mode=TwoWay}"
                                        x:Name="NavigationTree"
                                        ContextFlyout="{StaticResource AddStoryElementFlyout}"
-                                       ContextRequested="AddButton_ContextRequested">
+                                       RightTapped="NavigationTree_RightTapped">
                             <ItemsRepeater.ItemTemplate>
                                 <DataTemplate x:DataType="viewmodels:StoryNodeItem">
                                     <Grid DataContext="{x:Bind}">
@@ -512,7 +512,7 @@
                         <!-- Trash Can TreeView -->
                         <muxc:TreeView ItemsSource="{x:Bind AppState.CurrentDocument.Model.TrashView, Mode=TwoWay}"
                                        ContextFlyout="{StaticResource AddStoryElementFlyout}"
-                                       ContextRequested="AddButton_ContextRequested"
+                                       RightTapped="NavigationTree_RightTapped"
                                        ItemInvoked="TreeViewItem_Invoked"
                                        CanDragItems="False" AllowDrop="False" CanReorderItems="False"
                                        SelectionMode="Single">
