@@ -21,10 +21,10 @@
 
         <!-- Element Picker -->
         <ScrollViewer Height="450">
-            <ListBox Name="ElementBox" IsEnabled="False" HorizontalAlignment="Center"
-                     SelectedItem="{x:Bind PickerVM.SelectedElement, Mode=TwoWay}"
-                     DisplayMemberPath="Name" Margin="0,10,0,0"
-                     MinWidth="200" />
+            <ListView Name="ElementBox" IsEnabled="False" HorizontalAlignment="Center"
+                      SelectedItem="{x:Bind PickerVM.SelectedElement, Mode=TwoWay}"
+                      DisplayMemberPath="Name" Margin="0,10,0,0"
+                      MinWidth="200" SelectionMode="Single" />
         </ScrollViewer>
 
         <Border Margin="30,10" HorizontalAlignment="Stretch"

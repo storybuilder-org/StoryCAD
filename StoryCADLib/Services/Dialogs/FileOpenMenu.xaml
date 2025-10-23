@@ -96,7 +96,7 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <ListBox Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        <ListView Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
                                  ItemsSource="{x:Bind FileOpenVM.BackupUI}"
                                  SelectedIndex="{x:Bind FileOpenVM.SelectedBackupIndex, Mode=TwoWay}" />
                     </Grid>

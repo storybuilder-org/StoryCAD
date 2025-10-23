@@ -118,7 +118,11 @@ public class FileOpenVM : ObservableRecipient
             try
             {
                 var file = await folder.CreateFileAsync("StoryCAD" + DateTimeOffset.Now.ToUnixTimeSeconds());
+#if HAS_UNO_WINUI
                 await file.DeleteAsync(StorageDeleteOption.PermanentDelete);
+#else
+                await file.DeleteAsync();
+#endif
             }
             catch
             {
