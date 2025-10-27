@@ -3,7 +3,7 @@ using Microsoft.UI.Text;
 using StoryCADLib.Services.Reports;
 
 namespace StoryCADLib.Controls;
-#if !HAS_UNO
+
 public partial class RichEditBoxExtended : RichEditBox
 {
     public static readonly DependencyProperty RtfTextProperty =
@@ -15,6 +15,9 @@ public partial class RichEditBoxExtended : RichEditBox
 
     public RichEditBoxExtended()
     {
+        // Debug: Log which version is running
+        System.Diagnostics.Debug.WriteLine("=== RichEditBoxExtended: WINAPPSDK VERSION (RichEditBox) ===");
+
         TextChanged += RichEditBoxExtended_TextChanged;
         TextAlignment = TextAlignment.Left;
         CornerRadius = new CornerRadius(5);
@@ -79,50 +82,3 @@ public partial class RichEditBoxExtended : RichEditBox
         rtb._lockChangeExecution = false;
     }
 }
-#else
-    public partial class RichEditBoxExtended : TextBox
-    {
-        public static readonly DependencyProperty RtfTextProperty =
-            DependencyProperty.Register(
-                nameof(RtfText), typeof(string), typeof(RichEditBoxExtended),
-                new PropertyMetadata(default(string), RtfTextPropertyChanged));
-
-        private bool _lockChangeExecution;
-
-        public RichEditBoxExtended()
-        {
-            TextWrapping = TextWrapping.Wrap;
-            TextChanged += RichEditBoxExtended_TextChanged;
-        }
-
-        public string RtfText
-        {
-            get => (string)GetValue(RtfTextProperty);
-            set => SetValue(RtfTextProperty, value);
-        }
-
-        private void RichEditBoxExtended_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (_lockChangeExecution) return;
-            _lockChangeExecution = true;
-            RtfText = Text;
-            _lockChangeExecution = false;
-        }
-
-        private static void RtfTextPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var tb = d as RichEditBoxExtended;
-            if (tb == null || tb._lockChangeExecution) return;
-
-            tb._lockChangeExecution = true;
-            tb.Text = new ReportFormatter(Ioc.Default.GetRequiredService<AppState>())
-                .GetText(e.NewValue?.ToString() ?? "");
-            tb._lockChangeExecution = false;
-        }
-
-        public void UpdateTheme(object sender, RoutedEventArgs e)
-        {
-            // No-op for TextBox version
-        }
-    }
-#endif
