@@ -852,6 +852,13 @@ public class ShellViewModel : ObservableRecipient
 
     public void RefreshAllCommands()
     {
+        // Don't update command state during application shutdown
+        // COM infrastructure may be shutting down, causing E_UNEXPECTED exceptions
+        if (IsClosing)
+        {
+            return;
+        }
+
         TogglePaneCommand.NotifyCanExecuteChanged();
         OpenFileOpenMenuCommand.NotifyCanExecuteChanged();
         NarrativeToolCommand.NotifyCanExecuteChanged();
@@ -1426,6 +1433,9 @@ public class ShellViewModel : ObservableRecipient
         {
             Logger.Log(LogLevel.Info, "Application closing - starting cleanup");
 
+            // Set closing flag immediately to prevent UI updates during shutdown
+            IsClosing = true;
+
             // 1. Update cumulative time used and save preferences
             var prefs = Ioc.Default.GetRequiredService<PreferenceService>();
             var sessionTime = (DateTime.Now - AppStartTime).TotalSeconds;
@@ -1462,9 +1472,6 @@ public class ShellViewModel : ObservableRecipient
             {
                 Logger.LogException(LogLevel.Warn, ex, "Error destroying collaborator service during shutdown");
             }
-
-            // 5. Set the closing flag
-            IsClosing = true;
 
             Logger.Log(LogLevel.Info, "Application cleanup completed successfully");
         }
