@@ -1,10 +1,12 @@
 using Windows.ApplicationModel.DataTransfer;
+using Windows.System;
 using Windows.UI.ViewManagement;
 using Microsoft.UI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using StoryCADLib.Helpers;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services;
 using StoryCADLib.Services.Backup;
@@ -32,7 +34,7 @@ public sealed partial class Shell : Page
             AllowDrop = false;
             Logger = Ioc.Default.GetService<LogService>();
             DataContext = ShellVm;
-            Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher = DispatcherQueue.GetForCurrentThread();
+            Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
             Loaded += Shell_Loaded;
             AppState.CurrentDocumentChanged += (_, __) => UpdateDocumentBindings();
             SerializationLock.CanExecuteStateChanged += (_, __) => ShellVm.RefreshAllCommands();
@@ -355,4 +357,286 @@ public sealed partial class Shell : Page
             Logger.LogException(LogLevel.Error, ex, "Error during drag and drop operation.");
         }
     }
+
+    /// <summary>
+    /// Centralized keyboard shortcut handler using KeyboardHelper for cross-platform support.
+    /// This replaces individual KeyboardAccelerator elements in XAML.
+    /// </summary>
+    private void ShellPage_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        try
+        {
+            // Don't process keyboard shortcuts if the event has already been handled
+            // by a child element (like a text box or context menu)
+            if (e.Handled)
+            {
+                return;
+            }
+
+            // Don't process if the original source is a TextBox or other input control
+            // to avoid interfering with text entry
+            if (e.OriginalSource is TextBox || e.OriginalSource is RichEditBox ||
+                e.OriginalSource is AutoSuggestBox || e.OriginalSource is PasswordBox)
+            {
+                return;
+            }
+
+            var ctrl = KeyboardHelper.IsControlPressed();
+            var shift = KeyboardHelper.IsShiftPressed();
+            var alt = KeyboardHelper.IsAltPressed();
+
+            // File Menu shortcuts
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.O)
+            {
+                ShellVm.OpenFileOpenMenuCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.S)
+            {
+                ShellVm.SaveFileCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (ctrl && shift && !alt && e.Key == VirtualKey.S)
+            {
+                ShellVm.SaveAsCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.B)
+            {
+                ShellVm.CreateBackupCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            // Add Menu shortcuts (Alt+Letter)
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.F && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddFolderCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.A && ShellVm.NarratorVisibility == Visibility.Visible)
+            {
+                ShellVm.AddSectionCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.P && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddProblemCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.C && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddCharacterCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.L && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddSettingCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.S && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddSceneCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.W && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddWebCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.N && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddNotesCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            // Delete key (no modifiers)
+            if (!ctrl && !shift && !alt && e.Key == VirtualKey.Delete && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.RemoveStoryElementCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            // Tools Menu shortcuts
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.N)
+            {
+                ShellVm.NarrativeToolCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.Q)
+            {
+                ShellVm.KeyQuestionsCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.M)
+            {
+                ShellVm.MasterPlotsCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.D)
+            {
+                ShellVm.DramaticSituationsCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.L)
+            {
+                ShellVm.StockScenesCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            // Reports Menu shortcuts
+            // Note: Ctrl+P is platform-specific - Print on Windows, Preferences elsewhere
+#if HAS_UNO_WINUI
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.P)
+            {
+                ShellVm.PrintReportsCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+#else
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.P)
+            {
+                ShellVm.PreferencesCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+#endif
+
+            if (ctrl && shift && !alt && e.Key == VirtualKey.P)
+            {
+                ShellVm.ExportReportsToPdfCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.R)
+            {
+                ShellVm.ScrivenerReportsCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            // Help shortcut
+            if (!ctrl && !shift && !alt && e.Key == VirtualKey.F1)
+            {
+                ShellVm.HelpCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger?.LogException(LogLevel.Error, ex, "Error handling keyboard shortcut");
+        }
+    }
+
+    /// <summary>
+    /// Updates keyboard hint text to use platform-specific symbols (⌥ on macOS, Alt elsewhere)
+    /// </summary>
+    private void UpdateKeyboardHints()
+    {
+#if __MACOS__
+        // On macOS, replace "Alt" with the Option symbol "⌥"
+        UpdateMenuFlyoutItems(Resources["AddStoryElementFlyout"] as CommandBarFlyout);
+
+        // Find and update the main menu items
+        var commandBar = FindVisualChild<CommandBar>(this);
+        if (commandBar != null)
+        {
+            foreach (var item in commandBar.PrimaryCommands.OfType<AppBarButton>())
+            {
+                if (item.Flyout is MenuFlyout menuFlyout)
+                {
+                    UpdateMenuFlyoutItems(menuFlyout);
+                }
+            }
+        }
+#endif
+    }
+
+#if __MACOS__
+    private void UpdateMenuFlyoutItems(CommandBarFlyout flyout)
+    {
+        if (flyout?.SecondaryCommands == null) return;
+
+        foreach (var command in flyout.SecondaryCommands.OfType<AppBarButton>())
+        {
+            if (command.Flyout is MenuFlyout menuFlyout)
+            {
+                UpdateMenuFlyoutItems(menuFlyout);
+            }
+        }
+    }
+
+    private void UpdateMenuFlyoutItems(MenuFlyout menuFlyout)
+    {
+        if (menuFlyout?.Items == null) return;
+
+        foreach (var item in menuFlyout.Items.OfType<MenuFlyoutItem>())
+        {
+            if (!string.IsNullOrEmpty(item.Text) && item.Text.Contains("Alt+"))
+            {
+                item.Text = item.Text.Replace("Alt+", "⌥");
+            }
+        }
+
+        // Also check for nested MenuFlyoutSubItem
+        foreach (var subItem in menuFlyout.Items.OfType<MenuFlyoutSubItem>())
+        {
+            foreach (var item in subItem.Items.OfType<MenuFlyoutItem>())
+            {
+                if (!string.IsNullOrEmpty(item.Text) && item.Text.Contains("Alt+"))
+                {
+                    item.Text = item.Text.Replace("Alt+", "⌥");
+                }
+            }
+        }
+    }
+
+    private T FindVisualChild<T>(DependencyObject obj) where T : DependencyObject
+    {
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+        {
+            var child = VisualTreeHelper.GetChild(obj, i);
+            if (child is T typedChild)
+                return typedChild;
+
+            var childOfChild = FindVisualChild<T>(child);
+            if (childOfChild != null)
+                return childOfChild;
+        }
+        return null;
+    }
+#endif
 }

@@ -6,10 +6,12 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:muxc="using:Microsoft.UI.Xaml.Controls" RequestedTheme="{x:Bind Windowing.RequestedTheme, Mode=OneWay}"
       xmlns:viewmodels="using:StoryCADLib.ViewModels"
-      mc:Ignorable="d notwin skia" SizeChanged="ShellPage_SizeChanged"
+      mc:Ignorable="d notwin skia macos" SizeChanged="ShellPage_SizeChanged"
       xmlns:win="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:skia="http://uno.ui/skia"
-      xmlns:notwin="http://uno.ui/not_win">
+      xmlns:notwin="http://uno.ui/not_win"
+      xmlns:macos="http://uno.ui/macos"
+      KeyDown="ShellPage_KeyDown">
     <Page.Resources>
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
@@ -21,30 +23,46 @@
                     <AppBarButton Icon="Add" Label="Add Elements">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Icon="Folder" Text="Add Folder         Alt+F"
+                                <MenuFlyoutItem Icon="Folder"
                                                 Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}"
-                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="Folder" Text="Add Section        Alt+A"
+                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                                win:Text="Add Folder         Alt+F"
+                                                macos:Text="Add Folder         ⌥F" />
+                                <MenuFlyoutItem Icon="Folder"
                                                 Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}"
-                                                Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="Help" Text="Add Problem      Alt+P"
+                                                Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}"
+                                                win:Text="Add Section        Alt+A"
+                                                macos:Text="Add Section        ⌥A" />
+                                <MenuFlyoutItem Icon="Help"
                                                 Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}"
-                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="Contact" Text="Add Character    Alt+C"
+                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                                win:Text="Add Problem      Alt+P"
+                                                macos:Text="Add Problem      ⌥P" />
+                                <MenuFlyoutItem Icon="Contact"
                                                 Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}"
-                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="Globe" Text="Add Setting        Alt+L"
+                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                                win:Text="Add Character    Alt+C"
+                                                macos:Text="Add Character    ⌥C" />
+                                <MenuFlyoutItem Icon="Globe"
                                                 Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}"
-                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="AllApps" Text="Add Scene          Alt+S"
+                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                                win:Text="Add Setting        Alt+L"
+                                                macos:Text="Add Setting        ⌥L" />
+                                <MenuFlyoutItem Icon="AllApps"
                                                 Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}"
-                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="TwoPage" Text="Add Notes          Alt+N"
+                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                                win:Text="Add Scene          Alt+S"
+                                                macos:Text="Add Scene          ⌥S" />
+                                <MenuFlyoutItem Icon="TwoPage"
                                                 Command="{x:Bind ShellVm.AddNotesCommand, Mode=OneWay}"
-                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="PreviewLink" Text="Add Website      Alt+W"
+                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                                win:Text="Add Notes          Alt+N"
+                                                macos:Text="Add Notes          ⌥N" />
+                                <MenuFlyoutItem Icon="PreviewLink"
                                                 Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}"
-                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
+                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                                win:Text="Add Website      Alt+W"
+                                                macos:Text="Add Website      ⌥W" />
                             </MenuFlyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
@@ -153,34 +171,22 @@
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8F4;" />
                                 </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Modifiers="Control" Key="O" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Save Story" Command="{x:Bind ShellVm.SaveFileCommand, Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" />
                                 </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="S" Modifiers="Control" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Save Story As" Command="{x:Bind ShellVm.SaveAsCommand, Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE792;" />
                                 </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Modifiers="Control,Shift" Key="S" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Create Backup"
                                             Command="{x:Bind ShellVm.CreateBackupCommand, Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xe838;" />
                                 </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="B" Modifiers="Control" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Close Story" Command="{x:Bind ShellVm.CloseCommand, Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
@@ -204,73 +210,54 @@
                         <MenuFlyout>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Icon="Folder"
-                                            Text="Add folder">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="F" Modifiers="Menu" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                                            win:Text="Add folder         Alt+F"
+                                            macos:Text="Add folder         ⌥F">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}" Icon="Folder"
-                                            Text="Add section">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="A" Modifiers="Menu" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                                            win:Text="Add section        Alt+A"
+                                            macos:Text="Add section        ⌥A">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}" Icon="Help"
-                                            Text="Add problem">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="P" Modifiers="Menu" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                                            win:Text="Add problem      Alt+P"
+                                            macos:Text="Add problem      ⌥P">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}" Icon="Contact"
-                                            Text="Add character">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="C" Modifiers="Menu" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                                            win:Text="Add character    Alt+C"
+                                            macos:Text="Add character    ⌥C">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}" Icon="Globe"
-                                            Text="Add setting">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="L" Modifiers="Menu" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                                            win:Text="Add setting        Alt+L"
+                                            macos:Text="Add setting        ⌥L">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}" Icon="AllApps"
-                                            Text="Add scene">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="S" Modifiers="Menu" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                                            win:Text="Add scene          Alt+S"
+                                            macos:Text="Add scene          ⌥S">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Add Web node"
-                                            Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
-                                            Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}">
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}"
+                                            win:Text="Add Web node     Alt+W"
+                                            macos:Text="Add Web node     ⌥W">
                                 <MenuFlyoutItem.Icon>
                                     <SymbolIcon Symbol="PreviewLink" />
                                 </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="W" Modifiers="Menu" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Add Notes node"
-                                            Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
-                                            Command="{x:Bind ShellVm.AddNotesCommand,Mode=OneWay}">
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.AddNotesCommand,Mode=OneWay}"
+                                            win:Text="Add Notes node   Alt+N"
+                                            macos:Text="Add Notes node   ⌥N">
                                 <MenuFlyoutItem.Icon>
                                     <SymbolIcon Symbol="TwoPage" />
                                 </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="N" Modifiers="Menu" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutSeparator />
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.RemoveStoryElementCommand,Mode=OneWay}"
                                             Icon="Delete" Text="Delete story element">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="Delete" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.TrashButtonVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.RestoreStoryElementCommand,Mode=OneWay}"
@@ -344,36 +331,21 @@
                             <MenuFlyoutItem Text="Open Narrative Editor"
                                             Command="{x:Bind ShellVm.NarrativeToolCommand, Mode=OneWay}"
                                             muxc:ToolTipService.ToolTip="Opens the narrative editor to build your story as its told">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="N" Modifiers="Control" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Key Questions"
                                             Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="Q" Modifiers="Control" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Topic Information"
                                             Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}" />
                             <MenuFlyoutSubItem Text="Plotting Aids">
                                 <MenuFlyoutItem Text="Master Plots"
                                                 Command="{x:Bind ShellVm.MasterPlotsCommand, Mode=OneWay}">
-                                    <MenuFlyoutItem.KeyboardAccelerators>
-                                        <KeyboardAccelerator Key="M" Modifiers="Control" />
-                                    </MenuFlyoutItem.KeyboardAccelerators>
                                 </MenuFlyoutItem>
                                 <MenuFlyoutItem Text="Dramatic Situations"
                                                 Command="{x:Bind ShellVm.DramaticSituationsCommand, Mode=OneWay}">
-                                    <MenuFlyoutItem.KeyboardAccelerators>
-                                        <KeyboardAccelerator Key="D" Modifiers="Control" />
-                                    </MenuFlyoutItem.KeyboardAccelerators>
                                 </MenuFlyoutItem>
                                 <MenuFlyoutItem Text="Stock Scenes"
                                                 Command="{x:Bind ShellVm.StockScenesCommand, Mode=OneWay}">
-                                    <MenuFlyoutItem.KeyboardAccelerators>
-                                        <KeyboardAccelerator Key="L" Modifiers="Control" />
-                                    </MenuFlyoutItem.KeyboardAccelerators>
                                 </MenuFlyoutItem>
                             </MenuFlyoutSubItem>
                         </MenuFlyout>
@@ -389,21 +361,12 @@
                                             Command="{x:Bind ShellVm.PrintReportsCommand, Mode=OneWay}"
                                             win:Visibility="Visible" notwin:Visibility="Collapsed"
                                             skia:Visibility="Collapsed">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="P" Modifiers="Control" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="PDF Reports"
                                             Command="{x:Bind ShellVm.ExportReportsToPdfCommand, Mode=OneWay}">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="P" Modifiers="Control,Shift" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Scrivener Reports"
                                             Command="{x:Bind ShellVm.ScrivenerReportsCommand, Mode=OneWay}">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="R" Modifiers="Control" />
-                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
 
                         </MenuFlyout>
@@ -414,9 +377,6 @@
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE713;" />
                     </AppBarButton.Icon>
-                    <AppBarButton.KeyboardAccelerators>
-                        <KeyboardAccelerator Modifiers="Control" Key="P" />
-                    </AppBarButton.KeyboardAccelerators>
                 </AppBarButton>
                 <AppBarButton Width="50" IsCompact="True" Label="Report Feedback"
                               ToolTipService.ToolTip="Report Feedback" Click="ButtonBase_OnClick">
@@ -426,9 +386,6 @@
                 </AppBarButton>
                 <AppBarButton Width="50" IsCompact="True" Label="Help" ToolTipService.ToolTip="Help"
                               Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}">
-                    <AppBarButton.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="F1" />
-                    </AppBarButton.KeyboardAccelerators>
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE897;" />
                     </AppBarButton.Icon>

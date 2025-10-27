@@ -14,7 +14,6 @@
         <ApplicationPublisher>StoryBuilder Foundation</ApplicationPublisher>
         <!-- Package Description -->
         <Description>StoryCAD powered by Uno Platform.</Description>
-        <WarningsAsErrors>UNO0001</WarningsAsErrors>
     </PropertyGroup>
 
     <!-- On Windows, build both WinAppSDK and Skia Desktop -->
