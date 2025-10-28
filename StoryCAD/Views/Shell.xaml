@@ -26,43 +26,35 @@
                                 <MenuFlyoutItem Icon="Folder"
                                                 Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
-                                                win:Text="Add Folder         Alt+F"
-                                                macos:Text="Add Folder         ⌥F" />
+                                                Text="Add Folder         Alt+F" />
                                 <MenuFlyoutItem Icon="Folder"
                                                 Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}"
-                                                win:Text="Add Section        Alt+A"
-                                                macos:Text="Add Section        ⌥A" />
+                                                Text="Add Section        Alt+A" />
                                 <MenuFlyoutItem Icon="Help"
                                                 Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
-                                                win:Text="Add Problem      Alt+P"
-                                                macos:Text="Add Problem      ⌥P" />
+                                                Text="Add Problem      Alt+P" />
                                 <MenuFlyoutItem Icon="Contact"
                                                 Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
-                                                win:Text="Add Character    Alt+C"
-                                                macos:Text="Add Character    ⌥C" />
+                                                Text="Add Character    Alt+C" />
                                 <MenuFlyoutItem Icon="Globe"
                                                 Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
-                                                win:Text="Add Setting        Alt+L"
-                                                macos:Text="Add Setting        ⌥L" />
+                                                Text="Add Setting        Alt+L" />
                                 <MenuFlyoutItem Icon="AllApps"
                                                 Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
-                                                win:Text="Add Scene          Alt+S"
-                                                macos:Text="Add Scene          ⌥S" />
+                                                Text="Add Scene          Alt+S" />
                                 <MenuFlyoutItem Icon="TwoPage"
                                                 Command="{x:Bind ShellVm.AddNotesCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
-                                                win:Text="Add Notes          Alt+N"
-                                                macos:Text="Add Notes          ⌥N" />
+                                                Text="Add Notes          Alt+N" />
                                 <MenuFlyoutItem Icon="PreviewLink"
                                                 Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
-                                                win:Text="Add Website      Alt+W"
-                                                macos:Text="Add Website      ⌥W" />
+                                                Text="Add Website      Alt+W" />
                             </MenuFlyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
@@ -167,22 +159,22 @@
                               Width="50">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="Open/Create file" Command="{x:Bind ShellVm.OpenFileOpenMenuCommand}">
+                            <MenuFlyoutItem Text="Open/Create file                Ctrl+O" Command="{x:Bind ShellVm.OpenFileOpenMenuCommand}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8F4;" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Save Story" Command="{x:Bind ShellVm.SaveFileCommand, Mode=OneWay}">
+                            <MenuFlyoutItem Text="Save Story                      Ctrl+S" Command="{x:Bind ShellVm.SaveFileCommand, Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Save Story As" Command="{x:Bind ShellVm.SaveAsCommand, Mode=OneWay}">
+                            <MenuFlyoutItem Text="Save Story As                   Ctrl+Shift+S" Command="{x:Bind ShellVm.SaveAsCommand, Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE792;" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Create Backup"
+                            <MenuFlyoutItem Text="Create Backup                   Ctrl+B"
                                             Command="{x:Bind ShellVm.CreateBackupCommand, Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xe838;" />
@@ -210,46 +202,38 @@
                         <MenuFlyout>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Icon="Folder"
-                                            win:Text="Add folder         Alt+F"
-                                            macos:Text="Add folder         ⌥F">
+                                            Text="Add folder         Alt+F">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}" Icon="Folder"
-                                            win:Text="Add section        Alt+A"
-                                            macos:Text="Add section        ⌥A">
+                                            Text="Add section        Alt+A">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}" Icon="Help"
-                                            win:Text="Add problem      Alt+P"
-                                            macos:Text="Add problem      ⌥P">
+                                            Text="Add problem      Alt+P">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}" Icon="Contact"
-                                            win:Text="Add character    Alt+C"
-                                            macos:Text="Add character    ⌥C">
+                                            Text="Add character    Alt+C">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}" Icon="Globe"
-                                            win:Text="Add setting        Alt+L"
-                                            macos:Text="Add setting        ⌥L">
+                                            Text="Add setting        Alt+L">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}" Icon="AllApps"
-                                            win:Text="Add scene          Alt+S"
-                                            macos:Text="Add scene          ⌥S">
+                                            Text="Add scene          Alt+S">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}"
-                                            win:Text="Add Web node     Alt+W"
-                                            macos:Text="Add Web node     ⌥W">
+                                            Text="Add Web node     Alt+W">
                                 <MenuFlyoutItem.Icon>
                                     <SymbolIcon Symbol="PreviewLink" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
                                             Command="{x:Bind ShellVm.AddNotesCommand,Mode=OneWay}"
-                                            win:Text="Add Notes node   Alt+N"
-                                            macos:Text="Add Notes node   ⌥N">
+                                            Text="Add Notes node   Alt+N">
                                 <MenuFlyoutItem.Icon>
                                     <SymbolIcon Symbol="TwoPage" />
                                 </MenuFlyoutItem.Icon>
@@ -328,23 +312,23 @@
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="Open Narrative Editor"
+                            <MenuFlyoutItem Text="Open Narrative Editor         Ctrl+N"
                                             Command="{x:Bind ShellVm.NarrativeToolCommand, Mode=OneWay}"
                                             muxc:ToolTipService.ToolTip="Opens the narrative editor to build your story as its told">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Key Questions"
+                            <MenuFlyoutItem Text="Key Questions                 Ctrl+Q"
                                             Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Topic Information"
                                             Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}" />
                             <MenuFlyoutSubItem Text="Plotting Aids">
-                                <MenuFlyoutItem Text="Master Plots"
+                                <MenuFlyoutItem Text="Master Plots                Ctrl+M"
                                                 Command="{x:Bind ShellVm.MasterPlotsCommand, Mode=OneWay}">
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="Dramatic Situations"
+                                <MenuFlyoutItem Text="Dramatic Situations         Ctrl+D"
                                                 Command="{x:Bind ShellVm.DramaticSituationsCommand, Mode=OneWay}">
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="Stock Scenes"
+                                <MenuFlyoutItem Text="Stock Scenes                Ctrl+L"
                                                 Command="{x:Bind ShellVm.StockScenesCommand, Mode=OneWay}">
                                 </MenuFlyoutItem>
                             </MenuFlyoutSubItem>
@@ -357,22 +341,22 @@
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="Print Reports"
+                            <MenuFlyoutItem Text="Print Reports                   Ctrl+P"
                                             Command="{x:Bind ShellVm.PrintReportsCommand, Mode=OneWay}"
                                             win:Visibility="Visible" notwin:Visibility="Collapsed"
                                             skia:Visibility="Collapsed">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="PDF Reports"
+                            <MenuFlyoutItem Text="PDF Reports                     Ctrl+Shift+P"
                                             Command="{x:Bind ShellVm.ExportReportsToPdfCommand, Mode=OneWay}">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Scrivener Reports"
+                            <MenuFlyoutItem Text="Scrivener Reports               Ctrl+R"
                                             Command="{x:Bind ShellVm.ScrivenerReportsCommand, Mode=OneWay}">
                             </MenuFlyoutItem>
 
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton Width="50" IsCompact="True" Label="Preferences" ToolTipService.ToolTip="Preferences"
+                <AppBarButton Width="50" IsCompact="True" Label="Preferences" ToolTipService.ToolTip="Preferences (Ctrl+P on macOS)"
                               Command="{x:Bind ShellVm.PreferencesCommand, Mode=OneWay}">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE713;" />
@@ -384,7 +368,7 @@
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xED15;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <AppBarButton Width="50" IsCompact="True" Label="Help" ToolTipService.ToolTip="Help"
+                <AppBarButton Width="50" IsCompact="True" Label="Help" ToolTipService.ToolTip="Help (F1)"
                               Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE897;" />
@@ -403,9 +387,7 @@
                     <StackPanel>
                         <!-- Main Navigation Tree -->
                         <ItemsRepeater ItemsSource="{x:Bind AppState.CurrentDocument.Model.CurrentView, Mode=TwoWay}"
-                                       x:Name="NavigationTree"
-                                       ContextFlyout="{StaticResource AddStoryElementFlyout}"
-                                       ContextRequested="AddButton_ContextRequested">
+                                       x:Name="NavigationTree">
                             <ItemsRepeater.ItemTemplate>
                                 <DataTemplate x:DataType="viewmodels:StoryNodeItem">
                                     <Grid DataContext="{x:Bind}">
@@ -417,7 +399,8 @@
                                         <!-- Shows the root node out of tree, prevents creating new roots. -->
                                         <TreeViewItem Tapped="RootClick" RightTapped="TreeViewItem_RightTapped"
                                                       HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
-                                                      Background="Transparent" BorderBrush="Transparent">
+                                                      Background="Transparent" BorderBrush="Transparent"
+                                                      ContextFlyout="{StaticResource AddStoryElementFlyout}">
                                             <StackPanel Orientation="Horizontal"
                                                         Background="{x:Bind Background, Mode=OneWay}"
                                                         BorderBrush="{x:Bind  boarderBrush, Mode=OneWay}"
@@ -446,7 +429,8 @@
                                                                        BorderThickness="1"
                                                                        RightTapped="TreeViewItem_RightTapped"
                                                                        IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                                                                       CanDrag="True">
+                                                                       CanDrag="True"
+                                                                       ContextFlyout="{StaticResource AddStoryElementFlyout}">
                                                         <StackPanel Orientation="Horizontal">
                                                             <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}"
                                                                         Width="20" Height="20" />
@@ -468,8 +452,6 @@
 
                         <!-- Trash Can TreeView -->
                         <muxc:TreeView ItemsSource="{x:Bind AppState.CurrentDocument.Model.TrashView, Mode=TwoWay}"
-                                       ContextFlyout="{StaticResource AddStoryElementFlyout}"
-                                       ContextRequested="AddButton_ContextRequested"
                                        ItemInvoked="TreeViewItem_Invoked"
                                        CanDragItems="False" AllowDrop="False" CanReorderItems="False"
                                        SelectionMode="Single">
@@ -478,7 +460,8 @@
                                     <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
                                                        RightTapped="TreeViewItem_RightTapped"
                                                        IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                                                       CanDrag="False">
+                                                       CanDrag="False"
+                                                       ContextFlyout="{StaticResource AddStoryElementFlyout}">
                                         <StackPanel Orientation="Horizontal">
                                             <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20" />
                                             <TextBlock Text="{x:Bind Name, Mode=TwoWay}"

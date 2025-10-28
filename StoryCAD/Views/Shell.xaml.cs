@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.System;
 using Windows.UI.ViewManagement;
@@ -143,6 +144,10 @@ public sealed partial class Shell : Page
         {
             Windowing.MainWindow.AppWindow.Closing += OnMainWindowClosing;
         }
+
+        // Update keyboard hints for macOS (only updates context flyout)
+        // Done after all initialization to avoid flyout state issues
+        UpdateKeyboardHints();
     }
 
     /// <summary>
@@ -223,14 +228,6 @@ public sealed partial class Shell : Page
     {
         ShellVm.TreeViewNodeClicked(args.InvokedItem);
         args.Handled = true;
-    }
-
-    private void AddButton_ContextRequested(UIElement sender, ContextRequestedEventArgs args)
-    {
-        FlyoutShowOptions myOption = new();
-        myOption.ShowMode = FlyoutShowMode.Transient;
-        
-        ((CommandBarFlyout)Resources["AddStoryElementFlyout"]).ShowAt(NavigationTree, myOption);
     }
 
     private void Search(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
@@ -562,30 +559,35 @@ public sealed partial class Shell : Page
     }
 
     /// <summary>
-    /// Updates keyboard hint text to use platform-specific symbols (⌥ on macOS, Alt elsewhere)
+    /// Updates keyboard hint text to use platform-specific symbols (⌘ and ⌥ on macOS, Ctrl+ and Alt+ elsewhere)
+    /// Called once during initialization.
     /// </summary>
     private void UpdateKeyboardHints()
     {
-#if __MACOS__
-        // On macOS, replace "Alt" with the Option symbol "⌥"
-        UpdateMenuFlyoutItems(Resources["AddStoryElementFlyout"] as CommandBarFlyout);
+        // Only update on macOS - use runtime OS detection
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            return;
 
-        // Find and update the main menu items
-        var commandBar = FindVisualChild<CommandBar>(this);
-        if (commandBar != null)
+        // On macOS, replace keyboard shortcuts with macOS symbols
+        // Update context flyout (used for right-click)
+        if (Resources["AddStoryElementFlyout"] is CommandBarFlyout contextFlyout)
         {
-            foreach (var item in commandBar.PrimaryCommands.OfType<AppBarButton>())
+            UpdateMenuFlyoutItems(contextFlyout);
+        }
+
+        // Update main menu flyouts in CommandBar
+        if (Content is Grid grid && grid.Children.Count > 0 && grid.Children[0] is CommandBar commandBar)
+        {
+            foreach (var command in commandBar.PrimaryCommands.OfType<AppBarButton>())
             {
-                if (item.Flyout is MenuFlyout menuFlyout)
+                if (command.Flyout is MenuFlyout menuFlyout)
                 {
                     UpdateMenuFlyoutItems(menuFlyout);
                 }
             }
         }
-#endif
     }
 
-#if __MACOS__
     private void UpdateMenuFlyoutItems(CommandBarFlyout flyout)
     {
         if (flyout?.SecondaryCommands == null) return;
@@ -605,9 +607,13 @@ public sealed partial class Shell : Page
 
         foreach (var item in menuFlyout.Items.OfType<MenuFlyoutItem>())
         {
-            if (!string.IsNullOrEmpty(item.Text) && item.Text.Contains("Alt+"))
+            if (!string.IsNullOrEmpty(item.Text))
             {
-                item.Text = item.Text.Replace("Alt+", "⌥");
+                // Replace keyboard shortcuts with macOS symbols
+                // Order matters: replace compound keys first
+                item.Text = item.Text.Replace("Ctrl+Shift+", "⇧+⌘+");
+                item.Text = item.Text.Replace("Ctrl+", "⌘+");
+                item.Text = item.Text.Replace("Alt+", "⌥+");
             }
         }
 
@@ -616,27 +622,14 @@ public sealed partial class Shell : Page
         {
             foreach (var item in subItem.Items.OfType<MenuFlyoutItem>())
             {
-                if (!string.IsNullOrEmpty(item.Text) && item.Text.Contains("Alt+"))
+                if (!string.IsNullOrEmpty(item.Text))
                 {
-                    item.Text = item.Text.Replace("Alt+", "⌥");
+                    item.Text = item.Text.Replace("Ctrl+Shift+", "⇧+⌘+");
+                    item.Text = item.Text.Replace("Ctrl+", "⌘+");
+                    item.Text = item.Text.Replace("Alt+", "⌥+");
                 }
             }
         }
     }
 
-    private T FindVisualChild<T>(DependencyObject obj) where T : DependencyObject
-    {
-        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
-        {
-            var child = VisualTreeHelper.GetChild(obj, i);
-            if (child is T typedChild)
-                return typedChild;
-
-            var childOfChild = FindVisualChild<T>(child);
-            if (childOfChild != null)
-                return childOfChild;
-        }
-        return null;
-    }
-#endif
 }

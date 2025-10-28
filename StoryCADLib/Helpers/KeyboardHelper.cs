@@ -12,11 +12,17 @@ public static class KeyboardHelper
 {
     /// <summary>
     /// Checks if the Control key (or Cmd on macOS) is currently pressed.
+    /// On macOS, the Command key is mapped to VirtualKey.LeftWindows/RightWindows.
     /// </summary>
     public static bool IsControlPressed()
     {
-        var state = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
-        return state.HasFlag(CoreVirtualKeyStates.Down);
+        var controlState = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
+        var leftWinState = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.LeftWindows);
+        var rightWinState = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.RightWindows);
+
+        return controlState.HasFlag(CoreVirtualKeyStates.Down) ||
+               leftWinState.HasFlag(CoreVirtualKeyStates.Down) ||
+               rightWinState.HasFlag(CoreVirtualKeyStates.Down);
     }
 
     /// <summary>
