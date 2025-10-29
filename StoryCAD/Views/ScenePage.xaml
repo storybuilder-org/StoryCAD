@@ -270,10 +270,18 @@
                 </Grid>
             </PivotItem>
             <PivotItem Header="Notes">
-                <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind SceneVm.Notes, Mode=TwoWay}"
-                                                  AcceptsReturn="True"
-                                                  IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                  ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <usercontrols:RichEditBoxExtended Grid.Row="0"
+                                                      Header="Notes"
+                                                      RtfText="{x:Bind SceneVm.Notes, Mode=TwoWay}"
+                                                      AcceptsReturn="True"
+                                                      IsSpellCheckEnabled="True"
+                                                      TextWrapping="Wrap"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                </Grid>
             </PivotItem>
         </Pivot>
     </Grid>

@@ -133,10 +133,18 @@
             </PivotItem>
             <PivotItem Header="Appearance">
                 <!-- Character appearance data -->
-                <usercontrols:RichEditBoxExtended Header="Appearance" RtfText="{x:Bind CharVm.Appearance, Mode=TwoWay}"
-                                                  AcceptsReturn="True"
-                                                  IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                  ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <usercontrols:RichEditBoxExtended Grid.Row="0"
+                                                      Header="Appearance"
+                                                      RtfText="{x:Bind CharVm.Appearance, Mode=TwoWay}"
+                                                      AcceptsReturn="True"
+                                                      IsSpellCheckEnabled="True"
+                                                      TextWrapping="Wrap"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                </Grid>
             </PivotItem>
             <PivotItem Header="Relationships">
                 <Grid>
@@ -162,10 +170,18 @@
             </PivotItem>
             <PivotItem Header="Backstory">
                 <!-- Character notes data -->
-                <usercontrols:RichEditBoxExtended Header="Backstory" RtfText="{x:Bind CharVm.BackStory, Mode=TwoWay}"
-                                                  AcceptsReturn="True"
-                                                  IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                  ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <usercontrols:RichEditBoxExtended Grid.Row="0"
+                                                      Header="Backstory"
+                                                      RtfText="{x:Bind CharVm.BackStory, Mode=TwoWay}"
+                                                      AcceptsReturn="True"
+                                                      IsSpellCheckEnabled="True"
+                                                      TextWrapping="Wrap"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                </Grid>
             </PivotItem>
             <PivotItem Header="Social">
                 <!-- Character social data -->
@@ -359,9 +375,18 @@
             </PivotItem>
             <PivotItem Header="Notes">
                 <!-- Character likes data -->
-                <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind CharVm.Notes, Mode=TwoWay}"
-                                                  AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                  ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <usercontrols:RichEditBoxExtended Grid.Row="0"
+                                                      Header="Notes"
+                                                      RtfText="{x:Bind CharVm.Notes, Mode=TwoWay}"
+                                                      AcceptsReturn="True"
+                                                      IsSpellCheckEnabled="True"
+                                                      TextWrapping="Wrap"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                </Grid>
             </PivotItem>
         </Pivot>
     </Grid>

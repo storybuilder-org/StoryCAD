@@ -17,13 +17,10 @@ public partial class RichEditBoxExtended : TextBox
         // Debug: Log which version is running
         //System.Diagnostics.Debug.WriteLine("=== RichEditBoxExtended: UNO PLATFORM VERSION (TextBox) ===");
 
-        TextWrapping = TextWrapping.Wrap;
-        AcceptsReturn = true;  // Enable multi-line text entry for proper text wrapping
-
-        // Prevent horizontal growth: disable horizontal scrolling & zoom
+        // Only set properties that prevent layout issues
+        // Let XAML control TextWrapping, AcceptsReturn, and VerticalScrollBarVisibility
         ScrollViewer.SetHorizontalScrollBarVisibility(this, ScrollBarVisibility.Disabled);
         ScrollViewer.SetHorizontalScrollMode(this, ScrollMode.Disabled);
-        ScrollViewer.SetVerticalScrollBarVisibility(this, ScrollBarVisibility.Auto);
         ScrollViewer.SetZoomMode(this, ZoomMode.Disabled);
 
         TextChanged += RichEditBoxExtended_TextChanged;

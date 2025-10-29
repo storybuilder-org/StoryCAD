@@ -47,30 +47,43 @@
             </PivotItem>
 
             <PivotItem Header="Concept">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <usercontrols:RichEditBoxExtended Header="Concept"
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <usercontrols:RichEditBoxExtended Grid.Row="0"
+                                                      Header="Concept"
                                                       RtfText="{x:Bind OverviewVm.Concept, Mode=TwoWay}"
                                                       AcceptsReturn="True"
-                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                                                      IsSpellCheckEnabled="True"
+                                                      TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible"
                                                       PlaceholderText="Use 'What if?' and 'What happens is' to flesh out your idea." />
-                </ScrollViewer>
+                </Grid>
             </PivotItem>
             <PivotItem Header="Premise">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel>
-                        <ComboBox Header="Story Problem" IsEditable="False" MinWidth="300"
-                                  DisplayMemberPath="Name"
-                                  SelectedItem="{x:Bind OverviewVm.SelectedProblem, Mode=TwoWay}"
-                                  ItemsSource="{x:Bind OverviewVm.Problems, Mode=OneWay}" />
-                        <usercontrols:RichEditBoxExtended Header="Premise" Margin="0,10,0,0"
-                                                          RtfText="{x:Bind OverviewVm.Premise, Mode=TwoWay}"
-                                                          AcceptsReturn="True"
-                                                          IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                                          PlaceholderText="A [character] in a situation [genre, setting] wants something [goal], which brings him into [conflict] with a second character [opposition]. After [a series of conflicts], the [final battle] erupts, and [the protagonist] finally [resolves] the conflict." />
-                    </StackPanel>
-                </ScrollViewer>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <ComboBox Grid.Row="0"
+                              Header="Story Problem"
+                              IsEditable="False"
+                              MinWidth="300"
+                              DisplayMemberPath="Name"
+                              SelectedItem="{x:Bind OverviewVm.SelectedProblem, Mode=TwoWay}"
+                              ItemsSource="{x:Bind OverviewVm.Problems, Mode=OneWay}" />
+                    <usercontrols:RichEditBoxExtended Grid.Row="1"
+                                                      Header="Premise"
+                                                      Margin="0,10,0,0"
+                                                      RtfText="{x:Bind OverviewVm.Premise, Mode=TwoWay}"
+                                                      AcceptsReturn="True"
+                                                      IsSpellCheckEnabled="True"
+                                                      TextWrapping="Wrap"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                                      PlaceholderText="A [character] in a situation [genre, setting] wants something [goal], which brings him into [conflict] with a second character [opposition]. After [a series of conflicts], the [final battle] erupts, and [the protagonist] finally [resolves] the conflict." />
+                </Grid>
             </PivotItem>
 
             <PivotItem Header="Structure">
@@ -151,12 +164,18 @@
             </PivotItem>
 
             <PivotItem Header="Notes">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind OverviewVm.Notes, Mode=TwoWay}"
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <usercontrols:RichEditBoxExtended Grid.Row="0"
+                                                      Header="Notes"
+                                                      RtfText="{x:Bind OverviewVm.Notes, Mode=TwoWay}"
                                                       AcceptsReturn="True"
-                                                      IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                                                      IsSpellCheckEnabled="True"
+                                                      TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
-                </ScrollViewer>
+                </Grid>
             </PivotItem>
         </Pivot>
     </Grid>

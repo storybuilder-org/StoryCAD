@@ -172,11 +172,15 @@
                                           Text="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}" Grid.Row="0" />
                             </Expander.Header>
                             <Expander.Content>
-                                <usercontrols:RichEditBoxExtended
-                                    RtfText="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}" Grid.Row="3"
-                                    TextWrapping="Wrap" IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}"
-                                    Header="Beat Sheet Description:"
-                                    HorizontalAlignment="Stretch" />
+                                <usercontrols:RichEditBoxExtended Grid.Row="3"
+                                                                  Header="Beat Sheet Description:"
+                                                                  RtfText="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}"
+                                                                  IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}"
+                                                                  AcceptsReturn="False"
+                                                                  IsSpellCheckEnabled="False"
+                                                                  TextWrapping="Wrap"
+                                                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                                  HorizontalAlignment="Stretch" />
                             </Expander.Content>
                         </Expander>
 
@@ -277,10 +281,14 @@
                                                     Background="{ThemeResource SystemControlForegroundBaseLowBrush}"
                                                     Height="1" />
 
-                                                <usercontrols:RichEditBoxExtended HorizontalAlignment="Stretch"
-                                                        Header="Element Desription"
-                                                        RtfText="{x:Bind ElementDescription, Mode=OneWay}"
-                                                        IsReadOnly="True" TextWrapping="Wrap" TextAlignment="Left" />
+                                                <usercontrols:RichEditBoxExtended Header="Element Description"
+                                                                                  HorizontalAlignment="Stretch"
+                                                                                  RtfText="{x:Bind ElementDescription, Mode=OneWay}"
+                                                                                  IsReadOnly="True"
+                                                                                  AcceptsReturn="False"
+                                                                                  IsSpellCheckEnabled="False"
+                                                                                  TextWrapping="Wrap"
+                                                                                  ScrollViewer.VerticalScrollBarVisibility="Auto" />
                                             </StackPanel>
                                         </Expander.Content>
                                     </Expander>
@@ -291,9 +299,18 @@
                 </Grid>
             </PivotItem>
             <PivotItem Header="Notes">
-                <usercontrols:RichEditBoxExtended Header="Notes" RtfText="{x:Bind ProblemVm.Notes, Mode=TwoWay}"
-                                                  AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                  ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <usercontrols:RichEditBoxExtended Grid.Row="0"
+                                                      Header="Notes"
+                                                      RtfText="{x:Bind ProblemVm.Notes, Mode=TwoWay}"
+                                                      AcceptsReturn="True"
+                                                      IsSpellCheckEnabled="True"
+                                                      TextWrapping="Wrap"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                </Grid>
             </PivotItem>
         </Pivot>
     </Grid>
