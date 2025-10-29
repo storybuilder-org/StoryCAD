@@ -98,14 +98,18 @@ public partial class Windowing
         if (TryWmhCall(window, "Resize", widthDip, heightDip))
             return;
 
-        // 2) Windows + real HWND → precise Win32 sizing
+        // 2) macOS - skip resizing, use system default window size
+        if (OperatingSystem.IsMacOS())
+            return;
+
+        // 3) Windows + real HWND → precise Win32 sizing
         if (OperatingSystem.IsWindows() && IsValidWin32Handle(WindowHandle))
         {
             SetWindowPos(WindowHandle, IntPtr.Zero, 0, 0, widthDip, heightDip, SWP_NOZORDER | SWP_SHOWWINDOW);
             return;
         }
 
-        // 3) Cross-platform fallback (no DisplayArea)
+        // 4) Cross-platform fallback using AppWindow
         var appWindow = GetAppWindow(window);
         appWindow.Resize(new SizeInt32 { Width = widthDip, Height = heightDip });
     }
