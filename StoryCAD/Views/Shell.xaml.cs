@@ -38,7 +38,11 @@ public sealed partial class Shell : Page
             Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
             Loaded += Shell_Loaded;
             AppState.CurrentDocumentChanged += (_, __) => UpdateDocumentBindings();
-            SerializationLock.CanExecuteStateChanged += (_, __) => ShellVm.RefreshAllCommands();
+            // Marshal to UI thread to prevent cross-thread deadlock when AutoSave fires this event
+            SerializationLock.CanExecuteStateChanged += (_, __) =>
+            {
+                Windowing.GlobalDispatcher.TryEnqueue(() => ShellVm.RefreshAllCommands());
+            };
         }
         catch (Exception ex)
         {
