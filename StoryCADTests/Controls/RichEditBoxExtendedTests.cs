@@ -46,7 +46,7 @@ namespace StoryCADTests.Controls
             // Assert
             Assert.AreEqual(TextWrapping.Wrap, richEditBox.TextWrapping,
                 "TextWrapping should be set to Wrap for proper text wrapping behavior");
-        }oh 
+        } 
 
         [TestMethod]
         public void RtfText_WhenSet_UpdatesCorrectly()
