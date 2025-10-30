@@ -6,7 +6,6 @@ namespace StoryCADTests.DAL;
 /// <summary>
 /// Windows-specific tests for StoryIO that test Windows-specific path validation
 /// </summary>
-[TestClass]
 public partial class StoryIOTests
 {
     [TestMethod]

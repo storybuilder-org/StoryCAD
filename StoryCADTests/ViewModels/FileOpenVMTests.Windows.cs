@@ -8,10 +8,9 @@ namespace StoryCADTests.ViewModels;
 /// <summary>
 /// Windows-specific tests for FileOpenVM that require UI controls
 /// </summary>
-[TestClass]
 public partial class FileOpenVMTests
 {
-    [UITestMethod]
+    [TestMethod]
     [TestCategory("Windows")]
     public void ConfirmClicked_WithNoRecentIndex_DoesNotThrow()
     {
