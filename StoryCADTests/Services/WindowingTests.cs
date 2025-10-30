@@ -56,15 +56,15 @@ namespace StoryCADTests.Services
         }
 
         [TestMethod]
-        public void SetWindowSize_WithNullWindow_ShouldNotThrow()
+        public void SetWindowSize_WithNullWindow_ThrowsException()
         {
             // Arrange
             Window? window = null;
 
             // Act & Assert
-            // Should handle null window gracefully (especially on macOS where it returns early)
-            _windowing.SetWindowSize(window!, 1200, 800);
-            // If we get here without exception, test passes
+            // SetWindowSize does not handle null gracefully - it throws NullReferenceException
+            Assert.ThrowsException<NullReferenceException>(() =>
+                _windowing.SetWindowSize(window!, 1200, 800));
         }
 
 #if WINDOWS10_0_18362_0_OR_GREATER

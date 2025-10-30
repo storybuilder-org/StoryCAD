@@ -27,6 +27,7 @@ namespace StoryCADTests.Controls
         // They are excluded from desktop head (macOS/Linux) builds
 
         [TestMethod]
+        [Ignore("Requires UI thread - cannot run in headless CI.")]
         public void Constructor_WhenCreated_SetsAcceptsReturnTrue()
         {
             // Arrange & Act
@@ -38,6 +39,7 @@ namespace StoryCADTests.Controls
         }
 
         [TestMethod]
+        [Ignore("Requires UI thread - cannot run in headless CI.")]
         public void Constructor_WhenCreated_SetsTextWrappingToWrap()
         {
             // Arrange & Act
@@ -46,9 +48,10 @@ namespace StoryCADTests.Controls
             // Assert
             Assert.AreEqual(TextWrapping.Wrap, richEditBox.TextWrapping,
                 "TextWrapping should be set to Wrap for proper text wrapping behavior");
-        } 
+        }
 
         [TestMethod]
+        [Ignore("Requires UI thread - cannot run in headless CI.")]
         public void RtfText_WhenSet_UpdatesCorrectly()
         {
             // Arrange
