@@ -22,6 +22,10 @@ namespace StoryCADTests.Controls
             }
         }
 
+#if WINDOWS10_0_18362_0_OR_GREATER
+        // These tests require UI dispatcher initialization which is only available on Windows with WinAppSDK head
+        // They are excluded from desktop head (macOS/Linux) builds
+
         [TestMethod]
         public void Constructor_WhenCreated_SetsAcceptsReturnTrue()
         {
@@ -42,7 +46,7 @@ namespace StoryCADTests.Controls
             // Assert
             Assert.AreEqual(TextWrapping.Wrap, richEditBox.TextWrapping,
                 "TextWrapping should be set to Wrap for proper text wrapping behavior");
-        }
+        } 
 
         [TestMethod]
         public void RtfText_WhenSet_UpdatesCorrectly()
@@ -57,5 +61,6 @@ namespace StoryCADTests.Controls
             // Assert
             Assert.IsNotNull(richEditBox.RtfText, "RtfText should not be null after setting");
         }
+#endif
     }
 }
