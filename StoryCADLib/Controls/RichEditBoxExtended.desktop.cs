@@ -14,8 +14,8 @@ public partial class RichEditBoxExtended : TextBox
 
     public RichEditBoxExtended()
     {
-        // Debug: Log which version is running
-        //System.Diagnostics.Debug.WriteLine("=== RichEditBoxExtended: UNO PLATFORM VERSION (TextBox) ===");
+        TextWrapping = TextWrapping.Wrap;
+        AcceptsReturn = true;  // Enable multi-line text entry for proper text wrapping
 
         // Only set properties that prevent layout issues
         // Let XAML control TextWrapping, AcceptsReturn, and VerticalScrollBarVisibility
@@ -24,7 +24,7 @@ public partial class RichEditBoxExtended : TextBox
         ScrollViewer.SetZoomMode(this, ZoomMode.Disabled);
 
         TextChanged += RichEditBoxExtended_TextChanged;
-        //SizeChanged += RichEditBoxExtended_SizeChanged;
+        SizeChanged += RichEditBoxExtended_SizeChanged;
     }
 
     public string RtfText
@@ -57,27 +57,15 @@ public partial class RichEditBoxExtended : TextBox
         // No-op for TextBox version
     }
 
-    //protected override Size MeasureOverride(Size availableSize)
-    //{
-        
-    //    System.Diagnostics.Debug.WriteLine($"=== MeasureOverride: availableSize.Width={availableSize.Width}, availableSize.Height={availableSize.Height}");
-
-    //    if (double.IsInfinity(availableSize.Width))
-    //    {
-    //        // Return 0 width to let HorizontalAlignment="Stretch" handle sizing
-    //        var result = base.MeasureOverride(new Size(0, availableSize.Height));
-    //        System.Diagnostics.Debug.WriteLine($"=== MeasureOverride (forced 0): result.Width={result.Width}, result.Height={result.Height}");
-    //        return result;
-    //    }
-
-    //    var normalResult = base.MeasureOverride(availableSize);
-    //    System.Diagnostics.Debug.WriteLine($"=== MeasureOverride: result.Width={normalResult.Width}, result.Height={normalResult.Height}");
-    //    return normalResult;
-    //}
-
     private void RichEditBoxExtended_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        System.Diagnostics.Debug.WriteLine($"=== SizeChanged: PreviousSize={e.PreviousSize}, NewSize={e.NewSize}");
-        this.MeasureOverride(e.NewSize);
+        if (_lockChangeExecution) return;
+        _lockChangeExecution = true;
+        RtfText = Text;
+        _lockChangeExecution = false;
+
+        // Force re-measure when text changes to trigger wrapping check
+        InvalidateMeasure();
+        InvalidateArrange();
     }
 }
