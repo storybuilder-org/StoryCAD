@@ -901,16 +901,13 @@ public class OutlineService
         }
 
 
-        using (var serializationLock = new SerializationLock(_log))
+        if (!model.StoryElements.StoryElementGuids.TryGetValue(guid, out var element))
         {
-            if (!model.StoryElements.StoryElementGuids.TryGetValue(guid, out var element))
-            {
-                throw new InvalidOperationException($"StoryElement with GUID {guid} not found");
-            }
-
-            _log.Log(LogLevel.Info, $"Retrieved StoryElement {element.Name} with GUID {guid}");
-            return element;
+            throw new InvalidOperationException($"StoryElement with GUID {guid} not found");
         }
+
+        _log.Log(LogLevel.Info, $"Retrieved StoryElement {element.Name} with GUID {guid}");
+        return element;
     }
 
     /// <summary>
