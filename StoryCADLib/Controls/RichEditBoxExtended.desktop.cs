@@ -23,6 +23,7 @@ public partial class RichEditBoxExtended : TextBox
         ScrollViewer.SetHorizontalScrollMode(this, ScrollMode.Disabled);
         ScrollViewer.SetZoomMode(this, ZoomMode.Disabled);
 
+        Loaded += RichEditBoxExtended_Loaded;
         TextChanged += RichEditBoxExtended_TextChanged;
         SizeChanged += RichEditBoxExtended_SizeChanged;
     }
@@ -57,15 +58,29 @@ public partial class RichEditBoxExtended : TextBox
         // No-op for TextBox version
     }
 
-    private void RichEditBoxExtended_SizeChanged(object sender, SizeChangedEventArgs e)
+    private void RichEditBoxExtended_Loaded(object sender, RoutedEventArgs e)
     {
+        // Force re-measure when window size changes to trigger text wrapping  
+        InvalidateMeasure();
+        InvalidateArrange();
+        UpdateLayout();
+
         if (_lockChangeExecution) return;
         _lockChangeExecution = true;
         RtfText = Text;
         _lockChangeExecution = false;
+    }
 
-        // Force re-measure when text changes to trigger wrapping check
+    private void RichEditBoxExtended_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        // Force re-measure when window size changes to trigger text wrapping  
         InvalidateMeasure();
         InvalidateArrange();
+        UpdateLayout();
+
+        if (_lockChangeExecution) return;
+        _lockChangeExecution = true;
+        RtfText = Text;
+        _lockChangeExecution = false;
     }
 }
