@@ -90,19 +90,6 @@ namespace StoryCADTests.Services
         }
 #endif
 
-#if __MACOS__
-        [TestMethod]
-        public void CenterOnScreen_OnMacOS_UsesNSWindow()
-        {
-            // This test verifies macOS implementation
-            // Actual window centering requires NSWindow which is not available in unit tests
-
-            // Test would verify NSWindow.Center() is called
-            // but requires UI thread and actual window instance
-            Assert.Inconclusive("macOS window centering requires NSWindow instance");
-        }
-#endif
-
         #region TDD Tests for SRP Refactoring and DPI Scaling
 
         [TestMethod]

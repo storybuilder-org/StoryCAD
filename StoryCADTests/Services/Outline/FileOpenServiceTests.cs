@@ -117,7 +117,7 @@ public class FileOpenServiceTests
     public async Task UpdateRecents_AddsPathToRecentFiles()
     {
         // Arrange
-        var testPath = @"C:\test\file.stbx";
+        var testPath = Path.Combine(Path.GetTempPath(), "test", "file.stbx");
         _preferences.Model.RecentFiles.Clear();
 
         // Act
@@ -132,8 +132,8 @@ public class FileOpenServiceTests
     public async Task UpdateRecents_MovesExistingPathToTop()
     {
         // Arrange
-        var testPath1 = @"C:\test\file1.stbx";
-        var testPath2 = @"C:\test\file2.stbx";
+        var testPath1 = Path.Combine(Path.GetTempPath(), "test", "file1.stbx");
+        var testPath2 = Path.Combine(Path.GetTempPath(), "test", "file2.stbx");
         _preferences.Model.RecentFiles.Clear();
         _preferences.Model.RecentFiles.Add(testPath1);
         _preferences.Model.RecentFiles.Add(testPath2);
@@ -154,15 +154,16 @@ public class FileOpenServiceTests
         _preferences.Model.RecentFiles.Clear();
         for (var i = 0; i < 15; i++)
         {
-            _preferences.Model.RecentFiles.Add($@"C:\test\file{i}.stbx");
+            _preferences.Model.RecentFiles.Add(Path.Combine(Path.GetTempPath(), "test", $"file{i}.stbx"));
         }
 
         // Act
-        await _fileOpenService.UpdateRecents(@"C:\test\newfile.stbx");
+        var newFilePath = Path.Combine(Path.GetTempPath(), "test", "newfile.stbx");
+        await _fileOpenService.UpdateRecents(newFilePath);
 
         // Assert
         Assert.AreEqual(10, _preferences.Model.RecentFiles.Count);
-        Assert.AreEqual(@"C:\test\newfile.stbx", _preferences.Model.RecentFiles[0]);
+        Assert.AreEqual(newFilePath, _preferences.Model.RecentFiles[0]);
     }
 
     [TestMethod]
@@ -170,7 +171,7 @@ public class FileOpenServiceTests
     {
         // Arrange
         _preferences.Model.RecentFiles.Clear();
-        _preferences.Model.RecentFiles.Add(@"C:\test\file.stbx");
+        _preferences.Model.RecentFiles.Add(Path.Combine(Path.GetTempPath(), "test", "file.stbx"));
         var initialCount = _preferences.Model.RecentFiles.Count;
 
         // Act
@@ -185,7 +186,7 @@ public class FileOpenServiceTests
     {
         // Arrange
         _preferences.Model.RecentFiles.Clear();
-        _preferences.Model.RecentFiles.Add(@"C:\test\file.stbx");
+        _preferences.Model.RecentFiles.Add(Path.Combine(Path.GetTempPath(), "test", "file.stbx"));
         var initialCount = _preferences.Model.RecentFiles.Count;
 
         // Act
@@ -218,7 +219,7 @@ public class FileOpenServiceTests
         // Act & Assert
         // This should NOT crash with ArgumentNullException
         // In headless mode, file picker returns null and method returns early
-        await _fileOpenService.OpenFile(@"C:\test\somefile.stbx");
+        await _fileOpenService.OpenFile(Path.Combine(Path.GetTempPath(), "test", "somefile.stbx"));
 
         // If we get here without exception, the test passes
         Assert.IsTrue(true);

@@ -24,7 +24,7 @@ public class StoryDocumentTests
     {
         // Arrange
         var model = new StoryModel();
-        const string path = @"C:\Stories\MyStory.stbx";
+        var path = Path.Combine(Path.GetTempPath(), "Stories", "MyStory.stbx");
 
         // Act
         var document = new StoryDocument(model, path);
@@ -39,7 +39,7 @@ public class StoryDocumentTests
     {
         // Arrange
         var document = new StoryDocument(new StoryModel());
-        const string newPath = @"C:\Stories\NewPath.stbx";
+        var newPath = Path.Combine(Path.GetTempPath(), "Stories", "NewPath.stbx");
 
         // Act
         document.FilePath = newPath;

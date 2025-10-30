@@ -481,7 +481,7 @@ public class OutlineViewModelTests
         // Arrange
         var appState = Ioc.Default.GetRequiredService<AppState>();
         var storyModel = new StoryModel();
-        appState.CurrentDocument = new StoryDocument(storyModel, @"C:\test.stbx");
+        appState.CurrentDocument = new StoryDocument(storyModel, Path.Combine(Path.GetTempPath(), "test.stbx"));
 
         // We can't easily test the full SaveFile method without setting up a lot of state,
         // but we can verify that OutlineViewModel has EditFlushService injected

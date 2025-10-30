@@ -12,7 +12,7 @@ public class AppStateTests
         // Arrange
         var appState = new AppState();
         var model = new StoryModel();
-        var document = new StoryDocument(model, @"C:\test.stbx");
+        var document = new StoryDocument(model, Path.Combine(Path.GetTempPath(), "test.stbx"));
 
         // Act
         appState.CurrentDocument = document;

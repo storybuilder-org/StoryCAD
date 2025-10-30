@@ -11,7 +11,7 @@ using StoryCADLib.ViewModels.SubViewModels;
 namespace StoryCADTests.DAL;
 
 [TestClass]
-public class StoryIOTests
+public partial class StoryIOTests
 {
     private AppState _appState;
     private ILogService _logService;
@@ -146,24 +146,6 @@ public class StoryIOTests
         }
     }
 
-    [TestMethod]
-    public void IsValidPath_WithInvalidPath_ReturnsFalse()
-    {
-        // Note: This test only works reliably on Windows where invalid path characters are well-defined
-        // On Unix-like systems, most characters are valid and IsValidPath creates directories,
-        // making it difficult to test invalid paths safely
-        if (!OperatingSystem.IsWindows())
-        {
-            Assert.Inconclusive("This test is only reliable on Windows due to platform differences in path validation");
-            return;
-        }
-
-        // Arrange - Windows doesn't allow these characters in filenames
-        var invalidPath = Path.Combine(Path.GetTempPath(), "test<>:|?.stbx");
-
-        // Act & Assert
-        Assert.IsFalse(StoryIO.IsValidPath(invalidPath));
-    }
 
     [TestMethod]
     public async Task ReadStory_FullFile_LoadsAllProperties()
