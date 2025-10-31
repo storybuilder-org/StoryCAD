@@ -36,13 +36,21 @@
                                  Text="{x:Bind OverviewVm.DateModified, Mode=TwoWay}"/>
                     </Grid>
 
-                    <usercontrols:RichEditBoxExtended Header="Story Idea" Grid.Row="2"
+                    <!-- Testing plain TextBox to diagnose Mac wrapping issue -->
+                    <!--<usercontrols:RichEditBoxExtended Header="Story Idea" Grid.Row="2"
                                                                               RtfText="{x:Bind OverviewVm.Description, Mode=TwoWay}"
                                                                               TextWrapping="Wrap"
                                                                               AcceptsReturn="True"
                                                                               IsSpellCheckEnabled="True"
                                                                               ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                                                              PlaceholderText="Record whatever idea or incident made you think 'story'." />
+                                                                              PlaceholderText="Record whatever idea or incident made you think 'story'." />-->
+                    <TextBox Header="Story Idea" Grid.Row="2"
+                             Text="{x:Bind OverviewVm.Description, Mode=TwoWay}"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             IsSpellCheckEnabled="True"
+                             ScrollViewer.VerticalScrollBarVisibility="Visible"
+                             PlaceholderText="Record whatever idea or incident made you think 'story'." />
                 </Grid>
             </PivotItem>
 
