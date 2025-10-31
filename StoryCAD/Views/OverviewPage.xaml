@@ -11,14 +11,15 @@
         </Grid.RowDefinitions>
         <TextBox Header="Title" Text="{x:Bind OverviewVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  Margin="10,10,10,0" />
-        <Pivot Grid.Row="1">
+        <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
 
-            <PivotItem Header="Story Idea">
+            <TabView.TabItems>
+                <TabViewItem Header="Story Idea" IsClosable="False">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>  <!-- Author -->
                         <RowDefinition Height="Auto"/>  <!-- Dates -->
-                        <RowDefinition Height="*"/>         <!-- Rtf editor fills the rest -->
+                        <RowDefinition Height="*"/>     <!-- Story Idea textbox fills remaining space -->
                     </Grid.RowDefinitions>
 
                     <TextBox Grid.Row="0"
@@ -49,12 +50,12 @@
                              TextWrapping="Wrap"
                              AcceptsReturn="True"
                              IsSpellCheckEnabled="True"
-                             ScrollViewer.VerticalScrollBarVisibility="Visible"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
                              PlaceholderText="Record whatever idea or incident made you think 'story'." />
                 </Grid>
-            </PivotItem>
+                </TabViewItem>
 
-            <PivotItem Header="Concept">
+                <TabViewItem Header="Concept" IsClosable="False">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -71,8 +72,9 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible"
                                                       PlaceholderText="Use 'What if?' and 'What happens is' to flesh out your idea." />
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="Premise">
+                </TabViewItem>
+
+                <TabViewItem Header="Premise" IsClosable="False">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -95,9 +97,9 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible"
                                                       PlaceholderText="A [character] in a situation [genre, setting] wants something [goal], which brings him into [conflict] with a second character [opposition]. After [a series of conflicts], the [final battle] erupts, and [the protagonist] finally [resolves] the conflict." />
                 </Grid>
-            </PivotItem>
+                </TabViewItem>
 
-            <PivotItem Header="Structure">
+                <TabViewItem Header="Structure" IsClosable="False">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -172,9 +174,9 @@
                                                           ScrollViewer.VerticalScrollBarVisibility="Visible" />
                     </Grid>
                 </ScrollViewer>
-            </PivotItem>
+                </TabViewItem>
 
-            <PivotItem Header="Notes">
+                <TabViewItem Header="Notes" IsClosable="False">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -187,7 +189,8 @@
                                                       TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
-            </PivotItem>
-        </Pivot>
+                </TabViewItem>
+            </TabView.TabItems>
+        </TabView>
     </Grid>
 </Page>

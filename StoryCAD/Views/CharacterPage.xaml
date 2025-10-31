@@ -13,8 +13,9 @@
         <TextBox Header="Name" Text="{x:Bind CharVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  viewModels:TextBoxFocus.IsFocused="{x:Bind CharVm.IsTextBoxFocused, Mode=TwoWay}"
                  Margin="10,10,10,0" HorizontalAlignment="Stretch" />
-        <Pivot Grid.Row="1">
-            <PivotItem Header="Role">
+        <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
+            <TabView.TabItems>
+                <TabViewItem Header="Role" IsClosable="False">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -37,8 +38,8 @@
                                                       TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="Physical">
+                </TabViewItem>
+                <TabViewItem Header="Physical" IsClosable="False">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -130,8 +131,8 @@
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="Appearance">
+                </TabViewItem>
+                <TabViewItem Header="Appearance" IsClosable="False">
                 <!-- Character appearance data -->
                 <Grid>
                     <Grid.RowDefinitions>
@@ -145,13 +146,13 @@
                                                       TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="Relationships">
+                </TabViewItem>
+                <TabViewItem Header="Relationships" IsClosable="False">
                 <Grid>
                     <usercontrols:RelationshipView />
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="Flaw">
+                </TabViewItem>
+                <TabViewItem Header="Flaw" IsClosable="False">
                 <!-- Character flaw data (heights of RichEditBoxes were "110") -->
                 <Grid>
                     <Grid.RowDefinitions>
@@ -167,8 +168,8 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible"
                                                       PlaceholderText="The trauma, fear, lie or secret that sabotages your character." />
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="Backstory">
+                </TabViewItem>
+                <TabViewItem Header="Backstory" IsClosable="False">
                 <!-- Character notes data -->
                 <Grid>
                     <Grid.RowDefinitions>
@@ -182,8 +183,8 @@
                                                       TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="Social">
+                </TabViewItem>
+                <TabViewItem Header="Social" IsClosable="False">
                 <!-- Character social data -->
                 <Grid>
                     <Grid.RowDefinitions>
@@ -213,8 +214,8 @@
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="Psychological">
+                </TabViewItem>
+                <TabViewItem Header="Psychological" IsClosable="False">
                 <!-- Character psychological data -->
                 <Grid>
                     <Grid.RowDefinitions>
@@ -265,8 +266,8 @@
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="Inner Traits">
+                </TabViewItem>
+                <TabViewItem Header="Inner Traits" IsClosable="False">
                 <Grid HorizontalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*" />
@@ -333,8 +334,8 @@
                               Text="{x:Bind CharVm.Stability, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Stability, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="Outer Traits">
+                </TabViewItem>
+                <TabViewItem Header="Outer Traits" IsClosable="False">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -372,8 +373,8 @@
                         </Button>
                     </Grid>
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="Notes">
+                </TabViewItem>
+                <TabViewItem Header="Notes" IsClosable="False">
                 <!-- Character likes data -->
                 <Grid>
                     <Grid.RowDefinitions>
@@ -387,7 +388,8 @@
                                                       TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
-            </PivotItem>
-        </Pivot>
+                </TabViewItem>
+            </TabView.TabItems>
+        </TabView>
     </Grid>
 </Page>
