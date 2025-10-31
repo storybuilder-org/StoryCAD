@@ -64,11 +64,6 @@ public partial class RichEditBoxExtended : TextBox
         InvalidateMeasure();
         InvalidateArrange();
         UpdateLayout();
-
-        if (_lockChangeExecution) return;
-        _lockChangeExecution = true;
-        RtfText = Text;
-        _lockChangeExecution = false;
     }
 
     private void RichEditBoxExtended_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -77,10 +72,5 @@ public partial class RichEditBoxExtended : TextBox
         InvalidateMeasure();
         InvalidateArrange();
         UpdateLayout();
-
-        if (_lockChangeExecution) return;
-        _lockChangeExecution = true;
-        RtfText = Text;
-        _lockChangeExecution = false;
     }
 }
