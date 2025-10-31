@@ -61,11 +61,23 @@ namespace StoryCADTests.Services
             Window? window = null;
 
             // Act & Assert
-            // macOS: Returns early without throwing (line 102-103 in Windowing.desktop.cs)
-            // Windows: Would throw NullReferenceException when accessing GetAppWindow()
-            // This test just verifies macOS behavior - returns without exception
-            _windowing.SetWindowSize(window!, 1200, 800);
-            // If we get here on macOS, test passes (early return on line 103)
+            if (OperatingSystem.IsMacOS())
+            {
+                // macOS: Returns early without throwing (line 102-103 in Windowing.desktop.cs)
+                _windowing.SetWindowSize(window!, 1200, 800);
+                // If we get here on macOS, test passes (early return on line 103)
+            }
+            else if (OperatingSystem.IsWindows())
+            {
+                // Windows: Throws NullReferenceException when accessing GetAppWindow()
+                Assert.ThrowsExactly<NullReferenceException>(() =>
+                    _windowing.SetWindowSize(window!, 1200, 800));
+            }
+            else
+            {
+                // Other platforms: behavior undefined, mark as inconclusive
+                Assert.Inconclusive("Test behavior not defined for this platform");
+            }
         }
 
 #if WINDOWS10_0_18362_0_OR_GREATER
