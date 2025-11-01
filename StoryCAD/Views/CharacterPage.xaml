@@ -14,6 +14,10 @@
                  viewModels:TextBoxFocus.IsFocused="{x:Bind CharVm.IsTextBoxFocused, Mode=TwoWay}"
                  Margin="10,10,10,0" HorizontalAlignment="Stretch" />
         <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
+            <TabView.Resources>
+                <!-- Increase from 32px default to 44px for touch accessibility (WCAG 2.1 Level AAA) -->
+                <x:Double x:Key="TabViewItemHeaderMinHeight">44</x:Double>
+            </TabView.Resources>
             <TabView.TabItems>
                 <TabViewItem Header="Role" IsClosable="False">
                 <Grid>

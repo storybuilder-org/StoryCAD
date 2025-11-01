@@ -28,8 +28,13 @@
         <TextBox Header="Name" Text="{x:Bind SceneVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  viewModels:TextBoxFocus.IsFocused="{x:Bind SceneVm.IsTextBoxFocused, Mode=TwoWay}"
                  Margin="10,10,10,0" />
-        <Pivot Grid.Row="1">
-            <PivotItem Header="Scene">
+        <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
+            <TabView.Resources>
+                <!-- Increase from 32px default to 44px for touch accessibility (WCAG 2.1 Level AAA) -->
+                <x:Double x:Key="TabViewItemHeaderMinHeight">44</x:Double>
+            </TabView.Resources>
+            <TabView.TabItems>
+                <TabViewItem Header="Scene" IsClosable="False">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -80,8 +85,8 @@
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="Cast">
+                </TabViewItem>
+                <TabViewItem Header="Cast" IsClosable="False">
                 <StackPanel HorizontalAlignment="Left">
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
@@ -121,8 +126,8 @@
                         </ListView>
                     </ScrollViewer>
                 </StackPanel>
-            </PivotItem>
-            <PivotItem Header="Development">
+                </TabViewItem>
+                <TabViewItem Header="Development" IsClosable="False">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -183,8 +188,8 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible"
                                                       PlaceholderText="(Inner Conflict/Effect) How your protagonist changes or what she learns. (Consider Sequel.)" />
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="Conflict">
+                </TabViewItem>
+                <TabViewItem Header="Conflict" IsClosable="False">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -246,8 +251,8 @@
                               PlaceholderText="{x:Bind SceneVm.Outcome, Mode=TwoWay}"
                               HorizontalAlignment="Left" />
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="Sequel">
+                </TabViewItem>
+                <TabViewItem Header="Sequel" IsClosable="False">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -268,8 +273,8 @@
                               Text="{x:Bind SceneVm.NewGoal, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.NewGoal, Mode=TwoWay}" />
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="Notes">
+                </TabViewItem>
+                <TabViewItem Header="Notes" IsClosable="False">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -282,8 +287,9 @@
                                                       TextWrapping="Wrap"
                                                       ScrollViewer.VerticalScrollBarVisibility="Visible" />
                 </Grid>
-            </PivotItem>
-        </Pivot>
+                </TabViewItem>
+            </TabView.TabItems>
+        </TabView>
     </Grid>
 
 </Page>

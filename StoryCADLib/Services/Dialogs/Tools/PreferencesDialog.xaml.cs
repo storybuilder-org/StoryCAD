@@ -42,7 +42,7 @@ public sealed partial class PreferencesDialog
         //Dev Menu is only shown on unofficial builds
         if (!State.DeveloperBuild)
         {
-            PivotView.Items.Remove(Dev);
+            PivotView.TabItems.Remove(Dev);
         }
     }
 

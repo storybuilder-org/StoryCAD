@@ -28,8 +28,13 @@
         </Grid>
 
 
-        <Pivot>
-            <PivotItem Header="Problems" TabIndex="0">
+        <TabView TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
+            <TabView.Resources>
+                <!-- Increase from 32px default to 44px for touch accessibility (WCAG 2.1 Level AAA) -->
+                <x:Double x:Key="TabViewItemHeaderMinHeight">44</x:Double>
+            </TabView.Resources>
+            <TabView.TabItems>
+                <TabViewItem Header="Problems" IsClosable="False" TabIndex="0">
                 <StackPanel>
                     <CheckBox Content="Print a list of all Problems"
                               IsChecked="{x:Bind PrintVM.ProblemList, Mode=TwoWay}" />
@@ -39,8 +44,8 @@
                               ItemsSource="{x:Bind PrintVM.ProblemNodes, Mode=TwoWay}"
                               SelectionChanged="UpdateSelection" />
                 </StackPanel>
-            </PivotItem>
-            <PivotItem Header="Characters">
+                </TabViewItem>
+                <TabViewItem Header="Characters" IsClosable="False">
                 <StackPanel>
                     <CheckBox Content="Print a list of all Characters"
                               IsChecked="{x:Bind PrintVM.CharacterList, Mode=TwoWay}" />
@@ -50,8 +55,8 @@
                               ItemsSource="{x:Bind PrintVM.CharacterNodes, Mode=TwoWay}"
                               SelectionChanged="UpdateSelection" />
                 </StackPanel>
-            </PivotItem>
-            <PivotItem Header="Scenes">
+                </TabViewItem>
+                <TabViewItem Header="Scenes" IsClosable="False">
                 <StackPanel>
                     <CheckBox Content="Print a list of all Scenes" IsChecked="{x:Bind PrintVM.SceneList, Mode=TwoWay}" />
                     <CheckBox Content="Print all scenes" IsChecked="{x:Bind PrintVM.SelectAllScenes, Mode=TwoWay}"
@@ -59,8 +64,8 @@
                     <ListView SelectionMode="Multiple" Height="260" Name="ScenesList"
                               ItemsSource="{x:Bind PrintVM.SceneNodes, Mode=TwoWay}" SelectionChanged="UpdateSelection" />
                 </StackPanel>
-            </PivotItem>
-            <PivotItem Header="Settings">
+                </TabViewItem>
+                <TabViewItem Header="Settings" IsClosable="False">
                 <StackPanel>
                     <CheckBox Content="Print a list of all Settings"
                               IsChecked="{x:Bind PrintVM.SettingList, Mode=TwoWay}" />
@@ -70,8 +75,8 @@
                               ItemsSource="{x:Bind PrintVM.SettingNodes, Mode=TwoWay}"
                               SelectionChanged="UpdateSelection" />
                 </StackPanel>
-            </PivotItem>
-            <PivotItem Header="Websites">
+                </TabViewItem>
+                <TabViewItem Header="Websites" IsClosable="False">
                 <StackPanel>
                     <CheckBox Content="Print a list of all Websites" IsChecked="{x:Bind PrintVM.WebList, Mode=TwoWay}" />
                     <CheckBox Content="Print all websites" IsChecked="{x:Bind PrintVM.SelectAllWeb,Mode=TwoWay}"
@@ -79,8 +84,9 @@
                     <ListView SelectionMode="Multiple" Height="260" Name="WebList"
                               ItemsSource="{x:Bind PrintVM.WebNodes, Mode=TwoWay}" SelectionChanged="UpdateSelection" />
                 </StackPanel>
-            </PivotItem>
-        </Pivot>
+                </TabViewItem>
+            </TabView.TabItems>
+        </TabView>
         <InfoBar IsOpen="False" Name="SynopsisWarning" Severity="Warning"
                  Message="Add some scenes to your synopsis, otherwise it will be empty." Height="auto" />
     </StackPanel>

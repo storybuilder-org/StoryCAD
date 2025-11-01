@@ -12,7 +12,10 @@
         <TextBox Header="Title" Text="{x:Bind OverviewVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  Margin="10,10,10,0" />
         <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
-
+            <TabView.Resources>
+                <!-- Increase from 32px default to 44px for touch accessibility (WCAG 2.1 Level AAA) -->
+                <x:Double x:Key="TabViewItemHeaderMinHeight">44</x:Double>
+            </TabView.Resources>
             <TabView.TabItems>
                 <TabViewItem Header="Story Idea" IsClosable="False">
                 <Grid>
@@ -37,21 +40,13 @@
                                  Text="{x:Bind OverviewVm.DateModified, Mode=TwoWay}"/>
                     </Grid>
 
-                    <!-- Testing plain TextBox to diagnose Mac wrapping issue -->
-                    <!--<usercontrols:RichEditBoxExtended Header="Story Idea" Grid.Row="2"
-                                                                              RtfText="{x:Bind OverviewVm.Description, Mode=TwoWay}"
-                                                                              TextWrapping="Wrap"
-                                                                              AcceptsReturn="True"
-                                                                              IsSpellCheckEnabled="True"
-                                                                              ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                                                              PlaceholderText="Record whatever idea or incident made you think 'story'." />-->
-                    <TextBox Header="Story Idea" Grid.Row="2"
-                             Text="{x:Bind OverviewVm.Description, Mode=TwoWay}"
-                             TextWrapping="Wrap"
-                             AcceptsReturn="True"
-                             IsSpellCheckEnabled="True"
-                             ScrollViewer.VerticalScrollBarVisibility="Auto"
-                             PlaceholderText="Record whatever idea or incident made you think 'story'." />
+                    <usercontrols:RichEditBoxExtended Header="Story Idea" Grid.Row="2"
+                                                      RtfText="{x:Bind OverviewVm.Description, Mode=TwoWay}"
+                                                      TextWrapping="Wrap"
+                                                      AcceptsReturn="True"
+                                                      IsSpellCheckEnabled="True"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                                      PlaceholderText="Record whatever idea or incident made you think 'story'." />
                 </Grid>
                 </TabViewItem>
 

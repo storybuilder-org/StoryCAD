@@ -5,8 +5,14 @@
     xmlns:controls="using:StoryCADLib.Controls">
 
     <StackPanel Width="500" Height="410">
-        <Pivot Name="PivotView" Height="381" Width="500" VerticalAlignment="Stretch">
-            <PivotItem Header="General" VerticalContentAlignment="Stretch" VerticalAlignment="Center">
+        <TabView Name="PivotView" Height="381" Width="500" VerticalAlignment="Stretch"
+                 TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
+            <TabView.Resources>
+                <!-- Increase from 32px default to 44px for touch accessibility (WCAG 2.1 Level AAA) -->
+                <x:Double x:Key="TabViewItemHeaderMinHeight">44</x:Double>
+            </TabView.Resources>
+            <TabView.TabItems>
+                <TabViewItem Header="General" IsClosable="False" VerticalContentAlignment="Stretch" VerticalAlignment="Center">
                 <StackPanel>
                     <TextBox Header="Your first name:" PlaceholderText="Put the first name want to publish under here"
                              HorizontalAlignment="Center" Margin="8" Width="300"
@@ -24,8 +30,8 @@
                         BrowseMode="Folder"
                         PathSelected="OnProjectPathSelected" />
                 </StackPanel>
-            </PivotItem>
-            <PivotItem Header="Backup" VerticalAlignment="Stretch" VerticalContentAlignment="Center">
+                </TabViewItem>
+                <TabViewItem Header="Backup" IsClosable="False" VerticalAlignment="Stretch" VerticalContentAlignment="Center">
                 <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
                         <CheckBox Content="Automatically Save every"
@@ -52,8 +58,8 @@
                         BrowseMode="Folder"
                         PathSelected="OnBackupPathSelected" />
                 </StackPanel>
-            </PivotItem>
-            <PivotItem Header="Other" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch">
+                </TabViewItem>
+                <TabViewItem Header="Other" IsClosable="False" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch">
                 <Grid HorizontalAlignment="Center">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -101,8 +107,8 @@
                         <ComboBoxItem Content="Yahoo" />
                     </ComboBox>
                 </Grid>
-            </PivotItem>
-            <PivotItem Header="About" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
+                </TabViewItem>
+                <TabViewItem Header="About" IsClosable="False" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
                 <StackPanel>
                     <TextBlock HorizontalAlignment="Center" Margin="5,0,0,20" Text="{x:Bind State.Version}" />
                     <Button Content="Open Logs folder" HorizontalAlignment="Center" Click="OpenLogFolder" Margin="20"
@@ -158,13 +164,13 @@
                         </Button>
                     </StackPanel>
                 </StackPanel>
-            </PivotItem>
-            <PivotItem Header="What's new">
+                </TabViewItem>
+                <TabViewItem Header="What's new" IsClosable="False">
                 <ScrollViewer VerticalScrollBarVisibility="Visible" Height="450">
                     <TextBlock Name="Changelog" TextWrapping="Wrap" />
                 </ScrollViewer>
-            </PivotItem>
-            <PivotItem Header="Dev" Name="Dev">
+                </TabViewItem>
+                <TabViewItem Header="Dev" Name="Dev" IsClosable="False">
                 <StackPanel Orientation="Horizontal">
                     <StackPanel>
                         <Button Content="Set Init to false" Click="SetInitToFalse" Width="150" Margin="0,5" />
@@ -181,8 +187,9 @@
                         </StackPanel>
                     </ScrollViewer>
                 </StackPanel>
-            </PivotItem>
-        </Pivot>
+                </TabViewItem>
+            </TabView.TabItems>
+        </TabView>
         <SymbolIcon Symbol="ReportHacked"
                     Foreground="Red"
                     Visibility="{x:Bind PreferencesVm.HasErrors, Mode=OneWay}"
