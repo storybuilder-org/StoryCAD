@@ -117,7 +117,7 @@
                                      HorizontalAlignment="Center"
                                      NavigateUri="https://github.com/StoryBuilder-org/StoryCAD/graphs/contributors"
                                      Margin="5" FontSize="13" />
-                    <HyperlinkButton Content="Review StoryCAD on the Microsoft Store" HorizontalAlignment="Center"
+                    <HyperlinkButton Content="{x:Bind PreferencesVm.AppStoreReviewButtonText, Mode=OneTime}" HorizontalAlignment="Center"
                                      Click="{x:Bind PreferencesVm.ShowRatingPrompt}" Margin="5" FontSize="13" />
                     <TextBlock Text="Keep up with StoryCAD news:" Margin="0,10" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
