@@ -216,7 +216,6 @@
         <Content Remove="Assets\Install\samples\The Maltese Falcon.stbx" />
         <Content Remove="Assets\Install\samples\The Old Man and the Sea.stbx" />
         <Content Remove="Assets\Install\Symbols.json" />
-        <Content Remove="Assets\Install\Tools.json" />
         <EmbeddedResource Include="Assets\Install\Bibliog.txt" />
         <EmbeddedResource Include="Assets\Install\Controls.json" />
         <EmbeddedResource Include="Assets\Install\Lists.json" />

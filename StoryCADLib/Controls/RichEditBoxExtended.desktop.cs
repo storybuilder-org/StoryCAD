@@ -17,6 +17,7 @@ public partial class RichEditBoxExtended : TextBox
         TextWrapping = TextWrapping.Wrap;
         AcceptsReturn = true;  // Enable multi-line text entry for proper text wrapping
 
+
         // Only set properties that prevent layout issues
         // Let XAML control TextWrapping, AcceptsReturn, and VerticalScrollBarVisibility
         ScrollViewer.SetHorizontalScrollBarVisibility(this, ScrollBarVisibility.Disabled);
