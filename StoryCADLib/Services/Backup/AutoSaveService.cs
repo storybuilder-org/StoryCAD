@@ -111,7 +111,7 @@ public class AutoSaveService : IDisposable
 
         _logger.Log(LogLevel.Info, "Initiating AutoSave.");
 
-        using (new SerializationLock(_logger))
+        await SerializationLock.RunExclusiveAsync(async ct =>
         {
             // flush UI edits on the UI thread and await completion
             await _windowing.GlobalDispatcher.EnqueueAsync(() => { _editFlushService.FlushCurrentEdits(); });
@@ -132,6 +132,6 @@ public class AutoSaveService : IDisposable
             {
                 _appState.CurrentDocument.Model.Changed = false;
             }
-        }
+        }, CancellationToken.None, _logger);
     }
 }

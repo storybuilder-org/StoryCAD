@@ -51,28 +51,24 @@ public class FileOpenService
     /// <param name="fromPath">Path to open file from (Optional)</param>
     public async Task OpenFile(string fromPath = "")
     {
-        using (var serializationLock = new SerializationLock(_logger))
-        {
-            // Check if current StoryModel has been changed, if so, save and write the model.
-            // Fix for issue #1153: Only save if FilePath is not null (ResetModel creates document with null path)
-            if (_appState.CurrentDocument?.Model?.Changed ?? false)
-            {
-                if (!string.IsNullOrEmpty(_appState.CurrentDocument.FilePath))
-                {
-                    _editFlushService.FlushCurrentEdits();
-                    await _outlineService.WriteModel(_appState.CurrentDocument.Model, _appState.CurrentDocument.FilePath);
-                }
-            }
-
-            _logger.Log(LogLevel.Info, "Executing OpenFile command");
-        }
-
         try
         {
-            using (var serializationLock = new SerializationLock(_logger))
+            await SerializationLock.RunExclusiveAsync(async ct =>
             {
+                _logger.Log(LogLevel.Info, "Executing OpenFile command");
+
+                // Check if current StoryModel has been changed, if so, save and write the model.
+                // Fix for issue #1153: Only save if FilePath is not null (ResetModel creates document with null path)
+                if (_appState.CurrentDocument?.Model?.Changed ?? false)
+                {
+                    if (!string.IsNullOrEmpty(_appState.CurrentDocument.FilePath))
+                    {
+                        _editFlushService.FlushCurrentEdits();
+                        await _outlineService.WriteModel(_appState.CurrentDocument.Model, _appState.CurrentDocument.FilePath);
+                    }
+                }
+
                 // Reset the model and show the home page
-                // Note: These UI operations should be handled via messaging
                 // Note: These UI operations should be handled via messaging
                 // For now, we'll send status messages and rely on the caller to handle UI updates
                 Default.Send(new StatusChangedMessage(new StatusMessage("Resetting model", LogLevel.Info)));
@@ -134,7 +130,8 @@ public class FileOpenService
 
                 // Successfully loaded - create StoryDocument
                 _appState.CurrentDocument = new StoryDocument(loadedModel, filePath);
-            }
+
+            }, CancellationToken.None, _logger);
 
             // Take a backup of the project if the user has the 'backup on open' preference set.
             if (_preferences.Model.BackupOnOpen)
@@ -147,7 +144,7 @@ public class FileOpenService
             {
                 _outlineService.SetCurrentView(_appState.CurrentDocument.Model, StoryViewType.ExplorerView);
                 Default.Send(new StatusChangedMessage(new StatusMessage("Open Story completed", LogLevel.Info)));
-                
+
             }
 
             _windowing.UpdateWindowTitle();

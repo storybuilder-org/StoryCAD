@@ -480,17 +480,18 @@ public sealed partial class Shell : Page
                 return;
             }
 
-            // Tools Menu shortcuts
-            if (ctrl && !shift && !alt && e.Key == VirtualKey.N)
+            // Exit shortcut (Cmd+Q on macOS, Ctrl+Q on Windows)
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.Q)
             {
-                ShellVm.NarrativeToolCommand.Execute(null);
+                ShellVm.ExitCommand.Execute(null);
                 e.Handled = true;
                 return;
             }
 
-            if (ctrl && !shift && !alt && e.Key == VirtualKey.Q)
+            // Tools Menu shortcuts
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.N)
             {
-                ShellVm.KeyQuestionsCommand.Execute(null);
+                ShellVm.NarrativeToolCommand.Execute(null);
                 e.Handled = true;
                 return;
             }

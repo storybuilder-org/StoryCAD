@@ -97,7 +97,7 @@ public partial class Windowing(AppState appState, ILogService logService) : Obse
 
     /// <summary>
     ///     This is a color that should in most cases
-    ///     constrast the users accent color
+    ///     contrast the users accent color
     /// </summary>
     public SolidColorBrush ContrastColor
     {

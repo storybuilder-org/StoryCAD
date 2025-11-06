@@ -40,9 +40,9 @@ public class PreferencesIo
     {
         try
         {
-            using (new SerializationLock(_log))
+            PreferencesModel _model = null;
+            await SerializationLock.RunExclusiveAsync(async ct =>
             {
-                PreferencesModel _model;
                 //Check if we have a preferences.json
                 if (File.Exists(_preferencesFilePath))
                 {
@@ -89,9 +89,9 @@ public class PreferencesIo
                         window.SecondaryColor = new SolidColorBrush(Colors.White);
                     }
                 }
+            }, CancellationToken.None, _log);
 
-                return _model;
-            }
+            return _model;
         }
         catch (Exception e)
         {
@@ -108,7 +108,7 @@ public class PreferencesIo
     {
         try
         {
-            using (new SerializationLock(_log))
+            await SerializationLock.RunExclusiveAsync(async ct =>
             {
                 //Write file
                 _log.Log(LogLevel.Info, $"Saving Preferences to file {_preferencesFilePath}");
@@ -116,13 +116,13 @@ public class PreferencesIo
 
                 StorageFolder _localFolder = await StorageFolder.GetFolderFromPathAsync(_appState.RootDirectory);
                 StorageFile _preferencesFile = await _localFolder.CreateFileAsync("Preferences.json",
-                    CreationCollisionOption.OpenIfExists); 
+                    CreationCollisionOption.OpenIfExists);
 
                 //Log and write.
                 _log.Log(LogLevel.Debug, $"Serialised preferences as {_newPreferences}");
                 await FileIO.WriteTextAsync(_preferencesFile, _newPreferences); //Writes file to disk
                 _log.Log(LogLevel.Info, "Preferences write complete.");
-            }
+            }, CancellationToken.None, _log);
         }
         catch (Exception ex)
         {

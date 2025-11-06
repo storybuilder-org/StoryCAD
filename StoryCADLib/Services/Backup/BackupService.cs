@@ -84,7 +84,7 @@ public class BackupService
                 _appState.RootDirectory);
 
             // Save file under the serialization lock (awaited work remains inside using scope)
-            using (var serializationLock = new SerializationLock(_logService))
+            await SerializationLock.RunExclusiveAsync(async ct =>
             {
                 var tempFolder = await rootFolder.CreateFolderAsync(
                     "Temp", CreationCollisionOption.ReplaceExisting);
@@ -97,7 +97,7 @@ public class BackupService
 
                 _logService.Log(LogLevel.Info, $"Created Zip file at {zipFilePath}");
                 await tempFolder.DeleteAsync();
-            }
+            }, CancellationToken.None, _logService);
 
             // update indicator
             _windowing.GlobalDispatcher.TryEnqueue(() =>
