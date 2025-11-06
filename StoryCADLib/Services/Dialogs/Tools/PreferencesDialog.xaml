@@ -7,10 +7,6 @@
     <StackPanel Width="500" Height="410">
         <TabView Name="PivotView" Height="381" Width="500" VerticalAlignment="Stretch"
                  TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
-            <TabView.Resources>
-                <!-- Increase from 32px default to 44px for touch accessibility (WCAG 2.1 Level AAA) -->
-                <x:Double x:Key="TabViewItemHeaderMinHeight">44</x:Double>
-            </TabView.Resources>
             <TabView.TabItems>
                 <TabViewItem Header="General" IsClosable="False" VerticalContentAlignment="Stretch" VerticalAlignment="Center">
                 <StackPanel>

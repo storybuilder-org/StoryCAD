@@ -240,9 +240,9 @@ public partial class App : Application
         SerializationLock.ConfigureUi(() => window.GlobalDispatcher?.HasThreadAccess == true);
 
 // Size first via AppWindow (safe before HWND exists)
-        window.SetMinimumSize(MainWindow);                // Prevent manual resize below minimum
-        window.SetWindowSize(MainWindow, 1200, 800);      // Initial size via AppWindow
-
+        //window.SetMinimumSize(MainWindow);                // Prevent manual resize below minimum
+       // window.SetWindowSize(MainWindow, 1200, 800);      // Initial size via AppWindow with DPI scaling
+       MainWindow.AppWindow.Resize(new Windows.Graphics.SizeInt32 { Width = 1200, Height = 800 } );
 // Realize the native window so a real HWND is created by Uno
         MainWindow.Activate();
 
@@ -253,7 +253,7 @@ public partial class App : Application
         window.WindowHandle = hwnd;
 
 // Now Win32 centering works on a valid HWND
-        window.CenterOnScreen(MainWindow);
+        //window.CenterOnScreen(MainWindow);
 
         _log.Log(LogLevel.Info, "StoryCAD App loaded and launched");
 

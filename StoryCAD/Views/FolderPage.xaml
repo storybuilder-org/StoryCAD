@@ -6,7 +6,9 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:usercontrols="using:StoryCADLib.Controls"
       xmlns:viewModels="using:StoryCADLib.ViewModels"
-      mc:Ignorable="d">
+      mc:Ignorable="d"
+      ScrollViewer.VerticalScrollBarVisibility="Disabled"
+      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -20,7 +22,8 @@
         <usercontrols:RichEditBoxExtended Header="Notes" Grid.Row="1"
                                           RtfText="{x:Bind FolderVm.Description, Mode=TwoWay}"
                                           AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                          ScrollViewer.VerticalScrollBarVisibility="Visible" Margin="10,10,10,0" />
+                                          VerticalAlignment="Stretch"
+                                          ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="10,10,10,0" />
     </Grid>
 
 </Page>
