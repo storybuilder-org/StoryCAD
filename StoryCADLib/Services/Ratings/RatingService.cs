@@ -1,5 +1,8 @@
-﻿using Windows.Services.Store;
+﻿#if HAS_UNO_WINUI
+using Windows.Services.Store;
 using WinRT.Interop;
+#endif
+using Windows.System;
 
 namespace StoryCADLib.Services.Ratings;
 
@@ -12,6 +15,10 @@ public class RatingService
     private readonly ILogService _logService;
     private readonly PreferenceService _preferenceService;
     private readonly Windowing _windowing;
+
+    // TODO: Replace with actual Mac App Store ID when app is published
+    // Format: https://apps.apple.com/app/id{APP_ID}?action=write-review
+    private const string MacAppStoreId = "YOUR_MAC_APP_STORE_ID";
 
     public RatingService(AppState appState, PreferenceService preferenceService, Windowing windowing,
         ILogService logService)
@@ -75,33 +82,77 @@ public class RatingService
 
     public async void OpenRatingPrompt()
     {
-        try
+        if (OperatingSystem.IsMacOS())
         {
-            _logService.Log(LogLevel.Info, "Asking user to rate StoryCAD");
-
-            //We need HWIND
-            var _storeContext = StoreContext.GetDefault();
-            InitializeWithWindow.Initialize(_storeContext, _windowing.WindowHandle);
-            _logService.Log(LogLevel.Info, "Opening Rate prompt");
-            var result = await _storeContext.RequestRateAndReviewAppAsync();
-            _logService.Log(LogLevel.Info, $"Prompt closed, status {result.Status}," +
-                                           $" updated {result.WasUpdated}");
-
-            //Don't prompt user to rate again if they close or post a review.
-            //If something went wrong we will prompt them again another time.
-            switch (result.Status)
+            // macOS: Use deep link to open Mac App Store
+            try
             {
-                //Set so we don't ask the user again until the next update or 60 days, whichever occurs last.
-                case StoreRateAndReviewStatus.Succeeded:
-                case StoreRateAndReviewStatus.CanceledByUser:
+                _logService.Log(LogLevel.Info, "Asking user to rate StoryCAD (Mac App Store)");
+
+                // Build the Mac App Store URL with review action
+                var appStoreUrl = $"https://apps.apple.com/app/id{MacAppStoreId}?action=write-review";
+                _logService.Log(LogLevel.Info, $"Opening Mac App Store URL: {appStoreUrl}");
+
+                // Launch the URL using Windows.System.Launcher (cross-platform API)
+                var uri = new Uri(appStoreUrl);
+                var success = await Launcher.LaunchUriAsync(uri);
+
+                if (success)
+                {
+                    _logService.Log(LogLevel.Info, "Successfully opened Mac App Store");
+                    // Mark as reviewed so we don't prompt again for 180 days
                     _preferenceService.Model.HideRatingPrompt = true;
                     _preferenceService.Model.LastReviewDate = DateTime.Now;
-                    break;
+                }
+                else
+                {
+                    _logService.Log(LogLevel.Warn, "Failed to open Mac App Store URL");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logService.LogException(LogLevel.Error, ex, "Error opening Mac App Store for rating.");
             }
         }
-        catch (Exception ex)
+        else if (OperatingSystem.IsWindows())
         {
-            _logService.LogException(LogLevel.Error, ex, "Error in rating prompt.");
+#if HAS_UNO_WINUI
+            // Windows: Use Windows Store API for in-app rating prompt
+            try
+            {
+                _logService.Log(LogLevel.Info, "Asking user to rate StoryCAD (Windows Store)");
+
+                // We need HWND for Windows Store API
+                var _storeContext = StoreContext.GetDefault();
+                InitializeWithWindow.Initialize(_storeContext, _windowing.WindowHandle);
+                _logService.Log(LogLevel.Info, "Opening Rate prompt");
+                var result = await _storeContext.RequestRateAndReviewAppAsync();
+                _logService.Log(LogLevel.Info, $"Prompt closed, status {result.Status}," +
+                                               $" updated {result.WasUpdated}");
+
+                // Don't prompt user to rate again if they close or post a review.
+                // If something went wrong we will prompt them again another time.
+                switch (result.Status)
+                {
+                    // Set so we don't ask the user again until the next update or 60 days, whichever occurs last.
+                    case StoreRateAndReviewStatus.Succeeded:
+                    case StoreRateAndReviewStatus.CanceledByUser:
+                        _preferenceService.Model.HideRatingPrompt = true;
+                        _preferenceService.Model.LastReviewDate = DateTime.Now;
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logService.LogException(LogLevel.Error, ex, "Error in rating prompt.");
+            }
+#else
+            _logService.Log(LogLevel.Warn, "Windows Store rating API not available in this build");
+#endif
+        }
+        else
+        {
+            _logService.Log(LogLevel.Warn, "Rating prompt not supported on this platform");
         }
     }
 }

@@ -343,7 +343,29 @@ public class PreferencesViewModel : ObservableValidator
     }
 
     /// <summary>
-    ///     Shows the MS Store prompt
+    ///     Returns platform-specific text for the app store review button
+    /// </summary>
+    public string AppStoreReviewButtonText
+    {
+        get
+        {
+            if (OperatingSystem.IsMacOS())
+            {
+                return "Review StoryCAD on the Mac App Store";
+            }
+            else if (OperatingSystem.IsWindows())
+            {
+                return "Review StoryCAD on the Microsoft Store";
+            }
+            else
+            {
+                return "Review StoryCAD";
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Shows the app store rating prompt (Windows Store on Windows, Mac App Store on macOS)
     /// </summary>
     public void ShowRatingPrompt(object sender, RoutedEventArgs e)
     {
