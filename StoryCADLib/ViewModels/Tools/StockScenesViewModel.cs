@@ -1,16 +1,23 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using StoryCAD.Models.Tools;
+using StoryCADLib.Models.Tools;
 
-namespace StoryCAD.ViewModels.Tools;
+namespace StoryCADLib.ViewModels.Tools;
 
 public class StockScenesViewModel : ObservableRecipient
 {
+    #region Combobox and ListBox sources
+
+    private readonly SortedDictionary<string, ObservableCollection<string>> _stockScenes;
+
+    #endregion
+
     #region Properties
 
     public ObservableCollection<string> StockSceneCategories;
 
     private string _categoryName;
+
     public string CategoryName
     {
         get => _categoryName;
@@ -22,6 +29,7 @@ public class StockScenesViewModel : ObservableRecipient
     }
 
     private ObservableCollection<string> _stockSceneList;
+
     public ObservableCollection<string> StockSceneList
     {
         get => _stockSceneList;
@@ -29,6 +37,7 @@ public class StockScenesViewModel : ObservableRecipient
     }
 
     private string _sceneName;
+
     public string SceneName
     {
         get => _sceneName;
@@ -37,27 +46,19 @@ public class StockScenesViewModel : ObservableRecipient
 
     #endregion
 
-    #region Combobox and ListBox sources
-
-    private readonly SortedDictionary<string, ObservableCollection<string>> _stockScenes;
-
-    #endregion
-
     #region Constructor
 
     private readonly ToolsData _toolsData;
-
-    // Constructor for XAML compatibility - will be removed later
-    public StockScenesViewModel() : this(Ioc.Default.GetRequiredService<ToolsData>())
-    {
-    }
 
     public StockScenesViewModel(ToolsData toolsData)
     {
         _toolsData = toolsData;
         StockSceneCategories = new ObservableCollection<string>();
         _stockScenes = _toolsData.StockScenesSource;
-        foreach (string _category in _stockScenes.Keys) { StockSceneCategories.Add(_category); }
+        foreach (var _category in _stockScenes.Keys)
+        {
+            StockSceneCategories.Add(_category);
+        }
     }
 
     #endregion

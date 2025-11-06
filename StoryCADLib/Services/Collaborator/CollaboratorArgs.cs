@@ -1,23 +1,20 @@
-using Microsoft.UI.Xaml;
-using StoryCAD.Collaborator.ViewModels;
-using WinUIEx;
+using StoryCADLib.Collaborator.ViewModels;
 
-﻿namespace StoryCAD.Services.Collaborator;
+namespace StoryCADLib.Services.Collaborator;
 
 public class CollaboratorArgs
 {
-    public StoryModel StoryModel;
-    
-    public WorkflowViewModel WorkflowVm;
-
-	/// <summary>
-	/// Reference to the Collaborator window
-	/// </summary>
-    public WindowEx CollaboratorWindow;
-
     //public WorkflowStepViewModel WorkflowStepVM;
-    
+
     public delegate void OnDone();
 
+    /// <summary>
+    ///     Reference to the Collaborator window
+    /// </summary>
+    public Window CollaboratorWindow;
+
     public OnDone onDoneCallback;
+    public StoryModel StoryModel;
+
+    public WorkflowViewModel WorkflowVm;
 }

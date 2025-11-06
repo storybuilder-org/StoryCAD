@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using StoryCAD.Collaborator.Views;
-using StoryCAD.Models;
+using StoryCADLib.Collaborator.Views;
 
-namespace StoryCAD.Collaborator;
+namespace StoryCADLib.Collaborator;
 
 public interface IWizardViewModel
 {
@@ -21,8 +16,9 @@ public interface IWizardViewModel
     StoryItemType ItemType { get; set; }
     Frame ContentFrame { get; set; }
     NavigationView NavView { get; set; }
+
     NavigationViewItem CurrentItem { get; set; }
-    IWizardStepModel CurrentStep { get; set; }
+    // IWizardStepModel CurrentStep { get; set; }
 
     // Methods
 

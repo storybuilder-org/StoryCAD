@@ -1,14 +1,14 @@
 ﻿<Page
-    x:Class="StoryCAD.Services.Dialogs.SaveAsDialog"
+    x:Class="StoryCADLib.Services.Dialogs.SaveAsDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:controls="using:StoryCAD.Controls"
+    xmlns:controls="using:StoryCADLib.Controls"
     mc:Ignorable="d">
 
     <StackPanel Padding="14,14,14,24">
-        <TextBox x:Name="ProjectName" Margin="10"  x:FieldModifier="public" Width="400"
+        <TextBox x:Name="ProjectName" Margin="10" x:FieldModifier="public" Width="400"
                  HorizontalAlignment="Left" Header="New project Name" Text="{x:Bind SaveAsVm.ProjectName, Mode=TwoWay}" />
         <controls:BrowseTextBox
             x:Name="ProjectPathBrowse"
@@ -19,6 +19,6 @@
             BrowseMode="Folder"
             ButtonVerticalAlignment="Bottom"
             ButtonMargin="0,0,0,0"
-            PathSelected="OnPathSelected"/>
+            PathSelected="OnPathSelected" />
     </StackPanel>
 </Page>

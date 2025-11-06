@@ -1,14 +1,14 @@
-﻿using StoryCAD.Models.Tools;
+﻿using StoryCADLib.Models.Tools;
 
-namespace StoryCAD.Services;
+namespace StoryCADLib.Services;
 
 /// <summary>
-/// This service provides the users preferences.
+///     This service provides the users preferences.
 /// </summary>
 public class PreferenceService
 {
-	/// <summary>
-	/// User preferences model that's currently loaded.
-	/// </summary>
-	public PreferencesModel Model = new();
+    /// <summary>
+    ///     User preferences model that's currently loaded.
+    /// </summary>
+    public PreferencesModel Model = new();
 }

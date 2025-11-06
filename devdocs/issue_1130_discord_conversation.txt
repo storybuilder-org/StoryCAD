@@ -1,0 +1,471 @@
+[11:43 AM]Jake
+:
+public partial class RichEditBoxExtended : RichEditBox
+    {
+        public static readonly DependencyProperty RtfTextProperty =
+            DependencyProperty.Register(
+                nameof(RtfText), typeof(string), typeof(RichEditBoxExtended),
+                new PropertyMetadata(default(string), RtfTextPropertyChanged));
+
+        private bool _lockChangeExecution;
+
+        public RichEditBoxExtended()
+        {
+            TextWrapping = TextWrapping.Wrap;
+            //TextChanged += RichEditBoxExtended_TextChanged;
+        }
+
+        public string RtfText
+        {
+            get => (string)GetValue(RtfTextProperty);
+            set => SetValue(RtfTextProperty, value);
+        }
+
+        private void RichEditBoxExtended_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_lockChangeExecution) return;
+            _lockChangeExecution = true;
+            //RtfText = Text;
+            _lockChangeExecution = false;
+        }
+
+        private static void RtfTextPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var tb = d as RichEditBoxExtended;
+            if (tb == null || tb._lockChangeExecution) return;
+
+            tb._lockChangeExecution = true;
+            tb.RtfText = new ReportFormatter(Ioc.Default.GetRequiredService<AppState>())
+                .GetText(e.NewValue?.ToString() ?? "");
+            tb._lockChangeExecution = false;
+        }
+
+        public void UpdateTheme(object sender, RoutedEventArgs e)
+        {
+            // No-op for TextBox version
+        }
+}
+ 
+[11:44 AM]Terry Cox
+: Try something different
+[11:44 AM]Terry Cox
+: So you've created a missmatch there
+[11:44 AM]Jake
+: I was in the middle of still seeing if there was a way forward with NS Textbox
+[11:44 AM]Terry Cox
+: Just replace RichEditBoxExteneded with the UNO RichEditBox
+[11:44 AM]Terry Cox
+: I understand
+[11:45 AM]Terry Cox
+: I'm not trying to jerk you around, we can still look at that
+[11:45 AM]Jake
+: we can't do that cleanly easily because rtf extend has it's own custom text field 
+[11:45 AM]Terry Cox
+: Still, I think that is where your problem may lie
+[11:46 AM]Jake
+: what issue?
+[11:46 AM]Terry Cox
+: trying to shoehorn RichEditBoxExtended.cs (with your mods) to their RichEditBox
+[11:47 AM]Terry Cox
+: If it's even possible
+[11:47 AM]Jake
+: fair, I'll swap out one of them to see how that goes
+[11:47 AM]Terry Cox
+: I understand stripping our RTF formatting out is still an issue
+[11:47 AM]Jake
+: thats fixed
+[11:47 AM]Jake
+: but obviously uses RTFExtend to handle it
+[11:47 AM]Terry Cox
+: Oh?
+[11:48 AM]Terry Cox
+: Right
+[11:48 AM]Jake
+: Mac OS textboxes should have identical text and formatting sans RTF stuff 
+[11:48 AM]Terry Cox
+: And we will want that, because we want an outline to work on either platform
+[11:49 AM]Terry Cox
+: I don't want a MacOS Text box, I want a UNO RichEditBox
+[11:49 AM]Terry Cox
+: Maybe a MacOS NSTextView, if that's feasible
+[11:49 AM]Terry Cox
+: But we want to look at each option
+[11:49 AM]Jake
+: Okay lets go over everything just so we are clear
+[11:51 AM]Jake
+: UNO RTF stuff is nonexistant and either crashes when trying to use it becasue of unimplemented exceptions or doesn't appear (see attached image)
+We have our RTF stuff that's based on the windows one, which when ran outside of windows will instead base off the Uno textbox and strip all RTF stuff.
+
+I am now trying to get a native mac os textbox (NS Textview) to work.
+[11:52 AM]Jake
+: is that all correct
+[11:52 AM]Terry Cox
+: No
+[11:52 AM]Jake
+: Okay what part of this incorrect
+[11:52 AM]Jake
+: I am not trying argue here but we need to have the same understanding of this all
+[11:53 AM]Terry Cox
+: UNO RTF stuff is nonexistant and either crashes when trying to use it becasue of unimplemented exceptions or doesn't appear (see attached image)
+[11:53 AM]Terry Cox
+: That is trying to fit our RichEditBoxExtended on top of their RichEditBox
+[11:53 AM]Terry Cox
+: And it's what is getting exceptions or not showing
+[11:54 AM]Terry Cox
+: Don't talk over me
+[11:55 AM]Terry Cox
+: we have our RTF stuff that's based on the windows one, which when ran outside of windows will instead base off the Uno textbox and strip all RTF stuff.
+[11:55 AM]Terry Cox
+: That is describing your fix for this
+[11:56 AM]Terry Cox
+: What I want you to do is just try using UNO RichEditBox on one of our Page views. StoryIdea is fine
+[11:56 AM]Jake
+: Okay I have done that 
+[11:56 AM]Terry Cox
+: Let's see it 
+[11:57 AM]Jake
+:
+Image
+[11:57 AM]Terry Cox
+: Put some text in it
+[11:57 AM]Jake
+: it's here, and I can't seem to interact with it
+[11:57 AM]Terry Cox
+: Show me the code, both the XAML and the code behind
+[11:57 AM]Terry Cox
+: I get the feeling you're jerking me around
+[11:57 AM]Jake
+:
+Image
+[11:58 AM]Terry Cox
+: Explain a bit to me
+[11:58 AM]Jake
+: yes?
+[11:58 AM]Terry Cox
+: the properties that aren't implemented, like spellcheck
+[11:58 AM]Terry Cox
+: They're like yeast in beer, just noops?
+[11:59 AM]Jake
+: I think it depends
+[11:59 AM]Terry Cox
+: PlaceHolderText seems to work
+[11:59 AM]Jake
+: for stuff like spell check yeah, but some stuff will just flat throw NotImplementedExceptions if you try use them
+[11:59 AM]Terry Cox
+: Nods
+[12:00 PM]Terry Cox
+: You should see that in a catch block or in the unhandled exception handler
+[12:00 PM]Jake
+: I remember the FileOpenUI using a Listbox instead of listview and in uno's eyes they are completely different and your program deserves to crash if you use the wrong one
+[12:00 PM]Terry Cox
+: Right
+[12:00 PM]Terry Cox
+: And if you look at compile warnings you will see that right there in plain view
+[12:01 PM]Terry Cox
+: Although your language there is a bit snarky
+[12:01 PM]Terry Cox
+: But I am not talking about a listbox
+[12:01 PM]Terry Cox
+: I am talking about RTF
+[12:02 PM]Jake
+: you literally asked a minute ago how uno handled stuff thats unimplemented
+[12:02 PM]Terry Cox
+: Jake, quit trying to fight me on this
+[12:03 PM]Terry Cox
+: Where's your binding on the contol?
+[12:04 PM]Jake
+: it was just a test and I dont know where Im to bind to on a RichEditBox
+[12:04 PM]Terry Cox
+: The property in your VM, same as for RichEditBoxExtended
+[12:05 PM]Jake
+: There's no RTFText or Text field.
+[12:06 PM]Terry Cox
+: RtfText="{x:Bind OverviewVm.Description, Mode=TwoWay}"
+[12:06 PM]Terry Cox
+: sighs
+[12:06 PM]Jake
+: thats a custom field on the RTF Extend box
+[12:06 PM]Jake
+: It looks like you are supposed to bind to document for the real one
+[12:07 PM]Terry Cox
+: And we play with Document.Text
+[12:08 PM]Jake
+: Right, I've set it and im trying it now
+[12:08 PM]Jake
+: What's the end game for this though?
+[12:10 PM]Terry Cox
+: Stick to what's in front of us
+[12:10 PM]Jake
+: The line I call Settext on immediately throws a not implemented exception
+[12:10 PM]Terry Cox
+: We might need to have a different version of a RichEditBoxExtended. It would be similar to our existing one but use their Document naming which is different. Something like :
+public static readonly DependencyProperty TextProperty = 
+    DependencyProperty.Register("Text", typeof(string), typeof(MyRichEditBox), new PropertyMetadata(null, TextPropertyChanged));
+
+public string Text
+{
+    get => (string)GetValue(TextProperty);
+    set => SetValue(TextProperty, value);
+}
+
+private static void TextPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+{
+    var richEditBox = (MyRichEditBox)d;
+    if (richEditBox.Editor.Document is ITextDocument doc)
+    {
+        // Set the RTF text based on the binding
+        // You would need to handle conversion from string to RTF here.
+    }
+}
+
+// Assume you have access to the actual RichEditBox within MyRichEditBox
+private RichEditBox Editor { get; set; }
+[12:11 PM]Terry Cox
+: We'd use a partial class for the custome control to have different versions
+[12:11 PM]Terry Cox
+: Just thinking out  loud
+[12:12 PM]Terry Cox
+: Instead of Document UNO uses TextDocument
+[12:12 PM]Terry Cox
+: For some reason or other
+[12:12 PM]Jake
+: Even if we had that, the issue lies in actually rendering the RTF Text right?
+[12:12 PM]Terry Cox
+: 'rendering'?
+[12:13 PM]Terry Cox
+: We have two issues
+[12:13 PM]Terry Cox
+: Binding to our VMs properly
+[12:13 PM]Terry Cox
+: and stripping out the RFT formatting that their RichEditBox won't understand today
+[12:13 PM]Terry Cox
+: IMO that's the hard one and you already did that
+[12:14 PM]Terry Cox
+: Going the other way, from mac to Windows, I don't think is a problem
+[12:14 PM]Terry Cox
+: If you throw plain text at a RichEditBox on Windows it formats it as RTF
+[12:15 PM]Jake
+: our current solution already binds to VMs properly though
+[12:15 PM]Terry Cox
+: You haven't been listening to me at all, have you? 
+[12:16 PM]Jake
+: I am, but you just aren't making sense to me
+[12:17 PM]Jake
+: at first I thought you were trying to do this to see if it even worked a bit, then I thought it was becasue youn wanted it for compatability incase Uno does do something and now Im just clueless
+[12:18 PM]Terry Cox
+: Your version of this based on a textbox will not pick up on any work UNO does on this identified issue
+[12:18 PM]Terry Cox
+: then I thought it was becasue youn wanted it for compatability incase Uno does do something
+[12:18 PM]Terry Cox
+: That is exactly what I'm thinking about, and which your homebrew doesn't address
+[12:19 PM]Terry Cox
+: You'd lead us down our own primrose path forever
+[12:19 PM]Jake
+: okay but in that case surely we just switch off our version and go to the uno version
+[12:19 PM]Terry Cox
+: And I think you are fighting me on this because it says 'Jake'
+[12:19 PM]Terry Cox
+: You have to learn to throw away your darlings
+[12:20 PM]Jake
+: you seem to take an awfully dim view of me and its getting incredibly frustrating
+[12:20 PM]Terry Cox
+: okay but in that case surely we just switch off our version and go to the uno version
+[12:20 PM]Terry Cox
+: Yes, but we need only do that on the desktop head
+[12:20 PM]Terry Cox
+: And we still need the RTF stripping
+[12:20 PM]Terry Cox
+: Can I be any clearer?
+[12:20 PM]Terry Cox
+: Don't screw with the Windows users
+[12:21 PM]Terry Cox
+: Make it work for mac users, albeit in a rudamentary way
+[12:21 PM]Terry Cox
+: and be able to have outlines work from both sides
+[12:22 PM]Jake
+: Yeah, so through using the include stuff, we explictly ignore windows app sdk head
+[12:22 PM]Terry Cox
+: ?
+[12:23 PM]Jake
+: the current solution we have explictly leaves windows app sdk as it was pre uno so we don't screw with the windows users
+[12:23 PM]Terry Cox
+: Enough
+[12:24 PM]Terry Cox
+: If you mention 'the current version' - your textbox one- one more time I'm going to say something unseemly
+[12:24 PM]Terry Cox
+: Why the hell do you insist on fighting with me?
+[12:25 PM]Jake
+: So to confirm you want me to make all RTF extend now just be the default in RTFEditBoxes?
+or still remain as RTF extend on Windows?
+[12:25 PM]Terry Cox
+: Gawd
+[12:26 PM]Terry Cox
+: If you worked for me back in the day I'd probably have fired you by now
+[12:26 PM]Terry Cox
+: You know exactly what I want you to do right now
+[12:27 PM]Terry Cox
+: You better know
+[12:27 PM]Terry Cox
+: Say it back to me
+[12:28 PM]Terry Cox
+: I'm listening
+[12:29 PM]Jake
+: I thought you wanted the uno rich edit box
+[12:29 PM]Terry Cox
+: Okay, one more time:
+[12:30 PM]Terry Cox
+: This is one of the options for RTF we need to look at
+[12:30 PM]Terry Cox
+: There are a couple more
+[12:31 PM]Terry Cox
+: One of the others is your textbox version, which you're already coded and are so adament about staying with
+[12:32 PM]Terry Cox
+: But it has the downside that it's Jake-made
+[12:32 PM]Terry Cox
+: Doesn't leverage anybody else's work on it
+[12:32 PM]Terry Cox
+: Won't ever be RTF-savvy
+[12:34 PM]Terry Cox
+: The UNO RichEditBox thing we have been talking about for the last hour (you own me 25 GBP) is essientially the same thing but based on their RichEditBox instead  of TextBox
+[12:35 PM]Terry Cox
+: There's a third option, which is NSTextView, which sounds like it might be closer to the WinUI 3 RichEditBox, but is a big unknown
+[12:36 PM]Terry Cox
+: Unknown for manu reasons: Swift interop, style maybe (I can't visualize a mac desktop contol in a WInUI 3 app)
+[12:36 PM]Jake
+: Okay but what I've been trying to say is that the backing store of document for the Uno Rich Edit Box is not implemented and throws errors when used
+[12:37 PM]Terry Cox
+: and the same 'you made it, you keep it issue'
+[12:37 PM]Terry Cox
+: So fix it
+[12:37 PM]Jake
+: like work around it?
+[12:37 PM]Jake
+: or figure out how to do it in the uno sdk
+[12:38 PM]Terry Cox
+: I don't get you at all
+[12:38 PM]Terry Cox
+: Look
+[12:38 PM]Terry Cox
+: Today we wrapper RichEditBox on Windows
+[12:38 PM]Terry Cox
+: Don't talk over me
+[12:39 PM]Terry Cox
+: Damn it Jake, if you ask me a question wait for the answer
+[12:39 PM]Terry Cox
+: Today we wrapper RichEditBox on Windows 
+[12:40 PM]Terry Cox
+: I think we are talking about the same thing for the mac, a wrapper around their RIchEditBox
+[12:40 PM]Terry Cox
+: It's not much of a RichEditBox, and you'll need to strip RTF formatting from a WIndows-created outline for it to work
+[12:41 PM]Terry Cox
+: The only differences I can think of are the binding problems because their control is named differently
+[12:42 PM]Terry Cox
+: It might even mean that on the mac you don't use a user control and have to just draw their RichEditBox, maybe do the text strippiong in a setter
+[12:43 PM]Terry Cox
+: but otherwise it's what you're doing now
+[12:43 PM]Terry Cox
+: So take a victory lap and try it out
+[12:43 PM]Terry Cox
+: shh
+[12:44 PM]Terry Cox
+: As for doing all of them, let's get one working, and explore the other options, and then once we know what we're doing, do it
+[12:44 PM]Terry Cox
+: Now say what you were going to say
+[12:46 PM]Jake
+: Terry, we aren't talking in person, the messages don't get lost if we send them at the same time, for the past five mins I've been trying to say unless you or claude have some neat trick to set the text of the box directly that isn't via document.settext or textdocument.settext then I don't think we can set the text at all really 
+[12:47 PM]Terry Cox
+: If you can't make it work step away from it and work on something else
+[12:47 PM]Terry Cox
+: I'll make it work
+[12:47 PM]Terry Cox
+: I have been bickering with you for the past two hours and I am sick of it
+[12:49 PM]Jake
+: is it really bickering or arguing if I'm just trying to tell you that this is a bad idea and setting the Uno RichEditBox isn't feasible
+[12:49 PM]Jake
+: anyway Im sure you've heard enough of me by now, so I'll look into NSTextBox if you want or do something different entirely
+[12:49 PM]Terry Cox
+: go find another issue
+[12:50 PM]Terry Cox
+: I'll take this on
+[12:50 PM]Jake
+: Okay
+[12:50 PM]Terry Cox
+: If you can't do what I want you to
+[12:50 PM]Terry Cox
+: Which seems to be the case
+[12:50 PM]Terry Cox
+: But I think it's just your ego getting in the way
+[12:51 PM]Jake
+: If you manage to get it working, do let me know and I'll apologise unreservedly
+[12:51 PM]Jake
+: If you can't though, then i think you've been rarther mean to me for no reason
+[12:51 PM]Terry Cox
+: When you start paying me you can tell me what to do
+[12:52 PM]Terry Cox
+: Until thin, since I'm paying you, it works the other way
+[12:52 PM]Terry Cox
+: That's the way it works
+[12:52 PM]Jake
+: At no point did I tell you what to do though
+[12:52 PM]Terry Cox
+: No, you told me what you wouldn't do
+[12:53 PM]Terry Cox
+: Which issue are you working on?
+[12:53 PM]Jake
+: Im going to start looking at the STBX file assocation
+[12:54 PM]Jake
+: is that ok?
+[12:54 PM]Terry Cox
+: Which issue is that?
+[12:54 PM]Terry Cox
+: 963?
+[12:54 PM]Jake
+: 963
+[12:54 PM]Jake
+: yes
+[12:55 PM]Terry Cox
+: Start by treating it like you would a bug, put up an example
+[12:55 PM]Jake
+: on the issue page?
+[12:55 PM]Terry Cox
+: Yes
+[12:56 PM]Jake
+: Okay
+[12:56 PM]Terry Cox
+: Have a nice whatever is left of the day
+[12:56 PM]Terry Cox
+: Oh
+[12:57 PM]Terry Cox
+: What state did you leave the code in for your RichEditBox games?
+[12:57 PM]Terry Cox
+: Nothing committed I take it
+[12:57 PM]Jake
+: Untouched, I haven't committed it
+[12:58 PM]Terry Cox
+: Which files did you have changed? OverViewPage.xaml, what else?
+[12:58 PM]Jake
+: Just overview
+[12:58 PM]Jake
+: I had a line in overview.xaml.cs to set the text
+[12:59 PM]Terry Cox
+: ?
+[12:59 PM]Jake
+: I tried calling Test.Document.SetText() after giving one of the boxes a x:Name
+[1:00 PM]Terry Cox
+: I'll figure it out
+[1:00 PM]Jake
+: Hope you have better luck than I did
+[1:00 PM]Terry Cox
+: So do I
+[1:01 PM]Terry Cox
+: But luck isn't supposed to be a factor in software engineeriing
+[1:01 PM]Terry Cox
+: I think the requirements were pretty clear
+[1:02 PM]Terry Cox
+: And this was just a POC
+[1:02 PM]Terry Cox
+: Two and a half hours, Jesus
+[1:26 PM]Jake
+: I got storycad to open from double clicking the file but it doesnt actually open the file yet
+[1:26 PM]Jake
+: I'll continue debugging tomorrow, i need to go and cook dinner

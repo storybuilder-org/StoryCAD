@@ -1,33 +1,31 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using StoryCAD.DAL;
-using StoryCAD.Models;
-using StoryCAD.Services;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Messages;
-using StoryCAD.Services.Outline;
-using StoryCAD.ViewModels;
-using StoryCAD.Services.Logging;
+using StoryCADLib.DAL;
+using StoryCADLib.Models;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Backup;
+using StoryCADLib.Services.Logging;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels;
 
-namespace StoryCAD.Tests.Services.Outline;
+#nullable disable
+
+namespace StoryCADTests.Services.Outline;
 
 [TestClass]
 public class FileOpenServiceTests
 {
+    private AppState _appState;
+    private AutoSaveService _autoSaveService;
+    private BackupService _backupService;
+    private EditFlushService _editFlushService;
     private FileOpenService _fileOpenService;
     private ILogService _logger;
     private OutlineService _outlineService;
-    private AppState _appState;
-    private EditFlushService _editFlushService;
     private PreferenceService _preferences;
-    private Windowing _windowing;
-    private BackupService _backupService;
-    private AutoSaveService _autoSaveService;
     private StoryIO _storyIO;
+    private Windowing _windowing;
 
     [TestInitialize]
     public void Setup()
@@ -79,14 +77,11 @@ public class FileOpenServiceTests
     public async Task OpenFile_WithNullPath_ShowsFilePicker()
     {
         // Arrange
-        bool messageReceived = false;
-        WeakReferenceMessenger.Default.Register<StatusChangedMessage>(this, (r, m) =>
-        {
-            messageReceived = true;
-        });
+        var messageReceived = false;
+        WeakReferenceMessenger.Default.Register<StatusChangedMessage>(this, (r, m) => { messageReceived = true; });
 
         // Act
-        await _fileOpenService.OpenFile("");
+        await _fileOpenService.OpenFile();
 
         // Assert
         // File picker would be shown, but cancelled in headless mode
@@ -100,8 +95,8 @@ public class FileOpenServiceTests
     public async Task OpenFile_WithNonExistentFile_ShowsFilePicker()
     {
         // Arrange
-        string nonExistentPath = Path.Combine(Path.GetTempPath(), "nonexistent.stbx");
-        
+        var nonExistentPath = Path.Combine(Path.GetTempPath(), "nonexistent.stbx");
+
         // In headless mode, ShowFilePicker returns null, which causes the method to return early
         // This test verifies that the service handles non-existent files gracefully by showing
         // a file picker (which returns null in tests) rather than crashing
@@ -122,7 +117,7 @@ public class FileOpenServiceTests
     public async Task UpdateRecents_AddsPathToRecentFiles()
     {
         // Arrange
-        string testPath = @"C:\test\file.stbx";
+        var testPath = Path.Combine(Path.GetTempPath(), "test", "file.stbx");
         _preferences.Model.RecentFiles.Clear();
 
         // Act
@@ -137,8 +132,8 @@ public class FileOpenServiceTests
     public async Task UpdateRecents_MovesExistingPathToTop()
     {
         // Arrange
-        string testPath1 = @"C:\test\file1.stbx";
-        string testPath2 = @"C:\test\file2.stbx";
+        var testPath1 = Path.Combine(Path.GetTempPath(), "test", "file1.stbx");
+        var testPath2 = Path.Combine(Path.GetTempPath(), "test", "file2.stbx");
         _preferences.Model.RecentFiles.Clear();
         _preferences.Model.RecentFiles.Add(testPath1);
         _preferences.Model.RecentFiles.Add(testPath2);
@@ -157,17 +152,18 @@ public class FileOpenServiceTests
     {
         // Arrange
         _preferences.Model.RecentFiles.Clear();
-        for (int i = 0; i < 15; i++)
+        for (var i = 0; i < 15; i++)
         {
-            _preferences.Model.RecentFiles.Add($@"C:\test\file{i}.stbx");
+            _preferences.Model.RecentFiles.Add(Path.Combine(Path.GetTempPath(), "test", $"file{i}.stbx"));
         }
 
         // Act
-        await _fileOpenService.UpdateRecents(@"C:\test\newfile.stbx");
+        var newFilePath = Path.Combine(Path.GetTempPath(), "test", "newfile.stbx");
+        await _fileOpenService.UpdateRecents(newFilePath);
 
         // Assert
         Assert.AreEqual(10, _preferences.Model.RecentFiles.Count);
-        Assert.AreEqual(@"C:\test\newfile.stbx", _preferences.Model.RecentFiles[0]);
+        Assert.AreEqual(newFilePath, _preferences.Model.RecentFiles[0]);
     }
 
     [TestMethod]
@@ -175,8 +171,8 @@ public class FileOpenServiceTests
     {
         // Arrange
         _preferences.Model.RecentFiles.Clear();
-        _preferences.Model.RecentFiles.Add(@"C:\test\file.stbx");
-        int initialCount = _preferences.Model.RecentFiles.Count;
+        _preferences.Model.RecentFiles.Add(Path.Combine(Path.GetTempPath(), "test", "file.stbx"));
+        var initialCount = _preferences.Model.RecentFiles.Count;
 
         // Act
         await _fileOpenService.UpdateRecents(null);
@@ -190,13 +186,42 @@ public class FileOpenServiceTests
     {
         // Arrange
         _preferences.Model.RecentFiles.Clear();
-        _preferences.Model.RecentFiles.Add(@"C:\test\file.stbx");
-        int initialCount = _preferences.Model.RecentFiles.Count;
+        _preferences.Model.RecentFiles.Add(Path.Combine(Path.GetTempPath(), "test", "file.stbx"));
+        var initialCount = _preferences.Model.RecentFiles.Count;
 
         // Act
         await _fileOpenService.UpdateRecents("");
 
         // Assert
         Assert.AreEqual(initialCount, _preferences.Model.RecentFiles.Count);
+    }
+
+    [TestMethod]
+    public async Task OpenFile_ReopenAfterResetModel_DoesNotCrash()
+    {
+        // Regression test for issue #1153
+        // When ResetModel() is called (e.g., during CloseFile()), it creates a
+        // StoryDocument with FilePath = null. If the model has Changed = true,
+        // OpenFile() would attempt to save using the null path, causing a crash.
+        //
+        // This test verifies that OpenFile() handles this scenario gracefully
+        // by checking for null FilePath before attempting to save.
+
+        // Arrange
+        // Simulate the state after ResetModel() is called:
+        // - CurrentDocument exists (not null)
+        // - FilePath is null (no file path set)
+        // - Model.Changed could be true (simulate unsaved changes)
+        var emptyModel = new StoryModel();
+        emptyModel.Changed = true; // Simulate unsaved changes
+        _appState.CurrentDocument = new StoryDocument(emptyModel, null);
+
+        // Act & Assert
+        // This should NOT crash with ArgumentNullException
+        // In headless mode, file picker returns null and method returns early
+        await _fileOpenService.OpenFile(Path.Combine(Path.GetTempPath(), "test", "somefile.stbx"));
+
+        // If we get here without exception, the test passes
+        Assert.IsTrue(true);
     }
 }

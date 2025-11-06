@@ -1,93 +1,115 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
-		<LangVersion>latest</LangVersion> 
-		<TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
-		<TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
-		<TargetPlatformVersion>10.0.22621.0</TargetPlatformVersion>
-		<RootNamespace>StoryCADTests</RootNamespace>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<Platforms>x86;x64;arm64</Platforms>
-		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
-		<EnableMsixTooling>false</EnableMsixTooling>
-		<UseWinUI>true</UseWinUI>
-		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-		
-		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-	</PropertyGroup>
-	<ItemGroup>
-	  <Compile Remove="SceneViewModelTests.cs" />
-	</ItemGroup>
-	<ItemGroup>
-		<Content Remove="Assets\OpenFromDesktopTest.stbx" />
-	</ItemGroup>
+<Project Sdk="Uno.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <UnoSingleProject>true</UnoSingleProject>
+        <LangVersion>latest</LangVersion>
+        <RootNamespace>StoryCADTests</RootNamespace>
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+        <IsTestProject>true</IsTestProject>
+        <TestProjectType>UnitTest</TestProjectType>
+        <EnableMSTestRunner>true</EnableMSTestRunner>
+        <GenerateLibraryLayout>true</GenerateLibraryLayout>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <WarningsAsErrors>UNO0001</WarningsAsErrors>
 
-	<ItemGroup>
-		<None Update=".env">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\AddElement.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\CloseFileTest.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\Full.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\OpenFromDesktopTest.stbx">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\OpenTest.stbx">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="TestInputs\StructureTests.stbx">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
+        <!-- Test features -->
+        <UnoFeatures>
+            Toolkit;
+        </UnoFeatures>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<AppxManifest Include="Package.appxmanifest">
-			<SubType>Designer</SubType>
-		</AppxManifest>
-	</ItemGroup>
+    <!-- Target frameworks based on OS -->
+    <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
+        <TargetFrameworks>net9.0-windows10.0.22621;net9.0-desktop</TargetFrameworks>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<Content Include="Assets\LockScreenLogo.scale-200.png" />
-		<Content Include="Assets\SplashScreen.scale-200.png" />
-		<Content Include="Assets\Square150x150Logo.scale-200.png" />
-		<Content Include="Assets\Square44x44Logo.scale-200.png" />
-		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-		<Content Include="Assets\StoreLogo.png" />
-		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
-	</ItemGroup>
+    <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
+        <TargetFrameworks>net9.0-desktop</TargetFrameworks>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<ProjectCapability Include="TestContainer" />
-	</ItemGroup>
-	<ItemGroup>
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4654" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="MSTest.TestAdapter">
-			<Version>3.10.1</Version>
-		</PackageReference>
-		<PackageReference Include="MSTest.TestFramework">
-			<Version>3.10.1</Version>
-		</PackageReference>
-		<PackageReference Include="Microsoft.TestPlatform.TestHost">
-			<Version>17.14.1</Version>
-			<ExcludeAssets>build</ExcludeAssets>
-		</PackageReference>
-		<Manifest Include="$(ApplicationManifest)" />
-	</ItemGroup>
-	<ItemGroup>
-	  <None Include="SceneViewModelTests.cs" />
-	</ItemGroup>
+    <!-- Windows-specific settings -->
+    <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
+        <UseWinUI>true</UseWinUI>
+        <EnableMsixTooling>false</EnableMsixTooling>
+        <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <Platforms>x86;x64;arm64</Platforms>
+        <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
-	</ItemGroup>
+    <!-- Desktop-specific settings -->
+    <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-desktop'">
+        <UseWinUI>false</UseWinUI>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="SceneViewModelTests.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Remove="Assets\OpenFromDesktopTest.stbx" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update=".env">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="TestInputs\AddElement.stbx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="TestInputs\CloseFileTest.stbx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="TestInputs\Full.stbx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="TestInputs\OpenFromDesktopTest.stbx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="TestInputs\OpenTest.stbx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="TestInputs\StructureTests.stbx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <!-- Windows-specific content -->
+    <ItemGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
+        <AppxManifest Include="Package.appxmanifest">
+            <SubType>Designer</SubType>
+        </AppxManifest>
+        <Content Include="Assets\LockScreenLogo.scale-200.png" />
+        <Content Include="Assets\SplashScreen.scale-200.png" />
+        <Content Include="Assets\Square150x150Logo.scale-200.png" />
+        <Content Include="Assets\Square44x44Logo.scale-200.png" />
+        <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+        <Content Include="Assets\StoreLogo.png" />
+        <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+        <Manifest Include="$(ApplicationManifest)" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectCapability Include="TestContainer" />
+    </ItemGroup>
+
+    <!-- Test packages -->
+    <ItemGroup>
+        <PackageReference Include="MSTest.TestAdapter" />
+        <PackageReference Include="MSTest.TestFramework" />
+        <PackageReference Include="Microsoft.TestPlatform.TestHost">
+            <ExcludeAssets>build</ExcludeAssets>
+        </PackageReference>
+        <PackageReference Include="CommunityToolkit.Mvvm" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="SceneViewModelTests.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
+    </ItemGroup>
 
 </Project>

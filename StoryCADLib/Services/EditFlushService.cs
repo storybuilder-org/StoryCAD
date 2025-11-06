@@ -1,27 +1,23 @@
-using CommunityToolkit.Mvvm.DependencyInjection;
-using StoryCAD.Models;
-using StoryCAD.Services.Logging;
-
-namespace StoryCAD.Services;
+namespace StoryCADLib.Services;
 
 /// <summary>
-/// Service responsible for flushing UI edits from ViewModels to the Model.
-/// Eliminates circular dependencies by using AppState instead of direct ViewModel references.
+///     Service responsible for flushing UI edits from ViewModels to the Model.
+///     Eliminates circular dependencies by using AppState instead of direct ViewModel references.
 /// </summary>
 public class EditFlushService
 {
     private readonly AppState _appState;
     private readonly ILogService _logger;
-    
+
     public EditFlushService(AppState appState)
     {
         _appState = appState;
         _logger = Ioc.Default.GetRequiredService<ILogService>();
     }
-    
+
     /// <summary>
-    /// Flushes edits from the current saveable ViewModel to the model.
-    /// Safe to call even when CurrentSaveable is null.
+    ///     Flushes edits from the current saveable ViewModel to the model.
+    ///     Safe to call even when CurrentSaveable is null.
     /// </summary>
     public void FlushCurrentEdits()
     {

@@ -1,13 +1,47 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace StoryCAD.ViewModels.Tools;
+namespace StoryCADLib.ViewModels.Tools;
 
-public class TraitsViewModel: ObservableRecipient
+public class TraitsViewModel : ObservableRecipient
 {
+    #region Public Methods
+
+    public void ViewChanged(object sender, SelectionChangedEventArgs args)
+    {
+        ExampleList.Clear();
+        switch (Category)
+        {
+            case "Behaviors":
+                foreach (var _item in BehaviorList)
+                {
+                    ExampleList.Add("(Behavior): " + _item);
+                }
+
+                break;
+            case "Habits":
+                foreach (var _item in HabitList)
+                {
+                    ExampleList.Add("(Habit): " + _item);
+                }
+
+                break;
+            case "Skills and Abilities":
+                foreach (var _item in SkillList)
+                {
+                    ExampleList.Add("(Skill): " + _item);
+                }
+
+                break;
+        }
+    }
+
+    #endregion
+
     #region Properties
 
     private string _category;
+
     public string Category
     {
         get => _category;
@@ -15,30 +49,11 @@ public class TraitsViewModel: ObservableRecipient
     }
 
     private string _example;
-    public string Example   
+
+    public string Example
     {
         get => _example;
         set => SetProperty(ref _example, value);
-    }
-
-    #endregion
-
-    #region Public Methods
-    public void ViewChanged(object sender, SelectionChangedEventArgs args)
-    {
-        ExampleList.Clear();
-        switch (Category)
-        {
-            case "Behaviors":
-                foreach (string _item in BehaviorList) { ExampleList.Add("(Behavior): " + _item); }
-                break;
-            case "Habits":
-                foreach (string _item in HabitList) { ExampleList.Add("(Habit): " + _item); }
-                break;
-            case "Skills and Abilities":
-                foreach (string _item in SkillList) { ExampleList.Add("(Skill): " + _item); }
-                break;
-        }
     }
 
     #endregion
@@ -59,15 +74,10 @@ public class TraitsViewModel: ObservableRecipient
 
     private readonly ListData _listData;
 
-    // Constructor for XAML compatibility - will be removed later
-    public TraitsViewModel() : this(Ioc.Default.GetRequiredService<ListData>())
-    {
-    }
-
     public TraitsViewModel(ListData listData)
     {
         _listData = listData;
-        Dictionary<string, ObservableCollection<string>> _lists = _listData.ListControlSource;
+        var _lists = _listData.ListControlSource;
         CategoryList = new ObservableCollection<string> { "Behaviors", "Habits", "Skills and Abilities" };
         ExampleList = new ObservableCollection<string>();
 

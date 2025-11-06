@@ -1,12 +1,39 @@
 {
   "profiles": {
-    "StoryCAD (Package)": {
+    "StoryCAD (WinAppSDK Unpackaged)": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_MODIFIABLE_ASSEMBLIES": "debug"
+      },
+      "compatibleTargetFramework": "windows",
+      "nativeDebugging": true
+    },
+    "StoryCAD (WinAppSDK Packaged)": {
       "commandName": "MsixPackage",
+      "compatibleTargetFramework": "windows",
       "hotReloadEnabled": true,
       "nativeDebugging": true
     },
-    "StoryCAD (Unpackaged)": {
-      "commandName": "Project"
+    "StoryCAD (Desktop)": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_MODIFIABLE_ASSEMBLIES": "debug"
+      },
+      "compatibleTargetFramework": "desktop"
+    },
+    "StoryCAD (Desktop WSL2)": {
+      "commandName": "WSL2",
+      "commandLineArgs": "{ProjectDir}/bin/Debug/net9.0-desktop/StoryCAD.dll",
+      "distributionName": "",
+      "compatibleTargetFramework": "desktop"
+    }
+  },
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:8080",
+      "sslPort": 0
     }
   }
 }

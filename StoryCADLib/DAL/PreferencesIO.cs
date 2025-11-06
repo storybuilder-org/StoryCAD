@@ -1,68 +1,56 @@
 using System.Text.Json;
-using Windows.Storage;
 using Microsoft.UI;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services;
-using Octokit;
+using StoryCADLib.Models.Tools;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Backup;
+using StoryCADLib.Services.Locking;
 using Application = Microsoft.UI.Xaml.Application;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Locking;
 
-namespace StoryCAD.DAL;
+namespace StoryCADLib.DAL;
+
 /// <summary>
-/// Object that reads/writes StoryCAD Preference Files
+///     Object that reads/writes StoryCAD Preference Files
 /// </summary>
 public class PreferencesIo
 {
-	private readonly ILogService _log;
-	private readonly AppState _appState;
-	private readonly AutoSaveService _autoSaveService;
-	private readonly BackupService _backupService;
-	private readonly PreferenceService _preferenceService;
-	private readonly Windowing _windowing;
+    private readonly AppState _appState;
+    private readonly ILogService _log;
+    private readonly PreferenceService _preferenceService;
+    private readonly Windowing _windowing;
+    private string _preferencesFilePath => Path.Combine(_appState.RootDirectory, "Preferences.json");
 
-	public PreferencesIo(ILogService log, AppState appState, AutoSaveService autoSaveService, 
-		BackupService backupService, PreferenceService preferenceService, Windowing windowing)
-	{
-		_log = log;
-		_appState = appState;
-		_autoSaveService = autoSaveService;
-		_backupService = backupService;
-		_preferenceService = preferenceService;
-		_windowing = windowing;
-	}
+    public PreferencesIo(ILogService log, AppState appState, PreferenceService preferenceService, Windowing windowing)
+    {
+        _log = log;
+        _appState = appState;
+        _preferenceService = preferenceService;
+        _windowing = windowing;
+    }
 
-	// Constructor for backward compatibility - will be removed later
-	public PreferencesIo() : this(
-		Ioc.Default.GetService<ILogService>(),
-		Ioc.Default.GetService<AppState>(),
-		Ioc.Default.GetRequiredService<AutoSaveService>(),
-		Ioc.Default.GetRequiredService<BackupService>(),
-		Ioc.Default.GetRequiredService<PreferenceService>(),
-		Ioc.Default.GetRequiredService<Windowing>())
-	{
-	}
+    // Constructor for backward compatibility - will be removed later
+    public PreferencesIo() : this(
+        Ioc.Default.GetService<ILogService>(),
+        Ioc.Default.GetService<AppState>(),
+        Ioc.Default.GetRequiredService<PreferenceService>(),
+        Ioc.Default.GetRequiredService<Windowing>())
+    {
+    }
 
-	public async Task<PreferencesModel> ReadPreferences()
-	{
-		try
-		{
-            using (var serializationLock = new SerializationLock( _log))
+    public async Task<PreferencesModel> ReadPreferences()
+    {
+        try
+        {
+            PreferencesModel _model = null;
+            await SerializationLock.RunExclusiveAsync(async ct =>
             {
-                StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_appState.RootDirectory);
-
-                PreferencesModel _model = new();
-
                 //Check if we have a preferences.json
-                if (File.Exists(Path.Combine(_preferencesFolder.Path, "Preferences.json")))
+                if (File.Exists(_preferencesFilePath))
                 {
                     //Read file into memory
                     _log.Log(LogLevel.Info, "Preferences.json found, reading it.");
-                    StorageFile _preferencesFile = await _preferencesFolder.GetFileAsync("Preferences.json");
-                    string _preferencesJson = await FileIO.ReadTextAsync(_preferencesFile);
-                    _log.Log(LogLevel.Info, $"Preferences Contents: {_preferencesJson}");
+                    StorageFile _preferencesFile = await StorageFile.GetFileFromPathAsync(_preferencesFilePath);
+                    var _preferencesJson = await FileIO.ReadTextAsync(_preferencesFile);
+                    _log.Log(LogLevel.Debug, $"Preferences Contents: {_preferencesJson}");
 
                     //Update _model, with new values.
                     _model = JsonSerializer.Deserialize<PreferencesModel>(_preferencesJson);
@@ -71,13 +59,14 @@ public class PreferencesIo
                 }
                 else
                 {
+                    _model = new();
                     _log.Log(LogLevel.Info, "Preferences.json not found; default created.");
                 }
 
                 if (!_appState.Headless)
                 {
                     //Handle UI Theme stuff
-                    Windowing window = _windowing;
+                    var window = _windowing;
                     if (_model.ThemePreference == ElementTheme.Default)
                     {
                         window.RequestedTheme = Application.Current.RequestedTheme == ApplicationTheme.Dark
@@ -100,49 +89,44 @@ public class PreferencesIo
                         window.SecondaryColor = new SolidColorBrush(Colors.White);
                     }
                 }
+            }, CancellationToken.None, _log);
 
-                return _model;
-            }
+            return _model;
         }
-		catch (Exception e)
-		{
-			_log.LogException(LogLevel.Error,e, 
-				$"Preferences read error {e.Data} {e.StackTrace} {e.Message}");
-			return new();
-		}
-	}
-
-	/// <summary>
-	/// This writes the file to disk using given preferences model.
-	/// </summary>
-	public async Task WritePreferences(PreferencesModel Model)
-    {
-		try
+        catch (Exception e)
         {
-            using (var serializationLock = new SerializationLock(_log))
+            _log.LogException(LogLevel.Error, e,
+                $"Preferences read error {e.Data} {e.StackTrace} {e.Message}");
+            return new PreferencesModel();
+        }
+    }
+
+    /// <summary>
+    ///     This writes the file to disk using given preferences model.
+    /// </summary>
+    public async Task WritePreferences(PreferencesModel _model)
+    {
+        try
+        {
+            await SerializationLock.RunExclusiveAsync(async ct =>
             {
-                //Get/Create file.
-                _log.Log(LogLevel.Info, "Writing preferences model to disk.");
-                StorageFolder _preferencesFolder = await StorageFolder.GetFolderFromPathAsync(_appState.RootDirectory);
-                _log.Log(LogLevel.Info, $"Saving to folder {_preferencesFolder.Path}");
-
-                StorageFile _preferencesFile =
-                    await _preferencesFolder.CreateFileAsync("Preferences.json",
-                        CreationCollisionOption.ReplaceExisting);
                 //Write file
-                _log.Log(LogLevel.Info, $"Saving Preferences to file {_preferencesFile.Path}");
-                string _newPreferences = JsonSerializer.Serialize(Model,
-                    new JsonSerializerOptions { WriteIndented = true });
+                _log.Log(LogLevel.Info, $"Saving Preferences to file {_preferencesFilePath}");
+                var _newPreferences = JsonSerializer.Serialize(_model, new JsonSerializerOptions { WriteIndented = true });
 
-                //Log stuff
-                _log.Log(LogLevel.Info, $"Serialised preferences as {_newPreferences}");
+                StorageFolder _localFolder = await StorageFolder.GetFolderFromPathAsync(_appState.RootDirectory);
+                StorageFile _preferencesFile = await _localFolder.CreateFileAsync("Preferences.json",
+                    CreationCollisionOption.OpenIfExists);
+
+                //Log and write.
+                _log.Log(LogLevel.Debug, $"Serialised preferences as {_newPreferences}");
                 await FileIO.WriteTextAsync(_preferencesFile, _newPreferences); //Writes file to disk
                 _log.Log(LogLevel.Info, "Preferences write complete.");
-            }
-		}
-		catch (Exception ex)
-		{
-			_log.LogException(LogLevel.Error, ex, $"Error writing preferences: {ex.Message}");
-		}
-	}
+            }, CancellationToken.None, _log);
+        }
+        catch (Exception ex)
+        {
+            _log.LogException(LogLevel.Error, ex, $"Error writing preferences: {ex.Message}");
+        }
+    }
 }

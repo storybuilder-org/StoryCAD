@@ -1,22 +1,20 @@
-﻿using Microsoft.UI.Xaml.Navigation;
-using StoryCAD.Models;
-using StoryCAD.Services;
-using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryCADLib.Services;
 
 namespace StoryCAD.Views;
 
-public sealed partial class OverviewPage : BindablePage
+public sealed partial class OverviewPage : Page
 {
+    public OverviewPage()
+    {
+        InitializeComponent();
+
+        // Responsive XAML: Pivot wrapped in ScrollViewer; containers stretch; child mins removed.
+        DataContext = OverviewVm;
+    }
 
     public OverviewViewModel OverviewVm => Ioc.Default.GetService<OverviewViewModel>();
     public ShellViewModel ShellVM => Ioc.Default.GetService<ShellViewModel>();
 
-    public OverviewPage()
-    {
-        InitializeComponent();
-        DataContext = OverviewVm;
-    }
-    
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);

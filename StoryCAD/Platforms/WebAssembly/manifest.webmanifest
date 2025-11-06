@@ -1,0 +1,10 @@
+{
+  "background_color": "#ffffff",
+  "description": "StoryCAD",
+  "display": "standalone",
+  "name": "StoryCAD",
+  "short_name": "StoryCAD",
+  "start_url": "/index.html",
+  "theme_color": "#ffffff",
+  "scope": "/"
+}

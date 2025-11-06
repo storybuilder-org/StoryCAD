@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 public class RelationType : ObservableObject
 {
@@ -13,5 +13,8 @@ public class RelationType : ObservableObject
         PartnerRole = partnerRole;
     }
 
-    public override string ToString() { return MemberRole+ " => " + PartnerRole; }
+    public override string ToString()
+    {
+        return MemberRole + " => " + PartnerRole;
+    }
 }

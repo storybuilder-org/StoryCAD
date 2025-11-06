@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using LogLevel = StoryCAD.Services.Logging.LogLevel;
+using LogLevel = StoryCADLib.Services.Logging.LogLevel;
 
-namespace StoryCAD.DAL;
+namespace StoryCADLib.DAL;
 
 /// <summary>
-/// Custom converter for StoryElement with Type discriminator.
+///     Custom converter for StoryElement with Type discriminator.
 /// </summary>
 public class StoryElementConverter : JsonConverter<StoryElement>
 {
@@ -17,13 +17,17 @@ public class StoryElementConverter : JsonConverter<StoryElement>
             var jsonObject = jsonDoc.RootElement;
 
             if (!jsonObject.TryGetProperty("Type", out var typeProperty))
+            {
                 throw new JsonException("Missing Type discriminator.");
+            }
 
-            string typeDiscriminator = typeProperty.GetString();
+            var typeDiscriminator = typeProperty.GetString();
             if (string.IsNullOrEmpty(typeDiscriminator))
+            {
                 throw new JsonException("Invalid or empty Type discriminator.");
+            }
 
-            Type targetType = typeDiscriminator switch
+            var targetType = typeDiscriminator switch
             {
                 "StoryOverview" => typeof(OverviewModel),
                 "Problem" => typeof(ProblemModel),
@@ -82,28 +86,28 @@ public class StoryElementConverter : JsonConverter<StoryElement>
             throw;
         }
     }
-    
-    public override void Write(Utf8JsonWriter writer, StoryElement value, JsonSerializerOptions options)
-	{
-		try
-		{
-			// Determine the Type discriminator based on the runtime type
-			string typeDiscriminator = value switch
-			{
-				OverviewModel _ => "StoryOverview",
-				ProblemModel _ => "Problem",
-				CharacterModel _ => "Character",
-				SettingModel _ => "Setting",
-				SceneModel _ => "Scene",
-				FolderModel { ElementType: StoryItemType.Notes } => "Notes",
-				FolderModel { ElementType: StoryItemType.Folder } => "Folder",
-				FolderModel { ElementType: StoryItemType.Section } => "Section",
-				WebModel _ => "Web",
-				TrashCanModel _ => "TrashCan",
-				_ => "Unknown"
-			};
 
-			// Create a copy of the object to include the Type discriminator
+    public override void Write(Utf8JsonWriter writer, StoryElement value, JsonSerializerOptions options)
+    {
+        try
+        {
+            // Determine the Type discriminator based on the runtime type
+            var typeDiscriminator = value switch
+            {
+                OverviewModel _ => "StoryOverview",
+                ProblemModel _ => "Problem",
+                CharacterModel _ => "Character",
+                SettingModel _ => "Setting",
+                SceneModel _ => "Scene",
+                FolderModel { ElementType: StoryItemType.Notes } => "Notes",
+                FolderModel { ElementType: StoryItemType.Folder } => "Folder",
+                FolderModel { ElementType: StoryItemType.Section } => "Section",
+                WebModel _ => "Web",
+                TrashCanModel _ => "TrashCan",
+                _ => "Unknown"
+            };
+
+            // Create a copy of the object to include the Type discriminator
             using var jsonDoc = JsonDocument.Parse(JsonSerializer.Serialize(value, value.GetType(), options));
             writer.WriteStartObject();
 
@@ -114,18 +118,19 @@ public class StoryElementConverter : JsonConverter<StoryElement>
             foreach (var property in jsonDoc.RootElement.EnumerateObject())
             {
                 if (property.NameEquals("Type"))
+                {
                     continue; // Skip existing Type property if any
+                }
 
                 property.WriteTo(writer);
             }
 
             writer.WriteEndObject();
         }
-		catch (Exception ex)
-		{
-			Ioc.Default.GetRequiredService<ILogService>().LogException(LogLevel.Error,ex, "Failed to write back");
-			throw;
-		}
-
-	}
+        catch (Exception ex)
+        {
+            Ioc.Default.GetRequiredService<ILogService>().LogException(LogLevel.Error, ex, "Failed to write back");
+            throw;
+        }
+    }
 }

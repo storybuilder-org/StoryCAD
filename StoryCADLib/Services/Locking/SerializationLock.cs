@@ -1,43 +1,44 @@
-using System;
-using System.Diagnostics;
+#pragma warning disable CS8632 // Nullable annotations used without nullable context
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
-using StoryCAD.Services.Logging;
 
-namespace StoryCAD.Services.Locking;
+namespace StoryCADLib.Services.Locking;
 
 /// <summary>
-/// A single shared gate used to serialize saves, backups, and manual commands.
-/// Supports reentrant locking within the same async context.
+///     A single shared gate used to serialize saves, backups, and manual commands.
+///     Supports reentrant locking within the same async context.
 /// </summary>
 public sealed class SerializationLock : IDisposable
 {
     // One shared gate for the whole process.
     private static readonly SemaphoreSlim Gate = new(1, 1);
 
+    // NEW: simple UI-thread probe; default = false so headless/tests are safe.
+    // Wire this once at app startup: SerializationLock.ConfigureUi(() => windowing.GlobalDispatcher.HasThreadAccess);
+    private static Func<bool> _uiHasThreadAccess = static () => false;
+    public static void ConfigureUi(Func<bool> uiHasThreadAccess) => _uiHasThreadAccess = uiHasThreadAccess ?? (() => false);
+
     // AsyncLocal persists data across await statements and thread context switches, making it suitable for tracking logical data
     // through an asynchronous call stack. In this case it stores and propagates the current lock depth, which is incremented on
     // each nested lock acquisition and decremented on each release. If the depth is greater than zero, it indicates that the current
     // execution context already holds the lock, allowing reentrant acquisition without deadlock.
     private static readonly AsyncLocal<int> Depth = new();
-
-    private bool _held;
-    private readonly bool _isNested;
     private readonly string _caller;
     private readonly ILogService _logger;
 
-    /// <summary>
-    /// Raised whenever the lock state changes (acquire/release).
-    /// Used by ShellViewModel / Shell.xaml.cs to refresh CanExecute.
-    /// </summary>
-    public static event EventHandler? CanExecuteStateChanged;
+    private bool _held;
 
     // Constructor with optional logger
     public SerializationLock(ILogService logger = null, [CallerMemberName] string caller = "")
     {
         _caller = caller;
         _logger = logger;
+
+        if (!IsIdle && _uiHasThreadAccess())
+        {
+            _held = false;
+            _logger?.Log(LogLevel.Warn, $"{caller} skipped: UI-thread sync lock while busy.");
+            return;   // prevents deadlock
+        }
 
         // Check if we already hold the lock in this async context
         if (Depth.Value > 0)
@@ -46,10 +47,11 @@ public sealed class SerializationLock : IDisposable
             if (Depth.Value < int.MaxValue - 1) // Prevent overflow
             {
                 Depth.Value++;
-                _logger?.Log(LogLevel.Warn, $"[CallerMemberName] REENTRANT: {_caller} acquired nested lock (depth: {Depth.Value})");
+                _logger?.Log(LogLevel.Warn,
+                    $"[CallerMemberName] REENTRANT: {_caller} acquired nested lock (depth: {Depth.Value})");
             }
+
             _held = true;
-            _isNested = true;
             return;
         }
 
@@ -58,21 +60,26 @@ public sealed class SerializationLock : IDisposable
         Gate.Wait();
         Depth.Value = 1;
         _held = true;
-        _isNested = false;
         _logger?.Log(LogLevel.Info, $"[CallerMemberName] {_caller} acquired lock (depth: 1)");
 
         // Only fire event for outermost lock acquisition
         CanExecuteStateChanged?.Invoke(null, EventArgs.Empty);
     }
 
+    /// <summary>True when nothing is currently saving/backing up.</summary>
+    public static bool IsIdle => Gate.CurrentCount == 1 && Depth.Value == 0;
+
     public void Dispose()
     {
-        if (!_held) return;
+        if (!_held)
+        {
+            return;
+        }
 
         _held = false;
 
         // Atomically decrement and check depth
-        int newDepth = Math.Max(0, Depth.Value - 1);
+        var newDepth = Math.Max(0, Depth.Value - 1);
         Depth.Value = newDepth;
 
         // Only release gate and fire event when fully released
@@ -85,18 +92,26 @@ public sealed class SerializationLock : IDisposable
         else
         {
             // For nested releases, don't fire events since lock state hasn't changed
-            _logger?.Log(LogLevel.Warn, $"[CallerMemberName] REENTRANT: {_caller} releasing nested lock (depth: {newDepth})");
+            _logger?.Log(LogLevel.Warn,
+                $"[CallerMemberName] REENTRANT: {_caller} releasing nested lock (depth: {newDepth})");
         }
     }
 
-    /// <summary>True when nothing is currently saving/backing up.</summary>
-    public static bool IsIdle => Gate.CurrentCount == 1 && Depth.Value == 0;
+    /// <summary>
+    ///     Raised whenever the lock state changes (acquire/release).
+    ///     Used by ShellViewModel / Shell.xaml.cs to refresh CanExecute.
+    /// </summary>
+    public static event EventHandler? CanExecuteStateChanged;
 
     /// <summary>Preserve existing predicate name used by ShellViewModel CanExecute.</summary>
     public static bool CanExecuteCommands() => IsIdle;
 
     /// <summary>
-    /// Awaitable helper when you want the gate to cover async work end-to-end.
+    ///     Awaitable helper when you want the gate to cover async work end-to-end.
+    ///     TEMPORARY PRODUCTION SAFETY GUARD:
+    ///       - If the UI thread calls while the gate is not idle, return immediately to avoid hangs
+    ///         from re-entrant UI events or invalid nested calls.
+    ///       - Background callers still await the gate normally.
     /// </summary>
     public static async Task RunExclusiveAsync(
         Func<CancellationToken, Task> body,
@@ -104,6 +119,13 @@ public sealed class SerializationLock : IDisposable
         ILogService logger = null,
         [CallerMemberName] string caller = "")
     {
+        // --- TEMP GUARD: centralize Jake’s workaround inside the lock ---
+        if (!IsIdle && _uiHasThreadAccess())
+        {
+            logger?.Log(LogLevel.Warn, $"[CallerMemberName] {caller} skipped: UI-thread call while busy.");
+            return; // ignore UI-triggered work while another op holds the gate
+        }
+
         // Check if we already hold the lock
         if (Depth.Value > 0)
         {
@@ -111,18 +133,22 @@ public sealed class SerializationLock : IDisposable
             if (Depth.Value < int.MaxValue - 1)
             {
                 Depth.Value++;
-                logger?.Log(LogLevel.Warn, $"[CallerMemberName] REENTRANT: {caller} acquired nested async lock (depth: {Depth.Value})");
+                logger?.Log(LogLevel.Warn,
+                    $"[CallerMemberName] REENTRANT: {caller} acquired nested async lock (depth: {Depth.Value})");
             }
+
             try
             {
-                await body(ct).ConfigureAwait(false);
+                await body(ct).ConfigureAwait(false); // (left as-is to minimize churn)
             }
             finally
             {
-                int newDepth = Math.Max(0, Depth.Value - 1);
+                var newDepth = Math.Max(0, Depth.Value - 1);
                 Depth.Value = newDepth;
-                logger?.Log(LogLevel.Warn, $"[CallerMemberName] REENTRANT: {caller} releasing nested async lock (depth: {newDepth})");
+                logger?.Log(LogLevel.Warn,
+                    $"[CallerMemberName] REENTRANT: {caller} releasing nested async lock (depth: {newDepth})");
             }
+
             return;
         }
 

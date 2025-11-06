@@ -1,19 +1,18 @@
-﻿using Microsoft.UI.Xaml.Navigation;
-using StoryCAD.Models;
-using StoryCAD.Services;
-using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryCADLib.Services;
 
 namespace StoryCAD.Views;
 
-public sealed partial class CharacterPage : BindablePage
+// Note: XAML updated for responsive layout; code-behind unchanged.
+public sealed partial class CharacterPage : Page
 {
-    public CharacterViewModel CharVm => Ioc.Default.GetService<CharacterViewModel>();
     public CharacterPage()
     {
         InitializeComponent();
         DataContext = CharVm;
     }
-    
+
+    public CharacterViewModel CharVm => Ioc.Default.GetService<CharacterViewModel>();
+
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);

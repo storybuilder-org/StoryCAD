@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using MySql.Data.MySqlClient;
 
-namespace StoryCAD.DAL;
+namespace StoryCADLib.DAL;
 
 public class MySqlIo
 {
@@ -14,15 +14,16 @@ public class MySqlIo
         _cmd.Parameters.Add("@user_id", MySqlDbType.Int32);
         _cmd.Parameters["@user_id"].Direction = ParameterDirection.Output;
         await _cmd.ExecuteNonQueryAsync();
-        int _id = (int)_cmd.Parameters["@user_id"].Value;
+        var _id = (int)_cmd.Parameters["@user_id"].Value;
         return _id;
     }
+
     public async Task AddOrUpdatePreferences(MySqlConnection conn, int id, bool elmah, bool newsletter, string version)
     {
         const string sql = "INSERT INTO StoryBuilder.preferences" +
-                            " (user_id, elmah_consent, newsletter_consent, version)" +
-                            " VALUES (@user_id,@elmah,@newsletter, @version)" +
-                            " ON DUPLICATE KEY UPDATE elmah_consent = @elmah, newsletter_consent = @newsletter, version = @version";
+                           " (user_id, elmah_consent, newsletter_consent, version)" +
+                           " VALUES (@user_id,@elmah,@newsletter, @version)" +
+                           " ON DUPLICATE KEY UPDATE elmah_consent = @elmah, newsletter_consent = @newsletter, version = @version";
         await using MySqlCommand _cmd = new(sql, conn);
         _cmd.Parameters.AddWithValue("@user_id", id);
         _cmd.Parameters.AddWithValue("@elmah", elmah);
@@ -47,5 +48,4 @@ public class MySqlIo
             await _cmd.ExecuteNonQueryAsync();
         }
     }
-
 }

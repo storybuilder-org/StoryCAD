@@ -1,9 +1,9 @@
-﻿namespace StoryCAD.Models.Tools;
+namespace StoryCADLib.Models.Tools;
 
 public class PlotPatternScene
 {
-    public string SceneTitle;
     public string Notes;
+    public string SceneTitle;
 
     public PlotPatternScene(string title)
     {

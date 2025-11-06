@@ -1,12 +1,9 @@
-using StoryCAD.Controls;
+namespace StoryCADLib.Collaborator.Views;
 
-namespace StoryCAD.Collaborator.Views;
-
-
-public sealed partial class WelcomePage : BindablePage
+public sealed partial class WelcomePage : Page
 {
     public WelcomePage()
     {
-        this.InitializeComponent();
+        InitializeComponent();
     }
 }

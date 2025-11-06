@@ -1,30 +1,28 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using StoryCAD.Models;
-using StoryCAD.Services;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Messages;
-using StoryCAD.Services.Outline;
-using StoryCAD.Services.Logging;
+using StoryCADLib.Models;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Backup;
+using StoryCADLib.Services.Logging;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Outline;
 
-namespace StoryCAD.Tests.Services.Outline;
+#nullable disable
+
+namespace StoryCADTests.Services.Outline;
 
 [TestClass]
 public class FileCreateServiceTests
 {
+    private AppState _appState;
+    private AutoSaveService _autoSaveService;
+    private BackupService _backupService;
     private FileCreateService _fileCreateService;
     private ILogService _logger;
     private OutlineService _outlineService;
-    private AppState _appState;
     private PreferenceService _preferences;
-    private Windowing _windowing;
-    private BackupService _backupService;
-    private AutoSaveService _autoSaveService;
     private string _testFolder;
+    private Windowing _windowing;
 
     [TestInitialize]
     public void Setup()
@@ -93,11 +91,11 @@ public class FileCreateServiceTests
     public async Task CreateFile_WithValidParameters_CreatesFile()
     {
         // Arrange
-        string fileName = "TestStory.stbx";
-        int templateIndex = 0;
+        var fileName = "TestStory.stbx";
+        var templateIndex = 0;
 
         // Act
-        string result = await _fileCreateService.CreateFile(_testFolder, fileName, templateIndex);
+        var result = await _fileCreateService.CreateFile(_testFolder, fileName, templateIndex);
 
         // Assert
         Assert.IsNotNull(result);
@@ -110,11 +108,11 @@ public class FileCreateServiceTests
     public async Task CreateFile_WithoutExtension_AddsStbxExtension()
     {
         // Arrange
-        string fileName = "TestStory";
-        int templateIndex = 0;
+        var fileName = "TestStory";
+        var templateIndex = 0;
 
         // Act
-        string result = await _fileCreateService.CreateFile(_testFolder, fileName, templateIndex);
+        var result = await _fileCreateService.CreateFile(_testFolder, fileName, templateIndex);
 
         // Assert
         Assert.IsNotNull(result);
@@ -125,13 +123,14 @@ public class FileCreateServiceTests
     [TestMethod]
     public async Task CreateFile_WithInvalidPath_ReturnsNull()
     {
-        // Arrange
-        string invalidFolder = @"Z:\InvalidPath\That\Does\Not\Exist";
-        string fileName = "TestStory.stbx";
-        int templateIndex = 0;
+        // Arrange - Use a path with invalid characters (cross-platform)
+        // On Unix, null character is invalid in paths; on Windows, <, >, :, ", |, ?, * are invalid
+        var invalidFolder = Path.Combine(Path.GetTempPath(), "Invalid\0Path");
+        var fileName = "TestStory.stbx";
+        var templateIndex = 0;
 
         // Act
-        string result = await _fileCreateService.CreateFile(invalidFolder, fileName, templateIndex);
+        var result = await _fileCreateService.CreateFile(invalidFolder, fileName, templateIndex);
 
         // Assert
         Assert.IsNull(result);
@@ -141,14 +140,11 @@ public class FileCreateServiceTests
     public async Task CreateFile_SendsStatusMessages()
     {
         // Arrange
-        string fileName = "TestStory.stbx";
-        int templateIndex = 0;
-        bool messageReceived = false;
+        var fileName = "TestStory.stbx";
+        var templateIndex = 0;
+        var messageReceived = false;
 
-        WeakReferenceMessenger.Default.Register<StatusChangedMessage>(this, (r, m) =>
-        {
-            messageReceived = true;
-        });
+        WeakReferenceMessenger.Default.Register<StatusChangedMessage>(this, (r, m) => { messageReceived = true; });
 
         // Act
         await _fileCreateService.CreateFile(_testFolder, fileName, templateIndex);
@@ -166,11 +162,11 @@ public class FileCreateServiceTests
         // Arrange
         _preferences.Model.FirstName = "Test";
         _preferences.Model.LastName = "Author";
-        string fileName = "TestStory.stbx";
-        int templateIndex = 0;
+        var fileName = "TestStory.stbx";
+        var templateIndex = 0;
 
         // Act
-        string result = await _fileCreateService.CreateFile(_testFolder, fileName, templateIndex);
+        var result = await _fileCreateService.CreateFile(_testFolder, fileName, templateIndex);
 
         // Assert
         Assert.IsNotNull(_appState.CurrentDocument);
@@ -192,11 +188,11 @@ public class FileCreateServiceTests
         initialModel.Changed = true;
         _appState.CurrentDocument = initialDoc;
 
-        string fileName = "NewStory.stbx";
-        int templateIndex = 0;
+        var fileName = "NewStory.stbx";
+        var templateIndex = 0;
 
         // Act
-        string result = await _fileCreateService.CreateFile(_testFolder, fileName, templateIndex);
+        var result = await _fileCreateService.CreateFile(_testFolder, fileName, templateIndex);
 
         // Assert
         Assert.IsNotNull(result);
@@ -207,12 +203,24 @@ public class FileCreateServiceTests
     [TestMethod]
     public async Task CreateFile_WithInvalidCharacters_ReturnsNull()
     {
-        // Arrange
-        string invalidFileName = "Test<>Story|?.stbx";
-        int templateIndex = 0;
+        // Arrange - Use an invalid filename with invalid characters
+        string invalidFileName;
+
+        if (OperatingSystem.IsWindows())
+        {
+            // Windows doesn't allow these characters in filenames
+            invalidFileName = "Test<>Story|?.stbx";
+        }
+        else
+        {
+            // Unix-like systems: Use null character which is invalid in filenames
+            invalidFileName = "Test\0Story.stbx";
+        }
+
+        var templateIndex = 0;
 
         // Act
-        string result = await _fileCreateService.CreateFile(_testFolder, invalidFileName, templateIndex);
+        var result = await _fileCreateService.CreateFile(_testFolder, invalidFileName, templateIndex);
 
         // Assert
         Assert.IsNull(result);

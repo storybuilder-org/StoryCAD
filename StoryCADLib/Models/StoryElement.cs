@@ -1,45 +1,42 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
-using StoryCAD.ViewModels.SubViewModels;
-using StoryCAD.DAL;
-using System.Text.Json;
+using StoryCADLib.DAL;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 public class StoryElement : ObservableObject
 {
-	#region  Properties
-	[JsonIgnore]
-	private Guid _uuid;
+    #region Properties
 
-	[JsonInclude]
-	[JsonPropertyName("GUID")]
-	public Guid Uuid
-	{
-		get => _uuid;
-		set => _uuid = value;
-	}
+    [JsonIgnore] private Guid _uuid;
 
-	[JsonIgnore]
-	private string _description;
+    [JsonInclude]
+    [JsonPropertyName("GUID")]
+    public Guid Uuid
+    {
+        get => _uuid;
+        set => _uuid = value;
+    }
+
+    [JsonIgnore] private string _description;
 
     /// <summary>
-    /// Common description field that is mapped to the main textbox on an element.
+    ///     Common description field that is mapped to the main textbox on an element.
     /// </summary>
-	[JsonInclude]
-	[JsonPropertyName("ElementDescription")]
-	public string Description
-	{
-		get => _description;
-		set => _description = value;
-	}
+    [JsonInclude]
+    [JsonPropertyName("ElementDescription")]
+    public string Description
+    {
+        get => _description;
+        set => _description = value;
+    }
 
-	[JsonIgnore]
-    private string _name;
+    [JsonIgnore] private string _name;
 
     [JsonInclude]
     [JsonPropertyName("Name")]
-	public string Name
+    public string Name
     {
         get => _name;
         set
@@ -47,23 +44,23 @@ public class StoryElement : ObservableObject
             _name = value;
             // Keep the node synchronized when name changes from API
             if (_node != null)
+            {
                 _node.Name = value;
+            }
         }
     }
 
-	[JsonIgnore]
-    private StoryItemType _type;
+    [JsonIgnore] private StoryItemType _type;
 
-	[JsonInclude]
-	[JsonPropertyName("Type")]
+    [JsonInclude]
+    [JsonPropertyName("Type")]
     public StoryItemType ElementType
     {
         get => _type;
         set => _type = value;
     }
 
-	[JsonIgnore]
-    private StoryNodeItem _node;
+    [JsonIgnore] private StoryNodeItem _node;
 
     [JsonIgnore]
     public StoryNodeItem Node
@@ -72,9 +69,9 @@ public class StoryElement : ObservableObject
         set => _node = value;
     }
 
-	[JsonIgnore]
-    private bool _isSelected;
-	[JsonIgnore]
+    [JsonIgnore] private bool _isSelected;
+
+    [JsonIgnore]
     public bool IsSelected
     {
         get => _isSelected;
@@ -86,8 +83,8 @@ public class StoryElement : ObservableObject
     #region Public Methods
 
     /// <summary>
-    /// Updates this elements GUID field.
-    /// (Call this immediately after creating an element)
+    ///     Updates this elements GUID field.
+    ///     (Call this immediately after creating an element)
     /// </summary>
     internal void UpdateGuid(StoryModel model, Guid newGuid)
     {
@@ -97,29 +94,30 @@ public class StoryElement : ObservableObject
     }
 
     /// <summary>
-    /// Retrieve a StoryElement from its Guid.
-    ///
-    /// Guids are used as keys to StoryElements, stored in
-    /// the StoryModel's StoryElementCollection. They also
-    /// identify links from one StoryElement to another,
-    /// such as the Setting or a cast member Character in
-    /// a Scene. We use Guid.Empty as the value for such a
-    /// link  until it's assigned.
-    ///
-    /// These placeholder links are often expected to be a
-    /// StoryElement key, such as to display the name of
-    /// the setting on the Scene Content pane. Treating
-    /// Guid.Empty as an 'Undefined' StoryElement, with
-    /// a blank name, simplifies that code. 
+    ///     Retrieve a StoryElement from its Guid.
+    ///     Guids are used as keys to StoryElements, stored in
+    ///     the StoryModel's StoryElementCollection. They also
+    ///     identify links from one StoryElement to another,
+    ///     such as the Setting or a cast member Character in
+    ///     a Scene. We use Guid.Empty as the value for such a
+    ///     link  until it's assigned.
+    ///     These placeholder links are often expected to be a
+    ///     StoryElement key, such as to display the name of
+    ///     the setting on the Scene Content pane. Treating
+    ///     Guid.Empty as an 'Undefined' StoryElement, with
+    ///     a blank name, simplifies that code.
     /// </summary>
     /// <param name="guid">The Guid of the StoryElement to retrieve</param>
+    /// <param name="storyModel">optional story model override, defaults to current app state model.</param>
     /// <returns></returns>
     public static StoryElement GetByGuid(Guid guid, StoryModel storyModel = null)
     {
         if (guid.Equals(Guid.Empty))
-             return new StoryElement();
-        
-        // Get the StoryElementsCollection from the provided storyModel or from OutlineViewModel
+        {
+            return new StoryElement();
+        }
+
+        // Get the StoryElementsCollection from the provided storyModel or from AppState
         StoryElementCollection elements;
         if (storyModel != null)
         {
@@ -127,33 +125,32 @@ public class StoryElement : ObservableObject
         }
         else
         {
-            // Fallback to current behavior - get from AppState
-            // TODO: Examine this more closely. Called from OutlineViewModel.DeleteNode() and other ViewModels
-            // where OutlineViewModel context is available. Consider if this global state dependency is appropriate.
+            // Fallback to AppState when storyModel is not provided
+            // This global state dependency is acceptable for UI scenarios
+            // API consumers should always provide storyModel explicitly
             var appState = Ioc.Default.GetRequiredService<AppState>();
-            elements = appState.CurrentDocument.Model.StoryElements;
+            elements = appState.CurrentDocument?.Model.StoryElements ?? new();
         }
-        
+
         // Look for the StoryElement corresponding to the passed guid
         if (elements.StoryElementGuids.ContainsKey(guid))
-            return elements.StoryElementGuids[guid];
-        else
         {
-            Ioc.Default.GetRequiredService<ILogService>()
-                .Log(LogLevel.Error, $"Cannot find GUID {guid} in outline");
-            return new StoryElement();  // Not found
-
+            return elements.StoryElementGuids[guid];
         }
+
+        Ioc.Default.GetRequiredService<ILogService>()
+            .Log(LogLevel.Error, $"Cannot find GUID {guid} in outline");
+        return new StoryElement(); // Not found
     }
 
     /// <summary>
-    /// Deserializes a JSON string into a StoryElement.
+    ///     Deserializes a JSON string into a StoryElement.
     /// </summary>
     /// <param name="json">JSON to deserialize.</param>
     /// <returns>StoryElement Object.</returns>
     public static StoryElement Deserialize(string json)
     {
-        return JsonSerializer.Deserialize<StoryElement>(json, new JsonSerializerOptions()
+        return JsonSerializer.Deserialize<StoryElement>(json, new JsonSerializerOptions
         {
             Converters =
             {
@@ -165,12 +162,12 @@ public class StoryElement : ObservableObject
     }
 
     /// <summary>
-    /// Serialises this StoryElement into JSON.
+    ///     Serialises this StoryElement into JSON.
     /// </summary>
     /// <returns>JSON Representation of this object.</returns>
     public string Serialize()
     {
-        return JsonSerializer.Serialize<StoryElement>(this, new JsonSerializerOptions()
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions
         {
             Converters =
             {
@@ -181,17 +178,14 @@ public class StoryElement : ObservableObject
         });
     }
 
-    public override string ToString()
-    {
-        return _uuid.ToString();
-    }
+    public override string ToString() => _uuid.ToString();
 
-	#endregion
+    #endregion
 
-	#region Constructor 
-    
+    #region Constructor
+
     /// <summary>
-    /// Creates a new story element
+    ///     Creates a new story element
     /// </summary>
     /// <param name="name">Name of element</param>
     /// <param name="type">Type of element</param>
@@ -203,15 +197,15 @@ public class StoryElement : ObservableObject
         _name = name;
         _type = type;
         _description = string.Empty;
-        _node = new(this, parentNode, type);
+        _node = new StoryNodeItem(this, parentNode, type);
 
         model.StoryElements.Add(this);
     }
 
-	/// <summary>
-	/// Parameterless constructor for JSON Deserialization.
-	/// Don't remove.
-	/// </summary>
+    /// <summary>
+    ///     Parameterless constructor for JSON Deserialization.
+    ///     Don't remove.
+    /// </summary>
     public StoryElement()
     {
         _uuid = Guid.Empty;

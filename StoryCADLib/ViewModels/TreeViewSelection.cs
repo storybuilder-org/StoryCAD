@@ -1,11 +1,18 @@
 ﻿using System.ComponentModel;
-using Microsoft.UI.Xaml;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
-public class TreeViewSelection : DependencyObject, INotifyPropertyChanged
+public partial class TreeViewSelection : DependencyObject, INotifyPropertyChanged
 {
-    public event PropertyChangedEventHandler PropertyChanged;
+    // Use a DependencyProperty as the backing store for SelectedItem
+    public static readonly DependencyProperty SelectedItemProperty =
+        DependencyProperty.Register(
+            nameof(SelectedItem),
+            typeof(object),
+            typeof(TreeViewSelection),
+            new PropertyMetadata(null)
+        );
+
     public object SelectedItem
     {
         get => GetValue(SelectedItemProperty);
@@ -16,18 +23,10 @@ public class TreeViewSelection : DependencyObject, INotifyPropertyChanged
         }
     }
 
-    // Use a DependencyProperty as the backing store for SelectedItem
-    public static readonly DependencyProperty SelectedItemProperty =
-        DependencyProperty.Register(
-            nameof(SelectedItem),
-            typeof(object),
-            typeof(TreeViewSelection),
-            new PropertyMetadata(null)
-        );
+    public event PropertyChangedEventHandler PropertyChanged;
 
     private void NotifyPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
-
 }

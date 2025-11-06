@@ -1,17 +1,19 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using StoryCAD.Models.Tools;
+using StoryCADLib.Models.Tools;
 
-namespace StoryCAD.ViewModels.Tools;
+namespace StoryCADLib.ViewModels.Tools;
 
 public class DramaticSituationsViewModel : ObservableRecipient
 {
     #region Fields
 
     private bool _changed;
+
     #endregion
 
     #region Properties
+
     public bool Changed
     {
         get => _changed;
@@ -28,6 +30,7 @@ public class DramaticSituationsViewModel : ObservableRecipient
     }
 
     private string _situationName;
+
     public string SituationName
     {
         get => _situationName;
@@ -37,7 +40,9 @@ public class DramaticSituationsViewModel : ObservableRecipient
             Situation = _situations[value];
         }
     }
+
     private string _notes;
+
     public string Notes
     {
         get => _notes;
@@ -58,16 +63,12 @@ public class DramaticSituationsViewModel : ObservableRecipient
 
     private readonly ToolsData _toolsData;
 
-    // Constructor for XAML compatibility - will be removed later
-    public DramaticSituationsViewModel() : this(Ioc.Default.GetRequiredService<ToolsData>())
-    {
-    }
-
     public DramaticSituationsViewModel(ToolsData toolsData)
     {
         _toolsData = toolsData;
         _situations = _toolsData.DramaticSituationsSource;
         SituationsSource = new ObservableCollection<string>(_situations.Keys);
     }
+
     #endregion
 }

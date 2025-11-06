@@ -2,9 +2,9 @@
 using System.Diagnostics;
 using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
-using StoryCAD.Models.Tools;
+using StoryCADLib.Models.Tools;
 
-namespace StoryCAD.ViewModels.Tools;
+namespace StoryCADLib.ViewModels.Tools;
 
 public class TopicsViewModel : ObservableRecipient
 {
@@ -20,6 +20,7 @@ public class TopicsViewModel : ObservableRecipient
     #region Properties
 
     private string _topicName;
+
     public string TopicName
     {
         get => _topicName;
@@ -31,6 +32,7 @@ public class TopicsViewModel : ObservableRecipient
     }
 
     private string _subTopicName;
+
     public string SubTopicName
     {
         get => _subTopicName;
@@ -38,6 +40,7 @@ public class TopicsViewModel : ObservableRecipient
     }
 
     private string _subTopicNote;
+
     public string SubTopicNote
     {
         get => _subTopicNote;
@@ -47,15 +50,21 @@ public class TopicsViewModel : ObservableRecipient
     #endregion
 
     #region ComboBox and ListBox sources
+
     public readonly ObservableCollection<string> TopicNames;
     public ObservableCollection<string> SubTopicNames;
     public ObservableCollection<string> SubTopicNotes;
+
     #endregion
 
     #region Public Methods
+
     public async void LoadTopic(string topicName)
     {
-        if (topicName == null || topicName.Equals(string.Empty)) { return; } //Can't load topics that are null or empty.
+        if (topicName == null || topicName.Equals(string.Empty))
+        {
+            return;
+        } //Can't load topics that are null or empty.
 
         _topic = _toolsData.TopicsSource[TopicName];
         switch (_topic.TopicType)
@@ -64,7 +73,7 @@ public class TopicsViewModel : ObservableRecipient
                 if (_topic.Filename.Contains("Symbols.txt") || _topic.Filename.Contains("Bibliog.txt"))
                 {
                     //Gets content of Symbols.txt or Bibliog.txt 
-                    await using Stream internalResourceStream = Assembly.GetExecutingAssembly()
+                    await using var internalResourceStream = Assembly.GetExecutingAssembly()
                         .GetManifestResourceStream("StoryCAD.Assets.Install." + Path.GetFileName(_topic.Filename));
                     using StreamReader reader = new(internalResourceStream);
 
@@ -72,16 +81,17 @@ public class TopicsViewModel : ObservableRecipient
                     File.WriteAllText(_topic.Filename, await reader.ReadToEndAsync());
                 }
 
-                Process.Start(new ProcessStartInfo() { UseShellExecute = true, FileName= _topic.Filename });
+                Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = _topic.Filename });
                 break;
             case TopicTypeEnum.Inline:
                 SubTopicNames.Clear();
                 SubTopicNotes.Clear();
-                foreach (SubTopicModel _model in _topic.SubTopics)
+                foreach (var _model in _topic.SubTopics)
                 {
                     SubTopicNames.Add(_model.SubTopicName);
                     SubTopicNotes.Add(_model.SubTopicNotes);
                 }
+
                 _index = 0;
                 SubTopicName = SubTopicNames[0];
                 SubTopicNote = SubTopicNotes[0];
@@ -92,7 +102,11 @@ public class TopicsViewModel : ObservableRecipient
     public void NextSubTopic()
     {
         _index++;
-        if (_index >= SubTopicNames.Count) { _index = 0; }
+        if (_index >= SubTopicNames.Count)
+        {
+            _index = 0;
+        }
+
         SubTopicName = SubTopicNames[_index];
         SubTopicNote = SubTopicNotes[_index];
     }
@@ -100,7 +114,11 @@ public class TopicsViewModel : ObservableRecipient
     public void PreviousSubTopic()
     {
         _index--;
-        if (_index < 0) { _index = SubTopicNames.Count - 1; }
+        if (_index < 0)
+        {
+            _index = SubTopicNames.Count - 1;
+        }
+
         SubTopicName = SubTopicNames[_index];
         SubTopicNote = SubTopicNotes[_index];
     }
@@ -108,11 +126,6 @@ public class TopicsViewModel : ObservableRecipient
     #endregion
 
     #region Constructor
-
-    // Constructor for XAML compatibility - will be removed later
-    public TopicsViewModel() : this(Ioc.Default.GetRequiredService<ToolsData>())
-    {
-    }
 
     public TopicsViewModel(ToolsData toolsData)
     {
@@ -125,5 +138,6 @@ public class TopicsViewModel : ObservableRecipient
         _topic = _toolsData.TopicsSource[TopicName];
         TopicName = _topic.TopicName;
     }
+
     #endregion
 }

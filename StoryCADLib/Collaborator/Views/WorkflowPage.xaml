@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <Page
-    x:Class="StoryCAD.Collaborator.Views.WorkflowPage"
+    x:Class="StoryCADLib.Collaborator.Views.WorkflowPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,52 +10,50 @@
     <Grid>
         <!-- Define column and row definitions to make the layout responsive -->
         <Grid.RowDefinitions>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="Auto" />
             <!-- Takes up remaining space -->
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
             <!-- Height based on content -->
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="1*" />
             <!-- Takes up remaining space -->
         </Grid.ColumnDefinitions>
 
-		<!-- TitleBar -->
-        <TextBlock Text="{x:Bind WorkflowVm.Title}" HorizontalAlignment="Center" 
-                   Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1" MaxWidth="200">
-	        <Run FontWeight="Bold" Text="{x:Bind WorkflowVm.Title}"/>
-	        <LineBreak/>
-	        <Run FontWeight="Bold" Text="{x:Bind WorkflowVm.Description}"/>
+        <!-- TitleBar -->
+        <TextBlock Text="{x:Bind WorkflowVm.Title}" HorizontalAlignment="Center"
+                   Grid.Row="0" Grid.Column="0" MaxWidth="200">
+            <Run FontWeight="Bold" Text="{x:Bind WorkflowVm.Title}" />
+            <LineBreak />
+            <Run FontWeight="Bold" Text="{x:Bind WorkflowVm.Description}" />
         </TextBlock>
 
-        <TextBlock Text="{x:Bind WorkflowVm.Explanation}" HorizontalAlignment="Left" 
-                   Grid.Row="0" Grid.Column="0" TextWrapping="Wrap"/>
+        <TextBlock Text="{x:Bind WorkflowVm.Explanation}" HorizontalAlignment="Left"
+                   Grid.Row="0" Grid.Column="0" TextWrapping="Wrap" />
 
-		<StackPanel Grid.Row="1" Grid.Column="0">
-			<TextBlock Text="{x:Bind WorkflowVm.PromptOutput}"/>
-		</StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="0">
+            <TextBlock Text="{x:Bind WorkflowVm.PromptOutput}" />
+        </StackPanel>
 
         <!-- Chat history -->
-		<ListView ItemsSource="{x:Bind WorkflowVm.ConversationList}" Grid.Column="1" 
-		          Grid.Row="0" MaxHeight="500" Margin="2,0" >
-
-		</ListView>
+        <ListView ItemsSource="{x:Bind WorkflowVm.ConversationList}" Grid.Column="1"
+                  Grid.Row="0" MaxHeight="500" Margin="2,0" />
 
         <!-- Input and send button -->
         <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Vertical" Width="300">
-            <TextBox Grid.Row="1" Grid.Column="1"  x:Name="InputTextBox" 
-                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+            <TextBox x:Name="InputTextBox"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                      KeyDown="InputTextBox_KeyDown" TextWrapping="Wrap"
-                     Text="{x:Bind WorkflowVm.InputText, Mode=TwoWay}" 
-                     MinHeight="100" MaxWidth="300"/>
-            <Button x:Name="SendButton" Content="Send" Click="SendButton_Click" HorizontalAlignment="Right"/>
+                     Text="{x:Bind WorkflowVm.InputText, Mode=TwoWay}"
+                     MinHeight="100" MaxWidth="300" />
+            <Button x:Name="SendButton" Content="Send" Click="SendButton_Click" HorizontalAlignment="Right" />
         </StackPanel>
 
         <!-- Progress bar -->
-        <ProgressBar x:Name="ResponseProgressBar" 
-                     Grid.Row="2" Height="5" IsIndeterminate="True" 
+        <ProgressBar x:Name="ResponseProgressBar"
+                     Grid.Row="2" Height="5" IsIndeterminate="True"
                      Visibility="{x:Bind WorkflowVm.ProgressVisibility, Mode=TwoWay}" />
     </Grid>
 </Page>

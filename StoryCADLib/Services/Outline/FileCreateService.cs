@@ -1,30 +1,24 @@
-using System.IO;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryCAD.DAL;
-using StoryCAD.Models;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Locking;
-using StoryCAD.Services.Messages;
-using StoryCAD.ViewModels;
-using Windows.Storage;
-
+using StoryCADLib.DAL;
+using StoryCADLib.Services.Backup;
+using StoryCADLib.Services.Locking;
+using StoryCADLib.Services.Messages;
 using static CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger;
 
-namespace StoryCAD.Services.Outline;
+namespace StoryCADLib.Services.Outline;
 
 /// <summary>
-/// Service for creating new story files without dependencies on ViewModels 
+///     Service for creating new story files without dependencies on ViewModels
 /// </summary>
 public class FileCreateService
 {
+    private readonly AppState _appState;
+    private readonly AutoSaveService _autoSaveService;
+    private readonly BackupService _backupService;
     private readonly ILogService _logger;
     private readonly OutlineService _outlineService;
-    private readonly AppState _appState;
     private readonly PreferenceService _preferences;
     private readonly Windowing _windowing;
-    private readonly BackupService _backupService;
-    private readonly AutoSaveService _autoSaveService;
 
     public FileCreateService(
         ILogService logger,
@@ -45,7 +39,7 @@ public class FileCreateService
     }
 
     /// <summary>
-    /// Creates a new story file
+    ///     Creates a new story file
     /// </summary>
     /// <param name="outlineFolder">Folder to create the file in</param>
     /// <param name="outlineName">Name of the outline file</param>
@@ -56,7 +50,8 @@ public class FileCreateService
 
         try
         {
-            Default.Send(new StatusChangedMessage(new StatusMessage("New project command executing", LogLevel.Info)), true);
+            Default.Send(new StatusChangedMessage(new StatusMessage("New project command executing", LogLevel.Info)),
+                true);
 
             // Validate and adjust file name
             if (!Path.GetExtension(outlineName)!.Equals(".stbx"))
@@ -64,12 +59,12 @@ public class FileCreateService
                 outlineName += ".stbx";
             }
 
-            string newFilePath = Path.Combine(outlineFolder, outlineName);
+            var newFilePath = Path.Combine(outlineFolder, outlineName);
 
             if (!StoryIO.IsValidPath(newFilePath))
             {
                 _logger.Log(LogLevel.Warn, $"Invalid file path {newFilePath}");
-                Default.Send(new StatusChangedMessage(new("Invalid file path", LogLevel.Error)), true);
+                Default.Send(new StatusChangedMessage(new StatusMessage("Invalid file path", LogLevel.Error)), true);
                 return null;
             }
 
@@ -78,25 +73,26 @@ public class FileCreateService
                 // If the current project needs saved, do so
                 if (_appState.CurrentDocument?.Model?.Changed == true && _appState.CurrentDocument?.FilePath != null)
                 {
-                    await _outlineService.WriteModel(_appState.CurrentDocument.Model, _appState.CurrentDocument.FilePath);
+                    await _outlineService.WriteModel(_appState.CurrentDocument.Model,
+                        _appState.CurrentDocument.FilePath);
                 }
             }
 
             // Note: UI operations should be handled by the caller
             // We'll send a status message to indicate progress
-            Default.Send(new StatusChangedMessage(new("Creating new project", LogLevel.Info)));
+            Default.Send(new StatusChangedMessage(new StatusMessage("Creating new project", LogLevel.Info)));
 
             using (var serializationLock = new SerializationLock(_logger))
             {
                 // Create the new outline's file
-                StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(outlineFolder);
-                string storyModelFile =
+                var folder = await StorageFolder.GetFolderFromPathAsync(outlineFolder);
+                var storyModelFile =
                     (await folder.CreateFileAsync(outlineName, CreationCollisionOption.GenerateUniqueName))
                     .Path;
 
                 // Create the StoryModel
-                string name = Path.GetFileNameWithoutExtension(storyModelFile);
-                string author = _preferences.Model.FirstName + " " + _preferences.Model.LastName;
+                var name = Path.GetFileNameWithoutExtension(storyModelFile);
+                var author = _preferences.Model.FirstName + " " + _preferences.Model.LastName;
 
                 // Create the new project
                 var newModel = await _outlineService.CreateModel(name, author, selectedTemplateIndex);
@@ -124,7 +120,7 @@ public class FileCreateService
                 _windowing.UpdateWindowTitle();
 
                 _logger.Log(LogLevel.Info, $"Created new project {storyModelFile}");
-                Default.Send(new StatusChangedMessage(new("New project created", LogLevel.Info)));
+                Default.Send(new StatusChangedMessage(new StatusMessage("New project created", LogLevel.Info)));
 
                 return storyModelFile;
             }
@@ -132,7 +128,7 @@ public class FileCreateService
         catch (Exception ex)
         {
             _logger.LogException(LogLevel.Error, ex, "Error in CreateFile command");
-            Default.Send(new StatusChangedMessage(new("New project command failed", LogLevel.Error)));
+            Default.Send(new StatusChangedMessage(new StatusMessage("New project command failed", LogLevel.Error)));
             return null;
         }
     }

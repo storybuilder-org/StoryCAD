@@ -1,34 +1,35 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryCAD.Controls;
-using StoryCAD.Services;
-using StoryCAD.Services.Dialogs;
-using StoryCAD.Services.Messages;
-using StoryCAD.Services.Navigation;
-using StoryCAD.ViewModels.SubViewModels;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.Controls;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Dialogs;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Navigation;
+using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
 {
     #region Fields
-    
+
     private readonly ILogService _logger;
     public RelationshipModel CurrentRelationship;
     private bool _changeable; // process property changes for this story element
-    private bool _changed;    // this story element has changed
+    private bool _changed; // this story element has changed
     private readonly Windowing _windowing;
     private readonly AppState _appState;
     private StoryModel _storyModel;
+
     #endregion
 
     #region Properties
 
     #region Relay Commands
+
     public RelayCommand AddTraitCommand { get; }
     public RelayCommand RemoveTraitCommand { get; }
     public RelayCommand AddRelationshipCommand { get; }
@@ -37,9 +38,11 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
     public RelayCommand TraitCommand { get; }
 
     #endregion
+
     // StoryElement data
 
     private Guid _uuid = Guid.Empty;
+
     public Guid Uuid
     {
         get => _uuid;
@@ -47,6 +50,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _name;
+
     public string Name
     {
         get => _name;
@@ -58,11 +62,13 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
                 NameChangeMessage _msg = new(_name, value);
                 Messenger.Send(new NameChangedMessage(_msg));
             }
+
             SetProperty(ref _name, value);
         }
     }
 
     private bool _isTextBoxFocused;
+
     public bool IsTextBoxFocused
     {
         get => _isTextBoxFocused;
@@ -97,6 +103,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
 
     // Description property (migrated from CharacterSketch)
     private string _description;
+
     public string Description
     {
         get => _description;
@@ -215,15 +222,16 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
     public ObservableCollection<RelationshipModel> CharacterRelationships { get; set; }
 
     private RelationshipModel _selectedRelationship;
+
     public RelationshipModel SelectedRelationship
     {
         get => _selectedRelationship;
         //set => SetProperty(ref _selectedRelationship, value);
         set => _selectedRelationship = value;
-
     }
 
     private string _relationType;
+
     public string RelationType
     {
         get => _relationType;
@@ -231,6 +239,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _relationshipTrait;
+
     public string RelationshipTrait
     {
         get => _relationshipTrait;
@@ -238,6 +247,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _relationshipAttitude;
+
     public string RelationshipAttitude
     {
         get => _relationshipAttitude;
@@ -250,7 +260,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
     {
         get => _relationshipNotes;
         set => SetProperty(ref _relationshipNotes, value);
-    } 
+    }
 
     // Character social data
 
@@ -443,20 +453,22 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
         get => _notes;
         set => SetProperty(ref _notes, value);
     }
-         
+
     // Character flaw data
 
-    private string _flaw   ;
+    private string _flaw;
+
     public string Flaw
     {
         get => _flaw;
         set => SetProperty(ref _flaw, value);
     }
 
- 
+
     // Character Backstory data 
 
     private string _backStory;
+
     public string BackStory
     {
         get => _backStory;
@@ -465,6 +477,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
 
     // The StoryModel is passed when CharacterPage is navigated to
     private CharacterModel _model;
+
     public CharacterModel Model
     {
         get => _model;
@@ -474,6 +487,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
     // Traits info
 
     private ObservableCollection<string> _characterTraits;
+
     public ObservableCollection<string> CharacterTraits
     {
         get => _characterTraits;
@@ -481,6 +495,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private int _existingTraitIndex;
+
     public int ExistingTraitIndex
     {
         get => _existingTraitIndex;
@@ -488,7 +503,8 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _newTrait;
-    public string NewTrait 
+
+    public string NewTrait
     {
         get => _newTrait;
         set => SetProperty(ref _newTrait, value);
@@ -511,23 +527,29 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
 
     public void SaveRelationships()
     {
-        SaveRelationship(CurrentRelationship);  // Save any current changes
+        SaveRelationship(CurrentRelationship); // Save any current changes
         CurrentRelationship = null;
         // Move relationships back to the character model
         Model.RelationshipList.Clear();
-        foreach (RelationshipModel _relation in CharacterRelationships)
+        foreach (var _relation in CharacterRelationships)
+        {
             Model.RelationshipList.Add(_relation);
+        }
     }
 
     #endregion
 
     #region Private Methods
+
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
         if (_changeable)
         {
             if (!_changed)
+            {
                 _logger.Log(LogLevel.Info, $"CharacterViewModel.OnPropertyChanged: {args.PropertyName} changed");
+            }
+
             _changed = true;
             ShellViewModel.ShowChange();
         }
@@ -537,12 +559,15 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
     {
         _changeable = false;
         _changed = false;
-        _storyModel = _appState.CurrentDocument.Model;
+        _storyModel = _appState.CurrentDocument!.Model;
 
         Uuid = Model.Uuid;
         Name = Model.Name;
         if (Name.Equals("New Character"))
+        {
             IsTextBoxFocused = true;
+        }
+
         Role = Model.Role;
         StoryRole = Model.StoryRole;
         Archetype = Model.Archetype;
@@ -587,7 +612,10 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
         BackStory = Model.BackStory;
 
         CharacterTraits.Clear();
-        foreach (string _member in Model.TraitList) { CharacterTraits.Add(_member); }
+        foreach (var _member in Model.TraitList)
+        {
+            CharacterTraits.Add(_member);
+        }
 
         RelationType = string.Empty;
         RelationshipTrait = string.Empty;
@@ -596,9 +624,10 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
         SelectedRelationship = null;
         CurrentRelationship = null;
         CharacterRelationships.Clear();
-        foreach (RelationshipModel _relation in Model.RelationshipList)
+        foreach (var _relation in Model.RelationshipList)
         {
-            _relation.Partner = StoryElement.GetByGuid(_relation.PartnerUuid); // Populate partner Character StoryElement for Name
+            _relation.Partner =
+                StoryElement.GetByGuid(_relation.PartnerUuid); // Populate partner Character StoryElement for Name
             CharacterRelationships.Add(_relation);
         }
 
@@ -643,14 +672,20 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
         Model.Stability = Stability;
         Model.TraitList.Clear();
 
-        foreach (string _element in CharacterTraits) { Model.TraitList.Add(_element); }
+        foreach (var _element in CharacterTraits)
+        {
+            Model.TraitList.Add(_element);
+        }
 
-        SaveRelationship(CurrentRelationship);  // Save any current changes
+        SaveRelationship(CurrentRelationship); // Save any current changes
         CurrentRelationship = null;
         // Move relationships back to the character model
         Model.RelationshipList.Clear();
-        foreach (RelationshipModel _relation in CharacterRelationships)
+        foreach (var _relation in CharacterRelationships)
+        {
             Model.RelationshipList.Add(_relation);
+        }
+
         Model.Flaw = Flaw;
         Model.BackStory = BackStory;
 
@@ -672,37 +707,43 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
     {
         if (!string.IsNullOrEmpty(NewTrait))
         {
-            string _trait = "(Other) " + NewTrait;
+            var _trait = "(Other) " + NewTrait;
             CharacterTraits.Add(_trait);
             NewTrait = string.Empty;
         }
         else
         {
-            Messenger.Send(new StatusChangedMessage(new("You can't add an empty trait!", LogLevel.Warn)));
+            Messenger.Send(new StatusChangedMessage(new StatusMessage("You can't add an empty trait!", LogLevel.Warn)));
         }
     }
-        
-    private void RemoveTrait() 
+
+    private void RemoveTrait()
     {
-        if (ExistingTraitIndex == -1) 
+        if (ExistingTraitIndex == -1)
         {
-            Messenger.Send(new StatusChangedMessage(new("No trait selected to delete", LogLevel.Warn)));
+            Messenger.Send(new StatusChangedMessage(new StatusMessage("No trait selected to delete", LogLevel.Warn)));
             return;
         }
+
         CharacterTraits.RemoveAt(ExistingTraitIndex);
     }
 
     /// <summary>
-    /// Load and bind a RelationshipModel instance
+    ///     Load and bind a RelationshipModel instance
     /// </summary>
     /// <param name="selectedRelation">The RelationShipModel just selected or added</param>
     public void LoadRelationship(RelationshipModel selectedRelation)
     {
         if (selectedRelation == null)
+        {
             return;
+        }
+
         if (selectedRelation.PartnerUuid == Guid.Empty)
+        {
             return;
-        
+        }
+
         _changeable = false;
 
         RelationType = selectedRelation.RelationType;
@@ -716,7 +757,10 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
     public void SaveRelationship(RelationshipModel selectedRelation)
     {
         if (!_changed || selectedRelation == null)
+        {
             return;
+        }
+
         selectedRelation.Trait = RelationshipTrait;
         selectedRelation.Attitude = RelationshipAttitude;
         selectedRelation.Notes = RelationshipNotes;
@@ -724,8 +768,8 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
 
 
     /// <summary>
-    /// Add a new RelationshipModel instance for this character.
-    /// The added relationship is made the currently loaded and displayed one.
+    ///     Add a new RelationshipModel instance for this character.
+    ///     The added relationship is made the currently loaded and displayed one.
     /// </summary>
     public async Task AddRelationship()
     {
@@ -735,23 +779,36 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
         //Sets up view model
         NewRelationshipViewModel _vm = new(Model);
         _vm.RelationTypes.Clear();
-        foreach (string _relationshipType in Ioc.Default.GetRequiredService<ControlData>().RelationTypes) { _vm.RelationTypes.Add(_relationshipType); }
-        _vm.ProspectivePartners.Clear(); //Prospective partners are chars who are not in a relationship with this char
-        foreach (StoryElement _character in _storyModel.StoryElements.Characters)
+        foreach (var _relationshipType in Ioc.Default.GetRequiredService<ControlData>().RelationTypes)
         {
-            if (_character == _vm.Member) continue;  // Skip me
-            foreach (RelationshipModel _rel in CharacterRelationships)
+            _vm.RelationTypes.Add(_relationshipType);
+        }
+
+        _vm.ProspectivePartners.Clear(); //Prospective partners are chars who are not in a relationship with this char
+        foreach (var _character in _storyModel.StoryElements.Characters)
+        {
+            if (_character == _vm.Member)
             {
-                if (_character == _rel.Partner) goto NextCharacter; // Skip partner
+                continue; // Skip me
             }
+
+            foreach (var _rel in CharacterRelationships)
+            {
+                if (_character == _rel.Partner)
+                {
+                    goto NextCharacter; // Skip partner
+                }
+            }
+
             _vm.ProspectivePartners.Add(_character);
-        NextCharacter: ;
+            NextCharacter: ;
         }
 
         if (_vm.ProspectivePartners.Count == 0)
         {
-            _logger.Log(LogLevel.Warn,"There are no prospective partners, not showing AddRelationship Dialog." );
-            Messenger.Send(new StatusChangedMessage(new("This character already has a relationship with everyone", LogLevel.Warn)));
+            _logger.Log(LogLevel.Warn, "There are no prospective partners, not showing AddRelationship Dialog.");
+            Messenger.Send(new StatusChangedMessage(
+                new StatusMessage("This character already has a relationship with everyone", LogLevel.Warn)));
             return;
         }
 
@@ -764,7 +821,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
             Content = new NewRelationshipPage(_vm),
             MinWidth = 200
         };
-        ContentDialogResult _result = await _windowing.ShowContentDialog(_NewRelDialog);
+        var _result = await _windowing.ShowContentDialog(_NewRelDialog);
 
         if (_result == ContentDialogResult.Primary) //User clicks add relationship
         {
@@ -772,22 +829,26 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
             {
                 if (_vm.SelectedPartner == null) //This would occur if member box is empty and okay is clicked
                 {
-                    Messenger.Send(new StatusChangedMessage(new StatusMessage("The member box is empty!", LogLevel.Warn)));
+                    Messenger.Send(
+                        new StatusChangedMessage(new StatusMessage("The member box is empty!", LogLevel.Warn)));
                     return;
                 }
+
                 if (_vm.RelationType == null) //This would occur if member box is empty and okay is clicked
                 {
-                    Messenger.Send(new StatusChangedMessage(new StatusMessage("The relationship box is empty!", LogLevel.Warn)));
+                    Messenger.Send(
+                        new StatusChangedMessage(new StatusMessage("The relationship box is empty!", LogLevel.Warn)));
                     return;
                 }
+
                 // Create the new RelationshipModel
-                Guid partnerUuid = (_vm.SelectedPartner.Uuid);
+                var partnerUuid = _vm.SelectedPartner.Uuid;
                 RelationshipModel memberRelationship = new(partnerUuid, _vm.RelationType);
                 if (_vm.InverseRelationship && !string.IsNullOrWhiteSpace(_vm.InverseRelationType))
                 {
                     // Check for duplicate inverse relationship
-                    bool makeChar = true;
-                    foreach (RelationshipModel _relation in (_vm.SelectedPartner as CharacterModel)!.RelationshipList)
+                    var makeChar = true;
+                    foreach (var _relation in (_vm.SelectedPartner as CharacterModel)!.RelationshipList)
                     {
                         if (_relation.Partner == _vm.Member)
                         {
@@ -797,8 +858,10 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
 
                     if (makeChar)
                     {
-                        (_vm.SelectedPartner as CharacterModel)!.RelationshipList.Add(new RelationshipModel(Uuid, _vm.InverseRelationType));
-                    }                }
+                        (_vm.SelectedPartner as CharacterModel)!.RelationshipList.Add(
+                            new RelationshipModel(Uuid, _vm.InverseRelationType));
+                    }
+                }
 
                 memberRelationship.Partner = StoryElement.GetByGuid(partnerUuid); // Complete pairing
                 // Add partner relationship to member's list of relationships 
@@ -808,23 +871,26 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
                 CurrentRelationship = SelectedRelationship;
 
                 _changed = true;
-                Messenger.Send(new StatusChangedMessage(new StatusMessage($"Relationship to {_vm.SelectedPartner.Name} added", LogLevel.Info, true)));
+                Messenger.Send(new StatusChangedMessage(
+                    new StatusMessage($"Relationship to {_vm.SelectedPartner.Name} added", LogLevel.Info, true)));
             }
             catch (Exception _ex)
             {
                 _logger.LogException(LogLevel.Error, _ex, "Error creating new Relationship");
-                Messenger.Send(new StatusChangedMessage(new StatusMessage("Error creating new Relationship", LogLevel.Error)));
+                Messenger.Send(
+                    new StatusChangedMessage(new StatusMessage("Error creating new Relationship", LogLevel.Error)));
             }
         }
         else //User clicks cancel
         {
-            Messenger.Send(new StatusChangedMessage(new StatusMessage("AddRelationship cancelled", LogLevel.Info, true)));
+            Messenger.Send(
+                new StatusChangedMessage(new StatusMessage("AddRelationship cancelled", LogLevel.Info, true)));
         }
     }
 
 
     /// <summary>
-    /// This opens and deals with the flaw tool
+    ///     This opens and deals with the flaw tool
     /// </summary>
     private async void FlawTool()
     {
@@ -838,14 +904,14 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
             PrimaryButtonText = "Copy flaw example",
             CloseButtonText = "Cancel"
         };
-        ContentDialogResult _result = await _windowing.ShowContentDialog(_flawDialog);
+        var _result = await _windowing.ShowContentDialog(_flawDialog);
 
-        if (_result == ContentDialogResult.Primary)   // Copy to Character Flaw  
+        if (_result == ContentDialogResult.Primary) // Copy to Character Flaw  
         {
             Flaw = Ioc.Default.GetRequiredService<FlawViewModel>().WoundSummary; //Sets the flaw.
             _logger.Log(LogLevel.Info, "Flaw Finder complete");
         }
-        else  // Cancel button pressed
+        else // Cancel button pressed
         {
             _logger.Log(LogLevel.Info, "Flaw Finder canceled");
         }
@@ -863,16 +929,16 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
             CloseButtonText = "Cancel",
             Content = new Traits()
         };
-        ContentDialogResult _result = await _windowing.ShowContentDialog(_traitDialog);
+        var _result = await _windowing.ShowContentDialog(_traitDialog);
 
-        if (_result == ContentDialogResult.Primary)   // Copy to Character Trait 
+        if (_result == ContentDialogResult.Primary) // Copy to Character Trait 
         {
             CharacterTraits.Add(Ioc.Default.GetRequiredService<TraitsViewModel>().Example);
             _changed = true;
             ShellViewModel.ShowChange();
             _logger.Log(LogLevel.Info, "Trait Builder complete");
         }
-        else  // Cancel button pressed
+        else // Cancel button pressed
         {
             _logger.Log(LogLevel.Info, "Trait Builder cancelled");
         }
@@ -890,7 +956,6 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
     public ObservableCollection<string> RelationshipTraitList;
     public ObservableCollection<string> RelationshipAttitudeList;
 
-    // TODO: How do I bind to Sex option buttons?
     public ObservableCollection<string> EyesList;
     public ObservableCollection<string> HairList;
     public ObservableCollection<string> SkinList;
@@ -918,8 +983,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
 
     #region Constructors
 
-    // Constructor for XAML compatibility - will be removed later
-    public CharacterViewModel(ILogService logger, AppState appState, Windowing windowing)
+    public CharacterViewModel(ILogService logger, AppState appState, Windowing windowing, ListData listData)
     {
         _logger = logger;
         _appState = appState;
@@ -927,13 +991,12 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
 
         try
         {
-            Dictionary<string, ObservableCollection<string>> _lists = Ioc.Default.GetService<ListData>().ListControlSource;
+            var _lists = Ioc.Default.GetService<ListData>().ListControlSource;
             RoleList = _lists["Role"];
             StoryRoleList = _lists["StoryRole"];
             ArchetypeList = _lists["Archetype"];
             BuildList = _lists["Build"];
             NationalityList = _lists["Country"];
-            // TODO: How do I bind to Sex option buttons?
             EyesList = _lists["EyeColor"];
             HairList = _lists["HairColor"];
             SkinList = _lists["Complexion"];
@@ -970,7 +1033,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
 
         AddTraitCommand = new RelayCommand(AddTrait, () => true);
         RemoveTraitCommand = new RelayCommand(RemoveTrait, () => true);
-        AddRelationshipCommand = new RelayCommand(async () => await  AddRelationship(), () => true);
+        AddRelationshipCommand = new RelayCommand(async () => await AddRelationship(), () => true);
         FlawCommand = new RelayCommand(FlawTool, () => true);
         TraitCommand = new RelayCommand(TraitTool, () => true);
 

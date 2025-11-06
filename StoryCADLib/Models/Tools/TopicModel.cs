@@ -1,12 +1,17 @@
-﻿namespace StoryCAD.Models.Tools;
+namespace StoryCADLib.Models.Tools;
 
-public enum TopicTypeEnum { Notepad, Inline }
+public enum TopicTypeEnum
+{
+    Notepad,
+    Inline
+}
+
 public class TopicModel
 {
-    public TopicTypeEnum TopicType;
     public string Filename;
-    public string TopicName;
     public List<SubTopicModel> SubTopics;
+    public string TopicName;
+    public TopicTypeEnum TopicType;
 
     public TopicModel(string topic, string filename)
     {

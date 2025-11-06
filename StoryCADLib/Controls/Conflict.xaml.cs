@@ -1,20 +1,21 @@
-using Microsoft.UI.Xaml;
-using StoryCAD.Models.Tools;
+using StoryCADLib.Models.Tools;
 
-namespace StoryCAD.Controls;
+namespace StoryCADLib.Controls;
 
 public sealed partial class Conflict
 {
-    public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
     private string category;
-    private string subCategory;
+    public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
     private ConflictCategoryModel model;
-    public string ExampleText { get; set; }
+    private string subCategory;
 
     public Conflict()
     {
         InitializeComponent();
     }
+
+    public string ExampleText { get; set; }
+
     private void Category_SelectionChanged(object sender, SelectionChangedEventArgs selectionChangedEventArgs)
     {
         category = (string)Category.Items[Category.SelectedIndex];

@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Messaging.Messages;
 
-namespace StoryCAD.Services.Messages;
+namespace StoryCADLib.Services.Messages;
 
-class StatusRequestMessage : RequestMessage<StatusMessage>
+internal class StatusRequestMessage : RequestMessage<StatusMessage>
 {
 }

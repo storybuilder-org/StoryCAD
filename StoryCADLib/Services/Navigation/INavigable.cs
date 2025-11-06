@@ -1,4 +1,4 @@
-﻿namespace StoryCAD.Services.Navigation;
+﻿namespace StoryCADLib.Services.Navigation;
 
 public interface INavigable
 {

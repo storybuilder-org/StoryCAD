@@ -1,3 +1,7 @@
-﻿namespace StoryCAD.Services.Dialogs;
+﻿namespace StoryCADLib.Services.Dialogs;
 
-public enum DupProjectResult { Replace, Cancel }
+public enum DupProjectResult
+{
+    Replace,
+    Cancel
+}

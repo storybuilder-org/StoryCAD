@@ -1,8 +1,6 @@
-﻿using WinUIEx;
+﻿namespace StoryCAD;
 
-namespace StoryCAD;
-
-public sealed partial class MainWindow : WindowEx 
+public sealed partial class MainWindow : Window
 {
     public MainWindow()
     {

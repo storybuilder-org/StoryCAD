@@ -1,0 +1,286 @@
+    === RichEditBoxExtended: UNO PLATFORM VERSION (TextBox) ===
+    === RichEditBoxExtended: UNO PLATFORM VERSION (TextBox) ===
+    === RichEditBoxExtended: UNO PLATFORM VERSION (TextBox) ===
+    === RichEditBoxExtended: UNO PLATFORM VERSION (TextBox) ===
+    === RichEditBoxExtended: UNO PLATFORM VERSION (TextBox) ===
+    The Bindable attribute is missing and the type [StoryCADLib.ViewModels.OverviewViewModel] is not known by the MetadataProvider. Reflection was used instead of the binding engine and generated static metadata. Add the Bindable attribute to prevent this message and performance issues.
+    === OnSizeChanged fired ===
+      PreviousSize: 0 x 0
+      NewSize: 751.3333129882812 x 280
+      _isLoaded: False
+      Not updating MaxWidth (not loaded or invalid NewSize)
+    === OnLoaded fired ===
+      Parent.ActualWidth: 775.3333129882812, Margins: 0/0
+      MaxWidth set to: 775.3333129882812
+      _isLoaded = true, InvalidateMeasure() called
+    === OnSizeChanged fired ===
+      PreviousSize: 751.3333129882812 x 280
+      NewSize: 651.3333129882812 x 280
+      _isLoaded: True
+      MaxWidth updated to: 675.3333129882812
+    === OnSizeChanged fired ===
+      PreviousSize: 651.3333129882812 x 280
+      NewSize: 652.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 676.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 652.6666870117188 x 280
+      NewSize: 661.3333129882812 x 280
+      _isLoaded: True
+      MaxWidth updated to: 685.3333129882812
+    === OnSizeChanged fired ===
+      PreviousSize: 661.3333129882812 x 280
+      NewSize: 669.3333129882812 x 280
+      _isLoaded: True
+      MaxWidth updated to: 693.3333129882812
+    === OnSizeChanged fired ===
+      PreviousSize: 669.3333129882812 x 280
+      NewSize: 678 x 280
+      _isLoaded: True
+      MaxWidth updated to: 702
+    === OnSizeChanged fired ===
+      PreviousSize: 678 x 280
+      NewSize: 682.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 706.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 682.6666870117188 x 280
+      NewSize: 686.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 710.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 686.6666870117188 x 280
+      NewSize: 690 x 280
+      _isLoaded: True
+      MaxWidth updated to: 714
+    === OnSizeChanged fired ===
+      PreviousSize: 690 x 280
+      NewSize: 700.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 724.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 700.6666870117188 x 280
+      NewSize: 693.3333129882812 x 280
+      _isLoaded: True
+      MaxWidth updated to: 717.3333129882812
+    === OnSizeChanged fired ===
+      PreviousSize: 693.3333129882812 x 280
+      NewSize: 717.3333129882812 x 280
+      _isLoaded: True
+      MaxWidth updated to: 752
+    === OnSizeChanged fired ===
+      PreviousSize: 717.3333129882812 x 280
+      NewSize: 745.3333129882812 x 280
+      _isLoaded: True
+      MaxWidth updated to: 769.3333129882812
+    === OnSizeChanged fired ===
+      PreviousSize: 745.3333129882812 x 280
+      NewSize: 736.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 760.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 736.6666870117188 x 280
+      NewSize: 760.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 797.3333129882812
+    === OnSizeChanged fired ===
+      PreviousSize: 760.6666870117188 x 280
+      NewSize: 762.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 786.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 762.6666870117188 x 280
+      NewSize: 784.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 808.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 784.6666870117188 x 280
+      NewSize: 778 x 280
+      _isLoaded: True
+      MaxWidth updated to: 802
+    === OnSizeChanged fired ===
+      PreviousSize: 778 x 280
+      NewSize: 790 x 280
+      _isLoaded: True
+      MaxWidth updated to: 814
+    === OnSizeChanged fired ===
+      PreviousSize: 790 x 280
+      NewSize: 786.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 810.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 786.6666870117188 x 280
+      NewSize: 810.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 860
+    === OnSizeChanged fired ===
+      PreviousSize: 810.6666870117188 x 280
+      NewSize: 820.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 844.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 820.6666870117188 x 280
+      NewSize: 828 x 280
+      _isLoaded: True
+      MaxWidth updated to: 852
+    === OnSizeChanged fired ===
+      PreviousSize: 828 x 280
+      NewSize: 826 x 280
+      _isLoaded: True
+      MaxWidth updated to: 850
+    === OnSizeChanged fired ===
+      PreviousSize: 826 x 280
+      NewSize: 830.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 854.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 830.6666870117188 x 280
+      NewSize: 829.3333129882812 x 280
+      _isLoaded: True
+      MaxWidth updated to: 853.3333129882812
+    === OnSizeChanged fired ===
+      PreviousSize: 829.3333129882812 x 280
+      NewSize: 831.3333129882812 x 280
+      _isLoaded: True
+      MaxWidth updated to: 855.3333129882812
+    === OnSizeChanged fired ===
+      PreviousSize: 831.3333129882812 x 280
+      NewSize: 830.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 854.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 830.6666870117188 x 280
+      NewSize: 836 x 280
+      _isLoaded: True
+      MaxWidth updated to: 860
+    === OnSizeChanged fired ===
+      PreviousSize: 836 x 280
+      NewSize: 834.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 858.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 834.6666870117188 x 280
+      NewSize: 838.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 862.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 838.6666870117188 x 280
+      NewSize: 837.3333129882812 x 280
+      _isLoaded: True
+      MaxWidth updated to: 861.3333129882812
+    === OnSizeChanged fired ===
+      PreviousSize: 837.3333129882812 x 280
+      NewSize: 844.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 868.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 844.6666870117188 x 280
+      NewSize: 842.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 866.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 842.6666870117188 x 280
+      NewSize: 845.3333129882812 x 280
+      _isLoaded: True
+      MaxWidth updated to: 869.3333129882812
+    === OnSizeChanged fired ===
+      PreviousSize: 845.3333129882812 x 280
+      NewSize: 844 x 280
+      _isLoaded: True
+      MaxWidth updated to: 868
+    === OnSizeChanged fired ===
+      PreviousSize: 844 x 280
+      NewSize: 846 x 280
+      _isLoaded: True
+      MaxWidth updated to: 870
+    === OnSizeChanged fired ===
+      PreviousSize: 846 x 280
+      NewSize: 847.3333129882812 x 280
+      _isLoaded: True
+      MaxWidth updated to: 871.3333129882812
+    === OnSizeChanged fired ===
+      PreviousSize: 847.3333129882812 x 280
+      NewSize: 846.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 870.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 846.6666870117188 x 280
+      NewSize: 847.3333129882812 x 280
+      _isLoaded: True
+      MaxWidth updated to: 871.3333129882812
+    === OnSizeChanged fired ===
+      PreviousSize: 847.3333129882812 x 280
+      NewSize: 850.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 874.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 850.6666870117188 x 280
+      NewSize: 858.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 882.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 858.6666870117188 x 280
+      NewSize: 866.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 890.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 866.6666870117188 x 280
+      NewSize: 875.3333129882812 x 280
+      _isLoaded: True
+      MaxWidth updated to: 899.3333129882812
+    === OnSizeChanged fired ===
+      PreviousSize: 875.3333129882812 x 280
+      NewSize: 884 x 280
+      _isLoaded: True
+      MaxWidth updated to: 908
+    === OnSizeChanged fired ===
+      PreviousSize: 884 x 280
+      NewSize: 894.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 918.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 894.6666870117188 x 280
+      NewSize: 888 x 280
+      _isLoaded: True
+      MaxWidth updated to: 912
+    === OnSizeChanged fired ===
+      PreviousSize: 888 x 280
+      NewSize: 912 x 280
+      _isLoaded: True
+      MaxWidth updated to: 936.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 912 x 280
+      NewSize: 905.3333129882812 x 280
+      _isLoaded: True
+      MaxWidth updated to: 929.3333129882812
+    === OnSizeChanged fired ===
+      PreviousSize: 905.3333129882812 x 280
+      NewSize: 906 x 280
+      _isLoaded: True
+      MaxWidth updated to: 930
+    === OnSizeChanged fired ===
+      PreviousSize: 906 x 280
+      NewSize: 907.3333129882812 x 280
+      _isLoaded: True
+      MaxWidth updated to: 931.3333129882812
+    === OnSizeChanged fired ===
+      PreviousSize: 907.3333129882812 x 280
+      NewSize: 906.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 930.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 906.6666870117188 x 280
+      NewSize: 908.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 932.6666870117188
+    === OnSizeChanged fired ===
+      PreviousSize: 908.6666870117188 x 280
+      NewSize: 908 x 280
+      _isLoaded: True
+      MaxWidth updated to: 932
+    === OnSizeChanged fired ===
+      PreviousSize: 908 x 280
+      NewSize: 908.6666870117188 x 280
+      _isLoaded: True
+      MaxWidth updated to: 932.6666870117188
+PS D:\dev\src\StoryCAD>

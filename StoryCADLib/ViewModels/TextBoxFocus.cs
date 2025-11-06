@@ -1,38 +1,36 @@
-﻿using Microsoft.UI.Xaml;
+﻿namespace StoryCADLib.ViewModels;
 
-namespace StoryCAD.ViewModels
+public static class TextBoxFocus
+{
+    public static readonly DependencyProperty IsFocusedProperty =
+        DependencyProperty.RegisterAttached("IsFocused", typeof(bool), typeof(TextBoxFocus),
+            new PropertyMetadata(false, OnIsFocusedPropertyChanged));
+
+    public static bool GetIsFocused(DependencyObject obj)
     {
-        public static class TextBoxFocus
+        return (bool)obj.GetValue(IsFocusedProperty);
+    }
+
+    public static void SetIsFocused(DependencyObject obj, bool value)
+    {
+        obj.SetValue(IsFocusedProperty, value);
+    }
+
+    private static void OnIsFocusedPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if ((bool)e.NewValue)
         {
-            public static bool GetIsFocused(DependencyObject obj)
-            {
-                return (bool)obj.GetValue(IsFocusedProperty);
-            }
-
-            public static void SetIsFocused(DependencyObject obj, bool value)
-            {
-                obj.SetValue(IsFocusedProperty, value);
-            }
-
-            public static readonly DependencyProperty IsFocusedProperty =
-                DependencyProperty.RegisterAttached("IsFocused", typeof(bool), typeof(TextBoxFocus), new PropertyMetadata(false, OnIsFocusedPropertyChanged));
-
-            private static void OnIsFocusedPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-            {
-                if ((bool)e.NewValue)
-                {
-                    ((TextBox)d).Loaded += TextBox_Loaded;
-                }
-                else
-                {
-                    ((TextBox)d).Loaded -= TextBox_Loaded;
-                }
-            }
-
-            private static void TextBox_Loaded(object sender, RoutedEventArgs e)
-            {
-                ((TextBox)sender).Focus(FocusState.Programmatic);
-                ((TextBox)sender).SelectAll();
-            }
+            ((TextBox)d).Loaded += TextBox_Loaded;
+        }
+        else
+        {
+            ((TextBox)d).Loaded -= TextBox_Loaded;
         }
     }
+
+    private static void TextBox_Loaded(object sender, RoutedEventArgs e)
+    {
+        ((TextBox)sender).Focus(FocusState.Programmatic);
+        ((TextBox)sender).SelectAll();
+    }
+}

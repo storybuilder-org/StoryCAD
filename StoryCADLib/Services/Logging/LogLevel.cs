@@ -1,4 +1,4 @@
-﻿namespace StoryCAD.Services.Logging;
+﻿namespace StoryCADLib.Services.Logging;
 
 public enum LogLevel
 {

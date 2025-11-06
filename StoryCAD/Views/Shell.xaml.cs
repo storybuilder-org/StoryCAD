@@ -1,32 +1,28 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
+using System.Runtime.InteropServices;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.System;
+using Windows.UI.ViewManagement;
+using Microsoft.UI;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using StoryCAD.Models.Tools;
-using StoryCAD.Services.Logging;
-using Windows.UI.ViewManagement;
-using Windows.ApplicationModel.DataTransfer;
-using Microsoft.UI;
-using StoryCAD.Services.Collaborator;
-using StoryCAD.Exceptions;
-using StoryCAD.Services;
-using StoryCAD.Services.Dialogs;
-using StoryCAD.Services.Ratings;
-using StoryCAD.ViewModels.SubViewModels;
-using StoryCAD.ViewModels.Tools;
-using StoryCAD.Services.Backup;
-using StoryCAD.Services.Locking;
+using StoryCADLib.Helpers;
+using StoryCADLib.Models.Tools;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Backup;
+using StoryCADLib.Services.Collaborator;
+using StoryCADLib.Services.Dialogs;
+using StoryCADLib.Services.Locking;
+using StoryCADLib.Services.Logging;
+using StoryCADLib.Services.Ratings;
+using StoryCADLib.ViewModels.SubViewModels;
+using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCAD.Views;
 
-public sealed partial class Shell
+public sealed partial class Shell : Page
 {
-    public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
-    public Windowing Windowing => Ioc.Default.GetService<Windowing>();
-    public OutlineViewModel OutlineVM => Ioc.Default.GetService<OutlineViewModel>();
-    public AppState AppState => Ioc.Default.GetService<AppState>();
     public LogService Logger;
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
 
@@ -42,21 +38,31 @@ public sealed partial class Shell
             Ioc.Default.GetRequiredService<Windowing>().GlobalDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
             Loaded += Shell_Loaded;
             AppState.CurrentDocumentChanged += (_, __) => UpdateDocumentBindings();
-            SerializationLock.CanExecuteStateChanged += (_, __) => ShellVm.RefreshAllCommands();
+            // Marshal to UI thread to prevent cross-thread deadlock when AutoSave fires this event
+            SerializationLock.CanExecuteStateChanged += (_, __) =>
+            {
+                Windowing.GlobalDispatcher.TryEnqueue(() => ShellVm.RefreshAllCommands());
+            };
         }
         catch (Exception ex)
         {
             // A shell initialization error is fatal
             Logger!.LogException(LogLevel.Error, ex, ex.Message);
             Logger.Flush();
-            Application.Current.Exit();  // Win32
+            Application.Current.Exit(); // Win32
         }
+
         ShellVm.SplitViewFrame = SplitViewFrame;
     }
 
-	private async void Shell_Loaded(object sender, RoutedEventArgs e)
+    public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
+    public Windowing Windowing => Ioc.Default.GetService<Windowing>();
+    public OutlineViewModel OutlineVM => Ioc.Default.GetService<OutlineViewModel>();
+    public AppState AppState => Ioc.Default.GetService<AppState>();
+
+    private async void Shell_Loaded(object sender, RoutedEventArgs e)
     {
-        Windowing.XamlRoot = Content.XamlRoot;
+        Windowing.XamlRoot = XamlRoot;
         Ioc.Default.GetService<AppState>()!.StartUpTimer.Stop();
 
         if (await Ioc.Default.GetService<CollaboratorService>()!.CollaboratorEnabled())
@@ -65,7 +71,9 @@ public sealed partial class Shell
             ShellVm.CollaboratorVisibility = Visibility.Visible;
         }
         else
+        {
             ShellVm.CollaboratorVisibility = Visibility.Collapsed;
+        }
 
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();
@@ -85,64 +93,101 @@ public sealed partial class Shell
             {
                 await Ioc.Default.GetRequiredService<WebViewModel>().ShowWebViewDialog();
             }
-
         }
+
         //Shows changelog if the app has been updated since the last launch.
         if (Ioc.Default.GetRequiredService<AppState>().LoadedWithVersionChange)
         {
-			Ioc.Default.GetService<PreferenceService>()!.Model.HideRatingPrompt = false;  //rating prompt re-enabled on updates.
-			var logger = Ioc.Default.GetService<ILogService>();
-			var appState = Ioc.Default.GetService<AppState>();
-			await new Changelog(logger, appState).ShowChangeLog();
+            Ioc.Default.GetService<PreferenceService>()!.Model.HideRatingPrompt =
+                false; //rating prompt re-enabled on updates.
+            var logger = Ioc.Default.GetService<ILogService>();
+            var appState = Ioc.Default.GetService<AppState>();
+            await new Changelog(logger, appState).ShowChangeLog();
         }
 
         if (Preferences.ShowStartupDialog)
         {
-                ContentDialog cd = new()
-                {
-                        Title = "Need help getting started?",
-                        Content = new HelpPage(),
-                        PrimaryButtonText = "Close",
-                };
-                await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
-                }
+            ContentDialog cd = new()
+            {
+                Title = "Need help getting started?",
+                Content = new HelpPage(),
+                PrimaryButtonText = "Close"
+            };
+            await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
+        }
 
         AdjustSplitViewPane(ShellPage.ActualWidth);
 
         //If StoryCAD was loaded from a .STBX File then instead of showing the file open menu
         //We will instead load the file instead.
         Logger.Log(LogLevel.Info, $"Filepath to launch {ShellVm.FilePathToLaunch}");
-        if (ShellVm.FilePathToLaunch == null) { await ShellVm.OutlineManager.OpenFileOpenMenu(); }
-        else { await ShellVm.OutlineManager.OpenFile(ShellVm.FilePathToLaunch); }
+        if (ShellVm.FilePathToLaunch == null)
+        {
+            // Only show the file open menu if the preference is enabled
+            if (Preferences.ShowFilePickerOnStartup)
+            {
+                await ShellVm.OutlineManager.OpenFileOpenMenu();
+            }
+        }
+        else
+        {
+            await ShellVm.OutlineManager.OpenFile(ShellVm.FilePathToLaunch);
+        }
 
-		//Ask user for review if appropriate.
-		RatingService rateService = Ioc.Default.GetService<RatingService>();
-		if (rateService!.AskForRatings())
-		{
-			rateService.OpenRatingPrompt();
-		}
+        //Ask user for review if appropriate.
+        var rateService = Ioc.Default.GetService<RatingService>();
+        if (rateService!.AskForRatings())
+        {
+            rateService.OpenRatingPrompt();
+        }
 
         // Track when the application is shutting down
-        
-        Windowing.MainWindow.Closed += ((_, _) => ShellVm.IsClosing = true);
+
+        // Hook up the Closing event for cleanup before window destruction
+        if (Windowing.MainWindow.AppWindow != null)
+        {
+            Windowing.MainWindow.AppWindow.Closing += OnMainWindowClosing;
+        }
+
+        // Update keyboard hints for macOS (only updates context flyout)
+        // Done after all initialization to avoid flyout state issues
+        UpdateKeyboardHints();
     }
 
     /// <summary>
-    /// Makes the TreeView lose its selection when there is no corresponding main menu item.
+    ///     Handles the main window closing event. Calls ShellViewModel to perform cleanup.
     /// </summary>
-    /// <remarks>But I don't know why...</remarks>
-    private void SplitViewFrame_OnNavigated(object sender, NavigationEventArgs e)
+    private async void OnMainWindowClosing(AppWindow sender, AppWindowClosingEventArgs args)
     {
-        ((SplitViewFrame.Content as FrameworkElement)!).RequestedTheme = Windowing.RequestedTheme;
-        SplitViewFrame.Background = Windowing.RequestedTheme == ElementTheme.Light ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Black);
-        if (!((FrameworkElement)SplitViewFrame.Content).BaseUri.ToString().Contains("HomePage"))
+        try
         {
-            ((Page)SplitViewFrame.Content).Margin = new(0, 0, 0, 5);
+            await ShellVm.OnApplicationClosing();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogException(LogLevel.Error, ex, "Error during application closing");
+            // Don't re-throw - let the window close even if cleanup fails
         }
     }
 
     /// <summary>
-    /// Navigates to the specified source page type.
+    ///     Makes the TreeView lose its selection when there is no corresponding main menu item.
+    /// </summary>
+    /// <remarks>But I don't know why...</remarks>
+    private void SplitViewFrame_OnNavigated(object sender, NavigationEventArgs e)
+    {
+        (SplitViewFrame.Content as FrameworkElement)!.RequestedTheme = Windowing.RequestedTheme;
+        SplitViewFrame.Background = Windowing.RequestedTheme == ElementTheme.Light
+            ? new SolidColorBrush(Colors.White)
+            : new SolidColorBrush(Colors.Black);
+        if (!((FrameworkElement)SplitViewFrame.Content).BaseUri.ToString().Contains("HomePage"))
+        {
+            ((Page)SplitViewFrame.Content).Margin = new Thickness(0, 0, 0, 5);
+        }
+    }
+
+    /// <summary>
+    ///     Navigates to the specified source page type.
     /// </summary>
     public bool Navigate(Type sourcePageType, object parameter = null)
     {
@@ -157,20 +202,21 @@ public sealed partial class Shell
             ShellVm.LastClickedTreeviewItem.IsSelected = false;
             ShellVm.LastClickedTreeviewItem.BorderBrush = null;
         }
+
         //Remove old right-clicked node's background
-        TreeViewItem item = (TreeViewItem)sender;
+        var item = (TreeViewItem)sender;
         item.Background = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
 
         ShellVm.RightTappedNode = (StoryNodeItem)item.DataContext;
         ShellVm.LastClickedTreeviewItem = item; //We can't set the background through RightTappedNode so
-                                                //we set a reference to the node itself to reset the background later
+        //we set a reference to the node itself to reset the background later
         ShellVm.ShowFlyoutButtons();
     }
 
     /// <summary>
-    /// Updates the bindings when the document changes.
-    /// Called when AppState.CurrentDocument is set to refresh x:Bind bindings
-    /// for the tree views (CurrentView and TrashView) in the Shell UI.
+    ///     Updates the bindings when the document changes.
+    ///     Called when AppState.CurrentDocument is set to refresh x:Bind bindings
+    ///     for the tree views (CurrentView and TrashView) in the Shell UI.
     /// </summary>
     public void UpdateDocumentBindings()
     {
@@ -178,7 +224,7 @@ public sealed partial class Shell
     }
 
     /// <summary>
-    /// Treat a treeview item as if it were a button
+    ///     Treat a treeview item as if it were a button
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="args"></param>
@@ -186,13 +232,6 @@ public sealed partial class Shell
     {
         ShellVm.TreeViewNodeClicked(args.InvokedItem);
         args.Handled = true;
-    }
-
-    private void AddButton_ContextRequested(UIElement sender, ContextRequestedEventArgs args)
-    {
-        FlyoutShowOptions myOption = new();
-        myOption.ShowMode = FlyoutShowMode.Transient;
-        AddStoryElementCommandBarFlyout.ShowAt(NavigationTree, myOption);
     }
 
     private void Search(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
@@ -203,8 +242,15 @@ public sealed partial class Shell
     private void ClearNodes(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
         var storyModel = Ioc.Default.GetService<AppState>()!.CurrentDocument.Model;
-        if (storyModel?.CurrentView == null || storyModel.CurrentView.Count == 0) { return; }
-        foreach (StoryNodeItem node in storyModel.CurrentView[0]) { node.Background = null; }
+        if (storyModel?.CurrentView == null || storyModel.CurrentView.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var node in storyModel.CurrentView[0])
+        {
+            node.Background = null;
+        }
     }
 
     private void TreeViewItem_Tapped(object sender, TappedRoutedEventArgs e)
@@ -215,24 +261,26 @@ public sealed partial class Shell
             ShellVm.LastClickedTreeviewItem.IsSelected = false;
             ShellVm.LastClickedTreeviewItem.BorderBrush = null;
         }
+
         ShellVm.LastClickedTreeviewItem = (TreeViewItem)sender;
     }
 
     private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
     {
-	    var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new()
-	    {
-		    Content = new FeedbackDialog(),
-		    PrimaryButtonText = "Submit Feedback",
-			SecondaryButtonText = "Discard",
-		    Title = "Submit",
-	    });
+        var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new ContentDialog
+        {
+            Content = new FeedbackDialog(),
+            PrimaryButtonText = "Submit Feedback",
+            SecondaryButtonText = "Discard",
+            Title = "Submit"
+        });
 
-	    if (result == ContentDialogResult.Primary)
-	    {
-		    Ioc.Default.GetRequiredService<FeedbackViewModel>().CreateFeedback();
-	    }
+        if (result == ContentDialogResult.Primary)
+        {
+            Ioc.Default.GetRequiredService<FeedbackViewModel>().CreateFeedback();
+        }
     }
+
     private void ShellPage_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         AdjustSplitViewPane(e.NewSize.Width);
@@ -242,7 +290,7 @@ public sealed partial class Shell
     {
         if (ShellSplitView != null && ShellSplitView.IsPaneOpen)
         {
-            double pane = Math.Max(200, width * 0.3);
+            var pane = Math.Max(200, width * 0.3);
             ShellSplitView.OpenPaneLength = pane;
         }
     }
@@ -259,30 +307,34 @@ public sealed partial class Shell
     */
 
     /// <summary>
-    /// Ran when root nodes are clicked.
-    /// This is because you can't attach the TreViewItem_Invoked event 
-    /// to the root nodes as they are not within a tree view,
-    /// so this just forwards the click so it can run normally.
+    ///     Ran when root nodes are clicked.
+    ///     This is because you can't attach the TreViewItem_Invoked event
+    ///     to the root nodes as they are not within a tree view,
+    ///     so this just forwards the click so it can run normally.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private void RootClick(object s, RoutedEventArgs e) => ShellVm.TreeViewNodeClicked((s as FrameworkElement).DataContext);
+    private void RootClick(object s, RoutedEventArgs e) =>
+        ShellVm.TreeViewNodeClicked((s as FrameworkElement).DataContext);
 
     /// <summary>
-    /// This updates the parent of a node in a drag and drop to correctly update backing store (story model)
-    /// when the parent of the item being moved is supposed to be the root of the tree view.
+    ///     This updates the parent of a node in a drag and drop to correctly update backing store (story model)
+    ///     when the parent of the item being moved is supposed to be the root of the tree view.
     /// </summary>
     private void NavigationTree_DragItemsCompleted(TreeView sender, TreeViewDragItemsCompletedEventArgs args)
     {
         try
         {
             //Block all other operations
-            if (args.DropResult != DataPackageOperation.Move) return;
+            if (args.DropResult != DataPackageOperation.Move)
+            {
+                return;
+            }
 
             //Update parent field of item in storymodel so it's correct
             var movedItem = (StoryNodeItem)args.Items[0];
             var parent = args.NewParentItem as StoryNodeItem;
-            
+
             // If parent is null, use the CurrentView view's root node
             if (parent == null)
             {
@@ -304,6 +356,284 @@ public sealed partial class Shell
         catch (Exception ex)
         {
             Logger.LogException(LogLevel.Error, ex, "Error during drag and drop operation.");
+        }
+    }
+
+    /// <summary>
+    /// Centralized keyboard shortcut handler using KeyboardHelper for cross-platform support.
+    /// This replaces individual KeyboardAccelerator elements in XAML.
+    /// </summary>
+    private void ShellPage_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        try
+        {
+            // Don't process keyboard shortcuts if the event has already been handled
+            // by a child element (like a text box or context menu)
+            if (e.Handled)
+            {
+                return;
+            }
+
+            // Don't process if the original source is a TextBox or other input control
+            // to avoid interfering with text entry
+            if (e.OriginalSource is TextBox || e.OriginalSource is RichEditBox ||
+                e.OriginalSource is AutoSuggestBox || e.OriginalSource is PasswordBox)
+            {
+                return;
+            }
+
+            var ctrl = KeyboardHelper.IsControlPressed();
+            var shift = KeyboardHelper.IsShiftPressed();
+            var alt = KeyboardHelper.IsAltPressed();
+
+            // File Menu shortcuts
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.O)
+            {
+                ShellVm.OpenFileOpenMenuCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.S)
+            {
+                ShellVm.SaveFileCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (ctrl && shift && !alt && e.Key == VirtualKey.S)
+            {
+                ShellVm.SaveAsCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.B)
+            {
+                ShellVm.CreateBackupCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            // Add Menu shortcuts (Alt+Letter)
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.F && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddFolderCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.A && ShellVm.NarratorVisibility == Visibility.Visible)
+            {
+                ShellVm.AddSectionCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.P && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddProblemCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.C && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddCharacterCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.L && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddSettingCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.S && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddSceneCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.W && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddWebCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.N && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddNotesCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            // Delete key (no modifiers)
+            if (!ctrl && !shift && !alt && e.Key == VirtualKey.Delete && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.RemoveStoryElementCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            // Exit shortcut (Cmd+Q on macOS, Ctrl+Q on Windows)
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.Q)
+            {
+                ShellVm.ExitCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            // Tools Menu shortcuts
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.N)
+            {
+                ShellVm.NarrativeToolCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.M)
+            {
+                ShellVm.MasterPlotsCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.D)
+            {
+                ShellVm.DramaticSituationsCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.L)
+            {
+                ShellVm.StockScenesCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            // Reports Menu shortcuts
+            // Note: Ctrl+P is platform-specific - Print on Windows, Preferences elsewhere
+#if HAS_UNO_WINUI
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.P)
+            {
+                ShellVm.PrintReportsCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+#else
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.P)
+            {
+                ShellVm.PreferencesCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+#endif
+
+            if (ctrl && shift && !alt && e.Key == VirtualKey.P)
+            {
+                ShellVm.ExportReportsToPdfCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.R)
+            {
+                ShellVm.ScrivenerReportsCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            // Help shortcut
+            if (!ctrl && !shift && !alt && e.Key == VirtualKey.F1)
+            {
+                ShellVm.HelpCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger?.LogException(LogLevel.Error, ex, "Error handling keyboard shortcut");
+        }
+    }
+
+    /// <summary>
+    /// Updates keyboard hint text to use platform-specific symbols (⌘ and ⌥ on macOS, Ctrl+ and Alt+ elsewhere)
+    /// Called once during initialization.
+    /// </summary>
+    private void UpdateKeyboardHints()
+    {
+        // Only update on macOS - use runtime OS detection
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            return;
+
+        // On macOS, replace keyboard shortcuts with macOS symbols
+        // Update context flyout (used for right-click)
+        if (Resources["AddStoryElementFlyout"] is CommandBarFlyout contextFlyout)
+        {
+            UpdateMenuFlyoutItems(contextFlyout);
+        }
+
+        // Update main menu flyouts in CommandBar
+        if (Content is Grid grid && grid.Children.Count > 0 && grid.Children[0] is CommandBar commandBar)
+        {
+            foreach (var command in commandBar.PrimaryCommands.OfType<AppBarButton>())
+            {
+                if (command.Flyout is MenuFlyout menuFlyout)
+                {
+                    UpdateMenuFlyoutItems(menuFlyout);
+                }
+            }
+        }
+    }
+
+    private void UpdateMenuFlyoutItems(CommandBarFlyout flyout)
+    {
+        if (flyout?.SecondaryCommands == null) return;
+
+        foreach (var command in flyout.SecondaryCommands.OfType<AppBarButton>())
+        {
+            if (command.Flyout is MenuFlyout menuFlyout)
+            {
+                UpdateMenuFlyoutItems(menuFlyout);
+            }
+        }
+    }
+
+    private void UpdateMenuFlyoutItems(MenuFlyout menuFlyout)
+    {
+        if (menuFlyout?.Items == null) return;
+
+        foreach (var item in menuFlyout.Items.OfType<MenuFlyoutItem>())
+        {
+            if (!string.IsNullOrEmpty(item.Text))
+            {
+                // Replace keyboard shortcuts with macOS symbols
+                // Order matters: replace compound keys first
+                item.Text = item.Text.Replace("Ctrl+Shift+", "⇧+⌘+");
+                item.Text = item.Text.Replace("Ctrl+", "⌘+");
+                item.Text = item.Text.Replace("Alt+", "⌥+");
+            }
+        }
+
+        // Also check for nested MenuFlyoutSubItem
+        foreach (var subItem in menuFlyout.Items.OfType<MenuFlyoutSubItem>())
+        {
+            foreach (var item in subItem.Items.OfType<MenuFlyoutItem>())
+            {
+                if (!string.IsNullOrEmpty(item.Text))
+                {
+                    item.Text = item.Text.Replace("Ctrl+Shift+", "⇧+⌘+");
+                    item.Text = item.Text.Replace("Ctrl+", "⌘+");
+                    item.Text = item.Text.Replace("Alt+", "⌥+");
+                }
+            }
         }
     }
 

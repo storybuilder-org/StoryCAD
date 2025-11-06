@@ -1,26 +1,25 @@
 ﻿using System.Reflection;
 using System.Runtime.Loader;
 
-namespace StoryCAD.Services.Collaborator
+namespace StoryCADLib.Services.Collaborator;
+
+public class CustomLoadContext : AssemblyLoadContext
 {
-    public class CustomLoadContext : AssemblyLoadContext
+    private readonly string _basePath;
+
+    public CustomLoadContext(string basePath)
     {
-        private string _basePath;
+        _basePath = basePath;
+    }
 
-        public CustomLoadContext(string basePath)
+    protected override Assembly Load(AssemblyName assemblyName)
+    {
+        var assemblyPath = Path.Combine(_basePath, $"{assemblyName.Name}.dll");
+        if (File.Exists(assemblyPath))
         {
-            _basePath = basePath;
+            return LoadFromAssemblyPath(assemblyPath);
         }
 
-        protected override Assembly Load(AssemblyName assemblyName)
-        {
-            string assemblyPath = Path.Combine(_basePath, $"{assemblyName.Name}.dll");
-            if (File.Exists(assemblyPath))
-            {
-                return LoadFromAssemblyPath(assemblyPath);
-            }
-
-            return null; // Fallback to default context
-        }
+        return null; // Fallback to default context
     }
 }

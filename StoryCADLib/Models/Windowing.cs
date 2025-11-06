@@ -1,21 +1,29 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.Windows.AppLifecycle;
-using StoryCAD.Exceptions;
-using StoryCAD.ViewModels.SubViewModels;
+using StoryCADLib.Exceptions;
+using StoryCADLib.Services.Logging;
+using StoryCADLib.ViewModels.SubViewModels;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.UI;
 using Windows.UI.ViewManagement;
-using WinUIEx;
-using LogLevel = StoryCAD.Services.Logging.LogLevel;
+using LogLevel = StoryCADLib.Services.Logging.LogLevel;
+#if WINDOWS
+using Microsoft.UI.Windowing;
+using Windows.Graphics;
+#endif
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 /// <summary>
 /// This class contains window (MainWindow) related items etc.
@@ -37,6 +45,7 @@ public partial class Windowing : ObservableRecipient
         Ioc.Default.GetRequiredService<ILogService>())
     {
     }
+
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs e) { }
 
     /// <summary>
@@ -44,37 +53,36 @@ public partial class Windowing : ObservableRecipient
     /// </summary>
     public IntPtr WindowHandle;
 
-    /// Tools that copy data into StoryElements must access and update the viewmodel currently 
+    /// Tools that copy data into StoryElements must access and update the viewmodel currently
     /// active viewmodel at the time the tool is invoked. The viewmodel type is identified
     /// by the navigation service page key.
     public string PageKey;
 
-    // MainWindow is the main window displayed by the app. It's an instance of
-    // WinUIEx's WindowEx, which is an extension of Microsoft.Xaml.UI.Window 
-    // and which hosts a Frame holding 
-    public WindowEx MainWindow;
+    // MainWindow is the main window displayed by the app.
+    // Resize events can be tracked via ShellPage.xaml.cs ShellPage_SizeChanged
+    public Window MainWindow;
 
     /// <summary>
     // A defect in early WinUI 3 Win32 code is that ContentDialog
     // controls don't have an established XamlRoot. A workaround
     // is to assign the dialog's XamlRoot to the root of a visible
-    // Page. The Shell page's XamlRoot is stored here and accessed wherever needed. 
+    // Page. The Shell page's XamlRoot is stored here and accessed wherever needed.
     /// </summary>
     public XamlRoot XamlRoot;
 
     /// <summary>
-    /// A univerisal dispatcher to show messages/change UI from 
+    /// A universal dispatcher to show messages/change UI from
     /// a non UI thread. Example: Showing a warning from backup.
     /// </summary>
     public DispatcherQueue GlobalDispatcher = null;
 
     /// <summary>
     /// This is used to track if a ContentDialog is already open
-    /// within ShowContentDialog() as spwaning two at once will 
+    /// within ShowContentDialog() as spwaning two at once will
     /// cause a crash.
     /// </summary>
     private bool _IsContentDialogOpen = false;
-    
+
     private ElementTheme _requestedTheme = ElementTheme.Default;
     public ElementTheme RequestedTheme
     {
@@ -110,8 +118,8 @@ public partial class Windowing : ObservableRecipient
     }
 
     /// <summary>
-    /// This is a color that should in most cases
-    /// constrast the users accent color
+    ///     This is a color that should in most cases
+    ///     contrast the users accent color
     /// </summary>
     public SolidColorBrush ContrastColor
     {
@@ -157,7 +165,7 @@ public partial class Windowing : ObservableRecipient
     }
 
     /// <summary>
-    /// This will update the elements of the UI to 
+    /// This will update the elements of the UI to
     /// match the theme set in RequestedTheme.
     /// </summary>
     public async void UpdateUIToTheme()
@@ -216,7 +224,7 @@ public partial class Windowing : ObservableRecipient
 		}
 
 		//Checks a content dialog isn't already open
-		if (!_IsContentDialogOpen) 
+		if (!_IsContentDialogOpen)
         {
 			logger.Log(LogLevel.Trace, $"Showing dialog {Dialog.Title}");
 			OpenDialog = Dialog;
@@ -224,10 +232,12 @@ public partial class Windowing : ObservableRecipient
 			//Set XAML root and correct theme.
 			OpenDialog.XamlRoot = XamlRoot;
 			OpenDialog.RequestedTheme = RequestedTheme;
+
             OpenDialog.Resources["ContentDialogMaxWidth"] = 1080;
+            OpenDialog.Resources["ContentDialogMaxHeight"] = 1080;
 
             _IsContentDialogOpen = true;
-            
+
 			//Show and log result.
             ContentDialogResult Result = await OpenDialog.ShowAsync();
             switch (Result)
@@ -246,7 +256,7 @@ public partial class Windowing : ObservableRecipient
             OpenDialog = null;
             return Result;
         }
-        return ContentDialogResult.None; 
+        return ContentDialogResult.None;
     }
 
     /// <summary>
@@ -267,9 +277,8 @@ public partial class Windowing : ObservableRecipient
     /// </summary>
     public void ActivateMainInstance()
     {
-        Windowing wnd = this;
-        wnd.MainWindow.Restore(); //Resize window and unminimize window
-        wnd.MainWindow.BringToFront(); //Bring window to front
+        Windowing wnd = Ioc.Default.GetRequiredService<Windowing>();
+        wnd.MainWindow.Activate();
 
         try
         {
@@ -301,7 +310,7 @@ public partial class Windowing : ObservableRecipient
 		    };
 
 			//Init and spawn file picker
-		    WinRT.Interop.InitializeWithWindow.Initialize(filePicker, MainWindow.GetWindowHandle());
+		    WinRT.Interop.InitializeWithWindow.Initialize(filePicker, WindowHandle);
 			StorageFile file = await filePicker.PickSingleFileAsync();
 
 			//Null check
@@ -311,7 +320,11 @@ public partial class Windowing : ObservableRecipient
 				return null;
 			}
 
-			logger.Log(LogLevel.Info, $"Picked folder {file.Path} attributes:{file.Attributes}");
+			logger.Log(LogLevel.Info, $"Picked folder {file.Path}");
+
+            #if !HAS_UNO
+                logger.Log(LogLevel.Info, $"Picked file attributes {file.Attributes}");
+            #endif
 			return file;
 		}
 	    catch (Exception e)
@@ -344,7 +357,7 @@ public partial class Windowing : ObservableRecipient
             filePicker.FileTypeChoices.Add("File", new List<string>() {extension });
 
             //Init and spawn file picker
-            WinRT.Interop.InitializeWithWindow.Initialize(filePicker, MainWindow.GetWindowHandle());
+            WinRT.Interop.InitializeWithWindow.Initialize(filePicker, WindowHandle);
 			StorageFile file = await filePicker.PickSaveFileAsync();
 
 			//Null check
@@ -387,9 +400,8 @@ public partial class Windowing : ObservableRecipient
 				FileTypeFilter = { filter }
 		    };
 
-			//Initialize and show picker 
-		    WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, 
-			    MainWindow.GetWindowHandle());
+			//Initialize and show picker
+		    WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, WindowHandle);
 			StorageFolder folder = await folderPicker.PickSingleFolderAsync();
 
 			//Null check
@@ -400,8 +412,10 @@ public partial class Windowing : ObservableRecipient
 			}
 
 			//Log it was successful
-			logger.Log(LogLevel.Info, $"Picked folder {folder.Path} attributes:{folder.Attributes}");
-
+			logger.Log(LogLevel.Info, $"Picked folder {folder.Path}");
+            #if !HAS_UNO
+                logger.Log(LogLevel.Info, $"Picked folder attributes {folder.Attributes}");
+            #endif
 			return folder;
 	    }
 	    catch (Exception e)
@@ -414,6 +428,60 @@ public partial class Windowing : ObservableRecipient
 	    }
 
     }
+
+    /// <summary>
+    /// Sets the window size with proper DPI scaling across platforms
+    /// </summary>
+    /// <param name="window">The window to resize</param>
+    /// <param name="desiredWidthDip">Desired width in device independent pixels</param>
+    /// <param name="desiredHeightDip">Desired height in device independent pixels</param>
+    public void SetWindowSize(Window window, double desiredWidthDip, double desiredHeightDip)
+    {
+        if (window == null) return;
+
+        // Try to get scale factor, with fallbacks
+        double scaleFactor = TryGetScaleFactor();
+
+        int targetWidth = (int)(desiredWidthDip * scaleFactor);
+        int targetHeight = (int)(desiredHeightDip * scaleFactor);
+
+        window.AppWindow.Resize(new Windows.Graphics.SizeInt32
+        {
+            Width = targetWidth,
+            Height = targetHeight
+        });
+    }
+
+    private double TryGetScaleFactor()
+    {
+#if HAS_UNO_WINUI
+        // WinAppSDK (net9.0-windows10.0.22621) - use P/Invoke
+        var dpi = GetDpiForWindow(new IntPtr((long)MainWindow.AppWindow.Id.Value));
+        return dpi / 96.0;
+#else
+        // Uno Skia (net9.0-desktop on Windows/macOS/Linux) - try DisplayInformation
+        try
+        {
+            var displayInfo = Windows.Graphics.Display.DisplayInformation.GetForCurrentView();
+            return displayInfo.RawPixelsPerViewPixel;
+        }
+        catch
+        {
+            // Fallback to checking environment variable for Linux
+            var envScale = Environment.GetEnvironmentVariable("UNO_DISPLAY_SCALE_OVERRIDE");
+            if (double.TryParse(envScale, out double scale))
+                return scale;
+
+            // Final fallback
+            return 1.0;
+        }
+#endif
+    }
+
+#if HAS_UNO_WINUI
+    [DllImport("user32.dll")]
+    private static extern uint GetDpiForWindow(IntPtr hwnd);
+#endif
 
     #region Com stuff for File/Folder pickers
     [ComImport]
@@ -439,7 +507,7 @@ public partial class Windowing : ObservableRecipient
     /// <summary>
     /// Shows an error message to the user that there's an issue
     /// with the app, and it needs to be reinstalled
-    /// As of the RemoveInstallService merge, this is theoretically 
+    /// As of the RemoveInstallService merge, this is theoretically
     /// impossible to occur, but it should stay incase something
     /// goes wrong with resource loading.
     /// </summary>

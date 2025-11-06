@@ -1,17 +1,16 @@
-﻿using Microsoft.UI.Xaml;
-using StoryCAD.ViewModels.Tools;
+﻿using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.Services.Dialogs.Tools;
+namespace StoryCADLib.Services.Dialogs.Tools;
 
 public sealed partial class KeyQuestionsDialog
 {
-    public KeyQuestionsViewModel KeyQuestionsVm => Ioc.Default.GetService<KeyQuestionsViewModel>();
-
     public KeyQuestionsDialog()
     {
         InitializeComponent();
         DataContext = KeyQuestionsVm;
     }
+
+    public KeyQuestionsViewModel KeyQuestionsVm => Ioc.Default.GetService<KeyQuestionsViewModel>();
 
     public void Next_Click(object o, RoutedEventArgs routedEventArgs)
     {

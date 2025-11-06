@@ -1,17 +1,15 @@
-﻿using StoryCAD.Services;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using StoryCADLib.Services;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 public class WebModel : StoryElement
 {
-	[JsonInclude]
-	[JsonPropertyName("URI")]
-	public Uri URL;
+    [JsonInclude] [JsonPropertyName("Timestamp")]
+    public DateTime Timestamp;
 
-	[JsonInclude]
-	[JsonPropertyName("Timestamp")]
-	public DateTime Timestamp;
+    [JsonInclude] [JsonPropertyName("URI")]
+    public Uri URL;
 
     public WebModel(StoryModel model, StoryNodeItem node) : base("New Webpage", StoryItemType.Web, model, node)
     {
@@ -20,7 +18,7 @@ public class WebModel : StoryElement
         switch (Ioc.Default.GetRequiredService<PreferenceService>().Model.PreferredSearchEngine)
         {
             case BrowserType.DuckDuckGo:
-                 URL = new Uri("https://duckduckgo.com/");
+                URL = new Uri("https://duckduckgo.com/");
                 break;
             case BrowserType.Google:
                 URL = new Uri("https://google.com/");
@@ -29,14 +27,15 @@ public class WebModel : StoryElement
                 URL = new Uri("https://bing.com/");
                 break;
             case BrowserType.Yahoo:
-               URL = new Uri("https://yahoo.com/");
+                URL = new Uri("https://yahoo.com/");
                 break;
             default: //Just default to DDG.
-               URL = new Uri("https://duckduckgo.com/");
+                URL = new Uri("https://duckduckgo.com/");
                 break;
         }
     }
 
-	public WebModel(){}
-	
+    public WebModel()
+    {
+    }
 }

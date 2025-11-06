@@ -1,96 +1,134 @@
-<Page x:Name="ShellPage" NavigationCacheMode="Required"  
-    x:Class="StoryCAD.Views.Shell"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:muxc="using:Microsoft.UI.Xaml.Controls" RequestedTheme="{x:Bind Windowing.RequestedTheme, Mode=OneWay}"
-    xmlns:viewmodels="using:StoryCAD.ViewModels"
-    mc:Ignorable="d" SizeChanged="ShellPage_SizeChanged">
+<Page x:Name="ShellPage" NavigationCacheMode="Required"
+      x:Class="StoryCAD.Views.Shell"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:muxc="using:Microsoft.UI.Xaml.Controls" RequestedTheme="{x:Bind Windowing.RequestedTheme, Mode=OneWay}"
+      xmlns:viewmodels="using:StoryCADLib.ViewModels"
+      mc:Ignorable="d notwin skia macos" SizeChanged="ShellPage_SizeChanged"
+      xmlns:win="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:skia="http://uno.ui/skia"
+      xmlns:notwin="http://uno.ui/not_win"
+      xmlns:macos="http://uno.ui/macos"
+      KeyDown="ShellPage_KeyDown">
     <Page.Resources>
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Default" />
             </ResourceDictionary.ThemeDictionaries>
 
-            <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right" x:Name="AddStoryElementCommandBarFlyout" >
+            <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right">
                 <CommandBarFlyout.SecondaryCommands>
-                    <AppBarButton Icon="Add" Label="Add Elements" Visibility="{x:Bind ShellVm.AddButtonVisibility, Mode=OneWay}">
+                    <AppBarButton Icon="Add" Label="Add Elements">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Icon="Folder" Text="Add Folder         Alt+F"  Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="Folder" Text="Add Section        Alt+A"  Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="Help"   Text="Add Problem      Alt+P"  Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="Contact" Text="Add Character    Alt+C"  Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="Globe" Text="Add Setting        Alt+L"  Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="AllApps" Text="Add Scene          Alt+S"  Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="TwoPage" Text="Add Notes          Alt+N"  Command="{x:Bind ShellVm.AddNotesCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
-                                <MenuFlyoutItem Icon="PreviewLink" Text="Add Website      Alt+W"  Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
+                                <MenuFlyoutItem Icon="Folder"
+                                                Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}"
+                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                                Text="Add Folder         Alt+F" />
+                                <MenuFlyoutItem Icon="Folder"
+                                                Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}"
+                                                Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}"
+                                                Text="Add Section        Alt+A" />
+                                <MenuFlyoutItem Icon="Help"
+                                                Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}"
+                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                                Text="Add Problem      Alt+P" />
+                                <MenuFlyoutItem Icon="Contact"
+                                                Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}"
+                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                                Text="Add Character    Alt+C" />
+                                <MenuFlyoutItem Icon="Globe"
+                                                Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}"
+                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                                Text="Add Setting        Alt+L" />
+                                <MenuFlyoutItem Icon="AllApps"
+                                                Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}"
+                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                                Text="Add Scene          Alt+S" />
+                                <MenuFlyoutItem Icon="TwoPage"
+                                                Command="{x:Bind ShellVm.AddNotesCommand, Mode=OneWay}"
+                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                                Text="Add Notes          Alt+N" />
+                                <MenuFlyoutItem Icon="PreviewLink"
+                                                Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}"
+                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                                Text="Add Website      Alt+W" />
                             </MenuFlyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
                     <AppBarSeparator />
-                    <AppBarButton Icon="Delete" Label="Delete element"  Command="{x:Bind ShellVm.RemoveStoryElementCommand, Mode=OneWay}" 
-                          Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" >
+                    <AppBarButton Icon="Delete" Label="Delete element"
+                                  Command="{x:Bind ShellVm.RemoveStoryElementCommand, Mode=OneWay}"
+                                  Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}">
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Move Story Element to Trashcan" />
                         </ToolTipService.ToolTip>
                     </AppBarButton>
-                    <AppBarButton Icon="Refresh" Label="Restore Element" Command="{x:Bind ShellVm.RestoreStoryElementCommand, Mode=OneWay}" 
-                          Visibility="{x:Bind ShellVm.TrashButtonVisibility, Mode=TwoWay}" >
+                    <AppBarButton Icon="Refresh" Label="Restore Element"
+                                  Command="{x:Bind ShellVm.RestoreStoryElementCommand, Mode=OneWay}"
+                                  Visibility="{x:Bind ShellVm.TrashButtonVisibility, Mode=TwoWay}">
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Restore Story Element from Trashcan" />
                         </ToolTipService.ToolTip>
                     </AppBarButton>
-                    <AppBarButton Icon="Switch" Label="Add to Narrative" Command="{x:Bind ShellVm.AddToNarrativeCommand, Mode=OneWay}" 
-                          Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" >
+                    <AppBarButton Icon="Switch" Label="Add to Narrative"
+                                  Command="{x:Bind ShellVm.AddToNarrativeCommand, Mode=OneWay}"
+                                  Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}">
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Add Scene to Narrative" />
                         </ToolTipService.ToolTip>
                     </AppBarButton>
-                    <AppBarButton Icon="Switch" Label="Remove from narrative" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand, Mode=OneWay}"
-                          Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}" >
+                    <AppBarButton Icon="Switch" Label="Remove from narrative"
+                                  Command="{x:Bind ShellVm.RemoveFromNarrativeCommand, Mode=OneWay}"
+                                  Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}">
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Remove Scene from Narrative" />
                         </ToolTipService.ToolTip>
                     </AppBarButton>
-                    <AppBarButton Icon="Switch" Label="Convert to Scene" Command="{x:Bind ShellVm.ConvertToSceneCommand, Mode=OneWay}"
-                          Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
-                    <AppBarButton Icon="Switch" Label="Convert to Problem" Command="{x:Bind ShellVm.ConvertToProblemCommand, Mode=OneWay}"
-                          Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
-                    <AppBarButton Icon="Print" Label="Print node" Command="{x:Bind ShellVm.PrintNodeCommand, Mode=OneWay}"
-                          Visibility="{x:Bind ShellVm.PrintNodeVisibility, Mode=TwoWay}" >
+                    <AppBarButton Icon="Switch" Label="Convert to Scene"
+                                  Command="{x:Bind ShellVm.ConvertToSceneCommand, Mode=OneWay}"
+                                  Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
+                    <AppBarButton Icon="Switch" Label="Convert to Problem"
+                                  Command="{x:Bind ShellVm.ConvertToProblemCommand, Mode=OneWay}"
+                                  Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" />
+                    <AppBarButton Icon="Print" Label="Print node"
+                                  Command="{x:Bind ShellVm.PrintNodeCommand, Mode=OneWay}"
+                                  Visibility="{x:Bind ShellVm.PrintNodeVisibility, Mode=TwoWay}">
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="Print selected node"/>
+                            <ToolTip Content="Print selected node" />
                         </ToolTipService.ToolTip>
                     </AppBarButton>
-                    <AppBarButton Icon="Cancel" Label="Empty Trash" Visibility="{x:Bind ShellVm.TrashButtonVisibility, Mode=TwoWay}" >
+                    <AppBarButton Icon="Cancel" Label="Empty Trash"
+                                  Visibility="{x:Bind ShellVm.TrashButtonVisibility, Mode=TwoWay}">
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="Empty trash"/>
+                            <ToolTip Content="Empty trash" />
                         </ToolTipService.ToolTip>
                         <AppBarButton.Flyout>
                             <Flyout>
                                 <StackPanel>
-                                    <TextBlock Text="Are you sure you want to empty the trash?" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                                    <Button Command="{x:Bind ShellVm.EmptyTrashCommand, Mode=OneWay}" Content="Empty" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Are you sure you want to empty the trash?"
+                                               HorizontalAlignment="Center" Margin="0,0,0,10" />
+                                    <Button Command="{x:Bind ShellVm.EmptyTrashCommand, Mode=OneWay}" Content="Empty"
+                                            HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Flyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
                 </CommandBarFlyout.SecondaryCommands>
             </CommandBarFlyout>
-
             <DataTemplate x:Key="StoryNodeContentTemplate" x:DataType="viewmodels:StoryNodeItem">
                 <StackPanel Orientation="Horizontal">
-                    <SymbolIcon 
-                    Symbol="{x:Bind Symbol, Mode=OneWay}" 
-                    Width="20" 
-                    Height="20"/>
-                    <TextBlock 
-                    Text="{x:Bind Name, Mode=TwoWay}"
-                    TextWrapping="{x:Bind TextWrapping}"
-                    MaxWidth="220"
-                    Margin="10,0,0,0"/>
+                    <SymbolIcon
+                        Symbol="{x:Bind Symbol, Mode=OneWay}"
+                        Width="20"
+                        Height="20" />
+                    <TextBlock
+                        Text="{x:Bind Name, Mode=TwoWay}"
+                        TextWrapping="{x:Bind TextWrapping}"
+                        MaxWidth="220"
+                        Margin="10,0,0,0" />
                 </StackPanel>
             </DataTemplate>
         </ResourceDictionary>
@@ -98,257 +136,242 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <!-- Command Bar -->
-		<CommandBar Background="{x:Bind Windowing.PrimaryColor, Mode=OneWay}" HorizontalAlignment="Stretch"
-		            IsOpen="False" Padding="2,0" Margin="0,0" Width="auto" OverflowButtonVisibility="Collapsed">
+        <CommandBar Background="{x:Bind Windowing.PrimaryColor, Mode=OneWay}" HorizontalAlignment="Stretch"
+                    IsOpen="False" Padding="2,0" Margin="0,0" Width="auto" OverflowButtonVisibility="Collapsed">
             <CommandBar.Content>
                 <StackPanel Orientation="Horizontal">
-                    <AutoSuggestBox PlaceholderText="Enter text to search for here" QueryIcon="Find" Width="335" Margin="0,8" Padding="0,0"
-                                    QuerySubmitted="Search" TextChanged="ClearNodes" Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" VerticalAlignment="Center"/>
+                    <AutoSuggestBox PlaceholderText="Enter text to search for here" QueryIcon="Find" Width="335"
+                                    Margin="0,8" Padding="0,0"
+                                    QuerySubmitted="Search" TextChanged="ClearNodes"
+                                    Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" VerticalAlignment="Center" />
                 </StackPanel>
             </CommandBar.Content>
             <CommandBar.PrimaryCommands>
-				<AppBarButton  Width="50" IsCompact="True" Icon="GlobalNavigationButton" Label="Show" ToolTipService.ToolTip="Show/Hide Navigation Pane"
-				               Command="{x:Bind ShellVm.TogglePaneCommand, Mode=OneWay}"/>
-				<AppBarButton IsCompact="True" Icon="Document" Label="File" ToolTipService.ToolTip="File Menu" Width="50">
+                <AppBarButton Width="50" IsCompact="True" Icon="GlobalNavigationButton" Label="Show"
+                              ToolTipService.ToolTip="Show/Hide Navigation Pane"
+                              Command="{x:Bind ShellVm.TogglePaneCommand, Mode=OneWay}" />
+                <AppBarButton IsCompact="True" Icon="Document" Label="File" ToolTipService.ToolTip="File Menu"
+                              Width="50">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="Open/Create file" Command="{x:Bind ShellVm.OpenFileOpenMenuCommand}">
+                            <MenuFlyoutItem Text="Open/Create file                Ctrl+O" Command="{x:Bind ShellVm.OpenFileOpenMenuCommand}">
                                 <MenuFlyoutItem.Icon>
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8F4;"/>
-                                </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Modifiers="Control" Key="O"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
-                            </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Save Story" Command="{x:Bind ShellVm.SaveFileCommand, Mode=OneWay}" >
-                                <MenuFlyoutItem.Icon>
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;"/>
-                                </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="S" Modifiers="Control"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
-                            </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Save Story As" Command="{x:Bind ShellVm.SaveAsCommand, Mode=OneWay}" >
-                                <MenuFlyoutItem.Icon>
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE792;"/>
-                                </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Modifiers="Control,Shift" Key="S"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
-                            </MenuFlyoutItem>
-	                        <MenuFlyoutItem Text="Create Backup" Command="{x:Bind ShellVm.CreateBackupCommand, Mode=OneWay}" >
-		                        <MenuFlyoutItem.Icon>
-									<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xe838;"/>
-		                        </MenuFlyoutItem.Icon>
-		                        <MenuFlyoutItem.KeyboardAccelerators>
-			                        <KeyboardAccelerator Key="B" Modifiers="Control"/>
-		                        </MenuFlyoutItem.KeyboardAccelerators>
-	                        </MenuFlyoutItem>
-							<MenuFlyoutItem Text="Close Story" Command="{x:Bind ShellVm.CloseCommand, Mode=OneWay}" >
-                                <MenuFlyoutItem.Icon>
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE127;"/>
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8F4;" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Exit" Command="{x:Bind ShellVm.ExitCommand, Mode=OneWay}" >
+                            <MenuFlyoutItem Text="Save Story                      Ctrl+S" Command="{x:Bind ShellVm.SaveFileCommand, Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE106;"/>
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Save Story As                   Ctrl+Shift+S" Command="{x:Bind ShellVm.SaveAsCommand, Mode=OneWay}">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE792;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Create Backup                   Ctrl+B"
+                                            Command="{x:Bind ShellVm.CreateBackupCommand, Mode=OneWay}">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xe838;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Close Story" Command="{x:Bind ShellVm.CloseCommand, Mode=OneWay}">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE127;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Exit                     Ctrl+Q" Command="{x:Bind ShellVm.ExitCommand, Mode=OneWay}">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE106;" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-				<AppBarButton IsCompact="True" Label="Add" ToolTipService.ToolTip="Add/Remove Story Elements" Width="50">
+                <AppBarButton IsCompact="True" Label="Add" ToolTipService.ToolTip="Add/Remove Story Elements"
+                              Width="50">
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE710;"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE710;" />
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem  Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Icon="Folder" Text="Add folder">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="F" Modifiers="Menu"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Icon="Folder"
+                                            Text="Add folder         Alt+F">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSectionCommand,Mode=OneWay}" Icon="Folder" Text="Add section">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="A" Modifiers="Menu"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}" Icon="Folder"
+                                            Text="Add section        Alt+A">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddProblemCommand ,Mode=OneWay}" Icon="Help" Text="Add problem">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="P" Modifiers="Menu"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}" Icon="Help"
+                                            Text="Add problem      Alt+P">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddCharacterCommand,Mode=OneWay}" Icon="Contact" Text="Add character">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="C" Modifiers="Menu"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}" Icon="Contact"
+                                            Text="Add character    Alt+C">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSettingCommand,Mode=OneWay}" Icon="Globe" Text="Add setting">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="L" Modifiers="Menu"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}" Icon="Globe"
+                                            Text="Add setting        Alt+L">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddSceneCommand,Mode=OneWay}" Icon="AllApps" Text="Add scene">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="S" Modifiers="Menu"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}" Icon="AllApps"
+                                            Text="Add scene          Alt+S">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Add Web node" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddWebCommand,Mode=OneWay}">
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}"
+                                            Text="Add Web node     Alt+W">
                                 <MenuFlyoutItem.Icon>
-                                    <SymbolIcon Symbol="PreviewLink"/>
+                                    <SymbolIcon Symbol="PreviewLink" />
                                 </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="W" Modifiers="Menu"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Add Notes node" Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddNotesCommand,Mode=OneWay}">
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.AddNotesCommand,Mode=OneWay}"
+                                            Text="Add Notes node   Alt+N">
                                 <MenuFlyoutItem.Icon>
-                                    <SymbolIcon Symbol="TwoPage"/>
+                                    <SymbolIcon Symbol="TwoPage" />
                                 </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="N" Modifiers="Menu"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveStoryElementCommand,Mode=OneWay}" Icon="Delete" Text="Delete story element">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="Delete"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.RemoveStoryElementCommand,Mode=OneWay}"
+                                            Icon="Delete" Text="Delete story element">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.TrashButtonVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RestoreStoryElementCommand,Mode=OneWay}" Icon="Refresh" Text="Restore Story element"/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.AddToNarrativeCommand,Mode=OneWay}" Icon="Switch" Text="Add To Narrative"/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.RemoveFromNarrativeCommand,Mode=OneWay}" Icon="Switch" Text="Remove from Narrative"/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.ConvertToSceneCommand,Mode=OneWay}" Icon="Switch" Text="Convert to Scene"/>
-                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}" Command="{x:Bind ShellVm.ConvertToProblemCommand,Mode=OneWay}" Icon="Switch" Text="Convert to Problem"/>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.TrashButtonVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.RestoreStoryElementCommand,Mode=OneWay}"
+                                            Icon="Refresh" Text="Restore Story element" />
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.AddToNarrativeCommand,Mode=OneWay}" Icon="Switch"
+                                            Text="Add To Narrative" />
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.RemoveFromNarrativeCommand,Mode=OneWay}"
+                                            Icon="Switch" Text="Remove from Narrative" />
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.ConvertToSceneCommand,Mode=OneWay}" Icon="Switch"
+                                            Text="Convert to Scene" />
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=TwoWay}"
+                                            Command="{x:Bind ShellVm.ConvertToProblemCommand,Mode=OneWay}"
+                                            Icon="Switch" Text="Convert to Problem" />
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-				<AppBarButton Width="50" IsCompact="True" Label="Move" ToolTipService.ToolTip="Move Story Elements" >
+                <AppBarButton Width="50" IsCompact="True" Label="Move" ToolTipService.ToolTip="Move Story Elements">
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE759;"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE759;" />
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <Flyout>
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="40"/>
-                                    <RowDefinition Height="40"/>
-                                    <RowDefinition Height="40"/>
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="40" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="45"/>
-                                    <ColumnDefinition Width="50"/>
-                                    <ColumnDefinition Width="45"/>
+                                    <ColumnDefinition Width="45" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="45" />
                                 </Grid.ColumnDefinitions>
                                 <Button ToolTipService.ToolTip="Move Left"
-                                        FontFamily="Segoe MDL2 Assets" Content="&#xE09A;"
-                                        Command="{x:Bind ShellVm.MoveLeftCommand, Mode=OneWay}"  
-                                        Margin="0,5,0,5"  Grid.Row="1"/>
+                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE76B;"
+                                        Command="{x:Bind ShellVm.MoveLeftCommand, Mode=OneWay}"
+                                        Margin="0,5,0,5" Grid.Row="1" />
                                 <Button ToolTipService.ToolTip="Move Right"
-                                        FontFamily="Segoe MDL2 Assets" Content="&#xE013;"
-                                        Command="{x:Bind ShellVm.MoveRightCommand, Mode=OneWay}"  
-                                        Margin="0,5,0,5" Grid.Row="1" Grid.Column="2"/>
+                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE76C;"
+                                        Command="{x:Bind ShellVm.MoveRightCommand, Mode=OneWay}"
+                                        Margin="0,5,0,5" Grid.Row="1" Grid.Column="2" />
                                 <Button ToolTipService.ToolTip="Move Up"
-                                        FontFamily="Segoe MDL2 Assets" Content="&#xE09C;"
-                                        Command="{x:Bind ShellVm.MoveUpCommand, Mode=OneWay}"  
-                                        Margin="5,0,5,0" Grid.Row="0" Grid.Column="1"/>
+                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE70E;"
+                                        Command="{x:Bind ShellVm.MoveUpCommand, Mode=OneWay}"
+                                        Margin="5,0,5,0" Grid.Row="0" Grid.Column="1" />
                                 <Button ToolTipService.ToolTip="Move Down"
-                                        FontFamily="Segoe MDL2 Assets" Content="&#xE09D;"
-                                        Command="{x:Bind ShellVm.MoveDownCommand, Mode=OneWay}" 
-                                        Margin="5,0,5,0" Grid.Column="1" Grid.Row="2"/>
+                                        FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE70D;"
+                                        Command="{x:Bind ShellVm.MoveDownCommand, Mode=OneWay}"
+                                        Margin="5,0,5,0" Grid.Column="1" Grid.Row="2" />
                             </Grid>
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-				<AppBarButton Width="50" IsCompact="True" Label="Collaborator" ToolTipService.ToolTip="Launch Collaborator"
-				              Visibility="{x:Bind ShellVm.CollaboratorVisibility, Mode=TwoWay}"
-				              Command="{x:Bind ShellVm.CollaboratorCommand, Mode=OneWay}" >
+                <AppBarButton Width="50" IsCompact="True" Label="Collaborator"
+                              ToolTipService.ToolTip="Launch Collaborator"
+                              Visibility="{x:Bind ShellVm.CollaboratorVisibility, Mode=TwoWay}"
+                              Command="{x:Bind ShellVm.CollaboratorCommand, Mode=OneWay}">
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71B;"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE71B;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-				<AppBarButton Width="50" IsCompact="True" Label="Tools" ToolTipService.ToolTip="Tools Menu" >
+                <AppBarButton Width="50" IsCompact="True" Label="Tools" ToolTipService.ToolTip="Tools Menu">
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE90F;"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE90F;" />
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="Open Narrative Editor" Command="{x:Bind ShellVm.NarrativeToolCommand, Mode=OneWay}" muxc:ToolTipService.ToolTip="Opens the narrative editor to build your story as its told">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="N" Modifiers="Control"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                            <MenuFlyoutItem Text="Open Narrative Editor         Ctrl+N"
+                                            Command="{x:Bind ShellVm.NarrativeToolCommand, Mode=OneWay}"
+                                            muxc:ToolTipService.ToolTip="Opens the narrative editor to build your story as its told">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Key Questions" Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="Q" Modifiers="Control"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                            <MenuFlyoutItem Text="Key Questions"
+                                            Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Topic Information" Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}" />
+                            <MenuFlyoutItem Text="Topic Information"
+                                            Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}" />
                             <MenuFlyoutSubItem Text="Plotting Aids">
-                                <MenuFlyoutItem Text="Master Plots" Command="{x:Bind ShellVm.MasterPlotsCommand, Mode=OneWay}">
-                                    <MenuFlyoutItem.KeyboardAccelerators>
-                                        <KeyboardAccelerator Key="M" Modifiers="Control"/>
-                                    </MenuFlyoutItem.KeyboardAccelerators>
+                                <MenuFlyoutItem Text="Master Plots                Ctrl+M"
+                                                Command="{x:Bind ShellVm.MasterPlotsCommand, Mode=OneWay}">
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="Dramatic Situations" Command="{x:Bind ShellVm.DramaticSituationsCommand, Mode=OneWay}">
-                                    <MenuFlyoutItem.KeyboardAccelerators>
-                                        <KeyboardAccelerator Key="D" Modifiers="Control"/>
-                                    </MenuFlyoutItem.KeyboardAccelerators>
+                                <MenuFlyoutItem Text="Dramatic Situations         Ctrl+D"
+                                                Command="{x:Bind ShellVm.DramaticSituationsCommand, Mode=OneWay}">
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="Stock Scenes" Command="{x:Bind ShellVm.StockScenesCommand, Mode=OneWay}">
-                                    <MenuFlyoutItem.KeyboardAccelerators>
-                                        <KeyboardAccelerator Key="L" Modifiers="Control"/>
-                                    </MenuFlyoutItem.KeyboardAccelerators>
+                                <MenuFlyoutItem Text="Stock Scenes                Ctrl+L"
+                                                Command="{x:Bind ShellVm.StockScenesCommand, Mode=OneWay}">
                                 </MenuFlyoutItem>
                             </MenuFlyoutSubItem>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-				<AppBarButton Width="50" IsCompact="True" Label="Reports" ToolTipService.ToolTip="Reports Menu" >
+                <AppBarButton Width="50" IsCompact="True" Label="Reports" ToolTipService.ToolTip="Reports Menu">
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF571;"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE9F9;" />
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="Print Reports" Command="{x:Bind ShellVm.PrintReportsCommand, Mode=OneWay}">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="P" Modifiers="Control"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                            <MenuFlyoutItem Text="Print Reports                   Ctrl+P"
+                                            Command="{x:Bind ShellVm.PrintReportsCommand, Mode=OneWay}"
+                                            win:Visibility="Visible" notwin:Visibility="Collapsed"
+                                            skia:Visibility="Collapsed">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Scrivener Reports" Command="{x:Bind ShellVm.ScrivenerReportsCommand, Mode=OneWay}">
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="R" Modifiers="Control"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
+                            <MenuFlyoutItem Text="PDF Reports                     Ctrl+Shift+P"
+                                            Command="{x:Bind ShellVm.ExportReportsToPdfCommand, Mode=OneWay}">
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Scrivener Reports               Ctrl+R"
+                                            Command="{x:Bind ShellVm.ScrivenerReportsCommand, Mode=OneWay}">
                             </MenuFlyoutItem>
 
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-				<AppBarButton Width="50" IsCompact="True" Label="Preferences" ToolTipService.ToolTip="Preferences" 
-				              Command="{x:Bind ShellVm.PreferencesCommand, Mode=OneWay}" >
+                <AppBarButton Width="50" IsCompact="True" Label="Preferences" ToolTipService.ToolTip="Preferences (Ctrl+P on macOS)"
+                              Command="{x:Bind ShellVm.PreferencesCommand, Mode=OneWay}">
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE713;" />
                     </AppBarButton.Icon>
-                    <AppBarButton.KeyboardAccelerators>
-                        <KeyboardAccelerator Modifiers="Control" Key="P"/>
-                    </AppBarButton.KeyboardAccelerators>
                 </AppBarButton>
-				<AppBarButton Width="50" IsCompact="True" Label="Report Feedback" ToolTipService.ToolTip="Report Feedback" Click="ButtonBase_OnClick">
-					<AppBarButton.Icon>
-						<FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xED15;"/>
-					</AppBarButton.Icon>
-				</AppBarButton>
-				<AppBarButton Width="50" IsCompact="True" Label="Help" ToolTipService.ToolTip="Help" Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}" >
-                    <AppBarButton.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="F1"/>
-                    </AppBarButton.KeyboardAccelerators>
+                <AppBarButton Width="50" IsCompact="True" Label="Report Feedback"
+                              ToolTipService.ToolTip="Report Feedback" Click="ButtonBase_OnClick">
                     <AppBarButton.Icon>
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE897;"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xED15;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton Width="50" IsCompact="True" Label="Help" ToolTipService.ToolTip="Help (F1)"
+                              Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE897;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
             </CommandBar.PrimaryCommands>
@@ -362,131 +385,137 @@
             <SplitView.Pane>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                     <StackPanel>
-                    <!-- Main Navigation Tree -->
-                    <ItemsRepeater ItemsSource="{x:Bind AppState.CurrentDocument.Model.CurrentView, Mode=TwoWay}" x:Name="NavigationTree"
-                               ContextFlyout="{StaticResource AddStoryElementFlyout}" 
-                               ContextRequested="AddButton_ContextRequested" >
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="viewmodels:StoryNodeItem">
-                            <Grid DataContext="{x:Bind}">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
+                        <!-- Main Navigation Tree -->
+                        <ItemsRepeater ItemsSource="{x:Bind AppState.CurrentDocument.Model.CurrentView, Mode=TwoWay}"
+                                       x:Name="NavigationTree">
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="viewmodels:StoryNodeItem">
+                                    <Grid DataContext="{x:Bind}">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
 
-                                <!-- Shows the root node out of tree, prevents creating new roots. -->
-                                <TreeViewItem Tapped="RootClick" RightTapped="TreeViewItem_RightTapped"
-                                              HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
-                                              Background="Transparent" BorderBrush="Transparent">
-                                    <StackPanel Orientation="Horizontal"
-                                            Background="{x:Bind Background, Mode=OneWay}" 
-                                            BorderBrush="{x:Bind  boarderBrush, Mode=OneWay}"
-                                            BorderThickness="1">
-                                        <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
-                                        <TextBlock Text="{x:Bind Name, Mode=TwoWay}"          
-                                                   TextWrapping="{x:Bind TextWrapping}" MaxWidth="220" Margin="10,0,10,0"/>
-                                    </StackPanel>
-                                </TreeViewItem>
+                                        <!-- Shows the root node out of tree, prevents creating new roots. -->
+                                        <TreeViewItem Tapped="RootClick" RightTapped="TreeViewItem_RightTapped"
+                                                      HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                                      Background="Transparent" BorderBrush="Transparent"
+                                                      ContextFlyout="{StaticResource AddStoryElementFlyout}">
+                                            <StackPanel Orientation="Horizontal"
+                                                        Background="{x:Bind Background, Mode=OneWay}"
+                                                        BorderBrush="{x:Bind  boarderBrush, Mode=OneWay}"
+                                                        BorderThickness="1">
+                                                <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20"
+                                                            Height="20" />
+                                                <TextBlock Text="{x:Bind Name, Mode=TwoWay}"
+                                                           TextWrapping="{x:Bind TextWrapping}" MaxWidth="220"
+                                                           Margin="10,0,10,0" />
+                                            </StackPanel>
+                                        </TreeViewItem>
 
-                                <!-- children of root node.-->
-                                <muxc:TreeView Grid.Row="1"
-                                   CanDragItems="True" AllowDrop="True" CanReorderItems="True"
-                                   ItemsSource="{x:Bind Children, Mode=TwoWay}"
-                                   SelectionMode="Single" 
-                                   ItemInvoked="TreeViewItem_Invoked"
-                                   DragItemsCompleted="NavigationTree_DragItemsCompleted">
+                                        <!-- children of root node.-->
+                                        <muxc:TreeView Grid.Row="1"
+                                                       CanDragItems="True" AllowDrop="True" CanReorderItems="True"
+                                                       ItemsSource="{x:Bind Children, Mode=TwoWay}"
+                                                       SelectionMode="Single"
+                                                       ItemInvoked="TreeViewItem_Invoked"
+                                                       DragItemsCompleted="NavigationTree_DragItemsCompleted">
 
-                                    <muxc:TreeView.ItemTemplate>
-                                        <DataTemplate  x:DataType="viewmodels:StoryNodeItem">
-                                            <muxc:TreeViewItem ItemsSource="{x:Bind Children}" 
-                                                   Background="{x:Bind Background, Mode=OneWay}" 
-                                                   BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
-                                                   BorderThickness="1"
-                                                   RightTapped="TreeViewItem_RightTapped"
-                                                   IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                                                   CanDrag="True">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
-                                                    <TextBlock Text="{x:Bind Name, Mode=TwoWay}"          
-                                                   TextWrapping="{x:Bind TextWrapping}" MaxWidth="220" Margin="10,0,10,0"/>
-                                                </StackPanel>
-                                            </muxc:TreeViewItem>
-                                        </DataTemplate>
-                                    </muxc:TreeView.ItemTemplate>
-                                </muxc:TreeView>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
-                
-                <!-- Separator -->
-                <Border Height="2" Background="Gray" Margin="5,10,5,2" />
-                
-                <!-- Trash Can TreeView -->
-                <muxc:TreeView ItemsSource="{x:Bind AppState.CurrentDocument.Model.TrashView, Mode=TwoWay}"
-                              ContextFlyout="{StaticResource AddStoryElementFlyout}"
-                              ContextRequested="AddButton_ContextRequested"
-                              ItemInvoked="TreeViewItem_Invoked"
-                              CanDragItems="False" AllowDrop="False" CanReorderItems="False"
-                              SelectionMode="Single">
-                    <muxc:TreeView.ItemTemplate>
-                        <DataTemplate x:DataType="viewmodels:StoryNodeItem">
-                            <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
-                                              RightTapped="TreeViewItem_RightTapped"
-                                              IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                                              CanDrag="False">
-                                <StackPanel Orientation="Horizontal">
-                                    <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20"/>
-                                    <TextBlock Text="{x:Bind Name, Mode=TwoWay}"
-                                              TextWrapping="{x:Bind TextWrapping}" MaxWidth="220" Margin="10,0,10,0"/>
-                                </StackPanel>
-                            </muxc:TreeViewItem>
-                        </DataTemplate>
-                    </muxc:TreeView.ItemTemplate>
-                </muxc:TreeView>
+                                            <muxc:TreeView.ItemTemplate>
+                                                <DataTemplate x:DataType="viewmodels:StoryNodeItem">
+                                                    <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
+                                                                       Background="{x:Bind Background, Mode=OneWay}"
+                                                                       BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
+                                                                       BorderThickness="1"
+                                                                       RightTapped="TreeViewItem_RightTapped"
+                                                                       IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
+                                                                       CanDrag="True"
+                                                                       ContextFlyout="{StaticResource AddStoryElementFlyout}">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}"
+                                                                        Width="20" Height="20" />
+                                                            <TextBlock Text="{x:Bind Name, Mode=TwoWay}"
+                                                                       TextWrapping="{x:Bind TextWrapping}"
+                                                                       MaxWidth="220" Margin="10,0,10,0" />
+                                                        </StackPanel>
+                                                    </muxc:TreeViewItem>
+                                                </DataTemplate>
+                                            </muxc:TreeView.ItemTemplate>
+                                        </muxc:TreeView>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+
+                        <!-- Separator -->
+                        <Border Height="2" Background="Gray" Margin="5,10,5,2" />
+
+                        <!-- Trash Can TreeView -->
+                        <muxc:TreeView ItemsSource="{x:Bind AppState.CurrentDocument.Model.TrashView, Mode=TwoWay}"
+                                       ItemInvoked="TreeViewItem_Invoked"
+                                       CanDragItems="False" AllowDrop="False" CanReorderItems="False"
+                                       SelectionMode="Single">
+                            <muxc:TreeView.ItemTemplate>
+                                <DataTemplate x:DataType="viewmodels:StoryNodeItem">
+                                    <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
+                                                       RightTapped="TreeViewItem_RightTapped"
+                                                       IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
+                                                       CanDrag="False"
+                                                       ContextFlyout="{StaticResource AddStoryElementFlyout}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20" />
+                                            <TextBlock Text="{x:Bind Name, Mode=TwoWay}"
+                                                       TextWrapping="{x:Bind TextWrapping}" MaxWidth="220"
+                                                       Margin="10,0,10,0" />
+                                        </StackPanel>
+                                    </muxc:TreeViewItem>
+                                </DataTemplate>
+                            </muxc:TreeView.ItemTemplate>
+                        </muxc:TreeView>
                     </StackPanel>
                 </ScrollViewer>
             </SplitView.Pane>
             <SplitView.Content>
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <!-- Navigation Frame -->
-                    <Frame x:Name="SplitViewFrame" Navigated="SplitViewFrame_OnNavigated" Padding="0,0,0,0"/>
+                    <Frame x:Name="SplitViewFrame" Navigated="SplitViewFrame_OnNavigated" Padding="0,0,0,0" />
                 </Grid>
             </SplitView.Content>
         </SplitView>
         <!-- Status Bar -->
-        <!-- Status Bar -->
         <Grid Grid.Row="2" Background="{x:Bind Windowing.PrimaryColor, Mode=OneWay}">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" />
                 <!-- ComboBox -->
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" />
                 <!-- Status Text -->
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" />
                 <!-- Save Button -->
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*" />
                 <!-- Filler -->
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" />
                 <!-- Backup Button -->
             </Grid.ColumnDefinitions>
 
             <ComboBox Grid.Column="0" IsEditable="False" Width="200" Margin="10"
-              ItemsSource="{x:Bind ShellVm.ViewList}" 
-              SelectionChanged="{x:Bind ShellVm.ViewChanged, Mode=OneWay}" 
-              SelectedItem="{x:Bind ShellVm.SelectedView, Mode=TwoWay}" />
+                      ItemsSource="{x:Bind ShellVm.ViewList}"
+                      SelectionChanged="{x:Bind ShellVm.ViewChanged, Mode=OneWay}"
+                      SelectedItem="{x:Bind ShellVm.SelectedView, Mode=TwoWay}" />
 
             <TextBlock Grid.Column="1" Text="{x:Bind ShellVm.StatusMessage, Mode=OneWay}"
-               Foreground="{x:Bind ShellVm.StatusColor, Mode=OneWay}"
-               Width="350" FontSize="14" Margin="10" FontFamily="Segoe UI" Padding="0,5"/>
+                       Foreground="{x:Bind ShellVm.StatusColor, Mode=OneWay}"
+                       Width="350" FontSize="14" Margin="10" FontFamily="Segoe UI" Padding="0,5" />
 
-            <Button Grid.Column="2" Background="Transparent" Command="{x:Bind ShellVm.SaveFileCommand}" BorderBrush="Transparent">
+            <Button Grid.Column="2" Background="Transparent" Command="{x:Bind ShellVm.SaveFileCommand}"
+                    BorderBrush="Transparent">
                 <Button.Content>
-                    <SymbolIcon Symbol="Edit" Height="36" ToolTipService.ToolTip="This icon becomes red when you've made changes that haven't been saved yet.">
+                    <SymbolIcon Symbol="Edit" Height="36"
+                                ToolTipService.ToolTip="This icon becomes red when you've made changes that haven't been saved yet.">
                         <SymbolIcon.Foreground>
-                            <SolidColorBrush Color="{x:Bind ShellVm.ChangeStatusColor, Mode=TwoWay}"/>
+                            <SolidColorBrush Color="{x:Bind ShellVm.ChangeStatusColor, Mode=TwoWay}" />
                         </SymbolIcon.Foreground>
                     </SymbolIcon>
                 </Button.Content>
@@ -494,12 +523,13 @@
 
             <!-- Spacer in Column 3 -->
 
-            <Button Grid.Column="4" Background="Transparent" Command="{x:Bind ShellVm.CreateBackupCommand}" BorderBrush="Transparent" HorizontalAlignment="Right">
+            <Button Grid.Column="4" Background="Transparent" Command="{x:Bind ShellVm.CreateBackupCommand}"
+                    BorderBrush="Transparent" HorizontalAlignment="Right">
                 <Button.Content>
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE777;" Height="36"
-                      ToolTipService.ToolTip="This icon is green when you or StoryCAD has recently made a backup of your work.">
+                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE777;" Height="36"
+                              ToolTipService.ToolTip="This icon is green when you or StoryCAD has recently made a backup of your work.">
                         <FontIcon.Foreground>
-                            <SolidColorBrush Color="{x:Bind ShellVm.BackupStatusColor, Mode=TwoWay}"/>
+                            <SolidColorBrush Color="{x:Bind ShellVm.BackupStatusColor, Mode=TwoWay}" />
                         </FontIcon.Foreground>
                     </FontIcon>
                 </Button.Content>

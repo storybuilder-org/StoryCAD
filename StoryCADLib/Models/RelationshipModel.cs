@@ -1,46 +1,44 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace StoryCAD.Models;
+namespace StoryCADLib.Models;
 
 public class RelationshipModel
 {
-	#region Properties
-	// The other character in the relationship
-	[JsonIgnore]
-	public StoryElement Partner { get; set; }
+    #region Properties
 
-	// The other character's UUID
-	[JsonInclude]
-	[JsonPropertyName("PartnerUuid")]
-	public Guid PartnerUuid { get; set; }
+    // The other character in the relationship
+    [JsonIgnore] public StoryElement Partner { get; set; }
 
-	// Relationship type
-	[JsonInclude]
-	[JsonPropertyName("RelationType")]
-	public string RelationType { get; set; }
+    // The other character's UUID
+    [JsonInclude]
+    [JsonPropertyName("PartnerUuid")]
+    public Guid PartnerUuid { get; set; }
 
-	[JsonInclude] 
-	[JsonPropertyName("Trait")]
-	public string Trait { get; set; }
+    // Relationship type
+    [JsonInclude]
+    [JsonPropertyName("RelationType")]
+    public string RelationType { get; set; }
 
-	[JsonInclude]
-	[JsonPropertyName("Attitude")]
-	public string Attitude { get; set; }
+    [JsonInclude]
+    [JsonPropertyName("Trait")]
+    public string Trait { get; set; }
 
-	[JsonInclude]
-	[JsonPropertyName("Notes")]
-	public string Notes { get; set; }
+    [JsonInclude]
+    [JsonPropertyName("Attitude")]
+    public string Attitude { get; set; }
 
-	[JsonIgnore]
-	public readonly CharacterViewModel CharVM = Ioc.Default.GetService<CharacterViewModel>();
+    [JsonInclude]
+    [JsonPropertyName("Notes")]
+    public string Notes { get; set; }
 
-	#endregion
+    [JsonIgnore] public readonly CharacterViewModel CharVM = Ioc.Default.GetService<CharacterViewModel>();
 
-	#region Constructors
+    #endregion
 
-	public RelationshipModel(Guid partnerUuid, string type)
+    #region Constructors
+
+    public RelationshipModel(Guid partnerUuid, string type)
     {
-
         PartnerUuid = partnerUuid;
         RelationType = type;
         Trait = string.Empty;
@@ -49,7 +47,9 @@ public class RelationshipModel
     }
 
 
-    public RelationshipModel() { }
+    public RelationshipModel()
+    {
+    }
 
     #endregion
 }

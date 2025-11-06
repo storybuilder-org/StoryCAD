@@ -1,110 +1,87 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
-		<LangVersion>latest</LangVersion> 
-		<TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
-		<TargetPlatformVersion>10.0.22621.0</TargetPlatformVersion>
-		<TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
-		<RootNamespace>StoryCAD</RootNamespace>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<Platforms>x86;x64;arm64</Platforms>
-		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
-		<UseWinUI>true</UseWinUI>
-		<EnableMsixTooling>true</EnableMsixTooling>
-		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
-		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-		<AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
-		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
-		<GenerateTestArtifacts>True</GenerateTestArtifacts>
-		<AppxBundle>Auto</AppxBundle>
-		<AppInstallerUri>C:\msixs\</AppInstallerUri>
-		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-		<AppxPackageDir>C:\Users\RARI\Desktop\CadApp\</AppxPackageDir>
-		<AppxBundlePlatforms>x86|x64|arm64</AppxBundlePlatforms>
-		<RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
-		<RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
-	</PropertyGroup>
-	<PropertyGroup>
-		<SourceRevisionId>build$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ss:fffZ"))</SourceRevisionId>
-	</PropertyGroup>
-	<ItemGroup>
-		<Content Include="Assets\SplashScreen.scale-200.png" />
-		<Content Include="Assets\Square150x150Logo.scale-200.png" />
-		<Content Include="Assets\Square44x44Logo.scale-200.png" />
-		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
-	</ItemGroup>
+<Project Sdk="Uno.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <UnoSingleProject>true</UnoSingleProject>
 
-	<ItemGroup>
-		<PackageReference Include="dotenv.net" Version="4.0.0" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4654" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="NLog" Version="6.0.3" />
-		<PackageReference Include="NLog.Extensions.Logging" Version="6.0.3" />
-		<PackageReference Include="WinUIEx" Version="2.6.0" />
-		<Manifest Include="$(ApplicationManifest)" />
-	</ItemGroup>
+        <!-- Display name -->
+        <ApplicationTitle>StoryCAD</ApplicationTitle>
+        <!-- App Identifier -->
+        <ApplicationId>net.storybuilder.storycad</ApplicationId>
+        <!-- Versions -->
+        <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+        <ApplicationVersion>1</ApplicationVersion>
+        <!-- Package Publisher -->
+        <ApplicationPublisher>StoryBuilder Foundation</ApplicationPublisher>
+        <!-- Package Description -->
+        <Description>StoryCAD powered by Uno Platform.</Description>
+    </PropertyGroup>
 
-	<!-- Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
-       Tools extension to be activated for this project even if the Windows App SDK Nuget
-       package has not yet been restored -->
-	<ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnablePreviewMsixTooling)'=='true'">
-		<ProjectCapability Include="Msix" />
-	</ItemGroup>
+    <!-- On Windows, build both WinAppSDK and Skia Desktop -->
+    <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
+        <TargetFrameworks>
+            net9.0-desktop;
+            net9.0-windows10.0.22621
+        </TargetFrameworks>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<Content Include="Assets\Install\**">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
+    <!-- On macOS/Linux, build only Skia Desktop -->
+    <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
+        <TargetFrameworks>net9.0-desktop</TargetFrameworks>
+    </PropertyGroup>
 
-	<ItemGroup>
-	  <Content Remove="Assets\BadgeLogo.scale-400.png" />
-	  <Content Remove="Assets\StoryTree\4KRev1.1Square.png" />
-	</ItemGroup>
+    <PropertyGroup>
+        <!-- MSIX Configuration for Windows -->
+        <UseWinUI Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</UseWinUI>
+        <EnableMsixTooling Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</EnableMsixTooling>
+        <WindowsPackageType Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">MSIX</WindowsPackageType>
+        <WindowsAppSDKSelfContained Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</WindowsAppSDKSelfContained>
+        <GenerateAppxPackageOnBuild Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</GenerateAppxPackageOnBuild>
+        <AppxPackageSigningEnabled Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">false</AppxPackageSigningEnabled>
 
-	<ItemGroup>
-		<None Remove="Assets\HomeLogo.png" />
-		<None Remove="Assets\Icons\BootstrapEmailIcon.png" />
-		<None Remove="Assets\Icons\DiscordIcon.png" />
-		<None Remove="Assets\Icons\FaceBookIcon.png" />
-		<None Remove="Assets\Icons\GitHubIcon.png" />
-		<None Remove="Assets\Icons\PatreonIcon.png" />
-		<None Remove="Assets\Icons\TwitterIcon.png" />
-		<None Remove="Assets\Icons\YoutubeIcon.png" />
-		<None Remove="Assets\Logo.png" />
-		<None Remove="Views\PreferencesInitialization.xaml" />
-		<None Remove="Views\WebPage.xaml" />
-	</ItemGroup>
+        <UnoFeatures>
+            SkiaRenderer;
+            Lottie;
+            Toolkit;
+        </UnoFeatures>
 
-	<ItemGroup>
-		<ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
-	</ItemGroup>
+        <Platforms>AnyCPU;x64</Platforms>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<None Update=".env">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<Page Update="Views\WebPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-	</ItemGroup>
+    <!-- App Icon Configuration -->
+    <ItemGroup>
+        <UnoImage Include="Assets\Icons\icon.png">
+            <Kind>Icon</Kind>
+        </UnoImage>
+        <UnoSplashScreen Include="Assets\Splash\splash.png">
+          <Kind>Icon</Kind>
+        </UnoSplashScreen>
+    </ItemGroup>
 
-	<ItemGroup>
-		<Page Update="Views\PreferencesInitialization.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Uno.Fonts.Fluent" />
+    </ItemGroup>
 
-	<!-- This allows Runtime ID's like win10-x86 since .NET8 changed them-->
-	<ItemGroup>
-		<RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
+    </ItemGroup>
 
-	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-	  <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)BuildIncrement.ps1&quot;&#xA;" />
-	</Target>
+    <!-- Move Package.appxmanifest to Windows platform folder -->
+    <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+        <AppxManifest Include="Package.appxmanifest" />
+    </ItemGroup>
+
+    <!-- Include .env file in output -->
+    <ItemGroup>
+        <None Update=".env">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+      <UnoIcon Remove="Assets\Icons\icon.svg" />
+      <Content Remove="Assets\Icons\icon.png" />
+      <UnoIcon Include="Assets\Icons\icon.png" />
+    </ItemGroup>
+    <ItemGroup>
+      <UnoSplashScreen Remove="Assets\Splash\splash_screen.svg" />
+    </ItemGroup>
 </Project>

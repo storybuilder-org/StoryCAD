@@ -1,40 +1,40 @@
 ﻿<Page
-    x:Class="StoryCAD.Services.Dialogs.FileOpenMenuPage"
+    x:Class="StoryCADLib.Services.Dialogs.FileOpenMenuPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" Height="500" MinWidth="800">
+    mc:Ignorable="d" MinWidth="360">
 
-    <NavigationView OverflowLabelMode="NoLabel" IsBackButtonVisible="Collapsed"
+    <NavigationView HorizontalContentAlignment="Stretch" OverflowLabelMode="NoLabel" IsBackButtonVisible="Collapsed"
                     SelectedItem="{x:Bind FileOpenVM.CurrentTab, Mode=TwoWay}"
                     IsSettingsVisible="False" PaneDisplayMode="Left" IsPaneToggleButtonVisible="False">
         <NavigationView.MenuItems>
             <!-- New button -->
             <NavigationViewItem Content="Create new outline" Tag="New">
                 <NavigationViewItem.Icon>
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE710;"/>
+                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE710;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
 
             <!-- Recents button -->
             <NavigationViewItem Content="Recently opened" Tag="Recent">
                 <NavigationViewItem.Icon>
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEC92;"/>
+                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xEC92;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
 
             <!-- Samples button -->
             <NavigationViewItem Content="Sample outlines" Tag="Sample">
                 <NavigationViewItem.Icon>
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE753;"/>
+                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE753;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
 
             <!-- Backup button -->
             <NavigationViewItem Content="Backups" Tag="Backup">
                 <NavigationViewItem.Icon>
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE777;"/>
+                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE777;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
         </NavigationView.MenuItems>
@@ -44,8 +44,8 @@
             <Button HorizontalAlignment="Center" Click="{x:Bind FileOpenVM.LoadStoryFromFile}">
                 <Button.Content>
                     <StackPanel Orientation="Horizontal">
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE838;"/>
-                        <TextBlock Text="Open Outline from file" Margin="10,0,0,0"/>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE838;" />
+                        <TextBlock Text="Open Outline from file" Margin="10,0,0,0" />
                     </StackPanel>
                 </Button.Content>
             </Button>
@@ -53,99 +53,96 @@
 
         <Grid Margin="10" Background="Transparent">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!-- Title and warning -->
             <TextBlock Text="{x:Bind FileOpenVM.TitleText, Mode=TwoWay}" FontSize="25" HorizontalAlignment="Center"
-                       VerticalAlignment="Top" Grid.Row="0"/>
+                       VerticalAlignment="Top" Grid.Row="0" />
 
-            <InfoBar Grid.Row="1" IsOpen="{x:Bind FileOpenVM.ShowWarning, Mode=TwoWay}" Severity="Warning" IsClosable="False"
-                     Message="{x:Bind FileOpenVM.WarningText, Mode=TwoWay}" HorizontalAlignment="Center"/>
+            <InfoBar Grid.Row="1" IsOpen="{x:Bind FileOpenVM.ShowWarning, Mode=TwoWay}" Severity="Warning"
+                     IsClosable="False"
+                     Message="{x:Bind FileOpenVM.WarningText, Mode=TwoWay}" HorizontalAlignment="Center" />
 
             <ScrollView Grid.Row="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
-                <Grid>
+                <Grid MinWidth="300" MinHeight="300">
                     <!-- Recents tab -->
-                    <Grid Visibility="{x:Bind FileOpenVM.RecentsTabContentVisibility, Mode=TwoWay}" >
+                    <Grid Visibility="{x:Bind FileOpenVM.RecentsTabContentVisibility, Mode=TwoWay}">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="40"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <ListView Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" 
-                             ItemsSource="{x:Bind FileOpenVM.RecentsUI}" 
-                             SelectedIndex="{x:Bind FileOpenVM.SelectedRecentIndex, Mode=TwoWay}">
+                        <ListView Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                                  ItemsSource="{x:Bind FileOpenVM.RecentsUI}"
+                                  SelectedIndex="{x:Bind FileOpenVM.SelectedRecentIndex, Mode=TwoWay}">
                             <ListView.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <ItemsStackPanel Orientation="Vertical" Margin="0,10,0,0"/>
+                                    <ItemsStackPanel Orientation="Vertical" Margin="0,10,0,0" />
                                 </ItemsPanelTemplate>
                             </ListView.ItemsPanel>
                         </ListView>
                     </Grid>
 
                     <!-- Backups tab -->
-                    <Grid Visibility="{x:Bind FileOpenVM.BackupTabContentVisibility, Mode=TwoWay}" >
+                    <Grid Visibility="{x:Bind FileOpenVM.BackupTabContentVisibility, Mode=TwoWay}">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="40"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <ListBox Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" 
-                                 ItemsSource="{x:Bind FileOpenVM.BackupUI}" 
-                                 SelectedIndex="{x:Bind FileOpenVM.SelectedBackupIndex, Mode=TwoWay}"/>
+                        <ListView Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                 ItemsSource="{x:Bind FileOpenVM.BackupUI}"
+                                 SelectedIndex="{x:Bind FileOpenVM.SelectedBackupIndex, Mode=TwoWay}" />
                     </Grid>
 
                     <!-- New tab -->
                     <Grid Visibility="{x:Bind FileOpenVM.NewTabContentVisibility, Mode=TwoWay}">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <ComboBox Grid.Row="0" Header="Template:" HorizontalAlignment="Stretch" Margin="20"
-                              SelectedIndex="{x:Bind FileOpenVM.SelectedTemplateIndex, Mode=TwoWay}">
-                            <x:String>Blank Outline</x:String>
-                            <x:String>Overview and Story Problem</x:String>
-                            <x:String>Folders</x:String>
-                            <x:String>External and Internal Problems</x:String>
-                            <x:String>Protagonist and Antagonist</x:String>
-                            <x:String>Problems and Characters</x:String>
-                        </ComboBox>
+                                  ItemsSource="{x:Bind FileOpenVM.ProjectTemplateNames}"
+                                  SelectedIndex="{x:Bind FileOpenVM.SelectedTemplateIndex, Mode=TwoWay}" />
 
-                        <TextBox Grid.Row="1" HorizontalContentAlignment="Center" PlaceholderText="You can't put files here"
-                                 Header="Project path:"  HorizontalAlignment="Stretch" Margin="20"
-                                 Text="{x:Bind FileOpenVM.OutlineFolder, Mode=TwoWay}"/>
+                        <TextBox Grid.Row="1" HorizontalContentAlignment="Center"
+                                 PlaceholderText="You can't put files here"
+                                 Header="Project path:" HorizontalAlignment="Stretch" Margin="20"
+                                 Text="{x:Bind FileOpenVM.OutlineFolder, Mode=TwoWay}" />
 
-                        <Button Grid.Row="2" Content="Browse" Click="{x:Bind FileOpenVM.Browse_Click}" HorizontalAlignment="Center"/>
+                        <Button Grid.Row="2" Content="Browse" Click="{x:Bind FileOpenVM.Browse_Click}"
+                                HorizontalAlignment="Center" />
 
-                        <TextBox Grid.Row="3" MinWidth="250"  HorizontalAlignment="Stretch" Margin="20"
-                                 Header="Project Name: " Text="{x:Bind FileOpenVM.OutlineName, Mode=TwoWay}"/>
+                        <TextBox Grid.Row="3" MinWidth="250" HorizontalAlignment="Stretch" Margin="20"
+                                 Header="Project Name: " Text="{x:Bind FileOpenVM.OutlineName, Mode=TwoWay}" />
                     </Grid>
 
                     <!-- Samples tab -->
                     <Grid Visibility="{x:Bind FileOpenVM.SamplesTabContentVisibility, Mode=TwoWay}">
-                        <ListBox HorizontalAlignment="Center" VerticalAlignment="Center"
-                             ItemsSource="{x:Bind FileOpenVM.SampleNames}" CornerRadius="4"
-                             SelectedIndex="{x:Bind FileOpenVM.SelectedSampleIndex, Mode=TwoWay}"/>
+                        <ListView HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                  ItemsSource="{x:Bind FileOpenVM.SampleNames}" CornerRadius="4"
+                                  SelectedIndex="{x:Bind FileOpenVM.SelectedSampleIndex, Mode=TwoWay}" />
                     </Grid>
                 </Grid>
             </ScrollView>
 
 
             <!-- Footer buttons -->
-            <StackPanel Grid.Row="3" MinWidth="700" HorizontalAlignment="Stretch" Orientation="Horizontal"
+            <StackPanel Grid.Row="3" HorizontalAlignment="Stretch" Orientation="Horizontal"
                         Margin="10">
                 <!-- buttons -->
                 <Button Content="{x:Bind FileOpenVM.ConfirmButtonText, Mode=TwoWay}"
-                        Click="{x:Bind FileOpenVM.ConfirmClicked}" HorizontalAlignment="Stretch" Width="300" Margin="10,0" />
-                <Button Content="Close" HorizontalAlignment="Stretch" Width="300" Click="{x:Bind FileOpenVM.Close}"/>
+                        Click="{x:Bind FileOpenVM.ConfirmClicked}" HorizontalAlignment="Stretch" Margin="10,0" />
+                <Button Content="Close" HorizontalAlignment="Stretch" Click="{x:Bind FileOpenVM.Close}" />
 
 
             </StackPanel>

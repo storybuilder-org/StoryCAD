@@ -1,12 +1,13 @@
-﻿using StoryCAD.ViewModels.Tools;
+﻿using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.Controls;
+namespace StoryCADLib.Controls;
 
 public sealed partial class Flaw
 {
-    public FlawViewModel FlawVm => Ioc.Default.GetService<FlawViewModel>();
     public Flaw()
     {
         InitializeComponent();
     }
+
+    public FlawViewModel FlawVm => Ioc.Default.GetService<FlawViewModel>();
 }

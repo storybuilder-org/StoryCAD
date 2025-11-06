@@ -1,6 +1,6 @@
 # StoryCAD Development Guide
 
-This file provides project-specific guidance for StoryCAD development. Universal development standards are defined in `/dev/src/CLAUDE.md` and automatically included.
+This file provides project-specific guidance for StoryCAD development.
 
 ## Primary Directive: Simplicity First
 
@@ -10,6 +10,118 @@ This file provides project-specific guidance for StoryCAD development. Universal
 - Built-in .NET features over external libraries
 - Straightforward debugging (`Debugger.Launch()`) over complex conditions
 - Clear, obvious code over clever solutions
+
+## Platform Development (UNO)
+
+### Multi-Targeting Strategy
+
+**Windows builds both targets**:
+- `net9.0-windows10.0.22621` (WinAppSDK head) - Windows 10/11, Windows Store
+- `net9.0-desktop` (Desktop head) - Windows 7/8/10/11, macOS, Linux
+
+**macOS builds desktop only**:
+- `net9.0-desktop` (Desktop head) - macOS, also runs on Windows/Linux
+
+**Critical Concept - Platform-Specific Code**:
+
+When using **cross-platform APIs only** (standard .NET, UNO controls):
+- ✅ Build on either platform → Universal binary runs everywhere
+
+When using **platform-specific APIs** (AppKit, Win32, etc.):
+- ⚠️ Build on Windows → Excludes Mac-specific code (can't compile AppKit)
+- ⚠️ Build on Mac → Excludes Windows-specific code (can't compile Win32)
+- 📦 Need platform-specific builds for production distribution
+
+**Example**:
+```csharp
+#if __MACOS__
+using AppKit;  // This code ONLY compiles on Mac
+public void SetupMacMenu() { }
+#endif
+```
+
+See `/devdocs/platform_targeting_guidelines.md` for complete workflows and decision trees.
+
+### Cross-Machine Development Workflow
+
+**Primary Strategy**: Develop on Windows (VS2022), test on Mac (Rider)
+
+1. **Code on Windows**:
+   - Write code in VS2022 (familiar environment)
+   - Test on Windows (WinAppSDK head)
+   - Commit and push
+
+2. **Test on Mac**:
+   ```bash
+   git pull
+   dotnet run -f net9.0-desktop  # Quick verification
+   ```
+
+3. **Debug on Mac** (if needed):
+   - Open in Rider on Mac Mini
+   - Debug Mac-specific issues
+   - Commit fixes and pull back to Windows
+
+**Alternative Workflows**:
+- Network share (rapid iteration, must copy to local for build)
+- Separate build folders (simultaneous debugging)
+
+See `devdocs/platform_targeting_guidelines.md` for detailed workflow comparison.
+
+### When to Build on Which Platform
+
+Use this decision tree to determine where to develop:
+
+| Issue Type | Build Platform | Test Platform | Rationale |
+|------------|----------------|---------------|-----------|
+| UNO Platform bugs | Windows | Both | Cross-platform testing required |
+| Pure XAML/UI | Windows | Both | Faster in familiar IDE |
+| Business logic | Windows | Both | No platform-specific code |
+| Mac-specific features | Mac | Mac only | Requires AppKit/Mac APIs |
+| Windows-specific features | Windows | Windows only | Requires Win32/WinAppSDK APIs |
+| Performance optimization | Both | Both | Platform differences matter |
+
+**Key Points**:
+- ~90% of StoryCAD code is shared/cross-platform → Develop on Windows
+- Mac-specific features (AppKit menus, sandboxing) → Must build on Mac
+- Always test on both platforms before merging to UNOTestBranch
+
+### Platform-Specific Testing
+
+**Quick Manual Test (Mac)**:
+```bash
+# No IDE needed:
+dotnet run -f net9.0-desktop
+```
+
+**Debugging (Mac)**:
+```bash
+# Must build on Mac, use Rider:
+rider ~/Documents/dev/src/StoryCAD/StoryCAD.sln
+# Set breakpoints and debug normally
+```
+
+**Important**: Cannot remote debug from Windows to Mac. Use logging for remote troubleshooting or debug locally on Mac.
+
+### Working with UNO Platform
+When developing on the UNOTestBranch:
+- **Shared Code First**: Write platform-agnostic code whenever possible
+- **Platform-Specific Code**:
+  - Use partial classes: `Windowing.WinAppSDK.cs` for Windows, `Windowing.desktop.cs` for macOS
+  - Use conditional compilation: `#if HAS_UNO_WINUI` for Windows, `#if __MACOS__` for macOS
+- **Testing**: Test on both Windows and macOS before committing
+- **File Paths**: Use platform-agnostic paths (avoid hardcoded Windows paths)
+- **Keyboard Shortcuts**: Support both Ctrl (Windows) and Cmd (macOS) patterns
+
+### UNO Platform Resources
+- [UNO Platform Documentation](https://platform.uno/docs/) - Main documentation
+- [Platform-Specific C#](https://platform.uno/docs/articles/platform-specific-csharp.html) - Partial classes and conditional compilation
+- [Getting Started with UNO](https://platform.uno/docs/articles/get-started.html) - Setup and basics
+- [WinUI to UNO Migration](https://platform.uno/docs/articles/howto-migrate-existing-code.html) - Migration guidance
+- [Supported Features](https://platform.uno/docs/articles/supported-features.html) - API compatibility matrix
+- [UNO Platform GitHub](https://github.com/unoplatform/uno) - Source code and issues
+- [Migration Guide](https://github.com/orgs/storybuilder-org/projects/6) - StoryCAD specific migration project
+- Testing Strategy: `/StoryCADTests/ManualTests/UNO_Platform_Testing_Strategy.md`
 
 ## Branch Management
 
@@ -31,31 +143,97 @@ This file provides project-specific guidance for StoryCAD development. Universal
 
 ## About StoryCAD
 
-StoryCAD is a free, open-source Windows application for fiction writers that provides structured outlining tools. It's described as "CAD for fiction writers" and helps writers manage the complexity of plotted fiction through systematic story development.
+StoryCAD is a free, open-source application for fiction writers that provides structured outlining tools. It's described as "CAD for fiction writers" and helps writers manage the complexity of plotted fiction through systematic story development.
+
+**Version 3.x** (main branch): Windows-only application using WinUI 3
+**Version 4.0** (UNOTestBranch): Cross-platform application supporting Windows and macOS via UNO Platform
 
 ## Quick Reference
 
-### Technology Stack
-- **Framework**: .NET 9.0 with WinUI 3, Windows App SDK 1.6
+### Technology Stack (UNO Platform - Branch: UNOTestBranch)
+- **Framework**: .NET 9.0 with UNO Platform 5.x
+- **UI Framework**: WinUI 3 (cross-platform via UNO)
+- **Platform Targets**:
+  - **Windows**: WinAppSDK head (Windows 10/11, minimum 10.0.19041.0)
+  - **macOS**: Desktop head (macOS 10.15+)
+  - **Future**: Linux, WebAssembly, iOS, Android
 - **Architecture**: MVVM with CommunityToolkit.Mvvm
-- **Testing**: MSTest with WinUI support
-- **Platform**: Windows 10/11 (minimum 10.0.19041.0)
+- **Testing**: MSTest with UNO Platform support
+- **Shared Code**: ~90% across all platforms
+
+### Production Stack (Main Branch - Version 3.x)
+- **Framework**: .NET 9.0 with WinUI 3, Windows App SDK 1.6
+- **Platform**: Windows 10/11 only
 
 ### Project Structure
 1. **StoryCAD** - Main WinUI 3 application (executable)
 2. **StoryCADLib** - Core business logic library (NuGet package)
 3. **StoryCADTests** - MSTest test project
 
-## Development Guides
+## Documentation Resources
 
-### Core Documentation
-- [Architecture Guide](./.claude/architecture.md) - MVVM patterns, data binding, services
-- [Build & Test Commands](./.claude/build_commands.md) - WSL/Windows build instructions
-- [Testing Guide](./.claude/testing.md) - Test patterns and data creation
-- [User Manual Index](/mnt/c/temp/user_manual.md) - User documentation structure
+### Core Memory Files (`/home/tcox/.claude/memory/`)
 
-### Workflow Documentation
-- [AI Workflow](/mnt/c/temp/AI_Workflow.md) - Issue-centric development process
+Essential architecture and development documentation accessible to all sessions:
+
+- **[patterns.md](/home/tcox/.claude/memory/patterns.md)** - 9 architectural patterns (MVVM, ISaveable, SerializationLock, OperationResult, Stateless Services, IMessenger, Platform-Specific Code, StoryDocument, DI)
+- **[architecture.md](/home/tcox/.claude/memory/architecture.md)** - Critical dated decisions (2025-10-12), circular dependencies, navigation lifecycle, StoryDocument never-null rule, theme management
+- **[gotchas.md](/home/tcox/.claude/memory/gotchas.md)** - Common pitfalls, headless mode behavior, platform-specific gotchas, ISaveable registration, navigation timing
+- **[cross-platform.md](/home/tcox/.claude/memory/cross-platform.md)** - Cross-platform development workflows, multi-targeting, when to build where
+- **[testing.md](/home/tcox/.claude/memory/testing.md)** - Test patterns, naming conventions (MethodName_Scenario_ExpectedResult), TDD workflow, test data creation
+- **[build-commands.md](/home/tcox/.claude/memory/build-commands.md)** - WSL/Windows/Mac build and test commands, TDD red-green-refactor cycle, cross-machine workflow
+- **[dependencies.md](/home/tcox/.claude/memory/dependencies.md)** - UNO Platform 6.2.36, MVVM Toolkit 8.4.0, Semantic Kernel 1.41.0 usage patterns
+
+**Usage**: All memory files cross-reference each other. Start with patterns.md for quick lookup, then drill into specific topics.
+
+### Comprehensive Documentation (`.claude/docs/`)
+
+Detailed technical documentation (memory files provide condensed versions):
+
+- **Architecture**: `.claude/docs/architecture/` - StoryCAD_architecture_notes.md (comprehensive), coding-standards.md, debugging-guide.md, ai-workflow.md
+- **Dependencies**: `.claude/docs/dependencies/` - Full dependency guides with complete API examples
+- **Code Examples**: `.claude/docs/examples/` - Copy-paste templates for ViewModels, Services, platform-specific code
+- **Troubleshooting**: `.claude/docs/troubleshooting/` - Common errors with solutions
+
+### User Manual (ManualTest Repository)
+
+- **Repository**: [github.com/storybuilder-org/ManualTest](https://github.com/storybuilder-org/ManualTest)
+- **AI Agent Guide**: [ManualTest/CLAUDE.md](/mnt/d/dev/src/ManualTest/CLAUDE.md) - Comprehensive guidance for working with user documentation
+- **Location**: `/mnt/d/dev/src/ManualTest/docs/`
+- **Published (Staging)**: https://storybuilder-org.github.io/StoryBuilder-Manual/
+- **Format**: Jekyll with Just the Docs theme (115 markdown files)
+- **Index**: `/mnt/c/temp/user_manual.md` - Complete index with file summaries
+- **Audience**: Fiction writers (non-technical users)
+
+**Search Strategy**:
+- **DO NOT** read all 115 files sequentially
+- **DO** use index file for quick lookup
+- **DO** use Grep to search specific sections
+- **DO** read ManualTest/CLAUDE.md for detailed search guidance
+
+**Key Manual Sections**:
+- `Front Matter/` - Introduction, help resources, legal information (4 files)
+- `Quick Start/` - UI basics, navigation, file operations, keyboard shortcuts (23 files)
+- `Story Elements/` - Forms and tabs for each story element type (30 files)
+- `Tools/` - Master Plots, Dramatic Situations, Stock Scenes, Conflict Builder (10 files)
+- `Writing with StoryCAD/` - Outlining philosophy, workflow, plotting techniques (17 files)
+- `Tutorial Creating a Story/` - Step-by-step story creation guide (10 files)
+- `Reports/` - Print reports and Scrivener integration (4 files)
+- `Preferences/` - Application settings and configuration (1 file)
+- `For Developers/` - API documentation, changelog, developer notes (6 files)
+
+**When to Reference User Documentation**:
+- Before implementing UI changes (understand user workflows)
+- When adding new story elements (follow established patterns)
+- When changing features (update corresponding user docs)
+- See architecture notes for feature-to-documentation mapping
+
+### Context7 MCP Server
+
+StoryCAD uses Context7 MCP server for up-to-date documentation of public dependencies:
+- **Status**: Configured in `/home/tcox/.claude.json`
+- **Provides**: Latest docs for UNO Platform, Semantic Kernel, MVVM Toolkit, and other NuGet packages
+- **Usage**: Query Context7 for dependency-specific questions
 
 ## Quick Start
 
@@ -68,7 +246,7 @@ StoryCAD is a free, open-source Windows application for fiction writers that pro
 "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
 ```
 
-For detailed commands, see [Build & Test Commands](./.claude/build_commands.md).
+For detailed commands, see [Build & Test Commands](/home/tcox/.claude/memory/build-commands.md).
 
 ## Key Services
 
@@ -80,7 +258,7 @@ For detailed commands, see [Build & Test Commands](./.claude/build_commands.md).
 - **SearchService**: Full-text search across story content
 - **LogService**: Comprehensive logging with NLog and elmah.io integration
 
-For detailed architecture information, see [Architecture Guide](./.claude/architecture.md).
+For detailed architecture information, see [Architecture Memory](/home/tcox/.claude/memory/architecture.md) and [Patterns](/home/tcox/.claude/memory/patterns.md).
 
 ## Important Notes
 
@@ -98,6 +276,8 @@ For detailed architecture information, see [Architecture Guide](./.claude/archit
 ## Working with GitHub Issues
 
 Claude Code can interact with GitHub issues using the `gh` CLI tool. This is essential for following the AI Issue-Centric Workflow.
+
+**PIE Workflow Implementation**: The enterprise PIE policy (Plan-Implement-Evaluate) from `/etc/claude-code/CLAUDE.md` is implemented for StoryCAD via **`.claude/docs/architecture/ai-workflow.md`**. This issue-centric workflow defines how to plan, implement, and evaluate work within GitHub issues.
 
 ### Viewing Issues
 ```bash
@@ -118,12 +298,22 @@ gh issue comment 1067 --body "Planning complete" --repo storybuilder-org/StoryCA
 ```
 
 ### AI Workflow Integration
-When following AI_workflow.md:
+When following AI_workflow.md (PIE implementation):
+
+**Plan Phase**:
 1. Read issue to understand current state
-2. Update issue body with planned tasks between checkboxes
-3. Check off tasks as completed
-4. Add comments as specified in the workflow
-5. Include design documents in PR comments (not in repository files)
+2. Recommend specialized agents for complex tasks in the plan
+3. Update issue body with planned tasks between checkboxes (include agent recommendations)
+4. Get plan approval before proceeding
+
+**Implement Phase**:
+5. Use specialized agents proactively for approved tasks (no additional approval needed)
+6. Check off tasks as completed
+7. Add comments as specified in the workflow
+
+**Evaluate Phase**:
+8. Include design documents in PR comments (not in repository files)
+9. Document agent effectiveness and lessons learned
 
 Example: Updating Code tasks in issue body:
 ```bash
@@ -257,4 +447,4 @@ git commit -m "message"
 ### Circular Dependencies
 - Watch for circular dependencies when adding constructor parameters
 - If encountered, document with TODO and leave specific Ioc.Default calls rather than forcing bad design
-- Example: Windowing ↔ OutlineViewModel (architectural issue documented in /devdocs/StoryCAD_architecture_notes.md)
+- Example: Windowing ↔ OutlineViewModel (documented in /home/tcox/.claude/memory/architecture.md)

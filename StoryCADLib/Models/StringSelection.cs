@@ -1,34 +1,37 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace StoryCAD.Models
+namespace StoryCADLib.Models;
+
+public class StringSelection : ObservableObject
 {
-    public class StringSelection : ObservableObject
+    private bool _selection;
+    private string _stringName;
+
+    public StringSelection(string stringName, bool selected = false)
     {
-        private string _stringName;
-        public string StringName
-        {
-            get => _stringName;
-            set => _stringName = value;
-        }
+        _stringName = stringName;
+        _selection = selected;
+    }
 
-        private bool _selection;
-        public bool Selection
+    public string StringName
+    {
+        get => _stringName;
+        set => _stringName = value;
+    }
+
+    public bool Selection
+    {
+        get => _selection;
+        set
         {
-            get => _selection;
-            set
+            // ReSharper disable once RedundantCheckBeforeAssignment
+            if (_selection == value)
             {
-                // ReSharper disable once RedundantCheckBeforeAssignment
-                if (_selection == value)
-                    return;
-                _selection = value;
-                OnPropertyChanged();
+                return;
             }
-        }
 
-        public StringSelection(string stringName, bool selected = false)
-        {
-            _stringName = stringName;
-            _selection = selected;
+            _selection = value;
+            OnPropertyChanged();
         }
     }
 }

@@ -1,16 +1,10 @@
 using System.Diagnostics;
-using Windows.Storage;
-using Microsoft.UI.Xaml;
-using StoryCAD.ViewModels.Tools;
+using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.Services.Dialogs.Tools;
+namespace StoryCADLib.Services.Dialogs.Tools;
 
 public sealed partial class PreferencesDialog
 {
-    public PreferencesViewModel PreferencesVm => Ioc.Default.GetService<PreferencesViewModel>();
-    public LogService Logger => Ioc.Default.GetRequiredService<LogService>();
-    public AppState State => Ioc.Default.GetRequiredService<AppState>();
-    public Windowing window => Ioc.Default.GetRequiredService<Windowing>();
     public PreferencesDialog()
     {
         InitializeComponent();
@@ -18,8 +12,13 @@ public sealed partial class PreferencesDialog
         ShowInfo();
     }
 
+    public PreferencesViewModel PreferencesVm => Ioc.Default.GetService<PreferencesViewModel>();
+    public LogService Logger => Ioc.Default.GetRequiredService<LogService>();
+    public AppState State => Ioc.Default.GetRequiredService<AppState>();
+    public Windowing window => Ioc.Default.GetRequiredService<Windowing>();
+
     /// <summary>
-    /// Sets info text for changelog and dev menu
+    ///     Sets info text for changelog and dev menu
     /// </summary>
     private async void ShowInfo()
     {
@@ -29,21 +28,34 @@ public sealed partial class PreferencesDialog
         var appState = Ioc.Default.GetService<AppState>();
         Changelog.Text = await new Changelog(logger, appState).GetChangelogText();
 
-        if (PreferencesVm.WrapNodeNames == TextWrapping.WrapWholeWords) { TextWrap.IsChecked = true; }
-        else { TextWrap.IsChecked = false; }
+        if (PreferencesVm.WrapNodeNames == TextWrapping.WrapWholeWords)
+        {
+            TextWrap.IsChecked = true;
+        }
+        else
+        {
+            TextWrap.IsChecked = false;
+        }
 
         SearchEngine.SelectedIndex = (int)PreferencesVm.PreferredSearchEngine;
 
         //Dev Menu is only shown on unofficial builds
-        if (!State.DeveloperBuild) { PivotView.Items.Remove(Dev); }
+        if (!State.DeveloperBuild)
+        {
+            PivotView.TabItems.Remove(Dev);
+        }
     }
 
     /// <summary>
-    /// Opens the Log Folder
+    ///     Opens the Log Folder
     /// </summary>
     private void OpenLogFolder(object sender, RoutedEventArgs e)
     {
-        Process.Start(new ProcessStartInfo { FileName = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "Logs"), UseShellExecute = true, Verb = "open" });
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "Logs"),
+            UseShellExecute = true, Verb = "open"
+        });
     }
 
     private void OnBackupPathSelected(object sender, string path)
@@ -57,33 +69,34 @@ public sealed partial class PreferencesDialog
     }
 
     /// <summary>
-    /// This function throws an error as it is used to test errors.
+    ///     This function throws an error as it is used to test errors.
     /// </summary>
     private void ThrowException(object sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException("This is a test exception thrown by the developer Menu and should be ignored.");
+        throw new NotImplementedException(
+            "This is a test exception thrown by the developer Menu and should be ignored.");
     }
 
     /// <summary>
-    /// This sets init to false, meaning the next time
-    /// StoryCAD is opened the PreferencesInitialization
-    /// page will be shown.
+    ///     This sets init to false, meaning the next time
+    ///     StoryCAD is opened the PreferencesInitialization
+    ///     page will be shown.
     /// </summary>
     private void SetInitToFalse(object sender, RoutedEventArgs e)
     {
         PreferencesVm.PreferencesInitialized = false;
     }
 
-	/// <summary>
-	/// Refreshes developer stats such as sys info.
-	/// </summary>
+    /// <summary>
+    ///     Refreshes developer stats such as sys info.
+    /// </summary>
     public void RefreshDevStats(object sender, RoutedEventArgs e)
     {
         DevInfo.Text = Logger.SystemInfo();
-    } 
+    }
 
     /// <summary>
-    /// This toggles the status of preferences.TextWrapping
+    ///     This toggles the status of preferences.TextWrapping
     /// </summary>
     private void ToggleWrapping(object sender, RoutedEventArgs e)
     {
@@ -91,19 +104,22 @@ public sealed partial class PreferencesDialog
         {
             PreferencesVm.WrapNodeNames = TextWrapping.WrapWholeWords;
         }
-        else { PreferencesVm.WrapNodeNames = TextWrapping.NoWrap; }
+        else
+        {
+            PreferencesVm.WrapNodeNames = TextWrapping.NoWrap;
+        }
     }
 
 
     /// <summary>
-    /// This is used to open social media links when
-    /// they clicked in the about page.
+    ///     This is used to open social media links when
+    ///     they clicked in the about page.
     /// </summary>
     private void OpenURL(object sender, RoutedEventArgs e)
     {
         //Shell execute will just open the app in the default for
         //That protocol i.e firefox for https:// and spark for mailto://
-        ProcessStartInfo URL = new(){ UseShellExecute = true};
+        ProcessStartInfo URL = new() { UseShellExecute = true };
 
         //Select URL based on tag of button that was clicked.
         switch ((sender as Button).Tag)

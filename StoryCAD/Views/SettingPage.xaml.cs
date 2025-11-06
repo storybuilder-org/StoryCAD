@@ -1,20 +1,17 @@
-﻿using Microsoft.UI.Xaml.Navigation;
-using StoryCAD.Models;
-using StoryCAD.Services;
-using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using StoryCADLib.Services;
 
 namespace StoryCAD.Views;
 
-public sealed partial class SettingPage : BindablePage
+public sealed partial class SettingPage : Page
 {
-    public SettingViewModel SettingVm => Ioc.Default.GetService<SettingViewModel>();
-
     public SettingPage()
     {
         InitializeComponent();
         DataContext = SettingVm;
     }
-    
+
+    public SettingViewModel SettingVm => Ioc.Default.GetService<SettingViewModel>();
+
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);

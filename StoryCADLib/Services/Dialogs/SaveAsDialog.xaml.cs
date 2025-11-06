@@ -1,6 +1,4 @@
-﻿using Microsoft.UI.Xaml;
-
-namespace StoryCAD.Services.Dialogs;
+﻿namespace StoryCADLib.Services.Dialogs;
 
 public sealed partial class SaveAsDialog : Page
 {

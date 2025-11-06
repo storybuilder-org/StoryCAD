@@ -1,5 +1,5 @@
 ﻿<Page
-    x:Class="StoryCAD.Services.Dialogs.Tools.PrintReportsDialog"
+    x:Class="StoryCADLib.Services.Dialogs.Tools.PrintReportsDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -8,62 +8,82 @@
 
     <StackPanel HorizontalAlignment="Center">
         <Grid HorizontalAlignment="Center" Margin="0,15">
-			<Grid.RowDefinitions>
-				<RowDefinition Height="Auto"/>
-				<RowDefinition Height="Auto"/>
-			</Grid.RowDefinitions>
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="Auto"/>
-				<ColumnDefinition Width="Auto"/>
-				<ColumnDefinition Width="Auto"/>
-			</Grid.ColumnDefinitions>
-	        <TextBlock Text="Create reports for the following:" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,10"/>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Create reports for the following:" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+                       Margin="0,0,0,10" />
             <CheckBox Content="Story Overview" Grid.Column="0" Grid.Row="1"
                       IsChecked="{x:Bind PrintVM.CreateOverview, Mode=TwoWay}" />
             <CheckBox Content="Story Synopsis" Grid.Column="1" Grid.Row="1" Margin="10,0"
-                      IsChecked="{x:Bind PrintVM.CreateSummary, Mode=TwoWay}" Checked="EmptySynopsisWarningCheck"/>
-			<CheckBox Content="Story Problem Structure" Grid.Row="1" Grid.Column="2"
-			          IsChecked="{x:Bind PrintVM.CreateStructure, Mode=TwoWay}"/>
+                      IsChecked="{x:Bind PrintVM.CreateSummary, Mode=TwoWay}" Checked="EmptySynopsisWarningCheck" />
+            <CheckBox Content="Story Problem Structure" Grid.Row="1" Grid.Column="2"
+                      IsChecked="{x:Bind PrintVM.CreateStructure, Mode=TwoWay}" />
         </Grid>
 
 
-        <Pivot>
-            <PivotItem Header="Problems" TabIndex="0">
+        <TabView TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
+            <TabView.TabItems>
+                <TabViewItem Header="Problems" IsClosable="False" TabIndex="0">
                 <StackPanel>
-                    <CheckBox Content="Print a list of all Problems" IsChecked="{x:Bind PrintVM.ProblemList, Mode=TwoWay}"/>
-                    <CheckBox Content="Print all problems" IsChecked="{x:Bind PrintVM.SelectAllProblems,Mode=TwoWay}" Click="CheckboxClicked"/>
-                    <ListView SelectionMode="Multiple" Height="260" Name="ProblemsList" ItemsSource="{x:Bind PrintVM.ProblemNodes, Mode=TwoWay}" SelectionChanged="UpdateSelection" />
+                    <CheckBox Content="Print a list of all Problems"
+                              IsChecked="{x:Bind PrintVM.ProblemList, Mode=TwoWay}" />
+                    <CheckBox Content="Print all problems" IsChecked="{x:Bind PrintVM.SelectAllProblems,Mode=TwoWay}"
+                              Click="CheckboxClicked" />
+                    <ListView SelectionMode="Multiple" Height="260" Name="ProblemsList"
+                              ItemsSource="{x:Bind PrintVM.ProblemNodes, Mode=TwoWay}"
+                              SelectionChanged="UpdateSelection" />
                 </StackPanel>
-            </PivotItem>
-            <PivotItem Header="Characters">
+                </TabViewItem>
+                <TabViewItem Header="Characters" IsClosable="False">
                 <StackPanel>
-                    <CheckBox Content="Print a list of all Characters" IsChecked="{x:Bind PrintVM.CharacterList, Mode=TwoWay}"/>
-                    <CheckBox Content="Print all characters" IsChecked="{x:Bind PrintVM.SelectAllCharacters,Mode=TwoWay}" Click="CheckboxClicked"/>
-                    <ListView SelectionMode="Multiple" Height="260" Name="CharactersList" ItemsSource="{x:Bind PrintVM.CharacterNodes, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+                    <CheckBox Content="Print a list of all Characters"
+                              IsChecked="{x:Bind PrintVM.CharacterList, Mode=TwoWay}" />
+                    <CheckBox Content="Print all characters"
+                              IsChecked="{x:Bind PrintVM.SelectAllCharacters,Mode=TwoWay}" Click="CheckboxClicked" />
+                    <ListView SelectionMode="Multiple" Height="260" Name="CharactersList"
+                              ItemsSource="{x:Bind PrintVM.CharacterNodes, Mode=TwoWay}"
+                              SelectionChanged="UpdateSelection" />
                 </StackPanel>
-            </PivotItem>
-            <PivotItem Header="Scenes">
+                </TabViewItem>
+                <TabViewItem Header="Scenes" IsClosable="False">
                 <StackPanel>
-                    <CheckBox Content="Print a list of all Scenes" IsChecked="{x:Bind PrintVM.SceneList, Mode=TwoWay}"/>
-                    <CheckBox Content="Print all scenes" IsChecked="{x:Bind PrintVM.SelectAllScenes, Mode=TwoWay}" Click="CheckboxClicked"/>
-                    <ListView SelectionMode="Multiple" Height="260" Name="ScenesList" ItemsSource="{x:Bind PrintVM.SceneNodes, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+                    <CheckBox Content="Print a list of all Scenes" IsChecked="{x:Bind PrintVM.SceneList, Mode=TwoWay}" />
+                    <CheckBox Content="Print all scenes" IsChecked="{x:Bind PrintVM.SelectAllScenes, Mode=TwoWay}"
+                              Click="CheckboxClicked" />
+                    <ListView SelectionMode="Multiple" Height="260" Name="ScenesList"
+                              ItemsSource="{x:Bind PrintVM.SceneNodes, Mode=TwoWay}" SelectionChanged="UpdateSelection" />
                 </StackPanel>
-            </PivotItem>
-            <PivotItem Header="Settings">
+                </TabViewItem>
+                <TabViewItem Header="Settings" IsClosable="False">
                 <StackPanel>
-                    <CheckBox Content="Print a list of all Settings" IsChecked="{x:Bind PrintVM.SettingList, Mode=TwoWay}"/>
-                    <CheckBox Content="Print all settings" IsChecked="{x:Bind PrintVM.SelectAllSettings,Mode=TwoWay}" Click="CheckboxClicked"/>
-                    <ListView SelectionMode="Multiple" Height="260" Name="SettingsList" ItemsSource="{x:Bind PrintVM.SettingNodes, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+                    <CheckBox Content="Print a list of all Settings"
+                              IsChecked="{x:Bind PrintVM.SettingList, Mode=TwoWay}" />
+                    <CheckBox Content="Print all settings" IsChecked="{x:Bind PrintVM.SelectAllSettings,Mode=TwoWay}"
+                              Click="CheckboxClicked" />
+                    <ListView SelectionMode="Multiple" Height="260" Name="SettingsList"
+                              ItemsSource="{x:Bind PrintVM.SettingNodes, Mode=TwoWay}"
+                              SelectionChanged="UpdateSelection" />
                 </StackPanel>
-            </PivotItem>
-            <PivotItem Header="Websites">
+                </TabViewItem>
+                <TabViewItem Header="Websites" IsClosable="False">
                 <StackPanel>
-                    <CheckBox Content="Print a list of all Websites" IsChecked="{x:Bind PrintVM.WebList, Mode=TwoWay}"/>
-                    <CheckBox Content="Print all websites" IsChecked="{x:Bind PrintVM.SelectAllWeb,Mode=TwoWay}" Click="CheckboxClicked"/>
-                    <ListView SelectionMode="Multiple" Height="260" Name="WebList" ItemsSource="{x:Bind PrintVM.WebNodes, Mode=TwoWay}"  SelectionChanged="UpdateSelection"/>
+                    <CheckBox Content="Print a list of all Websites" IsChecked="{x:Bind PrintVM.WebList, Mode=TwoWay}" />
+                    <CheckBox Content="Print all websites" IsChecked="{x:Bind PrintVM.SelectAllWeb,Mode=TwoWay}"
+                              Click="CheckboxClicked" />
+                    <ListView SelectionMode="Multiple" Height="260" Name="WebList"
+                              ItemsSource="{x:Bind PrintVM.WebNodes, Mode=TwoWay}" SelectionChanged="UpdateSelection" />
                 </StackPanel>
-            </PivotItem>
-        </Pivot>
-        <InfoBar IsOpen="False" Name="SynopsisWarning" Severity="Warning" Message="Add some scenes to your synopsis, otherwise it will be empty." Height="auto"/>
+                </TabViewItem>
+            </TabView.TabItems>
+        </TabView>
+        <InfoBar IsOpen="False" Name="SynopsisWarning" Severity="Warning"
+                 Message="Add some scenes to your synopsis, otherwise it will be empty." Height="auto" />
     </StackPanel>
 </Page>

@@ -1,19 +1,19 @@
 ﻿using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
-using StoryCAD.Services;
-using StoryCAD.Services.Messages;
-using StoryCAD.Services.Navigation;
+using StoryCADLib.Services;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Navigation;
 
-namespace StoryCAD.ViewModels;
+namespace StoryCADLib.ViewModels;
 
 /// <summary>
-/// A Folder StoryElement is a divider in the Story ExplorerView
-/// view. A 'folder' in the NarratorView view, by contrast, 
-/// is a Section StoryElement. A Folder can have anything as
-/// a parent (including another Folder.) A Section can only have
-/// another Section as its parent. Sections are Chapters, Acts,
-/// etc.
+///     A Folder StoryElement is a divider in the Story ExplorerView
+///     view. A 'folder' in the NarratorView view, by contrast,
+///     is a Section StoryElement. A Folder can have anything as
+///     a parent (including another Folder.) A Section can only have
+///     another Section as its parent. Sections are Chapters, Acts,
+///     etc.
 /// </summary>
 public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
 {
@@ -21,7 +21,7 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
 
     private readonly ILogService _logger;
     private bool _changeable; // process property changes for this story element
-    private bool _changed;    // this story element has changed
+    private bool _changed; // this story element has changed
 
     #endregion
 
@@ -30,6 +30,7 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
     // StoryElement data
 
     private Guid _uuid;
+
     public Guid Uuid
     {
         get => _uuid;
@@ -37,6 +38,7 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     private string _name;
+
     public string Name
     {
         get => _name;
@@ -48,11 +50,13 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
                 NameChangeMessage _msg = new(_name, value);
                 Messenger.Send(new NameChangedMessage(_msg));
             }
+
             SetProperty(ref _name, value);
         }
     }
 
     private bool _isTextBoxFocused;
+
     public bool IsTextBoxFocused
     {
         get => _isTextBoxFocused;
@@ -63,6 +67,7 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
 
     // Description property (migrated from Notes)
     private string _description;
+
     public string Description
     {
         get => _description;
@@ -71,6 +76,7 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
 
     // The StoryModel is passed when FolderPage is navigated to
     private FolderModel _model;
+
     public FolderModel Model
     {
         get => _model;
@@ -84,12 +90,12 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
     public void Activate(object parameter)
     {
         Model = (FolderModel)parameter;
-        LoadModel();  // Load the ViewModel from the Story
+        LoadModel(); // Load the ViewModel from the Story
     }
 
     public void Deactivate(object parameter)
     {
-         SaveModel();    // Save the ViewModel back to the Story
+        SaveModel(); // Save the ViewModel back to the Story
     }
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
@@ -97,7 +103,10 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
         if (_changeable)
         {
             if (!_changed)
-                _logger.Log(LogLevel.Info, $"FolderViewModel.OnPropertyChanged: {args.PropertyName} changed"); 
+            {
+                _logger.Log(LogLevel.Info, $"FolderViewModel.OnPropertyChanged: {args.PropertyName} changed");
+            }
+
             _changed = true;
             ShellViewModel.ShowChange();
         }
@@ -111,9 +120,15 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
         Uuid = Model.Uuid;
         Name = Model.Name;
         if (Name.Equals("New Folder") || Name.Equals("New Note"))
+        {
             IsTextBoxFocused = true;
+        }
+
         if (Name.Equals("New Section"))
+        {
             IsTextBoxFocused = true;
+        }
+
         Description = Model.Description;
 
         _changeable = true;
@@ -133,12 +148,6 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
 
     #region Constructor
 
-    // Constructor for XAML compatibility - will be removed later
-    public FolderViewModel() : this(
-        Ioc.Default.GetRequiredService<ILogService>())
-    {
-    }
-    
     public FolderViewModel(ILogService logger)
     {
         _logger = logger;

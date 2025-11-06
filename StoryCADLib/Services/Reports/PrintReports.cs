@@ -1,29 +1,38 @@
-﻿using StoryCAD.Models;
-using StoryCAD.Services.Outline;
-using StoryCAD.ViewModels.Tools;
-﻿using System.Drawing;
-using System.Drawing.Printing;
-using System.Text;
+﻿using System.Text;
+using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels.Tools;
 
-namespace StoryCAD.Services.Reports;
+namespace StoryCADLib.Services.Reports;
 
 public class PrintReports
 {
-    private PrintReportDialogVM _vm;
     private readonly AppState _appState;
-    private StoryModel _model;
-    private ReportFormatter _formatter;
-    private string _documentText;
+    private readonly ReportFormatter _formatter;
     private readonly ILogService _logger;
+    private readonly StoryModel _model;
+    private readonly PrintReportDialogVM _vm;
+    private string _documentText;
 
     public PrintReports(ILogService logger)
     {
         _logger = logger;
     }
 
+    #region Constructor
+
+    public PrintReports(PrintReportDialogVM vm, AppState appState)
+    {
+        _vm = vm;
+        _appState = appState;
+        _model = appState.CurrentDocument!.Model;
+        _formatter = new ReportFormatter(appState);
+    }
+
+    #endregion
+
     public async Task<string> Generate()
     {
-        string rtf = string.Empty;
+        var rtf = string.Empty;
         await _formatter.LoadReportTemplates(); // Load text report templates
 
         //Process single selection (non-Pivot) reports
@@ -32,6 +41,7 @@ public class PrintReports
             rtf = _formatter.FormatStoryOverviewReport();
             _documentText += FormatText(rtf);
         }
+
         if (_vm.CreateSummary)
         {
             rtf = _formatter.FormatSynopsisReport();
@@ -40,37 +50,41 @@ public class PrintReports
 
         if (_vm.CreateStructure)
         {
-	        rtf = _formatter.FormatStoryProblemStructureReport();
-	        _documentText += FormatText(rtf);
-		}
+            rtf = _formatter.FormatStoryProblemStructureReport();
+            _documentText += FormatText(rtf);
+        }
 
-		if (_vm.ProblemList)
+        if (_vm.ProblemList)
         {
             rtf = _formatter.FormatListReport(StoryItemType.Problem);
             _documentText += FormatText(rtf);
         }
+
         if (_vm.CharacterList)
         {
             rtf = _formatter.FormatListReport(StoryItemType.Character);
             _documentText += FormatText(rtf);
         }
+
         if (_vm.SettingList)
         {
             rtf = _formatter.FormatListReport(StoryItemType.Setting);
             _documentText += FormatText(rtf);
         }
+
         if (_vm.SceneList)
         {
             rtf = _formatter.FormatListReport(StoryItemType.Scene);
             _documentText += FormatText(rtf);
         }
+
         if (_vm.WebList)
         {
             rtf = _formatter.FormatListReport(StoryItemType.Web);
             _documentText += FormatText(rtf);
         }
 
-        foreach (StoryNodeItem node in _vm.SelectedNodes)
+        foreach (var node in _vm.SelectedNodes)
         {
             StoryElement element = null;
             var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
@@ -82,6 +96,7 @@ public class PrintReports
             {
                 // Element not found, element remains null
             }
+
             if (element != null)
             {
                 switch (node.Type)
@@ -102,6 +117,7 @@ public class PrintReports
                         rtf = _formatter.FormatWebReport(element);
                         break;
                 }
+
                 _documentText += FormatText(rtf);
             }
         }
@@ -111,28 +127,31 @@ public class PrintReports
             _logger.Log(LogLevel.Warn, "No nodes selected for report generation");
             return "";
         }
+
         return _documentText;
     }
 
     /// <summary>
-    /// Formats text for a report, if SummaryMode is set to true
-    /// then some formatting is changed to make summary reports more pleasant
+    ///     Formats text for a report, if SummaryMode is set to true
+    ///     then some formatting is changed to make summary reports more pleasant
     /// </summary>
     /// <param name="rtfInput"></param>
     /// <param name="summaryMode"></param>
     private string FormatText(string rtfInput, bool summaryMode = false)
     {
         const int MaxLineLength = 72;
-        
-        string text = _formatter.GetText(rtfInput, false);
-        string[] lines = text.Split('\n');
+
+        var text = _formatter.GetText(rtfInput, false);
+        var lines = text.Split('\n');
         StringBuilder sb = new();
 
-        foreach (string inputLine in lines)
+        foreach (var inputLine in lines)
         {
-            string line = inputLine.TrimEnd();
+            var line = inputLine.TrimEnd();
             if (line.Equals("\r"))
+            {
                 continue;
+            }
 
             WrapAndAppendLine(sb, line, MaxLineLength);
         }
@@ -142,13 +161,13 @@ public class PrintReports
             sb.Replace("[", "\r\n[");
             sb.Replace("]", "]\r\n");
         }
-        
+
         sb.Append("\n\\PageBreak\n");
         return sb.ToString();
     }
 
     /// <summary>
-    /// Wraps a line to the specified maximum length and appends to StringBuilder
+    ///     Wraps a line to the specified maximum length and appends to StringBuilder
     /// </summary>
     /// <param name="sb">StringBuilder to append to</param>
     /// <param name="line">Line to wrap</param>
@@ -157,35 +176,23 @@ public class PrintReports
     {
         while (line.Length > maxLength)
         {
-            string segment = line[..maxLength];
-            
+            var segment = line[..maxLength];
+
             // Ensure we have a space for wrapping
             if (!segment.Contains(" "))
             {
                 segment += " ";
             }
-            
-            int lastSpaceIndex = segment.LastIndexOf(' ');
-            string wrappedPortion = segment[..lastSpaceIndex];
-            
+
+            var lastSpaceIndex = segment.LastIndexOf(' ');
+            var wrappedPortion = segment[..lastSpaceIndex];
+
             sb.Append(wrappedPortion);
             sb.Append(Environment.NewLine);
-            
+
             line = line[lastSpaceIndex..].TrimStart();
         }
-        
+
         sb.Append(line + Environment.NewLine);
     }
-
-    #region Constructor
-
-    public PrintReports(PrintReportDialogVM vm, AppState appState)
-    {
-        _vm = vm;
-        _appState = appState;
-        _model = appState.CurrentDocument!.Model;
-        _formatter = new ReportFormatter(appState);
-    }
-
-    #endregion
 }
