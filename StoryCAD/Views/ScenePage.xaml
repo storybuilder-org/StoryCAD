@@ -7,7 +7,9 @@
       xmlns:models="using:StoryCADLib.Models"
       xmlns:usercontrols="using:StoryCADLib.Controls"
       xmlns:viewModels="using:StoryCADLib.ViewModels"
-      mc:Ignorable="d">
+      mc:Ignorable="d"
+      ScrollViewer.VerticalScrollBarVisibility="Disabled"
+      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
     <Page.Resources>
 
@@ -28,14 +30,16 @@
         <TextBox Header="Name" Text="{x:Bind SceneVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  viewModels:TextBoxFocus.IsFocused="{x:Bind SceneVm.IsTextBoxFocused, Mode=TwoWay}"
                  Margin="10,10,10,0" />
-        <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
-            <TabView.Resources>
-                <!-- Increase from 32px default to 44px for touch accessibility (WCAG 2.1 Level AAA) -->
-                <x:Double x:Key="TabViewItemHeaderMinHeight">44</x:Double>
-            </TabView.Resources>
+        <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
+                 HorizontalAlignment="Stretch"
+                 VerticalAlignment="Stretch"
+                 HorizontalContentAlignment="Stretch"
+                 VerticalContentAlignment="Stretch">
             <TabView.TabItems>
-                <TabViewItem Header="Scene" IsClosable="False">
-                <Grid>
+                <TabViewItem Header="Scene" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -83,10 +87,13 @@
                                                       RtfText="{x:Bind SceneVm.Description, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Cast" IsClosable="False">
+                <TabViewItem Header="Cast" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
                 <StackPanel HorizontalAlignment="Left">
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
@@ -127,8 +134,10 @@
                     </ScrollViewer>
                 </StackPanel>
                 </TabViewItem>
-                <TabViewItem Header="Development" IsClosable="False">
-                <Grid>
+                <TabViewItem Header="Development" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
@@ -167,30 +176,36 @@
                                                       RtfText="{x:Bind SceneVm.Events, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                                                       PlaceholderText="(Plot/Cause) The way the scene starts to unfold." />
                     <usercontrols:RichEditBoxExtended Header="The Consequence" Grid.Row="2"
                                                       RtfText="{x:Bind SceneVm.Consequences, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                                                       PlaceholderText="(Plot/Effect) The way the scene ends (usually a disaster)." />
                     <usercontrols:RichEditBoxExtended Header="Why It Matters" Grid.Row="3"
                                                       RtfText="{x:Bind SceneVm.Significance, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                                                       PlaceholderText="(Inner Conflict/Cause) Why what happens affects or resonates with your protagonist." />
                     <usercontrols:RichEditBoxExtended Header="The Realization" Grid.Row="4"
                                                       RtfText="{x:Bind SceneVm.Realization, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                                                       PlaceholderText="(Inner Conflict/Effect) How your protagonist changes or what she learns. (Consider Sequel.)" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Conflict" IsClosable="False">
-                <Grid>
+                <TabViewItem Header="Conflict" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -252,8 +267,10 @@
                               HorizontalAlignment="Left" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Sequel" IsClosable="False">
-                <Grid>
+                <TabViewItem Header="Sequel" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
@@ -267,15 +284,18 @@
                                                       RtfText="{x:Bind SceneVm.Review, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                     <ComboBox IsEditable="True" Header="New Goal" Grid.Row="2" MinWidth="400"
                               ItemsSource="{x:Bind SceneVm.GoalList}"
                               Text="{x:Bind SceneVm.NewGoal, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.NewGoal, Mode=TwoWay}" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Notes" IsClosable="False">
-                <Grid>
+                <TabViewItem Header="Notes" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -285,7 +305,8 @@
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
             </TabView.TabItems>

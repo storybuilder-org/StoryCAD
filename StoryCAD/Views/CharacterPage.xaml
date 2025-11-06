@@ -3,7 +3,9 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:usercontrols="using:StoryCADLib.Controls"
-      xmlns:viewModels="using:StoryCADLib.ViewModels">
+      xmlns:viewModels="using:StoryCADLib.ViewModels"
+      ScrollViewer.VerticalScrollBarVisibility="Disabled"
+      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -13,14 +15,16 @@
         <TextBox Header="Name" Text="{x:Bind CharVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  viewModels:TextBoxFocus.IsFocused="{x:Bind CharVm.IsTextBoxFocused, Mode=TwoWay}"
                  Margin="10,10,10,0" HorizontalAlignment="Stretch" />
-        <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
-            <TabView.Resources>
-                <!-- Increase from 32px default to 44px for touch accessibility (WCAG 2.1 Level AAA) -->
-                <x:Double x:Key="TabViewItemHeaderMinHeight">44</x:Double>
-            </TabView.Resources>
+        <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
+                 HorizontalAlignment="Stretch"
+                 VerticalAlignment="Stretch"
+                 HorizontalContentAlignment="Stretch"
+                 VerticalContentAlignment="Stretch">
             <TabView.TabItems>
-                <TabViewItem Header="Role" IsClosable="False">
-                <Grid>
+                <TabViewItem Header="Role" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -40,11 +44,14 @@
                                                       RtfText="{x:Bind CharVm.Description, Mode=TwoWay}"
                                                       AcceptsReturn="True" IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Physical" IsClosable="False">
-                <Grid>
+                <TabViewItem Header="Physical" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -133,12 +140,15 @@
                                                       RtfText="{x:Bind CharVm.PhysNotes, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Appearance" IsClosable="False">
+                <TabViewItem Header="Appearance" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
                 <!-- Character appearance data -->
-                <Grid>
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -148,17 +158,22 @@
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Relationships" IsClosable="False">
-                <Grid>
+                <TabViewItem Header="Relationships" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <usercontrols:RelationshipView />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Flaw" IsClosable="False">
+                <TabViewItem Header="Flaw" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
                 <!-- Character flaw data (heights of RichEditBoxes were "110") -->
-                <Grid>
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -169,13 +184,16 @@
                     <usercontrols:RichEditBoxExtended Grid.Row="2" Margin="0,10,0,0" Header="Flaw"
                                                       RtfText="{x:Bind CharVm.Flaw, Mode=TwoWay}" AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                                                       PlaceholderText="The trauma, fear, lie or secret that sabotages your character." />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Backstory" IsClosable="False">
+                <TabViewItem Header="Backstory" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
                 <!-- Character notes data -->
-                <Grid>
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -185,12 +203,15 @@
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Social" IsClosable="False">
+                <TabViewItem Header="Social" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
                 <!-- Character social data -->
-                <Grid>
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
                         <RowDefinition Height="*" />
@@ -201,27 +222,33 @@
                                                       RtfText="{x:Bind CharVm.Economic, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                     <usercontrols:RichEditBoxExtended Header="Education" Grid.Row="1"
                                                       RtfText="{x:Bind CharVm.Education, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                     <usercontrols:RichEditBoxExtended Header="Ethnic" Grid.Row="2"
                                                       RtfText="{x:Bind CharVm.Ethnic, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                     <usercontrols:RichEditBoxExtended Header="Religion" Grid.Row="3"
                                                       RtfText="{x:Bind CharVm.Religion, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Psychological" IsClosable="False">
+                <TabViewItem Header="Psychological" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
                 <!-- Character psychological data -->
-                <Grid>
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -268,11 +295,14 @@
                                                       RtfText="{x:Bind CharVm.PsychNotes, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Inner Traits" IsClosable="False">
-                <Grid HorizontalAlignment="Stretch">
+                <TabViewItem Header="Inner Traits" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*" />
                         <ColumnDefinition Width="*" />
@@ -339,8 +369,10 @@
                               PlaceholderText="{x:Bind CharVm.Stability, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Outer Traits" IsClosable="False">
-                <Grid>
+                <TabViewItem Header="Outer Traits" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
@@ -378,9 +410,11 @@
                     </Grid>
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Notes" IsClosable="False">
+                <TabViewItem Header="Notes" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
                 <!-- Character likes data -->
-                <Grid>
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -390,7 +424,8 @@
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
             </TabView.TabItems>

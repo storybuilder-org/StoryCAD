@@ -4,7 +4,9 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:usercontrols="using:StoryCADLib.Controls"
       xmlns:viewModels="using:StoryCADLib.ViewModels"
-      xmlns:tools="using:StoryCADLib.ViewModels.Tools">
+      xmlns:tools="using:StoryCADLib.ViewModels.Tools"
+      ScrollViewer.VerticalScrollBarVisibility="Disabled"
+      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -13,14 +15,16 @@
         <TextBox Header="Name" Text="{x:Bind ProblemVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  viewModels:TextBoxFocus.IsFocused="{x:Bind ProblemVm.IsTextBoxFocused, Mode=TwoWay}"
                  Margin="10,10,10,0" />
-        <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
-            <TabView.Resources>
-                <!-- Increase from 32px default to 44px for touch accessibility (WCAG 2.1 Level AAA) -->
-                <x:Double x:Key="TabViewItemHeaderMinHeight">44</x:Double>
-            </TabView.Resources>
+        <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
+                 HorizontalAlignment="Stretch"
+                 VerticalAlignment="Stretch"
+                 HorizontalContentAlignment="Stretch"
+                 VerticalContentAlignment="Stretch">
             <TabView.TabItems>
-                <TabViewItem Header="Problem" IsClosable="False">
-                <Grid>
+                <TabViewItem Header="Problem" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -56,15 +60,18 @@
                                                       RtfText="{x:Bind ProblemVm.Description, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                     <ComboBox IsEditable="True" Header="Problem Source" Grid.Row="4" MinWidth="300"
                               ItemsSource="{x:Bind ProblemVm.ProblemSourceList}"
                               Text="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Protagonist" IsClosable="False">
-                <Grid>
+                <TabViewItem Header="Protagonist" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -90,11 +97,14 @@
                                                       RtfText="{x:Bind ProblemVm.ProtConflict, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Antagonist" IsClosable="False">
-                <Grid>
+                <TabViewItem Header="Antagonist" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -121,11 +131,14 @@
                                                       RtfText="{x:Bind ProblemVm.AntagConflict, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Resolution" IsClosable="False">
-                <Grid>
+                <TabViewItem Header="Resolution" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -148,12 +161,15 @@
                                                       RtfText="{x:Bind ProblemVm.Premise, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                                                       PlaceholderText="A [character] in a situation [genre, setting] wants something [goal], which brings him into [conflict] with a second character [opposition]. After [a series of conflicts], the [final battle] erupts, and [the protagonist] finally [resolves] the conflict. " />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Structure" IsClosable="False">
-                <Grid>
+                <TabViewItem Header="Structure" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
@@ -201,19 +217,23 @@
                                     <Flyout>
                                         <StackPanel>
 
-                                            <TabView TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
-                                                <TabView.Resources>
-                                                    <!-- Increase from 32px default to 44px for touch accessibility (WCAG 2.1 Level AAA) -->
-                                                    <x:Double x:Key="TabViewItemHeaderMinHeight">44</x:Double>
-                                                </TabView.Resources>
+                                            <TabView TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
+                                                     HorizontalAlignment="Stretch"
+                                                     VerticalAlignment="Stretch"
+                                                     HorizontalContentAlignment="Stretch"
+                                                     VerticalContentAlignment="Stretch">
                                                 <TabView.TabItems>
-                                                    <TabViewItem Header="Scenes" IsClosable="False">
+                                                    <TabViewItem Header="Scenes" IsClosable="False"
+                                                                 HorizontalContentAlignment="Stretch"
+                                                                 VerticalContentAlignment="Stretch">
                                                     <ListView ItemsSource="{x:Bind ProblemVm.Scenes, Mode=TwoWay}"
                                                               IsItemClickEnabled="True"
                                                               ItemClick="{x:Bind ProblemVm.AssignBeat}"
                                                               DisplayMemberPath="Name" />
                                                     </TabViewItem>
-                                                    <TabViewItem Header="Problems" IsClosable="False">
+                                                    <TabViewItem Header="Problems" IsClosable="False"
+                                                                 HorizontalContentAlignment="Stretch"
+                                                                 VerticalContentAlignment="Stretch">
                                                     <ListView ItemsSource="{x:Bind ProblemVm.Problems, Mode=TwoWay}"
                                                               IsItemClickEnabled="True"
                                                               ItemClick="{x:Bind ProblemVm.AssignBeat}"
@@ -309,8 +329,10 @@
                     </ScrollViewer>
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Notes" IsClosable="False">
-                <Grid>
+                <TabViewItem Header="Notes" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -320,7 +342,8 @@
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
             </TabView.TabItems>

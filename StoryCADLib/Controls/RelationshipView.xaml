@@ -68,7 +68,8 @@
                                                                   RtfText="{x:Bind Notes, Mode=TwoWay}"
                                                                   AcceptsReturn="True" IsSpellCheckEnabled="True"
                                                                   TextWrapping="Wrap"
-                                                                  ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                                                  VerticalAlignment="Stretch"
+                                                                  ScrollViewer.VerticalScrollBarVisibility="Auto" />
                             </Grid>
                         </Expander>
                     </DataTemplate>

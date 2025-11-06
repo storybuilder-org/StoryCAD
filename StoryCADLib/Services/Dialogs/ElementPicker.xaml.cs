@@ -1,4 +1,6 @@
-﻿namespace StoryCADLib.Services.Dialogs;
+using static Uno.WinRTFeatureConfiguration.Storage;
+
+namespace StoryCADLib.Services.Dialogs;
 
 /// <summary>
 ///     A simple picker allowing a user to pick the
@@ -6,7 +8,7 @@
 /// </summary>
 public sealed partial class ElementPicker : Page
 {
-    private ElementPickerVM PickerVM = Ioc.Default.GetRequiredService<ElementPickerVM>();
+    public ElementPickerVM PickerVM;
 
     /// <summary>
     ///     Don't spawn this on its own, use ElementPickerVM.ShowPicker()
@@ -14,7 +16,8 @@ public sealed partial class ElementPicker : Page
     public ElementPicker()
     {
         InitializeComponent();
-
+        
+        PickerVM = Ioc.Default.GetRequiredService<ElementPickerVM>();
         if (PickerVM.ForcedType != null)
         {
             TypeBox.Visibility = Visibility.Collapsed;
@@ -26,7 +29,7 @@ public sealed partial class ElementPicker : Page
     /// <summary>
     ///     This just handles the UI when the type Combobox is changed
     /// </summary>
-    private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    public void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         StoryItemType type;
         if (PickerVM.ForcedType == null)
