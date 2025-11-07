@@ -432,7 +432,7 @@ public partial class Windowing : ObservableRecipient
     /// <summary>
     /// Sets the window size with proper DPI scaling across platforms
     /// </summary>
-    /// <param name="window">The window to resize</param>
+    /// <param name="window">The Window to resize</param>
     /// <param name="desiredWidthDip">Desired width in device independent pixels</param>
     /// <param name="desiredHeightDip">Desired height in device independent pixels</param>
     public void SetWindowSize(Window window, double desiredWidthDip, double desiredHeightDip)
@@ -440,7 +440,7 @@ public partial class Windowing : ObservableRecipient
         if (window == null) return;
 
         // Try to get scale factor, with fallbacks
-        double scaleFactor = TryGetScaleFactor();
+        double scaleFactor = TryGetScaleFactor(window);
 
         int targetWidth = (int)(desiredWidthDip * scaleFactor);
         int targetHeight = (int)(desiredHeightDip * scaleFactor);
@@ -452,11 +452,11 @@ public partial class Windowing : ObservableRecipient
         });
     }
 
-    private double TryGetScaleFactor()
+    private double TryGetScaleFactor(Window window)
     {
 #if HAS_UNO_WINUI
         // WinAppSDK (net9.0-windows10.0.22621) - use P/Invoke
-        var dpi = GetDpiForWindow(new IntPtr((long)MainWindow.AppWindow.Id.Value));
+        var dpi = GetDpiForWindow(new IntPtr((long)window.AppWindow.Id.Value));
         return dpi / 96.0;
 #else
         // Uno Skia (net9.0-desktop on Windows/macOS/Linux) - try DisplayInformation
