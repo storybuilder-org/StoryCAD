@@ -437,13 +437,22 @@ public partial class Windowing : ObservableRecipient
     /// <param name="desiredHeightDip">Desired height in device independent pixels</param>
     public void SetWindowSize(Window window, double desiredWidthDip, double desiredHeightDip)
     {
-        if (window == null) return;
+        ILogService logger = _logService;
+
+        if (window == null)
+        {
+            logger.Log(LogLevel.Warn, "SetWindowSize called with null window");
+            return;
+        }
 
         // Try to get scale factor, with fallbacks
         double scaleFactor = TryGetScaleFactor(window);
 
         int targetWidth = (int)(desiredWidthDip * scaleFactor);
         int targetHeight = (int)(desiredHeightDip * scaleFactor);
+
+        logger.Log(LogLevel.Info,
+            $"Setting window size: {desiredWidthDip}x{desiredHeightDip} DIP → {targetWidth}x{targetHeight} pixels (scale: {scaleFactor:F2})");
 
         window.AppWindow.Resize(new Windows.Graphics.SizeInt32
         {
@@ -454,25 +463,37 @@ public partial class Windowing : ObservableRecipient
 
     private double TryGetScaleFactor(Window window)
     {
+        ILogService logger = _logService;
+
 #if HAS_UNO_WINUI
         // WinAppSDK (net9.0-windows10.0.22621) - use P/Invoke
         var dpi = GetDpiForWindow(new IntPtr((long)window.AppWindow.Id.Value));
-        return dpi / 96.0;
+        double scaleFactor = dpi / 96.0;
+        logger.Log(LogLevel.Trace, $"Scale factor from WinAppSDK P/Invoke: {scaleFactor:F2} (DPI: {dpi})");
+        return scaleFactor;
 #else
-        // Uno Skia (net9.0-desktop on Windows/macOS/Linux) - try DisplayInformation
+        // Uno Skia (net9.0-desktop on Windows/macOS) - try DisplayInformation
         try
         {
             var displayInfo = Windows.Graphics.Display.DisplayInformation.GetForCurrentView();
-            return displayInfo.RawPixelsPerViewPixel;
+            double scaleFactor = displayInfo.RawPixelsPerViewPixel;
+            logger.Log(LogLevel.Trace, $"Scale factor from DisplayInformation: {scaleFactor:F2}");
+            return scaleFactor;
         }
-        catch
+        catch (Exception ex)
         {
-            // Fallback to checking environment variable for Linux
+            logger.Log(LogLevel.Warn, $"Failed to get DisplayInformation: {ex.Message}");
+
+            // Fallback to checking environment variable
             var envScale = Environment.GetEnvironmentVariable("UNO_DISPLAY_SCALE_OVERRIDE");
             if (double.TryParse(envScale, out double scale))
+            {
+                logger.Log(LogLevel.Info, $"Using UNO_DISPLAY_SCALE_OVERRIDE: {scale:F2}");
                 return scale;
+            }
 
             // Final fallback
+            logger.Log(LogLevel.Info, "Using default scale factor: 1.0");
             return 1.0;
         }
 #endif
