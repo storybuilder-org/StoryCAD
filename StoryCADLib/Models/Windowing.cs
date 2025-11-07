@@ -1,19 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using StoryCADLib.Exceptions;
-using StoryCADLib.Services.Logging;
 using StoryCADLib.ViewModels.SubViewModels;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.UI;
 using Windows.UI.ViewManagement;
@@ -28,7 +18,7 @@ namespace StoryCADLib.Models;
 /// <summary>
 /// This class contains window (MainWindow) related items etc.
 /// </summary>
-public partial class Windowing : ObservableRecipient
+public class Windowing : ObservableRecipient
 {
     private readonly AppState _appState;
     private readonly ILogService _logService;
@@ -63,10 +53,10 @@ public partial class Windowing : ObservableRecipient
     public Window MainWindow;
 
     /// <summary>
-    // A defect in early WinUI 3 Win32 code is that ContentDialog
-    // controls don't have an established XamlRoot. A workaround
-    // is to assign the dialog's XamlRoot to the root of a visible
-    // Page. The Shell page's XamlRoot is stored here and accessed wherever needed.
+    /// A defect in early WinUI 3 Win32 code is that ContentDialog
+    /// controls don't have an established XamlRoot. A workaround
+    /// is to assign the dialog's XamlRoot to the root of a visible
+    /// Page. The Shell page's XamlRoot is stored here and accessed wherever needed.
     /// </summary>
     public XamlRoot XamlRoot;
 
@@ -465,13 +455,13 @@ public partial class Windowing : ObservableRecipient
     {
         ILogService logger = _logService;
 
-#if HAS_UNO_WINUI
+#if WINDOWS && !HAS_UNO
         // WinAppSDK (net9.0-windows10.0.22621) - use P/Invoke
         var dpi = GetDpiForWindow(new IntPtr((long)window.AppWindow.Id.Value));
         double scaleFactor = dpi / 96.0;
         logger.Log(LogLevel.Trace, $"Scale factor from WinAppSDK P/Invoke: {scaleFactor:F2} (DPI: {dpi})");
         return scaleFactor;
-#else
+#elif HAS_UNO
         // Uno Skia (net9.0-desktop on Windows/macOS) - try DisplayInformation
         try
         {
@@ -499,7 +489,7 @@ public partial class Windowing : ObservableRecipient
 #endif
     }
 
-#if HAS_UNO_WINUI
+#if WINDOWS && !HAS_UNO
     [DllImport("user32.dll")]
     private static extern uint GetDpiForWindow(IntPtr hwnd);
 #endif

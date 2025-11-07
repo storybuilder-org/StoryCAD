@@ -91,13 +91,13 @@ namespace StoryCADTests.Services
             // This test verifies that the correct DPI handling approach exists for each platform
             // We can't test actual DPI values without a real window, but we can verify the infrastructure
 
-#if HAS_UNO_WINUI
+#if WINDOWS && !HAS_UNO
             // On WinAppSDK, verify GetDpiForWindow P/Invoke exists
             var methodInfo = typeof(Windowing).GetMethod("GetDpiForWindow",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
             Assert.IsNotNull(methodInfo,
                 "WinAppSDK build should have GetDpiForWindow P/Invoke for DPI scaling");
-#else
+#elif HAS_UNO
             // On Uno Skia builds (Windows desktop or macOS desktop)
             // Verify TryGetScaleFactor exists and accepts Window parameter
             var methodInfo = typeof(Windowing).GetMethod("TryGetScaleFactor",
