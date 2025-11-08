@@ -253,7 +253,7 @@ public partial class App : Application
         window.WindowHandle = hwnd;
 
 // Now Win32 centering works on a valid HWND
-        //window.CenterOnScreen(MainWindow);
+        window.CenterOnScreen(MainWindow);
 
         _log.Log(LogLevel.Info, "StoryCAD App loaded and launched");
 

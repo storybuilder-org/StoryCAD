@@ -492,7 +492,213 @@ public class Windowing : ObservableRecipient
 #if WINDOWS && !HAS_UNO
     [DllImport("user32.dll")]
     private static extern uint GetDpiForWindow(IntPtr hwnd);
+
+    // P/Invoke declarations for CenterOnScreen
+    [DllImport("user32.dll")]
+    private static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
+
+    [DllImport("user32.dll")]
+    private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+
+    [DllImport("user32.dll")]
+    private static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+    [DllImport("user32.dll")]
+    private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, out RECT pvParam, uint fWinIni);
+
+    [DllImport("user32.dll")]
+    private static extern int GetSystemMetrics(int nIndex);
+
+    // Structures for Win32 API
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MONITORINFO
+    {
+        public int cbSize;
+        public RECT rcMonitor;
+        public RECT rcWork;
+        public uint dwFlags;
+    }
+
+    // Constants for Win32 API
+    private const uint MONITOR_DEFAULTTONEAREST = 2;
+    private const uint SWP_NOSIZE = 0x0001;
+    private const uint SWP_NOZORDER = 0x0004;
+    private const uint SWP_SHOWWINDOW = 0x0040;
+    private const uint SPI_GETWORKAREA = 0x0030;
+    private const int SM_CXSCREEN = 0;
+    private const int SM_CYSCREEN = 1;
 #endif
+
+    // Helper methods for CenterOnScreen
+    private static bool TryWmhCall(Window window, string methodName)
+    {
+#if HAS_UNO
+        try
+        {
+            // Try to use Uno's WindowManagerHelper if available
+            var wmhType = Type.GetType("Uno.UI.Xaml.WindowManagerHelper, Uno.UI");
+            if (wmhType != null)
+            {
+                var instanceProp = wmhType.GetProperty("Instance");
+                if (instanceProp != null)
+                {
+                    var helper = instanceProp.GetValue(null);
+                    if (helper != null)
+                    {
+                        var method = helper.GetType().GetMethod(methodName);
+                        if (method != null)
+                        {
+                            method.Invoke(helper, new object[] { window });
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        catch { }
+#endif
+        return false;
+    }
+
+    private static bool IsValidWin32Handle(IntPtr handle)
+    {
+        return handle != IntPtr.Zero && handle != new IntPtr(-1);
+    }
+
+    private static Microsoft.UI.Windowing.AppWindow GetAppWindow(Window window)
+    {
+        return window?.AppWindow;
+    }
+
+    public void CenterOnScreen(Window window)
+    {
+        ILogService logger = _logService;
+
+        if (window == null)
+        {
+            logger.Log(LogLevel.Warn, "CenterOnScreen called with null window");
+            return;
+        }
+
+        logger.Log(LogLevel.Info, "Attempting to center window on screen");
+
+        // 1) Uno helper (cross-platform) if present
+        if (TryWmhCall(window, "Center"))
+        {
+            logger.Log(LogLevel.Info, "Window centered using Uno WindowManagerHelper");
+            return;
+        }
+
+#if WINDOWS && !HAS_UNO
+        // 2) WinAppSDK: center using monitor work area via Win32 P/Invoke
+        if (IsValidWin32Handle(WindowHandle))
+        {
+            try
+            {
+                var hMon = MonitorFromWindow(WindowHandle, MONITOR_DEFAULTTONEAREST);
+                MONITORINFO mi = new() { cbSize = Marshal.SizeOf<MONITORINFO>() };
+                if (hMon != IntPtr.Zero && GetMonitorInfo(hMon, ref mi) && GetWindowRect(WindowHandle, out var rect))
+                {
+                    int winW = rect.Right - rect.Left;
+                    int winH = rect.Bottom - rect.Top;
+                    int workW = mi.rcWork.Right - mi.rcWork.Left;
+                    int workH = mi.rcWork.Bottom - mi.rcWork.Top;
+
+                    int x = mi.rcWork.Left + (workW - winW) / 2;
+                    int y = mi.rcWork.Top + (workH - winH) / 2;
+
+                    logger.Log(LogLevel.Trace, $"Centering window: size={winW}x{winH}, work area={workW}x{workH}, position={x},{y}");
+
+                    SetWindowPos(WindowHandle, IntPtr.Zero, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+                    logger.Log(LogLevel.Info, "Window centered using Win32 API");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Log(LogLevel.Warn, $"Win32 centering failed: {ex.Message}");
+            }
+        }
+
+        // 3) WinAppSDK fallback: compute work area via SPI, move via AppWindow
+        try
+        {
+            RECT work;
+            if (!SystemParametersInfo(SPI_GETWORKAREA, 0, out work, 0))
+            {
+                work = new RECT
+                {
+                    Left = 0,
+                    Top = 0,
+                    Right = GetSystemMetrics(SM_CXSCREEN),
+                    Bottom = GetSystemMetrics(SM_CYSCREEN)
+                };
+                logger.Log(LogLevel.Trace, "Using screen dimensions as fallback work area");
+            }
+
+            var appWin = GetAppWindow(window);
+            if (appWin != null)
+            {
+                var size = appWin.Size;
+
+                int workW = work.Right - work.Left;
+                int workH = work.Bottom - work.Top;
+
+                int newX = work.Left + (workW - size.Width) / 2;
+                int newY = work.Top + (workH - size.Height) / 2;
+
+                appWin.Move(new Windows.Graphics.PointInt32 { X = newX, Y = newY });
+                logger.Log(LogLevel.Info, $"Window centered using AppWindow: position={newX},{newY}");
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.Log(LogLevel.Warn, $"AppWindow centering failed: {ex.Message}");
+        }
+#endif
+
+#if HAS_UNO
+        // 4) Uno platforms (Skia desktop): best-effort center
+        try
+        {
+            var appWin = GetAppWindow(window);
+            if (appWin != null)
+            {
+                var size = appWin.Size;
+
+                // Try to get screen dimensions
+                int screenWidth = 1920;  // Default fallback
+                int screenHeight = 1080; // Default fallback
+
+                // TODO: Try to get actual screen dimensions on Uno platforms
+                // For now, use reasonable defaults
+
+                int newX = Math.Max(0, (screenWidth - size.Width) / 2);
+                int newY = Math.Max(0, (screenHeight - size.Height) / 2);
+
+                appWin.Move(new Windows.Graphics.PointInt32 { X = newX, Y = newY });
+                logger.Log(LogLevel.Info, $"Window centered on Uno platform: position={newX},{newY} (using default screen size)");
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.Log(LogLevel.Warn, $"Uno platform centering failed: {ex.Message}");
+        }
+#endif
+    }
 
     #region Com stuff for File/Folder pickers
     [ComImport]
