@@ -651,16 +651,22 @@ public class Windowing : ObservableRecipient
             var appWin = GetAppWindow(window);
             if (appWin != null)
             {
-                var size = appWin.Size;
+                var size = appWin.Size;  // Physical pixels (SizeInt32)
 
-                int workW = work.Right - work.Left;
-                int workH = work.Bottom - work.Top;
+                // All values are in physical pixels - no conversion needed
+                int winWidth = size.Width;   // Physical pixels
+                int winHeight = size.Height; // Physical pixels
 
-                int newX = work.Left + (workW - size.Width) / 2;
-                int newY = work.Top + (workH - size.Height) / 2;
+                int workW = work.Right - work.Left;  // Physical pixels
+                int workH = work.Bottom - work.Top;  // Physical pixels
 
+                int newX = work.Left + (workW - winWidth) / 2;
+                int newY = work.Top + (workH - winHeight) / 2;
+
+                // AppWindow.Move expects physical pixels
                 appWin.Move(new Windows.Graphics.PointInt32 { X = newX, Y = newY });
-                logger.Log(LogLevel.Info, $"Window centered using AppWindow: position={newX},{newY}");
+                logger.Log(LogLevel.Info,
+                    $"Window centered using AppWindow: size={winWidth}x{winHeight}px work={workW}x{workH}px position={newX},{newY}px");
                 return;
             }
         }
@@ -671,33 +677,40 @@ public class Windowing : ObservableRecipient
 #endif
 
 #if HAS_UNO
-        // 4) Uno platforms (Skia desktop): best-effort center
         try
         {
             var appWin = GetAppWindow(window);
             if (appWin != null)
             {
-                var size = appWin.Size;
+                // Get screen size in physical pixels (no DisplayArea API on UNO)
+                var di = Windows.Graphics.Display.DisplayInformation.GetForCurrentView();
+                var scale = di.RawPixelsPerViewPixel; // e.g., 1.5 for 150%
+                int screenWpx = (int)di.ScreenWidthInRawPixels;   // Physical pixels
+                int screenHpx = (int)di.ScreenHeightInRawPixels;  // Physical pixels
 
-                // Try to get screen dimensions
-                int screenWidth = 1920;  // Default fallback
-                int screenHeight = 1080; // Default fallback
+                // AppWindow.Size is in physical pixels on Uno/Skia (same as WinAppSDK)
+                int w = appWin.Size.Width;   // Physical pixels
+                int h = appWin.Size.Height;  // Physical pixels
 
-                // TODO: Try to get actual screen dimensions on Uno platforms
-                // For now, use reasonable defaults
+                // Center in physical pixels relative to (0,0)
+                int x = Math.Max(0, (screenWpx - w) / 2);
+                int y = Math.Max(0, (screenHpx - h) / 2);
 
-                int newX = Math.Max(0, (screenWidth - size.Width) / 2);
-                int newY = Math.Max(0, (screenHeight - size.Height) / 2);
+                appWin.Move(new Windows.Graphics.PointInt32 { X = x, Y = y });
 
-                appWin.Move(new Windows.Graphics.PointInt32 { X = newX, Y = newY });
-                logger.Log(LogLevel.Info, $"Window centered on Uno platform: position={newX},{newY} (using default screen size)");
+                logger.Log(LogLevel.Info,
+                    $"Window centered (Uno): pos={x},{y}px size={w}×{h}px screen={screenWpx}×{screenHpx}px (scale={scale:F2})");
+                return;
             }
         }
         catch (Exception ex)
         {
-            logger.Log(LogLevel.Warn, $"Uno platform centering failed: {ex.Message}");
+            logger.Log(LogLevel.Warn, $"Uno centering fallback failed: {ex.Message}");
         }
 #endif
+
+
+
     }
 
     #region Com stuff for File/Folder pickers
