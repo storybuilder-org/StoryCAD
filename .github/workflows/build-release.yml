@@ -2,13 +2,13 @@ name: Build & Release
 
 on:
   push:
-    branches: [main]
+    branches: [UNOTestBranch]
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
       - '**/*.{png,jpg,jpeg,svg,gif}'
   pull_request:
-    branches: [main]
+    branches: [UNOTestBranch]
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
@@ -19,11 +19,6 @@ on:
         description: 'Tag / version (e.g. v4.0.0)'
         required: true
         type: string
-      skip_release:
-        description: 'Skip creating a release (build only)'
-        required: false
-        type: boolean
-        default: false
 
 permissions:
   contents: write
@@ -257,7 +252,7 @@ jobs:
 
   release:
     needs: build
-    if: github.event_name == 'workflow_dispatch' && !inputs.skip_release
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
