@@ -420,12 +420,12 @@ public class Windowing : ObservableRecipient
     }
 
     /// <summary>
-    /// Sets the window size with proper DPI scaling across platforms
+    /// Sets the window size in physical pixels (consistent across all platforms regardless of DPI)
     /// </summary>
     /// <param name="window">The Window to resize</param>
-    /// <param name="desiredWidthDip">Desired width in device independent pixels</param>
-    /// <param name="desiredHeightDip">Desired height in device independent pixels</param>
-    public void SetWindowSize(Window window, double desiredWidthDip, double desiredHeightDip)
+    /// <param name="desiredWidthPx">Desired width in physical pixels</param>
+    /// <param name="desiredHeightPx">Desired height in physical pixels</param>
+    public void SetWindowSize(Window window, double desiredWidthPx, double desiredHeightPx)
     {
         ILogService logger = _logService;
 
@@ -435,14 +435,13 @@ public class Windowing : ObservableRecipient
             return;
         }
 
-        // Try to get scale factor, with fallbacks
-        double scaleFactor = TryGetScaleFactor(window);
-
-        int targetWidth = (int)(desiredWidthDip * scaleFactor);
-        int targetHeight = (int)(desiredHeightDip * scaleFactor);
+        // Parameters are physical pixels - pass directly to AppWindow.Resize
+        // This ensures consistent window size across all platforms regardless of DPI scaling
+        int targetWidth = (int)desiredWidthPx;
+        int targetHeight = (int)desiredHeightPx;
 
         logger.Log(LogLevel.Info,
-            $"Setting window size: {desiredWidthDip}x{desiredHeightDip} DIP → {targetWidth}x{targetHeight} pixels (scale: {scaleFactor:F2})");
+            $"Setting window size: {targetWidth}x{targetHeight} physical pixels");
 
         window.AppWindow.Resize(new Windows.Graphics.SizeInt32
         {
