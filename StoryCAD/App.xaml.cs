@@ -241,7 +241,7 @@ public partial class App : Application
 
 // Size first via AppWindow (safe before HWND exists)
         //window.SetMinimumSize(MainWindow);                // Prevent manual resize below minimum
-       window.SetWindowSize(MainWindow, 1200, 800);      // Initial size via AppWindow with DPI scaling
+       window.SetWindowSize(MainWindow, 1800, 1200);     // Initial size in physical pixels (consistent across platforms)
        //MainWindow.AppWindow.Resize(new Windows.Graphics.SizeInt32 { Width = 1200, Height = 800 } );
 // Realize the native window so a real HWND is created by Uno
         MainWindow.Activate();
