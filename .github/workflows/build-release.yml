@@ -42,6 +42,7 @@ jobs:
       DOTNET_NOLOGO: true
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
       DOTNET_RESTORE_LOCKED_MODE: false
+      DOTNET_MULTILEVEL_LOOKUP: 0
     strategy:
       fail-fast: false
       matrix:
@@ -80,11 +81,14 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '9.0.307'
           cache: true
           cache-dependency-path: |
             **/*.csproj
             **/packages.lock.json
+
+      - name: Verify dotnet
+        run: dotnet --info
 
       - name: Install Uno macOS workload
         if: matrix.os == 'macos-latest'
@@ -106,6 +110,11 @@ jobs:
 
       - name: Restore
         run: dotnet restore StoryCAD.sln
+
+      # Windows: set up MSBuild before any build/test so task hosts resolve consistently
+      - name: Setup MSBuild
+        if: matrix.os == 'windows-latest'
+        uses: microsoft/setup-msbuild@v2
 
       - name: Update Package.appxmanifest version (Windows)
         if: matrix.os == 'windows-latest'
@@ -135,9 +144,14 @@ jobs:
             [IO.File]::WriteAllText("${{ github.workspace }}\StoryCADTests\.env", "${{ secrets.ENV }}")
           }
 
-      - name: Run tests (Windows x64)
+      # Windows tests: run each TFM explicitly on x64 only
+      - name: Test net9.0-desktop (Windows x64)
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
-        run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:Platform=${{ matrix.platform }}
+        run: dotnet test StoryCADTests/StoryCADTests.csproj -c Release --no-restore -p:Platform=${{ matrix.platform }} -f net9.0-desktop
+
+      - name: Test WinAppSDK TFM (Windows x64)
+        if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
+        run: dotnet test StoryCADTests/StoryCADTests.csproj -c Release --no-restore -p:Platform=${{ matrix.platform }} -f ${{ matrix.fw }}
 
       - name: Write .env (macOS)
         if: matrix.os == 'macos-latest'
@@ -151,14 +165,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore
 
-
-
-      # 10 ─ Setup MSBuild (Windows only)
-      - name: Setup MSBuild
-        if: matrix.os == 'windows-latest'
-        uses: microsoft/setup-msbuild@v2
-
-      # 11 ─ Build MSIX package (Windows only)
+      # Build + package
       - name: Create MSIX package
         if: matrix.os == 'windows-latest'
         shell: pwsh
@@ -188,12 +195,14 @@ jobs:
         run: |
           Remove-Item "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx" -Force -ErrorAction SilentlyContinue
           Remove-Item "${{ github.workspace }}\StoryCAD\.env","${{ github.workspace }}\StoryCADTests\.env" -Force -ErrorAction SilentlyContinue
+
       - name: Remove .env (macOS)
         if: matrix.os == 'macos-latest'
         continue-on-error: true
         run: |
           rm -f "${{ github.workspace }}/StoryCAD/.env"
           rm -f "${{ github.workspace }}/StoryCADTests/.env"
+
       - name: Clean publish dir (macOS)
         if: matrix.os == 'macos-latest'
         run: rm -rf publish
