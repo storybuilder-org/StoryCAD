@@ -111,11 +111,6 @@ jobs:
       - name: Restore
         run: dotnet restore StoryCAD.sln
 
-      # Windows: set up MSBuild before any build/test so task hosts resolve consistently
-      - name: Setup MSBuild
-        if: matrix.os == 'windows-latest'
-        uses: microsoft/setup-msbuild@v2
-
       - name: Update Package.appxmanifest version (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
@@ -144,7 +139,7 @@ jobs:
             [IO.File]::WriteAllText("${{ github.workspace }}\StoryCADTests\.env", "${{ secrets.ENV }}")
           }
 
-      # Windows tests: run each TFM explicitly on x64 only
+      # Windows tests: run both TFMs explicitly on x64
       - name: Test net9.0-desktop (Windows x64)
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
         run: dotnet test StoryCADTests/StoryCADTests.csproj -c Release --no-restore -p:Platform=${{ matrix.platform }} -f net9.0-desktop
@@ -165,7 +160,13 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore
 
-      # Build + package
+      # Setup MSBuild only after tests; ensure x64 host
+      - name: Setup MSBuild
+        if: matrix.os == 'windows-latest'
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-architecture: x64
+
       - name: Create MSIX package
         if: matrix.os == 'windows-latest'
         shell: pwsh
