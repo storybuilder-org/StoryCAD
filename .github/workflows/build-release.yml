@@ -168,11 +168,11 @@ jobs:
       # Tests
       - name: Test net9.0-desktop (Windows x64)
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
-        run: dotnet test StoryCADTests/StoryCADTests.csproj -c Release --no-restore -p:Platform=${{ matrix.platform }} -f net9.0-desktop
+        run: dotnet test StoryCADTests/StoryCADTests.csproj -c Release -p:Platform=${{ matrix.platform }} -f net9.0-desktop
 
       - name: Test WinAppSDK TFM (Windows x64)
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
-        run: dotnet test StoryCADTests/StoryCADTests.csproj -c Release --no-restore -p:Platform=${{ matrix.platform }} -f ${{ matrix.fw }}
+        run: dotnet test StoryCADTests/StoryCADTests.csproj -c Release -p:Platform=${{ matrix.platform }} -f ${{ matrix.fw }}
 
       - name: Write .env (macOS)
         if: matrix.os == 'macos-latest'
@@ -184,7 +184,7 @@ jobs:
 
       - name: Run all tests (macOS)
         if: matrix.os == 'macos-latest'
-        run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore
+        run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release
 
       # Build + Package
       - name: Setup MSBuild (x64)
