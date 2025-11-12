@@ -24,6 +24,11 @@ on:
         required: false
         type: boolean
         default: false
+      purge_uno:
+        description: 'One-time purge Uno packages cache (true/false)'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -43,6 +48,7 @@ jobs:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
       DOTNET_RESTORE_LOCKED_MODE: false
       DOTNET_MULTILEVEL_LOOKUP: 0
+
     strategy:
       fail-fast: false
       matrix:
@@ -78,14 +84,16 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Setup .NET
+      - name: Setup .NET (SDK + deterministic NuGet cache)
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.307'
           cache: true
           cache-dependency-path: |
-            **/*.csproj
+            global.json
+            Directory.Packages.props
             **/packages.lock.json
+            **/*.csproj
 
       - name: Verify dotnet
         run: dotnet --info
@@ -94,198 +102,4 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: dotnet workload install macos
 
-      - name: Generate version
-        id: version
-        shell: pwsh
-        run: |
-          if ("${{ github.event.inputs.version }}" -ne "") {
-            $parts = "${{ github.event.inputs.version }}".TrimStart('v').Split('.')
-            $v = "$($parts[0]).$($parts[1]).${{ github.run_number }}.65534"
-          } else {
-            $v = "1.0.${{ github.run_number }}.65534"
-          }
-          "version=$v"       >> $env:GITHUB_OUTPUT
-          "tag_version=v$v"  >> $env:GITHUB_OUTPUT
-          Write-Host "Generated version: $v"
-
-      - name: Restore
-        run: dotnet restore StoryCAD.sln
-
-      - name: Update Package.appxmanifest version (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        run: |
-          $manifestPath = Join-Path "${{ github.workspace }}" "StoryCAD\Package.appxmanifest"
-          [xml]$xml = Get-Content $manifestPath
-          $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
-          $ns.AddNamespace('ns', $xml.DocumentElement.NamespaceURI)
-          $identity = $xml.SelectSingleNode('/ns:Package/ns:Identity', $ns)
-          $identity.SetAttribute('Version', '${{ steps.version.outputs.version }}')
-          $xml.Save($manifestPath)
-          Write-Host "Updated manifest version to ${{ steps.version.outputs.version }}"
-
-      - name: Decode real PFX and write .env (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        run: |
-          if ("${{ secrets.BASE64_ENCODED_PFX }}".Length -eq 0) {
-            throw "Real PFX not available. Forked PRs cannot access secrets."
-          }
-          $bytes = [Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
-          $pfxPath = "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx"
-          [IO.File]::WriteAllBytes($pfxPath, $bytes)
-          if ("${{ secrets.ENV }}".Length -gt 0) {
-            [IO.File]::WriteAllText("${{ github.workspace }}\StoryCAD\.env", "${{ secrets.ENV }}")
-            [IO.File]::WriteAllText("${{ github.workspace }}\StoryCADTests\.env", "${{ secrets.ENV }}")
-          }
-
-      # Windows tests: run both TFMs explicitly on x64
-      - name: Test net9.0-desktop (Windows x64)
-        if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
-        run: dotnet test StoryCADTests/StoryCADTests.csproj -c Release --no-restore -p:Platform=${{ matrix.platform }} -f net9.0-desktop
-
-      - name: Test WinAppSDK TFM (Windows x64)
-        if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
-        run: dotnet test StoryCADTests/StoryCADTests.csproj -c Release --no-restore -p:Platform=${{ matrix.platform }} -f ${{ matrix.fw }}
-
-      - name: Write .env (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          if [ -n "${{ secrets.ENV }}" ]; then
-            echo "${{ secrets.ENV }}" > "${{ github.workspace }}/StoryCAD/.env"
-            echo "${{ secrets.ENV }}" > "${{ github.workspace }}/StoryCADTests/.env"
-          fi
-
-      - name: Run all tests (macOS)
-        if: matrix.os == 'macos-latest'
-        run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore
-
-      # Setup MSBuild only after tests; ensure x64 host
-      - name: Setup MSBuild
-        if: matrix.os == 'windows-latest'
-        uses: microsoft/setup-msbuild@v2
-        with:
-          msbuild-architecture: x64
-
-      - name: Create MSIX package
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        run: |
-          $pfx = "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx"
-          if (-not (Test-Path $pfx)) { throw "PFX missing. Cannot sign MSIX." }
-          $msbuildArgs = @(
-            'StoryCAD.sln',
-            '/m',
-            '/p:Configuration=Release',
-            '/p:Platform=${{ matrix.platform }}',
-            '/p:UapAppxPackageBuildMode=SideloadOnly',
-            '/p:AppxBundle=Never',
-            "/p:PackageCertificateKeyFile=$pfx",
-            "/p:AppxPackageDir=${{ github.workspace }}\StoryCAD\Packages\",
-            '/p:GenerateAppxPackageOnBuild=true'
-          )
-          if ("${{ secrets.PFX_PASSWORD }}".Length -gt 0) {
-            $msbuildArgs += "/p:PackageCertificatePassword=${{ secrets.PFX_PASSWORD }}"
-          }
-          & msbuild @msbuildArgs
-
-      - name: Remove PFX and .env (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        continue-on-error: true
-        run: |
-          Remove-Item "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx" -Force -ErrorAction SilentlyContinue
-          Remove-Item "${{ github.workspace }}\StoryCAD\.env","${{ github.workspace }}\StoryCADTests\.env" -Force -ErrorAction SilentlyContinue
-
-      - name: Remove .env (macOS)
-        if: matrix.os == 'macos-latest'
-        continue-on-error: true
-        run: |
-          rm -f "${{ github.workspace }}/StoryCAD/.env"
-          rm -f "${{ github.workspace }}/StoryCADTests/.env"
-
-      - name: Clean publish dir (macOS)
-        if: matrix.os == 'macos-latest'
-        run: rm -rf publish
-
-      - name: Publish (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          dotnet publish StoryCAD/StoryCAD.csproj \
-            -c Release -f ${{ matrix.fw }} -r ${{ matrix.rid }} \
-            --self-contained -o publish
-
-      - name: Apply Uno font fix (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          mkdir -p publish/StoryCAD.app/Contents/MacOS
-          mkdir -p publish/StoryCAD.app/Contents/Resources
-          cp -R publish/* publish/StoryCAD.app/Contents/MacOS/ 2>/dev/null || true
-          if [ -d publish/Resources ]; then
-            cp -R publish/Resources/* publish/StoryCAD.app/Contents/Resources/
-          fi
-          if [ -d publish/Uno.Fonts.Fluent/Fonts ]; then
-            mkdir -p publish/StoryCAD.app/Contents/MacOS/Uno.Fonts.Fluent/Fonts
-            cp publish/Uno.Fonts.Fluent/Fonts/* publish/StoryCAD.app/Contents/MacOS/Uno.Fonts.Fluent/Fonts/
-          fi
-          rm -rf publish/StoryCAD.app/Contents/MacOS/StoryCAD.app
-          echo "Font verification:" && find publish/StoryCAD.app/Contents/MacOS -name "*uno-fluentui-assets.ttf*" -ls
-
-      - name: Create PKG (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          mkdir -p pkg-build/Applications
-          cp -R publish/StoryCAD.app pkg-build/Applications/
-          pkgbuild --root pkg-build \
-            --identifier org.storybuilder.storycad \
-            --version ${{ steps.version.outputs.version }} \
-            --install-location / \
-            storycad-${{ matrix.art }}.pkg
-
-      - name: Zip MSIX artifacts (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        run: |
-          $zipName = "storycad-msix-${{ matrix.art }}.zip"
-          Compress-Archive -Path "${{ github.workspace }}\StoryCAD\Packages\*" -DestinationPath $zipName -Force
-
-      - name: Upload MSIX (Windows)
-        if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: storycad-msix-${{ matrix.art }}
-          path: storycad-msix-${{ matrix.art }}.zip
-          if-no-files-found: error
-
-      - name: Upload PKG (macOS)
-        if: matrix.os == 'macos-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: storycad-${{ matrix.art }}
-          path: storycad-${{ matrix.art }}.pkg
-          if-no-files-found: error
-
-  release:
-    needs: build
-    if: github.event_name == 'workflow_dispatch' && !inputs.skip_release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.build.outputs.tag_version }}
-          name: Release ${{ needs.build.outputs.tag_version }}
-          files: |
-            storycad-msix-win-x64/storycad-msix-win-x64.zip
-            storycad-msix-win-arm64/storycad-msix-win-arm64.zip
-            storycad-msix-win-x86/storycad-msix-win-x86.zip
-            storycad-osx-arm64/storycad-osx-arm64.pkg
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Gene
