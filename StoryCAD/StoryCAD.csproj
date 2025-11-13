@@ -47,6 +47,17 @@
         <Platforms>AnyCPU;x64</Platforms>
     </PropertyGroup>
 
+    <!-- MSBuild Task Host Configuration for CI/CD -->
+    <!-- Fixes MSB4216 error with UNO SDK's EmbeddedResourceInjectorTask in GitHub Actions -->
+    <PropertyGroup>
+        <!-- Force MSBuild to use current runtime/architecture for tasks -->
+        <GenerateResourceMSBuildArchitecture>CurrentArchitecture</GenerateResourceMSBuildArchitecture>
+        <GenerateResourceMSBuildRuntime>CurrentRuntime</GenerateResourceMSBuildRuntime>
+
+        <!-- Disable out-of-process task host for embedded resources (CI compatibility) -->
+        <DisableOutOfProcTaskHost>true</DisableOutOfProcTaskHost>
+    </PropertyGroup>
+
     <!-- App Icon Configuration -->
     <ItemGroup>
         <UnoImage Include="Assets\Icons\icon.png">
