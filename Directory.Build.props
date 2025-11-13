@@ -12,4 +12,17 @@
     -->
         <NoWarn>$(NoWarn);NU1507;NETSDK1201;PRI257</NoWarn>
     </PropertyGroup>
+
+    <!-- MSBuild Task Host Configuration for CI/CD -->
+    <!-- Fixes MSB4216 error with UNO SDK's EmbeddedResourceInjectorTask in GitHub Actions -->
+    <!-- Must be in Directory.Build.props to load BEFORE SDK imports buildTransitive targets -->
+    <!-- See: https://github.com/dotnet/msbuild/issues/12751 (SDK 9.0.307 bug) -->
+    <PropertyGroup>
+        <!-- Force MSBuild to use current runtime/architecture for tasks -->
+        <GenerateResourceMSBuildArchitecture>CurrentArchitecture</GenerateResourceMSBuildArchitecture>
+        <GenerateResourceMSBuildRuntime>CurrentRuntime</GenerateResourceMSBuildRuntime>
+
+        <!-- Disable out-of-process task host for embedded resources (CI compatibility) -->
+        <DisableOutOfProcTaskHost>true</DisableOutOfProcTaskHost>
+    </PropertyGroup>
 </Project>
