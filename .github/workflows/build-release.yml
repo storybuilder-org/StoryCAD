@@ -121,6 +121,20 @@ jobs:
           $xml.Save($manifestPath)
           Write-Host "Updated manifest version to ${{ steps.version.outputs.version }}"
 
+      - name: Update StoryCADLib.csproj version
+        shell: pwsh
+        run: |
+          $csprojPath = Join-Path "${{ github.workspace }}" "StoryCADLib\StoryCADLib.csproj"
+          [xml]$xml = Get-Content $csprojPath
+          $versionNode = $xml.SelectSingleNode('//Version')
+          $assemblyVersionNode = $xml.SelectSingleNode('//AssemblyVersion')
+          $fileVersionNode = $xml.SelectSingleNode('//FileVersion')
+          if ($versionNode) { $versionNode.InnerText = '${{ steps.version.outputs.version }}' }
+          if ($assemblyVersionNode) { $assemblyVersionNode.InnerText = '${{ steps.version.outputs.version }}' }
+          if ($fileVersionNode) { $fileVersionNode.InnerText = '${{ steps.version.outputs.version }}' }
+          $xml.Save($csprojPath)
+          Write-Host "Updated StoryCADLib.csproj version to ${{ steps.version.outputs.version }}"
+
       - name: Decode real PFX and write .env (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
