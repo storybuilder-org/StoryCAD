@@ -1,19 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using StoryCADLib.Exceptions;
-using StoryCADLib.Services.Logging;
 using StoryCADLib.ViewModels.SubViewModels;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.UI;
 using Windows.UI.ViewManagement;
@@ -28,7 +18,7 @@ namespace StoryCADLib.Models;
 /// <summary>
 /// This class contains window (MainWindow) related items etc.
 /// </summary>
-public partial class Windowing : ObservableRecipient
+public class Windowing : ObservableRecipient
 {
     private readonly AppState _appState;
     private readonly ILogService _logService;
@@ -63,10 +53,10 @@ public partial class Windowing : ObservableRecipient
     public Window MainWindow;
 
     /// <summary>
-    // A defect in early WinUI 3 Win32 code is that ContentDialog
-    // controls don't have an established XamlRoot. A workaround
-    // is to assign the dialog's XamlRoot to the root of a visible
-    // Page. The Shell page's XamlRoot is stored here and accessed wherever needed.
+    /// A defect in early WinUI 3 Win32 code is that ContentDialog
+    /// controls don't have an established XamlRoot. A workaround
+    /// is to assign the dialog's XamlRoot to the root of a visible
+    /// Page. The Shell page's XamlRoot is stored here and accessed wherever needed.
     /// </summary>
     public XamlRoot XamlRoot;
 
@@ -430,20 +420,28 @@ public partial class Windowing : ObservableRecipient
     }
 
     /// <summary>
-    /// Sets the window size with proper DPI scaling across platforms
+    /// Sets the window size in physical pixels (consistent across all platforms regardless of DPI)
     /// </summary>
-    /// <param name="window">The window to resize</param>
-    /// <param name="desiredWidthDip">Desired width in device independent pixels</param>
-    /// <param name="desiredHeightDip">Desired height in device independent pixels</param>
-    public void SetWindowSize(Window window, double desiredWidthDip, double desiredHeightDip)
+    /// <param name="window">The Window to resize</param>
+    /// <param name="desiredWidthPx">Desired width in physical pixels</param>
+    /// <param name="desiredHeightPx">Desired height in physical pixels</param>
+    public void SetWindowSize(Window window, double desiredWidthPx, double desiredHeightPx)
     {
-        if (window == null) return;
+        ILogService logger = _logService;
 
-        // Try to get scale factor, with fallbacks
-        double scaleFactor = TryGetScaleFactor();
+        if (window == null)
+        {
+            logger.Log(LogLevel.Warn, "SetWindowSize called with null window");
+            return;
+        }
 
-        int targetWidth = (int)(desiredWidthDip * scaleFactor);
-        int targetHeight = (int)(desiredHeightDip * scaleFactor);
+        // Parameters are physical pixels - pass directly to AppWindow.Resize
+        // This ensures consistent window size across all platforms regardless of DPI scaling
+        int targetWidth = (int)desiredWidthPx;
+        int targetHeight = (int)desiredHeightPx;
+
+        logger.Log(LogLevel.Info,
+            $"Setting window size: {targetWidth}x{targetHeight} physical pixels");
 
         window.AppWindow.Resize(new Windows.Graphics.SizeInt32
         {
@@ -452,36 +450,267 @@ public partial class Windowing : ObservableRecipient
         });
     }
 
-    private double TryGetScaleFactor()
+    private double TryGetScaleFactor(Window window)
     {
-#if HAS_UNO_WINUI
+        ILogService logger = _logService;
+
+#if WINDOWS && !HAS_UNO
         // WinAppSDK (net9.0-windows10.0.22621) - use P/Invoke
-        var dpi = GetDpiForWindow(new IntPtr((long)MainWindow.AppWindow.Id.Value));
-        return dpi / 96.0;
-#else
-        // Uno Skia (net9.0-desktop on Windows/macOS/Linux) - try DisplayInformation
+        var dpi = GetDpiForWindow(new IntPtr((long)window.AppWindow.Id.Value));
+        double scaleFactor = dpi / 96.0;
+        logger.Log(LogLevel.Trace, $"Scale factor from WinAppSDK P/Invoke: {scaleFactor:F2} (DPI: {dpi})");
+        return scaleFactor;
+#elif HAS_UNO
+        // Uno Skia (net9.0-desktop on Windows/macOS) - try DisplayInformation
         try
         {
             var displayInfo = Windows.Graphics.Display.DisplayInformation.GetForCurrentView();
-            return displayInfo.RawPixelsPerViewPixel;
+            double scaleFactor = displayInfo.RawPixelsPerViewPixel;
+            logger.Log(LogLevel.Trace, $"Scale factor from DisplayInformation: {scaleFactor:F2}");
+            return scaleFactor;
         }
-        catch
+        catch (Exception ex)
         {
-            // Fallback to checking environment variable for Linux
+            logger.Log(LogLevel.Warn, $"Failed to get DisplayInformation: {ex.Message}");
+
+            // Fallback to checking environment variable
             var envScale = Environment.GetEnvironmentVariable("UNO_DISPLAY_SCALE_OVERRIDE");
             if (double.TryParse(envScale, out double scale))
+            {
+                logger.Log(LogLevel.Info, $"Using UNO_DISPLAY_SCALE_OVERRIDE: {scale:F2}");
                 return scale;
+            }
 
             // Final fallback
+            logger.Log(LogLevel.Info, "Using default scale factor: 1.0");
             return 1.0;
         }
 #endif
     }
 
-#if HAS_UNO_WINUI
+#if WINDOWS && !HAS_UNO
     [DllImport("user32.dll")]
     private static extern uint GetDpiForWindow(IntPtr hwnd);
+
+    // P/Invoke declarations for CenterOnScreen
+    [DllImport("user32.dll")]
+    private static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
+
+    [DllImport("user32.dll")]
+    private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+
+    [DllImport("user32.dll")]
+    private static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+    [DllImport("user32.dll")]
+    private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, out RECT pvParam, uint fWinIni);
+
+    [DllImport("user32.dll")]
+    private static extern int GetSystemMetrics(int nIndex);
+
+    // Structures for Win32 API
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MONITORINFO
+    {
+        public int cbSize;
+        public RECT rcMonitor;
+        public RECT rcWork;
+        public uint dwFlags;
+    }
+
+    // Constants for Win32 API
+    private const uint MONITOR_DEFAULTTONEAREST = 2;
+    private const uint SWP_NOSIZE = 0x0001;
+    private const uint SWP_NOZORDER = 0x0004;
+    private const uint SWP_SHOWWINDOW = 0x0040;
+    private const uint SPI_GETWORKAREA = 0x0030;
+    private const int SM_CXSCREEN = 0;
+    private const int SM_CYSCREEN = 1;
 #endif
+
+    // Helper methods for CenterOnScreen
+    private static bool TryWmhCall(Window window, string methodName)
+    {
+#if HAS_UNO
+        try
+        {
+            // Try to use Uno's WindowManagerHelper if available
+            var wmhType = Type.GetType("Uno.UI.Xaml.WindowManagerHelper, Uno.UI");
+            if (wmhType != null)
+            {
+                var instanceProp = wmhType.GetProperty("Instance");
+                if (instanceProp != null)
+                {
+                    var helper = instanceProp.GetValue(null);
+                    if (helper != null)
+                    {
+                        var method = helper.GetType().GetMethod(methodName);
+                        if (method != null)
+                        {
+                            method.Invoke(helper, new object[] { window });
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        catch { }
+#endif
+        return false;
+    }
+
+    private static bool IsValidWin32Handle(IntPtr handle)
+    {
+        return handle != IntPtr.Zero && handle != new IntPtr(-1);
+    }
+
+    private static Microsoft.UI.Windowing.AppWindow GetAppWindow(Window window)
+    {
+        return window?.AppWindow;
+    }
+
+    public void CenterOnScreen(Window window)
+    {
+        ILogService logger = _logService;
+
+        if (window == null)
+        {
+            logger.Log(LogLevel.Warn, "CenterOnScreen called with null window");
+            return;
+        }
+
+        logger.Log(LogLevel.Info, "Attempting to center window on screen");
+
+        // 1) Uno helper (cross-platform) if present
+        if (TryWmhCall(window, "Center"))
+        {
+            logger.Log(LogLevel.Info, "Window centered using Uno WindowManagerHelper");
+            return;
+        }
+
+#if WINDOWS && !HAS_UNO
+        // 2) WinAppSDK: center using monitor work area via Win32 P/Invoke
+        if (IsValidWin32Handle(WindowHandle))
+        {
+            try
+            {
+                var hMon = MonitorFromWindow(WindowHandle, MONITOR_DEFAULTTONEAREST);
+                MONITORINFO mi = new() { cbSize = Marshal.SizeOf<MONITORINFO>() };
+                if (hMon != IntPtr.Zero && GetMonitorInfo(hMon, ref mi) && GetWindowRect(WindowHandle, out var rect))
+                {
+                    int winW = rect.Right - rect.Left;
+                    int winH = rect.Bottom - rect.Top;
+                    int workW = mi.rcWork.Right - mi.rcWork.Left;
+                    int workH = mi.rcWork.Bottom - mi.rcWork.Top;
+
+                    int x = mi.rcWork.Left + (workW - winW) / 2;
+                    int y = mi.rcWork.Top + (workH - winH) / 2;
+
+                    logger.Log(LogLevel.Trace, $"Centering window: size={winW}x{winH}, work area={workW}x{workH}, position={x},{y}");
+
+                    SetWindowPos(WindowHandle, IntPtr.Zero, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+                    logger.Log(LogLevel.Info, "Window centered using Win32 API");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Log(LogLevel.Warn, $"Win32 centering failed: {ex.Message}");
+            }
+        }
+
+        // 3) WinAppSDK fallback: compute work area via SPI, move via AppWindow
+        try
+        {
+            RECT work;
+            if (!SystemParametersInfo(SPI_GETWORKAREA, 0, out work, 0))
+            {
+                work = new RECT
+                {
+                    Left = 0,
+                    Top = 0,
+                    Right = GetSystemMetrics(SM_CXSCREEN),
+                    Bottom = GetSystemMetrics(SM_CYSCREEN)
+                };
+                logger.Log(LogLevel.Trace, "Using screen dimensions as fallback work area");
+            }
+
+            var appWin = GetAppWindow(window);
+            if (appWin != null)
+            {
+                var size = appWin.Size;  // Physical pixels (SizeInt32)
+
+                // All values are in physical pixels - no conversion needed
+                int winWidth = size.Width;   // Physical pixels
+                int winHeight = size.Height; // Physical pixels
+
+                int workW = work.Right - work.Left;  // Physical pixels
+                int workH = work.Bottom - work.Top;  // Physical pixels
+
+                int newX = work.Left + (workW - winWidth) / 2;
+                int newY = work.Top + (workH - winHeight) / 2;
+
+                // AppWindow.Move expects physical pixels
+                appWin.Move(new Windows.Graphics.PointInt32 { X = newX, Y = newY });
+                logger.Log(LogLevel.Info,
+                    $"Window centered using AppWindow: size={winWidth}x{winHeight}px work={workW}x{workH}px position={newX},{newY}px");
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.Log(LogLevel.Warn, $"AppWindow centering failed: {ex.Message}");
+        }
+#endif
+
+#if HAS_UNO
+        try
+        {
+            var appWin = GetAppWindow(window);
+            if (appWin != null)
+            {
+                // Get screen size in physical pixels (no DisplayArea API on UNO)
+                var di = Windows.Graphics.Display.DisplayInformation.GetForCurrentView();
+                var scale = di.RawPixelsPerViewPixel; // e.g., 1.5 for 150%
+                int screenWpx = (int)di.ScreenWidthInRawPixels;   // Physical pixels
+                int screenHpx = (int)di.ScreenHeightInRawPixels;  // Physical pixels
+
+                // AppWindow.Size is in physical pixels on Uno/Skia (same as WinAppSDK)
+                int w = appWin.Size.Width;   // Physical pixels
+                int h = appWin.Size.Height;  // Physical pixels
+
+                // Center in physical pixels relative to (0,0)
+                int x = Math.Max(0, (screenWpx - w) / 2);
+                int y = Math.Max(0, (screenHpx - h) / 2);
+
+                appWin.Move(new Windows.Graphics.PointInt32 { X = x, Y = y });
+
+                logger.Log(LogLevel.Info,
+                    $"Window centered (Uno): pos={x},{y}px size={w}×{h}px screen={screenWpx}×{screenHpx}px (scale={scale:F2})");
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.Log(LogLevel.Warn, $"Uno centering fallback failed: {ex.Message}");
+        }
+#endif
+
+
+
+    }
 
     #region Com stuff for File/Folder pickers
     [ComImport]

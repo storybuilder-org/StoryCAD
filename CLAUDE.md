@@ -42,13 +42,6 @@ public void SetupMacMenu() { }
 
 See `/devdocs/platform_targeting_guidelines.md` for complete workflows and decision trees.
 
-**IMPORTANT - Target Framework Order**:
-- Windows target (`net9.0-windows10.0.22621`) **must be first** in `<TargetFrameworks>`
-- VS uses first framework to initialize startup configuration and determine supported launch profiles
-- If desktop is first: VS can't recognize `MsixPackage` command (desktop doesn't support MSIX)
-- If Windows is first: VS recognizes both packaged and unpackaged launch profiles
-- Restart VS completely after changing framework order
-
 ### Cross-Machine Development Workflow
 
 **Primary Strategy**: Develop on Windows (VS2022), test on Mac (Rider)

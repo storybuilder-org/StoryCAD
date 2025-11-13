@@ -15,9 +15,6 @@ public partial class RichEditBoxExtended : RichEditBox
 
     public RichEditBoxExtended()
     {
-        // Debug: Log which version is running
-        System.Diagnostics.Debug.WriteLine("=== RichEditBoxExtended: WINAPPSDK VERSION (RichEditBox) ===");
-
         TextChanged += RichEditBoxExtended_TextChanged;
         TextAlignment = TextAlignment.Left;
         CornerRadius = new CornerRadius(5);

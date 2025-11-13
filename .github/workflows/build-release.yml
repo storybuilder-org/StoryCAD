@@ -23,8 +23,7 @@ on:
         description: 'Skip creating a release (build only)'
         required: false
         type: boolean
-        default: false
-
+        default: true
 permissions:
   contents: write
 
@@ -80,7 +79,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          # Pin to 9.0.306 to avoid MSB4216 bug in SDK 9.0.307
+          # See: https://github.com/dotnet/msbuild/issues/12751
+          dotnet-version: '9.0.306'
           cache: true
           cache-dependency-path: |
             **/*.csproj

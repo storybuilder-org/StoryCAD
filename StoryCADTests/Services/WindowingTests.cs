@@ -69,36 +69,59 @@ namespace StoryCADTests.Services
         }
 
         [TestMethod]
+        public void TryGetScaleFactor_UsesPassedWindowParameter_NotMainWindow()
+        {
+            // This test ensures TryGetScaleFactor uses the passed Window parameter
+            // This was a bug where it used MainWindow instead of the passed window
+            var methodInfo = typeof(Windowing).GetMethod("TryGetScaleFactor",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            Assert.IsNotNull(methodInfo, "TryGetScaleFactor method should exist");
+
+            var parameters = methodInfo.GetParameters();
+            Assert.AreEqual(1, parameters.Length,
+                "TryGetScaleFactor should accept exactly one parameter");
+            Assert.AreEqual(typeof(Window), parameters[0].ParameterType,
+                "TryGetScaleFactor should accept Window parameter to avoid using MainWindow directly");
+        }
+
+        [TestMethod]
         public void SetWindowSize_PlatformSpecificDpiHandling_UsesCorrectApproach()
         {
             // This test verifies that the correct DPI handling approach exists for each platform
             // We can't test actual DPI values without a real window, but we can verify the infrastructure
 
-#if HAS_UNO_WINUI
+#if WINDOWS && !HAS_UNO
             // On WinAppSDK, verify GetDpiForWindow P/Invoke exists
             var methodInfo = typeof(Windowing).GetMethod("GetDpiForWindow",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
             Assert.IsNotNull(methodInfo,
                 "WinAppSDK build should have GetDpiForWindow P/Invoke for DPI scaling");
-#else
-            // On Uno Skia builds, we use different fallback approaches
-            // Can't directly test DisplayInformation without UI context, but verify TryGetScaleFactor exists
+#elif HAS_UNO
+            // On Uno Skia builds (Windows desktop or macOS desktop)
+            // Verify TryGetScaleFactor exists and accepts Window parameter
             var methodInfo = typeof(Windowing).GetMethod("TryGetScaleFactor",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             Assert.IsNotNull(methodInfo,
                 "Uno Skia build should have TryGetScaleFactor method for DPI handling");
 
-            // Runtime-specific expectations
-            if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS())
+            // Verify TryGetScaleFactor accepts Window parameter (fix for bug where it used MainWindow)
+            var parameters = methodInfo.GetParameters();
+            Assert.AreEqual(1, parameters.Length,
+                "TryGetScaleFactor should accept exactly one parameter");
+            Assert.AreEqual(typeof(Window), parameters[0].ParameterType,
+                "TryGetScaleFactor should accept Window parameter, not use MainWindow directly");
+
+            // Platform-specific expectations for Skia desktop
+            if (OperatingSystem.IsWindows())
             {
-                // These platforms try DisplayInformation first, then fall back
-                Assert.IsTrue(true, "Windows/macOS should attempt DisplayInformation for DPI");
+                // Windows Skia desktop uses DisplayInformation or environment variable
+                Assert.IsTrue(true, "Windows Skia desktop should attempt DisplayInformation for DPI");
             }
-            else if (OperatingSystem.IsLinux())
+            else if (OperatingSystem.IsMacOS())
             {
-                // Linux typically uses environment variable or defaults to 1.0
-                // We could test environment variable handling if TryGetScaleFactor was internal
-                Assert.IsTrue(true, "Linux should use environment variable or default DPI");
+                // macOS Skia desktop uses DisplayInformation or defaults
+                Assert.IsTrue(true, "macOS Skia desktop should attempt DisplayInformation for DPI");
             }
 #endif
         }
