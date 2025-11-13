@@ -2,13 +2,13 @@ name: Build & Release
 
 on:
   push:
-    branches: [UNOTestBranch]
+    branches: [main]
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
       - '**/*.{png,jpg,jpeg,svg,gif}'
   pull_request:
-    branches: [UNOTestBranch]
+    branches: [main]
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
