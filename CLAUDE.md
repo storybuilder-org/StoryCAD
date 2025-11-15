@@ -202,7 +202,7 @@ Detailed technical documentation (memory files provide condensed versions):
 - **Location**: `/mnt/d/dev/src/ManualTest/docs/`
 - **Published (Staging)**: https://storybuilder-org.github.io/StoryBuilder-Manual/
 - **Format**: Jekyll with Just the Docs theme (115 markdown files)
-- **Index**: `/mnt/c/temp/user_manual.md` - Complete index with file summaries
+- **Index**: `/mnt/d/dev/src/ManualTest/docs/index.md` - Complete index with file summaries (always current)
 - **Audience**: Fiction writers (non-technical users)
 
 **Search Strategy**:
