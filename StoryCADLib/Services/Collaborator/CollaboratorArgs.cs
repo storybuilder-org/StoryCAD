@@ -1,4 +1,4 @@
-using StoryCADLib.Collaborator.ViewModels;
+using StoryCADLib.Services.Collaborator.Contracts;
 
 namespace StoryCADLib.Services.Collaborator;
 
@@ -16,5 +16,12 @@ public class CollaboratorArgs
     public OnDone onDoneCallback;
     public StoryModel StoryModel;
 
-    public WorkflowViewModel WorkflowVm;
+    /// <summary>
+    ///     Reference to the API for accessing story data
+    /// </summary>
+    public IStoryCADAPI StoryApi;
+
+    // Note: WorkflowViewModel is now in Collaborator project
+    // This will need to be changed to object or removed
+    public object WorkflowVm;
 }
