@@ -40,48 +40,8 @@ public class CollaboratorInterfaceTests
         Assert.IsTrue(true); // Method exists and can be called
     }
 
-    /// <summary>
-    ///     Test workflow loading methods exist
-    /// </summary>
-    [TestMethod]
-    public void ICollaborator_WorkflowMethods_Exist()
-    {
-        // Arrange
-        ICollaborator collaborator = new MockCollaborator();
-        var element = new StoryElement { Name = "Test" };
-
-        // Act & Assert - just verify methods can be called
-        collaborator.LoadWorkflowViewModel(StoryItemType.Character);
-        collaborator.LoadWizardViewModel();
-        collaborator.LoadWorkflowModel(element, "test-workflow");
-    }
-
-    /// <summary>
-    ///     Test async methods
-    /// </summary>
-    [TestMethod]
-    public async Task ICollaborator_AsyncMethods_CanExecute()
-    {
-        // Arrange
-        ICollaborator collaborator = new MockCollaborator();
-
-        // Act & Assert - verify async methods can be called
-        await collaborator.ProcessWorkflowAsync();
-        await collaborator.SendButtonClickedAsync();
-    }
-
-    /// <summary>
-    ///     Test SaveOutputs method
-    /// </summary>
-    [TestMethod]
-    public void ICollaborator_SaveOutputs_CanExecute()
-    {
-        // Arrange
-        ICollaborator collaborator = new MockCollaborator();
-
-        // Act & Assert - verify method can be called
-        collaborator.SaveOutputs();
-    }
+    // Test methods for removed interface methods have been deleted
+    // The interface now only has CreateWindow and Dispose methods
 
     /// <summary>
     ///     Mock implementation for testing
@@ -95,32 +55,7 @@ public class CollaboratorInterfaceTests
             return null;
         }
 
-        public void LoadWorkflowViewModel(StoryItemType elementType)
-        {
-            // Mock implementation
-        }
-
-        public void LoadWizardViewModel()
-        {
-            // Mock implementation
-        }
-
-        public void LoadWorkflowModel(StoryElement element, string workflow)
-        {
-            // Mock implementation
-        }
-
-        public async Task ProcessWorkflowAsync()
-        {
-            await Task.CompletedTask;
-        }
-
-        public async Task SendButtonClickedAsync()
-        {
-            await Task.CompletedTask;
-        }
-
-        public void SaveOutputs()
+        public void Dispose()
         {
             // Mock implementation
         }

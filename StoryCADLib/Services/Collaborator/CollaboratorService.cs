@@ -49,149 +49,47 @@ public class CollaboratorService
     /// </summary>
     public bool HasCollaborator => _collaboratorInterface != null;
 
-    /// <summary>
-    ///     Sets the collaborator instance (for testing or direct injection)
-    /// </summary>
-    public void SetCollaborator(ICollaborator collaboratorInstance)
-    {
-        _collaboratorInterface = collaboratorInstance;
-    }
-
-    public void LoadWorkflows(CollaboratorArgs args)
-    {
-        // Load the workflow navigation menu for user selection
-        if (_collaboratorInterface != null)
-        {
-            _collaboratorInterface.LoadWizardViewModel();
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
 
     /// <summary>
-    ///     Load the workflow view model for a specific element type
+    ///     Opens the Collaborator window with the current story context.
+    ///     Collaborator handles all workflow operations internally.
     /// </summary>
-    public void LoadWorkflowViewModel(StoryItemType elementType)
+    public void OpenCollaborator()
     {
-        if (_collaboratorInterface != null)
+        if (_collaboratorInterface == null)
         {
-            _collaboratorInterface.LoadWorkflowViewModel(elementType);
+            _logService.Log(LogLevel.Warn, "Collaborator plugin not available - plugin DLL not found or failed to load");
+            return;
         }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
 
-    /// <summary>
-    ///     Load the WizardViewModel (WizardShell's VM) with the high level
-    ///     NavigationView menu.
-    ///     This is a proxy for Collaborator's LoadWizardViewModel.
-    /// </summary>
-    public void LoadWizardViewModel()
-    {
-        if (_collaboratorInterface != null)
+        // Get the current StoryModel from AppState
+        var storyModel = _appState.CurrentDocument?.Model;
+        if (storyModel == null)
         {
-            _collaboratorInterface.LoadWizardViewModel();
+            _logService.Log(LogLevel.Error, "No StoryModel available - no document is open");
+            return;
         }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
 
-    /// <summary>
-    ///     Load the WorkflowViewModel with the currently selected
-    ///     Workflow Model.
-    ///     This is a proxy for Collaborator's LoadWorkflowModel method.
-    /// </summary>
-    public void LoadWorkflowModel(StoryElement element, string workflow)
-    {
-        if (_collaboratorInterface != null)
+        // Create the API instance for Collaborator to use
+        var outlineService = Ioc.Default.GetService<OutlineService>();
+        if (outlineService != null)
         {
-            _collaboratorInterface.LoadWorkflowModel(element, workflow);
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
+            var api = new SemanticKernelApi(outlineService);
+            api.SetCurrentModel(storyModel);
 
-    /// <summary>
-    ///     Process the Workflow we've loaded.
-    ///     This is a proxy for Collaborator's ProcessWorkflow method.
-    /// </summary>
-    public void ProcessWorkflow()
-    {
-        if (_collaboratorInterface != null)
-        {
-            // Call async version synchronously for backward compatibility
-            Task.Run(async () => await ProcessWorkflowAsync()).Wait();
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
-
-    /// <summary>
-    ///     Process the Workflow we've loaded asynchronously.
-    /// </summary>
-    public async Task ProcessWorkflowAsync()
-    {
-        if (_collaboratorInterface != null)
-        {
-            await _collaboratorInterface.ProcessWorkflowAsync();
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
-
-    public void SendButtonClicked()
-    {
-        if (_collaboratorInterface != null)
-        {
-            // Call async version synchronously for backward compatibility
-            Task.Run(async () => await SendButtonClickedAsync()).Wait();
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
-
-    /// <summary>
-    ///     Handle send button click asynchronously.
-    /// </summary>
-    public async Task SendButtonClickedAsync()
-    {
-        if (_collaboratorInterface != null)
-        {
-            await _collaboratorInterface.SendButtonClickedAsync();
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
-
-    /// <summary>
-    ///     Save any unchanged OutputProperty values to their StoryElement.
-    ///     This is a proxy for Collaborator's SaveOutputs() method.
-    /// </summary>
-    public void SaveOutputs()
-    {
-        if (_collaboratorInterface != null)
-        {
-            _collaboratorInterface.SaveOutputs();
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
+            // Create the Collaborator window, passing the API
+            CollaboratorWindow = _collaboratorInterface.CreateWindow(api);
+            if (CollaboratorWindow != null)
+            {
+                CollaboratorWindow.AppWindow.Closing += HideCollaborator;
+                CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
+                CollaboratorWindow.Activate();
+                _logService.Log(LogLevel.Info, "Collaborator window opened");
+            }
+            else
+            {
+                _logService.Log(LogLevel.Error, "Failed to create Collaborator window");
+            }
         }
     }
 
@@ -217,70 +115,29 @@ public class CollaboratorService
             return;
         }
 
-        // Create an instance of the Collaborator class
-        _logService.Log(LogLevel.Info, "Calling Collaborator constructor.");
+        // Create an instance of the Collaborator class using parameterless constructor
+        _logService.Log(LogLevel.Info, "Creating Collaborator instance.");
 
-        // Get the current StoryModel from AppState
-        var storyModel = _appState.CurrentDocument?.Model;
-        if (storyModel == null)
-        {
-            _logService.Log(LogLevel.Error, "No StoryModel available - no document is open");
-            return;
-        }
-
-        // Create and populate CollaboratorArgs
-        var collabArgs = Ioc.Default.GetService<ShellViewModel>()!.CollabArgs = new CollaboratorArgs();
-        collabArgs.StoryModel = storyModel;
-        collabArgs.WorkflowVm = null; // Collaborator creates its own WorkflowViewModel
-        collabArgs.CollaboratorWindow = CollaboratorWindow;
-
-        // Create the API instance for Collaborator to use
-        var outlineService = Ioc.Default.GetService<OutlineService>();
-        if (outlineService != null)
-        {
-            var api = new SemanticKernelApi(outlineService);
-            api.SetCurrentModel(storyModel);
-            collabArgs.StoryApi = api;
-        }
-
-        object[] methodArgs = { collabArgs };
-
-        // Find the constructor that takes CollaboratorArgs parameter
-        var constructor = collaboratorType.GetConstructor(new[] { typeof(CollaboratorArgs) });
+        // Find the parameterless constructor
+        var constructor = collaboratorType.GetConstructor(Type.EmptyTypes);
         if (constructor == null)
         {
-            _logService.Log(LogLevel.Error, "Could not find Collaborator constructor that takes CollaboratorArgs");
-            throw new InvalidOperationException("Collaborator must have a constructor that takes CollaboratorArgs");
+            _logService.Log(LogLevel.Error, "Could not find parameterless constructor for Collaborator");
+            throw new InvalidOperationException("Collaborator must have a parameterless constructor");
         }
 
-        var collaborator = constructor.Invoke(methodArgs);
-        _logService.Log(LogLevel.Info, "Collaborator Constructor finished.");
+        var collaborator = constructor.Invoke(null);
+        _logService.Log(LogLevel.Info, "Collaborator instance created.");
 
-        // Cast to interface - this is now required
+        // Cast to interface
         _collaboratorInterface = collaborator as ICollaborator;
-        if (_collaboratorInterface != null)
+        if (_collaboratorInterface == null)
         {
-            _logService.Log(LogLevel.Info, "Collaborator successfully loaded with ICollaborator interface.");
-
-            // Create the collaborator window using the ICollaborator interface
-            // Pass the API as context
-            CollaboratorWindow = _collaboratorInterface.CreateWindow(collabArgs.StoryApi);
-            if (CollaboratorWindow != null)
-            {
-                CollaboratorWindow.AppWindow.Closing += HideCollaborator;
-                CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
-                _logService.Log(LogLevel.Info, "Collaborator window created and configured.");
-            }
-            else
-            {
-                _logService.Log(LogLevel.Error, "Failed to create Collaborator window.");
-            }
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator does not implement ICollaborator interface. Cannot proceed.");
+            _logService.Log(LogLevel.Error, "Collaborator does not implement ICollaborator interface");
             throw new InvalidOperationException("CollaboratorLib must implement ICollaborator interface");
         }
+
+        _logService.Log(LogLevel.Info, "Collaborator successfully loaded with ICollaborator interface.");
     }
 
     public async Task<bool> CollaboratorEnabled()
@@ -532,20 +389,26 @@ public class CollaboratorService
     public void DestroyCollaborator()
     {
         _logService.Log(LogLevel.Warn, "Destroying collaborator object.");
+
+        // Dispose of the Collaborator plugin resources
+        _collaboratorInterface?.Dispose();
+
         if (CollaboratorWindow != null)
         {
             CollaboratorWindow.Close(); // Destroy window object
+            CollaboratorWindow = null;
             _logService.Log(LogLevel.Info, "Closed collaborator window");
-
-            //Null objects to deallocate them
-            CollabAssembly = null;
-            _logService.Log(LogLevel.Info, "Nulled collaborator objects");
-
-            //Run garbage collection to clean up any remnants.
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            _logService.Log(LogLevel.Info, "Garbage collection finished.");
         }
+
+        // Null objects to deallocate them
+        _collaboratorInterface = null;
+        CollabAssembly = null;
+        _logService.Log(LogLevel.Info, "Nulled collaborator objects");
+
+        // Run garbage collection to clean up any remnants
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        _logService.Log(LogLevel.Info, "Garbage collection finished.");
     }
 
     public void CollaboratorClosed()

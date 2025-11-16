@@ -960,11 +960,8 @@ public class ShellViewModel : ObservableRecipient
 
 
             Logger.Log(LogLevel.Info, "Launching collaborator");
-            CollabArgs.StoryModel = State.CurrentDocument?.Model;
-            Ioc.Default.GetService<CollaboratorService>()!.LoadWorkflows(CollabArgs);
-            Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Activate();
-            // Navigation is now handled internally by Collaborator
-            Logger.Log(LogLevel.Info, "Collaborator opened");
+            var collaboratorService = Ioc.Default.GetService<CollaboratorService>();
+            collaboratorService?.OpenCollaborator();
 
         }
     }
