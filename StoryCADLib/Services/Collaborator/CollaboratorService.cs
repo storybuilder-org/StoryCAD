@@ -2,10 +2,10 @@ using System.Reflection;
 using System.Runtime.Loader;
 using Windows.ApplicationModel.AppExtensions;
 using Microsoft.UI.Windowing;
-using StoryCADLib.Collaborator;
-using StoryCADLib.Collaborator.ViewModels;
+using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator.Contracts;
+using StoryCADLib.Services.Outline;
 
 namespace StoryCADLib.Services.Collaborator;
 
@@ -208,21 +208,6 @@ public class CollaboratorService
         // Use the custom context to load the assembly
         CollabAssembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dllPath);
         _logService.Log(LogLevel.Info, "Loaded CollaboratorLib.dll");
-        //Create a new WindowEx for collaborator to prevent access errors.
-        CollaboratorWindow = new Window();
-        CollaboratorWindow.AppWindow.Closing += HideCollaborator;
-        // Create a Window for StoryBuilder Collaborator
-        Frame rootFrame = new();
-        //CollaboratorWindow = args.window;
-        //CollaboratorWindow.MinWidth = Convert.ToDouble("500");
-        //CollaboratorWindow.MinHeight = Convert.ToDouble("500");
-        CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
-        CollaboratorWindow.Title = "StoryCAD Collaborator";
-        CollaboratorWindow.Content = rootFrame;
-        _logService.Log(LogLevel.Info, "Collaborator window created and configured.");
-
-        rootFrame.Content = new WorkflowShell();
-        _logService.Log(LogLevel.Info, "Set collaborator window content to WizardShell.");
 
         // Get the type of the Collaborator class
         var collaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
@@ -234,9 +219,30 @@ public class CollaboratorService
 
         // Create an instance of the Collaborator class
         _logService.Log(LogLevel.Info, "Calling Collaborator constructor.");
+
+        // Get the current StoryModel from AppState
+        var storyModel = _appState.CurrentDocument?.Model;
+        if (storyModel == null)
+        {
+            _logService.Log(LogLevel.Error, "No StoryModel available - no document is open");
+            return;
+        }
+
+        // Create and populate CollaboratorArgs
         var collabArgs = Ioc.Default.GetService<ShellViewModel>()!.CollabArgs = new CollaboratorArgs();
-        collabArgs.WorkflowVm = Ioc.Default.GetService<WorkflowViewModel>();
+        collabArgs.StoryModel = storyModel;
+        collabArgs.WorkflowVm = null; // Collaborator creates its own WorkflowViewModel
         collabArgs.CollaboratorWindow = CollaboratorWindow;
+
+        // Create the API instance for Collaborator to use
+        var outlineService = Ioc.Default.GetService<OutlineService>();
+        if (outlineService != null)
+        {
+            var api = new SemanticKernelApi(outlineService);
+            api.SetCurrentModel(storyModel);
+            collabArgs.StoryApi = api;
+        }
+
         object[] methodArgs = { collabArgs };
 
         // Find the constructor that takes CollaboratorArgs parameter
@@ -255,6 +261,20 @@ public class CollaboratorService
         if (_collaboratorInterface != null)
         {
             _logService.Log(LogLevel.Info, "Collaborator successfully loaded with ICollaborator interface.");
+
+            // Create the collaborator window using the ICollaborator interface
+            // Pass the API as context
+            CollaboratorWindow = _collaboratorInterface.CreateWindow(collabArgs.StoryApi);
+            if (CollaboratorWindow != null)
+            {
+                CollaboratorWindow.AppWindow.Closing += HideCollaborator;
+                CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
+                _logService.Log(LogLevel.Info, "Collaborator window created and configured.");
+            }
+            else
+            {
+                _logService.Log(LogLevel.Error, "Failed to create Collaborator window.");
+            }
         }
         else
         {

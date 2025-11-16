@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI;
-using StoryCADLib.Collaborator.ViewModels;
 using StoryCADLib.DAL;
 using StoryCADLib.Services;
 using StoryCADLib.Services.Backup;
@@ -964,7 +963,7 @@ public class ShellViewModel : ObservableRecipient
             CollabArgs.StoryModel = State.CurrentDocument?.Model;
             Ioc.Default.GetService<CollaboratorService>()!.LoadWorkflows(CollabArgs);
             Ioc.Default.GetService<CollaboratorService>()!.CollaboratorWindow.Activate();
-            Ioc.Default.GetService<WorkflowViewModel>()!.EnableNavigation();
+            // Navigation is now handled internally by Collaborator
             Logger.Log(LogLevel.Info, "Collaborator opened");
 
         }
