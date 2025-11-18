@@ -1,6 +1,8 @@
 using System.Reflection;
 using System.Runtime.Loader;
 using Windows.ApplicationModel.AppExtensions;
+using Windows.ApplicationModel.Resources.Core;
+using Windows.Storage;
 using Microsoft.UI.Windowing;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backup;
@@ -107,10 +109,13 @@ public class CollaboratorService
         CollabAssembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dllPath);
         _logService.Log(LogLevel.Info, "Loaded CollaboratorLib.dll");
 
+        //debugging
+        var collaboratorTypes = CollabAssembly.GetTypes();
+
         // Get the type of the Collaborator class
         var collaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
         if (collaboratorType == null)
-        {
+        {   
             _logService.Log(LogLevel.Error, "Could not find Collaborator type in assembly");
             return;
         }
@@ -180,28 +185,28 @@ public class CollaboratorService
         _logService.Log(LogLevel.Info, $"Found {InstalledExtensions} installed extensions");
         _logService.Log(LogLevel.Info, "Locating CollaboratorLib...");
 
-        // 1) DEV: explicit override — deterministic
-        if (TryResolveFromEnv(out var envPath))
-        {
-            dllPath = envPath;
-            dllExists = true;
-            _logService.Log(LogLevel.Info, $"Found via ${EnvPluginDirVar}: {dllPath}");
-            return true;
-        }
+        //// 1) DEV: explicit override — deterministic
+        //if (TryResolveFromEnv(out var envPath))
+        //{
+        //    dllPath = envPath;
+        //    dllExists = true;
+        //    _logService.Log(LogLevel.Info, $"Found via ${EnvPluginDirVar}: {dllPath}");
+        //    return true;
+        //}
 
-        // 2) DEV: sibling repo (safeguarded scan)
-        if (_appState.DeveloperBuild)
-        {
-            if (TryResolveFromSibling(out var devPath))
-            {
-                dllPath = devPath;
-                dllExists = true;
-                _logService.Log(LogLevel.Info, $"Found dev DLL: {dllPath}");
-                return true;
-            }
+        //// 2) DEV: sibling repo (safeguarded scan)
+        //if (_appState.DeveloperBuild)
+        //{
+        //    if (TryResolveFromSibling(out var devPath))
+        //    {
+        //        dllPath = devPath;
+        //        dllExists = true;
+        //        _logService.Log(LogLevel.Info, $"Found dev DLL: {dllPath}");
+        //        return true;
+        //    }
 
-            _logService.Log(LogLevel.Warn, "Dev paths not found, falling back to package lookup.");
-        }
+        //    _logService.Log(LogLevel.Warn, "Dev paths not found, falling back to package lookup.");
+        //}
 
         // 3) PROD: MSIX AppExtension
         var (ok, pkgPath) = await TryResolveFromExtensionAsync();
@@ -210,6 +215,10 @@ public class CollaboratorService
             dllPath = pkgPath;
             dllExists = File.Exists(dllPath);
             _logService.Log(LogLevel.Info, $"Found package DLL: {dllPath}, exists={dllExists}");
+            if (dllExists)
+            {
+                await TryLoadPriForDllAsync(dllPath);
+            }
             return dllExists;
         }
 
@@ -259,7 +268,7 @@ public class CollaboratorService
         var exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
 
         var cursor = exeDir;
-        for (var i = 0; i < 10 && cursor != null; i++)
+        for (var i = 0; i < 8 && cursor != null; i++)
         {
             cursor = Path.GetDirectoryName(cursor);
         }
@@ -342,6 +351,41 @@ public class CollaboratorService
             _logService.Log(LogLevel.Error, $"Extension lookup failed: {ex}");
             return (false, null);
         }
+    }
+
+    private async Task TryLoadPriForDllAsync(string path)
+    {
+#if !HAS_UNO
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        var priPath = Path.ChangeExtension(path, ".pri");
+        if (string.IsNullOrWhiteSpace(priPath) || !File.Exists(priPath))
+        {
+            _logService.Log(LogLevel.Debug, $"No PRI file found next to plugin DLL: {priPath}");
+            return;
+        }
+
+        try
+        {
+            var priFile = await StorageFile.GetFileFromPathAsync(priPath);
+            ResourceManager.Current.LoadPriFiles(new[] { priFile });
+            _logService.Log(LogLevel.Info, $"Loaded Collaborator PRI resources from {priPath}");
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"Failed to load Collaborator PRI '{priPath}': {ex.Message}");
+        }
+#else
+        await Task.CompletedTask;
+#endif
     }
 
     #endregion

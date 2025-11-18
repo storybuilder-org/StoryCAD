@@ -6,13 +6,13 @@
         "DOTNET_MODIFIABLE_ASSEMBLIES": "debug"
       },
       "compatibleTargetFramework": "windows",
-      "nativeDebugging": true
+      "nativeDebugging": false
     },
     "StoryCAD (WinAppSDK Packaged)": {
       "commandName": "MsixPackage",
       "compatibleTargetFramework": "windows",
       "hotReloadEnabled": true,
-      "nativeDebugging": true
+      "nativeDebugging": false
     },
     "StoryCAD (Desktop)": {
       "commandName": "Project",
