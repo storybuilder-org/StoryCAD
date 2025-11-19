@@ -75,7 +75,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
     #endregion
 
     /// <summary>
-    ///     Creates a new story beat.
+    /// Creates a new story beat.
     /// </summary>
     public void CreateBeat(object sender, RoutedEventArgs e)
     {
@@ -83,7 +83,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
     }
 
     /// <summary>
-    ///     Deletes this beat
+    /// Deletes this beat
     /// </summary>
     public void DeleteBeat(object sender, RoutedEventArgs e)
     {
@@ -700,6 +700,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
 
     public void Activate(object parameter)
     {
+        _changeable = false;  // Disable change tracking before setting Model
+        _changed = false;
         Model = (ProblemModel)parameter;
         LoadModel();
     }
@@ -715,6 +717,10 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
 
     public void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
+        // Ignore Model property changes - these happen during navigation, not user edits
+        if (args.PropertyName == nameof(Model))
+            return;
+
         if (_changeable)
         {
             if (!_changed)
@@ -746,12 +752,10 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
         Description = Model.Description;
         ProblemSource = Model.ProblemSource;
         Protagonist = Model.Protagonist;
-        SelectedProtagonist = Characters.FirstOrDefault(p => p.Uuid == Protagonist);
         ProtGoal = Model.ProtGoal;
         ProtMotive = Model.ProtMotive;
         ProtConflict = Model.ProtConflict;
         Antagonist = Model.Antagonist;
-        SelectedAntagonist = Characters.FirstOrDefault(p => p.Uuid == Antagonist);
         AntagGoal = Model.AntagGoal;
         AntagMotive = Model.AntagMotive;
         AntagConflict = Model.AntagConflict;
@@ -798,6 +802,14 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
         }
 
         _changeable = true;
+
+        // Set UI-bound selection properties after enabling change tracking
+        // These can trigger property cascades from UI binding updates
+        var wasChangeable = _changeable;
+        _changeable = false;
+        SelectedProtagonist = Characters.FirstOrDefault(p => p.Uuid == Protagonist);
+        SelectedAntagonist = Characters.FirstOrDefault(p => p.Uuid == Antagonist);
+        _changeable = wasChangeable;
     }
 
     public void SaveModel()

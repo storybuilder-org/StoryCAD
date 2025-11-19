@@ -289,6 +289,8 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
 
     public void Activate(object parameter)
     {
+        _changeable = false;  // Disable change tracking before setting Model
+        _changed = false;
         Model = (OverviewModel)parameter;
         LoadModel();
     }
@@ -300,6 +302,10 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
+        // Ignore Model property changes - these happen during navigation, not user edits
+        if (args.PropertyName == nameof(Model))
+            return;
+
         if (_changeable)
         {
             if (!_changed)
@@ -330,7 +336,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
         StoryGenre = Model.StoryGenre;
         Viewpoint = Model.Viewpoint;
         ViewpointCharacter = Model.ViewpointCharacter;
-        SelectedViewpointCharacter = Characters.FirstOrDefault(p => p.Uuid == ViewpointCharacter);
         Voice = Model.Voice;
         LiteraryTechnique = Model.LiteraryDevice;
         Tense = Model.Tense;
@@ -338,8 +343,6 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
         Tone = Model.Tone;
         Style = Model.Style;
         StoryProblem = Model.StoryProblem;
-        // Set SelectedProblem based on StoryProblem GUID
-        SelectedProblem = Problems.FirstOrDefault(p => p.Uuid == StoryProblem);
         Description = Model.Description;
         Concept = Model.Concept;
         Premise = Model.Premise;
@@ -347,6 +350,14 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
         Notes = Model.Notes;
 
         _changeable = true;
+
+        // Set UI-bound selection properties after enabling change tracking
+        // These can trigger property cascades from UI binding updates
+        var wasChangeable = _changeable;
+        _changeable = false;
+        SelectedViewpointCharacter = Characters.FirstOrDefault(p => p.Uuid == ViewpointCharacter);
+        SelectedProblem = Problems.FirstOrDefault(p => p.Uuid == StoryProblem);
+        _changeable = wasChangeable;
     }
 
     public void SaveModel()

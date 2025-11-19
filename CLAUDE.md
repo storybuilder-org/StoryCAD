@@ -448,3 +448,4 @@ git commit -m "message"
 - Watch for circular dependencies when adding constructor parameters
 - If encountered, document with TODO and leave specific Ioc.Default calls rather than forcing bad design
 - Example: Windowing ↔ OutlineViewModel (documented in /home/tcox/.claude/memory/architecture.md)
+- Do not memorise or document any information about Storybuilder-miscellaneous in the StoryCAD Repo.
