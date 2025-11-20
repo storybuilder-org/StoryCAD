@@ -3,6 +3,7 @@ using StoryCADLib.Models;
 using StoryCADLib.Services.Logging;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.Services.Search;
+using StoryCADLib.ViewModels.Tools;
 
 #nullable disable
 
@@ -419,6 +420,145 @@ public class SearchServiceTests
 
         // Assert
         Assert.IsFalse(result, "Should return false for null model");
+    }
+
+    #endregion
+
+    #region Bidirectional Search Tests (Problem-Scene Relationships)
+
+    [TestMethod]
+    public async Task SearchString_FindsProblemWhenSearchingForBoundScene()
+    {
+        // Arrange - Create a test model with Problem bound to Scene
+        var model = await _outlineService.CreateModel("Bidirectional Test", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        // Create a Problem
+        var problem = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+        problem.Name = "Romance Problem";
+
+        // Create a Scene
+        var scene = _outlineService.AddStoryElement(model, StoryItemType.Scene, overview.Node);
+        scene.Name = "Love Scene";
+
+        // Bind the Scene to the Problem's first structure beat
+        var problemModel = (ProblemModel)problem;
+        problemModel.StructureBeats.Add(new StructureBeatViewModel("Beat 1", "First beat"));
+        problemModel.StructureBeats[0].Guid = scene.Uuid;
+
+        // Act - Search for the Problem name while on the Scene node
+        var result = _searchService.SearchString(scene.Node, "Romance", model);
+
+        // Assert - Should find the Problem because it references this Scene
+        Assert.IsTrue(result, "Should find 'Romance Problem' when searching Scene that's bound to it");
+    }
+
+    [TestMethod]
+    public async Task SearchString_FindsSceneWhenSearchingForBindingProblem()
+    {
+        // Arrange - Create a test model with Problem bound to Scene
+        var model = await _outlineService.CreateModel("Forward Search Test", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        // Create a Problem
+        var problem = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+        problem.Name = "Mystery Problem";
+
+        // Create a Scene
+        var scene = _outlineService.AddStoryElement(model, StoryItemType.Scene, overview.Node);
+        scene.Name = "Clue Discovery";
+
+        // Bind the Scene to the Problem's structure beat
+        var problemModel = (ProblemModel)problem;
+        problemModel.StructureBeats.Add(new StructureBeatViewModel("Beat 1", "First beat"));
+        problemModel.StructureBeats[0].Guid = scene.Uuid;
+
+        // Act - Search for the Scene name while on the Problem node (forward search)
+        var result = _searchService.SearchString(problem.Node, "Clue", model);
+
+        // Assert - Should find the Scene through StructureBeat reference
+        Assert.IsTrue(result, "Should find 'Clue Discovery' scene when searching Problem that binds to it");
+    }
+
+    [TestMethod]
+    public async Task SearchString_DoesNotFindUnrelatedProblem()
+    {
+        // Arrange
+        var model = await _outlineService.CreateModel("Negative Test", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        // Create a Problem and Scene that are NOT bound together
+        var problem = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+        problem.Name = "Unrelated Problem";
+
+        var scene = _outlineService.AddStoryElement(model, StoryItemType.Scene, overview.Node);
+        scene.Name = "Unrelated Scene";
+
+        // Act - Search for Problem name on unrelated Scene
+        var result = _searchService.SearchString(scene.Node, "Unrelated Problem", model);
+
+        // Assert - Should NOT find because they're not related
+        Assert.IsFalse(result, "Should not find unrelated Problem when searching Scene");
+    }
+
+    [TestMethod]
+    public async Task SearchString_FindsMultipleProblemsReferencingSameScene()
+    {
+        // Arrange
+        var model = await _outlineService.CreateModel("Multiple References Test", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        // Create one Scene
+        var scene = _outlineService.AddStoryElement(model, StoryItemType.Scene, overview.Node);
+        scene.Name = "Climax Scene";
+
+        // Create two Problems that both reference the Scene
+        var problem1 = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+        problem1.Name = "Primary Problem";
+        var problemModel1 = (ProblemModel)problem1;
+        problemModel1.StructureBeats.Add(new StructureBeatViewModel("Beat 1", ""));
+        problemModel1.StructureBeats[0].Guid = scene.Uuid;
+
+        var problem2 = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+        problem2.Name = "Secondary Problem";
+        var problemModel2 = (ProblemModel)problem2;
+        problemModel2.StructureBeats.Add(new StructureBeatViewModel("Beat 1", ""));
+        problemModel2.StructureBeats[0].Guid = scene.Uuid;
+
+        // Act - Search for first Problem while on Scene
+        var result1 = _searchService.SearchString(scene.Node, "Primary", model);
+        var result2 = _searchService.SearchString(scene.Node, "Secondary", model);
+
+        // Assert - Should find both Problems
+        Assert.IsTrue(result1, "Should find 'Primary Problem' from Scene");
+        Assert.IsTrue(result2, "Should find 'Secondary Problem' from Scene");
+    }
+
+    [TestMethod]
+    public async Task SearchString_FindsProblemBindingAnotherProblem()
+    {
+        // Arrange - Problems can bind to other Problems in their StructureBeats
+        var model = await _outlineService.CreateModel("Problem to Problem Test", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        // Create a parent Problem
+        var parentProblem = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+        parentProblem.Name = "Master Problem";
+
+        // Create a child Problem
+        var childProblem = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+        childProblem.Name = "Sub Problem";
+
+        // Bind child Problem to parent's structure beat
+        var parentModel = (ProblemModel)parentProblem;
+        parentModel.StructureBeats.Add(new StructureBeatViewModel("Beat 1", ""));
+        parentModel.StructureBeats[0].Guid = childProblem.Uuid;
+
+        // Act - Search for parent Problem name while on child Problem
+        var result = _searchService.SearchString(childProblem.Node, "Master", model);
+
+        // Assert - Should find parent Problem
+        Assert.IsTrue(result, "Should find 'Master Problem' when searching child Problem bound to it");
     }
 
     #endregion

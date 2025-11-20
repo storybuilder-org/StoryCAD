@@ -32,6 +32,7 @@ public class SearchService
     /// <summary>
     ///     Searches a StoryElement for a given string using reflection.
     ///     Performs case-insensitive search across all string properties and referenced element names.
+    ///     Also searches for reverse relationships (e.g., Problems that reference this element in StructureBeats).
     /// </summary>
     /// <param name="node">The StoryNodeItem whose StoryElement will be searched.</param>
     /// <param name="searchArg">The string to search for (case-insensitive).</param>
@@ -52,8 +53,14 @@ public class SearchService
             return false;
         }
 
-        // Perform string search
-        return SearchElementForString(element, searchArg.ToLower(), model.StoryElements);
+        // Perform direct string search
+        if (SearchElementForString(element, searchArg.ToLower(), model.StoryElements))
+        {
+            return true;
+        }
+
+        // Check for reverse relationships - other elements referencing this one
+        return SearchReverseReferences(element.Uuid, searchArg.ToLower(), model.StoryElements);
     }
 
     /// <summary>
@@ -148,6 +155,14 @@ public class SearchService
                 else if (IsCollectionOfType(property.PropertyType, "RelationshipModel"))
                 {
                     if (SearchRelationshipCollectionForString(value, searchString, elementCollection))
+                    {
+                        return true;
+                    }
+                }
+                // Handle StructureBeat collections
+                else if (IsCollectionOfType(property.PropertyType, "StructureBeatViewModel"))
+                {
+                    if (SearchStructureBeatCollectionForString(value, searchString, elementCollection))
                     {
                         return true;
                     }
@@ -446,6 +461,37 @@ public class SearchService
     }
 
     /// <summary>
+    ///     Searches a collection of StructureBeat objects for string matches.
+    ///     Resolves the Guid in each beat to get the element name and searches it.
+    /// </summary>
+    private bool SearchStructureBeatCollectionForString(object collection, string searchString,
+        StoryElementCollection elementCollection)
+    {
+        if (collection is not IEnumerable beats)
+        {
+            return false;
+        }
+
+        foreach (var beat in beats)
+        {
+            var guidProp = beat.GetType().GetProperty("Guid");
+            if (guidProp != null)
+            {
+                var guid = (Guid)guidProp.GetValue(beat);
+                if (guid != Guid.Empty &&
+                    elementCollection.StoryElementGuids.TryGetValue(guid, out var element) &&
+                    !string.IsNullOrEmpty(element.Name) &&
+                    element.Name.ToLower().Contains(searchString))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
     ///     Searches a collection of StructureBeat objects for UUID matches.
     /// </summary>
     private bool SearchStructureBeatCollectionForUuid(object collection, Guid targetUuid)
@@ -490,5 +536,107 @@ public class SearchService
         }
 
         return found;
+    }
+
+    /// <summary>
+    ///     Searches for elements that reference the given UUID and checks if they match the search string.
+    ///     This enables bidirectional search - e.g., searching for a Scene name will find Problems
+    ///     that reference that Scene in their StructureBeats.
+    /// </summary>
+    /// <param name="targetUuid">The UUID being referenced.</param>
+    /// <param name="searchString">The lowercase search string to match.</param>
+    /// <param name="elementCollection">The story elements collection.</param>
+    /// <returns>true if any referencing element matches the search string; otherwise, false.</returns>
+    private bool SearchReverseReferences(Guid targetUuid, string searchString, StoryElementCollection elementCollection)
+    {
+        // Iterate through all elements to find ones that reference this UUID
+        foreach (var element in elementCollection.StoryElementGuids.Values)
+        {
+            // Skip if the element doesn't match the search string
+            if (string.IsNullOrEmpty(element.Name) || !element.Name.ToLower().Contains(searchString))
+            {
+                continue;
+            }
+
+            // Check if this element references the target UUID
+            if (ElementReferencesUuid(element, targetUuid))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Checks if an element references a given UUID in any of its properties.
+    ///     Used for reverse relationship searches.
+    /// </summary>
+    /// <param name="element">The element to check.</param>
+    /// <param name="targetUuid">The UUID to search for.</param>
+    /// <returns>true if the element references the UUID; otherwise, false.</returns>
+    private bool ElementReferencesUuid(StoryElement element, Guid targetUuid)
+    {
+        var type = element.GetType();
+        var properties = PropertyCache.GetOrAdd(type,
+            t => t.GetProperties(BindingFlags.Public | BindingFlags.Instance));
+
+        foreach (var property in properties)
+        {
+            try
+            {
+                // Skip the element's own UUID
+                if (property.Name.Equals("Uuid", StringComparison.OrdinalIgnoreCase) ||
+                    property.Name.Equals("_uuid", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var value = property.GetValue(element);
+                if (value == null)
+                {
+                    continue;
+                }
+
+                // Check Guid properties
+                if (property.PropertyType == typeof(Guid))
+                {
+                    if ((Guid)value == targetUuid)
+                    {
+                        return true;
+                    }
+                }
+                // Check collections of Guids
+                else if (IsCollectionOfType(property.PropertyType, typeof(Guid)))
+                {
+                    if (SearchGuidCollectionForUuid(value, targetUuid))
+                    {
+                        return true;
+                    }
+                }
+                // Check RelationshipModel collections
+                else if (IsCollectionOfType(property.PropertyType, "RelationshipModel"))
+                {
+                    if (SearchRelationshipCollectionForUuid(value, targetUuid))
+                    {
+                        return true;
+                    }
+                }
+                // Check StructureBeat collections (the key for Problem-Scene relationships)
+                else if (IsCollectionOfType(property.PropertyType, "StructureBeatViewModel"))
+                {
+                    if (SearchStructureBeatCollectionForUuid(value, targetUuid))
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.Log(LogLevel.Warn, $"Error checking property {property.Name} for UUID reference: {ex.Message}");
+            }
+        }
+
+        return false;
     }
 }
