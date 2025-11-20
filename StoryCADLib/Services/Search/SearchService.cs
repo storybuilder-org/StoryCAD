@@ -1,8 +1,7 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Reflection;
-//using LogLevel = StoryCAD.Services.Logging.LogLevel;
 
 namespace StoryCADLib.Services.Search;
 
@@ -21,45 +20,34 @@ public class SearchService
 
     private readonly ILogService _logger;
 
-    /// <summary>
-    ///     Initializes a new instance of the SearchService class.
-    /// </summary>
     public SearchService(ILogService logger)
     {
         _logger = logger;
     }
+
+    #region Public API
 
     /// <summary>
     ///     Searches a StoryElement for a given string using reflection.
     ///     Performs case-insensitive search across all string properties and referenced element names.
     ///     Also searches for reverse relationships (e.g., Problems that reference this element in StructureBeats).
     /// </summary>
-    /// <param name="node">The StoryNodeItem whose StoryElement will be searched.</param>
-    /// <param name="searchArg">The string to search for (case-insensitive).</param>
-    /// <param name="model">The StoryModel containing the StoryElements.</param>
-    /// <returns>true if the StoryElement contains the search argument; otherwise, false.</returns>
     public bool SearchString(StoryNodeItem node, string searchArg, StoryModel model)
     {
-        // Validate input parameters
         if (string.IsNullOrEmpty(searchArg) || node == null || model?.StoryElements?.StoryElementGuids == null)
-        {
             return false;
-        }
 
-        // Get the element for this node
         if (!model.StoryElements.StoryElementGuids.TryGetValue(node.Uuid, out var element))
         {
             _logger?.Log(LogLevel.Info, $"No element found for UUID {node.Uuid}");
             return false;
         }
 
-        // Perform direct string search
+        // Direct search
         if (SearchElementForString(element, searchArg.ToLower(), model.StoryElements))
-        {
             return true;
-        }
 
-        // Check for reverse relationships - other elements referencing this one
+        // Reverse search - find elements that reference this one
         return SearchReverseReferences(element.Uuid, searchArg.ToLower(), model.StoryElements);
     }
 
@@ -67,105 +55,60 @@ public class SearchService
     ///     Searches a StoryElement for references to a given UUID using reflection.
     ///     Optionally removes found references when delete flag is set.
     /// </summary>
-    /// <param name="node">The StoryNodeItem whose StoryElement to search.</param>
-    /// <param name="searchArg">The UUID to search for.</param>
-    /// <param name="model">The StoryModel to search in.</param>
-    /// <param name="delete">If true, deletes found references.</param>
-    /// <returns>true if the StoryElement contains the UUID reference; otherwise, false.</returns>
     public bool SearchUuid(StoryNodeItem node, Guid searchArg, StoryModel model, bool delete = false)
     {
-        // Validate input parameters
         if (node == null || model?.StoryElements?.StoryElementGuids == null)
-        {
             return false;
-        }
 
-        // Get the element for this node
         if (!model.StoryElements.StoryElementGuids.TryGetValue(node.Uuid, out var element))
         {
             _logger?.Log(LogLevel.Info, $"No element found for UUID {node.Uuid}");
             return false;
         }
 
-        // Perform UUID search/deletion
         return SearchElementForUuid(element, searchArg, delete);
     }
+
+    #endregion
+
+    #region Core Search Logic
 
     /// <summary>
     ///     Searches an object for string content using reflection.
     /// </summary>
-    /// <param name="obj">The object to search.</param>
-    /// <param name="searchString">The lowercase search string.</param>
-    /// <param name="elementCollection">The story elements collection for lookups.</param>
-    /// <returns>true if the search string is found; otherwise, false.</returns>
     private bool SearchElementForString(object obj, string searchString, StoryElementCollection elementCollection)
     {
-        if (obj == null)
-        {
-            return false;
-        }
+        if (obj == null) return false;
 
-        var type = obj.GetType();
+        var properties = GetCachedProperties(obj.GetType());
 
-        // Get cached properties or cache them for performance
-        var properties = PropertyCache.GetOrAdd(type,
-            t => t.GetProperties(BindingFlags.Public | BindingFlags.Instance));
-
-        // Search all public properties
         foreach (var property in properties)
         {
             try
             {
                 var value = property.GetValue(obj);
-                if (value == null)
-                {
-                    continue;
-                }
+                if (value == null) continue;
 
-                // Handle string properties
+                // String properties
                 if (property.PropertyType == typeof(string))
                 {
-                    var stringValue = (string)value;
-                    if (!string.IsNullOrEmpty(stringValue) && stringValue.ToLower().Contains(searchString))
-                    {
+                    if (((string)value).ToLower().Contains(searchString))
                         return true;
-                    }
                 }
-                // Handle Guid properties - check their associated element names
+                // Guid properties - search referenced element name
                 else if (property.PropertyType == typeof(Guid))
                 {
-                    var guidValue = (Guid)value;
-                    if (guidValue != Guid.Empty &&
-                        elementCollection.StoryElementGuids.TryGetValue(guidValue, out var element) &&
-                        !string.IsNullOrEmpty(element.Name) &&
-                        element.Name.ToLower().Contains(searchString))
-                    {
+                    var guid = (Guid)value;
+                    if (guid != Guid.Empty &&
+                        elementCollection.StoryElementGuids.TryGetValue(guid, out var element) &&
+                        element.Name?.ToLower().Contains(searchString) == true)
                         return true;
-                    }
                 }
-                // Handle collections of Guids
-                else if (IsCollectionOfType(property.PropertyType, typeof(Guid)))
+                // Collections
+                else if (value is IEnumerable && property.PropertyType.IsGenericType)
                 {
-                    if (SearchGuidCollectionForString(value, searchString, elementCollection))
-                    {
+                    if (SearchCollectionForString(value, property.PropertyType, searchString, elementCollection))
                         return true;
-                    }
-                }
-                // Handle RelationshipModel collections
-                else if (IsCollectionOfType(property.PropertyType, "RelationshipModel"))
-                {
-                    if (SearchRelationshipCollectionForString(value, searchString, elementCollection))
-                    {
-                        return true;
-                    }
-                }
-                // Handle StructureBeat collections
-                else if (IsCollectionOfType(property.PropertyType, "StructureBeatViewModel"))
-                {
-                    if (SearchStructureBeatCollectionForString(value, searchString, elementCollection))
-                    {
-                        return true;
-                    }
                 }
             }
             catch (Exception ex)
@@ -179,55 +122,32 @@ public class SearchService
 
     /// <summary>
     ///     Searches an object for UUID references using reflection.
-    ///     Optionally removes found references when delete flag is set.
     /// </summary>
-    /// <param name="obj">The object to search.</param>
-    /// <param name="targetUuid">The UUID to search for.</param>
-    /// <param name="delete">Whether to delete found references.</param>
-    /// <returns>true if the UUID is found; otherwise, false.</returns>
     private bool SearchElementForUuid(object obj, Guid targetUuid, bool delete)
     {
-        if (obj == null)
-        {
-            return false;
-        }
+        if (obj == null) return false;
 
         var found = false;
-        var type = obj.GetType();
+        var properties = GetCachedProperties(obj.GetType());
 
-        // Get cached properties or cache them for performance
-        var properties = PropertyCache.GetOrAdd(type,
-            t => t.GetProperties(BindingFlags.Public | BindingFlags.Instance));
-
-        // Search all public properties
         foreach (var property in properties)
         {
             try
             {
-                // Skip the element's own UUID fields to avoid self-references
+                // Skip element's own UUID
                 if (property.Name.Equals("Uuid", StringComparison.OrdinalIgnoreCase) ||
                     property.Name.Equals("_uuid", StringComparison.OrdinalIgnoreCase))
-                {
                     continue;
-                }
 
-                // Skip read-only properties when deleting
-                if (delete && !property.CanWrite)
-                {
-                    continue;
-                }
+                if (delete && !property.CanWrite) continue;
 
                 var value = property.GetValue(obj);
-                if (value == null)
-                {
-                    continue;
-                }
+                if (value == null) continue;
 
-                // Check Guid properties
+                // Guid properties
                 if (property.PropertyType == typeof(Guid))
                 {
-                    var guidValue = (Guid)value;
-                    if (guidValue == targetUuid)
+                    if ((Guid)value == targetUuid)
                     {
                         if (delete)
                         {
@@ -235,55 +155,19 @@ public class SearchService
                             found = true;
                         }
                         else
-                        {
                             return true;
-                        }
                     }
                 }
-                // Check collections of Guids
-                else if (IsCollectionOfType(property.PropertyType, typeof(Guid)))
+                // Collections
+                else if (value is IEnumerable && property.PropertyType.IsGenericType)
                 {
                     if (delete)
                     {
-                        if (RemoveFromGuidCollection(value, targetUuid))
-                        {
+                        if (RemoveFromCollection(value, property.PropertyType, targetUuid))
                             found = true;
-                        }
                     }
-                    else if (SearchGuidCollectionForUuid(value, targetUuid))
-                    {
+                    else if (SearchCollectionForUuid(value, property.PropertyType, targetUuid))
                         return true;
-                    }
-                }
-                // Check RelationshipModel collections
-                else if (IsCollectionOfType(property.PropertyType, "RelationshipModel"))
-                {
-                    if (delete)
-                    {
-                        if (RemoveFromRelationshipCollection(value, targetUuid))
-                        {
-                            found = true;
-                        }
-                    }
-                    else if (SearchRelationshipCollectionForUuid(value, targetUuid))
-                    {
-                        return true;
-                    }
-                }
-                // Check StructureBeat collections
-                else if (IsCollectionOfType(property.PropertyType, "StructureBeat"))
-                {
-                    if (delete)
-                    {
-                        if (RemoveFromStructureBeatCollection(value, targetUuid))
-                        {
-                            found = true;
-                        }
-                    }
-                    else if (SearchStructureBeatCollectionForUuid(value, targetUuid))
-                    {
-                        return true;
-                    }
                 }
             }
             catch (Exception ex)
@@ -295,348 +179,303 @@ public class SearchService
         return found;
     }
 
+    #endregion
+
+    #region Collection Search (Unified)
+
     /// <summary>
-    ///     Checks if a type is a generic collection containing a specific element type.
+    ///     Unified method to search any collection type for string matches.
     /// </summary>
-    /// <param name="type">The type to check.</param>
-    /// <param name="elementType">The expected element type or type name.</param>
-    /// <returns>true if the type is a collection of the target type; otherwise, false.</returns>
-    private bool IsCollectionOfType(Type type, object elementType)
+    private bool SearchCollectionForString(object collection, Type collectionType, string searchString,
+        StoryElementCollection elementCollection)
     {
-        if (!type.IsGenericType)
-        {
-            return false;
-        }
+        var elementType = GetCollectionElementType(collectionType);
+        if (elementType == null) return false;
 
-        var genericDef = type.GetGenericTypeDefinition();
-        if (genericDef != typeof(List<>) && genericDef != typeof(IList<>) &&
-            genericDef != typeof(ICollection<>) && genericDef != typeof(ObservableCollection<>))
-        {
-            return false;
-        }
+        // Guid collections
+        if (elementType == typeof(Guid))
+            return SearchEnumerable<Guid>(collection, guid =>
+                guid != Guid.Empty &&
+                elementCollection.StoryElementGuids.TryGetValue(guid, out var el) &&
+                el.Name?.ToLower().Contains(searchString) == true);
 
-        var genericArg = type.GetGenericArguments()[0];
+        // StructureBeat collections
+        if (elementType.Name == "StructureBeatViewModel")
+            return SearchStructureBeats(collection, searchString, elementCollection);
 
-        return elementType switch
-        {
-            Type t => genericArg == t,
-            string typeName => genericArg.Name == typeName,
-            _ => false
-        };
+        // Relationship collections
+        if (elementType.Name == "RelationshipModel")
+            return SearchRelationships(collection, searchString, elementCollection);
+
+        return false;
     }
 
     /// <summary>
-    ///     Searches a collection of Guids for string matches.
+    ///     Unified method to search any collection type for UUID matches.
     /// </summary>
-    private bool SearchGuidCollectionForString(object collection, string searchString,
-        StoryElementCollection elementCollection)
+    private bool SearchCollectionForUuid(object collection, Type collectionType, Guid targetUuid)
     {
-        if (collection is IEnumerable<Guid> guids)
+        var elementType = GetCollectionElementType(collectionType);
+        if (elementType == null) return false;
+
+        // Guid collections
+        if (elementType == typeof(Guid))
+            return SearchEnumerable<Guid>(collection, guid => guid == targetUuid);
+
+        // StructureBeat collections
+        if (elementType.Name == "StructureBeatViewModel")
+            return SearchEnumerable(collection, beat =>
+                GetPropertyValue<Guid>(beat, "Guid") == targetUuid);
+
+        // Relationship collections
+        if (elementType.Name == "RelationshipModel")
+            return SearchEnumerable(collection, rel =>
+                GetPropertyValue<Guid>(rel, "PartnerUuid") == targetUuid);
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Unified method to remove UUID references from any collection type.
+    /// </summary>
+    private bool RemoveFromCollection(object collection, Type collectionType, Guid targetUuid)
+    {
+        var elementType = GetCollectionElementType(collectionType);
+        if (elementType == null) return false;
+
+        // Guid collections
+        if (elementType == typeof(Guid) && collection is List<Guid> guidList)
         {
-            foreach (var guid in guids)
+            var count = guidList.Count;
+            guidList.RemoveAll(g => g == targetUuid);
+            return guidList.Count < count;
+        }
+
+        // StructureBeat collections - clear Guid property
+        if (elementType.Name == "StructureBeatViewModel" && collection is IEnumerable beats)
+        {
+            var found = false;
+            foreach (var beat in beats)
             {
-                if (guid != Guid.Empty &&
-                    elementCollection.StoryElementGuids.TryGetValue(guid, out var element) &&
-                    !string.IsNullOrEmpty(element.Name) &&
-                    element.Name.ToLower().Contains(searchString))
+                if (GetPropertyValue<Guid>(beat, "Guid") == targetUuid)
                 {
-                    return true;
+                    SetPropertyValue(beat, "Guid", Guid.Empty);
+                    found = true;
                 }
             }
+            return found;
         }
 
-        return false;
-    }
-
-    /// <summary>
-    ///     Searches a collection of Guids for UUID matches.
-    /// </summary>
-    private bool SearchGuidCollectionForUuid(object collection, Guid targetUuid)
-    {
-        if (collection is IEnumerable<Guid> guids)
+        // Relationship collections
+        if (elementType.Name == "RelationshipModel" && collection is IList list)
         {
-            return guids.Contains(targetUuid);
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    ///     Removes matching UUIDs from a Guid collection.
-    /// </summary>
-    private bool RemoveFromGuidCollection(object collection, Guid targetUuid)
-    {
-        if (collection is List<Guid> guidList)
-        {
-            var originalCount = guidList.Count;
-            guidList.RemoveAll(g => g == targetUuid);
-            return guidList.Count < originalCount;
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    ///     Searches a collection of RelationshipModel objects for string matches.
-    /// </summary>
-    private bool SearchRelationshipCollectionForString(object collection, string searchString,
-        StoryElementCollection elementCollection)
-    {
-        if (collection is not IEnumerable relationships)
-        {
-            return false;
-        }
-
-        foreach (var item in relationships)
-        {
-            var partnerProp = item.GetType().GetProperty("PartnerUuid");
-            if (partnerProp == null)
+            var toRemove = new List<object>();
+            foreach (var item in list)
             {
-                continue;
+                if (GetPropertyValue<Guid>(item, "PartnerUuid") == targetUuid)
+                    toRemove.Add(item);
             }
+            foreach (var item in toRemove)
+                list.Remove(item);
+            return toRemove.Count > 0;
+        }
 
-            var partnerUuid = (Guid)partnerProp.GetValue(item);
+        return false;
+    }
+
+    #endregion
+
+    #region Specialized Collection Searches
+
+    /// <summary>
+    ///     Searches StructureBeat collections for string matches in Title, Description, or bound element name.
+    /// </summary>
+    private bool SearchStructureBeats(object collection, string searchString, StoryElementCollection elementCollection)
+    {
+        if (collection is not IEnumerable beats) return false;
+
+        foreach (var beat in beats)
+        {
+            // Search Title
+            var title = GetPropertyValue<string>(beat, "Title");
+            if (title?.ToLower().Contains(searchString) == true)
+                return true;
+
+            // Search Description
+            var description = GetPropertyValue<string>(beat, "Description");
+            if (description?.ToLower().Contains(searchString) == true)
+                return true;
+
+            // Search bound element name
+            var guid = GetPropertyValue<Guid>(beat, "Guid");
+            if (guid != Guid.Empty &&
+                elementCollection.StoryElementGuids.TryGetValue(guid, out var element) &&
+                element.Name?.ToLower().Contains(searchString) == true)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Searches Relationship collections for string matches in partner names.
+    /// </summary>
+    private bool SearchRelationships(object collection, string searchString, StoryElementCollection elementCollection)
+    {
+        if (collection is not IEnumerable relationships) return false;
+
+        foreach (var rel in relationships)
+        {
+            var partnerUuid = GetPropertyValue<Guid>(rel, "PartnerUuid");
             if (partnerUuid != Guid.Empty &&
                 elementCollection.StoryElementGuids.TryGetValue(partnerUuid, out var element) &&
-                !string.IsNullOrEmpty(element.Name) &&
-                element.Name.ToLower().Contains(searchString))
-            {
+                element.Name?.ToLower().Contains(searchString) == true)
                 return true;
-            }
         }
 
         return false;
     }
 
-    /// <summary>
-    ///     Searches a collection of RelationshipModel objects for UUID matches.
-    /// </summary>
-    private bool SearchRelationshipCollectionForUuid(object collection, Guid targetUuid)
-    {
-        if (collection is not IEnumerable relationships)
-        {
-            return false;
-        }
+    #endregion
 
-        foreach (var item in relationships)
-        {
-            var partnerProp = item.GetType().GetProperty("PartnerUuid");
-            if (partnerProp != null && (Guid)partnerProp.GetValue(item) == targetUuid)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
+    #region Reverse Search
 
     /// <summary>
-    ///     Removes relationships with matching partner UUIDs from a collection.
+    ///     Searches for elements that reference the given UUID and match the search string.
+    ///     Enables bidirectional search (e.g., find Problems that reference a Scene).
     /// </summary>
-    private bool RemoveFromRelationshipCollection(object collection, Guid targetUuid)
-    {
-        if (collection is not IList list)
-        {
-            return false;
-        }
-
-        // Collect items to remove (can't modify collection while iterating)
-        List<object> toRemove = new();
-        foreach (var item in list)
-        {
-            var partnerProp = item.GetType().GetProperty("PartnerUuid");
-            if (partnerProp != null && (Guid)partnerProp.GetValue(item) == targetUuid)
-            {
-                toRemove.Add(item);
-            }
-        }
-
-        // Remove collected items
-        foreach (var item in toRemove)
-        {
-            list.Remove(item);
-        }
-
-        return toRemove.Count > 0;
-    }
-
-    /// <summary>
-    ///     Searches a collection of StructureBeat objects for string matches.
-    ///     Resolves the Guid in each beat to get the element name and searches it.
-    /// </summary>
-    private bool SearchStructureBeatCollectionForString(object collection, string searchString,
-        StoryElementCollection elementCollection)
-    {
-        if (collection is not IEnumerable beats)
-        {
-            return false;
-        }
-
-        foreach (var beat in beats)
-        {
-            var guidProp = beat.GetType().GetProperty("Guid");
-            if (guidProp != null)
-            {
-                var guid = (Guid)guidProp.GetValue(beat);
-                if (guid != Guid.Empty &&
-                    elementCollection.StoryElementGuids.TryGetValue(guid, out var element) &&
-                    !string.IsNullOrEmpty(element.Name) &&
-                    element.Name.ToLower().Contains(searchString))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    ///     Searches a collection of StructureBeat objects for UUID matches.
-    /// </summary>
-    private bool SearchStructureBeatCollectionForUuid(object collection, Guid targetUuid)
-    {
-        if (collection is not IEnumerable beats)
-        {
-            return false;
-        }
-
-        foreach (var beat in beats)
-        {
-            var guidProp = beat.GetType().GetProperty("Guid");
-            if (guidProp != null && (Guid)guidProp.GetValue(beat) == targetUuid)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    ///     Clears UUID references in StructureBeat objects within a collection.
-    /// </summary>
-    private bool RemoveFromStructureBeatCollection(object collection, Guid targetUuid)
-    {
-        if (collection is not IEnumerable beats)
-        {
-            return false;
-        }
-
-        var found = false;
-        foreach (var beat in beats)
-        {
-            var guidProp = beat.GetType().GetProperty("Guid");
-            if (guidProp != null && guidProp.CanWrite && (Guid)guidProp.GetValue(beat) == targetUuid)
-            {
-                // Clear the reference by setting to Empty
-                guidProp.SetValue(beat, Guid.Empty);
-                found = true;
-            }
-        }
-
-        return found;
-    }
-
-    /// <summary>
-    ///     Searches for elements that reference the given UUID and checks if they match the search string.
-    ///     This enables bidirectional search - e.g., searching for a Scene name will find Problems
-    ///     that reference that Scene in their StructureBeats.
-    /// </summary>
-    /// <param name="targetUuid">The UUID being referenced.</param>
-    /// <param name="searchString">The lowercase search string to match.</param>
-    /// <param name="elementCollection">The story elements collection.</param>
-    /// <returns>true if any referencing element matches the search string; otherwise, false.</returns>
     private bool SearchReverseReferences(Guid targetUuid, string searchString, StoryElementCollection elementCollection)
     {
-        // Iterate through all elements to find ones that reference this UUID
         foreach (var element in elementCollection.StoryElementGuids.Values)
         {
-            // Skip if the element doesn't match the search string
-            if (string.IsNullOrEmpty(element.Name) || !element.Name.ToLower().Contains(searchString))
-            {
+            if (!ElementReferencesUuid(element, targetUuid))
                 continue;
-            }
 
-            // Check if this element references the target UUID
-            if (ElementReferencesUuid(element, targetUuid))
-            {
+            // Check element name
+            if (element.Name?.ToLower().Contains(searchString) == true)
                 return true;
-            }
+
+            // Check element content (including StructureBeat text)
+            if (SearchElementForString(element, searchString, elementCollection))
+                return true;
         }
 
         return false;
     }
 
     /// <summary>
-    ///     Checks if an element references a given UUID in any of its properties.
-    ///     Used for reverse relationship searches.
+    ///     Checks if an element references a given UUID in any property.
     /// </summary>
-    /// <param name="element">The element to check.</param>
-    /// <param name="targetUuid">The UUID to search for.</param>
-    /// <returns>true if the element references the UUID; otherwise, false.</returns>
     private bool ElementReferencesUuid(StoryElement element, Guid targetUuid)
     {
-        var type = element.GetType();
-        var properties = PropertyCache.GetOrAdd(type,
-            t => t.GetProperties(BindingFlags.Public | BindingFlags.Instance));
+        var properties = GetCachedProperties(element.GetType());
 
         foreach (var property in properties)
         {
             try
             {
-                // Skip the element's own UUID
-                if (property.Name.Equals("Uuid", StringComparison.OrdinalIgnoreCase) ||
-                    property.Name.Equals("_uuid", StringComparison.OrdinalIgnoreCase))
-                {
+                // Skip element's own UUID
+                if (property.Name.Equals("Uuid", StringComparison.OrdinalIgnoreCase))
                     continue;
-                }
 
                 var value = property.GetValue(element);
-                if (value == null)
-                {
-                    continue;
-                }
+                if (value == null) continue;
 
-                // Check Guid properties
-                if (property.PropertyType == typeof(Guid))
+                // Guid properties
+                if (property.PropertyType == typeof(Guid) && (Guid)value == targetUuid)
+                    return true;
+
+                // Collections
+                if (value is IEnumerable && property.PropertyType.IsGenericType)
                 {
-                    if ((Guid)value == targetUuid)
-                    {
+                    if (SearchCollectionForUuid(value, property.PropertyType, targetUuid))
                         return true;
-                    }
-                }
-                // Check collections of Guids
-                else if (IsCollectionOfType(property.PropertyType, typeof(Guid)))
-                {
-                    if (SearchGuidCollectionForUuid(value, targetUuid))
-                    {
-                        return true;
-                    }
-                }
-                // Check RelationshipModel collections
-                else if (IsCollectionOfType(property.PropertyType, "RelationshipModel"))
-                {
-                    if (SearchRelationshipCollectionForUuid(value, targetUuid))
-                    {
-                        return true;
-                    }
-                }
-                // Check StructureBeat collections (the key for Problem-Scene relationships)
-                else if (IsCollectionOfType(property.PropertyType, "StructureBeatViewModel"))
-                {
-                    if (SearchStructureBeatCollectionForUuid(value, targetUuid))
-                    {
-                        return true;
-                    }
                 }
             }
             catch (Exception ex)
             {
-                _logger?.Log(LogLevel.Warn, $"Error checking property {property.Name} for UUID reference: {ex.Message}");
+                _logger?.Log(LogLevel.Warn, $"Error checking property {property.Name}: {ex.Message}");
             }
         }
 
         return false;
     }
+
+    #endregion
+
+    #region Reflection Helpers
+
+    /// <summary>
+    ///     Gets cached property info for a type.
+    /// </summary>
+    private PropertyInfo[] GetCachedProperties(Type type)
+    {
+        return PropertyCache.GetOrAdd(type, t =>
+            t.GetProperties(BindingFlags.Public | BindingFlags.Instance));
+    }
+
+    /// <summary>
+    ///     Gets the element type of a generic collection.
+    /// </summary>
+    private Type GetCollectionElementType(Type collectionType)
+    {
+        if (!collectionType.IsGenericType) return null;
+
+        var genericDef = collectionType.GetGenericTypeDefinition();
+        if (genericDef != typeof(List<>) && genericDef != typeof(IList<>) &&
+            genericDef != typeof(ICollection<>) && genericDef != typeof(ObservableCollection<>))
+            return null;
+
+        return collectionType.GetGenericArguments()[0];
+    }
+
+    /// <summary>
+    ///     Gets a property value using reflection.
+    /// </summary>
+    private T GetPropertyValue<T>(object obj, string propertyName)
+    {
+        var prop = obj.GetType().GetProperty(propertyName);
+        if (prop == null) return default;
+
+        var value = prop.GetValue(obj);
+        return value is T typedValue ? typedValue : default;
+    }
+
+    /// <summary>
+    ///     Sets a property value using reflection.
+    /// </summary>
+    private void SetPropertyValue(object obj, string propertyName, object value)
+    {
+        var prop = obj.GetType().GetProperty(propertyName);
+        if (prop?.CanWrite == true)
+            prop.SetValue(obj, value);
+    }
+
+    /// <summary>
+    ///     Searches an enumerable collection using a predicate.
+    /// </summary>
+    private bool SearchEnumerable<T>(object collection, Func<T, bool> predicate)
+    {
+        if (collection is IEnumerable<T> typedCollection)
+            return typedCollection.Any(predicate);
+        return false;
+    }
+
+    /// <summary>
+    ///     Searches an enumerable collection using a predicate (non-generic).
+    /// </summary>
+    private bool SearchEnumerable(object collection, Func<object, bool> predicate)
+    {
+        if (collection is IEnumerable enumerable)
+        {
+            foreach (var item in enumerable)
+            {
+                if (predicate(item))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    #endregion
 }

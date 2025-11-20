@@ -562,4 +562,114 @@ public class SearchServiceTests
     }
 
     #endregion
+
+    #region Beat Text Search Tests
+
+    [TestMethod]
+    public async Task SearchString_FindsBeatTitle()
+    {
+        // Arrange
+        var model = await _outlineService.CreateModel("Beat Title Test", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        var problem = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+        problem.Name = "Test Problem";
+
+        var problemModel = (ProblemModel)problem;
+        problemModel.StructureBeats.Add(new StructureBeatViewModel("Inciting Incident", "This is the description"));
+
+        // Act - Search for text in beat title
+        var result = _searchService.SearchString(problem.Node, "Inciting", model);
+
+        // Assert
+        Assert.IsTrue(result, "Should find 'Inciting' in beat title");
+    }
+
+    [TestMethod]
+    public async Task SearchString_FindsBeatDescription()
+    {
+        // Arrange
+        var model = await _outlineService.CreateModel("Beat Description Test", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        var problem = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+        problem.Name = "Test Problem";
+
+        var problemModel = (ProblemModel)problem;
+        problemModel.StructureBeats.Add(new StructureBeatViewModel("Beat 1", "The hero discovers a mysterious artifact"));
+
+        // Act - Search for text in beat description
+        var result = _searchService.SearchString(problem.Node, "artifact", model);
+
+        // Assert
+        Assert.IsTrue(result, "Should find 'artifact' in beat description");
+    }
+
+    [TestMethod]
+    public async Task SearchString_FindsBeatText_CaseInsensitive()
+    {
+        // Arrange
+        var model = await _outlineService.CreateModel("Case Test", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        var problem = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+        problem.Name = "Test Problem";
+
+        var problemModel = (ProblemModel)problem;
+        problemModel.StructureBeats.Add(new StructureBeatViewModel("CLIMAX", "Final BATTLE"));
+
+        // Act - Search with different case
+        var result1 = _searchService.SearchString(problem.Node, "climax", model);
+        var result2 = _searchService.SearchString(problem.Node, "battle", model);
+
+        // Assert
+        Assert.IsTrue(result1, "Should find 'climax' in 'CLIMAX' (case-insensitive)");
+        Assert.IsTrue(result2, "Should find 'battle' in 'BATTLE' (case-insensitive)");
+    }
+
+    [TestMethod]
+    public async Task SearchString_FindsProblemByBeatText()
+    {
+        // Arrange - Search for Problem via its beat text
+        var model = await _outlineService.CreateModel("Reverse Beat Test", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        var problem = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+        problem.Name = "Love Story Problem";
+
+        var scene = _outlineService.AddStoryElement(model, StoryItemType.Scene, overview.Node);
+        scene.Name = "Meeting Scene";
+
+        var problemModel = (ProblemModel)problem;
+        problemModel.StructureBeats.Add(new StructureBeatViewModel("First Kiss", "Romantic moment under stars"));
+        problemModel.StructureBeats[0].Guid = scene.Uuid;
+
+        // Act - Search for beat text while viewing the Scene (reverse search)
+        var result = _searchService.SearchString(scene.Node, "stars", model);
+
+        // Assert
+        Assert.IsTrue(result, "Should find Problem with beat description containing 'stars' when searching from bound Scene");
+    }
+
+    [TestMethod]
+    public async Task SearchString_DoesNotFindUnrelatedBeatText()
+    {
+        // Arrange
+        var model = await _outlineService.CreateModel("Negative Beat Test", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        var problem = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+        problem.Name = "Test Problem";
+
+        var problemModel = (ProblemModel)problem;
+        problemModel.StructureBeats.Add(new StructureBeatViewModel("Beat 1", "Some description"));
+
+        // Act - Search for text not in beats
+        var result = _searchService.SearchString(problem.Node, "nonexistent", model);
+
+        // Assert
+        Assert.IsFalse(result, "Should not find text that doesn't exist in beats");
+    }
+
+    #endregion
 }
