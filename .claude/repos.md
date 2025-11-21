@@ -68,11 +68,6 @@ This document maps the repositories in the development environment. Each reposit
 
 ## Other Repositories
 
-### storybuilder-miscellaneous
-- **Path**: `/mnt/d/dev/src/storybuilder-miscellaneous/`
-- **README**: [README.md](/mnt/d/dev/src/storybuilder-miscellaneous/README.md)
-- **Summary**: Private repo with sysadmin material for StoryBuilder (confidential)
-
 ### openai
 - **Path**: `/mnt/d/dev/src/openai/`
 - **README**: [README.md](/mnt/d/dev/src/openai/README.md)

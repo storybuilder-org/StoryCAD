@@ -43,6 +43,8 @@ public class WebViewModel : ObservableRecipient, INavigable, ISaveable
 
     public void Activate(object parameter)
     {
+        _changeable = false;  // Disable change tracking before setting Model
+        _changed = false;
         Model = (WebModel)parameter;
         LoadModel();
     }
@@ -69,6 +71,10 @@ public class WebViewModel : ObservableRecipient, INavigable, ISaveable
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
+        // Ignore Model property changes - these happen during navigation, not user edits
+        if (args.PropertyName == nameof(Model))
+            return;
+
         if (_changeable)
         {
             if (!_changed)

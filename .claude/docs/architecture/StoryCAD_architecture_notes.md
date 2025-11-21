@@ -186,17 +186,6 @@ ManualTest/docs/
 
 **Note**: StoryCAD has a public API (SemanticKernelAPI) that external tools can use
 
----
-
-#### 7. storybuilder-miscellaneous
-- **GitHub**: [github.com/storybuilder-org/storybuilder-miscellaneous](https://github.com/storybuilder-org/storybuilder-miscellaneous)
-- **Local Path**: `/mnt/d/dev/src/storybuilder-miscellaneous/`
-- **Visibility**: Private
-- **Purpose**: Private repository for sysadmin material, secrets, archived docs
-- **Content**: Confidential/administrative material
-- **Usage**: Archive location for closed issue documentation from `devdocs/`
-
----
 
 ### Repository Relationships
 
@@ -247,7 +236,7 @@ API-Samples
 2. Build CollaboratorLib.dll
 3. Set `STORYCAD_PLUGIN_DIR` environment variable
 4. StoryCAD loads plugin at runtime
-
+[StoryCAD.2025-11-18.log](../../../../../../Downloads/StoryCAD.2025-11-18.log)
 #### Writing Documentation
 **For End Users**:
 - Repository: `ManualTest`
@@ -297,7 +286,6 @@ API-Samples
 | StoryCAD-Legacy-STBX-Conversion-Tool | https://github.com/storybuilder-org/StoryCAD-Legacy-STBX-Conversion-Tool | Public |
 | NRTFTree-Async | https://github.com/storybuilder-org/NRTFTree-Async | Public |
 | API-Samples | https://github.com/storybuilder-org/API-Samples | Private |
-| storybuilder-miscellaneous | https://github.com/storybuilder-org/storybuilder-miscellaneous | Private |
 
 ---
 
