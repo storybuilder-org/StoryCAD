@@ -72,16 +72,14 @@ public class SomeViewModel
 
 **Contract between StoryCAD and plugin**:
 ```csharp
-public interface ICollaborator
+public interface ICollaborator : IDisposable
 {
-    void LoadWizardViewModel();
-    void LoadWorkflowViewModel(StoryItemType elementType);
-    void LoadWorkflowModel(StoryElement element, string workflow);
-    Task ProcessWorkflowAsync();
-    Task SendButtonClickedAsync();
-    void SaveOutputs();
+    bool Open(IStoryCADAPI api, StoryModel model);
+    CollaboratorResult Close();
 }
 ```
+
+`Open` launches the Collaborator session (StoryCAD passes the current `StoryModel` and API), and `Close` returns a session summary when the host dismisses the plugin.
 
 **Implementation in CollaboratorLib**:
 ```csharp

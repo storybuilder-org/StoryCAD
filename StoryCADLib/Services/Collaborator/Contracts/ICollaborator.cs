@@ -1,51 +1,30 @@
 #pragma warning disable CS8632 // Nullable annotations used without nullable context
+using StoryCADLib.Models;
+using StoryCADLib.Services.API;
+
 namespace StoryCADLib.Services.Collaborator.Contracts;
 
 /// <summary>
-///     Public interface for Collaborator plugin functionality.
-///     Implemented by external plugins to provide AI-assisted workflows.
+///     Simplified interface for Collaborator plugin functionality.
+///     The plugin is self-contained and handles all workflow operations internally.
 /// </summary>
 public interface ICollaborator
 {
     /// <summary>
-    ///     Creates the Collaborator window with the provided context (typically the API)
-    /// </summary>
-    /// <param name="context">Context object containing API and other initialization data</param>
-    /// <returns>The created Window instance</returns>
-    Window CreateWindow(object? context);
+///     Opens a Collaborator session for the provided story.
+/// </summary>
+/// <param name="api">API surfaced to the plugin for interacting with StoryCAD data</param>
+/// <param name="model">The story model Collaborator should operate on</param>
+/// <returns>The window hosting Collaborator's UI</returns>
+Window Open(IStoryCADAPI api, StoryModel model);
 
-    /// <summary>
-    ///     Loads the workflow view model for a specific element type
-    /// </summary>
-    /// <param name="elementType">The type of story element to create workflow for</param>
-    void LoadWorkflowViewModel(StoryItemType elementType);
+/// <summary>
+///     Signals that the host is closing Collaborator and retrieves a session summary.
+/// </summary>
+CollaboratorResult Close();
 
-    /// <summary>
-    ///     Loads the wizard view model for guided story creation
-    /// </summary>
-    void LoadWizardViewModel();
-
-    /// <summary>
-    ///     Loads a workflow model for a specific element and workflow
-    /// </summary>
-    /// <param name="element">The story element to work with</param>
-    /// <param name="workflow">The workflow identifier</param>
-    void LoadWorkflowModel(StoryElement element, string workflow);
-
-    /// <summary>
-    ///     Processes the current workflow asynchronously
-    /// </summary>
-    /// <returns>Task representing the async operation</returns>
-    Task ProcessWorkflowAsync();
-
-    /// <summary>
-    ///     Handles the send button click event asynchronously
-    /// </summary>
-    /// <returns>Task representing the async operation</returns>
-    Task SendButtonClickedAsync();
-
-    /// <summary>
-    ///     Saves the current workflow outputs to the story model
-    /// </summary>
-    void SaveOutputs();
+/// <summary>
+///     Disposes of resources used by the Collaborator plugin.
+/// </summary>
+void Dispose();
 }

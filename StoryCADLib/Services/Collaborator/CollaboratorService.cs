@@ -1,11 +1,12 @@
 using System.Reflection;
 using System.Runtime.Loader;
 using Windows.ApplicationModel.AppExtensions;
-using Microsoft.UI.Windowing;
-using StoryCADLib.Collaborator;
-using StoryCADLib.Collaborator.ViewModels;
+using Windows.ApplicationModel.Resources.Core;
+using Windows.Storage;
+using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator.Contracts;
+using StoryCADLib.Services.Outline;
 
 namespace StoryCADLib.Services.Collaborator;
 
@@ -49,149 +50,54 @@ public class CollaboratorService
     /// </summary>
     public bool HasCollaborator => _collaboratorInterface != null;
 
-    /// <summary>
-    ///     Sets the collaborator instance (for testing or direct injection)
-    /// </summary>
-    public void SetCollaborator(ICollaborator collaboratorInstance)
-    {
-        _collaboratorInterface = collaboratorInstance;
-    }
-
-    public void LoadWorkflows(CollaboratorArgs args)
-    {
-        // Load the workflow navigation menu for user selection
-        if (_collaboratorInterface != null)
-        {
-            _collaboratorInterface.LoadWizardViewModel();
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
 
     /// <summary>
-    ///     Load the workflow view model for a specific element type
+    ///     Opens the Collaborator window with the current story context.
+    ///     Collaborator handles all workflow operations internally.
     /// </summary>
-    public void LoadWorkflowViewModel(StoryItemType elementType)
+    public void OpenCollaborator()
     {
-        if (_collaboratorInterface != null)
+        if (_collaboratorInterface == null)
         {
-            _collaboratorInterface.LoadWorkflowViewModel(elementType);
+            _logService.Log(LogLevel.Warn, "Collaborator plugin not available - plugin DLL not found or failed to load");
+            return;
         }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
 
-    /// <summary>
-    ///     Load the WizardViewModel (WizardShell's VM) with the high level
-    ///     NavigationView menu.
-    ///     This is a proxy for Collaborator's LoadWizardViewModel.
-    /// </summary>
-    public void LoadWizardViewModel()
-    {
-        if (_collaboratorInterface != null)
+        // Get the current StoryModel from AppState
+        var storyModel = _appState.CurrentDocument?.Model;
+        if (storyModel == null)
         {
-            _collaboratorInterface.LoadWizardViewModel();
+            _logService.Log(LogLevel.Error, "No StoryModel available - no document is open");
+            return;
         }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
 
-    /// <summary>
-    ///     Load the WorkflowViewModel with the currently selected
-    ///     Workflow Model.
-    ///     This is a proxy for Collaborator's LoadWorkflowModel method.
-    /// </summary>
-    public void LoadWorkflowModel(StoryElement element, string workflow)
-    {
-        if (_collaboratorInterface != null)
+        // Create the API instance for Collaborator to use
+        var outlineService = Ioc.Default.GetService<OutlineService>();
+        if (outlineService != null)
         {
-            _collaboratorInterface.LoadWorkflowModel(element, workflow);
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
+            var api = new SemanticKernelApi(outlineService);
+            api.SetCurrentModel(storyModel);
 
-    /// <summary>
-    ///     Process the Workflow we've loaded.
-    ///     This is a proxy for Collaborator's ProcessWorkflow method.
-    /// </summary>
-    public void ProcessWorkflow()
-    {
-        if (_collaboratorInterface != null)
-        {
-            // Call async version synchronously for backward compatibility
-            Task.Run(async () => await ProcessWorkflowAsync()).Wait();
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
+            try
+            {
+                CollaboratorWindow = _collaboratorInterface.Open(api, storyModel);
+            }
+            catch (Exception ex)
+            {
+                _logService.Log(LogLevel.Error, $"Failed to open Collaborator: {ex.Message}");
+                return;
+            }
 
-    /// <summary>
-    ///     Process the Workflow we've loaded asynchronously.
-    /// </summary>
-    public async Task ProcessWorkflowAsync()
-    {
-        if (_collaboratorInterface != null)
-        {
-            await _collaboratorInterface.ProcessWorkflowAsync();
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
-
-    public void SendButtonClicked()
-    {
-        if (_collaboratorInterface != null)
-        {
-            // Call async version synchronously for backward compatibility
-            Task.Run(async () => await SendButtonClickedAsync()).Wait();
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
-
-    /// <summary>
-    ///     Handle send button click asynchronously.
-    /// </summary>
-    public async Task SendButtonClickedAsync()
-    {
-        if (_collaboratorInterface != null)
-        {
-            await _collaboratorInterface.SendButtonClickedAsync();
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
-        }
-    }
-
-    /// <summary>
-    ///     Save any unchanged OutputProperty values to their StoryElement.
-    ///     This is a proxy for Collaborator's SaveOutputs() method.
-    /// </summary>
-    public void SaveOutputs()
-    {
-        if (_collaboratorInterface != null)
-        {
-            _collaboratorInterface.SaveOutputs();
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator interface not initialized");
+            if (CollaboratorWindow != null)
+            {
+                CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
+                CollaboratorWindow.Activate();
+                _logService.Log(LogLevel.Info, "Collaborator window opened");
+            }
+            else
+            {
+                _logService.Log(LogLevel.Error, "Failed to create Collaborator window");
+            }
         }
     }
 
@@ -208,59 +114,41 @@ public class CollaboratorService
         // Use the custom context to load the assembly
         CollabAssembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dllPath);
         _logService.Log(LogLevel.Info, "Loaded CollaboratorLib.dll");
-        //Create a new WindowEx for collaborator to prevent access errors.
-        CollaboratorWindow = new Window();
-        CollaboratorWindow.AppWindow.Closing += HideCollaborator;
-        // Create a Window for StoryBuilder Collaborator
-        Frame rootFrame = new();
-        //CollaboratorWindow = args.window;
-        //CollaboratorWindow.MinWidth = Convert.ToDouble("500");
-        //CollaboratorWindow.MinHeight = Convert.ToDouble("500");
-        CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
-        CollaboratorWindow.Title = "StoryCAD Collaborator";
-        CollaboratorWindow.Content = rootFrame;
-        _logService.Log(LogLevel.Info, "Collaborator window created and configured.");
 
-        rootFrame.Content = new WorkflowShell();
-        _logService.Log(LogLevel.Info, "Set collaborator window content to WizardShell.");
+        //debugging
+        var collaboratorTypes = CollabAssembly.GetTypes();
 
         // Get the type of the Collaborator class
         var collaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
         if (collaboratorType == null)
-        {
+        {   
             _logService.Log(LogLevel.Error, "Could not find Collaborator type in assembly");
             return;
         }
 
-        // Create an instance of the Collaborator class
-        _logService.Log(LogLevel.Info, "Calling Collaborator constructor.");
-        var collabArgs = Ioc.Default.GetService<ShellViewModel>()!.CollabArgs = new CollaboratorArgs();
-        collabArgs.WorkflowVm = Ioc.Default.GetService<WorkflowViewModel>();
-        collabArgs.CollaboratorWindow = CollaboratorWindow;
-        object[] methodArgs = { collabArgs };
+        // Create an instance of the Collaborator class using parameterless constructor
+        _logService.Log(LogLevel.Info, "Creating Collaborator instance.");
 
-        // Find the constructor that takes CollaboratorArgs parameter
-        var constructor = collaboratorType.GetConstructor(new[] { typeof(CollaboratorArgs) });
+        // Find the parameterless constructor
+        var constructor = collaboratorType.GetConstructor(Type.EmptyTypes);
         if (constructor == null)
         {
-            _logService.Log(LogLevel.Error, "Could not find Collaborator constructor that takes CollaboratorArgs");
-            throw new InvalidOperationException("Collaborator must have a constructor that takes CollaboratorArgs");
+            _logService.Log(LogLevel.Error, "Could not find parameterless constructor for Collaborator");
+            throw new InvalidOperationException("Collaborator must have a parameterless constructor");
         }
 
-        var collaborator = constructor.Invoke(methodArgs);
-        _logService.Log(LogLevel.Info, "Collaborator Constructor finished.");
+        var collaborator = constructor.Invoke(null);
+        _logService.Log(LogLevel.Info, "Collaborator instance created.");
 
-        // Cast to interface - this is now required
+        // Cast to interface
         _collaboratorInterface = collaborator as ICollaborator;
-        if (_collaboratorInterface != null)
+        if (_collaboratorInterface == null)
         {
-            _logService.Log(LogLevel.Info, "Collaborator successfully loaded with ICollaborator interface.");
-        }
-        else
-        {
-            _logService.Log(LogLevel.Error, "Collaborator does not implement ICollaborator interface. Cannot proceed.");
+            _logService.Log(LogLevel.Error, "Collaborator does not implement ICollaborator interface");
             throw new InvalidOperationException("CollaboratorLib must implement ICollaborator interface");
         }
+
+        _logService.Log(LogLevel.Info, "Collaborator successfully loaded with ICollaborator interface.");
     }
 
     public async Task<bool> CollaboratorEnabled()
@@ -271,7 +159,14 @@ public class CollaboratorService
             return false;
         }
         
-        // Check COLLAB_DEBUG environment variable to bypass collaborator loading
+        // COLLAB_DEBUG environment variable provides runtime control over Collaborator loading
+        // - "0" = disable loading (useful for testing StoryCAD without Collaborator overhead)
+        // - "1" or unset = enable loading (normal operation)
+        //
+        // Why environment variable instead of #if DEBUG?
+        // - Runtime flexibility: can disable/enable without rebuilding
+        // - Test scenarios: can test Store deployment behavior in debug builds
+        // - CI/CD: can run tests with/without Collaborator via environment config
         var collabDebug = Environment.GetEnvironmentVariable("COLLAB_DEBUG");
         if (collabDebug == "0")
         {
@@ -289,54 +184,31 @@ public class CollaboratorService
     }
 
     /// <summary>
-    ///     Checks if CollaboratorLib.dll exists.
+    ///     Locates CollaboratorLib.dll using STORYCAD_PLUGIN_DIR environment variable.
+    ///
+    ///     For development/debugging:
+    ///     - Set STORYCAD_PLUGIN_DIR to CollaboratorLib build output directory
+    ///     - Example: D:\dev\src\StoryBuilderCollaborator\CollaboratorLib\bin\x64\Debug\net9.0-windows10.0.22621
+    ///
+    ///     For production deployment:
+    ///     - Plugin will be bundled in MSIX package at AppContext.BaseDirectory
+    ///     - See issue #30 for production deployment strategy
     /// </summary>
-    /// <returns>True if CollaboratorLib.dll exists, false otherwise.</returns>
+    /// <returns>True if CollaboratorLib.dll was found and is accessible, false otherwise.</returns>
     private async Task<bool> FindDll()
     {
 #if !HAS_UNO
-        _logService.Log(LogLevel.Info, "Locating Collaborator Package...");
-
-        //Find all installed extensions
-        var _catalog = AppExtensionCatalog.Open("org.storybuilder");
-        var InstalledExtensions = await _catalog.FindAllAsync();
-        _logService.Log(LogLevel.Info, $"Found {InstalledExtensions} installed extensions");
         _logService.Log(LogLevel.Info, "Locating CollaboratorLib...");
 
-        // 1) DEV: explicit override — deterministic
         if (TryResolveFromEnv(out var envPath))
         {
             dllPath = envPath;
             dllExists = true;
-            _logService.Log(LogLevel.Info, $"Found via ${EnvPluginDirVar}: {dllPath}");
+            _logService.Log(LogLevel.Info, $"Found via {EnvPluginDirVar}: {dllPath}");
             return true;
         }
 
-        // 2) DEV: sibling repo (safeguarded scan)
-        if (_appState.DeveloperBuild)
-        {
-            if (TryResolveFromSibling(out var devPath))
-            {
-                dllPath = devPath;
-                dllExists = true;
-                _logService.Log(LogLevel.Info, $"Found dev DLL: {dllPath}");
-                return true;
-            }
-
-            _logService.Log(LogLevel.Warn, "Dev paths not found, falling back to package lookup.");
-        }
-
-        // 3) PROD: MSIX AppExtension
-        var (ok, pkgPath) = await TryResolveFromExtensionAsync();
-        if (ok)
-        {
-            dllPath = pkgPath;
-            dllExists = File.Exists(dllPath);
-            _logService.Log(LogLevel.Info, $"Found package DLL: {dllPath}, exists={dllExists}");
-            return dllExists;
-        }
-
-        _logService.Log(LogLevel.Info, "Failed to resolve CollaboratorLib.dll");
+        _logService.Log(LogLevel.Info, "CollaboratorLib.dll not found. Set STORYCAD_PLUGIN_DIR environment variable.");
         dllPath = null;
         dllExists = false;
         return false;
@@ -374,116 +246,9 @@ public class CollaboratorService
         return true;
     }
 
-    // Looks for: <reposRoot>\StoryBuilderCollaborator\CollaboratorLib\bin\x64\Debug\<net8.0-windows*>\CollaboratorLib.dll
-    private bool TryResolveFromSibling(out string path)
-    {
-        path = null;
-
-        var exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-
-        var cursor = exeDir;
-        for (var i = 0; i < 10 && cursor != null; i++)
-        {
-            cursor = Path.GetDirectoryName(cursor);
-        }
-
-        if (cursor == null)
-        {
-            return false;
-        }
-
-        var baseDebug = Path.Combine(cursor,
-            "StoryBuilderCollaborator", "CollaboratorLib", "bin", "x64", "Debug");
-        if (!Directory.Exists(baseDebug))
-        {
-            return false;
-        }
-
-        var tfmCandidates = Directory.EnumerateDirectories(baseDebug, "net*-windows*")
-            .OrderByDescending(d => Directory.GetLastWriteTimeUtc(d))
-            .ToList();
-        foreach (var tfmDir in tfmCandidates)
-        {
-            var candidate = Path.Combine(tfmDir, PluginFileName);
-            if (File.Exists(candidate))
-            {
-                var pdb = Path.ChangeExtension(candidate, ".pdb");
-                if (!File.Exists(pdb))
-                {
-                    _logService.Log(LogLevel.Warn, $"PDB missing next to DLL: {pdb}");
-                }
-
-                path = candidate;
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private async Task<(bool ok, string dllPath)> TryResolveFromExtensionAsync()
-    {
-        try
-        {
-            #if !WINDOWS10_0_18362_0_OR_GREATER
-            _logService.Log(LogLevel.Warn, "Collaborator is only supported on Windows.");
-            return (false, null);
-            #else
-            var catalog = AppExtensionCatalog.Open("org.storybuilder");
-            var exts = await catalog.FindAllAsync();
-
-            _logService.Log(LogLevel.Info, $"Found {exts.Count} installed extensions for org.storybuilder");
-
-            var collab = exts.FirstOrDefault(e =>
-                string.Equals(e.Package.Id.Name, "StoryCADCollaborator", StringComparison.OrdinalIgnoreCase) ||
-                (e.Package.DisplayName?.Contains("StoryCAD Collaborator", StringComparison.OrdinalIgnoreCase) ??
-                 false));
-
-            if (collab == null)
-            {
-                _logService.Log(LogLevel.Info, "Collaborator extension not installed.");
-                return (false, null);
-            }
-
-            var pkg = collab.Package;
-            _logService.Log(LogLevel.Info,
-                $"Found Collaborator Package: {pkg.DisplayName} {pkg.Id.Version.Major}.{pkg.Id.Version.Minor}.{pkg.Id.Version.Build}");
-
-            if (!await pkg.VerifyContentIntegrityAsync())
-            {
-                _logService.Log(LogLevel.Error, "VerifyContentIntegrityAsync failed; refusing to load.");
-                return (false, null);
-            }
-
-            var installDir = pkg.InstalledLocation.Path; // StorageFolder → string
-            var dll = Path.Combine(installDir, PluginFileName);
-            return (true, dll);
-            #endif
-        }
-        catch (Exception ex)
-        {
-            _logService.Log(LogLevel.Error, $"Extension lookup failed: {ex}");
-            return (false, null);
-        }
-    }
-
     #endregion
 
     #region Show/Hide window
-
-    /// <summary>
-    ///     This will hide the collaborator window.
-    /// </summary>
-    private void HideCollaborator(AppWindow appWindow, AppWindowClosingEventArgs e)
-    {
-        _logService.Log(LogLevel.Debug, "Hiding collaborator window.");
-        e.Cancel = true; // Cancel stops the window from being disposed.
-        appWindow.Hide(); // Hide the window instead.
-        _logService.Log(LogLevel.Debug, "Successfully hid collaborator window.");
-
-        //Call collaborator callback since we need to reenable async to prevent a locked state.
-        FinishedCallback();
-    }
 
     /// <summary>
     ///     This is called when collaborator has finished doing stuff.
@@ -512,25 +277,68 @@ public class CollaboratorService
     public void DestroyCollaborator()
     {
         _logService.Log(LogLevel.Warn, "Destroying collaborator object.");
+
+        try
+        {
+            _collaboratorInterface?.Close();
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"Error closing collaborator during destroy: {ex.Message}");
+        }
+
+        try
+        {
+            _collaboratorInterface?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"Error disposing collaborator during destroy: {ex.Message}");
+        }
+
         if (CollaboratorWindow != null)
         {
             CollaboratorWindow.Close(); // Destroy window object
+            CollaboratorWindow = null;
             _logService.Log(LogLevel.Info, "Closed collaborator window");
-
-            //Null objects to deallocate them
-            CollabAssembly = null;
-            _logService.Log(LogLevel.Info, "Nulled collaborator objects");
-
-            //Run garbage collection to clean up any remnants.
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            _logService.Log(LogLevel.Info, "Garbage collection finished.");
         }
+
+        // Null objects to deallocate them
+        _collaboratorInterface = null;
+        CollabAssembly = null;
+        _logService.Log(LogLevel.Info, "Nulled collaborator objects");
+
+        // Run garbage collection to clean up any remnants
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        _logService.Log(LogLevel.Info, "Garbage collection finished.");
     }
 
     public void CollaboratorClosed()
     {
         _logService.Log(LogLevel.Debug, "Closing Collaborator.");
+        try
+        {
+            var result = _collaboratorInterface?.Close();
+            if (result != null)
+            {
+                _logService.Log(LogLevel.Info, $"Collaborator summary: {result.Summary}");
+                if (result.Messages?.Count > 0)
+                {
+                    foreach (var message in result.Messages)
+                    {
+                        _logService.Log(LogLevel.Info, message);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Error, $"Collaborator Close failed: {ex.Message}");
+        }
+
+        CollaboratorWindow = null;
+        FinishedCallback();
     }
 
     #endregion
