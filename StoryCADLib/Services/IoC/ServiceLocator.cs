@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using StoryCADLib.Collaborator.ViewModels;
 using StoryCADLib.DAL;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.Backend;
@@ -111,7 +110,6 @@ public static class BootStrapper
         Services.AddSingleton<SceneViewModel>();
         Services.AddSingleton<FolderViewModel>();
         Services.AddSingleton<WebViewModel>();
-        Services.AddSingleton<WorkflowViewModel>();
         Services.AddSingleton<TrashCanViewModel>();
         Services.AddSingleton<FileOpenVM>();
         Services.AddSingleton<InitVM>();

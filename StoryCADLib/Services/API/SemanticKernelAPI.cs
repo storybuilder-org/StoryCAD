@@ -319,8 +319,8 @@ public class SemanticKernelApi : IStoryCADAPI
     /// <summary>
     ///     Sets the current StoryModel to work with (for Collaborator integration)
     ///     An open outline in StoryCAD is represented by a StoryModel and ShellViewModel
-    ///     contains the active StoryModel as CurrentModel, which is passed to Collaborator in CollaboratorArgs
-    ///     for further operations. This method allows Collaborator to set the API's current StoryModel.
+    ///     contains the active StoryModel as CurrentModel, which is passed to Collaborator when opening
+    ///     a session. This method allows Collaborator to set the API's current StoryModel.
     /// </summary>
     /// <param name="model">The active StoryModel from ShellViewModel</param>
     public void SetCurrentModel(StoryModel model)

@@ -89,6 +89,8 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
 
     public void Activate(object parameter)
     {
+        _changeable = false;  // Disable change tracking before setting Model
+        _changed = false;
         Model = (FolderModel)parameter;
         LoadModel(); // Load the ViewModel from the Story
     }
@@ -100,6 +102,10 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
 
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
+        // Ignore Model property changes - these happen during navigation, not user edits
+        if (args.PropertyName == nameof(Model))
+            return;
+
         if (_changeable)
         {
             if (!_changed)

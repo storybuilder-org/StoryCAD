@@ -481,6 +481,8 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
 
     public void Activate(object parameter)
     {
+        _changeable = false;  // Disable change tracking before setting Model
+        _changed = false;
         Model = (SceneModel)parameter;
         LoadModel(); // Load the ViewModel from the Story
     }
@@ -492,6 +494,10 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
 
     public void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
+        // Ignore Model property changes - these happen during navigation, not user edits
+        if (args.PropertyName == nameof(Model))
+            return;
+
         if (_changeable)
         {
             if (!_changed)
@@ -524,14 +530,12 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
         Date = Model.Date;
         Time = Model.Time;
         Setting = Model.Setting;
-        SelectedSetting = Settings.FirstOrDefault(p => p.Uuid == Setting);
         SceneType = Model.SceneType;
 
         // The list of cast members is loaded from the Model
         LoadCastList();
         ViewpointCharacter = Model.ViewpointCharacter; // Add viewpoint character if missing
-        SelectedViewpointCharacter = Characters.FirstOrDefault(p => p.Uuid == ViewpointCharacter);
-        // Now set the correct view and initialize the cast elements    
+        // Now set the correct view and initialize the cast elements
         AllCharacters = CastList.Count == 0;
         InitializeCharacterList();
 
@@ -556,11 +560,9 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
 
         ValueExchange = Model.ValueExchange;
         Protagonist = Model.Protagonist;
-        SelectedProtagonist = Characters.FirstOrDefault(p => p.Uuid == Protagonist);
         ProtagEmotion = Model.ProtagEmotion;
         ProtagGoal = Model.ProtagGoal;
         Antagonist = Model.Antagonist;
-        SelectedAntagonist = Characters.FirstOrDefault(p => p.Uuid == Antagonist);
         AntagEmotion = Model.AntagEmotion;
         AntagGoal = Model.AntagGoal;
         Opposition = Model.Opposition;
@@ -576,6 +578,16 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
         Notes = Model.Notes;
         UpdateViewpointCharacterTip();
         _changeable = true;
+
+        // Set UI-bound selection properties after enabling change tracking
+        // These can trigger property cascades from UI binding updates
+        var wasChangeable = _changeable;
+        _changeable = false;
+        SelectedSetting = Settings.FirstOrDefault(p => p.Uuid == Setting);
+        SelectedViewpointCharacter = Characters.FirstOrDefault(p => p.Uuid == ViewpointCharacter);
+        SelectedProtagonist = Characters.FirstOrDefault(p => p.Uuid == Protagonist);
+        SelectedAntagonist = Characters.FirstOrDefault(p => p.Uuid == Antagonist);
+        _changeable = wasChangeable;
     }
 
 
