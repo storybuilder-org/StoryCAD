@@ -23,23 +23,6 @@ public class CollaboratorInterfaceTests
         Assert.IsNotNull(collaborator);
     }
 
-    /// <summary>
-    ///     Test that CreateWindow method exists and can be called
-    /// </summary>
-    [TestMethod]
-    public void ICollaborator_CreateWindow_MethodExists()
-    {
-        // Arrange
-        ICollaborator collaborator = new MockCollaborator();
-        object context = new { Test = "context" };
-
-        // Act & Assert - just verify method can be called
-        // Note: CreateWindow returns null in mock since Window requires UI thread
-        var result = collaborator.CreateWindow(context);
-        // We're testing the interface contract, not the implementation
-        Assert.IsTrue(true); // Method exists and can be called
-    }
-
     // Test methods for removed interface methods have been deleted
     // The interface now only has CreateWindow and Dispose methods
 
@@ -48,16 +31,18 @@ public class CollaboratorInterfaceTests
     /// </summary>
     private class MockCollaborator : ICollaborator
     {
-        public Window CreateWindow(object context)
+        public Window Open(IStoryCADAPI api, StoryModel model)
         {
-            // Return null since creating Window requires UI thread
-            // This is just testing the interface contract
             return null;
+        }
+
+        public CollaboratorResult Close()
+        {
+            return new CollaboratorResult { Completed = true, Summary = "mock" };
         }
 
         public void Dispose()
         {
-            // Mock implementation
         }
     }
 }

@@ -55,8 +55,6 @@ public class ShellViewModel : ObservableRecipient
     private ObservableCollection<StoryNodeItem> _targetCollection;
     private int _targetIndex;
 
-    public CollaboratorArgs CollabArgs;
-
     public StoryViewType CurrentViewType;
 
     //File opened (if StoryCAD was opened via an STBX file)

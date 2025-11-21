@@ -3,7 +3,6 @@ using System.Runtime.Loader;
 using Windows.ApplicationModel.AppExtensions;
 using Windows.ApplicationModel.Resources.Core;
 using Windows.Storage;
-using Microsoft.UI.Windowing;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator.Contracts;
@@ -79,11 +78,18 @@ public class CollaboratorService
             var api = new SemanticKernelApi(outlineService);
             api.SetCurrentModel(storyModel);
 
-            // Create the Collaborator window, passing the API
-            CollaboratorWindow = _collaboratorInterface.CreateWindow(api);
+            try
+            {
+                CollaboratorWindow = _collaboratorInterface.Open(api, storyModel);
+            }
+            catch (Exception ex)
+            {
+                _logService.Log(LogLevel.Error, $"Failed to open Collaborator: {ex.Message}");
+                return;
+            }
+
             if (CollaboratorWindow != null)
             {
-                CollaboratorWindow.AppWindow.Closing += HideCollaborator;
                 CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
                 CollaboratorWindow.Activate();
                 _logService.Log(LogLevel.Info, "Collaborator window opened");
@@ -153,7 +159,14 @@ public class CollaboratorService
             return false;
         }
         
-        // Check COLLAB_DEBUG environment variable to bypass collaborator loading
+        // COLLAB_DEBUG environment variable provides runtime control over Collaborator loading
+        // - "0" = disable loading (useful for testing StoryCAD without Collaborator overhead)
+        // - "1" or unset = enable loading (normal operation)
+        //
+        // Why environment variable instead of #if DEBUG?
+        // - Runtime flexibility: can disable/enable without rebuilding
+        // - Test scenarios: can test Store deployment behavior in debug builds
+        // - CI/CD: can run tests with/without Collaborator via environment config
         var collabDebug = Environment.GetEnvironmentVariable("COLLAB_DEBUG");
         if (collabDebug == "0")
         {
@@ -171,58 +184,31 @@ public class CollaboratorService
     }
 
     /// <summary>
-    ///     Checks if CollaboratorLib.dll exists.
+    ///     Locates CollaboratorLib.dll using STORYCAD_PLUGIN_DIR environment variable.
+    ///
+    ///     For development/debugging:
+    ///     - Set STORYCAD_PLUGIN_DIR to CollaboratorLib build output directory
+    ///     - Example: D:\dev\src\StoryBuilderCollaborator\CollaboratorLib\bin\x64\Debug\net9.0-windows10.0.22621
+    ///
+    ///     For production deployment:
+    ///     - Plugin will be bundled in MSIX package at AppContext.BaseDirectory
+    ///     - See issue #30 for production deployment strategy
     /// </summary>
-    /// <returns>True if CollaboratorLib.dll exists, false otherwise.</returns>
+    /// <returns>True if CollaboratorLib.dll was found and is accessible, false otherwise.</returns>
     private async Task<bool> FindDll()
     {
 #if !HAS_UNO
-        _logService.Log(LogLevel.Info, "Locating Collaborator Package...");
-
-        //Find all installed extensions
-        var _catalog = AppExtensionCatalog.Open("org.storybuilder");
-        var InstalledExtensions = await _catalog.FindAllAsync();
-        _logService.Log(LogLevel.Info, $"Found {InstalledExtensions} installed extensions");
         _logService.Log(LogLevel.Info, "Locating CollaboratorLib...");
 
-        //// 1) DEV: explicit override — deterministic
-        //if (TryResolveFromEnv(out var envPath))
-        //{
-        //    dllPath = envPath;
-        //    dllExists = true;
-        //    _logService.Log(LogLevel.Info, $"Found via ${EnvPluginDirVar}: {dllPath}");
-        //    return true;
-        //}
-
-        //// 2) DEV: sibling repo (safeguarded scan)
-        //if (_appState.DeveloperBuild)
-        //{
-        //    if (TryResolveFromSibling(out var devPath))
-        //    {
-        //        dllPath = devPath;
-        //        dllExists = true;
-        //        _logService.Log(LogLevel.Info, $"Found dev DLL: {dllPath}");
-        //        return true;
-        //    }
-
-        //    _logService.Log(LogLevel.Warn, "Dev paths not found, falling back to package lookup.");
-        //}
-
-        // 3) PROD: MSIX AppExtension
-        var (ok, pkgPath) = await TryResolveFromExtensionAsync();
-        if (ok)
+        if (TryResolveFromEnv(out var envPath))
         {
-            dllPath = pkgPath;
-            dllExists = File.Exists(dllPath);
-            _logService.Log(LogLevel.Info, $"Found package DLL: {dllPath}, exists={dllExists}");
-            if (dllExists)
-            {
-                await TryLoadPriForDllAsync(dllPath);
-            }
-            return dllExists;
+            dllPath = envPath;
+            dllExists = true;
+            _logService.Log(LogLevel.Info, $"Found via {EnvPluginDirVar}: {dllPath}");
+            return true;
         }
 
-        _logService.Log(LogLevel.Info, "Failed to resolve CollaboratorLib.dll");
+        _logService.Log(LogLevel.Info, "CollaboratorLib.dll not found. Set STORYCAD_PLUGIN_DIR environment variable.");
         dllPath = null;
         dllExists = false;
         return false;
@@ -260,151 +246,9 @@ public class CollaboratorService
         return true;
     }
 
-    // Looks for: <reposRoot>\StoryBuilderCollaborator\CollaboratorLib\bin\x64\Debug\<net8.0-windows*>\CollaboratorLib.dll
-    private bool TryResolveFromSibling(out string path)
-    {
-        path = null;
-
-        var exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-
-        var cursor = exeDir;
-        for (var i = 0; i < 8 && cursor != null; i++)
-        {
-            cursor = Path.GetDirectoryName(cursor);
-        }
-
-        if (cursor == null)
-        {
-            return false;
-        }
-
-        var baseDebug = Path.Combine(cursor,
-            "StoryBuilderCollaborator", "CollaboratorLib", "bin", "x64", "Debug");
-        if (!Directory.Exists(baseDebug))
-        {
-            return false;
-        }
-
-        var tfmCandidates = Directory.EnumerateDirectories(baseDebug, "net*-windows*")
-            .OrderByDescending(d => Directory.GetLastWriteTimeUtc(d))
-            .ToList();
-        foreach (var tfmDir in tfmCandidates)
-        {
-            var candidate = Path.Combine(tfmDir, PluginFileName);
-            if (File.Exists(candidate))
-            {
-                var pdb = Path.ChangeExtension(candidate, ".pdb");
-                if (!File.Exists(pdb))
-                {
-                    _logService.Log(LogLevel.Warn, $"PDB missing next to DLL: {pdb}");
-                }
-
-                path = candidate;
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private async Task<(bool ok, string dllPath)> TryResolveFromExtensionAsync()
-    {
-        try
-        {
-            #if !WINDOWS10_0_18362_0_OR_GREATER
-            _logService.Log(LogLevel.Warn, "Collaborator is only supported on Windows.");
-            return (false, null);
-            #else
-            var catalog = AppExtensionCatalog.Open("org.storybuilder");
-            var exts = await catalog.FindAllAsync();
-
-            _logService.Log(LogLevel.Info, $"Found {exts.Count} installed extensions for org.storybuilder");
-
-            var collab = exts.FirstOrDefault(e =>
-                string.Equals(e.Package.Id.Name, "StoryCADCollaborator", StringComparison.OrdinalIgnoreCase) ||
-                (e.Package.DisplayName?.Contains("StoryCAD Collaborator", StringComparison.OrdinalIgnoreCase) ??
-                 false));
-
-            if (collab == null)
-            {
-                _logService.Log(LogLevel.Info, "Collaborator extension not installed.");
-                return (false, null);
-            }
-
-            var pkg = collab.Package;
-            _logService.Log(LogLevel.Info,
-                $"Found Collaborator Package: {pkg.DisplayName} {pkg.Id.Version.Major}.{pkg.Id.Version.Minor}.{pkg.Id.Version.Build}");
-
-            if (!await pkg.VerifyContentIntegrityAsync())
-            {
-                _logService.Log(LogLevel.Error, "VerifyContentIntegrityAsync failed; refusing to load.");
-                return (false, null);
-            }
-
-            var installDir = pkg.InstalledLocation.Path; // StorageFolder → string
-            var dll = Path.Combine(installDir, PluginFileName);
-            return (true, dll);
-            #endif
-        }
-        catch (Exception ex)
-        {
-            _logService.Log(LogLevel.Error, $"Extension lookup failed: {ex}");
-            return (false, null);
-        }
-    }
-
-    private async Task TryLoadPriForDllAsync(string path)
-    {
-#if !HAS_UNO
-        if (!OperatingSystem.IsWindows())
-        {
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(path))
-        {
-            return;
-        }
-
-        var priPath = Path.ChangeExtension(path, ".pri");
-        if (string.IsNullOrWhiteSpace(priPath) || !File.Exists(priPath))
-        {
-            _logService.Log(LogLevel.Debug, $"No PRI file found next to plugin DLL: {priPath}");
-            return;
-        }
-
-        try
-        {
-            var priFile = await StorageFile.GetFileFromPathAsync(priPath);
-            ResourceManager.Current.LoadPriFiles(new[] { priFile });
-            _logService.Log(LogLevel.Info, $"Loaded Collaborator PRI resources from {priPath}");
-        }
-        catch (Exception ex)
-        {
-            _logService.Log(LogLevel.Warn, $"Failed to load Collaborator PRI '{priPath}': {ex.Message}");
-        }
-#else
-        await Task.CompletedTask;
-#endif
-    }
-
     #endregion
 
     #region Show/Hide window
-
-    /// <summary>
-    ///     This will hide the collaborator window.
-    /// </summary>
-    private void HideCollaborator(AppWindow appWindow, AppWindowClosingEventArgs e)
-    {
-        _logService.Log(LogLevel.Debug, "Hiding collaborator window.");
-        e.Cancel = true; // Cancel stops the window from being disposed.
-        appWindow.Hide(); // Hide the window instead.
-        _logService.Log(LogLevel.Debug, "Successfully hid collaborator window.");
-
-        //Call collaborator callback since we need to reenable async to prevent a locked state.
-        FinishedCallback();
-    }
 
     /// <summary>
     ///     This is called when collaborator has finished doing stuff.
@@ -434,8 +278,23 @@ public class CollaboratorService
     {
         _logService.Log(LogLevel.Warn, "Destroying collaborator object.");
 
-        // Dispose of the Collaborator plugin resources
-        _collaboratorInterface?.Dispose();
+        try
+        {
+            _collaboratorInterface?.Close();
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"Error closing collaborator during destroy: {ex.Message}");
+        }
+
+        try
+        {
+            _collaboratorInterface?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"Error disposing collaborator during destroy: {ex.Message}");
+        }
 
         if (CollaboratorWindow != null)
         {
@@ -458,6 +317,28 @@ public class CollaboratorService
     public void CollaboratorClosed()
     {
         _logService.Log(LogLevel.Debug, "Closing Collaborator.");
+        try
+        {
+            var result = _collaboratorInterface?.Close();
+            if (result != null)
+            {
+                _logService.Log(LogLevel.Info, $"Collaborator summary: {result.Summary}");
+                if (result.Messages?.Count > 0)
+                {
+                    foreach (var message in result.Messages)
+                    {
+                        _logService.Log(LogLevel.Info, message);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Error, $"Collaborator Close failed: {ex.Message}");
+        }
+
+        CollaboratorWindow = null;
+        FinishedCallback();
     }
 
     #endregion
