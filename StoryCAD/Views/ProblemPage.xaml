@@ -267,31 +267,51 @@
                       ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}"
                       SelectedItem="{x:Bind ProblemVm.SelectedBeat, Mode=TwoWay}"
                       SelectedIndex="{x:Bind ProblemVm.SelectedBeatIndex, Mode=TwoWay}"
+                      SelectionMode="Single"
                       HorizontalAlignment="Stretch">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">
                                         <Setter Property="HorizontalContentAlignment"
-                                Value="Stretch" />
+                                                Value="Stretch" />
+                                        <Setter Property="BorderBrush"
+                                                Value="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                                        <Setter Property="BorderThickness"
+                                                Value="0,0,0,1" />
+                                        <Setter Property="Padding"
+                                                Value="8,4,8,4" />
                                     </Style>
                                 </ListView.ItemContainerStyle>
 
                                 <ListView.ItemTemplate>
                                     <DataTemplate x:DataType="tools:StructureBeatViewModel">
-                                        <Grid ColumnDefinitions="Auto,*,Auto"
-                          VerticalAlignment="Center"
-                          Margin="4">
+                                        <Grid ColumnDefinitions="Auto,*"
+                              VerticalAlignment="Center"
+                              Margin="8,8,8,8"
+                              RowDefinitions="Auto,Auto"
+                              Background="Transparent"
+                              PointerPressed="ListViewItem_PointerPressed">
+                                            <!-- Icon spans both rows -->
                                             <SymbolIcon Grid.Column="0"
-                                    Symbol="{x:Bind ElementIcon, Mode=OneWay}" />
-                                            <TextBox Grid.Column="1"
-                                 Text="{x:Bind Title, Mode=TwoWay}"
-                                 TextWrapping="NoWrap"
-                                 IsReadOnly="{x:Bind ProblemViewModel.IsBeatSheetReadOnly}"
-                                 Margin="10,0"
-                                 Padding="5,0,20,0" />
-                                            <TextBlock Grid.Column="2"
-                                   Text="{x:Bind ElementName, Mode=OneWay}"
-                                   VerticalAlignment="Center"
-                                   TextWrapping="Wrap" />
+                                        Grid.RowSpan="2"
+                                        Symbol="{x:Bind ElementIcon, Mode=OneWay}"
+                                        Margin="0,0,12,0"
+                                        VerticalAlignment="Center" />
+
+                                            <!-- Beat Title on top row -->
+                                            <TextBlock Grid.Column="1"
+                                       Grid.Row="0"
+                                       Text="{x:Bind Title, Mode=OneWay}"
+                                       TextWrapping="Wrap"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,4" />
+
+                                            <!-- Element Name on bottom row -->
+                                            <TextBlock Grid.Column="1"
+                                       Grid.Row="1"
+                                       Text="{x:Bind ElementName, Mode=OneWay}"
+                                       TextWrapping="Wrap"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       FontSize="13" />
                                         </Grid>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
