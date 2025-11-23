@@ -188,7 +188,7 @@ public class CollaboratorService
     ///
     ///     For development/debugging:
     ///     - Set STORYCAD_PLUGIN_DIR to CollaboratorLib build output directory
-    ///     - Example: D:\dev\src\StoryBuilderCollaborator\CollaboratorLib\bin\x64\Debug\net9.0-windows10.0.22621
+    ///     - Example: D:\dev\src\Collaborator\CollaboratorLib\bin\x64\Debug\net9.0-windows10.0.22621
     ///
     ///     For production deployment:
     ///     - Plugin will be bundled in MSIX package at AppContext.BaseDirectory
