@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
+using StoryCADLib.Services;
 using StoryCADLib.ViewModels;
 using StoryCADLib.ViewModels.Tools;
 
@@ -18,13 +19,22 @@ public class ProblemViewModelTests
     [TestInitialize]
     public void TestInitialize()
     {
-        // Create a test story model and problem model
-        _storyModel = new StoryModel();
-        _problemModel = new ProblemModel("Test Problem", _storyModel, null);
+        // Reset AppState to clean state (critical for singleton ViewModel isolation)
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        appState.CurrentDocument = null;
 
-        // Initialize the view model
-        _viewModel = Ioc.Default.GetService<ProblemViewModel>();
-        _viewModel.Model = _problemModel;
+        // Create a test story model and problem model
+        _storyModel = CreateTestStoryModel();
+        _problemModel = CreateTestProblemModel(_storyModel);
+
+        // Initialize the view model with proper AppState setup
+        _viewModel = SetupViewModelWithStory();
+
+        // Re-subscribe PropertyChanged handler (may have been unsubscribed by previous test)
+        // This is safe: unsubscribe first prevents duplicates, then re-subscribe ensures handler works
+        _viewModel.PropertyChanged -= _viewModel.OnPropertyChanged;
+        _viewModel.PropertyChanged += _viewModel.OnPropertyChanged;
+
         _viewModel.StructureBeats = new ObservableCollection<StructureBeatViewModel>();
         _viewModel.StructureModelTitle = "Custom Beat Sheet"; // Enable editing
     }
@@ -279,6 +289,151 @@ public class ProblemViewModelTests
         Assert.IsTrue(propertyChangedFired);
     }
 
+    [TestMethod]
+    public void CurrentElementSource_OnLoadModel_DefaultsToScenes()
+    {
+        // Arrange - Setup AppState with CurrentDocument
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        appState.CurrentDocument = new StoryDocument(_storyModel);
+
+        // Act
+        _viewModel.Activate(_problemModel);
+
+        // Assert
+        Assert.IsNotNull(_viewModel.CurrentElementSource);
+        Assert.AreSame(_viewModel.Scenes, _viewModel.CurrentElementSource);
+    }
+
+    [TestMethod]
+    public void SelectedElementSource_WhenSetToScene_SetsCurrentElementSourceToScenes()
+    {
+        // Arrange - Setup AppState with CurrentDocument
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        appState.CurrentDocument = new StoryDocument(_storyModel);
+        _viewModel.Activate(_problemModel);
+
+        // Act
+        _viewModel.SelectedElementSource = "Scene";
+
+        // Assert
+        Assert.AreSame(_viewModel.Scenes, _viewModel.CurrentElementSource);
+    }
+
+    [TestMethod]
+    public void SelectedElementSource_WhenSetToProblem_SetsCurrentElementSourceToProblems()
+    {
+        // Arrange - AppState already setup in TestInitialize via SetupViewModelWithStory
+        _viewModel.Activate(_problemModel);
+
+        // Verify initial state
+        Assert.AreEqual("Scene", _viewModel.SelectedElementSource, "Initial SelectedElementSource should be 'Scene'");
+        Assert.IsNotNull(_viewModel.Problems, "Problems should not be null");
+        Assert.IsNotNull(_viewModel.Scenes, "Scenes should not be null");
+        Assert.AreSame(_viewModel.Scenes, _viewModel.CurrentElementSource, "Initial CurrentElementSource should be Scenes");
+
+        // Act
+        _viewModel.SelectedElementSource = "Problem";
+
+        // Assert
+        Assert.AreEqual("Problem", _viewModel.SelectedElementSource, "SelectedElementSource should be 'Problem'");
+        Assert.AreSame(_viewModel.Problems, _viewModel.CurrentElementSource);
+    }
+
+    [TestMethod]
+    public void CurrentElementSource_WhenToggled_RaisesPropertyChanged()
+    {
+        // Arrange - AppState already setup in TestInitialize via SetupViewModelWithStory
+        _viewModel.Activate(_problemModel);
+
+        // Ensure we start from a known state (Scene) since singleton may have stale state
+        _viewModel.SelectedElementSource = "Scene";
+
+        var propertyChangedFired = false;
+        _viewModel.PropertyChanged += (sender, e) =>
+        {
+            if (e.PropertyName == nameof(_viewModel.CurrentElementSource))
+            {
+                propertyChangedFired = true;
+            }
+        };
+
+        // Act - Toggle from Scene to Problem
+        _viewModel.SelectedElementSource = "Problem";
+
+        // Assert
+        Assert.IsTrue(propertyChangedFired);
+    }
+
+    #region Helper Methods
+
+    /// <summary>
+    ///     Creates a ProblemViewModel with a properly configured StoryModel in AppState.
+    ///     This follows the pattern from SceneViewModelTests using IoC container.
+    /// </summary>
+    private ProblemViewModel SetupViewModelWithStory()
+    {
+        // Get AppState from IoC container (no fake implementations)
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+
+        // Create and assign a StoryDocument with our test StoryModel
+        appState.CurrentDocument = new StoryDocument(_storyModel);
+
+        // Get ProblemViewModel from IoC container with all dependencies injected
+        var viewModel = Ioc.Default.GetService<ProblemViewModel>();
+
+        return viewModel;
+    }
+
+    /// <summary>
+    ///     Creates a test StoryModel populated with necessary story elements.
+    ///     This provides realistic test data for ViewModel operations.
+    /// </summary>
+    private StoryModel CreateTestStoryModel()
+    {
+        // Create base story model
+        var storyModel = new StoryModel();
+
+        // Add OverviewModel to ExplorerView (required by ProblemViewModel.LoadModel at line 790)
+        var overview = new OverviewModel("Test Story", storyModel, null);
+        storyModel.ExplorerView.Add(overview.Node); // Add the Node, not the OverviewModel itself
+
+        // Add test characters to the story
+        var character1 = new CharacterModel("Test Character 1", storyModel, null);
+        var character2 = new CharacterModel("Test Character 2", storyModel, null);
+        storyModel.StoryElements.Characters.Add(character1);
+        storyModel.StoryElements.Characters.Add(character2);
+
+        // Add test scene to the story
+        var scene = new SceneModel("Test Scene", storyModel, null);
+        storyModel.StoryElements.Scenes.Add(scene);
+
+        // Add test problem to the story (required for CurrentElementSource toggle tests)
+        var problem = new ProblemModel("Test Story Problem", storyModel, null);
+        storyModel.StoryElements.Problems.Add(problem);
+
+        return storyModel;
+    }
+
+    /// <summary>
+    ///     Creates a test ProblemModel with realistic default values.
+    ///     Uses the pattern: new ProblemModel(name, parent, null)
+    /// </summary>
+    private ProblemModel CreateTestProblemModel(StoryModel parent = null)
+    {
+        // Use provided parent or create new one
+        parent ??= CreateTestStoryModel();
+
+        // Create problem with standard constructor
+        var problem = new ProblemModel("Test Problem", parent, null);
+
+        // Set common problem properties
+        problem.ProblemType = "Character";
+        problem.ConflictType = "Internal";
+        problem.Subject = "Test Subject";
+
+        return problem;
+    }
+
     /// <summary>
     ///     Helper method to create test beats without relying on IoC container
     /// </summary>
@@ -290,14 +445,12 @@ public class ProblemViewModelTests
         return beat;
     }
 
+    #endregion
+
     [TestCleanup]
     public void TestCleanup()
     {
-        if (_viewModel != null)
-        {
-            _viewModel.PropertyChanged -= _viewModel.OnPropertyChanged;
-        }
-
+        // Clean up test references (don't unsubscribe handler - breaks singleton for next test)
         _viewModel = null;
         _problemModel = null;
         _storyModel = null;

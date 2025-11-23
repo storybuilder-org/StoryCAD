@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -693,6 +693,22 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
         get => _selectedBeat;
         set => SetProperty(ref _selectedBeat, value);
     }
+    public IReadOnlyList<string> ElementSource { get; } =
+        new[] { "Scene", "Problem" };
+
+    private string _selectedElementSource = "Scene";
+    public string SelectedElementSource
+    {
+        get => _selectedElementSource;
+        set => SetProperty(ref _selectedElementSource, value);
+    }
+
+    private ObservableCollection<StoryElement> _currentElementSource;
+    public ObservableCollection<StoryElement> CurrentElementSource
+    {
+        get => _currentElementSource;
+        set => SetProperty(ref _currentElementSource, value);
+    }
 
     #endregion
 
@@ -721,6 +737,12 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
         if (args.PropertyName == nameof(Model))
             return;
 
+        // Handle SelectedElementSource changes to update CurrentElementSource
+        if (args.PropertyName == nameof(SelectedElementSource))
+        {
+            CurrentElementSource = SelectedElementSource == "Scene" ? Scenes : Problems;
+        }
+
         if (_changeable)
         {
             if (!_changed)
@@ -733,7 +755,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
         }
     }
 
-    private void LoadModel()
+    public void LoadModel()
     {
         _changeable = false;
         _changed = false;
@@ -788,6 +810,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
         //Ensure correct set of Elements are loaded for Structure Lists
         Problems = _storyModel.StoryElements.Problems;
         Scenes = _storyModel.StoryElements.Scenes;
+        CurrentElementSource = Scenes; // Default to Scenes
 
         //Enable/disable edit buttons based on selection
         if (StructureModelTitle == "Custom Beat Sheet")
