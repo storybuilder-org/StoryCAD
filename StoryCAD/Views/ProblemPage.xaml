@@ -220,16 +220,7 @@
                                             ItemsSource="{x:Bind ProblemVm.ElementSource}"
                                             SelectedItem="{x:Bind ProblemVm.SelectedElementSource, Mode=TwoWay}"
                                             MaxColumns="2">
-
-                                            <RadioButtons.ItemTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding}"/>
-                                                </DataTemplate>
-                                            </RadioButtons.ItemTemplate>
-
                                         </RadioButtons>
-
-
                                     </StackPanel>
 
                                     <!-- Row 1, Col 0: Beat Sheet ComboBox (bindings unchanged) -->
