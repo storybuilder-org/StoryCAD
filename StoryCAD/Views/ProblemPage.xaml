@@ -222,8 +222,8 @@
                                             MaxColumns="2">
 
                                             <RadioButtons.ItemTemplate>
-                                                <DataTemplate x:DataType="x:String">
-                                                    <TextBlock Text="{x:Bind}"/>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}"/>
                                                 </DataTemplate>
                                             </RadioButtons.ItemTemplate>
 
