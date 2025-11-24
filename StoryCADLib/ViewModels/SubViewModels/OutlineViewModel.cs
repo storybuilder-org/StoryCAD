@@ -308,7 +308,20 @@ public class OutlineViewModel : ObservableRecipient
     {
         logger.Log(LogLevel.Info, "Opening File Menu");
 
-        shellVm._contentDialog = new ContentDialog { Content = new FileOpenMenuPage() };
+        var fileOpenVM = Ioc.Default.GetRequiredService<FileOpenVM>();
+        shellVm._contentDialog = new ContentDialog
+        {
+            Content = new FileOpenMenuPage(),
+            PrimaryButtonText = fileOpenVM.ConfirmButtonText,
+            CloseButtonText = "Close",
+            BorderThickness = new Thickness(0)
+        };
+        shellVm._contentDialog.PrimaryButtonClick += (_, _) => fileOpenVM.ConfirmClicked();
+        fileOpenVM.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(FileOpenVM.ConfirmButtonText))
+                shellVm._contentDialog.PrimaryButtonText = fileOpenVM.ConfirmButtonText;
+        };
         if (window.RequestedTheme == ElementTheme.Light)
         {
             shellVm._contentDialog.RequestedTheme = window.RequestedTheme;

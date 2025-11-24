@@ -4,11 +4,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" MinWidth="360">
+    mc:Ignorable="d" MinWidth="360" Background="Transparent">
 
     <NavigationView HorizontalContentAlignment="Stretch" OverflowLabelMode="NoLabel" IsBackButtonVisible="Collapsed"
                     SelectedItem="{x:Bind FileOpenVM.CurrentTab, Mode=TwoWay}"
-                    IsSettingsVisible="False" PaneDisplayMode="Left" IsPaneToggleButtonVisible="False">
+                    IsSettingsVisible="False" PaneDisplayMode="Left" IsPaneToggleButtonVisible="False"
+                    Background="Transparent" BorderThickness="0">
         <NavigationView.MenuItems>
             <!-- New button -->
             <NavigationViewItem Content="Create new outline" Tag="New">
@@ -37,26 +38,20 @@
                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE777;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
+
+            <!-- Open from file -->
+            <NavigationViewItem Content="Open from file" Tag="OpenFile">
+                <NavigationViewItem.Icon>
+                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE838;" />
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
         </NavigationView.MenuItems>
 
-        <!-- Open from file -->
-        <NavigationView.PaneFooter>
-            <Button HorizontalAlignment="Center" Click="{x:Bind FileOpenVM.LoadStoryFromFile}">
-                <Button.Content>
-                    <StackPanel Orientation="Horizontal">
-                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE838;" />
-                        <TextBlock Text="Open Outline from file" Margin="10,0,0,0" />
-                    </StackPanel>
-                </Button.Content>
-            </Button>
-        </NavigationView.PaneFooter>
-
-        <Grid Margin="10" Background="Transparent">
+        <Grid Margin="10" Background="Transparent" BorderThickness="0" MinWidth="350" MinHeight="400">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!-- Title and warning -->
@@ -67,8 +62,8 @@
                      IsClosable="False"
                      Message="{x:Bind FileOpenVM.WarningText, Mode=TwoWay}" HorizontalAlignment="Center" />
 
-            <ScrollView Grid.Row="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
-                <Grid MinWidth="300" MinHeight="300">
+            <ScrollView Grid.Row="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" BorderThickness="0" Background="Transparent">
+                <Grid Background="Transparent" BorderThickness="0">
                     <!-- Recents tab -->
                     <Grid Visibility="{x:Bind FileOpenVM.RecentsTabContentVisibility, Mode=TwoWay}">
                         <Grid.RowDefinitions>
@@ -136,16 +131,6 @@
             </ScrollView>
 
 
-            <!-- Footer buttons -->
-            <StackPanel Grid.Row="3" HorizontalAlignment="Stretch" Orientation="Horizontal"
-                        Margin="10">
-                <!-- buttons -->
-                <Button Content="{x:Bind FileOpenVM.ConfirmButtonText, Mode=TwoWay}"
-                        Click="{x:Bind FileOpenVM.ConfirmClicked}" HorizontalAlignment="Stretch" Margin="10,0" />
-                <Button Content="Close" HorizontalAlignment="Stretch" Click="{x:Bind FileOpenVM.Close}" />
-
-
-            </StackPanel>
         </Grid>
     </NavigationView>
 </Page>

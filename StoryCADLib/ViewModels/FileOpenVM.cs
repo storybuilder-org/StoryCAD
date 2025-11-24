@@ -487,6 +487,9 @@ public class FileOpenVM : ObservableRecipient
                     NewTabContentVisibility = Visibility.Collapsed;
                     BackupTabContentVisibility = Visibility.Visible;
                     break;
+                case "OpenFile":
+                    LoadStoryFromFile();
+                    return; // Don't update tab, just open file picker
                 default:
                     throw new NotImplementedException("Unexpected tag " + value.Tag);
             }
