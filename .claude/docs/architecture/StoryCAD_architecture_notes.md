@@ -84,9 +84,9 @@ StoryCAD is part of a larger ecosystem of repositories under the StoryBuilder or
 
 ---
 
-#### 2. StoryBuilderCollaborator
-- **GitHub**: [github.com/storybuilder-org/StoryBuilderCollaborator](https://github.com/storybuilder-org/StoryBuilderCollaborator)
-- **Local Path**: `/mnt/d/dev/src/StoryBuilderCollaborator/`
+#### 2. Collaborator
+- **GitHub**: [github.com/storybuilder-org/Collaborator](https://github.com/storybuilder-org/Collaborator)
+- **Local Path**: `/mnt/d/dev/src/Collaborator/`
 - **Visibility**: Private
 - **Purpose**: AI collaboration features for StoryCAD using Microsoft Semantic Kernel
 - **Technology**: .NET 9.0, Semantic Kernel 1.41.0
@@ -195,7 +195,7 @@ ManualTest/docs/
 StoryCAD (Main App)
 ├── StoryCADLib (Core Logic - same repo)
 │   └── NRTFTree-Async (NuGet package)
-├── StoryBuilderCollaborator (Plugin - separate repo)
+├── Collaborator (Plugin - separate repo)
 │   └── Semantic Kernel 1.41.0
 └── ManualTest (Documentation - separate repo)
 
@@ -232,7 +232,7 @@ API-Samples
 4. Tests: `StoryCADTests/`
 
 #### Working on AI Features
-1. Clone: `github.com/storybuilder-org/StoryBuilderCollaborator` (private)
+1. Clone: `github.com/storybuilder-org/Collaborator` (private)
 2. Build CollaboratorLib.dll
 3. Set `STORYCAD_PLUGIN_DIR` environment variable
 4. StoryCAD loads plugin at runtime
