@@ -47,6 +47,18 @@
             </NavigationViewItem>
         </NavigationView.MenuItems>
 
+        <NavigationView.FooterMenuItems>
+            <!-- Settings/Preferences section at the bottom -->
+            <NavigationViewItemSeparator />
+            <NavigationViewItem IsEnabled="True" SelectsOnInvoked="False">
+                <NavigationViewItem.Content>
+                    <CheckBox Content="Show on startup"
+                              IsChecked="{x:Bind FileOpenVM.ShowFilePickerOnStartup, Mode=TwoWay}"
+                              Margin="0,0,10,0" />
+                </NavigationViewItem.Content>
+            </NavigationViewItem>
+        </NavigationView.FooterMenuItems>
+
         <Grid Margin="10" Background="Transparent" BorderThickness="0" MinWidth="350" MinHeight="400">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
