@@ -21,6 +21,7 @@ public class CollaboratorService
     private readonly PreferenceService _preferenceService;
     private ICollaborator _collaboratorInterface; // Interface-based reference
     private Assembly CollabAssembly;
+    private AssemblyLoadContext _pluginLoadContext; // Custom load context for plugin dependencies
 #pragma warning disable CS0169 // Field is used in platform-specific code
     private object collaborator;
     private Type collaboratorType;
@@ -111,12 +112,29 @@ public class CollaboratorService
     /// </summary>
     public void ConnectCollaborator()
     {
-        // Use the custom context to load the assembly
-        CollabAssembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dllPath);
-        _logService.Log(LogLevel.Info, "Loaded CollaboratorLib.dll");
+        // Use custom load context to resolve plugin dependencies
+        _pluginLoadContext = new PluginLoadContext(dllPath);
+        CollabAssembly = _pluginLoadContext.LoadFromAssemblyPath(dllPath);
+        _logService.Log(LogLevel.Info, "Loaded CollaboratorLib.dll with custom load context");
 
         //debugging
-        var collaboratorTypes = CollabAssembly.GetTypes();
+        Type[] collaboratorTypes;
+        try
+        {
+            collaboratorTypes = CollabAssembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            // Log each loader exception
+            foreach (var loaderEx in ex.LoaderExceptions)
+            {
+                if (loaderEx != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Loader Exception: {loaderEx.Message}");
+                }
+            }
+            throw;
+        }
 
         // Get the type of the Collaborator class
         var collaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
@@ -343,4 +361,45 @@ public class CollaboratorService
     }
 
     #endregion
+
+    /// <summary>
+    /// Custom AssemblyLoadContext that resolves plugin dependencies from the plugin directory.
+    /// Uses AssemblyDependencyResolver to find dependencies next to the plugin DLL.
+    /// </summary>
+    private class PluginLoadContext : AssemblyLoadContext
+    {
+        private readonly AssemblyDependencyResolver _resolver;
+
+        public PluginLoadContext(string pluginPath)
+        {
+            _resolver = new AssemblyDependencyResolver(pluginPath);
+        }
+
+        protected override Assembly Load(AssemblyName assemblyName)
+        {
+            // Simple strategy: prefer what's already loaded, otherwise load from plugin
+            // This ensures StoryCADLib and other shared assemblies use the same instance
+            // while allowing plugin-specific dependencies to load from plugin directory
+
+            var existingAssembly = Default.Assemblies
+                .FirstOrDefault(a => AssemblyName.ReferenceMatchesDefinition(
+                    a.GetName(), assemblyName));
+
+            if (existingAssembly != null)
+            {
+                // Assembly already loaded in default context - use that instance
+                return null;
+            }
+
+            // Not in default context - try to load from plugin directory
+            string assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
+            if (assemblyPath != null)
+            {
+                return LoadFromAssemblyPath(assemblyPath);
+            }
+
+            // Not found anywhere - let runtime handle it
+            return null;
+        }
+    }
 }

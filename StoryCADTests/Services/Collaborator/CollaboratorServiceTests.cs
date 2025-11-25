@@ -50,7 +50,8 @@ public class CollaboratorServiceTests
     }
 
     /// <summary>
-    ///     Test that COLLAB_DEBUG=1 allows normal collaborator checks
+    ///     Test that COLLAB_DEBUG values other than "0" allow normal collaborator checks.
+    ///     (Only COLLAB_DEBUG=0 disables loading; any other value including "1" allows normal operation)
     /// </summary>
     [TestMethod]
     public async Task CollaboratorService_CollabDebugOne_AllowsNormalChecks()
@@ -62,7 +63,7 @@ public class CollaboratorServiceTests
 
         try
         {
-            // Act - Set COLLAB_DEBUG to 1 (should continue with normal checks)
+            // Act - Set COLLAB_DEBUG to 1 (should continue with normal checks, no longer triggers debugging)
             Environment.SetEnvironmentVariable("COLLAB_DEBUG", "1");
             // Clear STORYCAD_PLUGIN_DIR to ensure we're testing the COLLAB_DEBUG=1 path
             Environment.SetEnvironmentVariable("STORYCAD_PLUGIN_DIR", null);
