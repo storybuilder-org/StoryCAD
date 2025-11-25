@@ -376,12 +376,28 @@ public class CollaboratorService
 
         protected override Assembly Load(AssemblyName assemblyName)
         {
+            // Simple strategy: prefer what's already loaded, otherwise load from plugin
+            // This ensures StoryCADLib and other shared assemblies use the same instance
+            // while allowing plugin-specific dependencies to load from plugin directory
+
+            var existingAssembly = Default.Assemblies
+                .FirstOrDefault(a => AssemblyName.ReferenceMatchesDefinition(
+                    a.GetName(), assemblyName));
+
+            if (existingAssembly != null)
+            {
+                // Assembly already loaded in default context - use that instance
+                return null;
+            }
+
+            // Not in default context - try to load from plugin directory
             string assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
             if (assemblyPath != null)
             {
                 return LoadFromAssemblyPath(assemblyPath);
             }
 
+            // Not found anywhere - let runtime handle it
             return null;
         }
     }
