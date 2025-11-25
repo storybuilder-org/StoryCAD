@@ -29,7 +29,7 @@ public partial class App : Application
     private const string WebPage = "WebPage";
 
     private readonly ILogService _log;
-    private string launchPath;
+    private string launchPath = string.Empty;
 
     /// <summary>
     ///     Initializes the singleton application object. This is the first line of authored code

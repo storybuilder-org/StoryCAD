@@ -26,9 +26,9 @@ public class CollaboratorService
     private Type collaboratorType;
 #pragma warning restore CS0169
     public Window CollaboratorWindow; // The secondary window for Collaborator
-#pragma warning disable CS0169 // Fields used in platform-specific code (!HAS_UNO only - see Issue #1126 for macOS support)
+#pragma warning disable CS0169, CS0414 // CS0169: unused on macOS, CS0414: assigned but unused on Windows - tracked for Issue #1126
     private bool dllExists;     // Used in Windows-only FindDll() method
-#pragma warning restore CS0169
+#pragma warning restore CS0169, CS0414
 #pragma warning disable CS0649 // Field will be assigned in future macOS implementation (Issue #1126)
     private string dllPath;     // Used in ConnectCollaborator() - will be needed for macOS (Issue #1126)
 #pragma warning restore CS0649
@@ -198,6 +198,7 @@ public class CollaboratorService
     private async Task<bool> FindDll()
     {
 #if !HAS_UNO
+        await Task.CompletedTask; // Async signature required for cross-platform compatibility
         _logService.Log(LogLevel.Info, "Locating CollaboratorLib...");
 
         if (TryResolveFromEnv(out var envPath))
