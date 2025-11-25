@@ -79,10 +79,10 @@
                     <CheckBox Grid.Row="1" Grid.Column="1" Content="Advanced logging" Margin="8"
                               HorizontalAlignment="Left"
                               IsChecked="{x:Bind PreferencesVm.AdvancedLogging, Mode=TwoWay}" />
-                    <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"
+                    <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="1" HorizontalAlignment="Center"
                               Content="Show startup page" Margin="8"
                               IsChecked="{x:Bind PreferencesVm.ShowStartupPage, Mode=TwoWay}" />
-                    <CheckBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"
+                    <CheckBox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center"
                               Content="Show file picker on startup" Margin="8"
                               IsChecked="{x:Bind PreferencesVm.ShowFilePickerOnStartup, Mode=TwoWay}" />
 

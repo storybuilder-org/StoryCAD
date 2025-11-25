@@ -54,6 +54,14 @@ public class PreferencesIo
 
                     //Update _model, with new values.
                     _model = JsonSerializer.Deserialize<PreferencesModel>(_preferencesJson);
+
+                    // TODO: Remove this migration in May 2026
+                    // Migrate WrapWholeWords to Wrap (WrapWholeWords doesn't break long words)
+                    if (_model.WrapNodeNames == TextWrapping.WrapWholeWords)
+                    {
+                        _model.WrapNodeNames = TextWrapping.Wrap;
+                    }
+
                     _preferenceService.Model = _model;
                     _log.Log(LogLevel.Info, "Preferences deserialized.");
                 }
