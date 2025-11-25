@@ -127,7 +127,7 @@
                     <TextBlock
                         Text="{x:Bind Name, Mode=TwoWay}"
                         TextWrapping="{x:Bind TextWrapping}"
-                        MaxWidth="220"
+                        MaxWidth="150"
                         Margin="10,0,0,0" />
                 </StackPanel>
             </DataTemplate>
@@ -408,7 +408,7 @@
                                                 <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20"
                                                             Height="20" />
                                                 <TextBlock Text="{x:Bind Name, Mode=TwoWay}"
-                                                           TextWrapping="{x:Bind TextWrapping}" MaxWidth="220"
+                                                           TextWrapping="{x:Bind TextWrapping}" MaxWidth="150"
                                                            Margin="10,0,10,0" />
                                             </StackPanel>
                                         </TreeViewItem>
@@ -436,7 +436,7 @@
                                                                         Width="20" Height="20" />
                                                             <TextBlock Text="{x:Bind Name, Mode=TwoWay}"
                                                                        TextWrapping="{x:Bind TextWrapping}"
-                                                                       MaxWidth="220" Margin="10,0,10,0" />
+                                                                       MaxWidth="150" Margin="10,0" />
                                                         </StackPanel>
                                                     </muxc:TreeViewItem>
                                                 </DataTemplate>
@@ -465,7 +465,7 @@
                                         <StackPanel Orientation="Horizontal">
                                             <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20" />
                                             <TextBlock Text="{x:Bind Name, Mode=TwoWay}"
-                                                       TextWrapping="{x:Bind TextWrapping}" MaxWidth="220"
+                                                       TextWrapping="{x:Bind TextWrapping}" MaxWidth="150"
                                                        Margin="10,0,10,0" />
                                         </StackPanel>
                                     </muxc:TreeViewItem>
@@ -481,7 +481,7 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <!-- Navigation Frame -->
-                    <Frame x:Name="SplitViewFrame" Navigated="SplitViewFrame_OnNavigated" Padding="0,0,0,0" />
+                    <Frame x:Name="SplitViewFrame" Navigated="SplitViewFrame_OnNavigated" Margin="10"/>
                 </Grid>
             </SplitView.Content>
         </SplitView>
