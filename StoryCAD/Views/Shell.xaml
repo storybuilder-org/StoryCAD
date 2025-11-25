@@ -497,6 +497,8 @@
                 <ColumnDefinition Width="*" />
                 <!-- Filler -->
                 <ColumnDefinition Width="Auto" />
+                <!-- Autosave Button -->
+                <ColumnDefinition Width="Auto" />
                 <!-- Backup Button -->
             </Grid.ColumnDefinitions>
 
@@ -523,7 +525,18 @@
 
             <!-- Spacer in Column 3 -->
 
-            <Button Grid.Column="4" Background="Transparent" Command="{x:Bind ShellVm.CreateBackupCommand}"
+            <Button Grid.Column="4" Background="Transparent" BorderBrush="Transparent" HorizontalAlignment="Right">
+                <Button.Content>
+                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" Height="36"
+                              ToolTipService.ToolTip="This icon is green when AutoSave is active and working.">
+                        <FontIcon.Foreground>
+                            <SolidColorBrush Color="{x:Bind ShellVm.AutosaveStatusColor, Mode=TwoWay}" />
+                        </FontIcon.Foreground>
+                    </FontIcon>
+                </Button.Content>
+            </Button>
+
+            <Button Grid.Column="5" Background="Transparent" Command="{x:Bind ShellVm.CreateBackupCommand}"
                     BorderBrush="Transparent" HorizontalAlignment="Right">
                 <Button.Content>
                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE777;" Height="36"

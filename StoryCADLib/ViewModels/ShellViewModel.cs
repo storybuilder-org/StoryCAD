@@ -98,6 +98,8 @@ public class ShellViewModel : ObservableRecipient
         Messenger.Register<ShellViewModel, IsChangedMessage>(this, static (r, m) => r.IsChangedMessageReceived(m));
         Messenger.Register<ShellViewModel, IsBackupStatusMessage>(this,
             static (r, m) => r.BackupStatusMessageReceived(m));
+        Messenger.Register<ShellViewModel, IsAutosaveStatusMessage>(this,
+            static (r, m) => r.AutosaveStatusMessageReceived(m));
         Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
         Messenger.Register<ShellViewModel, NameChangedMessage>(this, static (r, m) => r.NameMessageReceived(m));
 
@@ -109,7 +111,8 @@ public class ShellViewModel : ObservableRecipient
             _statusTimer = new DispatcherTimer();
             _statusTimer.Tick += statusTimer_Tick;
             ChangeStatusColor = Colors.Green;
-            BackupStatusColor = Colors.Green;
+            BackupStatusColor = Colors.Gray;  // Start gray until backup is active
+            AutosaveStatusColor = Colors.Gray;  // Start gray until autosave is active
         }
 
         Messenger.Send(new StatusChangedMessage(new StatusMessage("Ready", LogLevel.Info)));
@@ -543,6 +546,14 @@ public class ShellViewModel : ObservableRecipient
     {
         get => _backupStatusColor;
         set => SetProperty(ref _backupStatusColor, value);
+    }
+
+    private Color _autosaveStatusColor;
+
+    public Color AutosaveStatusColor
+    {
+        get => _autosaveStatusColor;
+        set => SetProperty(ref _autosaveStatusColor, value);
     }
 
     #endregion
@@ -1333,7 +1344,19 @@ public class ShellViewModel : ObservableRecipient
         }
         else
         {
-            BackupStatusColor = Colors.Red;
+            BackupStatusColor = Colors.Gray;
+        }
+    }
+
+    private void AutosaveStatusMessageReceived(IsAutosaveStatusMessage isGood)
+    {
+        if (isGood.Value)
+        {
+            AutosaveStatusColor = Colors.Green;
+        }
+        else
+        {
+            AutosaveStatusColor = Colors.Gray;
         }
     }
 

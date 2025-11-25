@@ -57,8 +57,17 @@ public class AutoSaveService : IDisposable
     }
 
     // original API names
-    public void StartAutoSave() => _autoSaveTimer.Start();
-    public void StopAutoSave() => _autoSaveTimer.Stop();
+    public void StartAutoSave()
+    {
+        _autoSaveTimer.Start();
+        WeakReferenceMessenger.Default.Send(new IsAutosaveStatusMessage(true));
+    }
+
+    public void StopAutoSave()
+    {
+        _autoSaveTimer.Stop();
+        WeakReferenceMessenger.Default.Send(new IsAutosaveStatusMessage(false));
+    }
 
     /// <summary>
     ///     Stops auto-save and waits for any in-progress save to complete
@@ -66,6 +75,7 @@ public class AutoSaveService : IDisposable
     public async Task StopAutoSaveAndWaitAsync()
     {
         _autoSaveTimer.Stop();
+        WeakReferenceMessenger.Default.Send(new IsAutosaveStatusMessage(false));
         // Wait for any in-progress save to complete
         await _autoSaveGate.WaitAsync();
         _autoSaveGate.Release();
@@ -126,6 +136,8 @@ public class AutoSaveService : IDisposable
                 {
                     // Indicate the model is now saved and unchanged
                     WeakReferenceMessenger.Default.Send(new IsChangedMessage(false));
+                    // Indicate autosave completed successfully
+                    WeakReferenceMessenger.Default.Send(new IsAutosaveStatusMessage(true));
                 });
             }
             else
