@@ -14,7 +14,7 @@ namespace StoryCADTests.Services
     [TestClass]
     public class WindowingTests
     {
-        private Windowing _windowing;
+        private Windowing _windowing = null!;
 
         [TestInitialize]
         public void Setup()
