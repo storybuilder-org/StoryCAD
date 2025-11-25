@@ -2,7 +2,7 @@
 
 namespace StoryCADLib.Controls;
 
-public sealed partial class Traits
+public sealed partial class Traits : UserControl
 {
     public Traits()
     {

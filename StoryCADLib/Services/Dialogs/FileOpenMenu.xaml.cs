@@ -3,7 +3,7 @@ namespace StoryCADLib.Services.Dialogs;
 /// <summary>
 ///     File open menu page, allows user to open and create outlines/samples
 /// </summary>
-public sealed partial class FileOpenMenuPage
+public sealed partial class FileOpenMenuPage : Page
 {
     public FileOpenVM FileOpenVM = Ioc.Default.GetRequiredService<FileOpenVM>();
 

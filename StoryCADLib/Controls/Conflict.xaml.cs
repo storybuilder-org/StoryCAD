@@ -2,7 +2,7 @@ using StoryCADLib.Models.Tools;
 
 namespace StoryCADLib.Controls;
 
-public sealed partial class Conflict
+public sealed partial class Conflict : UserControl
 {
     private string category;
     public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;

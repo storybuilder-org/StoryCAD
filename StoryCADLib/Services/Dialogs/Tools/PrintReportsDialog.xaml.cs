@@ -2,7 +2,7 @@ using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.Services.Dialogs.Tools;
 
-public sealed partial class PrintReportsDialog
+public sealed partial class PrintReportsDialog : Page
 {
     private readonly AppState _appState;
     private readonly ILogService _logService;

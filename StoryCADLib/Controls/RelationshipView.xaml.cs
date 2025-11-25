@@ -2,7 +2,7 @@ using Microsoft.UI.Xaml.Input;
 
 namespace StoryCADLib.Controls;
 
-public sealed partial class RelationshipView
+public sealed partial class RelationshipView : UserControl
 {
     public RelationshipView()
     {

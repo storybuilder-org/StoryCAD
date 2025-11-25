@@ -347,15 +347,14 @@ public partial class PrintReportDialogVM : ObservableRecipient
                     return;
                 }
 
+                using var font = new SKFont(SKTypeface.Default, PdfFontSize);
                 using var paint = new SKPaint
                 {
                     Color = SKColors.Black,
-                    TextSize = PdfFontSize,
-                    Typeface = SKTypeface.Default,
                     IsAntialias = true
                 };
 
-                var lineHeight = paint.FontSpacing;
+                var lineHeight = font.Spacing;
                 if (lineHeight <= 0)
                 {
                     lineHeight = PdfFontSize * 1.2f;
@@ -388,7 +387,7 @@ public partial class PrintReportDialogVM : ObservableRecipient
 
                             while (lineIndex < pageLines.Count)
                             {
-                                canvas.DrawText(pageLines[lineIndex] ?? string.Empty, PdfMarginLeft, y, paint);
+                                canvas.DrawText(pageLines[lineIndex] ?? string.Empty, PdfMarginLeft, y, SKTextAlign.Left, font, paint);
                                 lineIndex++;
 
                                 if (lineIndex >= pageLines.Count)

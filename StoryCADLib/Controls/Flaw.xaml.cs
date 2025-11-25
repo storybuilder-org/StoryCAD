@@ -2,7 +2,7 @@
 
 namespace StoryCADLib.Controls;
 
-public sealed partial class Flaw
+public sealed partial class Flaw : UserControl
 {
     public Flaw()
     {

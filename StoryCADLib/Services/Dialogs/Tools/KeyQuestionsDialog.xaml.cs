@@ -2,7 +2,7 @@
 
 namespace StoryCADLib.Services.Dialogs.Tools;
 
-public sealed partial class KeyQuestionsDialog
+public sealed partial class KeyQuestionsDialog : Page
 {
     public KeyQuestionsDialog()
     {
