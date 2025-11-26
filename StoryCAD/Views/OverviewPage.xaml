@@ -11,8 +11,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <TextBox Header="Title" Text="{x:Bind OverviewVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 Margin="10,10,10,0" />
+        <TextBox Header="Title" Text="{x:Bind OverviewVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
                  HorizontalAlignment="Stretch"
                  VerticalAlignment="Stretch"
@@ -183,19 +182,14 @@
                 <TabViewItem Header="Notes" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch">
-                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <usercontrols:RichEditBoxExtended Grid.Row="0"
-                                                      Header="Notes"
-                                                      RtfText="{x:Bind OverviewVm.Notes, Mode=TwoWay}"
-                                                      AcceptsReturn="True"
-                                                      IsSpellCheckEnabled="True"
-                                                      TextWrapping="Wrap"
-                                                      VerticalAlignment="Stretch"
-                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" />
-                </Grid>
+                    <usercontrols:RichEditBoxExtended
+                        Header="Notes"
+                        RtfText="{x:Bind OverviewVm.Notes, Mode=TwoWay}"
+                        AcceptsReturn="True"
+                        IsSpellCheckEnabled="True"
+                        TextWrapping="Wrap"
+                        VerticalAlignment="Stretch"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </TabViewItem>
             </TabView.TabItems>
         </TabView>

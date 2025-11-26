@@ -2,7 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
 using StoryCADLib.Exceptions;
 using StoryCADLib.ViewModels.SubViewModels;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Windows.Storage.Pickers;
 using Windows.UI;
@@ -35,8 +34,6 @@ public class Windowing : ObservableRecipient
         Ioc.Default.GetRequiredService<ILogService>())
     {
     }
-
-    private void OnPropertyChanged(object sender, PropertyChangedEventArgs e) { }
 
     /// <summary>
     /// A pointer to the App Window (MainWindow) handle
@@ -71,7 +68,7 @@ public class Windowing : ObservableRecipient
     /// within ShowContentDialog() as spwaning two at once will
     /// cause a crash.
     /// </summary>
-    private bool _IsContentDialogOpen = false;
+    private bool _isContentDialogOpen;
 
     private ElementTheme _requestedTheme = ElementTheme.Default;
     public ElementTheme RequestedTheme
@@ -202,19 +199,19 @@ public class Windowing : ObservableRecipient
 
 		//force close any other dialog if one is open
 		//(if force is enabled)
-		if (force && _IsContentDialogOpen && OpenDialog != null)
+		if (force && _isContentDialogOpen && OpenDialog != null)
 	    {
 		    logger.Log(LogLevel.Info, $"Force closing open content dialog: ({OpenDialog.Title})");
 			OpenDialog.Hide();
 
 			//This will be unset eventually but because we have called
 			//Hide() already we can unset this early.
-			_IsContentDialogOpen = false;
+			_isContentDialogOpen = false;
 			logger.Log(LogLevel.Info, $"Closed content dialog: ({OpenDialog.Title})");
 		}
 
 		//Checks a content dialog isn't already open
-		if (!_IsContentDialogOpen)
+		if (!_isContentDialogOpen)
         {
 			logger.Log(LogLevel.Trace, $"Showing dialog {Dialog.Title}");
 			OpenDialog = Dialog;
@@ -226,7 +223,7 @@ public class Windowing : ObservableRecipient
             OpenDialog.Resources["ContentDialogMaxWidth"] = 1080;
             OpenDialog.Resources["ContentDialogMaxHeight"] = 1080;
 
-            _IsContentDialogOpen = true;
+            _isContentDialogOpen = true;
 
 			//Show and log result.
             ContentDialogResult Result = await OpenDialog.ShowAsync();
@@ -242,7 +239,7 @@ public class Windowing : ObservableRecipient
 		            logger.Log(LogLevel.Info, $"User selected secondary option {Dialog.SecondaryButtonText}");
 					break;
             }
-			_IsContentDialogOpen = false;
+			_isContentDialogOpen = false;
             OpenDialog = null;
             return Result;
         }
@@ -254,7 +251,7 @@ public class Windowing : ObservableRecipient
     /// </summary>
     public void CloseContentDialog()
     {
-        if (_IsContentDialogOpen)
+        if (_isContentDialogOpen)
         {
             OpenDialog.Hide();
         }
@@ -270,14 +267,10 @@ public class Windowing : ObservableRecipient
         Windowing wnd = Ioc.Default.GetRequiredService<Windowing>();
         wnd.MainWindow.Activate();
 
-        try
+        wnd.GlobalDispatcher.TryEnqueue(() =>
         {
-            wnd.GlobalDispatcher.TryEnqueue(() =>
-            {
-                Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
-            });
-        }
-        finally { }
+            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
+        });
     }
 
     /// <summary>

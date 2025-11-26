@@ -2,7 +2,6 @@ using StoryCADLib.Services;
 
 namespace StoryCAD.Views;
 
-// Note: XAML updated for responsive layout; code-behind unchanged.
 public sealed partial class CharacterPage : Page
 {
     public CharacterPage()

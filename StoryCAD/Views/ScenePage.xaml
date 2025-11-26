@@ -28,8 +28,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <TextBox Header="Name" Text="{x:Bind SceneVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 viewModels:TextBoxFocus.IsFocused="{x:Bind SceneVm.IsTextBoxFocused, Mode=TwoWay}"
-                 Margin="10,10,10,0" />
+                 viewModels:TextBoxFocus.IsFocused="{x:Bind SceneVm.IsTextBoxFocused, Mode=TwoWay}" />
         <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
                  HorizontalAlignment="Stretch"
                  VerticalAlignment="Stretch"
@@ -109,8 +108,7 @@
                         </StackPanel>
                     </StackPanel>
                     <ScrollViewer Height="500">
-                        <ListView MinWidth="300" x:Name="SceneCast"
-                                  SelectionMode="Single"
+                        <ListView MinWidth="300" SelectionMode="Single"
                                   ItemsSource="{x:Bind SceneVm.CastSource, Mode=TwoWay}">
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="models:StoryElement">
