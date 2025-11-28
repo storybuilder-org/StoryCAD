@@ -35,7 +35,7 @@ public class StoryModel : ObservableObject
     private static List<PersistableNode> FlattenTree(ObservableCollection<StoryNodeItem> rootNodes)
     {
         var list = new List<PersistableNode>();
-        foreach (var root in rootNodes)
+        foreach (StoryNodeItem root in rootNodes)
         {
             AddNodeRecursively(root, list);
         }

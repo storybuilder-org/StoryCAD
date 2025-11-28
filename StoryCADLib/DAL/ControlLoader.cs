@@ -15,7 +15,7 @@ public class ControlLoader
         {
             await using var internalResourceStream = Assembly.GetExecutingAssembly()
                 .GetManifestResourceStream("StoryCADLib.Assets.Install.Controls.json");
-            using StreamReader reader = new(internalResourceStream);
+            using StreamReader reader = new(internalResourceStream!);
             var json = await reader.ReadToEndAsync();
 
             var options = new JsonSerializerOptions
@@ -25,24 +25,24 @@ public class ControlLoader
 
             _controlsData = JsonSerializer.Deserialize<ControlsJsonData>(json, options);
         }
-        catch (Exception _ex)
+        catch (Exception ex)
         {
-            Console.WriteLine(_ex.Message);
+            Console.WriteLine(ex.Message);
         }
 
         // Populate UserControl data source collections
-        List<object> Controls = new()
-        {
+        List<object> controls =
+        [
             LoadConflictTypes(),
             LoadRelationTypes()
-        };
+        ];
         Clear();
-        return Controls;
+        return controls;
     }
 
-    public SortedDictionary<string, ConflictCategoryModel> LoadConflictTypes()
+    private SortedDictionary<string, ConflictCategoryModel> LoadConflictTypes()
     {
-        SortedDictionary<string, ConflictCategoryModel> _conflictTypes = new();
+        SortedDictionary<string, ConflictCategoryModel> conflictTypes = new();
 
         if (_controlsData?.ConflictTypes != null)
         {
@@ -53,17 +53,17 @@ public class ControlLoader
                 foreach (var subCategory in conflictType.SubCategories)
                 {
                     model.SubCategories.Add(subCategory.Name);
-                    model.Examples.Add(subCategory.Name, new List<string>(subCategory.Examples));
+                    model.Examples.Add(subCategory.Name, [..subCategory.Examples]);
                 }
 
-                _conflictTypes.Add(conflictType.Category, model);
+                conflictTypes.Add(conflictType.Category, model);
             }
         }
 
-        return _conflictTypes;
+        return conflictTypes;
     }
 
-    public List<string> LoadRelationTypes()
+    private List<string> LoadRelationTypes()
     {
         return _controlsData?.RelationTypes != null
             ? new List<string>(_controlsData.RelationTypes)

@@ -133,13 +133,12 @@ public class StoryElement : ObservableObject
         }
 
         // Look for the StoryElement corresponding to the passed guid
-        if (elements.StoryElementGuids.ContainsKey(guid))
+        if (elements.StoryElementGuids.TryGetValue(guid, out StoryElement byGuid))
         {
-            return elements.StoryElementGuids[guid];
+            return byGuid;
         }
 
-        Ioc.Default.GetRequiredService<ILogService>()
-            .Log(LogLevel.Error, $"Cannot find GUID {guid} in outline");
+        Ioc.Default.GetRequiredService<ILogService>().Log(LogLevel.Error, $"Can't find GUID {guid} in outline");
         return new StoryElement(); // Not found
     }
 

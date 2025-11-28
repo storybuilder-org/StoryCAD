@@ -80,7 +80,6 @@ public static class BootStrapper
         Services.AddSingleton<LogService>();
         Services.AddSingleton<SearchService>();
         Services.AddSingleton<ControlLoader>();
-        Services.AddSingleton<ListLoader>();
         Services.AddSingleton<ToolLoader>();
         Services.AddSingleton<ScrivenerIo>();
         Services.AddSingleton<StoryIO>();

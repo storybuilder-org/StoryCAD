@@ -47,9 +47,7 @@ public class RelationshipModel
     }
 
 
-    public RelationshipModel()
-    {
-    }
-
+    //Required for deserialization
+    public RelationshipModel() { }
     #endregion
 }

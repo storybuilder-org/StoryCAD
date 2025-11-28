@@ -1,3 +1,4 @@
+using System.Resources;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
 using StoryCADLib.Exceptions;
@@ -28,7 +29,7 @@ public class Windowing : ObservableRecipient
         _logService = logService;
     }
 
-    // Constructor for backward compatibility - will be removed later
+    //TODO: Constructor for backward compatibility - will be removed later
     public Windowing() : this(
         Ioc.Default.GetRequiredService<AppState>(),
         Ioc.Default.GetRequiredService<ILogService>())
@@ -728,21 +729,18 @@ public class Windowing : ObservableRecipient
 
     /// <summary>
     /// Shows an error message to the user that there's an issue
-    /// with the app, and it needs to be reinstalled
-    /// As of the RemoveInstallService merge, this is theoretically
-    /// impossible to occur, but it should stay incase something
-    /// goes wrong with resource loading.
+    /// with the app, and it needs to be reinstalled.
     /// </summary>
     public async void ShowResourceErrorMessage()
     {
-        await new ContentDialog()
+        await new ContentDialog
         {
             XamlRoot = this.XamlRoot,
             Title = "Error loading resources",
-            Content = "An error has occurred, please reinstall or update StoryCAD to continue.",
+            Content = "An error has occurred, please reinstall StoryCAD, your outlines will not be affected..",
             CloseButtonText = "Close",
             RequestedTheme = RequestedTheme
         }.ShowAsync();
-        throw new ResourceLoadingException();
+        throw new MissingManifestResourceException();
     }
 }

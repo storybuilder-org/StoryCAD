@@ -35,7 +35,6 @@ public class WebModel : StoryElement
         }
     }
 
-    public WebModel()
-    {
-    }
+    //JSON Constructor, Don't Remove.
+    public WebModel() { }
 }
