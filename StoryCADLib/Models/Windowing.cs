@@ -1,7 +1,6 @@
 using System.Resources;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
-using StoryCADLib.Exceptions;
 using StoryCADLib.ViewModels.SubViewModels;
 using System.Runtime.InteropServices;
 using Windows.Storage.Pickers;
