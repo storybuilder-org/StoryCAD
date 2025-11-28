@@ -1,8 +1,9 @@
 using System.Resources;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Dispatching;
-using StoryCADLib.ViewModels.SubViewModels;
 using System.Runtime.InteropServices;
+using StoryCADLib.Services.Messages;
 using Windows.Storage.Pickers;
 using Windows.UI;
 using Windows.UI.ViewManagement;
@@ -26,13 +27,6 @@ public class Windowing : ObservableRecipient
     {
         _appState = appState;
         _logService = logService;
-    }
-
-    //TODO: Constructor for backward compatibility - will be removed later
-    public Windowing() : this(
-        Ioc.Default.GetRequiredService<AppState>(),
-        Ioc.Default.GetRequiredService<ILogService>())
-    {
     }
 
     /// <summary>
@@ -136,15 +130,9 @@ public class Windowing : ObservableRecipient
             BaseTitle += "(DEV BUILD) ";
         }
 
-        // TODO: ARCHITECTURAL ISSUE - Windowing (UI layer) should not depend on OutlineViewModel (business logic)
-        // This creates a circular dependency: OutlineViewModel -> Windowing -> OutlineViewModel
-        // Proper fix (SRP): Move UpdateWindowTitle logic to OutlineViewModel (which knows about file changes)
-        // and have it set the title on Windowing. OutlineViewModel already has Windowing reference.
-        // Current workaround: Use service locator to break the circular dependency
-        AppState appState = Ioc.Default.GetRequiredService<AppState>();
-        if (!string.IsNullOrEmpty(appState.CurrentDocument?.FilePath))
+        if (!string.IsNullOrEmpty(_appState.CurrentDocument?.FilePath))
         {
-            BaseTitle += $"- Currently editing {Path.GetFileNameWithoutExtension(appState.CurrentDocument.FilePath)}";
+            BaseTitle += $"- Currently editing {Path.GetFileNameWithoutExtension(_appState.CurrentDocument.FilePath)}";
         }
 
         //Set window Title.
@@ -155,22 +143,16 @@ public class Windowing : ObservableRecipient
     /// This will update the elements of the UI to
     /// match the theme set in RequestedTheme.
     /// </summary>
-    public async void UpdateUIToTheme()
+    public void UpdateUIToTheme()
     {
         (MainWindow.Content as FrameworkElement).RequestedTheme = RequestedTheme;
 
-        // TODO: ARCHITECTURAL ISSUE - Same as UpdateWindowTitle above
-        // Proper fix (SRP): Move UpdateUIToTheme logic to ShellViewModel (which manages navigation/UI state)
-        // ShellViewModel can coordinate the save and navigation when theme changes
-        // Current workaround: Use service locator to break the circular dependency
-        AppState appState = Ioc.Default.GetRequiredService<AppState>();
-        //Save file, close current node since it won't be the right theme.
-        if (!string.IsNullOrEmpty(appState.CurrentDocument?.FilePath))
+        // Notify subscribers (ShellViewModel) to save and navigate to safe state
+        if (!string.IsNullOrEmpty(_appState.CurrentDocument?.FilePath))
         {
-            await Ioc.Default.GetRequiredService<OutlineViewModel>().SaveFile();
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowHomePage();
+            WeakReferenceMessenger.Default.Send(new ThemeChangedMessage());
         }
-	}
+    }
 
 	/// <summary>
 	/// Reference to currently open dialog.
@@ -264,12 +246,11 @@ public class Windowing : ObservableRecipient
     /// </summary>
     public void ActivateMainInstance()
     {
-        Windowing wnd = Ioc.Default.GetRequiredService<Windowing>();
-        wnd.MainWindow.Activate();
+        MainWindow.Activate();
 
-        wnd.GlobalDispatcher.TryEnqueue(() =>
+        GlobalDispatcher.TryEnqueue(() =>
         {
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
+            WeakReferenceMessenger.Default.Send(new ActivateInstanceMessage());
         });
     }
 

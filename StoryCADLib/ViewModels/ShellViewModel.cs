@@ -102,6 +102,8 @@ public class ShellViewModel : ObservableRecipient
             static (r, m) => r.AutosaveStatusMessageReceived(m));
         Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
         Messenger.Register<ShellViewModel, NameChangedMessage>(this, static (r, m) => r.NameMessageReceived(m));
+        Messenger.Register<ShellViewModel, ThemeChangedMessage>(this, static (r, m) => r.ThemeChangedMessageReceived());
+        Messenger.Register<ShellViewModel, ActivateInstanceMessage>(this, static (r, m) => r.ActivateInstanceMessageReceived());
 
         State.CurrentDocument = new StoryDocument(new StoryModel());
 
@@ -1523,6 +1525,23 @@ public class ShellViewModel : ObservableRecipient
                 SettingModel.SettingNames[_settingIndex] = _msg.NewName;
                 break;
         }
+    }
+
+    /// <summary>
+    /// Handles theme change by saving current file and navigating to home page.
+    /// </summary>
+    private async void ThemeChangedMessageReceived()
+    {
+        await OutlineManager.SaveFile();
+        ShowHomePage();
+    }
+
+    /// <summary>
+    /// Handles second instance activation by showing a warning message.
+    /// </summary>
+    private void ActivateInstanceMessageReceived()
+    {
+        ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
     }
 
     #endregion
