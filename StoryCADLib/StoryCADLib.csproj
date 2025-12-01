@@ -252,4 +252,5 @@
     <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'windows'">
         <Compile Remove="ViewModels\Tools\PrintReportDialogVM.WinAppSDK.cs" />
     </ItemGroup>
+
 </Project>

@@ -112,29 +112,10 @@ public class CollaboratorService
     /// </summary>
     public void ConnectCollaborator()
     {
-        // Use custom load context to resolve plugin dependencies
+        // Use custom load context to resolve plugin dependencies when an explicit path is provided
         _pluginLoadContext = new PluginLoadContext(dllPath);
         CollabAssembly = _pluginLoadContext.LoadFromAssemblyPath(dllPath);
         _logService.Log(LogLevel.Info, "Loaded CollaboratorLib.dll with custom load context");
-
-        //debugging
-        Type[] collaboratorTypes;
-        try
-        {
-            collaboratorTypes = CollabAssembly.GetTypes();
-        }
-        catch (ReflectionTypeLoadException ex)
-        {
-            // Log each loader exception
-            foreach (var loaderEx in ex.LoaderExceptions)
-            {
-                if (loaderEx != null)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Loader Exception: {loaderEx.Message}");
-                }
-            }
-            throw;
-        }
 
         // Get the type of the Collaborator class
         var collaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
@@ -147,7 +128,6 @@ public class CollaboratorService
         // Create an instance of the Collaborator class using parameterless constructor
         _logService.Log(LogLevel.Info, "Creating Collaborator instance.");
 
-        // Find the parameterless constructor
         var constructor = collaboratorType.GetConstructor(Type.EmptyTypes);
         if (constructor == null)
         {
@@ -193,12 +173,11 @@ public class CollaboratorService
         }
 
         // Allow loading if:
-        // 1. Developer build AND plugin found
-        // 2. OR if STORYCAD_PLUGIN_DIR is set (for JIT debugging without F5)
+        // 1. Developer build (bundled CollaboratorLib) or
+        // 2. STORYCAD_PLUGIN_DIR is set (for JIT debugging without F5)
         var hasPluginDir = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(EnvPluginDirVar));
 
-        return (_appState.DeveloperBuild || hasPluginDir)
-               && await FindDll();
+        return hasPluginDir && await FindDll();
     }
 
     /// <summary>
