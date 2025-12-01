@@ -331,7 +331,7 @@ public class Windowing : ObservableRecipient
 				return null;
 			}
 
-			logger.Log(LogLevel.Info, $"Picked folder {file.Path} attributes:{file.Attributes}");
+			logger.Log(LogLevel.Info, $"Picked folder {file.Path}");
 			return file;
 		}
 	    catch (Exception e)

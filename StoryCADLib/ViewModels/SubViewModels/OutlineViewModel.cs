@@ -1362,6 +1362,12 @@ public class OutlineViewModel : ObservableRecipient
                     shellVm.RightTappedNode = null;
                     shellVm.CurrentNode = null;
 
+                    // Navigate to Overview to avoid showing deleted element
+                    if (appState.CurrentDocument.Model.ExplorerView?.Count > 0)
+                    {
+                        shellVm.TreeViewNodeClicked(appState.CurrentDocument.Model.ExplorerView[0]);
+                    }
+
                     // Mark the model as changed
                     Messenger.Send(new IsChangedMessage(true));
                 }

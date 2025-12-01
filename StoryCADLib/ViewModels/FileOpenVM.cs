@@ -228,6 +228,11 @@ public class FileOpenVM : ObservableRecipient
         var appState = Ioc.Default.GetRequiredService<AppState>();
         if (appState.CurrentDocument?.Model?.ExplorerView?.Count > 0)
         {
+            // Reset view state to Explorer View in case we were in Narrative View
+            shellVm.SelectedView = "Story Explorer View";
+            shellVm.CurrentView = "Story Explorer View";
+            shellVm.CurrentViewType = StoryViewType.ExplorerView;
+
             shellVm.TreeViewNodeClicked(appState.CurrentDocument.Model.ExplorerView[0]);
         }
     }
