@@ -216,10 +216,9 @@ public class ToolsData
                 };
 
                 // Assign roles
-                if (situation.Roles != null && situation.Roles.Count > 0)
+                if (situation.Roles is { Count: > 0 })
                 {
-                    if (situation.Roles.Count > 0)
-                        model.Role1 = situation.Roles[0];
+                    model.Role1 = situation.Roles[0];
                     if (situation.Roles.Count > 1)
                         model.Role2 = situation.Roles[1];
                     if (situation.Roles.Count > 2)
@@ -229,10 +228,9 @@ public class ToolsData
                 }
 
                 // Assign descriptions
-                if (situation.Descriptions != null && situation.Descriptions.Count > 0)
+                if (situation.Descriptions is { Count: > 0 })
                 {
-                    if (situation.Descriptions.Count > 0)
-                        model.Description1 = situation.Descriptions[0];
+                    model.Description1 = situation.Descriptions[0];
                     if (situation.Descriptions.Count > 1)
                         model.Description2 = situation.Descriptions[1];
                     if (situation.Descriptions.Count > 2)

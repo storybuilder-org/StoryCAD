@@ -6,7 +6,7 @@ using LogLevel = StoryCADLib.Services.Logging.LogLevel;
 namespace StoryCADLib.DAL;
 
 /// <summary>
-/// Updated resource loader for embedded resources now they are all JSON Files and don't need wierd XML handling.
+/// Updated resource loader for embedded resources now they are all JSON Files and don't need weird XML handling.
 /// </summary>
 public class JSONResourceLoader(ILogService logger)
 {

@@ -717,7 +717,7 @@ public class Windowing : ObservableRecipient
         {
             XamlRoot = this.XamlRoot,
             Title = "Error loading resources",
-            Content = "An error has occurred, please reinstall StoryCAD, your outlines will not be affected..",
+            Content = "An error has occurred, please reinstall StoryCAD, your outlines will not be affected.",
             CloseButtonText = "Close",
             RequestedTheme = RequestedTheme
         }.ShowAsync();

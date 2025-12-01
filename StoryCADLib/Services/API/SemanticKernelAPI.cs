@@ -167,9 +167,6 @@ public class SemanticKernelApi(OutlineService outlineService) : IStoryCADAPI
 
         try
         {
-            // Use OutlineService to get the element
-            var existingElement = outlineService.GetStoryElementByGuid(CurrentModel, guid);
-
             //Deserialize and update.
             var updated = StoryElement.Deserialize(newElement.ToString());
             updated.Uuid = guid;
@@ -245,7 +242,7 @@ public class SemanticKernelApi(OutlineService outlineService) : IStoryCADAPI
     }
 
     /// <summary>
-    ///     Implementation of IStoryCAWDAPI.GetStoryElement.
+    ///     Implementation of IStoryCADAPI.GetStoryElement.
     ///     This is an alias for GetStoryElementByGuid.
     /// </summary>
     public OperationResult<StoryElement> GetStoryElement(Guid guid)

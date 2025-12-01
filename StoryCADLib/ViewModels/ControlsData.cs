@@ -85,7 +85,7 @@ public class ControlData
                 foreach (var subCategory in conflictType.SubCategories)
                 {
                     model.SubCategories.Add(subCategory.Name);
-                    model.Examples.Add(subCategory.Name, [..subCategory.Examples]);
+                    model.Examples.Add(subCategory.Name, subCategory.Examples.ToList());
                 }
 
                 conflictTypes.Add(conflictType.Category, model);
