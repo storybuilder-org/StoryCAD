@@ -56,7 +56,7 @@ public class CollaboratorService
     ///     Opens the Collaborator window with the current story context.
     ///     Collaborator handles all workflow operations internally.
     /// </summary>
-    public void OpenCollaborator()
+    public async void OpenCollaborator()
     {
         if (_collaboratorInterface == null)
         {
@@ -81,7 +81,7 @@ public class CollaboratorService
 
             try
             {
-                CollaboratorWindow = _collaboratorInterface.Open(api, storyModel);
+                CollaboratorWindow = await _collaboratorInterface.OpenAsync(api, storyModel);
             }
             catch (Exception ex)
             {
@@ -92,7 +92,7 @@ public class CollaboratorService
             if (CollaboratorWindow != null)
             {
                 CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
-                CollaboratorWindow.Activate();
+                // Window is already activated in WindowManager.CreateWindowAsync
                 _logService.Log(LogLevel.Info, "Collaborator window opened");
             }
             else
