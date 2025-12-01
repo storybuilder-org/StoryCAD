@@ -3,6 +3,8 @@ using System.Runtime.Loader;
 using Windows.ApplicationModel.AppExtensions;
 using Windows.ApplicationModel.Resources.Core;
 using Windows.Storage;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Markup;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator.Contracts;
@@ -117,6 +119,9 @@ public class CollaboratorService
         CollabAssembly = _pluginLoadContext.LoadFromAssemblyPath(dllPath);
         _logService.Log(LogLevel.Info, "Loaded CollaboratorLib.dll with custom load context");
 
+        // Load plugin PRI and register its XAML metadata provider so plugin XAML can resolve types/resources
+        TryLoadPluginResourcesAndMetadata(dllPath, CollabAssembly);
+
         // Get the type of the Collaborator class
         var collaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
         if (collaboratorType == null)
@@ -178,6 +183,100 @@ public class CollaboratorService
         var hasPluginDir = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(EnvPluginDirVar));
 
         return hasPluginDir && await FindDll();
+    }
+
+    private void TryLoadPluginResourcesAndMetadata(string dllPath, Assembly collabAssembly)
+    {
+        try
+        {
+#if WINDOWS10_0_22621_0_OR_GREATER
+            var priPath = Path.ChangeExtension(dllPath, ".pri");
+            if (File.Exists(priPath))
+            {
+                try
+                {
+                    var priFile = StorageFile.GetFileFromPathAsync(priPath).AsTask().Result;
+                    ResourceManager.Current.LoadPriFiles(new[] { priFile });
+                    _logService.Log(LogLevel.Info, $"Loaded Collaborator PRI: {priPath}");
+                }
+                catch (Exception priEx)
+                {
+                    _logService.Log(LogLevel.Warn, $"Failed to load Collaborator PRI {priPath}: {priEx.Message}");
+                }
+            }
+            else
+            {
+                _logService.Log(LogLevel.Warn, $"Collaborator PRI not found at {priPath}");
+            }
+#endif
+
+            var providerType = collabAssembly.GetType("StoryCollaborator.CollaboratorLib_XamlTypeInfo.XamlMetaDataProvider");
+            if (providerType == null)
+            {
+                _logService.Log(LogLevel.Warn, "Collaborator XamlMetaDataProvider type not found");
+                return;
+            }
+
+            if (Activator.CreateInstance(providerType) is not IXamlMetadataProvider pluginProvider)
+            {
+                _logService.Log(LogLevel.Warn, "Failed to create Collaborator XamlMetaDataProvider instance");
+                return;
+            }
+
+            TryRegisterMetadataProvider(pluginProvider);
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"Failed to load Collaborator resources/metadata: {ex.Message}");
+        }
+    }
+
+    private void TryRegisterMetadataProvider(IXamlMetadataProvider pluginProvider)
+    {
+        try
+        {
+            var app = Application.Current as IXamlMetadataProvider;
+            if (app == null)
+            {
+                _logService.Log(LogLevel.Warn, "App does not implement IXamlMetadataProvider");
+                return;
+            }
+
+            var appType = app.GetType();
+            var appProviderField = appType.GetField("__appProvider", BindingFlags.Instance | BindingFlags.NonPublic);
+            var appProvider = appProviderField?.GetValue(app);
+            if (appProvider == null)
+            {
+                _logService.Log(LogLevel.Warn, "__appProvider field not found or null");
+                return;
+            }
+
+            var providerField = appProvider.GetType().GetField("_provider", BindingFlags.Instance | BindingFlags.NonPublic);
+            var provider = providerField?.GetValue(appProvider);
+            if (provider == null)
+            {
+                _logService.Log(LogLevel.Warn, "_provider field not found or null on app provider");
+                return;
+            }
+
+            var otherProvidersField = provider.GetType().GetField("_otherProviders", BindingFlags.Instance | BindingFlags.NonPublic);
+            var otherProviders = otherProvidersField?.GetValue(provider) as IList<IXamlMetadataProvider>;
+            if (otherProviders == null)
+            {
+                otherProviders = new List<IXamlMetadataProvider>();
+                otherProvidersField?.SetValue(provider, otherProviders);
+            }
+
+            if (!otherProviders.Contains(pluginProvider))
+            {
+                otherProviders.Add(pluginProvider);
+                _logService.Log(LogLevel.Info, "Registered Collaborator XamlMetadataProvider with host");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"Failed to register Collaborator metadata provider: {ex.Message}");
+        }
     }
 
     /// <summary>
