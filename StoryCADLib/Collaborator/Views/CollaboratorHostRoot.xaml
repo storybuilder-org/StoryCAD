@@ -1,11 +1,8 @@
 <Page
     x:Class="StoryCADLib.Collaborator.Views.CollaboratorHostRoot"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:uen="using:Uno.Extensions.Navigation.UI">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Grid>
-        <Frame x:Name="RootFrame"
-               uen:Region.Attached="True"
-               uen:Region.Name="Root" />
+        <Frame x:Name="RootFrame" />
     </Grid>
 </Page>

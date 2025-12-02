@@ -54,7 +54,6 @@
 		<PackageReference Include="Microsoft.SemanticKernel.Abstractions" />
 		<PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" />
 		<PackageReference Include="CommunityToolkit.Mvvm" />
-		<PackageReference Include="Uno.Extensions.Navigation.WinUI" />
 		<PackageReference Include="dotenv.net" />
 		<PackageReference Include="Elmah.Io.NLog" />
 		<PackageReference Include="MySql.Data" />
