@@ -19,6 +19,7 @@
     <PackageVersion Include="Octokit" Version="14.0.0" />
     <PackageVersion Include="SkiaSharp" Version="3.119.1" />
     <PackageVersion Include="Uno.Fonts.Fluent" Version="2.7.1" />
+    <PackageVersion Include="Uno.Extensions.Navigation.WinUI" Version="5.0.2" />
     <PackageVersion Include="MSTest.TestAdapter" Version="3.10.1" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.10.1" />
     <PackageVersion Include="Microsoft.TestPlatform.TestHost" Version="17.14.1" />

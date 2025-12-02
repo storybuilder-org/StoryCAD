@@ -1,6 +1,6 @@
 <Project Sdk="Uno.Sdk">
     <PropertyGroup>
-        <UnoSingleProject>true</UnoSingleProject>
+        <UnoSingleProject>true</UnoSingleProject> 
         <OutputType>Library</OutputType>
         <UnoDisableValidateWinAppSDK3548>true</UnoDisableValidateWinAppSDK3548>
 
@@ -49,16 +49,17 @@
         <TargetFrameworks>net9.0-desktop</TargetFrameworks>
     </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.SemanticKernel" />
-        <PackageReference Include="Microsoft.SemanticKernel.Abstractions" />
-        <PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" />
-        <PackageReference Include="CommunityToolkit.Mvvm" />
-        <PackageReference Include="dotenv.net" />
-        <PackageReference Include="Elmah.Io.NLog" />
-        <PackageReference Include="MySql.Data" />
-        <PackageReference Include="NLog" />
-        <PackageReference Include="NLog.Extensions.Logging" />
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SemanticKernel" />
+		<PackageReference Include="Microsoft.SemanticKernel.Abstractions" />
+		<PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" />
+		<PackageReference Include="CommunityToolkit.Mvvm" />
+		<PackageReference Include="Uno.Extensions.Navigation.WinUI" />
+		<PackageReference Include="dotenv.net" />
+		<PackageReference Include="Elmah.Io.NLog" />
+		<PackageReference Include="MySql.Data" />
+		<PackageReference Include="NLog" />
+		<PackageReference Include="NLog.Extensions.Logging" />
         <PackageReference Include="NRTFTree-Async" />
         <PackageReference Include="Octokit" />
         <PackageReference Include="SkiaSharp" />
@@ -90,25 +91,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Page Update="Collaborator\Views\WelcomePage.xaml">
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-    </ItemGroup>
-
-    <ItemGroup>
         <Page Update="Controls\RelationshipView.xaml">
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Page Update="Collaborator\Views\WorkflowShell.xaml">
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Page Update="Collaborator\Views\WorkflowPage.xaml">
             <Generator>MSBuild:Compile</Generator>
         </Page>
     </ItemGroup>

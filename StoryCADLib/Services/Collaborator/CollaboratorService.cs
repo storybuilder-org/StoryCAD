@@ -21,6 +21,7 @@ public class CollaboratorService
     private readonly BackupService _backupService;
     private readonly ILogService _logService;
     private readonly PreferenceService _preferenceService;
+    private IXamlMetadataProvider _pluginMetadataProvider;
     private ICollaborator _collaboratorInterface; // Interface-based reference
     private Assembly CollabAssembly;
     private AssemblyLoadContext _pluginLoadContext; // Custom load context for plugin dependencies
@@ -83,7 +84,21 @@ public class CollaboratorService
 
             try
             {
-                CollaboratorWindow = await _collaboratorInterface.OpenAsync(api, storyModel);
+                // Host supplies the root frame for navigation
+                var hostRoot = new StoryCADLib.Collaborator.Views.CollaboratorHostRoot();
+                var hostFrame = hostRoot.RootFrameControl;
+                if (hostFrame == null)
+                {
+                    _logService.Log(LogLevel.Error, "Collaborator host frame not found");
+                    return;
+                }
+
+                // Create the window on the host side
+                CollaboratorWindow = new Window { Content = hostRoot, Title = "Story Collaborator" };
+                CollaboratorWindow.Activate();
+
+                // Let the plugin drive the provided frame
+                await _collaboratorInterface.OpenAsync(api, storyModel, CollaboratorWindow, hostFrame);
             }
             catch (Exception ex)
             {
@@ -233,6 +248,8 @@ public class CollaboratorService
 
     private void TryRegisterMetadataProvider(IXamlMetadataProvider pluginProvider)
     {
+        _pluginMetadataProvider = pluginProvider;
+
         try
         {
             var app = Application.Current as IXamlMetadataProvider;
@@ -278,6 +295,8 @@ public class CollaboratorService
             _logService.Log(LogLevel.Warn, $"Failed to register Collaborator metadata provider: {ex.Message}");
         }
     }
+
+    internal IXamlMetadataProvider? PluginMetadataProvider => _pluginMetadataProvider;
 
     /// <summary>
     ///     Locates CollaboratorLib.dll using STORYCAD_PLUGIN_DIR environment variable.

@@ -5,6 +5,7 @@ using StoryCADLib.DAL;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services;
 using StoryCADLib.Services.Backend;
+using StoryCADLib.Services.Collaborator;
 using StoryCADLib.Services.IoC;
 using StoryCADLib.Services.Json;
 using StoryCADLib.Services.Locking;
