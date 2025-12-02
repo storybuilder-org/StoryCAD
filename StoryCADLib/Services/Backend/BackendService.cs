@@ -41,6 +41,12 @@ public class BackendService
     private string connection = string.Empty;
     private string sslCA = string.Empty;
 
+    /// <summary>
+    /// Indicates whether the backend connection was successfully configured.
+    /// When false, database operations will be skipped to avoid cascading errors.
+    /// </summary>
+    public bool IsConnectionConfigured { get; private set; }
+
     public BackendService(ILogService logService, AppState appState, PreferenceService preferenceService)
     {
         _logService = logService;
@@ -143,10 +149,15 @@ public class BackendService
 
     public async Task PostPreferences(PreferencesModel preferences)
     {
+        if (!IsConnectionConfigured)
+        {
+            _logService.Log(LogLevel.Warn, "Skipping PostPreferences - backend connection not configured");
+            return;
+        }
+
         _logService.Log(LogLevel.Info, "Post user preferences to back-end database");
 
         var sql = Ioc.Default.GetService<MySqlIo>();
-
 
         // Get a connection to the database
         MySqlConnection conn = new(connection);
@@ -195,7 +206,13 @@ public class BackendService
 
     public async Task PostVersion()
     {
-        _logService.Log(LogLevel.Info, "Posting version data to parse");
+        if (!IsConnectionConfigured)
+        {
+            _logService.Log(LogLevel.Warn, "Skipping PostVersion - backend connection not configured");
+            return;
+        }
+
+        _logService.Log(LogLevel.Info, "Posting version data to back-end database");
 
         var preferences = _preferenceService.Model;
         var sql = Ioc.Default.GetService<MySqlIo>();
@@ -273,7 +290,7 @@ public class BackendService
     {
         try
         {
-            _logService.Log(LogLevel.Info, "GetConnectionString");
+            _logService.Log(LogLevel.Info, "SetConnectionString");
             var tempFolder = await StorageFolder.GetFolderFromPathAsync(Path.GetTempPath());
             var tempFile =
                 await tempFolder.CreateFileAsync("StoryCAD.pem", CreationCollisionOption.ReplaceExisting);
@@ -282,11 +299,13 @@ public class BackendService
             sslCA = $"SslCa={tempFile.Path};";
             // create MySQL connection string if keys are defined
             connection = keys.CONNECTION + sslCA;
-            // can compare the c:\certs and temp file to see if they are the same
+            IsConnectionConfigured = true;
+            _logService.Log(LogLevel.Info, "Backend connection configured successfully");
         }
         catch (Exception ex)
         {
-            _logService.LogException(LogLevel.Error, ex, ex.Message);
+            IsConnectionConfigured = false;
+            _logService.LogException(LogLevel.Error, ex, $"Failed to configure backend connection: {ex.Message}");
         }
     }
 
