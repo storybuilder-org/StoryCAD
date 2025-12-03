@@ -4,7 +4,7 @@ using StoryCADLib.ViewModels.Tools;
 namespace StoryCAD.Views;
 
 /// <summary>
-///     This Page is displayed if Preferences.Initialise is false.
+/// This Page is displayed if Preferences.Initialise is false.
 /// </summary>
 public sealed partial class PreferencesInitialization : Page
 {

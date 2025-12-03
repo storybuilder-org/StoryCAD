@@ -6,8 +6,8 @@ namespace StoryCAD.Views;
 
 public sealed partial class WebPage : Page
 {
-    private readonly LogService Logger = Ioc.Default.GetRequiredService<LogService>();
-    private WebViewModel WebVM = Ioc.Default.GetRequiredService<WebViewModel>();
+    private readonly LogService _logger = Ioc.Default.GetRequiredService<LogService>();
+    public WebViewModel WebVM = Ioc.Default.GetRequiredService<WebViewModel>();
 
     public WebPage()
     {
@@ -18,20 +18,11 @@ public sealed partial class WebPage : Page
         WebVM.GoBack = GoBack;
     }
 
-    public void Refresh()
-    {
-        WebView.Reload();
-    }
+    public void Refresh() => WebView.Reload();
 
-    public void GoForward()
-    {
-        WebView.GoForward();
-    }
-
-    public void GoBack()
-    {
-        WebView.GoBack();
-    }
+    public void GoForward() => WebView.GoForward();
+    
+    public void GoBack() => WebView.GoBack();
 
     /// <summary>
     ///     This code updates the timestamp and query so that the URL box can be updated.
@@ -40,14 +31,12 @@ public sealed partial class WebPage : Page
     {
         WebVM.Query = WebVM.Url.ToString();
         WebVM.Timestamp = DateTime.Now;
-        Logger.Log(LogLevel.Info, $"Updated Query to {WebVM.Query} ");
+        _logger.Log(LogLevel.Info, $"Updated Query to {WebVM.Query}");
     }
 
     /// <summary>
-    ///     This happens when the search icon is clicked.
+    /// This happens when the search icon is clicked.
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="args"></param>
     private void QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
         WebVM.SubmitQuery();

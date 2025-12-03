@@ -340,7 +340,7 @@ public class SemanticKernelApiTests
 
         // Act
         // Assume deletion from ExplorerView.
-        var deleteResult = await _api.DeleteElement(elementGuid, StoryViewType.ExplorerView);
+        var deleteResult = await _api.DeleteElement(elementGuid);
 
         // Assert
         Assert.IsTrue(deleteResult.IsSuccess, "DeleteElement should succeed.");
@@ -583,7 +583,7 @@ public class SemanticKernelApiTests
         var sceneGuid = addResult.Payload;
 
         // Act
-        var deleteResult = await _api.DeleteElement(sceneGuid, StoryViewType.ExplorerView);
+        var deleteResult = await _api.DeleteElement(sceneGuid);
 
         // Assert
         Assert.IsTrue(deleteResult.IsSuccess, "DeleteElement should succeed");
@@ -601,7 +601,7 @@ public class SemanticKernelApiTests
         var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
 
         // Act
-        var result = await api.DeleteElement(Guid.NewGuid(), StoryViewType.ExplorerView);
+        var result = await api.DeleteElement(Guid.NewGuid());
 
         // Assert
         Assert.IsFalse(result.IsSuccess, "DeleteElement should fail");
@@ -624,7 +624,7 @@ public class SemanticKernelApiTests
         var problemGuid = addResult.Payload;
 
         // Move to trash first
-        await _api.DeleteElement(problemGuid, StoryViewType.ExplorerView);
+        await _api.DeleteElement(problemGuid);
 
         // Act
         var restoreResult = await _api.RestoreFromTrash(problemGuid);
@@ -689,8 +689,8 @@ public class SemanticKernelApiTests
         Assert.IsTrue(addResult2.IsSuccess);
 
         // Move both to trash
-        await _api.DeleteElement(addResult1.Payload, StoryViewType.ExplorerView);
-        await _api.DeleteElement(addResult2.Payload, StoryViewType.ExplorerView);
+        await _api.DeleteElement(addResult1.Payload);
+        await _api.DeleteElement(addResult2.Payload);
 
         var trashNode = _api.CurrentModel.TrashView.First();
         Assert.AreEqual(2, trashNode.Children.Count, "Should have 2 items in trash");

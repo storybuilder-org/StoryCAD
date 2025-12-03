@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS8632 // Nullable annotations used without nullable context
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reflection;
 using StoryCADLib.Services;
 
@@ -33,7 +32,7 @@ public class AppState
     ///     This is a debug timer that counts the amount of time from
     ///     the app being opened to Shell being properly initialised.
     /// </summary>
-    public Stopwatch StartUpTimer = Stopwatch.StartNew();
+    public readonly Stopwatch StartUpTimer = Stopwatch.StartNew();
 
     /// <summary>
     ///     This is the path where all app files are stored

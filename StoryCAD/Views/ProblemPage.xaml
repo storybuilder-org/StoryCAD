@@ -13,8 +13,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <TextBox Header="Name" Text="{x:Bind ProblemVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 viewModels:TextBoxFocus.IsFocused="{x:Bind ProblemVm.IsTextBoxFocused, Mode=TwoWay}"
-                 Margin="10,10,10,0" />
+                 viewModels:TextBoxFocus.IsFocused="{x:Bind ProblemVm.IsTextBoxFocused, Mode=TwoWay}"/>
         <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
                  HorizontalAlignment="Stretch"
                  VerticalAlignment="Stretch"

@@ -386,8 +386,7 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                     <StackPanel>
                         <!-- Main Navigation Tree -->
-                        <ItemsRepeater ItemsSource="{x:Bind AppState.CurrentDocument.Model.CurrentView, Mode=TwoWay}"
-                                       x:Name="NavigationTree">
+                        <ItemsRepeater ItemsSource="{x:Bind AppState.CurrentDocument.Model.CurrentView, Mode=TwoWay}">
                             <ItemsRepeater.ItemTemplate>
                                 <DataTemplate x:DataType="viewmodels:StoryNodeItem">
                                     <Grid DataContext="{x:Bind}">
