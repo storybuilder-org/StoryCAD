@@ -6,6 +6,4 @@ nav_order: 76
 parent: Home
 has_toc: false
 ---
-# Researching your story
-
 Effective storytelling often requires thorough research. StoryCAD provides two story element types to support your research process: **Notes**  story elements, for capturing and organizing your ideas and observations, and  **WebPage** story elements, for seamlessly integrating online resources directly into your outline.

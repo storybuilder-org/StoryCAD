@@ -9,7 +9,7 @@ has_toc: false
 ### Psychological Tab
 Psychological Tab
 
-![](../media/Character-Psychological-Tab.png)
+![](Character-Psychological-Tab.png)
 
 This tab contains information about the mental states and processes of the character.
 

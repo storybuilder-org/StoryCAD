@@ -7,7 +7,6 @@ parent: Reports
 has_toc: false
 ---
 ## Print Reports
-Print Reports
 
 If you select the Print Reports option, a dialog will appear which allows you to check the particular reports you wish to print:
 

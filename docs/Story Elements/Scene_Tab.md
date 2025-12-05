@@ -7,7 +7,6 @@ parent: Scene Form
 has_toc: false
 ---
 ### Scene Tab
-Scene Tab
 
 ![](../media/Scene-Scene-Tab.png)
 

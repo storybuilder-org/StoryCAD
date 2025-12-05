@@ -7,7 +7,6 @@ parent: Navigating in StoryCAD
 has_toc: false
 ---
 ### Tabs
-Tabs		
 
 For most Story Element types, that Form contains multiple tabs. Clicking or touching a Tab name (the larger font) will switch to that tab’s content. 
 

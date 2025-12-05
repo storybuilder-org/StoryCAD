@@ -7,7 +7,6 @@ parent: Writing with StoryCAD
 has_toc: false
 ---
 ## Plotting Tools
-Plotting Tools
 
 StoryCAD comes with three tools to help you plot your story.
 
@@ -17,8 +16,7 @@ In recent decades, the three-act structure has been joined by a bevy of other st
 
 ![](../media/Tools-Master-Plots-1.png)
 
-
-Since every Problem is a ‘small story’ and has its own set of events that define it, a Problem is good place to use this tool. A Problem can be thought of as a sequence, a term used frequently in scriptwriting, which is defined as ‘a series of scenes with a beginning, middle, and end.’ Or, if you prefer, setup, development, and resolution. 
+Since every Problem is a 'small story' and has its own set of events that define it, a Problem is good place to use this tool. A Problem can be thought of as a sequence, a term used frequently in scriptwriting, which is defined as ‘a series of scenes with a beginning, middle, and end.’ Or, if you prefer, setup, development, and resolution. 
 
 Here’s what using the Three Act Play will do if you add it after a problem:
 
@@ -57,8 +55,4 @@ Each of these categories contains a number of scenes examples:
 ![](../media/Stock-Scenes-Examples.png)
 
 Unlike Dramatic Situations, this tool works just with Scenes. One use is to help develop Master Plot plot points / story beats. For example,  the Climatic Moments category can suggest Resolution examples, Ticking Clocks can suggest scenes that ratchet up drama, Obstacles to the Chase (or Discovery, or Romance) can be a Pinch Point, and so forth. As with all examples, if you use it, own it, make it yours. Be specific.
-
-
-
-
 

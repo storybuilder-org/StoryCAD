@@ -9,7 +9,7 @@ has_toc: false
 ### Outer Traits
 Outer Traits Tab
 
-![](../media/Character-Outer-Traits.png)
+![](Character-Outer-Traits.png)
 
 Trait Builder
 

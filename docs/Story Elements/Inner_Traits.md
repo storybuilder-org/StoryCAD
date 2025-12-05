@@ -7,9 +7,8 @@ parent: Character Form
 has_toc: false
 ---
 ### Inner Traits
-Inner Traits Tab
 
-![](../media/Character-Inner-Traits-Tab.png)
+![](Character-Inner-Traits-Tab.png)
 
 A trait is a distinguishing characteristic or quality.  As a fiction writer, you may find it useful to think of inner and outer (external) traits.  Inner traits are aspects of  character stemming from psychological and social causes.  External traits are habits and behaviors which reflect and illustrate the inner traits.  For instance, a girl may be submissive toward her mother (an inner trait) and may reflect it by bringing her small presents each day (an outer trait.)  You will want to find external traits to illuminate the inner traits of your characters, following the 'show, don't tell' maxim.
 
@@ -19,4 +18,4 @@ A menu item on the Characterization Aids sub-menu of the Tools menu,  Virtues an
 
 Don't go overboard and provide every possible trait for a character.  Focus on the traits which serve your story's premise (see "Plotting through character".)  Real people are often  complicated and confusing.  Characters should be multi-dimensional, but their motives, strengths, flaws, and growth should be clear and understandable to the reader.
 
-Both the Inner Traits tab and the Virtues and Vices list in StoryCAD can be tailored to your needs and wishes.  See "Customizing StoryCAD" for details on how to add, delete, or modify the listed traits.
+Both the Inner Traits tab and the Virtues and Vices list in StoryCAD can be tailored to your needs and wishes.

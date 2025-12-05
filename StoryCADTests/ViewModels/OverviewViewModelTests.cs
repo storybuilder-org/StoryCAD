@@ -20,7 +20,10 @@ public class OverviewViewModelTests
     {
         // Create a test story model and overview model
         _storyModel = new StoryModel();
-        _overviewModel = _storyModel.StoryElements.StoryOverview;
+
+        // Create an OverviewModel and add it to the story
+        _overviewModel = new OverviewModel("Test Story", _storyModel, null);
+        _storyModel.StoryElements.Add(_overviewModel);
 
         // Get AppState and set up the current document
         _appState = Ioc.Default.GetRequiredService<AppState>();

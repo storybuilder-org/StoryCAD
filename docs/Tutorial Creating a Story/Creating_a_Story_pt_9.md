@@ -11,7 +11,7 @@ We know how our story starts and how it ends; we're left with the middle story t
 
 We need to figure out how the two detectives can find out where the next drug deal is to be held.  One way is to enlist an ally who knows all about wireless communications.  Let's say he's the owner of a small radio-electronics shop.  But as with the interplay between Leonard and Tony, we need conflict.  Let's make this character a reluctant ally, one who's coerced into helping our protagonists.  We might make him a petty criminal of some sort, for instance, and have Leonard threaten or blackmail him.  That fits Leonard's character as we know it: he'll go to any lengths to catch Lacas.  Let's call our new character Joe Edwards. For his crime, we need something serious enough to get him into trouble, but not too serious, or the reader will be outraged that Leonard's left him on the street.  Let's say that he's used his electronics skills to bug the people in the apartment where he lives;  and in particular, the single woman who lives downstairs--- he's a Peeping Tom.  We can also add the scene where Kraskin threatens Edwards with arrest and exposure unless he cooperates.
 
-![](../media/Tut9JoeEdwards.png)
+![](Tut9JoeEdwards.png)
 1
 
 We've also gotten rid of the rest of the scaffolding plot points; we know where we're going now and don't need additional directions.  The Dramatic Situations entry (had we used it) would have been 'Obtaining (through force)'. 
@@ -27,14 +27,14 @@ Let's look for a way to get Leonard captured.  Turning once more to the Tools me
  This provides us with a number of stock scenes which offer dramatic twists: 
 
 
-![](../media/Tut9StockScenesTwists.png)
+![](Tut9StockScenesTwists.png)
 
 2
 
 In this case the first twist listed might help us; our electronics buff ally, Joe Edwards, could be tied to Lacas in some fashion and tip him off that the two detectives are listing in on his call.   Lacas could then set the cops up.  We decide to go with this.  Clicking on the first item in the list, and then on the Copy button, adds this stock scene into our plot outline.
 
 
-![](../media/Tut9StockSceneInserted.png)
+![](Tut9StockSceneInserted.png)
 3
 
 We can change the scene summary to read 'Edwards has tipped Lacas, who traps Kraskin.'  
@@ -46,7 +46,7 @@ We know that our detectives are using an illegal bug to catch Lacas, so they can
 So let's add a plot point immediately prior to this where this takes place, and title it 'Leonard, on stake out, learns of a drug deal .'  We can add notes to explain the details of the stake out.
 
 Our plot outline now looks like this:
-![](../media/Tut9ReorderedPlotline.png)
+![](Tut9ReorderedPlotline.png)
 
 4
 This is a relatively complete plot.  We could sit down and start writing the story now, but that would be a mistake.  There's a lot left unfinished: we haven't created settings, the characters are still unrefined, etc.  The more these things are worked out, the richer and more complete the first draft will be when you write it. 
@@ -54,7 +54,7 @@ This is a relatively complete plot.  We could sit down and start writing the sto
 We should evaluate our work so far.  The creation of the story outline is an excellent time to review and revise.  For one thing, changes at this point in the story's development, while it's still just an outline, are relatively cheap and easy; you're not sacrificing prose and dialog that took time and effort to produce.  There's also another advantage: at this point you're looking only at the structure of the story.  Every story has these components of problems, characters, setting and plot; but once you begin to write, the bones will be fleshed out in narrative and dialog and dressed with your writing style.  The naked structure will be, in a sense, hidden by the prose. This makes spotting and correcting structural problems more difficult. 
 
 StoryCAD offers a tool, Key Questions, to assist in refining and testing your story elements.  There are questions for Story, Problem, Character, Setting, and Plot.  From the Tools menu, select Key Questions and then Story Questions.  A form displaying a series of questions for the overall story will appear.  We can test the story concept against these questions.  If one is worth further study, notes can be recorded in the Answer section.  For example, scrolling through the questions, we find:
-![](../media/Tut9KeyQuestions.png)
+![](Tut9KeyQuestions.png)
 
 5
 

@@ -28,11 +28,11 @@ The primary reason your reader reads your story is to find out how it comes out,
 Consider whether the reader should know the story’s outcome prior to the climax scene. In many character-oriented stories the answer should be yes, and the story’s dramatic arc deals with how things happen rather than what will happen. If the answer should be no, the story question is the essential suspense of the story, and your plot must serve to keep the outcome in doubt.
 Focusing on our original idea again, let's say that Charlie is highly mobile, conducting his deals all over town, and that he uses a combination of pagers (yes, I know, old tech) and cellular phones to arrange the deals. Our suspenseful question might be ‘Will Leonard and Tony overcome the cellular phone advantage’ and find out where Charlie Lacas’ next drug deal will be held, so that they can catch him?’:
 
-![](../media/Tutorial-3-Catching-the-drug-dealer.png)
+![](Tutorial-3-Catching-the-drug-dealer.png)
 
 As is often the case, one question leads to another. We’re also faced with the question of how the detectives overcome Charlie’s tech. 
 
-We can treat this this issue of overcoming the advantage of the cellular phones as a  complication, by rewording the problem  not as a yes or no (suspense) question but as a ‘how do they overcome?’  Story Question. Your story can (and usually will) contain more than one Problem, and every Problem has its own Premise. Let’s add our ‘how to’ question as a second problem:
+We can treat this issue of overcoming the advantage of the cellular phones as a complication, by rewording the problem  not as a yes or no (suspense) question but as a ‘how do they overcome?’  Story Question. Your story can (and usually will) contain more than one Problem, and every Problem has its own Premise. Let’s add our ‘how to’ question as a second problem:
 
 ![](../media/Tutorial-3-The--how-to--complication.png)
 

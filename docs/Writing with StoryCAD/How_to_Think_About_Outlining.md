@@ -7,8 +7,6 @@ parent: Writing with StoryCAD
 has_toc: false
 ---
 ## How to Think About Outlining
-How to Think About Outlining
-
 
 How much should I outline? How detailed should my outline be? 
 
@@ -25,9 +23,5 @@ What’s different between these two positions? Several things:
 	•	The Pantser finishes her first draft. It contains all that knowledge needed to rewrite a second draft, but it’s diffused, spread throughout the prose. She has to edit much more extensively than if she worked from a good outline.
 	•	Here’s the killer: the Pantser had to face a blank page every day in order to get through that draft.  She often worked without a net, not knowing where her story was going. The plotter did too- while she was writing her outline. But there is a big difference in writing a few pages of outline and in writing a 200-page draft. The outline is more tractable. That’s what makes Pantsing a plotting issue.
 
-The gap between these two perspectives,  and the answer to the original questions, is to outline as little as possible to get to an effective first draft. The trick is to develop an effective workflow, one that gets you to the writing as quickly and efficiently as possible.
-
-
-
-	
+The gap between these two perspectives, and the answer to the original questions, is to outline as little as possible to get to an effective first draft. The trick is to develop an effective workflow, one that gets you to the writing as quickly and efficiently as possible.
 

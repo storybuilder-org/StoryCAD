@@ -7,15 +7,14 @@ parent: Character Form
 has_toc: false
 ---
 ### Social Tab
-Social Tab
 
-![](../media/Character-Social-Tab.png)
+![](Character-Social-Tab.png)
 
 These elements are the major factors which affect this character's behavior and which come from the influence of others or the community.
 
 The four socializing factors on this tab are important, but there is another, equally important source of social influence: specific relationships with other people.  Parents are notable examples.
 
-Social factors may act as a source of story conflict, either externally with another character or characters, or internally within the character, war with each other in character, when contradicted by events or learning. , as a source of story conflict.  For example, a young white boy might have been raised to dislike or distrust blacks,  but the positive influence of a particular person of color  could conflict with that background.  This type of conflict is common in 'Man against Society' stories.
+Social factors may act as a source of story conflict, either externally with another character or characters, or internally within the character when contradicted by events or learning. For example, a young white boy might have been raised to dislike or distrust blacks, but the positive influence of a particular person of color could conflict with that background. This type of conflict is common in 'Man against Society' stories.
 
 Fields:
 
@@ -35,7 +34,7 @@ Use this field to hold information about the character's education.
 
 Education is a primary means of social mobility, or rising above poverty or humble beginnings.  But education is also sometimes associated with class separation, snobbish behavior, and lack of worldliness.
 
-In either roll, positive or negative, education can place a character in conflict with his previous (before school) environment.
+In either role, positive or negative, education can place a character in conflict with his previous (before school) environment.
 
 Ethnic and Cultural
 

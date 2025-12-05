@@ -7,7 +7,6 @@ parent: Writing with StoryCAD
 has_toc: false
 ---
 ## Plotting in Scenes
-Plotting in Scenes
 
 Outlining your story at the scene level (plotting) is where you move from the abstract level of characters and their problems to the specific events you’ll draft your story from.
 
@@ -20,6 +19,3 @@ Each separate event is a Scene story element. A scene takes place at one locatio
 Certain events usually happen at fixed places in a story, a pattern called story structure. A plot has a beginning, middle, and end.  Aristotle described it as consisting of three movements, or acts. The first act, or setup, introduces us with characters with problems that must be solved. The second act, or rising action, presents obstacles as the characters try to solve their problems. The third act contains the logical outcome of the events in the first two acts. Most stories’ plots follow Aristotle's idea of story structure. 
 
 The things that happen at a certain place in the plot (introduce the protagonist, present the problem to be solved, introduce an obstacle, solve the story problem (the climax), and so forth) are often called plot points, which the Oxford Dictionary defines as ‘a particularly significant part of a work of fiction.’ Another term for a plot point is a story beat.
-
-
-

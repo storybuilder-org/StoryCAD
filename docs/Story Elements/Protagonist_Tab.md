@@ -7,11 +7,10 @@ parent: Problem Form
 has_toc: false
 ---
 ### Protagonist Tab
-Protagonist Tab
 
-![](../media/Problem-Protagonist-Tab.png)
+![](Problem-Protagonist-Tab.png)
 
-The  protagonist is the character who has the problem.  The protagonist of of the story problem is the main driver of the plot.  In the case of a subplot, that problem's protagonist may be a different character than the story's protagonist.
+The protagonist is the character who has the problem. The protagonist of the story problem is the main driver of the plot.  In the case of a subplot, that problem's protagonist may be a different character than the story's protagonist.
 
 Protagonist	
 
@@ -27,7 +26,7 @@ Motivation is closely tied to character--- it could be thought of as the place w
 
 The list of provided motivations is not meant to be exhaustive, but covers many of those found in literature.
 
-As with many other controls, you can modify the motivations listed to suit your own needs and interests.  See "Customizing StoryCAD" for details.
+As with many other controls, you can modify the motivations listed to suit your own needs and interests.
 
 Goal
 

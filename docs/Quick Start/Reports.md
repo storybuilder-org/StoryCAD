@@ -6,8 +6,7 @@ nav_order: 19
 parent: Menu Bar
 has_toc: false
 ---
-#### Reports
-Reports
+## Reports
 
 Clicking on the Reports button on the Menu Bar displays a fly-out menu with two reporting options:
 

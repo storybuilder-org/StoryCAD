@@ -6,8 +6,7 @@ nav_order: 20
 parent: Menu Bar
 has_toc: false
 ---
-#### Preferences
-Preferences Menu
+## Preferences
 
 The Preferences dialog is launched when you click on the Preferences button on the Menu Bar:
 

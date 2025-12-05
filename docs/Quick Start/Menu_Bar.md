@@ -7,8 +7,6 @@ parent: The StoryCAD User Interface
 has_toc: false
 ---
 ### Menu Bar
-Menu Bar
-
 The Menu bar is located just below the title bar on the StoryCAD form and provides access to StoryCAD’s common tasks.
 
 ![](../media/Menu-Bar.png)

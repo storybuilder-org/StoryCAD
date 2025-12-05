@@ -7,10 +7,8 @@ parent: Other Uses of StoryCAD
 has_toc: false
 ---
 ### StoryCAD for Pantsers
-StoryCAD for Pantsers
 
-‘Not all who wander are lost.’ - J.R.R. Tolkien
-
+'Not all who wander are lost.' - J.R.R. Tolkien
 
 The section Writing With StoryCAD begins by asking the question ‘How much should I outline’, and discusses the difference in ‘plotters’ and ‘pantsers.’ It ends as follows:
 
@@ -28,9 +26,5 @@ But- and this is important- figure out which problem(s) the scenes belong to, an
 
 If you’re character oriented, outline the characters you’re visualizing. Details can help bring your characters into focus. Pay attention to their flaws, relationships, and traits- the attributes that lead to conflict. A story is a character with a problem; just as if you had started with scenes, you want to get to (and outline) that problem. 
 
-Your character’s problem will often be a character arc- an  internal problem involving learning, growing or changing. Unfortunately, that’s usually not the story problem, except for Ascent/Descent plots such as Citizen Kane and The Treasure of the Sierra Madre. The story problem’s goal should be tangible, easy to understand and grasp- usually an external problem. Think of the internal problem as an obstacle that needs to be overcome in order to solve the external problem, by seeing the flaw that’s at the heart of it and changing a behavior or problem-solving approach which affects the story problem. If you start with a character flaw, find a problem that correcting it can solve. 
-
-
-
-
+Your character’s problem will often be a character arc- an  internal problem involving learning, growing or changing. Unfortunately, that’s usually not the story problem, except for Ascent/Descent plots such as Citizen Kane and The Treasure of the Sierra Madre. The story problem’s goal should be tangible, easy to understand and grasp- usually an external problem. Think of the internal problem as an obstacle that needs to be overcome in order to solve the external problem, by seeing the flaw that’s at the heart of it and changing a behavior or problem-solving approach which affects the story problem. If you start with a character flaw, find a problem that correcting it can solve.
 
