@@ -8,6 +8,163 @@ has_toc: false
 ---
 ## StoryCAD ChangeLog
 
+#### Release 3.3.0.0
+StoryCAD 3.3.0.0 was released in September 2025.
+- Code Clean up (#1074, #1075, #1079, #1086, #1090, #1093, #1094, #1095, #1096, #1097, #1098, #1099, #1101, #1103 #1104, #1105)
+- Printing is no longer supported on Windows builds older than Windows 10 22H2 (#1059)
+- Outlines created before 3.0.0 now require manual migration
+- Update Tests (#1079, #1091)
+- Update Dependencies (#1082)
+- Upgrade Search (#1085)
+- Update to .NET9
+- Fix ReleaseBuilder
+
+**API Changes:**
+- Data source has been removed and replaced (#1074)
+- Fix Assets missing issue (#1080)
+- Added search to API (SearchForText and SearchForGUID) (#1085)
+- A text field in every property field has been renamed to Description (See #1102 for more info)
+
+#### Release 3.2.1.0
+StoryCAD 3.2.1.0 was released in July 2025.
+- Fix backup folder missing crash
+- Fix many DND issues
+- Fix error in reports
+
+#### Release 3.2.0.0
+StoryCAD 3.2.0.0 was released in July 2025.
+- Add custom beat sheets (#1011, #1026)
+- Add Problem/Scene conversion option (#994)
+- Add treeview and file open dialog resizing (#1001)
+- Add preference to hide key file warning (#1002)
+- Add Backup tab (#1007, #1020)
+- Update CI/CD to Windows Server 2025 (#1013, #1017, #1027)
+- Rework Structure Tab (#1011, #1019)
+- Validate path before creating outline file (#1021)
+- Increase size of narrative editor UI (#1033)
+- Block creation of new root nodes in narrative editor (#1033)
+- Improve docs (#999)
+- Improve tests (#997, #1022, #1025)
+- Allow SK to override the GUID of a given element (#1008)
+- Fix crash on shutdown (#1024)
+- Fix empty trash index crash (#1023)
+- Fix issues with drag and drop (#1034)
+- Fix issues with templates (#1031)
+- Fix issue with inserting dramatic scenes (#1031)
+- Fix issues with master plots (#1031)
+- Fix crash when print fails (#1031)
+- Fix name shown when copying element in narrative editor (#1031)
+
+#### Release 3.1.4.0
+StoryCAD 3.1.4.0 was released in May 2025.
+- Update documentation
+- Fix issue when creating story
+
+#### Release 3.1.3.0
+StoryCAD 3.1.3.0 was released in May 2025.
+- Maintenance release
+
+#### Release 3.1.2.0
+StoryCAD 3.1.2.0 was released in May 2025.
+- Fix issue with lock
+- Fix issue with prefs file being unwritable
+
+#### Release 3.1.1.0
+StoryCAD 3.1.1.0 was released in May 2025.
+- Fix crash when open outline is clicked and no outline is selected
+- Fix crash when deleting nodes
+
+#### Release 3.1.0.0
+StoryCAD 3.1.0.0 was released in April 2025.
+- Add StoryCAD API
+- Update Dependencies
+- Clean compile warnings
+- Fix crash when clicking generate reports multiple times
+- Increase Log Size
+- Clean up unified menu
+- Update Documentation
+- Fix crash in save as menu
+
+#### Release 3.0.2.0
+StoryCAD 3.0.2.0 was released in February 2025.
+This is a maintenance release to fix reported bugs.
+- Fix Migration issue (#919)
+- Update Story Elements lists not loading correct lists on outline reload (#920)
+
+#### Release 3.0.1.0
+StoryCAD 3.0.1.0 was released in February 2025.
+- Fixed warnings (#896)
+- Fixed issues when opening story elements (#907)
+- Fixed scaling issue with feedback prompt (#906)
+- Fixed issue with rocky sample (#911)
+
+#### Release 3.0.0.0
+StoryCAD 3.0.0.0 was released in February 2025.
+- Updated manual and documentation (#838, #851, #854, #857)
+- Updated getting started dialog (#855)
+- Updated Dependencies (#856)
+- Save data as JSON (#865, #866, #872, #875)
+- Store references to elements as GUIDs (#874, #889)
+- Added backup now option (#876)
+- Fixed report crash (#887)
+- Fixed RTF Extend Box titles on dark theme (#873)
+- Fixed various bugs in 3.0 beta (#894)
+- Fixed Memory leak (#895)
+- Fixed dead discord link
+- Fixed issue with displaying changelog
+- Fixed issue with storyreader in invalid paths (#853, #870)
+- Fixed ItemsSource list issue with ViewpointCharacter (#892)
+- Removed first time using StoryCAD prompt in initialization page
+
+#### Release 2.15.0.0
+StoryCAD 2.15.0.0 was released in November 2024.
+- Update Dependencies
+- Add Structure tab to Problem Page
+- Update samples
+- Added additional help page
+- Update top bar to make all buttons fit
+
+#### Release 2.14.6.0
+StoryCAD 2.14.6.0 was released in August 2024.
+- Fix issue where story names could contain invalid characters, causing errors (#790)
+- Fixed crash trying to delete nodes
+
+#### Release 2.14.5.0
+StoryCAD 2.14.5.0 was released in August 2024.
+- Fix issue where text inside comboboxes could be invisible until clicked once
+
+#### Release 2.14.4.0
+StoryCAD 2.14.4.0 was released in July 2024.
+- Fixed issues with buildtools
+- Fixed issue with File/Folder open Menus
+- Various changes for future releases of StoryCAD
+
+#### Release 2.14.3.0
+StoryCAD 2.14.3.0 was released in July 2024.
+- Clean up codebase (#750, #751, #753)
+- Fix issues with saving (#761)
+- Groundwork for future updates (#748, #749, #752, #754, #758)
+
+#### Release 2.14.2.0
+StoryCAD 2.14.2.0 was released in June 2024.
+- Updated icons
+
+#### Release 2.14.1.0
+StoryCAD 2.14.1.0 was released in June 2024.
+- Fix how StoryCAD handles cloud files when they are unavailable (#738)
+
+#### Release 2.14.0.0
+StoryCAD 2.14.0.0 was released in May 2024.
+- Clean up code
+- Removed Patreon Code
+- Add rating prompt
+- Added report feedback button
+- Updated file writes
+- Updated user manual
+- Fixed potential issue with print reports menu
+- Update Drag and Drop to prevent issues
+- Updated Publisher Field
+
 #### Release 2.13.1.0
 StoryCAD 2.13.1.0 Was released in January 2024.
 - Fixed bug when using templates and you haven't reloaded your outline yet (#692)
