@@ -633,7 +633,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
         foreach (var _relation in Model.RelationshipList)
         {
             _relation.Partner =
-                StoryElement.GetByGuid(_relation.PartnerUuid); // Populate partner Character StoryElement for Name
+                StoryElement.GetByGuid(_relation.PartnerUuid, _storyModel); // Populate partner Character StoryElement for Name
             CharacterRelationships.Add(_relation);
         }
 
@@ -869,7 +869,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
                     }
                 }
 
-                memberRelationship.Partner = StoryElement.GetByGuid(partnerUuid); // Complete pairing
+                memberRelationship.Partner = StoryElement.GetByGuid(partnerUuid, _storyModel); // Complete pairing
                 // Add partner relationship to member's list of relationships 
                 CharacterRelationships.Add(memberRelationship);
                 SelectedRelationship = memberRelationship;
