@@ -416,3 +416,9 @@ StoryCAD/.ENV
 # Claude settings
 .claude/settings.local.json
 .env
+
+# Jekyll documentation
+_site/
+.jekyll-cache/
+.jekyll-metadata
+Gemfile.lock
