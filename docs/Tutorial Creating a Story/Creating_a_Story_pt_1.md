@@ -7,11 +7,8 @@ parent: Tutorial Creating a Story
 has_toc: false
 ---
 ## Creating a Story pt 1
-Creating a Story
 
-
-
-The best  way to learn about StoryCAD is to actually create a story with it.  That's what this tutorial is for.  We'll create a story outline with StoryCAD and show you exactly what we did at each step along the way. We don’t claim it’s a great outline; actually, it’s pretty trite. But the point is that any story idea, with work and process, can be developed into a workable story.
+The best way to learn about StoryCAD is to actually create a story with it.  That's what this tutorial is for.  We'll create a story outline with StoryCAD and show you exactly what we did at each step along the way. We don’t claim it’s a great outline; actually, it’s pretty trite. But the point is that any story idea, with work and process, can be developed into a workable story.
 
 The tutorial assumes you can navigate in StoryCAD, so if you haven’t yet done so, please take a look at the Quick Start  section of this manual, and particularly at the Navigating in StoryCAD subsection. That  said, let’s begin.
 
@@ -37,15 +34,15 @@ Select ‘Folders’ for the Template. If it’s not already there, change the P
 
 Note the green pencil on the Status Bar at the bottom of the page. The green indicates that the story outline has been saved to disk:
 
-![](../media/Tutorial-1-Danger-Calls-on-Disk.png)
+![](Tutorial-1-Danger-Calls-on-Disk.png)
 
 Click on the  Story Overview node in the navigation pane:
 
-![](../media/Tutorial-1-Story-Overvew-Node.png)
+![](Tutorial-1-Story-Overvew-Node.png)
 
 The content pane will show this node’s (empty) tabs and be sitting on the empty Story Idea tab:
 
-![](../media/Tutorial-1-Empty-Story-Idea-Tab.png)
+![](Tutorial-1-Empty-Story-Idea-Tab.png)
 
 You can click on any of the tabs to display that tab’s contents.
 
@@ -63,14 +60,13 @@ The indicator will change from red to green, indicating that all changes have be
 
 Alternatively, from the File menu, you can select Save Story, or enter the Ctrl+S shortcut keys.  Remember to save your work periodically.
 
-As we said in the beginning, an idea can come form anywhere: a bit of dialog, a possible character, a subject from an article or another story. You want to capture as much of that as possible. If it’s a character or a bit of dialog, create a Character story element. If it’s a location or situation, create a Setting story element. if it’s an event, create a Scene story element. If it’s a newspaper article or story you’ve read or movie you seen, describe it on the Story Idea tab. Encourage and trust your muse: whatever it was that made you think ‘story’, save it. For now, for “Danger Calls”, we don’t have any of these, just the idea as recorded.
+As we said in the beginning, an idea can come from anywhere: a bit of dialog, a possible character, a subject from an article or another story. You want to capture as much of that as possible. If it’s a character or a bit of dialog, create a Character story element. If it’s a location or situation, create a Setting story element. if it’s an event, create a Scene story element. If it’s a newspaper article or story you’ve read or movie you seen, describe it on the Story Idea tab. Encourage and trust your muse: whatever it was that made you think ‘story’, save it. For now, for “Danger Calls”, we don’t have any of these, just the idea as recorded.
 
 This is a good place to talk about workflow. Workflow is discussed more fully in Writing with StoryCAD, but the idea’s pretty simple. Your story outline is comprised of a number of story elements, and each story element is organized as one or more tabs. Each tab focuses on one aspect of the story element. A story outline always contains and starts with one story element, the Story Overview, and so far you’ve filled in one tab, the Story Idea. Every story starts with a story idea, and recording it is the first step in your workflow.
 
 Click on the Danger Calls node’s Structure tab. As is described in the Quick Start, this tab is concerned with constraints on the order and form you place on your story, and contains a number of user interface controls for this purpose. Our story idea’s about crime and criminals, so let’s pick a genre for that. Clicking on the down-arrow key on the Genre ComboBox will display a list of choices; we’ll choose Suspense.  Set Type to Short Story (to keep our example brief.) StoryCAD has many drop-down lists. Not all lists are editable, but for the most part they’re not exhaustive, and  are editable: you can enter values other than the provided options. The lists are examples, suggestions; they’re not there to limit your creativity, but to encourage it. 
 
-![](../media/Tutorial-1-Empty-Struture-Tab.png)
-
+![](Tutorial-1-Empty-Struture-Tab.png)
 
 The Structure tab on the Story Overview is important not necessarily at the moment of conception, but early in story development, because it constrains other choices. Type affects story length and complexity, and Genre sets reader expectations: to be amused for a humor piece, to have a mystery to solve in a mystery, etc.
 

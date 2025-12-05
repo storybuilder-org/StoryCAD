@@ -9,7 +9,7 @@ has_toc: false
 ### Relationships Tab
  Relationships Tab
 
-![](../media/Character-Relationships-Tab.png)
+![](Character-Relationships-Tab.png)
 
 
 The Relationship tab on the Character form describes significant character-to-character relationships.

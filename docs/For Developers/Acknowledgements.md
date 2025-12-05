@@ -3,20 +3,16 @@ title: Acknowledgements
 layout: default
 nav_enabled: true
 nav_order: 115
-parent: For Developers	
+parent: For Developers
 has_toc: false
 ---
 ## Acknowledgements
 
 #### Contributors
 
-Any complex undertaking, such as writing a novel, creating a
-complex piece of software, or a marriage, requires cooperation.
+Any complex undertaking, such as writing a novel, creating a complex piece of software, or a marriage, requires cooperation.
 
-We would like to express our sincere appreciation and gratitude 
-to those whose generous ideas and time helped make StoryCAD possible.
-If we've missed anyone's contribution, our sincere apologies. Let us know
-and we'll rectify that.
+We would like to express our sincere appreciation and gratitude to those whose generous ideas and time helped make StoryCAD possible. If we've missed anyone's contribution, our sincere apologies. Let us know and we'll rectify that.
 
 **Thanks go to these wonderful people:**
 
@@ -42,7 +38,7 @@ livelihood freely available to public open source projects like ours.
 
 (StoryCAD Versions before 2.14.2 relied on SyncFusion Controls and we are 
 eternally greatful for their support.)
-
+(StoryCAD Versions before 4.0.0 used WinUI, versions beyond use the UNO Framework)
 #### Origins
 
 Hi, I'm Terry Cox. 

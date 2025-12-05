@@ -3,7 +3,7 @@ title: Changelog
 layout: default
 nav_enabled: true
 nav_order: 116
-parent: For Developers	
+parent: For Developers
 has_toc: false
 ---
 ## StoryCAD ChangeLog
@@ -260,12 +260,12 @@ users.
 ######## Codebase Cleanup (##439) (ongoing)
 
 We're continuing to work on refactorings to
-improve our codebase and will continue to do so 
-indefinately. 
+improve our codebase and will continue to do so
+indefinitely.
 
 ###### Bug fixes
 
-The following bugsd were addressed in this release:
+The following bugs were addressed in this release:
 
 ######## Update Deletion Service to catch potential errors (##470, ##472)
 ######## Track Version in .STBX file (##469)
@@ -382,7 +382,7 @@ better highlight where you are.
 Scene Story Elements contain a Cast List control which, as its name implies,
 is used to list the characters in a scene. The Cast List control is based
 on a ListView and requires a convoluted set of interactions to add and
-delete cast members using a second control. Weve simplified this by allowing you
+delete cast members using a second control. We've simplified this by allowing you
 to switch between a list of all characters, with a checkbox by each name to
 add or remove the character to this scene's cast, or a list of just the scene's members.
 
@@ -402,8 +402,8 @@ values) when installing StoryCAD.
 
 Actively maintained programs tend to accumulate cruft over time. This release we've
 started a process of addressing this by working through the codebase and removing
-duplicate and unusued code, conforming to some newly-set naming conventions,
-and making other improvements.This is a long-term process, which will continue in
+duplicate and unused code, conforming to some newly-set naming conventions,
+and making other improvements. This is a long-term process, which will continue in
 future releases, but we're making progress.
 
 ######## Bug fixes:
@@ -411,9 +411,9 @@ future releases, but we're making progress.
 StoryCAD is a new product, and our number-one priority remains bug fixes and improvements.
 Some specific fixes in this release include:
 
-*Fixed a problem where the node wrapping Preference setting was not persisting.
+* Fixed a problem where the node wrapping Preference setting was not persisting.
 
-*Fixed the app freezing when generating large reports. A progress indicator is now shown.
+* Fixed the app freezing when generating large reports. A progress indicator is now shown.
 
 * Fixed a number of crashes relating to tool use and transitioning from one user action to 
 another.
@@ -460,8 +460,8 @@ prevents that from happening.
 
 Actively maintained programs tend to accumulate cruft over time. This release we've
 started a process of addressing this by working through the codebase and removing
-duplicate and unusued code, conforming to some newly-set naming conventions,
-and making other improvements.This is a long-term process, which will continue in
+duplicate and unused code, conforming to some newly-set naming conventions,
+and making other improvements. This is a long-term process, which will continue in
 future releases, but we're making progress.
 
 ######## User Manual and sample updates
@@ -562,7 +562,7 @@ Update packages by @Rarisma in ##340
 
 Fixed CharacterName, ProblemName and SceneName control issues by @Rarisma in ##341
 
-User is now prevented from opening the add relationships menu if there arent any prospective partners
+User is now prevented from opening the add relationships menu if there aren't any prospective partners
 Get ready for the store by @Rarisma in ##344
 
 Fix DotEnv Requirement by @Rarisma in ##346

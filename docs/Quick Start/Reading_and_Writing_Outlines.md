@@ -7,15 +7,16 @@ parent: Quick Start
 has_toc: false
 ---
 ## Reading and Writing Outlines
-Reading and Writing Outlines
 
 The File Menu button displays a drop-down menu of file options:
 
 ![](../media/File-Menu.png)
 
 
-A StoryCAD outline is a single file with a file extension of .stbx: for instance, ‘The Maltese Falcon.stbx.’   A StoryCAD file can be moved, copied, etc.
- 
+A StoryCAD outline is a single file with a file extension of .stbx: for instance, 'The Maltese Falcon.stbx.'   A StoryCAD file can be moved, copied, etc.
+
+StoryCAD .stbx files are fully compatible across Windows and macOS. See [Platform Differences](../Front%20Matter/Platform_Differences.html) for details on text formatting differences between platforms.
+
 The Open command identifies which outline you wish to work on. The Save command will save the file with the same name it with which it was opened or previously saved. The Save As command will save an outline under a new name or at a new location. 
 
 File Open displays the following open dialog:
@@ -29,6 +30,4 @@ This dialog will by default display recently opened outlines. Clicking on Open s
 Clicking on Sample Stories on the left tab displays a list of sample outlines installed with StoryCAD for you to play with. If you intend to change a sample, we recommend saving it to a different location before doing so.
 
 Only one story outline can be open at a time.  If you open a new file you'll be prompted to save the current file first if it’s been modified.
-
-If you see an error about invalid characters when creating a new outline, check that both the outline name and folder path contain only characters permitted by your operating system.
 

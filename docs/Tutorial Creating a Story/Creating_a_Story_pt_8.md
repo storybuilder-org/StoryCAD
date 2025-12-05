@@ -21,7 +21,7 @@ Our initial thought was that the conflict was between Tony (or Leonard) and Char
 
 The next point in the skeleton is 'Present Problem to be Solved'.   Since we've worked over the problems, we know what the problem is--- the Story Question for our first, external problem: 'How can Leonard and Tony overcome the 'cellular phone advantage' and find out where Charlie Lacas' next drug deal will be held, so that they can catch him?' 
 
-All we need to do is to change the skeleton plot point into one which presents this problem.  We can let Leonard present it to the reader, by discussing Lacas' use of technology. A single scene can, and should, server multiple purposes.
+All we need to do is to change the skeleton plot point into one which presents this problem.  We can let Leonard present it to the reader, by discussing Lacas' use of technology. A single scene can, and should, serve multiple purposes.
 
 There are other tools to help you plot- for example, Stock Scenes:
 

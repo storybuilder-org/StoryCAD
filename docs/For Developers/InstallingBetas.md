@@ -3,10 +3,15 @@ title: Installing Beta Versions of StoryCADLib
 layout: default
 nav_enabled: true
 nav_order: 118
-parent: For Developers	
+parent: For Developers
 has_toc: false
 ---
-
+### Installing Beta Versions of StoryCAD.
+-  Navigate to the actions tab
+- Select the AutoBuilder or Build and Release Tab
+- Find the build you want and click on it
+- Download StoryCAD zip file you want
+- Unzip and follow the included instructions.
 ## Installing Beta Versions of StoryCADLib via Local NuGet Repository
 
 Beta versions of StoryCADLib can be installed using NuGet by setting up a local repository. Follow these steps:

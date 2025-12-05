@@ -7,9 +7,8 @@ parent: Problem Form
 has_toc: false
 ---
 ### Resolution Tab
-Resolution Tab
 
-![](../media/Problem-Resolution-Tab.png)
+![](Problem-Resolution-Tab.png)
 
 The Resolution tab describes the Problem’s outcome. 
 
@@ -31,9 +30,9 @@ There is, however, a risk with themes, best illustrated by the anecdote about a 
  
 Premise
 
-A Problem’s premise is a a synopsis of the problem: of what happens to the characters as a result of the actions it entails.  
+A Problem's premise is a synopsis of the problem: of what happens to the characters as a result of the actions it entails.  
 
-If the problem is fully understood, the the premise can be constructed from its elements in the form of a template sentence or paragraph. There are many potential templates. Here’s an example:
+If the problem is fully understood, the premise can be constructed from its elements in the form of a template sentence or paragraph. There are many potential templates. Here’s an example:
 
 When a fish-out-of-water, big-city cop (protagonist) moves to a small, coastal town dependent on tourism (situation), he must team with an oceanographer and a crusty sailor to convince the doubting, money-grubbing townsfolk to close their beaches because a giant, man-eating shark (opponent) is lurking just offshore,  (objective) until the shark strikes (disaster), forcing the townsfolk to allow the cop and his buddies to take on the shark mano-a-mano (conflict).
 

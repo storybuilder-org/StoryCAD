@@ -2,13 +2,10 @@
 title: Using Various Input Devices
 layout: default
 nav_enabled: true
-nav_order: 8
+nav_order: 9
 parent: Quick Start
 has_toc: false
 ---
-## Using Various Input Devices
-Using Various Input Devices
-
 You can use a wide range of input devices with StoryCAD:  keyboard, virtual keyboard, pen or stylus, mouse, and touch, depending on your computer or tablet ‘s capabilities.
 Invoke pop-up menus using the following actions:
 

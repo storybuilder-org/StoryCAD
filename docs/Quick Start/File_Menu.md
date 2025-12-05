@@ -6,7 +6,6 @@ nav_order: 15
 parent: Menu Bar
 has_toc: false
 ---
-#### File Menu
-File Menu
+## File Menu
 
 The File Menu button was discussed previously in Reading and Writing Outlines.
