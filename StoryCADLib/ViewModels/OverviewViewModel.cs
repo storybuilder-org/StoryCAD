@@ -134,9 +134,9 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
         get => _storyProblem;
         set
         {
-            // only try to load if it's not Guid.Empty
+            // only try to load if it’s not Guid.Empty
             var candidate = value != Guid.Empty
-                ? StoryElement.GetByGuid(value, _storyModel) as ProblemModel
+                ? StoryElement.GetByGuid(value) as ProblemModel
                 : null;
 
             // if we got one, use its Uuid; otherwise clear it
@@ -392,7 +392,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
                     // This prevents errors during CloseFile when model has been reset
                     if (StoryProblem != Guid.Empty && _storyModel?.StoryElements?.StoryElementGuids != null)
                     {
-                        if (StoryElement.GetByGuid(StoryProblem, _storyModel) is ProblemModel sync_problem)
+                        if (StoryElement.GetByGuid(StoryProblem) is ProblemModel sync_problem)
                         {
                             sync_problem.Premise = Premise;
                         }

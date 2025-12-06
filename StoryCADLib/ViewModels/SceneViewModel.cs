@@ -84,7 +84,6 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
 
     private readonly ILogService _logger;
     private readonly AppState _appState;
-    private StoryModel _storyModel;
     private bool _changeable; // process property changes for this story element
     private bool _changed; // this story element has changed
 
@@ -160,7 +159,7 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
                 return;
             }
 
-            AddCastMember(StoryElement.GetByGuid(value, _storyModel)); // Insure the character is in the cast list
+            AddCastMember(StoryElement.GetByGuid(value)); // Insure the character is in the cast list
         }
     }
 
@@ -515,10 +514,10 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
     {
         _changeable = false;
         _changed = false;
-        _storyModel = _appState.CurrentDocument!.Model;
-        Characters = _storyModel.StoryElements.Characters;
-        Settings = _storyModel.StoryElements.Settings;
-        CharacterList = _storyModel.StoryElements.Characters; // Populate CharacterList here
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        Characters = _appState.CurrentDocument!.Model.StoryElements.Characters;
+        Settings = _appState.CurrentDocument.Model.StoryElements.Settings;
+        CharacterList = _appState.CurrentDocument.Model.StoryElements.Characters; // Populate CharacterList here
 
         Uuid = Model.Uuid;
         Name = Model.Name;
@@ -605,7 +604,7 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
         CastList.Clear();
         foreach (var memberGuid in Model.CastMembers)
         {
-            var element = StoryElement.GetByGuid(memberGuid, _storyModel);
+            var element = StoryElement.GetByGuid(memberGuid);
             if (element != null && element.ElementType == StoryItemType.Character)
             {
                 CastList.Add(element);
