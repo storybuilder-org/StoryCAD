@@ -710,6 +710,20 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
         set => SetProperty(ref _currentElementSource, value);
     }
 
+    private StoryElement _selectedListElement;
+    public StoryElement SelectedListElement
+    {
+        get => _selectedListElement;
+        set => SetProperty(ref _selectedListElement, value);
+    }
+
+    private string _currentElementDescription;
+    public string CurrentElementDescription
+    {
+        get => _currentElementDescription;
+        set => SetProperty(ref _currentElementDescription, value);
+    }
+
     #endregion
 
     #region Methods
@@ -741,6 +755,18 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
         if (args.PropertyName == nameof(SelectedElementSource))
         {
             CurrentElementSource = SelectedElementSource == "Scene" ? Scenes : Problems;
+        }
+
+        // Handle SelectedBeat changes to update CurrentElementDescription
+        if (args.PropertyName == nameof(SelectedBeat))
+        {
+            CurrentElementDescription = SelectedBeat?.ElementDescription;
+        }
+
+        // Handle SelectedListElement changes to update CurrentElementDescription
+        if (args.PropertyName == nameof(SelectedListElement))
+        {
+            CurrentElementDescription = SelectedListElement?.Description;
         }
 
         if (_changeable)

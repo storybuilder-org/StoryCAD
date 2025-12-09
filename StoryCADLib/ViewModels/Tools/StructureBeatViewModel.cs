@@ -142,7 +142,7 @@ public class StructureBeatViewModel : ObservableObject
                 }
             }
 
-            return "Assign an element to this beat by clicking the edit button.";
+            return null;
         }
     }
 

@@ -364,6 +364,70 @@ public class ProblemViewModelTests
         Assert.IsTrue(propertyChangedFired);
     }
 
+    [TestMethod]
+    public void CurrentElementDescription_WhenSelectedBeatChanges_UpdatesFromBeatElement()
+    {
+        // Arrange
+        _viewModel.Activate(_problemModel);
+        var beat = CreateTestBeat("Test Beat");
+        beat.Element = _storyModel.StoryElements.Scenes.First();
+        _viewModel.StructureBeats.Add(beat);
+
+        // Act
+        _viewModel.SelectedBeat = beat;
+
+        // Assert
+        Assert.AreEqual(beat.ElementDescription, _viewModel.CurrentElementDescription);
+    }
+
+    [TestMethod]
+    public void CurrentElementDescription_WhenSelectedBeatHasNoElement_IsNull()
+    {
+        // Arrange
+        _viewModel.Activate(_problemModel);
+        var beat = CreateTestBeat("Test Beat");
+        _viewModel.StructureBeats.Add(beat);
+
+        // Act
+        _viewModel.SelectedBeat = beat;
+
+        // Assert
+        Assert.IsNull(_viewModel.CurrentElementDescription);
+    }
+
+    [TestMethod]
+    public void CurrentElementDescription_WhenSelectedListElementChanges_UpdatesFromElement()
+    {
+        // Arrange
+        _viewModel.Activate(_problemModel);
+        var scene = _storyModel.StoryElements.Scenes.First();
+
+        // Act
+        _viewModel.SelectedListElement = scene;
+
+        // Assert
+        Assert.AreEqual(scene.Description, _viewModel.CurrentElementDescription);
+    }
+
+    [TestMethod]
+    public void SelectedListElement_WhenSet_RaisesPropertyChanged()
+    {
+        // Arrange
+        _viewModel.Activate(_problemModel);
+        var propertyChangedFired = false;
+        _viewModel.PropertyChanged += (sender, e) =>
+        {
+            if (e.PropertyName == nameof(_viewModel.SelectedListElement))
+                propertyChangedFired = true;
+        };
+
+        // Act
+        _viewModel.SelectedListElement = _storyModel.StoryElements.Scenes.First();
+
+        // Assert
+        Assert.IsTrue(propertyChangedFired);
+    }
+
     #region Helper Methods
 
     /// <summary>
