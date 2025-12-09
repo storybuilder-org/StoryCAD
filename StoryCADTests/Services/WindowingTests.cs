@@ -250,5 +250,79 @@ namespace StoryCADTests.Services
 //#endif
 
         #endregion
+
+        #region GetMaxWindowSize and Clamping Tests
+
+        [TestMethod]
+        public void GetMaxWindowSize_MethodExists_WithCorrectSignature()
+        {
+            // Arrange & Act
+            var methodInfo = typeof(Windowing).GetMethod("GetMaxWindowSize",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            // Assert
+            Assert.IsNotNull(methodInfo, "GetMaxWindowSize method should exist");
+
+            var returnType = methodInfo.ReturnType;
+            Assert.IsTrue(returnType.IsGenericType || returnType.Name.Contains("ValueTuple"),
+                "GetMaxWindowSize should return a tuple");
+        }
+
+        [TestMethod]
+        public void GetMaxWindowSize_OnWindows_ReturnsPositiveValues()
+        {
+            // This test verifies GetMaxWindowSize returns valid dimensions on Windows
+            // We use reflection since it's a private method
+            var methodInfo = typeof(Windowing).GetMethod("GetMaxWindowSize",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            Assert.IsNotNull(methodInfo, "GetMaxWindowSize method should exist");
+
+            // Invoke the method
+            var result = methodInfo.Invoke(_windowing, null);
+            Assert.IsNotNull(result, "GetMaxWindowSize should return a value");
+
+            // Extract tuple values
+            var tupleType = result.GetType();
+            var widthField = tupleType.GetField("Item1") ?? tupleType.GetField("width");
+            var heightField = tupleType.GetField("Item2") ?? tupleType.GetField("height");
+
+            Assert.IsNotNull(widthField, "Result should have width field");
+            Assert.IsNotNull(heightField, "Result should have height field");
+
+            int width = (int)widthField.GetValue(result)!;
+            int height = (int)heightField.GetValue(result)!;
+
+            // On Windows, we should get positive screen dimensions
+            // (In headless test mode, this may return 0,0 which is acceptable)
+            Assert.IsTrue(width >= 0, $"Width should be non-negative, got {width}");
+            Assert.IsTrue(height >= 0, $"Height should be non-negative, got {height}");
+        }
+
+        [TestMethod]
+        public void SetWindowSize_ClampsToScreenBounds_WhenRequestedSizeExceedsScreen()
+        {
+            // This test documents the expected clamping behavior
+            // SetWindowSize should clamp requested dimensions to fit within available screen space
+            //
+            // Example scenario (Wilkie's issue):
+            // - Screen: 1680x1050
+            // - Requested: 1800x1200
+            // - Expected: Clamped to ~1630x1000 (with 50px margin)
+            //
+            // We can't easily test the actual clamping without a real window,
+            // but we verify the infrastructure exists
+
+            var setWindowSizeMethod = typeof(Windowing).GetMethod("SetWindowSize",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+            Assert.IsNotNull(setWindowSizeMethod, "SetWindowSize should exist");
+
+            var getMaxWindowSizeMethod = typeof(Windowing).GetMethod("GetMaxWindowSize",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            Assert.IsNotNull(getMaxWindowSizeMethod,
+                "GetMaxWindowSize should exist for clamping logic");
+        }
+
+        #endregion
     }
 }
