@@ -414,6 +414,24 @@ public class Windowing : ObservableRecipient
         int targetWidth = (int)desiredWidthPx;
         int targetHeight = (int)desiredHeightPx;
 
+        // Clamp to available screen space to prevent window from exceeding display bounds
+        var (maxWidth, maxHeight) = GetMaxWindowSize();
+        if (maxWidth > 0 && maxHeight > 0)
+        {
+            const int margin = 50; // Leave room for window chrome/shadows
+            int clampedWidth = Math.Min(targetWidth, maxWidth - margin);
+            int clampedHeight = Math.Min(targetHeight, maxHeight - margin);
+
+            if (clampedWidth != targetWidth || clampedHeight != targetHeight)
+            {
+                logger.Log(LogLevel.Warn,
+                    $"Requested size {targetWidth}x{targetHeight} exceeds screen {maxWidth}x{maxHeight}, " +
+                    $"clamping to {clampedWidth}x{clampedHeight}");
+                targetWidth = clampedWidth;
+                targetHeight = clampedHeight;
+            }
+        }
+
         logger.Log(LogLevel.Info,
             $"Setting window size: {targetWidth}x{targetHeight} physical pixels");
 
@@ -422,6 +440,48 @@ public class Windowing : ObservableRecipient
             Width = targetWidth,
             Height = targetHeight
         });
+    }
+
+    /// <summary>
+    /// Gets the maximum available window size based on the current display's work area.
+    /// Returns (0,0) if unable to determine screen dimensions.
+    /// </summary>
+    /// <returns>Tuple of (maxWidth, maxHeight) in physical pixels</returns>
+    private (int width, int height) GetMaxWindowSize()
+    {
+        ILogService logger = _logService;
+
+#if WINDOWS && !HAS_UNO
+        // Use SystemParametersInfo to get work area (excludes taskbar)
+        if (SystemParametersInfo(SPI_GETWORKAREA, 0, out RECT work, 0))
+        {
+            int w = work.Right - work.Left;
+            int h = work.Bottom - work.Top;
+            logger.Log(LogLevel.Trace, $"GetMaxWindowSize: work area = {w}x{h}");
+            return (w, h);
+        }
+        // Fallback to full screen metrics
+        int screenW = GetSystemMetrics(SM_CXSCREEN);
+        int screenH = GetSystemMetrics(SM_CYSCREEN);
+        logger.Log(LogLevel.Trace, $"GetMaxWindowSize: screen metrics fallback = {screenW}x{screenH}");
+        return (screenW, screenH);
+#elif HAS_UNO
+        try
+        {
+            var di = Windows.Graphics.Display.DisplayInformation.GetForCurrentView();
+            int w = (int)di.ScreenWidthInRawPixels;
+            int h = (int)di.ScreenHeightInRawPixels;
+            logger.Log(LogLevel.Trace, $"GetMaxWindowSize (Uno): screen = {w}x{h}");
+            return (w, h);
+        }
+        catch (Exception ex)
+        {
+            logger.Log(LogLevel.Warn, $"GetMaxWindowSize: failed to get display info - {ex.Message}");
+            return (0, 0); // No clamping if we can't get screen size
+        }
+#else
+        return (0, 0);
+#endif
     }
 
     private double TryGetScaleFactor(Window window)
