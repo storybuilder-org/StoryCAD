@@ -2,12 +2,12 @@ using StoryCADLib.Models.Tools;
 
 namespace StoryCADLib.Controls;
 
-public sealed partial class Conflict
+public sealed partial class Conflict : UserControl
 {
-    private string category;
+    private string _category;
     public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
-    private ConflictCategoryModel model;
-    private string subCategory;
+    private ConflictCategoryModel _model;
+    private string _subCategory;
 
     public Conflict()
     {
@@ -18,9 +18,9 @@ public sealed partial class Conflict
 
     private void Category_SelectionChanged(object sender, SelectionChangedEventArgs selectionChangedEventArgs)
     {
-        category = (string)Category.Items[Category.SelectedIndex];
-        model = ConflictTypes[category];
-        SubCategory.ItemsSource = model.SubCategories;
+        _category = (string)Category.Items[Category.SelectedIndex];
+        _model = ConflictTypes[_category];
+        SubCategory.ItemsSource = _model.SubCategories;
         SubCategory.SelectedIndex = -1;
         Example.SelectedIndex = -1;
     }
@@ -29,8 +29,8 @@ public sealed partial class Conflict
     {
         if (SubCategory.SelectedIndex > -1)
         {
-            subCategory = (string)SubCategory.Items[SubCategory.SelectedIndex];
-            Example.ItemsSource = model.Examples[subCategory];
+            _subCategory = (string)SubCategory.Items[SubCategory.SelectedIndex];
+            Example.ItemsSource = _model.Examples[_subCategory];
         }
     }
 

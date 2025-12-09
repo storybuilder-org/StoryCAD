@@ -395,6 +395,7 @@ public class TestableBackendService : BackendService
     {
         try
         {
+            await Task.CompletedTask; // Async signature required for base class compatibility
             // Simulate the logic from base.StartupRecording but throw injected exception
             if (_testPreferenceService.Model.RecordPreferencesStatus)
             {

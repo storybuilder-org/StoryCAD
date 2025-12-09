@@ -1,9 +1,9 @@
+using System.Resources;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Dispatching;
-using StoryCADLib.Exceptions;
-using StoryCADLib.ViewModels.SubViewModels;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
+using StoryCADLib.Services.Messages;
 using Windows.Storage.Pickers;
 using Windows.UI;
 using Windows.UI.ViewManagement;
@@ -28,15 +28,6 @@ public class Windowing : ObservableRecipient
         _appState = appState;
         _logService = logService;
     }
-
-    // Constructor for backward compatibility - will be removed later
-    public Windowing() : this(
-        Ioc.Default.GetRequiredService<AppState>(),
-        Ioc.Default.GetRequiredService<ILogService>())
-    {
-    }
-
-    private void OnPropertyChanged(object sender, PropertyChangedEventArgs e) { }
 
     /// <summary>
     /// A pointer to the App Window (MainWindow) handle
@@ -71,7 +62,7 @@ public class Windowing : ObservableRecipient
     /// within ShowContentDialog() as spwaning two at once will
     /// cause a crash.
     /// </summary>
-    private bool _IsContentDialogOpen = false;
+    private bool _isContentDialogOpen;
 
     private ElementTheme _requestedTheme = ElementTheme.Default;
     public ElementTheme RequestedTheme
@@ -139,15 +130,9 @@ public class Windowing : ObservableRecipient
             BaseTitle += "(DEV BUILD) ";
         }
 
-        // TODO: ARCHITECTURAL ISSUE - Windowing (UI layer) should not depend on OutlineViewModel (business logic)
-        // This creates a circular dependency: OutlineViewModel -> Windowing -> OutlineViewModel
-        // Proper fix (SRP): Move UpdateWindowTitle logic to OutlineViewModel (which knows about file changes)
-        // and have it set the title on Windowing. OutlineViewModel already has Windowing reference.
-        // Current workaround: Use service locator to break the circular dependency
-        AppState appState = Ioc.Default.GetRequiredService<AppState>();
-        if (!string.IsNullOrEmpty(appState.CurrentDocument?.FilePath))
+        if (!string.IsNullOrEmpty(_appState.CurrentDocument?.FilePath))
         {
-            BaseTitle += $"- Currently editing {Path.GetFileNameWithoutExtension(appState.CurrentDocument.FilePath)}";
+            BaseTitle += $"- Currently editing {Path.GetFileNameWithoutExtension(_appState.CurrentDocument.FilePath)}";
         }
 
         //Set window Title.
@@ -158,22 +143,16 @@ public class Windowing : ObservableRecipient
     /// This will update the elements of the UI to
     /// match the theme set in RequestedTheme.
     /// </summary>
-    public async void UpdateUIToTheme()
+    public void UpdateUIToTheme()
     {
         (MainWindow.Content as FrameworkElement).RequestedTheme = RequestedTheme;
 
-        // TODO: ARCHITECTURAL ISSUE - Same as UpdateWindowTitle above
-        // Proper fix (SRP): Move UpdateUIToTheme logic to ShellViewModel (which manages navigation/UI state)
-        // ShellViewModel can coordinate the save and navigation when theme changes
-        // Current workaround: Use service locator to break the circular dependency
-        AppState appState = Ioc.Default.GetRequiredService<AppState>();
-        //Save file, close current node since it won't be the right theme.
-        if (!string.IsNullOrEmpty(appState.CurrentDocument?.FilePath))
+        // Notify subscribers (ShellViewModel) to save and navigate to safe state
+        if (!string.IsNullOrEmpty(_appState.CurrentDocument?.FilePath))
         {
-            await Ioc.Default.GetRequiredService<OutlineViewModel>().SaveFile();
-            Ioc.Default.GetRequiredService<ShellViewModel>().ShowHomePage();
+            WeakReferenceMessenger.Default.Send(new ThemeChangedMessage());
         }
-	}
+    }
 
 	/// <summary>
 	/// Reference to currently open dialog.
@@ -202,19 +181,19 @@ public class Windowing : ObservableRecipient
 
 		//force close any other dialog if one is open
 		//(if force is enabled)
-		if (force && _IsContentDialogOpen && OpenDialog != null)
+		if (force && _isContentDialogOpen && OpenDialog != null)
 	    {
 		    logger.Log(LogLevel.Info, $"Force closing open content dialog: ({OpenDialog.Title})");
 			OpenDialog.Hide();
 
 			//This will be unset eventually but because we have called
 			//Hide() already we can unset this early.
-			_IsContentDialogOpen = false;
+			_isContentDialogOpen = false;
 			logger.Log(LogLevel.Info, $"Closed content dialog: ({OpenDialog.Title})");
 		}
 
 		//Checks a content dialog isn't already open
-		if (!_IsContentDialogOpen)
+		if (!_isContentDialogOpen)
         {
 			logger.Log(LogLevel.Trace, $"Showing dialog {Dialog.Title}");
 			OpenDialog = Dialog;
@@ -226,7 +205,7 @@ public class Windowing : ObservableRecipient
             OpenDialog.Resources["ContentDialogMaxWidth"] = 1080;
             OpenDialog.Resources["ContentDialogMaxHeight"] = 1080;
 
-            _IsContentDialogOpen = true;
+            _isContentDialogOpen = true;
 
 			//Show and log result.
             ContentDialogResult Result = await OpenDialog.ShowAsync();
@@ -242,7 +221,7 @@ public class Windowing : ObservableRecipient
 		            logger.Log(LogLevel.Info, $"User selected secondary option {Dialog.SecondaryButtonText}");
 					break;
             }
-			_IsContentDialogOpen = false;
+			_isContentDialogOpen = false;
             OpenDialog = null;
             return Result;
         }
@@ -254,7 +233,7 @@ public class Windowing : ObservableRecipient
     /// </summary>
     public void CloseContentDialog()
     {
-        if (_IsContentDialogOpen)
+        if (_isContentDialogOpen)
         {
             OpenDialog.Hide();
         }
@@ -267,17 +246,12 @@ public class Windowing : ObservableRecipient
     /// </summary>
     public void ActivateMainInstance()
     {
-        Windowing wnd = Ioc.Default.GetRequiredService<Windowing>();
-        wnd.MainWindow.Activate();
+        MainWindow.Activate();
 
-        try
+        GlobalDispatcher.TryEnqueue(() =>
         {
-            wnd.GlobalDispatcher.TryEnqueue(() =>
-            {
-                Ioc.Default.GetRequiredService<ShellViewModel>().ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
-            });
-        }
-        finally { }
+            WeakReferenceMessenger.Default.Send(new ActivateInstanceMessage());
+        });
     }
 
     /// <summary>
@@ -357,7 +331,7 @@ public class Windowing : ObservableRecipient
 				return null;
 			}
 
-			logger.Log(LogLevel.Info, $"Picked folder {file.Path} attributes:{file.Attributes}");
+			logger.Log(LogLevel.Info, $"Picked folder {file.Path}");
 			return file;
 		}
 	    catch (Exception e)
@@ -440,6 +414,24 @@ public class Windowing : ObservableRecipient
         int targetWidth = (int)desiredWidthPx;
         int targetHeight = (int)desiredHeightPx;
 
+        // Clamp to available screen space to prevent window from exceeding display bounds
+        var (maxWidth, maxHeight) = GetMaxWindowSize();
+        if (maxWidth > 0 && maxHeight > 0)
+        {
+            const int margin = 50; // Leave room for window chrome/shadows
+            int clampedWidth = Math.Min(targetWidth, maxWidth - margin);
+            int clampedHeight = Math.Min(targetHeight, maxHeight - margin);
+
+            if (clampedWidth != targetWidth || clampedHeight != targetHeight)
+            {
+                logger.Log(LogLevel.Warn,
+                    $"Requested size {targetWidth}x{targetHeight} exceeds screen {maxWidth}x{maxHeight}, " +
+                    $"clamping to {clampedWidth}x{clampedHeight}");
+                targetWidth = clampedWidth;
+                targetHeight = clampedHeight;
+            }
+        }
+
         logger.Log(LogLevel.Info,
             $"Setting window size: {targetWidth}x{targetHeight} physical pixels");
 
@@ -448,6 +440,48 @@ public class Windowing : ObservableRecipient
             Width = targetWidth,
             Height = targetHeight
         });
+    }
+
+    /// <summary>
+    /// Gets the maximum available window size based on the current display's work area.
+    /// Returns (0,0) if unable to determine screen dimensions.
+    /// </summary>
+    /// <returns>Tuple of (maxWidth, maxHeight) in physical pixels</returns>
+    private (int width, int height) GetMaxWindowSize()
+    {
+        ILogService logger = _logService;
+
+#if WINDOWS && !HAS_UNO
+        // Use SystemParametersInfo to get work area (excludes taskbar)
+        if (SystemParametersInfo(SPI_GETWORKAREA, 0, out RECT work, 0))
+        {
+            int w = work.Right - work.Left;
+            int h = work.Bottom - work.Top;
+            logger.Log(LogLevel.Trace, $"GetMaxWindowSize: work area = {w}x{h}");
+            return (w, h);
+        }
+        // Fallback to full screen metrics
+        int screenW = GetSystemMetrics(SM_CXSCREEN);
+        int screenH = GetSystemMetrics(SM_CYSCREEN);
+        logger.Log(LogLevel.Trace, $"GetMaxWindowSize: screen metrics fallback = {screenW}x{screenH}");
+        return (screenW, screenH);
+#elif HAS_UNO
+        try
+        {
+            var di = Windows.Graphics.Display.DisplayInformation.GetForCurrentView();
+            int w = (int)di.ScreenWidthInRawPixels;
+            int h = (int)di.ScreenHeightInRawPixels;
+            logger.Log(LogLevel.Trace, $"GetMaxWindowSize (Uno): screen = {w}x{h}");
+            return (w, h);
+        }
+        catch (Exception ex)
+        {
+            logger.Log(LogLevel.Warn, $"GetMaxWindowSize: failed to get display info - {ex.Message}");
+            return (0, 0); // No clamping if we can't get screen size
+        }
+#else
+        return (0, 0);
+#endif
     }
 
     private double TryGetScaleFactor(Window window)
@@ -735,21 +769,18 @@ public class Windowing : ObservableRecipient
 
     /// <summary>
     /// Shows an error message to the user that there's an issue
-    /// with the app, and it needs to be reinstalled
-    /// As of the RemoveInstallService merge, this is theoretically
-    /// impossible to occur, but it should stay incase something
-    /// goes wrong with resource loading.
+    /// with the app, and it needs to be reinstalled.
     /// </summary>
     public async void ShowResourceErrorMessage()
     {
-        await new ContentDialog()
+        await new ContentDialog
         {
             XamlRoot = this.XamlRoot,
             Title = "Error loading resources",
-            Content = "An error has occurred, please reinstall or update StoryCAD to continue.",
+            Content = "An error has occurred, please reinstall StoryCAD, your outlines will not be affected.",
             CloseButtonText = "Close",
             RequestedTheme = RequestedTheme
         }.ShowAsync();
-        throw new ResourceLoadingException();
+        throw new MissingManifestResourceException();
     }
 }

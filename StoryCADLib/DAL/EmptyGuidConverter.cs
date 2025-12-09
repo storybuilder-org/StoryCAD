@@ -10,36 +10,18 @@ public class EmptyGuidConverter : JsonConverter<Guid>
 {
     public override Guid Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TokenType == JsonTokenType.String)
-        {
-            var guidString = reader.GetString();
-            if (string.IsNullOrWhiteSpace(guidString))
-            {
-                return Guid.Empty;
-            }
+        if (reader.TokenType == JsonTokenType.Null) { return Guid.Empty; }
 
-            if (Guid.TryParse(guidString, out var guid))
-            {
-                return guid;
-            }
-        }
-        else if (reader.TokenType == JsonTokenType.Null)
-        {
-            return Guid.Empty;
-        }
+        var guidString = reader.GetString();
+        if (string.IsNullOrWhiteSpace(guidString)) { return Guid.Empty; }
 
-        throw new JsonException($"Unable to convert \"{reader.GetString()}\" to {typeof(Guid)}.");
+        return Guid.TryParse(guidString, out var guid) 
+            ? guid 
+            : throw new JsonException($"Unable to convert \"{guidString}\" to Guid.");
     }
 
     public override void Write(Utf8JsonWriter writer, Guid value, JsonSerializerOptions options)
     {
-        if (value == Guid.Empty)
-        {
-            writer.WriteStringValue(string.Empty);
-        }
-        else
-        {
-            writer.WriteStringValue(value.ToString());
-        }
+        writer.WriteStringValue(value == Guid.Empty ? "" : value.ToString());
     }
 }

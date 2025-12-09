@@ -12,8 +12,7 @@ public sealed class StoryDocument
     /// </summary>
     /// <param name="model">The story model (required)</param>
     /// <param name="filePath">The file path (optional, null for new documents)</param>
-    public StoryDocument(StoryModel model, string? filePath = null)
-        => (Model, FilePath) = (model, filePath);
+    public StoryDocument(StoryModel model, string? filePath = null) => (Model, FilePath) = (model, filePath);
 
     /// <summary>
     ///     The story model containing all story data.

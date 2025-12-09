@@ -12,9 +12,9 @@ This document maps the repositories in the development environment. Each reposit
 
 ## Related Repositories
 
-### StoryBuilderCollaborator
-- **Path**: `/mnt/d/dev/src/StoryBuilderCollaborator/`
-- **README**: [README.md](/mnt/d/dev/src/StoryBuilderCollaborator/README.md)
+### Collaborator
+- **Path**: `/mnt/d/dev/src/Collaborator/`
+- **README**: [README.md](/mnt/d/dev/src/Collaborator/README.md)
 - **Summary**: AI collaboration service/library for StoryCAD
 
 ### ManualTest
@@ -88,7 +88,7 @@ This document maps the repositories in the development environment. Each reposit
 
 ```
 StoryCAD (Main App)
-├── StoryBuilderCollaborator (AI Features)
+├── Collaborator (AI Features)
 ├── ManualTest (User Documentation)
 ├── StoryCADConverter (File Migration)
 ├── StoryCAD-Legacy-STBX-Conversion-Tool (Legacy Support)

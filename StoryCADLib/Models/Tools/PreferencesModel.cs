@@ -25,7 +25,7 @@ public class PreferencesModel : ObservableObject
         Newsletter = false;
         PreferencesInitialized = false;
         LastSelectedTemplate = 0;
-        WrapNodeNames = TextWrapping.WrapWholeWords;
+        WrapNodeNames = TextWrapping.Wrap;
         RecentFiles = new List<string>();
 
         AutoSave = true;

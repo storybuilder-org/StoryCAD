@@ -13,12 +13,24 @@
 
             <!-- Add resources here -->
 
-            <!-- Global TabView style for touch accessibility (WCAG 2.1 Level AAA) -->
+            <!-- Global TabView style for touch accessibility -->
             <!-- Sets minimum height of 44px for all TabViewItem headers across the application -->
-            <Style TargetType="TabViewItem">
-                <Setter Property="MinHeight" Value="44" />
-            </Style>
 
+            <Style TargetType="TabViewItem">
+                <Setter Property="HeaderTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}"
+                                       FontSize="14"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Center"/>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="MinHeight" Value="44" />
+                <Setter Property="MinWidth" Value="120"/> <!-- ensures consistent tab width -->
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 

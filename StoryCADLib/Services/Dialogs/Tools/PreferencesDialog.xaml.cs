@@ -3,7 +3,7 @@ using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.Services.Dialogs.Tools;
 
-public sealed partial class PreferencesDialog
+public sealed partial class PreferencesDialog : Page
 {
     public PreferencesDialog()
     {
@@ -28,7 +28,7 @@ public sealed partial class PreferencesDialog
         var appState = Ioc.Default.GetService<AppState>();
         Changelog.Text = await new Changelog(logger, appState).GetChangelogText();
 
-        if (PreferencesVm.WrapNodeNames == TextWrapping.WrapWholeWords)
+        if (PreferencesVm.WrapNodeNames == TextWrapping.Wrap)
         {
             TextWrap.IsChecked = true;
         }
@@ -102,7 +102,7 @@ public sealed partial class PreferencesDialog
     {
         if ((sender as CheckBox).IsChecked == true)
         {
-            PreferencesVm.WrapNodeNames = TextWrapping.WrapWholeWords;
+            PreferencesVm.WrapNodeNames = TextWrapping.Wrap;
         }
         else
         {

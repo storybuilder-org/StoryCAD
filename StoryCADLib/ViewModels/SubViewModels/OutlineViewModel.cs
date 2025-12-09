@@ -308,7 +308,20 @@ public class OutlineViewModel : ObservableRecipient
     {
         logger.Log(LogLevel.Info, "Opening File Menu");
 
-        shellVm._contentDialog = new ContentDialog { Content = new FileOpenMenuPage() };
+        var fileOpenVM = Ioc.Default.GetRequiredService<FileOpenVM>();
+        shellVm._contentDialog = new ContentDialog
+        {
+            Content = new FileOpenMenuPage(),
+            PrimaryButtonText = fileOpenVM.ConfirmButtonText,
+            CloseButtonText = "Close",
+            BorderThickness = new Thickness(0)
+        };
+        shellVm._contentDialog.PrimaryButtonClick += (_, _) => fileOpenVM.ConfirmClicked();
+        fileOpenVM.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(FileOpenVM.ConfirmButtonText))
+                shellVm._contentDialog.PrimaryButtonText = fileOpenVM.ConfirmButtonText;
+        };
         if (window.RequestedTheme == ElementTheme.Light)
         {
             shellVm._contentDialog.RequestedTheme = window.RequestedTheme;
@@ -1348,6 +1361,12 @@ public class OutlineViewModel : ObservableRecipient
                     // Fix error #1056 - clear selected nodes
                     shellVm.RightTappedNode = null;
                     shellVm.CurrentNode = null;
+
+                    // Navigate to Overview to avoid showing deleted element
+                    if (appState.CurrentDocument.Model.ExplorerView?.Count > 0)
+                    {
+                        shellVm.TreeViewNodeClicked(appState.CurrentDocument.Model.ExplorerView[0]);
+                    }
 
                     // Mark the model as changed
                     Messenger.Send(new IsChangedMessage(true));

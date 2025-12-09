@@ -559,4 +559,53 @@ public class OutlineViewModelTests
         Assert.IsNotNull(appState.CurrentDocument.Model, "Model should exist after close");
         Assert.IsNull(appState.CurrentDocument.FilePath, "FilePath should be null after close");
     }
+
+    /// <summary>
+    /// Verifies that closing a file without saving does not persist unsaved changes.
+    /// In headless mode (tests), CloseFile skips the save dialog entirely (equivalent to "No").
+    /// This ensures changes made after the last save are discarded.
+    /// </summary>
+    [TestMethod]
+    public async Task CloseFile_WithoutSaving_DoesNotPersistChanges()
+    {
+        // Arrange
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var filePath = Path.Combine(App.ResultsDir, "CloseWithoutSaveTest.stbx");
+
+        // Create and save initial model
+        var model = await outlineService.CreateModel("CloseWithoutSaveTest", "StoryBuilder", 0);
+        appState.CurrentDocument = new StoryDocument(model, filePath);
+
+        var overviewModel = appState.CurrentDocument.Model.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview) as OverviewModel;
+        overviewModel.Author = "Original Author";
+
+        // Save to disk
+        await outlineService.WriteModel(appState.CurrentDocument.Model, filePath);
+        outlineService.SetChanged(appState.CurrentDocument.Model, false);
+
+        // Verify file was written
+        Assert.IsTrue(File.Exists(filePath), "File should exist after initial save");
+
+        // Make unsaved changes
+        overviewModel.Author = "Modified Author";
+        outlineService.SetChanged(appState.CurrentDocument.Model, true);
+        Assert.IsTrue(appState.CurrentDocument.Model.Changed, "Model should be marked as changed");
+
+        // Act - Close file (in headless mode, this is equivalent to clicking "No" on save dialog)
+        await outlineVM.CloseFile();
+
+        // Assert - Re-read the file and verify original content is preserved
+        var reloadedModel = await outlineService.OpenFile(filePath);
+        Assert.IsNotNull(reloadedModel, "Should be able to read the saved file");
+
+        var reloadedOverview = reloadedModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview) as OverviewModel;
+        Assert.AreEqual("Original Author", reloadedOverview.Author,
+            "Unsaved changes should NOT be persisted when closing without saving");
+
+        // Cleanup
+        if (File.Exists(filePath))
+            File.Delete(filePath);
+    }
 }

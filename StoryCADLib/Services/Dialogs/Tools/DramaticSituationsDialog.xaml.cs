@@ -2,7 +2,7 @@
 
 namespace StoryCADLib.Services.Dialogs.Tools;
 
-public sealed partial class DramaticSituationsDialog
+public sealed partial class DramaticSituationsDialog : Page
 {
     public DramaticSituationsDialog()
     {

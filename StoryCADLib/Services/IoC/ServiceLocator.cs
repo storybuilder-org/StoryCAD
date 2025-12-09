@@ -79,9 +79,7 @@ public static class BootStrapper
         Services.AddSingleton<ILogService, LogService>();
         Services.AddSingleton<LogService>();
         Services.AddSingleton<SearchService>();
-        Services.AddSingleton<ControlLoader>();
-        Services.AddSingleton<ListLoader>();
-        Services.AddSingleton<ToolLoader>();
+        Services.AddSingleton<JSONResourceLoader>();
         Services.AddSingleton<ScrivenerIo>();
         Services.AddSingleton<StoryIO>();
         Services.AddSingleton<MySqlIo>();

@@ -47,12 +47,11 @@ public class StoryElementConverter : JsonConverter<StoryElement>
                 var element = (StoryElement)jsonObject.Deserialize(targetType, options);
 
                 // Check if Description is empty and migrate old fields
-                if (string.IsNullOrEmpty(element.Description))
+                if (element != null && string.IsNullOrEmpty(element.Description))
                 {
-                    string migratedDescription = null;
-
-                    // Map of type discriminators to old field names
-                    migratedDescription = typeDiscriminator switch
+                    string migratedDescription =
+                        // Map of type discriminators to old field names
+                        typeDiscriminator switch
                     {
                         "StoryOverview" when jsonObject.TryGetProperty("StoryIdea", out var prop)
                             => prop.GetString(),

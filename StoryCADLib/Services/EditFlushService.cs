@@ -9,10 +9,10 @@ public class EditFlushService
     private readonly AppState _appState;
     private readonly ILogService _logger;
 
-    public EditFlushService(AppState appState)
+    public EditFlushService(AppState appState, ILogService logger)
     {
         _appState = appState;
-        _logger = Ioc.Default.GetRequiredService<ILogService>();
+        _logger = logger;
     }
 
     /// <summary>

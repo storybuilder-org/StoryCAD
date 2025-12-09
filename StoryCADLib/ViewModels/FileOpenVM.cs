@@ -55,6 +55,9 @@ public class FileOpenVM : ObservableRecipient
             "Protagonist and Antagonist",
             "Problems and Characters"
         ];
+
+        // Initialize the ShowFilePickerOnStartup property from preferences
+        _showFilePickerOnStartup = _preferences.Model.ShowFilePickerOnStartup;
     }
 
     /// <summary>
@@ -225,6 +228,11 @@ public class FileOpenVM : ObservableRecipient
         var appState = Ioc.Default.GetRequiredService<AppState>();
         if (appState.CurrentDocument?.Model?.ExplorerView?.Count > 0)
         {
+            // Reset view state to Explorer View in case we were in Narrative View
+            shellVm.SelectedView = "Story Explorer View";
+            shellVm.CurrentView = "Story Explorer View";
+            shellVm.CurrentViewType = StoryViewType.ExplorerView;
+
             shellVm.TreeViewNodeClicked(appState.CurrentDocument.Model.ExplorerView[0]);
         }
     }
@@ -277,6 +285,29 @@ public class FileOpenVM : ObservableRecipient
     public Visibility SamplesTabContentVisibility { get; set; }
     public Visibility NewTabContentVisibility { get; set; }
     public Visibility BackupTabContentVisibility { get; set; }
+
+    private bool _showFilePickerOnStartup;
+
+    /// <summary>
+    ///     Controls whether the file picker dialog is shown on startup
+    /// </summary>
+    public bool ShowFilePickerOnStartup
+    {
+        get => _showFilePickerOnStartup;
+        set
+        {
+            if (SetProperty(ref _showFilePickerOnStartup, value))
+            {
+                // Update the preference immediately when changed
+                _preferences.Model.ShowFilePickerOnStartup = value;
+                Task.Run(async () =>
+                {
+                    var preferencesIo = new PreferencesIo();
+                    await preferencesIo.WritePreferences(_preferences.Model);
+                });
+            }
+        }
+    }
 
     /// <summary>
     ///     Used to track which backup to open if needed.
@@ -447,6 +478,12 @@ public class FileOpenVM : ObservableRecipient
         get => _currentTab;
         set
         {
+            // Ignore items without tags (like the footer preference item)
+            if (value?.Tag == null)
+            {
+                return;
+            }
+
             switch (value.Tag)
             {
                 case "Recent":
@@ -487,6 +524,9 @@ public class FileOpenVM : ObservableRecipient
                     NewTabContentVisibility = Visibility.Collapsed;
                     BackupTabContentVisibility = Visibility.Visible;
                     break;
+                case "OpenFile":
+                    LoadStoryFromFile();
+                    return; // Don't update tab, just open file picker
                 default:
                     throw new NotImplementedException("Unexpected tag " + value.Tag);
             }

@@ -2,7 +2,6 @@ using System.Text.Json;
 using Microsoft.UI;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services;
-using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Locking;
 using Application = Microsoft.UI.Xaml.Application;
 
@@ -17,9 +16,9 @@ public class PreferencesIo
     private readonly ILogService _log;
     private readonly PreferenceService _preferenceService;
     private readonly Windowing _windowing;
-    private string _preferencesFilePath => Path.Combine(_appState.RootDirectory, "Preferences.json");
+    private string PreferencesFilePath => Path.Combine(_appState.RootDirectory, "Preferences.json");
 
-    public PreferencesIo(ILogService log, AppState appState, PreferenceService preferenceService, Windowing windowing)
+    private PreferencesIo(ILogService log, AppState appState, PreferenceService preferenceService, Windowing windowing)
     {
         _log = log;
         _appState = appState;
@@ -27,7 +26,7 @@ public class PreferencesIo
         _windowing = windowing;
     }
 
-    // Constructor for backward compatibility - will be removed later
+    //TODO: Constructor for backward compatibility - will be removed later
     public PreferencesIo() : this(
         Ioc.Default.GetService<ILogService>(),
         Ioc.Default.GetService<AppState>(),
@@ -41,19 +40,27 @@ public class PreferencesIo
         try
         {
             PreferencesModel _model = null;
-            await SerializationLock.RunExclusiveAsync(async ct =>
+            await SerializationLock.RunExclusiveAsync(async _ =>
             {
                 //Check if we have a preferences.json
-                if (File.Exists(_preferencesFilePath))
+                if (File.Exists(PreferencesFilePath))
                 {
                     //Read file into memory
                     _log.Log(LogLevel.Info, "Preferences.json found, reading it.");
-                    StorageFile _preferencesFile = await StorageFile.GetFileFromPathAsync(_preferencesFilePath);
+                    StorageFile _preferencesFile = await StorageFile.GetFileFromPathAsync(PreferencesFilePath);
                     var _preferencesJson = await FileIO.ReadTextAsync(_preferencesFile);
                     _log.Log(LogLevel.Debug, $"Preferences Contents: {_preferencesJson}");
 
                     //Update _model, with new values.
                     _model = JsonSerializer.Deserialize<PreferencesModel>(_preferencesJson);
+
+                    // TODO: Remove this migration in May 2026
+                    // Migrate WrapWholeWords to Wrap (WrapWholeWords doesn't break long words)
+                    if (_model.WrapNodeNames == TextWrapping.WrapWholeWords)
+                    {
+                        _model.WrapNodeNames = TextWrapping.Wrap;
+                    }
+
                     _preferenceService.Model = _model;
                     _log.Log(LogLevel.Info, "Preferences deserialized.");
                 }
@@ -95,8 +102,7 @@ public class PreferencesIo
         }
         catch (Exception e)
         {
-            _log.LogException(LogLevel.Error, e,
-                $"Preferences read error {e.Data} {e.StackTrace} {e.Message}");
+            _log.LogException(LogLevel.Error, e, $"Preferences read error {e.Data} {e.StackTrace} {e.Message}");
             return new PreferencesModel();
         }
     }
@@ -108,10 +114,10 @@ public class PreferencesIo
     {
         try
         {
-            await SerializationLock.RunExclusiveAsync(async ct =>
+            await SerializationLock.RunExclusiveAsync(async _ =>
             {
                 //Write file
-                _log.Log(LogLevel.Info, $"Saving Preferences to file {_preferencesFilePath}");
+                _log.Log(LogLevel.Info, $"Saving Preferences to file {PreferencesFilePath}");
                 var _newPreferences = JsonSerializer.Serialize(_model, new JsonSerializerOptions { WriteIndented = true });
 
                 StorageFolder _localFolder = await StorageFolder.GetFolderFromPathAsync(_appState.RootDirectory);

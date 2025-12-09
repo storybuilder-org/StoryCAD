@@ -1,5 +1,7 @@
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
+using StoryCADLib.Services.Logging;
 
 #nullable disable
 
@@ -15,7 +17,8 @@ public class EditFlushServiceTests
     public void Initialize()
     {
         _appState = new AppState();
-        _service = new EditFlushService(_appState);
+        var logger = Ioc.Default.GetRequiredService<ILogService>();
+        _service = new EditFlushService(_appState, logger);
     }
 
     [TestMethod]

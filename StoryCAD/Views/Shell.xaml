@@ -127,7 +127,7 @@
                     <TextBlock
                         Text="{x:Bind Name, Mode=TwoWay}"
                         TextWrapping="{x:Bind TextWrapping}"
-                        MaxWidth="220"
+                        MaxWidth="150"
                         Margin="10,0,0,0" />
                 </StackPanel>
             </DataTemplate>
@@ -386,8 +386,7 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                     <StackPanel>
                         <!-- Main Navigation Tree -->
-                        <ItemsRepeater ItemsSource="{x:Bind AppState.CurrentDocument.Model.CurrentView, Mode=TwoWay}"
-                                       x:Name="NavigationTree">
+                        <ItemsRepeater ItemsSource="{x:Bind AppState.CurrentDocument.Model.CurrentView, Mode=TwoWay}">
                             <ItemsRepeater.ItemTemplate>
                                 <DataTemplate x:DataType="viewmodels:StoryNodeItem">
                                     <Grid DataContext="{x:Bind}">
@@ -408,7 +407,7 @@
                                                 <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20"
                                                             Height="20" />
                                                 <TextBlock Text="{x:Bind Name, Mode=TwoWay}"
-                                                           TextWrapping="{x:Bind TextWrapping}" MaxWidth="220"
+                                                           TextWrapping="{x:Bind TextWrapping}" MaxWidth="150"
                                                            Margin="10,0,10,0" />
                                             </StackPanel>
                                         </TreeViewItem>
@@ -436,7 +435,7 @@
                                                                         Width="20" Height="20" />
                                                             <TextBlock Text="{x:Bind Name, Mode=TwoWay}"
                                                                        TextWrapping="{x:Bind TextWrapping}"
-                                                                       MaxWidth="220" Margin="10,0,10,0" />
+                                                                       MaxWidth="150" Margin="10,0" />
                                                         </StackPanel>
                                                     </muxc:TreeViewItem>
                                                 </DataTemplate>
@@ -465,7 +464,7 @@
                                         <StackPanel Orientation="Horizontal">
                                             <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20" />
                                             <TextBlock Text="{x:Bind Name, Mode=TwoWay}"
-                                                       TextWrapping="{x:Bind TextWrapping}" MaxWidth="220"
+                                                       TextWrapping="{x:Bind TextWrapping}" MaxWidth="150"
                                                        Margin="10,0,10,0" />
                                         </StackPanel>
                                     </muxc:TreeViewItem>
@@ -481,7 +480,7 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <!-- Navigation Frame -->
-                    <Frame x:Name="SplitViewFrame" Navigated="SplitViewFrame_OnNavigated" Padding="0,0,0,0" />
+                    <Frame x:Name="SplitViewFrame" Navigated="SplitViewFrame_OnNavigated" Margin="10"/>
                 </Grid>
             </SplitView.Content>
         </SplitView>
@@ -496,6 +495,8 @@
                 <!-- Save Button -->
                 <ColumnDefinition Width="*" />
                 <!-- Filler -->
+                <ColumnDefinition Width="Auto" />
+                <!-- Autosave Button -->
                 <ColumnDefinition Width="Auto" />
                 <!-- Backup Button -->
             </Grid.ColumnDefinitions>
@@ -523,7 +524,18 @@
 
             <!-- Spacer in Column 3 -->
 
-            <Button Grid.Column="4" Background="Transparent" Command="{x:Bind ShellVm.CreateBackupCommand}"
+            <Button Grid.Column="4" Background="Transparent" BorderBrush="Transparent" HorizontalAlignment="Right">
+                <Button.Content>
+                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" Height="36"
+                              ToolTipService.ToolTip="This icon is green when AutoSave is active and working.">
+                        <FontIcon.Foreground>
+                            <SolidColorBrush Color="{x:Bind ShellVm.AutosaveStatusColor, Mode=TwoWay}" />
+                        </FontIcon.Foreground>
+                    </FontIcon>
+                </Button.Content>
+            </Button>
+
+            <Button Grid.Column="5" Background="Transparent" Command="{x:Bind ShellVm.CreateBackupCommand}"
                     BorderBrush="Transparent" HorizontalAlignment="Right">
                 <Button.Content>
                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE777;" Height="36"

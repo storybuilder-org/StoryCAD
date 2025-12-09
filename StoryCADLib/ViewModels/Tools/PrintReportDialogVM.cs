@@ -212,7 +212,7 @@ public partial class PrintReportDialogVM : ObservableRecipient
     {
         using (var serializationLock = new SerializationLock(_logService))
         {
-            if (_appState.CurrentDocument.Model?.CurrentView == null)
+            if (_appState.CurrentDocument?.Model?.CurrentView.Count == 0)
             {
                 Messenger.Send(
                     new StatusChangedMessage(new StatusMessage("You need to load a Story first!", LogLevel.Warn)));
@@ -347,15 +347,14 @@ public partial class PrintReportDialogVM : ObservableRecipient
                     return;
                 }
 
+                using var font = new SKFont(SKTypeface.Default, PdfFontSize);
                 using var paint = new SKPaint
                 {
                     Color = SKColors.Black,
-                    TextSize = PdfFontSize,
-                    Typeface = SKTypeface.Default,
                     IsAntialias = true
                 };
 
-                var lineHeight = paint.FontSpacing;
+                var lineHeight = font.Spacing;
                 if (lineHeight <= 0)
                 {
                     lineHeight = PdfFontSize * 1.2f;
@@ -388,7 +387,7 @@ public partial class PrintReportDialogVM : ObservableRecipient
 
                             while (lineIndex < pageLines.Count)
                             {
-                                canvas.DrawText(pageLines[lineIndex] ?? string.Empty, PdfMarginLeft, y, paint);
+                                canvas.DrawText(pageLines[lineIndex] ?? string.Empty, PdfMarginLeft, y, SKTextAlign.Left, font, paint);
                                 lineIndex++;
 
                                 if (lineIndex >= pageLines.Count)
@@ -455,9 +454,15 @@ public partial class PrintReportDialogVM : ObservableRecipient
     /// <summary>Print only the passed node.</summary>
     public void PrintSingleNode(StoryNodeItem elementItem)
     {
-        SelectedNodes.Clear();
+        // Check if an outline is open before proceeding
+        if (_appState.CurrentDocument?.Model == null)
+        {
+            Messenger.Send(
+                new StatusChangedMessage(new StatusMessage("You need to load a Story first!", LogLevel.Warn)));
+            return;
+        }
 
-        var _ = new PrintReports(this, _appState);
+        SelectedNodes.Clear();
 
         if (elementItem.Type == StoryItemType.StoryOverview)
         {

@@ -11,9 +11,7 @@ public class TrashCanModel : StoryElement
     /// <summary>
     ///     JSON Constructor
     /// </summary>
-    public TrashCanModel()
-    {
-    }
+    public TrashCanModel() { }
 
     public TrashCanModel(StoryModel model, StoryNodeItem node)
         : base("Deleted Story Elements", StoryItemType.TrashCan, model, node)

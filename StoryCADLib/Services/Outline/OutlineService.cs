@@ -293,7 +293,7 @@ public class OutlineService
 
         StoryElement newElement = typeToAdd switch
         {
-            StoryItemType.Folder => new FolderModel(model, parent),
+            StoryItemType.Folder => new FolderModel("New Folder",model,StoryItemType.Folder, parent),
             StoryItemType.Section => new FolderModel("New Section", model, StoryItemType.Folder, parent),
             StoryItemType.Problem => new ProblemModel(model, parent),
             StoryItemType.Character => new CharacterModel(model, parent),

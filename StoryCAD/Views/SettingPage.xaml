@@ -16,8 +16,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <TextBox Header="Name" Text="{x:Bind SettingVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 viewModels:TextBoxFocus.IsFocused="{x:Bind SettingVm.IsTextBoxFocused, Mode=TwoWay}"
-                 Margin="10,10,10,0" />
+                 viewModels:TextBoxFocus.IsFocused="{x:Bind SettingVm.IsTextBoxFocused, Mode=TwoWay}" />
         <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
                  HorizontalAlignment="Stretch"
                  VerticalAlignment="Stretch"
@@ -83,46 +82,46 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-<TabViewItem Header="Sensations" IsClosable="False"
-             HorizontalContentAlignment="Stretch"
-             VerticalContentAlignment="Stretch">
-  <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-    <Grid.RowDefinitions>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
-    </Grid.RowDefinitions>
+                <TabViewItem Header="Sensations" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                  <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="*"/>
+                      <RowDefinition Height="*"/>
+                      <RowDefinition Height="*"/>
+                      <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-    <usercontrols:RichEditBoxExtended Grid.Row="0" Header="Sights"
-                                      RtfText="{x:Bind SettingVm.Sights, Mode=TwoWay}"
-                                      AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                      TextWrapping="Wrap"
-                                      VerticalAlignment="Stretch"
-                                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                    <usercontrols:RichEditBoxExtended Grid.Row="0" Header="Sights"
+                                                      RtfText="{x:Bind SettingVm.Sights, Mode=TwoWay}"
+                                                      AcceptsReturn="True" IsSpellCheckEnabled="True"
+                                                      TextWrapping="Wrap"
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
-    <usercontrols:RichEditBoxExtended Grid.Row="1" Header="Sounds"
-                                      RtfText="{x:Bind SettingVm.Sounds, Mode=TwoWay}"
-                                      AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                      TextWrapping="Wrap"
-                                      VerticalAlignment="Stretch"
-                                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                    <usercontrols:RichEditBoxExtended Grid.Row="1" Header="Sounds"
+                                                      RtfText="{x:Bind SettingVm.Sounds, Mode=TwoWay}"
+                                                      AcceptsReturn="True" IsSpellCheckEnabled="True"
+                                                      TextWrapping="Wrap"
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
-    <usercontrols:RichEditBoxExtended Grid.Row="2" Header="Touch"
-                                      RtfText="{x:Bind SettingVm.Touch, Mode=TwoWay}"
-                                      AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                      TextWrapping="Wrap"
-                                      VerticalAlignment="Stretch"
-                                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                    <usercontrols:RichEditBoxExtended Grid.Row="2" Header="Touch"
+                                                      RtfText="{x:Bind SettingVm.Touch, Mode=TwoWay}"
+                                                      AcceptsReturn="True" IsSpellCheckEnabled="True"
+                                                      TextWrapping="Wrap"
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
-    <usercontrols:RichEditBoxExtended Grid.Row="3" Header="Smell/Taste"
-                                      RtfText="{x:Bind SettingVm.SmellTaste, Mode=TwoWay}"
-                                      AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                      TextWrapping="Wrap"
-                                      VerticalAlignment="Stretch"
-                                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-  </Grid>
-</TabViewItem>
+                    <usercontrols:RichEditBoxExtended Grid.Row="3" Header="Smell/Taste"
+                                                      RtfText="{x:Bind SettingVm.SmellTaste, Mode=TwoWay}"
+                                                      AcceptsReturn="True" IsSpellCheckEnabled="True"
+                                                      TextWrapping="Wrap"
+                                                      VerticalAlignment="Stretch"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                  </Grid>
+                </TabViewItem>
 
                 <TabViewItem Header="Notes" IsClosable="False"
                              HorizontalContentAlignment="Stretch"

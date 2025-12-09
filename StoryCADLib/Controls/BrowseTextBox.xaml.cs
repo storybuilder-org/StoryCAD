@@ -88,39 +88,39 @@ public sealed partial class BrowseTextBox : UserControl
 
     private async void OnBrowseClick(object sender, RoutedEventArgs e)
     {
-        var windowing = Ioc.Default.GetRequiredService<Windowing>();
-
-        if (BrowseMode == BrowseMode.Folder)
+        try
         {
-            var folder = await windowing.ShowFolderPicker();
-            if (folder != null)
-            {
-                Path = folder.Path;
-                PathSelected?.Invoke(this, folder.Path);
-            }
-        }
-        else
-        {
-            var picker = new FileOpenPicker();
-            InitializeWithWindow.Initialize(picker, windowing.WindowHandle);
-            picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            var windowing = Ioc.Default.GetRequiredService<Windowing>();
 
-            // Add appropriate file type filters based on use case
-            if (BrowseMode == BrowseMode.STBXFile)
+            if (BrowseMode == BrowseMode.Folder)
             {
-                picker.FileTypeFilter.Add(".stbx");
+                var folder = await windowing.ShowFolderPicker();
+                if (folder != null)
+                {
+                    Path = folder.Path;
+                    PathSelected?.Invoke(this, folder.Path);
+                }
             }
             else
             {
-                picker.FileTypeFilter.Add("*");
-            }
+                var picker = new FileOpenPicker();
+                InitializeWithWindow.Initialize(picker, windowing.WindowHandle);
+                picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
 
-            var file = await picker.PickSingleFileAsync();
-            if (file != null)
-            {
-                Path = file.Path;
-                PathSelected?.Invoke(this, file.Path);
+                // Add appropriate file type filters based on use case
+                picker.FileTypeFilter.Add(BrowseMode == BrowseMode.STBXFile ? ".stbx" : "*");
+
+                var file = await picker.PickSingleFileAsync();
+                if (file != null)
+                {
+                    Path = file.Path;
+                    PathSelected?.Invoke(this, file.Path);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Ioc.Default.GetRequiredService<LogService>().LogException(LogLevel.Error, ex, "BrowseBox error");
         }
     }
 }

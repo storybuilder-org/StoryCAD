@@ -2,7 +2,7 @@ using Microsoft.UI.Xaml.Input;
 
 namespace StoryCADLib.Controls;
 
-public sealed partial class RelationshipView
+public sealed partial class RelationshipView : UserControl
 {
     public RelationshipView()
     {
@@ -10,24 +10,10 @@ public sealed partial class RelationshipView
     }
 
     public CharacterViewModel CharVm => Ioc.Default.GetService<CharacterViewModel>();
-    public LogService Logger => Ioc.Default.GetService<LogService>();
-
-    /// Instead of loading a Character's RelationshipModels directly into
-    /// the ViewModel and binding them, the models themselves are loaded 
-    /// into the VM's CharacterRelationships ObservableCollection, but
-    /// its properties are bound only when one of of the ComboBox items
-    /// CharacterRelationships is bound to is selected.
-    /// However, one property need modified during ReadPreferences: the Partner  
-    /// StoryElement in the RelationshipModel needs loaded from its Uuid.
-    private void RelationshipChanged(object sender, SelectionChangedEventArgs e)
-    {
-        CharVm.SaveRelationship(CharVm.CurrentRelationship);
-        CharVm.LoadRelationship(CharVm.SelectedRelationship);
-        CharVm.CurrentRelationship = CharVm.SelectedRelationship;
-    }
+    private LogService Logger => Ioc.Default.GetService<LogService>();
 
     /// <summary>
-    ///     This removes a relationship from the 'master' character.
+    /// This removes a relationship from the 'master' character.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
@@ -35,23 +21,21 @@ public sealed partial class RelationshipView
     {
         try
         {
-            //First identify the relationship.
             Logger.Log(LogLevel.Info, "Starting to remove relationship");
-            RelationshipModel characterToDelete = null;
-            foreach (var character in CharVm.CharacterRelationships)
+
+            // Get the RelationshipModel directly from DataContext
+            var characterToDelete = (sender as FrameworkElement)?.DataContext as RelationshipModel;
+            if (characterToDelete == null)
             {
-                //UUID is stored in tag as a cheeky hack to identify the relationship.
-                if (character.PartnerUuid.Equals((sender as SymbolIcon).Tag)) //Identify via tag.
-                {
-                    characterToDelete = character;
-                }
+                Logger.Log(LogLevel.Warn, "Could not get RelationshipModel from DataContext");
+                return;
             }
 
             Logger.Log(LogLevel.Info,
                 $"Character to delete: {characterToDelete.Partner.Name}({characterToDelete.Partner.Uuid})");
 
             //Show confirmation dialog and gets result.
-            ContentDialog CD = new()
+            ContentDialog cd = new()
             {
                 Title = "Are you sure?",
                 Content =
@@ -59,13 +43,13 @@ public sealed partial class RelationshipView
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No"
             };
-            var result = await Ioc.Default.GetService<Windowing>().ShowContentDialog(CD);
+            var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
             Logger.Log(LogLevel.Info, $"Dialog Result: {result}");
 
             if (result == ContentDialogResult.Primary) //If positive, then delete.
             {
                 Logger.Log(LogLevel.Info, $"Deleting Relationship to {characterToDelete.Partner.Name}");
-                Ioc.Default.GetService<CharacterViewModel>().CharacterRelationships.Remove(characterToDelete);
+                Ioc.Default.GetRequiredService<CharacterViewModel>().CharacterRelationships.Remove(characterToDelete);
                 Logger.Log(LogLevel.Info, "Deleted");
                 CharVm.SaveRelationships();
             }

@@ -7,33 +7,21 @@ using StoryCADLib.Services.Outline;
 
 namespace StoryCADLib.Services.API;
 
-/// <summary>
-///     The StoryCAD API—a powerful interface that combines human and AI interactions for generating and managing
-///     comprehensive story outlines.
-///     Two types of interaction are supported:
-///     - Human Interaction: Allows users to directly create, modify, and manage story elements through method calls.
-///     - AI-Driven Automation: Integrates with Semantic Kernel to enable AI-powered story generation and element creation.
-///     For a complete description of the API and its capabilities, see:
+///     This class is designed for integration with Semantic Kernel, if you are writing
+///     something that's not AI, you probably want to use OutlineService directly.
+/// 
+///     For detailed documentation on using the StoryCAD API, please refer to:
 ///     https://storybuilder-org.github.io/StoryCAD/docs/For%20Developers/Using_the_API.html
+/// 
 ///     Usage:
 ///     - State Handling: The API operates on a CurrentModel property which holds the active StoryModel instance.
 ///     This model must be set before most operations can be performed, either via SetCurrentModel() or by
 ///     creating a new outline with CreateEmptyOutline().
-///     - Calling Standard: All public API methods return OperationResult
-///     <T>
-///         to ensure safe external consumption.
+///     - Calling Standard: All public API methods return OperationResult<T> to ensure safe external consumption.
 ///         No exceptions are thrown to external callers; all errors are communicated through the OperationResult
 ///         pattern with IsSuccess flags and descriptive ErrorMessage strings.
-/// </summary>
-public class SemanticKernelApi : IStoryCADAPI
+public class SemanticKernelApi(OutlineService outlineService) : IStoryCADAPI
 {
-    private readonly OutlineService _outlineService;
-
-    public SemanticKernelApi(OutlineService outlineService)
-    {
-        _outlineService = outlineService;
-    }
-
     public StoryModel CurrentModel { get; set; }
 
     /// <summary>
@@ -61,7 +49,7 @@ public class SemanticKernelApi : IStoryCADAPI
         {
             // Create a new StoryModel using the OutlineService.
             var result =
-                await OperationResult<StoryModel>.SafeExecuteAsync(_outlineService.CreateModel(name, author, idx));
+                await OperationResult<StoryModel>.SafeExecuteAsync(outlineService.CreateModel(name, author, idx));
             //var result = 
             if (!result.IsSuccess || result.Payload == null)
             {
@@ -110,7 +98,7 @@ public class SemanticKernelApi : IStoryCADAPI
             }
 
             // Write the model to disk using the OutlineService.
-            await _outlineService.WriteModel(CurrentModel, filePath);
+            await outlineService.WriteModel(CurrentModel, filePath);
 
             response.IsSuccess = true;
             response.Payload = "Outline written IsSuccessfully.";
@@ -179,13 +167,10 @@ public class SemanticKernelApi : IStoryCADAPI
 
         try
         {
-            // Use OutlineService to get the element
-            var existingElement = _outlineService.GetStoryElementByGuid(CurrentModel, guid);
-
             //Deserialize and update.
             var updated = StoryElement.Deserialize(newElement.ToString());
             updated.Uuid = guid;
-            _outlineService.UpdateStoryElement(CurrentModel, updated);
+            outlineService.UpdateStoryElement(CurrentModel, updated);
 
             return OperationResult<bool>.Success(true);
         }
@@ -274,7 +259,7 @@ public class SemanticKernelApi : IStoryCADAPI
 
         try
         {
-            var element = _outlineService.GetStoryElementByGuid(CurrentModel, guid);
+            var element = outlineService.GetStoryElementByGuid(CurrentModel, guid);
             return OperationResult<StoryElement>.Success(element);
         }
         catch (InvalidOperationException)
@@ -347,8 +332,8 @@ public class SemanticKernelApi : IStoryCADAPI
 
         try
         {
-            var element = _outlineService.GetStoryElementByGuid(CurrentModel, guid);
-            _outlineService.MoveToTrash(element, CurrentModel);
+            var element = outlineService.GetStoryElementByGuid(CurrentModel, guid);
+            outlineService.MoveToTrash(element, CurrentModel);
             return OperationResult<bool>.Success(true);
         }
         catch (InvalidOperationException ex)
@@ -377,7 +362,7 @@ public class SemanticKernelApi : IStoryCADAPI
 
         try
         {
-            var element = _outlineService.GetStoryElementByGuid(CurrentModel, guid);
+            var element = outlineService.GetStoryElementByGuid(CurrentModel, guid);
             return OperationResult<object>.Success(element.Serialize());
         }
         catch (InvalidOperationException)
@@ -430,7 +415,7 @@ public class SemanticKernelApi : IStoryCADAPI
 
             try
             {
-                _outlineService.GetStoryElementByGuid(CurrentModel, DesiredGuid);
+                outlineService.GetStoryElementByGuid(CurrentModel, DesiredGuid);
                 return OperationResult<Guid>.Failure("GUID Override already exists.");
             }
             catch (InvalidOperationException)
@@ -449,7 +434,7 @@ public class SemanticKernelApi : IStoryCADAPI
         try
         {
             // Create the new element using the OutlineService.
-            var newElement = _outlineService.AddStoryElement(CurrentModel, typeToAdd, parent.Node);
+            var newElement = outlineService.AddStoryElement(CurrentModel, typeToAdd, parent.Node);
             if (DesiredGuid != Guid.Empty)
             {
                 newElement.UpdateGuid(CurrentModel, DesiredGuid);
@@ -507,7 +492,7 @@ public class SemanticKernelApi : IStoryCADAPI
 
             try
             {
-                _outlineService.GetStoryElementByGuid(CurrentModel, DesiredGuid);
+                outlineService.GetStoryElementByGuid(CurrentModel, DesiredGuid);
                 return OperationResult<Guid>.Failure("GUID Override already exists.");
             }
             catch (InvalidOperationException)
@@ -526,7 +511,7 @@ public class SemanticKernelApi : IStoryCADAPI
         try
         {
             // Create the new element using the OutlineService.
-            var newElement = _outlineService.AddStoryElement(CurrentModel, typeToAdd, parent.Node);
+            var newElement = outlineService.AddStoryElement(CurrentModel, typeToAdd, parent.Node);
 
             if (DesiredGuid != Guid.Empty)
             {
@@ -625,7 +610,7 @@ public class SemanticKernelApi : IStoryCADAPI
                 throw new ArgumentException("Invalid path");
             }
 
-            CurrentModel = await _outlineService.OpenFile(path);
+            CurrentModel = await outlineService.OpenFile(path);
             return OperationResult<bool>.Success(true);
         }
         catch (Exception ex)
@@ -643,7 +628,7 @@ public class SemanticKernelApi : IStoryCADAPI
                  Type is a enum that specifies if you are deleting from explorer or narrator
                  view.
                  """)]
-    public Task<OperationResult<bool>> DeleteElement(Guid elementToDelete, StoryViewType Type)
+    public Task<OperationResult<bool>> DeleteElement(Guid elementToDelete)
     {
         try
         {
@@ -654,8 +639,8 @@ public class SemanticKernelApi : IStoryCADAPI
             }
 
             // Get the element and move it to trash using OutlineService
-            var element = _outlineService.GetStoryElementByGuid(CurrentModel, elementToDelete);
-            _outlineService.MoveToTrash(element, CurrentModel);
+            var element = outlineService.GetStoryElementByGuid(CurrentModel, elementToDelete);
+            outlineService.MoveToTrash(element, CurrentModel);
 
             return Task.FromResult(OperationResult<bool>.Success(true));
         }
@@ -680,8 +665,8 @@ public class SemanticKernelApi : IStoryCADAPI
                 return OperationResult<bool>.Failure("No outline is opened");
             }
 
-            var element = _outlineService.GetStoryElementByGuid(CurrentModel, scene);
-            _outlineService.AddCastMember(CurrentModel, element, character);
+            var element = outlineService.GetStoryElementByGuid(CurrentModel, scene);
+            outlineService.AddCastMember(CurrentModel, element, character);
 
             return OperationResult<bool>.Success(true);
         }
@@ -719,7 +704,7 @@ public class SemanticKernelApi : IStoryCADAPI
 
         try
         {
-            _outlineService.AddRelationship(CurrentModel, source, recipient, desc, mirror);
+            outlineService.AddRelationship(CurrentModel, source, recipient, desc, mirror);
             return OperationResult<bool>.Success(true);
         }
         catch (Exception ex)
@@ -754,7 +739,7 @@ public class SemanticKernelApi : IStoryCADAPI
                 return OperationResult<List<Dictionary<string, object>>>.Failure("Search text cannot be empty");
             }
 
-            var results = _outlineService.SearchForText(CurrentModel, searchText);
+            var results = outlineService.SearchForText(CurrentModel, searchText);
 
             var formattedResults = results.Select(element => new Dictionary<string, object>
             {
@@ -797,7 +782,7 @@ public class SemanticKernelApi : IStoryCADAPI
                 return OperationResult<List<Dictionary<string, object>>>.Failure("Target UUID cannot be empty");
             }
 
-            var results = _outlineService.SearchForUuidReferences(CurrentModel, targetUuid);
+            var results = outlineService.SearchForUuidReferences(CurrentModel, targetUuid);
 
             var formattedResults = results.Select(element => new Dictionary<string, object>
             {
@@ -842,7 +827,7 @@ public class SemanticKernelApi : IStoryCADAPI
                 return OperationResult<int>.Failure("Target UUID cannot be empty");
             }
 
-            var affectedCount = _outlineService.RemoveUuidReferences(CurrentModel, targetUuid);
+            var affectedCount = outlineService.RemoveUuidReferences(CurrentModel, targetUuid);
 
             return OperationResult<int>.Success(affectedCount);
         }
@@ -886,13 +871,13 @@ public class SemanticKernelApi : IStoryCADAPI
             }
 
             // Find the root node
-            var rootElement = _outlineService.GetStoryElementByGuid(CurrentModel, rootNodeGuid);
+            var rootElement = outlineService.GetStoryElementByGuid(CurrentModel, rootNodeGuid);
             if (rootElement == null)
             {
                 return OperationResult<List<Dictionary<string, object>>>.Failure("Root node not found");
             }
 
-            var results = _outlineService.SearchInSubtree(CurrentModel, rootElement.Node, searchText);
+            var results = outlineService.SearchInSubtree(CurrentModel, rootElement.Node, searchText);
 
             var formattedResults = results.Select(element => new Dictionary<string, object>
             {
@@ -945,7 +930,7 @@ public class SemanticKernelApi : IStoryCADAPI
             }
 
             // Use OutlineService to restore the element
-            _outlineService.RestoreFromTrash(nodeToRestore, CurrentModel);
+            outlineService.RestoreFromTrash(nodeToRestore, CurrentModel);
 
             return Task.FromResult(OperationResult<bool>.Success(true));
         }
@@ -976,7 +961,7 @@ public class SemanticKernelApi : IStoryCADAPI
             }
 
             // Use OutlineService to empty the trash
-            _outlineService.EmptyTrash(CurrentModel);
+            outlineService.EmptyTrash(CurrentModel);
 
             return Task.FromResult(OperationResult<bool>.Success(true));
         }

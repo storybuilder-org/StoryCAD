@@ -41,27 +41,27 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
     /// <param name="e"></param>
     private void OnStoryElementsChanged(object sender, NotifyCollectionChangedEventArgs e)
     {
-        StoryElement _element;
+        StoryElement element;
 
         switch (e.Action)
         {
             case NotifyCollectionChangedAction.Add:
-                _element = (StoryElement)e.NewItems![0];
-                StoryElementGuids.Add(_element!.Uuid, _element);
+                element = (StoryElement)e.NewItems![0];
+                StoryElementGuids.Add(element!.Uuid, element);
                 // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
-                switch (_element.ElementType)
+                switch (element.ElementType)
                 {
                     case StoryItemType.Character:
-                        Characters.Add(_element);
+                        Characters.Add(element);
                         break;
                     case StoryItemType.Setting:
-                        Settings.Add(_element);
+                        Settings.Add(element);
                         break;
                     case StoryItemType.Problem:
-                        Problems.Add(_element);
+                        Problems.Add(element);
                         break;
                     case StoryItemType.Scene:
-                        Scenes.Add(_element);
+                        Scenes.Add(element);
                         break;
                 }
 
@@ -71,23 +71,22 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
                 break;
 
             case NotifyCollectionChangedAction.Remove:
-                _element = (StoryElement)e.OldItems![0];
-                StoryElementGuids.Remove(_element!.Uuid);
-                int _i;
-                // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
-                switch (_element.ElementType)
+                element = (StoryElement)e.OldItems![0];
+                StoryElementGuids.Remove(element!.Uuid);
+                int i;
+                switch (element.ElementType)
                 {
                     case StoryItemType.Character:
-                        _i = Characters.IndexOf(_element);
-                        Characters.RemoveAt(_i);
+                        i = Characters.IndexOf(element);
+                        Characters.RemoveAt(i);
                         break;
                     case StoryItemType.Setting:
-                        _i = Settings.IndexOf(_element);
-                        Settings.RemoveAt(_i);
+                        i = Settings.IndexOf(element);
+                        Settings.RemoveAt(i);
                         break;
                     case StoryItemType.Problem:
-                        _i = Problems.IndexOf(_element);
-                        Problems.RemoveAt(_i);
+                        i = Problems.IndexOf(element);
+                        Problems.RemoveAt(i);
                         break;
                 }
 

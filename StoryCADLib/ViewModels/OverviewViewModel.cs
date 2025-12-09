@@ -392,7 +392,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
                     // This prevents errors during CloseFile when model has been reset
                     if (StoryProblem != Guid.Empty && _storyModel?.StoryElements?.StoryElementGuids != null)
                     {
-                        if (StoryElement.GetByGuid(StoryProblem) is ProblemModel sync_problem)
+                        if (StoryElement.GetByGuid(StoryProblem, _storyModel) is ProblemModel sync_problem)
                         {
                             sync_problem.Premise = Premise;
                         }

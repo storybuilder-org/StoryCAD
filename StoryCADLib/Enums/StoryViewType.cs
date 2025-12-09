@@ -1,8 +1,10 @@
 ﻿namespace StoryCADLib.Models;
 
+/// <summary>
+/// Views Modes available in StoryCAD UI.
+/// </summary>
 public enum StoryViewType
 {
-    // Instantiated views (saved in StoryModel)
     ExplorerView,
     NarratorView
 }

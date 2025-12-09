@@ -1,18 +1,18 @@
 ﻿using StoryCADLib.DAL;
+using StoryCADLib.Models.Resources;
 using StoryCADLib.Models.Tools;
 
 namespace StoryCADLib.ViewModels;
 
 /// <summary>
-///     This contains controls data
-///     previously stored in GlobalData.cs
+///     This contains controls data loaded from Controls.json.
+///     Previously stored in GlobalData.cs
 /// </summary>
 public class ControlData
 {
-    private readonly ControlLoader _controlLoader;
     private readonly ILogService _log;
 
-    //Character conflics
+    //Character conflicts
     public SortedDictionary<string, ConflictCategoryModel> ConflictTypes;
 
     /// <summary>
@@ -20,20 +20,19 @@ public class ControlData
     /// </summary>
     public List<string> RelationTypes;
 
-    public ControlData(ILogService log, ControlLoader controlLoader)
+    public ControlData(ILogService log, JSONResourceLoader resourceLoader)
     {
         _log = log;
-        _controlLoader = controlLoader;
         var subTypeCount = 0;
         var exampleCount = 0;
         try
         {
-            _log.Log(LogLevel.Info, "Loading Controls.ini data");
+            _log.Log(LogLevel.Info, "Loading Controls.json data");
             Task.Run(async () =>
             {
-                var Controls = await _controlLoader.Init();
-                ConflictTypes = (SortedDictionary<string, ConflictCategoryModel>)Controls[0];
-                RelationTypes = (List<string>)Controls[1];
+                var controlsData = await resourceLoader.LoadResource<ControlsJson>("Controls.json");
+                ConflictTypes = LoadConflictTypes(controlsData);
+                RelationTypes = LoadRelationTypes(controlsData);
             }).Wait();
 
             _log.Log(LogLevel.Info, "ConflictType Counts");
@@ -60,7 +59,7 @@ public class ControlData
                 _log.Log(LogLevel.Info,
                     $"{subTypeCount} Total ConflictSubType keys created");
                 _log.Log(LogLevel.Info,
-                    $"{exampleCount} Total ConflictSubType keys created");
+                    $"{exampleCount} Total ConflictSubType examples created");
             }
         }
         catch (Exception ex)
@@ -71,5 +70,35 @@ public class ControlData
                 Application.Current.Exit();
             }
         }
+    }
+
+    private static SortedDictionary<string, ConflictCategoryModel> LoadConflictTypes(ControlsJson controlsData)
+    {
+        SortedDictionary<string, ConflictCategoryModel> conflictTypes = new();
+
+        if (controlsData?.ConflictTypes != null)
+        {
+            foreach (var conflictType in controlsData.ConflictTypes)
+            {
+                var model = new ConflictCategoryModel(conflictType.Category);
+
+                foreach (var subCategory in conflictType.SubCategories)
+                {
+                    model.SubCategories.Add(subCategory.Name);
+                    model.Examples.Add(subCategory.Name, subCategory.Examples.ToList());
+                }
+
+                conflictTypes.Add(conflictType.Category, model);
+            }
+        }
+
+        return conflictTypes;
+    }
+
+    private static List<string> LoadRelationTypes(ControlsJson controlsData)
+    {
+        return controlsData?.RelationTypes != null
+            ? new List<string>(controlsData.RelationTypes)
+            : new List<string>();
     }
 }
