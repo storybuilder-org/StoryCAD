@@ -25,7 +25,7 @@ public sealed partial class Shell : Page
 {
     public LogService Logger;
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
-
+    private CommandBarFlyout _contextFlyout;
 
     public Shell()
     {
@@ -53,6 +53,7 @@ public sealed partial class Shell : Page
         }
 
         ShellVm.SplitViewFrame = SplitViewFrame;
+        _contextFlyout = (CommandBarFlyout)ShellPage.Resources["AddStoryElementFlyout"];
     }
 
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
@@ -196,6 +197,8 @@ public sealed partial class Shell : Page
 
     private void TreeViewItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
     {
+        e.Handled = true; // Stop event propagation to prevent recursion
+
         if (ShellVm.LastClickedTreeviewItem != null)
         {
             ShellVm.LastClickedTreeviewItem.Background = null;
@@ -211,6 +214,12 @@ public sealed partial class Shell : Page
         ShellVm.LastClickedTreeviewItem = item; //We can't set the background through RightTappedNode so
         //we set a reference to the node itself to reset the background later
         ShellVm.ShowFlyoutButtons();
+
+        // Programmatically show the flyout on the clicked item
+        _contextFlyout?.ShowAt(item, new FlyoutShowOptions
+        {
+            Position = e.GetPosition(item)
+        });
     }
 
     /// <summary>
