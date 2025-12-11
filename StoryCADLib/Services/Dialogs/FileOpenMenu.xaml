@@ -77,7 +77,7 @@
             <ScrollView Grid.Row="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" BorderThickness="0" Background="Transparent">
                 <Grid Background="Transparent" BorderThickness="0">
                     <!-- Recents tab -->
-                    <Grid Visibility="{x:Bind FileOpenVM.RecentsTabContentVisibility, Mode=TwoWay}">
+                    <Grid Visibility="{x:Bind FileOpenVM.RecentsTabContentVisibility, Mode=OneWay}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
@@ -96,7 +96,7 @@
                     </Grid>
 
                     <!-- Backups tab -->
-                    <Grid Visibility="{x:Bind FileOpenVM.BackupTabContentVisibility, Mode=TwoWay}">
+                    <Grid Visibility="{x:Bind FileOpenVM.BackupTabContentVisibility, Mode=OneWay}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
@@ -109,7 +109,7 @@
                     </Grid>
 
                     <!-- New tab -->
-                    <Grid Visibility="{x:Bind FileOpenVM.NewTabContentVisibility, Mode=TwoWay}">
+                    <Grid Visibility="{x:Bind FileOpenVM.NewTabContentVisibility, Mode=OneWay}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
@@ -134,7 +134,7 @@
                     </Grid>
 
                     <!-- Samples tab -->
-                    <Grid Visibility="{x:Bind FileOpenVM.SamplesTabContentVisibility, Mode=TwoWay}">
+                    <Grid Visibility="{x:Bind FileOpenVM.SamplesTabContentVisibility, Mode=OneWay}">
                         <ListView HorizontalAlignment="Stretch" VerticalAlignment="Center"
                                   ItemsSource="{x:Bind FileOpenVM.SampleNames}" CornerRadius="4"
                                   SelectedIndex="{x:Bind FileOpenVM.SelectedSampleIndex, Mode=TwoWay}" />

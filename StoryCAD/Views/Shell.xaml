@@ -20,41 +20,42 @@
 
             <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right">
                 <CommandBarFlyout.SecondaryCommands>
-                    <AppBarButton Icon="Add" Label="Add Elements">
+                    <AppBarButton Icon="Add" Label="Add Elements"
+                                  Visibility="{x:Bind ShellVm.AddButtonVisibility, Mode=OneWay}">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
                                 <MenuFlyoutItem Icon="Folder"
                                                 Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
-                                                Text="Add Folder         Alt+F" />
+                                                win:Text="Add Folder         Alt+F" skia:Text="Add Folder         ⌥F" />
                                 <MenuFlyoutItem Icon="Folder"
                                                 Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=OneWay}"
-                                                Text="Add Section        Alt+A" />
+                                                win:Text="Add Section        Alt+A" skia:Text="Add Section        ⌥A" />
                                 <MenuFlyoutItem Icon="Help"
                                                 Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
-                                                Text="Add Problem      Alt+P" />
+                                                win:Text="Add Problem      Alt+P" skia:Text="Add Problem      ⌥P" />
                                 <MenuFlyoutItem Icon="Contact"
                                                 Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
-                                                Text="Add Character    Alt+C" />
+                                                win:Text="Add Character    Alt+C" skia:Text="Add Character    ⌥C" />
                                 <MenuFlyoutItem Icon="Globe"
                                                 Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
-                                                Text="Add Setting        Alt+L" />
+                                                win:Text="Add Setting        Alt+L" skia:Text="Add Setting        ⌥L" />
                                 <MenuFlyoutItem Icon="AllApps"
                                                 Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
-                                                Text="Add Scene          Alt+S" />
+                                                win:Text="Add Scene          Alt+S" skia:Text="Add Scene          ⌥S" />
                                 <MenuFlyoutItem Icon="TwoPage"
                                                 Command="{x:Bind ShellVm.AddNotesCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
-                                                Text="Add Notes          Alt+N" />
+                                                win:Text="Add Notes          Alt+N" skia:Text="Add Notes          ⌥N" />
                                 <MenuFlyoutItem Icon="PreviewLink"
                                                 Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
-                                                Text="Add Website      Alt+W" />
+                                                win:Text="Add Website      Alt+W" skia:Text="Add Website      ⌥W" />
                             </MenuFlyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
@@ -159,22 +160,22 @@
                               Width="50">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="Open/Create file                Ctrl+O" Command="{x:Bind ShellVm.OpenFileOpenMenuCommand}">
+                            <MenuFlyoutItem win:Text="Open/Create file                Ctrl+O" skia:Text="Open/Create file                ⌘O" Command="{x:Bind ShellVm.OpenFileOpenMenuCommand}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8F4;" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Save Story                      Ctrl+S" Command="{x:Bind ShellVm.SaveFileCommand, Mode=OneWay}">
+                            <MenuFlyoutItem win:Text="Save Story                      Ctrl+S" skia:Text="Save Story                      ⌘S" Command="{x:Bind ShellVm.SaveFileCommand, Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Save Story As                   Ctrl+Shift+S" Command="{x:Bind ShellVm.SaveAsCommand, Mode=OneWay}">
+                            <MenuFlyoutItem win:Text="Save Story As                   Ctrl+Shift+S" skia:Text="Save Story As                   ⇧⌘S" Command="{x:Bind ShellVm.SaveAsCommand, Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE792;" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Create Backup                   Ctrl+B"
+                            <MenuFlyoutItem win:Text="Create Backup                   Ctrl+B" skia:Text="Create Backup                   ⌘B"
                                             Command="{x:Bind ShellVm.CreateBackupCommand, Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xe838;" />
@@ -185,7 +186,7 @@
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE127;" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Exit                     Ctrl+Q" Command="{x:Bind ShellVm.ExitCommand, Mode=OneWay}">
+                            <MenuFlyoutItem win:Text="Exit                            Ctrl+Q" skia:Text="Quit                            ⌘Q" Command="{x:Bind ShellVm.ExitCommand, Mode=OneWay}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE106;" />
                                 </MenuFlyoutItem.Icon>
@@ -202,38 +203,38 @@
                         <MenuFlyout>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Icon="Folder"
-                                            Text="Add folder         Alt+F">
+                                            win:Text="Add folder         Alt+F" skia:Text="Add folder         ⌥F">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}" Icon="Folder"
-                                            Text="Add section        Alt+A">
+                                            win:Text="Add section        Alt+A" skia:Text="Add section        ⌥A">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}" Icon="Help"
-                                            Text="Add problem      Alt+P">
+                                            win:Text="Add problem      Alt+P" skia:Text="Add problem      ⌥P">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}" Icon="Contact"
-                                            Text="Add character    Alt+C">
+                                            win:Text="Add character    Alt+C" skia:Text="Add character    ⌥C">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}" Icon="Globe"
-                                            Text="Add setting        Alt+L">
+                                            win:Text="Add setting        Alt+L" skia:Text="Add setting        ⌥L">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}" Icon="AllApps"
-                                            Text="Add scene          Alt+S">
+                                            win:Text="Add scene          Alt+S" skia:Text="Add scene          ⌥S">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}"
-                                            Text="Add Web node     Alt+W">
+                                            win:Text="Add Web node     Alt+W" skia:Text="Add Web node     ⌥W">
                                 <MenuFlyoutItem.Icon>
                                     <SymbolIcon Symbol="PreviewLink" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddNotesCommand,Mode=OneWay}"
-                                            Text="Add Notes node   Alt+N">
+                                            win:Text="Add Notes node   Alt+N" skia:Text="Add Notes node   ⌥N">
                                 <MenuFlyoutItem.Icon>
                                     <SymbolIcon Symbol="TwoPage" />
                                 </MenuFlyoutItem.Icon>
@@ -312,7 +313,7 @@
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Text="Open Narrative Editor         Ctrl+N"
+                            <MenuFlyoutItem win:Text="Open Narrative Editor         Ctrl+N" skia:Text="Open Narrative Editor         ⌘N"
                                             Command="{x:Bind ShellVm.NarrativeToolCommand, Mode=OneWay}"
                                             muxc:ToolTipService.ToolTip="Opens the narrative editor to build your story as its told">
                             </MenuFlyoutItem>
@@ -322,13 +323,13 @@
                             <MenuFlyoutItem Text="Topic Information"
                                             Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}" />
                             <MenuFlyoutSubItem Text="Plotting Aids">
-                                <MenuFlyoutItem Text="Master Plots                Ctrl+M"
+                                <MenuFlyoutItem win:Text="Master Plots                Ctrl+M" skia:Text="Master Plots                ⌘M"
                                                 Command="{x:Bind ShellVm.MasterPlotsCommand, Mode=OneWay}">
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="Dramatic Situations         Ctrl+D"
+                                <MenuFlyoutItem win:Text="Dramatic Situations         Ctrl+D" skia:Text="Dramatic Situations         ⌘D"
                                                 Command="{x:Bind ShellVm.DramaticSituationsCommand, Mode=OneWay}">
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="Stock Scenes                Ctrl+L"
+                                <MenuFlyoutItem win:Text="Stock Scenes                Ctrl+L" skia:Text="Stock Scenes                ⌘L"
                                                 Command="{x:Bind ShellVm.StockScenesCommand, Mode=OneWay}">
                                 </MenuFlyoutItem>
                             </MenuFlyoutSubItem>
@@ -346,17 +347,17 @@
                                             win:Visibility="Visible" notwin:Visibility="Collapsed"
                                             skia:Visibility="Collapsed">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="PDF Reports                     Ctrl+Shift+P"
+                            <MenuFlyoutItem win:Text="PDF Reports                     Ctrl+Shift+P" skia:Text="PDF Reports                     ⇧⌘P"
                                             Command="{x:Bind ShellVm.ExportReportsToPdfCommand, Mode=OneWay}">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Scrivener Reports               Ctrl+R"
+                            <MenuFlyoutItem win:Text="Scrivener Reports               Ctrl+R" skia:Text="Scrivener Reports               ⌘R"
                                             Command="{x:Bind ShellVm.ScrivenerReportsCommand, Mode=OneWay}">
                             </MenuFlyoutItem>
 
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton Width="50" IsCompact="True" Label="Preferences" ToolTipService.ToolTip="Preferences (Ctrl+P on macOS)"
+                <AppBarButton Width="50" IsCompact="True" Label="Preferences" win:ToolTipService.ToolTip="Preferences" skia:ToolTipService.ToolTip="Preferences (⌘P)"
                               Command="{x:Bind ShellVm.PreferencesCommand, Mode=OneWay}">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE713;" />
@@ -513,7 +514,7 @@
                     <SymbolIcon Symbol="Edit" Height="36"
                                 ToolTipService.ToolTip="This icon becomes red when you've made changes that haven't been saved yet.">
                         <SymbolIcon.Foreground>
-                            <SolidColorBrush Color="{x:Bind ShellVm.ChangeStatusColor, Mode=TwoWay}" />
+                            <SolidColorBrush Color="{x:Bind ShellVm.ChangeStatusColor, Mode=OneWay}" />
                         </SymbolIcon.Foreground>
                     </SymbolIcon>
                 </Button.Content>
@@ -526,7 +527,7 @@
                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" Height="36"
                               ToolTipService.ToolTip="This icon is green when AutoSave is active and working.">
                         <FontIcon.Foreground>
-                            <SolidColorBrush Color="{x:Bind ShellVm.AutosaveStatusColor, Mode=TwoWay}" />
+                            <SolidColorBrush Color="{x:Bind ShellVm.AutosaveStatusColor, Mode=OneWay}" />
                         </FontIcon.Foreground>
                     </FontIcon>
                 </Button.Content>
@@ -538,7 +539,7 @@
                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE777;" Height="36"
                               ToolTipService.ToolTip="This icon is green when you or StoryCAD has recently made a backup of your work.">
                         <FontIcon.Foreground>
-                            <SolidColorBrush Color="{x:Bind ShellVm.BackupStatusColor, Mode=TwoWay}" />
+                            <SolidColorBrush Color="{x:Bind ShellVm.BackupStatusColor, Mode=OneWay}" />
                         </FontIcon.Foreground>
                     </FontIcon>
                 </Button.Content>

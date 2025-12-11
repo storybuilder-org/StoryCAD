@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.System;
 using Windows.UI.ViewManagement;
@@ -150,9 +149,6 @@ public sealed partial class Shell : Page
             Windowing.MainWindow.AppWindow.Closing += OnMainWindowClosing;
         }
 
-        // Update keyboard hints for macOS (only updates context flyout)
-        // Done after all initialization to avoid flyout state issues
-        UpdateKeyboardHints();
     }
 
     /// <summary>
@@ -571,79 +567,4 @@ public sealed partial class Shell : Page
             Logger?.LogException(LogLevel.Error, ex, "Error handling keyboard shortcut");
         }
     }
-
-    /// <summary>
-    /// Updates keyboard hint text to use platform-specific symbols (⌘ and ⌥ on macOS, Ctrl+ and Alt+ elsewhere)
-    /// Called once during initialization.
-    /// </summary>
-    private void UpdateKeyboardHints()
-    {
-        // Only update on macOS - use runtime OS detection
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            return;
-
-        // On macOS, replace keyboard shortcuts with macOS symbols
-        // Update context flyout (used for right-click)
-        if (Resources["AddStoryElementFlyout"] is CommandBarFlyout contextFlyout)
-        {
-            UpdateMenuFlyoutItems(contextFlyout);
-        }
-
-        // Update main menu flyouts in CommandBar
-        if (Content is Grid grid && grid.Children.Count > 0 && grid.Children[0] is CommandBar commandBar)
-        {
-            foreach (var command in commandBar.PrimaryCommands.OfType<AppBarButton>())
-            {
-                if (command.Flyout is MenuFlyout menuFlyout)
-                {
-                    UpdateMenuFlyoutItems(menuFlyout);
-                }
-            }
-        }
-    }
-
-    private void UpdateMenuFlyoutItems(CommandBarFlyout flyout)
-    {
-        if (flyout?.SecondaryCommands == null) return;
-
-        foreach (var command in flyout.SecondaryCommands.OfType<AppBarButton>())
-        {
-            if (command.Flyout is MenuFlyout menuFlyout)
-            {
-                UpdateMenuFlyoutItems(menuFlyout);
-            }
-        }
-    }
-
-    private void UpdateMenuFlyoutItems(MenuFlyout menuFlyout)
-    {
-        if (menuFlyout?.Items == null) return;
-
-        foreach (var item in menuFlyout.Items.OfType<MenuFlyoutItem>())
-        {
-            if (!string.IsNullOrEmpty(item.Text))
-            {
-                // Replace keyboard shortcuts with macOS symbols
-                // Order matters: replace compound keys first
-                item.Text = item.Text.Replace("Ctrl+Shift+", "⇧+⌘+");
-                item.Text = item.Text.Replace("Ctrl+", "⌘+");
-                item.Text = item.Text.Replace("Alt+", "⌥+");
-            }
-        }
-
-        // Also check for nested MenuFlyoutSubItem
-        foreach (var subItem in menuFlyout.Items.OfType<MenuFlyoutSubItem>())
-        {
-            foreach (var item in subItem.Items.OfType<MenuFlyoutItem>())
-            {
-                if (!string.IsNullOrEmpty(item.Text))
-                {
-                    item.Text = item.Text.Replace("Ctrl+Shift+", "⇧+⌘+");
-                    item.Text = item.Text.Replace("Ctrl+", "⌘+");
-                    item.Text = item.Text.Replace("Alt+", "⌥+");
-                }
-            }
-        }
-    }
-
 }
