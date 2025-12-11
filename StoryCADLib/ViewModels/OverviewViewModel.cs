@@ -134,9 +134,9 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
         get => _storyProblem;
         set
         {
-            // only try to load if it's not Guid.Empty
+            // only try to load if it’s not Guid.Empty
             var candidate = value != Guid.Empty
-                ? StoryElement.GetByGuid(value, _storyModel) as ProblemModel
+                ? StoryElement.GetByGuid(value) as ProblemModel
                 : null;
 
             // if we got one, use its Uuid; otherwise clear it

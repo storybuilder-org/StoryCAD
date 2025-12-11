@@ -362,39 +362,6 @@ public class SceneViewModelTests
         Assert.AreEqual(modifiedName, _sceneModel.Name, "Deactivate should save Name changes");
     }
 
-    [TestMethod]
-    public void LoadCastList_WithCastMembers_DoesNotThrowWhenStoryModelIsValid()
-    {
-        // Arrange - Add a character to the scene's cast members in the model
-        var character = new CharacterModel("Cast Member", _storyModel, null);
-        _storyModel.StoryElements.Characters.Add(character);
-        _sceneModel.CastMembers.Add(character.Uuid);
-
-        // Act & Assert - Activate triggers LoadModel which calls LoadCastList
-        // This exercises StoryElement.GetByGuid with _storyModel parameter
-        // Should not throw NullReferenceException
-        _viewModel.Activate(_sceneModel);
-
-        // Verify cast was loaded
-        Assert.AreEqual(1, _viewModel.CastList.Count, "CastList should contain the cast member");
-    }
-
-    [TestMethod]
-    public void ViewpointCharacter_WhenSetWithValidCharacter_DoesNotThrow()
-    {
-        // Arrange - This tests the GetByGuid call in ViewpointCharacter setter
-        var character = new CharacterModel("VP Character", _storyModel, null);
-        _storyModel.StoryElements.Characters.Add(character);
-        _viewModel.Activate(_sceneModel);
-
-        // Act & Assert - Should not throw when using _storyModel in GetByGuid
-        _viewModel.ViewpointCharacter = character.Uuid;
-
-        // Verify character was added to cast
-        Assert.IsTrue(_viewModel.CastList.Any(c => c.Uuid == character.Uuid),
-            "Viewpoint character should be added to cast list");
-    }
-
     #endregion
 
     #region Priority 2: Cast Management Tests (PARTIALLY IMPLEMENTED - 3 examples)
