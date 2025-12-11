@@ -279,7 +279,6 @@ public class ShellViewModel : ObservableRecipient
                 NarratorVisibility = Visibility.Collapsed;
                 AddButtonVisibility = Visibility.Collapsed;
                 PrintNodeVisibility = Visibility.Collapsed;
-                AddButtonVisibility = Visibility.Collapsed;
                 TrashButtonVisibility = Visibility.Visible;
             }
             else
@@ -297,12 +296,10 @@ public class ShellViewModel : ObservableRecipient
                 {
                     ExplorerVisibility = Visibility.Collapsed;
                     NarratorVisibility = Visibility.Visible;
-                    AddButtonVisibility = Visibility.Collapsed;
+                    AddButtonVisibility = Visibility.Visible;
                     PrintNodeVisibility = Visibility.Visible;
                     TrashButtonVisibility = Visibility.Collapsed;
                 }
-
-                AddButtonVisibility = Visibility.Visible;
             }
         }
         catch (Exception e) //errors (is RightTappedNode null?
