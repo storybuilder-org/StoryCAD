@@ -25,7 +25,7 @@ The scene will be moved under Deleted Story Elements. At the bottom of the Navig
 
 The placeholder scenes added by Master Plots each describe one function, but it’s wrong to think that a real scene only does one thing. The ‘He’s like a ghost’ scene, our Narrative Hook, also Introduces Characters- not all of them, but our protagonists, Leonard Kraskin and Tony Irwin, and, from a remove, our antagonist, Charlie Lacas. It also Presents a Problem to be Solved- ‘How will Leonard and Tony get past Charlie's tech?’, which is in fact a sub-problem of the Story Problem, ‘Catching the drug dealer Lacas’.  To illustrate, here’s a reorder of the Problems.
 
-![](../media/Problems-and-Scenes-Reordered.png)
+![](Problems-and-Scenes-Reordered.png)
 
 The two sub-problems have been moved under the main problem, and our one scene so far (‘He’s like a ghost’) has been moved under the problem it’s a part of.  The MasterPlots tool was also used a second time, to copy a slightly different kind of story structure, a pattern of action- the Escape.  Back when we worked on our story idea we already had an idea of what our climax scene  would be; this placeholder represents that. Clicking on this scene, we can make it our own by renaming it to 'Tony diverts Lacas by paging him and allows Leonard to escape’ and using our story Premise description. We also added the scene cast members by selecting their names from New Cast Member drop-down and clicking the ‘+’ Add Cast Member button.
 

@@ -1,0 +1,235 @@
+{
+  "main": {
+    "id": "bed544f0d3a5d01d",
+    "type": "split",
+    "children": [
+      {
+        "id": "9f2d320f3dcdf272",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b575afb4c0fd9b65",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Front Matter/Platform_Differences.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Platform_Differences"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "39aa0d4599f33b81",
+    "type": "split",
+    "children": [
+      {
+        "id": "0bfb8d12b9d4fbab",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6637a699d98153e9",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "b202aadd8d95fccf",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "9e23230302c8f3a3",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "19d0f645c8c53079",
+    "type": "split",
+    "children": [
+      {
+        "id": "326fc3d64dea89d5",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3871dfd7e2c1367c",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Quick Start/AddRemove_Story_Elements.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for AddRemove_Story_Elements"
+            }
+          },
+          {
+            "id": "b41cd4a5b1e87205",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Quick Start/AddRemove_Story_Elements.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from AddRemove_Story_Elements"
+            }
+          },
+          {
+            "id": "44beabb42552ead4",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "078355fc05ec15a8",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "0876670de9efe719",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Quick Start/AddRemove_Story_Elements.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of AddRemove_Story_Elements"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "b575afb4c0fd9b65",
+  "lastOpenFiles": [
+    "Front Matter/Platform_Differences.md",
+    "Miscellaneous/Troubleshooting_Cloud_Storage_Providers.md.tmp.10724.1764884180763",
+    "Tutorial Creating a Story/Creating_a_Story_pt_2.md.tmp.10724.1764882340415",
+    "Reports/Reports_Menu.md.tmp.10724.1764882318943",
+    "media/Overview-Structure-Tab.png",
+    "Story Elements/Protagonist_Tab.md",
+    "media/RedPenIcon.png",
+    "Tutorial Creating a Story/Creating_a_Story_pt_8.md.tmp.10724.1764881115363",
+    "Tools/Stock_Scenes.md",
+    "media/Trait-Builder.png",
+    "media/User-Interface.png",
+    "media/Tutorial/Tut9JoeEdwards.png",
+    "media/Tutorial/Tut9ReorderedPlotline.png",
+    "media/Tutorial/Tut9StockScenesTwists.png",
+    "media/Tabs.png",
+    "media/StoryCAD.png",
+    "media/Elements/Problem/Problem-Antagonist-Tab.png",
+    "media/Printing",
+    "media/Elements/Problem",
+    "media/Elements/Untitled.md",
+    "media/Elements/Character",
+    "media/Tutorial",
+    "media/Elements/Web",
+    "media/Elements",
+    "Writing with StoryCAD/Defining_Problems.md",
+    "Back Matter/Glossary.md",
+    "Story Elements/Antagonist_Tab.md",
+    "Quick Start/Move_Story_Elements.md",
+    "Story Elements/Develpment_Tab.md",
+    "Story Elements/Development_Tab.md",
+    "Quick Start/Menu_Bar.md",
+    "Quick Start/Key_Binds.md",
+    "Quick Start/Installing_StoryCAD.md",
+    "Quick Start/File_Menu.md",
+    "Quick Start/AddRemove_Story_Elements.md",
+    "Preferences/Preferences.md",
+    "Miscellaneous/Troubleshooting_Cloud_Storage_Providers.md",
+    "Miscellaneous/Miscellaneous.md",
+    "Miscellaneous/Leaving_Feedback.md",
+    "Miscellaneous/Backups_Protecting_Your_Work.md",
+    "For Developers/Developing_StoryCAD.md",
+    "For Developers/Editing this Manual.md",
+    "Front Matter/Important_Notice_to_StoryCAD_Users.md",
+    "Front Matter/Getting_Help.md",
+    "Front Matter/Front_Matter.md",
+    "For Developers/Using_the_API.md"
+  ]
+}

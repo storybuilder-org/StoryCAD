@@ -6,9 +6,11 @@ nav_order: 21
 parent: Menu Bar
 has_toc: false
 ---
-#### Key Binds
-Key Binds
+## Key Binds
+
 Some options in the menu have key binds to speed up your story planning. Below is a comprehensive list of all the key binds on the menu bar:
+
+*Note on MacOS, use the command key instead of control*
 
 File Related Commands
 Ctrl + O - Open a story
@@ -32,4 +34,4 @@ Ctrl + L - Stock Scenes
 
 Report Commands
 Ctrl + P - Open Print Report Menu
-Ctrl +R - Scrivener Reports 
+Ctrl + R - Scrivener Reports 

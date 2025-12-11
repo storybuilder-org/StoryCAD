@@ -3,7 +3,7 @@ title: Developer Notes
 layout: default
 nav_enabled: true
 nav_order: 117
-parent: For Developers	
+parent: For Developers
 has_toc: false
 ---
 

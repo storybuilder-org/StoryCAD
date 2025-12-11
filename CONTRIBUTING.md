@@ -7,6 +7,8 @@ If you have a question, make sure it isn't already answered. Our goal is to prov
 
 Another source of information is our Discord server. You can join it from [this link][4].
 
+For developer documentation, see the [For Developers](https://storybuilder-org.github.io/StoryCAD/docs/For%20Developers/For_Developers.html) section of the manual.
+
 The rest of this document discusses possible ways to help.
 
 ## Bugs
@@ -28,7 +30,7 @@ Got an outlining itch StoryCAD can't scratch? Tell us about it, either by
 opening an [issue][1]. Select **New Issue** and select the **Feature Request**
 template). 
 
-Alternatively, you can develop your idea by starting a new [discussion][2]. We're always looking to make
+Alternatively, you can develop your idea by starting a new [discussion][3]. We're always looking to make
 StoryCAD better.
 
 We'll try to prioritize new feature development that makes our users happy.
@@ -63,20 +65,10 @@ They're the deconstruction champs.
 
 ## Documentation
 
-The StoryCAD user manual is maintained in as a Scrivener project which is currently
-maintained apart from the StoryCAD repository. The process uses
-Scrivener's Compile to produce markdown, which is split and reformatted by some c# code,
-and then deployed to github-pages for the StoryCAD repository.
+The StoryCAD user manual is built with Jekyll and located in the `docs` folder. You can preview changes locally before submitting a pull request.
 
-If you're interested in working on the documentation, contact tcox@storybuilder.org.
-
-
-## Development
-
-If you're interested in helping to develop StoryCAD, see the [Programmer Notes][5].
+See [Updating the Manual](https://storybuilder-org.github.io/StoryCAD/docs/For%20Developers/Updating_the_Manual.html) for instructions on serving the documentation locally and adding new pages.
 
 [1]:https://github.com/StoryBuilder-org/StoryCAD/issues
-[2]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/DEVNOTES.md
-[3]:https://github.com/StoryBuilder-org/StoryCAD/discussions  
+[3]:https://github.com/StoryBuilder-org/StoryCAD/discussions
 [4]:https://discord.gg/bpCyAQnWCa
-[5]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/DEVNOTES.md

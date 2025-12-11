@@ -6,14 +6,9 @@ nav_order: 75
 parent: Home
 has_toc: false
 ---
-# Preferences
-Preferences
-
 The Preferences Dialog will be displayed when you press the Preferences button on the Menu Bar:
 
 ![](../media/Prefences-CommandBar-Button-1.png)
-
-
 
 The Preferences Dialog contains many options. It’s divided into a series of tabs which group the functions.
 
@@ -49,14 +44,13 @@ Other tab:
 
 ![](../media/Preferences-Other-tab.png)
 
-Send error logs - This option uses a service, elmah.io, which collects error data and provides us with a log which gives us an idea of what happened. This information includes your your email so that we can follow up for more information if needed. Your outline data is not not retained or forwarded and no
-information is shared with anyone outside of Team StoryCAD.
+Send error logs - This option uses a service, elmah.io, which collects error data and provides us with a log which gives us an idea of what happened. This information includes your email so that we can follow up for more information if needed. Your outline data is not retained or forwarded and no information is shared with anyone outside of Team StoryCAD.
 
 Send newsletters - Your email address will be subscribed to the StoryCAD newsletter, which is usually sent about once a month.
 
 Wrap node names - Wraps node names in the Story Explorer and Narrator treeviews, if the Name is longer than the treeview’s display width.
 
-Automatically Save - This function will automatically save your story  story outline every X seconds. It operates exactly as if you’d used File > Save or clicked on the edit button on the status bar.  You’ll see a verification of the save event on the status bar and the edit button will turn green. 
+Automatically Save - This function will automatically save your story outline every X seconds. It operates exactly as if you’d used File > Save or clicked on the edit button on the status bar.  You’ll see a verification of the save event on the status bar and the edit button will turn green. 
 
 Preferred Search Engine - This is the search engine that will be used within web nodes.
 

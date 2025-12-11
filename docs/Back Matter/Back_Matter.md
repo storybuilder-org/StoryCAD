@@ -6,6 +6,4 @@ nav_order: 111
 parent: Home
 has_toc: false
 ---
-# Back Matter
-
 Just a glossary, for now.

@@ -9,7 +9,7 @@ has_toc: false
 ### Physical Tab
 Physical and Appearance Tabs
 
-![](../media/CharPhysTab.png)
+![](CharPhysTab.png)
 
 These character traits describe the external physical characteristics and appearance of the character.  They are generally self-explanatory.
 

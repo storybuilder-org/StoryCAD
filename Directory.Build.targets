@@ -1,2 +1,14 @@
 ﻿<Project>
+  <!-- Serve Jekyll documentation locally for testing -->
+  <Target Name="ServeDocs">
+    <Exec Command="pwsh -ExecutionPolicy Bypass -File serve-docs.ps1" WorkingDirectory="$(MSBuildThisFileDirectory)" />
+  </Target>
+
+  <!-- Build Jekyll documentation (static output to _site folder) -->
+  <Target Name="BuildDocs">
+    <Message Importance="high" Text="Building StoryCAD Documentation..." />
+    <Exec Command="bundle install" WorkingDirectory="$(MSBuildThisFileDirectory)" Condition="!Exists('$(MSBuildThisFileDirectory)Gemfile.lock')" />
+    <Exec Command="bundle exec jekyll build" WorkingDirectory="$(MSBuildThisFileDirectory)" />
+    <Message Importance="high" Text="Documentation built to _site folder" />
+  </Target>
 </Project>

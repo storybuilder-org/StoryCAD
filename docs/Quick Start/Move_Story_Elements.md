@@ -6,8 +6,7 @@ nav_order: 17
 parent: Menu Bar
 has_toc: false
 ---
-#### Move Story Elements
-Move Story Elements
+## Move Story Elements
 
 ![](../media/Move-Story-Elements.png)
 

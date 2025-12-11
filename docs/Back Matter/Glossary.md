@@ -6,12 +6,6 @@ nav_order: 112
 parent: Back Matter
 has_toc: false
 ---
-## Glossary
-
-Glossary
-
-Glossary
-
 A
 
 ab ovo: Telling a story by starting at the earliest possible scene.  See 'in media res.'  From the Latin 'from the egg.'
@@ -122,14 +116,13 @@ locale: The setting for a novel, play, or motion picture.
 
 M
 
-
 McGuffin: An object which is searched for, fought over, or fled from, but which has no value other than to set the action in motion.  The term was devised by Alfred Hitchcock.
 
 melodrama: Plays which exaggerate emotion and relate sensational and thrilling action, often at the expense of character development.
 
 metamorphosis: A complete change of form or substance, often caused by some form of magic or witchcraft, found in fantasies.
 
-mimesis: A principal of drama proposed by Aristotle, which states that dramatic works should mirror and mimic life.
+mimesis: A principle of drama proposed by Aristotle, which states that dramatic works should mirror and mimic life.
 
 mise-en-scene: The surroundings and environment of a scene.  Often used to refer to the stage setting of a play.
 
@@ -147,7 +140,7 @@ movement: The pace and force of action in a story.   Action is 'fast', descripti
 
 mystery: (1) Something kept secret or that remains unexplained.  Elements of mystery in a story create suspense in the reader (see 'suspense'.)  (2) A detective story involving a criminal act whose perpetrator is not immediately divulged to the reader.
 
-myth: A traditional or legendary story, usually involving gods and heros or supernatural occurrences.
+myth: A traditional or legendary story, usually involving gods and heroes or supernatural occurrences.
 
 N
 
@@ -155,7 +148,7 @@ narration: Relating or telling events.  Narration implies a narrator, always eit
 
 narrative hook: Events or scenes placed at the beginning of a story for the purpose of arousing the reader's interest so as to make him read further.
 
-novel: A lengthy fictitious prose narrative.  Novels are  usually 70,000 words or more in length.  Short novels are called novelettes.   
+novel: A lengthy fictitious prose narrative.  Novels are  usually 70,000 words or more in length.  Short novels are called novelettes.
 
 novelette: A short novel, typically 30,000-40,000 words in length.
 
@@ -187,7 +180,7 @@ play-within-a-play: A scene in a story in which a miniature drama is presented. 
 
 plot: The order or sequence of scenes and events in a story.  The plot points generally progress from goal to conflict to resolution.  Motive is what separates plot from a mere string of episodes.  'The king died and then the queen died' is a string of events; 'the king died, and then the queen died of grief' is a plot.--- E.M. Forster.
 
-point of view: The position of the narrator in relation to the story.  Point of view covers not only vocal, spacial, and temporal aspects, but also mental and attitudinal aspects.  Point of view is to prose what camera angle and lens choice are to the director.
+point of view: The position of the narrator in relation to the story.  Point of view covers not only vocal, spatial, and temporal aspects, but also mental and attitudinal aspects.  Point of view is to prose what camera angle and lens choice are to the director.
 
 premise: The basis or proposition  from which a story proceeds.  The premise may be a moral the story is intended to illustrate, or an idea or concept it intends to prove.  See 'theme.'
 
@@ -223,7 +216,7 @@ stereotype: A simplified concept of a character or situation.
 
 stock character: A familiar character expected by readers in certain types of fiction, such as the hard-boiled detective or the prostitute with a heart of gold.
 
-stock situation: A situation or incident which is commonly found in fiction, such as 'boy meets girl' or revenge. 
+stock situation: A situation or incident which is commonly found in fiction, such as 'boy meets girl' or revenge.
 
 story: A narration of incidents designed to amuse and inform an audience.
 
@@ -234,7 +227,6 @@ subplot: Scenes and events in a story which are secondary to the main plot.  Sub
 suspense: Uncertainty as to the outcome of an event or situation.  Suspense is  caused by posing questions for the reader but not answering them right away.  A man hiding in an apartment  with a knife leaves the reader wondering 'what will happen  when the tenant arrives home.
 
 suspension of disbelief: The willingness of readers or the audience to suspend doubt about the reality of characters or events in a story.  For example, a movie goer may  ignore that he is sitting in a darkened room looking at projected image, and treat the film as 'real.'  Bad storytelling can break this spell.
-
 
 T
 
@@ -257,329 +249,3 @@ verisimilitude: 'The appearance of truth.'  The aspects of a story which make it
 vignette: A term derived from the art work which decorated the front plates of novels, 'little vines.'   It refers to a brief literary sketch or episode such as a character study or a single scene.  The term usually refers to a short, unplotted work.
 
 villain: A character who represents an evil or unwelcome force.  The villain is a stock character frequently cast as the antagonist in stories.
-
-[StoryCAD]: StoryCAD.png width=704px height=704px
-
-[Keyboard-Right-Mouse-Key]: Keyboard-Right-Mouse-Key.png width=59px height=51px
-
-[File-Menu]: File-Menu.png width=467px height=311px
-
-[File-Open-Dialog]: File-Open-Dialog.png width=559px height=562px
-
-[Create-New-Outline-Dialog]: Create-New-Outline-Dialog.png width=552px height=556px
-
-[User-Interface]: User-Interface.png width=600px height=431px
-
-[Menu-Bar]: Menu-Bar.png width=665px height=65px
-
-[Menu-Bar-Tooltip]: Menu-Bar-Tooltip.png width=204px height=92px
-
-[Search-Function]: Search-Function.png width=603px height=432px
-
-[Show-and-Hide-Navigation]: Show-and-Hide-Navigation.png width=601px height=431px
-
-[Menu-Bar-1]: Menu-Bar-1.png width=599px height=64px
-
-[Story-Element-Flyout]: Story-Element-Flyout.png width=343px height=211px
-
-[Move-Story-Elements]: Move-Story-Elements.png width=217px height=284px
-
-[Print-Reports-Button-and-Menu]: Print-Reports-Button-and-Menu.png width=165px height=161px
-
-[Prefences-CommandBar-Button]: Prefences-CommandBar-Button.png width=448px height=82px
-
-[ContentPane]: ContentPane.png width=680px height=487px
-
-[Navigation-and-Content-Pane]: Navigation-and-Content-Pane.png width=704px height=478px
-
-[Status-Bar]: Status-Bar.png width=680px height=34px
-
-[Changed-Indicator]: Changed-Indicator.png width=54px height=40px
-
-[RedPenIcon]: RedPenIcon.png width=66px height=41px
-
-[Navigation-and-Content-Pane-1]: Navigation-and-Content-Pane-1.png width=675px height=457px
-
-[Navigation-Pane-Flyout-CommandBar]: Navigation-Pane-Flyout-CommandBar.png width=668px height=477px
-
-[Tabs]: Tabs.png width=675px height=484px
-
-[Explorer-and-Navigator-Views]: Explorer-and-Navigator-Views.png width=342px height=251px
-
-[Create-New-Story-Project-Templates]: Create-New-Story-Project-Templates.png width=463px height=459px
-
-[Overview-and-Story-Problem]: Overview-and-Story-Problem.png width=693px height=497px
-
-[Overview-Story-Idea-Tab]: Overview-Story-Idea-Tab.png width=668px height=479px
-
-[Overview-Concept-Tab]: Overview-Concept-Tab.png width=675px height=484px
-
-[Overview-Premise]: Overview-Premise.png width=675px height=484px
-
-[Overview-Structure-Tab]: Overview-Structure-Tab.png width=675px height=487px
-
-[Problem-Problem-Tab]: Problem-Problem-Tab.png width=700px height=501px
-
-[Problem-Protagonist-Tab]: Problem-Protagonist-Tab.png width=629px height=491px
-
-[Problem-Antagonist-Tab]: Problem-Antagonist-Tab.png width=676px height=485px
-
-[Problem-Resolution-Tab]: Problem-Resolution-Tab.png width=612px height=476px
-
-[Image1]: Image1.png width=673px height=463px
-
-[Image1-1]: Image1-1.png width=673px height=463px
-
-[CharRoleTab]: CharRoleTab.png width=680px height=487px
-
-[CharPhysTab]: CharPhysTab.png width=675px height=484px
-
-[CharAppearanceTab]: CharAppearanceTab.png width=680px height=487px
-
-[Character-Relationships-Tab]: Character-Relationships-Tab.png width=668px height=480px
-
-[Add-a-Relationship]: Add-a-Relationship.png width=669px height=376px
-
-[Inverse-Relationship]: Inverse-Relationship.png width=680px height=415px
-
-[Character-Flaw-Tab]: Character-Flaw-Tab.png width=701px height=463px
-
-[Character-Backstory-Tab]: Character-Backstory-Tab.png width=680px height=489px
-
-[Character-Social-Tab]: Character-Social-Tab.png width=680px height=454px
-
-[Character-Psychological-Tab]: Character-Psychological-Tab.png width=701px height=463px
-
-[Character-Inner-Traits-Tab]: Character-Inner-Traits-Tab.png width=701px height=452px
-
-[Character-Outer-Traits]: Character-Outer-Traits.png width=687px height=443px
-
-[Trait-Builder]: Trait-Builder.png width=335px height=289px
-
-[Setting-Setting-Tab]: Setting-Setting-Tab.png width=665px height=428px
-
-[Setting-Sensations-Tab]: Setting-Sensations-Tab.png width=711px height=509px
-
-[Scene-Scene-Tab]: Scene-Scene-Tab.png width=700px height=501px
-
-[Scene-Development-Tab]: Scene-Development-Tab.png width=680px height=454px
-
-[Scene-Conflict-Tab]: Scene-Conflict-Tab.png width=700px height=501px
-
-[Scene-Sequel-Tab]: Scene-Sequel-Tab.png width=645px height=463px
-
-[NarrativeEditors]: NarrativeEditors.png width=552px height=761px
-
-[Clipboard-Image]: Clipboard-Image.png width=443px height=496px
-
-[Topic-Information]: Topic-Information.png width=713px height=512px
-
-[TopicDialog]: TopicDialog.png width=359px height=492px
-
-[Tools-Master-Plots]: Tools-Master-Plots.png width=549px height=572px
-
-[Tools-Dramatic-Situations]: Tools-Dramatic-Situations.png width=456px height=210px
-
-[Tools-Stock-Scenes]: Tools-Stock-Scenes.png width=489px height=683px
-
-[ConflictBuilderDialog]: ConflictBuilderDialog.png width=553px height=384px
-
-[Flaw-Builder]: Flaw-Builder.png width=551px height=325px
-
-[Print-Reports-Button-and-Menu-1]: Print-Reports-Button-and-Menu-1.png width=165px height=161px
-
-[Generate-Reports-Dialog]: Generate-Reports-Dialog.png width=560px height=616px
-
-[Print-Manager]: Print-Manager.png width=680px height=599px
-
-[Scrivener-Reports-File-Picker]: Scrivener-Reports-File-Picker.png width=680px height=280px
-
-[Scrivener-Reports-Generated-Status-Message]: Scrivener-Reports-Generated-Status-Message.png width=296px height=44px
-
-[Scrivener-Binder-with-StoryCAD-Outline]: Scrivener-Binder-with-StoryCAD-Outline.png width=680px height=331px
-
-[Scrivener-Split-Screen-with-StoryCAD]: Scrivener-Split-Screen-with-StoryCAD.png width=680px height=511px
-
-[Prefences-CommandBar-Button-1]: Prefences-CommandBar-Button-1.png width=448px height=82px
-
-[Preferences-General-tab]: Preferences-General-tab.png width=499px height=472px
-
-[Preferences-Backup-tab]: Preferences-Backup-tab.png width=556px height=526px
-
-[Backup-Folder-Hierarchy]: Backup-Folder-Hierarchy.png width=680px height=191px
-
-[Preferences-Other-tab]: Preferences-Other-tab.png width=554px height=586px
-
-[Preferences-About-tab]: Preferences-About-tab.png width=546px height=581px
-
-[Logs-Folder-Display]: Logs-Folder-Display.png width=680px height=238px
-
-[Preferences-Whats-New-tb]: Preferences-Whats-New-tb.png width=551px height=522px
-
-[WebElementOverview]: WebElementOverview.png width=680px height=487px
-
-[ReloadBackAndForward]: ReloadBackAndForward.png width=151px height=47px
-
-[SearchBar]: SearchBar.png width=539px height=36px
-
-[WebNodeHighlighted]: WebNodeHighlighted.png width=408px height=239px
-
-[WebsiteNodeWithSearchEngine]: WebsiteNodeWithSearchEngine.png width=680px height=487px
-
-[WebsiteNodeWithSearchQuery]: WebsiteNodeWithSearchQuery.png width=680px height=487px
-
-[WebNodeExamplePage]: WebNodeExamplePage.png width=680px height=487px
-
-[NotesElement]: NotesElement.png width=680px height=464px
-
-[File-Open-Dialog-1]: File-Open-Dialog-1.png width=559px height=562px
-
-[Create-New-Story-Dialog]: Create-New-Story-Dialog.png width=552px height=553px
-
-[Danger-Calls-New-Story-Outline]: Danger-Calls-New-Story-Outline.png width=653px height=468px
-
-[Tutorial-1-Danger-Calls-on-Disk]: Tutorial-1-Danger-Calls-on-Disk.png width=680px height=108px
-
-[Tutorial-1-Story-Overvew-Node]: Tutorial-1-Story-Overvew-Node.png width=593px height=53px
-
-[Tutorial-1-Empty-Story-Idea-Tab]: Tutorial-1-Empty-Story-Idea-Tab.png width=648px height=479px
-
-[Tutorial-1-Changed-Indicator-(Red)]: Tutorial-1-Changed-Indicator-(Red).png width=53px height=47px
-
-[Changed-Indicator-1]: Changed-Indicator-1.png width=55px height=40px
-
-[Tutorial-1-Empty-Struture-Tab]: Tutorial-1-Empty-Struture-Tab.png width=651px height=708px
-
-[Tutorial-2-Concept-Tooltip]: Tutorial-2-Concept-Tooltip.png width=625px height=164px
-
-[Tutorial-2-Concept]: Tutorial-2-Concept.png width=700px height=503px
-
-[Tutorial-2-Key-Questions]: Tutorial-2-Key-Questions.png width=537px height=631px
-
-[Tutorial-2-Add-Character]: Tutorial-2-Add-Character.png width=708px height=268px
-
-[Tutorial-2-Detective-Role]: Tutorial-2-Detective-Role.png width=687px height=492px
-
-[Tutorial-2-Add-New-Role]: Tutorial-2-Add-New-Role.png width=677px height=485px
-
-[Tutorial-2-Third-Character]: Tutorial-2-Third-Character.png width=680px height=503px
-
-[Tutorial-3-Catching-the-drug-dealer]: Tutorial-3-Catching-the-drug-dealer.png width=657px height=472px
-
-[Tutorial-3-The-'how-to'-complication]: Tutorial-3-The-'how-to'-complication.png width=575px height=371px
-
-[Tutorial-4-Lacas-gets-the-drop-on-Kraskin]: Tutorial-4-Lacas-gets-the-drop-on-Kraskin.png width=700px height=503px
-
-[Tutorial-4-Trait-Builder]: Tutorial-4-Trait-Builder.png width=336px height=332px
-
-[Tutorial-4-Behaviors]: Tutorial-4-Behaviors.png width=511px height=593px
-
-[Tutorial-4-Impulsive]: Tutorial-4-Impulsive.png width=700px height=503px
-
-[Tutorial-4-Inner-Trait]: Tutorial-4-Inner-Trait.png width=653px height=469px
-
-[Tutorial-4-Renamed-third-problem]: Tutorial-4-Renamed-third-problem.png width=561px height=403px
-
-[Tony-Irwin-Inner-Traits]: Tony-Irwin-Inner-Traits.png width=608px height=420px
-
-[Overview-Empty-Premis-tab]: Overview-Empty-Premis-tab.png width=608px height=420px
-
-[Danger-Calls-Story-Premise]: Danger-Calls-Story-Premise.png width=608px height=420px
-
-[Danger-Calls-Add-Scene]: Danger-Calls-Add-Scene.png width=700px height=484px
-
-[Danger-Calls-First-Scene-Sketch]: Danger-Calls-First-Scene-Sketch.png width=607px height=425px
-
-[Danger-Calls-MasterPlots-menu]: Danger-Calls-MasterPlots-menu.png width=701px height=452px
-
-[Danger-Calls-Three-Act-Play]: Danger-Calls-Three-Act-Play.png width=608px height=392px
-
-[Danger-Calls-Narrative-Hook]: Danger-Calls-Narrative-Hook.png width=689px height=540px
-
-[Danger-Calls-Move-Scene]: Danger-Calls-Move-Scene.png width=701px height=452px
-
-[Danger-Calls-after-Scene-Move]: Danger-Calls-after-Scene-Move.png width=635px height=409px
-
-[Danger-Calls-Delete-Placeholder]: Danger-Calls-Delete-Placeholder.png width=679px height=437px
-
-[Problems-and-Scenes-Reordered]: Problems-and-Scenes-Reordered.png width=701px height=452px
-
-[Danger-Calls-Climax]: Danger-Calls-Climax.png width=681px height=464px
-
-[Lacas-Role]: Lacas-Role.png width=653px height=440px
-
-[Lacas-Psychological]: Lacas-Psychological.png width=555px height=436px
-
-[Lacas-Social]: Lacas-Social.png width=637px height=525px
-
-[Lacas-Backstory]: Lacas-Backstory.png width=575px height=371px
-
-[Opening-Scene-Development]: Opening-Scene-Development.png width=667px height=428px
-
-[Opening-Scene-Conflict]: Opening-Scene-Conflict.png width=700px height=503px
-
-[Danger-Callse-Stock-Scenes]: Danger-Callse-Stock-Scenes.png width=465px height=660px
-
-[Danger-Calls-Shootout]: Danger-Calls-Shootout.png width=700px height=503px
-
-[Danger-Calls-Denouement]: Danger-Calls-Denouement.png width=653px height=469px
-
-[Tut9JoeEdwards]: Tut9JoeEdwards.png width=680px height=487px
-
-[Tut9StockScenesTwists]: Tut9StockScenesTwists.png width=475px height=667px
-
-[Tut9StockSceneInserted]: Tut9StockSceneInserted.png width=680px height=487px
-
-[Tut9ReorderedPlotline]: Tut9ReorderedPlotline.png width=561px height=403px
-
-[Tut9KeyQuestions]: Tut9KeyQuestions.png width=561px height=403px
-
-[Clipboard-Image-1]: Clipboard-Image-1.png width=491px height=171px
-
-[Clipboard-Image-2]: Clipboard-Image-2.png width=228px height=208px
-
-[Clipboard-Image-3]: Clipboard-Image-3.png width=256px height=129px
-
-[Clipboard-Image-4]: Clipboard-Image-4.png width=265px height=137px
-
-[Tools-Master-Plots-1]: Tools-Master-Plots-1.png width=544px height=631px
-
-[Tools-Master-Plots-Result]: Tools-Master-Plots-Result.png width=680px height=353px
-
-[SnowWhitePlotPoints]: SnowWhitePlotPoints.png width=267px height=448px
-
-[Dramatic-Situations-List-of-SItuations]: Dramatic-Situations-List-of-SItuations.png width=631px height=407px
-
-[Dramatic-Situations-tool]: Dramatic-Situations-tool.png width=459px height=208px
-
-[Stock-Scenes-Categories]: Stock-Scenes-Categories.png width=463px height=623px
-
-[Stock-Scenes-Examples]: Stock-Scenes-Examples.png width=465px height=628px
-
-[Plotting-with-StoryCAD-Premise]: Plotting-with-StoryCAD-Premise.png width=680px height=307px
-
-[Plotting-with-StoryCAD-Story-Problem-MasterPlots-Scene-list]: Plotting-with-StoryCAD-Story-Problem-MasterPlots-Scene-list.png width=680px height=338px
-
-[Plotting-with-StoryCAD-Complication-SubProblems]: Plotting-with-StoryCAD-Complication-SubProblems.png width=312px height=103px
-
-[Plotting-with-StoryCAD-SubProblems-Epanded-into-Scenes]: Plotting-with-StoryCAD-SubProblems-Epanded-into-Scenes.png width=273px height=356px
-
-[PlottingWithStoryCADOldManCharArc]: PlottingWithStoryCADOldManCharArc.png width=697px height=535px
-
-[PlottingWithStoryCADOldManSixScenes]: PlottingWithStoryCADOldManSixScenes.png width=325px height=337px
-
-[Clipboard-Image-5]: Clipboard-Image-5.png width=543px height=281px
-
-[Clipboard-Image-6]: Clipboard-Image-6.png width=568px height=355px
-
-[LeaveAReview]: LeaveAReview.png width=562px height=589px
-
-[ShellBar]: ShellBar.png width=655px height=51px
-
-[Clipboard-Image-7]: Clipboard-Image-7.png width=476px height=271px
-
-[Clipboard-Image-8]: Clipboard-Image-8.png width=564px height=555px
-
-[Clipboard-Image-9]: Clipboard-Image-9.png width=680px height=594px
-
-[Clipboard-Image-10]: Clipboard-Image-10.png width=680px height=297px
