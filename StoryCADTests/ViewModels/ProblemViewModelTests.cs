@@ -370,7 +370,7 @@ public class ProblemViewModelTests
         // Arrange
         _viewModel.Activate(_problemModel);
         var beat = CreateTestBeat("Test Beat");
-        beat.Element = _storyModel.StoryElements.Scenes.First();
+        beat.Guid = _storyModel.StoryElements.Scenes.First().Uuid;
         _viewModel.StructureBeats.Add(beat);
 
         // Act

@@ -350,7 +350,7 @@ public class PluginLoadContextTests
         }
     }
 
-    private AssemblyLoadContext? CreatePluginLoadContextSafe()
+    private AssemblyLoadContext CreatePluginLoadContextSafe()
     {
         try
         {
