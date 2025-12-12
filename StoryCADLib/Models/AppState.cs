@@ -2,6 +2,8 @@
 using System.Reflection;
 using StoryCADLib.Services;
 
+#nullable enable
+
 namespace StoryCADLib.Models;
 
 /// <summary>

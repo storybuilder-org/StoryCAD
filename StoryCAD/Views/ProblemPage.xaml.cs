@@ -1,4 +1,5 @@
-﻿using StoryCADLib.Services;
+﻿using Microsoft.UI.Xaml.Input;
+using StoryCADLib.Services;
 using StoryCADLib.Services.Logging;
 using StoryCADLib.ViewModels.SubViewModels;
 using StoryCADLib.ViewModels.Tools;
@@ -26,6 +27,17 @@ public sealed partial class ProblemPage : Page
     {
         ProblemVm.SelectedBeat = (StructureBeatViewModel)sender.DataContext;
         ProblemVm.SelectedBeatIndex = ProblemVm.StructureBeats.IndexOf(ProblemVm.SelectedBeat);
+    }
+
+    private void ListViewItem_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        var container = sender as FrameworkElement;
+        var clickedItem = container?.DataContext as StructureBeatViewModel;
+        if (clickedItem != null)
+        {
+            ProblemVm.SelectedBeat = clickedItem;
+            ProblemVm.SelectedBeatIndex = ProblemVm.StructureBeats.IndexOf(clickedItem);
+        }
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)

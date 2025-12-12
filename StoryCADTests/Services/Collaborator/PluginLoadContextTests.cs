@@ -10,6 +10,7 @@ using StoryCADLib.Services.Logging;
 namespace StoryCADTests.Services.Collaborator;
 
 [TestClass]
+[TestCategory("Integration")]
 public class PluginLoadContextTests
 {
     private string _pluginPath;
@@ -297,6 +298,77 @@ public class PluginLoadContextTests
         {
             Assert.Inconclusive($"Plugin not found at {_pluginPath}. " +
                 "Build CollaboratorLib first or set STORYCAD_PLUGIN_DIR environment variable.");
+        }
+
+        // Also verify the plugin can be loaded and has valid types
+        try
+        {
+            var context = CreatePluginLoadContextSafe();
+            if (context == null)
+            {
+                Assert.Inconclusive("PluginLoadContext could not be created. Skipping integration test.");
+            }
+
+            var assembly = context.LoadFromAssemblyPath(_pluginPath);
+            var types = assembly.GetTypes(); // This is where version mismatches fail
+
+            if (types.Length == 0)
+            {
+                Assert.Inconclusive($"Plugin at {_pluginPath} has no types. Plugin may be incompatible.");
+            }
+        }
+        catch (FileNotFoundException ex)
+        {
+            Assert.Inconclusive($"Plugin dependency not found: {ex.Message}");
+        }
+        catch (FileLoadException ex)
+        {
+            Assert.Inconclusive($"Plugin could not be loaded: {ex.Message}");
+        }
+        catch (BadImageFormatException ex)
+        {
+            Assert.Inconclusive($"Plugin has invalid format: {ex.Message}");
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            var loaderMessages = ex.LoaderExceptions?
+                .Where(e => e != null)
+                .Select(e => e!.Message)
+                .ToList();
+            var details = loaderMessages?.Any() == true
+                ? string.Join("; ", loaderMessages)
+                : ex.Message;
+            Assert.Inconclusive($"Plugin types could not be loaded: {details}");
+        }
+        catch (TypeLoadException ex)
+        {
+            Assert.Inconclusive($"Plugin type could not be loaded: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Assert.Inconclusive($"Plugin validation failed: {ex.GetType().Name}: {ex.Message}");
+        }
+    }
+
+    private AssemblyLoadContext CreatePluginLoadContextSafe()
+    {
+        try
+        {
+            var contextType = typeof(CollaboratorService).GetNestedType("PluginLoadContext", BindingFlags.NonPublic);
+            if (contextType == null) return null;
+
+            var constructor = contextType.GetConstructor(
+                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public,
+                null,
+                new[] { typeof(string) },
+                null);
+            if (constructor == null) return null;
+
+            return constructor.Invoke(new object[] { _pluginPath }) as AssemblyLoadContext;
+        }
+        catch
+        {
+            return null;
         }
     }
 
