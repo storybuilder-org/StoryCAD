@@ -73,6 +73,11 @@ If you would like to join the StoryCAD community and help improve the software, 
 StoryCAD uses the [GNU GPLv3][20] license.
 See the [LICENSE.TXT][23] file in this directory. 
 
+Additional Permissions For Submission to Apple App Store: Provided that you are otherwise in compliance with the GPLv3 for each covered work you convey
+(including without limitation making the Corresponding Source available in compliance with Section 6 of the GPLv3), StoryBuilder Foundation also grants
+you the additional permission to convey through the Apple App Store non-source executable versions of the Program as incorporated into each applicable covered
+work as Executable Versions only under the Mozilla Public License version 2.0 (https://www.mozilla.org/en-US/MPL/2.0/).
+
 ## Privacy Policy
 
 Our privacy policy is [here][22].
