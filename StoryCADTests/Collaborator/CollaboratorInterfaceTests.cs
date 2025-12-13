@@ -31,9 +31,9 @@ public class CollaboratorInterfaceTests
     /// </summary>
     private class MockCollaborator : ICollaborator
     {
-        public Window Open(IStoryCADAPI api, StoryModel model)
+        public Task<Window> OpenAsync(IStoryCADAPI api, StoryModel model, Window hostWindow, Frame hostFrame)
         {
-            return null;
+            return Task.FromResult<Window>(null);
         }
 
         public CollaboratorResult Close()
