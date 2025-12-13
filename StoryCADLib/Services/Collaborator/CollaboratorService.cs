@@ -3,6 +3,8 @@ using System.Runtime.Loader;
 using Windows.ApplicationModel.AppExtensions;
 using Windows.ApplicationModel.Resources.Core;
 using Windows.Storage;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Markup;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator.Contracts;
@@ -22,10 +24,6 @@ public class CollaboratorService
     private ICollaborator _collaboratorInterface; // Interface-based reference
     private Assembly CollabAssembly;
     private AssemblyLoadContext _pluginLoadContext; // Custom load context for plugin dependencies
-#pragma warning disable CS0169 // Field is used in platform-specific code
-    private object collaborator;
-    private Type collaboratorType;
-#pragma warning restore CS0169
     public Window CollaboratorWindow; // The secondary window for Collaborator
 #pragma warning disable CS0169, CS0414 // CS0169: unused on macOS, CS0414: assigned but unused on Windows - tracked for Issue #1126
     private bool dllExists;     // Used in Windows-only FindDll() method
@@ -56,7 +54,7 @@ public class CollaboratorService
     ///     Opens the Collaborator window with the current story context.
     ///     Collaborator handles all workflow operations internally.
     /// </summary>
-    public void OpenCollaborator()
+    public async void OpenCollaborator()
     {
         if (_collaboratorInterface == null)
         {
@@ -81,7 +79,21 @@ public class CollaboratorService
 
             try
             {
-                CollaboratorWindow = _collaboratorInterface.Open(api, storyModel);
+                // Host supplies the root frame for navigation
+                var hostRoot = new StoryCADLib.Collaborator.Views.CollaboratorHostRoot();
+                var hostFrame = hostRoot.RootFrameControl;
+                if (hostFrame == null)
+                {
+                    _logService.Log(LogLevel.Error, "Collaborator host frame not found");
+                    return;
+                }
+
+                // Create the window on the host side
+                CollaboratorWindow = new Window { Content = hostRoot, Title = "Story Collaborator" };
+                CollaboratorWindow.Activate();
+
+                // Let the plugin drive the provided frame
+                await _collaboratorInterface.OpenAsync(api, storyModel, CollaboratorWindow, hostFrame);
             }
             catch (Exception ex)
             {
@@ -92,7 +104,7 @@ public class CollaboratorService
             if (CollaboratorWindow != null)
             {
                 CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
-                CollaboratorWindow.Activate();
+                // Window is already activated in WindowManager.CreateWindowAsync
                 _logService.Log(LogLevel.Info, "Collaborator window opened");
             }
             else
@@ -112,29 +124,10 @@ public class CollaboratorService
     /// </summary>
     public void ConnectCollaborator()
     {
-        // Use custom load context to resolve plugin dependencies
+        // Use custom load context to resolve plugin dependencies when an explicit path is provided
         _pluginLoadContext = new PluginLoadContext(dllPath);
         CollabAssembly = _pluginLoadContext.LoadFromAssemblyPath(dllPath);
         _logService.Log(LogLevel.Info, "Loaded CollaboratorLib.dll with custom load context");
-
-        //debugging
-        Type[] collaboratorTypes;
-        try
-        {
-            collaboratorTypes = CollabAssembly.GetTypes();
-        }
-        catch (ReflectionTypeLoadException ex)
-        {
-            // Log each loader exception
-            foreach (var loaderEx in ex.LoaderExceptions)
-            {
-                if (loaderEx != null)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Loader Exception: {loaderEx.Message}");
-                }
-            }
-            throw;
-        }
 
         // Get the type of the Collaborator class
         var collaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
@@ -147,7 +140,6 @@ public class CollaboratorService
         // Create an instance of the Collaborator class using parameterless constructor
         _logService.Log(LogLevel.Info, "Creating Collaborator instance.");
 
-        // Find the parameterless constructor
         var constructor = collaboratorType.GetConstructor(Type.EmptyTypes);
         if (constructor == null)
         {
@@ -193,12 +185,11 @@ public class CollaboratorService
         }
 
         // Allow loading if:
-        // 1. Developer build AND plugin found
-        // 2. OR if STORYCAD_PLUGIN_DIR is set (for JIT debugging without F5)
+        // 1. Developer build (bundled CollaboratorLib) or
+        // 2. STORYCAD_PLUGIN_DIR is set (for JIT debugging without F5)
         var hasPluginDir = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(EnvPluginDirVar));
 
-        return (_appState.DeveloperBuild || hasPluginDir)
-               && await FindDll();
+        return hasPluginDir && await FindDll();
     }
 
     /// <summary>

@@ -1,0 +1,48 @@
+<Page
+    x:Class="StoryCADLib.Collaborator.Views.ElementPicker"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <StackPanel>
+
+        <!-- ElementType Picker -->
+        <ComboBox SelectedItem="{x:Bind PickerVM.SelectedType, Mode=TwoWay}"
+                  Name="TypeBox"
+                  PlaceholderText="Click here to select an element type" HorizontalAlignment="Center"
+                  MinWidth="200" SelectionChanged="Selector_OnSelectionChanged">
+            <ComboBoxItem Content="Problem" />
+            <ComboBoxItem Content="Character" />
+            <ComboBoxItem Content="Setting" />
+            <ComboBoxItem Content="Scene" />
+        </ComboBox>
+
+        <!-- Element Picker -->
+        <ScrollViewer Height="450">
+            <ListView Name="ElementBox" IsEnabled="False" HorizontalAlignment="Center"
+                      SelectedItem="{x:Bind PickerVM.SelectedElement, Mode=TwoWay}"
+                      DisplayMemberPath="Name" Margin="0,10,0,0"
+                      MinWidth="200" SelectionMode="Single" />
+        </ScrollViewer>
+
+        <Border Margin="30,10" HorizontalAlignment="Stretch"
+                BorderBrush="Gray" BorderThickness="1" />
+
+        <!-- Create new element UI -->
+        <Button HorizontalAlignment="Center" Content="+ Create a new element"
+                Name="NewButton" IsEnabled="False">
+            <Button.Flyout>
+                <Flyout>
+                    <StackPanel>
+                        <TextBox Header="Element name:" Width="200"
+                                 Text="{x:Bind PickerVM.NewNodeName, Mode=TwoWay}" />
+                        <Button Content="Create" HorizontalAlignment="Center"
+                                Margin="0,20,0,0" Click="{x:Bind PickerVM.CreateNode}" />
+                    </StackPanel>
+                </Flyout>
+            </Button.Flyout>
+        </Button>
+    </StackPanel>
+</Page>
