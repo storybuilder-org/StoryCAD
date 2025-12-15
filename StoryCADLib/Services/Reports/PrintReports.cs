@@ -20,10 +20,11 @@ public class PrintReports
 
     #region Constructor
 
-    public PrintReports(PrintReportDialogVM vm, AppState appState)
+    public PrintReports(PrintReportDialogVM vm, AppState appState, ILogService logger)
     {
         _vm = vm;
         _appState = appState;
+        _logger = logger;
         _model = appState.CurrentDocument!.Model;
         _formatter = new ReportFormatter(appState);
     }

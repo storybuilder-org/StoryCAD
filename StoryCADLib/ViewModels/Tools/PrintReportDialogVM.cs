@@ -255,7 +255,7 @@ public partial class PrintReportDialogVM : ObservableRecipient
 
     private async Task<IReadOnlyList<IReadOnlyList<string>>> BuildReportPagesAsync(int? linesPerPageOverride = null)
     {
-        var report = await new PrintReports(this, _appState).Generate();
+        var report = await new PrintReports(this, _appState, _logService).Generate();
         return BuildReportPages(report, linesPerPageOverride);
     }
 
@@ -415,7 +415,7 @@ public partial class PrintReportDialogVM : ObservableRecipient
                 document.Close();
             }
 
-            await FileIO.WriteBytesAsync(exportFile, memoryStream.ToArray());
+            await File.WriteAllBytesAsync(exportFile.Path, memoryStream.ToArray());
             Messenger.Send(new StatusChangedMessage(new StatusMessage($"Reports exported to PDF: {exportFile.Path}",
                 LogLevel.Info)));
         }
