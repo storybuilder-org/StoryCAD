@@ -522,7 +522,7 @@
                   "Witty",
                   "Yes-man"
               ],
-    "Country":  [
+    "Nationality":  [
                     "Afghanistan",
                     "Albania",
                     "Algeria",
@@ -886,7 +886,7 @@
                    "Vengeance (DARK)",
                    "Winning a competition"
                ],
-    "HairColor":  [
+    "Hair":  [
                       "Ash Blond",
                       "Auburn",
                       "Black",
@@ -1879,7 +1879,7 @@
                        "Silent",
                        "Talkative"
                    ],
-    "Aggressiveness":  [
+    "Aggression":  [
                            "Aggressive",
                            "Assaultive",
                            "Combative",
@@ -1940,7 +1940,7 @@
                     "Triumph",
                     "Wonderment"
                 ],
-    "Value":  [
+    "Values":  [
                   "Knowledge/Learning/Curiousity",
                   "Respect for Others",
                   "Courage",
@@ -2272,7 +2272,7 @@
                     "Villain is successful",
                     "Arguments, threats, or force succeeds"
                 ],
-    "Creativeness":  [
+    "Creativity":  [
                          "AbsentMinded",
                          "Artistic",
                          "Conventional",
@@ -2320,7 +2320,7 @@
                   "We often dispise what\u0027s most useful to us.",
                   "You can always share the labor, but not the spoil."
               ],
-    "MentalIllness":  [
+    "Abnormality":  [
                           "Anxiety neurotic",
                           "Depressive",
                           "Manic",
@@ -2524,7 +2524,7 @@
                       "Suspense scene",
                       "Twister scene"
                   ],
-    "Adventurous":  [
+    "Adventureousness":  [
                         "Active",
                         "Adventurous",
                         "Embittered",
@@ -2559,7 +2559,7 @@
                       "Questioner",
                       "Romantic"
                   ],
-    "EyeColor":  [
+    "Eyes":  [
                      "Blue",
                      "Brown",
                      "Green",
