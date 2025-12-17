@@ -90,21 +90,27 @@ jobs:
       - name: Install Uno macOS workload
         if: matrix.os == 'macos-latest'
         run: dotnet workload install macos
-
+        
       - name: Generate version
         id: version
         shell: pwsh
         run: |
-          if ("${{ github.event.inputs.version }}" -ne "") {
+        if ("${{ github.event.inputs.version }}" -ne "") {
+          if ("${{ github.event.inputs.skip_release }}" -eq "false") {
+            # Release mode: use version verbatim
+            $v = "${{ github.event.inputs.version }}".TrimStart('v')
+          } else {
+            # Draft mode: use major.minor.run_number.65534
             $parts = "${{ github.event.inputs.version }}".TrimStart('v').Split('.')
             $v = "$($parts[0]).$($parts[1]).${{ github.run_number }}.65534"
-          } else {
-            $v = "1.0.${{ github.run_number }}.65534"
           }
-          "version=$v"       >> $env:GITHUB_OUTPUT
-          "tag_version=v$v"  >> $env:GITHUB_OUTPUT
-          Write-Host "Generated version: $v"
-
+        } else {
+          $v = "1.0.${{ github.run_number }}.65534"
+        }
+        "version=$v"       >> $env:GITHUB_OUTPUT
+        "tag_version=v$v"  >> $env:GITHUB_OUTPUT
+        Write-Host "Generated version: $v"
+          
       - name: Restore
         run: dotnet restore StoryCAD.sln
 
