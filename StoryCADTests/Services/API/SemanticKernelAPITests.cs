@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels;
 
 #nullable disable
 
@@ -11,7 +12,7 @@ namespace StoryCADTests.Services.API;
 [TestClass]
 public class SemanticKernelApiTests
 {
-    private readonly SemanticKernelApi _api = new(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
+    private readonly SemanticKernelApi _api = new(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
 
     [TestMethod]
     public async Task CreateOutlineWithInvalidTemplate()
@@ -315,7 +316,7 @@ public class SemanticKernelApiTests
         Assert.IsTrue(writeResult.IsSuccess, "WriteOutline should succeed.");
 
         // Act: Create a new API instance and open the written file.
-        var newApi = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
+        var newApi = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
         var openResult = await newApi.OpenOutline(filePath);
 
         // Assert
@@ -415,7 +416,7 @@ public class SemanticKernelApiTests
     public async Task SetCurrentModel_WithValidModel_SetsCurrentModel()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
 
         // Create a test model
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
@@ -447,7 +448,7 @@ public class SemanticKernelApiTests
     public void SetCurrentModel_WithNullModel_SetsCurrentModelToNull()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
 
         // Act
         api.SetCurrentModel(null);
@@ -463,7 +464,7 @@ public class SemanticKernelApiTests
     public async Task SetCurrentModel_AllowsOperationsOnNewModel()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
 
         // Create first model
         var firstResult = await api.CreateEmptyOutline("First Story", "Author 1", "0");
@@ -557,7 +558,7 @@ public class SemanticKernelApiTests
     public void DeleteStoryElement_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
 
         // Act
         var result = api.DeleteStoryElement(Guid.NewGuid().ToString());
@@ -598,7 +599,7 @@ public class SemanticKernelApiTests
     public async Task DeleteElement_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
 
         // Act
         var result = await api.DeleteElement(Guid.NewGuid());
@@ -662,7 +663,7 @@ public class SemanticKernelApiTests
     public async Task RestoreFromTrash_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
 
         // Act
         var result = await api.RestoreFromTrash(Guid.NewGuid());
@@ -729,7 +730,7 @@ public class SemanticKernelApiTests
     public async Task EmptyTrash_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
 
         // Act
         var result = await api.EmptyTrash();
@@ -774,7 +775,7 @@ public class SemanticKernelApiTests
     public void GetStoryElement_WithNoCurrentModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
         var someGuid = Guid.NewGuid();
 
         // Act
@@ -833,7 +834,7 @@ public class SemanticKernelApiTests
     public void SearchForText_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
 
         // Act
         var result = api.SearchForText("test");
@@ -935,7 +936,7 @@ public class SemanticKernelApiTests
     public void SearchForReferences_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
 
         // Act
         var result = api.SearchForReferences(Guid.NewGuid());
@@ -1022,7 +1023,7 @@ public class SemanticKernelApiTests
     public void RemoveReferences_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
 
         // Act
         var result = api.RemoveReferences(Guid.NewGuid());
@@ -1113,7 +1114,7 @@ public class SemanticKernelApiTests
     public void SearchInSubtree_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
 
         // Act
         var result = api.SearchInSubtree(Guid.NewGuid(), "test");
@@ -1273,6 +1274,122 @@ public class SemanticKernelApiTests
         Assert.IsFalse(result.IsSuccess, "GetExamples should fail for invalid property");
         Assert.IsNull(result.Payload, "Payload should be null on failure");
         Assert.AreEqual($"No list found for property '{propertyName}'", result.ErrorMessage);
+    }
+
+    #endregion
+
+    #region Conflicts API Tests (Issue #1223)
+
+    /// <summary>
+    /// Tests that GetConflictCategories returns all categories
+    /// </summary>
+    [TestMethod]
+    public void GetConflictCategories_WhenCalled_ReturnsAllCategories()
+    {
+        // Act
+        var result = _api.GetConflictCategories();
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetConflictCategories should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        var categories = result.Payload.ToList();
+        Assert.IsTrue(categories.Count >= 8, "Should have at least 8 conflict categories");
+        // Verify some known categories exist
+        Assert.IsTrue(categories.Contains("Relationship"), "Should contain Relationship category");
+        Assert.IsTrue(categories.Contains("Criminal activities"), "Should contain Criminal activities category");
+    }
+
+    /// <summary>
+    /// Tests that GetConflictSubcategories returns subcategories for a valid category
+    /// </summary>
+    [TestMethod]
+    public void GetConflictSubcategories_ValidCategory_ReturnsSubcategories()
+    {
+        // Arrange
+        var category = "Relationship";
+
+        // Act
+        var result = _api.GetConflictSubcategories(category);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetConflictSubcategories should succeed for valid category");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.IsTrue(result.Payload.Any(), "Should return at least one subcategory");
+    }
+
+    /// <summary>
+    /// Tests that GetConflictSubcategories returns failure for invalid category
+    /// </summary>
+    [TestMethod]
+    public void GetConflictSubcategories_InvalidCategory_ReturnsFailure()
+    {
+        // Arrange
+        var category = "NonExistentCategory";
+
+        // Act
+        var result = _api.GetConflictSubcategories(category);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetConflictSubcategories should fail for invalid category");
+        Assert.IsNull(result.Payload, "Payload should be null on failure");
+        Assert.AreEqual($"No conflict category '{category}' found", result.ErrorMessage);
+    }
+
+    /// <summary>
+    /// Tests that GetConflictExamples returns examples for valid inputs
+    /// </summary>
+    [TestMethod]
+    public void GetConflictExamples_ValidInputs_ReturnsExamples()
+    {
+        // Arrange - first get a valid subcategory
+        var category = "Relationship";
+        var subcatResult = _api.GetConflictSubcategories(category);
+        Assert.IsTrue(subcatResult.IsSuccess, "Need valid subcategory for test");
+        var subcategory = subcatResult.Payload.First();
+
+        // Act
+        var result = _api.GetConflictExamples(category, subcategory);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetConflictExamples should succeed for valid inputs");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.IsTrue(result.Payload.Any(), "Should return at least one example");
+    }
+
+    /// <summary>
+    /// Tests that GetConflictExamples returns failure for invalid category
+    /// </summary>
+    [TestMethod]
+    public void GetConflictExamples_InvalidCategory_ReturnsFailure()
+    {
+        // Arrange
+        var category = "NonExistentCategory";
+        var subcategory = "SomeSubcategory";
+
+        // Act
+        var result = _api.GetConflictExamples(category, subcategory);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetConflictExamples should fail for invalid category");
+        Assert.AreEqual($"No conflict category '{category}' found", result.ErrorMessage);
+    }
+
+    /// <summary>
+    /// Tests that GetConflictExamples returns failure for invalid subcategory
+    /// </summary>
+    [TestMethod]
+    public void GetConflictExamples_InvalidSubcategory_ReturnsFailure()
+    {
+        // Arrange
+        var category = "Relationship";
+        var subcategory = "NonExistentSubcategory";
+
+        // Act
+        var result = _api.GetConflictExamples(category, subcategory);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetConflictExamples should fail for invalid subcategory");
+        Assert.AreEqual($"No subcategory '{subcategory}' in category '{category}'", result.ErrorMessage);
     }
 
     #endregion

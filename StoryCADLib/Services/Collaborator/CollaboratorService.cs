@@ -75,9 +75,10 @@ public class CollaboratorService
         // Create the API instance for Collaborator to use
         var outlineService = Ioc.Default.GetService<OutlineService>();
         var listData = Ioc.Default.GetService<ListData>();
-        if (outlineService != null && listData != null)
+        var controlData = Ioc.Default.GetService<ControlData>();
+        if (outlineService != null && listData != null && controlData != null)
         {
-            var api = new SemanticKernelApi(outlineService, listData);
+            var api = new SemanticKernelApi(outlineService, listData, controlData);
             api.SetCurrentModel(storyModel);
 
             try

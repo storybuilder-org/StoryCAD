@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Microsoft.SemanticKernel;
 using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels;
 
 namespace StoryCADLib.Services.API;
 
@@ -20,7 +21,7 @@ namespace StoryCADLib.Services.API;
 ///     - Calling Standard: All public API methods return OperationResult<T> to ensure safe external consumption.
 ///         No exceptions are thrown to external callers; all errors are communicated through the OperationResult
 ///         pattern with IsSuccess flags and descriptive ErrorMessage strings.
-public class SemanticKernelApi(OutlineService outlineService, ListData listData) : IStoryCADAPI
+public class SemanticKernelApi(OutlineService outlineService, ListData listData, ControlData controlData) : IStoryCADAPI
 {
     public StoryModel CurrentModel { get; set; }
 
@@ -986,6 +987,51 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData)
             return OperationResult<IEnumerable<string>>.Success(list);
 
         return OperationResult<IEnumerable<string>>.Failure($"No list found for property '{propertyName}'");
+    }
+
+    /// <summary>
+    /// Gets all conflict categories from Controls.json
+    /// </summary>
+    /// <returns>Result containing the list of conflict categories</returns>
+    [KernelFunction]
+    [Description("Gets all available conflict categories for character development")]
+    public OperationResult<IEnumerable<string>> GetConflictCategories()
+    {
+        return OperationResult<IEnumerable<string>>.Success(controlData.ConflictTypes.Keys);
+    }
+
+    /// <summary>
+    /// Gets subcategories for a conflict category
+    /// </summary>
+    /// <param name="category">The conflict category name</param>
+    /// <returns>Result containing the list of subcategories, or error if category not found</returns>
+    [KernelFunction]
+    [Description("Gets subcategories for a specific conflict category")]
+    public OperationResult<IEnumerable<string>> GetConflictSubcategories(string category)
+    {
+        if (controlData.ConflictTypes.TryGetValue(category, out var model))
+            return OperationResult<IEnumerable<string>>.Success(model.SubCategories);
+
+        return OperationResult<IEnumerable<string>>.Failure($"No conflict category '{category}' found");
+    }
+
+    /// <summary>
+    /// Gets examples for a conflict category and subcategory
+    /// </summary>
+    /// <param name="category">The conflict category name</param>
+    /// <param name="subcategory">The subcategory name within the category</param>
+    /// <returns>Result containing the list of examples, or error if not found</returns>
+    [KernelFunction]
+    [Description("Gets example conflicts for a specific category and subcategory")]
+    public OperationResult<IEnumerable<string>> GetConflictExamples(string category, string subcategory)
+    {
+        if (!controlData.ConflictTypes.TryGetValue(category, out var model))
+            return OperationResult<IEnumerable<string>>.Failure($"No conflict category '{category}' found");
+
+        if (!model.Examples.TryGetValue(subcategory, out var examples))
+            return OperationResult<IEnumerable<string>>.Failure($"No subcategory '{subcategory}' in category '{category}'");
+
+        return OperationResult<IEnumerable<string>>.Success(examples);
     }
 
     #endregion

@@ -76,5 +76,26 @@ public interface IStoryCADAPI
     /// <returns>Result containing the list values, or error if key not found</returns>
     OperationResult<IEnumerable<string>> GetExamples(string propertyName);
 
+    /// <summary>
+    /// Gets all conflict categories from Controls.json
+    /// </summary>
+    /// <returns>Result containing the list of conflict categories</returns>
+    OperationResult<IEnumerable<string>> GetConflictCategories();
+
+    /// <summary>
+    /// Gets subcategories for a conflict category
+    /// </summary>
+    /// <param name="category">The conflict category name</param>
+    /// <returns>Result containing the list of subcategories, or error if category not found</returns>
+    OperationResult<IEnumerable<string>> GetConflictSubcategories(string category);
+
+    /// <summary>
+    /// Gets examples for a conflict category and subcategory
+    /// </summary>
+    /// <param name="category">The conflict category name</param>
+    /// <param name="subcategory">The subcategory name within the category</param>
+    /// <returns>Result containing the list of examples, or error if not found</returns>
+    OperationResult<IEnumerable<string>> GetConflictExamples(string category, string subcategory);
+
     #endregion
 }
