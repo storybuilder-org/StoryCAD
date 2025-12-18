@@ -42,7 +42,7 @@
             Toolkit;
         </UnoFeatures>
 
-        <Platforms>AnyCPU;x64</Platforms>
+        <Platforms>x64;arm64;x86</Platforms>
     </PropertyGroup>
 
     <!-- App Icon Configuration -->
