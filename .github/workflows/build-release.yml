@@ -193,7 +193,8 @@ jobs:
             '/p:AppxBundle=Never',
             "/p:PackageCertificateKeyFile=$pfx",
             "/p:AppxPackageDir=${{ github.workspace }}\StoryCAD\Packages\",
-            '/p:GenerateAppxPackageOnBuild=true'
+            '/p:GenerateAppxPackageOnBuild=true',
+            '/p:PublishReadyToRun=false'
           )
           if ("${{ secrets.PFX_PASSWORD }}".Length -gt 0) {
             $msbuildArgs += "/p:PackageCertificatePassword=${{ secrets.PFX_PASSWORD }}"
