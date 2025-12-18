@@ -10,8 +10,6 @@
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
         <ApplicationVersion>1</ApplicationVersion>
-        <!-- Package Publisher -->
-        <ApplicationPublisher>STORYBUILDER ORG</ApplicationPublisher>
         <!-- Package Description -->
         <Description>StoryCAD powered by Uno Platform.</Description>
     </PropertyGroup>
