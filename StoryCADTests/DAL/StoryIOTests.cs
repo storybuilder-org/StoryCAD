@@ -277,7 +277,7 @@ public partial class StoryIOTests
     public async Task DetectLegacyDualRoot_WithTrashCanAsSecondRoot_ReturnsTrue()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
         // All templates create the legacy dual-root structure automatically
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
@@ -302,7 +302,7 @@ public partial class StoryIOTests
     public async Task MigrateLegacyDualRoot_MovesTrashCanChildrenToTrashView()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
 
@@ -358,7 +358,7 @@ public partial class StoryIOTests
     public async Task MigrateLegacyDualRoot_PreservesHierarchyInTrashView()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
         Assert.IsTrue(createResult.IsSuccess);
 

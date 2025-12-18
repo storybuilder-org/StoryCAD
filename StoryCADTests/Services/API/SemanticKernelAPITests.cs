@@ -11,7 +11,7 @@ namespace StoryCADTests.Services.API;
 [TestClass]
 public class SemanticKernelApiTests
 {
-    private readonly SemanticKernelApi _api = new(Ioc.Default.GetRequiredService<OutlineService>());
+    private readonly SemanticKernelApi _api = new(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
 
     [TestMethod]
     public async Task CreateOutlineWithInvalidTemplate()
@@ -315,7 +315,7 @@ public class SemanticKernelApiTests
         Assert.IsTrue(writeResult.IsSuccess, "WriteOutline should succeed.");
 
         // Act: Create a new API instance and open the written file.
-        var newApi = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var newApi = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
         var openResult = await newApi.OpenOutline(filePath);
 
         // Assert
@@ -415,7 +415,7 @@ public class SemanticKernelApiTests
     public async Task SetCurrentModel_WithValidModel_SetsCurrentModel()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
 
         // Create a test model
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
@@ -447,7 +447,7 @@ public class SemanticKernelApiTests
     public void SetCurrentModel_WithNullModel_SetsCurrentModelToNull()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
 
         // Act
         api.SetCurrentModel(null);
@@ -463,7 +463,7 @@ public class SemanticKernelApiTests
     public async Task SetCurrentModel_AllowsOperationsOnNewModel()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
 
         // Create first model
         var firstResult = await api.CreateEmptyOutline("First Story", "Author 1", "0");
@@ -557,7 +557,7 @@ public class SemanticKernelApiTests
     public void DeleteStoryElement_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
 
         // Act
         var result = api.DeleteStoryElement(Guid.NewGuid().ToString());
@@ -598,7 +598,7 @@ public class SemanticKernelApiTests
     public async Task DeleteElement_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
 
         // Act
         var result = await api.DeleteElement(Guid.NewGuid());
@@ -662,7 +662,7 @@ public class SemanticKernelApiTests
     public async Task RestoreFromTrash_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
 
         // Act
         var result = await api.RestoreFromTrash(Guid.NewGuid());
@@ -729,7 +729,7 @@ public class SemanticKernelApiTests
     public async Task EmptyTrash_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
 
         // Act
         var result = await api.EmptyTrash();
@@ -774,7 +774,7 @@ public class SemanticKernelApiTests
     public void GetStoryElement_WithNoCurrentModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
         var someGuid = Guid.NewGuid();
 
         // Act
@@ -833,7 +833,7 @@ public class SemanticKernelApiTests
     public void SearchForText_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
 
         // Act
         var result = api.SearchForText("test");
@@ -935,7 +935,7 @@ public class SemanticKernelApiTests
     public void SearchForReferences_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
 
         // Act
         var result = api.SearchForReferences(Guid.NewGuid());
@@ -1022,7 +1022,7 @@ public class SemanticKernelApiTests
     public void RemoveReferences_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
 
         // Act
         var result = api.RemoveReferences(Guid.NewGuid());
@@ -1113,7 +1113,7 @@ public class SemanticKernelApiTests
     public void SearchInSubtree_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>());
 
         // Act
         var result = api.SearchInSubtree(Guid.NewGuid(), "test");
@@ -1229,6 +1229,50 @@ public class SemanticKernelApiTests
         Assert.IsTrue(names.Contains("Hero Character"), "Should find Hero Character inside folder");
         Assert.IsTrue(names.Contains("Sidekick"), "Should find Sidekick (has 'hero' in notes)");
         Assert.IsFalse(names.Contains("Another Hero"), "Should NOT find Another Hero (outside folder)");
+    }
+
+    #endregion
+
+    #region GetExamples Tests (Lists API - Issue #1223)
+
+    /// <summary>
+    /// Tests that GetExamples returns list values for a valid property name
+    /// </summary>
+    [TestMethod]
+    public void GetExamples_ValidProperty_ReturnsListValues()
+    {
+        // Arrange
+        var propertyName = "Tone"; // Known list key from Lists.json
+
+        // Act
+        var result = _api.GetExamples(propertyName);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetExamples should succeed for valid property");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.IsTrue(result.Payload.Any(), "Should return at least one value");
+        // Verify some known tone values exist
+        var values = result.Payload.ToList();
+        Assert.IsTrue(values.Contains("Angry") || values.Contains("Calm") || values.Contains("Cheerful"),
+            "Should contain expected tone values");
+    }
+
+    /// <summary>
+    /// Tests that GetExamples returns failure for an invalid property name
+    /// </summary>
+    [TestMethod]
+    public void GetExamples_InvalidProperty_ReturnsFailure()
+    {
+        // Arrange
+        var propertyName = "NonExistentProperty";
+
+        // Act
+        var result = _api.GetExamples(propertyName);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetExamples should fail for invalid property");
+        Assert.IsNull(result.Payload, "Payload should be null on failure");
+        Assert.AreEqual($"No list found for property '{propertyName}'", result.ErrorMessage);
     }
 
     #endregion

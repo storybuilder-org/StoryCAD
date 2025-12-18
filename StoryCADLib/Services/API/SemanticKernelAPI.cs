@@ -20,7 +20,7 @@ namespace StoryCADLib.Services.API;
 ///     - Calling Standard: All public API methods return OperationResult<T> to ensure safe external consumption.
 ///         No exceptions are thrown to external callers; all errors are communicated through the OperationResult
 ///         pattern with IsSuccess flags and descriptive ErrorMessage strings.
-public class SemanticKernelApi(OutlineService outlineService) : IStoryCADAPI
+public class SemanticKernelApi(OutlineService outlineService, ListData listData) : IStoryCADAPI
 {
     public StoryModel CurrentModel { get; set; }
 
@@ -970,4 +970,23 @@ public class SemanticKernelApi(OutlineService outlineService) : IStoryCADAPI
             return Task.FromResult(OperationResult<bool>.Failure($"Error in EmptyTrash: {ex.Message}"));
         }
     }
+
+    #region Resource API (Issue #1223)
+
+    /// <summary>
+    /// Gets examples for a property from Lists.json
+    /// </summary>
+    /// <param name="propertyName">Property name matching a list key</param>
+    /// <returns>Result containing the list values, or error if key not found</returns>
+    [KernelFunction]
+    [Description("Gets valid example values for a story element property from Lists.json")]
+    public OperationResult<IEnumerable<string>> GetExamples(string propertyName)
+    {
+        if (listData.ListControlSource.TryGetValue(propertyName, out var list))
+            return OperationResult<IEnumerable<string>>.Success(list);
+
+        return OperationResult<IEnumerable<string>>.Failure($"No list found for property '{propertyName}'");
+    }
+
+    #endregion
 }

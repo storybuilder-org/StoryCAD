@@ -66,4 +66,15 @@ public interface IStoryCADAPI
     /// <param name="guid">The GUID of the element</param>
     /// <returns>OperationResult containing the story element if found, or error message if not</returns>
     OperationResult<StoryElement> GetStoryElement(Guid guid);
+
+    #region Resource API (Issue #1223)
+
+    /// <summary>
+    /// Gets examples for a property from Lists.json
+    /// </summary>
+    /// <param name="propertyName">Property name matching a list key</param>
+    /// <returns>Result containing the list values, or error if key not found</returns>
+    OperationResult<IEnumerable<string>> GetExamples(string propertyName);
+
+    #endregion
 }
