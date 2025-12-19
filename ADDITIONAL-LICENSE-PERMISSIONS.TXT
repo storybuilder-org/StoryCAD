@@ -1,0 +1,60 @@
+StoryCAD Additional Permissions v1.0
+(Additional permissions under GNU GPL version 3, section 7)
+
+This document grants additional permissions that supplement the GNU GPLv3
+for the following software (the “Program”):
+- StoryCAD
+- StoryCADLib
+
+1) Proprietary “Collaborator” module linking permission
+
+As a special exception, you have permission to link, load, or otherwise
+combine the Program with the independent proprietary module known as
+“Collaborator” (the “Collaborator Module”), including when the Collaborator
+Module consumes StoryCADLib (for example via a NuGet package reference), and
+to convey the resulting combined work under terms of your choice for the
+Collaborator Module, provided that all of the following are met:
+
+  a) The Collaborator Module is distributed by, or under a written license
+     from, StoryCAD Foundation.
+
+  b) You comply with the GNU GPLv3 for all portions of the Program included
+     in the combined work. This includes providing Corresponding Source for
+     the Program and preserving all required copyright and license notices.
+
+  c) This exception does not grant any permission to copy, modify, or convey
+     the Collaborator Module except as allowed by the Collaborator Module’s
+     own license.
+
+  d) This exception does not grant permission to combine the Program with
+     any other proprietary module or plug-in.
+
+2) Apple App Store distribution permission for StoryCAD builds
+
+As a special exception, StoryCAD Foundation (and distributors expressly
+authorized in writing by StoryCAD Foundation) have permission to convey
+compiled object-code builds of StoryCAD through the Apple App Store,
+notwithstanding any otherwise-incompatible App Store terms, usage rules, or
+technical restrictions (including code signing requirements), provided that
+all of the following are met:
+
+  a) The complete Corresponding Source for the exact version of StoryCAD
+     distributed via the Apple App Store is made available to the public,
+     at no charge, from a publicly accessible network server that is not
+     subject to App Store terms or device-based usage limits.
+
+  b) The App Store listing (or in-app “About / Licenses” screen) includes a
+     clear notice that StoryCAD is GPLv3-licensed and includes a URL or
+     other clear directions to obtain the Corresponding Source.
+
+  c) You comply with the GNU GPLv3 for the Program in all other respects for
+     that distribution.
+
+3) General
+
+These additional permissions apply only to the extent they are valid under
+applicable law. If you modify the Program, you may extend these additional
+permissions to your version, but you are not obligated to do so.
+
+(For clarity: Under GPLv3 section 7, when conveying a copy of a covered work,
+a distributor may remove additional permissions from that copy.)
