@@ -73,6 +73,18 @@ If you would like to join the StoryCAD community and help improve the software, 
 StoryCAD uses the [GNU GPLv3][20] license.
 See the [LICENSE.TXT][23] file in this directory. 
 
+StoryCAD and StoryCADLib are licensed under the GNU General Public License v3.0
+(see `LICENSE`).
+
+Additional permissions under GPLv3 section 7 are provided in
+`LICENSE-ADDITIONAL-PERMISSIONS.txt`, including:
+- permission to combine the Program with the proprietary “Collaborator” module
+  distributed by StoryCAD Foundation; and
+- permission for StoryCAD Foundation to distribute compiled StoryCAD builds
+  via the Apple App Store under the conditions stated in that file.
+
+The “Collaborator” module is proprietary and licensed separately.
+
 ## Privacy Policy
 
 Our privacy policy is [here][22].
