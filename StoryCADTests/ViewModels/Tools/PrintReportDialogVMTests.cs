@@ -79,6 +79,68 @@ public class PrintReportDialogVMTests
     #region Report Generation Tests
 
     [TestMethod]
+    public void BuildReportPages_WithEmptyContent_ReturnsEmptyReportPage()
+    {
+        // Arrange - This tests the fix for the NullReferenceException crash
+        // when no content is selected for printing
+        var report = "";
+        var linesPerPage = 70;
+
+        // Act - Using reflection since BuildReportPages is private static
+        var method = typeof(PrintReportDialogVM).GetMethod(
+            "BuildReportPages",
+            BindingFlags.NonPublic | BindingFlags.Static);
+        var pages = (IReadOnlyList<IReadOnlyList<string>>)method.Invoke(
+            null,
+            new object[] { report, linesPerPage });
+
+        // Assert
+        Assert.AreEqual(1, pages.Count, "Should return one page for empty report");
+        Assert.AreEqual(1, pages[0].Count, "Page should have one line");
+        Assert.AreEqual("(Empty report)", pages[0][0], "Should show empty report message");
+    }
+
+    [TestMethod]
+    public void BuildReportPages_WithNullContent_ReturnsEmptyReportPage()
+    {
+        // Arrange - Edge case: null report string
+        string report = null;
+        var linesPerPage = 70;
+
+        // Act
+        var method = typeof(PrintReportDialogVM).GetMethod(
+            "BuildReportPages",
+            BindingFlags.NonPublic | BindingFlags.Static);
+        var pages = (IReadOnlyList<IReadOnlyList<string>>)method.Invoke(
+            null,
+            new object[] { report, linesPerPage });
+
+        // Assert
+        Assert.AreEqual(1, pages.Count, "Should return one page for null report");
+        Assert.AreEqual("(Empty report)", pages[0][0], "Should show empty report message");
+    }
+
+    [TestMethod]
+    public void BuildReportPages_WithWhitespaceOnlyContent_ReturnsEmptyReportPage()
+    {
+        // Arrange - Edge case: whitespace-only report
+        var report = "   \n\t\n   ";
+        var linesPerPage = 70;
+
+        // Act
+        var method = typeof(PrintReportDialogVM).GetMethod(
+            "BuildReportPages",
+            BindingFlags.NonPublic | BindingFlags.Static);
+        var pages = (IReadOnlyList<IReadOnlyList<string>>)method.Invoke(
+            null,
+            new object[] { report, linesPerPage });
+
+        // Assert
+        Assert.AreEqual(1, pages.Count, "Should return one page for whitespace-only report");
+        Assert.AreEqual("(Empty report)", pages[0][0], "Should show empty report message");
+    }
+
+    [TestMethod]
     public void BuildReportPages_WithShortContent_CreatesSinglePage()
     {
         // Arrange
