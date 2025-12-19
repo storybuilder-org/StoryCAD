@@ -72,7 +72,7 @@ See [Updating the Manual](https://storybuilder-org.github.io/StoryCAD/docs/For%2
 ## Licensing of Contributions
 
 By submitting a pull request, you agree to license your contribution under
-the GNU GPLv3 AND the additional permissions in `LICENSE-ADDITIONAL-PERMISSIONS.txt`.
+the GNU GPLv3 AND the additional permissions in `ADDITIONAL-LICENSE-PERMISSIONS.TXT`.
 
 [1]:https://github.com/StoryBuilder-org/StoryCAD/issues
 [3]:https://github.com/StoryBuilder-org/StoryCAD/discussions
