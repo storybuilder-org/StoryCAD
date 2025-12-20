@@ -1460,4 +1460,64 @@ public class SemanticKernelApiTests
     }
 
     #endregion
+
+    #region Master Plots API Tests (Issue #1223)
+
+    /// <summary>
+    /// Tests that GetMasterPlotNames returns all master plot names
+    /// </summary>
+    [TestMethod]
+    public void GetMasterPlotNames_WhenCalled_ReturnsPlotNames()
+    {
+        // Act
+        var result = _api.GetMasterPlotNames();
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetMasterPlotNames should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        var names = result.Payload.ToList();
+        Assert.IsTrue(names.Count >= 1, "Should have at least one master plot");
+        // Verify some known master plots exist (from Tobias's 20 Master Plots)
+        Assert.IsTrue(names.Contains("Quest") || names.Contains("Adventure") || names.Contains("Pursuit"),
+            "Should contain known master plot names");
+    }
+
+    /// <summary>
+    /// Tests that GetMasterPlotNotes returns notes for a valid plot name
+    /// </summary>
+    [TestMethod]
+    public void GetMasterPlotNotes_ValidName_ReturnsNotes()
+    {
+        // Arrange - get a valid plot name first
+        var namesResult = _api.GetMasterPlotNames();
+        Assert.IsTrue(namesResult.IsSuccess, "Need valid plot name for test");
+        var plotName = namesResult.Payload.First();
+
+        // Act
+        var result = _api.GetMasterPlotNotes(plotName);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetMasterPlotNotes should succeed for valid name");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+    }
+
+    /// <summary>
+    /// Tests that GetMasterPlotNotes returns failure for invalid plot name
+    /// </summary>
+    [TestMethod]
+    public void GetMasterPlotNotes_InvalidName_ReturnsFailure()
+    {
+        // Arrange
+        var plotName = "NonExistentPlot";
+
+        // Act
+        var result = _api.GetMasterPlotNotes(plotName);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetMasterPlotNotes should fail for invalid name");
+        Assert.IsNull(result.Payload, "Payload should be null on failure");
+        Assert.AreEqual($"No master plot '{plotName}' found", result.ErrorMessage);
+    }
+
+    #endregion
 }

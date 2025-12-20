@@ -110,5 +110,18 @@ public interface IStoryCADAPI
     /// <returns>Result containing tuples of (Topic, Question), or error if element type not found</returns>
     OperationResult<IEnumerable<(string Topic, string Question)>> GetKeyQuestions(string elementType);
 
+    /// <summary>
+    /// Gets all master plot names
+    /// </summary>
+    /// <returns>Result containing the list of master plot names</returns>
+    OperationResult<IEnumerable<string>> GetMasterPlotNames();
+
+    /// <summary>
+    /// Gets notes for a master plot
+    /// </summary>
+    /// <param name="plotName">The master plot name</param>
+    /// <returns>Result containing the plot notes, or error if plot not found</returns>
+    OperationResult<string> GetMasterPlotNotes(string plotName);
+
     #endregion
 }

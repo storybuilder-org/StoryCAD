@@ -1062,5 +1062,33 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
             questions.Select(q => (q.Topic, q.Question)));
     }
 
+    /// <summary>
+    /// Gets all master plot names
+    /// </summary>
+    /// <returns>Result containing the list of master plot names</returns>
+    [KernelFunction]
+    [Description("Gets all available master plot names (e.g., Quest, Revenge, Pursuit)")]
+    public OperationResult<IEnumerable<string>> GetMasterPlotNames()
+    {
+        return OperationResult<IEnumerable<string>>.Success(
+            toolsData.MasterPlotsSource.Select(p => p.PlotPatternName));
+    }
+
+    /// <summary>
+    /// Gets notes for a master plot
+    /// </summary>
+    /// <param name="plotName">The master plot name</param>
+    /// <returns>Result containing the plot notes, or error if plot not found</returns>
+    [KernelFunction]
+    [Description("Gets the descriptive notes for a specific master plot")]
+    public OperationResult<string> GetMasterPlotNotes(string plotName)
+    {
+        var plot = toolsData.MasterPlotsSource.FirstOrDefault(p => p.PlotPatternName == plotName);
+        if (plot == null)
+            return OperationResult<string>.Failure($"No master plot '{plotName}' found");
+
+        return OperationResult<string>.Success(plot.PlotPatternNotes);
+    }
+
     #endregion
 }
