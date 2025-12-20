@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 using Microsoft.SemanticKernel;
+using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.ViewModels;
@@ -21,7 +22,7 @@ namespace StoryCADLib.Services.API;
 ///     - Calling Standard: All public API methods return OperationResult<T> to ensure safe external consumption.
 ///         No exceptions are thrown to external callers; all errors are communicated through the OperationResult
 ///         pattern with IsSuccess flags and descriptive ErrorMessage strings.
-public class SemanticKernelApi(OutlineService outlineService, ListData listData, ControlData controlData) : IStoryCADAPI
+public class SemanticKernelApi(OutlineService outlineService, ListData listData, ControlData controlData, ToolsData toolsData) : IStoryCADAPI
 {
     public StoryModel CurrentModel { get; set; }
 
@@ -1032,6 +1033,33 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
             return OperationResult<IEnumerable<string>>.Failure($"No subcategory '{subcategory}' in category '{category}'");
 
         return OperationResult<IEnumerable<string>>.Success(examples);
+    }
+
+    /// <summary>
+    /// Gets all element types that have key questions available
+    /// </summary>
+    /// <returns>Result containing the list of element types</returns>
+    [KernelFunction]
+    [Description("Gets all element types that have key questions available (e.g., Character, Problem, Scene)")]
+    public OperationResult<IEnumerable<string>> GetKeyQuestionElements()
+    {
+        return OperationResult<IEnumerable<string>>.Success(toolsData.KeyQuestionsSource.Keys);
+    }
+
+    /// <summary>
+    /// Gets key questions for an element type
+    /// </summary>
+    /// <param name="elementType">The element type (e.g., Character, Problem, Scene)</param>
+    /// <returns>Result containing tuples of (Topic, Question), or error if element type not found</returns>
+    [KernelFunction]
+    [Description("Gets key questions for an element type. Returns tuples where Item1 is the topic (aspect being addressed) and Item2 is the question text.")]
+    public OperationResult<IEnumerable<(string Topic, string Question)>> GetKeyQuestions(string elementType)
+    {
+        if (!toolsData.KeyQuestionsSource.TryGetValue(elementType, out var questions))
+            return OperationResult<IEnumerable<(string Topic, string Question)>>.Failure($"No key questions for element type '{elementType}'");
+
+        return OperationResult<IEnumerable<(string Topic, string Question)>>.Success(
+            questions.Select(q => (q.Topic, q.Question)));
     }
 
     #endregion

@@ -97,5 +97,18 @@ public interface IStoryCADAPI
     /// <returns>Result containing the list of examples, or error if not found</returns>
     OperationResult<IEnumerable<string>> GetConflictExamples(string category, string subcategory);
 
+    /// <summary>
+    /// Gets all element types that have key questions available
+    /// </summary>
+    /// <returns>Result containing the list of element types</returns>
+    OperationResult<IEnumerable<string>> GetKeyQuestionElements();
+
+    /// <summary>
+    /// Gets key questions for an element type
+    /// </summary>
+    /// <param name="elementType">The element type (e.g., Character, Problem, Scene)</param>
+    /// <returns>Result containing tuples of (Topic, Question), or error if element type not found</returns>
+    OperationResult<IEnumerable<(string Topic, string Question)>> GetKeyQuestions(string elementType);
+
     #endregion
 }

@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
+using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.ViewModels;
@@ -12,7 +13,7 @@ namespace StoryCADTests.Services.API;
 [TestClass]
 public class SemanticKernelApiTests
 {
-    private readonly SemanticKernelApi _api = new(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
+    private readonly SemanticKernelApi _api = new(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
     [TestMethod]
     public async Task CreateOutlineWithInvalidTemplate()
@@ -316,7 +317,7 @@ public class SemanticKernelApiTests
         Assert.IsTrue(writeResult.IsSuccess, "WriteOutline should succeed.");
 
         // Act: Create a new API instance and open the written file.
-        var newApi = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
+        var newApi = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
         var openResult = await newApi.OpenOutline(filePath);
 
         // Assert
@@ -416,7 +417,7 @@ public class SemanticKernelApiTests
     public async Task SetCurrentModel_WithValidModel_SetsCurrentModel()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Create a test model
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
@@ -448,7 +449,7 @@ public class SemanticKernelApiTests
     public void SetCurrentModel_WithNullModel_SetsCurrentModelToNull()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         api.SetCurrentModel(null);
@@ -464,7 +465,7 @@ public class SemanticKernelApiTests
     public async Task SetCurrentModel_AllowsOperationsOnNewModel()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Create first model
         var firstResult = await api.CreateEmptyOutline("First Story", "Author 1", "0");
@@ -558,7 +559,7 @@ public class SemanticKernelApiTests
     public void DeleteStoryElement_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = api.DeleteStoryElement(Guid.NewGuid().ToString());
@@ -599,7 +600,7 @@ public class SemanticKernelApiTests
     public async Task DeleteElement_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = await api.DeleteElement(Guid.NewGuid());
@@ -663,7 +664,7 @@ public class SemanticKernelApiTests
     public async Task RestoreFromTrash_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = await api.RestoreFromTrash(Guid.NewGuid());
@@ -730,7 +731,7 @@ public class SemanticKernelApiTests
     public async Task EmptyTrash_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = await api.EmptyTrash();
@@ -775,7 +776,7 @@ public class SemanticKernelApiTests
     public void GetStoryElement_WithNoCurrentModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
         var someGuid = Guid.NewGuid();
 
         // Act
@@ -834,7 +835,7 @@ public class SemanticKernelApiTests
     public void SearchForText_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = api.SearchForText("test");
@@ -936,7 +937,7 @@ public class SemanticKernelApiTests
     public void SearchForReferences_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = api.SearchForReferences(Guid.NewGuid());
@@ -1023,7 +1024,7 @@ public class SemanticKernelApiTests
     public void RemoveReferences_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = api.RemoveReferences(Guid.NewGuid());
@@ -1114,7 +1115,7 @@ public class SemanticKernelApiTests
     public void SearchInSubtree_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = api.SearchInSubtree(Guid.NewGuid(), "test");
@@ -1390,6 +1391,72 @@ public class SemanticKernelApiTests
         // Assert
         Assert.IsFalse(result.IsSuccess, "GetConflictExamples should fail for invalid subcategory");
         Assert.AreEqual($"No subcategory '{subcategory}' in category '{category}'", result.ErrorMessage);
+    }
+
+    #endregion
+
+    #region Key Questions API Tests (Issue #1223)
+
+    /// <summary>
+    /// Tests that GetKeyQuestionElements returns all element types with key questions
+    /// </summary>
+    [TestMethod]
+    public void GetKeyQuestionElements_WhenCalled_ReturnsElementTypes()
+    {
+        // Act
+        var result = _api.GetKeyQuestionElements();
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetKeyQuestionElements should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        var elements = result.Payload.ToList();
+        Assert.IsTrue(elements.Count >= 1, "Should have at least one element type with key questions");
+        // Verify some known element types exist
+        Assert.IsTrue(elements.Contains("Character") || elements.Contains("Problem") || elements.Contains("Scene"),
+            "Should contain common element types");
+    }
+
+    /// <summary>
+    /// Tests that GetKeyQuestions returns questions for a valid element type
+    /// </summary>
+    [TestMethod]
+    public void GetKeyQuestions_ValidElementType_ReturnsQuestions()
+    {
+        // Arrange - get a valid element type first
+        var elementsResult = _api.GetKeyQuestionElements();
+        Assert.IsTrue(elementsResult.IsSuccess, "Need valid element type for test");
+        var elementType = elementsResult.Payload.First();
+
+        // Act
+        var result = _api.GetKeyQuestions(elementType);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetKeyQuestions should succeed for valid element type");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        var questions = result.Payload.ToList();
+        Assert.IsTrue(questions.Count >= 1, "Should have at least one question");
+        // Verify tuple structure
+        var firstQuestion = questions.First();
+        Assert.IsFalse(string.IsNullOrEmpty(firstQuestion.Topic), "Topic should not be empty");
+        Assert.IsFalse(string.IsNullOrEmpty(firstQuestion.Question), "Question should not be empty");
+    }
+
+    /// <summary>
+    /// Tests that GetKeyQuestions returns failure for invalid element type
+    /// </summary>
+    [TestMethod]
+    public void GetKeyQuestions_InvalidElementType_ReturnsFailure()
+    {
+        // Arrange
+        var elementType = "NonExistentElement";
+
+        // Act
+        var result = _api.GetKeyQuestions(elementType);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetKeyQuestions should fail for invalid element type");
+        Assert.IsNull(result.Payload, "Payload should be null on failure");
+        Assert.AreEqual($"No key questions for element type '{elementType}'", result.ErrorMessage);
     }
 
     #endregion

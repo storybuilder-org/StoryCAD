@@ -3,6 +3,7 @@ using System.Runtime.Loader;
 using Windows.ApplicationModel.AppExtensions;
 using Windows.ApplicationModel.Resources.Core;
 using Windows.Storage;
+using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator.Contracts;
@@ -76,9 +77,10 @@ public class CollaboratorService
         var outlineService = Ioc.Default.GetService<OutlineService>();
         var listData = Ioc.Default.GetService<ListData>();
         var controlData = Ioc.Default.GetService<ControlData>();
-        if (outlineService != null && listData != null && controlData != null)
+        var toolsData = Ioc.Default.GetService<ToolsData>();
+        if (outlineService != null && listData != null && controlData != null && toolsData != null)
         {
-            var api = new SemanticKernelApi(outlineService, listData, controlData);
+            var api = new SemanticKernelApi(outlineService, listData, controlData, toolsData);
             api.SetCurrentModel(storyModel);
 
             try
