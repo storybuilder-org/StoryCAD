@@ -1520,4 +1520,61 @@ public class SemanticKernelApiTests
     }
 
     #endregion
+
+    #region Stock Scenes API Tests (Issue #1223)
+
+    /// <summary>
+    /// Tests that GetStockSceneCategories returns all categories
+    /// </summary>
+    [TestMethod]
+    public void GetStockSceneCategories_WhenCalled_ReturnsCategories()
+    {
+        // Act
+        var result = _api.GetStockSceneCategories();
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetStockSceneCategories should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        var categories = result.Payload.ToList();
+        Assert.IsTrue(categories.Count >= 1, "Should have at least one category");
+    }
+
+    /// <summary>
+    /// Tests that GetStockScenes returns scenes for a valid category
+    /// </summary>
+    [TestMethod]
+    public void GetStockScenes_ValidCategory_ReturnsScenes()
+    {
+        // Arrange - get a valid category first
+        var categoriesResult = _api.GetStockSceneCategories();
+        Assert.IsTrue(categoriesResult.IsSuccess, "Need valid category for test");
+        var category = categoriesResult.Payload.First();
+
+        // Act
+        var result = _api.GetStockScenes(category);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetStockScenes should succeed for valid category");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+    }
+
+    /// <summary>
+    /// Tests that GetStockScenes returns failure for invalid category
+    /// </summary>
+    [TestMethod]
+    public void GetStockScenes_InvalidCategory_ReturnsFailure()
+    {
+        // Arrange
+        var category = "NonExistentCategory";
+
+        // Act
+        var result = _api.GetStockScenes(category);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetStockScenes should fail for invalid category");
+        Assert.IsNull(result.Payload, "Payload should be null on failure");
+        Assert.AreEqual($"No stock scene category '{category}' found", result.ErrorMessage);
+    }
+
+    #endregion
 }

@@ -123,5 +123,18 @@ public interface IStoryCADAPI
     /// <returns>Result containing the plot notes, or error if plot not found</returns>
     OperationResult<string> GetMasterPlotNotes(string plotName);
 
+    /// <summary>
+    /// Gets all stock scene categories
+    /// </summary>
+    /// <returns>Result containing the list of category names</returns>
+    OperationResult<IEnumerable<string>> GetStockSceneCategories();
+
+    /// <summary>
+    /// Gets stock scenes for a category
+    /// </summary>
+    /// <param name="category">The stock scene category name</param>
+    /// <returns>Result containing the list of scenes, or error if category not found</returns>
+    OperationResult<IEnumerable<string>> GetStockScenes(string category);
+
     #endregion
 }

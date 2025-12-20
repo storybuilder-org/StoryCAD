@@ -1090,5 +1090,31 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
         return OperationResult<string>.Success(plot.PlotPatternNotes);
     }
 
+    /// <summary>
+    /// Gets all stock scene categories
+    /// </summary>
+    /// <returns>Result containing the list of category names</returns>
+    [KernelFunction]
+    [Description("Gets all available stock scene categories")]
+    public OperationResult<IEnumerable<string>> GetStockSceneCategories()
+    {
+        return OperationResult<IEnumerable<string>>.Success(toolsData.StockScenesSource.Keys);
+    }
+
+    /// <summary>
+    /// Gets stock scenes for a category
+    /// </summary>
+    /// <param name="category">The stock scene category name</param>
+    /// <returns>Result containing the list of scenes, or error if category not found</returns>
+    [KernelFunction]
+    [Description("Gets stock scenes for a specific category")]
+    public OperationResult<IEnumerable<string>> GetStockScenes(string category)
+    {
+        if (toolsData.StockScenesSource.TryGetValue(category, out var scenes))
+            return OperationResult<IEnumerable<string>>.Success(scenes);
+
+        return OperationResult<IEnumerable<string>>.Failure($"No stock scene category '{category}' found");
+    }
+
     #endregion
 }
