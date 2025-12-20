@@ -6,6 +6,7 @@ using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.ViewModels;
+using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.Services.API;
 
@@ -1114,6 +1115,231 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
             return OperationResult<IEnumerable<string>>.Success(scenes);
 
         return OperationResult<IEnumerable<string>>.Failure($"No stock scene category '{category}' found");
+    }
+
+    // ===== Beat Sheets API =====
+    // Note: To find Scenes/Problems for beat assignment, use GetAllElements() or SearchForText()
+    // and filter by ElementType (Scene or Problem). A convenience method may be added in the future.
+
+    /// <summary>
+    /// Gets all beat sheet template names
+    /// </summary>
+    [KernelFunction]
+    [Description("Gets all available beat sheet template names")]
+    public OperationResult<IEnumerable<string>> GetBeatSheetNames()
+    {
+        return OperationResult<IEnumerable<string>>.Success(
+            toolsData.BeatSheetSource.Select(b => b.PlotPatternName));
+    }
+
+    /// <summary>
+    /// Gets a beat sheet template by name
+    /// </summary>
+    [KernelFunction]
+    [Description("Gets a beat sheet template by name. Returns the description and all beats.")]
+    public OperationResult<(string Description, IEnumerable<(string BeatName, string BeatNotes)> Beats)> GetBeatSheet(string beatSheetName)
+    {
+        var beatSheet = toolsData.BeatSheetSource.FirstOrDefault(b => b.PlotPatternName == beatSheetName);
+        if (beatSheet == null)
+            return OperationResult<(string, IEnumerable<(string, string)>)>.Failure($"No beat sheet '{beatSheetName}' found");
+
+        var beats = beatSheet.PlotPatternScenes.Select(s => (s.SceneTitle, s.Notes));
+        return OperationResult<(string, IEnumerable<(string, string)>)>.Success((beatSheet.PlotPatternNotes, beats));
+    }
+
+    /// <summary>
+    /// Applies a beat sheet template to a Problem's structure
+    /// </summary>
+    [KernelFunction]
+    [Description("Applies a beat sheet template to a Problem element. This sets up the structure with beats from the template.")]
+    public OperationResult<bool> ApplyBeatSheetToProblem(Guid problemGuid, string beatSheetName)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var beatSheet = toolsData.BeatSheetSource.FirstOrDefault(b => b.PlotPatternName == beatSheetName);
+        if (beatSheet == null)
+            return OperationResult<bool>.Failure($"No beat sheet '{beatSheetName}' found");
+
+        var problem = (ProblemModel)element;
+        problem.StructureTitle = beatSheetName;
+        problem.StructureDescription = beatSheet.PlotPatternNotes;
+        problem.StructureBeats.Clear();
+
+        foreach (var scene in beatSheet.PlotPatternScenes)
+        {
+            problem.StructureBeats.Add(new StructureBeatViewModel(scene.SceneTitle, scene.Notes));
+        }
+
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Gets the current structure of a Problem
+    /// </summary>
+    [KernelFunction]
+    [Description("Gets the current beat sheet structure of a Problem, including title, description, and all beats with their assignments.")]
+    public OperationResult<(string Title, string Description, IEnumerable<(string BeatTitle, string BeatDescription, Guid? LinkedElement)> Beats)> GetProblemStructure(Guid problemGuid)
+    {
+        if (CurrentModel == null)
+            return OperationResult<(string, string, IEnumerable<(string, string, Guid?)>)>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<(string, string, IEnumerable<(string, string, Guid?)>)>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        var beats = problem.StructureBeats.Select(b => (
+            b.Title,
+            b.Description,
+            b.Guid == Guid.Empty ? (Guid?)null : b.Guid
+        ));
+
+        return OperationResult<(string, string, IEnumerable<(string, string, Guid?)>)>.Success(
+            (problem.StructureTitle ?? "", problem.StructureDescription ?? "", beats));
+    }
+
+    /// <summary>
+    /// Assigns a Scene or Problem element to a beat
+    /// </summary>
+    [KernelFunction]
+    [Description("Assigns a Scene or Problem element to a specific beat in the Problem's structure.")]
+    public OperationResult<bool> AssignElementToBeat(Guid problemGuid, int beatIndex, Guid elementGuid)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
+            return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
+
+        // Verify the element to assign exists and is a Scene or Problem
+        var targetElement = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == elementGuid);
+        if (targetElement == null)
+            return OperationResult<bool>.Failure($"Element with GUID '{elementGuid}' not found");
+        if (targetElement.ElementType != StoryItemType.Scene && targetElement.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure("Only Scene or Problem elements can be assigned to beats");
+
+        problem.StructureBeats[beatIndex].Guid = elementGuid;
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Clears the element assignment from a beat
+    /// </summary>
+    [KernelFunction]
+    [Description("Clears the element assignment from a specific beat in the Problem's structure.")]
+    public OperationResult<bool> ClearBeatAssignment(Guid problemGuid, int beatIndex)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
+            return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
+
+        problem.StructureBeats[beatIndex].Guid = Guid.Empty;
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Creates a new beat in a Problem's structure
+    /// </summary>
+    [KernelFunction]
+    [Description("Creates a new beat at the end of a Problem's structure.")]
+    public OperationResult<bool> CreateBeat(Guid problemGuid, string title, string description)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        problem.StructureBeats.Add(new StructureBeatViewModel(title, description));
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Updates a beat's title and description
+    /// </summary>
+    [KernelFunction]
+    [Description("Updates a beat's title and description in the Problem's structure.")]
+    public OperationResult<bool> UpdateBeat(Guid problemGuid, int beatIndex, string title, string description)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
+            return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
+
+        problem.StructureBeats[beatIndex].Title = title;
+        problem.StructureBeats[beatIndex].Description = description;
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Deletes a beat from a Problem's structure
+    /// </summary>
+    [KernelFunction]
+    [Description("Deletes a beat from the Problem's structure.")]
+    public OperationResult<bool> DeleteBeat(Guid problemGuid, int beatIndex)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
+            return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
+
+        problem.StructureBeats.RemoveAt(beatIndex);
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Moves a beat from one position to another
+    /// </summary>
+    [KernelFunction]
+    [Description("Moves a beat from one position to another in the Problem's structure.")]
+    public OperationResult<bool> MoveBeat(Guid problemGuid, int fromIndex, int toIndex)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        if (fromIndex < 0 || fromIndex >= problem.StructureBeats.Count)
+            return OperationResult<bool>.Failure($"From index {fromIndex} is out of range");
+        if (toIndex < 0 || toIndex >= problem.StructureBeats.Count)
+            return OperationResult<bool>.Failure($"To index {toIndex} is out of range");
+
+        problem.StructureBeats.Move(fromIndex, toIndex);
+        return OperationResult<bool>.Success(true);
     }
 
     #endregion

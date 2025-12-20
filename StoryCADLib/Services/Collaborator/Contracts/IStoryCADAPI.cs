@@ -136,5 +136,57 @@ public interface IStoryCADAPI
     /// <returns>Result containing the list of scenes, or error if category not found</returns>
     OperationResult<IEnumerable<string>> GetStockScenes(string category);
 
+    // ===== Beat Sheets API =====
+
+    /// <summary>
+    /// Gets all beat sheet template names
+    /// </summary>
+    OperationResult<IEnumerable<string>> GetBeatSheetNames();
+
+    /// <summary>
+    /// Gets a beat sheet template by name
+    /// </summary>
+    OperationResult<(string Description, IEnumerable<(string BeatName, string BeatNotes)> Beats)> GetBeatSheet(string beatSheetName);
+
+    /// <summary>
+    /// Applies a beat sheet template to a Problem's structure
+    /// </summary>
+    OperationResult<bool> ApplyBeatSheetToProblem(Guid problemGuid, string beatSheetName);
+
+    /// <summary>
+    /// Gets the current structure of a Problem
+    /// </summary>
+    OperationResult<(string Title, string Description, IEnumerable<(string BeatTitle, string BeatDescription, Guid? LinkedElement)> Beats)> GetProblemStructure(Guid problemGuid);
+
+    /// <summary>
+    /// Assigns a Scene or Problem element to a beat
+    /// </summary>
+    OperationResult<bool> AssignElementToBeat(Guid problemGuid, int beatIndex, Guid elementGuid);
+
+    /// <summary>
+    /// Clears the element assignment from a beat
+    /// </summary>
+    OperationResult<bool> ClearBeatAssignment(Guid problemGuid, int beatIndex);
+
+    /// <summary>
+    /// Creates a new beat in a Problem's structure
+    /// </summary>
+    OperationResult<bool> CreateBeat(Guid problemGuid, string title, string description);
+
+    /// <summary>
+    /// Updates a beat's title and description
+    /// </summary>
+    OperationResult<bool> UpdateBeat(Guid problemGuid, int beatIndex, string title, string description);
+
+    /// <summary>
+    /// Deletes a beat from a Problem's structure
+    /// </summary>
+    OperationResult<bool> DeleteBeat(Guid problemGuid, int beatIndex);
+
+    /// <summary>
+    /// Moves a beat from one position to another
+    /// </summary>
+    OperationResult<bool> MoveBeat(Guid problemGuid, int fromIndex, int toIndex);
+
     #endregion
 }

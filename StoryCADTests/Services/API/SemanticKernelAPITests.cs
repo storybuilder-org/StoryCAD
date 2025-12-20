@@ -1577,4 +1577,369 @@ public class SemanticKernelApiTests
     }
 
     #endregion
+
+    #region Beat Sheets API Tests (Issue #1223)
+
+    // ===== Read Operations - Templates =====
+
+    /// <summary>
+    /// Tests that GetBeatSheetNames returns all beat sheet template names
+    /// </summary>
+    [TestMethod]
+    public void GetBeatSheetNames_WhenCalled_ReturnsNames()
+    {
+        // Act
+        var result = _api.GetBeatSheetNames();
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetBeatSheetNames should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        var names = result.Payload.ToList();
+        Assert.IsTrue(names.Count >= 1, "Should have at least one beat sheet");
+    }
+
+    /// <summary>
+    /// Tests that GetBeatSheet returns description and beats for a valid template
+    /// </summary>
+    [TestMethod]
+    public void GetBeatSheet_ValidName_ReturnsDescriptionAndBeats()
+    {
+        // Arrange
+        var namesResult = _api.GetBeatSheetNames();
+        Assert.IsTrue(namesResult.IsSuccess, "Need valid beat sheet name for test");
+        var beatSheetName = namesResult.Payload.First();
+
+        // Act
+        var result = _api.GetBeatSheet(beatSheetName);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetBeatSheet should succeed for valid name");
+        Assert.IsNotNull(result.Payload.Description, "Description should not be null");
+        Assert.IsNotNull(result.Payload.Beats, "Beats should not be null");
+        var beats = result.Payload.Beats.ToList();
+        Assert.IsTrue(beats.Count >= 1, "Should have at least one beat");
+    }
+
+    /// <summary>
+    /// Tests that GetBeatSheet returns failure for invalid template name
+    /// </summary>
+    [TestMethod]
+    public void GetBeatSheet_InvalidName_ReturnsFailure()
+    {
+        // Act
+        var result = _api.GetBeatSheet("NonExistentBeatSheet");
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetBeatSheet should fail for invalid name");
+        Assert.AreEqual("No beat sheet 'NonExistentBeatSheet' found", result.ErrorMessage);
+    }
+
+    // ===== Apply Template to Problem =====
+
+    /// <summary>
+    /// Tests that ApplyBeatSheetToProblem applies a template to a Problem
+    /// </summary>
+    [TestMethod]
+    public async Task ApplyBeatSheetToProblem_ValidInputs_AppliesTemplate()
+    {
+        // Arrange - create model with Problem
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        Assert.IsTrue(addProblemResult.IsSuccess, "Problem creation should succeed");
+        var problemGuid = addProblemResult.Payload;
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+
+        // Act
+        var result = _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "ApplyBeatSheetToProblem should succeed");
+
+        // Verify structure was applied
+        var structureResult = _api.GetProblemStructure(problemGuid);
+        Assert.IsTrue(structureResult.IsSuccess, "Should be able to get structure after applying");
+        Assert.AreEqual(beatSheetName, structureResult.Payload.Title, "Structure title should match beat sheet name");
+    }
+
+    /// <summary>
+    /// Tests that ApplyBeatSheetToProblem fails for invalid Problem GUID
+    /// </summary>
+    [TestMethod]
+    public async Task ApplyBeatSheetToProblem_InvalidProblem_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var invalidGuid = Guid.NewGuid();
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+
+        // Act
+        var result = _api.ApplyBeatSheetToProblem(invalidGuid, beatSheetName);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "Should fail for invalid Problem GUID");
+    }
+
+    /// <summary>
+    /// Tests that ApplyBeatSheetToProblem fails for invalid beat sheet name
+    /// </summary>
+    [TestMethod]
+    public async Task ApplyBeatSheetToProblem_InvalidBeatSheet_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        // Act
+        var result = _api.ApplyBeatSheetToProblem(problemGuid, "NonExistentBeatSheet");
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "Should fail for invalid beat sheet name");
+    }
+
+    // ===== Assign/Clear Element =====
+
+    /// <summary>
+    /// Tests that AssignElementToBeat assigns a Scene to a beat
+    /// </summary>
+    [TestMethod]
+    public async Task AssignElementToBeat_ValidInputs_AssignsElement()
+    {
+        // Arrange - create model with Problem and Scene
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+        var addSceneResult = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Test Scene");
+        var sceneGuid = addSceneResult.Payload;
+
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        // Act
+        var result = _api.AssignElementToBeat(problemGuid, 0, sceneGuid);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "AssignElementToBeat should succeed");
+
+        // Verify assignment
+        var structureResult = _api.GetProblemStructure(problemGuid);
+        var firstBeat = structureResult.Payload.Beats.First();
+        Assert.AreEqual(sceneGuid, firstBeat.LinkedElement, "Beat should have assigned element");
+    }
+
+    /// <summary>
+    /// Tests that ClearBeatAssignment clears an element assignment
+    /// </summary>
+    [TestMethod]
+    public async Task ClearBeatAssignment_ValidInputs_ClearsAssignment()
+    {
+        // Arrange - create model, apply beat sheet, and assign element
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+        var addSceneResult = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Test Scene");
+        var sceneGuid = addSceneResult.Payload;
+
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+        _api.AssignElementToBeat(problemGuid, 0, sceneGuid);
+
+        // Act
+        var result = _api.ClearBeatAssignment(problemGuid, 0);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "ClearBeatAssignment should succeed");
+
+        // Verify cleared
+        var structureResult = _api.GetProblemStructure(problemGuid);
+        var firstBeat = structureResult.Payload.Beats.First();
+        Assert.IsNull(firstBeat.LinkedElement, "Beat should have no assigned element");
+    }
+
+    // ===== CRUD Operations =====
+
+    /// <summary>
+    /// Tests that CreateBeat adds a new beat to a Problem's structure
+    /// </summary>
+    [TestMethod]
+    public async Task CreateBeat_ValidInputs_AddsBeat()
+    {
+        // Arrange - create model and apply beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        var initialCount = _api.GetProblemStructure(problemGuid).Payload.Beats.Count();
+
+        // Act
+        var result = _api.CreateBeat(problemGuid, "New Beat", "Beat description");
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "CreateBeat should succeed");
+
+        var newCount = _api.GetProblemStructure(problemGuid).Payload.Beats.Count();
+        Assert.AreEqual(initialCount + 1, newCount, "Should have one more beat");
+    }
+
+    /// <summary>
+    /// Tests that UpdateBeat modifies a beat's title and description
+    /// </summary>
+    [TestMethod]
+    public async Task UpdateBeat_ValidInputs_UpdatesBeat()
+    {
+        // Arrange - create model and apply beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        // Act
+        var result = _api.UpdateBeat(problemGuid, 0, "Updated Title", "Updated Description");
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "UpdateBeat should succeed");
+
+        var structureResult = _api.GetProblemStructure(problemGuid);
+        var firstBeat = structureResult.Payload.Beats.First();
+        Assert.AreEqual("Updated Title", firstBeat.BeatTitle, "Title should be updated");
+        Assert.AreEqual("Updated Description", firstBeat.BeatDescription, "Description should be updated");
+    }
+
+    /// <summary>
+    /// Tests that DeleteBeat removes a beat from a Problem's structure
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteBeat_ValidInputs_RemovesBeat()
+    {
+        // Arrange - create model and apply beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        var initialCount = _api.GetProblemStructure(problemGuid).Payload.Beats.Count();
+
+        // Act
+        var result = _api.DeleteBeat(problemGuid, 0);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "DeleteBeat should succeed");
+
+        var newCount = _api.GetProblemStructure(problemGuid).Payload.Beats.Count();
+        Assert.AreEqual(initialCount - 1, newCount, "Should have one fewer beat");
+    }
+
+    /// <summary>
+    /// Tests that MoveBeat reorders beats in a Problem's structure
+    /// </summary>
+    [TestMethod]
+    public async Task MoveBeat_ValidInputs_ReordersBeat()
+    {
+        // Arrange - create model and apply beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        var beats = _api.GetProblemStructure(problemGuid).Payload.Beats.ToList();
+        if (beats.Count < 2)
+        {
+            Assert.Inconclusive("Need at least 2 beats to test move");
+            return;
+        }
+        var firstBeatTitle = beats[0].BeatTitle;
+        var secondBeatTitle = beats[1].BeatTitle;
+
+        // Act - move first beat to second position
+        var result = _api.MoveBeat(problemGuid, 0, 1);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "MoveBeat should succeed");
+
+        var newBeats = _api.GetProblemStructure(problemGuid).Payload.Beats.ToList();
+        Assert.AreEqual(secondBeatTitle, newBeats[0].BeatTitle, "Second beat should now be first");
+        Assert.AreEqual(firstBeatTitle, newBeats[1].BeatTitle, "First beat should now be second");
+    }
+
+    // ===== Get Problem Structure =====
+
+    /// <summary>
+    /// Tests that GetProblemStructure returns the current structure of a Problem
+    /// </summary>
+    [TestMethod]
+    public async Task GetProblemStructure_ValidProblem_ReturnsStructure()
+    {
+        // Arrange - create model and apply beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        // Act
+        var result = _api.GetProblemStructure(problemGuid);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetProblemStructure should succeed");
+        Assert.IsNotNull(result.Payload.Title, "Title should not be null");
+        Assert.IsNotNull(result.Payload.Description, "Description should not be null");
+        Assert.IsNotNull(result.Payload.Beats, "Beats should not be null");
+    }
+
+    /// <summary>
+    /// Tests that GetProblemStructure fails for invalid Problem GUID
+    /// </summary>
+    [TestMethod]
+    public async Task GetProblemStructure_InvalidProblem_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+
+        // Act
+        var result = _api.GetProblemStructure(Guid.NewGuid());
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetProblemStructure should fail for invalid GUID");
+    }
+
+    /// <summary>
+    /// Tests that GetProblemStructure returns empty structure for Problem without beat sheet
+    /// </summary>
+    [TestMethod]
+    public async Task GetProblemStructure_NoBeatSheet_ReturnsEmptyStructure()
+    {
+        // Arrange - create model with Problem but no beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        // Act
+        var result = _api.GetProblemStructure(problemGuid);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetProblemStructure should succeed even without beat sheet");
+        // Structure may be empty but should not fail
+    }
+
+    #endregion
 }
