@@ -98,6 +98,22 @@ public interface IStoryCADAPI
     OperationResult<IEnumerable<string>> GetConflictExamples(string category, string subcategory);
 
     /// <summary>
+    /// Applies a conflict description to a Problem's protagonist conflict field
+    /// </summary>
+    /// <param name="problemGuid">The GUID of the Problem element</param>
+    /// <param name="conflictText">The conflict description text</param>
+    /// <returns>Result indicating success or failure</returns>
+    OperationResult<bool> ApplyConflictToProtagonist(Guid problemGuid, string conflictText);
+
+    /// <summary>
+    /// Applies a conflict description to a Problem's antagonist conflict field
+    /// </summary>
+    /// <param name="problemGuid">The GUID of the Problem element</param>
+    /// <param name="conflictText">The conflict description text</param>
+    /// <returns>Result indicating success or failure</returns>
+    OperationResult<bool> ApplyConflictToAntagonist(Guid problemGuid, string conflictText);
+
+    /// <summary>
     /// Gets all element types that have key questions available
     /// </summary>
     /// <returns>Result containing the list of element types</returns>
@@ -122,6 +138,13 @@ public interface IStoryCADAPI
     /// <param name="plotName">The master plot name</param>
     /// <returns>Result containing the plot notes, or error if plot not found</returns>
     OperationResult<string> GetMasterPlotNotes(string plotName);
+
+    /// <summary>
+    /// Gets the scene breakdown for a master plot
+    /// </summary>
+    /// <param name="plotName">The master plot name</param>
+    /// <returns>Result containing tuples of (SceneTitle, Notes), or error if plot not found</returns>
+    OperationResult<IEnumerable<(string SceneTitle, string Notes)>> GetMasterPlotScenes(string plotName);
 
     /// <summary>
     /// Gets all stock scene categories

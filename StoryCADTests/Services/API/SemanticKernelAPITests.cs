@@ -1942,4 +1942,130 @@ public class SemanticKernelApiTests
     }
 
     #endregion
+
+    #region Conflict Apply API Tests (Issue #1223)
+
+    /// <summary>
+    /// Tests that ApplyConflictToProtagonist sets the ProtConflict property
+    /// </summary>
+    [TestMethod]
+    public async Task ApplyConflictToProtagonist_ValidInputs_SetsProtConflict()
+    {
+        // Arrange - create model with Problem
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        Assert.IsTrue(addProblemResult.IsSuccess, "Problem creation should succeed");
+        var problemGuid = addProblemResult.Payload;
+        var conflictText = "Hero must overcome fear of heights";
+
+        // Act
+        var result = _api.ApplyConflictToProtagonist(problemGuid, conflictText);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "ApplyConflictToProtagonist should succeed");
+        var problem = _api.CurrentModel.StoryElements.First(e => e.Uuid == problemGuid) as ProblemModel;
+        Assert.AreEqual(conflictText, problem.ProtConflict, "ProtConflict should be set");
+    }
+
+    /// <summary>
+    /// Tests that ApplyConflictToProtagonist returns failure for invalid problem
+    /// </summary>
+    [TestMethod]
+    public async Task ApplyConflictToProtagonist_InvalidProblem_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var invalidGuid = Guid.NewGuid();
+
+        // Act
+        var result = _api.ApplyConflictToProtagonist(invalidGuid, "Some conflict");
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "Should fail for invalid problem GUID");
+    }
+
+    /// <summary>
+    /// Tests that ApplyConflictToAntagonist sets the AntagConflict property
+    /// </summary>
+    [TestMethod]
+    public async Task ApplyConflictToAntagonist_ValidInputs_SetsAntagConflict()
+    {
+        // Arrange - create model with Problem
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        Assert.IsTrue(addProblemResult.IsSuccess, "Problem creation should succeed");
+        var problemGuid = addProblemResult.Payload;
+        var conflictText = "Villain seeks world domination";
+
+        // Act
+        var result = _api.ApplyConflictToAntagonist(problemGuid, conflictText);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "ApplyConflictToAntagonist should succeed");
+        var problem = _api.CurrentModel.StoryElements.First(e => e.Uuid == problemGuid) as ProblemModel;
+        Assert.AreEqual(conflictText, problem.AntagConflict, "AntagConflict should be set");
+    }
+
+    /// <summary>
+    /// Tests that ApplyConflictToAntagonist returns failure for invalid problem
+    /// </summary>
+    [TestMethod]
+    public async Task ApplyConflictToAntagonist_InvalidProblem_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var invalidGuid = Guid.NewGuid();
+
+        // Act
+        var result = _api.ApplyConflictToAntagonist(invalidGuid, "Some conflict");
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "Should fail for invalid problem GUID");
+    }
+
+    #endregion
+
+    #region Master Plot Scenes API Tests (Issue #1223)
+
+    /// <summary>
+    /// Tests that GetMasterPlotScenes returns scenes for a valid plot
+    /// </summary>
+    [TestMethod]
+    public void GetMasterPlotScenes_ValidName_ReturnsScenes()
+    {
+        // Arrange - get a valid plot name first
+        var namesResult = _api.GetMasterPlotNames();
+        Assert.IsTrue(namesResult.IsSuccess, "Need valid plot name for test");
+        var plotName = namesResult.Payload.First();
+
+        // Act
+        var result = _api.GetMasterPlotScenes(plotName);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetMasterPlotScenes should succeed for valid name");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        // Note: Some plots may have zero scenes, so we just check it doesn't fail
+    }
+
+    /// <summary>
+    /// Tests that GetMasterPlotScenes returns failure for invalid plot name
+    /// </summary>
+    [TestMethod]
+    public void GetMasterPlotScenes_InvalidName_ReturnsFailure()
+    {
+        // Arrange
+        var plotName = "NonExistentPlot";
+
+        // Act
+        var result = _api.GetMasterPlotScenes(plotName);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetMasterPlotScenes should fail for invalid name");
+        Assert.IsNull(result.Payload, "Payload should be null on failure");
+        Assert.AreEqual($"No master plot '{plotName}' found", result.ErrorMessage);
+    }
+
+    #endregion
 }

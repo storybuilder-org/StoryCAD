@@ -1037,6 +1037,48 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     }
 
     /// <summary>
+    /// Applies a conflict description to a Problem's protagonist conflict field
+    /// </summary>
+    /// <param name="problemGuid">The GUID of the Problem element</param>
+    /// <param name="conflictText">The conflict description text</param>
+    /// <returns>Result indicating success or failure</returns>
+    [KernelFunction]
+    [Description("Applies a conflict description to a Problem's protagonist conflict. Use after selecting from GetConflictExamples or with custom text.")]
+    public OperationResult<bool> ApplyConflictToProtagonist(Guid problemGuid, string conflictText)
+    {
+        var elementResult = GetStoryElement(problemGuid);
+        if (!elementResult.IsSuccess)
+            return OperationResult<bool>.Failure(elementResult.ErrorMessage);
+
+        if (elementResult.Payload is not ProblemModel problem)
+            return OperationResult<bool>.Failure($"Element {problemGuid} is not a Problem");
+
+        problem.ProtConflict = conflictText;
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Applies a conflict description to a Problem's antagonist conflict field
+    /// </summary>
+    /// <param name="problemGuid">The GUID of the Problem element</param>
+    /// <param name="conflictText">The conflict description text</param>
+    /// <returns>Result indicating success or failure</returns>
+    [KernelFunction]
+    [Description("Applies a conflict description to a Problem's antagonist conflict. Use after selecting from GetConflictExamples or with custom text.")]
+    public OperationResult<bool> ApplyConflictToAntagonist(Guid problemGuid, string conflictText)
+    {
+        var elementResult = GetStoryElement(problemGuid);
+        if (!elementResult.IsSuccess)
+            return OperationResult<bool>.Failure(elementResult.ErrorMessage);
+
+        if (elementResult.Payload is not ProblemModel problem)
+            return OperationResult<bool>.Failure($"Element {problemGuid} is not a Problem");
+
+        problem.AntagConflict = conflictText;
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
     /// Gets all element types that have key questions available
     /// </summary>
     /// <returns>Result containing the list of element types</returns>
@@ -1089,6 +1131,23 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
             return OperationResult<string>.Failure($"No master plot '{plotName}' found");
 
         return OperationResult<string>.Success(plot.PlotPatternNotes);
+    }
+
+    /// <summary>
+    /// Gets the scene breakdown for a master plot
+    /// </summary>
+    /// <param name="plotName">The master plot name</param>
+    /// <returns>Result containing tuples of (SceneTitle, Notes), or error if plot not found</returns>
+    [KernelFunction]
+    [Description("Gets the scene breakdown for a master plot. Returns tuples where Item1 is the scene title and Item2 is the scene notes.")]
+    public OperationResult<IEnumerable<(string SceneTitle, string Notes)>> GetMasterPlotScenes(string plotName)
+    {
+        var plot = toolsData.MasterPlotsSource.FirstOrDefault(p => p.PlotPatternName == plotName);
+        if (plot == null)
+            return OperationResult<IEnumerable<(string SceneTitle, string Notes)>>.Failure($"No master plot '{plotName}' found");
+
+        return OperationResult<IEnumerable<(string SceneTitle, string Notes)>>.Success(
+            plot.PlotPatternScenes.Select(s => (s.SceneTitle, s.Notes)));
     }
 
     /// <summary>
