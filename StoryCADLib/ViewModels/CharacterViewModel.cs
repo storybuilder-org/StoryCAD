@@ -774,6 +774,69 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
 
 
     /// <summary>
+    /// Gets prospective relationship partners for the current character.
+    /// Filters out: non-CharacterModel entries (like "(none)" placeholder),
+    /// the current character (self), and existing relationship partners.
+    /// </summary>
+    public List<StoryElement> GetProspectivePartners(StoryModel storyModel)
+    {
+        // Build set of existing partner UUIDs for O(1) lookup
+        var existingPartnerUuids = new HashSet<Guid>(
+            CharacterRelationships.Select(r => r.PartnerUuid));
+
+        var prospectivePartners = new List<StoryElement>();
+
+        foreach (var character in storyModel.StoryElements.Characters)
+        {
+            // Filter out non-CharacterModel entries (like "(none)" placeholder)
+            if (character is not CharacterModel) continue;
+
+            // Skip self
+            if (character.Uuid == Uuid) continue;
+
+            // Skip existing partners
+            if (existingPartnerUuids.Contains(character.Uuid)) continue;
+
+            prospectivePartners.Add(character);
+        }
+
+        return prospectivePartners;
+    }
+
+    /// <summary>
+    /// Attempts to create an inverse relationship on the partner character.
+    /// Returns false if partner is not a CharacterModel or if relationship already exists.
+    /// </summary>
+    public bool TryCreateInverseRelationship(StoryElement partner, string relationType, out string errorMessage)
+    {
+        errorMessage = string.Empty;
+
+        // Validate partner is actually a CharacterModel
+        if (partner is not CharacterModel partnerChar)
+        {
+            errorMessage = $"Cannot create inverse relationship: partner '{partner?.Name}' is not a valid character";
+            _logger.Log(LogLevel.Error,
+                $"Inverse relationship failed: partner is {partner?.GetType().Name ?? "null"}, expected CharacterModel");
+            return false;
+        }
+
+        // Check for existing inverse relationship to avoid duplicates
+        if (partnerChar.RelationshipList.Any(r => r.PartnerUuid == Uuid))
+        {
+            _logger.Log(LogLevel.Info,
+                $"Inverse relationship already exists from {partnerChar.Name} to {Name}");
+            return true; // Not an error, just already exists
+        }
+
+        // Create the inverse relationship
+        partnerChar.RelationshipList.Add(new RelationshipModel(Uuid, relationType));
+        _logger.Log(LogLevel.Info,
+            $"Created inverse relationship: {partnerChar.Name} -> {Name} ({relationType})");
+
+        return true;
+    }
+
+    /// <summary>
     ///     Add a new RelationshipModel instance for this character.
     ///     The added relationship is made the currently loaded and displayed one.
     /// </summary>
@@ -790,24 +853,11 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
             _vm.RelationTypes.Add(_relationshipType);
         }
 
-        _vm.ProspectivePartners.Clear(); //Prospective partners are chars who are not in a relationship with this char
-        foreach (var _character in _storyModel.StoryElements.Characters)
+        // Get prospective partners using helper method (filters placeholders, self, existing partners)
+        _vm.ProspectivePartners.Clear();
+        foreach (var partner in GetProspectivePartners(_storyModel))
         {
-            if (_character == _vm.Member)
-            {
-                continue; // Skip me
-            }
-
-            foreach (var _rel in CharacterRelationships)
-            {
-                if (_character == _rel.Partner)
-                {
-                    goto NextCharacter; // Skip partner
-                }
-            }
-
-            _vm.ProspectivePartners.Add(_character);
-            NextCharacter: ;
+            _vm.ProspectivePartners.Add(partner);
         }
 
         if (_vm.ProspectivePartners.Count == 0)
@@ -850,22 +900,14 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
                 // Create the new RelationshipModel
                 var partnerUuid = _vm.SelectedPartner.Uuid;
                 RelationshipModel memberRelationship = new(partnerUuid, _vm.RelationType);
+
+                // Create inverse relationship if requested (using helper for safe type validation)
                 if (_vm.InverseRelationship && !string.IsNullOrWhiteSpace(_vm.InverseRelationType))
                 {
-                    // Check for duplicate inverse relationship
-                    var makeChar = true;
-                    foreach (var _relation in (_vm.SelectedPartner as CharacterModel)!.RelationshipList)
+                    if (!TryCreateInverseRelationship(_vm.SelectedPartner, _vm.InverseRelationType, out var errorMsg))
                     {
-                        if (_relation.Partner == _vm.Member)
-                        {
-                            makeChar = false;
-                        }
-                    }
-
-                    if (makeChar)
-                    {
-                        (_vm.SelectedPartner as CharacterModel)!.RelationshipList.Add(
-                            new RelationshipModel(Uuid, _vm.InverseRelationType));
+                        Messenger.Send(new StatusChangedMessage(new StatusMessage(errorMsg, LogLevel.Error)));
+                        return;
                     }
                 }
 
