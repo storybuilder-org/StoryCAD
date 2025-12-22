@@ -982,7 +982,16 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// <param name="propertyName">Property name matching a list key</param>
     /// <returns>Result containing the list values, or error if key not found</returns>
     [KernelFunction]
-    [Description("Gets valid example values for a story element property from Lists.json")]
+    [Description("""
+                 Gets valid example values for a story element property.
+                 Use this to discover dropdown values for element properties.
+                 Valid property names include: Tone, Role, Archetype, Sex, Age, Build, Complexion,
+                 EyeColor, HairColor, HairStyle, Demeanor, Enneagram, Intelligence, Values,
+                 Abnormality, Focus, Adventuresome, Aggression, Confidence, Conscientiousness,
+                 Creativity, Dominance, Enthusiasm, Assurance, Sensitivity, Shrewdness, Sociability,
+                 Stability, ScenePurpose, SceneType, SceneValueExchange, SettingCountry, Locale, Season.
+                 Returns an error if property name is not found.
+                 """)]
     public OperationResult<IEnumerable<string>> GetExamples(string propertyName)
     {
         if (listData.ListControlSource.TryGetValue(propertyName, out var list))
@@ -996,7 +1005,13 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// </summary>
     /// <returns>Result containing the list of conflict categories</returns>
     [KernelFunction]
-    [Description("Gets all available conflict categories for character development")]
+    [Description("""
+                 Gets all conflict categories for the Conflict Builder tool.
+                 This is step 1 of 4 in the conflict workflow.
+                 Next: Call GetConflictSubcategories with one of these categories.
+                 Categories include: Relationship, Situational, Inner Conflict, Paranormal,
+                 Criminal activities, Mystery and suspense, Social drama, Romantic.
+                 """)]
     public OperationResult<IEnumerable<string>> GetConflictCategories()
     {
         return OperationResult<IEnumerable<string>>.Success(controlData.ConflictTypes.Keys);
@@ -1008,7 +1023,12 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// <param name="category">The conflict category name</param>
     /// <returns>Result containing the list of subcategories, or error if category not found</returns>
     [KernelFunction]
-    [Description("Gets subcategories for a specific conflict category")]
+    [Description("""
+                 Gets subcategories for a conflict category.
+                 This is step 2 of 4 in the conflict workflow.
+                 Call GetConflictCategories first to get valid category values.
+                 Next: Call GetConflictExamples with category and subcategory.
+                 """)]
     public OperationResult<IEnumerable<string>> GetConflictSubcategories(string category)
     {
         if (controlData.ConflictTypes.TryGetValue(category, out var model))
@@ -1024,7 +1044,13 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// <param name="subcategory">The subcategory name within the category</param>
     /// <returns>Result containing the list of examples, or error if not found</returns>
     [KernelFunction]
-    [Description("Gets example conflicts for a specific category and subcategory")]
+    [Description("""
+                 Gets example conflict descriptions for a category and subcategory.
+                 This is step 3 of 4 in the conflict workflow.
+                 Call GetConflictSubcategories first to get valid subcategory values.
+                 Next: Call ApplyConflictToProtagonist or ApplyConflictToAntagonist
+                 with a Problem GUID and one of these example strings (or your own text).
+                 """)]
     public OperationResult<IEnumerable<string>> GetConflictExamples(string category, string subcategory)
     {
         if (!controlData.ConflictTypes.TryGetValue(category, out var model))
@@ -1043,7 +1069,13 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// <param name="conflictText">The conflict description text</param>
     /// <returns>Result indicating success or failure</returns>
     [KernelFunction]
-    [Description("Applies a conflict description to a Problem's protagonist conflict. Use after selecting from GetConflictExamples or with custom text.")]
+    [Description("""
+                 Applies a conflict description to a Problem's protagonist conflict field.
+                 This is step 4 of 4 in the conflict workflow.
+                 problemGuid MUST be the GUID of a Problem element.
+                 conflictText can be from GetConflictExamples or custom text.
+                 Use ApplyConflictToAntagonist for the antagonist's conflict.
+                 """)]
     public OperationResult<bool> ApplyConflictToProtagonist(Guid problemGuid, string conflictText)
     {
         var elementResult = GetStoryElement(problemGuid);
@@ -1064,7 +1096,13 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// <param name="conflictText">The conflict description text</param>
     /// <returns>Result indicating success or failure</returns>
     [KernelFunction]
-    [Description("Applies a conflict description to a Problem's antagonist conflict. Use after selecting from GetConflictExamples or with custom text.")]
+    [Description("""
+                 Applies a conflict description to a Problem's antagonist conflict field.
+                 This is step 4 of 4 in the conflict workflow (alternate to ApplyConflictToProtagonist).
+                 problemGuid MUST be the GUID of a Problem element.
+                 conflictText can be from GetConflictExamples or custom text.
+                 Use ApplyConflictToProtagonist for the protagonist's conflict.
+                 """)]
     public OperationResult<bool> ApplyConflictToAntagonist(Guid problemGuid, string conflictText)
     {
         var elementResult = GetStoryElement(problemGuid);
@@ -1083,7 +1121,12 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// </summary>
     /// <returns>Result containing the list of element types</returns>
     [KernelFunction]
-    [Description("Gets all element types that have key questions available (e.g., Character, Problem, Scene)")]
+    [Description("""
+                 Gets element types that have key questions available.
+                 This is step 1 of 2 in the key questions workflow.
+                 Next: Call GetKeyQuestions with one of these element type names.
+                 Common types: Character, Problem, Scene, Setting, Overview.
+                 """)]
     public OperationResult<IEnumerable<string>> GetKeyQuestionElements()
     {
         return OperationResult<IEnumerable<string>>.Success(toolsData.KeyQuestionsSource.Keys);
@@ -1095,7 +1138,15 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// <param name="elementType">The element type (e.g., Character, Problem, Scene)</param>
     /// <returns>Result containing tuples of (Topic, Question), or error if element type not found</returns>
     [KernelFunction]
-    [Description("Gets key questions for an element type. Returns tuples where Item1 is the topic (aspect being addressed) and Item2 is the question text.")]
+    [Description("""
+                 Gets key questions to help develop a story element.
+                 This is step 2 of 2 in the key questions workflow.
+                 Call GetKeyQuestionElements first to get valid element type names.
+                 Returns tuples of (Topic, Question):
+                 - Topic: The aspect being developed (e.g., "Motivation", "Backstory")
+                 - Question: A prompt to help the author think about this aspect
+                 Use these questions to guide element development or prompt the user.
+                 """)]
     public OperationResult<IEnumerable<(string Topic, string Question)>> GetKeyQuestions(string elementType)
     {
         if (!toolsData.KeyQuestionsSource.TryGetValue(elementType, out var questions))
@@ -1110,7 +1161,16 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// </summary>
     /// <returns>Result containing the list of master plot names</returns>
     [KernelFunction]
-    [Description("Gets all available master plot names (e.g., Quest, Revenge, Pursuit)")]
+    [Description("""
+                 Gets all master plot template names (Tobias's 20 Master Plots).
+                 This is step 1 of 3 in the master plots workflow.
+                 Next: Call GetMasterPlotNotes to understand a plot pattern.
+                 Then: Call GetMasterPlotScenes to get the scene breakdown.
+                 Plots include: Quest, Adventure, Pursuit, Rescue, Escape, Revenge,
+                 The Riddle, Rivalry, Underdog, Temptation, Metamorphosis, Transformation,
+                 Maturation, Love, Forbidden Love, Sacrifice, Discovery, Wretched Excess,
+                 Ascension, Descension.
+                 """)]
     public OperationResult<IEnumerable<string>> GetMasterPlotNames()
     {
         return OperationResult<IEnumerable<string>>.Success(
@@ -1123,7 +1183,13 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// <param name="plotName">The master plot name</param>
     /// <returns>Result containing the plot notes, or error if plot not found</returns>
     [KernelFunction]
-    [Description("Gets the descriptive notes for a specific master plot")]
+    [Description("""
+                 Gets the descriptive notes explaining a master plot pattern.
+                 This is step 2 of 3 in the master plots workflow.
+                 Call GetMasterPlotNames first to get valid plot names.
+                 Next: Call GetMasterPlotScenes to get the scene breakdown.
+                 The notes explain the plot pattern's key characteristics and themes.
+                 """)]
     public OperationResult<string> GetMasterPlotNotes(string plotName)
     {
         var plot = toolsData.MasterPlotsSource.FirstOrDefault(p => p.PlotPatternName == plotName);
@@ -1139,7 +1205,15 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// <param name="plotName">The master plot name</param>
     /// <returns>Result containing tuples of (SceneTitle, Notes), or error if plot not found</returns>
     [KernelFunction]
-    [Description("Gets the scene breakdown for a master plot. Returns tuples where Item1 is the scene title and Item2 is the scene notes.")]
+    [Description("""
+                 Gets the scene breakdown for a master plot pattern.
+                 This is step 3 of 3 in the master plots workflow.
+                 Call GetMasterPlotNames first to get valid plot names.
+                 Returns tuples of (SceneTitle, Notes):
+                 - SceneTitle: Name of this story beat (e.g., "Call to Adventure")
+                 - Notes: Description of what happens in this beat
+                 Use these to structure a story or create Scene elements with AddElement.
+                 """)]
     public OperationResult<IEnumerable<(string SceneTitle, string Notes)>> GetMasterPlotScenes(string plotName)
     {
         var plot = toolsData.MasterPlotsSource.FirstOrDefault(p => p.PlotPatternName == plotName);
@@ -1155,7 +1229,12 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// </summary>
     /// <returns>Result containing the list of category names</returns>
     [KernelFunction]
-    [Description("Gets all available stock scene categories")]
+    [Description("""
+                 Gets all stock scene categories for scene inspiration.
+                 This is step 1 of 2 in the stock scenes workflow.
+                 Next: Call GetStockScenes with one of these category names.
+                 Categories organize common scene types by genre or purpose.
+                 """)]
     public OperationResult<IEnumerable<string>> GetStockSceneCategories()
     {
         return OperationResult<IEnumerable<string>>.Success(toolsData.StockScenesSource.Keys);
@@ -1167,7 +1246,14 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// <param name="category">The stock scene category name</param>
     /// <returns>Result containing the list of scenes, or error if category not found</returns>
     [KernelFunction]
-    [Description("Gets stock scenes for a specific category")]
+    [Description("""
+                 Gets stock scene descriptions for a category.
+                 This is step 2 of 2 in the stock scenes workflow.
+                 Call GetStockSceneCategories first to get valid category names.
+                 Returns scene descriptions that can inspire Scene elements.
+                 Use AddElement to create a Scene, then set its Description property
+                 using UpdateElementProperty with the stock scene text.
+                 """)]
     public OperationResult<IEnumerable<string>> GetStockScenes(string category)
     {
         if (toolsData.StockScenesSource.TryGetValue(category, out var scenes))
@@ -1184,7 +1270,14 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// Gets all beat sheet template names
     /// </summary>
     [KernelFunction]
-    [Description("Gets all available beat sheet template names")]
+    [Description("""
+                 Gets all beat sheet template names for story structure.
+                 This is step 1 in the beat sheets workflow.
+                 Next: Call GetBeatSheet to preview a template's beats.
+                 Then: Call ApplyBeatSheetToProblem to apply it to a Problem element.
+                 Templates include various storytelling frameworks like Three Act Structure,
+                 Hero's Journey, Save the Cat, etc.
+                 """)]
     public OperationResult<IEnumerable<string>> GetBeatSheetNames()
     {
         return OperationResult<IEnumerable<string>>.Success(
@@ -1195,7 +1288,15 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// Gets a beat sheet template by name
     /// </summary>
     [KernelFunction]
-    [Description("Gets a beat sheet template by name. Returns the description and all beats.")]
+    [Description("""
+                 Gets a beat sheet template by name for preview.
+                 This is step 2 in the beat sheets workflow.
+                 Call GetBeatSheetNames first to get valid template names.
+                 Next: Call ApplyBeatSheetToProblem to apply it to a Problem.
+                 Returns (Description, Beats):
+                 - Description: Overview of this storytelling framework
+                 - Beats: List of (BeatName, BeatNotes) tuples defining story structure
+                 """)]
     public OperationResult<(string Description, IEnumerable<(string BeatName, string BeatNotes)> Beats)> GetBeatSheet(string beatSheetName)
     {
         var beatSheet = toolsData.BeatSheetSource.FirstOrDefault(b => b.PlotPatternName == beatSheetName);
@@ -1210,7 +1311,17 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// Applies a beat sheet template to a Problem's structure
     /// </summary>
     [KernelFunction]
-    [Description("Applies a beat sheet template to a Problem element. This sets up the structure with beats from the template.")]
+    [Description("""
+                 Applies a beat sheet template to a Problem element's structure.
+                 This is step 3 in the beat sheets workflow.
+                 problemGuid MUST be the GUID of a Problem element.
+                 beatSheetName MUST be a name from GetBeatSheetNames.
+                 This replaces any existing structure on the Problem.
+                 After applying:
+                 - Call GetProblemStructure to see the beats
+                 - Call AssignElementToBeat to link Scenes/Problems to beats
+                 - Call CreateBeat, UpdateBeat, DeleteBeat, MoveBeat to customize
+                 """)]
     public OperationResult<bool> ApplyBeatSheetToProblem(Guid problemGuid, string beatSheetName)
     {
         if (CurrentModel == null)
@@ -1241,7 +1352,16 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// Gets the current structure of a Problem
     /// </summary>
     [KernelFunction]
-    [Description("Gets the current beat sheet structure of a Problem, including title, description, and all beats with their assignments.")]
+    [Description("""
+                 Gets the current structure of a Problem element.
+                 problemGuid MUST be the GUID of a Problem element.
+                 Returns (Title, Description, Beats):
+                 - Title: Name of the applied beat sheet template
+                 - Description: Overview of the structure
+                 - Beats: List of (BeatTitle, BeatDescription, LinkedElement) tuples
+                   LinkedElement is the GUID of an assigned Scene/Problem, or null if unassigned.
+                 Use this to view structure after ApplyBeatSheetToProblem or to check assignments.
+                 """)]
     public OperationResult<(string Title, string Description, IEnumerable<(string BeatTitle, string BeatDescription, Guid? LinkedElement)> Beats)> GetProblemStructure(Guid problemGuid)
     {
         if (CurrentModel == null)
@@ -1266,7 +1386,15 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// Assigns a Scene or Problem element to a beat
     /// </summary>
     [KernelFunction]
-    [Description("Assigns a Scene or Problem element to a specific beat in the Problem's structure.")]
+    [Description("""
+                 Assigns a Scene or Problem element to a beat in the structure.
+                 problemGuid MUST be the GUID of a Problem element with beats.
+                 beatIndex is 0-based (first beat is index 0).
+                 elementGuid MUST be the GUID of a Scene or Problem element.
+                 To find Scenes/Problems: Call GetAllElements and filter by ElementType,
+                 or call SearchForText to find elements by name.
+                 Use ClearBeatAssignment to remove an assignment.
+                 """)]
     public OperationResult<bool> AssignElementToBeat(Guid problemGuid, int beatIndex, Guid elementGuid)
     {
         if (CurrentModel == null)
@@ -1295,7 +1423,13 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// Clears the element assignment from a beat
     /// </summary>
     [KernelFunction]
-    [Description("Clears the element assignment from a specific beat in the Problem's structure.")]
+    [Description("""
+                 Clears the element assignment from a beat.
+                 problemGuid MUST be the GUID of a Problem element with beats.
+                 beatIndex is 0-based (first beat is index 0).
+                 After clearing, the beat remains but has no linked Scene/Problem.
+                 Use AssignElementToBeat to assign a new element.
+                 """)]
     public OperationResult<bool> ClearBeatAssignment(Guid problemGuid, int beatIndex)
     {
         if (CurrentModel == null)
@@ -1317,7 +1451,14 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// Creates a new beat in a Problem's structure
     /// </summary>
     [KernelFunction]
-    [Description("Creates a new beat at the end of a Problem's structure.")]
+    [Description("""
+                 Creates a new beat at the end of a Problem's structure.
+                 problemGuid MUST be the GUID of a Problem element.
+                 title is the beat name (e.g., "Climax", "Resolution").
+                 description explains what happens in this story beat.
+                 New beats are added at the end; use MoveBeat to reorder.
+                 Use AssignElementToBeat to link a Scene/Problem to the new beat.
+                 """)]
     public OperationResult<bool> CreateBeat(Guid problemGuid, string title, string description)
     {
         if (CurrentModel == null)
@@ -1336,7 +1477,14 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// Updates a beat's title and description
     /// </summary>
     [KernelFunction]
-    [Description("Updates a beat's title and description in the Problem's structure.")]
+    [Description("""
+                 Updates a beat's title and description.
+                 problemGuid MUST be the GUID of a Problem element with beats.
+                 beatIndex is 0-based (first beat is index 0).
+                 title is the new beat name.
+                 description is the new beat explanation.
+                 This preserves any existing element assignment on the beat.
+                 """)]
     public OperationResult<bool> UpdateBeat(Guid problemGuid, int beatIndex, string title, string description)
     {
         if (CurrentModel == null)
@@ -1359,7 +1507,13 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// Deletes a beat from a Problem's structure
     /// </summary>
     [KernelFunction]
-    [Description("Deletes a beat from the Problem's structure.")]
+    [Description("""
+                 Deletes a beat from the Problem's structure.
+                 problemGuid MUST be the GUID of a Problem element with beats.
+                 beatIndex is 0-based (first beat is index 0).
+                 This is a destructive action - the beat and any assignment are removed.
+                 Remaining beats shift down to fill the gap.
+                 """)]
     public OperationResult<bool> DeleteBeat(Guid problemGuid, int beatIndex)
     {
         if (CurrentModel == null)
@@ -1381,7 +1535,14 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     /// Moves a beat from one position to another
     /// </summary>
     [KernelFunction]
-    [Description("Moves a beat from one position to another in the Problem's structure.")]
+    [Description("""
+                 Moves a beat from one position to another.
+                 problemGuid MUST be the GUID of a Problem element with beats.
+                 fromIndex is the current 0-based position of the beat.
+                 toIndex is the new 0-based position for the beat.
+                 The beat's title, description, and element assignment move together.
+                 Other beats shift to accommodate the move.
+                 """)]
     public OperationResult<bool> MoveBeat(Guid problemGuid, int fromIndex, int toIndex)
     {
         if (CurrentModel == null)
