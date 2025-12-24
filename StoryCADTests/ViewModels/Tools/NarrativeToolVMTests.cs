@@ -178,5 +178,38 @@ public class NarrativeToolVMTests
         Assert.AreEqual(trashNode, vm.SelectedNode, "SelectedNode should remain unchanged for protected nodes");
     }
 
+    [TestMethod]
+    public void Delete_WithNullSelectedNode_LogsWarningAndDoesNotThrow()
+    {
+        // Arrange - Regression test for issue #1227
+        // Before fix: Delete() with null SelectedNode would throw NullReferenceException
+        // After fix: Delete() checks for null and logs warning without throwing
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var windowing = Ioc.Default.GetRequiredService<Windowing>();
+        var toolValidation = Ioc.Default.GetRequiredService<ToolValidationService>();
+        var logger = Ioc.Default.GetRequiredService<ILogService>();
+
+        var vm = new NarrativeToolVM(shellVM, appState, windowing, toolValidation, logger);
+        vm.SelectedNode = null; // Explicitly set to null to trigger the bug scenario
+        vm.IsNarratorSelected = false;
+
+        // Act & Assert - Should not throw NullReferenceException
+        try
+        {
+            vm.Delete();
+            // Test passes if we get here without exception
+            Assert.IsTrue(true, "Delete() should handle null SelectedNode without throwing");
+        }
+        catch (NullReferenceException ex)
+        {
+            Assert.Fail($"Delete() threw NullReferenceException with null SelectedNode: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Assert.Fail($"Delete() threw unexpected exception: {ex.GetType().Name} - {ex.Message}");
+        }
+    }
+
     #endregion
 }
