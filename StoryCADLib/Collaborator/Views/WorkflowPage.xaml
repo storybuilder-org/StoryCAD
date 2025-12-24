@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    CROSS-PLATFORM BINDING PATTERN
+
+    Why we use {x:Bind ViewModel.Property} instead of {x:Bind Property} with x:DataType:
+
+    1. x:DataType at Page level is NOT supported on Skia/Desktop (macOS) targets.
+       Windows/WinUI supports it, but Skia generates: "Property x:DataType is not available"
+
+    2. x:Bind at Page level binds to the PAGE CLASS, not DataContext.
+       Per Uno docs: "For top level controls the data context is the control itself"
+
+    SOLUTION: Expose a public ViewModel property in code-behind that returns DataContext,
+    then bind to ViewModel.Property. This works on ALL platforms.
+
+    The [ForceUpdate(true)] attribute on the code-behind class tells Uno.Extensions.Navigation
+    to call Bindings.Update() when navigating, ensuring bindings refresh when DataContext changes.
+
+    See: https://github.com/unoplatform/uno.extensions/issues/2363
+-->
+<Page
+    x:Class="StoryCADLib.Collaborator.Views.WorkflowPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Grid>
+        <!-- Define column and row definitions to make the layout responsive -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <!-- Title and Description -->
+            <RowDefinition Height="Auto" />
+            <!-- Explanation -->
+            <RowDefinition Height="1*" />
+            <!-- PromptOutput (takes remaining space) -->
+            <RowDefinition Height="Auto" />
+            <!-- Progress bar -->
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Title and Description -->
+        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,10">
+            <TextBlock Text="{x:Bind ViewModel.Title, Mode=OneWay}"
+                       FontWeight="Bold" FontSize="16" TextWrapping="Wrap" />
+            <TextBlock Text="{x:Bind ViewModel.Description, Mode=OneWay}"
+                       FontStyle="Italic" TextWrapping="Wrap" Margin="0,5,0,0" />
+        </StackPanel>
+
+        <!-- Explanation -->
+        <TextBlock Text="{x:Bind ViewModel.Explanation, Mode=OneWay}"
+                   Grid.Row="1" Grid.Column="0"
+                   TextWrapping="Wrap" Margin="0,0,10,10" />
+
+        <!-- Selected Elements and Prompt Output -->
+        <ScrollViewer Grid.Row="2" Grid.Column="0" Margin="0,0,10,0">
+            <StackPanel>
+                <!-- Selected Elements Summary -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="Selected Elements:" FontWeight="SemiBold" Margin="0,0,0,5" />
+                        <TextBlock Text="{x:Bind ViewModel.SelectedElementsSummary, Mode=OneWay}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+                <!-- Prompt Output -->
+                <TextBlock Text="{x:Bind ViewModel.PromptOutput, Mode=OneWay}" TextWrapping="Wrap" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Chat history - spans rows 0-2 in column 1, grows from bottom up -->
+        <ListView ItemsSource="{x:Bind ViewModel.ConversationList, Mode=OneWay}"
+                  Grid.Column="1" Grid.Row="0" Grid.RowSpan="3"
+                  Margin="10,0,0,10"
+                  VerticalAlignment="Bottom">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ItemsStackPanel VerticalAlignment="Bottom"
+                                     ItemsUpdatingScrollMode="KeepLastItemInView" />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                    <TextBlock Text="{x:Bind}" TextWrapping="Wrap" Margin="0,2,0,2" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!-- Input and send button -->
+        <StackPanel Grid.Column="1" Grid.Row="3" Orientation="Vertical" Margin="10,0,0,0">
+            <TextBox x:Name="InputTextBox"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                     KeyDown="InputTextBox_KeyDown" TextWrapping="Wrap"
+                     Text="{x:Bind ViewModel.InputText, Mode=TwoWay}"
+                     MinHeight="60" />
+            <Button x:Name="SendButton" Content="Send" Click="SendButton_Click"
+                    HorizontalAlignment="Right" Margin="0,5,0,0" />
+        </StackPanel>
+
+        <!-- Progress bar - spans both columns at bottom -->
+        <ProgressBar x:Name="ResponseProgressBar"
+                     Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                     VerticalAlignment="Bottom"
+                     Height="5" IsIndeterminate="True"
+                     Visibility="{x:Bind ViewModel.ProgressVisibility, Mode=TwoWay}" />
+    </Grid>
+</Page>

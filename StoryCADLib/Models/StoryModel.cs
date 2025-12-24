@@ -168,6 +168,17 @@ public class StoryModel : ObservableObject
     [JsonIgnore]
     public StoryViewType CurrentViewType { get; set; }
 
+    /// <summary>
+    ///     Forces the UI to refresh by re-binding CurrentView.
+    ///     Used after Collaborator updates elements via API.
+    /// </summary>
+    public void RefreshCurrentView()
+    {
+        var view = CurrentView;
+        CurrentView = null;
+        CurrentView = view;
+    }
+
     #endregion
 
     #region Constructor
