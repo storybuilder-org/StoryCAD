@@ -85,8 +85,8 @@
                 </ItemsPanelTemplate>
             </ListView.ItemsPanel>
             <ListView.ItemTemplate>
-                <DataTemplate x:DataType="x:String">
-                    <TextBlock Text="{x:Bind}" TextWrapping="Wrap" Margin="0,2,0,2" />
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,2,0,2" />
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
