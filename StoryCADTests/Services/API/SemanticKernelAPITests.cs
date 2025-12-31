@@ -1,8 +1,10 @@
 ﻿using System.Text.Json;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
+using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels;
 
 #nullable disable
 
@@ -11,7 +13,7 @@ namespace StoryCADTests.Services.API;
 [TestClass]
 public class SemanticKernelApiTests
 {
-    private readonly SemanticKernelApi _api = new(Ioc.Default.GetRequiredService<OutlineService>());
+    private readonly SemanticKernelApi _api = new(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
     [TestMethod]
     public async Task CreateOutlineWithInvalidTemplate()
@@ -315,7 +317,7 @@ public class SemanticKernelApiTests
         Assert.IsTrue(writeResult.IsSuccess, "WriteOutline should succeed.");
 
         // Act: Create a new API instance and open the written file.
-        var newApi = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var newApi = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
         var openResult = await newApi.OpenOutline(filePath);
 
         // Assert
@@ -415,7 +417,7 @@ public class SemanticKernelApiTests
     public async Task SetCurrentModel_WithValidModel_SetsCurrentModel()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Create a test model
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
@@ -447,7 +449,7 @@ public class SemanticKernelApiTests
     public void SetCurrentModel_WithNullModel_SetsCurrentModelToNull()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         api.SetCurrentModel(null);
@@ -463,7 +465,7 @@ public class SemanticKernelApiTests
     public async Task SetCurrentModel_AllowsOperationsOnNewModel()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Create first model
         var firstResult = await api.CreateEmptyOutline("First Story", "Author 1", "0");
@@ -557,7 +559,7 @@ public class SemanticKernelApiTests
     public void DeleteStoryElement_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = api.DeleteStoryElement(Guid.NewGuid().ToString());
@@ -598,7 +600,7 @@ public class SemanticKernelApiTests
     public async Task DeleteElement_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = await api.DeleteElement(Guid.NewGuid());
@@ -662,7 +664,7 @@ public class SemanticKernelApiTests
     public async Task RestoreFromTrash_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = await api.RestoreFromTrash(Guid.NewGuid());
@@ -729,7 +731,7 @@ public class SemanticKernelApiTests
     public async Task EmptyTrash_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = await api.EmptyTrash();
@@ -774,7 +776,7 @@ public class SemanticKernelApiTests
     public void GetStoryElement_WithNoCurrentModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
         var someGuid = Guid.NewGuid();
 
         // Act
@@ -833,7 +835,7 @@ public class SemanticKernelApiTests
     public void SearchForText_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = api.SearchForText("test");
@@ -935,7 +937,7 @@ public class SemanticKernelApiTests
     public void SearchForReferences_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = api.SearchForReferences(Guid.NewGuid());
@@ -1022,7 +1024,7 @@ public class SemanticKernelApiTests
     public void RemoveReferences_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = api.RemoveReferences(Guid.NewGuid());
@@ -1113,7 +1115,7 @@ public class SemanticKernelApiTests
     public void SearchInSubtree_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>());
+        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = api.SearchInSubtree(Guid.NewGuid(), "test");
@@ -1229,6 +1231,992 @@ public class SemanticKernelApiTests
         Assert.IsTrue(names.Contains("Hero Character"), "Should find Hero Character inside folder");
         Assert.IsTrue(names.Contains("Sidekick"), "Should find Sidekick (has 'hero' in notes)");
         Assert.IsFalse(names.Contains("Another Hero"), "Should NOT find Another Hero (outside folder)");
+    }
+
+    #endregion
+
+    #region GetExamples Tests (Lists API - Issue #1223)
+
+    /// <summary>
+    /// Tests that GetExamples returns list values for a valid property name
+    /// </summary>
+    [TestMethod]
+    public void GetExamples_ValidProperty_ReturnsListValues()
+    {
+        // Arrange
+        var propertyName = "Tone"; // Known list key from Lists.json
+
+        // Act
+        var result = _api.GetExamples(propertyName);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetExamples should succeed for valid property");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.IsTrue(result.Payload.Any(), "Should return at least one value");
+        // Verify some known tone values exist
+        var values = result.Payload.ToList();
+        Assert.IsTrue(values.Contains("Angry") || values.Contains("Calm") || values.Contains("Cheerful"),
+            "Should contain expected tone values");
+    }
+
+    /// <summary>
+    /// Tests that GetExamples returns failure for an invalid property name
+    /// </summary>
+    [TestMethod]
+    public void GetExamples_InvalidProperty_ReturnsFailure()
+    {
+        // Arrange
+        var propertyName = "NonExistentProperty";
+
+        // Act
+        var result = _api.GetExamples(propertyName);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetExamples should fail for invalid property");
+        Assert.IsNull(result.Payload, "Payload should be null on failure");
+        Assert.AreEqual($"No list found for property '{propertyName}'", result.ErrorMessage);
+    }
+
+    #endregion
+
+    #region Conflicts API Tests (Issue #1223)
+
+    /// <summary>
+    /// Tests that GetConflictCategories returns all categories
+    /// </summary>
+    [TestMethod]
+    public void GetConflictCategories_WhenCalled_ReturnsAllCategories()
+    {
+        // Act
+        var result = _api.GetConflictCategories();
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetConflictCategories should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        var categories = result.Payload.ToList();
+        Assert.IsTrue(categories.Count >= 8, "Should have at least 8 conflict categories");
+        // Verify some known categories exist
+        Assert.IsTrue(categories.Contains("Relationship"), "Should contain Relationship category");
+        Assert.IsTrue(categories.Contains("Criminal activities"), "Should contain Criminal activities category");
+    }
+
+    /// <summary>
+    /// Tests that GetConflictSubcategories returns subcategories for a valid category
+    /// </summary>
+    [TestMethod]
+    public void GetConflictSubcategories_ValidCategory_ReturnsSubcategories()
+    {
+        // Arrange
+        var category = "Relationship";
+
+        // Act
+        var result = _api.GetConflictSubcategories(category);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetConflictSubcategories should succeed for valid category");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.IsTrue(result.Payload.Any(), "Should return at least one subcategory");
+    }
+
+    /// <summary>
+    /// Tests that GetConflictSubcategories returns failure for invalid category
+    /// </summary>
+    [TestMethod]
+    public void GetConflictSubcategories_InvalidCategory_ReturnsFailure()
+    {
+        // Arrange
+        var category = "NonExistentCategory";
+
+        // Act
+        var result = _api.GetConflictSubcategories(category);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetConflictSubcategories should fail for invalid category");
+        Assert.IsNull(result.Payload, "Payload should be null on failure");
+        Assert.AreEqual($"No conflict category '{category}' found", result.ErrorMessage);
+    }
+
+    /// <summary>
+    /// Tests that GetConflictExamples returns examples for valid inputs
+    /// </summary>
+    [TestMethod]
+    public void GetConflictExamples_ValidInputs_ReturnsExamples()
+    {
+        // Arrange - first get a valid subcategory
+        var category = "Relationship";
+        var subcatResult = _api.GetConflictSubcategories(category);
+        Assert.IsTrue(subcatResult.IsSuccess, "Need valid subcategory for test");
+        var subcategory = subcatResult.Payload.First();
+
+        // Act
+        var result = _api.GetConflictExamples(category, subcategory);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetConflictExamples should succeed for valid inputs");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.IsTrue(result.Payload.Any(), "Should return at least one example");
+    }
+
+    /// <summary>
+    /// Tests that GetConflictExamples returns failure for invalid category
+    /// </summary>
+    [TestMethod]
+    public void GetConflictExamples_InvalidCategory_ReturnsFailure()
+    {
+        // Arrange
+        var category = "NonExistentCategory";
+        var subcategory = "SomeSubcategory";
+
+        // Act
+        var result = _api.GetConflictExamples(category, subcategory);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetConflictExamples should fail for invalid category");
+        Assert.AreEqual($"No conflict category '{category}' found", result.ErrorMessage);
+    }
+
+    /// <summary>
+    /// Tests that GetConflictExamples returns failure for invalid subcategory
+    /// </summary>
+    [TestMethod]
+    public void GetConflictExamples_InvalidSubcategory_ReturnsFailure()
+    {
+        // Arrange
+        var category = "Relationship";
+        var subcategory = "NonExistentSubcategory";
+
+        // Act
+        var result = _api.GetConflictExamples(category, subcategory);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetConflictExamples should fail for invalid subcategory");
+        Assert.AreEqual($"No subcategory '{subcategory}' in category '{category}'", result.ErrorMessage);
+    }
+
+    #endregion
+
+    #region Key Questions API Tests (Issue #1223)
+
+    /// <summary>
+    /// Tests that GetKeyQuestionElements returns all element types with key questions
+    /// </summary>
+    [TestMethod]
+    public void GetKeyQuestionElements_WhenCalled_ReturnsElementTypes()
+    {
+        // Act
+        var result = _api.GetKeyQuestionElements();
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetKeyQuestionElements should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        var elements = result.Payload.ToList();
+        Assert.IsTrue(elements.Count >= 1, "Should have at least one element type with key questions");
+        // Verify some known element types exist
+        Assert.IsTrue(elements.Contains("Character") || elements.Contains("Problem") || elements.Contains("Scene"),
+            "Should contain common element types");
+    }
+
+    /// <summary>
+    /// Tests that GetKeyQuestions returns questions for a valid element type
+    /// </summary>
+    [TestMethod]
+    public void GetKeyQuestions_ValidElementType_ReturnsQuestions()
+    {
+        // Arrange - get a valid element type first
+        var elementsResult = _api.GetKeyQuestionElements();
+        Assert.IsTrue(elementsResult.IsSuccess, "Need valid element type for test");
+        var elementType = elementsResult.Payload.First();
+
+        // Act
+        var result = _api.GetKeyQuestions(elementType);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetKeyQuestions should succeed for valid element type");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        var questions = result.Payload.ToList();
+        Assert.IsTrue(questions.Count >= 1, "Should have at least one question");
+        // Verify tuple structure
+        var firstQuestion = questions.First();
+        Assert.IsFalse(string.IsNullOrEmpty(firstQuestion.Topic), "Topic should not be empty");
+        Assert.IsFalse(string.IsNullOrEmpty(firstQuestion.Question), "Question should not be empty");
+    }
+
+    /// <summary>
+    /// Tests that GetKeyQuestions returns failure for invalid element type
+    /// </summary>
+    [TestMethod]
+    public void GetKeyQuestions_InvalidElementType_ReturnsFailure()
+    {
+        // Arrange
+        var elementType = "NonExistentElement";
+
+        // Act
+        var result = _api.GetKeyQuestions(elementType);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetKeyQuestions should fail for invalid element type");
+        Assert.IsNull(result.Payload, "Payload should be null on failure");
+        Assert.AreEqual($"No key questions for element type '{elementType}'", result.ErrorMessage);
+    }
+
+    #endregion
+
+    #region Master Plots API Tests (Issue #1223)
+
+    /// <summary>
+    /// Tests that GetMasterPlotNames returns all master plot names
+    /// </summary>
+    [TestMethod]
+    public void GetMasterPlotNames_WhenCalled_ReturnsPlotNames()
+    {
+        // Act
+        var result = _api.GetMasterPlotNames();
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetMasterPlotNames should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        var names = result.Payload.ToList();
+        Assert.IsTrue(names.Count >= 1, "Should have at least one master plot");
+        // Verify some known master plots exist (from Tobias's 20 Master Plots)
+        Assert.IsTrue(names.Contains("Quest") || names.Contains("Adventure") || names.Contains("Pursuit"),
+            "Should contain known master plot names");
+    }
+
+    /// <summary>
+    /// Tests that GetMasterPlotNotes returns notes for a valid plot name
+    /// </summary>
+    [TestMethod]
+    public void GetMasterPlotNotes_ValidName_ReturnsNotes()
+    {
+        // Arrange - get a valid plot name first
+        var namesResult = _api.GetMasterPlotNames();
+        Assert.IsTrue(namesResult.IsSuccess, "Need valid plot name for test");
+        var plotName = namesResult.Payload.First();
+
+        // Act
+        var result = _api.GetMasterPlotNotes(plotName);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetMasterPlotNotes should succeed for valid name");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+    }
+
+    /// <summary>
+    /// Tests that GetMasterPlotNotes returns failure for invalid plot name
+    /// </summary>
+    [TestMethod]
+    public void GetMasterPlotNotes_InvalidName_ReturnsFailure()
+    {
+        // Arrange
+        var plotName = "NonExistentPlot";
+
+        // Act
+        var result = _api.GetMasterPlotNotes(plotName);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetMasterPlotNotes should fail for invalid name");
+        Assert.IsNull(result.Payload, "Payload should be null on failure");
+        Assert.AreEqual($"No master plot '{plotName}' found", result.ErrorMessage);
+    }
+
+    #endregion
+
+    #region Stock Scenes API Tests (Issue #1223)
+
+    /// <summary>
+    /// Tests that GetStockSceneCategories returns all categories
+    /// </summary>
+    [TestMethod]
+    public void GetStockSceneCategories_WhenCalled_ReturnsCategories()
+    {
+        // Act
+        var result = _api.GetStockSceneCategories();
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetStockSceneCategories should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        var categories = result.Payload.ToList();
+        Assert.IsTrue(categories.Count >= 1, "Should have at least one category");
+    }
+
+    /// <summary>
+    /// Tests that GetStockScenes returns scenes for a valid category
+    /// </summary>
+    [TestMethod]
+    public void GetStockScenes_ValidCategory_ReturnsScenes()
+    {
+        // Arrange - get a valid category first
+        var categoriesResult = _api.GetStockSceneCategories();
+        Assert.IsTrue(categoriesResult.IsSuccess, "Need valid category for test");
+        var category = categoriesResult.Payload.First();
+
+        // Act
+        var result = _api.GetStockScenes(category);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetStockScenes should succeed for valid category");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+    }
+
+    /// <summary>
+    /// Tests that GetStockScenes returns failure for invalid category
+    /// </summary>
+    [TestMethod]
+    public void GetStockScenes_InvalidCategory_ReturnsFailure()
+    {
+        // Arrange
+        var category = "NonExistentCategory";
+
+        // Act
+        var result = _api.GetStockScenes(category);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetStockScenes should fail for invalid category");
+        Assert.IsNull(result.Payload, "Payload should be null on failure");
+        Assert.AreEqual($"No stock scene category '{category}' found", result.ErrorMessage);
+    }
+
+    #endregion
+
+    #region Beat Sheets API Tests (Issue #1223)
+
+    // ===== Read Operations - Templates =====
+
+    /// <summary>
+    /// Tests that GetBeatSheetNames returns all beat sheet template names
+    /// </summary>
+    [TestMethod]
+    public void GetBeatSheetNames_WhenCalled_ReturnsNames()
+    {
+        // Act
+        var result = _api.GetBeatSheetNames();
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetBeatSheetNames should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        var names = result.Payload.ToList();
+        Assert.IsTrue(names.Count >= 1, "Should have at least one beat sheet");
+    }
+
+    /// <summary>
+    /// Tests that GetBeatSheet returns description and beats for a valid template
+    /// </summary>
+    [TestMethod]
+    public void GetBeatSheet_ValidName_ReturnsDescriptionAndBeats()
+    {
+        // Arrange
+        var namesResult = _api.GetBeatSheetNames();
+        Assert.IsTrue(namesResult.IsSuccess, "Need valid beat sheet name for test");
+        var beatSheetName = namesResult.Payload.First();
+
+        // Act
+        var result = _api.GetBeatSheet(beatSheetName);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetBeatSheet should succeed for valid name");
+        Assert.IsNotNull(result.Payload.Description, "Description should not be null");
+        Assert.IsNotNull(result.Payload.Beats, "Beats should not be null");
+        var beats = result.Payload.Beats.ToList();
+        Assert.IsTrue(beats.Count >= 1, "Should have at least one beat");
+    }
+
+    /// <summary>
+    /// Tests that GetBeatSheet returns failure for invalid template name
+    /// </summary>
+    [TestMethod]
+    public void GetBeatSheet_InvalidName_ReturnsFailure()
+    {
+        // Act
+        var result = _api.GetBeatSheet("NonExistentBeatSheet");
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetBeatSheet should fail for invalid name");
+        Assert.AreEqual("No beat sheet 'NonExistentBeatSheet' found", result.ErrorMessage);
+    }
+
+    // ===== Apply Template to Problem =====
+
+    /// <summary>
+    /// Tests that ApplyBeatSheetToProblem applies a template to a Problem
+    /// </summary>
+    [TestMethod]
+    public async Task ApplyBeatSheetToProblem_ValidInputs_AppliesTemplate()
+    {
+        // Arrange - create model with Problem
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        Assert.IsTrue(addProblemResult.IsSuccess, "Problem creation should succeed");
+        var problemGuid = addProblemResult.Payload;
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+
+        // Act
+        var result = _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "ApplyBeatSheetToProblem should succeed");
+
+        // Verify structure was applied
+        var structureResult = _api.GetProblemStructure(problemGuid);
+        Assert.IsTrue(structureResult.IsSuccess, "Should be able to get structure after applying");
+        Assert.AreEqual(beatSheetName, structureResult.Payload.Title, "Structure title should match beat sheet name");
+    }
+
+    /// <summary>
+    /// Tests that ApplyBeatSheetToProblem fails for invalid Problem GUID
+    /// </summary>
+    [TestMethod]
+    public async Task ApplyBeatSheetToProblem_InvalidProblem_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var invalidGuid = Guid.NewGuid();
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+
+        // Act
+        var result = _api.ApplyBeatSheetToProblem(invalidGuid, beatSheetName);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "Should fail for invalid Problem GUID");
+    }
+
+    /// <summary>
+    /// Tests that ApplyBeatSheetToProblem fails for invalid beat sheet name
+    /// </summary>
+    [TestMethod]
+    public async Task ApplyBeatSheetToProblem_InvalidBeatSheet_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        // Act
+        var result = _api.ApplyBeatSheetToProblem(problemGuid, "NonExistentBeatSheet");
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "Should fail for invalid beat sheet name");
+    }
+
+    // ===== Assign/Clear Element =====
+
+    /// <summary>
+    /// Tests that AssignElementToBeat assigns a Scene to a beat
+    /// </summary>
+    [TestMethod]
+    public async Task AssignElementToBeat_ValidInputs_AssignsElement()
+    {
+        // Arrange - create model with Problem and Scene
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+        var addSceneResult = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Test Scene");
+        var sceneGuid = addSceneResult.Payload;
+
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        // Act
+        var result = _api.AssignElementToBeat(problemGuid, 0, sceneGuid);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "AssignElementToBeat should succeed");
+
+        // Verify assignment
+        var structureResult = _api.GetProblemStructure(problemGuid);
+        var firstBeat = structureResult.Payload.Beats.First();
+        Assert.AreEqual(sceneGuid, firstBeat.LinkedElement, "Beat should have assigned element");
+    }
+
+    /// <summary>
+    /// Tests that ClearBeatAssignment clears an element assignment
+    /// </summary>
+    [TestMethod]
+    public async Task ClearBeatAssignment_ValidInputs_ClearsAssignment()
+    {
+        // Arrange - create model, apply beat sheet, and assign element
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+        var addSceneResult = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Test Scene");
+        var sceneGuid = addSceneResult.Payload;
+
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+        _api.AssignElementToBeat(problemGuid, 0, sceneGuid);
+
+        // Act
+        var result = _api.ClearBeatAssignment(problemGuid, 0);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "ClearBeatAssignment should succeed");
+
+        // Verify cleared
+        var structureResult = _api.GetProblemStructure(problemGuid);
+        var firstBeat = structureResult.Payload.Beats.First();
+        Assert.IsNull(firstBeat.LinkedElement, "Beat should have no assigned element");
+    }
+
+    // ===== CRUD Operations =====
+
+    /// <summary>
+    /// Tests that CreateBeat adds a new beat to a Problem's structure
+    /// </summary>
+    [TestMethod]
+    public async Task CreateBeat_ValidInputs_AddsBeat()
+    {
+        // Arrange - create model and apply beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        var initialCount = _api.GetProblemStructure(problemGuid).Payload.Beats.Count();
+
+        // Act
+        var result = _api.CreateBeat(problemGuid, "New Beat", "Beat description");
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "CreateBeat should succeed");
+
+        var newCount = _api.GetProblemStructure(problemGuid).Payload.Beats.Count();
+        Assert.AreEqual(initialCount + 1, newCount, "Should have one more beat");
+    }
+
+    /// <summary>
+    /// Tests that UpdateBeat modifies a beat's title and description
+    /// </summary>
+    [TestMethod]
+    public async Task UpdateBeat_ValidInputs_UpdatesBeat()
+    {
+        // Arrange - create model and apply beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        // Act
+        var result = _api.UpdateBeat(problemGuid, 0, "Updated Title", "Updated Description");
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "UpdateBeat should succeed");
+
+        var structureResult = _api.GetProblemStructure(problemGuid);
+        var firstBeat = structureResult.Payload.Beats.First();
+        Assert.AreEqual("Updated Title", firstBeat.BeatTitle, "Title should be updated");
+        Assert.AreEqual("Updated Description", firstBeat.BeatDescription, "Description should be updated");
+    }
+
+    /// <summary>
+    /// Tests that DeleteBeat removes a beat from a Problem's structure
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteBeat_ValidInputs_RemovesBeat()
+    {
+        // Arrange - create model and apply beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        var initialCount = _api.GetProblemStructure(problemGuid).Payload.Beats.Count();
+
+        // Act
+        var result = _api.DeleteBeat(problemGuid, 0);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "DeleteBeat should succeed");
+
+        var newCount = _api.GetProblemStructure(problemGuid).Payload.Beats.Count();
+        Assert.AreEqual(initialCount - 1, newCount, "Should have one fewer beat");
+    }
+
+    /// <summary>
+    /// Tests that MoveBeat reorders beats in a Problem's structure
+    /// </summary>
+    [TestMethod]
+    public async Task MoveBeat_ValidInputs_ReordersBeat()
+    {
+        // Arrange - create model and apply beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        var beats = _api.GetProblemStructure(problemGuid).Payload.Beats.ToList();
+        if (beats.Count < 2)
+        {
+            Assert.Inconclusive("Need at least 2 beats to test move");
+            return;
+        }
+        var firstBeatTitle = beats[0].BeatTitle;
+        var secondBeatTitle = beats[1].BeatTitle;
+
+        // Act - move first beat to second position
+        var result = _api.MoveBeat(problemGuid, 0, 1);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "MoveBeat should succeed");
+
+        var newBeats = _api.GetProblemStructure(problemGuid).Payload.Beats.ToList();
+        Assert.AreEqual(secondBeatTitle, newBeats[0].BeatTitle, "Second beat should now be first");
+        Assert.AreEqual(firstBeatTitle, newBeats[1].BeatTitle, "First beat should now be second");
+    }
+
+    // ===== Get Problem Structure =====
+
+    /// <summary>
+    /// Tests that GetProblemStructure returns the current structure of a Problem
+    /// </summary>
+    [TestMethod]
+    public async Task GetProblemStructure_ValidProblem_ReturnsStructure()
+    {
+        // Arrange - create model and apply beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        // Act
+        var result = _api.GetProblemStructure(problemGuid);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetProblemStructure should succeed");
+        Assert.IsNotNull(result.Payload.Title, "Title should not be null");
+        Assert.IsNotNull(result.Payload.Description, "Description should not be null");
+        Assert.IsNotNull(result.Payload.Beats, "Beats should not be null");
+    }
+
+    /// <summary>
+    /// Tests that GetProblemStructure fails for invalid Problem GUID
+    /// </summary>
+    [TestMethod]
+    public async Task GetProblemStructure_InvalidProblem_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+
+        // Act
+        var result = _api.GetProblemStructure(Guid.NewGuid());
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetProblemStructure should fail for invalid GUID");
+    }
+
+    /// <summary>
+    /// Tests that GetProblemStructure returns empty structure for Problem without beat sheet
+    /// </summary>
+    [TestMethod]
+    public async Task GetProblemStructure_NoBeatSheet_ReturnsEmptyStructure()
+    {
+        // Arrange - create model with Problem but no beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        // Act
+        var result = _api.GetProblemStructure(problemGuid);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetProblemStructure should succeed even without beat sheet");
+        // Structure may be empty but should not fail
+    }
+
+    #endregion
+
+    #region Conflict Apply API Tests (Issue #1223)
+
+    /// <summary>
+    /// Tests that ApplyConflictToProtagonist sets the ProtConflict property
+    /// </summary>
+    [TestMethod]
+    public async Task ApplyConflictToProtagonist_ValidInputs_SetsProtConflict()
+    {
+        // Arrange - create model with Problem
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        Assert.IsTrue(addProblemResult.IsSuccess, "Problem creation should succeed");
+        var problemGuid = addProblemResult.Payload;
+        var conflictText = "Hero must overcome fear of heights";
+
+        // Act
+        var result = _api.ApplyConflictToProtagonist(problemGuid, conflictText);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "ApplyConflictToProtagonist should succeed");
+        var problem = _api.CurrentModel.StoryElements.First(e => e.Uuid == problemGuid) as ProblemModel;
+        Assert.AreEqual(conflictText, problem.ProtConflict, "ProtConflict should be set");
+    }
+
+    /// <summary>
+    /// Tests that ApplyConflictToProtagonist returns failure for invalid problem
+    /// </summary>
+    [TestMethod]
+    public async Task ApplyConflictToProtagonist_InvalidProblem_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var invalidGuid = Guid.NewGuid();
+
+        // Act
+        var result = _api.ApplyConflictToProtagonist(invalidGuid, "Some conflict");
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "Should fail for invalid problem GUID");
+    }
+
+    /// <summary>
+    /// Tests that ApplyConflictToAntagonist sets the AntagConflict property
+    /// </summary>
+    [TestMethod]
+    public async Task ApplyConflictToAntagonist_ValidInputs_SetsAntagConflict()
+    {
+        // Arrange - create model with Problem
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        Assert.IsTrue(addProblemResult.IsSuccess, "Problem creation should succeed");
+        var problemGuid = addProblemResult.Payload;
+        var conflictText = "Villain seeks world domination";
+
+        // Act
+        var result = _api.ApplyConflictToAntagonist(problemGuid, conflictText);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "ApplyConflictToAntagonist should succeed");
+        var problem = _api.CurrentModel.StoryElements.First(e => e.Uuid == problemGuid) as ProblemModel;
+        Assert.AreEqual(conflictText, problem.AntagConflict, "AntagConflict should be set");
+    }
+
+    /// <summary>
+    /// Tests that ApplyConflictToAntagonist returns failure for invalid problem
+    /// </summary>
+    [TestMethod]
+    public async Task ApplyConflictToAntagonist_InvalidProblem_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var invalidGuid = Guid.NewGuid();
+
+        // Act
+        var result = _api.ApplyConflictToAntagonist(invalidGuid, "Some conflict");
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "Should fail for invalid problem GUID");
+    }
+
+    #endregion
+
+    #region Master Plot Scenes API Tests (Issue #1223)
+
+    /// <summary>
+    /// Tests that GetMasterPlotScenes returns scenes for a valid plot
+    /// </summary>
+    [TestMethod]
+    public void GetMasterPlotScenes_ValidName_ReturnsScenes()
+    {
+        // Arrange - get a valid plot name first
+        var namesResult = _api.GetMasterPlotNames();
+        Assert.IsTrue(namesResult.IsSuccess, "Need valid plot name for test");
+        var plotName = namesResult.Payload.First();
+
+        // Act
+        var result = _api.GetMasterPlotScenes(plotName);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetMasterPlotScenes should succeed for valid name");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        // Note: Some plots may have zero scenes, so we just check it doesn't fail
+    }
+
+    /// <summary>
+    /// Tests that GetMasterPlotScenes returns failure for invalid plot name
+    /// </summary>
+    [TestMethod]
+    public void GetMasterPlotScenes_InvalidName_ReturnsFailure()
+    {
+        // Arrange
+        var plotName = "NonExistentPlot";
+
+        // Act
+        var result = _api.GetMasterPlotScenes(plotName);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetMasterPlotScenes should fail for invalid name");
+        Assert.IsNull(result.Payload, "Payload should be null on failure");
+        Assert.AreEqual($"No master plot '{plotName}' found", result.ErrorMessage);
+    }
+
+    #endregion
+
+    #region Beat Sheet File API Tests (Issue #1223)
+
+    /// <summary>
+    /// Tests that SaveBeatSheet saves a Problem's beats to a file
+    /// </summary>
+    [TestMethod]
+    public async Task SaveBeatSheet_ValidInputs_SavesFile()
+    {
+        // Arrange - create model with Problem and apply a beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        Assert.IsTrue(addProblemResult.IsSuccess, "Problem creation should succeed");
+        var problemGuid = addProblemResult.Payload;
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        var filePath = Path.Combine(App.InputDir, "test_beatsheet.stbeat");
+
+        // Act
+        var result = _api.SaveBeatSheet(problemGuid, filePath);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "SaveBeatSheet should succeed");
+        Assert.IsTrue(File.Exists(filePath), "File should be created");
+
+        // Cleanup
+        if (File.Exists(filePath))
+            File.Delete(filePath);
+    }
+
+    /// <summary>
+    /// Tests that SaveBeatSheet fails for invalid Problem GUID
+    /// </summary>
+    [TestMethod]
+    public async Task SaveBeatSheet_InvalidProblem_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var invalidGuid = Guid.NewGuid();
+        var filePath = Path.Combine(App.InputDir, "test_beatsheet.stbeat");
+
+        // Act
+        var result = _api.SaveBeatSheet(invalidGuid, filePath);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "SaveBeatSheet should fail for invalid problem GUID");
+    }
+
+    /// <summary>
+    /// Tests that SaveBeatSheet fails when Problem has no beats
+    /// </summary>
+    [TestMethod]
+    public async Task SaveBeatSheet_NoBeats_ReturnsFailure()
+    {
+        // Arrange - create model with Problem but don't apply a beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        Assert.IsTrue(addProblemResult.IsSuccess, "Problem creation should succeed");
+        var problemGuid = addProblemResult.Payload;
+
+        var filePath = Path.Combine(App.InputDir, "test_beatsheet.stbeat");
+
+        // Act
+        var result = _api.SaveBeatSheet(problemGuid, filePath);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "SaveBeatSheet should fail when Problem has no beats");
+    }
+
+    /// <summary>
+    /// Tests that LoadBeatSheet loads beats from a file into a Problem
+    /// </summary>
+    [TestMethod]
+    public async Task LoadBeatSheet_ValidFile_LoadsBeats()
+    {
+        // Arrange - create model with Problem, apply beat sheet, save it
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        Assert.IsTrue(addProblemResult.IsSuccess, "Problem creation should succeed");
+        var problemGuid = addProblemResult.Payload;
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        var filePath = Path.Combine(App.InputDir, "test_beatsheet_load.stbeat");
+        _api.SaveBeatSheet(problemGuid, filePath);
+
+        // Get beat count before clearing
+        var structureBefore = _api.GetProblemStructure(problemGuid);
+        var beatCountBefore = structureBefore.Payload.Beats.Count();
+
+        // Create a second Problem to load beats into
+        var addProblem2Result = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem 2");
+        var problem2Guid = addProblem2Result.Payload;
+
+        // Act
+        var result = _api.LoadBeatSheet(problem2Guid, filePath);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "LoadBeatSheet should succeed");
+        var structureAfter = _api.GetProblemStructure(problem2Guid);
+        Assert.IsTrue(structureAfter.IsSuccess, "Should be able to get structure after loading");
+        Assert.AreEqual(beatCountBefore, structureAfter.Payload.Beats.Count(), "Beat count should match saved file");
+
+        // Cleanup
+        if (File.Exists(filePath))
+            File.Delete(filePath);
+    }
+
+    /// <summary>
+    /// Tests that LoadBeatSheet fails for invalid Problem GUID
+    /// </summary>
+    [TestMethod]
+    public async Task LoadBeatSheet_InvalidProblem_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var invalidGuid = Guid.NewGuid();
+        var filePath = Path.Combine(App.InputDir, "nonexistent.stbeat");
+
+        // Act
+        var result = _api.LoadBeatSheet(invalidGuid, filePath);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "LoadBeatSheet should fail for invalid problem GUID");
+    }
+
+    /// <summary>
+    /// Tests that LoadBeatSheet fails for invalid file path
+    /// </summary>
+    [TestMethod]
+    public async Task LoadBeatSheet_InvalidFile_ReturnsFailure()
+    {
+        // Arrange - create model with Problem
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        var filePath = Path.Combine(App.InputDir, "nonexistent_file.stbeat");
+
+        // Act
+        var result = _api.LoadBeatSheet(problemGuid, filePath);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "LoadBeatSheet should fail for nonexistent file");
     }
 
     #endregion

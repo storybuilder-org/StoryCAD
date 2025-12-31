@@ -2,8 +2,11 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 using Microsoft.SemanticKernel;
+using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels;
+using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.Services.API;
 
@@ -20,7 +23,7 @@ namespace StoryCADLib.Services.API;
 ///     - Calling Standard: All public API methods return OperationResult<T> to ensure safe external consumption.
 ///         No exceptions are thrown to external callers; all errors are communicated through the OperationResult
 ///         pattern with IsSuccess flags and descriptive ErrorMessage strings.
-public class SemanticKernelApi(OutlineService outlineService) : IStoryCADAPI
+public class SemanticKernelApi(OutlineService outlineService, ListData listData, ControlData controlData, ToolsData toolsData) : IStoryCADAPI
 {
     public StoryModel CurrentModel { get; set; }
 
@@ -970,4 +973,673 @@ public class SemanticKernelApi(OutlineService outlineService) : IStoryCADAPI
             return Task.FromResult(OperationResult<bool>.Failure($"Error in EmptyTrash: {ex.Message}"));
         }
     }
+
+    #region Resource API (Issue #1223)
+
+    /// <summary>
+    /// Gets examples for a property from Lists.json
+    /// </summary>
+    /// <param name="propertyName">Property name matching a list key</param>
+    /// <returns>Result containing the list values, or error if key not found</returns>
+    [KernelFunction]
+    [Description("""
+                 Gets valid example values for a story element property.
+                 Use this to discover dropdown values for element properties.
+                 Valid property names include: Tone, Role, Archetype, Sex, Age, Build, Complexion,
+                 EyeColor, HairColor, HairStyle, Demeanor, Enneagram, Intelligence, Values,
+                 Abnormality, Focus, Adventuresome, Aggression, Confidence, Conscientiousness,
+                 Creativity, Dominance, Enthusiasm, Assurance, Sensitivity, Shrewdness, Sociability,
+                 Stability, ScenePurpose, SceneType, SceneValueExchange, SettingCountry, Locale, Season.
+                 Returns an error if property name is not found.
+                 """)]
+    public OperationResult<IEnumerable<string>> GetExamples(string propertyName)
+    {
+        if (listData.ListControlSource.TryGetValue(propertyName, out var list))
+            return OperationResult<IEnumerable<string>>.Success(list);
+
+        return OperationResult<IEnumerable<string>>.Failure($"No list found for property '{propertyName}'");
+    }
+
+    /// <summary>
+    /// Gets all conflict categories from Controls.json
+    /// </summary>
+    /// <returns>Result containing the list of conflict categories</returns>
+    [KernelFunction]
+    [Description("""
+                 Gets all conflict categories for the Conflict Builder tool.
+                 This is step 1 of 4 in the conflict workflow.
+                 Next: Call GetConflictSubcategories with one of these categories.
+                 Categories include: Relationship, Situational, Inner Conflict, Paranormal,
+                 Criminal activities, Mystery and suspense, Social drama, Romantic.
+                 """)]
+    public OperationResult<IEnumerable<string>> GetConflictCategories()
+    {
+        return OperationResult<IEnumerable<string>>.Success(controlData.ConflictTypes.Keys);
+    }
+
+    /// <summary>
+    /// Gets subcategories for a conflict category
+    /// </summary>
+    /// <param name="category">The conflict category name</param>
+    /// <returns>Result containing the list of subcategories, or error if category not found</returns>
+    [KernelFunction]
+    [Description("""
+                 Gets subcategories for a conflict category.
+                 This is step 2 of 4 in the conflict workflow.
+                 Call GetConflictCategories first to get valid category values.
+                 Next: Call GetConflictExamples with category and subcategory.
+                 """)]
+    public OperationResult<IEnumerable<string>> GetConflictSubcategories(string category)
+    {
+        if (controlData.ConflictTypes.TryGetValue(category, out var model))
+            return OperationResult<IEnumerable<string>>.Success(model.SubCategories);
+
+        return OperationResult<IEnumerable<string>>.Failure($"No conflict category '{category}' found");
+    }
+
+    /// <summary>
+    /// Gets examples for a conflict category and subcategory
+    /// </summary>
+    /// <param name="category">The conflict category name</param>
+    /// <param name="subcategory">The subcategory name within the category</param>
+    /// <returns>Result containing the list of examples, or error if not found</returns>
+    [KernelFunction]
+    [Description("""
+                 Gets example conflict descriptions for a category and subcategory.
+                 This is step 3 of 4 in the conflict workflow.
+                 Call GetConflictSubcategories first to get valid subcategory values.
+                 Next: Call ApplyConflictToProtagonist or ApplyConflictToAntagonist
+                 with a Problem GUID and one of these example strings (or your own text).
+                 """)]
+    public OperationResult<IEnumerable<string>> GetConflictExamples(string category, string subcategory)
+    {
+        if (!controlData.ConflictTypes.TryGetValue(category, out var model))
+            return OperationResult<IEnumerable<string>>.Failure($"No conflict category '{category}' found");
+
+        if (!model.Examples.TryGetValue(subcategory, out var examples))
+            return OperationResult<IEnumerable<string>>.Failure($"No subcategory '{subcategory}' in category '{category}'");
+
+        return OperationResult<IEnumerable<string>>.Success(examples);
+    }
+
+    /// <summary>
+    /// Applies a conflict description to a Problem's protagonist conflict field
+    /// </summary>
+    /// <param name="problemGuid">The GUID of the Problem element</param>
+    /// <param name="conflictText">The conflict description text</param>
+    /// <returns>Result indicating success or failure</returns>
+    [KernelFunction]
+    [Description("""
+                 Applies a conflict description to a Problem's protagonist conflict field.
+                 This is step 4 of 4 in the conflict workflow.
+                 problemGuid MUST be the GUID of a Problem element.
+                 conflictText can be from GetConflictExamples or custom text.
+                 Use ApplyConflictToAntagonist for the antagonist's conflict.
+                 """)]
+    public OperationResult<bool> ApplyConflictToProtagonist(Guid problemGuid, string conflictText)
+    {
+        var elementResult = GetStoryElement(problemGuid);
+        if (!elementResult.IsSuccess)
+            return OperationResult<bool>.Failure(elementResult.ErrorMessage);
+
+        if (elementResult.Payload is not ProblemModel problem)
+            return OperationResult<bool>.Failure($"Element {problemGuid} is not a Problem");
+
+        problem.ProtConflict = conflictText;
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Applies a conflict description to a Problem's antagonist conflict field
+    /// </summary>
+    /// <param name="problemGuid">The GUID of the Problem element</param>
+    /// <param name="conflictText">The conflict description text</param>
+    /// <returns>Result indicating success or failure</returns>
+    [KernelFunction]
+    [Description("""
+                 Applies a conflict description to a Problem's antagonist conflict field.
+                 This is step 4 of 4 in the conflict workflow (alternate to ApplyConflictToProtagonist).
+                 problemGuid MUST be the GUID of a Problem element.
+                 conflictText can be from GetConflictExamples or custom text.
+                 Use ApplyConflictToProtagonist for the protagonist's conflict.
+                 """)]
+    public OperationResult<bool> ApplyConflictToAntagonist(Guid problemGuid, string conflictText)
+    {
+        var elementResult = GetStoryElement(problemGuid);
+        if (!elementResult.IsSuccess)
+            return OperationResult<bool>.Failure(elementResult.ErrorMessage);
+
+        if (elementResult.Payload is not ProblemModel problem)
+            return OperationResult<bool>.Failure($"Element {problemGuid} is not a Problem");
+
+        problem.AntagConflict = conflictText;
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Gets all element types that have key questions available
+    /// </summary>
+    /// <returns>Result containing the list of element types</returns>
+    [KernelFunction]
+    [Description("""
+                 Gets element types that have key questions available.
+                 This is step 1 of 2 in the key questions workflow.
+                 Next: Call GetKeyQuestions with one of these element type names.
+                 Common types: Character, Problem, Scene, Setting, Overview.
+                 """)]
+    public OperationResult<IEnumerable<string>> GetKeyQuestionElements()
+    {
+        return OperationResult<IEnumerable<string>>.Success(toolsData.KeyQuestionsSource.Keys);
+    }
+
+    /// <summary>
+    /// Gets key questions for an element type
+    /// </summary>
+    /// <param name="elementType">The element type (e.g., Character, Problem, Scene)</param>
+    /// <returns>Result containing tuples of (Topic, Question), or error if element type not found</returns>
+    [KernelFunction]
+    [Description("""
+                 Gets key questions to help develop a story element.
+                 This is step 2 of 2 in the key questions workflow.
+                 Call GetKeyQuestionElements first to get valid element type names.
+                 Returns tuples of (Topic, Question):
+                 - Topic: The aspect being developed (e.g., "Motivation", "Backstory")
+                 - Question: A prompt to help the author think about this aspect
+                 Use these questions to guide element development or prompt the user.
+                 """)]
+    public OperationResult<IEnumerable<(string Topic, string Question)>> GetKeyQuestions(string elementType)
+    {
+        if (!toolsData.KeyQuestionsSource.TryGetValue(elementType, out var questions))
+            return OperationResult<IEnumerable<(string Topic, string Question)>>.Failure($"No key questions for element type '{elementType}'");
+
+        return OperationResult<IEnumerable<(string Topic, string Question)>>.Success(
+            questions.Select(q => (q.Topic, q.Question)));
+    }
+
+    /// <summary>
+    /// Gets all master plot names
+    /// </summary>
+    /// <returns>Result containing the list of master plot names</returns>
+    [KernelFunction]
+    [Description("""
+                 Gets all master plot template names (Tobias's 20 Master Plots).
+                 This is step 1 of 3 in the master plots workflow.
+                 Next: Call GetMasterPlotNotes to understand a plot pattern.
+                 Then: Call GetMasterPlotScenes to get the scene breakdown.
+                 Plots include: Quest, Adventure, Pursuit, Rescue, Escape, Revenge,
+                 The Riddle, Rivalry, Underdog, Temptation, Metamorphosis, Transformation,
+                 Maturation, Love, Forbidden Love, Sacrifice, Discovery, Wretched Excess,
+                 Ascension, Descension.
+                 """)]
+    public OperationResult<IEnumerable<string>> GetMasterPlotNames()
+    {
+        return OperationResult<IEnumerable<string>>.Success(
+            toolsData.MasterPlotsSource.Select(p => p.PlotPatternName));
+    }
+
+    /// <summary>
+    /// Gets notes for a master plot
+    /// </summary>
+    /// <param name="plotName">The master plot name</param>
+    /// <returns>Result containing the plot notes, or error if plot not found</returns>
+    [KernelFunction]
+    [Description("""
+                 Gets the descriptive notes explaining a master plot pattern.
+                 This is step 2 of 3 in the master plots workflow.
+                 Call GetMasterPlotNames first to get valid plot names.
+                 Next: Call GetMasterPlotScenes to get the scene breakdown.
+                 The notes explain the plot pattern's key characteristics and themes.
+                 """)]
+    public OperationResult<string> GetMasterPlotNotes(string plotName)
+    {
+        var plot = toolsData.MasterPlotsSource.FirstOrDefault(p => p.PlotPatternName == plotName);
+        if (plot == null)
+            return OperationResult<string>.Failure($"No master plot '{plotName}' found");
+
+        return OperationResult<string>.Success(plot.PlotPatternNotes);
+    }
+
+    /// <summary>
+    /// Gets the scene breakdown for a master plot
+    /// </summary>
+    /// <param name="plotName">The master plot name</param>
+    /// <returns>Result containing tuples of (SceneTitle, Notes), or error if plot not found</returns>
+    [KernelFunction]
+    [Description("""
+                 Gets the scene breakdown for a master plot pattern.
+                 This is step 3 of 3 in the master plots workflow.
+                 Call GetMasterPlotNames first to get valid plot names.
+                 Returns tuples of (SceneTitle, Notes):
+                 - SceneTitle: Name of this story beat (e.g., "Call to Adventure")
+                 - Notes: Description of what happens in this beat
+                 Use these to structure a story or create Scene elements with AddElement.
+                 """)]
+    public OperationResult<IEnumerable<(string SceneTitle, string Notes)>> GetMasterPlotScenes(string plotName)
+    {
+        var plot = toolsData.MasterPlotsSource.FirstOrDefault(p => p.PlotPatternName == plotName);
+        if (plot == null)
+            return OperationResult<IEnumerable<(string SceneTitle, string Notes)>>.Failure($"No master plot '{plotName}' found");
+
+        return OperationResult<IEnumerable<(string SceneTitle, string Notes)>>.Success(
+            plot.PlotPatternScenes.Select(s => (s.SceneTitle, s.Notes)));
+    }
+
+    /// <summary>
+    /// Gets all stock scene categories
+    /// </summary>
+    /// <returns>Result containing the list of category names</returns>
+    [KernelFunction]
+    [Description("""
+                 Gets all stock scene categories for scene inspiration.
+                 This is step 1 of 2 in the stock scenes workflow.
+                 Next: Call GetStockScenes with one of these category names.
+                 Categories organize common scene types by genre or purpose.
+                 """)]
+    public OperationResult<IEnumerable<string>> GetStockSceneCategories()
+    {
+        return OperationResult<IEnumerable<string>>.Success(toolsData.StockScenesSource.Keys);
+    }
+
+    /// <summary>
+    /// Gets stock scenes for a category
+    /// </summary>
+    /// <param name="category">The stock scene category name</param>
+    /// <returns>Result containing the list of scenes, or error if category not found</returns>
+    [KernelFunction]
+    [Description("""
+                 Gets stock scene descriptions for a category.
+                 This is step 2 of 2 in the stock scenes workflow.
+                 Call GetStockSceneCategories first to get valid category names.
+                 Returns scene descriptions that can inspire Scene elements.
+                 Use AddElement to create a Scene, then set its Description property
+                 using UpdateElementProperty with the stock scene text.
+                 """)]
+    public OperationResult<IEnumerable<string>> GetStockScenes(string category)
+    {
+        if (toolsData.StockScenesSource.TryGetValue(category, out var scenes))
+            return OperationResult<IEnumerable<string>>.Success(scenes);
+
+        return OperationResult<IEnumerable<string>>.Failure($"No stock scene category '{category}' found");
+    }
+
+    // ===== Beat Sheets API =====
+    // Note: To find Scenes/Problems for beat assignment, use GetAllElements() or SearchForText()
+    // and filter by ElementType (Scene or Problem). A convenience method may be added in the future.
+
+    /// <summary>
+    /// Gets all beat sheet template names
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Gets all beat sheet template names for story structure.
+                 This is step 1 in the beat sheets workflow.
+                 Next: Call GetBeatSheet to preview a template's beats.
+                 Then: Call ApplyBeatSheetToProblem to apply it to a Problem element.
+                 Templates include various storytelling frameworks like Three Act Structure,
+                 Hero's Journey, Save the Cat, etc.
+                 """)]
+    public OperationResult<IEnumerable<string>> GetBeatSheetNames()
+    {
+        return OperationResult<IEnumerable<string>>.Success(
+            toolsData.BeatSheetSource.Select(b => b.PlotPatternName));
+    }
+
+    /// <summary>
+    /// Gets a beat sheet template by name
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Gets a beat sheet template by name for preview.
+                 This is step 2 in the beat sheets workflow.
+                 Call GetBeatSheetNames first to get valid template names.
+                 Next: Call ApplyBeatSheetToProblem to apply it to a Problem.
+                 Returns (Description, Beats):
+                 - Description: Overview of this storytelling framework
+                 - Beats: List of (BeatName, BeatNotes) tuples defining story structure
+                 """)]
+    public OperationResult<(string Description, IEnumerable<(string BeatName, string BeatNotes)> Beats)> GetBeatSheet(string beatSheetName)
+    {
+        var beatSheet = toolsData.BeatSheetSource.FirstOrDefault(b => b.PlotPatternName == beatSheetName);
+        if (beatSheet == null)
+            return OperationResult<(string, IEnumerable<(string, string)>)>.Failure($"No beat sheet '{beatSheetName}' found");
+
+        var beats = beatSheet.PlotPatternScenes.Select(s => (s.SceneTitle, s.Notes));
+        return OperationResult<(string, IEnumerable<(string, string)>)>.Success((beatSheet.PlotPatternNotes, beats));
+    }
+
+    /// <summary>
+    /// Applies a beat sheet template to a Problem's structure
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Applies a beat sheet template to a Problem element's structure.
+                 This is step 3 in the beat sheets workflow.
+                 problemGuid MUST be the GUID of a Problem element.
+                 beatSheetName MUST be a name from GetBeatSheetNames.
+                 This replaces any existing structure on the Problem.
+                 After applying:
+                 - Call GetProblemStructure to see the beats
+                 - Call AssignElementToBeat to link Scenes/Problems to beats
+                 - Call CreateBeat, UpdateBeat, DeleteBeat, MoveBeat to customize
+                 """)]
+    public OperationResult<bool> ApplyBeatSheetToProblem(Guid problemGuid, string beatSheetName)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var beatSheet = toolsData.BeatSheetSource.FirstOrDefault(b => b.PlotPatternName == beatSheetName);
+        if (beatSheet == null)
+            return OperationResult<bool>.Failure($"No beat sheet '{beatSheetName}' found");
+
+        var problem = (ProblemModel)element;
+        problem.StructureTitle = beatSheetName;
+        problem.StructureDescription = beatSheet.PlotPatternNotes;
+        problem.StructureBeats.Clear();
+
+        foreach (var scene in beatSheet.PlotPatternScenes)
+        {
+            problem.StructureBeats.Add(new StructureBeatViewModel(scene.SceneTitle, scene.Notes));
+        }
+
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Gets the current structure of a Problem
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Gets the current structure of a Problem element.
+                 problemGuid MUST be the GUID of a Problem element.
+                 Returns (Title, Description, Beats):
+                 - Title: Name of the applied beat sheet template
+                 - Description: Overview of the structure
+                 - Beats: List of (BeatTitle, BeatDescription, LinkedElement) tuples
+                   LinkedElement is the GUID of an assigned Scene/Problem, or null if unassigned.
+                 Use this to view structure after ApplyBeatSheetToProblem or to check assignments.
+                 """)]
+    public OperationResult<(string Title, string Description, IEnumerable<(string BeatTitle, string BeatDescription, Guid? LinkedElement)> Beats)> GetProblemStructure(Guid problemGuid)
+    {
+        if (CurrentModel == null)
+            return OperationResult<(string, string, IEnumerable<(string, string, Guid?)>)>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<(string, string, IEnumerable<(string, string, Guid?)>)>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        var beats = problem.StructureBeats.Select(b => (
+            b.Title,
+            b.Description,
+            b.Guid == Guid.Empty ? (Guid?)null : b.Guid
+        ));
+
+        return OperationResult<(string, string, IEnumerable<(string, string, Guid?)>)>.Success(
+            (problem.StructureTitle ?? "", problem.StructureDescription ?? "", beats));
+    }
+
+    /// <summary>
+    /// Assigns a Scene or Problem element to a beat
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Assigns a Scene or Problem element to a beat in the structure.
+                 problemGuid MUST be the GUID of a Problem element with beats.
+                 beatIndex is 0-based (first beat is index 0).
+                 elementGuid MUST be the GUID of a Scene or Problem element.
+                 To find Scenes/Problems: Call GetAllElements and filter by ElementType,
+                 or call SearchForText to find elements by name.
+                 Use ClearBeatAssignment to remove an assignment.
+                 """)]
+    public OperationResult<bool> AssignElementToBeat(Guid problemGuid, int beatIndex, Guid elementGuid)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
+            return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
+
+        // Verify the element to assign exists and is a Scene or Problem
+        var targetElement = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == elementGuid);
+        if (targetElement == null)
+            return OperationResult<bool>.Failure($"Element with GUID '{elementGuid}' not found");
+        if (targetElement.ElementType != StoryItemType.Scene && targetElement.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure("Only Scene or Problem elements can be assigned to beats");
+
+        problem.StructureBeats[beatIndex].Guid = elementGuid;
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Clears the element assignment from a beat
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Clears the element assignment from a beat.
+                 problemGuid MUST be the GUID of a Problem element with beats.
+                 beatIndex is 0-based (first beat is index 0).
+                 After clearing, the beat remains but has no linked Scene/Problem.
+                 Use AssignElementToBeat to assign a new element.
+                 """)]
+    public OperationResult<bool> ClearBeatAssignment(Guid problemGuid, int beatIndex)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
+            return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
+
+        problem.StructureBeats[beatIndex].Guid = Guid.Empty;
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Creates a new beat in a Problem's structure
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Creates a new beat at the end of a Problem's structure.
+                 problemGuid MUST be the GUID of a Problem element.
+                 title is the beat name (e.g., "Climax", "Resolution").
+                 description explains what happens in this story beat.
+                 New beats are added at the end; use MoveBeat to reorder.
+                 Use AssignElementToBeat to link a Scene/Problem to the new beat.
+                 """)]
+    public OperationResult<bool> CreateBeat(Guid problemGuid, string title, string description)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        problem.StructureBeats.Add(new StructureBeatViewModel(title, description));
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Updates a beat's title and description
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Updates a beat's title and description.
+                 problemGuid MUST be the GUID of a Problem element with beats.
+                 beatIndex is 0-based (first beat is index 0).
+                 title is the new beat name.
+                 description is the new beat explanation.
+                 This preserves any existing element assignment on the beat.
+                 """)]
+    public OperationResult<bool> UpdateBeat(Guid problemGuid, int beatIndex, string title, string description)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
+            return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
+
+        problem.StructureBeats[beatIndex].Title = title;
+        problem.StructureBeats[beatIndex].Description = description;
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Deletes a beat from a Problem's structure
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Deletes a beat from the Problem's structure.
+                 problemGuid MUST be the GUID of a Problem element with beats.
+                 beatIndex is 0-based (first beat is index 0).
+                 This is a destructive action - the beat and any assignment are removed.
+                 Remaining beats shift down to fill the gap.
+                 """)]
+    public OperationResult<bool> DeleteBeat(Guid problemGuid, int beatIndex)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
+            return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
+
+        problem.StructureBeats.RemoveAt(beatIndex);
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Moves a beat from one position to another
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Moves a beat from one position to another.
+                 problemGuid MUST be the GUID of a Problem element with beats.
+                 fromIndex is the current 0-based position of the beat.
+                 toIndex is the new 0-based position for the beat.
+                 The beat's title, description, and element assignment move together.
+                 Other beats shift to accommodate the move.
+                 """)]
+    public OperationResult<bool> MoveBeat(Guid problemGuid, int fromIndex, int toIndex)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        if (fromIndex < 0 || fromIndex >= problem.StructureBeats.Count)
+            return OperationResult<bool>.Failure($"From index {fromIndex} is out of range");
+        if (toIndex < 0 || toIndex >= problem.StructureBeats.Count)
+            return OperationResult<bool>.Failure($"To index {toIndex} is out of range");
+
+        problem.StructureBeats.Move(fromIndex, toIndex);
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Saves a Problem's beat sheet structure to a .stbeat file
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Saves a Problem's beat sheet to a .stbeat file.
+                 problemGuid MUST be the GUID of a Problem element with beats.
+                 filePath is the full path where the file will be saved.
+                 The Problem must have beats applied (via ApplyBeatSheetToProblem or CreateBeat).
+                 The saved file can be loaded into another Problem using LoadBeatSheet.
+                 """)]
+    public OperationResult<bool> SaveBeatSheet(Guid problemGuid, string filePath)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        if (problem.StructureBeats == null || problem.StructureBeats.Count == 0)
+            return OperationResult<bool>.Failure("Problem has no beats to save");
+
+        try
+        {
+            outlineService.SaveBeatsheet(filePath, problem.StructureDescription, problem.StructureBeats.ToList());
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error saving beat sheet: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Loads a beat sheet from a .stbeat file into a Problem's structure
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Loads a beat sheet from a .stbeat file into a Problem.
+                 problemGuid MUST be the GUID of a Problem element.
+                 filePath is the full path to the .stbeat file to load.
+                 This replaces any existing beats on the Problem.
+                 Use SaveBeatSheet to create .stbeat files from existing Problems.
+                 """)]
+    public OperationResult<bool> LoadBeatSheet(Guid problemGuid, string filePath)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        if (!File.Exists(filePath))
+            return OperationResult<bool>.Failure($"File not found: {filePath}");
+
+        try
+        {
+            var savedBeatSheet = outlineService.LoadBeatsheet(filePath);
+            var problem = (ProblemModel)element;
+
+            problem.StructureTitle = "Custom Beat Sheet";
+            problem.StructureDescription = savedBeatSheet.Description;
+            problem.StructureBeats.Clear();
+            foreach (var beat in savedBeatSheet.Beats)
+            {
+                problem.StructureBeats.Add(new StructureBeatViewModel(beat.Title, beat.Description));
+            }
+
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error loading beat sheet: {ex.Message}");
+        }
+    }
+
+    #endregion
 }
