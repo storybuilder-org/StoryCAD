@@ -2068,4 +2068,156 @@ public class SemanticKernelApiTests
     }
 
     #endregion
+
+    #region Beat Sheet File API Tests (Issue #1223)
+
+    /// <summary>
+    /// Tests that SaveBeatSheet saves a Problem's beats to a file
+    /// </summary>
+    [TestMethod]
+    public async Task SaveBeatSheet_ValidInputs_SavesFile()
+    {
+        // Arrange - create model with Problem and apply a beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        Assert.IsTrue(addProblemResult.IsSuccess, "Problem creation should succeed");
+        var problemGuid = addProblemResult.Payload;
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        var filePath = Path.Combine(App.InputDir, "test_beatsheet.stbeat");
+
+        // Act
+        var result = _api.SaveBeatSheet(problemGuid, filePath);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "SaveBeatSheet should succeed");
+        Assert.IsTrue(File.Exists(filePath), "File should be created");
+
+        // Cleanup
+        if (File.Exists(filePath))
+            File.Delete(filePath);
+    }
+
+    /// <summary>
+    /// Tests that SaveBeatSheet fails for invalid Problem GUID
+    /// </summary>
+    [TestMethod]
+    public async Task SaveBeatSheet_InvalidProblem_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var invalidGuid = Guid.NewGuid();
+        var filePath = Path.Combine(App.InputDir, "test_beatsheet.stbeat");
+
+        // Act
+        var result = _api.SaveBeatSheet(invalidGuid, filePath);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "SaveBeatSheet should fail for invalid problem GUID");
+    }
+
+    /// <summary>
+    /// Tests that SaveBeatSheet fails when Problem has no beats
+    /// </summary>
+    [TestMethod]
+    public async Task SaveBeatSheet_NoBeats_ReturnsFailure()
+    {
+        // Arrange - create model with Problem but don't apply a beat sheet
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        Assert.IsTrue(addProblemResult.IsSuccess, "Problem creation should succeed");
+        var problemGuid = addProblemResult.Payload;
+
+        var filePath = Path.Combine(App.InputDir, "test_beatsheet.stbeat");
+
+        // Act
+        var result = _api.SaveBeatSheet(problemGuid, filePath);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "SaveBeatSheet should fail when Problem has no beats");
+    }
+
+    /// <summary>
+    /// Tests that LoadBeatSheet loads beats from a file into a Problem
+    /// </summary>
+    [TestMethod]
+    public async Task LoadBeatSheet_ValidFile_LoadsBeats()
+    {
+        // Arrange - create model with Problem, apply beat sheet, save it
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        Assert.IsTrue(addProblemResult.IsSuccess, "Problem creation should succeed");
+        var problemGuid = addProblemResult.Payload;
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        var filePath = Path.Combine(App.InputDir, "test_beatsheet_load.stbeat");
+        _api.SaveBeatSheet(problemGuid, filePath);
+
+        // Get beat count before clearing
+        var structureBefore = _api.GetProblemStructure(problemGuid);
+        var beatCountBefore = structureBefore.Payload.Beats.Count();
+
+        // Create a second Problem to load beats into
+        var addProblem2Result = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem 2");
+        var problem2Guid = addProblem2Result.Payload;
+
+        // Act
+        var result = _api.LoadBeatSheet(problem2Guid, filePath);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "LoadBeatSheet should succeed");
+        var structureAfter = _api.GetProblemStructure(problem2Guid);
+        Assert.IsTrue(structureAfter.IsSuccess, "Should be able to get structure after loading");
+        Assert.AreEqual(beatCountBefore, structureAfter.Payload.Beats.Count(), "Beat count should match saved file");
+
+        // Cleanup
+        if (File.Exists(filePath))
+            File.Delete(filePath);
+    }
+
+    /// <summary>
+    /// Tests that LoadBeatSheet fails for invalid Problem GUID
+    /// </summary>
+    [TestMethod]
+    public async Task LoadBeatSheet_InvalidProblem_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var invalidGuid = Guid.NewGuid();
+        var filePath = Path.Combine(App.InputDir, "nonexistent.stbeat");
+
+        // Act
+        var result = _api.LoadBeatSheet(invalidGuid, filePath);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "LoadBeatSheet should fail for invalid problem GUID");
+    }
+
+    /// <summary>
+    /// Tests that LoadBeatSheet fails for invalid file path
+    /// </summary>
+    [TestMethod]
+    public async Task LoadBeatSheet_InvalidFile_ReturnsFailure()
+    {
+        // Arrange - create model with Problem
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addProblemResult = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem");
+        var problemGuid = addProblemResult.Payload;
+
+        var filePath = Path.Combine(App.InputDir, "nonexistent_file.stbeat");
+
+        // Act
+        var result = _api.LoadBeatSheet(problemGuid, filePath);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "LoadBeatSheet should fail for nonexistent file");
+    }
+
+    #endregion
 }

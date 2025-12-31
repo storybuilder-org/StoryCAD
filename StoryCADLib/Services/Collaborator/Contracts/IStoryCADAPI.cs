@@ -211,5 +211,21 @@ public interface IStoryCADAPI
     /// </summary>
     OperationResult<bool> MoveBeat(Guid problemGuid, int fromIndex, int toIndex);
 
+    /// <summary>
+    /// Saves a Problem's beat sheet structure to a .stbeat file
+    /// </summary>
+    /// <param name="problemGuid">The GUID of the Problem element with beats to save</param>
+    /// <param name="filePath">The file path to save to (should end in .stbeat)</param>
+    /// <returns>Result indicating success or failure</returns>
+    OperationResult<bool> SaveBeatSheet(Guid problemGuid, string filePath);
+
+    /// <summary>
+    /// Loads a beat sheet from a .stbeat file into a Problem's structure
+    /// </summary>
+    /// <param name="problemGuid">The GUID of the Problem element to load beats into</param>
+    /// <param name="filePath">The file path to load from</param>
+    /// <returns>Result indicating success or failure</returns>
+    OperationResult<bool> LoadBeatSheet(Guid problemGuid, string filePath);
+
     #endregion
 }

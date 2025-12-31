@@ -1562,5 +1562,84 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
         return OperationResult<bool>.Success(true);
     }
 
+    /// <summary>
+    /// Saves a Problem's beat sheet structure to a .stbeat file
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Saves a Problem's beat sheet to a .stbeat file.
+                 problemGuid MUST be the GUID of a Problem element with beats.
+                 filePath is the full path where the file will be saved.
+                 The Problem must have beats applied (via ApplyBeatSheetToProblem or CreateBeat).
+                 The saved file can be loaded into another Problem using LoadBeatSheet.
+                 """)]
+    public OperationResult<bool> SaveBeatSheet(Guid problemGuid, string filePath)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        var problem = (ProblemModel)element;
+        if (problem.StructureBeats == null || problem.StructureBeats.Count == 0)
+            return OperationResult<bool>.Failure("Problem has no beats to save");
+
+        try
+        {
+            outlineService.SaveBeatsheet(filePath, problem.StructureDescription, problem.StructureBeats.ToList());
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error saving beat sheet: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Loads a beat sheet from a .stbeat file into a Problem's structure
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Loads a beat sheet from a .stbeat file into a Problem.
+                 problemGuid MUST be the GUID of a Problem element.
+                 filePath is the full path to the .stbeat file to load.
+                 This replaces any existing beats on the Problem.
+                 Use SaveBeatSheet to create .stbeat files from existing Problems.
+                 """)]
+    public OperationResult<bool> LoadBeatSheet(Guid problemGuid, string filePath)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+        if (element == null || element.ElementType != StoryItemType.Problem)
+            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+
+        if (!File.Exists(filePath))
+            return OperationResult<bool>.Failure($"File not found: {filePath}");
+
+        try
+        {
+            var savedBeatSheet = outlineService.LoadBeatsheet(filePath);
+            var problem = (ProblemModel)element;
+
+            problem.StructureTitle = "Custom Beat Sheet";
+            problem.StructureDescription = savedBeatSheet.Description;
+            problem.StructureBeats.Clear();
+            foreach (var beat in savedBeatSheet.Beats)
+            {
+                problem.StructureBeats.Add(new StructureBeatViewModel(beat.Title, beat.Description));
+            }
+
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error loading beat sheet: {ex.Message}");
+        }
+    }
+
     #endregion
 }
