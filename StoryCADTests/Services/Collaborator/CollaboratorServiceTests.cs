@@ -89,5 +89,5 @@ public class CollaboratorServiceTests
     }
 
     // Note: Tests for removed interface methods have been deleted.
-    // The ICollaborator interface now only has CreateWindow and Dispose methods.
+    // The ICollaborator interface now has OpenAsync, Close, and Dispose methods.
 }

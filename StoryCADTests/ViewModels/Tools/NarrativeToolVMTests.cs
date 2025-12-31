@@ -1,6 +1,10 @@
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
+using StoryCADLib.Services;
 using StoryCADLib.Services.Dialogs;
 using StoryCADLib.Services.Logging;
+using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels;
 using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADTests.ViewModels.Tools;
@@ -83,4 +87,129 @@ public class NarrativeToolVMTests
         Assert.IsTrue(hasShellViewModelDependency,
             "NarrativeToolVM still has ShellViewModel dependency (needs refactoring to extract VerifyToolUse to a service)");
     }
+
+    #region Delete Tests
+
+    [TestMethod]
+    public async Task Delete_WhenNodeDeleted_ClearsSelectedNode()
+    {
+        // Arrange - This tests the fix for deleted elements remaining highlighted
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var windowing = Ioc.Default.GetRequiredService<Windowing>();
+        var toolValidation = Ioc.Default.GetRequiredService<ToolValidationService>();
+        var logger = Ioc.Default.GetRequiredService<ILogService>();
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+
+        // Create test model with narrator view
+        var model = await outlineService.CreateModel("Test Story", "Test Author", 0);
+        appState.CurrentDocument = new StoryDocument(model, "test.stbx");
+
+        // Create a scene and add it to narrator view via its node
+        var scene = new SceneModel("Test Scene", model, model.ExplorerView[0]);
+        scene.Node.CopyToNarratorView(model);
+        var narratorScene = model.NarratorView[0].Children.FirstOrDefault(c => c.Name == "Test Scene");
+
+        var vm = new NarrativeToolVM(shellVM, appState, windowing, toolValidation, logger);
+        vm.SelectedNode = narratorScene;
+        vm.IsNarratorSelected = true;
+
+        // Act
+        vm.Delete();
+
+        // Assert
+        Assert.IsNull(vm.SelectedNode, "SelectedNode should be null after deletion");
+        Assert.IsFalse(vm.IsNarratorSelected, "IsNarratorSelected should be false after deletion");
+    }
+
+    [TestMethod]
+    public async Task Delete_WhenNotNarratorSelected_DoesNotClearSelection()
+    {
+        // Arrange
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var windowing = Ioc.Default.GetRequiredService<Windowing>();
+        var toolValidation = Ioc.Default.GetRequiredService<ToolValidationService>();
+        var logger = Ioc.Default.GetRequiredService<ILogService>();
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+
+        // Create model with a scene
+        var model = await outlineService.CreateModel("Test Story", "Test Author", 0);
+        appState.CurrentDocument = new StoryDocument(model, "test.stbx");
+        var scene = new SceneModel("Test Scene", model, model.ExplorerView[0]);
+
+        var vm = new NarrativeToolVM(shellVM, appState, windowing, toolValidation, logger);
+        vm.SelectedNode = scene.Node;
+        vm.IsNarratorSelected = false; // Explorer view selected, not narrator
+
+        // Act
+        vm.Delete();
+
+        // Assert - Selection should NOT be cleared since we can't delete from explorer in this context
+        Assert.AreEqual(scene.Node, vm.SelectedNode, "SelectedNode should remain unchanged when not deleting from narrator");
+        Assert.AreEqual("You can't delete from here!", vm.Message, "Should show appropriate message");
+    }
+
+    [TestMethod]
+    public async Task Delete_WhenTrashCanSelected_ReturnsEarlyWithMessage()
+    {
+        // Arrange
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var windowing = Ioc.Default.GetRequiredService<Windowing>();
+        var toolValidation = Ioc.Default.GetRequiredService<ToolValidationService>();
+        var logger = Ioc.Default.GetRequiredService<ILogService>();
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+
+        // Create model to get access to trash node
+        var model = await outlineService.CreateModel("Test Story", "Test Author", 0);
+        appState.CurrentDocument = new StoryDocument(model, "test.stbx");
+        var trashNode = model.TrashView.FirstOrDefault();
+
+        var vm = new NarrativeToolVM(shellVM, appState, windowing, toolValidation, logger);
+        vm.SelectedNode = trashNode;
+        vm.IsNarratorSelected = true;
+
+        // Act
+        vm.Delete();
+
+        // Assert - Should return early without attempting deletion
+        Assert.AreEqual("You can't delete this node!", vm.Message, "Should show cannot delete message");
+        Assert.AreEqual(trashNode, vm.SelectedNode, "SelectedNode should remain unchanged for protected nodes");
+    }
+
+    [TestMethod]
+    public void Delete_WithNullSelectedNode_LogsWarningAndDoesNotThrow()
+    {
+        // Arrange - Regression test for issue #1227
+        // Before fix: Delete() with null SelectedNode would throw NullReferenceException
+        // After fix: Delete() checks for null and logs warning without throwing
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var shellVM = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var windowing = Ioc.Default.GetRequiredService<Windowing>();
+        var toolValidation = Ioc.Default.GetRequiredService<ToolValidationService>();
+        var logger = Ioc.Default.GetRequiredService<ILogService>();
+
+        var vm = new NarrativeToolVM(shellVM, appState, windowing, toolValidation, logger);
+        vm.SelectedNode = null; // Explicitly set to null to trigger the bug scenario
+        vm.IsNarratorSelected = false;
+
+        // Act & Assert - Should not throw NullReferenceException
+        try
+        {
+            vm.Delete();
+            // Test passes if we get here without exception
+            Assert.IsTrue(true, "Delete() should handle null SelectedNode without throwing");
+        }
+        catch (NullReferenceException ex)
+        {
+            Assert.Fail($"Delete() threw NullReferenceException with null SelectedNode: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Assert.Fail($"Delete() threw unexpected exception: {ex.GetType().Name} - {ex.Message}");
+        }
+    }
+
+    #endregion
 }

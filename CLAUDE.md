@@ -2,7 +2,15 @@
 
 This file provides project-specific guidance for StoryCAD development.
 
-## Primary Directive: Simplicity First
+**BEFORE ANY IMPLEMENTATION WORK:**
+
+- You must present a plan.
+- You must ask for explicit approval.
+- You must not proceed until approval is given.
+
+
+
+## **Simplicity First**
 
 **When solving StoryCAD problems, always choose the simplest approach:**
 - Direct method calls over reflection

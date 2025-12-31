@@ -120,12 +120,16 @@ public class NarrativeToolVM : ObservableRecipient
                 if (SelectedNode.Type == StoryItemType.TrashCan || SelectedNode.IsRoot)
                 {
                     Message = "You can't delete this node!";
+                    return;
                 }
 
                 if (IsNarratorSelected)
                 {
+                    var deletedName = SelectedNode.Name;
                     SelectedNode.Delete(StoryViewType.NarratorView);
-                    Message = $"Deleted {SelectedNode}";
+                    Message = $"Deleted {deletedName}";
+                    SelectedNode = null;
+                    IsNarratorSelected = false;
                 }
                 else
                 {
