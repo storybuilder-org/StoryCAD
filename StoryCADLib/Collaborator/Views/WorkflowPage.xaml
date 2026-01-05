@@ -77,7 +77,8 @@
         <ListView ItemsSource="{x:Bind ViewModel.ConversationList, Mode=OneWay}"
                   Grid.Column="1" Grid.Row="0" Grid.RowSpan="3"
                   Margin="10,0,0,10"
-                  VerticalAlignment="Bottom">
+                  VerticalAlignment="Bottom"
+                  SelectionMode="None">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <ItemsStackPanel VerticalAlignment="Bottom"
@@ -86,7 +87,24 @@
             </ListView.ItemsPanel>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,2,0,2" />
+                    <StackPanel Margin="0,4,0,4"
+                                HorizontalAlignment="{Binding BubbleAlignment}">
+                        <TextBlock Text="{Binding Sender}"
+                                   FontWeight="SemiBold"
+                                   FontSize="11"
+                                   Opacity="0.7"
+                                   HorizontalAlignment="{Binding BubbleAlignment}" />
+                        <Border CornerRadius="12"
+                                Padding="12,8,12,8"
+                                Margin="0,2,0,0"
+                                Background="{Binding BackgroundBrush}"
+                                HorizontalAlignment="{Binding BubbleAlignment}"
+                                MaxWidth="350">
+                            <TextBlock Text="{Binding Text}"
+                                       TextWrapping="Wrap"
+                                       Foreground="{Binding TextBrush}" />
+                        </Border>
+                    </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

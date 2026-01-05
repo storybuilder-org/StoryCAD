@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using CommunityToolkit.Mvvm.Input;
+using StoryCADLib.Collaborator.Models;
 using StoryCADLib.Collaborator.ViewModels;
 
 #nullable disable
@@ -295,7 +296,7 @@ public class WorkflowViewModelTests
         await _viewModel.SendButtonClicked();
 
         // Assert
-        Assert.IsTrue(_viewModel.ConversationList[0].StartsWith("User:"));
+        Assert.IsTrue(_viewModel.ConversationList[0].IsUser);
     }
 
     [TestMethod]
@@ -310,7 +311,7 @@ public class WorkflowViewModelTests
 
         // Assert
         Assert.AreEqual(2, _viewModel.ConversationList.Count);
-        Assert.IsTrue(_viewModel.ConversationList[1].Contains("not connected"));
+        Assert.IsTrue(_viewModel.ConversationList[1].Text.Contains("not connected"));
     }
 
     [TestMethod]
@@ -344,7 +345,7 @@ public class WorkflowViewModelTests
 
         // Assert
         Assert.AreEqual(2, _viewModel.ConversationList.Count);
-        Assert.IsTrue(_viewModel.ConversationList[1].Contains("Test response"));
+        Assert.IsTrue(_viewModel.ConversationList[1].Text.Contains("Test response"));
     }
 
     [TestMethod]
@@ -358,7 +359,7 @@ public class WorkflowViewModelTests
         await _viewModel.SendButtonClicked();
 
         // Assert
-        Assert.IsTrue(_viewModel.ConversationList[1].StartsWith("Error:"));
+        Assert.IsTrue(_viewModel.ConversationList[1].Text.StartsWith("Error:"));
     }
 
     [TestMethod]

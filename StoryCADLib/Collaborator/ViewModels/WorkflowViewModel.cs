@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using StoryCADLib.Collaborator.Models;
 
 namespace StoryCADLib.Collaborator.ViewModels;
 
@@ -16,7 +17,7 @@ public partial class WorkflowViewModel : ObservableRecipient
 {
     public WorkflowViewModel()
     {
-        ConversationList = new ObservableCollection<string>();
+        ConversationList = new ObservableCollection<ChatMessage>();
         AcceptCommand = new RelayCommand(SaveOutputs);
         SendCommand = new RelayCommand(async () => await SendButtonClicked());
     }
@@ -42,7 +43,7 @@ public partial class WorkflowViewModel : ObservableRecipient
 
     public string Explanation { get; set; }
 
-    public ObservableCollection<string> ConversationList { get; set; }
+    public ObservableCollection<ChatMessage> ConversationList { get; set; }
 
     /// <summary>
     /// Callback invoked when user sends a chat message.
@@ -117,23 +118,23 @@ public partial class WorkflowViewModel : ObservableRecipient
         InputText = string.Empty;
 
         ProgressVisibility = Microsoft.UI.Xaml.Visibility.Visible;
-        ConversationList.Add($"User: {userMessage}");
+        ConversationList.Add(ChatMessage.FromUser(userMessage));
 
         try
         {
             if (OnSendMessage != null)
             {
                 var response = await OnSendMessage(userMessage);
-                ConversationList.Add($"Collaborator: {response}");
+                ConversationList.Add(ChatMessage.FromCollaborator(response));
             }
             else
             {
-                ConversationList.Add("Collaborator: Chat not connected.");
+                ConversationList.Add(ChatMessage.FromCollaborator("Chat not connected."));
             }
         }
         catch (Exception ex)
         {
-            ConversationList.Add($"Error: {ex.Message}");
+            ConversationList.Add(ChatMessage.Error(ex.Message));
         }
         finally
         {
