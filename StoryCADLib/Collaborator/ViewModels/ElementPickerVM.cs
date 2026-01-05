@@ -45,15 +45,21 @@ public class ElementPickerVM
     public string PickerLabel { get; set; }
 
     /// <summary>
+    ///     GUID of the currently selected element (for pre-selection when changing)
+    /// </summary>
+    public Guid? CurrentSelection { get; set; }
+
+    /// <summary>
     ///     Spawns an instance of the picker.
     /// </summary>
     /// <param name="Model">StoryModel to show elements from</param>
     /// <param name="XAMLRoot">XamlRoot for the dialog</param>
     /// <param name="Type">Only allow elements of this type to be picked</param>
     /// <param name="label">Descriptive label for what we're picking (e.g., "Protagonist")</param>
+    /// <param name="currentSelection">GUID of currently selected element for pre-selection</param>
     /// <returns>The GUID of element the user picked</returns>
     public async Task<string> ShowPicker(StoryModel Model,
-        XamlRoot XAMLRoot, StoryItemType? Type = null, string label = null)
+        XamlRoot XAMLRoot, StoryItemType? Type = null, string label = null, Guid? currentSelection = null)
     {
         //Reset VM
         SelectedType = null;
@@ -62,14 +68,17 @@ public class ElementPickerVM
         ForcedType = Type;
         StoryModel = Model;
         PickerLabel = label;
+        CurrentSelection = currentSelection;
 
         //Spawn new picker, passing this VM so Page uses the same instance
         var ui = new Views.ElementPicker(this);
 
-        // Build dialog title - use label if provided, otherwise fall back to type
+        // Build dialog title - "Change" if there's a current selection, "Select" otherwise
+        var hasCurrentSelection = currentSelection.HasValue && currentSelection.Value != Guid.Empty;
+        var actionVerb = hasCurrentSelection ? "Change" : "Select";
         var title = !string.IsNullOrEmpty(label)
-            ? $"Select {label}"
-            : $"Select a {Type.ToString()} element";
+            ? $"{actionVerb} {label}"
+            : $"{actionVerb} {Type.ToString()} element";
 
         //create and show dialog
         dialog = new ContentDialog

@@ -46,6 +46,7 @@ public class ElementPickerVMTests
         Assert.IsNull(vm.NewNodeName);
         Assert.IsNull(vm.ForcedType);
         Assert.IsNull(vm.PickerLabel);
+        Assert.IsNull(vm.CurrentSelection);
     }
 
     #endregion
@@ -369,6 +370,69 @@ public class ElementPickerVMTests
 
     #endregion
 
+    #region CurrentSelection Property Tests
+
+    [TestMethod]
+    public void CurrentSelection_InitiallyIsNull()
+    {
+        // Arrange & Act
+        var vm = new ElementPickerVM();
+
+        // Assert
+        Assert.IsNull(vm.CurrentSelection);
+    }
+
+    [TestMethod]
+    public void CurrentSelection_WhenSetToGuid_ReturnsSetValue()
+    {
+        // Arrange
+        var guid = Guid.NewGuid();
+
+        // Act
+        _viewModel.CurrentSelection = guid;
+
+        // Assert
+        Assert.AreEqual(guid, _viewModel.CurrentSelection);
+    }
+
+    [TestMethod]
+    public void CurrentSelection_WhenSetToNull_ReturnsNull()
+    {
+        // Arrange
+        _viewModel.CurrentSelection = Guid.NewGuid();
+
+        // Act
+        _viewModel.CurrentSelection = null;
+
+        // Assert
+        Assert.IsNull(_viewModel.CurrentSelection);
+    }
+
+    [TestMethod]
+    public void CurrentSelection_WhenSetToEmptyGuid_ReturnsEmptyGuid()
+    {
+        // Act
+        _viewModel.CurrentSelection = Guid.Empty;
+
+        // Assert
+        Assert.AreEqual(Guid.Empty, _viewModel.CurrentSelection);
+    }
+
+    [TestMethod]
+    public void CurrentSelection_CanDistinguishBetweenNullAndEmptyGuid()
+    {
+        // Arrange & Act - set to empty
+        _viewModel.CurrentSelection = Guid.Empty;
+        Assert.IsTrue(_viewModel.CurrentSelection.HasValue);
+        Assert.AreEqual(Guid.Empty, _viewModel.CurrentSelection.Value);
+
+        // Act - set to null
+        _viewModel.CurrentSelection = null;
+        Assert.IsFalse(_viewModel.CurrentSelection.HasValue);
+    }
+
+    #endregion
+
     #region ShowPicker Method Tests
 
     [TestMethod]
@@ -443,6 +507,7 @@ public class ElementPickerVMTests
         // Arrange
         var storyModel = new StoryModel();
         var character = new CharacterModel("Test Hero", storyModel, null);
+        var currentGuid = Guid.NewGuid();
 
         // Act
         _viewModel.StoryModel = storyModel;
@@ -451,6 +516,7 @@ public class ElementPickerVMTests
         _viewModel.NewNodeName = "New Node";
         _viewModel.ForcedType = StoryItemType.Character;
         _viewModel.PickerLabel = "Protagonist";
+        _viewModel.CurrentSelection = currentGuid;
 
         // Assert
         Assert.AreSame(storyModel, _viewModel.StoryModel);
@@ -459,6 +525,7 @@ public class ElementPickerVMTests
         Assert.AreEqual("New Node", _viewModel.NewNodeName);
         Assert.AreEqual(StoryItemType.Character, _viewModel.ForcedType);
         Assert.AreEqual("Protagonist", _viewModel.PickerLabel);
+        Assert.AreEqual(currentGuid, _viewModel.CurrentSelection);
     }
 
     [TestMethod]
@@ -471,6 +538,7 @@ public class ElementPickerVMTests
         _viewModel.NewNodeName = "Test";
         _viewModel.ForcedType = StoryItemType.Scene;
         _viewModel.PickerLabel = "Test Label";
+        _viewModel.CurrentSelection = Guid.NewGuid();
 
         // Act - reset (simulating ShowPicker behavior)
         _viewModel.SelectedType = null;
@@ -478,6 +546,7 @@ public class ElementPickerVMTests
         _viewModel.NewNodeName = "";
         _viewModel.ForcedType = null;
         _viewModel.PickerLabel = null;
+        _viewModel.CurrentSelection = null;
 
         // Assert
         Assert.IsNull(_viewModel.SelectedType);
@@ -485,6 +554,7 @@ public class ElementPickerVMTests
         Assert.AreEqual("", _viewModel.NewNodeName);
         Assert.IsNull(_viewModel.ForcedType);
         Assert.IsNull(_viewModel.PickerLabel);
+        Assert.IsNull(_viewModel.CurrentSelection);
     }
 
     [TestMethod]
