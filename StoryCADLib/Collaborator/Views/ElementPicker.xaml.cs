@@ -71,7 +71,20 @@ public sealed partial class ElementPicker : Page
         {
             //Update element box with elements (skip the "(none)" placeholder)
             ElementBox.IsEnabled = true;
-            ElementBox.ItemsSource = elements.Skip(1);
+            var elementList = elements.Skip(1).ToList();
+            ElementBox.ItemsSource = elementList;
+
+            // Pre-select current element if one is specified
+            if (PickerVM.CurrentSelection.HasValue && PickerVM.CurrentSelection.Value != Guid.Empty)
+            {
+                var currentElement = elementList.FirstOrDefault(e =>
+                    e is StoryElement se && se.Uuid == PickerVM.CurrentSelection.Value);
+                if (currentElement != null)
+                {
+                    ElementBox.SelectedItem = currentElement;
+                    PickerVM.SelectedElement = currentElement;
+                }
+            }
         }
     }
 
