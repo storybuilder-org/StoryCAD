@@ -10,8 +10,6 @@
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
         <ApplicationVersion>1</ApplicationVersion>
-        <!-- Package Publisher -->
-        <ApplicationPublisher>StoryBuilder Foundation</ApplicationPublisher>
         <!-- Package Description -->
         <Description>StoryCAD powered by Uno Platform.</Description>
     </PropertyGroup>
@@ -37,6 +35,7 @@
         <WindowsAppSDKSelfContained Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</WindowsAppSDKSelfContained>
         <GenerateAppxPackageOnBuild Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</GenerateAppxPackageOnBuild>
         <AppxPackageSigningEnabled Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows' AND '$(Configuration)' == 'Release'">true</AppxPackageSigningEnabled>
+        <PublishReadyToRun Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">false</PublishReadyToRun>
 
         <UnoFeatures>
             SkiaRenderer;
@@ -44,7 +43,7 @@
             Toolkit;
         </UnoFeatures>
 
-        <Platforms>AnyCPU;x64</Platforms>
+        <Platforms>x64;arm64;x86</Platforms>
     </PropertyGroup>
 
     <!-- App Icon Configuration -->

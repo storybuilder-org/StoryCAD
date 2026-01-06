@@ -90,21 +90,27 @@ jobs:
       - name: Install Uno macOS workload
         if: matrix.os == 'macos-latest'
         run: dotnet workload install macos
-
+        
       - name: Generate version
         id: version
         shell: pwsh
         run: |
           if ("${{ github.event.inputs.version }}" -ne "") {
-            $parts = "${{ github.event.inputs.version }}".TrimStart('v').Split('.')
-            $v = "$($parts[0]).$($parts[1]).${{ github.run_number }}.65534"
+            if ("${{ github.event.inputs.skip_release }}" -eq "false") {
+              # Release mode: use version verbatim
+              $v = "${{ github.event.inputs.version }}".TrimStart('v')
+            } else {
+              # Draft mode: use major.minor.run_number.65534
+              $parts = "${{ github.event.inputs.version }}".TrimStart('v').Split('.')
+              $v = "$($parts[0]).$($parts[1]).${{ github.run_number }}.65534"
+            }
           } else {
             $v = "1.0.${{ github.run_number }}.65534"
           }
           "version=$v"       >> $env:GITHUB_OUTPUT
           "tag_version=v$v"  >> $env:GITHUB_OUTPUT
           Write-Host "Generated version: $v"
-
+          
       - name: Restore
         run: dotnet restore StoryCAD.sln
 
@@ -166,8 +172,6 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore
 
-
-
       # 10 ─ Setup MSBuild (Windows only)
       - name: Setup MSBuild
         if: matrix.os == 'windows-latest'
@@ -189,7 +193,8 @@ jobs:
             '/p:AppxBundle=Never',
             "/p:PackageCertificateKeyFile=$pfx",
             "/p:AppxPackageDir=${{ github.workspace }}\StoryCAD\Packages\",
-            '/p:GenerateAppxPackageOnBuild=true'
+            '/p:GenerateAppxPackageOnBuild=true',
+            '/p:PublishReadyToRun=false'
           )
           if ("${{ secrets.PFX_PASSWORD }}".Length -gt 0) {
             $msbuildArgs += "/p:PackageCertificatePassword=${{ secrets.PFX_PASSWORD }}"
@@ -203,12 +208,14 @@ jobs:
         run: |
           Remove-Item "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx" -Force -ErrorAction SilentlyContinue
           Remove-Item "${{ github.workspace }}\StoryCAD\.env","${{ github.workspace }}\StoryCADTests\.env" -Force -ErrorAction SilentlyContinue
+
       - name: Remove .env (macOS)
         if: matrix.os == 'macos-latest'
         continue-on-error: true
         run: |
           rm -f "${{ github.workspace }}/StoryCAD/.env"
           rm -f "${{ github.workspace }}/StoryCADTests/.env"
+
       - name: Clean publish dir (macOS)
         if: matrix.os == 'macos-latest'
         run: rm -rf publish
