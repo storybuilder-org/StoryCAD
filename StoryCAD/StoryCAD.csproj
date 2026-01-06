@@ -72,7 +72,7 @@
     <!-- Include .env file in output -->
     <ItemGroup>
         <None Update=".env">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
     <ItemGroup>
