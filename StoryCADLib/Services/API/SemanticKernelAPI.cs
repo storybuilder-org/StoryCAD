@@ -137,6 +137,37 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
         }
     }
 
+    [KernelFunction]
+    [Description("""
+                 Gets all story elements of a specific type from the current model.
+                 Use this to find all Characters, Scenes, Settings, Problems, etc.
+                 Valid types: Problem, Character, Setting, Scene, Folder, Section, Web, Notes.
+                 Note: StoryOverview and TrashCan types exist but are singleton elements.
+                 Returns a list of matching elements with their GUIDs and properties.
+                 """)]
+    public OperationResult<List<StoryElement>> GetElementsByType(StoryItemType elementType)
+    {
+        if (CurrentModel == null)
+        {
+            return OperationResult<List<StoryElement>>.Failure(
+                "No StoryModel available. Create a model first.");
+        }
+
+        try
+        {
+            var filtered = CurrentModel.StoryElements
+                .Where(e => e.ElementType == elementType)
+                .ToList();
+
+            return OperationResult<List<StoryElement>>.Success(filtered);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<List<StoryElement>>.Failure(
+                $"Error retrieving elements by type: {ex.Message}");
+        }
+    }
+
     /// <summary>
     ///     Updates a story model element.
     /// </summary>
