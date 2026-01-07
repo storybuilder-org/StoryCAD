@@ -155,6 +155,22 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
 
         try
         {
+            // Handle singleton types that aren't in StoryElements collection
+            if (elementType == StoryItemType.StoryOverview)
+            {
+                // StoryOverview is the first node in ExplorerView
+                if (CurrentModel.ExplorerView.Count > 0)
+                {
+                    var overviewNode = CurrentModel.ExplorerView[0];
+                    var overview = CurrentModel.StoryElements.StoryElementGuids.GetValueOrDefault(overviewNode.Uuid);
+                    if (overview != null)
+                    {
+                        return OperationResult<List<StoryElement>>.Success(new List<StoryElement> { overview });
+                    }
+                }
+                return OperationResult<List<StoryElement>>.Success(new List<StoryElement>());
+            }
+
             var filtered = CurrentModel.StoryElements
                 .Where(e => e.ElementType == elementType)
                 .ToList();
