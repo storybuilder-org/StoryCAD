@@ -36,6 +36,13 @@ public interface IStoryCADAPI
     OperationResult<ObservableCollection<StoryElement>> GetAllElements();
 
     /// <summary>
+    ///     Gets all story elements of a specific type
+    /// </summary>
+    /// <param name="elementType">The type of elements to retrieve</param>
+    /// <returns>OperationResult containing a list of matching story elements</returns>
+    OperationResult<List<StoryElement>> GetElementsByType(StoryItemType elementType);
+
+    /// <summary>
     ///     Updates a story element
     /// </summary>
     /// <param name="newElement">The updated element</param>

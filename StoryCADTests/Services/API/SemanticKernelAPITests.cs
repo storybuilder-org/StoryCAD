@@ -2220,4 +2220,80 @@ public class SemanticKernelApiTests
     }
 
     #endregion
+
+    #region GetElementsByType Tests (Issue #1249)
+
+    /// <summary>
+    /// Tests that GetElementsByType returns failure when no model is loaded
+    /// </summary>
+    [TestMethod]
+    public void GetElementsByType_WithNoModel_ReturnsFailure()
+    {
+        // Arrange - create fresh API instance with no model
+        var api = new SemanticKernelApi(
+            Ioc.Default.GetRequiredService<OutlineService>(),
+            Ioc.Default.GetRequiredService<ListData>(),
+            Ioc.Default.GetRequiredService<ControlData>(),
+            Ioc.Default.GetRequiredService<ToolsData>());
+
+        // Act
+        var result = api.GetElementsByType(StoryItemType.Character);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetElementsByType should fail without a model");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.AreEqual("No StoryModel available. Create a model first.", result.ErrorMessage);
+    }
+
+    /// <summary>
+    /// Tests that GetElementsByType returns only elements of the specified type
+    /// </summary>
+    [TestMethod]
+    public async Task GetElementsByType_WithValidType_ReturnsFilteredElements()
+    {
+        // Arrange - create model with elements of different types
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+
+        // Add elements of different types
+        _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Hero");
+        _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Villain");
+        _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Opening Scene");
+        _api.AddElement(StoryItemType.Setting, overviewGuid.ToString(), "Castle");
+
+        // Act
+        var result = _api.GetElementsByType(StoryItemType.Character);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetElementsByType should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.AreEqual(2, result.Payload.Count, "Should return exactly 2 characters");
+        Assert.IsTrue(result.Payload.All(e => e.ElementType == StoryItemType.Character),
+            "All returned elements should be Characters");
+    }
+
+    /// <summary>
+    /// Tests that GetElementsByType returns empty list when no elements of type exist
+    /// </summary>
+    [TestMethod]
+    public async Task GetElementsByType_WithNoMatchingElements_ReturnsEmptyList()
+    {
+        // Arrange - create model without any Web elements
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+
+        // Add elements of other types (not Web)
+        _api.AddElement(StoryItemType.Character, overviewGuid.ToString(), "Hero");
+        _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Opening Scene");
+
+        // Act
+        var result = _api.GetElementsByType(StoryItemType.Web);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetElementsByType should succeed even with no matches");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.AreEqual(0, result.Payload.Count, "Should return empty list when no elements match");
+    }
+
+    #endregion
 }
