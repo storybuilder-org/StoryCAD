@@ -69,6 +69,11 @@ The StoryCAD user manual is built with Jekyll and located in the `docs` folder. 
 
 See [Updating the Manual](https://storybuilder-org.github.io/StoryCAD/docs/For%20Developers/Updating_the_Manual.html) for instructions on serving the documentation locally and adding new pages.
 
+## Licensing of Contributions
+
+By submitting a pull request, you agree to license your contribution under
+the GNU GPLv3 AND the additional permissions in `ADDITIONAL-LICENSE-PERMISSIONS.TXT`.
+
 [1]:https://github.com/StoryBuilder-org/StoryCAD/issues
 [3]:https://github.com/StoryBuilder-org/StoryCAD/discussions
 [4]:https://discord.gg/bpCyAQnWCa
