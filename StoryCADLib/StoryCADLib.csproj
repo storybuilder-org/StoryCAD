@@ -245,7 +245,7 @@
         <EmbeddedResource Include="Assets\Install\Symbols.txt" />
         <EmbeddedResource Include="Assets\Install\Tools.json" />
         <Content Update="Assets\Icon.png">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
 
