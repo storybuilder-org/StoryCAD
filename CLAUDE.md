@@ -24,11 +24,11 @@ This file provides project-specific guidance for StoryCAD development.
 ### Multi-Targeting Strategy
 
 **Windows builds both targets**:
-- `net9.0-windows10.0.22621` (WinAppSDK head) - Windows 10/11, Windows Store
-- `net9.0-desktop` (Desktop head) - Windows 7/8/10/11, macOS, Linux
+- `net10.0-windows10.0.22621` (WinAppSDK head) - Windows 10/11, Windows Store
+- `net10.0-desktop` (Desktop head) - Windows 7/8/10/11, macOS, Linux
 
 **macOS builds desktop only**:
-- `net9.0-desktop` (Desktop head) - macOS, also runs on Windows/Linux
+- `net10.0-desktop` (Desktop head) - macOS, also runs on Windows/Linux
 
 **Critical Concept - Platform-Specific Code**:
 
@@ -62,7 +62,7 @@ See `/devdocs/platform_targeting_guidelines.md` for complete workflows and decis
 2. **Test on Mac**:
    ```bash
    git pull
-   dotnet run -f net9.0-desktop  # Quick verification
+   dotnet run -f net10.0-desktop  # Quick verification
    ```
 
 3. **Debug on Mac** (if needed):
@@ -99,7 +99,7 @@ Use this decision tree to determine where to develop:
 **Quick Manual Test (Mac)**:
 ```bash
 # No IDE needed:
-dotnet run -f net9.0-desktop
+dotnet run -f net10.0-desktop
 ```
 
 **Debugging (Mac)**:
@@ -159,7 +159,7 @@ StoryCAD is a free, open-source application for fiction writers that provides st
 ## Quick Reference
 
 ### Technology Stack (UNO Platform - Branch: UNOTestBranch)
-- **Framework**: .NET 9.0 with UNO Platform 5.x
+- **Framework**: .NET 10.0 with UNO Platform 5.x
 - **UI Framework**: WinUI 3 (cross-platform via UNO)
 - **Platform Targets**:
   - **Windows**: WinAppSDK head (Windows 10/11, minimum 10.0.19041.0)
@@ -170,7 +170,7 @@ StoryCAD is a free, open-source application for fiction writers that provides st
 - **Shared Code**: ~90% across all platforms
 
 ### Production Stack (Main Branch - Version 3.x)
-- **Framework**: .NET 9.0 with WinUI 3, Windows App SDK 1.6
+- **Framework**: .NET 10.0 with WinUI 3, Windows App SDK 1.6
 - **Platform**: Windows 10/11 only
 
 ### Project Structure
@@ -251,7 +251,7 @@ StoryCAD uses Context7 MCP server for up-to-date documentation of public depende
 "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64
 
 # Run all tests
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll"
 ```
 
 For detailed commands, see [Build & Test Commands](/home/tcox/.claude/memory/build-commands.md).
@@ -410,17 +410,17 @@ msbuild StoryCAD.sln /t:Build /p:Configuration=Release /p:Platform=x64
 ### Test Commands
 ```bash
 # Visual Studio Test Console (WSL path) - All wildcarded patterns
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*.*
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*,*
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*,*,*,*
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll"
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*.*
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*,*
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*,*,*,*
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll"
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*
 
 # Standard test commands
 dotnet test StoryCADTests/StoryCADTests.csproj --configuration Debug
-vstest.console.exe "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
+vstest.console.exe "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll"
 ```
 
 ### Git Commands
