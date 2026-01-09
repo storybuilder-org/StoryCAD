@@ -21,15 +21,15 @@
 
     <!-- Target frameworks based on OS -->
     <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
-        <TargetFrameworks>net9.0-windows10.0.22621;net9.0-desktop</TargetFrameworks>
+        <TargetFrameworks>net10.0-windows10.0.22621;net10.0-desktop</TargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
-        <TargetFrameworks>net9.0-desktop</TargetFrameworks>
+        <TargetFrameworks>net10.0-desktop</TargetFrameworks>
     </PropertyGroup>
 
     <!-- Windows-specific settings -->
-    <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
+    <PropertyGroup Condition="'$(TargetFramework)'=='net10.0-windows10.0.22621'">
         <UseWinUI>true</UseWinUI>
         <EnableMsixTooling>false</EnableMsixTooling>
         <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
@@ -39,7 +39,7 @@
     </PropertyGroup>
 
     <!-- Desktop-specific settings -->
-    <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-desktop'">
+    <PropertyGroup Condition="'$(TargetFramework)'=='net10.0-desktop'">
         <UseWinUI>false</UseWinUI>
     </PropertyGroup>
 
@@ -76,7 +76,7 @@
     </ItemGroup>
 
     <!-- Windows-specific content -->
-    <ItemGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
+    <ItemGroup Condition="'$(TargetFramework)'=='net10.0-windows10.0.22621'">
         <AppxManifest Include="Package.appxmanifest">
             <SubType>Designer</SubType>
         </AppxManifest>
