@@ -47,25 +47,25 @@ jobs:
         include:
           - os: windows-latest
             rid: win-x64
-            fw: net9.0-windows10.0.22621.0
+            fw: net10.0-windows10.0.22621.0
             art: win-x64
             platform: x64
             binary_name: StoryCAD.exe
           - os: windows-latest
             rid: win-arm64
-            fw: net9.0-windows10.0.22621.0
+            fw: net10.0-windows10.0.22621.0
             art: win-arm64
             platform: ARM64
             binary_name: StoryCAD.exe
           - os: windows-latest
             rid: win-x86
-            fw: net9.0-windows10.0.22621.0
+            fw: net10.0-windows10.0.22621.0
             art: win-x86
             platform: x86
             binary_name: StoryCAD.exe
           - os: macos-latest
             rid: osx-arm64
-            fw: net9.0-desktop
+            fw: net10.0-desktop
             art: osx-arm64
             platform: arm64
             binary_name: StoryCAD.app
@@ -79,9 +79,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          # Pin to 9.0.306 to avoid MSB4216 bug in SDK 9.0.307
-          # See: https://github.com/dotnet/msbuild/issues/12751
-          dotnet-version: '9.0.306'
+          dotnet-version: '10.0.100'
           cache: true
           cache-dependency-path: |
             **/*.csproj
@@ -216,43 +214,18 @@ jobs:
           rm -f "${{ github.workspace }}/StoryCAD/.env"
           rm -f "${{ github.workspace }}/StoryCADTests/.env"
 
-      - name: Clean publish dir (macOS)
-        if: matrix.os == 'macos-latest'
-        run: rm -rf publish
-
-      - name: Publish (macOS)
+      - name: Publish macOS package
         if: matrix.os == 'macos-latest'
         run: |
+          PUBLISH_DIR="${{ github.workspace }}/StoryCAD/bin/Release/${{ matrix.fw }}/${{ matrix.rid }}/publish"
           dotnet publish StoryCAD/StoryCAD.csproj \
-            -c Release -f ${{ matrix.fw }} -r ${{ matrix.rid }} \
-            --self-contained -o publish
-
-      - name: Apply Uno font fix (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          mkdir -p publish/StoryCAD.app/Contents/MacOS
-          mkdir -p publish/StoryCAD.app/Contents/Resources
-          cp -R publish/* publish/StoryCAD.app/Contents/MacOS/ 2>/dev/null || true
-          if [ -d publish/Resources ]; then
-            cp -R publish/Resources/* publish/StoryCAD.app/Contents/Resources/
-          fi
-          if [ -d publish/Uno.Fonts.Fluent/Fonts ]; then
-            mkdir -p publish/StoryCAD.app/Contents/MacOS/Uno.Fonts.Fluent/Fonts
-            cp publish/Uno.Fonts.Fluent/Fonts/* publish/StoryCAD.app/Contents/MacOS/Uno.Fonts.Fluent/Fonts/
-          fi
-          rm -rf publish/StoryCAD.app/Contents/MacOS/StoryCAD.app
-          echo "Font verification:" && find publish/StoryCAD.app/Contents/MacOS -name "*uno-fluentui-assets.ttf*" -ls
-
-      - name: Create PKG (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          mkdir -p pkg-build/Applications
-          cp -R publish/StoryCAD.app pkg-build/Applications/
-          pkgbuild --root pkg-build \
-            --identifier org.storybuilder.storycad \
-            --version ${{ steps.version.outputs.version }} \
-            --install-location / \
-            storycad-${{ matrix.art }}.pkg
+            -f ${{ matrix.fw }} \
+            -r ${{ matrix.rid }} \
+            -c Release \
+            -p:PackageFormat=pkg \
+            -p:SelfContained=true \
+            -p:AppBundlePath="${PUBLISH_DIR}/StoryCAD.app"
+          cp "${PUBLISH_DIR}/StoryCAD.pkg" storycad-${{ matrix.art }}.pkg
 
       - name: Zip MSIX artifacts (Windows)
         if: matrix.os == 'windows-latest'

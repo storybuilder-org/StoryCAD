@@ -489,13 +489,13 @@ public class Windowing : ObservableRecipient
         ILogService logger = _logService;
 
 #if WINDOWS && !HAS_UNO
-        // WinAppSDK (net9.0-windows10.0.22621) - use P/Invoke
+        // WinAppSDK (net10.0-windows10.0.22621) - use P/Invoke
         var dpi = GetDpiForWindow(new IntPtr((long)window.AppWindow.Id.Value));
         double scaleFactor = dpi / 96.0;
         logger.Log(LogLevel.Trace, $"Scale factor from WinAppSDK P/Invoke: {scaleFactor:F2} (DPI: {dpi})");
         return scaleFactor;
 #elif HAS_UNO
-        // Uno Skia (net9.0-desktop on Windows/macOS) - try DisplayInformation
+        // Uno Skia (net10.0-desktop on Windows/macOS) - try DisplayInformation
         try
         {
             var displayInfo = Windows.Graphics.Display.DisplayInformation.GetForCurrentView();

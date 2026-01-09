@@ -74,9 +74,9 @@ All paths must use `Path.Combine()` for cross-platform compatibility.
 ### Phase 1: Project Configuration (Immediate)
 
 #### Step 1.1: Update Desktop-Specific PropertyGroup
-Add cross-platform runtime identifiers to the `net9.0-desktop` target framework section:
+Add cross-platform runtime identifiers to the `net10.0-desktop` target framework section:
 ```xml
-<PropertyGroup Condition="'$(TargetFramework)'=='net9.0-desktop'">
+<PropertyGroup Condition="'$(TargetFramework)'=='net10.0-desktop'">
     <UseWinUI>false</UseWinUI>
     <Platforms>x64;arm64</Platforms>
     <RuntimeIdentifiers>osx-x64;osx-arm64;linux-x64;linux-arm64</RuntimeIdentifiers>
@@ -88,7 +88,7 @@ Add cross-platform runtime identifiers to the `net9.0-desktop` target framework 
 #### Step 1.2: Add Windows-Specific Build Constant
 Add `WINDOWS_HEAD` define to the existing Windows section:
 ```xml
-<PropertyGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
+<PropertyGroup Condition="'$(TargetFramework)'=='net10.0-windows10.0.22621'">
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>false</EnableMsixTooling>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
@@ -214,8 +214,8 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '9.0.x'
-      - run: dotnet test -f net9.0-windows10.0.22621
+          dotnet-version: '10.0.x'
+      - run: dotnet test -f net10.0-windows10.0.22621
 
   test-macos:
     runs-on: macos-latest
@@ -223,8 +223,8 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '9.0.x'
-      - run: dotnet test -f net9.0-desktop --filter TestCategory=CrossPlatform
+          dotnet-version: '10.0.x'
+      - run: dotnet test -f net10.0-desktop --filter TestCategory=CrossPlatform
 
   test-linux:
     runs-on: ubuntu-latest
@@ -232,8 +232,8 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '9.0.x'
-      - run: dotnet test -f net9.0-desktop --filter TestCategory=CrossPlatform
+          dotnet-version: '10.0.x'
+      - run: dotnet test -f net10.0-desktop --filter TestCategory=CrossPlatform
 ```
 
 ## Implementation Timeline
@@ -349,7 +349,7 @@ Key insights from implementation:
 ## Lessons Learned
 
 1. **Simplicity First Works**: Skipping Phase 1 (custom build constants) resulted in cleaner, more maintainable code
-2. **UNO Platform Gotchas**: `__MACOS__` constant doesn't work with `net9.0-desktop` (Skia), only native macOS
+2. **UNO Platform Gotchas**: `__MACOS__` constant doesn't work with `net10.0-desktop` (Skia), only native macOS
 3. **RTF Implementation**: RichEditBox behavior differs significantly between Windows and Skia - platform-specific tests required
 4. **CI/CD Already Existed**: Phase 4 was already implemented beyond the scope of the strategy document
 
