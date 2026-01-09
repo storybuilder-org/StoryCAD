@@ -20,7 +20,7 @@
       "request": "launch",
       "preLaunchTask": "build-desktop",
       // If you have changed target frameworks, make sure to update the program path.
-      "program": "${workspaceFolder}/StoryCAD/bin/Debug/net9.0-desktop/StoryCAD.dll",
+      "program": "${workspaceFolder}/StoryCAD/bin/Debug/net10.0-desktop/StoryCAD.dll",
       "args": [],
       "launchSettingsProfile": "StoryCAD (Desktop)",
       "env": {
