@@ -6,7 +6,7 @@
         <!-- Display name -->
         <ApplicationTitle>StoryCAD</ApplicationTitle>
         <!-- App Identifier -->
-        <ApplicationId>net.storybuilder.storycad</ApplicationId>
+        <ApplicationId>com.storybuilder.storycad</ApplicationId>
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
         <ApplicationVersion>1</ApplicationVersion>
@@ -25,7 +25,24 @@
     <!-- On macOS/Linux, build only Skia Desktop -->
     <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
         <TargetFrameworks>net10.0-desktop</TargetFrameworks>
+        <UnoMacOSCustomInfoPlist>Platforms/Desktop/Info.plist</UnoMacOSCustomInfoPlist>
     </PropertyGroup>
+
+    <!-- macOS PKG packaging - provide icon sizes for app bundle -->
+    <Target Name="_AddMacOSIcons" BeforeTargets="_UnoPublishAppBundle">
+        <ItemGroup>
+            <_UnoIcnsInput Include="Assets/Icons/icon16x16@1x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon16x16@2x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon32x32@1x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon32x32@2x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon128x128@1x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon128x128@2x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon256x256@1x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon256x256@2x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon512x512@1x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon512x512@2x.png" />
+        </ItemGroup>
+    </Target>
 
     <PropertyGroup>
         <!-- MSIX Configuration for Windows -->

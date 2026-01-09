@@ -214,43 +214,18 @@ jobs:
           rm -f "${{ github.workspace }}/StoryCAD/.env"
           rm -f "${{ github.workspace }}/StoryCADTests/.env"
 
-      - name: Clean publish dir (macOS)
-        if: matrix.os == 'macos-latest'
-        run: rm -rf publish
-
-      - name: Publish (macOS)
+      - name: Publish macOS package
         if: matrix.os == 'macos-latest'
         run: |
+          PUBLISH_DIR="${{ github.workspace }}/StoryCAD/bin/Release/${{ matrix.fw }}/${{ matrix.rid }}/publish"
           dotnet publish StoryCAD/StoryCAD.csproj \
-            -c Release -f ${{ matrix.fw }} -r ${{ matrix.rid }} \
-            --self-contained -o publish
-
-      - name: Apply Uno font fix (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          mkdir -p publish/StoryCAD.app/Contents/MacOS
-          mkdir -p publish/StoryCAD.app/Contents/Resources
-          cp -R publish/* publish/StoryCAD.app/Contents/MacOS/ 2>/dev/null || true
-          if [ -d publish/Resources ]; then
-            cp -R publish/Resources/* publish/StoryCAD.app/Contents/Resources/
-          fi
-          if [ -d publish/Uno.Fonts.Fluent/Fonts ]; then
-            mkdir -p publish/StoryCAD.app/Contents/MacOS/Uno.Fonts.Fluent/Fonts
-            cp publish/Uno.Fonts.Fluent/Fonts/* publish/StoryCAD.app/Contents/MacOS/Uno.Fonts.Fluent/Fonts/
-          fi
-          rm -rf publish/StoryCAD.app/Contents/MacOS/StoryCAD.app
-          echo "Font verification:" && find publish/StoryCAD.app/Contents/MacOS -name "*uno-fluentui-assets.ttf*" -ls
-
-      - name: Create PKG (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          mkdir -p pkg-build/Applications
-          cp -R publish/StoryCAD.app pkg-build/Applications/
-          pkgbuild --root pkg-build \
-            --identifier org.storybuilder.storycad \
-            --version ${{ steps.version.outputs.version }} \
-            --install-location / \
-            storycad-${{ matrix.art }}.pkg
+            -f ${{ matrix.fw }} \
+            -r ${{ matrix.rid }} \
+            -c Release \
+            -p:PackageFormat=pkg \
+            -p:SelfContained=true \
+            -p:AppBundlePath="${PUBLISH_DIR}/StoryCAD.app"
+          cp "${PUBLISH_DIR}/StoryCAD.pkg" storycad-${{ matrix.art }}.pkg
 
       - name: Zip MSIX artifacts (Windows)
         if: matrix.os == 'windows-latest'
