@@ -11,6 +11,20 @@ public class ReportFormatter
 {
     private readonly StoryModel _storyModel;
     private readonly Dictionary<string, string[]> _templates = new();
+    private bool _templatesLoaded;
+
+    /// <summary>
+    /// Ensures report templates are loaded before use.
+    /// This method is idempotent - calling it multiple times has no effect after first load.
+    /// </summary>
+    private async Task EnsureTemplatesLoadedAsync()
+    {
+        if (!_templatesLoaded)
+        {
+            await LoadReportTemplates();
+            _templatesLoaded = true;
+        }
+    }
 
     public string FormatListReport(StoryItemType elementType)
     {
@@ -51,8 +65,9 @@ public class ReportFormatter
 
     #region Public methods
 
-    public string FormatStoryOverviewReport()
+    public async Task<string> FormatStoryOverviewReport()
     {
+        await EnsureTemplatesLoadedAsync();
         var overview =
             (OverviewModel)_storyModel.StoryElements.FirstOrDefault(element =>
                 element.ElementType == StoryItemType.StoryOverview);
@@ -103,8 +118,9 @@ public class ReportFormatter
         return doc.GetRtf();
     }
 
-    public string FormatProblemReport(StoryElement element)
+    public async Task<string> FormatProblemReport(StoryElement element)
     {
+        await EnsureTemplatesLoadedAsync();
         var problem = (ProblemModel)element;
         var lines = _templates["Problem Description"];
         RtfDocument doc = new(string.Empty);
@@ -461,8 +477,9 @@ public class ReportFormatter
         return beats.ToString();
     }
 
-    public string FormatCharacterRelationshipReport(StoryElement element)
+    public async Task<string> FormatCharacterRelationshipReport(StoryElement element)
     {
+        await EnsureTemplatesLoadedAsync();
         var character = (CharacterModel)element;
         RtfDocument doc = new(string.Empty);
         foreach (var rel in character.RelationshipList)
@@ -502,8 +519,9 @@ public class ReportFormatter
         return doc.GetRtf();
     }
 
-    public string FormatCharacterReport(StoryElement element)
+    public async Task<string> FormatCharacterReport(StoryElement element)
     {
+        await EnsureTemplatesLoadedAsync();
         var character = (CharacterModel)element;
         var lines = _templates["Character Description"];
         RtfDocument doc = new(string.Empty);
@@ -537,7 +555,7 @@ public class ReportFormatter
             //Relationships section
             if (sb.ToString() == "@Relationships" && character.RelationshipList.Count > 0)
             {
-                sb.Replace("@Relationships", FormatCharacterRelationshipReport(element));
+                sb.Replace("@Relationships", await FormatCharacterRelationshipReport(element));
             }
 
             //Flaw section
@@ -587,8 +605,9 @@ public class ReportFormatter
         return doc.GetRtf();
     }
 
-    public string FormatSettingReport(StoryElement element)
+    public async Task<string> FormatSettingReport(StoryElement element)
     {
+        await EnsureTemplatesLoadedAsync();
         var setting = (SettingModel)element;
         var lines = _templates["Setting Description"];
         RtfDocument doc = new(string.Empty);
@@ -618,8 +637,9 @@ public class ReportFormatter
         return doc.GetRtf();
     }
 
-    public string FormatSceneReport(StoryElement element)
+    public async Task<string> FormatSceneReport(StoryElement element)
     {
+        await EnsureTemplatesLoadedAsync();
         var scene = (SceneModel)element;
         var lines = _templates["Scene Description"];
         RtfDocument doc = new(string.Empty);
@@ -759,8 +779,9 @@ public class ReportFormatter
         */
     }
 
-    public string FormatFolderReport(StoryElement element)
+    public async Task<string> FormatFolderReport(StoryElement element)
     {
+        await EnsureTemplatesLoadedAsync();
         var folder = (FolderModel)element;
         var lines = _templates["Folder Description"];
         RtfDocument doc = new(string.Empty);
@@ -777,8 +798,9 @@ public class ReportFormatter
         return doc.GetRtf();
     }
 
-    public string FormatSectionReport(StoryElement element)
+    public async Task<string> FormatSectionReport(StoryElement element)
     {
+        await EnsureTemplatesLoadedAsync();
         var section = (FolderModel)element;
         var lines = _templates["Section Description"];
         RtfDocument doc = new(string.Empty);
@@ -796,8 +818,9 @@ public class ReportFormatter
         return doc.GetRtf();
     }
 
-    public string FormatSynopsisReport()
+    public async Task<string> FormatSynopsisReport()
     {
+        await EnsureTemplatesLoadedAsync();
         var lines = _templates["Story Synopsis"];
         RtfDocument doc = new(string.Empty);
 

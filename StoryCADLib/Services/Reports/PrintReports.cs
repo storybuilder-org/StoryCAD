@@ -34,18 +34,17 @@ public class PrintReports
     public async Task<string> Generate()
     {
         var rtf = string.Empty;
-        await _formatter.LoadReportTemplates(); // Load text report templates
 
         //Process single selection (non-Pivot) reports
         if (_vm.CreateOverview)
         {
-            rtf = _formatter.FormatStoryOverviewReport();
+            rtf = await _formatter.FormatStoryOverviewReport();
             _documentText += FormatText(rtf);
         }
 
         if (_vm.CreateSummary)
         {
-            rtf = _formatter.FormatSynopsisReport();
+            rtf = await _formatter.FormatSynopsisReport();
             _documentText += FormatText(rtf, true);
         }
 
@@ -103,16 +102,16 @@ public class PrintReports
                 switch (node.Type)
                 {
                     case StoryItemType.Problem:
-                        rtf = _formatter.FormatProblemReport(element);
+                        rtf = await _formatter.FormatProblemReport(element);
                         break;
                     case StoryItemType.Character:
-                        rtf = _formatter.FormatCharacterReport(element);
+                        rtf = await _formatter.FormatCharacterReport(element);
                         break;
                     case StoryItemType.Setting:
-                        rtf = _formatter.FormatSettingReport(element);
+                        rtf = await _formatter.FormatSettingReport(element);
                         break;
                     case StoryItemType.Scene:
-                        rtf = _formatter.FormatSceneReport(element);
+                        rtf = await _formatter.FormatSceneReport(element);
                         break;
                     case StoryItemType.Web:
                         rtf = _formatter.FormatWebReport(element);
