@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
+using StoryCADLib.Services.Collaborator.Contracts;
 
 namespace StoryCADLib.Collaborator.ViewModels;
 
@@ -32,6 +33,17 @@ public partial class WorkflowShellViewModel : ObservableRecipient
     /// Async to support element gathering via dialogs before navigation.
     /// </summary>
     public Func<object, Task> OnWorkflowSelected { get; set; }
+
+    /// <summary>
+    /// Current Collaborator settings. Set by Collaborator on open.
+    /// </summary>
+    public CollaboratorSettings CurrentSettings { get; set; } = CollaboratorSettings.Default;
+
+    /// <summary>
+    /// Callback invoked when user changes settings in the dialog.
+    /// Collaborator sets this to update its internal settings.
+    /// </summary>
+    public Action<CollaboratorSettings> OnSettingsChanged { get; set; }
 
     private NavigationViewItem _currentItem;
     public NavigationViewItem CurrentItem

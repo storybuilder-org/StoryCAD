@@ -40,10 +40,12 @@
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE897;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <AppBarButton Label="Accept" Margin="5" />
-                <AppBarButton Margin="5">Retry</AppBarButton>
-                <AppBarButton Margin="5">Previous</AppBarButton>
-                <AppBarButton Margin="5">Next</AppBarButton>
+                <AppBarButton Label="Settings" ToolTipService.ToolTip="Collaborator Settings" Margin="5"
+                              Click="SettingsButton_Click">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE713;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
                 <AppBarButton Label="Exit" Margin="5"
                               Command="{x:Bind ShellViewModel.ExitCommand, Mode=OneWay}" />
             </CommandBar.PrimaryCommands>

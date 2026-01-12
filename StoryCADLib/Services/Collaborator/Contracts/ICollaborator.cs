@@ -26,6 +26,18 @@ Task<Window> OpenAsync(IStoryCADAPI api, StoryModel model, Window hostWindow, Fr
 CollaboratorResult Close();
 
 /// <summary>
+///     Sets Collaborator settings. Can be called before or after OpenAsync.
+/// </summary>
+/// <param name="settings">Settings to apply</param>
+void SetSettings(CollaboratorSettings settings);
+
+/// <summary>
+///     Gets the current Collaborator settings.
+/// </summary>
+/// <returns>Current settings</returns>
+CollaboratorSettings GetSettings();
+
+/// <summary>
 ///     Disposes of resources used by the Collaborator plugin.
 /// </summary>
 void Dispose();
