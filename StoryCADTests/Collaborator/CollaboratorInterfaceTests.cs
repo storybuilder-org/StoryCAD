@@ -41,6 +41,15 @@ public class CollaboratorInterfaceTests
             return new CollaboratorResult { Completed = true, Summary = "mock" };
         }
 
+        public void SetSettings(CollaboratorSettings settings)
+        {
+        }
+
+        public CollaboratorSettings GetSettings()
+        {
+            return new CollaboratorSettings();
+        }
+
         public void Dispose()
         {
         }
