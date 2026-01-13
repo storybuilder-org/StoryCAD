@@ -246,7 +246,7 @@ public class SemanticKernelApiTests
 
         // Assert
         Assert.IsTrue(addResult.IsSuccess, "AddElement should succeed with a valid parent.");
-        Assert.IsNotNull(addResult.Payload, "The payload should not be null for a successfully added element.");
+        Assert.AreNotEqual(Guid.Empty, addResult.Payload, "The payload should not be empty for a successfully added element.");
 
         // Optionally verify that the added element's type is Section.
         var newElement = _api.CurrentModel.StoryElements.StoryElementGuids[addResult.Payload];

@@ -4,14 +4,18 @@
         <UnoSingleProject>true</UnoSingleProject>
         <LangVersion>latest</LangVersion>
         <RootNamespace>StoryCADTests</RootNamespace>
+        <DefaultLanguage>en-us</DefaultLanguage>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
         <IsTestProject>true</IsTestProject>
         <TestProjectType>UnitTest</TestProjectType>
         <EnableMSTestRunner>true</EnableMSTestRunner>
+        <GenerateUnoMain>false</GenerateUnoMain>
         <GenerateLibraryLayout>true</GenerateLibraryLayout>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <WarningsAsErrors>UNO0001</WarningsAsErrors>
+        <!-- Suppress CS8892: MSTest and Uno both generate Main entry points, this is expected -->
+        <NoWarn>$(NoWarn);CS8892</NoWarn>
 
         <!-- Test features -->
         <UnoFeatures>
@@ -21,7 +25,7 @@
 
     <!-- Target frameworks based on OS -->
     <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
-        <TargetFrameworks>net10.0-windows10.0.22621;net10.0-desktop</TargetFrameworks>
+        <TargetFrameworks>net10.0-desktop;net10.0-windows10.0.22621</TargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
@@ -36,6 +40,8 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <Platforms>x86;x64;arm64</Platforms>
         <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+        <!-- Disable Uno-generated Program.cs to avoid conflict with MSTest entry point -->
+        <GenerateProgramFile>false</GenerateProgramFile>
     </PropertyGroup>
 
     <!-- Desktop-specific settings -->

@@ -198,8 +198,7 @@ public class NarrativeToolVMTests
         try
         {
             vm.Delete();
-            // Test passes if we get here without exception
-            Assert.IsTrue(true, "Delete() should handle null SelectedNode without throwing");
+            // Test passes if no exception thrown
         }
         catch (NullReferenceException ex)
         {

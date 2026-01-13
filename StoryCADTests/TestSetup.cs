@@ -1,8 +1,11 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using dotenv.net;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCADLib.Services;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.IoC;
+
+[assembly: DoNotParallelize]
 
 namespace StoryCADTests;
 

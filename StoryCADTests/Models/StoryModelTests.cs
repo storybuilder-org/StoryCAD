@@ -390,7 +390,7 @@ public class StoryModelTests
         //    - Move to trash: Use context menu "Delete" command
         //    - Restore from trash: Use context menu "Restore" command
 
-        Assert.IsTrue(true, "Drag-and-drop constraints are enforced through XAML properties");
+        // Test documents expected XAML constraints - passes if comment is accurate
     }
 
     #endregion

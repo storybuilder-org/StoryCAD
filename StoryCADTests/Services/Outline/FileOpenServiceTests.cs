@@ -104,10 +104,8 @@ public class FileOpenServiceTests
         // Act
         await _fileOpenService.OpenFile(nonExistentPath);
 
-        // Assert
-        // The method should complete without throwing an exception
+        // Assert - test passes if no exception thrown
         // In production, this would show a file picker to the user
-        Assert.IsTrue(true); // Method completed successfully
 
         // Cleanup
         WeakReferenceMessenger.Default.UnregisterAll(this);
@@ -221,7 +219,6 @@ public class FileOpenServiceTests
         // In headless mode, file picker returns null and method returns early
         await _fileOpenService.OpenFile(Path.Combine(Path.GetTempPath(), "test", "somefile.stbx"));
 
-        // If we get here without exception, the test passes
-        Assert.IsTrue(true);
+        // Test passes if no exception thrown
     }
 }

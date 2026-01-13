@@ -179,3 +179,8 @@ dotnet_diagnostic.CS0105.severity = warning  # Using directive appeared previous
 
 # Code Quality - Obsolete API Usage (Issue #1134)
 dotnet_diagnostic.CS0618.severity = warning  # Member is obsolete
+
+# MSTest Analyzer - Suppress style suggestions (MSTEST0037)
+# These are suggestions to use "better" Assert methods but the existing
+# patterns like Assert.IsTrue(collection.Contains(x)) work correctly
+dotnet_diagnostic.MSTEST0037.severity = none
