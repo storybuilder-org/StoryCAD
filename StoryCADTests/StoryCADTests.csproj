@@ -16,6 +16,8 @@
         <WarningsAsErrors>UNO0001</WarningsAsErrors>
         <!-- Suppress CS8892: MSTest and Uno both generate Main entry points, this is expected -->
         <NoWarn>$(NoWarn);CS8892</NoWarn>
+        <!-- Platforms must be unconditional so VS sees them regardless of which TFM is evaluated first -->
+        <Platforms>x86;x64;arm64</Platforms>
 
         <!-- Test features -->
         <UnoFeatures>
@@ -38,7 +40,6 @@
         <EnableMsixTooling>false</EnableMsixTooling>
         <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
         <ApplicationManifest>app.manifest</ApplicationManifest>
-        <Platforms>x86;x64;arm64</Platforms>
         <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
         <!-- Disable Uno-generated Program.cs to avoid conflict with MSTest entry point -->
         <GenerateProgramFile>false</GenerateProgramFile>

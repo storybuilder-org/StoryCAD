@@ -15,10 +15,11 @@
     </PropertyGroup>
 
     <!-- On Windows, build both WinAppSDK and Skia Desktop -->
+    <!-- Desktop must be first per UNOB0012 - windows first breaks cross-platform debugging -->
     <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
         <TargetFrameworks>
-            net10.0-windows10.0.22621;
-            net10.0-desktop
+            net10.0-desktop;
+            net10.0-windows10.0.22621
         </TargetFrameworks>
     </PropertyGroup>
 
