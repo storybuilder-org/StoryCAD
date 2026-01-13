@@ -250,8 +250,8 @@ StoryCAD uses Context7 MCP server for up-to-date documentation of public depende
 # Build solution
 "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64
 
-# Run all tests
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll"
+# Run all tests (.NET 10 requires --project syntax and global.json test runner config)
+~/.dotnet/dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Debug
 ```
 
 For detailed commands, see [Build & Test Commands](/home/tcox/.claude/memory/build-commands.md).
@@ -409,18 +409,15 @@ msbuild StoryCAD.sln /t:Build /p:Configuration=Release /p:Platform=x64
 
 ### Test Commands
 ```bash
-# Visual Studio Test Console (WSL path) - All wildcarded patterns
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll"
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*.*
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*,*
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*,*,*,*
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll"
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*
+# .NET 10 requires Microsoft.Testing.Platform (configured in global.json)
+# Use --project syntax (old positional syntax no longer works)
 
-# Standard test commands
-dotnet test StoryCADTests/StoryCADTests.csproj --configuration Debug
-vstest.console.exe "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621.0/StoryCADTests.dll"
+# From WSL with .NET 10 SDK installed
+~/.dotnet/dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Debug
+
+# From Windows PowerShell
+dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Debug
+dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Debug -p:Platform=x64
 ```
 
 ### Git Commands
