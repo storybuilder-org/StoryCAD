@@ -157,7 +157,7 @@ jobs:
 
       - name: Run tests (Windows x64)
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
-        run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:Platform=${{ matrix.platform }}
+        run: dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:Platform=${{ matrix.platform }}
 
       - name: Write .env (macOS)
         if: matrix.os == 'macos-latest'
@@ -169,7 +169,7 @@ jobs:
 
       - name: Run all tests (macOS)
         if: matrix.os == 'macos-latest'
-        run: dotnet test StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore
+        run: dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore
 
       # 10 ─ Setup MSBuild (Windows only)
       - name: Setup MSBuild
