@@ -55,8 +55,7 @@ public class ShellViewModelTests
         // Act - should not throw
         shell.SaveModel();
 
-        // Assert - we get here without exception
-        Assert.IsTrue(true);
+        // Assert - test passes if no exception thrown
     }
 
     /// <summary>
@@ -72,8 +71,7 @@ public class ShellViewModelTests
         // Act - should not throw, HomePage has no data to save
         shell.SaveModel();
 
-        // Assert - we get here without exception
-        Assert.IsTrue(true);
+        // Assert - test passes if no exception thrown
     }
 
     /// <summary>
@@ -89,8 +87,7 @@ public class ShellViewModelTests
         // Act - should not throw but log error
         shell.SaveModel();
 
-        // Assert - we get here without exception
-        Assert.IsTrue(true);
+        // Assert - test passes if no exception thrown
     }
 
     /// <summary>
@@ -759,7 +756,7 @@ public class ShellViewModelTests
         shell.ShowFlyoutButtons();
 
         // Assert - method should complete without throwing
-        Assert.IsTrue(true, "Method completed without throwing");
+        // Test passes if no exception thrown
     }
 
     #endregion
@@ -837,7 +834,7 @@ public class ShellViewModelTests
         shell.MoveLeftCommand.Execute(null);
 
         // Assert - method should complete without throwing
-        Assert.IsTrue(true, "Method completed without throwing");
+        // Test passes if no exception thrown
     }
 
     /// <summary>
@@ -913,7 +910,7 @@ public class ShellViewModelTests
         shell.MoveRightCommand.Execute(null);
 
         // Assert - method should complete without throwing
-        Assert.IsTrue(true, "Method completed without throwing");
+        // Test passes if no exception thrown
     }
 
     /// <summary>
@@ -1020,7 +1017,7 @@ public class ShellViewModelTests
         shell.MoveUpCommand.Execute(null);
 
         // Assert - method should complete without throwing
-        Assert.IsTrue(true, "Method completed without throwing");
+        // Test passes if no exception thrown
     }
 
     /// <summary>
@@ -1158,7 +1155,7 @@ public class ShellViewModelTests
         shell.MoveDownCommand.Execute(null);
 
         // Assert - method should complete without throwing
-        Assert.IsTrue(true, "Method completed without throwing");
+        // Test passes if no exception thrown
     }
 
     /// <summary>
@@ -1300,7 +1297,7 @@ public class ShellViewModelTests
 
         // Assert
         // Method should complete without throwing (CollaboratorService.DestroyCollaborator is called)
-        Assert.IsTrue(true, "Method should complete without throwing");
+        // Test passes if no exception thrown
     }
 
     [TestMethod]
@@ -1333,7 +1330,7 @@ public class ShellViewModelTests
         try
         {
             await shellViewModel.OnApplicationClosing();
-            Assert.IsTrue(true, "Method should complete without throwing");
+            // Test passes if no exception thrown
         }
         catch (Exception ex)
         {

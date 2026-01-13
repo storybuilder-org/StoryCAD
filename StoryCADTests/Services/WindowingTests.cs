@@ -43,8 +43,7 @@ namespace StoryCADTests.Services
             // Act - should return early without throwing
             _windowing.SetWindowSize(window!, 1200.0, 800.0);
 
-            // Assert - if we get here without exception, test passes
-            Assert.IsTrue(true, "SetWindowSize handled null window correctly on all platforms");
+            // Assert - test passes if no exception thrown
         }
 
         [TestMethod]
@@ -113,16 +112,10 @@ namespace StoryCADTests.Services
                 "TryGetScaleFactor should accept Window parameter, not use MainWindow directly");
 
             // Platform-specific expectations for Skia desktop
-            if (OperatingSystem.IsWindows())
-            {
-                // Windows Skia desktop uses DisplayInformation or environment variable
-                Assert.IsTrue(true, "Windows Skia desktop should attempt DisplayInformation for DPI");
-            }
-            else if (OperatingSystem.IsMacOS())
-            {
-                // macOS Skia desktop uses DisplayInformation or defaults
-                Assert.IsTrue(true, "macOS Skia desktop should attempt DisplayInformation for DPI");
-            }
+            // Platform verification:
+            // - Windows Skia desktop uses DisplayInformation or environment variable for DPI
+            // - macOS Skia desktop uses DisplayInformation or defaults for DPI
+            // Test passes if we reach this point
 #endif
         }
 
@@ -222,7 +215,7 @@ namespace StoryCADTests.Services
             // - Windows automatically handles the DPI scaling for WorkArea
 
             // This is why the old GetLogicalScreenWidth/Height methods are not needed
-            Assert.IsTrue(true, "DisplayArea.WorkArea provides logical dimensions automatically");
+            // Test documents expected behavior - passes if comment is accurate
         }
 
 //        [TestMethod]

@@ -286,8 +286,7 @@ public class PluginLoadContextTests
             Assert.IsNotNull(type.Assembly, $"Type {type.Name} should have a valid assembly reference");
         }
 
-        // Final assertion - no regression
-        Assert.IsTrue(true, "No ReflectionTypeLoadException thrown - regression prevented");
+        // Test passes if no ReflectionTypeLoadException thrown - regression prevented
     }
 
     #region Helper Methods
