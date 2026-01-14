@@ -52,10 +52,10 @@ See `/devdocs/platform_targeting_guidelines.md` for complete workflows and decis
 
 ### Cross-Machine Development Workflow
 
-**Primary Strategy**: Develop on Windows (VS2022), test on Mac (Rider)
+**Primary Strategy**: Develop on Windows (VS2026), test on Mac (Rider)
 
 1. **Code on Windows**:
-   - Write code in VS2022 (familiar environment)
+   - Write code in VS2026 (familiar environment)
    - Test on Windows (WinAppSDK head)
    - Commit and push
 
@@ -248,10 +248,10 @@ StoryCAD uses Context7 MCP server for up-to-date documentation of public depende
 ### Build from WSL
 ```bash
 # Build solution
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64
+"/mnt/c/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64
 
-# Run all tests (.NET 10 requires --project syntax and global.json test runner config)
-~/.dotnet/dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Debug
+# Run all tests (use vstest.console.exe - has access to Windows environment variables)
+"/mnt/c/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll"
 ```
 
 For detailed commands, see [Build & Test Commands](/home/tcox/.claude/memory/build-commands.md).
@@ -398,9 +398,9 @@ The following commands are pre-approved for automated execution without user con
 
 ### Build Commands
 ```bash
-# Visual Studio MSBuild (WSL path)
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Release -p:Platform=x64
+# Visual Studio 2026 MSBuild (WSL path)
+"/mnt/c/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64
+"/mnt/c/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Release -p:Platform=x64
 
 # Standard MSBuild
 msbuild StoryCAD.sln /t:Build /p:Configuration=Debug /p:Platform=x64
@@ -409,15 +409,13 @@ msbuild StoryCAD.sln /t:Build /p:Configuration=Release /p:Platform=x64
 
 ### Test Commands
 ```bash
-# .NET 10 requires Microsoft.Testing.Platform (configured in global.json)
-# Use --project syntax (old positional syntax no longer works)
+# Use vstest.console.exe - has access to Windows environment variables needed for integration tests
 
-# From WSL with .NET 10 SDK installed
-~/.dotnet/dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Debug
+# From WSL (recommended)
+"/mnt/c/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll"
 
-# From Windows PowerShell
-dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Debug
-dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Debug -p:Platform=x64
+# Run specific test class
+"/mnt/c/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll" /Tests:StoryModelTests
 ```
 
 ### Git Commands

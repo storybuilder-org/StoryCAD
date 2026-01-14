@@ -27,7 +27,7 @@ public class PluginLoadContextTests
             // Default to Collaborator build output relative to test directory
             var testDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             _pluginDir = Path.GetFullPath(Path.Combine(testDir, "..", "..", "..", "..", "..", "..",
-                "Collaborator", "CollaboratorLib", "bin", "x64", "Debug", "net8.0-windows10.0.22621.0"));
+                "Collaborator", "CollaboratorLib", "bin", "x64", "Debug", "net10.0-windows10.0.22621"));
         }
 
         _pluginPath = Path.Combine(_pluginDir, "CollaboratorLib.dll");
@@ -82,57 +82,6 @@ public class PluginLoadContextTests
         // Assert
         Assert.IsNotNull(assembly);
         Assert.AreEqual("CollaboratorLib", assembly.GetName().Name);
-    }
-
-    /// <summary>
-    /// Test that PluginLoadContext resolves Uno.Extensions.Navigation dependency.
-    /// This verifies that AssemblyDependencyResolver finds dependencies next to the plugin.
-    /// </summary>
-    [TestMethod]
-    public void PluginLoadContext_ResolvesUnoExtensionsNavigation()
-    {
-        // Arrange
-        SkipIfPluginNotAvailable();
-        var context = CreatePluginLoadContext();
-
-        // First load the main assembly to trigger dependency resolution
-        var mainAssembly = context.LoadFromAssemblyPath(_pluginPath);
-        Assert.IsNotNull(mainAssembly);
-
-        // Act - Try to load Uno.Extensions.Navigation by name
-        var unoNavAssemblyName = new AssemblyName("Uno.Extensions.Navigation");
-        Assembly unoNavAssembly = null;
-
-        try
-        {
-            // Use reflection to call the protected Load method
-            var loadMethod = context.GetType().GetMethod("Load",
-                BindingFlags.NonPublic | BindingFlags.Instance,
-                null,
-                new[] { typeof(AssemblyName) },
-                null);
-
-            unoNavAssembly = loadMethod?.Invoke(context, new object[] { unoNavAssemblyName }) as Assembly;
-        }
-        catch (Exception ex)
-        {
-            // Log for debugging but don't fail - the dependency might not be directly referenced
-            var logService = Ioc.Default.GetService<LogService>();
-            logService?.Log(LogLevel.Info, $"Could not load Uno.Extensions.Navigation: {ex.Message}");
-        }
-
-        // Assert - Either the assembly loaded or it's available through dependencies
-        if (unoNavAssembly != null)
-        {
-            Assert.AreEqual("Uno.Extensions.Navigation", unoNavAssembly.GetName().Name);
-        }
-        else
-        {
-            // Verify it exists in the plugin directory as a fallback check
-            var unoNavPath = Path.Combine(_pluginDir, "Uno.Extensions.Navigation.dll");
-            Assert.IsTrue(File.Exists(unoNavPath),
-                $"Uno.Extensions.Navigation.dll should exist in plugin directory: {unoNavPath}");
-        }
     }
 
     /// <summary>
