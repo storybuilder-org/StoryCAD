@@ -15,11 +15,13 @@
     </PropertyGroup>
 
     <!-- On Windows, build both WinAppSDK and Skia Desktop -->
-    <!-- Desktop must be first per UNOB0012 - windows first breaks cross-platform debugging -->
+    <!-- Windows must be first for MSIX packaged debugging to work in VS -->
+    <!-- Suppress UNOB0012 warning about framework order - we need windows first for MSIX -->
     <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
+        <NoWarn>$(NoWarn);UNOB0012</NoWarn>
         <TargetFrameworks>
-            net10.0-desktop;
-            net10.0-windows10.0.22621
+            net10.0-windows10.0.22621;
+            net10.0-desktop
         </TargetFrameworks>
     </PropertyGroup>
 
