@@ -17,8 +17,9 @@ public interface ICollaborator
 /// <param name="model">The story model Collaborator should operate on</param>
 /// <param name="hostWindow">Host-created window for Collaborator UI</param>
 /// <param name="hostFrame">Host-created frame (with region) for navigation</param>
+/// <param name="filePath">Path to the story file for saving via API</param>
 /// <returns>The window hosting Collaborator's UI</returns>
-Task<Window> OpenAsync(IStoryCADAPI api, StoryModel model, Window hostWindow, Frame hostFrame);
+Task<Window> OpenAsync(IStoryCADAPI api, StoryModel model, Window hostWindow, Frame hostFrame, string filePath);
 
 /// <summary>
 ///     Signals that the host is closing Collaborator and retrieves a session summary.

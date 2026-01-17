@@ -16,6 +16,7 @@ public partial class WorkflowShellViewModel : ObservableRecipient
     public WorkflowShellViewModel()
     {
         MenuItems = new ObservableCollection<NavigationViewItem>();
+        SaveCommand = new RelayCommand(SaveOutline);
         ExitCommand = new RelayCommand(ExitCollaborator);
     }
 
@@ -44,6 +45,18 @@ public partial class WorkflowShellViewModel : ObservableRecipient
     /// Collaborator sets this to update its internal settings.
     /// </summary>
     public Action<CollaboratorSettings> OnSettingsChanged { get; set; }
+
+    /// <summary>
+    /// Callback invoked when user clicks Save button.
+    /// Collaborator sets this to save the outline via API.
+    /// </summary>
+    public Action OnSave { get; set; }
+
+    /// <summary>
+    /// Callback invoked when user clicks Exit button.
+    /// Collaborator sets this to handle cleanup before window close.
+    /// </summary>
+    public Action OnExit { get; set; }
 
     private NavigationViewItem _currentItem;
     public NavigationViewItem CurrentItem
@@ -78,10 +91,18 @@ public partial class WorkflowShellViewModel : ObservableRecipient
 
     #region Commands
 
+    public RelayCommand SaveCommand { get; }
+
     public RelayCommand ExitCommand { get; }
+
+    private void SaveOutline()
+    {
+        OnSave?.Invoke();
+    }
 
     private void ExitCollaborator()
     {
+        OnExit?.Invoke();
         if (NavView != null)
         {
             NavView.SelectionChanged -= NavView_SelectionChanged;

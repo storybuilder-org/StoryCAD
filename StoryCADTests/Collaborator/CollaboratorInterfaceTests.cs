@@ -31,7 +31,7 @@ public class CollaboratorInterfaceTests
     /// </summary>
     private class MockCollaborator : ICollaborator
     {
-        public Task<Window> OpenAsync(IStoryCADAPI api, StoryModel model, Window hostWindow, Frame hostFrame)
+        public Task<Window> OpenAsync(IStoryCADAPI api, StoryModel model, Window hostWindow, Frame hostFrame, string filePath)
         {
             return Task.FromResult<Window>(null);
         }

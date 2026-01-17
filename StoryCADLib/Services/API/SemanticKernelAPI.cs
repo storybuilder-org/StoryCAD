@@ -1,9 +1,12 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.SemanticKernel;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.Collaborator.Contracts;
+using StoryCADLib.Services.Logging;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.ViewModels;
 using StoryCADLib.ViewModels.Tools;
@@ -583,18 +586,32 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
 
     public OperationResult<StoryElement> UpdateElementProperty(Guid elementUuid, string propertyName, object value)
     {
+        // DIAG-55: Get logger for diagnostic tracing
+        var log = Ioc.Default.GetService<ILogService>();
+
+        // DIAG-55: Log entry point
+        log?.Log(LogLevel.Info, $"DIAG-55: UpdateElementProperty - CurrentModel hash={RuntimeHelpers.GetHashCode(CurrentModel)}, elementUuid={elementUuid}, property={propertyName}");
+
         // Ensure we have a current StoryModel.
         if (CurrentModel == null)
         {
+            log?.Log(LogLevel.Error, "DIAG-55: CurrentModel is NULL!");
             return OperationResult<StoryElement>.Failure("No StoryModel available. Create a model first.");
         }
+
+        // DIAG-55: Log StoryElements collection info
+        log?.Log(LogLevel.Info, $"DIAG-55: CurrentModel.StoryElements hash={RuntimeHelpers.GetHashCode(CurrentModel.StoryElements)}, count={CurrentModel.StoryElements.Count}");
 
         // Find the StoryElement in the current model.
         var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == elementUuid);
         if (element == null)
         {
+            log?.Log(LogLevel.Error, $"DIAG-55: Element NOT FOUND for UUID {elementUuid}");
             return OperationResult<StoryElement>.Failure("StoryElement not found.");
         }
+
+        // DIAG-55: Log found element
+        log?.Log(LogLevel.Info, $"DIAG-55: Found element hash={RuntimeHelpers.GetHashCode(element)}, type={element.GetType().Name}, name={element.Name}");
 
         try
         {
@@ -634,8 +651,23 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
                 }
             }
 
+            // DIAG-55: Log before/after
+            var oldValue = property.GetValue(element);
+            var oldStr = oldValue?.ToString() ?? "";
+            log?.Log(LogLevel.Info, $"DIAG-55: Before SetValue - {propertyName} oldValue='{oldStr.Substring(0, Math.Min(50, oldStr.Length))}'");
+
             // Update the property value.
             property.SetValue(element, value);
+
+            // DIAG-55: Verify the set worked
+            var verifyValue = property.GetValue(element);
+            var newStr = verifyValue?.ToString() ?? "";
+            log?.Log(LogLevel.Info, $"DIAG-55: After SetValue - {propertyName} newValue='{newStr.Substring(0, Math.Min(50, newStr.Length))}'");
+
+            // DIAG-55: Log Changed flag status
+            log?.Log(LogLevel.Info, $"DIAG-55: Before setting Changed - CurrentModel.Changed={CurrentModel.Changed}");
+            CurrentModel.Changed = true;
+            log?.Log(LogLevel.Info, $"DIAG-55: After setting Changed - CurrentModel.Changed={CurrentModel.Changed}");
 
             return OperationResult<StoryElement>.Success(element);
         }

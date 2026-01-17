@@ -15,7 +15,7 @@ namespace StoryCADLib.ViewModels;
 ///     another Section as its parent. Sections are Chapters, Acts,
 ///     etc.
 /// </summary>
-public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
+public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     #region Fields
 
@@ -148,6 +148,14 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable
 
         // Write RYG file
         Model.Description = Description;
+    }
+
+    public void ReloadFromModel()
+    {
+        if (Model != null)
+        {
+            LoadModel();
+        }
     }
 
     #endregion
