@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 using Windows.ApplicationModel.AppExtensions;
 using Windows.ApplicationModel.Resources.Core;
@@ -65,6 +66,8 @@ public class CollaboratorService
 
         // Get the current StoryModel from AppState
         var storyModel = _appState.CurrentDocument?.Model;
+        // DIAG-55: Log StoryModel identity from AppState
+        _logService.Log(LogLevel.Info, $"DIAG-55: AppState.CurrentDocument.Model hash={RuntimeHelpers.GetHashCode(storyModel)}");
         if (storyModel == null)
         {
             _logService.Log(LogLevel.Error, "No StoryModel available - no document is open");
@@ -80,6 +83,8 @@ public class CollaboratorService
         {
             var api = new SemanticKernelApi(outlineService, listData, controlData, toolsData);
             api.SetCurrentModel(storyModel);
+            // DIAG-55: Log API.CurrentModel after SetCurrentModel
+            _logService.Log(LogLevel.Info, $"DIAG-55: After SetCurrentModel - api.CurrentModel hash={RuntimeHelpers.GetHashCode(api.CurrentModel)}");
 
             try
             {
@@ -97,7 +102,10 @@ public class CollaboratorService
                 CollaboratorWindow.Activate();
 
                 // Let the plugin drive the provided frame
-                await _collaboratorInterface.OpenAsync(api, storyModel, CollaboratorWindow, hostFrame);
+                // DIAG-55: Log before OpenAsync - verify both references match
+                _logService.Log(LogLevel.Info, $"DIAG-55: Before OpenAsync - storyModel hash={RuntimeHelpers.GetHashCode(storyModel)}, api.CurrentModel hash={RuntimeHelpers.GetHashCode(api.CurrentModel)}");
+                var filePath = _appState.CurrentDocument?.FilePath ?? string.Empty;
+                await _collaboratorInterface.OpenAsync(api, storyModel, CollaboratorWindow, hostFrame, filePath);
             }
             catch (Exception ex)
             {
@@ -352,7 +360,35 @@ public class CollaboratorService
         }
 
         CollaboratorWindow = null;
+
+        // Reload current ViewModel from Model to pick up Collaborator's changes
+        ReloadCurrentViewModel();
+
         FinishedCallback();
+    }
+
+    /// <summary>
+    ///     Reloads the current ViewModel from the Model after Collaborator updates.
+    ///     This ensures the UI reflects changes made by Collaborator.
+    /// </summary>
+    private void ReloadCurrentViewModel()
+    {
+        try
+        {
+            if (_appState.CurrentSaveable is IReloadable reloadable)
+            {
+                _logService.Log(LogLevel.Info, "Reloading current ViewModel from Model after Collaborator close");
+                reloadable.ReloadFromModel();
+            }
+            else
+            {
+                _logService.Log(LogLevel.Debug, "No reloadable ViewModel active - skipping reload");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Error, $"Error reloading ViewModel after Collaborator close: {ex.Message}");
+        }
     }
 
     #endregion

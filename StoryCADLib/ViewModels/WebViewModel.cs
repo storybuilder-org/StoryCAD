@@ -10,7 +10,7 @@ using StoryCADLib.Services.Navigation;
 
 namespace StoryCADLib.ViewModels;
 
-public class WebViewModel : ObservableRecipient, INavigable, ISaveable
+public class WebViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     public delegate void GoBackDelegate();
 
@@ -66,6 +66,14 @@ public class WebViewModel : ObservableRecipient, INavigable, ISaveable
         catch (Exception ex)
         {
             _logger.LogException(LogLevel.Error, ex, $"Failed to save WebVM {ex.Message}");
+        }
+    }
+
+    public void ReloadFromModel()
+    {
+        if (Model != null)
+        {
+            LoadModel();
         }
     }
 
