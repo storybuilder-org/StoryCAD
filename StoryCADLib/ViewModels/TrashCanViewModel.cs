@@ -5,6 +5,12 @@ namespace StoryCADLib.ViewModels;
 
 public class TrashCanViewModel : ObservableRecipient, INavigable
 {
+    #region Fields
+
+    private readonly ILogService _logger;
+
+    #endregion
+
     #region Properties
 
     // StoryElement data
@@ -38,16 +44,29 @@ public class TrashCanViewModel : ObservableRecipient, INavigable
 
     #endregion
 
+    #region Constructor
+
+    public TrashCanViewModel(ILogService logger)
+    {
+        _logger = logger;
+    }
+
+    #endregion
+
     #region Methods
 
     public void Activate(object parameter)
     {
+        var param = parameter as TrashCanModel;
+        _logger.Log(LogLevel.Info, $"TrashCanViewModel.Activate: parameter={param?.Name} (Uuid={param?.Uuid})");
         Model = (TrashCanModel)parameter;
+        _logger.Log(LogLevel.Info, $"TrashCanViewModel.Activate: Model set to {Model?.Name} (Uuid={Model?.Uuid})");
         LoadModel();
     }
 
     public void Deactivate(object parameter)
     {
+        _logger.Log(LogLevel.Info, "TrashCanViewModel.Deactivate: (no-op)");
     }
 
     private void LoadModel()

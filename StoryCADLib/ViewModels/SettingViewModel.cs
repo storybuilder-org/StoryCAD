@@ -184,14 +184,18 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
 
     public void Activate(object parameter)
     {
+        var param = parameter as SettingModel;
+        _logger.Log(LogLevel.Info, $"SettingViewModel.Activate: parameter={param?.Name} (Uuid={param?.Uuid})");
         _changeable = false;  // Disable change tracking before setting Model
         _changed = false;
         Model = (SettingModel)parameter;
+        _logger.Log(LogLevel.Info, $"SettingViewModel.Activate: Model set to {Model?.Name} (Uuid={Model?.Uuid})");
         LoadModel();
     }
 
     public void Deactivate(object parameter)
     {
+        _logger.Log(LogLevel.Info, $"SettingViewModel.Deactivate: Saving to Model={Model?.Name} (Uuid={Model?.Uuid})");
         SaveModel(); // Save the ViewModel back to the Story
     }
 
