@@ -180,21 +180,14 @@ StoryCAD is a free, open-source application for fiction writers that provides st
 
 ## Documentation Resources
 
-### Core Memory Files (`/home/tcox/.claude/memory/`)
+### Memory Files
 
-Essential architecture and development documentation accessible to all sessions:
+See `/mnt/d/dev/src/CLAUDE.md` for full list of shared memory files. Key ones for StoryCAD:
+- **patterns.md** - 9 architectural patterns (ISaveable, SerializationLock, etc.)
+- **architecture.md** - ADRs, navigation lifecycle, StoryDocument rules
+- **gotchas.md** - Common pitfalls, headless mode, platform issues
 
-- **[patterns.md](/home/tcox/.claude/memory/patterns.md)** - 9 architectural patterns (MVVM, ISaveable, SerializationLock, OperationResult, Stateless Services, IMessenger, Platform-Specific Code, StoryDocument, DI)
-- **[architecture.md](/home/tcox/.claude/memory/architecture.md)** - Critical dated decisions (2025-10-12), circular dependencies, navigation lifecycle, StoryDocument never-null rule, theme management
-- **[gotchas.md](/home/tcox/.claude/memory/gotchas.md)** - Common pitfalls, headless mode behavior, platform-specific gotchas, ISaveable registration, navigation timing
-- **[cross-platform.md](/home/tcox/.claude/memory/cross-platform.md)** - Cross-platform development workflows, multi-targeting, when to build where
-- **[testing.md](/home/tcox/.claude/memory/testing.md)** - Test patterns, naming conventions (MethodName_Scenario_ExpectedResult), TDD workflow, test data creation
-- **[build-commands.md](/home/tcox/.claude/memory/build-commands.md)** - WSL/Windows/Mac build and test commands, TDD red-green-refactor cycle, cross-machine workflow
-- **[dependencies.md](/home/tcox/.claude/memory/dependencies.md)** - UNO Platform 6.2.36, MVVM Toolkit 8.4.0, Semantic Kernel 1.41.0 usage patterns
-
-**Usage**: All memory files cross-reference each other. Start with patterns.md for quick lookup, then drill into specific topics.
-
-### Comprehensive Documentation (`.claude/docs/`)
+### StoryCAD-Specific Docs (`.claude/docs/`)
 
 Detailed technical documentation (memory files provide condensed versions):
 
@@ -254,7 +247,7 @@ StoryCAD uses Context7 MCP server for up-to-date documentation of public depende
 "/mnt/c/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll"
 ```
 
-For detailed commands, see [Build & Test Commands](/home/tcox/.claude/memory/build-commands.md).
+For detailed commands, see `build-commands.md` in shared memory files.
 
 ## Key Services
 
@@ -266,7 +259,7 @@ For detailed commands, see [Build & Test Commands](/home/tcox/.claude/memory/bui
 - **SearchService**: Full-text search across story content
 - **LogService**: Comprehensive logging with NLog and elmah.io integration
 
-For detailed architecture information, see [Architecture Memory](/home/tcox/.claude/memory/architecture.md) and [Patterns](/home/tcox/.claude/memory/patterns.md).
+For detailed architecture, see `architecture.md` and `patterns.md` in shared memory files.
 
 ## Important Notes
 
@@ -450,5 +443,5 @@ git commit -m "message"
 ### Circular Dependencies
 - Watch for circular dependencies when adding constructor parameters
 - If encountered, document with TODO and leave specific Ioc.Default calls rather than forcing bad design
-- Example: Windowing ↔ OutlineViewModel (documented in /home/tcox/.claude/memory/architecture.md)
+- Example: Windowing ↔ OutlineViewModel (documented in `architecture.md`)
 - Do not memorise or document any information about Storybuilder-miscellaneous in the StoryCAD Repo.

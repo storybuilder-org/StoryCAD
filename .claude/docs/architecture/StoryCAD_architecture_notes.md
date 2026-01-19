@@ -134,7 +134,7 @@ ManualTest/docs/
 **Usage**:
 - Reference via CLAUDE.md "User Manual Navigation"
 - Search with Glob/Grep rather than reading all files
-- See: `CLAUDE.md` for navigation guidance
+-  # Get current issue contentgh issue view 1067 --repo storybuilder-org/StoryCAD --json body -q .body > current-issue.md​# Edit the file to add tasks or check off completed ones# Then update the issuegh issue edit 1067 --repo storybuilder-org/StoryCAD --body-file current-issue.mdbash
 
 ---
 
@@ -1976,7 +1976,7 @@ StoryCAD uses several message types for different communication needs:
    {
        public StatusChangedMessage(StatusMessage value) : base(value) { }
    }
-
+   
    // Usage - sending from any ViewModel or service:
    Messenger.Send(new StatusChangedMessage(
        new StatusMessage("File saved successfully", LogLevel.Info, true)));
@@ -1988,7 +1988,7 @@ StoryCAD uses several message types for different communication needs:
    {
        public IsChangedMessage(bool value) : base(value) { }
    }
-
+   
    // Usage - notifying document changed:
    Messenger.Send(new IsChangedMessage(true));
    ```
@@ -1996,7 +1996,7 @@ StoryCAD uses several message types for different communication needs:
 3. **IsChangedRequestMessage**: Request current changed state (request/response pattern)
    ```csharp
    public class IsChangedRequestMessage : RequestMessage<bool> { }
-
+   
    // Usage - requesting information:
    var isChanged = Messenger.Send(new IsChangedRequestMessage());
    ```
@@ -2007,7 +2007,7 @@ StoryCAD uses several message types for different communication needs:
    {
        public NameChangedMessage(NameChangeMessage value) : base(value) { }
    }
-
+   
    // Usage - from OverviewViewModel when name changes:
    NameChangeMessage msg = new(oldName, newName);
    Messenger.Send(new NameChangedMessage(msg));
