@@ -46,8 +46,18 @@
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE713;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <AppBarButton Label="Exit" Margin="5"
-                              Command="{x:Bind ShellViewModel.ExitCommand, Mode=OneWay}" />
+                <AppBarButton Label="Save" ToolTipService.ToolTip="Save outline changes" Margin="5"
+                              Command="{x:Bind ShellViewModel.SaveCommand, Mode=OneWay}">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton Label="Exit" ToolTipService.ToolTip="Exit Collaborator" Margin="5"
+                              Command="{x:Bind ShellViewModel.ExitCommand, Mode=OneWay}">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8BB;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
             </CommandBar.PrimaryCommands>
         </CommandBar>
     </Grid>

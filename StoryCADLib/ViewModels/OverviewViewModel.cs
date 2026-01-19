@@ -14,7 +14,7 @@ namespace StoryCADLib.ViewModels;
 ///     There is only one OverviewModel instance for each story. It's also the root of the Shell Page's
 ///     StoryExplorer TreeView.
 /// </summary>
-public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
+public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     #region Fields
 
@@ -413,6 +413,14 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable
         {
             _logger.LogException(LogLevel.Error,
                 ex, $"Failed to save overview model - {ex.Message}");
+        }
+    }
+
+    public void ReloadFromModel()
+    {
+        if (Model != null)
+        {
+            LoadModel();
         }
     }
 

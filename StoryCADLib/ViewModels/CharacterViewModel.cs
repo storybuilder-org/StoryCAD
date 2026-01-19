@@ -12,7 +12,7 @@ using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.ViewModels;
 
-public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
+public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     #region Fields
 
@@ -707,6 +707,14 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
         Model.Notes = Notes;
         Model.Flaw = Flaw;
         Model.BackStory = BackStory;
+    }
+
+    public void ReloadFromModel()
+    {
+        if (Model != null)
+        {
+            LoadModel();
+        }
     }
 
     private void AddTrait()

@@ -8,7 +8,7 @@ using StoryCADLib.Services.Navigation;
 
 namespace StoryCADLib.ViewModels;
 
-public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
+public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     #region Constructors
 
@@ -689,6 +689,14 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable
         //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
         //Messenger.Send(new IsChangedMessage(Changed));
         _changeable = true;
+    }
+
+    public void ReloadFromModel()
+    {
+        if (Model != null)
+        {
+            LoadModel();
+        }
     }
 
     public void AddScenePurpose(StringSelection selectedPurpose)

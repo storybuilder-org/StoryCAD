@@ -8,7 +8,7 @@ using StoryCADLib.Services.Navigation;
 
 namespace StoryCADLib.ViewModels;
 
-public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
+public class SettingViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     #region Fields
 
@@ -269,6 +269,14 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable
         {
             _logger.LogException(LogLevel.Error,
                 ex, $"Failed to save setting model - {ex.Message}");
+        }
+    }
+
+    public void ReloadFromModel()
+    {
+        if (Model != null)
+        {
+            LoadModel();
         }
     }
 
