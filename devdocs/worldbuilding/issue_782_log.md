@@ -17,7 +17,7 @@
 
 #### Documents Reviewed
 All files in `/mnt/c/temp/worldbuilding/`:
-- storyworld_plan.md - Master implementation plan
+- issue_782_storyworld_plan.md - Master implementation plan (this folder)
 - workflow_summary.md - 26 Collaborator workflows
 - worldbuilding_categories.md - World Type classification UI pattern
 - software_research.md - 10 competitor tools analyzed
@@ -325,7 +325,7 @@ The 8 taxonomy categories **still apply** to Consensus Reality - they're grounde
    - Links to design documents
    - Standard lifecycle checkboxes (Design/Code/Test/Evaluate)
 
-4. **Updated storyworld_plan.md**:
+4. **Updated issue_782_storyworld_plan.md**:
    - Marked Phase 1 (Research & Data Model) as COMPLETE
    - Updated Phase 2 (UI Design) as CURRENT
    - Removed obsolete sections (superseded by data_model_research.md)
@@ -352,7 +352,7 @@ All major research questions resolved. Remaining items are for UI design/impleme
 | File | Purpose | Status |
 |------|---------|--------|
 | **data_model_research.md** | Final data model specification | **PRIMARY** |
-| storyworld_plan.md | Master implementation plan (updated) | Active |
+| issue_782_storyworld_plan.md | Master implementation plan (this folder) | Active |
 | gestalt_axis_mapping.md | 8 gestalts mapped to 6 axes | Complete |
 | world_type_examples.md | Comprehensive examples per World Type | Complete |
 | world_type_aware_workflows.md | Future Collaborator work (depends on #782) | Future |
@@ -364,6 +364,315 @@ All major research questions resolved. Remaining items are for UI design/impleme
 | workflow_summary.md | 26 Collaborator workflows | Reference |
 | worldbuilding_categories.md | World Type UI pattern (original) | Superseded |
 | world_type_source_chatgpt.md | ChatGPT conversation source | Reference |
+
+---
+
+### 2026-01-19 - Session 3: Documentation Consolidation
+
+**Context:** Session recovery after context compaction. Consolidated planning documents and updated issue status.
+
+#### Actions Taken
+
+1. **Consolidated plan documents**:
+   - Merged `storyworld_plan.md` and `issue_782_storyworld_integration_plan.md` into single `issue_782_storyworld_plan.md`
+   - Moved plan into `/devdocs/worldbuilding/` with other issue docs
+   - Deleted redundant `worldbuilding_status.md` (outdated, referenced old paths)
+
+2. **Updated references**:
+   - Updated this log file (3 occurrences)
+   - Updated GitHub issue #782 documentation table
+
+3. **Updated issue status**:
+   - Marked completed Design tasks
+   - Added detailed Code task checkboxes (6 done, 6 remaining)
+   - Added detailed Test task checkboxes (2 done, 5 remaining)
+
+#### Current State
+
+**Completed:**
+- StoryWorldModel with entry classes
+- StoryWorldViewModel (INavigable, ISaveable, IReloadable)
+- StoryWorldPage.xaml and code-behind
+- StoryItemType.StoryWorld enum
+- DI registration
+- Lists in Lists.json
+- Unit tests (Model and ViewModel)
+
+**Remaining (Integration):**
+- Navigation wiring
+- AddStoryWorldCommand with singleton check
+- OutlineService.AddStoryElement case
+- Menu/Flyout UI
+- Delete handling
+- Reports
+- Integration tests
+
+---
+
+### 2026-01-20 - Session 4: Integration Implementation
+
+**Context:** Implementing minimum integration to allow UI review.
+
+#### Actions Taken
+
+1. **Navigation wiring**:
+   - Added `StoryWorldPage` constant in ShellViewModel.cs and App.xaml.cs
+   - Added `nav.Configure(StoryWorldPage, typeof(StoryWorldPage))` in App.xaml.cs
+   - Added StoryWorld case in TreeViewNodeClicked switch
+
+2. **OutlineService.AddStoryElement**:
+   - Added StoryWorld case in switch expression
+   - Added `StoryWorldExists()` helper method for singleton validation
+   - Added singleton check before creation
+
+3. **AddStoryWorldCommand**:
+   - Added command property in ShellViewModel
+   - Added `CanAddStoryWorld()` method - checks SerializationLock AND singleton
+   - Added NotifyCanExecuteChanged call
+
+4. **Menu/Flyout UI (Shell.xaml)**:
+   - Added "Add StoryWorld" to Add flyout menu
+   - Added "Add StoryWorld" to right-click context menu
+   - Icon: Map (Globe was already used by Setting)
+   - No keyboard shortcut (Alt+W taken by Website)
+
+5. **Test fix**:
+   - Fixed ListLoaderTests counts (this branch doesn't have #1267 fix)
+
+#### Build/Test Results
+- Build: Success (0 errors, 0 warnings)
+- Tests: 682 passed, 14 skipped
+
+#### Current State
+
+**Now implemented:**
+- Navigation wiring
+- AddStoryWorldCommand with singleton check
+- OutlineService.AddStoryElement case
+- Menu/Flyout UI
+
+**Still remaining:**
+- Delete handling with confirmation
+- Reports (PrintReports, ScrivenerReports)
+- Integration tests
+
+**Ready for:** UI review - user can add StoryWorld and see the page
+
+---
+
+### 2026-01-20 - Session 5: UI Testing and Structure Tab Analysis
+
+**Context:** User testing the StoryWorld UI. Initial screenshots revealed naming issues (fixed), then revealed fundamental UX problems with the Structure tab.
+
+#### Naming Fixes Applied
+
+1. **Node name**: Changed from "New World" to static "Story World"
+   - Model constructor default changed
+   - SaveModel() no longer saves derived name back to model
+
+2. **Page title**: Changed to "{Story Name} Story World", centered
+   - LoadModel() derives display name from first node in ExplorerView
+   - Added HorizontalAlignment="Center" to XAML title
+
+#### Structure Tab UX Issues Identified
+
+The following conversation captures the problem analysis verbatim:
+
+---
+
+**Claude:** (reading screenshot 2 agency source issue.png)
+
+> see the red arrow pointing to "Agency Source (What drives change)". The dropdown appears to be cut off at the bottom of the visible area.
+>
+> Issues I notice:
+> 1. The title shows "Doll Hospital" and "World" separately with a gap (the naming issue we just fixed)
+> 2. Agency Source dropdown seems cut off or possibly empty
+>
+> What's the specific issue with Agency Source?
+
+**User:**
+
+> It is cut off, and that's a problem, but what I want you to see is selected values for each dropdown. Understand they ALL have the same problem, and even more so- the user won't know what 'Explicit Rules' or 'Divergent Earth' means. Even more importantly, he won't know why they matter- if they do.
+
+**Claude:**
+
+> I understand now. The problem is broader:
+>
+> 1. **All dropdown values are unexplained** - "Scientific Speculative", "Divergent Earth", "Explicit Rules", "Structural" - users won't know what any of these mean
+> 2. **No context for WHY they matter** - Even if explained, users don't know what impact these choices have. The design docs say these axis values guide the Collaborator AI, but that's not communicated anywhere.
+> 3. **The World Type dropdown has the same problem** - "Consensus Reality", "Divergent World" etc. are equally cryptic
+> 4. **Auto-population missing?** - The design said selecting a World Type should auto-populate the 6 axis values. That doesn't seem to be happening.
+>
+> The whole Structure tab needs UX work:
+> - Explanations for World Type options
+> - Auto-derive axis values from World Type selection
+> - Make it clear the Advanced section is for AI customization (optional)
+> - Tooltips or descriptions for axis values
+>
+> This is a design/UX issue beyond just code fixes. How would you like to address it?
+
+**User:**
+
+> You understand correctly. Point 4 might address some of this, but even if they were all set, the user wouldn't understand what this is about. In fact, neither do I. Let's analyze this a bit because as you said, the whole structure tab is in question.
+
+---
+
+#### Analysis Status
+
+Reviewing design documents (gestalt_axis_mapping.md, data_model_research.md) to understand:
+- What value does World Type provide to the USER?
+- Should axis values be hidden entirely and just derived automatically?
+- How does this connect to the Collaborator AI?
+- Should the Structure tab be redesigned or simplified?
+
+**Key finding from design docs:**
+- Original intent: "gestalts for humans, axes for AI"
+- Current implementation exposes BOTH to users without explanation
+- User said: "In fact, neither do I [understand what this is about]"
+
+#### Decision: Simplify Structure Tab
+
+After analysis, decided to:
+1. **Remove Advanced Axis Values section entirely** from visible UI
+2. **Auto-populate axis values** from World Type selection (stored internally)
+3. **Add description panel** showing what selected World Type means + examples
+4. **Add info text** explaining why this matters (Collaborator connection)
+
+Created mockup: `/devdocs/worldbuilding/structure_tab_mockup.md`
+
+#### Axis Mismatch Problem Identified
+
+Discussion about what happens when user's story doesn't fit cleanly into one World Type:
+- Example: "Broken Mythic" story (post-apocalyptic + prophecy/gods are real)
+- User picks "Broken World" but needs "Mythic World" axis values
+- Collaborator guidance would be wrong
+
+#### Solution: Escape Hatch for Collaborator Subscribers
+
+1. **StoryCAD side:** Hidden "Axis Customization" form
+   - Not visible in normal UI
+   - Only activated for Collaborator subscribers
+   - Invoked via button on Structure tab (subscribers only)
+   - Allows manual override of all 6 axis values
+
+2. **Collaborator side:** Smarter AI that analyzes actual content
+   - Read axis values as initial context
+   - Analyze user's actual worldbuilding entries
+   - Detect contradictions and adjust guidance
+   - Long-term: suggest axis value updates based on content
+
+#### Created Collaborator Issue
+
+[Collaborator #59 - World-Type-Aware Worldbuilding Workflows](https://github.com/storybuilder-org/Collaborator/issues/59)
+
+Covers:
+- Part 1: World-Type-Aware workflow updates
+- Part 2: The axis mismatch problem
+- Part 3: The escape hatch solution
+
+#### Implementation: Simplified Structure Tab + Hidden AI Parameters Tab
+
+**StoryWorldViewModel changes:**
+- Added `CollaboratorService` injection
+- Added `CollaboratorVisibility` property (checks `HasCollaborator`)
+- Added `IsAiParametersTabVisible` and `AiParametersTabVisibility` properties
+- Added `ShowAiParametersCommand` to reveal the hidden tab
+- Added `WorldTypeDescription` and `WorldTypeExamples` properties (update on WorldType change)
+- Added `AutoPopulateAxisValues()` method with full gestalt-to-axis mapping
+- Added `_axisValuesCustomized` flag to track manual customization
+
+**StoryWorldPage.xaml changes:**
+- Simplified Structure tab:
+  - Removed Advanced Expander with axis dropdowns
+  - Added question prompt: "What kind of world is your story set in?"
+  - Added description panel showing World Type description + example works
+  - Added Collaborator info bar with "Customize AI Parameters" button (hidden unless Collaborator available)
+- Added hidden AI Parameters tab (Tab 10):
+  - Visibility bound to `AiParametersTabVisibility`
+  - Contains all 6 axis dropdowns with full explanations
+  - Only appears when user clicks "Customize AI Parameters" AND has Collaborator access
+
+**Build/Test Results:**
+- Build: Success
+- Tests: 682 passed, 14 skipped
+
+---
+
+### 2026-01-20 - Session 6: List Tab Implementation and UI Review
+
+**Context:** Implementing list management for the 5 list-based tabs, then testing with user.
+
+#### List Management Implementation
+
+**StoryWorldViewModel changes:**
+- Added 5 Add commands: `AddPhysicalWorldCommand`, `AddSpeciesCommand`, `AddCultureCommand`, `AddGovernmentCommand`, `AddReligionCommand`
+- Added 5 Remove methods: `RemovePhysicalWorld()`, `RemoveSpecies()`, `RemoveCulture()`, `RemoveGovernment()`, `RemoveReligion()`
+
+**StoryWorldPage.xaml changes:**
+- Added `xmlns:storyworld` namespace for entry types
+- Updated all 5 list tabs with:
+  - `+ Add [Entry]` button centered at top
+  - `ItemsRepeater` with `Expander` for each entry (following RelationshipView pattern)
+  - `SymbolIcon` with Cancel symbol for delete in header
+  - `TextBox` for Name in header
+  - `RichEditBoxExtended` fields for all other properties with placeholder text
+
+**StoryWorldPage.xaml.cs changes:**
+- Added 5 remove event handlers with confirmation dialogs
+- Pattern: Get entry from DataContext → Show ContentDialog → Call ViewModel.Remove()
+
+**Title spacing fix:**
+- Added `.Trim()` to story name before concatenation
+- Fixed "Doll Hospital    Story World" → "Doll Hospital Story World"
+
+**Build/Test Results:**
+- Build: Success
+- Tests: 682 passed, 14 skipped
+
+#### UI Testing Feedback
+
+User tested the implementation and identified several issues:
+
+**1. Title problem fixed** ✅
+- "Doll Hospital Story World" now displays correctly without extra whitespace
+
+**2. Expander vs. Flat Layout comparison**
+- User compared list tab (Physical World with Expander) to single-occurrence tab (Economy with flat layout)
+- Single-occurrence tab is cleaner: full-width fields, no visual overhead
+- Expander adds complexity: header bar, indentation, narrower fields
+- **Decision:** Replace Expanders with flat layout to match single-occurrence tabs
+
+**3. Wasted space with button placement**
+- When tab is empty, "+ Add World" button sits centered with huge empty void below
+- **Decision:** Move Add/Remove buttons to Shell status bar
+- Buttons will be context-sensitive (labels change based on active tab)
+- Remove button only visible when entries exist
+
+**4. Missing scroll bars**
+- Single-occurrence tabs (History, Economy, Magic/Tech) lack ScrollViewer
+- Cannot scroll when content exceeds visible area
+- **Decision:** Add ScrollViewer wrapper to single-occurrence tabs
+
+**5. All fields need explanatory placeholder text**
+- Economy tab has good examples: "How does the economy work?", "What is the medium of exchange?"
+- All taxonomy fields should have similar helpful prompts
+
+#### Decisions Made
+
+| Decision | Rationale |
+|----------|-----------|
+| Replace Expanders with flat layout | Consistency with single-occurrence tabs; cleaner UI |
+| Move Add/Remove to status bar | Eliminates wasted space; context-sensitive labels |
+| Add ScrollViewer to single-occurrence tabs | Allow scrolling when content exceeds view |
+| Add explanatory placeholders to all fields | Help users understand what to enter |
+
+#### Next Actions (Agreed)
+
+1. Replace Expanders with flat layout for 5 list tabs
+2. Add explanatory placeholder text to all fields
+3. Move Add/Remove buttons to Shell status bar (context-sensitive)
+4. Add ScrollViewer to single-occurrence tabs (History, Economy, Magic/Tech)
+5. Build and test
 
 ---
 

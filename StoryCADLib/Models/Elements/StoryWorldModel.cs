@@ -240,7 +240,7 @@ public class StoryWorldModel : StoryElement
     /// Creates a new StoryWorld with default name.
     /// </summary>
     public StoryWorldModel(StoryModel model, StoryNodeItem node)
-        : base("New World", StoryItemType.StoryWorld, model, node)
+        : base("Story World", StoryItemType.StoryWorld, model, node)
     {
         InitializeProperties();
     }

@@ -56,6 +56,10 @@
                                                 Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                                 win:Text="Add Website      Alt+W" skia:Text="Add Website      ⌥W" />
+                                <MenuFlyoutItem Icon="Map"
+                                                Command="{x:Bind ShellVm.AddStoryWorldCommand, Mode=OneWay}"
+                                                Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
+                                                Text="Add StoryWorld" />
                             </MenuFlyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
@@ -237,6 +241,13 @@
                                             win:Text="Add Notes node   Alt+N" skia:Text="Add Notes node   ⌥N">
                                 <MenuFlyoutItem.Icon>
                                     <SymbolIcon Symbol="TwoPage" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
+                                            Command="{x:Bind ShellVm.AddStoryWorldCommand, Mode=OneWay}"
+                                            Text="Add StoryWorld">
+                                <MenuFlyoutItem.Icon>
+                                    <SymbolIcon Symbol="Map" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
                             <MenuFlyoutSeparator />

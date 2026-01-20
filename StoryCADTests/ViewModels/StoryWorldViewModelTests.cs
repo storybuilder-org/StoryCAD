@@ -97,8 +97,8 @@ public class StoryWorldViewModelTests
         // Act
         viewModel.Activate(model);
 
-        // Assert - Name is derived from story name + " World", not from model
-        Assert.AreEqual("Test World", viewModel.Name);
+        // Assert - Name is derived from story name + " Story World", not from model
+        Assert.AreEqual("Test Story World", viewModel.Name);
         Assert.AreEqual("Hidden World", viewModel.WorldType);
         Assert.AreEqual("Barter economy", viewModel.EconomicSystem);
     }

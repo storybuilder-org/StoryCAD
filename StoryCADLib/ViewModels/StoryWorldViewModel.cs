@@ -1,10 +1,13 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml;
 using StoryCADLib.Models;
 using StoryCADLib.Models.StoryWorld;
 using StoryCADLib.Services;
+using StoryCADLib.Services.Collaborator;
 using StoryCADLib.Services.Messages;
 using StoryCADLib.Services.Navigation;
 
@@ -16,6 +19,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
 
     private readonly ILogService _logger;
     private readonly AppState _appState;
+    private readonly CollaboratorService _collaboratorService;
     private bool _changeable;
     private bool _changed;
 
@@ -61,7 +65,18 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
     public string WorldType
     {
         get => _worldType;
-        set => SetProperty(ref _worldType, value);
+        set
+        {
+            if (SetProperty(ref _worldType, value))
+            {
+                UpdateWorldTypeDescriptions();
+                // Auto-populate axis values when World Type changes (if not manually customized)
+                if (_changeable && !_axisValuesCustomized)
+                {
+                    AutoPopulateAxisValues();
+                }
+            }
+        }
     }
 
     private string _ontology;
@@ -104,6 +119,654 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
     {
         get => _toneLogic;
         set => SetProperty(ref _toneLogic, value);
+    }
+
+    // Track whether user has manually customized axis values
+    private bool _axisValuesCustomized;
+
+    #endregion
+
+    #region Collaborator / AI Parameters Properties
+
+    /// <summary>
+    /// Visibility for Collaborator-only UI elements (Customize button, AI Parameters tab).
+    /// </summary>
+    public Visibility CollaboratorVisibility =>
+        _collaboratorService?.HasCollaborator == true ? Visibility.Visible : Visibility.Collapsed;
+
+    private bool _isAiParametersTabVisible;
+    /// <summary>
+    /// Controls whether the AI Parameters tab is visible.
+    /// Only shown when user clicks "Customize AI Parameters" button.
+    /// </summary>
+    public bool IsAiParametersTabVisible
+    {
+        get => _isAiParametersTabVisible;
+        set => SetProperty(ref _isAiParametersTabVisible, value);
+    }
+
+    /// <summary>
+    /// Visibility binding for the AI Parameters tab.
+    /// </summary>
+    public Visibility AiParametersTabVisibility =>
+        IsAiParametersTabVisible && _collaboratorService?.HasCollaborator == true
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+
+    /// <summary>
+    /// Command to show the AI Parameters tab.
+    /// </summary>
+    public RelayCommand ShowAiParametersCommand { get; private set; }
+
+    private void ShowAiParameters()
+    {
+        IsAiParametersTabVisible = true;
+        OnPropertyChanged(nameof(AiParametersTabVisibility));
+        _axisValuesCustomized = true; // User is now customizing
+    }
+
+    #endregion
+
+    #region List Entry Commands
+
+    #region Physical World Navigation
+
+    // Physical World commands
+    public RelayCommand AddPhysicalWorldCommand { get; private set; }
+    public RelayCommand RemoveCurrentPhysicalWorldCommand { get; private set; }
+    public RelayCommand PreviousPhysicalWorldCommand { get; private set; }
+    public RelayCommand NextPhysicalWorldCommand { get; private set; }
+
+    private int _currentPhysicalWorldIndex;
+    /// <summary>
+    /// Index of the currently displayed Physical World entry.
+    /// </summary>
+    public int CurrentPhysicalWorldIndex
+    {
+        get => _currentPhysicalWorldIndex;
+        set
+        {
+            if (SetProperty(ref _currentPhysicalWorldIndex, value))
+            {
+                NotifyPhysicalWorldNavigationChanged();
+            }
+        }
+    }
+
+    /// <summary>
+    /// True if there are any Physical World entries.
+    /// </summary>
+    public bool HasPhysicalWorlds => PhysicalWorlds?.Count > 0;
+
+    /// <summary>
+    /// True if there's a previous entry to navigate to.
+    /// </summary>
+    public bool HasPreviousPhysicalWorld => CurrentPhysicalWorldIndex > 0;
+
+    /// <summary>
+    /// True if there's a next entry to navigate to.
+    /// </summary>
+    public bool HasNextPhysicalWorld => PhysicalWorlds != null && CurrentPhysicalWorldIndex < PhysicalWorlds.Count - 1;
+
+    /// <summary>
+    /// Display string showing position (e.g., "1 of 3" or "0 of 0").
+    /// </summary>
+    public string PhysicalWorldPositionDisplay =>
+        PhysicalWorlds == null || PhysicalWorlds.Count == 0
+            ? "0 of 0"
+            : $"{CurrentPhysicalWorldIndex + 1} of {PhysicalWorlds.Count}";
+
+    // Current entry property accessors
+    public string CurrentPhysicalWorldName
+    {
+        get => HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count
+            ? PhysicalWorlds[CurrentPhysicalWorldIndex].Name : string.Empty;
+        set
+        {
+            if (HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count)
+            {
+                PhysicalWorlds[CurrentPhysicalWorldIndex].Name = value;
+                OnPropertyChanged();
+                ShellViewModel.ShowChange();
+            }
+        }
+    }
+
+    public string CurrentPhysicalWorldGeography
+    {
+        get => HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count
+            ? PhysicalWorlds[CurrentPhysicalWorldIndex].Geography : string.Empty;
+        set
+        {
+            if (HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count)
+            {
+                PhysicalWorlds[CurrentPhysicalWorldIndex].Geography = value;
+                OnPropertyChanged();
+                ShellViewModel.ShowChange();
+            }
+        }
+    }
+
+    public string CurrentPhysicalWorldClimate
+    {
+        get => HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count
+            ? PhysicalWorlds[CurrentPhysicalWorldIndex].Climate : string.Empty;
+        set
+        {
+            if (HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count)
+            {
+                PhysicalWorlds[CurrentPhysicalWorldIndex].Climate = value;
+                OnPropertyChanged();
+                ShellViewModel.ShowChange();
+            }
+        }
+    }
+
+    public string CurrentPhysicalWorldNaturalResources
+    {
+        get => HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count
+            ? PhysicalWorlds[CurrentPhysicalWorldIndex].NaturalResources : string.Empty;
+        set
+        {
+            if (HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count)
+            {
+                PhysicalWorlds[CurrentPhysicalWorldIndex].NaturalResources = value;
+                OnPropertyChanged();
+                ShellViewModel.ShowChange();
+            }
+        }
+    }
+
+    public string CurrentPhysicalWorldFlora
+    {
+        get => HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count
+            ? PhysicalWorlds[CurrentPhysicalWorldIndex].Flora : string.Empty;
+        set
+        {
+            if (HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count)
+            {
+                PhysicalWorlds[CurrentPhysicalWorldIndex].Flora = value;
+                OnPropertyChanged();
+                ShellViewModel.ShowChange();
+            }
+        }
+    }
+
+    public string CurrentPhysicalWorldFauna
+    {
+        get => HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count
+            ? PhysicalWorlds[CurrentPhysicalWorldIndex].Fauna : string.Empty;
+        set
+        {
+            if (HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count)
+            {
+                PhysicalWorlds[CurrentPhysicalWorldIndex].Fauna = value;
+                OnPropertyChanged();
+                ShellViewModel.ShowChange();
+            }
+        }
+    }
+
+    public string CurrentPhysicalWorldAstronomy
+    {
+        get => HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count
+            ? PhysicalWorlds[CurrentPhysicalWorldIndex].Astronomy : string.Empty;
+        set
+        {
+            if (HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count)
+            {
+                PhysicalWorlds[CurrentPhysicalWorldIndex].Astronomy = value;
+                OnPropertyChanged();
+                ShellViewModel.ShowChange();
+            }
+        }
+    }
+
+    private void NotifyPhysicalWorldNavigationChanged()
+    {
+        OnPropertyChanged(nameof(HasPhysicalWorlds));
+        OnPropertyChanged(nameof(HasPreviousPhysicalWorld));
+        OnPropertyChanged(nameof(HasNextPhysicalWorld));
+        OnPropertyChanged(nameof(PhysicalWorldPositionDisplay));
+        OnPropertyChanged(nameof(CurrentPhysicalWorldName));
+        OnPropertyChanged(nameof(CurrentPhysicalWorldGeography));
+        OnPropertyChanged(nameof(CurrentPhysicalWorldClimate));
+        OnPropertyChanged(nameof(CurrentPhysicalWorldNaturalResources));
+        OnPropertyChanged(nameof(CurrentPhysicalWorldFlora));
+        OnPropertyChanged(nameof(CurrentPhysicalWorldFauna));
+        OnPropertyChanged(nameof(CurrentPhysicalWorldAstronomy));
+        OnPropertyChanged(nameof(RemoveButtonVisibility));
+    }
+
+    private void PreviousPhysicalWorld()
+    {
+        if (HasPreviousPhysicalWorld)
+        {
+            CurrentPhysicalWorldIndex--;
+        }
+    }
+
+    private void NextPhysicalWorld()
+    {
+        if (HasNextPhysicalWorld)
+        {
+            CurrentPhysicalWorldIndex++;
+        }
+    }
+
+    private void AddPhysicalWorld()
+    {
+        var entry = new PhysicalWorldEntry { Name = "New World" };
+        PhysicalWorlds.Add(entry);
+        CurrentPhysicalWorldIndex = PhysicalWorlds.Count - 1; // Navigate to new entry
+        NotifyPhysicalWorldNavigationChanged();
+        ShellViewModel.ShowChange();
+    }
+
+    private void RemoveCurrentPhysicalWorld()
+    {
+        if (HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count)
+        {
+            PhysicalWorlds.RemoveAt(CurrentPhysicalWorldIndex);
+            // Adjust index if needed
+            if (CurrentPhysicalWorldIndex >= PhysicalWorlds.Count && PhysicalWorlds.Count > 0)
+            {
+                CurrentPhysicalWorldIndex = PhysicalWorlds.Count - 1;
+            }
+            NotifyPhysicalWorldNavigationChanged();
+            ShellViewModel.ShowChange();
+        }
+    }
+
+    public void RemovePhysicalWorld(PhysicalWorldEntry entry)
+    {
+        if (entry != null && PhysicalWorlds.Contains(entry))
+        {
+            var index = PhysicalWorlds.IndexOf(entry);
+            PhysicalWorlds.Remove(entry);
+            // Adjust current index if needed
+            if (CurrentPhysicalWorldIndex >= PhysicalWorlds.Count && PhysicalWorlds.Count > 0)
+            {
+                CurrentPhysicalWorldIndex = PhysicalWorlds.Count - 1;
+            }
+            NotifyPhysicalWorldNavigationChanged();
+            ShellViewModel.ShowChange();
+        }
+    }
+
+    #endregion
+
+    #region Species Navigation
+
+    public RelayCommand AddSpeciesCommand { get; private set; }
+    public RelayCommand RemoveCurrentSpeciesCommand { get; private set; }
+    public RelayCommand PreviousSpeciesCommand { get; private set; }
+    public RelayCommand NextSpeciesCommand { get; private set; }
+
+    private int _currentSpeciesIndex;
+    public int CurrentSpeciesIndex
+    {
+        get => _currentSpeciesIndex;
+        set { if (SetProperty(ref _currentSpeciesIndex, value)) NotifySpeciesNavigationChanged(); }
+    }
+
+    public bool HasSpecies => Species?.Count > 0;
+    public bool HasPreviousSpecies => CurrentSpeciesIndex > 0;
+    public bool HasNextSpecies => Species != null && CurrentSpeciesIndex < Species.Count - 1;
+    public string SpeciesPositionDisplay => Species == null || Species.Count == 0 ? "0 of 0" : $"{CurrentSpeciesIndex + 1} of {Species.Count}";
+
+    public string CurrentSpeciesName
+    {
+        get => HasSpecies && CurrentSpeciesIndex < Species.Count ? Species[CurrentSpeciesIndex].Name : string.Empty;
+        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].Name = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentSpeciesPhysicalTraits
+    {
+        get => HasSpecies && CurrentSpeciesIndex < Species.Count ? Species[CurrentSpeciesIndex].PhysicalTraits : string.Empty;
+        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].PhysicalTraits = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentSpeciesLifespan
+    {
+        get => HasSpecies && CurrentSpeciesIndex < Species.Count ? Species[CurrentSpeciesIndex].Lifespan : string.Empty;
+        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].Lifespan = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentSpeciesOrigins
+    {
+        get => HasSpecies && CurrentSpeciesIndex < Species.Count ? Species[CurrentSpeciesIndex].Origins : string.Empty;
+        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].Origins = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentSpeciesSocialStructure
+    {
+        get => HasSpecies && CurrentSpeciesIndex < Species.Count ? Species[CurrentSpeciesIndex].SocialStructure : string.Empty;
+        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].SocialStructure = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentSpeciesDiversity
+    {
+        get => HasSpecies && CurrentSpeciesIndex < Species.Count ? Species[CurrentSpeciesIndex].Diversity : string.Empty;
+        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].Diversity = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+
+    private void NotifySpeciesNavigationChanged()
+    {
+        OnPropertyChanged(nameof(HasSpecies)); OnPropertyChanged(nameof(HasPreviousSpecies)); OnPropertyChanged(nameof(HasNextSpecies));
+        OnPropertyChanged(nameof(SpeciesPositionDisplay)); OnPropertyChanged(nameof(CurrentSpeciesName));
+        OnPropertyChanged(nameof(CurrentSpeciesPhysicalTraits)); OnPropertyChanged(nameof(CurrentSpeciesLifespan));
+        OnPropertyChanged(nameof(CurrentSpeciesOrigins)); OnPropertyChanged(nameof(CurrentSpeciesSocialStructure)); OnPropertyChanged(nameof(CurrentSpeciesDiversity));
+    }
+
+    private void PreviousSpecies() { if (HasPreviousSpecies) CurrentSpeciesIndex--; }
+    private void NextSpecies() { if (HasNextSpecies) CurrentSpeciesIndex++; }
+    private void AddSpecies() { Species.Add(new SpeciesEntry { Name = "New Species" }); CurrentSpeciesIndex = Species.Count - 1; NotifySpeciesNavigationChanged(); ShellViewModel.ShowChange(); }
+    private void RemoveCurrentSpecies() { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species.RemoveAt(CurrentSpeciesIndex); if (CurrentSpeciesIndex >= Species.Count && Species.Count > 0) CurrentSpeciesIndex = Species.Count - 1; NotifySpeciesNavigationChanged(); ShellViewModel.ShowChange(); } }
+    public void RemoveSpecies(SpeciesEntry entry) { if (entry != null && Species.Contains(entry)) { Species.Remove(entry); if (CurrentSpeciesIndex >= Species.Count && Species.Count > 0) CurrentSpeciesIndex = Species.Count - 1; NotifySpeciesNavigationChanged(); ShellViewModel.ShowChange(); } }
+
+    #endregion
+
+    #region Culture Navigation
+
+    public RelayCommand AddCultureCommand { get; private set; }
+    public RelayCommand RemoveCurrentCultureCommand { get; private set; }
+    public RelayCommand PreviousCultureCommand { get; private set; }
+    public RelayCommand NextCultureCommand { get; private set; }
+
+    private int _currentCultureIndex;
+    public int CurrentCultureIndex
+    {
+        get => _currentCultureIndex;
+        set { if (SetProperty(ref _currentCultureIndex, value)) NotifyCultureNavigationChanged(); }
+    }
+
+    public bool HasCultures => Cultures?.Count > 0;
+    public bool HasPreviousCulture => CurrentCultureIndex > 0;
+    public bool HasNextCulture => Cultures != null && CurrentCultureIndex < Cultures.Count - 1;
+    public string CulturePositionDisplay => Cultures == null || Cultures.Count == 0 ? "0 of 0" : $"{CurrentCultureIndex + 1} of {Cultures.Count}";
+
+    public string CurrentCultureName
+    {
+        get => HasCultures && CurrentCultureIndex < Cultures.Count ? Cultures[CurrentCultureIndex].Name : string.Empty;
+        set { if (HasCultures && CurrentCultureIndex < Cultures.Count) { Cultures[CurrentCultureIndex].Name = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentCultureValues
+    {
+        get => HasCultures && CurrentCultureIndex < Cultures.Count ? Cultures[CurrentCultureIndex].Values : string.Empty;
+        set { if (HasCultures && CurrentCultureIndex < Cultures.Count) { Cultures[CurrentCultureIndex].Values = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentCultureCustoms
+    {
+        get => HasCultures && CurrentCultureIndex < Cultures.Count ? Cultures[CurrentCultureIndex].Customs : string.Empty;
+        set { if (HasCultures && CurrentCultureIndex < Cultures.Count) { Cultures[CurrentCultureIndex].Customs = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentCultureTaboos
+    {
+        get => HasCultures && CurrentCultureIndex < Cultures.Count ? Cultures[CurrentCultureIndex].Taboos : string.Empty;
+        set { if (HasCultures && CurrentCultureIndex < Cultures.Count) { Cultures[CurrentCultureIndex].Taboos = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentCultureArt
+    {
+        get => HasCultures && CurrentCultureIndex < Cultures.Count ? Cultures[CurrentCultureIndex].Art : string.Empty;
+        set { if (HasCultures && CurrentCultureIndex < Cultures.Count) { Cultures[CurrentCultureIndex].Art = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentCultureDailyLife
+    {
+        get => HasCultures && CurrentCultureIndex < Cultures.Count ? Cultures[CurrentCultureIndex].DailyLife : string.Empty;
+        set { if (HasCultures && CurrentCultureIndex < Cultures.Count) { Cultures[CurrentCultureIndex].DailyLife = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentCultureEntertainment
+    {
+        get => HasCultures && CurrentCultureIndex < Cultures.Count ? Cultures[CurrentCultureIndex].Entertainment : string.Empty;
+        set { if (HasCultures && CurrentCultureIndex < Cultures.Count) { Cultures[CurrentCultureIndex].Entertainment = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+
+    private void NotifyCultureNavigationChanged()
+    {
+        OnPropertyChanged(nameof(HasCultures)); OnPropertyChanged(nameof(HasPreviousCulture)); OnPropertyChanged(nameof(HasNextCulture));
+        OnPropertyChanged(nameof(CulturePositionDisplay)); OnPropertyChanged(nameof(CurrentCultureName));
+        OnPropertyChanged(nameof(CurrentCultureValues)); OnPropertyChanged(nameof(CurrentCultureCustoms)); OnPropertyChanged(nameof(CurrentCultureTaboos));
+        OnPropertyChanged(nameof(CurrentCultureArt)); OnPropertyChanged(nameof(CurrentCultureDailyLife)); OnPropertyChanged(nameof(CurrentCultureEntertainment));
+    }
+
+    private void PreviousCulture() { if (HasPreviousCulture) CurrentCultureIndex--; }
+    private void NextCulture() { if (HasNextCulture) CurrentCultureIndex++; }
+    private void AddCulture() { Cultures.Add(new CultureEntry { Name = "New Culture" }); CurrentCultureIndex = Cultures.Count - 1; NotifyCultureNavigationChanged(); ShellViewModel.ShowChange(); }
+    private void RemoveCurrentCulture() { if (HasCultures && CurrentCultureIndex < Cultures.Count) { Cultures.RemoveAt(CurrentCultureIndex); if (CurrentCultureIndex >= Cultures.Count && Cultures.Count > 0) CurrentCultureIndex = Cultures.Count - 1; NotifyCultureNavigationChanged(); ShellViewModel.ShowChange(); } }
+    public void RemoveCulture(CultureEntry entry) { if (entry != null && Cultures.Contains(entry)) { Cultures.Remove(entry); if (CurrentCultureIndex >= Cultures.Count && Cultures.Count > 0) CurrentCultureIndex = Cultures.Count - 1; NotifyCultureNavigationChanged(); ShellViewModel.ShowChange(); } }
+
+    #endregion
+
+    #region Government Navigation
+
+    public RelayCommand AddGovernmentCommand { get; private set; }
+    public RelayCommand RemoveCurrentGovernmentCommand { get; private set; }
+    public RelayCommand PreviousGovernmentCommand { get; private set; }
+    public RelayCommand NextGovernmentCommand { get; private set; }
+
+    private int _currentGovernmentIndex;
+    public int CurrentGovernmentIndex
+    {
+        get => _currentGovernmentIndex;
+        set { if (SetProperty(ref _currentGovernmentIndex, value)) NotifyGovernmentNavigationChanged(); }
+    }
+
+    public bool HasGovernments => Governments?.Count > 0;
+    public bool HasPreviousGovernment => CurrentGovernmentIndex > 0;
+    public bool HasNextGovernment => Governments != null && CurrentGovernmentIndex < Governments.Count - 1;
+    public string GovernmentPositionDisplay => Governments == null || Governments.Count == 0 ? "0 of 0" : $"{CurrentGovernmentIndex + 1} of {Governments.Count}";
+
+    public string CurrentGovernmentName
+    {
+        get => HasGovernments && CurrentGovernmentIndex < Governments.Count ? Governments[CurrentGovernmentIndex].Name : string.Empty;
+        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].Name = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentGovernmentType
+    {
+        get => HasGovernments && CurrentGovernmentIndex < Governments.Count ? Governments[CurrentGovernmentIndex].Type : string.Empty;
+        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].Type = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentGovernmentPowerStructures
+    {
+        get => HasGovernments && CurrentGovernmentIndex < Governments.Count ? Governments[CurrentGovernmentIndex].PowerStructures : string.Empty;
+        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].PowerStructures = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentGovernmentLaws
+    {
+        get => HasGovernments && CurrentGovernmentIndex < Governments.Count ? Governments[CurrentGovernmentIndex].Laws : string.Empty;
+        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].Laws = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentGovernmentClassStructure
+    {
+        get => HasGovernments && CurrentGovernmentIndex < Governments.Count ? Governments[CurrentGovernmentIndex].ClassStructure : string.Empty;
+        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].ClassStructure = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentGovernmentForeignRelations
+    {
+        get => HasGovernments && CurrentGovernmentIndex < Governments.Count ? Governments[CurrentGovernmentIndex].ForeignRelations : string.Empty;
+        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].ForeignRelations = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+
+    private void NotifyGovernmentNavigationChanged()
+    {
+        OnPropertyChanged(nameof(HasGovernments)); OnPropertyChanged(nameof(HasPreviousGovernment)); OnPropertyChanged(nameof(HasNextGovernment));
+        OnPropertyChanged(nameof(GovernmentPositionDisplay)); OnPropertyChanged(nameof(CurrentGovernmentName));
+        OnPropertyChanged(nameof(CurrentGovernmentType)); OnPropertyChanged(nameof(CurrentGovernmentPowerStructures));
+        OnPropertyChanged(nameof(CurrentGovernmentLaws)); OnPropertyChanged(nameof(CurrentGovernmentClassStructure)); OnPropertyChanged(nameof(CurrentGovernmentForeignRelations));
+    }
+
+    private void PreviousGovernment() { if (HasPreviousGovernment) CurrentGovernmentIndex--; }
+    private void NextGovernment() { if (HasNextGovernment) CurrentGovernmentIndex++; }
+    private void AddGovernment() { Governments.Add(new GovernmentEntry { Name = "New Government" }); CurrentGovernmentIndex = Governments.Count - 1; NotifyGovernmentNavigationChanged(); ShellViewModel.ShowChange(); }
+    private void RemoveCurrentGovernment() { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments.RemoveAt(CurrentGovernmentIndex); if (CurrentGovernmentIndex >= Governments.Count && Governments.Count > 0) CurrentGovernmentIndex = Governments.Count - 1; NotifyGovernmentNavigationChanged(); ShellViewModel.ShowChange(); } }
+    public void RemoveGovernment(GovernmentEntry entry) { if (entry != null && Governments.Contains(entry)) { Governments.Remove(entry); if (CurrentGovernmentIndex >= Governments.Count && Governments.Count > 0) CurrentGovernmentIndex = Governments.Count - 1; NotifyGovernmentNavigationChanged(); ShellViewModel.ShowChange(); } }
+
+    #endregion
+
+    #region Religion Navigation
+
+    public RelayCommand AddReligionCommand { get; private set; }
+    public RelayCommand RemoveCurrentReligionCommand { get; private set; }
+    public RelayCommand PreviousReligionCommand { get; private set; }
+    public RelayCommand NextReligionCommand { get; private set; }
+
+    private int _currentReligionIndex;
+    public int CurrentReligionIndex
+    {
+        get => _currentReligionIndex;
+        set { if (SetProperty(ref _currentReligionIndex, value)) NotifyReligionNavigationChanged(); }
+    }
+
+    public bool HasReligions => Religions?.Count > 0;
+    public bool HasPreviousReligion => CurrentReligionIndex > 0;
+    public bool HasNextReligion => Religions != null && CurrentReligionIndex < Religions.Count - 1;
+    public string ReligionPositionDisplay => Religions == null || Religions.Count == 0 ? "0 of 0" : $"{CurrentReligionIndex + 1} of {Religions.Count}";
+
+    public string CurrentReligionName
+    {
+        get => HasReligions && CurrentReligionIndex < Religions.Count ? Religions[CurrentReligionIndex].Name : string.Empty;
+        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].Name = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentReligionDeities
+    {
+        get => HasReligions && CurrentReligionIndex < Religions.Count ? Religions[CurrentReligionIndex].Deities : string.Empty;
+        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].Deities = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentReligionBeliefs
+    {
+        get => HasReligions && CurrentReligionIndex < Religions.Count ? Religions[CurrentReligionIndex].Beliefs : string.Empty;
+        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].Beliefs = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentReligionPractices
+    {
+        get => HasReligions && CurrentReligionIndex < Religions.Count ? Religions[CurrentReligionIndex].Practices : string.Empty;
+        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].Practices = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentReligionOrganizations
+    {
+        get => HasReligions && CurrentReligionIndex < Religions.Count ? Religions[CurrentReligionIndex].Organizations : string.Empty;
+        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].Organizations = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+    public string CurrentReligionCreationMyths
+    {
+        get => HasReligions && CurrentReligionIndex < Religions.Count ? Religions[CurrentReligionIndex].CreationMyths : string.Empty;
+        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].CreationMyths = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+    }
+
+    private void NotifyReligionNavigationChanged()
+    {
+        OnPropertyChanged(nameof(HasReligions)); OnPropertyChanged(nameof(HasPreviousReligion)); OnPropertyChanged(nameof(HasNextReligion));
+        OnPropertyChanged(nameof(ReligionPositionDisplay)); OnPropertyChanged(nameof(CurrentReligionName));
+        OnPropertyChanged(nameof(CurrentReligionDeities)); OnPropertyChanged(nameof(CurrentReligionBeliefs));
+        OnPropertyChanged(nameof(CurrentReligionPractices)); OnPropertyChanged(nameof(CurrentReligionOrganizations)); OnPropertyChanged(nameof(CurrentReligionCreationMyths));
+    }
+
+    private void PreviousReligion() { if (HasPreviousReligion) CurrentReligionIndex--; }
+    private void NextReligion() { if (HasNextReligion) CurrentReligionIndex++; }
+    private void AddReligion() { Religions.Add(new ReligionEntry { Name = "New Religion" }); CurrentReligionIndex = Religions.Count - 1; NotifyReligionNavigationChanged(); ShellViewModel.ShowChange(); }
+    private void RemoveCurrentReligion() { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions.RemoveAt(CurrentReligionIndex); if (CurrentReligionIndex >= Religions.Count && Religions.Count > 0) CurrentReligionIndex = Religions.Count - 1; NotifyReligionNavigationChanged(); ShellViewModel.ShowChange(); } }
+    public void RemoveReligion(ReligionEntry entry) { if (entry != null && Religions.Contains(entry)) { Religions.Remove(entry); if (CurrentReligionIndex >= Religions.Count && Religions.Count > 0) CurrentReligionIndex = Religions.Count - 1; NotifyReligionNavigationChanged(); ShellViewModel.ShowChange(); } }
+
+    #endregion
+
+    #endregion
+
+    #region World Type Description Properties
+
+    private string _worldTypeDescription;
+    /// <summary>
+    /// Full description of the selected World Type.
+    /// </summary>
+    public string WorldTypeDescription
+    {
+        get => _worldTypeDescription;
+        private set => SetProperty(ref _worldTypeDescription, value);
+    }
+
+    private string _worldTypeExamples;
+    /// <summary>
+    /// Example works for the selected World Type.
+    /// </summary>
+    public string WorldTypeExamples
+    {
+        get => _worldTypeExamples;
+        private set => SetProperty(ref _worldTypeExamples, value);
+    }
+
+    #endregion
+
+    #region Tab Selection and Context-Sensitive Buttons
+
+    private int _selectedTabIndex;
+    /// <summary>
+    /// The currently selected tab index. Used for context-sensitive Add/Remove buttons.
+    /// Tabs: 0=Structure, 1=Physical World, 2=Species, 3=Cultures, 4=Governments, 5=Religions, 6=History, 7=Economy, 8=Magic/Tech, 9=AI Parameters
+    /// </summary>
+    public int SelectedTabIndex
+    {
+        get => _selectedTabIndex;
+        set
+        {
+            if (SetProperty(ref _selectedTabIndex, value))
+            {
+                OnPropertyChanged(nameof(AddButtonLabel));
+                OnPropertyChanged(nameof(AddButtonVisibility));
+                OnPropertyChanged(nameof(RemoveButtonVisibility));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Label for the Add button based on selected tab.
+    /// </summary>
+    public string AddButtonLabel => SelectedTabIndex switch
+    {
+        1 => "+ Add World",
+        2 => "+ Add Species",
+        3 => "+ Add Culture",
+        4 => "+ Add Government",
+        5 => "+ Add Religion",
+        _ => "+ Add"
+    };
+
+    /// <summary>
+    /// Add button is only visible for list tabs (1-5).
+    /// </summary>
+    public Visibility AddButtonVisibility =>
+        SelectedTabIndex >= 1 && SelectedTabIndex <= 5 ? Visibility.Visible : Visibility.Collapsed;
+
+    /// <summary>
+    /// Remove button is only visible when there are entries to remove in the current list tab.
+    /// </summary>
+    public Visibility RemoveButtonVisibility
+    {
+        get
+        {
+            var hasEntries = SelectedTabIndex switch
+            {
+                1 => PhysicalWorlds?.Count > 0,
+                2 => Species?.Count > 0,
+                3 => Cultures?.Count > 0,
+                4 => Governments?.Count > 0,
+                5 => Religions?.Count > 0,
+                _ => false
+            };
+            return hasEntries ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
+    /// <summary>
+    /// Unified Add command that adds to the appropriate list based on selected tab.
+    /// </summary>
+    public RelayCommand AddEntryCommand { get; private set; }
+
+    private void AddEntry()
+    {
+        switch (SelectedTabIndex)
+        {
+            case 1: AddPhysicalWorld(); break;
+            case 2: AddSpecies(); break;
+            case 3: AddCulture(); break;
+            case 4: AddGovernment(); break;
+            case 5: AddReligion(); break;
+        }
+        OnPropertyChanged(nameof(RemoveButtonVisibility));
     }
 
     #endregion
@@ -294,8 +957,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
     {
         try
         {
-            // StoryElement properties
-            Model.Name = Name;
+            // Note: Don't save Name - it's derived for display, node keeps "Story World"
 
             // Structure tab
             Model.WorldType = WorldType;
@@ -357,11 +1019,14 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
 
         // StoryElement properties
         Uuid = Model.Uuid;
-        // Derive name from story name (first node in ExplorerView is OverviewModel)
+        // Derive display name from story name (first node in ExplorerView is OverviewModel)
         var storyModel = _appState.CurrentDocument?.Model;
-        Name = storyModel?.ExplorerView.Count > 0
-            ? storyModel.ExplorerView[0].Name + " World"
-            : "Story World";
+        var storyName = storyModel?.ExplorerView.Count > 0
+            ? storyModel.ExplorerView[0].Name?.Trim() ?? string.Empty
+            : string.Empty;
+        Name = string.IsNullOrEmpty(storyName)
+            ? "Story World"
+            : storyName + " Story World";
 
         // Structure tab
         WorldType = Model.WorldType;
@@ -376,22 +1041,32 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
         PhysicalWorlds.Clear();
         foreach (var entry in Model.PhysicalWorlds)
             PhysicalWorlds.Add(entry);
+        _currentPhysicalWorldIndex = 0; // Reset to first entry
+        NotifyPhysicalWorldNavigationChanged();
 
         Species.Clear();
         foreach (var entry in Model.Species)
             Species.Add(entry);
+        _currentSpeciesIndex = 0;
+        NotifySpeciesNavigationChanged();
 
         Cultures.Clear();
         foreach (var entry in Model.Cultures)
             Cultures.Add(entry);
+        _currentCultureIndex = 0;
+        NotifyCultureNavigationChanged();
 
         Governments.Clear();
         foreach (var entry in Model.Governments)
             Governments.Add(entry);
+        _currentGovernmentIndex = 0;
+        NotifyGovernmentNavigationChanged();
 
         Religions.Clear();
         foreach (var entry in Model.Religions)
             Religions.Add(entry);
+        _currentReligionIndex = 0;
+        NotifyReligionNavigationChanged();
 
         // History tab
         FoundingEvents = Model.FoundingEvents;
@@ -441,13 +1116,228 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
 
     #endregion
 
+    #region World Type Mapping
+
+    /// <summary>
+    /// Updates the description and examples based on the selected World Type.
+    /// </summary>
+    private void UpdateWorldTypeDescriptions()
+    {
+        var (description, examples) = GetWorldTypeInfo(WorldType);
+        WorldTypeDescription = description;
+        WorldTypeExamples = examples;
+    }
+
+    /// <summary>
+    /// Auto-populates axis values based on the selected World Type.
+    /// Uses the gestalt-to-axis mapping from design documents.
+    /// </summary>
+    private void AutoPopulateAxisValues()
+    {
+        var axes = GetAxisValuesForWorldType(WorldType);
+        if (axes == null) return;
+
+        Ontology = axes.Ontology;
+        WorldRelation = axes.WorldRelation;
+        RuleTransparency = axes.RuleTransparency;
+        ScaleOfDifference = axes.ScaleOfDifference;
+        AgencySource = axes.AgencySource;
+        ToneLogic = axes.ToneLogic;
+    }
+
+    /// <summary>
+    /// Returns description and examples for a World Type.
+    /// </summary>
+    private static (string Description, string Examples) GetWorldTypeInfo(string worldType)
+    {
+        return worldType switch
+        {
+            "Consensus Reality" => (
+                "The world operates exactly as expected - no magic, no hidden layers, no alternate physics. " +
+                "\"Consensus\" refers to a specific group or subculture whose reality you're depicting. " +
+                "Every consensus reality story still requires worldbuilding the norms, rules, and insider knowledge of that particular slice of life.",
+                "87th Precinct • Harry Bosch • Rabbit series • Grisham novels • Big Little Lies"),
+
+            "Enchanted Reality" => (
+                "Our world, but reality is porous. The impossible happens and is accepted rather than analyzed. " +
+                "Magic or the supernatural exists but isn't systematized - it simply is. " +
+                "This is the realm of magical realism and slipstream fiction.",
+                "One Hundred Years of Solitude • Like Water for Chocolate • Beloved • Pan's Labyrinth"),
+
+            "Hidden World" => (
+                "Our world, but with concealed magical or supernatural layers beneath or alongside normal reality. " +
+                "The \"mundane\" world operates normally, but a secret realm exists that most people don't know about. " +
+                "Discovery of this hidden layer is often dangerous or comes at a cost.",
+                "Harry Potter • Dresden Files • American Gods • The Matrix • Men in Black • Percy Jackson"),
+
+            "Divergent World" => (
+                "Our world, but history or conditions diverged at some point. " +
+                "The rules of reality remain rational and logical, but society, technology, or events developed differently. " +
+                "This includes alternate history, steampunk, cyberpunk, and near-future speculation.",
+                "The Man in the High Castle • 11/22/63 • Neuromancer • The Handmaid's Tale"),
+
+            "Constructed World" => (
+                "A fully invented reality with its own geography, history, peoples, and rules. " +
+                "The world doesn't derive from Earth at all - it's built from scratch. " +
+                "This is the realm of epic fantasy and secondary-world science fiction. The author defines everything.",
+                "A Song of Ice and Fire • Discworld • Dune • Star Wars • The Stormlight Archive"),
+
+            "Mythic World" => (
+                "A world where narrative meaning matters more than physical causality. " +
+                "Fate, prophecy, and archetypes drive events. Things happen because they're meaningful, not because of cause and effect. " +
+                "Gods and destiny are real forces.",
+                "The Lord of the Rings • Earthsea • The Chronicles of Narnia • Circe • The Once and Future King"),
+
+            "Estranged World" => (
+                "A world that feels fundamentally alien or wrong. Rules may exist, but they resist human intuition. " +
+                "The familiar becomes strange. " +
+                "This is the realm of cosmic horror, New Weird, and hard SF that emphasizes how truly alien the universe can be.",
+                "Solaris • Annihilation • Perdido Street Station • Blindsight • 2001: A Space Odyssey"),
+
+            "Broken World" => (
+                "A world where civilization, environment, or social order has collapsed or been corrupted. " +
+                "Survival replaces progress. Resources are scarce, institutions have failed, and the focus is on enduring rather than building. " +
+                "Includes post-apocalyptic and dystopian settings.",
+                "The Road • Mad Max • 1984 • The Walking Dead • Station Eleven • A Canticle for Leibowitz"),
+
+            _ => ("Select a World Type to see its description.", "")
+        };
+    }
+
+    /// <summary>
+    /// Returns axis values for a World Type based on the gestalt-to-axis mapping.
+    /// </summary>
+    private static AxisValues GetAxisValuesForWorldType(string worldType)
+    {
+        return worldType switch
+        {
+            "Consensus Reality" => new AxisValues
+            {
+                Ontology = "Mundane",
+                WorldRelation = "Primary World",
+                RuleTransparency = "Explicit Rules",
+                ScaleOfDifference = "Cosmetic",
+                AgencySource = "Human-Centric",
+                ToneLogic = "Rational"
+            },
+            "Enchanted Reality" => new AxisValues
+            {
+                Ontology = "Supernatural",
+                WorldRelation = "Primary World",
+                RuleTransparency = "Implicit Rules",
+                ScaleOfDifference = "Cosmetic",
+                AgencySource = "Systemic Forces",
+                ToneLogic = "Symbolic"
+            },
+            "Hidden World" => new AxisValues
+            {
+                Ontology = "Supernatural",
+                WorldRelation = "Layered",
+                RuleTransparency = "Explicit Rules",
+                ScaleOfDifference = "Structural",
+                AgencySource = "Nonhuman Intelligences",
+                ToneLogic = "Rational"
+            },
+            "Divergent World" => new AxisValues
+            {
+                Ontology = "Scientific Speculative",
+                WorldRelation = "Divergent Earth",
+                RuleTransparency = "Explicit Rules",
+                ScaleOfDifference = "Structural",
+                AgencySource = "Human-Centric",
+                ToneLogic = "Rational"
+            },
+            "Constructed World" => new AxisValues
+            {
+                Ontology = "Hybrid",
+                WorldRelation = "Secondary World",
+                RuleTransparency = "Explicit Rules",
+                ScaleOfDifference = "Cosmological",
+                AgencySource = "Human-Centric",  // Variable in spec, default to Human-Centric
+                ToneLogic = "Rational"           // Variable in spec, default to Rational
+            },
+            "Mythic World" => new AxisValues
+            {
+                Ontology = "Symbolic",
+                WorldRelation = "Secondary World",
+                RuleTransparency = "Symbolic Rules",
+                ScaleOfDifference = "Cosmological",
+                AgencySource = "Fate / Providence",
+                ToneLogic = "Mythic"
+            },
+            "Estranged World" => new AxisValues
+            {
+                Ontology = "Scientific Speculative",
+                WorldRelation = "Secondary World",  // Variable in spec
+                RuleTransparency = "Explicit Rules",
+                ScaleOfDifference = "Cosmological",
+                AgencySource = "Systemic Forces",
+                ToneLogic = "Dark / Entropic"
+            },
+            "Broken World" => new AxisValues
+            {
+                Ontology = "Scientific Speculative",
+                WorldRelation = "Divergent Earth",
+                RuleTransparency = "Explicit Rules",
+                ScaleOfDifference = "Structural",
+                AgencySource = "Human-Centric",
+                ToneLogic = "Dark / Entropic"
+            },
+            _ => null
+        };
+    }
+
+    /// <summary>
+    /// Helper class to hold axis values for mapping.
+    /// </summary>
+    private class AxisValues
+    {
+        public string Ontology { get; init; }
+        public string WorldRelation { get; init; }
+        public string RuleTransparency { get; init; }
+        public string ScaleOfDifference { get; init; }
+        public string AgencySource { get; init; }
+        public string ToneLogic { get; init; }
+    }
+
+    #endregion
+
     #region Constructor
 
-    public StoryWorldViewModel(ILogService logger, ListData listData, AppState appState)
+    public StoryWorldViewModel(ILogService logger, ListData listData, AppState appState, CollaboratorService collaboratorService)
     {
         _logger = logger;
         _appState = appState;
+        _collaboratorService = collaboratorService;
         PropertyChanged += OnPropertyChanged;
+
+        // Initialize commands
+        ShowAiParametersCommand = new RelayCommand(ShowAiParameters);
+        AddPhysicalWorldCommand = new RelayCommand(AddPhysicalWorld);
+        RemoveCurrentPhysicalWorldCommand = new RelayCommand(RemoveCurrentPhysicalWorld);
+        PreviousPhysicalWorldCommand = new RelayCommand(PreviousPhysicalWorld);
+        NextPhysicalWorldCommand = new RelayCommand(NextPhysicalWorld);
+        AddSpeciesCommand = new RelayCommand(AddSpecies);
+        RemoveCurrentSpeciesCommand = new RelayCommand(RemoveCurrentSpecies);
+        PreviousSpeciesCommand = new RelayCommand(PreviousSpecies);
+        NextSpeciesCommand = new RelayCommand(NextSpecies);
+        AddCultureCommand = new RelayCommand(AddCulture);
+        RemoveCurrentCultureCommand = new RelayCommand(RemoveCurrentCulture);
+        PreviousCultureCommand = new RelayCommand(PreviousCulture);
+        NextCultureCommand = new RelayCommand(NextCulture);
+        AddGovernmentCommand = new RelayCommand(AddGovernment);
+        RemoveCurrentGovernmentCommand = new RelayCommand(RemoveCurrentGovernment);
+        PreviousGovernmentCommand = new RelayCommand(PreviousGovernment);
+        NextGovernmentCommand = new RelayCommand(NextGovernment);
+        AddReligionCommand = new RelayCommand(AddReligion);
+        RemoveCurrentReligionCommand = new RelayCommand(RemoveCurrentReligion);
+        PreviousReligionCommand = new RelayCommand(PreviousReligion);
+        NextReligionCommand = new RelayCommand(NextReligion);
+        AddEntryCommand = new RelayCommand(AddEntry);
+
+        // Initialize description properties
+        WorldTypeDescription = "Select a World Type to see its description.";
+        WorldTypeExamples = string.Empty;
 
         // Initialize string properties
         Name = string.Empty;

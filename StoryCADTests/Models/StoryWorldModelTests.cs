@@ -17,11 +17,11 @@ public class StoryWorldModelTests
     #region Constructor Tests
 
     [TestMethod]
-    public void Constructor_WithDefaultName_SetsNameToNewWorld()
+    public void Constructor_WithDefaultName_SetsNameToStoryWorld()
     {
         var world = new StoryWorldModel(_storyModel, null);
 
-        Assert.AreEqual("New World", world.Name);
+        Assert.AreEqual("Story World", world.Name);
     }
 
     [TestMethod]

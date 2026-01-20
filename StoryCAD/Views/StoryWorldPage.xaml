@@ -5,6 +5,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:usercontrols="using:StoryCADLib.Controls"
+      xmlns:storyworld="using:StoryCADLib.Models.StoryWorld"
       mc:Ignorable="d"
       ScrollViewer.VerticalScrollBarVisibility="Disabled"
       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -15,106 +16,615 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Name field (derived from story name, read-only) -->
-        <TextBlock Text="{x:Bind StoryWorldVm.Name, Mode=OneWay}"
-                   FontSize="20" FontWeight="SemiBold" Margin="12,8,12,4" />
+        <!-- Header with title -->
+        <TextBlock Grid.Row="0" Margin="12,8,12,4"
+                   Text="{x:Bind StoryWorldVm.Name, Mode=OneWay}"
+                   FontSize="20" FontWeight="SemiBold"
+                   HorizontalAlignment="Center" />
 
         <!-- Tab View with 9 tabs -->
-        <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
+        <TabView x:Name="WorldTabView" Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                 HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                 HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                 SelectedIndex="{x:Bind StoryWorldVm.SelectedTabIndex, Mode=TwoWay}"
+                 SelectionChanged="WorldTabView_SelectionChanged">
             <TabView.TabItems>
 
                 <!-- Tab 1: Structure (World Type Classification) -->
                 <TabViewItem Header="Structure" IsClosable="False"
                              HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="12">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <ComboBox Grid.Row="0" Header="World Type" MinWidth="250" Margin="12,12,12,0"
+
+                        <!-- Question prompt -->
+                        <TextBlock Grid.Row="0" Text="What kind of world is your story set in?"
+                                   FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
+
+                        <!-- World Type dropdown -->
+                        <ComboBox Grid.Row="1" Header="World Type" MinWidth="350"
                                   ItemsSource="{x:Bind StoryWorldVm.WorldTypeList}"
                                   SelectedItem="{x:Bind StoryWorldVm.WorldType, Mode=TwoWay}"
                                   PlaceholderText="Select the type of world..."/>
 
-                        <!-- Advanced Options Expander -->
-                        <Expander Grid.Row="1" Header="Advanced: Axis Values" HorizontalAlignment="Stretch" Margin="12,16,12,12">
-                            <StackPanel Spacing="8" Padding="8">
-                                <TextBlock Text="These values are derived from World Type but can be customized for Collaborator AI guidance."
-                                           TextWrapping="Wrap" Foreground="Gray" FontSize="12" Margin="0,0,0,8"/>
-                                <ComboBox Header="Ontology (What exists)" MinWidth="200"
-                                          ItemsSource="{x:Bind StoryWorldVm.OntologyList}"
-                                          SelectedItem="{x:Bind StoryWorldVm.Ontology, Mode=TwoWay}"/>
-                                <ComboBox Header="World Relation (Relation to our reality)" MinWidth="200"
-                                          ItemsSource="{x:Bind StoryWorldVm.WorldRelationList}"
-                                          SelectedItem="{x:Bind StoryWorldVm.WorldRelation, Mode=TwoWay}"/>
-                                <ComboBox Header="Rule Transparency (How rules behave)" MinWidth="200"
-                                          ItemsSource="{x:Bind StoryWorldVm.RuleTransparencyList}"
-                                          SelectedItem="{x:Bind StoryWorldVm.RuleTransparency, Mode=TwoWay}"/>
-                                <ComboBox Header="Scale of Difference" MinWidth="200"
-                                          ItemsSource="{x:Bind StoryWorldVm.ScaleOfDifferenceList}"
-                                          SelectedItem="{x:Bind StoryWorldVm.ScaleOfDifference, Mode=TwoWay}"/>
-                                <ComboBox Header="Agency Source (What drives change)" MinWidth="200"
-                                          ItemsSource="{x:Bind StoryWorldVm.AgencySourceList}"
-                                          SelectedItem="{x:Bind StoryWorldVm.AgencySource, Mode=TwoWay}"/>
-                                <ComboBox Header="Tone Logic (How the world feels)" MinWidth="200"
-                                          ItemsSource="{x:Bind StoryWorldVm.ToneLogicList}"
-                                          SelectedItem="{x:Bind StoryWorldVm.ToneLogic, Mode=TwoWay}"/>
+                        <!-- Description panel -->
+                        <Border Grid.Row="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1" CornerRadius="4" Margin="0,16,0,0" Padding="16">
+                            <StackPanel>
+                                <TextBlock Text="{x:Bind StoryWorldVm.WorldTypeDescription, Mode=OneWay}"
+                                           TextWrapping="Wrap" FontSize="14" Margin="0,0,0,12"/>
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="Works in this category:" FontWeight="SemiBold" FontSize="13"
+                                               Margin="0,0,0,4"/>
+                                    <TextBlock Text="{x:Bind StoryWorldVm.WorldTypeExamples, Mode=OneWay}"
+                                               TextWrapping="Wrap" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                </StackPanel>
                             </StackPanel>
-                        </Expander>
+                        </Border>
+
+                        <!-- Collaborator info and customize button (only visible for Collaborator subscribers) -->
+                        <Border Grid.Row="3" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}"
+                                BorderBrush="{ThemeResource SystemFillColorNeutralBrush}"
+                                BorderThickness="1" CornerRadius="4" Margin="0,16,0,0" Padding="12"
+                                Visibility="{x:Bind StoryWorldVm.CollaboratorVisibility, Mode=OneWay}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <FontIcon Grid.Column="0" Glyph="&#xE946;" FontSize="16" Margin="0,0,8,0"/>
+                                <TextBlock Grid.Column="1" Text="Collaborator uses this to tailor worldbuilding guidance."
+                                           VerticalAlignment="Center" TextWrapping="Wrap" FontSize="12"/>
+                                <Button Grid.Column="2" Content="Customize AI Parameters"
+                                        Command="{x:Bind StoryWorldVm.ShowAiParametersCommand}"
+                                        Margin="12,0,0,0"/>
+                            </Grid>
+                        </Border>
                     </Grid>
                 </TabViewItem>
 
-                <!-- Tab 2: Physical World (List - placeholder for now) -->
-                <TabViewItem Header="Physical World" IsClosable="False"
+                <!-- Tab 2: Physical Worlds (Single entry view with navigation) -->
+                <TabViewItem Header="Physical Worlds" IsClosable="False"
                              HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-                    <Grid Padding="12">
-                        <TextBlock Text="Physical World entries will be added here. (List tab - future implementation)"
-                                   VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray"/>
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Name field -->
+                        <TextBox Grid.Row="0" Text="{x:Bind StoryWorldVm.CurrentPhysicalWorldName, Mode=TwoWay}"
+                                 PlaceholderText="World name" Header="Name"
+                                 IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}"/>
+
+                        <!-- Fields with star sizing like Sensations tab -->
+                        <usercontrols:RichEditBoxExtended Grid.Row="1" Header="Geography"
+                            RtfText="{x:Bind StoryWorldVm.CurrentPhysicalWorldGeography, Mode=TwoWay}"
+                            PlaceholderText="What are the major landforms, bodies of water, and terrain features?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="2" Header="Climate"
+                            RtfText="{x:Bind StoryWorldVm.CurrentPhysicalWorldClimate, Mode=TwoWay}"
+                            PlaceholderText="What are the weather patterns, seasons, and extreme conditions?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="3" Header="Natural Resources"
+                            RtfText="{x:Bind StoryWorldVm.CurrentPhysicalWorldNaturalResources, Mode=TwoWay}"
+                            PlaceholderText="What minerals, water sources, and energy are available?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="4" Header="Flora"
+                            RtfText="{x:Bind StoryWorldVm.CurrentPhysicalWorldFlora, Mode=TwoWay}"
+                            PlaceholderText="What plants, trees, and vegetation exist here?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="5" Header="Fauna"
+                            RtfText="{x:Bind StoryWorldVm.CurrentPhysicalWorldFauna, Mode=TwoWay}"
+                            PlaceholderText="What animals, creatures, and wildlife inhabit this world?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="6" Header="Astronomy"
+                            RtfText="{x:Bind StoryWorldVm.CurrentPhysicalWorldAstronomy, Mode=TwoWay}"
+                            PlaceholderText="What moons, stars, and celestial phenomena are visible?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <!-- Button bar at bottom with navigation -->
+                        <Border Grid.Row="7" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="0,1,0,0" Padding="12,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Navigation controls (left) -->
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                                    <Button Command="{x:Bind StoryWorldVm.PreviousPhysicalWorldCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.HasPreviousPhysicalWorld, Mode=OneWay}"
+                                            Padding="8,8" ToolTipService.ToolTip="Previous World">
+                                        <SymbolIcon Symbol="Back"/>
+                                    </Button>
+                                    <TextBlock Text="{x:Bind StoryWorldVm.PhysicalWorldPositionDisplay, Mode=OneWay}"
+                                               VerticalAlignment="Center" MinWidth="50" TextAlignment="Center"/>
+                                    <Button Command="{x:Bind StoryWorldVm.NextPhysicalWorldCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.HasNextPhysicalWorld, Mode=OneWay}"
+                                            Padding="8,8" ToolTipService.ToolTip="Next World">
+                                        <SymbolIcon Symbol="Forward"/>
+                                    </Button>
+                                </StackPanel>
+
+                                <!-- Add/Remove controls (right) -->
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                                    <Button Command="{x:Bind StoryWorldVm.AddPhysicalWorldCommand}"
+                                            Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <SymbolIcon Symbol="Add"/>
+                                            <TextBlock Text="Add World"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{x:Bind StoryWorldVm.RemoveCurrentPhysicalWorldCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}"
+                                            Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <SymbolIcon Symbol="Delete"/>
+                                            <TextBlock Text="Remove World"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
                     </Grid>
                 </TabViewItem>
 
-                <!-- Tab 3: People/Species (List - placeholder for now) -->
+                <!-- Tab 3: People/Species (Single entry view with navigation) -->
                 <TabViewItem Header="People/Species" IsClosable="False"
                              HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-                    <Grid Padding="12">
-                        <TextBlock Text="People/Species entries will be added here. (List tab - future implementation)"
-                                   VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray"/>
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBox Grid.Row="0" Text="{x:Bind StoryWorldVm.CurrentSpeciesName, Mode=TwoWay}"
+                                 PlaceholderText="Species name" Header="Name"
+                                 IsEnabled="{x:Bind StoryWorldVm.HasSpecies, Mode=OneWay}"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="1" Header="Physical Traits"
+                            RtfText="{x:Bind StoryWorldVm.CurrentSpeciesPhysicalTraits, Mode=TwoWay}"
+                            PlaceholderText="What do they look like? What physical abilities or limitations do they have?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasSpecies, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="2" Header="Lifespan"
+                            RtfText="{x:Bind StoryWorldVm.CurrentSpeciesLifespan, Mode=TwoWay}"
+                            PlaceholderText="How long do they live? What are their life stages?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasSpecies, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="3" Header="Origins"
+                            RtfText="{x:Bind StoryWorldVm.CurrentSpeciesOrigins, Mode=TwoWay}"
+                            PlaceholderText="Where did they come from? Evolution, creation, or migration?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasSpecies, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="4" Header="Social Structure"
+                            RtfText="{x:Bind StoryWorldVm.CurrentSpeciesSocialStructure, Mode=TwoWay}"
+                            PlaceholderText="How do they organize? Family units, tribes, hierarchies?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasSpecies, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="5" Header="Diversity"
+                            RtfText="{x:Bind StoryWorldVm.CurrentSpeciesDiversity, Mode=TwoWay}"
+                            PlaceholderText="What subspecies or regional variations exist?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasSpecies, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <Border Grid.Row="6" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="0,1,0,0" Padding="12,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                                    <Button Command="{x:Bind StoryWorldVm.PreviousSpeciesCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.HasPreviousSpecies, Mode=OneWay}"
+                                            Padding="8,8" ToolTipService.ToolTip="Previous Species">
+                                        <SymbolIcon Symbol="Back"/>
+                                    </Button>
+                                    <TextBlock Text="{x:Bind StoryWorldVm.SpeciesPositionDisplay, Mode=OneWay}"
+                                               VerticalAlignment="Center" MinWidth="50" TextAlignment="Center"/>
+                                    <Button Command="{x:Bind StoryWorldVm.NextSpeciesCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.HasNextSpecies, Mode=OneWay}"
+                                            Padding="8,8" ToolTipService.ToolTip="Next Species">
+                                        <SymbolIcon Symbol="Forward"/>
+                                    </Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                                    <Button Command="{x:Bind StoryWorldVm.AddSpeciesCommand}" Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <SymbolIcon Symbol="Add"/>
+                                            <TextBlock Text="Add Species"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{x:Bind StoryWorldVm.RemoveCurrentSpeciesCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.HasSpecies, Mode=OneWay}" Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <SymbolIcon Symbol="Delete"/>
+                                            <TextBlock Text="Remove Species"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
                     </Grid>
                 </TabViewItem>
 
-                <!-- Tab 4: Cultures (List - placeholder for now) -->
+                <!-- Tab 4: Cultures (Single entry view with navigation) -->
                 <TabViewItem Header="Cultures" IsClosable="False"
                              HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-                    <Grid Padding="12">
-                        <TextBlock Text="Culture entries will be added here. (List tab - future implementation)"
-                                   VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray"/>
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBox Grid.Row="0" Text="{x:Bind StoryWorldVm.CurrentCultureName, Mode=TwoWay}"
+                                 PlaceholderText="Culture name" Header="Name"
+                                 IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="1" Header="Values"
+                            RtfText="{x:Bind StoryWorldVm.CurrentCultureValues, Mode=TwoWay}"
+                            PlaceholderText="What does this culture believe in? What matters most to them?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="2" Header="Customs"
+                            RtfText="{x:Bind StoryWorldVm.CurrentCultureCustoms, Mode=TwoWay}"
+                            PlaceholderText="What traditions, ceremonies, and social rituals do they practice?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="3" Header="Taboos"
+                            RtfText="{x:Bind StoryWorldVm.CurrentCultureTaboos, Mode=TwoWay}"
+                            PlaceholderText="What behaviors are forbidden or socially unacceptable?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="4" Header="Art"
+                            RtfText="{x:Bind StoryWorldVm.CurrentCultureArt, Mode=TwoWay}"
+                            PlaceholderText="What music, visual arts, literature, and performance exist?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="5" Header="Daily Life"
+                            RtfText="{x:Bind StoryWorldVm.CurrentCultureDailyLife, Mode=TwoWay}"
+                            PlaceholderText="What are their routines, meals, family life, and work patterns?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="6" Header="Entertainment"
+                            RtfText="{x:Bind StoryWorldVm.CurrentCultureEntertainment, Mode=TwoWay}"
+                            PlaceholderText="What games, sports, and leisure activities do they enjoy?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <Border Grid.Row="7" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="0,1,0,0" Padding="12,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                                    <Button Command="{x:Bind StoryWorldVm.PreviousCultureCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.HasPreviousCulture, Mode=OneWay}"
+                                            Padding="8,8" ToolTipService.ToolTip="Previous Culture">
+                                        <SymbolIcon Symbol="Back"/>
+                                    </Button>
+                                    <TextBlock Text="{x:Bind StoryWorldVm.CulturePositionDisplay, Mode=OneWay}"
+                                               VerticalAlignment="Center" MinWidth="50" TextAlignment="Center"/>
+                                    <Button Command="{x:Bind StoryWorldVm.NextCultureCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.HasNextCulture, Mode=OneWay}"
+                                            Padding="8,8" ToolTipService.ToolTip="Next Culture">
+                                        <SymbolIcon Symbol="Forward"/>
+                                    </Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                                    <Button Command="{x:Bind StoryWorldVm.AddCultureCommand}" Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <SymbolIcon Symbol="Add"/>
+                                            <TextBlock Text="Add Culture"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{x:Bind StoryWorldVm.RemoveCurrentCultureCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}" Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <SymbolIcon Symbol="Delete"/>
+                                            <TextBlock Text="Remove Culture"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
                     </Grid>
                 </TabViewItem>
 
-                <!-- Tab 5: Governments (List - placeholder for now) -->
+                <!-- Tab 5: Governments (Single entry view with navigation) -->
                 <TabViewItem Header="Governments" IsClosable="False"
                              HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-                    <Grid Padding="12">
-                        <TextBlock Text="Government entries will be added here. (List tab - future implementation)"
-                                   VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray"/>
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBox Grid.Row="0" Text="{x:Bind StoryWorldVm.CurrentGovernmentName, Mode=TwoWay}"
+                                 PlaceholderText="Government name" Header="Name"
+                                 IsEnabled="{x:Bind StoryWorldVm.HasGovernments, Mode=OneWay}"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="1" Header="Type"
+                            RtfText="{x:Bind StoryWorldVm.CurrentGovernmentType, Mode=TwoWay}"
+                            PlaceholderText="What form of government is this? (democracy, monarchy, theocracy, etc.)"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasGovernments, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="2" Header="Power Structures"
+                            RtfText="{x:Bind StoryWorldVm.CurrentGovernmentPowerStructures, Mode=TwoWay}"
+                            PlaceholderText="Who holds power? How is it gained, maintained, and transferred?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasGovernments, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="3" Header="Laws"
+                            RtfText="{x:Bind StoryWorldVm.CurrentGovernmentLaws, Mode=TwoWay}"
+                            PlaceholderText="What is the legal system? How are laws enforced and violations punished?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasGovernments, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="4" Header="Class Structure"
+                            RtfText="{x:Bind StoryWorldVm.CurrentGovernmentClassStructure, Mode=TwoWay}"
+                            PlaceholderText="What is the social hierarchy? Can people move between classes?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasGovernments, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="5" Header="Foreign Relations"
+                            RtfText="{x:Bind StoryWorldVm.CurrentGovernmentForeignRelations, Mode=TwoWay}"
+                            PlaceholderText="Who are the allies and enemies? What treaties and trade agreements exist?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasGovernments, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <Border Grid.Row="6" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="0,1,0,0" Padding="12,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                                    <Button Command="{x:Bind StoryWorldVm.PreviousGovernmentCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.HasPreviousGovernment, Mode=OneWay}"
+                                            Padding="8,8" ToolTipService.ToolTip="Previous Government">
+                                        <SymbolIcon Symbol="Back"/>
+                                    </Button>
+                                    <TextBlock Text="{x:Bind StoryWorldVm.GovernmentPositionDisplay, Mode=OneWay}"
+                                               VerticalAlignment="Center" MinWidth="50" TextAlignment="Center"/>
+                                    <Button Command="{x:Bind StoryWorldVm.NextGovernmentCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.HasNextGovernment, Mode=OneWay}"
+                                            Padding="8,8" ToolTipService.ToolTip="Next Government">
+                                        <SymbolIcon Symbol="Forward"/>
+                                    </Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                                    <Button Command="{x:Bind StoryWorldVm.AddGovernmentCommand}" Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <SymbolIcon Symbol="Add"/>
+                                            <TextBlock Text="Add Government"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{x:Bind StoryWorldVm.RemoveCurrentGovernmentCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.HasGovernments, Mode=OneWay}" Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <SymbolIcon Symbol="Delete"/>
+                                            <TextBlock Text="Remove Government"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
                     </Grid>
                 </TabViewItem>
 
-                <!-- Tab 6: Religions (List - placeholder for now) -->
+                <!-- Tab 6: Religions (Single entry view with navigation) -->
                 <TabViewItem Header="Religions" IsClosable="False"
                              HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-                    <Grid Padding="12">
-                        <TextBlock Text="Religion entries will be added here. (List tab - future implementation)"
-                                   VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray"/>
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBox Grid.Row="0" Text="{x:Bind StoryWorldVm.CurrentReligionName, Mode=TwoWay}"
+                                 PlaceholderText="Religion name" Header="Name"
+                                 IsEnabled="{x:Bind StoryWorldVm.HasReligions, Mode=OneWay}"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="1" Header="Deities"
+                            RtfText="{x:Bind StoryWorldVm.CurrentReligionDeities, Mode=TwoWay}"
+                            PlaceholderText="What gods, spirits, or divine beings are worshipped?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasReligions, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="2" Header="Beliefs"
+                            RtfText="{x:Bind StoryWorldVm.CurrentReligionBeliefs, Mode=TwoWay}"
+                            PlaceholderText="What are the core tenets? What happens after death? What is moral?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasReligions, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="3" Header="Practices"
+                            RtfText="{x:Bind StoryWorldVm.CurrentReligionPractices, Mode=TwoWay}"
+                            PlaceholderText="What rituals, prayers, holy days, and ceremonies are observed?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasReligions, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="4" Header="Organizations"
+                            RtfText="{x:Bind StoryWorldVm.CurrentReligionOrganizations, Mode=TwoWay}"
+                            PlaceholderText="What temples, clergy, hierarchies, and sects exist?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasReligions, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <usercontrols:RichEditBoxExtended Grid.Row="5" Header="Creation Myths"
+                            RtfText="{x:Bind StoryWorldVm.CurrentReligionCreationMyths, Mode=TwoWay}"
+                            PlaceholderText="What are the origin stories, cosmology, and sacred narratives?"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            IsEnabled="{x:Bind StoryWorldVm.HasReligions, Mode=OneWay}"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                        <Border Grid.Row="6" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="0,1,0,0" Padding="12,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                                    <Button Command="{x:Bind StoryWorldVm.PreviousReligionCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.HasPreviousReligion, Mode=OneWay}"
+                                            Padding="8,8" ToolTipService.ToolTip="Previous Religion">
+                                        <SymbolIcon Symbol="Back"/>
+                                    </Button>
+                                    <TextBlock Text="{x:Bind StoryWorldVm.ReligionPositionDisplay, Mode=OneWay}"
+                                               VerticalAlignment="Center" MinWidth="50" TextAlignment="Center"/>
+                                    <Button Command="{x:Bind StoryWorldVm.NextReligionCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.HasNextReligion, Mode=OneWay}"
+                                            Padding="8,8" ToolTipService.ToolTip="Next Religion">
+                                        <SymbolIcon Symbol="Forward"/>
+                                    </Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                                    <Button Command="{x:Bind StoryWorldVm.AddReligionCommand}" Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <SymbolIcon Symbol="Add"/>
+                                            <TextBlock Text="Add Religion"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{x:Bind StoryWorldVm.RemoveCurrentReligionCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.HasReligions, Mode=OneWay}" Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <SymbolIcon Symbol="Delete"/>
+                                            <TextBlock Text="Remove Religion"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
                     </Grid>
                 </TabViewItem>
 
                 <!-- Tab 7: History (Single entry) -->
                 <TabViewItem Header="History" IsClosable="False"
                              HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-                    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="12">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
@@ -124,46 +634,46 @@
                         </Grid.RowDefinitions>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="0" Header="Founding Events"
-                                                          RtfText="{x:Bind StoryWorldVm.FoundingEvents, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          PlaceholderText="How did the current order begin?"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.FoundingEvents, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="How did the current order begin? What events established this world?"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="1" Header="Major Conflicts"
-                                                          RtfText="{x:Bind StoryWorldVm.MajorConflicts, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          PlaceholderText="What wars or struggles shaped this world?"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.MajorConflicts, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="What wars, struggles, or disasters shaped this world?"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="2" Header="Eras"
-                                                          RtfText="{x:Bind StoryWorldVm.Eras, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          PlaceholderText="What major periods or ages define this world's history?"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.Eras, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="What major periods or ages define this world's history?"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="3" Header="Technological Shifts"
-                                                          RtfText="{x:Bind StoryWorldVm.TechnologicalShifts, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          PlaceholderText="What changes in capability occurred?"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.TechnologicalShifts, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="What changes in technology or capability have occurred?"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="4" Header="Lost Knowledge"
-                                                          RtfText="{x:Bind StoryWorldVm.LostKnowledge, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          PlaceholderText="What has been forgotten or destroyed?"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.LostKnowledge, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="What has been forgotten, destroyed, or forbidden?"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
                     </Grid>
                 </TabViewItem>
 
                 <!-- Tab 8: Economy (Single entry) -->
                 <TabViewItem Header="Economy" IsClosable="False"
                              HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-                    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="12">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
@@ -173,46 +683,46 @@
                         </Grid.RowDefinitions>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="0" Header="Economic System"
-                                                          RtfText="{x:Bind StoryWorldVm.EconomicSystem, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          PlaceholderText="How does the economy work? (capitalism, barter, etc.)"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.EconomicSystem, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="How does the economy work? (capitalism, barter, feudalism, etc.)"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="1" Header="Currency"
-                                                          RtfText="{x:Bind StoryWorldVm.Currency, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          PlaceholderText="What is the medium of exchange?"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.Currency, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="What is the medium of exchange? Coins, credits, barter goods?"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="2" Header="Trade Routes"
-                                                          RtfText="{x:Bind StoryWorldVm.TradeRoutes, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          PlaceholderText="How do goods move around?"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.TradeRoutes, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="How do goods move around? What are the major trade hubs?"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="3" Header="Professions"
-                                                          RtfText="{x:Bind StoryWorldVm.Professions, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          PlaceholderText="What jobs and guilds exist?"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.Professions, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="What jobs, trades, and guilds exist in this world?"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="4" Header="Wealth Distribution"
-                                                          RtfText="{x:Bind StoryWorldVm.WealthDistribution, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          PlaceholderText="Who has money? Who doesn't? Why?"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.WealthDistribution, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="Who has money? Who doesn't? What causes inequality?"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
                     </Grid>
                 </TabViewItem>
 
                 <!-- Tab 9: Magic/Technology (Single entry) -->
                 <TabViewItem Header="Magic/Tech" IsClosable="False"
                              HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-                    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="12">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
@@ -228,41 +738,97 @@
                                   SelectedItem="{x:Bind StoryWorldVm.SystemType, Mode=TwoWay}"/>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="1" Header="Source"
-                                                          RtfText="{x:Bind StoryWorldVm.Source, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.Source, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="Where does this power come from? (mana, technology, divine gift, etc.)"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="2" Header="Rules"
-                                                          RtfText="{x:Bind StoryWorldVm.Rules, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.Rules, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="What are the laws that govern how this system works?"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="3" Header="Limitations"
-                                                          RtfText="{x:Bind StoryWorldVm.Limitations, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.Limitations, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="What can't it do? What are its boundaries and weaknesses?"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="4" Header="Cost"
-                                                          RtfText="{x:Bind StoryWorldVm.Cost, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.Cost, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="What price must be paid to use it? (energy, resources, health, morality)"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="5" Header="Practitioners"
-                                                          RtfText="{x:Bind StoryWorldVm.Practitioners, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.Practitioners, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="Who can use it? How are they trained or identified?"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                         <usercontrols:RichEditBoxExtended Grid.Row="6" Header="Social Impact"
-                                                          RtfText="{x:Bind StoryWorldVm.SocialImpact, Mode=TwoWay}"
-                                                          AcceptsReturn="True" IsSpellCheckEnabled="True"
-                                                          TextWrapping="Wrap" VerticalAlignment="Stretch"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            RtfText="{x:Bind StoryWorldVm.SocialImpact, Mode=TwoWay}"
+                            AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                            VerticalAlignment="Stretch"
+                            PlaceholderText="How does this system affect society, culture, and daily life?"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
                     </Grid>
+                </TabViewItem>
+
+                <!-- Tab 10: AI Parameters (Hidden - only visible for Collaborator subscribers who click Customize) -->
+                <TabViewItem Header="AI Parameters" IsClosable="False"
+                             Visibility="{x:Bind StoryWorldVm.AiParametersTabVisibility, Mode=OneWay}"
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="12">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Customize AI Parameters"
+                                       FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                            <TextBlock Text="These values are derived from your World Type selection. Customize them here if your story doesn't fit neatly into one category. Collaborator will use these values to tailor its worldbuilding guidance."
+                                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" Margin="0,0,0,12"/>
+
+                            <ComboBox Header="Ontology (What exists in this world?)" MinWidth="300"
+                                      ItemsSource="{x:Bind StoryWorldVm.OntologyList}"
+                                      SelectedItem="{x:Bind StoryWorldVm.Ontology, Mode=TwoWay}"/>
+                            <TextBlock Text="Mundane = only real-world elements. Supernatural = magic, gods, spirits. Scientific Speculative = advanced but naturalistic. Hybrid = both magic and science. Symbolic = reality follows dream/mythic logic."
+                                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,0,0,8"/>
+
+                            <ComboBox Header="World Relation (Relation to our reality)" MinWidth="300"
+                                      ItemsSource="{x:Bind StoryWorldVm.WorldRelationList}"
+                                      SelectedItem="{x:Bind StoryWorldVm.WorldRelation, Mode=TwoWay}"/>
+                            <TextBlock Text="Primary World = our Earth. Divergent Earth = alternate history. Secondary World = entirely separate reality. Layered = hidden realms overlapping ours. Multiversal = many coexisting worlds."
+                                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,0,0,8"/>
+
+                            <ComboBox Header="Rule Transparency (How the world's rules behave)" MinWidth="300"
+                                      ItemsSource="{x:Bind StoryWorldVm.RuleTransparencyList}"
+                                      SelectedItem="{x:Bind StoryWorldVm.RuleTransparency, Mode=TwoWay}"/>
+                            <TextBlock Text="Explicit Rules = knowable, consistent systems. Implicit Rules = consistent but unexplained. Capricious = inconsistent or will-based. Symbolic Rules = meaning overrides causality."
+                                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,0,0,8"/>
+
+                            <ComboBox Header="Scale of Difference (How different from reality)" MinWidth="300"
+                                      ItemsSource="{x:Bind StoryWorldVm.ScaleOfDifferenceList}"
+                                      SelectedItem="{x:Bind StoryWorldVm.ScaleOfDifference, Mode=TwoWay}"/>
+                            <TextBlock Text="Cosmetic = surface changes only. Structural = social, historical, technological shifts. Cosmological = different laws of reality."
+                                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,0,0,8"/>
+
+                            <ComboBox Header="Agency Source (What drives change in this world)" MinWidth="300"
+                                      ItemsSource="{x:Bind StoryWorldVm.AgencySourceList}"
+                                      SelectedItem="{x:Bind StoryWorldVm.AgencySource, Mode=TwoWay}"/>
+                            <TextBlock Text="Human-Centric = people drive events. Nonhuman Intelligences = aliens, gods, AI. Fate/Providence = destiny, prophecy. Systemic Forces = technology, magic, ecology."
+                                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,0,0,8"/>
+
+                            <ComboBox Header="Tone Logic (How the world feels)" MinWidth="300"
+                                      ItemsSource="{x:Bind StoryWorldVm.ToneLogicList}"
+                                      SelectedItem="{x:Bind StoryWorldVm.ToneLogic, Mode=TwoWay}"/>
+                            <TextBlock Text="Rational = cause and effect dominate. Mythic = archetypal, meaningful. Whimsical = playful, light. Dark/Entropic = decay, struggle. Transcendent = spiritual, transformative."
+                                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12"/>
+                        </StackPanel>
+                    </ScrollViewer>
                 </TabViewItem>
 
             </TabView.TabItems>
