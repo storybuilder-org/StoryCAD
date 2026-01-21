@@ -25,12 +25,14 @@ User manual documentation for the StoryWorld feature. Two parallel tracks:
 
 ### A1. Sample Data / sign-off
 
-- [ ] Plan this section
-- [ ] Human approves plan
-- [ ] Research public domain worldbuilding examples (Tolkien? Oz? Other?)
-- [ ] Select example with sufficient detail for all 9 tabs
-- [ ] **CHECKPOINT**: Document selected example in status log
+- [x] Plan this section
+- [x] Human approves plan
+- [x] Research public domain worldbuilding examples (Tolkien? Oz? Other?)
+- [x] Select example with sufficient detail for all 9 tabs
+- [x] **CHECKPOINT**: Document selected example in status log
 - [ ] Human final approval
+
+**Selected: Land of Oz (L. Frank Baum)** - Clear public domain, covers all 9 tabs, excellent wiki resources. See agent output for detailed content outline per tab.
 
 ### A2. Screenshots Preparation / sign-off
 
@@ -125,15 +127,17 @@ User manual documentation for the StoryWorld feature. Two parallel tracks:
 
 *Citations 1-4*
 
-- [ ] Plan this section
-- [ ] Human approves plan
-- [ ] Read: Dabblewriter worldbuilding guide
-- [ ] Read: Madeline James Writes guide
-- [ ] Read: Wikipedia - Worldbuilding
-- [ ] Read: Campfire worldbuilding tools
-- [ ] Extract key points to `worldbuilding_research_notes.md`
-- [ ] **CHECKPOINT**: Batch 1 notes complete
+- [x] Plan this section
+- [x] Human approves plan
+- [x] Read: Dabblewriter worldbuilding guide
+- [x] Read: Madeline James Writes guide
+- [x] Read: Wikipedia - Worldbuilding
+- [x] Read: Campfire worldbuilding tools
+- [x] Extract key points to `worldbuilding_research_notes.md`
+- [x] **CHECKPOINT**: Batch 1 notes complete
 - [ ] Human final approval
+
+**ARTIFACT**: `worldbuilding_research_notes.md` created with key points from all 4 sources.
 
 ### B2. Citation Research - Batch 2 / sign-off
 
@@ -218,6 +222,8 @@ User manual documentation for the StoryWorld feature. Two parallel tracks:
 | Date | Checkpoint | Notes |
 |------|------------|-------|
 | 2026-01-21 | Plan created | Two parallel tracks defined |
+| 2026-01-21 | A1 complete | Selected Land of Oz (Baum) - public domain, covers all 9 tabs |
+| 2026-01-21 | B1 complete | Created worldbuilding_research_notes.md with 4 citations |
 
 ---
 
@@ -249,7 +255,7 @@ See `worldbuilding citations.png`:
 
 | Artifact | Purpose | Status |
 |----------|---------|--------|
-| `worldbuilding_research_notes.md` | Condensed citation research for future sessions | Pending |
+| `worldbuilding_research_notes.md` | Condensed citation research for future sessions | **Complete** (B1) |
 | `StoryWorld_Tab_Template.md` | Template for reference docs | Pending |
 | `worldbuilding_guide_outline.md` | Outline for educational guide | Pending |
 

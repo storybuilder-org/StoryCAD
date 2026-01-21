@@ -50,6 +50,10 @@ Add a new story element type `StoryWorld` to StoryCAD for worldbuilding content.
 - [x] Add StoryWorld to ScrivenerReports.cs (confirmed needed)
 - [x] Add StoryWorld formatting in ReportFormatter.cs
 
+#### API (SemanticKernelAPI)
+- [ ] Add StoryWorld methods to SemanticKernelAPI for Collaborator integration
+- [ ] Add unit tests for API methods
+
 #### Documentation
 
 **See `issue_782_documentation_plan.md` for detailed WBS.**
