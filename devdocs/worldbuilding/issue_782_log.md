@@ -2,7 +2,7 @@
 
 **Issue:** [StoryCAD #782 - Support for Worldbuilding](https://github.com/storybuilder-org/StoryCAD/issues/782)
 **Log Started:** 2026-01-19
-**Status:** Final Integration Phase - UI Design Complete (Delete handling + Reports remaining)
+**Status:** Code Complete - Documentation Phase
 **Location:** `/devdocs/worldbuilding/` (moved from `/mnt/c/temp/worldbuilding/` on 2026-01-19)
 
 ---
@@ -1134,14 +1134,61 @@ Initial checkbox addition caused text truncation ("Story Wor"). Fixed by changin
 
 ---
 
+### 2026-01-21 - Session 11: SemanticKernelAPI Integration
+
+**Participants:** User (Terry), Claude Code
+
+**Context:** Adding StoryWorld to the SemanticKernelAPI for Collaborator integration.
+
+#### Requirements
+
+- Add `GetStoryWorld()` convenience method for singleton access
+- Update `GetElementsByType()` to handle StoryWorld (like StoryOverview)
+- Update API Description attributes to document StoryWorld as valid type
+- Follow TDD approach
+
+#### TDD Approach
+
+**Phase 1: Tests first (5 tests)**
+Added to `StoryCADTests/Services/API/SemanticKernelAPITests.cs`:
+1. `GetStoryWorld_WithNoModel_ReturnsFailure`
+2. `GetStoryWorld_WithNoStoryWorld_ReturnsSuccessWithNullPayload`
+3. `GetStoryWorld_WithStoryWorld_ReturnsStoryWorld`
+4. `GetElementsByType_WithStoryWorld_ReturnsStoryWorldAsList`
+5. `GetElementsByType_WithNoStoryWorld_ReturnsEmptyList`
+
+**Phase 2: Implementation**
+
+| File | Changes |
+|------|---------|
+| `StoryCADLib/Services/API/SemanticKernelAPI.cs` | Added `GetStoryWorld()` method (lines 193-227) |
+| `StoryCADLib/Services/API/SemanticKernelAPI.cs` | Updated `GetElementsByType` Description to include StoryWorld |
+
+#### Key Implementation Details
+
+- `GetStoryWorld()` returns `OperationResult<StoryElement>` with null payload if no StoryWorld exists
+- StoryWorld IS in StoryElements collection (unlike StoryOverview which uses ExplorerView), so standard filtering works
+- Description now lists StoryWorld as valid type and notes it's a singleton
+
+#### Build/Test Results
+- Build: Success (0 warnings, 0 errors)
+- Tests: All 5 new tests pass
+
+#### Commits
+
+- `6c12cc1d` - feat(#782): Add StoryWorld to SemanticKernelAPI with TDD
+
+---
+
 ## Summary: Remaining Work
 
 ### Completed
 - [x] UI Design (all tabs, Expander layout, content indicators)
 - [x] Delete handling (standard trash system + SaveModel fix)
 - [x] Reports (PrintReports, ScrivenerReports, ReportFormatter)
+- [x] API Integration (GetStoryWorld, GetElementsByType)
 
-### Test Tasks
+### Manual Testing Tasks
 - [ ] Test adding StoryWorld via command
 - [ ] Test singleton constraint
 - [ ] Test navigation end-to-end
@@ -1149,7 +1196,9 @@ Initial checkbox addition caused text truncation ("Story Wor"). Fixed by changin
 - [ ] Test OutlineService.AddStoryElement
 
 ### Documentation Tasks
-- [ ] User manual updates (TBD)
+See `issue_782_documentation_plan.md` for detailed WBS:
+- **Track A**: Reference documentation (screenshots, Story Elements section, Reports updates)
+- **Track B**: Educational content (worldbuilding craft guide for Writing with StoryCAD)
 
 ### Evaluate Tasks
 - [ ] Plan evaluation section
