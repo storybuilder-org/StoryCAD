@@ -850,6 +850,10 @@ public class ShellViewModel : ObservableRecipient
                 // TrashCanPage doesn't have data to save
                 Logger.Log(LogLevel.Trace, "TrashCanPage has no data to save");
                 break;
+            case StoryWorldPage:
+                var storyWorldVm = Ioc.Default.GetRequiredService<StoryWorldViewModel>();
+                storyWorldVm.SaveModel();
+                break;
             default:
                 Logger.Log(LogLevel.Error, $"SaveModel: Unrecognized page type {pageType}");
                 break;
