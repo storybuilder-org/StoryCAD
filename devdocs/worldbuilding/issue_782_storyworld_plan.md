@@ -52,73 +52,11 @@ Add a new story element type `StoryWorld` to StoryCAD for worldbuilding content.
 
 #### Documentation
 
-Two parallel tracks that can proceed independently:
+**See `issue_782_documentation_plan.md` for detailed WBS.**
 
----
-
-**TRACK A: Reference Documentation** (how to use the forms)
-
-*A1. Sample Data Research*
-- [ ] Find public domain or permissioned worldbuilding example with detailed data
-
-*A2. Screenshots* (`/docs/media/`)
-- [ ] Create manual script to populate StoryWorld with sample data
-- [ ] Capture screenshots for each of the 9 tabs
-- [ ] Capture updated Generate Reports dialog screenshot
-
-*A3. Story Elements Section* (`/docs/Story Elements/`)
-- [ ] Create `StoryWorld_Form.md` (main form overview)
-- [ ] Create tab files for all 9 tabs:
-  - [ ] `StoryWorld_Structure_Tab.md`
-  - [ ] `StoryWorld_Physical_Worlds_Tab.md`
-  - [ ] `StoryWorld_Species_Tab.md`
-  - [ ] `StoryWorld_Cultures_Tab.md`
-  - [ ] `StoryWorld_Governments_Tab.md`
-  - [ ] `StoryWorld_Religions_Tab.md`
-  - [ ] `StoryWorld_History_Tab.md`
-  - [ ] `StoryWorld_Economy_Tab.md`
-  - [ ] `StoryWorld_Magic_Technology_Tab.md`
-
-*A4. Reports Section* (`/docs/Reports/`)
-- [ ] Update `Print_Reports.md` to mention Story World checkbox
-- [ ] Update `Scrivener_Reports.md` to mention Story World export
-
----
-
-**TRACK B: Educational Content** (worldbuilding craft guide)
-
-*B1. Research*
-- [ ] Read and research worldbuilding citations (see sources below)
-- [ ] Identify useful points from each citation
-- [ ] Review `software_research.md` for competitor approaches
-
-*B2. Writing with StoryCAD Section* (`/docs/Writing with StoryCAD/`)
-- [ ] Outline a StoryCAD-specific worldbuilding guide
-- [ ] Map outline topics to StoryWorld tabs/features
-- [ ] Draft worldbuilding guide (what is worldbuilding, where to start, how to proceed)
-- [ ] Add links to Story Elements form/tab pages
-
----
-
-**Research Sources:**
-
-*Competitor Tools* (see `software_research.md` for detailed analysis of 10 tools):
-- World Anvil, Campfire, LegendKeeper, Kanka
-- Fantasia Archive, Notebook.ai, Plottr
-- Obsidian, Scrivener, Arcweave
-
-*Worldbuilding Citations* (see `worldbuilding citations.png`):
-- https://www.dabblewriter.com/articles/worldbuilding-guide
-- Madeline James Writes - Worldbuilding Guide
-- Wikipedia - Worldbuilding
-- https://www.campfirewriting.com/worldbuilding-tools
-- Study.com - Cultural Milieu
-- https://jerryjenkins.com/worldbuilding/
-- https://juliaamante.medium.com/world-building-for-contemporary-fiction-writers
-- https://www.reddit.com/r/worldbuilding/comments/u55hfb/worldbuilding_table_of_elements/
-- https://www.well-storied.com/blog/an-introduction-to-world-building
-- https://katiebachelder.com/2021/07/30/fantasy-world-building-fundamentals/
-- https://myersfiction.com/2024/02/13/world-building-101-crafting-immersive-fictional-worlds/
+Two parallel tracks:
+- **Track A**: Reference documentation (Story Elements, Reports, Screenshots)
+- **Track B**: Educational content (worldbuilding craft guide for Writing with StoryCAD)
 
 #### Manual Testing (Acceptance)
 - [ ] Test adding StoryWorld via command
@@ -199,6 +137,7 @@ All in `/devdocs/worldbuilding/`:
 | `gestalt_axis_mapping.md` | 8 gestalts mapped to 6 axes | Complete |
 | `world_type_examples.md` | Example works per World Type | Complete |
 | `issue_782_log.md` | Research session log | Active |
+| `issue_782_documentation_plan.md` | Documentation phase WBS | Active |
 | `world_type_aware_workflows.md` | Future Collaborator work | Future |
 | `taxonomies_research.md` | 25+ frameworks analyzed | Reference |
 | `software_research.md` | 10 competitor tools | Reference |
