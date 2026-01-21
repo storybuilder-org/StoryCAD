@@ -2,20 +2,7 @@
 
                   ============== World Structure =============
 
-    World Type:             @WorldType
-
-    Ontology:               @Ontology
-
-    World Relation:         @WorldRelation
-
-    Rule Transparency:      @RuleTransparency
-
-    Scale of Difference:    @ScaleOfDifference
-
-    Agency Source:          @AgencySource
-
-    Tone Logic:             @ToneLogic
-
+@WorldStructure
 
                   ============== Physical Worlds =============
 
@@ -39,59 +26,13 @@
 
                   ============== History =============
 
-    Founding Events:
-    @FoundingEvents
-
-    Major Conflicts:
-    @MajorConflicts
-
-    Eras:
-    @Eras
-
-    Technological Shifts:
-    @TechnologicalShifts
-
-    Lost Knowledge:
-    @LostKnowledge
-
+@History
 
                   ============== Economy =============
 
-    Economic System:
-    @EconomicSystem
-
-    Currency:
-    @Currency
-
-    Trade Routes:
-    @TradeRoutes
-
-    Professions:
-    @Professions
-
-    Wealth Distribution:
-    @WealthDistribution
-
+@Economy
 
                   ============== Magic/Technology =============
 
-    System Type:            @SystemType
-
-    Source:
-    @Source
-
-    Rules:
-    @Rules
-
-    Limitations:
-    @Limitations
-
-    Cost:
-    @Cost
-
-    Practitioners:
-    @Practitioners
-
-    Social Impact:
-    @SocialImpact
+@MagicTechnology
 

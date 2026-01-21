@@ -141,40 +141,29 @@ public class ReportFormatter
         {
             StringBuilder sb = new(line);
 
-            // Structure tab fields
-            sb.Replace("@WorldType", world.WorldType ?? string.Empty);
-            sb.Replace("@Ontology", world.Ontology ?? string.Empty);
-            sb.Replace("@WorldRelation", world.WorldRelation ?? string.Empty);
-            sb.Replace("@RuleTransparency", world.RuleTransparency ?? string.Empty);
-            sb.Replace("@ScaleOfDifference", world.ScaleOfDifference ?? string.Empty);
-            sb.Replace("@AgencySource", world.AgencySource ?? string.Empty);
-            sb.Replace("@ToneLogic", world.ToneLogic ?? string.Empty);
+            // World Structure section
+            if (line.Contains("@WorldStructure"))
+            {
+                sb.Clear();
+                if (!string.IsNullOrEmpty(world.WorldType))
+                {
+                    sb.AppendLine($"    World Type: {world.WorldType}");
+                    sb.AppendLine();
+                    var (description, examples) = GetWorldTypeInfo(world.WorldType);
+                    if (!string.IsNullOrEmpty(description))
+                    {
+                        sb.AppendLine($"    {description}");
+                        sb.AppendLine();
+                    }
+                    if (!string.IsNullOrEmpty(examples))
+                    {
+                        sb.AppendLine($"    Works in this category: {examples}");
+                    }
+                }
+            }
 
-            // History tab fields
-            sb.Replace("@FoundingEvents", GetText(world.FoundingEvents));
-            sb.Replace("@MajorConflicts", GetText(world.MajorConflicts));
-            sb.Replace("@Eras", GetText(world.Eras));
-            sb.Replace("@TechnologicalShifts", GetText(world.TechnologicalShifts));
-            sb.Replace("@LostKnowledge", GetText(world.LostKnowledge));
-
-            // Economy tab fields
-            sb.Replace("@EconomicSystem", GetText(world.EconomicSystem));
-            sb.Replace("@Currency", GetText(world.Currency));
-            sb.Replace("@TradeRoutes", GetText(world.TradeRoutes));
-            sb.Replace("@Professions", GetText(world.Professions));
-            sb.Replace("@WealthDistribution", GetText(world.WealthDistribution));
-
-            // Magic/Technology tab fields
-            sb.Replace("@SystemType", world.SystemType ?? string.Empty);
-            sb.Replace("@Source", GetText(world.Source));
-            sb.Replace("@Rules", GetText(world.Rules));
-            sb.Replace("@Limitations", GetText(world.Limitations));
-            sb.Replace("@Cost", GetText(world.Cost));
-            sb.Replace("@Practitioners", GetText(world.Practitioners));
-            sb.Replace("@SocialImpact", GetText(world.SocialImpact));
-
-            // Handle list entries - Physical Worlds
-            if (line.Contains("@PhysicalWorlds"))
+            // Physical Worlds section
+            else if (line.Contains("@PhysicalWorlds"))
             {
                 sb.Clear();
                 foreach (var entry in world.PhysicalWorlds)
@@ -190,8 +179,8 @@ public class ReportFormatter
                 }
             }
 
-            // Handle list entries - Species
-            if (line.Contains("@Species"))
+            // Species section
+            else if (line.Contains("@Species"))
             {
                 sb.Clear();
                 foreach (var entry in world.Species)
@@ -206,8 +195,8 @@ public class ReportFormatter
                 }
             }
 
-            // Handle list entries - Cultures
-            if (line.Contains("@Cultures"))
+            // Cultures section
+            else if (line.Contains("@Cultures"))
             {
                 sb.Clear();
                 foreach (var entry in world.Cultures)
@@ -223,8 +212,8 @@ public class ReportFormatter
                 }
             }
 
-            // Handle list entries - Governments
-            if (line.Contains("@Governments"))
+            // Governments section
+            else if (line.Contains("@Governments"))
             {
                 sb.Clear();
                 foreach (var entry in world.Governments)
@@ -239,8 +228,8 @@ public class ReportFormatter
                 }
             }
 
-            // Handle list entries - Religions
-            if (line.Contains("@Religions"))
+            // Religions section
+            else if (line.Contains("@Religions"))
             {
                 sb.Clear();
                 foreach (var entry in world.Religions)
@@ -255,11 +244,97 @@ public class ReportFormatter
                 }
             }
 
+            // History section
+            else if (line.Contains("@History"))
+            {
+                sb.Clear();
+                if (!string.IsNullOrEmpty(world.FoundingEvents)) sb.AppendLine($"    Founding Events: {GetText(world.FoundingEvents)}");
+                if (!string.IsNullOrEmpty(world.MajorConflicts)) sb.AppendLine($"    Major Conflicts: {GetText(world.MajorConflicts)}");
+                if (!string.IsNullOrEmpty(world.Eras)) sb.AppendLine($"    Eras: {GetText(world.Eras)}");
+                if (!string.IsNullOrEmpty(world.TechnologicalShifts)) sb.AppendLine($"    Technological Shifts: {GetText(world.TechnologicalShifts)}");
+                if (!string.IsNullOrEmpty(world.LostKnowledge)) sb.AppendLine($"    Lost Knowledge: {GetText(world.LostKnowledge)}");
+            }
+
+            // Economy section
+            else if (line.Contains("@Economy"))
+            {
+                sb.Clear();
+                if (!string.IsNullOrEmpty(world.EconomicSystem)) sb.AppendLine($"    Economic System: {GetText(world.EconomicSystem)}");
+                if (!string.IsNullOrEmpty(world.Currency)) sb.AppendLine($"    Currency: {GetText(world.Currency)}");
+                if (!string.IsNullOrEmpty(world.TradeRoutes)) sb.AppendLine($"    Trade Routes: {GetText(world.TradeRoutes)}");
+                if (!string.IsNullOrEmpty(world.Professions)) sb.AppendLine($"    Professions: {GetText(world.Professions)}");
+                if (!string.IsNullOrEmpty(world.WealthDistribution)) sb.AppendLine($"    Wealth Distribution: {GetText(world.WealthDistribution)}");
+            }
+
+            // Magic/Technology section
+            else if (line.Contains("@MagicTechnology"))
+            {
+                sb.Clear();
+                if (!string.IsNullOrEmpty(world.SystemType)) sb.AppendLine($"    System Type: {world.SystemType}");
+                if (!string.IsNullOrEmpty(world.Source)) sb.AppendLine($"    Source: {GetText(world.Source)}");
+                if (!string.IsNullOrEmpty(world.Rules)) sb.AppendLine($"    Rules: {GetText(world.Rules)}");
+                if (!string.IsNullOrEmpty(world.Limitations)) sb.AppendLine($"    Limitations: {GetText(world.Limitations)}");
+                if (!string.IsNullOrEmpty(world.Cost)) sb.AppendLine($"    Cost: {GetText(world.Cost)}");
+                if (!string.IsNullOrEmpty(world.Practitioners)) sb.AppendLine($"    Practitioners: {GetText(world.Practitioners)}");
+                if (!string.IsNullOrEmpty(world.SocialImpact)) sb.AppendLine($"    Social Impact: {GetText(world.SocialImpact)}");
+            }
+
             doc.AddText(sb.ToString());
             doc.AddNewLine();
         }
 
         return doc.GetRtf();
+    }
+
+    /// <summary>
+    /// Returns description and examples for a World Type.
+    /// </summary>
+    private static (string Description, string Examples) GetWorldTypeInfo(string worldType)
+    {
+        return worldType switch
+        {
+            "Consensus Reality" => (
+                "The world operates exactly as expected - no magic, no hidden layers, no alternate physics. " +
+                "\"Consensus\" refers to a specific group or subculture whose reality you're depicting.",
+                "87th Precinct • Harry Bosch • Rabbit series • Grisham novels • Big Little Lies"),
+
+            "Enchanted Reality" => (
+                "Our world, but reality is porous. The impossible happens and is accepted rather than analyzed. " +
+                "Magic or the supernatural exists but isn't systematized - it simply is.",
+                "One Hundred Years of Solitude • Like Water for Chocolate • Beloved • Pan's Labyrinth"),
+
+            "Hidden World" => (
+                "Our world, but with concealed magical or supernatural layers beneath or alongside normal reality. " +
+                "The \"mundane\" world operates normally, but a secret realm exists that most people don't know about.",
+                "Harry Potter • Dresden Files • American Gods • The Matrix • Men in Black • Percy Jackson"),
+
+            "Divergent World" => (
+                "Our world, but history or conditions diverged at some point. " +
+                "The rules of reality remain rational and logical, but society, technology, or events developed differently.",
+                "The Man in the High Castle • 11/22/63 • Neuromancer • The Handmaid's Tale"),
+
+            "Constructed World" => (
+                "A fully invented reality with its own geography, history, peoples, and rules. " +
+                "The world doesn't derive from Earth at all - it's built from scratch.",
+                "A Song of Ice and Fire • Discworld • Dune • Star Wars • The Stormlight Archive"),
+
+            "Mythic World" => (
+                "A world where narrative meaning matters more than physical causality. " +
+                "Fate, prophecy, and archetypes drive events. Things happen because they're meaningful, not because of cause and effect.",
+                "The Lord of the Rings • Earthsea • The Chronicles of Narnia • Circe • The Once and Future King"),
+
+            "Estranged World" => (
+                "A world that feels fundamentally alien or wrong. Rules may exist, but they resist human intuition. " +
+                "The familiar becomes strange.",
+                "Solaris • Annihilation • Perdido Street Station • Blindsight • 2001: A Space Odyssey"),
+
+            "Broken World" => (
+                "A world where civilization, environment, or social order has collapsed or been corrupted. " +
+                "Survival replaces progress. Resources are scarce, institutions have failed.",
+                "The Road • Mad Max • 1984 • The Walking Dead • Station Eleven • A Canticle for Leibowitz"),
+
+            _ => ("", "")
+        };
     }
 
     public async Task<string> FormatProblemReport(StoryElement element)
