@@ -196,38 +196,24 @@ Detailed technical documentation (memory files provide condensed versions):
 - **Code Examples**: `.claude/docs/examples/` - Copy-paste templates for ViewModels, Services, platform-specific code
 - **Troubleshooting**: `.claude/docs/troubleshooting/` - Common errors with solutions
 
-### User Manual (ManualTest Repository)
+### User Manual
 
-- **Repository**: [github.com/storybuilder-org/ManualTest](https://github.com/storybuilder-org/ManualTest)
-- **AI Agent Guide**: [ManualTest/CLAUDE.md](/mnt/d/dev/src/ManualTest/CLAUDE.md) - Comprehensive guidance for working with user documentation
-- **Location**: `/mnt/d/dev/src/ManualTest/docs/`
-- **Published (Staging)**: https://storybuilder-org.github.io/StoryBuilder-Manual/
-- **Format**: Jekyll with Just the Docs theme (115 markdown files)
-- **Index**: `/mnt/d/dev/src/ManualTest/docs/index.md` - Complete index with file summaries (always current)
+- **Location**: `/mnt/d/dev/src/StoryCAD/docs/`
+- **Production URL**: https://storybuilder-org.github.io/StoryCAD/
+- **Format**: Jekyll with Just the Docs theme (115+ markdown files)
 - **Audience**: Fiction writers (non-technical users)
 
-**Search Strategy**:
-- **DO NOT** read all 115 files sequentially
-- **DO** use index file for quick lookup
-- **DO** use Grep to search specific sections
-- **DO** read ManualTest/CLAUDE.md for detailed search guidance
+**See `user-manual.md` in shared memory files** for complete guidance on:
+- Workflow (branch-based staging)
+- Documentation structure (11 sections)
+- Front matter requirements
+- Writing style for non-technical audience
+- Adding new story element documentation
 
-**Key Manual Sections**:
-- `Front Matter/` - Introduction, help resources, legal information (4 files)
-- `Quick Start/` - UI basics, navigation, file operations, keyboard shortcuts (23 files)
-- `Story Elements/` - Forms and tabs for each story element type (30 files)
-- `Tools/` - Master Plots, Dramatic Situations, Stock Scenes, Conflict Builder (10 files)
-- `Writing with StoryCAD/` - Outlining philosophy, workflow, plotting techniques (17 files)
-- `Tutorial Creating a Story/` - Step-by-step story creation guide (10 files)
-- `Reports/` - Print reports and Scrivener integration (4 files)
-- `Preferences/` - Application settings and configuration (1 file)
-- `For Developers/` - API documentation, changelog, developer notes (6 files)
-
-**When to Reference User Documentation**:
-- Before implementing UI changes (understand user workflows)
+**When to Update User Documentation**:
 - When adding new story elements (follow established patterns)
-- When changing features (update corresponding user docs)
-- See architecture notes for feature-to-documentation mapping
+- When changing UI features (update corresponding docs)
+- When adding new tools or reports
 
 ### Context7 MCP Server
 
