@@ -2,7 +2,7 @@
 
 **Issue:** [StoryCAD #782 - Support for Worldbuilding](https://github.com/storybuilder-org/StoryCAD/issues/782)
 **Log Started:** 2026-01-19
-**Status:** Final Integration Phase (Delete handling + Reports remaining)
+**Status:** Final Integration Phase - UI Design Complete (Delete handling + Reports remaining)
 **Location:** `/devdocs/worldbuilding/` (moved from `/mnt/c/temp/worldbuilding/` on 2026-01-19)
 
 ---
@@ -933,10 +933,148 @@ Screenshot: `/mnt/c/temp/issue_782_tests/expander.png`
 
 ---
 
+### 2026-01-21 - Session 9: Content Indicators and Expander Rollout
+
+**Participants:** User (Terry), Claude Code
+
+**Context:** Complete the Expander layout with content indicators across all tabs.
+
+#### Content Indicators Implementation
+
+**Requirement:** Show which Expander fields have content without expanding them.
+
+**Options Considered:**
+| Option | Implementation | Pros | Cons |
+|--------|---------------|------|------|
+| Filled dot | Circle icon next to header | Common pattern | More XAML |
+| **Bold header text** | FontWeight binding | Simplest implementation | Subtle |
+| Accent color bar | Colored left border | Visually distinct | More complex |
+| Character count | "(42 chars)" in header | Informative | Noisy |
+
+**Decision: Bold header text** - Simplest solution that works.
+
+#### Implementation Approach
+
+Initial overcomplicated approach used computed properties with manual OnPropertyChanged calls. User feedback: "Simpler is ALWAYS better."
+
+**Final simple approach:**
+1. Backing fields for FontWeight properties (SetProperty handles notification)
+2. `Update*FontWeights()` method called on navigation/activation
+3. Property setters set FontWeight to Bold when content is entered
+4. No complex event propagation needed
+
+```csharp
+// Backing field + property
+private Windows.UI.Text.FontWeight _cultureValuesFontWeight;
+public Windows.UI.Text.FontWeight CultureValuesFontWeight
+{
+    get => _cultureValuesFontWeight;
+    set => SetProperty(ref _cultureValuesFontWeight, value);
+}
+
+// Update method called on navigation
+private void UpdateCultureFontWeights()
+{
+    var bold = new Windows.UI.Text.FontWeight { Weight = 700 };
+    var normal = new Windows.UI.Text.FontWeight { Weight = 400 };
+    CultureValuesFontWeight = HasRtfContent(CurrentCultureValues) ? bold : normal;
+    // ... etc
+}
+
+// Setter also sets to Bold
+set {
+    Cultures[CurrentCultureIndex].Values = value;
+    CultureValuesFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+    // ...
+}
+```
+
+#### Tabs Converted to Expanders
+
+All 7 remaining tabs converted (Cultures was done in Session 8):
+
+**Multiple-occurrence tabs (with navigation):**
+- Physical Worlds (6 fields)
+- People/Species (5 fields)
+- Governments (5 fields)
+- Religions (5 fields)
+
+**Single-occurrence tabs:**
+- History (5 fields)
+- Economy (5 fields)
+- Magic/Tech (6 RichEditBox fields + SystemType ComboBox outside Expanders)
+
+#### UI Design Complete
+
+All StoryWorld UI design work is now complete:
+- 9 tabs total (Structure + 8 taxonomy tabs)
+- Expander layout with content indicators
+- Navigation for multiple-occurrence tabs
+- Responsive layout that works at various window sizes
+
+#### Files Modified This Session
+
+- `StoryCADLib/ViewModels/StoryWorldViewModel.cs` - FontWeight properties, Update methods, setter changes
+- `StoryCAD/Views/StoryWorldPage.xaml` - Expander layout for all tabs
+- `devdocs/worldbuilding/issue_782_storyworld_plan.md` - Updated status
+- `devdocs/worldbuilding/issue_782_log.md` - This documentation
+
+#### Commits
+
+- `af2a93de` - feat(#782): Add Expander layout with content indicators to all StoryWorld tabs
+- `c0955f7a` - docs(#782): Update log and add report idea
+
+---
+
+### 2026-01-21 - Session 9 (continued): Delete Handling and SaveModel Fix
+
+**Context:** Verify StoryWorld element operations work correctly.
+
+#### Exploration Results
+
+Used agent to explore delete/trash handling. Found:
+
+| Operation | Status |
+|-----------|--------|
+| Add (menu + flyout) | ✅ Working |
+| Singleton constraint | ✅ Working |
+| Delete to trash | ✅ Works (generic system) |
+| Restore from trash | ✅ Works (generic) |
+| Empty trash | ✅ Works (generic) |
+| **SaveModel on navigation** | ❌ **Missing** |
+
+#### Bug Fix: SaveModel() Missing Case
+
+**Problem:** `ShellViewModel.SaveModel()` had no case for `StoryWorldPage`. Changes to StoryWorld were lost when navigating to another element.
+
+**Fix:** Added case in SaveModel() switch statement:
+```csharp
+case StoryWorldPage:
+    var storyWorldVm = Ioc.Default.GetRequiredService<StoryWorldViewModel>();
+    storyWorldVm.SaveModel();
+    break;
+```
+
+#### Delete Handling Decision
+
+No special confirmation dialog needed for StoryWorld:
+- Generic trash system handles all element types
+- StoryWorld can be restored like any other element
+- Singleton constraint prevents accidental re-creation
+
+#### Commits
+
+- `71ae24b9` - fix(#782): Add SaveModel case for StoryWorldPage
+
+---
+
 ## Summary: Remaining Work
 
+### Completed
+- [x] UI Design (all tabs, Expander layout, content indicators)
+- [x] Delete handling (standard trash system + SaveModel fix)
+
 ### Code Tasks
-- [ ] Delete handling with confirmation dialog
 - [ ] Reports (PrintReports.cs, ScrivenerReports.cs)
 
 ### Test Tasks
@@ -945,6 +1083,9 @@ Screenshot: `/mnt/c/temp/issue_782_tests/expander.png`
 - [ ] Test navigation end-to-end
 - [ ] Test delete with confirmation
 - [ ] Test OutlineService.AddStoryElement
+
+### Documentation Tasks
+- [ ] User manual updates (TBD)
 
 ### Evaluate Tasks
 - [ ] Plan evaluation section

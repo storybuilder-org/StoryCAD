@@ -2,8 +2,8 @@
 
 **Issue:** [StoryCAD #782 - Support for Worldbuilding](https://github.com/storybuilder-org/StoryCAD/issues/782)
 **Created:** 2026-01-14
-**Updated:** 2026-01-20
-**Status:** Final Integration Phase
+**Updated:** 2026-01-21
+**Status:** Final Integration Phase (UI Design Complete)
 
 ---
 
@@ -36,12 +36,14 @@ Add a new story element type `StoryWorld` to StoryCAD for worldbuilding content.
 - [x] Responsive Grid layout for all tabs
 - [x] Navigation pattern for multiple-occurrence tabs (Prev/Next with position display)
 - [x] Single-entry responsive layout for History, Economy, Magic/Tech tabs
+- [x] Expander layout for all taxonomy tabs with content indicators (bold when has content)
+- [x] **UI Design Complete** (2026-01-21)
 
 ### Remaining Work
 
 #### Delete Handling
-- [ ] Add confirmation dialog when deleting StoryWorld ("Are you sure?")
-- [ ] StoryWorld CAN be deleted (unlike Overview)
+- [x] StoryWorld uses standard trash system (delete, restore, empty)
+- [x] SaveModel() case added for StoryWorldPage (was missing - bug fix)
 
 #### Reports
 - [ ] Add StoryWorld to PrintReports.cs
@@ -54,6 +56,9 @@ Add a new story element type `StoryWorld` to StoryCAD for worldbuilding content.
 - [ ] Test navigation to StoryWorldPage
 - [ ] Test delete with confirmation
 - [ ] Test OutlineService.AddStoryElement for StoryWorld
+
+#### Documentation
+- [ ] User manual updates (TBD)
 
 ---
 
@@ -147,4 +152,4 @@ See `world_type_aware_workflows.md` for design notes.
 ---
 
 *Plan created: 2026-01-14*
-*Last updated: 2026-01-20*
+*Last updated: 2026-01-21*
