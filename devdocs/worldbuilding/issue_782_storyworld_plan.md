@@ -50,15 +50,15 @@ Add a new story element type `StoryWorld` to StoryCAD for worldbuilding content.
 - [x] Add StoryWorld to ScrivenerReports.cs (confirmed needed)
 - [x] Add StoryWorld formatting in ReportFormatter.cs
 
-#### Tests
+#### Documentation
+- [ ] User manual updates (TBD)
+
+#### Manual Testing (Acceptance)
 - [ ] Test adding StoryWorld via command
 - [ ] Test singleton constraint (command disabled when StoryWorld exists)
 - [ ] Test navigation to StoryWorldPage
 - [ ] Test delete with confirmation
 - [ ] Test OutlineService.AddStoryElement for StoryWorld
-
-#### Documentation
-- [ ] User manual updates (TBD)
 
 ---
 
