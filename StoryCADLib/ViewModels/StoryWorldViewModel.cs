@@ -241,6 +241,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
             if (HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count)
             {
                 PhysicalWorlds[CurrentPhysicalWorldIndex].Geography = value;
+                PhysicalWorldGeographyFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
                 OnPropertyChanged();
                 ShellViewModel.ShowChange();
             }
@@ -256,6 +257,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
             if (HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count)
             {
                 PhysicalWorlds[CurrentPhysicalWorldIndex].Climate = value;
+                PhysicalWorldClimateFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
                 OnPropertyChanged();
                 ShellViewModel.ShowChange();
             }
@@ -271,6 +273,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
             if (HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count)
             {
                 PhysicalWorlds[CurrentPhysicalWorldIndex].NaturalResources = value;
+                PhysicalWorldNaturalResourcesFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
                 OnPropertyChanged();
                 ShellViewModel.ShowChange();
             }
@@ -286,6 +289,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
             if (HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count)
             {
                 PhysicalWorlds[CurrentPhysicalWorldIndex].Flora = value;
+                PhysicalWorldFloraFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
                 OnPropertyChanged();
                 ShellViewModel.ShowChange();
             }
@@ -301,6 +305,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
             if (HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count)
             {
                 PhysicalWorlds[CurrentPhysicalWorldIndex].Fauna = value;
+                PhysicalWorldFaunaFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
                 OnPropertyChanged();
                 ShellViewModel.ShowChange();
             }
@@ -316,6 +321,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
             if (HasPhysicalWorlds && CurrentPhysicalWorldIndex < PhysicalWorlds.Count)
             {
                 PhysicalWorlds[CurrentPhysicalWorldIndex].Astronomy = value;
+                PhysicalWorldAstronomyFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
                 OnPropertyChanged();
                 ShellViewModel.ShowChange();
             }
@@ -336,6 +342,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
         OnPropertyChanged(nameof(CurrentPhysicalWorldFauna));
         OnPropertyChanged(nameof(CurrentPhysicalWorldAstronomy));
         OnPropertyChanged(nameof(RemoveButtonVisibility));
+        UpdatePhysicalWorldFontWeights();
     }
 
     private void PreviousPhysicalWorld()
@@ -423,27 +430,27 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
     public string CurrentSpeciesPhysicalTraits
     {
         get => HasSpecies && CurrentSpeciesIndex < Species.Count ? Species[CurrentSpeciesIndex].PhysicalTraits : string.Empty;
-        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].PhysicalTraits = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].PhysicalTraits = value; SpeciesPhysicalTraitsFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 }; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
     }
     public string CurrentSpeciesLifespan
     {
         get => HasSpecies && CurrentSpeciesIndex < Species.Count ? Species[CurrentSpeciesIndex].Lifespan : string.Empty;
-        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].Lifespan = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].Lifespan = value; SpeciesLifespanFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 }; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
     }
     public string CurrentSpeciesOrigins
     {
         get => HasSpecies && CurrentSpeciesIndex < Species.Count ? Species[CurrentSpeciesIndex].Origins : string.Empty;
-        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].Origins = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].Origins = value; SpeciesOriginsFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 }; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
     }
     public string CurrentSpeciesSocialStructure
     {
         get => HasSpecies && CurrentSpeciesIndex < Species.Count ? Species[CurrentSpeciesIndex].SocialStructure : string.Empty;
-        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].SocialStructure = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].SocialStructure = value; SpeciesSocialStructureFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 }; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
     }
     public string CurrentSpeciesDiversity
     {
         get => HasSpecies && CurrentSpeciesIndex < Species.Count ? Species[CurrentSpeciesIndex].Diversity : string.Empty;
-        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].Diversity = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set { if (HasSpecies && CurrentSpeciesIndex < Species.Count) { Species[CurrentSpeciesIndex].Diversity = value; SpeciesDiversityFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 }; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
     }
 
     private void NotifySpeciesNavigationChanged()
@@ -452,6 +459,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
         OnPropertyChanged(nameof(SpeciesPositionDisplay)); OnPropertyChanged(nameof(CurrentSpeciesName));
         OnPropertyChanged(nameof(CurrentSpeciesPhysicalTraits)); OnPropertyChanged(nameof(CurrentSpeciesLifespan));
         OnPropertyChanged(nameof(CurrentSpeciesOrigins)); OnPropertyChanged(nameof(CurrentSpeciesSocialStructure)); OnPropertyChanged(nameof(CurrentSpeciesDiversity));
+        UpdateSpeciesFontWeights();
     }
 
     private void PreviousSpecies() { if (HasPreviousSpecies) CurrentSpeciesIndex--; }
@@ -489,32 +497,86 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
     public string CurrentCultureValues
     {
         get => HasCultures && CurrentCultureIndex < Cultures.Count ? Cultures[CurrentCultureIndex].Values : string.Empty;
-        set { if (HasCultures && CurrentCultureIndex < Cultures.Count) { Cultures[CurrentCultureIndex].Values = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set
+        {
+            if (HasCultures && CurrentCultureIndex < Cultures.Count)
+            {
+                Cultures[CurrentCultureIndex].Values = value;
+                CultureValuesFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+                OnPropertyChanged();
+                ShellViewModel.ShowChange();
+            }
+        }
     }
     public string CurrentCultureCustoms
     {
         get => HasCultures && CurrentCultureIndex < Cultures.Count ? Cultures[CurrentCultureIndex].Customs : string.Empty;
-        set { if (HasCultures && CurrentCultureIndex < Cultures.Count) { Cultures[CurrentCultureIndex].Customs = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set
+        {
+            if (HasCultures && CurrentCultureIndex < Cultures.Count)
+            {
+                Cultures[CurrentCultureIndex].Customs = value;
+                CultureCustomsFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+                OnPropertyChanged();
+                ShellViewModel.ShowChange();
+            }
+        }
     }
     public string CurrentCultureTaboos
     {
         get => HasCultures && CurrentCultureIndex < Cultures.Count ? Cultures[CurrentCultureIndex].Taboos : string.Empty;
-        set { if (HasCultures && CurrentCultureIndex < Cultures.Count) { Cultures[CurrentCultureIndex].Taboos = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set
+        {
+            if (HasCultures && CurrentCultureIndex < Cultures.Count)
+            {
+                Cultures[CurrentCultureIndex].Taboos = value;
+                CultureTaboosFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+                OnPropertyChanged();
+                ShellViewModel.ShowChange();
+            }
+        }
     }
     public string CurrentCultureArt
     {
         get => HasCultures && CurrentCultureIndex < Cultures.Count ? Cultures[CurrentCultureIndex].Art : string.Empty;
-        set { if (HasCultures && CurrentCultureIndex < Cultures.Count) { Cultures[CurrentCultureIndex].Art = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set
+        {
+            if (HasCultures && CurrentCultureIndex < Cultures.Count)
+            {
+                Cultures[CurrentCultureIndex].Art = value;
+                CultureArtFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+                OnPropertyChanged();
+                ShellViewModel.ShowChange();
+            }
+        }
     }
     public string CurrentCultureDailyLife
     {
         get => HasCultures && CurrentCultureIndex < Cultures.Count ? Cultures[CurrentCultureIndex].DailyLife : string.Empty;
-        set { if (HasCultures && CurrentCultureIndex < Cultures.Count) { Cultures[CurrentCultureIndex].DailyLife = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set
+        {
+            if (HasCultures && CurrentCultureIndex < Cultures.Count)
+            {
+                Cultures[CurrentCultureIndex].DailyLife = value;
+                CultureDailyLifeFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+                OnPropertyChanged();
+                ShellViewModel.ShowChange();
+            }
+        }
     }
     public string CurrentCultureEntertainment
     {
         get => HasCultures && CurrentCultureIndex < Cultures.Count ? Cultures[CurrentCultureIndex].Entertainment : string.Empty;
-        set { if (HasCultures && CurrentCultureIndex < Cultures.Count) { Cultures[CurrentCultureIndex].Entertainment = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set
+        {
+            if (HasCultures && CurrentCultureIndex < Cultures.Count)
+            {
+                Cultures[CurrentCultureIndex].Entertainment = value;
+                CultureEntertainmentFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+                OnPropertyChanged();
+                ShellViewModel.ShowChange();
+            }
+        }
     }
 
     private void NotifyCultureNavigationChanged()
@@ -523,6 +585,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
         OnPropertyChanged(nameof(CulturePositionDisplay)); OnPropertyChanged(nameof(CurrentCultureName));
         OnPropertyChanged(nameof(CurrentCultureValues)); OnPropertyChanged(nameof(CurrentCultureCustoms)); OnPropertyChanged(nameof(CurrentCultureTaboos));
         OnPropertyChanged(nameof(CurrentCultureArt)); OnPropertyChanged(nameof(CurrentCultureDailyLife)); OnPropertyChanged(nameof(CurrentCultureEntertainment));
+        UpdateCultureFontWeights();
     }
 
     private void PreviousCulture() { if (HasPreviousCulture) CurrentCultureIndex--; }
@@ -530,6 +593,428 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
     private void AddCulture() { Cultures.Add(new CultureEntry { Name = "New Culture" }); CurrentCultureIndex = Cultures.Count - 1; NotifyCultureNavigationChanged(); ShellViewModel.ShowChange(); }
     private void RemoveCurrentCulture() { if (HasCultures && CurrentCultureIndex < Cultures.Count) { Cultures.RemoveAt(CurrentCultureIndex); if (CurrentCultureIndex >= Cultures.Count && Cultures.Count > 0) CurrentCultureIndex = Cultures.Count - 1; NotifyCultureNavigationChanged(); ShellViewModel.ShowChange(); } }
     public void RemoveCulture(CultureEntry entry) { if (entry != null && Cultures.Contains(entry)) { Cultures.Remove(entry); if (CurrentCultureIndex >= Cultures.Count && Cultures.Count > 0) CurrentCultureIndex = Cultures.Count - 1; NotifyCultureNavigationChanged(); ShellViewModel.ShowChange(); } }
+
+    #endregion
+
+    #region Content Indicators
+
+    /// <summary>
+    /// Helper to check if RTF content has meaningful text.
+    /// Empty RTF is typically ~40-50 characters of boilerplate.
+    /// </summary>
+    private static bool HasRtfContent(string rtfText)
+    {
+        if (string.IsNullOrWhiteSpace(rtfText)) return false;
+        return rtfText.Length > 50;
+    }
+
+    // Physical World FontWeights
+    private Windows.UI.Text.FontWeight _physicalWorldGeographyFontWeight;
+    public Windows.UI.Text.FontWeight PhysicalWorldGeographyFontWeight
+    {
+        get => _physicalWorldGeographyFontWeight;
+        set => SetProperty(ref _physicalWorldGeographyFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _physicalWorldClimateFontWeight;
+    public Windows.UI.Text.FontWeight PhysicalWorldClimateFontWeight
+    {
+        get => _physicalWorldClimateFontWeight;
+        set => SetProperty(ref _physicalWorldClimateFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _physicalWorldNaturalResourcesFontWeight;
+    public Windows.UI.Text.FontWeight PhysicalWorldNaturalResourcesFontWeight
+    {
+        get => _physicalWorldNaturalResourcesFontWeight;
+        set => SetProperty(ref _physicalWorldNaturalResourcesFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _physicalWorldFloraFontWeight;
+    public Windows.UI.Text.FontWeight PhysicalWorldFloraFontWeight
+    {
+        get => _physicalWorldFloraFontWeight;
+        set => SetProperty(ref _physicalWorldFloraFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _physicalWorldFaunaFontWeight;
+    public Windows.UI.Text.FontWeight PhysicalWorldFaunaFontWeight
+    {
+        get => _physicalWorldFaunaFontWeight;
+        set => SetProperty(ref _physicalWorldFaunaFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _physicalWorldAstronomyFontWeight;
+    public Windows.UI.Text.FontWeight PhysicalWorldAstronomyFontWeight
+    {
+        get => _physicalWorldAstronomyFontWeight;
+        set => SetProperty(ref _physicalWorldAstronomyFontWeight, value);
+    }
+
+    private void UpdatePhysicalWorldFontWeights()
+    {
+        var bold = new Windows.UI.Text.FontWeight { Weight = 700 };
+        var normal = new Windows.UI.Text.FontWeight { Weight = 400 };
+
+        PhysicalWorldGeographyFontWeight = HasRtfContent(CurrentPhysicalWorldGeography) ? bold : normal;
+        PhysicalWorldClimateFontWeight = HasRtfContent(CurrentPhysicalWorldClimate) ? bold : normal;
+        PhysicalWorldNaturalResourcesFontWeight = HasRtfContent(CurrentPhysicalWorldNaturalResources) ? bold : normal;
+        PhysicalWorldFloraFontWeight = HasRtfContent(CurrentPhysicalWorldFlora) ? bold : normal;
+        PhysicalWorldFaunaFontWeight = HasRtfContent(CurrentPhysicalWorldFauna) ? bold : normal;
+        PhysicalWorldAstronomyFontWeight = HasRtfContent(CurrentPhysicalWorldAstronomy) ? bold : normal;
+    }
+
+    // Species FontWeights
+    private Windows.UI.Text.FontWeight _speciesPhysicalTraitsFontWeight;
+    public Windows.UI.Text.FontWeight SpeciesPhysicalTraitsFontWeight
+    {
+        get => _speciesPhysicalTraitsFontWeight;
+        set => SetProperty(ref _speciesPhysicalTraitsFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _speciesLifespanFontWeight;
+    public Windows.UI.Text.FontWeight SpeciesLifespanFontWeight
+    {
+        get => _speciesLifespanFontWeight;
+        set => SetProperty(ref _speciesLifespanFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _speciesOriginsFontWeight;
+    public Windows.UI.Text.FontWeight SpeciesOriginsFontWeight
+    {
+        get => _speciesOriginsFontWeight;
+        set => SetProperty(ref _speciesOriginsFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _speciesSocialStructureFontWeight;
+    public Windows.UI.Text.FontWeight SpeciesSocialStructureFontWeight
+    {
+        get => _speciesSocialStructureFontWeight;
+        set => SetProperty(ref _speciesSocialStructureFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _speciesDiversityFontWeight;
+    public Windows.UI.Text.FontWeight SpeciesDiversityFontWeight
+    {
+        get => _speciesDiversityFontWeight;
+        set => SetProperty(ref _speciesDiversityFontWeight, value);
+    }
+
+    private void UpdateSpeciesFontWeights()
+    {
+        var bold = new Windows.UI.Text.FontWeight { Weight = 700 };
+        var normal = new Windows.UI.Text.FontWeight { Weight = 400 };
+
+        SpeciesPhysicalTraitsFontWeight = HasRtfContent(CurrentSpeciesPhysicalTraits) ? bold : normal;
+        SpeciesLifespanFontWeight = HasRtfContent(CurrentSpeciesLifespan) ? bold : normal;
+        SpeciesOriginsFontWeight = HasRtfContent(CurrentSpeciesOrigins) ? bold : normal;
+        SpeciesSocialStructureFontWeight = HasRtfContent(CurrentSpeciesSocialStructure) ? bold : normal;
+        SpeciesDiversityFontWeight = HasRtfContent(CurrentSpeciesDiversity) ? bold : normal;
+    }
+
+    // Culture FontWeights
+    private Windows.UI.Text.FontWeight _cultureValuesFontWeight;
+    public Windows.UI.Text.FontWeight CultureValuesFontWeight
+    {
+        get => _cultureValuesFontWeight;
+        set => SetProperty(ref _cultureValuesFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _cultureCustomsFontWeight;
+    public Windows.UI.Text.FontWeight CultureCustomsFontWeight
+    {
+        get => _cultureCustomsFontWeight;
+        set => SetProperty(ref _cultureCustomsFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _cultureTaboosFontWeight;
+    public Windows.UI.Text.FontWeight CultureTaboosFontWeight
+    {
+        get => _cultureTaboosFontWeight;
+        set => SetProperty(ref _cultureTaboosFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _cultureArtFontWeight;
+    public Windows.UI.Text.FontWeight CultureArtFontWeight
+    {
+        get => _cultureArtFontWeight;
+        set => SetProperty(ref _cultureArtFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _cultureDailyLifeFontWeight;
+    public Windows.UI.Text.FontWeight CultureDailyLifeFontWeight
+    {
+        get => _cultureDailyLifeFontWeight;
+        set => SetProperty(ref _cultureDailyLifeFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _cultureEntertainmentFontWeight;
+    public Windows.UI.Text.FontWeight CultureEntertainmentFontWeight
+    {
+        get => _cultureEntertainmentFontWeight;
+        set => SetProperty(ref _cultureEntertainmentFontWeight, value);
+    }
+
+    private void UpdateCultureFontWeights()
+    {
+        var bold = new Windows.UI.Text.FontWeight { Weight = 700 };
+        var normal = new Windows.UI.Text.FontWeight { Weight = 400 };
+
+        CultureValuesFontWeight = HasRtfContent(CurrentCultureValues) ? bold : normal;
+        CultureCustomsFontWeight = HasRtfContent(CurrentCultureCustoms) ? bold : normal;
+        CultureTaboosFontWeight = HasRtfContent(CurrentCultureTaboos) ? bold : normal;
+        CultureArtFontWeight = HasRtfContent(CurrentCultureArt) ? bold : normal;
+        CultureDailyLifeFontWeight = HasRtfContent(CurrentCultureDailyLife) ? bold : normal;
+        CultureEntertainmentFontWeight = HasRtfContent(CurrentCultureEntertainment) ? bold : normal;
+    }
+
+    // Government FontWeights
+    private Windows.UI.Text.FontWeight _governmentTypeFontWeight;
+    public Windows.UI.Text.FontWeight GovernmentTypeFontWeight
+    {
+        get => _governmentTypeFontWeight;
+        set => SetProperty(ref _governmentTypeFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _governmentPowerStructuresFontWeight;
+    public Windows.UI.Text.FontWeight GovernmentPowerStructuresFontWeight
+    {
+        get => _governmentPowerStructuresFontWeight;
+        set => SetProperty(ref _governmentPowerStructuresFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _governmentLawsFontWeight;
+    public Windows.UI.Text.FontWeight GovernmentLawsFontWeight
+    {
+        get => _governmentLawsFontWeight;
+        set => SetProperty(ref _governmentLawsFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _governmentClassStructureFontWeight;
+    public Windows.UI.Text.FontWeight GovernmentClassStructureFontWeight
+    {
+        get => _governmentClassStructureFontWeight;
+        set => SetProperty(ref _governmentClassStructureFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _governmentForeignRelationsFontWeight;
+    public Windows.UI.Text.FontWeight GovernmentForeignRelationsFontWeight
+    {
+        get => _governmentForeignRelationsFontWeight;
+        set => SetProperty(ref _governmentForeignRelationsFontWeight, value);
+    }
+
+    private void UpdateGovernmentFontWeights()
+    {
+        var bold = new Windows.UI.Text.FontWeight { Weight = 700 };
+        var normal = new Windows.UI.Text.FontWeight { Weight = 400 };
+
+        GovernmentTypeFontWeight = HasRtfContent(CurrentGovernmentType) ? bold : normal;
+        GovernmentPowerStructuresFontWeight = HasRtfContent(CurrentGovernmentPowerStructures) ? bold : normal;
+        GovernmentLawsFontWeight = HasRtfContent(CurrentGovernmentLaws) ? bold : normal;
+        GovernmentClassStructureFontWeight = HasRtfContent(CurrentGovernmentClassStructure) ? bold : normal;
+        GovernmentForeignRelationsFontWeight = HasRtfContent(CurrentGovernmentForeignRelations) ? bold : normal;
+    }
+
+    // Religion FontWeights
+    private Windows.UI.Text.FontWeight _religionDeitiesFontWeight;
+    public Windows.UI.Text.FontWeight ReligionDeitiesFontWeight
+    {
+        get => _religionDeitiesFontWeight;
+        set => SetProperty(ref _religionDeitiesFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _religionBeliefsFontWeight;
+    public Windows.UI.Text.FontWeight ReligionBeliefsFontWeight
+    {
+        get => _religionBeliefsFontWeight;
+        set => SetProperty(ref _religionBeliefsFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _religionPracticesFontWeight;
+    public Windows.UI.Text.FontWeight ReligionPracticesFontWeight
+    {
+        get => _religionPracticesFontWeight;
+        set => SetProperty(ref _religionPracticesFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _religionOrganizationsFontWeight;
+    public Windows.UI.Text.FontWeight ReligionOrganizationsFontWeight
+    {
+        get => _religionOrganizationsFontWeight;
+        set => SetProperty(ref _religionOrganizationsFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _religionCreationMythsFontWeight;
+    public Windows.UI.Text.FontWeight ReligionCreationMythsFontWeight
+    {
+        get => _religionCreationMythsFontWeight;
+        set => SetProperty(ref _religionCreationMythsFontWeight, value);
+    }
+
+    private void UpdateReligionFontWeights()
+    {
+        var bold = new Windows.UI.Text.FontWeight { Weight = 700 };
+        var normal = new Windows.UI.Text.FontWeight { Weight = 400 };
+
+        ReligionDeitiesFontWeight = HasRtfContent(CurrentReligionDeities) ? bold : normal;
+        ReligionBeliefsFontWeight = HasRtfContent(CurrentReligionBeliefs) ? bold : normal;
+        ReligionPracticesFontWeight = HasRtfContent(CurrentReligionPractices) ? bold : normal;
+        ReligionOrganizationsFontWeight = HasRtfContent(CurrentReligionOrganizations) ? bold : normal;
+        ReligionCreationMythsFontWeight = HasRtfContent(CurrentReligionCreationMyths) ? bold : normal;
+    }
+
+    // History FontWeights
+    private Windows.UI.Text.FontWeight _foundingEventsFontWeight;
+    public Windows.UI.Text.FontWeight FoundingEventsFontWeight
+    {
+        get => _foundingEventsFontWeight;
+        set => SetProperty(ref _foundingEventsFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _majorConflictsFontWeight;
+    public Windows.UI.Text.FontWeight MajorConflictsFontWeight
+    {
+        get => _majorConflictsFontWeight;
+        set => SetProperty(ref _majorConflictsFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _erasFontWeight;
+    public Windows.UI.Text.FontWeight ErasFontWeight
+    {
+        get => _erasFontWeight;
+        set => SetProperty(ref _erasFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _technologicalShiftsFontWeight;
+    public Windows.UI.Text.FontWeight TechnologicalShiftsFontWeight
+    {
+        get => _technologicalShiftsFontWeight;
+        set => SetProperty(ref _technologicalShiftsFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _lostKnowledgeFontWeight;
+    public Windows.UI.Text.FontWeight LostKnowledgeFontWeight
+    {
+        get => _lostKnowledgeFontWeight;
+        set => SetProperty(ref _lostKnowledgeFontWeight, value);
+    }
+
+    private void UpdateHistoryFontWeights()
+    {
+        var bold = new Windows.UI.Text.FontWeight { Weight = 700 };
+        var normal = new Windows.UI.Text.FontWeight { Weight = 400 };
+
+        FoundingEventsFontWeight = HasRtfContent(FoundingEvents) ? bold : normal;
+        MajorConflictsFontWeight = HasRtfContent(MajorConflicts) ? bold : normal;
+        ErasFontWeight = HasRtfContent(Eras) ? bold : normal;
+        TechnologicalShiftsFontWeight = HasRtfContent(TechnologicalShifts) ? bold : normal;
+        LostKnowledgeFontWeight = HasRtfContent(LostKnowledge) ? bold : normal;
+    }
+
+    // Economy FontWeights
+    private Windows.UI.Text.FontWeight _economicSystemFontWeight;
+    public Windows.UI.Text.FontWeight EconomicSystemFontWeight
+    {
+        get => _economicSystemFontWeight;
+        set => SetProperty(ref _economicSystemFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _currencyFontWeight;
+    public Windows.UI.Text.FontWeight CurrencyFontWeight
+    {
+        get => _currencyFontWeight;
+        set => SetProperty(ref _currencyFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _tradeRoutesFontWeight;
+    public Windows.UI.Text.FontWeight TradeRoutesFontWeight
+    {
+        get => _tradeRoutesFontWeight;
+        set => SetProperty(ref _tradeRoutesFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _professionsFontWeight;
+    public Windows.UI.Text.FontWeight ProfessionsFontWeight
+    {
+        get => _professionsFontWeight;
+        set => SetProperty(ref _professionsFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _wealthDistributionFontWeight;
+    public Windows.UI.Text.FontWeight WealthDistributionFontWeight
+    {
+        get => _wealthDistributionFontWeight;
+        set => SetProperty(ref _wealthDistributionFontWeight, value);
+    }
+
+    private void UpdateEconomyFontWeights()
+    {
+        var bold = new Windows.UI.Text.FontWeight { Weight = 700 };
+        var normal = new Windows.UI.Text.FontWeight { Weight = 400 };
+
+        EconomicSystemFontWeight = HasRtfContent(EconomicSystem) ? bold : normal;
+        CurrencyFontWeight = HasRtfContent(Currency) ? bold : normal;
+        TradeRoutesFontWeight = HasRtfContent(TradeRoutes) ? bold : normal;
+        ProfessionsFontWeight = HasRtfContent(Professions) ? bold : normal;
+        WealthDistributionFontWeight = HasRtfContent(WealthDistribution) ? bold : normal;
+    }
+
+    // Magic/Tech FontWeights
+    private Windows.UI.Text.FontWeight _sourceFontWeight;
+    public Windows.UI.Text.FontWeight SourceFontWeight
+    {
+        get => _sourceFontWeight;
+        set => SetProperty(ref _sourceFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _rulesFontWeight;
+    public Windows.UI.Text.FontWeight RulesFontWeight
+    {
+        get => _rulesFontWeight;
+        set => SetProperty(ref _rulesFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _limitationsFontWeight;
+    public Windows.UI.Text.FontWeight LimitationsFontWeight
+    {
+        get => _limitationsFontWeight;
+        set => SetProperty(ref _limitationsFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _costFontWeight;
+    public Windows.UI.Text.FontWeight CostFontWeight
+    {
+        get => _costFontWeight;
+        set => SetProperty(ref _costFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _practitionersFontWeight;
+    public Windows.UI.Text.FontWeight PractitionersFontWeight
+    {
+        get => _practitionersFontWeight;
+        set => SetProperty(ref _practitionersFontWeight, value);
+    }
+
+    private Windows.UI.Text.FontWeight _socialImpactFontWeight;
+    public Windows.UI.Text.FontWeight SocialImpactFontWeight
+    {
+        get => _socialImpactFontWeight;
+        set => SetProperty(ref _socialImpactFontWeight, value);
+    }
+
+    private void UpdateMagicTechFontWeights()
+    {
+        var bold = new Windows.UI.Text.FontWeight { Weight = 700 };
+        var normal = new Windows.UI.Text.FontWeight { Weight = 400 };
+
+        SourceFontWeight = HasRtfContent(Source) ? bold : normal;
+        RulesFontWeight = HasRtfContent(Rules) ? bold : normal;
+        LimitationsFontWeight = HasRtfContent(Limitations) ? bold : normal;
+        CostFontWeight = HasRtfContent(Cost) ? bold : normal;
+        PractitionersFontWeight = HasRtfContent(Practitioners) ? bold : normal;
+        SocialImpactFontWeight = HasRtfContent(SocialImpact) ? bold : normal;
+    }
 
     #endregion
 
@@ -560,27 +1045,27 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
     public string CurrentGovernmentType
     {
         get => HasGovernments && CurrentGovernmentIndex < Governments.Count ? Governments[CurrentGovernmentIndex].Type : string.Empty;
-        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].Type = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].Type = value; GovernmentTypeFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 }; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
     }
     public string CurrentGovernmentPowerStructures
     {
         get => HasGovernments && CurrentGovernmentIndex < Governments.Count ? Governments[CurrentGovernmentIndex].PowerStructures : string.Empty;
-        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].PowerStructures = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].PowerStructures = value; GovernmentPowerStructuresFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 }; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
     }
     public string CurrentGovernmentLaws
     {
         get => HasGovernments && CurrentGovernmentIndex < Governments.Count ? Governments[CurrentGovernmentIndex].Laws : string.Empty;
-        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].Laws = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].Laws = value; GovernmentLawsFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 }; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
     }
     public string CurrentGovernmentClassStructure
     {
         get => HasGovernments && CurrentGovernmentIndex < Governments.Count ? Governments[CurrentGovernmentIndex].ClassStructure : string.Empty;
-        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].ClassStructure = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].ClassStructure = value; GovernmentClassStructureFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 }; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
     }
     public string CurrentGovernmentForeignRelations
     {
         get => HasGovernments && CurrentGovernmentIndex < Governments.Count ? Governments[CurrentGovernmentIndex].ForeignRelations : string.Empty;
-        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].ForeignRelations = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set { if (HasGovernments && CurrentGovernmentIndex < Governments.Count) { Governments[CurrentGovernmentIndex].ForeignRelations = value; GovernmentForeignRelationsFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 }; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
     }
 
     private void NotifyGovernmentNavigationChanged()
@@ -589,6 +1074,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
         OnPropertyChanged(nameof(GovernmentPositionDisplay)); OnPropertyChanged(nameof(CurrentGovernmentName));
         OnPropertyChanged(nameof(CurrentGovernmentType)); OnPropertyChanged(nameof(CurrentGovernmentPowerStructures));
         OnPropertyChanged(nameof(CurrentGovernmentLaws)); OnPropertyChanged(nameof(CurrentGovernmentClassStructure)); OnPropertyChanged(nameof(CurrentGovernmentForeignRelations));
+        UpdateGovernmentFontWeights();
     }
 
     private void PreviousGovernment() { if (HasPreviousGovernment) CurrentGovernmentIndex--; }
@@ -626,27 +1112,27 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
     public string CurrentReligionDeities
     {
         get => HasReligions && CurrentReligionIndex < Religions.Count ? Religions[CurrentReligionIndex].Deities : string.Empty;
-        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].Deities = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].Deities = value; ReligionDeitiesFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 }; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
     }
     public string CurrentReligionBeliefs
     {
         get => HasReligions && CurrentReligionIndex < Religions.Count ? Religions[CurrentReligionIndex].Beliefs : string.Empty;
-        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].Beliefs = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].Beliefs = value; ReligionBeliefsFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 }; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
     }
     public string CurrentReligionPractices
     {
         get => HasReligions && CurrentReligionIndex < Religions.Count ? Religions[CurrentReligionIndex].Practices : string.Empty;
-        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].Practices = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].Practices = value; ReligionPracticesFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 }; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
     }
     public string CurrentReligionOrganizations
     {
         get => HasReligions && CurrentReligionIndex < Religions.Count ? Religions[CurrentReligionIndex].Organizations : string.Empty;
-        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].Organizations = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].Organizations = value; ReligionOrganizationsFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 }; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
     }
     public string CurrentReligionCreationMyths
     {
         get => HasReligions && CurrentReligionIndex < Religions.Count ? Religions[CurrentReligionIndex].CreationMyths : string.Empty;
-        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].CreationMyths = value; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
+        set { if (HasReligions && CurrentReligionIndex < Religions.Count) { Religions[CurrentReligionIndex].CreationMyths = value; ReligionCreationMythsFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 }; OnPropertyChanged(); ShellViewModel.ShowChange(); } }
     }
 
     private void NotifyReligionNavigationChanged()
@@ -655,6 +1141,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
         OnPropertyChanged(nameof(ReligionPositionDisplay)); OnPropertyChanged(nameof(CurrentReligionName));
         OnPropertyChanged(nameof(CurrentReligionDeities)); OnPropertyChanged(nameof(CurrentReligionBeliefs));
         OnPropertyChanged(nameof(CurrentReligionPractices)); OnPropertyChanged(nameof(CurrentReligionOrganizations)); OnPropertyChanged(nameof(CurrentReligionCreationMyths));
+        UpdateReligionFontWeights();
     }
 
     private void PreviousReligion() { if (HasPreviousReligion) CurrentReligionIndex--; }
@@ -787,35 +1274,65 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
     public string FoundingEvents
     {
         get => _foundingEvents;
-        set => SetProperty(ref _foundingEvents, value);
+        set
+        {
+            if (SetProperty(ref _foundingEvents, value))
+            {
+                FoundingEventsFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     private string _majorConflicts;
     public string MajorConflicts
     {
         get => _majorConflicts;
-        set => SetProperty(ref _majorConflicts, value);
+        set
+        {
+            if (SetProperty(ref _majorConflicts, value))
+            {
+                MajorConflictsFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     private string _eras;
     public string Eras
     {
         get => _eras;
-        set => SetProperty(ref _eras, value);
+        set
+        {
+            if (SetProperty(ref _eras, value))
+            {
+                ErasFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     private string _technologicalShifts;
     public string TechnologicalShifts
     {
         get => _technologicalShifts;
-        set => SetProperty(ref _technologicalShifts, value);
+        set
+        {
+            if (SetProperty(ref _technologicalShifts, value))
+            {
+                TechnologicalShiftsFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     private string _lostKnowledge;
     public string LostKnowledge
     {
         get => _lostKnowledge;
-        set => SetProperty(ref _lostKnowledge, value);
+        set
+        {
+            if (SetProperty(ref _lostKnowledge, value))
+            {
+                LostKnowledgeFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     #endregion
@@ -826,35 +1343,65 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
     public string EconomicSystem
     {
         get => _economicSystem;
-        set => SetProperty(ref _economicSystem, value);
+        set
+        {
+            if (SetProperty(ref _economicSystem, value))
+            {
+                EconomicSystemFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     private string _currency;
     public string Currency
     {
         get => _currency;
-        set => SetProperty(ref _currency, value);
+        set
+        {
+            if (SetProperty(ref _currency, value))
+            {
+                CurrencyFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     private string _tradeRoutes;
     public string TradeRoutes
     {
         get => _tradeRoutes;
-        set => SetProperty(ref _tradeRoutes, value);
+        set
+        {
+            if (SetProperty(ref _tradeRoutes, value))
+            {
+                TradeRoutesFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     private string _professions;
     public string Professions
     {
         get => _professions;
-        set => SetProperty(ref _professions, value);
+        set
+        {
+            if (SetProperty(ref _professions, value))
+            {
+                ProfessionsFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     private string _wealthDistribution;
     public string WealthDistribution
     {
         get => _wealthDistribution;
-        set => SetProperty(ref _wealthDistribution, value);
+        set
+        {
+            if (SetProperty(ref _wealthDistribution, value))
+            {
+                WealthDistributionFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     #endregion
@@ -872,42 +1419,78 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
     public string Source
     {
         get => _source;
-        set => SetProperty(ref _source, value);
+        set
+        {
+            if (SetProperty(ref _source, value))
+            {
+                SourceFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     private string _rules;
     public string Rules
     {
         get => _rules;
-        set => SetProperty(ref _rules, value);
+        set
+        {
+            if (SetProperty(ref _rules, value))
+            {
+                RulesFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     private string _limitations;
     public string Limitations
     {
         get => _limitations;
-        set => SetProperty(ref _limitations, value);
+        set
+        {
+            if (SetProperty(ref _limitations, value))
+            {
+                LimitationsFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     private string _cost;
     public string Cost
     {
         get => _cost;
-        set => SetProperty(ref _cost, value);
+        set
+        {
+            if (SetProperty(ref _cost, value))
+            {
+                CostFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     private string _practitioners;
     public string Practitioners
     {
         get => _practitioners;
-        set => SetProperty(ref _practitioners, value);
+        set
+        {
+            if (SetProperty(ref _practitioners, value))
+            {
+                PractitionersFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     private string _socialImpact;
     public string SocialImpact
     {
         get => _socialImpact;
-        set => SetProperty(ref _socialImpact, value);
+        set
+        {
+            if (SetProperty(ref _socialImpact, value))
+            {
+                SocialImpactFontWeight = new Windows.UI.Text.FontWeight { Weight = 700 };
+            }
+        }
     }
 
     #endregion
@@ -1074,6 +1657,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
         Eras = Model.Eras;
         TechnologicalShifts = Model.TechnologicalShifts;
         LostKnowledge = Model.LostKnowledge;
+        UpdateHistoryFontWeights();
 
         // Economy tab
         EconomicSystem = Model.EconomicSystem;
@@ -1081,6 +1665,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
         TradeRoutes = Model.TradeRoutes;
         Professions = Model.Professions;
         WealthDistribution = Model.WealthDistribution;
+        UpdateEconomyFontWeights();
 
         // Magic/Technology tab
         SystemType = Model.SystemType;
@@ -1090,6 +1675,7 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
         Cost = Model.Cost;
         Practitioners = Model.Practitioners;
         SocialImpact = Model.SocialImpact;
+        UpdateMagicTechFontWeights();
 
         _changeable = true;
     }
@@ -1372,6 +1958,68 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
         Cultures = new ObservableCollection<CultureEntry>();
         Governments = new ObservableCollection<GovernmentEntry>();
         Religions = new ObservableCollection<ReligionEntry>();
+
+        // Initialize all FontWeights to normal
+        var normalWeight = new Windows.UI.Text.FontWeight { Weight = 400 };
+
+        // Physical World
+        _physicalWorldGeographyFontWeight = normalWeight;
+        _physicalWorldClimateFontWeight = normalWeight;
+        _physicalWorldNaturalResourcesFontWeight = normalWeight;
+        _physicalWorldFloraFontWeight = normalWeight;
+        _physicalWorldFaunaFontWeight = normalWeight;
+        _physicalWorldAstronomyFontWeight = normalWeight;
+
+        // Species
+        _speciesPhysicalTraitsFontWeight = normalWeight;
+        _speciesLifespanFontWeight = normalWeight;
+        _speciesOriginsFontWeight = normalWeight;
+        _speciesSocialStructureFontWeight = normalWeight;
+        _speciesDiversityFontWeight = normalWeight;
+
+        // Culture
+        _cultureValuesFontWeight = normalWeight;
+        _cultureCustomsFontWeight = normalWeight;
+        _cultureTaboosFontWeight = normalWeight;
+        _cultureArtFontWeight = normalWeight;
+        _cultureDailyLifeFontWeight = normalWeight;
+        _cultureEntertainmentFontWeight = normalWeight;
+
+        // Government
+        _governmentTypeFontWeight = normalWeight;
+        _governmentPowerStructuresFontWeight = normalWeight;
+        _governmentLawsFontWeight = normalWeight;
+        _governmentClassStructureFontWeight = normalWeight;
+        _governmentForeignRelationsFontWeight = normalWeight;
+
+        // Religion
+        _religionDeitiesFontWeight = normalWeight;
+        _religionBeliefsFontWeight = normalWeight;
+        _religionPracticesFontWeight = normalWeight;
+        _religionOrganizationsFontWeight = normalWeight;
+        _religionCreationMythsFontWeight = normalWeight;
+
+        // History
+        _foundingEventsFontWeight = normalWeight;
+        _majorConflictsFontWeight = normalWeight;
+        _erasFontWeight = normalWeight;
+        _technologicalShiftsFontWeight = normalWeight;
+        _lostKnowledgeFontWeight = normalWeight;
+
+        // Economy
+        _economicSystemFontWeight = normalWeight;
+        _currencyFontWeight = normalWeight;
+        _tradeRoutesFontWeight = normalWeight;
+        _professionsFontWeight = normalWeight;
+        _wealthDistributionFontWeight = normalWeight;
+
+        // Magic/Tech
+        _sourceFontWeight = normalWeight;
+        _rulesFontWeight = normalWeight;
+        _limitationsFontWeight = normalWeight;
+        _costFontWeight = normalWeight;
+        _practitionersFontWeight = normalWeight;
+        _socialImpactFontWeight = normalWeight;
 
         // Load ComboBox source collections from ListData
         var _lists = listData.ListControlSource;
