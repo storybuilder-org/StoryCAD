@@ -86,7 +86,14 @@ Add a new story element type `StoryWorld` to StoryCAD for worldbuilding content.
 - [ ] Capture screenshots for each of the 9 tabs
 - [ ] Capture updated Generate Reports dialog screenshot
 
-**Worldbuilding Citations** (sources for educational content):
+**Research Sources:**
+
+*Competitor Tools* (see `software_research.md` for detailed analysis of 10 tools):
+- World Anvil, Campfire, LegendKeeper, Kanka
+- Fantasia Archive, Notebook.ai, Plottr
+- Obsidian, Scrivener, Arcweave
+
+*Worldbuilding Citations* (see `worldbuilding citations.png`):
 - https://www.dabblewriter.com/articles/worldbuilding-guide
 - Madeline James Writes - Worldbuilding Guide
 - Wikipedia - Worldbuilding
