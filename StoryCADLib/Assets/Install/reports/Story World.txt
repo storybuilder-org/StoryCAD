@@ -1,0 +1,97 @@
+                             StoryCAD - Story World
+
+                  ============== World Structure =============
+
+    World Type:             @WorldType
+
+    Ontology:               @Ontology
+
+    World Relation:         @WorldRelation
+
+    Rule Transparency:      @RuleTransparency
+
+    Scale of Difference:    @ScaleOfDifference
+
+    Agency Source:          @AgencySource
+
+    Tone Logic:             @ToneLogic
+
+
+                  ============== Physical Worlds =============
+
+@PhysicalWorlds
+
+                  ============== People/Species =============
+
+@Species
+
+                  ============== Cultures =============
+
+@Cultures
+
+                  ============== Governments =============
+
+@Governments
+
+                  ============== Religions =============
+
+@Religions
+
+                  ============== History =============
+
+    Founding Events:
+    @FoundingEvents
+
+    Major Conflicts:
+    @MajorConflicts
+
+    Eras:
+    @Eras
+
+    Technological Shifts:
+    @TechnologicalShifts
+
+    Lost Knowledge:
+    @LostKnowledge
+
+
+                  ============== Economy =============
+
+    Economic System:
+    @EconomicSystem
+
+    Currency:
+    @Currency
+
+    Trade Routes:
+    @TradeRoutes
+
+    Professions:
+    @Professions
+
+    Wealth Distribution:
+    @WealthDistribution
+
+
+                  ============== Magic/Technology =============
+
+    System Type:            @SystemType
+
+    Source:
+    @Source
+
+    Rules:
+    @Rules
+
+    Limitations:
+    @Limitations
+
+    Cost:
+    @Cost
+
+    Practitioners:
+    @Practitioners
+
+    Social Impact:
+    @SocialImpact
+

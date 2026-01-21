@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text;
 using NRtfTree.Util;
+using StoryCADLib.Models.StoryWorld;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.ViewModels.SubViewModels;
 using StoryCADLib.ViewModels.Tools;
@@ -111,6 +112,149 @@ public class ReportFormatter
             sb.Replace("@StructureNotes", GetText(overview.StructureNotes));
             sb.Replace("@Tone", overview.Tone);
             sb.Replace("@Notes", GetText(overview.Notes));
+            doc.AddText(sb.ToString());
+            doc.AddNewLine();
+        }
+
+        return doc.GetRtf();
+    }
+
+    public async Task<string> FormatStoryWorldReport()
+    {
+        await EnsureTemplatesLoadedAsync();
+        var world = (StoryWorldModel)_storyModel.StoryElements.FirstOrDefault(element =>
+            element.ElementType == StoryItemType.StoryWorld);
+
+        if (world == null)
+        {
+            // No StoryWorld element exists, return empty RTF
+            RtfDocument emptyDoc = new(string.Empty);
+            emptyDoc.AddText("No Story World defined.");
+            return emptyDoc.GetRtf();
+        }
+
+        var lines = _templates["Story World"];
+        RtfDocument doc = new(string.Empty);
+
+        // Parse and write the report
+        foreach (var line in lines)
+        {
+            StringBuilder sb = new(line);
+
+            // Structure tab fields
+            sb.Replace("@WorldType", world.WorldType ?? string.Empty);
+            sb.Replace("@Ontology", world.Ontology ?? string.Empty);
+            sb.Replace("@WorldRelation", world.WorldRelation ?? string.Empty);
+            sb.Replace("@RuleTransparency", world.RuleTransparency ?? string.Empty);
+            sb.Replace("@ScaleOfDifference", world.ScaleOfDifference ?? string.Empty);
+            sb.Replace("@AgencySource", world.AgencySource ?? string.Empty);
+            sb.Replace("@ToneLogic", world.ToneLogic ?? string.Empty);
+
+            // History tab fields
+            sb.Replace("@FoundingEvents", GetText(world.FoundingEvents));
+            sb.Replace("@MajorConflicts", GetText(world.MajorConflicts));
+            sb.Replace("@Eras", GetText(world.Eras));
+            sb.Replace("@TechnologicalShifts", GetText(world.TechnologicalShifts));
+            sb.Replace("@LostKnowledge", GetText(world.LostKnowledge));
+
+            // Economy tab fields
+            sb.Replace("@EconomicSystem", GetText(world.EconomicSystem));
+            sb.Replace("@Currency", GetText(world.Currency));
+            sb.Replace("@TradeRoutes", GetText(world.TradeRoutes));
+            sb.Replace("@Professions", GetText(world.Professions));
+            sb.Replace("@WealthDistribution", GetText(world.WealthDistribution));
+
+            // Magic/Technology tab fields
+            sb.Replace("@SystemType", world.SystemType ?? string.Empty);
+            sb.Replace("@Source", GetText(world.Source));
+            sb.Replace("@Rules", GetText(world.Rules));
+            sb.Replace("@Limitations", GetText(world.Limitations));
+            sb.Replace("@Cost", GetText(world.Cost));
+            sb.Replace("@Practitioners", GetText(world.Practitioners));
+            sb.Replace("@SocialImpact", GetText(world.SocialImpact));
+
+            // Handle list entries - Physical Worlds
+            if (line.Contains("@PhysicalWorlds"))
+            {
+                sb.Clear();
+                foreach (var entry in world.PhysicalWorlds)
+                {
+                    sb.AppendLine($"    --- {entry.Name ?? "Unnamed"} ---");
+                    if (!string.IsNullOrEmpty(entry.Geography)) sb.AppendLine($"    Geography: {GetText(entry.Geography)}");
+                    if (!string.IsNullOrEmpty(entry.Climate)) sb.AppendLine($"    Climate: {GetText(entry.Climate)}");
+                    if (!string.IsNullOrEmpty(entry.NaturalResources)) sb.AppendLine($"    Natural Resources: {GetText(entry.NaturalResources)}");
+                    if (!string.IsNullOrEmpty(entry.Flora)) sb.AppendLine($"    Flora: {GetText(entry.Flora)}");
+                    if (!string.IsNullOrEmpty(entry.Fauna)) sb.AppendLine($"    Fauna: {GetText(entry.Fauna)}");
+                    if (!string.IsNullOrEmpty(entry.Astronomy)) sb.AppendLine($"    Astronomy: {GetText(entry.Astronomy)}");
+                    sb.AppendLine();
+                }
+            }
+
+            // Handle list entries - Species
+            if (line.Contains("@Species"))
+            {
+                sb.Clear();
+                foreach (var entry in world.Species)
+                {
+                    sb.AppendLine($"    --- {entry.Name ?? "Unnamed"} ---");
+                    if (!string.IsNullOrEmpty(entry.PhysicalTraits)) sb.AppendLine($"    Physical Traits: {GetText(entry.PhysicalTraits)}");
+                    if (!string.IsNullOrEmpty(entry.Lifespan)) sb.AppendLine($"    Lifespan: {GetText(entry.Lifespan)}");
+                    if (!string.IsNullOrEmpty(entry.Origins)) sb.AppendLine($"    Origins: {GetText(entry.Origins)}");
+                    if (!string.IsNullOrEmpty(entry.SocialStructure)) sb.AppendLine($"    Social Structure: {GetText(entry.SocialStructure)}");
+                    if (!string.IsNullOrEmpty(entry.Diversity)) sb.AppendLine($"    Diversity: {GetText(entry.Diversity)}");
+                    sb.AppendLine();
+                }
+            }
+
+            // Handle list entries - Cultures
+            if (line.Contains("@Cultures"))
+            {
+                sb.Clear();
+                foreach (var entry in world.Cultures)
+                {
+                    sb.AppendLine($"    --- {entry.Name ?? "Unnamed"} ---");
+                    if (!string.IsNullOrEmpty(entry.Values)) sb.AppendLine($"    Values: {GetText(entry.Values)}");
+                    if (!string.IsNullOrEmpty(entry.Customs)) sb.AppendLine($"    Customs: {GetText(entry.Customs)}");
+                    if (!string.IsNullOrEmpty(entry.Taboos)) sb.AppendLine($"    Taboos: {GetText(entry.Taboos)}");
+                    if (!string.IsNullOrEmpty(entry.Art)) sb.AppendLine($"    Art: {GetText(entry.Art)}");
+                    if (!string.IsNullOrEmpty(entry.DailyLife)) sb.AppendLine($"    Daily Life: {GetText(entry.DailyLife)}");
+                    if (!string.IsNullOrEmpty(entry.Entertainment)) sb.AppendLine($"    Entertainment: {GetText(entry.Entertainment)}");
+                    sb.AppendLine();
+                }
+            }
+
+            // Handle list entries - Governments
+            if (line.Contains("@Governments"))
+            {
+                sb.Clear();
+                foreach (var entry in world.Governments)
+                {
+                    sb.AppendLine($"    --- {entry.Name ?? "Unnamed"} ---");
+                    if (!string.IsNullOrEmpty(entry.Type)) sb.AppendLine($"    Type: {GetText(entry.Type)}");
+                    if (!string.IsNullOrEmpty(entry.PowerStructures)) sb.AppendLine($"    Power Structures: {GetText(entry.PowerStructures)}");
+                    if (!string.IsNullOrEmpty(entry.Laws)) sb.AppendLine($"    Laws: {GetText(entry.Laws)}");
+                    if (!string.IsNullOrEmpty(entry.ClassStructure)) sb.AppendLine($"    Class Structure: {GetText(entry.ClassStructure)}");
+                    if (!string.IsNullOrEmpty(entry.ForeignRelations)) sb.AppendLine($"    Foreign Relations: {GetText(entry.ForeignRelations)}");
+                    sb.AppendLine();
+                }
+            }
+
+            // Handle list entries - Religions
+            if (line.Contains("@Religions"))
+            {
+                sb.Clear();
+                foreach (var entry in world.Religions)
+                {
+                    sb.AppendLine($"    --- {entry.Name ?? "Unnamed"} ---");
+                    if (!string.IsNullOrEmpty(entry.Deities)) sb.AppendLine($"    Deities: {GetText(entry.Deities)}");
+                    if (!string.IsNullOrEmpty(entry.Beliefs)) sb.AppendLine($"    Beliefs: {GetText(entry.Beliefs)}");
+                    if (!string.IsNullOrEmpty(entry.Practices)) sb.AppendLine($"    Practices: {GetText(entry.Practices)}");
+                    if (!string.IsNullOrEmpty(entry.Organizations)) sb.AppendLine($"    Organizations: {GetText(entry.Organizations)}");
+                    if (!string.IsNullOrEmpty(entry.CreationMyths)) sb.AppendLine($"    Creation Myths: {GetText(entry.CreationMyths)}");
+                    sb.AppendLine();
+                }
+            }
+
             doc.AddText(sb.ToString());
             doc.AddNewLine();
         }
