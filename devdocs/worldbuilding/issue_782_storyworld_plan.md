@@ -3,7 +3,7 @@
 **Issue:** [StoryCAD #782 - Support for Worldbuilding](https://github.com/storybuilder-org/StoryCAD/issues/782)
 **Created:** 2026-01-14
 **Updated:** 2026-01-21
-**Status:** Code Complete - Testing Phase
+**Status:** Code Complete - Documentation Phase
 
 ---
 
@@ -51,7 +51,53 @@ Add a new story element type `StoryWorld` to StoryCAD for worldbuilding content.
 - [x] Add StoryWorld formatting in ReportFormatter.cs
 
 #### Documentation
-- [ ] User manual updates (TBD)
+
+**Research Tasks**
+- [ ] Find public domain or permissioned worldbuilding example with detailed data for sample StoryWorld
+- [ ] Read and research worldbuilding citations (see `worldbuilding citations.png`)
+- [ ] Identify useful points from each citation for educational content
+
+**Story Elements Section** (`/docs/Story Elements/`)
+- [ ] Create `StoryWorld_Form.md` (main form overview)
+- [ ] Create tab files for all 9 tabs:
+  - [ ] `StoryWorld_Structure_Tab.md`
+  - [ ] `StoryWorld_Physical_Worlds_Tab.md`
+  - [ ] `StoryWorld_Species_Tab.md`
+  - [ ] `StoryWorld_Cultures_Tab.md`
+  - [ ] `StoryWorld_Governments_Tab.md`
+  - [ ] `StoryWorld_Religions_Tab.md`
+  - [ ] `StoryWorld_History_Tab.md`
+  - [ ] `StoryWorld_Economy_Tab.md`
+  - [ ] `StoryWorld_Magic_Technology_Tab.md`
+
+**Reports Section** (`/docs/Reports/`)
+- [ ] Update `Print_Reports.md` to mention Story World checkbox
+- [ ] Update `Scrivener_Reports.md` to mention Story World export
+- [ ] Update Generate Reports dialog screenshot
+
+**Writing with StoryCAD Section** (`/docs/Writing with StoryCAD/`)
+- [ ] Outline a StoryCAD-specific worldbuilding guide
+- [ ] Map outline topics to StoryWorld tabs/features
+- [ ] Draft worldbuilding guide (what is worldbuilding, where to start, how to proceed)
+- [ ] Add links to Story Elements form/tab pages
+
+**Screenshots and Media** (`/docs/media/`)
+- [ ] Create manual script to populate StoryWorld with sample data
+- [ ] Capture screenshots for each of the 9 tabs
+- [ ] Capture updated Generate Reports dialog screenshot
+
+**Worldbuilding Citations** (sources for educational content):
+- https://www.dabblewriter.com/articles/worldbuilding-guide
+- Madeline James Writes - Worldbuilding Guide
+- Wikipedia - Worldbuilding
+- https://www.campfirewriting.com/worldbuilding-tools
+- Study.com - Cultural Milieu
+- https://jerryjenkins.com/worldbuilding/
+- https://juliaamante.medium.com/world-building-for-contemporary-fiction-writers
+- https://www.reddit.com/r/worldbuilding/comments/u55hfb/worldbuilding_table_of_elements/
+- https://www.well-storied.com/blog/an-introduction-to-world-building
+- https://katiebachelder.com/2021/07/30/fantasy-world-building-fundamentals/
+- https://myersfiction.com/2024/02/13/world-building-101-crafting-immersive-fictional-worlds/
 
 #### Manual Testing (Acceptance)
 - [ ] Test adding StoryWorld via command
@@ -152,4 +198,4 @@ See `world_type_aware_workflows.md` for design notes.
 ---
 
 *Plan created: 2026-01-14*
-*Last updated: 2026-01-21*
+*Last updated: 2026-01-21 (Documentation plan added)*
