@@ -46,9 +46,9 @@ Add a new story element type `StoryWorld` to StoryCAD for worldbuilding content.
 - [x] SaveModel() case added for StoryWorldPage (was missing - bug fix)
 
 #### Reports
-- [ ] Add StoryWorld to PrintReports.cs
-- [ ] Add StoryWorld to ScrivenerReports.cs (confirmed needed)
-- [ ] Add StoryWorld formatting in ReportFormatter.cs
+- [x] Add StoryWorld to PrintReports.cs
+- [x] Add StoryWorld to ScrivenerReports.cs (confirmed needed)
+- [x] Add StoryWorld formatting in ReportFormatter.cs
 
 #### Tests
 - [ ] Test adding StoryWorld via command

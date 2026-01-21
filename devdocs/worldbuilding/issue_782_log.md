@@ -1068,14 +1068,78 @@ No special confirmation dialog needed for StoryWorld:
 
 ---
 
+### 2026-01-21 - Session 10: StoryWorld Report Implementation
+
+**Participants:** User (Terry), Claude Code
+
+**Context:** Implementing StoryWorld report support for both Print and Scrivener export.
+
+#### Requirements
+
+User specified the report should:
+- Work like Overview (singleton element - checkbox, not node selection)
+- Support both Print and Scrivener export
+- Format as RTF with category headers, property names, and content
+- Only print fields that have content (skip empty fields)
+- Show World Type with description and examples (user-facing info, not hidden axis values)
+
+#### TDD Approach
+
+**Phase 1: Tests first**
+Created `StoryCADTests/Services/Reports/StoryWorldReportTests.cs` with 5 tests:
+1. `FormatStoryWorldReport_WithValidModel_ReturnsValidRtf`
+2. `FormatStoryWorldReport_WithPopulatedData_IncludesContent`
+3. `FormatStoryWorldReport_WithNoStoryWorld_ReturnsEmptyRtf`
+4. `PrintReports_WithCreateStoryWorld_IncludesStoryWorldReport`
+5. `PrintReportDialogVM_PrintSingleNode_WithStoryWorld_SetsCreateStoryWorldFlag`
+
+**Phase 2: Implementation**
+
+| File | Changes |
+|------|---------|
+| `StoryCADLib/Assets/Install/reports/Story World.txt` | New template with section placeholders |
+| `StoryCADLib/StoryCADLib.csproj` | Added template as EmbeddedResource |
+| `StoryCADLib/ViewModels/Tools/PrintReportDialogVM.cs` | Added `CreateStoryWorld` property |
+| `StoryCADLib/Services/Reports/ReportFormatter.cs` | Added `FormatStoryWorldReport()` method |
+| `StoryCADLib/Services/Reports/PrintReports.cs` | Added StoryWorld case in Generate() |
+| `StoryCADLib/Services/Reports/ScrivenerReports.cs` | Added StoryWorld case and GenerateStoryWorldReport() |
+| `StoryCADLib/Services/Dialogs/Tools/PrintReportsDialog.xaml` | Added Story World checkbox |
+
+#### UI Dialog Fix
+
+Initial checkbox addition caused text truncation ("Story Wor"). Fixed by changing from 3-column layout to 2x2 grid layout for the four checkboxes:
+```
+[Story Overview]      [Story Problem Structure]
+[Story Synopsis]      [Story World]
+```
+
+#### Report Format Refinements
+
+**Problem 1:** Report was printing empty fields.
+**Fix:** Added null/empty checks to only print fields with content.
+
+**Problem 2:** Report showed hidden axis values (Ontology, RuleTransparency, etc.) instead of user-facing World Type info.
+**Fix:** Added `GetWorldTypeInfo()` method that returns description and example works for each of the 8 World Types:
+- Consensus Reality, Divergent World, Hidden World, Enchanted Reality
+- Constructed World, Mythic World, Estranged World, Broken World
+
+#### Build/Test Results
+- Build: Success
+- Tests: 693 passed, 14 skipped
+
+#### Commits
+
+- `afd18a82` - feat(#782): Add StoryWorld report support
+- `654cc724` - fix(#782): Improve StoryWorld report format and dialog layout
+
+---
+
 ## Summary: Remaining Work
 
 ### Completed
 - [x] UI Design (all tabs, Expander layout, content indicators)
 - [x] Delete handling (standard trash system + SaveModel fix)
-
-### Code Tasks
-- [ ] Reports (PrintReports.cs, ScrivenerReports.cs)
+- [x] Reports (PrintReports, ScrivenerReports, ReportFormatter)
 
 ### Test Tasks
 - [ ] Test adding StoryWorld via command
