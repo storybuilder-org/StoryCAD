@@ -751,6 +751,188 @@ From SettingPage Sensations tab analysis:
 
 ---
 
+### 2026-01-21 - Session 8: Layout Pattern Correction (MinHeight + Grid)
+
+**Participants:** User (Terry), Claude Code
+
+#### Problem Discovered
+
+During smoke testing, the Cultures tab fields were only ~2 lines high at default window size. With 7 fields sharing vertical space via star-sized rows, each field was too small to be usable.
+
+#### Wrong Fix Attempted
+
+Changed Cultures tab from Grid with star-sized rows to `ScrollViewer > StackPanel` with `MinHeight="80"` on each RichEditBoxExtended.
+
+**Why this was wrong:** StackPanel doesn't constrain children's height - controls grow to fit content. This breaks the internal scrollbar behavior: instead of fields staying at a fixed height and showing scrollbars when content overflows, fields expand to fit all content.
+
+#### Correct Pattern (IMPORTANT - Document for Future Reference)
+
+For tabs with multiple RichEditBoxExtended fields that need:
+- Uniform height across all fields
+- Fields that grow together when window is resized
+- Internal scrollbars when content overflows a field
+- Outer scrollbar when total content exceeds viewport
+
+**Use this layout:**
+```xml
+<ScrollViewer VerticalScrollBarVisibility="Auto">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>  <!-- Name TextBox -->
+            <RowDefinition Height="*" MinHeight="80"/>  <!-- Field 1 -->
+            <RowDefinition Height="*" MinHeight="80"/>  <!-- Field 2 -->
+            <!-- etc. -->
+            <RowDefinition Height="Auto"/>  <!-- Navigation bar -->
+        </Grid.RowDefinitions>
+
+        <usercontrols:RichEditBoxExtended Grid.Row="1"
+            VerticalAlignment="Stretch"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            ... />
+    </Grid>
+</ScrollViewer>
+```
+
+**Key elements:**
+1. **Grid with star-sized rows** - provides height constraint, enables internal scrollbars
+2. **MinHeight on RowDefinitions** - ensures usable minimum size at small window sizes
+3. **Outer ScrollViewer** - handles when total MinHeights exceed available space
+4. **VerticalAlignment="Stretch"** - fields fill their row
+5. **ScrollViewer.VerticalScrollBarVisibility="Auto"** - internal scrollbars per field
+
+**NEVER use StackPanel** for this layout - it removes height constraints and prevents internal scrollbars.
+
+#### Changes Made
+
+1. Added page-level XAML comment documenting this pattern
+2. Fixed Cultures tab layout
+3. Will apply MinHeight to all tabs after smoke test passes
+
+---
+
+### 2026-01-21 - Session 8 (continued): Layout Deep Dive - Finding a Workable Solution
+
+**Participants:** User (Terry), Claude Code
+
+#### The Core Problem
+
+Tabs with multiple RichEditBoxExtended fields (like Cultures with 6 fields) need:
+1. Uniform field heights
+2. Fields grow together when window resizes
+3. Internal scrollbars when field content overflows
+4. Outer scrollbar when window too small to show all fields at minimum size
+
+**The Fundamental Conflict:**
+- **Grid with star-sized rows** (`Height="*"`) requires FINITE parent height to work
+- **ScrollViewer** gives its child UNLIMITED height
+- These are incompatible - star-sizing breaks inside ScrollViewer
+
+#### Approaches Tried and Failed
+
+1. **Grid with star rows + MinHeight, inside ScrollViewer**
+   - Result: Star-sizing breaks, fields expand to content (non-uniform)
+   - Why: ScrollViewer removes height constraint
+
+2. **SizeChanged event handler** (`Grid.Height = ScrollViewer.Height`)
+   - Result: Star-sizing works, but outer scrollbar never appears
+   - Why: Grid forced to match viewport exactly, MinHeights ignored/overridden
+
+3. **Removing SizeChanged handler**
+   - Result: Outer scrollbar works, but star-sizing breaks again
+   - Back to square one
+
+4. **VerticalScrollBarVisibility="Visible"**
+   - Did not solve the underlying layout conflict
+
+#### Key Insight: The Problem is Unsolvable with Current Approach
+
+The requirement "uniform heights with internal scrollbars AND outer scrolling" cannot be achieved with Grid star-sizing inside ScrollViewer. This is a fundamental XAML layout constraint, not a bug.
+
+**Real-world content consideration:** Worldbuilding fields will contain substantial content (e.g., Tolkien's Middle-earth, Harry Potter universe). Internal scrollbars are ESSENTIAL, not optional.
+
+#### Alternative Layout Approaches Evaluated
+
+| Approach | Description | Pros | Cons |
+|----------|-------------|------|------|
+| **Expander/Accordion** | Collapse fields, expand one at a time | See all field names at once with "has content" indicators, full height for expanded field | Only one field visible at a time |
+| **ComboBox selector** | Dropdown + single large RichEditBox | Simplest XAML, minimal chrome | Must open dropdown to see which fields have content |
+| **NavigationView** | Vertical nav pane + content area | Familiar pattern, collapsible pane | More complex XAML |
+| **Sub-TabView** | Vertical tabs for each property | Direct navigation | More XAML, nested tabs |
+| **FlipView/Carousel** | Swipe between fields | - | Can't jump directly to field, tedious navigation |
+| **Fixed Heights** | `Height="100"` instead of star | Predictable, scrollbars work | Fields don't grow with window |
+| **GridSplitter** | User-resizable rows | User control | Cluttered with 6 splitters, manual adjustment |
+
+#### Decision: Expander/Accordion
+
+**Winner: Expander/Accordion** for these reasons:
+1. All property names visible at once
+2. "Has content" indicators visible without interaction
+3. Expanded field gets full height with working internal scrollbar
+4. Simpler than NavigationView or nested TabView
+5. User can quickly see state of all fields at a glance
+
+This is especially important for:
+- Building out a world (see what's done, what needs work)
+- Returning after time away (quickly see the state)
+
+#### Current Prototype (Cultures Tab)
+
+Implemented Expander layout on Cultures tab:
+
+```xml
+<Grid>
+    <Grid.RowDefinitions>
+        <RowDefinition Height="*"/>      <!-- Scrollable content -->
+        <RowDefinition Height="Auto"/>   <!-- Navigation bar -->
+    </Grid.RowDefinitions>
+
+    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="4">
+            <TextBox Header="Name" ... />
+
+            <Expander Header="Values">
+                <RichEditBoxExtended MinHeight="150" ... />
+            </Expander>
+
+            <Expander Header="Customs">
+                <RichEditBoxExtended MinHeight="150" ... />
+            </Expander>
+
+            <!-- ... 4 more Expanders ... -->
+        </StackPanel>
+    </ScrollViewer>
+
+    <Border Grid.Row="1">
+        <!-- Navigation bar: prev/next, add/remove -->
+    </Border>
+</Grid>
+```
+
+#### Test Result: SUCCESS
+
+Expander prototype verified working:
+- All property names visible at once (Values, Customs, Taboos, Art, Daily Life, Entertainment)
+- Expanded field (Customs) shows full content with adequate height
+- Collapsed expanders show just headers - compact
+- Navigation bar remains at bottom
+- Outer scrollbar available when needed
+
+Screenshot: `/mnt/c/temp/issue_782_tests/expander.png`
+
+#### Next Steps
+
+1. **Add "has content" indicators** - visual feedback on Expander headers
+2. **Apply Expander pattern to other single-entry tabs** (People/Species, Governments, Religions)
+3. **Consider for other tabs** with many fields
+
+#### Files Modified This Session
+
+- `StoryCAD/Views/StoryWorldPage.xaml` - Cultures tab converted to Expanders
+- `StoryCAD/Views/StoryWorldPage.xaml.cs` - Removed unused SizeChanged handler
+- `devdocs/worldbuilding/issue_782_log.md` - This documentation
+
+---
+
 ## Summary: Remaining Work
 
 ### Code Tasks
