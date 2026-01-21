@@ -2296,4 +2296,108 @@ public class SemanticKernelApiTests
     }
 
     #endregion
+
+    #region StoryWorld API Tests (Issue #782)
+
+    /// <summary>
+    /// Tests that GetStoryWorld returns failure when no model is loaded
+    /// </summary>
+    [TestMethod]
+    public void GetStoryWorld_WithNoModel_ReturnsFailure()
+    {
+        // Arrange - create fresh API instance with no model
+        var api = new SemanticKernelApi(
+            Ioc.Default.GetRequiredService<OutlineService>(),
+            Ioc.Default.GetRequiredService<ListData>(),
+            Ioc.Default.GetRequiredService<ControlData>(),
+            Ioc.Default.GetRequiredService<ToolsData>());
+
+        // Act
+        var result = api.GetStoryWorld();
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetStoryWorld should fail without a model");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.AreEqual("No StoryModel available. Create a model first.", result.ErrorMessage);
+    }
+
+    /// <summary>
+    /// Tests that GetStoryWorld returns null payload when no StoryWorld exists
+    /// </summary>
+    [TestMethod]
+    public async Task GetStoryWorld_WithNoStoryWorld_ReturnsSuccessWithNullPayload()
+    {
+        // Arrange - create model without StoryWorld
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+
+        // Act
+        var result = _api.GetStoryWorld();
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetStoryWorld should succeed even when no StoryWorld exists");
+        Assert.IsNull(result.Payload, "Payload should be null when no StoryWorld exists");
+    }
+
+    /// <summary>
+    /// Tests that GetStoryWorld returns the StoryWorld element when it exists
+    /// </summary>
+    [TestMethod]
+    public async Task GetStoryWorld_WithStoryWorld_ReturnsStoryWorld()
+    {
+        // Arrange - create model and add StoryWorld
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addResult = _api.AddElement(StoryItemType.StoryWorld, overviewGuid.ToString(), "My World");
+        Assert.IsTrue(addResult.IsSuccess, "Adding StoryWorld should succeed");
+
+        // Act
+        var result = _api.GetStoryWorld();
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetStoryWorld should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.AreEqual(StoryItemType.StoryWorld, result.Payload.ElementType, "Element should be StoryWorld type");
+        Assert.AreEqual("My World", result.Payload.Name, "StoryWorld name should match");
+    }
+
+    /// <summary>
+    /// Tests that GetElementsByType returns StoryWorld when requested (singleton handling)
+    /// </summary>
+    [TestMethod]
+    public async Task GetElementsByType_WithStoryWorld_ReturnsStoryWorldAsList()
+    {
+        // Arrange - create model and add StoryWorld
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        _api.AddElement(StoryItemType.StoryWorld, overviewGuid.ToString(), "Test World");
+
+        // Act
+        var result = _api.GetElementsByType(StoryItemType.StoryWorld);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetElementsByType should succeed for StoryWorld");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.AreEqual(1, result.Payload.Count, "Should return exactly 1 StoryWorld (singleton)");
+        Assert.AreEqual(StoryItemType.StoryWorld, result.Payload[0].ElementType, "Element should be StoryWorld type");
+    }
+
+    /// <summary>
+    /// Tests that GetElementsByType returns empty list when no StoryWorld exists
+    /// </summary>
+    [TestMethod]
+    public async Task GetElementsByType_WithNoStoryWorld_ReturnsEmptyList()
+    {
+        // Arrange - create model without StoryWorld
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+
+        // Act
+        var result = _api.GetElementsByType(StoryItemType.StoryWorld);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetElementsByType should succeed even with no StoryWorld");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.AreEqual(0, result.Payload.Count, "Should return empty list when no StoryWorld exists");
+    }
+
+    #endregion
 }

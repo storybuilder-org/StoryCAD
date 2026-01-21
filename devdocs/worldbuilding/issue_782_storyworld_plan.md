@@ -3,7 +3,7 @@
 **Issue:** [StoryCAD #782 - Support for Worldbuilding](https://github.com/storybuilder-org/StoryCAD/issues/782)
 **Created:** 2026-01-14
 **Updated:** 2026-01-21
-**Status:** Code Complete - Documentation Phase
+**Status:** Code Complete (incl. API) - Documentation Phase
 
 ---
 
@@ -51,8 +51,8 @@ Add a new story element type `StoryWorld` to StoryCAD for worldbuilding content.
 - [x] Add StoryWorld formatting in ReportFormatter.cs
 
 #### API (SemanticKernelAPI)
-- [ ] Add StoryWorld methods to SemanticKernelAPI for Collaborator integration
-- [ ] Add unit tests for API methods
+- [x] Add StoryWorld methods to SemanticKernelAPI for Collaborator integration
+- [x] Add unit tests for API methods
 
 #### Documentation
 
@@ -126,8 +126,9 @@ Adding a new story element type requires changes in these files:
 | `StoryCAD/App.xaml.cs` | Configure navigation | Done |
 | `StoryCAD/Shell.xaml` | Menu/Flyout buttons | Done |
 | `StoryCADLib/Services/Outline/OutlineService.cs` | AddStoryElement case | Done |
-| `StoryCADLib/Services/Reports/PrintReports.cs` | Report generation | Pending |
-| `StoryCADLib/Services/Reports/ScrivenerReports.cs` | Scrivener export | Pending |
+| `StoryCADLib/Services/Reports/PrintReports.cs` | Report generation | Done |
+| `StoryCADLib/Services/Reports/ScrivenerReports.cs` | Scrivener export | Done |
+| `StoryCADLib/Services/API/SemanticKernelAPI.cs` | GetStoryWorld() + GetElementsByType | Done |
 
 ---
 
@@ -162,4 +163,4 @@ See `world_type_aware_workflows.md` for design notes.
 ---
 
 *Plan created: 2026-01-14*
-*Last updated: 2026-01-21 (Documentation plan added)*
+*Last updated: 2026-01-21 (API integration added)*
