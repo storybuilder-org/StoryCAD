@@ -78,9 +78,10 @@ public class ListLoaderTests
         Assert.IsTrue(lists.ContainsKey("Outcome"));
         Assert.IsTrue(lists.ContainsKey("Viewpoint"));
         Assert.IsTrue(lists.ContainsKey("ValueExchange"));
-        Assert.AreEqual(7, lists["Season"].Count);
-        Assert.AreEqual(5, lists["Viewpoint"].Count);
-        Assert.AreEqual(5, lists["Tense"].Count);
+        // Counts include empty string at index 0 for SelectedItem binding (Issue #1267)
+        Assert.AreEqual(8, lists["Season"].Count);
+        Assert.AreEqual(6, lists["Viewpoint"].Count);
+        Assert.AreEqual(6, lists["Tense"].Count);
     }
 
     [TestMethod]

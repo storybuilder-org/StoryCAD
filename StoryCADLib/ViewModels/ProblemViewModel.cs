@@ -730,9 +730,12 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
 
     public void Activate(object parameter)
     {
+        var param = parameter as ProblemModel;
+        _logger.Log(LogLevel.Info, $"ProblemViewModel.Activate: parameter={param?.Name} (Uuid={param?.Uuid})");
         _changeable = false;  // Disable change tracking before setting Model
         _changed = false;
         Model = (ProblemModel)parameter;
+        _logger.Log(LogLevel.Info, $"ProblemViewModel.Activate: Model set to {Model?.Name} (Uuid={Model?.Uuid})");
         LoadModel();
     }
 
@@ -742,6 +745,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
     /// <param name="parameter"></param>
     public void Deactivate(object parameter)
     {
+        _logger.Log(LogLevel.Info, $"ProblemViewModel.Deactivate: Saving to Model={Model?.Name} (Uuid={Model?.Uuid})");
         SaveModel();
     }
 

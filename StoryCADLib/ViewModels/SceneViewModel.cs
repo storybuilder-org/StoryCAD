@@ -481,14 +481,18 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
 
     public void Activate(object parameter)
     {
+        var param = parameter as SceneModel;
+        _logger.Log(LogLevel.Info, $"SceneViewModel.Activate: parameter={param?.Name} (Uuid={param?.Uuid})");
         _changeable = false;  // Disable change tracking before setting Model
         _changed = false;
         Model = (SceneModel)parameter;
+        _logger.Log(LogLevel.Info, $"SceneViewModel.Activate: Model set to {Model?.Name} (Uuid={Model?.Uuid})");
         LoadModel(); // Load the ViewModel from the Story
     }
 
     public void Deactivate(object parameter)
     {
+        _logger.Log(LogLevel.Info, $"SceneViewModel.Deactivate: Saving to Model={Model?.Name} (Uuid={Model?.Uuid})");
         SaveModel(); // Save the ViewModel back to the Story
     }
 

@@ -129,18 +129,25 @@ public class NavigationService : INavigationService
     /// </summary>
     private static void PerformNavigation(Frame frame, Type targetPage, object parameter)
     {
+        var logger = Ioc.Default.GetRequiredService<ILogService>();
+        var paramName = (parameter as StoryElement)?.Name ?? parameter?.ToString() ?? "null";
+        var paramType = parameter?.GetType().Name ?? "null";
+
         if (frame.Content is FrameworkElement currentPage &&
             currentPage.DataContext is INavigable currentVm)
         {
+            logger.Log(LogLevel.Info, $"PerformNavigation: Deactivating {currentVm.GetType().Name}, parameter={paramName} ({paramType})");
             currentVm.Deactivate(parameter);
         }
 
         var navigated = frame.Navigate(targetPage, parameter);
+        logger.Log(LogLevel.Info, $"PerformNavigation: frame.Navigate({targetPage.Name}) returned {navigated}");
 
         if (navigated &&
             frame.Content is FrameworkElement newPage &&
             newPage.DataContext is INavigable newVm)
         {
+            logger.Log(LogLevel.Info, $"PerformNavigation: Activating {newVm.GetType().Name} with parameter={paramName} ({paramType})");
             newVm.Activate(parameter);
         }
     }
