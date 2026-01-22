@@ -34,6 +34,8 @@ User manual documentation for the StoryWorld feature. Two parallel tracks:
 
 **Selected: Land of Oz (L. Frank Baum)** - Clear public domain, covers all 9 tabs, excellent wiki resources. See agent output for detailed content outline per tab.
 
+- [x] Human final approval
+
 ### A2. Screenshots Preparation / sign-off
 
 - [ ] Plan this section
@@ -139,6 +141,8 @@ User manual documentation for the StoryWorld feature. Two parallel tracks:
 
 **ARTIFACT**: `worldbuilding_research_notes.md` created with key points from all 4 sources.
 
+- [x] Human final approval
+
 ### B2. Citation Research - Batch 2 / sign-off
 
 *Citations 5-8*
@@ -224,6 +228,8 @@ User manual documentation for the StoryWorld feature. Two parallel tracks:
 | 2026-01-21 | Plan created | Two parallel tracks defined |
 | 2026-01-21 | A1 complete | Selected Land of Oz (Baum) - public domain, covers all 9 tabs |
 | 2026-01-21 | B1 complete | Created worldbuilding_research_notes.md with 4 citations |
+| 2026-01-21 | A1 approved | Human final approval |
+| 2026-01-21 | B1 approved | Human final approval |
 
 ---
 
