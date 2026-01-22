@@ -239,6 +239,7 @@
         <EmbeddedResource Include="Assets\Install\samples\A Doll's House.stbx" />
         <EmbeddedResource Include="Assets\Install\samples\Danger Calls.stbx" />
         <EmbeddedResource Include="Assets\Install\samples\Hamlet.stbx" />
+        <EmbeddedResource Include="Assets\Install\samples\Land of Oz.stbx" />
         <EmbeddedResource Include="Assets\Install\samples\Rocky.stbx" />
         <EmbeddedResource Include="Assets\Install\samples\Snow White.stbx" />
         <EmbeddedResource Include="Assets\Install\samples\The Glass Menagerie.stbx" />

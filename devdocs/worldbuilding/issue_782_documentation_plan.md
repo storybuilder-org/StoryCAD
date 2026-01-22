@@ -38,88 +38,94 @@ User manual documentation for the StoryWorld feature. Two parallel tracks:
 
 ### A2. Screenshots Preparation / sign-off
 
-- [ ] Plan this section
-- [ ] Human approves plan
-- [ ] Create manual script/checklist for populating StoryWorld with sample data
-- [ ] **CHECKPOINT**: Script reviewed and ready
-- [ ] Human final approval
+- [x] Plan this section
+- [x] Human approves plan
+- [x] Create manual script/checklist for populating StoryWorld with sample data
+- [x] **CHECKPOINT**: Script reviewed and ready → `screenshot_data_script.md`
+- [x] Human final approval
 
 ### A3. Screenshot Capture / sign-off
 
 *Depends on: A1 (sample data), A2 (script)*
 
-- [ ] Plan this section
-- [ ] Human approves plan
-- [ ] Populate StoryWorld with sample data using script
-- [ ] Capture Structure tab screenshot
-- [ ] Capture Physical Worlds tab screenshot
-- [ ] Capture People/Species tab screenshot
-- [ ] Capture Cultures tab screenshot
-- [ ] Capture Governments tab screenshot
-- [ ] Capture Religions tab screenshot
-- [ ] Capture History tab screenshot
-- [ ] Capture Economy tab screenshot
-- [ ] Capture Magic/Technology tab screenshot
-- [ ] Capture Generate Reports dialog screenshot (with Story World checked)
-- [ ] **CHECKPOINT**: All screenshots in `/docs/media/`, named consistently
-- [ ] Human final approval
+- [x] Plan this section
+- [x] Human approves plan
+- [x] Populate StoryWorld with sample data using script
+- [x] Capture Structure tab screenshot
+- [x] Capture Physical Worlds tab screenshot
+- [x] Capture People/Species tab screenshot
+- [x] Capture Cultures tab screenshot
+- [x] Capture Governments tab screenshot
+- [x] Capture Religions tab screenshot
+- [x] Capture History tab screenshot
+- [x] Capture Economy tab screenshot
+- [x] Capture Magic/Technology tab screenshot
+- [x] Capture Generate Reports dialog screenshot (with Story World checked)
+- [x] **CHECKPOINT**: All screenshots in `/docs/media/`, named consistently
+- [x] Human final approval
 
 ### A4. Reference Doc Template / sign-off
 
-- [ ] Plan this section
-- [ ] Human approves plan
-- [ ] Review existing tab documentation patterns (e.g., `Setting_Tab.md`, `Role_Tab.md`)
-- [ ] Create `StoryWorld_Tab_Template.md` with standard structure
-- [ ] **CHECKPOINT**: Template approved, ready for batch use
-- [ ] Human final approval
+- [x] Plan this section
+- [x] Human approves plan
+- [x] Review existing tab documentation patterns (e.g., `Setting_Tab.md`, `Role_Tab.md`)
+- [x] Update screenshot script with filenames (10 screenshots defined)
+- [x] Create `StoryWorld_Tab_Template.md` with standard structure
+- [x] **CHECKPOINT**: Template approved, ready for batch use
+- [x] Human final approval
+
+**Deliverables:**
+- Screenshot filenames added to `screenshot_data_script.md`
+- Three templates in `StoryWorld_Tab_Template.md`: Main Form, Single-Entry Tab, List-Based Tab
+- File naming convention, nav_order suggestions, screenshot placement guidelines
 
 ### A5. Story Elements - Main Form Doc / sign-off
 
 *Depends on: A3 (screenshots), A4 (template)*
 
-- [ ] Plan this section
-- [ ] Human approves plan
-- [ ] Create `StoryWorld_Form.md` (main overview)
-- [ ] **CHECKPOINT**: Form doc complete
-- [ ] Human final approval
+- [x] Plan this section
+- [x] Human approves plan
+- [x] Create `StoryWorld_Form.md` (main overview)
+- [x] **CHECKPOINT**: Form doc complete
+- [x] Human final approval
 
 ### A6. Story Elements - Single-Entry Tabs / sign-off
 
 *Batch: Structure, History, Economy, Magic/Technology (similar structure)*
 
-- [ ] Plan this section
-- [ ] Human approves plan
-- [ ] Create `StoryWorld_Structure_Tab.md`
-- [ ] Create `StoryWorld_History_Tab.md`
-- [ ] Create `StoryWorld_Economy_Tab.md`
-- [ ] Create `StoryWorld_Magic_Technology_Tab.md`
-- [ ] **CHECKPOINT**: 4 single-entry tab docs complete
-- [ ] Human final approval
+- [x] Plan this section
+- [x] Human approves plan
+- [x] Create `StoryWorld_Structure_Tab.md`
+- [x] Create `StoryWorld_History_Tab.md`
+- [x] Create `StoryWorld_Economy_Tab.md`
+- [x] Create `StoryWorld_Magic_Technology_Tab.md`
+- [x] **CHECKPOINT**: 4 single-entry tab docs complete
+- [x] Human final approval
 
 ### A7. Story Elements - List-Based Tabs / sign-off
 
 *Batch: Physical Worlds, People/Species, Cultures, Governments, Religions (similar structure)*
 
-- [ ] Plan this section
-- [ ] Human approves plan
-- [ ] Create `StoryWorld_Physical_Worlds_Tab.md`
-- [ ] Create `StoryWorld_Species_Tab.md`
-- [ ] Create `StoryWorld_Cultures_Tab.md`
-- [ ] Create `StoryWorld_Governments_Tab.md`
-- [ ] Create `StoryWorld_Religions_Tab.md`
-- [ ] **CHECKPOINT**: 5 list-based tab docs complete
-- [ ] Human final approval
+- [x] Plan this section
+- [x] Human approves plan
+- [x] Create `StoryWorld_Physical_Worlds_Tab.md`
+- [x] Create `StoryWorld_Species_Tab.md`
+- [x] Create `StoryWorld_Cultures_Tab.md`
+- [x] Create `StoryWorld_Governments_Tab.md`
+- [x] Create `StoryWorld_Religions_Tab.md`
+- [x] **CHECKPOINT**: 5 list-based tab docs complete
+- [x] Human final approval
 
 ### A8. Reports Section Updates / sign-off
 
 *Depends on: A3 (screenshots)*
 
-- [ ] Plan this section
-- [ ] Human approves plan
-- [ ] Update `Print_Reports.md` to mention Story World checkbox
-- [ ] Update `Scrivener_Reports.md` to mention Story World export
-- [ ] **CHECKPOINT**: Reports docs updated
-- [ ] Human final approval
+- [x] Plan this section
+- [x] Human approves plan
+- [x] Update `Print_Reports.md` to mention Story World checkbox
+- [x] Update `Scrivener_Reports.md` to mention Story World export
+- [x] **CHECKPOINT**: Reports docs updated
+- [x] Human final approval
 
 ---
 
@@ -147,75 +153,79 @@ User manual documentation for the StoryWorld feature. Two parallel tracks:
 
 *Citations 5-8*
 
-- [ ] Plan this section
-- [ ] Human approves plan
-- [ ] Read: Study.com - Cultural Milieu
-- [ ] Read: Jerry Jenkins worldbuilding
-- [ ] Read: Julia Amante - Worldbuilding for contemporary fiction
-- [ ] Read: Reddit worldbuilding table of elements
-- [ ] Add key points to `worldbuilding_research_notes.md`
-- [ ] **CHECKPOINT**: Batch 2 notes complete
-- [ ] Human final approval
+- [x] Plan this section
+- [x] Human approves plan
+- [x] Read: Study.com - Cultural Milieu
+- [x] Read: Jerry Jenkins worldbuilding
+- [x] Read: Malinda Lo - Worldbuilding for contemporary fiction
+- [x] Read: Reddit worldbuilding table of elements
+- [x] Add key points to `worldbuilding_research_notes.md`
+- [x] **CHECKPOINT**: Batch 2 notes complete
+- [x] Human final approval
+
+**Note:** Julia Amante source was unavailable; substituted Malinda Lo's "Building a Real World" which covers the same topic (contemporary fiction worldbuilding) with excellent content.
 
 ### B3. Citation Research - Batch 3 / sign-off
 
 *Citations 9-11*
 
-- [ ] Plan this section
-- [ ] Human approves plan
-- [ ] Read: Well-Storied introduction to worldbuilding
-- [ ] Read: Katie Bachelder fantasy worldbuilding fundamentals
-- [ ] Read: Myers Fiction worldbuilding 101
-- [ ] Add key points to `worldbuilding_research_notes.md`
-- [ ] **CHECKPOINT**: All citation research complete
-- [ ] **ARTIFACT**: `worldbuilding_research_notes.md` - condensed summary for future sessions
-- [ ] Human final approval
+- [x] Plan this section
+- [x] Human approves plan
+- [x] Read: Well-Storied introduction to worldbuilding
+- [x] Read: Katie Bachelder fantasy worldbuilding fundamentals
+- [x] Read: Myers Fiction worldbuilding 101
+- [x] Add key points to `worldbuilding_research_notes.md`
+- [x] **CHECKPOINT**: All citation research complete
+- [x] **ARTIFACT**: `worldbuilding_research_notes.md` - condensed summary with Final Synthesis section
+- [x] Human final approval
 
 ### B4. Competitor Review / sign-off
 
-- [ ] Plan this section
-- [ ] Human approves plan
-- [ ] Review `software_research.md` for how competitors present worldbuilding
-- [ ] Note relevant patterns for our guide
-- [ ] Add competitor insights to `worldbuilding_research_notes.md`
-- [ ] **CHECKPOINT**: Research phase complete
-- [ ] Human final approval
+- [x] Plan this section
+- [x] Human approves plan
+- [x] Review `software_research.md` for how competitors present worldbuilding
+- [x] Note relevant patterns for our guide
+- [x] Add competitor insights to `worldbuilding_research_notes.md`
+- [x] **CHECKPOINT**: Research phase complete
+- [x] Human final approval
 
 ### B5. Guide Outline / sign-off
 
 *Depends on: B1-B4 (research complete)*
 
-- [ ] Plan this section
-- [ ] Human approves plan
-- [ ] Create outline for worldbuilding guide
-- [ ] Map outline sections to StoryWorld tabs/features
-- [ ] **CHECKPOINT**: Outline approved
-- [ ] **ARTIFACT**: Outline in `worldbuilding_guide_outline.md`
-- [ ] Human final approval
+- [x] Plan this section
+- [x] Human approves plan
+- [x] Create outline for worldbuilding guide
+- [x] Map outline sections to StoryWorld tabs/features
+- [x] **CHECKPOINT**: Outline approved
+- [x] **ARTIFACT**: Outline in `worldbuilding_guide_outline.md` (14 sections + appendix)
+- [x] Human final approval
 
 ### B6. Guide Draft / sign-off
 
 *Depends on: B5 (outline), A5-A7 (reference docs for cross-links)*
 
-- [ ] Plan this section
-- [ ] Human approves plan
-- [ ] Draft introduction (what is worldbuilding)
-- [ ] Draft "where to start" section
-- [ ] Draft "how to proceed" section
-- [ ] Draft section linking to StoryWorld features
-- [ ] Add cross-links to Story Elements reference pages
-- [ ] **CHECKPOINT**: Full draft complete
-- [ ] Human final approval
+- [x] Plan this section
+- [x] Human approves plan
+- [x] Draft introduction (what is worldbuilding)
+- [x] Draft "where to start" section
+- [x] Draft "how to proceed" section
+- [x] Draft section linking to StoryWorld features
+- [x] Add cross-links to Story Elements reference pages
+- [x] **CHECKPOINT**: Full draft complete
+- [x] Human final approval
+
+**ARTIFACT**: `/docs/Writing with StoryCAD/Worldbuilding_Guide.md` - 14-section guide (~2500 words) with cross-links to all StoryWorld reference docs. Used `tutorial-engineer` agent for initial draft, reviewed for style consistency.
 
 ### B7. Guide Review and Polish / sign-off
 
-- [ ] Plan this section
-- [ ] Human approves plan
-- [ ] Review for plain language (non-technical audience)
-- [ ] Check all cross-links work
-- [ ] Final polish
-- [ ] **CHECKPOINT**: Guide ready for publication
-- [ ] Human final approval
+- [x] Plan this section
+- [x] Human approves plan
+- [x] Review for plain language (non-technical audience)
+- [x] Check all cross-links work
+- [x] Final polish (fixed nav_order for StoryWorld to appear after Scene Form)
+- [x] **CHECKPOINT**: Guide ready for publication
+- [x] Human final approval
 
 ---
 
@@ -230,6 +240,27 @@ User manual documentation for the StoryWorld feature. Two parallel tracks:
 | 2026-01-21 | B1 complete | Created worldbuilding_research_notes.md with 4 citations |
 | 2026-01-21 | A1 approved | Human final approval |
 | 2026-01-21 | B1 approved | Human final approval |
+| 2026-01-22 | A2 complete | Created screenshot_data_script.md with Land of Oz content for all 9 tabs |
+| 2026-01-22 | B2 complete | Added citations 5-8 to worldbuilding_research_notes.md |
+| 2026-01-22 | A2 approved | Human final approval |
+| 2026-01-22 | B2 approved | Human final approval |
+| 2026-01-22 | B3 complete | Added citations 9-11 + Final Synthesis to worldbuilding_research_notes.md |
+| 2026-01-22 | B3 approved | Human final approval |
+| 2026-01-22 | B4 complete | Competitor review - patterns, terminology, approaches for guide |
+| 2026-01-22 | B4 approved | Human final approval - Track B research phase complete |
+| 2026-01-22 | B5 complete | Guide outline created - 14 sections mapped to StoryWorld tabs |
+| 2026-01-22 | B5 approved | Human final approval - added series/collaborative world sharing |
+| 2026-01-22 | A4 complete | Template created with 3 templates, screenshot filenames, nav_order suggestions |
+| 2026-01-22 | A4 approved | Human final approval |
+| 2026-01-22 | A3 complete | All 10 screenshots captured to /docs/media/ |
+| 2026-01-22 | A5 complete | Created StoryWorld_Form.md (main form overview) |
+| 2026-01-22 | A6 complete | Created 4 single-entry tab docs (Structure, History, Economy, Magic/Technology) |
+| 2026-01-22 | A7 complete | Created 5 list-based tab docs (Physical Worlds, Species, Cultures, Governments, Religions) |
+| 2026-01-22 | A8 complete | Updated Print_Reports.md and Scrivener_Reports.md with Story World mentions |
+| 2026-01-22 | B6 complete | Created Worldbuilding_Guide.md - 14-section guide with cross-links |
+| 2026-01-22 | A5-A8 approved | Human final approval for all Track A reference docs |
+| 2026-01-22 | B6 approved | Human final approval for worldbuilding guide draft |
+| 2026-01-22 | B7 complete | Review passed, fixed nav_order (StoryWorld after Scene Form) |
 
 ---
 
@@ -261,10 +292,30 @@ See `worldbuilding citations.png`:
 
 | Artifact | Purpose | Status |
 |----------|---------|--------|
-| `worldbuilding_research_notes.md` | Condensed citation research for future sessions | **Complete** (B1) |
-| `StoryWorld_Tab_Template.md` | Template for reference docs | Pending |
-| `worldbuilding_guide_outline.md` | Outline for educational guide | Pending |
+| `worldbuilding_research_notes.md` | Condensed citation research for future sessions | **Complete** (B1-B4) |
+| `StoryWorld_Tab_Template.md` | Template for reference docs | **Complete** (A4) |
+| `worldbuilding_guide_outline.md` | Outline for educational guide | **Complete** (B5) |
+| `/docs/Story Elements/StoryWorld_Form.md` | Main form documentation | **Complete** (A5) |
+| `/docs/Story Elements/StoryWorld_*_Tab.md` (9 files) | Tab documentation | **Complete** (A6-A7) |
+| `/docs/Reports/Print_Reports.md` | Updated with Story World | **Complete** (A8) |
+| `/docs/Reports/Scrivener_Reports.md` | Updated with Story World | **Complete** (A8) |
+| `/docs/Writing with StoryCAD/Worldbuilding_Guide.md` | Educational worldbuilding guide | **Complete** (B6) |
+
+---
+
+## Context for B7 (Guide Review)
+
+**Draft location:** `/docs/Writing with StoryCAD/Worldbuilding_Guide.md`
+
+**Review checklist:**
+1. Check plain language (non-technical audience)
+2. Verify all cross-links work
+3. Ensure consistency with StoryCAD documentation voice
+4. Final polish
+
+**Audience:** Fiction writers (non-technical), need practical guidance
 
 ---
 
 *Plan created: 2026-01-21*
+*Last updated: 2026-01-22 (B7 complete - All documentation tasks complete)*

@@ -12,6 +12,8 @@ If you select the Print Reports option, a dialog will appear which allows you to
 
 ![](../media/Generate-Reports-Dialog.png)
 
+The available report types include Story Overview, Problem, Character, Setting, Scene, Folder, Web, Notes, and Story World. Check the boxes for the story element types you want to include in your printed output.
+
 
 On Windows 11 systems, StoryCAD provides a Print Manager which allows you to select a printer and its options, and to display reports in a Print Preview window:
 

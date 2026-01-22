@@ -377,9 +377,344 @@ Based on this research, the StoryCAD worldbuilding guide should:
 
 ---
 
+---
+
+## Citation 5: Study.com - Cultural Milieu
+
+**Source:** [Study.com Cultural Milieu](https://study.com/academy/lesson/cultural-milieu-definition-lesson-quiz.html)
+
+### Key Definitions
+
+- **Cultural Milieu**: The external cultural background in which social actions occur
+- Etymology: French "mi" (middle) + "lieu" (place) - being in the middle of events
+- Encompasses values, beliefs, customs, and behaviors that shape identity and actions
+
+### Three Types of Milieu
+
+| Type | Description | Examples |
+|------|-------------|----------|
+| **Social Milieu** | Human community context | Religious practices, ethnic makeup, gender dynamics, artistic influences |
+| **Natural Milieu** | Physical environment | Rainforest, desert, mountains, coastal regions |
+| **Artificial Milieu** | Human-built environment | Architecture, cities, online forums, transportation systems |
+
+### Impact on Character Development
+
+- Characters are molded by their surroundings
+- Experiences within the environment inform motivations and actions
+- A character raised in a strict community has different values than one from a liberal background
+
+### Relevance to StoryCAD
+
+This directly supports the **Cultures** tab in StoryWorld. The three-type framework maps to:
+- Social Milieu → Culture fields (Values, Customs, Taboos)
+- Natural Milieu → Physical World tab
+- Artificial Milieu → overlaps with Economy, Government, and Technology
+
+---
+
+## Citation 6: Jerry Jenkins - Worldbuilding Guide
+
+**Source:** [Jerry Jenkins Worldbuilding Guide](https://jerryjenkins.com/worldbuilding/)
+
+### Key Definition
+
+> Worldbuilding is "how you create that foundation - the *Where* of your story"
+
+### Six-Step Framework
+
+1. **Plan but Don't Over-Plan** - Balance preparation with writing momentum
+2. **Describe Your World** - Focus on climate, environment, resources, geography; engage all five senses
+3. **Populate Your World** - Determine appearance, population, backstory, class systems, languages
+4. **Establish History** - Consider deep past events, trauma (wars, famines), power shifts
+5. **Determine Culture** - Define religion, society, politics, language, behavior norms
+6. **Power Your World** - Choose technology or magic; establish consistent rules
+
+### Three Grounding Principles
+
+1. **Be Consistent** - Follow your own rules religiously throughout the narrative
+2. **Draw from Reality** - Use historical events, personal experiences as inspiration
+3. **Prioritize Story Over Setting** - Fascinating worlds fail without compelling characters and plots
+
+### Notable Quote
+
+> "World building must not come at the expense of your story."
+
+### Mapping to StoryWorld Tabs
+
+| Jenkins Step | StoryWorld Tab(s) |
+|--------------|-------------------|
+| Describe Your World | Physical World |
+| Populate Your World | People/Species, Cultures |
+| Establish History | History |
+| Determine Culture | Cultures, Religions |
+| Power Your World | Magic/Technology |
+
+---
+
+## Citation 7: Malinda Lo - Building a Real World (Contemporary Fiction)
+
+**Source:** [Malinda Lo Blog](https://www.malindalo.com/blog/2020/3/9/building-a-real-world)
+
+### Core Thesis
+
+Worldbuilding isn't limited to fantasy - it's essential for contemporary fiction too.
+
+### Five Foundations Framework
+
+**1. Power**
+- Recognize hierarchies: economic, social, cultural, sexual
+- Understand how intersecting identities shape social status
+- Architecture and geography reveal class structures
+
+**2. Rules**
+- Acknowledge cultural expectations that constrain behavior
+- Different characters face different consequences for identical actions
+
+**3. Place**
+- Capture specific local character and culture (not generic descriptions)
+- Get practical details right: weather, geography, regional norms
+
+**4. Rituals**
+- Use social occasions (dinners, dances, funerals) to reveal power dynamics
+- Demonstrate how characters understand social dynamics
+
+**5. Food**
+- Leverage cuisine and dining to convey cultural identity and class
+- Use food details to authenticate setting
+
+### Relevance to StoryCAD
+
+Especially valuable for **Consensus Reality** stories. The Five Foundations map to:
+
+| Lo's Foundation | StoryWorld Location |
+|-----------------|---------------------|
+| Power | Government, Economy, Culture (class systems) |
+| Rules | Culture (Customs, Taboos) |
+| Place | Physical World |
+| Rituals | Culture (Daily Life, Entertainment) |
+| Food | Culture (Daily Life), Economy |
+
+---
+
+## Citation 8: Reddit Worldbuilding Table of Elements
+
+**Source:** [r/worldbuilding](https://www.reddit.com/r/worldbuilding/comments/u55hfb/worldbuilding_table_of_elements/)
+
+### Overview
+
+- A framework listing 118 facets to consider when building fictional worlds
+- Organized like a periodic table for visual reference
+
+### High-Level Categories
+
+- Environment
+- People
+- Culture
+- Architecture
+- Government
+
+### Notable Specific Elements
+
+Taboos, Heraldry, Lies & Propaganda, Disease, Slang & Curses, Deathcare
+
+### Alternative Framework: Kevin J. Anderson's Nine Elements
+
+| Element | StoryWorld Tab |
+|---------|----------------|
+| Geography | Physical World |
+| Climate | Physical World |
+| Politics | Governments |
+| Economics | Economy |
+| Society | Cultures |
+| Religion | Religions |
+| Intellectual/Scientific | Magic/Technology |
+| Arts | Cultures (Art field) |
+| History | History |
+
+This independently validates StoryWorld's 8 taxonomy categories.
+
+---
+
+## Updated Cross-Source Synthesis
+
+### Key Insights from Citations 5-8
+
+1. **Worldbuilding Is Universal**: Applies to ALL genres, not just fantasy/sci-fi (Lo, Jenkins)
+
+2. **Consistency Is the Master Rule**: "Follow your own rules religiously" (Jenkins)
+
+3. **Milieu = Culture**: The three-type milieu framework validates StoryWorld's Cultures tab design
+
+4. **Power Dynamics Are Central**: Lo's framework puts Power first, intersecting Government, Economy, and Culture
+
+5. **Validated Category Structure**: Kevin J. Anderson's "Nine Elements" independently validates StoryWorld's 8 taxonomy categories
+
+6. **Story First, World Second**: "World building must not come at the expense of your story" (Jenkins)
+
+7. **Sensory Details Matter**: Engage all five senses, not just sight and sound
+
+---
+
+---
+
+## Citation 9: Well-Storied - An Introduction to World-Building
+
+**Source:** [Well-Storied](https://www.well-storied.com/blog/an-introduction-to-world-building)
+
+### Two Development Approaches
+
+| Approach | Description | Best For |
+|----------|-------------|----------|
+| **Inside-Out** | Develop story's most integral element first, expand outward | Writers with a compelling story idea |
+| **Outside-In** | Begin with foundational geography, expand toward cultures/societies | Writers passionate about extensive worldbuilding |
+
+### Five Essential Elements Framework
+
+1. **Geography** - Boundaries, water sources, natural features, climate zones
+2. **Cultures & Societies** - Power structures, government, religion, art, inter-societal relations
+3. **History** - Power shifts, traumatic events (war, famine, plague)
+4. **Magic Systems** - 10 key questions covering who wields magic, costs, governance, perception
+5. **Technology** - 10 questions covering communication, travel, combat, regulation
+
+### Notable Quote
+
+> "You only need to develop your world in as much detail as your story requires. Bigger isn't always better."
+
+---
+
+## Citation 10: Katie Bachelder - Fantasy World-Building Fundamentals
+
+**Source:** [Katie Bachelder](https://katiebachelder.com/2021/07/30/fantasy-world-building-fundamentals/)
+
+### Three-Tier Prioritization System (NEW FRAMEWORK)
+
+| Tier | Description | Removal Impact |
+|------|-------------|----------------|
+| **Primary** | Essential plot elements | Breaks the narrative |
+| **Secondary** | Provides context and coherence | Answers "Why now?" and "Why them?" |
+| **Tertiary** | Atmospheric details | Enhance immersion but not plot-critical |
+
+This framework helps writers evaluate worldbuilding depth—focus effort on Primary elements, sketch Secondary, and leave Tertiary flexible.
+
+### Notable Quote
+
+> "More isn't always better; it's what details an author chooses to incorporate that matters rather than how much."
+
+### Genre Calibration
+
+High fantasy demands different worldbuilding focus than urban/low fantasy. Calibrate scope to genre expectations.
+
+---
+
+## Citation 11: Myers Fiction - World-Building 101
+
+**Source:** [Myers Fiction](https://myersfiction.com/2024/02/13/world-building-101-crafting-immersive-fictional-worlds/)
+
+### Story Bible Concept
+
+> "Create a Story Bible: Document every decision your narrative makes to track changes across drafts"
+
+This directly validates StoryCAD's StoryWorld feature as a writer's worldbuilding bible.
+
+### Research Approach
+
+- Study real-world cultures, history, and civilizations for authentic details
+- Use historical accounts to understand human behavior under stress
+- Apply "write what you know" by studying beyond personal experience
+
+### Practical Quick Start Exercise
+
+1. Select a geographic region (real or invented)
+2. Develop brief histories of 2+ civilizations
+3. Focus on one civilization's cultural details
+4. Create 3-5 key phrases in their language
+5. Write a 1-2 page scene with sensory details
+6. Reflect on how immersion deepened world authenticity
+
+---
+
+## Competitor Software Insights
+
+**Source:** `software_research.md` - Analysis of 10 worldbuilding tools
+
+### Patterns to Follow
+
+1. **Entity-Based Organization** - All tools use: Characters, Locations, Items, Organizations, Species, Magic/Systems
+2. **Hierarchical Nesting with Cross-Linking** - Parent-child + wiki-style references
+3. **Templates with Guiding Questions** - Structured prompts, not blank forms
+
+### Standard Terminology
+
+| Use This | Avoid |
+|----------|-------|
+| Worldbuilding | "World creation", "setting development" |
+| Characters | "Actors", "persons" |
+| Locations | "Places", "geography" |
+| Organizations | "Groups", "factions" |
+| Magic Systems | "Power systems" |
+
+### Approaches to Avoid
+
+1. **Overwhelming new users** - World Anvil has 25+ templates; causes "blank page paralysis"
+2. **RPG/Gaming jargon** - Say "supporting characters" not "NPCs"
+3. **Requiring external tools** - Emphasize StoryCAD's integration advantage
+
+### Documentation Principles
+
+| Principle | Application |
+|-----------|-------------|
+| Lead with "Why" | Writer benefits, not feature lists |
+| Use standard terms | Characters, Locations, Organizations |
+| Start simple | Core categories first, advanced later |
+| Show integration | Worldbuilding + scene outlining together |
+| Provide examples | Filled-in templates, not empty forms |
+| Progressive disclosure | Complexity grows as users grow |
+
+---
+
+## Final Synthesis: All 11 Citations
+
+### Core Principles (Universal Agreement)
+
+1. **World Serves Story** - Don't let worldbuilding replace storytelling
+2. **Consistency Is Critical** - Follow your own rules religiously
+3. **Organization Is Essential** - Centralized reference (Story Bible / StoryWorld)
+4. **Start with What Matters** - Focus on elements that impact your narrative
+
+### Unique Frameworks Summary
+
+| Framework | Source | Application |
+|-----------|--------|-------------|
+| Three World Types | Dabble, Jenkins | Real-World Fantasy, Second World, Hybrid |
+| Top-Down vs Bottom-Up | Wikipedia, Well-Storied | Two valid approaches to worldbuilding |
+| Three-Tier Prioritization | Katie Bachelder | Primary/Secondary/Tertiary element classification |
+| Five Foundations | Malinda Lo | Power, Rules, Place, Rituals, Food (contemporary fiction) |
+| Nine Elements | Kevin J. Anderson | Geography, Climate, Politics, Economics, Society, Religion, Science, Arts, History |
+| Three Milieu Types | Study.com | Social, Natural, Artificial environments |
+
+### Recommendations for StoryCAD Guide
+
+1. **Definition section** - What worldbuilding is and why it matters for ALL genres
+2. **World Type explanation** - Link to Structure tab's 8 gestalts
+3. **Two approaches** - Inside-Out vs Outside-In (let writers choose their style)
+4. **Prioritization guidance** - Three-Tier system for evaluating depth
+5. **Element categories** - How tabs map to standard worldbuilding frameworks
+6. **Quick Start exercise** - Adapted from Myers Fiction
+7. **Common mistakes** - Worldbuilder's Disease, info dumps, inconsistency
+8. **Story Bible positioning** - StoryWorld as centralized worldbuilding reference
+
+---
+
 ## Sources
 
 - [Dabble Writer Worldbuilding Guide](https://www.dabblewriter.com/articles/worldbuilding-guide)
 - [Madeline James Writes Worldbuilding Guide](https://www.madelinejameswrites.com/worldbuilding-guide)
 - [Wikipedia - Worldbuilding](https://en.wikipedia.org/wiki/Worldbuilding)
 - [Campfire Writing Worldbuilding Tools](https://www.campfirewriting.com/worldbuilding-tools)
+- [Study.com - Cultural Milieu](https://study.com/academy/lesson/cultural-milieu-definition-lesson-quiz.html)
+- [Jerry Jenkins Worldbuilding Guide](https://jerryjenkins.com/worldbuilding/)
+- [Malinda Lo - Building a Real World](https://www.malindalo.com/blog/2020/3/9/building-a-real-world)
+- [Reddit Worldbuilding Table of Elements](https://www.reddit.com/r/worldbuilding/comments/u55hfb/worldbuilding_table_of_elements/)
+- [Well-Storied - An Introduction to World-Building](https://www.well-storied.com/blog/an-introduction-to-world-building)
+- [Katie Bachelder - Fantasy World-Building Fundamentals](https://katiebachelder.com/2021/07/30/fantasy-world-building-fundamentals/)
+- [Myers Fiction - World-Building 101](https://myersfiction.com/2024/02/13/world-building-101-crafting-immersive-fictional-worlds/)
