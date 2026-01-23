@@ -19,7 +19,11 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
 
     private readonly ILogService _logger;
     private readonly AppState _appState;
+    // Reserved for future Collaborator AI worldbuilding guidance integration
+    // See Collaborator/devdocs/storyworld-ai-parameters-parking.md
+    #pragma warning disable IDE0052 // Remove unread private members
     private readonly CollaboratorService _collaboratorService;
+    #pragma warning restore IDE0052
     private bool _changeable;
     private bool _changed;
 
@@ -70,8 +74,8 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
             if (SetProperty(ref _worldType, value))
             {
                 UpdateWorldTypeDescriptions();
-                // Auto-populate axis values when World Type changes (if not manually customized)
-                if (_changeable && !_axisValuesCustomized)
+                // Auto-populate axis values when World Type changes
+                if (_changeable)
                 {
                     AutoPopulateAxisValues();
                 }
@@ -119,50 +123,6 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
     {
         get => _toneLogic;
         set => SetProperty(ref _toneLogic, value);
-    }
-
-    // Track whether user has manually customized axis values
-    private bool _axisValuesCustomized;
-
-    #endregion
-
-    #region Collaborator / AI Parameters Properties
-
-    /// <summary>
-    /// Visibility for Collaborator-only UI elements (Customize button, AI Parameters tab).
-    /// </summary>
-    public Visibility CollaboratorVisibility =>
-        _collaboratorService?.HasCollaborator == true ? Visibility.Visible : Visibility.Collapsed;
-
-    private bool _isAiParametersTabVisible;
-    /// <summary>
-    /// Controls whether the AI Parameters tab is visible.
-    /// Only shown when user clicks "Customize AI Parameters" button.
-    /// </summary>
-    public bool IsAiParametersTabVisible
-    {
-        get => _isAiParametersTabVisible;
-        set => SetProperty(ref _isAiParametersTabVisible, value);
-    }
-
-    /// <summary>
-    /// Visibility binding for the AI Parameters tab.
-    /// </summary>
-    public Visibility AiParametersTabVisibility =>
-        IsAiParametersTabVisible && _collaboratorService?.HasCollaborator == true
-            ? Visibility.Visible
-            : Visibility.Collapsed;
-
-    /// <summary>
-    /// Command to show the AI Parameters tab.
-    /// </summary>
-    public RelayCommand ShowAiParametersCommand { get; private set; }
-
-    private void ShowAiParameters()
-    {
-        IsAiParametersTabVisible = true;
-        OnPropertyChanged(nameof(AiParametersTabVisibility));
-        _axisValuesCustomized = true; // User is now customizing
     }
 
     #endregion
@@ -1898,7 +1858,6 @@ public class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, I
         PropertyChanged += OnPropertyChanged;
 
         // Initialize commands
-        ShowAiParametersCommand = new RelayCommand(ShowAiParameters);
         AddPhysicalWorldCommand = new RelayCommand(AddPhysicalWorld);
         RemoveCurrentPhysicalWorldCommand = new RelayCommand(RemoveCurrentPhysicalWorld);
         PreviousPhysicalWorldCommand = new RelayCommand(PreviousPhysicalWorld);

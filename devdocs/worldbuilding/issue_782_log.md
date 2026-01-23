@@ -1443,4 +1443,61 @@ All Track A and Track B documentation tasks are now complete:
 
 ---
 
+### 2026-01-23 - Session 16: PR #1272 Code Review Fixes
+
+**Participants:** User (Terry), Claude Code
+
+**Context:** Jake Shaw reviewed PR #1272 and identified issues requiring fixes. Tracking them here for methodical resolution.
+
+#### Review Items
+
+| # | Issue | Location | Status |
+|---|-------|----------|--------|
+| 1 | **JSON Type Discriminator Missing** - `System.Text.Json.JsonException: 'Unsupported Type discriminator: StoryWorld'` when loading a saved file containing StoryWorld. The `StoryElementConverter` needs a case for StoryWorld deserialization. | `StoryCADLib/DAL/StoryElementConverter.cs:81` | [x] Not a bug - code was correct, stale build |
+| 2 | **Bold Content Indicator Not Clearing** - Expander headers go bold when content is entered, but don't return to normal weight when content is deleted. The property setters need to check if content is empty and set FontWeight back to normal (400). | `StoryCADLib/ViewModels/StoryWorldViewModel.cs` | [ ] |
+| 3 | **TreeView Icon Missing** - StoryWorld nodes in the Story Explorer TreeView don't display an icon beside their name, though the icon exists and is used in the flyout menu. Need to add StoryWorld case to icon mapping for TreeView. | `StoryCADLib/ViewModels/StoryNodeItem.cs` (both constructors) | [x] Fixed + created `new-story-element-checklist.md` |
+| 4 | **No Keyboard Shortcut** - No keybind for adding a StoryWorld. (Note: Alt+W was noted as taken by Website during original implementation.) Need to assign an available shortcut. macOS and WinAppSDK may have different keybinds available - check both platforms. | `Shell.xaml`, `Shell.xaml.cs` | [x] Added Alt+B/⌥B + tests + headless fix in OutlineViewModel |
+| 5 | **Bold Content Indicator Implementation Bloat** - Current implementation adds ~2K LOC to StoryWorldViewModel. Jake notes it's also inconsistent with other story elements (needs clarification). Consider an abstraction to simplify: e.g., a value converter, attached property/behavior, or helper class that generically handles "has content → bold" logic. **Jake available for followup.** | `StoryCADLib/ViewModels/StoryWorldViewModel.cs` | [ ] |
+| 6 | **Collaborator References Leaked** - Collaborator is unreleased and confidential, but references have crept into StoryCAD code (e.g., hidden AI Parameters tab, CollaboratorService injection, CollaboratorVisibility property). These need to be removed or made generic until Collaborator is publicly announced. | `StoryWorldViewModel.cs`, `StoryWorldPage.xaml` | [x] Fixed - UI removed, code parked in Collaborator repo |
+| 7 | **Remove devdocs/worldbuilding Before Merge** - Archive folder contents to `storybuilder-miscellaneous` repo, then delete `/devdocs/worldbuilding/` from this branch before PR approval. | `/devdocs/worldbuilding/` | [ ] |
+| 8 | **Dependency: Issue #482 Must Ship Together** - User manual mentions copying StoryWorld for series/shared worlds, but "Copy Characters and Settings" (#482) doesn't exist yet. #482 must be prioritized and released alongside StoryWorld to avoid documentation promising unavailable functionality. | Issue #482 | [ ] |
+
+---
+
+### 2026-01-23 - Session 16 (continued): Item 6 - Collaborator References
+
+**Participants:** User (Terry), Claude Code
+
+**Context:** Removing Collaborator-specific UI from StoryCAD while preserving code for future use.
+
+#### Approach Taken
+
+Instead of deleting Collaborator code, parked it in the Collaborator repo for future use:
+
+1. **Created parking branch** in Collaborator repo: `storyworld-ai-parameters`
+2. **Created documentation** at `Collaborator/devdocs/storyworld-ai-parameters-parking.md` containing:
+   - Full Structure tab XAML with Collaborator info bar
+   - Full AI Parameters tab XAML
+   - Full ViewModel Collaborator/AI Parameters region
+   - Context explaining why code was parked
+   - Instructions for restoring when Collaborator is ready
+
+#### Changes Made to StoryCAD
+
+| File | Change |
+|------|--------|
+| `StoryWorldPage.xaml` | Removed Collaborator info bar from Structure tab (Grid.Row="3") |
+| `StoryWorldPage.xaml` | Removed AI Parameters tab (Tab 10) |
+| `StoryWorldPage.xaml` | Removed unused row definition from Structure tab Grid |
+| `StoryWorldViewModel.cs` | Removed `#region Collaborator / AI Parameters Properties` (CollaboratorVisibility, IsAiParametersTabVisible, AiParametersTabVisibility, ShowAiParametersCommand, ShowAiParameters method) |
+| `StoryWorldViewModel.cs` | Removed `_axisValuesCustomized` field and related check (dead code after removing Customize button) |
+| `StoryWorldViewModel.cs` | Added pragma to suppress warning on unused `_collaboratorService` field, kept for future use |
+
+#### Build & Test Results
+
+- ✅ Build succeeded with no warnings
+- ✅ All 702 tests pass
+
+---
+
 *Log maintained by Claude Code sessions*

@@ -59,7 +59,7 @@
                                 <MenuFlyoutItem Icon="Map"
                                                 Command="{x:Bind ShellVm.AddStoryWorldCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
-                                                Text="Add StoryWorld" />
+                                                win:Text="Add StoryWorld  Alt+B" skia:Text="Add StoryWorld  ⌥B" />
                             </MenuFlyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
@@ -245,7 +245,7 @@
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddStoryWorldCommand, Mode=OneWay}"
-                                            Text="Add StoryWorld">
+                                            win:Text="Add StoryWorld  Alt+B" skia:Text="Add StoryWorld  ⌥B">
                                 <MenuFlyoutItem.Icon>
                                     <SymbolIcon Symbol="Map" />
                                 </MenuFlyoutItem.Icon>

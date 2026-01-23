@@ -1114,10 +1114,14 @@ public class OutlineViewModel : ObservableRecipient
             var newNode =
                 outlineService.AddStoryElement(appState.CurrentDocument.Model, typeToAdd, shellVm.RightTappedNode);
 
-            newNode.Node.Parent.IsExpanded = true;
-            newNode.IsSelected = false;
-            newNode.Node.Background = window.ContrastColor;
-            shellVm.NewNodeHighlightCache.Add(newNode.Node);
+            // UI operations - skip in headless/test mode
+            if (!appState.Headless)
+            {
+                newNode.Node.Parent.IsExpanded = true;
+                newNode.IsSelected = false;
+                newNode.Node.Background = window.ContrastColor;
+                shellVm.NewNodeHighlightCache.Add(newNode.Node);
+            }
             logger.Log(LogLevel.Info, $"Added Story Element {newNode.Uuid}");
 
             Messenger.Send(new IsChangedMessage(true));

@@ -477,6 +477,13 @@ public sealed partial class Shell : Page
                 return;
             }
 
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.B && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddStoryWorldCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
             // Delete key (no modifiers)
             if (!ctrl && !shift && !alt && e.Key == VirtualKey.Delete && ShellVm.ExplorerVisibility == Visibility.Visible)
             {

@@ -294,7 +294,8 @@ public class OutlineService
         // StoryWorld is a singleton - only one per story
         if (typeToAdd == StoryItemType.StoryWorld && StoryWorldExists(model))
         {
-            throw new InvalidOperationException("Only one StoryWorld element is allowed per story.");
+            _log.Log(LogLevel.Warn, "StoryWorld already exists - only one allowed per story");
+            return null;
         }
 
         StoryElement newElement = typeToAdd switch

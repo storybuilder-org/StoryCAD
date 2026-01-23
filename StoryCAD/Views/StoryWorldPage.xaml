@@ -68,7 +68,6 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <!-- Question prompt -->
@@ -97,25 +96,6 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- Collaborator info and customize button (only visible for Collaborator subscribers) -->
-                        <Border Grid.Row="3" Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}"
-                                BorderBrush="{ThemeResource SystemFillColorNeutralBrush}"
-                                BorderThickness="1" CornerRadius="4" Margin="0,16,0,0" Padding="12"
-                                Visibility="{x:Bind StoryWorldVm.CollaboratorVisibility, Mode=OneWay}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <FontIcon Grid.Column="0" Glyph="&#xE946;" FontSize="16" Margin="0,0,8,0"/>
-                                <TextBlock Grid.Column="1" Text="Collaborator uses this to tailor worldbuilding guidance."
-                                           VerticalAlignment="Center" TextWrapping="Wrap" FontSize="12"/>
-                                <Button Grid.Column="2" Content="Customize AI Parameters"
-                                        Command="{x:Bind StoryWorldVm.ShowAiParametersCommand}"
-                                        Margin="12,0,0,0"/>
-                            </Grid>
-                        </Border>
                     </Grid>
                 </TabViewItem>
 
@@ -996,55 +976,6 @@
                     </ScrollViewer>
                 </TabViewItem>
 
-                <!-- Tab 10: AI Parameters (Hidden - only visible for Collaborator subscribers who click Customize) -->
-                <TabViewItem Header="AI Parameters" IsClosable="False"
-                             Visibility="{x:Bind StoryWorldVm.AiParametersTabVisibility, Mode=OneWay}"
-                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="12">
-                        <StackPanel Spacing="12">
-                            <TextBlock Text="Customize AI Parameters"
-                                       FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                            <TextBlock Text="These values are derived from your World Type selection. Customize them here if your story doesn't fit neatly into one category. Collaborator will use these values to tailor its worldbuilding guidance."
-                                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13" Margin="0,0,0,12"/>
-
-                            <ComboBox Header="Ontology (What exists in this world?)" MinWidth="300"
-                                      ItemsSource="{x:Bind StoryWorldVm.OntologyList}"
-                                      SelectedItem="{x:Bind StoryWorldVm.Ontology, Mode=TwoWay}"/>
-                            <TextBlock Text="Mundane = only real-world elements. Supernatural = magic, gods, spirits. Scientific Speculative = advanced but naturalistic. Hybrid = both magic and science. Symbolic = reality follows dream/mythic logic."
-                                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,0,0,8"/>
-
-                            <ComboBox Header="World Relation (Relation to our reality)" MinWidth="300"
-                                      ItemsSource="{x:Bind StoryWorldVm.WorldRelationList}"
-                                      SelectedItem="{x:Bind StoryWorldVm.WorldRelation, Mode=TwoWay}"/>
-                            <TextBlock Text="Primary World = our Earth. Divergent Earth = alternate history. Secondary World = entirely separate reality. Layered = hidden realms overlapping ours. Multiversal = many coexisting worlds."
-                                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,0,0,8"/>
-
-                            <ComboBox Header="Rule Transparency (How the world's rules behave)" MinWidth="300"
-                                      ItemsSource="{x:Bind StoryWorldVm.RuleTransparencyList}"
-                                      SelectedItem="{x:Bind StoryWorldVm.RuleTransparency, Mode=TwoWay}"/>
-                            <TextBlock Text="Explicit Rules = knowable, consistent systems. Implicit Rules = consistent but unexplained. Capricious = inconsistent or will-based. Symbolic Rules = meaning overrides causality."
-                                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,0,0,8"/>
-
-                            <ComboBox Header="Scale of Difference (How different from reality)" MinWidth="300"
-                                      ItemsSource="{x:Bind StoryWorldVm.ScaleOfDifferenceList}"
-                                      SelectedItem="{x:Bind StoryWorldVm.ScaleOfDifference, Mode=TwoWay}"/>
-                            <TextBlock Text="Cosmetic = surface changes only. Structural = social, historical, technological shifts. Cosmological = different laws of reality."
-                                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,0,0,8"/>
-
-                            <ComboBox Header="Agency Source (What drives change in this world)" MinWidth="300"
-                                      ItemsSource="{x:Bind StoryWorldVm.AgencySourceList}"
-                                      SelectedItem="{x:Bind StoryWorldVm.AgencySource, Mode=TwoWay}"/>
-                            <TextBlock Text="Human-Centric = people drive events. Nonhuman Intelligences = aliens, gods, AI. Fate/Providence = destiny, prophecy. Systemic Forces = technology, magic, ecology."
-                                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12" Margin="0,0,0,8"/>
-
-                            <ComboBox Header="Tone Logic (How the world feels)" MinWidth="300"
-                                      ItemsSource="{x:Bind StoryWorldVm.ToneLogicList}"
-                                      SelectedItem="{x:Bind StoryWorldVm.ToneLogic, Mode=TwoWay}"/>
-                            <TextBlock Text="Rational = cause and effect dominate. Mythic = archetypal, meaningful. Whimsical = playful, light. Dark/Entropic = decay, struggle. Transcendent = spiritual, transformative."
-                                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorTertiaryBrush}" FontSize="12"/>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabViewItem>
 
             </TabView.TabItems>
         </TabView>
