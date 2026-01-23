@@ -182,3 +182,21 @@ Then use:
 "$MSBUILD" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64
 "$VSTEST" "$TESTDLL"
 ```
+
+## macOS Build & App Store Submission
+
+For the complete macOS App Store build guide, see **[/devdocs/macos-app-store-build-guide.md](/devdocs/macos-app-store-build-guide.md)**.
+
+### Quick Reference
+
+Build for macOS:
+```bash
+dotnet publish StoryCAD/StoryCAD.csproj -c Release -f net10.0-desktop -r osx-arm64 --self-contained true
+```
+
+Key points:
+- Bundle ID: `com.storybuilder.storycad`
+- Minimum macOS: 12.0 (required for arm64-only)
+- Bump `CFBundleVersion` in `StoryCAD/Platforms/Desktop/Info.plist` before each upload
+- Do NOT use `--deep` flag when signing
+- Sign helper executables (createdump) with sandbox-only entitlements

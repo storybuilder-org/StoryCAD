@@ -167,6 +167,34 @@ jobs:
             echo "${{ secrets.ENV }}" > "${{ github.workspace }}/StoryCADTests/.env"
           fi
 
+      - name: Setup macOS signing
+        if: matrix.os == 'macos-latest'
+        env:
+          APPLE_CERTIFICATES_BASE64: ${{ secrets.APPLE_CERTIFICATES_BASE64 }}
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+          MACOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          # Create temporary keychain
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          # Import certificates
+          echo "$APPLE_CERTIFICATES_BASE64" | base64 --decode > $RUNNER_TEMP/certs.p12
+          security import $RUNNER_TEMP/certs.p12 -P "$APPLE_CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+
+          # Save provisioning profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$MACOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > $RUNNER_TEMP/storycad.provisionprofile
+
+          # Clean up cert file
+          rm $RUNNER_TEMP/certs.p12
+
       - name: Run all tests (macOS)
         if: matrix.os == 'macos-latest'
         run: dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -f net10.0-desktop
@@ -218,15 +246,52 @@ jobs:
       - name: Publish macOS package
         if: matrix.os == 'macos-latest'
         run: |
-          PUBLISH_DIR="${{ github.workspace }}/StoryCAD/bin/Release/${{ matrix.fw }}/${{ matrix.rid }}/publish"
-          dotnet publish StoryCAD/StoryCAD.csproj \
-            -f ${{ matrix.fw }} \
-            -r ${{ matrix.rid }} \
-            -c Release \
-            -p:PackageFormat=pkg \
-            -p:SelfContained=true \
-            -p:AppBundlePath="${PUBLISH_DIR}/StoryCAD.app"
-          cp "${PUBLISH_DIR}/StoryCAD.pkg" storycad-${{ matrix.art }}.pkg
+          # Build
+          dotnet publish StoryCAD/StoryCAD.csproj -c Release -f ${{ matrix.fw }} -r ${{ matrix.rid }} --self-contained true
+
+          # Create app bundle
+          APP_DIR="/tmp/StoryCAD.app"
+          rm -rf "$APP_DIR"
+          mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
+          cp -R StoryCAD/bin/Release/${{ matrix.fw }}/${{ matrix.rid }}/publish/* "$APP_DIR/Contents/MacOS/"
+          mv "$APP_DIR/Contents/MacOS/Assets" "$APP_DIR/Contents/Resources/"
+          mv "$APP_DIR/Contents/MacOS/Uno.Fonts.OpenSans" "$APP_DIR/Contents/Resources/" 2>/dev/null || true
+          mv "$APP_DIR/Contents/MacOS/Uno.Fonts.Fluent" "$APP_DIR/Contents/Resources/" 2>/dev/null || true
+          cp StoryCAD/Platforms/Desktop/Info.plist "$APP_DIR/Contents/Info.plist"
+          cp $RUNNER_TEMP/storycad.provisionprofile "$APP_DIR/Contents/embedded.provisionprofile"
+          chmod +x "$APP_DIR/Contents/MacOS/StoryCAD"
+          xattr -cr "$APP_DIR"
+
+          # Create icon
+          SRC="StoryCAD/Assets/LargeTile.scale-400.png"
+          mkdir -p /tmp/icon.iconset
+          sips -z 16 16 "$SRC" --out /tmp/icon.iconset/icon_16x16.png
+          sips -z 32 32 "$SRC" --out /tmp/icon.iconset/icon_16x16@2x.png
+          sips -z 32 32 "$SRC" --out /tmp/icon.iconset/icon_32x32.png
+          sips -z 64 64 "$SRC" --out /tmp/icon.iconset/icon_32x32@2x.png
+          sips -z 128 128 "$SRC" --out /tmp/icon.iconset/icon_128x128.png
+          sips -z 256 256 "$SRC" --out /tmp/icon.iconset/icon_128x128@2x.png
+          sips -z 256 256 "$SRC" --out /tmp/icon.iconset/icon_256x256.png
+          sips -z 512 512 "$SRC" --out /tmp/icon.iconset/icon_256x256@2x.png
+          sips -z 512 512 "$SRC" --out /tmp/icon.iconset/icon_512x512.png
+          sips -z 1024 1024 "$SRC" --out /tmp/icon.iconset/icon_512x512@2x.png
+          iconutil -c icns /tmp/icon.iconset -o "$APP_DIR/Contents/Resources/icon.icns"
+
+          # Sign (entitlements from repo)
+          ENTITLEMENTS="StoryCAD/Platforms/Desktop/entitlements.plist"
+          HELPER_ENTITLEMENTS="StoryCAD/Platforms/Desktop/helper-entitlements.plist"
+
+          find "$APP_DIR/Contents/MacOS" -type f ! -name "StoryCAD" ! -name "createdump" -exec codesign --force --sign "Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)" {} \; 2>/dev/null || true
+          find "$APP_DIR/Contents/Resources" -type f -exec codesign --force --sign "Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)" {} \; 2>/dev/null || true
+          codesign --force --options runtime --sign "Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)" --entitlements "$HELPER_ENTITLEMENTS" "$APP_DIR/Contents/MacOS/createdump"
+          codesign --force --options runtime --sign "Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)" --entitlements "$ENTITLEMENTS" "$APP_DIR/Contents/MacOS/StoryCAD"
+          codesign --force --options runtime --sign "Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)" --entitlements "$ENTITLEMENTS" "$APP_DIR"
+
+          # Verify signature
+          codesign -vvv "$APP_DIR"
+
+          # Create PKG
+          productbuild --component "$APP_DIR" /Applications --sign "3rd Party Mac Developer Installer: StoryBuilder Foundation (3T4DPS2D5Y)" storycad-${{ matrix.art }}.pkg
 
       - name: Zip MSIX artifacts (Windows)
         if: matrix.os == 'windows-latest'
@@ -250,6 +315,13 @@ jobs:
           name: storycad-${{ matrix.art }}
           path: storycad-${{ matrix.art }}.pkg
           if-no-files-found: error
+
+      - name: Cleanup macOS signing
+        if: matrix.os == 'macos-latest' && always()
+        continue-on-error: true
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db 2>/dev/null || true
+          rm -f $RUNNER_TEMP/storycad.provisionprofile
 
   release:
     needs: build
