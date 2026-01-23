@@ -61,10 +61,24 @@ PR #1272 code review by Jake Shaw identified 8 items:
 - RIGHT: Source (opened file)
 - MIDDLE: Vertical button bar (←, →, ↑, ↓)
 
-**Open Question:** View type - Flattened list vs Full TreeView vs Hybrid?
+**DECIDED:** Flattened lists filtered by story element type (like ElementPicker pattern)
+
+**User Direction:** Clone NarrativeTool as template for layout, use ListViews instead of TreeViews.
+
+**Button Bar (simplified):**
+- ← Copy selected from source to destination
+- → Remove (only session-copied)
+- ↑↓ Navigate
+- NO: Copy all, Add section, Trash
+
+### Design Plan Complete
+
+Full design: `devdocs/issue_482/design_plan.md`
+
+GitHub issue updated with design checkboxes.
 
 ### Next Step
-Resume design discussion - finalize view approach
+Await human approval of design, then proceed to Code phase
 
 ## Collaborator Repo Status
 

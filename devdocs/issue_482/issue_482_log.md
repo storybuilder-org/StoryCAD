@@ -123,9 +123,30 @@ Flattened list but show parent path as context, e.g., "John Smith (Characters > 
 - User can bail (close without saving) at any time
 - Filter to copyable types only: Character, Setting, StoryWorld, Problem, Notes, Web
 
-#### Session Paused
+#### Session Resumed - Design Decisions with Jake
 
-User needs to pause. Will resume to finalize UI approach (flattened vs TreeView vs hybrid).
+**View Type Decision:** Flattened lists filtered by element type (like ElementPicker)
+
+**Button Bar Simplified:**
+- ← Copy selected from source to destination
+- → Remove (only session-copied elements)
+- ↑ Navigate up
+- ↓ Navigate down
+
+**NOT included:** Copy all, Add section/folder, Trash/Delete
+
+**Template:** Clone NarrativeTool for layout, use ListViews instead of TreeViews
+
+#### Design Plan Created
+
+Full design documented in `devdocs/issue_482/design_plan.md`
+
+Key decisions:
+- Dual ListView layout with vertical button bar
+- ComboBox filter for element type
+- Session tracking via HashSet<Guid> for safe removal
+- Cross-references cleared on copy (Guid.Empty)
+- StoryWorld singleton enforced (block if exists)
 
 ---
 
