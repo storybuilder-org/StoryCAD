@@ -15,9 +15,11 @@ This design implements a dialog for copying story elements (Character, Setting, 
 
 ### 2.1 Dialog Structure
 
+Title includes current outline name for clarity.
+
 ```
 +---------------------------------------------------------------+
-| Copy Elements to Another Outline                          [X] |
+| Copy Elements from "Story Title" to Another Outline       [X] |
 +---------------------------------------------------------------+
 | Target: [Browse...] [path/to/target.stbx                    ] |
 +---------------------------------------------------------------+
@@ -37,6 +39,10 @@ This design implements a dialog for copying story elements (Character, Setting, 
 ```
 
 ### 2.2 Control Specifications
+
+**Dialog Title:**
+- Dynamic: `Copy Elements from "{StoryName}" to Another Outline`
+- StoryName from Overview element or filename if unnamed
 
 **Header Area:**
 - Target file picker: Browse button + text field showing selected path
@@ -292,8 +298,19 @@ On [Save] button:
 
 | File | Pattern |
 |------|---------|
-| `NarrativeTool.xaml` | Dual-pane layout |
-| `NarrativeToolVM.cs` | Tool ViewModel pattern |
-| `ElementPicker.xaml` | ListView with filter |
+| `StoryCADLib/Services/Dialogs/ElementPicker.xaml` | **Primary template** - ListView with ComboBox filter |
+| `StoryCADLib/ViewModels/ElementPickerVM.cs` | ViewModel pattern for filtered lists |
+| `NarrativeTool.xaml` | Dual-pane layout reference |
 | `OutlineService.cs` | OpenFile() method |
 | `CharacterModel.cs` | Property copying reference |
+
+## 12. UI Review Checkpoint
+
+**IMPORTANT:** After Phase 1 (Infrastructure) is complete, conduct a live UI review before proceeding:
+
+1. Build and run with basic dialog shell
+2. Verify layout looks correct
+3. Test target file picker flow
+4. Review with user before implementing copy logic
+
+This prevents wasted effort if layout needs adjustment.
