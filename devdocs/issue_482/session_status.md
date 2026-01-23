@@ -65,11 +65,20 @@ PR #1272 code review by Jake Shaw identified 8 items:
 
 **User Direction:** Clone NarrativeTool as template for layout, use ListViews instead of TreeViews.
 
-**Button Bar (simplified):**
-- ← Copy selected from source to destination
-- → Remove (only session-copied)
+**Layout:**
+- LEFT: Source (current outline) - copy FROM here
+- RIGHT: Target (opened file) - copy TO here
+- Target picker row with Browse button + path display
+
+**Button Bar:**
+- → Copy from source to target (left to right)
+- ← Remove from target (only session-copied)
 - ↑↓ Navigate
 - NO: Copy all, Add section, Trash
+
+**Footer:**
+- [Cancel] - close without saving
+- [Save] - save target file and close
 
 ### Design Plan Complete
 

@@ -7,7 +7,7 @@
 
 ## 1. Overview
 
-This design implements a dialog for copying story elements (Character, Setting, StoryWorld, Problem, Notes, Web) between StoryCAD outlines. The primary use case is copying worldbuilding elements between stories in a series.
+This design implements a dialog for copying story elements (Character, Setting, StoryWorld, Problem, Notes, Web) from the current outline to another outline. The primary use case is copying worldbuilding elements to other stories in a series.
 
 ---
 
@@ -16,61 +16,61 @@ This design implements a dialog for copying story elements (Character, Setting, 
 ### 2.1 Dialog Structure
 
 ```
-+----------------------------------------------------------------+
-| Copy Elements from Another Outline                         [X]  |
-+----------------------------------------------------------------+
-| [Source: Browse...] C:\path\to\source.stbx                      |
-+----------------------------------------------------------------+
-| Filter: [Character v]                                           |
-+----------------------------------------------------------------+
-|                                                                 |
-| DESTINATION (Current)     |     | SOURCE (Opened File)          |
-| ----------------------    | [←] | ----------------------         |
-| [ListView]                | [→] | [ListView]                     |
-|   - John Smith            | [↑] |   - Mary Jones                 |
-|   - Jane Doe              | [↓] |   - Bob Wilson                 |
-|   - ...                   |     |   - ...                        |
-|                           |     |                                |
-+----------------------------------------------------------------+
-| Status: Ready | 2 elements copied this session                  |
-+----------------------------------------------------------------+
-|                              [Done]                             |
-+----------------------------------------------------------------+
++---------------------------------------------------------------+
+| Copy Elements to Another Outline                          [X] |
++---------------------------------------------------------------+
+| Target: [Browse...] [path/to/target.stbx                    ] |
++---------------------------------------------------------------+
+| Filter: [Character v]                                         |
++---------------------------------------------------------------+
+|                                                               |
+| SOURCE (Current Outline) |     | TARGET (Opened File)         |
+| ----------------------   | [→] | ----------------------        |
+| [ListView]               | [←] | [ListView]                    |
+|   - John Smith           | [↑] |   - Mary Jones                |
+|   - Jane Doe             | [↓] |   - Bob Wilson                |
+|   - ...                  |     |   - ...                       |
+|                          |     |                               |
++---------------------------------------------------------------+
+| Status: 2 elements copied this session      [Cancel] [Save]   |
++---------------------------------------------------------------+
 ```
 
 ### 2.2 Control Specifications
 
 **Header Area:**
-- Source file path display with Browse button
+- Target file picker: Browse button + text field showing selected path
 - Filter ComboBox with element types: Character, Setting, StoryWorld, Problem, Notes, Web
 
-**Left Pane (Destination - Current Document):**
+**Left Pane (Source - Current Outline):**
 - ListView with single selection
 - Items filtered by selected type
 - DisplayMemberPath="Name"
 - Shows elements from `AppState.CurrentDocument.Model`
+- Read-only (cannot modify current outline from this dialog)
 
-**Button Bar (Vertical, Center) - SIMPLIFIED:**
+**Button Bar (Vertical, Center):**
 
 | Button | Action | Notes |
 |--------|--------|-------|
-| ← | Copy selected source element to destination | Main action |
-| → | Remove selected destination element | ONLY elements copied this session |
+| → | Copy selected source element to target | Main action (left to right) |
+| ← | Remove selected target element | ONLY elements copied this session |
 | ↑ | Navigate up in selected list | |
 | ↓ | Navigate down in selected list | |
 
 **NOT included:** Copy all, Add section/folder, Trash/Delete
 
-**Right Pane (Source - Opened File):**
+**Right Pane (Target - Opened File):**
 - ListView with single selection
 - Items filtered by selected type
 - DisplayMemberPath="Name"
-- Shows elements from loaded source StoryModel
+- Shows elements from loaded target StoryModel
 
 **Footer:**
 - Status message area
 - Count of elements copied this session
-- Done button (primary)
+- [Cancel] button - close without saving target file
+- [Save] button - save target file and close
 
 ---
 
@@ -87,26 +87,28 @@ Location: `StoryCADLib/ViewModels/Tools/CopyElementsDialogVM.cs`
 - ILogService
 
 **Key Properties:**
-- `SourceModel` - StoryModel loaded from source file
-- `SourceFilePath` - Path display
+- `TargetModel` - StoryModel loaded from target file
+- `TargetFilePath` - Path display for target file
 - `SelectedFilterType` - StoryItemType for filtering
-- `DestinationElements` - ObservableCollection for left list
-- `SourceElements` - ObservableCollection for right list
-- `SelectedDestinationElement` - Current selection (left)
-- `SelectedSourceElement` - Current selection (right)
+- `SourceElements` - ObservableCollection for left list (current outline)
+- `TargetElements` - ObservableCollection for right list (target file)
+- `SelectedSourceElement` - Current selection (left, from current outline)
+- `SelectedTargetElement` - Current selection (right, from target file)
 - `StatusMessage` - Status text
 - `CopiedCount` - Session copy count
 
 **Session Tracking:**
 - `_copiedElementIds` - HashSet<Guid> of elements copied this session
-- Used to enable/disable → button (remove only session-copied)
+- Used to enable/disable ← button (remove only session-copied)
 
 **Commands:**
-- `BrowseSourceCommand` - Open file picker
-- `CopyElementCommand` - ← button
-- `RemoveElementCommand` - → button
+- `BrowseTargetCommand` - Open file picker for target
+- `CopyElementCommand` - → button (copy source to target)
+- `RemoveElementCommand` - ← button (remove from target)
 - `MoveUpCommand` - ↑ button
 - `MoveDownCommand` - ↓ button
+- `SaveCommand` - Save target file
+- `CancelCommand` - Close without saving
 
 **Filter Types:**
 ```csharp
@@ -157,19 +159,19 @@ public List<StoryItemType> CopyableTypes { get; } = new()
 ### 5.1 Purpose
 
 Track which elements were copied during this dialog session:
-1. **Safe removal**: Only session-copied elements can be removed via → button
-2. **Prevents accidents**: Cannot delete existing destination elements
-3. **Scope**: Closing dialog clears tracking (normal save behavior applies)
+1. **Safe removal**: Only session-copied elements can be removed via ← button
+2. **Prevents accidents**: Cannot delete existing target elements
+3. **Scope**: Closing dialog without saving discards all copies
 
 ### 5.2 Implementation
 
 ```csharp
 private readonly HashSet<Guid> _copiedElementIds = new();
 
-// On copy:
+// On copy (→ button):
 _copiedElementIds.Add(newElement.Uuid);
 
-// On remove check:
+// On remove check (← button):
 if (!_copiedElementIds.Contains(selectedElement.Uuid))
 {
     StatusMessage = "Can only remove elements copied this session.";
@@ -181,17 +183,26 @@ if (!_copiedElementIds.Contains(selectedElement.Uuid))
 
 ## 6. File Handling
 
-### 6.1 Loading Source File
+### 6.1 Loading Target File
 
 Use existing `OutlineService.OpenFile(path)`:
 - Returns StoryModel without affecting AppState.CurrentDocument
+- Target file loaded into `TargetModel` property
 - No side effects on current document
 
-### 6.2 Validation
+### 6.2 Saving Target File
 
-- Cannot select current file as source
+On [Save] button:
+- Use `OutlineService.WriteModel(TargetModel, TargetFilePath)`
+- Save the target file with copied elements
+- Current document is NOT modified
+
+### 6.3 Validation
+
+- Cannot select current file as target (would cause conflicts)
 - Handle file not found
 - Handle corrupt/invalid files
+- Warn if target has unsaved changes before closing
 
 ---
 
