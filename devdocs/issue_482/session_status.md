@@ -258,14 +258,6 @@ Do NOT:
 
 ### Next Steps for New Session
 
-**Bug 3: Target List Clears on Filter Change - FIXED**
-
-**Root Cause:** `RefreshTargetElements()` filtered target elements by `SelectedFilterType`. When user changed filter, copied elements from previous type disappeared from view.
-
-**Fix:** Changed `RefreshTargetElements()` to show ALL session-copied elements (using `_copiedElementIds`) instead of filtering by type. Now users see cumulative progress across all element types.
-
-**Test Updated:** `RefreshTargetElements_AfterLoadingFile_PopulatesTargetList` renamed to `RefreshTargetElements_AfterLoadingFile_IsEmptyUntilElementsCopied` to reflect new behavior.
-
 ### Implementation Complete ✅
 
 All bugs fixed, all tests passing. Ready for final review and merge.

@@ -501,13 +501,13 @@ public class CopyElementsDialogVMTests
     }
 
     [TestMethod]
-    public async Task RefreshTargetElements_AfterLoadingFile_IsEmptyUntilElementsCopied()
+    public async Task RefreshTargetElements_AfterLoadingFile_PopulatesTargetList()
     {
         // Arrange
         var vm = Ioc.Default.GetRequiredService<CopyElementsDialogVM>();
         var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
 
-        // Create target file with characters (these should NOT appear in target list)
+        // Create target file with characters
         var testModel = await outlineService.CreateModel("Target Story", "Test Author", 0);
         new CharacterModel("Target Character 1", testModel, testModel.ExplorerView[0]);
         new CharacterModel("Target Character 2", testModel, testModel.ExplorerView[0]);
@@ -524,9 +524,9 @@ public class CopyElementsDialogVMTests
             vm.SelectedFilterType = StoryItemType.Character;
             vm.RefreshTargetElements();
 
-            // Assert - target list shows only session-copied elements, not existing elements
-            Assert.AreEqual(0, vm.TargetElements.Count,
-                "Target list should be empty until elements are copied this session");
+            // Assert
+            Assert.AreEqual(2, vm.TargetElements.Count,
+                "Should have 2 characters from target file");
         }
         finally
         {
