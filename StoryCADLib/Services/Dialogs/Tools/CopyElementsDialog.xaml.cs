@@ -24,6 +24,6 @@ public sealed partial class CopyElementsDialog : Page
     private void FilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         VM.RefreshSourceElements();
-        VM.RefreshTargetElements();
+        // Target list accumulates copied elements - doesn't refresh on filter change
     }
 }

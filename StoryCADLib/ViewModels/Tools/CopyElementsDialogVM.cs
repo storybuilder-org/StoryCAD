@@ -110,7 +110,7 @@ public class CopyElementsDialogVM : ObservableRecipient
             if (SetProperty(ref _selectedFilterType, value))
             {
                 RefreshSourceElements();
-                RefreshTargetElements();
+                // Don't refresh target - it accumulates copied elements regardless of filter
             }
         }
     }
@@ -335,11 +335,10 @@ public class CopyElementsDialogVM : ObservableRecipient
             StatusMessage = $"Target loaded: {targetName}";
             _logger.Log(LogLevel.Info, $"Target file loaded successfully: {targetName}");
 
-            // Refresh target elements if filter is selected
-            if (SelectedFilterType != default)
-            {
-                RefreshTargetElements();
-            }
+            // Clear copied elements when target changes - starting fresh with new target
+            TargetElements.Clear();
+            _copiedElementIds.Clear();
+            CopiedCount = 0;
         }
         catch (Exception ex)
         {
@@ -569,10 +568,14 @@ public class CopyElementsDialogVM : ObservableRecipient
             _logger.LogException(LogLevel.Warn, ex, "Error copying properties - element created but may be incomplete");
         }
 
-        // Track the copied element
+        // Track the copied element and add to target list directly
         _copiedElementIds.Add(copiedUuid);
         CopiedCount++;
-        RefreshTargetElements();
+        var copiedElement = TargetModel.StoryElements.FirstOrDefault(e => e.Uuid == copiedUuid);
+        if (copiedElement != null)
+        {
+            TargetElements.Add(copiedElement);
+        }
         StatusMessage = $"Copied: {SelectedSourceElement.Name}";
         _logger.Log(LogLevel.Info, $"Copied {SelectedSourceElement.Name} to target with GUID {copiedUuid}");
     }
@@ -622,9 +625,9 @@ public class CopyElementsDialogVM : ObservableRecipient
         _copiedElementIds.Remove(elementToRemove.Uuid);
         CopiedCount--;
 
-        // Clear selection and refresh
+        // Remove from target list directly and clear selection
+        TargetElements.Remove(elementToRemove);
         SelectedTargetElement = null;
-        RefreshTargetElements();
 
         StatusMessage = $"Removed: {elementName}";
         _logger.Log(LogLevel.Info, $"Removed element: {elementName}");
