@@ -361,6 +361,9 @@
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Topic Information"
                                             Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}" />
+                            <MenuFlyoutItem Text="Copy Elements to Another Outline"
+                                            Command="{x:Bind ShellVm.CopyElementsCommand, Mode=OneWay}"
+                                            ToolTipService.ToolTip="Copy story elements to another outline file" />
                             <MenuFlyoutSubItem Text="Plotting Aids">
                                 <MenuFlyoutItem win:Text="Master Plots                Ctrl+M" skia:Text="Master Plots                ⌘M"
                                                 Command="{x:Bind ShellVm.MasterPlotsCommand, Mode=OneWay}">

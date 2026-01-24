@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using StoryCADLib.DAL;
 using StoryCADLib.Models.Tools;
+using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backend;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator;
@@ -84,6 +85,7 @@ public static class BootStrapper
         Services.AddSingleton<StoryIO>();
         Services.AddSingleton<MySqlIo>();
         Services.AddSingleton<OutlineService>();
+        Services.AddSingleton<SemanticKernelApi>();
         Services.AddSingleton<BackupService>();
         Services.AddSingleton<AutoSaveService>();
         Services.AddSingleton<BackendService>();
@@ -122,6 +124,7 @@ public static class BootStrapper
         Services.AddSingleton<PrintReportDialogVM>();
         Services.AddSingleton<NarrativeToolVM>();
         Services.AddSingleton<ElementPickerVM>();
+        Services.AddSingleton<CopyElementsDialogVM>();
         // Register Tools ViewModels
         Services.AddSingleton<KeyQuestionsViewModel>();
         Services.AddSingleton<TopicsViewModel>();
