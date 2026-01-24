@@ -257,8 +257,10 @@ public class CopyElementsDialogVM : ObservableRecipient
             return;
         }
 
+        // Show ALL elements copied this session, regardless of filter type
+        // This allows users to see their cumulative progress across all types
         var elements = TargetModel.StoryElements
-            .Where(e => e.ElementType == SelectedFilterType);
+            .Where(e => _copiedElementIds.Contains(e.Uuid));
 
         foreach (var element in elements)
         {
