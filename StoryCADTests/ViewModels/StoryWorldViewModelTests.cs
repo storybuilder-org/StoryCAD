@@ -171,4 +171,47 @@ public class StoryWorldViewModelTests
         Assert.IsNotNull(viewModel.SystemTypeList);
         Assert.AreSame(listData.ListControlSource["SystemType"], viewModel.SystemTypeList);
     }
+
+    [TestMethod]
+    public void FontWeight_IsBold_WhenFieldHasContent()
+    {
+        // Arrange
+        var viewModel = Ioc.Default.GetRequiredService<StoryWorldViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var storyModel = new StoryModel();
+        appState.CurrentDocument = new StoryDocument(storyModel);
+        var model = new StoryWorldModel("Test", storyModel, null);
+        viewModel.Activate(model);
+
+        // Add a culture entry
+        viewModel.AddCultureCommand.Execute(null);
+
+        // Act - set content (RichEditBoxExtended normalizes to RTF, but any non-empty string works)
+        viewModel.CurrentCultureValues = "Some content";
+
+        // Assert - should be bold (weight 700)
+        Assert.AreEqual((ushort)700, viewModel.CultureValuesFontWeight.Weight);
+    }
+
+    [TestMethod]
+    public void FontWeight_IsNormal_WhenFieldIsEmpty()
+    {
+        // Arrange
+        var viewModel = Ioc.Default.GetRequiredService<StoryWorldViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var storyModel = new StoryModel();
+        appState.CurrentDocument = new StoryDocument(storyModel);
+        var model = new StoryWorldModel("Test", storyModel, null);
+        viewModel.Activate(model);
+
+        // Add a culture entry with content
+        viewModel.AddCultureCommand.Execute(null);
+        viewModel.CurrentCultureValues = "Some content";
+
+        // Act - clear content (RichEditBoxExtended sets to "" when plain text is empty)
+        viewModel.CurrentCultureValues = "";
+
+        // Assert - should be normal (weight 400)
+        Assert.AreEqual((ushort)400, viewModel.CultureValuesFontWeight.Weight);
+    }
 }
