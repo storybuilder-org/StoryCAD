@@ -152,6 +152,7 @@
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
                         <Setter Target="ShellSplitView.DisplayMode" Value="Inline" />
+                        <Setter Target="ShellSplitView.IsPaneOpen" Value="True" />
                     </VisualState.Setters>
                 </VisualState>
                 <!-- Narrow layout: overlay (below 800px) -->
