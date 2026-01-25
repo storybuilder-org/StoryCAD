@@ -2,8 +2,8 @@
 
 **Issue:** [StoryCAD #25 - Alternate use of Hamburger button for small screens and tablets](https://github.com/storybuilder-org/StoryCAD/issues/25)
 **Log Started:** 2026-01-25
-**Status:** Research
-**Branch:** None yet
+**Status:** Implementation (MVP complete)
+**Branch:** issue-25-responsive-layout
 
 ---
 
@@ -123,5 +123,73 @@ Improve responsive design for small screens, tablets, and portrait orientation. 
 - Prototype: Add VisualStateManager to Shell.xaml
 - Test on Windows and macOS with different window sizes
 - Future: Add mobile orientation detection when targeting iOS/Android
+
+---
+
+### 2026-01-25 - Session 2: Implementation (MVP)
+
+**Participants:** User (Terry), Claude Code
+
+**Context:** Implemented Option A (Visual State Manager only) for responsive layout.
+
+#### Actions Taken
+
+1. Created branch `issue-25-responsive-layout` from `dev`
+2. Added VisualStateManager to Shell.xaml with AdaptiveTriggers
+3. Added unit tests for `IsPaneOpen` and `TogglePaneCommand`
+
+#### Implementation Details
+
+**Shell.xaml changes:**
+- Added `VisualStateManager.VisualStateGroups` inside the root Grid
+- `WideState` (≥800px): `DisplayMode="Inline"` (side-by-side layout)
+- `NarrowState` (<800px): `DisplayMode="Overlay"`, `IsPaneOpen="False"` (pane overlays content)
+- Triggers ordered largest→smallest per UNO Platform requirements
+
+```xml
+<VisualStateManager.VisualStateGroups>
+    <VisualStateGroup>
+        <VisualState x:Name="WideState">
+            <VisualState.StateTriggers>
+                <AdaptiveTrigger MinWindowWidth="800" />
+            </VisualState.StateTriggers>
+            <VisualState.Setters>
+                <Setter Target="ShellSplitView.DisplayMode" Value="Inline" />
+            </VisualState.Setters>
+        </VisualState>
+        <VisualState x:Name="NarrowState">
+            <VisualState.StateTriggers>
+                <AdaptiveTrigger MinWindowWidth="0" />
+            </VisualState.StateTriggers>
+            <VisualState.Setters>
+                <Setter Target="ShellSplitView.DisplayMode" Value="Overlay" />
+                <Setter Target="ShellSplitView.IsPaneOpen" Value="False" />
+            </VisualState.Setters>
+        </VisualState>
+    </VisualStateGroup>
+</VisualStateManager.VisualStateGroups>
+```
+
+#### Tests Added
+
+**ShellViewModelTests.cs - Navigation Pane Toggle Tests:**
+1. `IsPaneOpen_DefaultsToTrue` - Verifies default pane state
+2. `TogglePaneCommand_WhenPaneOpen_ClosesPaneOnExecute` - Toggle from open to closed
+3. `TogglePaneCommand_WhenPaneClosed_OpensPaneOnExecute` - Toggle from closed to open
+4. `TogglePaneCommand_MultipleTimes_AlternatesState` - Multiple toggles work correctly
+5. `IsPaneOpen_WhenSet_RaisesPropertyChanged` - Property notification works
+
+All 5 tests pass.
+
+#### Build Status
+
+✅ Build succeeded
+✅ All new tests pass
+
+#### Next Steps
+
+- Manual testing: Resize window to verify layout changes at 800px breakpoint
+- Test on macOS to verify UNO Platform compatibility
+- Consider adding CompactOverlay mode for intermediate widths (future enhancement)
 
 ---
