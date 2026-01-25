@@ -293,7 +293,9 @@ public sealed partial class Shell : Page
 
     private void AdjustSplitViewPane(double width)
     {
-        if (ShellSplitView != null && ShellSplitView.IsPaneOpen)
+        // Always set OpenPaneLength regardless of pane state, so when the pane
+        // opens (e.g., via VisualStateManager), it has the correct width
+        if (ShellSplitView != null)
         {
             var pane = Math.Max(200, width * 0.3);
             ShellSplitView.OpenPaneLength = pane;
