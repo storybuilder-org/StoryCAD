@@ -155,7 +155,7 @@
                         <Setter Target="ShellSplitView.IsPaneOpen" Value="True" />
                     </VisualState.Setters>
                 </VisualState>
-                <!-- Narrow layout: overlay (below 800px) -->
+                <!-- Narrow layout: overlay full-width (below 800px) -->
                 <VisualState x:Name="NarrowState">
                     <VisualState.StateTriggers>
                         <AdaptiveTrigger MinWindowWidth="0" />
@@ -163,6 +163,7 @@
                     <VisualState.Setters>
                         <Setter Target="ShellSplitView.DisplayMode" Value="Overlay" />
                         <Setter Target="ShellSplitView.IsPaneOpen" Value="False" />
+                        <Setter Target="ShellSplitView.OpenPaneLength" Value="2000" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>

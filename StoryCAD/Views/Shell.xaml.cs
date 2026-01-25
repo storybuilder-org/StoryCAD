@@ -297,7 +297,9 @@ public sealed partial class Shell : Page
         // opens (e.g., via VisualStateManager), it has the correct width
         if (ShellSplitView != null)
         {
-            var pane = Math.Max(200, width * 0.3);
+            // In narrow mode (<800px), pane should fill entire width for full-screen toggle
+            // In wide mode (>=800px), pane should be 30% of width (min 200px)
+            var pane = width < 800 ? width : Math.Max(200, width * 0.3);
             ShellSplitView.OpenPaneLength = pane;
         }
     }
