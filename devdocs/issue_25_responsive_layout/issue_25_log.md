@@ -193,3 +193,90 @@ All 5 tests pass.
 - Consider adding CompactOverlay mode for intermediate widths (future enhancement)
 
 ---
+
+### 2026-01-25 - Session 3: Bug Fixes from Manual Testing
+
+**Participants:** User (Terry), Claude Code
+
+**Context:** Manual testing revealed three issues with the initial implementation.
+
+#### Bug 1: Pane doesn't reopen when widening window
+
+**Problem:** Narrowing the window closed the pane correctly, but widening past 800px didn't automatically reopen it.
+
+**Cause:** WideState only set `DisplayMode="Inline"` but didn't restore `IsPaneOpen="True"`.
+
+**Fix:** Added `<Setter Target="ShellSplitView.IsPaneOpen" Value="True" />` to WideState.
+
+**Commit:** `e6b26935`
+
+#### Bug 2: Pane too narrow when reopening
+
+**Problem:** When the pane reopened after widening, it was much narrower than expected (not 30% of window).
+
+**Cause:** `AdjustSplitViewPane()` only set `OpenPaneLength` when pane was already open. The `SizeChanged` event fired before VisualStateManager opened the pane, so the width wasn't recalculated.
+
+**Fix:** Removed `IsPaneOpen` check from `AdjustSplitViewPane()` so it always sets the correct width.
+
+**Commit:** `c7e6fa5b`
+
+#### Bug 3: Narrow mode should toggle between pane-only and content-only
+
+**Problem:** In narrow mode, hamburger toggled overlay (pane partially covering content) instead of switching between full-screen pane and full-screen content.
+
+**Expected behavior:**
+- Narrow mode: Toggle between pane-only (full width) and content-only
+- Wide mode: Toggle pane visibility (30% width)
+
+**Fix:** Modified `AdjustSplitViewPane()` to set pane width to 100% when `width < 800`, and 30% otherwise.
+
+**Commit:** `7c579353`
+
+#### Final Implementation
+
+**Shell.xaml VisualStateManager:**
+```xml
+<VisualState x:Name="WideState">
+    <VisualState.StateTriggers>
+        <AdaptiveTrigger MinWindowWidth="800" />
+    </VisualState.StateTriggers>
+    <VisualState.Setters>
+        <Setter Target="ShellSplitView.DisplayMode" Value="Inline" />
+        <Setter Target="ShellSplitView.IsPaneOpen" Value="True" />
+    </VisualState.Setters>
+</VisualState>
+<VisualState x:Name="NarrowState">
+    <VisualState.StateTriggers>
+        <AdaptiveTrigger MinWindowWidth="0" />
+    </VisualState.StateTriggers>
+    <VisualState.Setters>
+        <Setter Target="ShellSplitView.DisplayMode" Value="Overlay" />
+        <Setter Target="ShellSplitView.IsPaneOpen" Value="False" />
+        <Setter Target="ShellSplitView.OpenPaneLength" Value="2000" />
+    </VisualState.Setters>
+</VisualState>
+```
+
+**Shell.xaml.cs AdjustSplitViewPane:**
+```csharp
+private void AdjustSplitViewPane(double width)
+{
+    if (ShellSplitView != null)
+    {
+        // In narrow mode (<800px), pane should fill entire width for full-screen toggle
+        // In wide mode (>=800px), pane should be 30% of width (min 200px)
+        var pane = width < 800 ? width : Math.Max(200, width * 0.3);
+        ShellSplitView.OpenPaneLength = pane;
+    }
+}
+```
+
+#### Status
+
+✅ All manual tests pass:
+- Narrow → Wide: Pane reappears at correct width
+- Wide → Narrow: Pane closes, content shows full-screen
+- Narrow hamburger toggle: Switches between pane-only and content-only
+- Wide hamburger toggle: Shows/hides 30% pane
+
+---
