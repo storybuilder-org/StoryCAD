@@ -145,6 +145,34 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+
+        <!-- Responsive Layout: Adapt SplitView based on window width -->
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <!-- Wide layout: side-by-side (800px and above) -->
+                <VisualState x:Name="WideState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="800" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="ShellSplitView.DisplayMode" Value="Inline" />
+                        <Setter Target="ShellSplitView.IsPaneOpen" Value="True" />
+                    </VisualState.Setters>
+                </VisualState>
+                <!-- Narrow layout: overlay full-width (below 800px) -->
+                <VisualState x:Name="NarrowState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="ShellSplitView.DisplayMode" Value="Overlay" />
+                        <Setter Target="ShellSplitView.IsPaneOpen" Value="False" />
+                        <Setter Target="ShellSplitView.OpenPaneLength" Value="2000" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
         <!-- Command Bar -->
         <CommandBar Background="{x:Bind Windowing.PrimaryColor, Mode=OneWay}" HorizontalAlignment="Stretch"
                     IsOpen="False" Padding="2,0" Margin="0,0" Width="auto" OverflowButtonVisibility="Collapsed">
