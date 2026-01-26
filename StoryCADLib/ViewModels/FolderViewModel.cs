@@ -89,14 +89,18 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IRelo
 
     public void Activate(object parameter)
     {
+        var param = parameter as FolderModel;
+        _logger.Log(LogLevel.Info, $"FolderViewModel.Activate: parameter={param?.Name} (Uuid={param?.Uuid})");
         _changeable = false;  // Disable change tracking before setting Model
         _changed = false;
         Model = (FolderModel)parameter;
+        _logger.Log(LogLevel.Info, $"FolderViewModel.Activate: Model set to {Model?.Name} (Uuid={Model?.Uuid})");
         LoadModel(); // Load the ViewModel from the Story
     }
 
     public void Deactivate(object parameter)
     {
+        _logger.Log(LogLevel.Info, $"FolderViewModel.Deactivate: Saving to Model={Model?.Name} (Uuid={Model?.Uuid})");
         SaveModel(); // Save the ViewModel back to the Story
     }
 

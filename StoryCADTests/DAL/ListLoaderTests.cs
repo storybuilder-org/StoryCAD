@@ -87,10 +87,10 @@ public class ListLoaderTests
         Assert.IsTrue(lists.ContainsKey("AgencySource"));
         Assert.IsTrue(lists.ContainsKey("ToneLogic"));
         Assert.IsTrue(lists.ContainsKey("SystemType"));
-        // Verify sample list counts
-        Assert.AreEqual(7, lists["Season"].Count);
-        Assert.AreEqual(5, lists["Viewpoint"].Count);
-        Assert.AreEqual(5, lists["Tense"].Count);
+        // Counts include empty string at index 0 for SelectedItem binding (Issue #1267)
+        Assert.AreEqual(8, lists["Season"].Count);
+        Assert.AreEqual(6, lists["Viewpoint"].Count);
+        Assert.AreEqual(6, lists["Tense"].Count);
     }
 
     [TestMethod]

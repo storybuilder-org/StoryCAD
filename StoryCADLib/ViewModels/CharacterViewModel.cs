@@ -516,14 +516,19 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable, IR
 
     public void Activate(object parameter)
     {
+        var param = parameter as CharacterModel;
+        _logger.Log(LogLevel.Info, $"CharacterViewModel.Activate: parameter={param?.Name} (Uuid={param?.Uuid})");
         _changeable = false;  // Disable change tracking before setting Model
         _changed = false;
         Model = (CharacterModel)parameter;
+        _logger.Log(LogLevel.Info, $"CharacterViewModel.Activate: Model set to {Model?.Name} (Uuid={Model?.Uuid})");
         LoadModel(); // Load the ViewModel from the Story
     }
 
     public void Deactivate(object parameter)
     {
+        _logger.Log(LogLevel.Info, $"CharacterViewModel.Deactivate: Saving to Model={Model?.Name} (Uuid={Model?.Uuid})");
+        _logger.Log(LogLevel.Info, $"CharacterViewModel.Deactivate: Current VM values - Role={Role}, StoryRole={StoryRole}, Archetype={Archetype}");
         SaveModel(); // Save the ViewModel back to the Story
     }
 
