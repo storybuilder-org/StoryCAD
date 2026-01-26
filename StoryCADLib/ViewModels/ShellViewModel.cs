@@ -33,6 +33,7 @@ public class ShellViewModel : ObservableRecipient
     private const string SettingPage = "SettingPage";
     private const string TrashCanPage = "TrashCanPage";
     private const string WebPage = "WebPage";
+    private const string StoryWorldPage = "StoryWorldPage";
     public readonly AutoSaveService _autoSaveService;
     public readonly BackupService _BackupService;
     private readonly NavigationService _navigationService;
@@ -187,6 +188,8 @@ public class ShellViewModel : ObservableRecipient
             SerializationLock.CanExecuteCommands);
         AddSceneCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Scene),
             SerializationLock.CanExecuteCommands);
+        AddStoryWorldCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.StoryWorld),
+            CanAddStoryWorld);
         ConvertToSceneCommand =
             new RelayCommand(OutlineManager.ConvertProblemToScene, SerializationLock.CanExecuteCommands);
         ConvertToProblemCommand =
@@ -410,6 +413,7 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand AddNotesCommand { get; }
     public RelayCommand AddSettingCommand { get; }
     public RelayCommand AddSceneCommand { get; }
+    public RelayCommand AddStoryWorldCommand { get; }
     public RelayCommand ConvertToSceneCommand { get; }
     public RelayCommand ConvertToProblemCommand { get; }
     public RelayCommand PrintNodeCommand { get; }
@@ -687,6 +691,10 @@ public class ShellViewModel : ObservableRecipient
                         CurrentPageType = TrashCanPage;
                         _navigationService.NavigateTo(SplitViewFrame, TrashCanPage, element);
                         break;
+                    case StoryItemType.StoryWorld:
+                        CurrentPageType = StoryWorldPage;
+                        _navigationService.NavigateTo(SplitViewFrame, StoryWorldPage, element);
+                        break;
                 }
 
                 CurrentNode.IsExpanded = true;
@@ -842,6 +850,10 @@ public class ShellViewModel : ObservableRecipient
                 // TrashCanPage doesn't have data to save
                 Logger.Log(LogLevel.Trace, "TrashCanPage has no data to save");
                 break;
+            case StoryWorldPage:
+                var storyWorldVm = Ioc.Default.GetRequiredService<StoryWorldViewModel>();
+                storyWorldVm.SaveModel();
+                break;
             default:
                 Logger.Log(LogLevel.Error, $"SaveModel: Unrecognized page type {pageType}");
                 break;
@@ -898,6 +910,7 @@ public class ShellViewModel : ObservableRecipient
         AddNotesCommand.NotifyCanExecuteChanged();
         AddSettingCommand.NotifyCanExecuteChanged();
         AddSceneCommand.NotifyCanExecuteChanged();
+        AddStoryWorldCommand.NotifyCanExecuteChanged();
         ConvertToSceneCommand.NotifyCanExecuteChanged();
         ConvertToProblemCommand.NotifyCanExecuteChanged();
         RemoveStoryElementCommand.NotifyCanExecuteChanged();
@@ -907,6 +920,18 @@ public class ShellViewModel : ObservableRecipient
         RemoveFromNarrativeCommand.NotifyCanExecuteChanged();
     }
 
+    /// <summary>
+    /// Determines if StoryWorld can be added.
+    /// Returns false if commands are blocked or a StoryWorld already exists.
+    /// </summary>
+    private bool CanAddStoryWorld()
+    {
+        if (!SerializationLock.CanExecuteCommands())
+            return false;
+        if (State.CurrentDocument?.Model == null)
+            return false;
+        return !outlineService.StoryWorldExists(State.CurrentDocument.Model);
+    }
 
     private async void OpenPreferences()
     {

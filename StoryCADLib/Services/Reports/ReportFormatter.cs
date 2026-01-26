@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text;
 using NRtfTree.Util;
+using StoryCADLib.Models.StoryWorld;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.ViewModels.SubViewModels;
 using StoryCADLib.ViewModels.Tools;
@@ -116,6 +117,224 @@ public class ReportFormatter
         }
 
         return doc.GetRtf();
+    }
+
+    public async Task<string> FormatStoryWorldReport()
+    {
+        await EnsureTemplatesLoadedAsync();
+        var world = (StoryWorldModel)_storyModel.StoryElements.FirstOrDefault(element =>
+            element.ElementType == StoryItemType.StoryWorld);
+
+        if (world == null)
+        {
+            // No StoryWorld element exists, return empty RTF
+            RtfDocument emptyDoc = new(string.Empty);
+            emptyDoc.AddText("No Story World defined.");
+            return emptyDoc.GetRtf();
+        }
+
+        var lines = _templates["Story World"];
+        RtfDocument doc = new(string.Empty);
+
+        // Parse and write the report
+        foreach (var line in lines)
+        {
+            StringBuilder sb = new(line);
+
+            // World Structure section
+            if (line.Contains("@WorldStructure"))
+            {
+                sb.Clear();
+                if (!string.IsNullOrEmpty(world.WorldType))
+                {
+                    sb.AppendLine($"    World Type: {world.WorldType}");
+                    sb.AppendLine();
+                    var (description, examples) = GetWorldTypeInfo(world.WorldType);
+                    if (!string.IsNullOrEmpty(description))
+                    {
+                        sb.AppendLine($"    {description}");
+                        sb.AppendLine();
+                    }
+                    if (!string.IsNullOrEmpty(examples))
+                    {
+                        sb.AppendLine($"    Works in this category: {examples}");
+                    }
+                }
+            }
+
+            // Physical Worlds section
+            else if (line.Contains("@PhysicalWorlds"))
+            {
+                sb.Clear();
+                foreach (var entry in world.PhysicalWorlds)
+                {
+                    sb.AppendLine($"    --- {entry.Name ?? "Unnamed"} ---");
+                    if (!string.IsNullOrEmpty(entry.Geography)) sb.AppendLine($"    Geography: {GetText(entry.Geography)}");
+                    if (!string.IsNullOrEmpty(entry.Climate)) sb.AppendLine($"    Climate: {GetText(entry.Climate)}");
+                    if (!string.IsNullOrEmpty(entry.NaturalResources)) sb.AppendLine($"    Natural Resources: {GetText(entry.NaturalResources)}");
+                    if (!string.IsNullOrEmpty(entry.Flora)) sb.AppendLine($"    Flora: {GetText(entry.Flora)}");
+                    if (!string.IsNullOrEmpty(entry.Fauna)) sb.AppendLine($"    Fauna: {GetText(entry.Fauna)}");
+                    if (!string.IsNullOrEmpty(entry.Astronomy)) sb.AppendLine($"    Astronomy: {GetText(entry.Astronomy)}");
+                    sb.AppendLine();
+                }
+            }
+
+            // Species section
+            else if (line.Contains("@Species"))
+            {
+                sb.Clear();
+                foreach (var entry in world.Species)
+                {
+                    sb.AppendLine($"    --- {entry.Name ?? "Unnamed"} ---");
+                    if (!string.IsNullOrEmpty(entry.PhysicalTraits)) sb.AppendLine($"    Physical Traits: {GetText(entry.PhysicalTraits)}");
+                    if (!string.IsNullOrEmpty(entry.Lifespan)) sb.AppendLine($"    Lifespan: {GetText(entry.Lifespan)}");
+                    if (!string.IsNullOrEmpty(entry.Origins)) sb.AppendLine($"    Origins: {GetText(entry.Origins)}");
+                    if (!string.IsNullOrEmpty(entry.SocialStructure)) sb.AppendLine($"    Social Structure: {GetText(entry.SocialStructure)}");
+                    if (!string.IsNullOrEmpty(entry.Diversity)) sb.AppendLine($"    Diversity: {GetText(entry.Diversity)}");
+                    sb.AppendLine();
+                }
+            }
+
+            // Cultures section
+            else if (line.Contains("@Cultures"))
+            {
+                sb.Clear();
+                foreach (var entry in world.Cultures)
+                {
+                    sb.AppendLine($"    --- {entry.Name ?? "Unnamed"} ---");
+                    if (!string.IsNullOrEmpty(entry.Values)) sb.AppendLine($"    Values: {GetText(entry.Values)}");
+                    if (!string.IsNullOrEmpty(entry.Customs)) sb.AppendLine($"    Customs: {GetText(entry.Customs)}");
+                    if (!string.IsNullOrEmpty(entry.Taboos)) sb.AppendLine($"    Taboos: {GetText(entry.Taboos)}");
+                    if (!string.IsNullOrEmpty(entry.Art)) sb.AppendLine($"    Art: {GetText(entry.Art)}");
+                    if (!string.IsNullOrEmpty(entry.DailyLife)) sb.AppendLine($"    Daily Life: {GetText(entry.DailyLife)}");
+                    if (!string.IsNullOrEmpty(entry.Entertainment)) sb.AppendLine($"    Entertainment: {GetText(entry.Entertainment)}");
+                    sb.AppendLine();
+                }
+            }
+
+            // Governments section
+            else if (line.Contains("@Governments"))
+            {
+                sb.Clear();
+                foreach (var entry in world.Governments)
+                {
+                    sb.AppendLine($"    --- {entry.Name ?? "Unnamed"} ---");
+                    if (!string.IsNullOrEmpty(entry.Type)) sb.AppendLine($"    Type: {GetText(entry.Type)}");
+                    if (!string.IsNullOrEmpty(entry.PowerStructures)) sb.AppendLine($"    Power Structures: {GetText(entry.PowerStructures)}");
+                    if (!string.IsNullOrEmpty(entry.Laws)) sb.AppendLine($"    Laws: {GetText(entry.Laws)}");
+                    if (!string.IsNullOrEmpty(entry.ClassStructure)) sb.AppendLine($"    Class Structure: {GetText(entry.ClassStructure)}");
+                    if (!string.IsNullOrEmpty(entry.ForeignRelations)) sb.AppendLine($"    Foreign Relations: {GetText(entry.ForeignRelations)}");
+                    sb.AppendLine();
+                }
+            }
+
+            // Religions section
+            else if (line.Contains("@Religions"))
+            {
+                sb.Clear();
+                foreach (var entry in world.Religions)
+                {
+                    sb.AppendLine($"    --- {entry.Name ?? "Unnamed"} ---");
+                    if (!string.IsNullOrEmpty(entry.Deities)) sb.AppendLine($"    Deities: {GetText(entry.Deities)}");
+                    if (!string.IsNullOrEmpty(entry.Beliefs)) sb.AppendLine($"    Beliefs: {GetText(entry.Beliefs)}");
+                    if (!string.IsNullOrEmpty(entry.Practices)) sb.AppendLine($"    Practices: {GetText(entry.Practices)}");
+                    if (!string.IsNullOrEmpty(entry.Organizations)) sb.AppendLine($"    Organizations: {GetText(entry.Organizations)}");
+                    if (!string.IsNullOrEmpty(entry.CreationMyths)) sb.AppendLine($"    Creation Myths: {GetText(entry.CreationMyths)}");
+                    sb.AppendLine();
+                }
+            }
+
+            // History section
+            else if (line.Contains("@History"))
+            {
+                sb.Clear();
+                if (!string.IsNullOrEmpty(world.FoundingEvents)) sb.AppendLine($"    Founding Events: {GetText(world.FoundingEvents)}");
+                if (!string.IsNullOrEmpty(world.MajorConflicts)) sb.AppendLine($"    Major Conflicts: {GetText(world.MajorConflicts)}");
+                if (!string.IsNullOrEmpty(world.Eras)) sb.AppendLine($"    Eras: {GetText(world.Eras)}");
+                if (!string.IsNullOrEmpty(world.TechnologicalShifts)) sb.AppendLine($"    Technological Shifts: {GetText(world.TechnologicalShifts)}");
+                if (!string.IsNullOrEmpty(world.LostKnowledge)) sb.AppendLine($"    Lost Knowledge: {GetText(world.LostKnowledge)}");
+            }
+
+            // Economy section
+            else if (line.Contains("@Economy"))
+            {
+                sb.Clear();
+                if (!string.IsNullOrEmpty(world.EconomicSystem)) sb.AppendLine($"    Economic System: {GetText(world.EconomicSystem)}");
+                if (!string.IsNullOrEmpty(world.Currency)) sb.AppendLine($"    Currency: {GetText(world.Currency)}");
+                if (!string.IsNullOrEmpty(world.TradeRoutes)) sb.AppendLine($"    Trade Routes: {GetText(world.TradeRoutes)}");
+                if (!string.IsNullOrEmpty(world.Professions)) sb.AppendLine($"    Professions: {GetText(world.Professions)}");
+                if (!string.IsNullOrEmpty(world.WealthDistribution)) sb.AppendLine($"    Wealth Distribution: {GetText(world.WealthDistribution)}");
+            }
+
+            // Magic/Technology section
+            else if (line.Contains("@MagicTechnology"))
+            {
+                sb.Clear();
+                if (!string.IsNullOrEmpty(world.SystemType)) sb.AppendLine($"    System Type: {world.SystemType}");
+                if (!string.IsNullOrEmpty(world.Source)) sb.AppendLine($"    Source: {GetText(world.Source)}");
+                if (!string.IsNullOrEmpty(world.Rules)) sb.AppendLine($"    Rules: {GetText(world.Rules)}");
+                if (!string.IsNullOrEmpty(world.Limitations)) sb.AppendLine($"    Limitations: {GetText(world.Limitations)}");
+                if (!string.IsNullOrEmpty(world.Cost)) sb.AppendLine($"    Cost: {GetText(world.Cost)}");
+                if (!string.IsNullOrEmpty(world.Practitioners)) sb.AppendLine($"    Practitioners: {GetText(world.Practitioners)}");
+                if (!string.IsNullOrEmpty(world.SocialImpact)) sb.AppendLine($"    Social Impact: {GetText(world.SocialImpact)}");
+            }
+
+            doc.AddText(sb.ToString());
+            doc.AddNewLine();
+        }
+
+        return doc.GetRtf();
+    }
+
+    /// <summary>
+    /// Returns description and examples for a World Type.
+    /// </summary>
+    private static (string Description, string Examples) GetWorldTypeInfo(string worldType)
+    {
+        return worldType switch
+        {
+            "Consensus Reality" => (
+                "The world operates exactly as expected - no magic, no hidden layers, no alternate physics. " +
+                "\"Consensus\" refers to a specific group or subculture whose reality you're depicting.",
+                "87th Precinct • Harry Bosch • Rabbit series • Grisham novels • Big Little Lies"),
+
+            "Enchanted Reality" => (
+                "Our world, but reality is porous. The impossible happens and is accepted rather than analyzed. " +
+                "Magic or the supernatural exists but isn't systematized - it simply is.",
+                "One Hundred Years of Solitude • Like Water for Chocolate • Beloved • Pan's Labyrinth"),
+
+            "Hidden World" => (
+                "Our world, but with concealed magical or supernatural layers beneath or alongside normal reality. " +
+                "The \"mundane\" world operates normally, but a secret realm exists that most people don't know about.",
+                "Harry Potter • Dresden Files • American Gods • The Matrix • Men in Black • Percy Jackson"),
+
+            "Divergent World" => (
+                "Our world, but history or conditions diverged at some point. " +
+                "The rules of reality remain rational and logical, but society, technology, or events developed differently.",
+                "The Man in the High Castle • 11/22/63 • Neuromancer • The Handmaid's Tale"),
+
+            "Constructed World" => (
+                "A fully invented reality with its own geography, history, peoples, and rules. " +
+                "The world doesn't derive from Earth at all - it's built from scratch.",
+                "A Song of Ice and Fire • Discworld • Dune • Star Wars • The Stormlight Archive"),
+
+            "Mythic World" => (
+                "A world where narrative meaning matters more than physical causality. " +
+                "Fate, prophecy, and archetypes drive events. Things happen because they're meaningful, not because of cause and effect.",
+                "The Lord of the Rings • Earthsea • The Chronicles of Narnia • Circe • The Once and Future King"),
+
+            "Estranged World" => (
+                "A world that feels fundamentally alien or wrong. Rules may exist, but they resist human intuition. " +
+                "The familiar becomes strange.",
+                "Solaris • Annihilation • Perdido Street Station • Blindsight • 2001: A Space Odyssey"),
+
+            "Broken World" => (
+                "A world where civilization, environment, or social order has collapsed or been corrupted. " +
+                "Survival replaces progress. Resources are scarce, institutions have failed.",
+                "The Road • Mad Max • 1984 • The Walking Dead • Station Eleven • A Canticle for Leibowitz"),
+
+            _ => ("", "")
+        };
     }
 
     public async Task<string> FormatProblemReport(StoryElement element)

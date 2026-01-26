@@ -15,5 +15,6 @@ public enum StoryItemType
     Web,
     Notes,
     TrashCan,
+    StoryWorld,
     Unknown
 }

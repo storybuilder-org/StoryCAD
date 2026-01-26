@@ -1361,6 +1361,116 @@ public class ShellViewModelTests
 
     #endregion
 
+    #region AddStoryWorld Tests
+
+    /// <summary>
+    ///     Tests that adding StoryWorld via OutlineService works correctly.
+    ///     This is the underlying logic triggered by the Alt+B keyboard shortcut.
+    ///     Note: We test at service level because the command involves UI thread operations.
+    /// </summary>
+    [TestMethod]
+    public async Task AddStoryWorld_ViaOutlineService_AddsStoryWorldToModel()
+    {
+        // Arrange
+        var outlineService = Ioc.Default.GetService<OutlineService>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+
+        // Create a model without StoryWorld
+        var model = await outlineService.CreateModel("TestStory", "TestAuthor", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
+
+        var overview = model.ExplorerView.First();
+
+        // Verify no StoryWorld exists initially
+        var initialStoryWorld = model.StoryElements
+            .FirstOrDefault(e => e.ElementType == StoryItemType.StoryWorld);
+        Assert.IsNull(initialStoryWorld, "StoryWorld should not exist initially");
+
+        // Act - call OutlineService directly (what the command eventually calls)
+        var storyWorld = outlineService.AddStoryElement(model, StoryItemType.StoryWorld, overview);
+
+        // Assert
+        Assert.IsNotNull(storyWorld, "StoryWorld should be created");
+        Assert.AreEqual(StoryItemType.StoryWorld, storyWorld.ElementType);
+
+        var foundInModel = model.StoryElements
+            .FirstOrDefault(e => e.ElementType == StoryItemType.StoryWorld);
+        Assert.IsNotNull(foundInModel, "StoryWorld should exist in model after creation");
+    }
+
+    /// <summary>
+    ///     Tests that StoryWorld is a singleton - only one can exist per model.
+    ///     OutlineService returns null if trying to add a second.
+    /// </summary>
+    [TestMethod]
+    public async Task AddStoryWorld_WhenStoryWorldExists_ReturnsNull()
+    {
+        // Arrange
+        var outlineService = Ioc.Default.GetService<OutlineService>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+
+        // Create a model and add StoryWorld
+        var model = await outlineService.CreateModel("TestStory", "TestAuthor", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
+
+        var overview = model.ExplorerView.First();
+
+        // Add first StoryWorld
+        var first = outlineService.AddStoryElement(model, StoryItemType.StoryWorld, overview);
+        Assert.IsNotNull(first, "First StoryWorld should be created");
+
+        var storyWorldCount = model.StoryElements
+            .Count(e => e.ElementType == StoryItemType.StoryWorld);
+        Assert.AreEqual(1, storyWorldCount, "Should have exactly one StoryWorld");
+
+        // Act - try to add second StoryWorld
+        var second = outlineService.AddStoryElement(model, StoryItemType.StoryWorld, overview);
+
+        // Assert - should return null (singleton enforced)
+        Assert.IsNull(second, "Second StoryWorld should return null (singleton)");
+
+        // Verify still only one exists
+        var finalCount = model.StoryElements
+            .Count(e => e.ElementType == StoryItemType.StoryWorld);
+        Assert.AreEqual(1, finalCount, "Should still have only one StoryWorld (singleton)");
+    }
+
+    /// <summary>
+    ///     Tests that CanAddStoryWorld returns false when StoryWorld exists.
+    /// </summary>
+    [TestMethod]
+    public async Task CanAddStoryWorld_WhenStoryWorldExists_ReturnsFalse()
+    {
+        // Arrange
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var outlineService = Ioc.Default.GetService<OutlineService>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+
+        var model = await outlineService.CreateModel("TestStory", "TestAuthor", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
+
+        var overview = model.ExplorerView.First();
+
+        // Verify command can execute initially
+        Assert.IsTrue(shell.AddStoryWorldCommand.CanExecute(null),
+            "Should be able to add StoryWorld when none exists");
+
+        // Add StoryWorld
+        outlineService.AddStoryElement(model, StoryItemType.StoryWorld, overview);
+
+        // Refresh CanExecute state
+        shell.AddStoryWorldCommand.NotifyCanExecuteChanged();
+
+        // Assert - command should not be executable now
+        Assert.IsFalse(shell.AddStoryWorldCommand.CanExecute(null),
+            "Should not be able to add StoryWorld when one already exists");
+    }
+
+    #endregion
+
     #region Navigation Pane Toggle Tests
 
     /// <summary>

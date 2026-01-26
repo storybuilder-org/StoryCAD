@@ -27,6 +27,7 @@ public partial class App : Application
     private const string SettingPage = "SettingPage";
     private const string TrashCanPage = "TrashCanPage";
     private const string WebPage = "WebPage";
+    private const string StoryWorldPage = "StoryWorldPage";
 
     private readonly ILogService _log;
     private string launchPath = string.Empty;
@@ -106,6 +107,7 @@ public partial class App : Application
             nav.Configure(ScenePage, typeof(ScenePage));
             nav.Configure(TrashCanPage, typeof(TrashCanPage));
             nav.Configure(WebPage, typeof(WebPage));
+            nav.Configure(StoryWorldPage, typeof(StoryWorldPage));
         }
         catch (Exception ex)
         {

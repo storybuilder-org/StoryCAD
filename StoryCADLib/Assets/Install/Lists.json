@@ -2672,5 +2672,59 @@
                  "Mongolian",
                  "Oriental",
                  "Polynesian"
-             ]
+             ],
+    "WorldType":  [
+                      "Consensus Reality",
+                      "Enchanted Reality",
+                      "Hidden World",
+                      "Divergent World",
+                      "Constructed World",
+                      "Mythic World",
+                      "Estranged World",
+                      "Broken World"
+                  ],
+    "Ontology":  [
+                     "Mundane",
+                     "Supernatural",
+                     "Scientific Speculative",
+                     "Hybrid",
+                     "Symbolic"
+                 ],
+    "WorldRelation":  [
+                          "Primary World",
+                          "Divergent Earth",
+                          "Secondary World",
+                          "Layered",
+                          "Multiversal"
+                      ],
+    "RuleTransparency":  [
+                             "Explicit Rules",
+                             "Implicit Rules",
+                             "Capricious",
+                             "Symbolic Rules"
+                         ],
+    "ScaleOfDifference":  [
+                              "Cosmetic",
+                              "Structural",
+                              "Cosmological"
+                          ],
+    "AgencySource":  [
+                         "Human-Centric",
+                         "Nonhuman Intelligences",
+                         "Fate / Providence",
+                         "Systemic Forces"
+                     ],
+    "ToneLogic":  [
+                      "Rational",
+                      "Mythic",
+                      "Whimsical",
+                      "Dark / Entropic",
+                      "Transcendent"
+                  ],
+    "SystemType":  [
+                       "Magic",
+                       "Technology",
+                       "Both",
+                       "Neither"
+                   ]
 }

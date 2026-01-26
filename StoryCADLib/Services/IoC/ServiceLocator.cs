@@ -109,6 +109,7 @@ public static class BootStrapper
         Services.AddSingleton<FolderViewModel>();
         Services.AddSingleton<WebViewModel>();
         Services.AddSingleton<TrashCanViewModel>();
+        Services.AddSingleton<StoryWorldViewModel>();
         Services.AddSingleton<FileOpenVM>();
         Services.AddSingleton<InitVM>();
         Services.AddSingleton<BackupNowVM>();

@@ -144,8 +144,9 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     [Description("""
                  Gets all story elements of a specific type from the current model.
                  Use this to find all Characters, Scenes, Settings, Problems, etc.
-                 Valid types: Problem, Character, Setting, Scene, Folder, Section, Web, Notes.
-                 Note: StoryOverview and TrashCan types exist but are singleton elements.
+                 Valid types: Problem, Character, Setting, Scene, Folder, Section, Web, Notes, StoryWorld.
+                 Note: StoryOverview, TrashCan, and StoryWorld types exist but are singleton elements.
+                 For StoryWorld specifically, consider using GetStoryWorld() for convenience.
                  Returns a list of matching elements with their GUIDs and properties.
                  """)]
     public OperationResult<List<StoryElement>> GetElementsByType(StoryItemType elementType)
@@ -184,6 +185,44 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
         {
             return OperationResult<List<StoryElement>>.Failure(
                 $"Error retrieving elements by type: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    ///     Gets the StoryWorld element from the current model.
+    ///     StoryWorld is a singleton element (at most one per story) used for worldbuilding content.
+    /// </summary>
+    /// <returns>
+    ///     OperationResult with the StoryWorld element as payload if it exists,
+    ///     or success with null payload if no StoryWorld exists in the story.
+    /// </returns>
+    [KernelFunction]
+    [Description("""
+                 Gets the StoryWorld element from the current model.
+                 StoryWorld is a singleton element (at most one per story) containing worldbuilding information:
+                 world type classification, physical worlds, species, cultures, governments, religions,
+                 history, economy, and magic/technology systems.
+                 Returns the StoryWorld element if it exists, or null if the story has no StoryWorld.
+                 """)]
+    public OperationResult<StoryElement> GetStoryWorld()
+    {
+        if (CurrentModel == null)
+        {
+            return OperationResult<StoryElement>.Failure(
+                "No StoryModel available. Create a model first.");
+        }
+
+        try
+        {
+            var storyWorld = CurrentModel.StoryElements
+                .FirstOrDefault(e => e.ElementType == StoryItemType.StoryWorld);
+
+            return OperationResult<StoryElement>.Success(storyWorld);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<StoryElement>.Failure(
+                $"Error retrieving StoryWorld: {ex.Message}");
         }
     }
 

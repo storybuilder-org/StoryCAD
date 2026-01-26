@@ -1,0 +1,38 @@
+                             StoryCAD - Story World
+
+                  ============== World Structure =============
+
+@WorldStructure
+
+                  ============== Physical Worlds =============
+
+@PhysicalWorlds
+
+                  ============== People/Species =============
+
+@Species
+
+                  ============== Cultures =============
+
+@Cultures
+
+                  ============== Governments =============
+
+@Governments
+
+                  ============== Religions =============
+
+@Religions
+
+                  ============== History =============
+
+@History
+
+                  ============== Economy =============
+
+@Economy
+
+                  ============== Magic/Technology =============
+
+@MagicTechnology
+
