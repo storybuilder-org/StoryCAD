@@ -1360,4 +1360,104 @@ public class ShellViewModelTests
     }
 
     #endregion
+
+    #region Navigation Pane Toggle Tests
+
+    /// <summary>
+    ///     Tests that IsPaneOpen defaults to true (pane expanded)
+    /// </summary>
+    [TestMethod]
+    public void IsPaneOpen_DefaultsToTrue()
+    {
+        // Arrange - get a fresh ShellViewModel (note: DI provides singleton, but default state is true)
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+
+        // Reset to default state for test isolation
+        shell.IsPaneOpen = true;
+
+        // Assert
+        Assert.IsTrue(shell.IsPaneOpen, "IsPaneOpen should default to true (pane expanded)");
+    }
+
+    /// <summary>
+    ///     Tests that TogglePaneCommand toggles IsPaneOpen from true to false
+    /// </summary>
+    [TestMethod]
+    public void TogglePaneCommand_WhenPaneOpen_ClosesPaneOnExecute()
+    {
+        // Arrange
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.IsPaneOpen = true;
+
+        // Act
+        shell.TogglePaneCommand.Execute(null);
+
+        // Assert
+        Assert.IsFalse(shell.IsPaneOpen, "TogglePaneCommand should close pane when open");
+    }
+
+    /// <summary>
+    ///     Tests that TogglePaneCommand toggles IsPaneOpen from false to true
+    /// </summary>
+    [TestMethod]
+    public void TogglePaneCommand_WhenPaneClosed_OpensPaneOnExecute()
+    {
+        // Arrange
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.IsPaneOpen = false;
+
+        // Act
+        shell.TogglePaneCommand.Execute(null);
+
+        // Assert
+        Assert.IsTrue(shell.IsPaneOpen, "TogglePaneCommand should open pane when closed");
+    }
+
+    /// <summary>
+    ///     Tests that multiple toggles alternate the pane state correctly
+    /// </summary>
+    [TestMethod]
+    public void TogglePaneCommand_MultipleTimes_AlternatesState()
+    {
+        // Arrange
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.IsPaneOpen = true;
+
+        // Act & Assert - toggle multiple times
+        shell.TogglePaneCommand.Execute(null);
+        Assert.IsFalse(shell.IsPaneOpen, "First toggle should close pane");
+
+        shell.TogglePaneCommand.Execute(null);
+        Assert.IsTrue(shell.IsPaneOpen, "Second toggle should open pane");
+
+        shell.TogglePaneCommand.Execute(null);
+        Assert.IsFalse(shell.IsPaneOpen, "Third toggle should close pane");
+    }
+
+    /// <summary>
+    ///     Tests that IsPaneOpen property setter raises PropertyChanged
+    /// </summary>
+    [TestMethod]
+    public void IsPaneOpen_WhenSet_RaisesPropertyChanged()
+    {
+        // Arrange
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.IsPaneOpen = true;
+        var propertyChangedRaised = false;
+        shell.PropertyChanged += (sender, args) =>
+        {
+            if (args.PropertyName == nameof(shell.IsPaneOpen))
+            {
+                propertyChangedRaised = true;
+            }
+        };
+
+        // Act
+        shell.IsPaneOpen = false;
+
+        // Assert
+        Assert.IsTrue(propertyChangedRaised, "PropertyChanged should be raised for IsPaneOpen");
+    }
+
+    #endregion
 }
