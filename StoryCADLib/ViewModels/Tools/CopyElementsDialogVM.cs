@@ -243,6 +243,11 @@ public class CopyElementsDialogVM : ObservableRecipient
         {
             SourceElements.Add(element);
         }
+
+        if (SourceElements.Count == 0)
+        {
+            StatusMessage = $"No {SelectedFilterType} elements in current outline.";
+        }
     }
 
     /// <summary>
