@@ -126,6 +126,9 @@ public class ShellViewModel : ObservableRecipient
         NarrativeToolCommand =
             new RelayCommand(async () => await Ioc.Default.GetRequiredService<NarrativeToolVM>().OpenNarrativeTool(),
                 SerializationLock.CanExecuteCommands);
+        CopyElementsCommand =
+            new RelayCommand(async () => await Ioc.Default.GetRequiredService<CopyElementsDialogVM>().OpenCopyElementsDialog(),
+                SerializationLock.CanExecuteCommands);
         PrintNodeCommand = new RelayCommand(async () => await OutlineManager.PrintCurrentNodeAsync(),
             SerializationLock.CanExecuteCommands);
         OpenFileCommand = new RelayCommand(async () => await OutlineManager.OpenFile(),
@@ -418,6 +421,7 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand ConvertToProblemCommand { get; }
     public RelayCommand PrintNodeCommand { get; }
     public RelayCommand NarrativeToolCommand { get; }
+    public RelayCommand CopyElementsCommand { get; }
 
     // Remove command (move to trash)
     public AsyncRelayCommand RemoveStoryElementCommand { get; }
@@ -881,6 +885,7 @@ public class ShellViewModel : ObservableRecipient
         TogglePaneCommand.NotifyCanExecuteChanged();
         OpenFileOpenMenuCommand.NotifyCanExecuteChanged();
         NarrativeToolCommand.NotifyCanExecuteChanged();
+        CopyElementsCommand.NotifyCanExecuteChanged();
         PrintNodeCommand.NotifyCanExecuteChanged();
         OpenFileCommand.NotifyCanExecuteChanged();
         SaveFileCommand.NotifyCanExecuteChanged();

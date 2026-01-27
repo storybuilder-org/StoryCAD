@@ -91,6 +91,12 @@ public class StoryElement : ObservableObject
         model.StoryElements.StoryElementGuids.Remove(Uuid);
         Uuid = newGuid;
         model.StoryElements.StoryElementGuids.Add(newGuid, this);
+
+        // Also update the node's UUID to stay in sync
+        if (Node != null)
+        {
+            Node.Uuid = newGuid;
+        }
     }
 
     /// <summary>
