@@ -40,8 +40,8 @@ public sealed partial class NarrativeTool : Page
             return;
         }
 
-        var old = ShellVM.CurrentNode;
-        ShellVM.CurrentNode = ToolVM.SelectedNode;
+        var old = AppState.CurrentNode;
+        AppState.CurrentNode = ToolVM.SelectedNode;
         if ((sender as Button).Tag.ToString().Contains("UP"))
         {
             ShellVM.MoveUpCommand.Execute(null);
@@ -51,6 +51,6 @@ public sealed partial class NarrativeTool : Page
             ShellVM.MoveDownCommand.Execute(null);
         } //Move down
 
-        ShellVM.CurrentNode = old;
+        AppState.CurrentNode = old;
     }
 }

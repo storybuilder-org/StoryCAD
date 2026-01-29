@@ -231,7 +231,7 @@ public class FileOpenVM : ObservableRecipient
             // Reset view state to Explorer View in case we were in Narrative View
             shellVm.SelectedView = "Story Explorer View";
             shellVm.CurrentView = "Story Explorer View";
-            shellVm.CurrentViewType = StoryViewType.ExplorerView;
+            appState.CurrentViewType = StoryViewType.ExplorerView;
 
             shellVm.TreeViewNodeClicked(appState.CurrentDocument.Model.ExplorerView[0]);
         }

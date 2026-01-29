@@ -1,5 +1,6 @@
 using StoryCADLib.Models;
 using StoryCADLib.Services;
+using StoryCADLib.ViewModels;
 
 namespace StoryCADTests.Models;
 
@@ -75,4 +76,121 @@ public class AppStateTests
         {
         }
     }
+
+    #region CurrentViewType Tests (Issue #1146)
+
+    [TestMethod]
+    public void CurrentViewType_WhenSet_StoresValue()
+    {
+        // Arrange
+        var appState = new AppState();
+
+        // Act
+        appState.CurrentViewType = StoryViewType.NarratorView;
+
+        // Assert
+        Assert.AreEqual(StoryViewType.NarratorView, appState.CurrentViewType);
+    }
+
+    [TestMethod]
+    public void CurrentViewType_InitiallyDefault()
+    {
+        // Arrange
+        var appState = new AppState();
+
+        // Act & Assert - enum defaults to first value (0 = ExplorerView)
+        Assert.AreEqual(default(StoryViewType), appState.CurrentViewType);
+    }
+
+    #endregion
+
+    #region CurrentNode Tests (Issue #1146)
+
+    [TestMethod]
+    public void CurrentNode_WhenSet_StoresValue()
+    {
+        // Arrange
+        var appState = new AppState();
+        var model = new StoryModel();
+        var node = new StoryNodeItem(new OverviewModel("Test", model, null), null);
+
+        // Act
+        appState.CurrentNode = node;
+
+        // Assert
+        Assert.AreSame(node, appState.CurrentNode);
+    }
+
+    [TestMethod]
+    public void CurrentNode_InitiallyNull()
+    {
+        // Arrange
+        var appState = new AppState();
+
+        // Act & Assert
+        Assert.IsNull(appState.CurrentNode);
+    }
+
+    [TestMethod]
+    public void CurrentNode_CanBeSetToNull()
+    {
+        // Arrange
+        var appState = new AppState();
+        var model = new StoryModel();
+        var node = new StoryNodeItem(new OverviewModel("Test", model, null), null);
+        appState.CurrentNode = node;
+
+        // Act
+        appState.CurrentNode = null;
+
+        // Assert
+        Assert.IsNull(appState.CurrentNode);
+    }
+
+    #endregion
+
+    #region RightTappedNode Tests (Issue #1146)
+
+    [TestMethod]
+    public void RightTappedNode_WhenSet_StoresValue()
+    {
+        // Arrange
+        var appState = new AppState();
+        var model = new StoryModel();
+        var node = new StoryNodeItem(new OverviewModel("Test", model, null), null);
+
+        // Act
+        appState.RightTappedNode = node;
+
+        // Assert
+        Assert.AreSame(node, appState.RightTappedNode);
+    }
+
+    [TestMethod]
+    public void RightTappedNode_InitiallyNull()
+    {
+        // Arrange
+        var appState = new AppState();
+
+        // Act & Assert
+        Assert.IsNull(appState.RightTappedNode);
+    }
+
+    [TestMethod]
+    public void RightTappedNode_CanBeSetToNull()
+    {
+        // Arrange
+        var appState = new AppState();
+        var model = new StoryModel();
+        var node = new StoryNodeItem(new OverviewModel("Test", model, null), null);
+        appState.RightTappedNode = node;
+
+        // Act
+        appState.RightTappedNode = null;
+
+        // Assert
+        Assert.IsNull(appState.RightTappedNode);
+    }
+
+    #endregion
 }

@@ -206,7 +206,7 @@ public sealed partial class Shell : Page
         var item = (TreeViewItem)sender;
         item.Background = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
 
-        ShellVm.RightTappedNode = (StoryNodeItem)item.DataContext;
+        AppState.RightTappedNode = (StoryNodeItem)item.DataContext;
         ShellVm.LastClickedTreeviewItem = item; //We can't set the background through RightTappedNode so
         //we set a reference to the node itself to reset the background later
         ShellVm.ShowFlyoutButtons();

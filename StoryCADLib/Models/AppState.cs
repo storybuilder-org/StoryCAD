@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using StoryCADLib.Services;
+using StoryCADLib.ViewModels;
 
 #nullable enable
 
@@ -98,6 +99,33 @@ public class AppState
     ///     Null for pages without editable content (Home, Reports, etc.).
     /// </summary>
     public ISaveable? CurrentSaveable { get; set; }
+
+    #region Navigation State (Issue #1146)
+    // These properties were moved from ShellViewModel to enable service-layer access
+    // without ViewModel dependencies. All access must occur on the UI thread.
+
+    /// <summary>
+    ///     The current view type (Explorer or Narrator).
+    ///     Set by ShellViewModel.ViewChanged() when user switches views.
+    /// </summary>
+    public StoryViewType CurrentViewType { get; set; }
+
+    /// <summary>
+    ///     The currently selected node in the tree view.
+    ///     Set by ShellViewModel.TreeViewNodeClicked() when user clicks a node.
+    ///     Null when no node is selected.
+    /// </summary>
+    public StoryNodeItem? CurrentNode { get; set; }
+
+    /// <summary>
+    ///     The node that was right-clicked to open a context menu.
+    ///     Set by Shell.xaml.cs right-click handler.
+    ///     Used by tools that operate on the right-clicked node.
+    ///     Null when no node has been right-clicked.
+    /// </summary>
+    public StoryNodeItem? RightTappedNode { get; set; }
+
+    #endregion
 
     /// <summary>
     ///     The currently open story document, combining the model and its file path.
