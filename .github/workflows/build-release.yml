@@ -107,7 +107,7 @@ jobs:
             $v = "1.0.${{ github.run_number }}.65534"
           }
           "version=$v"       >> $env:GITHUB_OUTPUT
-          "tag_version=v$v"  >> $env:GITHUB_OUTPUT
+          "tag_version=$v"   >> $env:GITHUB_OUTPUT
           Write-Host "Generated version: $v"
           
       - name: Restore
