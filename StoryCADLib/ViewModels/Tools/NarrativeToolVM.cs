@@ -23,8 +23,6 @@ public class NarrativeToolVM : ObservableRecipient
 
     private readonly ILogService _logger;
 
-    // ShellViewModel required for CurrentViewType, CurrentNode, and RightTappedNode
-    // See ToolValidationService.cs:11-17 for refactoring plan (deferred - requires ~123 changes)
     private readonly ShellViewModel _shellVM;
     private readonly ToolValidationService _toolValidationService;
     private readonly Windowing _windowing;
@@ -75,15 +73,10 @@ public class NarrativeToolVM : ObservableRecipient
     /// </summary>
     public async Task OpenNarrativeTool()
     {
-        // Use ToolValidationService instead of direct OutlineViewModel dependency
-        // Note: Still requires ShellViewModel for state, see ToolValidationService docs for future refactoring
+        // ToolValidationService reads state from AppState (Issue #1146)
         if (_toolValidationService.VerifyToolUse(
-                _shellVM.CurrentViewType,
-                _shellVM.CurrentNode,
-                _shellVM.RightTappedNode,
-                _appState.CurrentDocument?.Model,
-                false, // explorerViewOnly
-                false)) // nodeRequired
+                explorerViewOnly: false,
+                nodeRequired: false))
         {
             using (new SerializationLock(_logger))
             {

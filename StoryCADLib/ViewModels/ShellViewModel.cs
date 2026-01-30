@@ -56,8 +56,6 @@ public class ShellViewModel : ObservableRecipient
     private ObservableCollection<StoryNodeItem> _targetCollection;
     private int _targetIndex;
 
-    public StoryViewType CurrentViewType;
-
     //File opened (if StoryCAD was opened via an STBX file)
     public string FilePathToLaunch;
     public bool IsClosing;
@@ -65,7 +63,6 @@ public class ShellViewModel : ObservableRecipient
 
     //List of new nodes that have a background, these are cleared on navigation
     public List<StoryNodeItem> NewNodeHighlightCache = new();
-    public StoryNodeItem RightTappedNode;
 
     // The right-hand (detail) side of ShellView
     public Frame SplitViewFrame;
@@ -231,8 +228,6 @@ public class ShellViewModel : ObservableRecipient
     // Public property for debugging PrintManager state
     public PrintReportDialogVM PrintReportDialog { get; }
 
-    // Navigation navigation landmark nodes
-    public StoryNodeItem CurrentNode { get; set; }
     public DateTime AppStartTime { get; set; } = DateTime.Now;
 
     // Track the current page type for SaveModel (testable without UI)
@@ -262,7 +257,7 @@ public class ShellViewModel : ObservableRecipient
                     break;
             }
 
-            CurrentViewType = State.CurrentDocument.Model.CurrentViewType;
+            State.CurrentViewType = State.CurrentDocument.Model.CurrentViewType;
             TreeViewNodeClicked(State.CurrentDocument.Model.CurrentView[0]);
         }
     }
@@ -279,7 +274,7 @@ public class ShellViewModel : ObservableRecipient
         try
         {
             //Trash Can - View Hide all buttons except Empty Trash.
-            if (StoryNodeItem.RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
+            if (StoryNodeItem.RootNodeType(State.RightTappedNode) == StoryItemType.TrashCan)
             {
                 ExplorerVisibility = Visibility.Collapsed;
                 NarratorVisibility = Visibility.Collapsed;
@@ -311,7 +306,7 @@ public class ShellViewModel : ObservableRecipient
         catch (Exception e) //errors (is RightTappedNode null?
         {
             Logger.Log(LogLevel.Error, $"An error occurred in ShowFlyoutButtons() \n{e.Message}\n" +
-                                       $"- For reference RightTappedNode is " + RightTappedNode);
+                                       $"- For reference RightTappedNode is " + State.RightTappedNode);
         }
     }
 
@@ -651,7 +646,7 @@ public class ShellViewModel : ObservableRecipient
         {
             if (selectedItem is StoryNodeItem node)
             {
-                CurrentNode = node;
+                State.CurrentNode = node;
                 var element = outlineService.GetStoryElementByGuid(State.CurrentDocument!.Model, node.Uuid);
                 switch (element.ElementType)
                 {
@@ -701,7 +696,7 @@ public class ShellViewModel : ObservableRecipient
                         break;
                 }
 
-                CurrentNode.IsExpanded = true;
+                State.CurrentNode.IsExpanded = true;
             }
 
             //Clears background of new nodes on navigation as well as the last node.
@@ -990,7 +985,7 @@ public class ShellViewModel : ObservableRecipient
     {
         if (SerializationLock.CanExecuteCommands())
         {
-            //if (CurrentNode == null)
+            //if (State.CurrentNode == null)
             //{
             //    Messenger.Send(new StatusChangedMessage(new("Select a node to collaborate on", LogLevel.Warn, true)));
             //    return;
@@ -1032,45 +1027,45 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
 
-        _sourceChildren = CurrentNode.Parent.Children;
-        _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
+        _sourceChildren = State.CurrentNode.Parent.Children;
+        _sourceIndex = _sourceChildren.IndexOf(State.CurrentNode);
         _targetCollection = null;
         _targetIndex = -1;
-        var targetParent = CurrentNode.Parent.Parent;
+        var targetParent = State.CurrentNode.Parent.Parent;
         // The source must become the parent's successor
-        _targetCollection = CurrentNode.Parent.Parent.Children;
-        _targetIndex = _targetCollection.IndexOf(CurrentNode.Parent) + 1;
+        _targetCollection = State.CurrentNode.Parent.Parent.Children;
+        _targetIndex = _targetCollection.IndexOf(State.CurrentNode.Parent) + 1;
 
         _sourceChildren.RemoveAt(_sourceIndex);
         if (_targetIndex == -1)
         {
-            _targetCollection.Add(CurrentNode);
+            _targetCollection.Add(State.CurrentNode);
         }
         else
         {
-            _targetCollection.Insert(_targetIndex, CurrentNode);
+            _targetCollection.Insert(_targetIndex, State.CurrentNode);
         }
 
-        CurrentNode.Parent = targetParent;
+        State.CurrentNode.Parent = targetParent;
         ShowChange();
-        Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} left to parent {CurrentNode.Parent.Name}");
+        Logger.Log(LogLevel.Info, $"Moving {State.CurrentNode.Name} left to parent {State.CurrentNode.Parent.Name}");
     }
 
     private bool MoveLeftIsValid()
     {
-        if (CurrentNode == null)
+        if (State.CurrentNode == null)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("Click or touch a node to move", LogLevel.Warn)));
             return false;
         }
 
-        if (CurrentNode.Parent != null && CurrentNode.Parent.IsRoot)
+        if (State.CurrentNode.Parent != null && State.CurrentNode.Parent.IsRoot)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot move further left", LogLevel.Warn)));
             return false;
         }
 
-        if (CurrentNode.Parent == null)
+        if (State.CurrentNode.Parent == null)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot move root node.", LogLevel.Warn)));
             return false;
@@ -1092,10 +1087,10 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
 
-        if (CurrentNode.Parent != null)
+        if (State.CurrentNode.Parent != null)
         {
-            _sourceChildren = CurrentNode.Parent.Children;
-            _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
+            _sourceChildren = State.CurrentNode.Parent.Children;
+            _sourceIndex = _sourceChildren.IndexOf(State.CurrentNode);
             _targetCollection = null;
             _targetIndex = -1;
         }
@@ -1106,7 +1101,7 @@ public class ShellViewModel : ObservableRecipient
         }
 
 
-        var sourceIndex = _sourceChildren.IndexOf(CurrentNode);
+        var sourceIndex = _sourceChildren.IndexOf(State.CurrentNode);
         StoryNodeItem targetParent;
         ObservableCollection<StoryNodeItem> targetCollection;
         int targetIndex;
@@ -1119,8 +1114,8 @@ public class ShellViewModel : ObservableRecipient
         }
         else
         {
-            var grandparentCollection = CurrentNode.Parent.Parent.Children;
-            var siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
+            var grandparentCollection = State.CurrentNode.Parent.Parent.Children;
+            var siblingIndex = grandparentCollection.IndexOf(State.CurrentNode.Parent) - 1;
 
             if (siblingIndex >= 0)
             {
@@ -1147,28 +1142,28 @@ public class ShellViewModel : ObservableRecipient
         }
 
         _sourceChildren.RemoveAt(sourceIndex);
-        targetCollection.Insert(targetIndex, CurrentNode);
-        CurrentNode.Parent = targetParent;
+        targetCollection.Insert(targetIndex, State.CurrentNode);
+        State.CurrentNode.Parent = targetParent;
         ShowChange();
-        Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} right to parent {CurrentNode.Parent.Name}");
+        Logger.Log(LogLevel.Info, $"Moving {State.CurrentNode.Name} right to parent {State.CurrentNode.Parent.Name}");
     }
 
     private bool MoveRightIsValid()
     {
-        if (CurrentNode == null)
+        if (State.CurrentNode == null)
         {
             ShowStatusMessage("Click or touch a node to move", LogLevel.Warn);
             return false;
         }
 
-        if (CurrentNode.Parent == null)
+        if (State.CurrentNode.Parent == null)
         {
             ShowStatusMessage("Cannot move root node.", LogLevel.Warn);
             return false;
         }
 
-        if (CurrentNode.Parent.Parent == null
-            && CurrentNode.Parent.Children.IndexOf(CurrentNode) == 0)
+        if (State.CurrentNode.Parent.Parent == null
+            && State.CurrentNode.Parent.Children.IndexOf(State.CurrentNode) == 0)
         {
             ShowStatusMessage("Cannot move further right", LogLevel.Warn);
             return false;
@@ -1185,22 +1180,22 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
 
-        _sourceChildren = CurrentNode.Parent.Children;
-        _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
+        _sourceChildren = State.CurrentNode.Parent.Children;
+        _sourceIndex = _sourceChildren.IndexOf(State.CurrentNode);
         _targetCollection = null;
         _targetIndex = -1;
-        var targetParent = CurrentNode.Parent;
+        var targetParent = State.CurrentNode.Parent;
 
         if (_sourceIndex == 0)
         {
-            if (CurrentNode.Parent.Parent == null)
+            if (State.CurrentNode.Parent.Parent == null)
             {
                 ShowStatusMessage("Cannot move up further", LogLevel.Warn);
                 return;
             }
 
-            var grandparentCollection = CurrentNode.Parent.Parent.Children;
-            var siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
+            var grandparentCollection = State.CurrentNode.Parent.Parent.Children;
+            var siblingIndex = grandparentCollection.IndexOf(State.CurrentNode.Parent) - 1;
 
             if (siblingIndex >= 0)
             {
@@ -1225,27 +1220,27 @@ public class ShellViewModel : ObservableRecipient
 
         if (_targetIndex == -1)
         {
-            _targetCollection.Add(CurrentNode);
+            _targetCollection.Add(State.CurrentNode);
         }
         else
         {
-            _targetCollection.Insert(_targetIndex, CurrentNode);
+            _targetCollection.Insert(_targetIndex, State.CurrentNode);
         }
 
-        CurrentNode.Parent = targetParent;
+        State.CurrentNode.Parent = targetParent;
         ShowChange();
-        Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} up to parent {CurrentNode.Parent.Name}");
+        Logger.Log(LogLevel.Info, $"Moving {State.CurrentNode.Name} up to parent {State.CurrentNode.Parent.Name}");
     }
 
     private bool MoveUpIsValid()
     {
-        if (CurrentNode == null)
+        if (State.CurrentNode == null)
         {
             ShowStatusMessage("Click or touch a node to move", LogLevel.Warn);
             return false;
         }
 
-        if (CurrentNode.IsRoot)
+        if (State.CurrentNode.IsRoot)
         {
             ShowStatusMessage("Cannot move up further", LogLevel.Warn);
             return false;
@@ -1262,18 +1257,18 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
 
-        _sourceChildren = CurrentNode.Parent.Children;
-        _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
+        _sourceChildren = State.CurrentNode.Parent.Children;
+        _sourceIndex = _sourceChildren.IndexOf(State.CurrentNode);
         _targetCollection = null;
         _targetIndex = 0;
-        var targetParent = CurrentNode.Parent;
+        var targetParent = State.CurrentNode.Parent;
 
         // If last child, must move to end parent's successor (sibling node).
         // If there are no siblings, we're at the bottom of the tree?
         if (_sourceIndex == _sourceChildren.Count - 1)
         {
             // Find the next sibling of the parent.
-            var nextParentSibling = GetNextSibling(CurrentNode.Parent);
+            var nextParentSibling = GetNextSibling(State.CurrentNode.Parent);
 
             // If there's no next sibling, then we're at the bottom of the first root's children.
             if (nextParentSibling == null)
@@ -1301,11 +1296,11 @@ public class ShellViewModel : ObservableRecipient
         }
 
         _sourceChildren.RemoveAt(_sourceIndex);
-        _targetCollection.Insert(_targetIndex, CurrentNode);
-        CurrentNode.Parent = targetParent;
+        _targetCollection.Insert(_targetIndex, State.CurrentNode);
+        State.CurrentNode.Parent = targetParent;
 
         ShowChange();
-        Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} down up to parent {CurrentNode.Parent.Name}");
+        Logger.Log(LogLevel.Info, $"Moving {State.CurrentNode.Name} down up to parent {State.CurrentNode.Parent.Name}");
     }
 
     public StoryNodeItem GetNextSibling(StoryNodeItem node)
@@ -1328,13 +1323,13 @@ public class ShellViewModel : ObservableRecipient
 
     private bool MoveDownIsValid()
     {
-        if (CurrentNode == null)
+        if (State.CurrentNode == null)
         {
             ShowStatusMessage("Click or touch a node to move", LogLevel.Warn);
             return false;
         }
 
-        if (CurrentNode.IsRoot)
+        if (State.CurrentNode.IsRoot)
         {
             ShowStatusMessage("Cannot move a root node", LogLevel.Warn);
             return false;
@@ -1540,8 +1535,8 @@ public class ShellViewModel : ObservableRecipient
     private void NameMessageReceived(NameChangedMessage name)
     {
         var _msg = name.Value;
-        CurrentNode.Name = _msg.NewName;
-        switch (CurrentNode.Type)
+        State.CurrentNode.Name = _msg.NewName;
+        switch (State.CurrentNode.Type)
         {
             case StoryItemType.Character:
                 //int charIndex = CharacterModel.CharacterNames.IndexOf(msg.OldName);

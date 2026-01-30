@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
+using StoryCADLib.Models;
 using StoryCADLib.Services.Messages;
 using static CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger;
 
@@ -6,47 +7,40 @@ namespace StoryCADLib.Services.Dialogs;
 
 /// <summary>
 ///     Service for validating tool usage prerequisites.
-///     IMPORTANT: This service is a temporary solution that still requires ShellViewModel parameters.
-///     This is part of the DI refactoring (Issue #1063) to extract validation logic from ViewModels.
-///     Issue #1146 tracks moving CurrentViewType, CurrentNode, and RightTappedNode properties
-///     from ShellViewModel to AppState to eliminate the ViewModel dependency entirely.
-///     This would require updating ~123 references across the codebase, so it's deferred to a separate task.
-///     This intermediate step allows us to:
-///     1. Extract the validation logic to a testable service
-///     2. Remove the direct dependency between NarrativeToolVM and OutlineViewModel
-///     3. Enable future incremental refactoring
+///     Reads navigation state (CurrentViewType, CurrentNode, RightTappedNode) from AppState.
+///     Issue #1146: Properties moved from ShellViewModel to AppState for service-layer access.
 /// </summary>
 public class ToolValidationService
 {
+    private readonly AppState _appState;
     private readonly ILogService _logger;
 
-    public ToolValidationService(ILogService logger)
+    public ToolValidationService(AppState appState, ILogService logger)
     {
+        _appState = appState;
         _logger = logger;
     }
 
     /// <summary>
     ///     Verifies that prerequisites are met for tool usage.
+    ///     Reads CurrentViewType, CurrentNode, and RightTappedNode from AppState.
+    ///     When nodeRequired is true and RightTappedNode is null but CurrentNode exists,
+    ///     sets RightTappedNode = CurrentNode as a fallback (side effect).
     /// </summary>
-    /// <param name="currentViewType">Current story view type from ShellViewModel</param>
-    /// <param name="currentNode">Currently selected node from ShellViewModel</param>
-    /// <param name="rightTappedNode">Right-clicked node from ShellViewModel</param>
-    /// <param name="model">Current story model from AppState</param>
     /// <param name="explorerViewOnly">If true, tool can only be used in Explorer view</param>
     /// <param name="nodeRequired">If true, a node must be selected</param>
     /// <param name="checkOutlineIsOpen">If true, checks that an outline is open</param>
     /// <returns>true if all prerequisites are met, false otherwise</returns>
     public bool VerifyToolUse(
-        StoryViewType? currentViewType,
-        StoryNodeItem currentNode,
-        StoryNodeItem rightTappedNode,
-        StoryModel model,
         bool explorerViewOnly,
         bool nodeRequired,
         bool checkOutlineIsOpen = true)
     {
         try
         {
+            var currentViewType = _appState.CurrentViewType;
+            var model = _appState.CurrentDocument?.Model;
+
             // Check if tool requires Explorer view
             if (explorerViewOnly && currentViewType != StoryViewType.ExplorerView)
             {
@@ -83,14 +77,20 @@ public class ToolValidationService
             // Check if a node is required and selected
             if (nodeRequired)
             {
-                // Use rightTappedNode if available, otherwise use currentNode
-                var nodeToUse = rightTappedNode ?? currentNode;
-
-                if (nodeToUse == null)
+                if (_appState.RightTappedNode == null)
                 {
-                    Default.Send(
-                        new StatusChangedMessage(new StatusMessage("You need to select a node first", LogLevel.Warn)));
-                    return false;
+                    if (_appState.CurrentNode != null)
+                    {
+                        // Fallback: use selected node as the target (side effect)
+                        _appState.RightTappedNode = _appState.CurrentNode;
+                    }
+                    else
+                    {
+                        // Both null - validation failure
+                        Default.Send(
+                            new StatusChangedMessage(new StatusMessage("You need to select a node first", LogLevel.Warn)));
+                        return false;
+                    }
                 }
             }
 
@@ -99,7 +99,7 @@ public class ToolValidationService
         catch (Exception ex)
         {
             _logger.LogException(LogLevel.Error, ex, "Error in ToolValidationService.VerifyToolUse()");
-            return false; // Return false to prevent any issues
+            return false;
         }
     }
 }
