@@ -168,13 +168,14 @@
                         <Setter Target="ShellSplitView.DisplayMode" Value="Overlay" />
                         <Setter Target="ShellSplitView.IsPaneOpen" Value="False" />
                         <Setter Target="ShellSplitView.OpenPaneLength" Value="2000" />
+                        <Setter Target="ShellCommandBar.OverflowButtonVisibility" Value="Auto" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
 
         <!-- Command Bar -->
-        <CommandBar Background="{x:Bind Windowing.PrimaryColor, Mode=OneWay}" HorizontalAlignment="Stretch"
+        <CommandBar x:Name="ShellCommandBar" Background="{x:Bind Windowing.PrimaryColor, Mode=OneWay}" HorizontalAlignment="Stretch"
                     IsOpen="False" Padding="2,0" Margin="0,0" Width="auto" OverflowButtonVisibility="Collapsed">
             <CommandBar.Content>
                 <StackPanel Orientation="Horizontal">
