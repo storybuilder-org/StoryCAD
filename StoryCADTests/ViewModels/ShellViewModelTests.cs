@@ -1341,13 +1341,13 @@ public class ShellViewModelTests
         var appState = Ioc.Default.GetRequiredService<AppState>();
 
         appState.CurrentDocument = null;
-        shellViewModel.IsClosing = false;
+        appState.IsClosing = false;
 
         // Act
         await shellViewModel.OnApplicationClosing();
 
         // Assert
-        Assert.IsTrue(shellViewModel.IsClosing, "IsClosing flag should be set to true");
+        Assert.IsTrue(appState.IsClosing, "IsClosing flag should be set to true");
     }
 
     [TestMethod]
