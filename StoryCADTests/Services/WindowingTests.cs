@@ -317,5 +317,24 @@ namespace StoryCADTests.Services
         }
 
         #endregion
+
+        #region UpdateWindowTitle Shutdown Guard Tests (Issue #1293)
+
+        [TestMethod]
+        public void UpdateWindowTitle_WhenIsClosing_ReturnsEarlyWithoutException()
+        {
+            // Arrange
+            var appState = Ioc.Default.GetRequiredService<AppState>();
+            appState.IsClosing = true;
+
+            // Act - should return early without throwing COMException
+            _windowing.UpdateWindowTitle();
+
+            // Assert - test passes if no exception thrown
+            // Reset state for other tests
+            appState.IsClosing = false;
+        }
+
+        #endregion
     }
 }

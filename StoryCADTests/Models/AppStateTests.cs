@@ -193,4 +193,45 @@ public class AppStateTests
     }
 
     #endregion
+
+    #region IsClosing Tests (Issue #1293)
+
+    [TestMethod]
+    public void IsClosing_InitiallyFalse()
+    {
+        // Arrange
+        var appState = new AppState();
+
+        // Act & Assert - should default to false
+        Assert.IsFalse(appState.IsClosing);
+    }
+
+    [TestMethod]
+    public void IsClosing_WhenSetTrue_StoresValue()
+    {
+        // Arrange
+        var appState = new AppState();
+
+        // Act
+        appState.IsClosing = true;
+
+        // Assert
+        Assert.IsTrue(appState.IsClosing);
+    }
+
+    [TestMethod]
+    public void IsClosing_CanBeResetToFalse()
+    {
+        // Arrange
+        var appState = new AppState();
+        appState.IsClosing = true;
+
+        // Act
+        appState.IsClosing = false;
+
+        // Assert
+        Assert.IsFalse(appState.IsClosing);
+    }
+
+    #endregion
 }

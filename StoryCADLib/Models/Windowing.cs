@@ -120,7 +120,7 @@ public class Windowing : ObservableRecipient
     /// </summary>
     public void UpdateWindowTitle()
     {
-        if (_appState.Headless) { return; }
+        if (_appState.Headless || _appState.IsClosing) { return; }
 
         string BaseTitle = "StoryCAD ";
 

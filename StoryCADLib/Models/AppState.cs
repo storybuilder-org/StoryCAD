@@ -25,6 +25,12 @@ public class AppState
     public bool Headless;
 
     /// <summary>
+    ///     Indicates the application is in the process of shutting down.
+    ///     Used to guard UI operations that would fail after window destruction.
+    /// </summary>
+    public bool IsClosing;
+
+    /// <summary>
     ///     Returns true if the app has loaded with a version change.
     ///     If this is true a changelog will show, install service will
     ///     run and the server will update the version.

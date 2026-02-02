@@ -48,7 +48,7 @@ public class ShellViewModel : ObservableRecipient
 
     public readonly ScrivenerIo Scrivener;
     private readonly SearchService Search;
-    private readonly AppState State;
+    private readonly AppState appState;
     private readonly Windowing Window;
     public ContentDialog _contentDialog;
     public ObservableCollection<StoryNodeItem> _sourceChildren;
@@ -58,7 +58,6 @@ public class ShellViewModel : ObservableRecipient
 
     //File opened (if StoryCAD was opened via an STBX file)
     public string FilePathToLaunch;
-    public bool IsClosing;
     public TreeViewItem LastClickedTreeviewItem;
 
     //List of new nodes that have a background, these are cleared on navigation
@@ -81,7 +80,7 @@ public class ShellViewModel : ObservableRecipient
         _autoSaveService = autoSaveService;
         _BackupService = backupService;
         Window = window;
-        State = appState;
+        this.appState = appState;
         Scrivener = scrivener;
         Preferences = preferenceService;
         _navigationService = navigationService;
@@ -92,7 +91,7 @@ public class ShellViewModel : ObservableRecipient
 
         // Register inter-MVVM messaging
         Messenger.Register<IsChangedRequestMessage>(this,
-            (_, m) => { m.Reply(State.CurrentDocument?.Model?.Changed ?? false); });
+            (_, m) => { m.Reply(this.appState.CurrentDocument?.Model?.Changed ?? false); });
         Messenger.Register<ShellViewModel, IsChangedMessage>(this, static (r, m) => r.IsChangedMessageReceived(m));
         Messenger.Register<ShellViewModel, IsBackupStatusMessage>(this,
             static (r, m) => r.BackupStatusMessageReceived(m));
@@ -103,10 +102,10 @@ public class ShellViewModel : ObservableRecipient
         Messenger.Register<ShellViewModel, ThemeChangedMessage>(this, static (r, m) => r.ThemeChangedMessageReceived());
         Messenger.Register<ShellViewModel, ActivateInstanceMessage>(this, static (r, m) => r.ActivateInstanceMessageReceived());
 
-        State.CurrentDocument = new StoryDocument(new StoryModel());
+        this.appState.CurrentDocument = new StoryDocument(new StoryModel());
 
         //Skip status timer initialization in Tests.
-        if (!State.Headless)
+        if (!this.appState.Headless)
         {
             _statusTimer = new DispatcherTimer();
             _statusTimer.Tick += statusTimer_Tick;
@@ -235,7 +234,7 @@ public class ShellViewModel : ObservableRecipient
 
     public void ViewChanged()
     {
-        if (State.CurrentDocument?.Model?.CurrentView == null || State.CurrentDocument.Model.CurrentView.Count == 0)
+        if (appState.CurrentDocument?.Model?.CurrentView == null || appState.CurrentDocument.Model.CurrentView.Count == 0)
         {
             Messenger.Send(
                 new StatusChangedMessage(new StatusMessage("You need to load a story first!", LogLevel.Warn)));
@@ -250,15 +249,15 @@ public class ShellViewModel : ObservableRecipient
             switch (CurrentView)
             {
                 case "Story Explorer View":
-                    outlineService.SetCurrentView(State.CurrentDocument.Model, StoryViewType.ExplorerView);
+                    outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
                     break;
                 case "Story Narrator View":
-                    outlineService.SetCurrentView(State.CurrentDocument.Model, StoryViewType.NarratorView);
+                    outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.NarratorView);
                     break;
             }
 
-            State.CurrentViewType = State.CurrentDocument.Model.CurrentViewType;
-            TreeViewNodeClicked(State.CurrentDocument.Model.CurrentView[0]);
+            appState.CurrentViewType = appState.CurrentDocument.Model.CurrentViewType;
+            TreeViewNodeClicked(appState.CurrentDocument.Model.CurrentView[0]);
         }
     }
 
@@ -274,7 +273,7 @@ public class ShellViewModel : ObservableRecipient
         try
         {
             //Trash Can - View Hide all buttons except Empty Trash.
-            if (StoryNodeItem.RootNodeType(State.RightTappedNode) == StoryItemType.TrashCan)
+            if (StoryNodeItem.RootNodeType(appState.RightTappedNode) == StoryItemType.TrashCan)
             {
                 ExplorerVisibility = Visibility.Collapsed;
                 NarratorVisibility = Visibility.Collapsed;
@@ -306,7 +305,7 @@ public class ShellViewModel : ObservableRecipient
         catch (Exception e) //errors (is RightTappedNode null?
         {
             Logger.Log(LogLevel.Error, $"An error occurred in ShowFlyoutButtons() \n{e.Message}\n" +
-                                       $"- For reference RightTappedNode is " + State.RightTappedNode);
+                                       $"- For reference RightTappedNode is " + appState.RightTappedNode);
         }
     }
 
@@ -600,7 +599,7 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public async Task CreateBackupNow()
     {
-        if (State.CurrentDocument?.Model?.CurrentView == null || State.CurrentDocument.Model.CurrentView.Count == 0)
+        if (appState.CurrentDocument?.Model?.CurrentView == null || appState.CurrentDocument.Model.CurrentView.Count == 0)
         {
             Messenger.Send(
                 new StatusChangedMessage(new StatusMessage("You need to load a story first!", LogLevel.Warn)));
@@ -616,7 +615,7 @@ public class ShellViewModel : ObservableRecipient
             PrimaryButtonText = "Create Backup",
             SecondaryButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
-            Content = new BackupNow(Path.GetFileNameWithoutExtension(State.CurrentDocument?.FilePath))
+            Content = new BackupNow(Path.GetFileNameWithoutExtension(appState.CurrentDocument?.FilePath))
         });
 
         //Check result
@@ -646,8 +645,8 @@ public class ShellViewModel : ObservableRecipient
         {
             if (selectedItem is StoryNodeItem node)
             {
-                State.CurrentNode = node;
-                var element = outlineService.GetStoryElementByGuid(State.CurrentDocument!.Model, node.Uuid);
+                appState.CurrentNode = node;
+                var element = outlineService.GetStoryElementByGuid(appState.CurrentDocument!.Model, node.Uuid);
                 switch (element.ElementType)
                 {
                     case StoryItemType.Character:
@@ -696,7 +695,7 @@ public class ShellViewModel : ObservableRecipient
                         break;
                 }
 
-                State.CurrentNode.IsExpanded = true;
+                appState.CurrentNode.IsExpanded = true;
             }
 
             //Clears background of new nodes on navigation as well as the last node.
@@ -743,7 +742,7 @@ public class ShellViewModel : ObservableRecipient
 
     public void ShowHomePage()
     {
-        if (!State.Headless)
+        if (!appState.Headless)
         {
             Logger.Log(LogLevel.Info, "ShowHomePage");
 
@@ -861,7 +860,7 @@ public class ShellViewModel : ObservableRecipient
 
     public void ResetModel()
     {
-        State.CurrentDocument = new StoryDocument(new StoryModel());
+        appState.CurrentDocument = new StoryDocument(new StoryModel());
     }
 
     #endregion
@@ -872,7 +871,7 @@ public class ShellViewModel : ObservableRecipient
     {
         // Don't update command state during application shutdown
         // COM infrastructure may be shutting down, causing E_UNEXPECTED exceptions
-        if (IsClosing)
+        if (appState.IsClosing)
         {
             return;
         }
@@ -928,9 +927,9 @@ public class ShellViewModel : ObservableRecipient
     {
         if (!SerializationLock.CanExecuteCommands())
             return false;
-        if (State.CurrentDocument?.Model == null)
+        if (appState.CurrentDocument?.Model == null)
             return false;
-        return !outlineService.StoryWorldExists(State.CurrentDocument.Model);
+        return !outlineService.StoryWorldExists(appState.CurrentDocument.Model);
     }
 
     private async void OpenPreferences()
@@ -985,7 +984,7 @@ public class ShellViewModel : ObservableRecipient
     {
         if (SerializationLock.CanExecuteCommands())
         {
-            //if (State.CurrentNode == null)
+            //if (appState.CurrentNode == null)
             //{
             //    Messenger.Send(new StatusChangedMessage(new("Select a node to collaborate on", LogLevel.Warn, true)));
             //    return;
@@ -1027,45 +1026,45 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
 
-        _sourceChildren = State.CurrentNode.Parent.Children;
-        _sourceIndex = _sourceChildren.IndexOf(State.CurrentNode);
+        _sourceChildren = appState.CurrentNode.Parent.Children;
+        _sourceIndex = _sourceChildren.IndexOf(appState.CurrentNode);
         _targetCollection = null;
         _targetIndex = -1;
-        var targetParent = State.CurrentNode.Parent.Parent;
+        var targetParent = appState.CurrentNode.Parent.Parent;
         // The source must become the parent's successor
-        _targetCollection = State.CurrentNode.Parent.Parent.Children;
-        _targetIndex = _targetCollection.IndexOf(State.CurrentNode.Parent) + 1;
+        _targetCollection = appState.CurrentNode.Parent.Parent.Children;
+        _targetIndex = _targetCollection.IndexOf(appState.CurrentNode.Parent) + 1;
 
         _sourceChildren.RemoveAt(_sourceIndex);
         if (_targetIndex == -1)
         {
-            _targetCollection.Add(State.CurrentNode);
+            _targetCollection.Add(appState.CurrentNode);
         }
         else
         {
-            _targetCollection.Insert(_targetIndex, State.CurrentNode);
+            _targetCollection.Insert(_targetIndex, appState.CurrentNode);
         }
 
-        State.CurrentNode.Parent = targetParent;
+        appState.CurrentNode.Parent = targetParent;
         ShowChange();
-        Logger.Log(LogLevel.Info, $"Moving {State.CurrentNode.Name} left to parent {State.CurrentNode.Parent.Name}");
+        Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} left to parent {appState.CurrentNode.Parent.Name}");
     }
 
     private bool MoveLeftIsValid()
     {
-        if (State.CurrentNode == null)
+        if (appState.CurrentNode == null)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("Click or touch a node to move", LogLevel.Warn)));
             return false;
         }
 
-        if (State.CurrentNode.Parent != null && State.CurrentNode.Parent.IsRoot)
+        if (appState.CurrentNode.Parent != null && appState.CurrentNode.Parent.IsRoot)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot move further left", LogLevel.Warn)));
             return false;
         }
 
-        if (State.CurrentNode.Parent == null)
+        if (appState.CurrentNode.Parent == null)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot move root node.", LogLevel.Warn)));
             return false;
@@ -1087,10 +1086,10 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
 
-        if (State.CurrentNode.Parent != null)
+        if (appState.CurrentNode.Parent != null)
         {
-            _sourceChildren = State.CurrentNode.Parent.Children;
-            _sourceIndex = _sourceChildren.IndexOf(State.CurrentNode);
+            _sourceChildren = appState.CurrentNode.Parent.Children;
+            _sourceIndex = _sourceChildren.IndexOf(appState.CurrentNode);
             _targetCollection = null;
             _targetIndex = -1;
         }
@@ -1101,7 +1100,7 @@ public class ShellViewModel : ObservableRecipient
         }
 
 
-        var sourceIndex = _sourceChildren.IndexOf(State.CurrentNode);
+        var sourceIndex = _sourceChildren.IndexOf(appState.CurrentNode);
         StoryNodeItem targetParent;
         ObservableCollection<StoryNodeItem> targetCollection;
         int targetIndex;
@@ -1114,8 +1113,8 @@ public class ShellViewModel : ObservableRecipient
         }
         else
         {
-            var grandparentCollection = State.CurrentNode.Parent.Parent.Children;
-            var siblingIndex = grandparentCollection.IndexOf(State.CurrentNode.Parent) - 1;
+            var grandparentCollection = appState.CurrentNode.Parent.Parent.Children;
+            var siblingIndex = grandparentCollection.IndexOf(appState.CurrentNode.Parent) - 1;
 
             if (siblingIndex >= 0)
             {
@@ -1142,28 +1141,28 @@ public class ShellViewModel : ObservableRecipient
         }
 
         _sourceChildren.RemoveAt(sourceIndex);
-        targetCollection.Insert(targetIndex, State.CurrentNode);
-        State.CurrentNode.Parent = targetParent;
+        targetCollection.Insert(targetIndex, appState.CurrentNode);
+        appState.CurrentNode.Parent = targetParent;
         ShowChange();
-        Logger.Log(LogLevel.Info, $"Moving {State.CurrentNode.Name} right to parent {State.CurrentNode.Parent.Name}");
+        Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} right to parent {appState.CurrentNode.Parent.Name}");
     }
 
     private bool MoveRightIsValid()
     {
-        if (State.CurrentNode == null)
+        if (appState.CurrentNode == null)
         {
             ShowStatusMessage("Click or touch a node to move", LogLevel.Warn);
             return false;
         }
 
-        if (State.CurrentNode.Parent == null)
+        if (appState.CurrentNode.Parent == null)
         {
             ShowStatusMessage("Cannot move root node.", LogLevel.Warn);
             return false;
         }
 
-        if (State.CurrentNode.Parent.Parent == null
-            && State.CurrentNode.Parent.Children.IndexOf(State.CurrentNode) == 0)
+        if (appState.CurrentNode.Parent.Parent == null
+            && appState.CurrentNode.Parent.Children.IndexOf(appState.CurrentNode) == 0)
         {
             ShowStatusMessage("Cannot move further right", LogLevel.Warn);
             return false;
@@ -1180,22 +1179,22 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
 
-        _sourceChildren = State.CurrentNode.Parent.Children;
-        _sourceIndex = _sourceChildren.IndexOf(State.CurrentNode);
+        _sourceChildren = appState.CurrentNode.Parent.Children;
+        _sourceIndex = _sourceChildren.IndexOf(appState.CurrentNode);
         _targetCollection = null;
         _targetIndex = -1;
-        var targetParent = State.CurrentNode.Parent;
+        var targetParent = appState.CurrentNode.Parent;
 
         if (_sourceIndex == 0)
         {
-            if (State.CurrentNode.Parent.Parent == null)
+            if (appState.CurrentNode.Parent.Parent == null)
             {
                 ShowStatusMessage("Cannot move up further", LogLevel.Warn);
                 return;
             }
 
-            var grandparentCollection = State.CurrentNode.Parent.Parent.Children;
-            var siblingIndex = grandparentCollection.IndexOf(State.CurrentNode.Parent) - 1;
+            var grandparentCollection = appState.CurrentNode.Parent.Parent.Children;
+            var siblingIndex = grandparentCollection.IndexOf(appState.CurrentNode.Parent) - 1;
 
             if (siblingIndex >= 0)
             {
@@ -1220,27 +1219,27 @@ public class ShellViewModel : ObservableRecipient
 
         if (_targetIndex == -1)
         {
-            _targetCollection.Add(State.CurrentNode);
+            _targetCollection.Add(appState.CurrentNode);
         }
         else
         {
-            _targetCollection.Insert(_targetIndex, State.CurrentNode);
+            _targetCollection.Insert(_targetIndex, appState.CurrentNode);
         }
 
-        State.CurrentNode.Parent = targetParent;
+        appState.CurrentNode.Parent = targetParent;
         ShowChange();
-        Logger.Log(LogLevel.Info, $"Moving {State.CurrentNode.Name} up to parent {State.CurrentNode.Parent.Name}");
+        Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} up to parent {appState.CurrentNode.Parent.Name}");
     }
 
     private bool MoveUpIsValid()
     {
-        if (State.CurrentNode == null)
+        if (appState.CurrentNode == null)
         {
             ShowStatusMessage("Click or touch a node to move", LogLevel.Warn);
             return false;
         }
 
-        if (State.CurrentNode.IsRoot)
+        if (appState.CurrentNode.IsRoot)
         {
             ShowStatusMessage("Cannot move up further", LogLevel.Warn);
             return false;
@@ -1257,18 +1256,18 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
 
-        _sourceChildren = State.CurrentNode.Parent.Children;
-        _sourceIndex = _sourceChildren.IndexOf(State.CurrentNode);
+        _sourceChildren = appState.CurrentNode.Parent.Children;
+        _sourceIndex = _sourceChildren.IndexOf(appState.CurrentNode);
         _targetCollection = null;
         _targetIndex = 0;
-        var targetParent = State.CurrentNode.Parent;
+        var targetParent = appState.CurrentNode.Parent;
 
         // If last child, must move to end parent's successor (sibling node).
         // If there are no siblings, we're at the bottom of the tree?
         if (_sourceIndex == _sourceChildren.Count - 1)
         {
             // Find the next sibling of the parent.
-            var nextParentSibling = GetNextSibling(State.CurrentNode.Parent);
+            var nextParentSibling = GetNextSibling(appState.CurrentNode.Parent);
 
             // If there's no next sibling, then we're at the bottom of the first root's children.
             if (nextParentSibling == null)
@@ -1296,11 +1295,11 @@ public class ShellViewModel : ObservableRecipient
         }
 
         _sourceChildren.RemoveAt(_sourceIndex);
-        _targetCollection.Insert(_targetIndex, State.CurrentNode);
-        State.CurrentNode.Parent = targetParent;
+        _targetCollection.Insert(_targetIndex, appState.CurrentNode);
+        appState.CurrentNode.Parent = targetParent;
 
         ShowChange();
-        Logger.Log(LogLevel.Info, $"Moving {State.CurrentNode.Name} down up to parent {State.CurrentNode.Parent.Name}");
+        Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} down up to parent {appState.CurrentNode.Parent.Name}");
     }
 
     public StoryNodeItem GetNextSibling(StoryNodeItem node)
@@ -1323,13 +1322,13 @@ public class ShellViewModel : ObservableRecipient
 
     private bool MoveDownIsValid()
     {
-        if (State.CurrentNode == null)
+        if (appState.CurrentNode == null)
         {
             ShowStatusMessage("Click or touch a node to move", LogLevel.Warn);
             return false;
         }
 
-        if (State.CurrentNode.IsRoot)
+        if (appState.CurrentNode.IsRoot)
         {
             ShowStatusMessage("Cannot move a root node", LogLevel.Warn);
             return false;
@@ -1345,12 +1344,12 @@ public class ShellViewModel : ObservableRecipient
 
     private void IsChangedMessageReceived(IsChangedMessage isDirty)
     {
-        if (State.CurrentDocument?.Model != null)
+        if (appState.CurrentDocument?.Model != null)
         {
-            State.CurrentDocument.Model.Changed = isDirty.Value;
+            appState.CurrentDocument.Model.Changed = isDirty.Value;
         }
 
-        if (State.CurrentDocument?.Model?.Changed == true)
+        if (appState.CurrentDocument?.Model?.Changed == true)
         {
             ChangeStatusColor = Colors.Red;
         }
@@ -1402,7 +1401,7 @@ public class ShellViewModel : ObservableRecipient
     private void StatusMessageReceived(StatusChangedMessage statusMessage)
     {
         // Bypass if in headless mode or if the app is closing
-        if (State.Headless || IsClosing)
+        if (appState.Headless || appState.IsClosing)
         {
             return;
         }
@@ -1475,7 +1474,7 @@ public class ShellViewModel : ObservableRecipient
             Logger.Log(LogLevel.Info, "Application closing - starting cleanup");
 
             // Set closing flag immediately to prevent UI updates during shutdown
-            IsClosing = true;
+            appState.IsClosing = true;
 
             // 1. Update cumulative time used and save preferences
             var prefs = Ioc.Default.GetRequiredService<PreferenceService>();
@@ -1489,7 +1488,7 @@ public class ShellViewModel : ObservableRecipient
 
             // 2. Close the current document if one is open
             // This handles AutoSave stop, BackupService stop, and document cleanup
-            if (State.CurrentDocument != null)
+            if (appState.CurrentDocument != null)
             {
                 Logger.Log(LogLevel.Info, "Closing open document");
                 await OutlineManager.CloseFile();
@@ -1535,8 +1534,8 @@ public class ShellViewModel : ObservableRecipient
     private void NameMessageReceived(NameChangedMessage name)
     {
         var _msg = name.Value;
-        State.CurrentNode.Name = _msg.NewName;
-        switch (State.CurrentNode.Type)
+        appState.CurrentNode.Name = _msg.NewName;
+        switch (appState.CurrentNode.Type)
         {
             case StoryItemType.Character:
                 //int charIndex = CharacterModel.CharacterNames.IndexOf(msg.OldName);
