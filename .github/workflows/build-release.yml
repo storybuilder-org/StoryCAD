@@ -246,52 +246,42 @@ jobs:
       - name: Publish macOS package
         if: matrix.os == 'macos-latest'
         run: |
-          # Build
-          dotnet publish StoryCAD/StoryCAD.csproj -c Release -f ${{ matrix.fw }} -r ${{ matrix.rid }} --self-contained true
+          ENTITLEMENTS="StoryCAD/Platforms/Desktop/Entitlements.plist"
+          CERT="Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)"
 
-          # Create app bundle
-          APP_DIR="/tmp/StoryCAD.app"
-          rm -rf "$APP_DIR"
-          mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
-          cp -R StoryCAD/bin/Release/${{ matrix.fw }}/${{ matrix.rid }}/publish/* "$APP_DIR/Contents/MacOS/"
-          mv "$APP_DIR/Contents/MacOS/Assets" "$APP_DIR/Contents/Resources/"
-          mv "$APP_DIR/Contents/MacOS/Uno.Fonts.OpenSans" "$APP_DIR/Contents/Resources/" 2>/dev/null || true
-          mv "$APP_DIR/Contents/MacOS/Uno.Fonts.Fluent" "$APP_DIR/Contents/Resources/" 2>/dev/null || true
-          cp StoryCAD/Platforms/Desktop/Info.plist "$APP_DIR/Contents/Info.plist"
+          # Publish (UNO creates .app bundle automatically with PackageFormat=app)
+          dotnet publish StoryCAD/StoryCAD.csproj -c Release -f ${{ matrix.fw }} -r ${{ matrix.rid }} \
+            -p:SelfContained=true \
+            -p:PackageFormat=app \
+            -p:UnoMacOSEntitlements="$ENTITLEMENTS" \
+            -p:UnoMacOSIncludeCreateDump=false
+
+          APP_DIR="StoryCAD/bin/Release/${{ matrix.fw }}/${{ matrix.rid }}/publish/StoryCAD.app"
+
+          # Post-publish fixups
           cp $RUNNER_TEMP/storycad.provisionprofile "$APP_DIR/Contents/embedded.provisionprofile"
-          chmod +x "$APP_DIR/Contents/MacOS/StoryCAD"
           xattr -cr "$APP_DIR"
 
-          # Create icon
-          SRC="StoryCAD/Assets/LargeTile.scale-400.png"
-          mkdir -p /tmp/icon.iconset
-          sips -z 16 16 "$SRC" --out /tmp/icon.iconset/icon_16x16.png
-          sips -z 32 32 "$SRC" --out /tmp/icon.iconset/icon_16x16@2x.png
-          sips -z 32 32 "$SRC" --out /tmp/icon.iconset/icon_32x32.png
-          sips -z 64 64 "$SRC" --out /tmp/icon.iconset/icon_32x32@2x.png
-          sips -z 128 128 "$SRC" --out /tmp/icon.iconset/icon_128x128.png
-          sips -z 256 256 "$SRC" --out /tmp/icon.iconset/icon_128x128@2x.png
-          sips -z 256 256 "$SRC" --out /tmp/icon.iconset/icon_256x256.png
-          sips -z 512 512 "$SRC" --out /tmp/icon.iconset/icon_256x256@2x.png
-          sips -z 512 512 "$SRC" --out /tmp/icon.iconset/icon_512x512.png
-          sips -z 1024 1024 "$SRC" --out /tmp/icon.iconset/icon_512x512@2x.png
-          iconutil -c icns /tmp/icon.iconset -o "$APP_DIR/Contents/Resources/icon.icns"
+          # Move json files to Resources (required for App Store validation)
+          mv "$APP_DIR/Contents/MacOS/StoryCAD.deps.json" "$APP_DIR/Contents/Resources/"
+          mv "$APP_DIR/Contents/MacOS/StoryCAD.runtimeconfig.json" "$APP_DIR/Contents/Resources/"
+          ln -s ../Resources/StoryCAD.deps.json "$APP_DIR/Contents/MacOS/StoryCAD.deps.json"
+          ln -s ../Resources/StoryCAD.runtimeconfig.json "$APP_DIR/Contents/MacOS/StoryCAD.runtimeconfig.json"
 
-          # Sign (entitlements from repo)
-          ENTITLEMENTS="StoryCAD/Platforms/Desktop/entitlements.plist"
-          HELPER_ENTITLEMENTS="StoryCAD/Platforms/Desktop/helper-entitlements.plist"
-
-          find "$APP_DIR/Contents/MacOS" -type f ! -name "StoryCAD" ! -name "createdump" -exec codesign --force --sign "Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)" {} \; 2>/dev/null || true
-          find "$APP_DIR/Contents/Resources" -type f -exec codesign --force --sign "Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)" {} \; 2>/dev/null || true
-          codesign --force --options runtime --sign "Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)" --entitlements "$HELPER_ENTITLEMENTS" "$APP_DIR/Contents/MacOS/createdump"
-          codesign --force --options runtime --sign "Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)" --entitlements "$ENTITLEMENTS" "$APP_DIR/Contents/MacOS/StoryCAD"
-          codesign --force --options runtime --sign "Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)" --entitlements "$ENTITLEMENTS" "$APP_DIR"
+          # Sign dylibs, then executable, then bundle
+          find "$APP_DIR/Contents/MacOS" -name "*.dylib" -exec codesign --force --sign "$CERT" {} \;
+          codesign --force --options runtime --sign "$CERT" --entitlements "$ENTITLEMENTS" "$APP_DIR/Contents/MacOS/StoryCAD"
+          codesign --force --options runtime --sign "$CERT" --entitlements "$ENTITLEMENTS" "$APP_DIR"
 
           # Verify signature
-          codesign -vvv "$APP_DIR"
+          codesign --verify --deep --strict "$APP_DIR"
 
           # Create PKG
+          xattr -cr "$APP_DIR"
           productbuild --component "$APP_DIR" /Applications --sign "3rd Party Mac Developer Installer: StoryBuilder Foundation (3T4DPS2D5Y)" storycad-${{ matrix.art }}.pkg
+
+          # Delete build .app to prevent installer relocation bug
+          rm -rf "$APP_DIR"
 
       - name: Zip MSIX artifacts (Windows)
         if: matrix.os == 'windows-latest'

@@ -43,12 +43,12 @@ security find-identity -v | grep -i installer
 |------|---------|
 | `scripts/build-macos-appstore.sh` | Automated build script |
 | `StoryCAD/Platforms/Desktop/Info.plist` | macOS app metadata, version numbers |
-| `StoryCAD/Platforms/Desktop/entitlements.plist` | App entitlements (sandbox, JIT) |
+| `StoryCAD/Platforms/Desktop/Entitlements.plist` | App entitlements (sandbox, JIT) |
 | `~/Downloads/StoryCAD__Provisioning_Profile.provisionprofile` | App Store provisioning profile |
 
 ## Required Entitlements
 
-The `entitlements.plist` must include:
+The `Entitlements.plist` must include:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -67,111 +67,107 @@ The `entitlements.plist` must include:
 
 **Critical:** The `allow-jit` entitlement is required for .NET CoreCLR to allocate executable memory. Without it, the app crashes on launch with `HRESULT: 0x80070008`.
 
+## How It Works
+
+UNO Platform's `PackageFormat=app` handles most of the bundle creation automatically:
+- Creates the `.app` bundle structure
+- Generates the app icon (icns) from project assets
+- Merges `Info.plist` into the bundle
+- Excludes `createdump` when `UnoMacOSIncludeCreateDump=false`
+
+The build script handles the remaining post-publish steps that UNO doesn't cover:
+- Embedding the provisioning profile
+- Relocating `.json` files for App Store validation
+- Code signing
+- Creating the PKG installer
+
 ## Manual Build Process
 
 If you need to build manually (the script handles all of this):
 
 ### Step 1: Publish the App
 
+UNO Platform creates the `.app` bundle automatically:
+
 ```bash
-dotnet publish StoryCAD/StoryCAD.csproj -c Release -f net10.0-desktop -r osx-arm64 --self-contained true
+dotnet publish StoryCAD/StoryCAD.csproj -c Release -f net10.0-desktop -r osx-arm64 \
+  -p:SelfContained=true \
+  -p:PackageFormat=app \
+  -p:UnoMacOSEntitlements=Platforms/Desktop/Entitlements.plist \
+  -p:UnoMacOSIncludeCreateDump=false
 ```
 
-### Step 2: Create App Bundle
+This produces `StoryCAD/bin/Release/net10.0-desktop/osx-arm64/publish/StoryCAD.app`.
+
+### Step 2: Post-Publish Fixups
 
 ```bash
-APP_DIR="/tmp/StoryCAD.app"
-rm -rf "$APP_DIR"
-mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
+APP_DIR="StoryCAD/bin/Release/net10.0-desktop/osx-arm64/publish/StoryCAD.app"
 
-# Copy published files
-cp -R StoryCAD/bin/Release/net10.0-desktop/osx-arm64/publish/* "$APP_DIR/Contents/MacOS/"
-
-# Move resources to correct location
-mv "$APP_DIR/Contents/MacOS/Assets" "$APP_DIR/Contents/Resources/"
-mv "$APP_DIR/Contents/MacOS/Uno.Fonts.OpenSans" "$APP_DIR/Contents/Resources/" 2>/dev/null || true
-mv "$APP_DIR/Contents/MacOS/Uno.Fonts.Fluent" "$APP_DIR/Contents/Resources/" 2>/dev/null || true
-
-# Copy required files
-cp StoryCAD/Platforms/Desktop/Info.plist "$APP_DIR/Contents/Info.plist"
-cp /tmp/icon.icns "$APP_DIR/Contents/Resources/icon.icns"
+# Embed provisioning profile
 cp ~/Downloads/StoryCAD__Provisioning_Profile.provisionprofile "$APP_DIR/Contents/embedded.provisionprofile"
 
-# IMPORTANT: Remove createdump (incompatible with App Store)
-rm -f "$APP_DIR/Contents/MacOS/createdump"
-
-# Make executable and remove quarantine
-chmod +x "$APP_DIR/Contents/MacOS/StoryCAD"
+# IMPORTANT: Clear quarantine attributes after copying the provisioning profile
 xattr -cr "$APP_DIR"
+
+# Move json files to Resources (required for App Store validation)
+# Symlinks let the runtime still find them in MacOS/
+mv "$APP_DIR/Contents/MacOS/StoryCAD.deps.json" "$APP_DIR/Contents/Resources/"
+mv "$APP_DIR/Contents/MacOS/StoryCAD.runtimeconfig.json" "$APP_DIR/Contents/Resources/"
+ln -s ../Resources/StoryCAD.deps.json "$APP_DIR/Contents/MacOS/StoryCAD.deps.json"
+ln -s ../Resources/StoryCAD.runtimeconfig.json "$APP_DIR/Contents/MacOS/StoryCAD.runtimeconfig.json"
 ```
 
-### Step 3: Create Icon (if needed)
-
-```bash
-SRC="StoryCAD/Assets/LargeTile.scale-400.png"
-rm -rf /tmp/icon.iconset
-mkdir -p /tmp/icon.iconset
-
-sips -z 16 16 "$SRC" --out /tmp/icon.iconset/icon_16x16.png
-sips -z 32 32 "$SRC" --out /tmp/icon.iconset/icon_16x16@2x.png
-sips -z 32 32 "$SRC" --out /tmp/icon.iconset/icon_32x32.png
-sips -z 64 64 "$SRC" --out /tmp/icon.iconset/icon_32x32@2x.png
-sips -z 128 128 "$SRC" --out /tmp/icon.iconset/icon_128x128.png
-sips -z 256 256 "$SRC" --out /tmp/icon.iconset/icon_128x128@2x.png
-sips -z 256 256 "$SRC" --out /tmp/icon.iconset/icon_256x256.png
-sips -z 512 512 "$SRC" --out /tmp/icon.iconset/icon_256x256@2x.png
-sips -z 512 512 "$SRC" --out /tmp/icon.iconset/icon_512x512.png
-sips -z 1024 1024 "$SRC" --out /tmp/icon.iconset/icon_512x512@2x.png
-
-iconutil -c icns /tmp/icon.iconset -o /tmp/icon.icns
-```
-
-### Step 4: Sign Everything
+### Step 3: Sign the App
 
 **Important:** Sign in this exact order. Do NOT use `--deep` flag.
 
 ```bash
 CERT="Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)"
-ENTITLEMENTS="StoryCAD/Platforms/Desktop/entitlements.plist"
+ENTITLEMENTS="StoryCAD/Platforms/Desktop/Entitlements.plist"
+APP_DIR="StoryCAD/bin/Release/net10.0-desktop/osx-arm64/publish/StoryCAD.app"
 
-# 1. Sign all nested files (excluding main executable)
-find /tmp/StoryCAD.app/Contents/MacOS -type f ! -name "StoryCAD" \
-  -exec codesign --force --sign "$CERT" {} \; 2>/dev/null
-
-find /tmp/StoryCAD.app/Contents/Resources -type f \
-  -exec codesign --force --sign "$CERT" {} \; 2>/dev/null
+# 1. Sign dylibs individually
+find "$APP_DIR/Contents/MacOS" -name "*.dylib" \
+  -exec codesign --force --sign "$CERT" {} \;
 
 # 2. Sign main executable with entitlements
 codesign --force --options runtime \
   --sign "$CERT" \
   --entitlements "$ENTITLEMENTS" \
-  /tmp/StoryCAD.app/Contents/MacOS/StoryCAD
+  "$APP_DIR/Contents/MacOS/StoryCAD"
 
 # 3. Sign the app bundle
 codesign --force --options runtime \
   --sign "$CERT" \
   --entitlements "$ENTITLEMENTS" \
-  /tmp/StoryCAD.app
+  "$APP_DIR"
 ```
 
-### Step 5: Verify Signature
+### Step 4: Verify Signature
 
 ```bash
-codesign -vvv /tmp/StoryCAD.app
+codesign --verify --deep --strict "$APP_DIR"
 
 # Verify JIT entitlement is present
-codesign -d --entitlements - /tmp/StoryCAD.app/Contents/MacOS/StoryCAD
+codesign -d --entitlements - "$APP_DIR/Contents/MacOS/StoryCAD"
 ```
 
-### Step 6: Create PKG
+### Step 5: Create PKG
 
 ```bash
-productbuild --component /tmp/StoryCAD.app /Applications \
+# Clear quarantine before packaging
+xattr -cr "$APP_DIR"
+
+productbuild --component "$APP_DIR" /Applications \
   --sign "3rd Party Mac Developer Installer: StoryBuilder Foundation (3T4DPS2D5Y)" \
   ~/Desktop/StoryCAD-4.0.0.pkg
+
+# Delete the build .app after creating pkg (prevents installer relocation bug)
+rm -rf "$APP_DIR"
 ```
 
-### Step 7: Upload via Transporter
+### Step 6: Upload via Transporter
 
 1. Open Transporter app
 2. Drag `StoryCAD-4.0.0.pkg` to the window
@@ -192,7 +188,7 @@ Or use `./scripts/build-macos-appstore.sh --bump` to auto-increment.
 
 ### "Failed to create CoreCLR, HRESULT: 0x80070008"
 **Cause:** Missing `com.apple.security.cs.allow-jit` entitlement.
-**Fix:** Add `allow-jit` to entitlements.plist. The .NET JIT compiler needs to allocate executable memory.
+**Fix:** Add `allow-jit` to Entitlements.plist. The .NET JIT compiler needs to allocate executable memory.
 
 ### "Bundle version must be higher"
 Increment `CFBundleVersion` in Info.plist.
@@ -203,18 +199,22 @@ Ensure entitlements include `com.apple.security.app-sandbox` set to `true`.
 ### "Missing provisioning profile"
 Copy provisioning profile to `Contents/embedded.provisionprofile`.
 
-### "Invalid Code Signing - executable missing provisioning profile but has application identifier"
-**Cause:** Nested executables (like `createdump`) with `application-identifier` require their own provisioning profile.
-**Fix:** Remove the executable from the bundle. The build script removes `createdump` automatically.
-
 ### "Invalid bundle - arm64 only requires macOS 12.0"
 Set `LSMinimumSystemVersion` to `12.0` in Info.plist.
 
-### "Quarantine attribute"
-Run `xattr -cr /tmp/StoryCAD.app` before signing.
+### "Quarantine attribute" / signing failures after copying provisioning profile
+Run `xattr -cr` on the app bundle **after** copying the provisioning profile and **before** signing. The `cp` command can reintroduce quarantine attributes.
 
 ### "Code object not signed in subcomponent"
-Sign ALL files recursively before signing executables. Don't use `--deep`.
+Sign dylibs individually before signing the main executable and bundle. Don't use `--deep`.
+
+### App Store validation rejects .json files in MacOS/
+**Cause:** `.deps.json` and `.runtimeconfig.json` in `Contents/MacOS/` fail validation.
+**Fix:** Move them to `Contents/Resources/` and create symlinks in `Contents/MacOS/` so the runtime can still find them.
+
+### Installer relocation bug (app installs to wrong location)
+**Cause:** If the `.app` bundle exists at the build path when the PKG is installed, macOS may "relocate" the install to that path instead of `/Applications`.
+**Fix:** Delete the build `.app` after creating the PKG.
 
 ## Info.plist Required Keys
 

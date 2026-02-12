@@ -37,6 +37,8 @@ Developer Notes
 
 StoryCAD 4.0+ supports macOS via the Uno Platform. This section covers building and submitting to the Mac App Store.
 
+For the complete build guide, see `devdocs/macos-app-store-build-guide.md`.
+
 ### Prerequisites
 
 - macOS with Xcode Command Line Tools
@@ -47,38 +49,48 @@ StoryCAD 4.0+ supports macOS via the Uno Platform. This section covers building 
 - App Store provisioning profile for `com.storybuilder.storycad`
 - Transporter app (from Mac App Store)
 
-### Build Process
+### Automated Build
+
+Use the build script (recommended):
+
+```bash
+# Build with current version
+./scripts/build-macos-appstore.sh
+
+# Build and auto-increment version
+./scripts/build-macos-appstore.sh --bump
+```
+
+### Manual Build Process
 
 #### 1. Publish the App
 
+UNO Platform creates the `.app` bundle automatically with `PackageFormat=app`:
+
 ```bash
-dotnet publish StoryCAD/StoryCAD.csproj -c Release -f net10.0-desktop -r osx-arm64 --self-contained true
+dotnet publish StoryCAD/StoryCAD.csproj -c Release -f net10.0-desktop -r osx-arm64 \
+  -p:SelfContained=true \
+  -p:PackageFormat=app \
+  -p:UnoMacOSEntitlements=Platforms/Desktop/Entitlements.plist \
+  -p:UnoMacOSIncludeCreateDump=false
 ```
 
-#### 2. Create App Bundle
+This produces `StoryCAD/bin/Release/net10.0-desktop/osx-arm64/publish/StoryCAD.app` with the bundle structure, icon, and Info.plist already set up.
 
-The build output needs to be assembled into a proper .app bundle:
+#### 2. Post-Publish Fixups
 
 ```bash
-APP_DIR="/tmp/StoryCAD.app"
-rm -rf "$APP_DIR"
-mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
+APP_DIR="StoryCAD/bin/Release/net10.0-desktop/osx-arm64/publish/StoryCAD.app"
 
-# Copy published files
-cp -R StoryCAD/bin/Release/net10.0-desktop/osx-arm64/publish/* "$APP_DIR/Contents/MacOS/"
-
-# Move resources
-mv "$APP_DIR/Contents/MacOS/Assets" "$APP_DIR/Contents/Resources/"
-mv "$APP_DIR/Contents/MacOS/Uno.Fonts.OpenSans" "$APP_DIR/Contents/Resources/" 2>/dev/null || true
-mv "$APP_DIR/Contents/MacOS/Uno.Fonts.Fluent" "$APP_DIR/Contents/Resources/" 2>/dev/null || true
-
-# Copy required files
-cp StoryCAD/Platforms/Desktop/Info.plist "$APP_DIR/Contents/Info.plist"
-cp /tmp/icon.icns "$APP_DIR/Contents/Resources/icon.icns"
+# Embed provisioning profile and clear quarantine
 cp ~/Downloads/StoryCAD__Provisioning_Profile.provisionprofile "$APP_DIR/Contents/embedded.provisionprofile"
-
-chmod +x "$APP_DIR/Contents/MacOS/StoryCAD"
 xattr -cr "$APP_DIR"
+
+# Move json files to Resources (required for App Store validation)
+mv "$APP_DIR/Contents/MacOS/StoryCAD.deps.json" "$APP_DIR/Contents/Resources/"
+mv "$APP_DIR/Contents/MacOS/StoryCAD.runtimeconfig.json" "$APP_DIR/Contents/Resources/"
+ln -s ../Resources/StoryCAD.deps.json "$APP_DIR/Contents/MacOS/StoryCAD.deps.json"
+ln -s ../Resources/StoryCAD.runtimeconfig.json "$APP_DIR/Contents/MacOS/StoryCAD.runtimeconfig.json"
 ```
 
 #### 3. Sign the App
@@ -86,40 +98,33 @@ xattr -cr "$APP_DIR"
 Sign in this exact order (do NOT use `--deep`):
 
 ```bash
-# Sign all nested files first
-find /tmp/StoryCAD.app/Contents/MacOS -type f ! -name "StoryCAD" ! -name "createdump" \
-  -exec codesign --force --sign "Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)" {} \; 2>/dev/null
-find /tmp/StoryCAD.app/Contents/Resources -type f \
-  -exec codesign --force --sign "Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)" {} \; 2>/dev/null
+CERT="Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)"
+ENTITLEMENTS="StoryCAD/Platforms/Desktop/Entitlements.plist"
 
-# Sign helper executable (sandbox only)
-codesign --force --options runtime \
-  --sign "Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)" \
-  --entitlements /tmp/helper-entitlements.plist \
-  /tmp/StoryCAD.app/Contents/MacOS/createdump
+# Sign dylibs individually
+find "$APP_DIR/Contents/MacOS" -name "*.dylib" \
+  -exec codesign --force --sign "$CERT" {} \;
 
-# Sign main executable
-codesign --force --options runtime \
-  --sign "Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)" \
-  --entitlements /tmp/entitlements.plist \
-  /tmp/StoryCAD.app/Contents/MacOS/StoryCAD
+# Sign main executable with entitlements
+codesign --force --options runtime --sign "$CERT" --entitlements "$ENTITLEMENTS" "$APP_DIR/Contents/MacOS/StoryCAD"
 
 # Sign the bundle
-codesign --force --options runtime \
-  --sign "Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)" \
-  --entitlements /tmp/entitlements.plist \
-  /tmp/StoryCAD.app
+codesign --force --options runtime --sign "$CERT" --entitlements "$ENTITLEMENTS" "$APP_DIR"
 ```
 
-#### 5. Create PKG Installer
+#### 4. Create PKG Installer
 
 ```bash
-productbuild --component /tmp/StoryCAD.app /Applications \
+xattr -cr "$APP_DIR"
+productbuild --component "$APP_DIR" /Applications \
   --sign "3rd Party Mac Developer Installer: StoryBuilder Foundation (3T4DPS2D5Y)" \
   ~/Desktop/StoryCAD-4.0.0.pkg
+
+# Delete build .app after creating pkg (prevents installer relocation bug)
+rm -rf "$APP_DIR"
 ```
 
-#### 6. Upload via Transporter
+#### 5. Upload via Transporter
 
 Open Transporter app and drag the PKG file to upload to App Store Connect.
 
@@ -128,7 +133,7 @@ Open Transporter app and drag the PKG file to upload to App Store Connect.
 Increment `CFBundleVersion` in `StoryCAD/Platforms/Desktop/Info.plist`:
 ```xml
 <key>CFBundleVersion</key>
-<string>8</string>  <!-- Increment this number -->
+<string>9</string>  <!-- Increment this number -->
 ```
 
 ### Common Issues
@@ -138,5 +143,6 @@ Increment `CFBundleVersion` in `StoryCAD/Platforms/Desktop/Info.plist`:
 | Bundle version already used | Increment `CFBundleVersion` in Info.plist |
 | App sandbox not enabled | Ensure entitlements include `com.apple.security.app-sandbox` |
 | Missing provisioning profile | Embed profile at `Contents/embedded.provisionprofile` |
-| Entitlements don't match profile | Main app needs sandbox + app-identifier; helpers need sandbox only |
-| Quarantine attribute | Run `xattr -cr` on app bundle before signing |
+| Quarantine attribute | Run `xattr -cr` after copying provisioning profile |
+| json files rejected by App Store | Move `.deps.json`/`.runtimeconfig.json` to `Contents/Resources/` with symlinks |
+| Installer relocation bug | Delete build `.app` after creating PKG |

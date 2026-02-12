@@ -189,14 +189,19 @@ For the complete macOS App Store build guide, see **[/devdocs/macos-app-store-bu
 
 ### Quick Reference
 
-Build for macOS:
+Build for macOS (UNO creates .app bundle automatically):
 ```bash
-dotnet publish StoryCAD/StoryCAD.csproj -c Release -f net10.0-desktop -r osx-arm64 --self-contained true
+dotnet publish StoryCAD/StoryCAD.csproj -c Release -f net10.0-desktop -r osx-arm64 \
+  -p:SelfContained=true -p:PackageFormat=app \
+  -p:UnoMacOSEntitlements=Platforms/Desktop/Entitlements.plist \
+  -p:UnoMacOSIncludeCreateDump=false
 ```
 
 Key points:
+- `PackageFormat=app` creates the `.app` bundle, icon, and Info.plist automatically
 - Bundle ID: `com.storybuilder.storycad`
 - Minimum macOS: 12.0 (required for arm64-only)
 - Bump `CFBundleVersion` in `StoryCAD/Platforms/Desktop/Info.plist` before each upload
-- Do NOT use `--deep` flag when signing
-- Sign helper executables (createdump) with sandbox-only entitlements
+- Move `.deps.json` and `.runtimeconfig.json` to `Contents/Resources/` with symlinks
+- Run `xattr -cr` after copying provisioning profile
+- Sign only dylibs, then executable, then bundle (do NOT use `--deep`)
