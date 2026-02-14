@@ -357,7 +357,7 @@
                                             Command="{x:Bind ShellVm.NarrativeToolCommand, Mode=OneWay}"
                                             muxc:ToolTipService.ToolTip="Opens the narrative editor to build your story as its told">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Key Questions"
+                            <MenuFlyoutItem win:Text="Key Questions                   Ctrl+K" skia:Text="Key Questions                   ⌘K"
                                             Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Topic Information"
@@ -390,7 +390,7 @@
                                             win:Visibility="Visible" notwin:Visibility="Collapsed"
                                             skia:Visibility="Collapsed">
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem win:Text="PDF Reports                     Ctrl+Shift+P" skia:Text="PDF Reports                     ⇧⌘P"
+                            <MenuFlyoutItem win:Text="PDF Reports                     Ctrl+Shift+P" skia:Text="PDF Reports                     ⌘P"
                                             Command="{x:Bind ShellVm.ExportReportsToPdfCommand, Mode=OneWay}">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem win:Text="Scrivener Reports               Ctrl+R" skia:Text="Scrivener Reports               ⌘R"
@@ -400,7 +400,7 @@
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton Width="50" IsCompact="True" Label="Preferences" win:ToolTipService.ToolTip="Preferences" skia:ToolTipService.ToolTip="Preferences (⌘P)"
+                <AppBarButton Width="50" IsCompact="True" Label="Preferences" win:ToolTipService.ToolTip="Preferences (Ctrl+,)" skia:ToolTipService.ToolTip="Preferences (⌘,)"
                               Command="{x:Bind ShellVm.PreferencesCommand, Mode=OneWay}">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE713;" />

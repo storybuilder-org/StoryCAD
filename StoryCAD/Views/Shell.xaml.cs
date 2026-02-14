@@ -425,6 +425,9 @@ public sealed partial class Shell : Page
             }
 
             // Add Menu shortcuts (Alt+Letter)
+            // Note: On macOS, Option+Letter normally produces special characters (e.g., ñ, ß).
+            // UNO Platform's Skia backend may intercept these before the OS does.
+            // If Alt+Letter shortcuts don't work on macOS, consider Ctrl+Shift+Letter alternatives.
             if (!ctrl && !shift && alt && e.Key == VirtualKey.F && ShellVm.ExplorerVisibility == Visibility.Visible)
             {
                 ShellVm.AddFolderCommand.Execute(null);
@@ -533,8 +536,15 @@ public sealed partial class Shell : Page
                 return;
             }
 
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.K)
+            {
+                ShellVm.KeyQuestionsCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
             // Reports Menu shortcuts
-            // Note: Ctrl+P is platform-specific - Print on Windows, Preferences elsewhere
+            // Ctrl+P: Print Reports on Windows, PDF Export on macOS (Print is unsupported on macOS)
 #if HAS_UNO_WINUI
             if (ctrl && !shift && !alt && e.Key == VirtualKey.P)
             {
@@ -545,7 +555,7 @@ public sealed partial class Shell : Page
 #else
             if (ctrl && !shift && !alt && e.Key == VirtualKey.P)
             {
-                ShellVm.PreferencesCommand.Execute(null);
+                ShellVm.ExportReportsToPdfCommand.Execute(null);
                 e.Handled = true;
                 return;
             }
@@ -561,6 +571,14 @@ public sealed partial class Shell : Page
             if (ctrl && !shift && !alt && e.Key == VirtualKey.R)
             {
                 ShellVm.ScrivenerReportsCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            // Preferences shortcut (Ctrl+, / ⌘,)
+            if (ctrl && !shift && !alt && e.Key == (VirtualKey)188)
+            {
+                ShellVm.PreferencesCommand.Execute(null);
                 e.Handled = true;
                 return;
             }
