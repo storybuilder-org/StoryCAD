@@ -19,7 +19,7 @@ This checklist ensures all integration points are covered when adding a new stor
 | OutlineService | 2 | OutlineService.cs |
 | DI/Registration | 2 | BootStrapper.cs, Lists.json |
 | Reports | 7 | Multiple files |
-| API | 3 | SemanticKernelAPI.cs |
+| API | 3 | StoryCADAPI.cs |
 | Tests | 5+ | Test project |
 | Documentation | 4+ | User manual |
 
@@ -187,16 +187,16 @@ This checklist ensures all integration points are covered when adding a new stor
 
 ### 8. API Integration
 
-- [ ] **SemanticKernelAPI GetXxx** (if singleton) - Add convenience method
-  - File: `StoryCADLib/Services/API/SemanticKernelAPI.cs`
+- [ ] **StoryCADAPI GetXxx** (if singleton) - Add convenience method
+  - File: `StoryCADLib/Services/API/StoryCADAPI.cs`
   - Add: `Get[ElementName]()` method returning `OperationResult<StoryElement>`
 
-- [ ] **SemanticKernelAPI GetElementsByType** - Update to handle new type
-  - File: `StoryCADLib/Services/API/SemanticKernelAPI.cs`
+- [ ] **StoryCADAPI GetElementsByType** - Update to handle new type
+  - File: `StoryCADLib/Services/API/StoryCADAPI.cs`
   - Update switch or filtering logic
 
 - [ ] **API Description Attributes** - Update documentation
-  - File: `StoryCADLib/Services/API/SemanticKernelAPI.cs`
+  - File: `StoryCADLib/Services/API/StoryCADAPI.cs`
   - Update `[Description]` attributes to mention new element type
 
 ### 9. Tests (TDD)

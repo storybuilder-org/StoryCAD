@@ -71,8 +71,8 @@ namespace StoryCADConsoleSample
     {
         static async Task Main(string[] args)
         {
-            // Create a new instance of the SemanticKernelApi (assuming dependency injection or manual instantiation)
-            var api = new SemanticKernelApi();
+            // Create a new instance of the StoryCADApi (assuming dependency injection or manual instantiation)
+            var api = new StoryCADApi();
             
             // Create an empty outline
             var outlineResult = await api.CreateEmptyOutline("The Great Adventure", "Jane Doe", "0");

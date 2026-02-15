@@ -29,13 +29,13 @@ public class CopyElementsDialogVMTests
         var diConstructor = constructors.FirstOrDefault(c =>
             c.GetParameters().Any(p => p.ParameterType == typeof(AppState)) &&
             c.GetParameters().Any(p => p.ParameterType == typeof(OutlineService)) &&
-            c.GetParameters().Any(p => p.ParameterType == typeof(SemanticKernelApi)) &&
+            c.GetParameters().Any(p => p.ParameterType == typeof(StoryCADApi)) &&
             c.GetParameters().Any(p => p.ParameterType == typeof(Windowing)) &&
             c.GetParameters().Any(p => p.ParameterType == typeof(ILogService)));
 
         // Assert
         Assert.IsNotNull(diConstructor,
-            "CopyElementsDialogVM should have a constructor with AppState, OutlineService, SemanticKernelApi, Windowing, and ILogService parameters");
+            "CopyElementsDialogVM should have a constructor with AppState, OutlineService, StoryCADApi, Windowing, and ILogService parameters");
     }
 
     [TestMethod]
@@ -1131,7 +1131,7 @@ public class CopyElementsDialogVMTests
         var vm = Ioc.Default.GetRequiredService<CopyElementsDialogVM>();
         var appState = Ioc.Default.GetRequiredService<AppState>();
         var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-        var api = Ioc.Default.GetRequiredService<SemanticKernelApi>();
+        var api = Ioc.Default.GetRequiredService<StoryCADApi>();
 
         // Set up source with a character
         var sourceModel = await outlineService.CreateModel("Source Story", "Test Author", 0);

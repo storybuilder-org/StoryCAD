@@ -18,7 +18,7 @@ public class CopyElementsDialogVM : ObservableRecipient
 {
     private readonly AppState _appState;
     private readonly OutlineService _outlineService;
-    private readonly SemanticKernelApi _api;
+    private readonly StoryCADApi _api;
     private readonly Windowing _windowing;
     private readonly ILogService _logger;
 
@@ -39,7 +39,7 @@ public class CopyElementsDialogVM : ObservableRecipient
     public CopyElementsDialogVM(
         AppState appState,
         OutlineService outlineService,
-        SemanticKernelApi api,
+        StoryCADApi api,
         Windowing windowing,
         ILogService logger)
     {
