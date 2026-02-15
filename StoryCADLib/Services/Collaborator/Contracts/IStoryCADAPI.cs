@@ -4,7 +4,7 @@ using StoryCADLib.Services.API;
 namespace StoryCADLib.Services.Collaborator.Contracts;
 
 /// <summary>
-///     Interface for existing SemanticKernelAPI methods that Collaborator uses
+///     Interface for existing StoryCADAPI methods that Collaborator uses
 /// </summary>
 public interface IStoryCADAPI
 {

@@ -347,7 +347,7 @@ When creating pull requests, include any design documentation directly in the PR
 
 ### Test File Naming
 - **Pattern**: `[SourceFileName]Tests.cs`
-- **Example**: `SemanticKernelAPITests.cs` for source file `SemanticKernelAPI.cs`
+- **Example**: `StoryCADAPITests.cs` for source file `StoryCADAPI.cs`
 - **Location**: Test files in StoryCADTests project, mirroring source structure where practical
 
 ### Test Method Naming

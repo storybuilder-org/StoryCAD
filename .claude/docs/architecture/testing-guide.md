@@ -111,10 +111,10 @@ public async Task UIElement_Action_ExpectedResult()
 
 ## Creating Test Data
 
-### Method 1: Using SemanticKernelApi (Preferred)
+### Method 1: Using StoryCADApi (Preferred)
 ```csharp
 // Create API instance
-var api = new SemanticKernelApi();
+var api = new StoryCADApi();
 
 // Create outline with template
 var result = await api.CreateEmptyOutline("Test Story", "Test Author", "0");

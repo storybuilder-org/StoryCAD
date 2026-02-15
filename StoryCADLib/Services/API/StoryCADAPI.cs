@@ -26,7 +26,7 @@ namespace StoryCADLib.Services.API;
 ///     - Calling Standard: All public API methods return OperationResult<T> to ensure safe external consumption.
 ///         No exceptions are thrown to external callers; all errors are communicated through the OperationResult
 ///         pattern with IsSuccess flags and descriptive ErrorMessage strings.
-public class SemanticKernelApi(OutlineService outlineService, ListData listData, ControlData controlData, ToolsData toolsData) : IStoryCADAPI
+public class StoryCADApi(OutlineService outlineService, ListData listData, ControlData controlData, ToolsData toolsData) : IStoryCADAPI
 {
     public StoryModel CurrentModel { get; set; }
 
