@@ -6,9 +6,14 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:usercontrols="using:StoryCADLib.Controls"
       xmlns:storyworld="using:StoryCADLib.Models.StoryWorld"
+      xmlns:converters="using:StoryCADLib.Converters"
       mc:Ignorable="d"
       ScrollViewer.VerticalScrollBarVisibility="Disabled"
       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+    <Page.Resources>
+        <converters:HasContentToFontWeightConverter x:Key="HasContentToFontWeight"/>
+    </Page.Resources>
 
     <!--
     LAYOUT PATTERN FOR SINGLE-ENTRY TABS WITH MULTIPLE RICHEDITBOXEXTENDED FIELDS:
@@ -110,17 +115,17 @@
 
                         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
                             <StackPanel Spacing="4" Padding="0,0,12,0">
-                                <TextBox Text="{x:Bind StoryWorldVm.CurrentPhysicalWorldName, Mode=TwoWay}"
+                                <TextBox Text="{x:Bind StoryWorldVm.PhysicalWorldNav.CurrentItem.Name, Mode=TwoWay}"
                                          PlaceholderText="World name" Header="Name"
-                                         IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}"/>
+                                         IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"/>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Geography" FontWeight="{x:Bind StoryWorldVm.PhysicalWorldGeographyFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Geography" FontWeight="{x:Bind StoryWorldVm.PhysicalWorldNav.CurrentItem.Geography, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentPhysicalWorldGeography, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.PhysicalWorldNav.CurrentItem.Geography, Mode=TwoWay}"
                                         PlaceholderText="What are the major landforms, bodies of water, and terrain features?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -128,12 +133,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Climate" FontWeight="{x:Bind StoryWorldVm.PhysicalWorldClimateFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Climate" FontWeight="{x:Bind StoryWorldVm.PhysicalWorldNav.CurrentItem.Climate, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentPhysicalWorldClimate, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.PhysicalWorldNav.CurrentItem.Climate, Mode=TwoWay}"
                                         PlaceholderText="What are the weather patterns, seasons, and extreme conditions?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -141,12 +146,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Natural Resources" FontWeight="{x:Bind StoryWorldVm.PhysicalWorldNaturalResourcesFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Natural Resources" FontWeight="{x:Bind StoryWorldVm.PhysicalWorldNav.CurrentItem.NaturalResources, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentPhysicalWorldNaturalResources, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.PhysicalWorldNav.CurrentItem.NaturalResources, Mode=TwoWay}"
                                         PlaceholderText="What minerals, water sources, and energy are available?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -154,12 +159,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Flora" FontWeight="{x:Bind StoryWorldVm.PhysicalWorldFloraFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Flora" FontWeight="{x:Bind StoryWorldVm.PhysicalWorldNav.CurrentItem.Flora, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentPhysicalWorldFlora, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.PhysicalWorldNav.CurrentItem.Flora, Mode=TwoWay}"
                                         PlaceholderText="What plants, trees, and vegetation exist here?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -167,12 +172,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Fauna" FontWeight="{x:Bind StoryWorldVm.PhysicalWorldFaunaFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Fauna" FontWeight="{x:Bind StoryWorldVm.PhysicalWorldNav.CurrentItem.Fauna, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentPhysicalWorldFauna, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.PhysicalWorldNav.CurrentItem.Fauna, Mode=TwoWay}"
                                         PlaceholderText="What animals, creatures, and wildlife inhabit this world?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -180,12 +185,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Astronomy" FontWeight="{x:Bind StoryWorldVm.PhysicalWorldAstronomyFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Astronomy" FontWeight="{x:Bind StoryWorldVm.PhysicalWorldNav.CurrentItem.Astronomy, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentPhysicalWorldAstronomy, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.PhysicalWorldNav.CurrentItem.Astronomy, Mode=TwoWay}"
                                         PlaceholderText="What moons, stars, and celestial phenomena are visible?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -206,15 +211,15 @@
 
                                 <!-- Navigation controls (left) -->
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
-                                    <Button Command="{x:Bind StoryWorldVm.PreviousPhysicalWorldCommand}"
-                                            IsEnabled="{x:Bind StoryWorldVm.HasPreviousPhysicalWorld, Mode=OneWay}"
+                                    <Button Command="{x:Bind StoryWorldVm.PhysicalWorldNav.PreviousCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasPrevious, Mode=OneWay}"
                                             Padding="8,8" ToolTipService.ToolTip="Previous World">
                                         <SymbolIcon Symbol="Back"/>
                                     </Button>
-                                    <TextBlock Text="{x:Bind StoryWorldVm.PhysicalWorldPositionDisplay, Mode=OneWay}"
+                                    <TextBlock Text="{x:Bind StoryWorldVm.PhysicalWorldNav.PositionDisplay, Mode=OneWay}"
                                                VerticalAlignment="Center" MinWidth="50" TextAlignment="Center"/>
-                                    <Button Command="{x:Bind StoryWorldVm.NextPhysicalWorldCommand}"
-                                            IsEnabled="{x:Bind StoryWorldVm.HasNextPhysicalWorld, Mode=OneWay}"
+                                    <Button Command="{x:Bind StoryWorldVm.PhysicalWorldNav.NextCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasNext, Mode=OneWay}"
                                             Padding="8,8" ToolTipService.ToolTip="Next World">
                                         <SymbolIcon Symbol="Forward"/>
                                     </Button>
@@ -222,15 +227,15 @@
 
                                 <!-- Add/Remove controls (right) -->
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                                    <Button Command="{x:Bind StoryWorldVm.AddPhysicalWorldCommand}"
+                                    <Button Command="{x:Bind StoryWorldVm.PhysicalWorldNav.AddCommand}"
                                             Padding="12,8">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Add"/>
                                             <TextBlock Text="Add World"/>
                                         </StackPanel>
                                     </Button>
-                                    <Button Command="{x:Bind StoryWorldVm.RemoveCurrentPhysicalWorldCommand}"
-                                            IsEnabled="{x:Bind StoryWorldVm.HasPhysicalWorlds, Mode=OneWay}"
+                                    <Button Command="{x:Bind StoryWorldVm.PhysicalWorldNav.RemoveCurrentCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
                                             Padding="12,8">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Delete"/>
@@ -254,17 +259,17 @@
 
                         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
                             <StackPanel Spacing="4" Padding="0,0,12,0">
-                                <TextBox Text="{x:Bind StoryWorldVm.CurrentSpeciesName, Mode=TwoWay}"
+                                <TextBox Text="{x:Bind StoryWorldVm.SpeciesNav.CurrentItem.Name, Mode=TwoWay}"
                                          PlaceholderText="Species name" Header="Name"
-                                         IsEnabled="{x:Bind StoryWorldVm.HasSpecies, Mode=OneWay}"/>
+                                         IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}"/>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasSpecies, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Physical Traits" FontWeight="{x:Bind StoryWorldVm.SpeciesPhysicalTraitsFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Physical Traits" FontWeight="{x:Bind StoryWorldVm.SpeciesNav.CurrentItem.PhysicalTraits, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentSpeciesPhysicalTraits, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.SpeciesNav.CurrentItem.PhysicalTraits, Mode=TwoWay}"
                                         PlaceholderText="What do they look like? What physical abilities or limitations do they have?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -272,12 +277,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasSpecies, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Lifespan" FontWeight="{x:Bind StoryWorldVm.SpeciesLifespanFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Lifespan" FontWeight="{x:Bind StoryWorldVm.SpeciesNav.CurrentItem.Lifespan, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentSpeciesLifespan, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.SpeciesNav.CurrentItem.Lifespan, Mode=TwoWay}"
                                         PlaceholderText="How long do they live? What are their life stages?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -285,12 +290,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasSpecies, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Origins" FontWeight="{x:Bind StoryWorldVm.SpeciesOriginsFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Origins" FontWeight="{x:Bind StoryWorldVm.SpeciesNav.CurrentItem.Origins, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentSpeciesOrigins, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.SpeciesNav.CurrentItem.Origins, Mode=TwoWay}"
                                         PlaceholderText="Where did they come from? Evolution, creation, or migration?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -298,12 +303,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasSpecies, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Social Structure" FontWeight="{x:Bind StoryWorldVm.SpeciesSocialStructureFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Social Structure" FontWeight="{x:Bind StoryWorldVm.SpeciesNav.CurrentItem.SocialStructure, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentSpeciesSocialStructure, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.SpeciesNav.CurrentItem.SocialStructure, Mode=TwoWay}"
                                         PlaceholderText="How do they organize? Family units, tribes, hierarchies?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -311,12 +316,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasSpecies, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Diversity" FontWeight="{x:Bind StoryWorldVm.SpeciesDiversityFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Diversity" FontWeight="{x:Bind StoryWorldVm.SpeciesNav.CurrentItem.Diversity, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentSpeciesDiversity, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.SpeciesNav.CurrentItem.Diversity, Mode=TwoWay}"
                                         PlaceholderText="What subspecies or regional variations exist?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -335,28 +340,28 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
-                                    <Button Command="{x:Bind StoryWorldVm.PreviousSpeciesCommand}"
-                                            IsEnabled="{x:Bind StoryWorldVm.HasPreviousSpecies, Mode=OneWay}"
+                                    <Button Command="{x:Bind StoryWorldVm.SpeciesNav.PreviousCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasPrevious, Mode=OneWay}"
                                             Padding="8,8" ToolTipService.ToolTip="Previous Species">
                                         <SymbolIcon Symbol="Back"/>
                                     </Button>
-                                    <TextBlock Text="{x:Bind StoryWorldVm.SpeciesPositionDisplay, Mode=OneWay}"
+                                    <TextBlock Text="{x:Bind StoryWorldVm.SpeciesNav.PositionDisplay, Mode=OneWay}"
                                                VerticalAlignment="Center" MinWidth="50" TextAlignment="Center"/>
-                                    <Button Command="{x:Bind StoryWorldVm.NextSpeciesCommand}"
-                                            IsEnabled="{x:Bind StoryWorldVm.HasNextSpecies, Mode=OneWay}"
+                                    <Button Command="{x:Bind StoryWorldVm.SpeciesNav.NextCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasNext, Mode=OneWay}"
                                             Padding="8,8" ToolTipService.ToolTip="Next Species">
                                         <SymbolIcon Symbol="Forward"/>
                                     </Button>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                                    <Button Command="{x:Bind StoryWorldVm.AddSpeciesCommand}" Padding="12,8">
+                                    <Button Command="{x:Bind StoryWorldVm.SpeciesNav.AddCommand}" Padding="12,8">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Add"/>
                                             <TextBlock Text="Add Species"/>
                                         </StackPanel>
                                     </Button>
-                                    <Button Command="{x:Bind StoryWorldVm.RemoveCurrentSpeciesCommand}"
-                                            IsEnabled="{x:Bind StoryWorldVm.HasSpecies, Mode=OneWay}" Padding="12,8">
+                                    <Button Command="{x:Bind StoryWorldVm.SpeciesNav.RemoveCurrentCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}" Padding="12,8">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Delete"/>
                                             <TextBlock Text="Remove Species"/>
@@ -379,17 +384,17 @@
 
                         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
                             <StackPanel Spacing="4" Padding="0,0,12,0">
-                                <TextBox Text="{x:Bind StoryWorldVm.CurrentCultureName, Mode=TwoWay}"
+                                <TextBox Text="{x:Bind StoryWorldVm.CultureNav.CurrentItem.Name, Mode=TwoWay}"
                                          PlaceholderText="Culture name" Header="Name"
-                                         IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}"/>
+                                         IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}"/>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Values" FontWeight="{x:Bind StoryWorldVm.CultureValuesFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Values" FontWeight="{x:Bind StoryWorldVm.CultureNav.CurrentItem.Values, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentCultureValues, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.CultureNav.CurrentItem.Values, Mode=TwoWay}"
                                         PlaceholderText="What does this culture believe in? What matters most to them?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -397,12 +402,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Customs" FontWeight="{x:Bind StoryWorldVm.CultureCustomsFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Customs" FontWeight="{x:Bind StoryWorldVm.CultureNav.CurrentItem.Customs, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentCultureCustoms, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.CultureNav.CurrentItem.Customs, Mode=TwoWay}"
                                         PlaceholderText="What traditions, ceremonies, and social rituals do they practice?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -410,12 +415,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Taboos" FontWeight="{x:Bind StoryWorldVm.CultureTaboosFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Taboos" FontWeight="{x:Bind StoryWorldVm.CultureNav.CurrentItem.Taboos, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentCultureTaboos, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.CultureNav.CurrentItem.Taboos, Mode=TwoWay}"
                                         PlaceholderText="What behaviors are forbidden or socially unacceptable?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -423,12 +428,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Art" FontWeight="{x:Bind StoryWorldVm.CultureArtFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Art" FontWeight="{x:Bind StoryWorldVm.CultureNav.CurrentItem.Art, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentCultureArt, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.CultureNav.CurrentItem.Art, Mode=TwoWay}"
                                         PlaceholderText="What music, visual arts, literature, and performance exist?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -436,12 +441,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Daily Life" FontWeight="{x:Bind StoryWorldVm.CultureDailyLifeFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Daily Life" FontWeight="{x:Bind StoryWorldVm.CultureNav.CurrentItem.DailyLife, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentCultureDailyLife, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.CultureNav.CurrentItem.DailyLife, Mode=TwoWay}"
                                         PlaceholderText="What are their routines, meals, family life, and work patterns?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -449,12 +454,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Entertainment" FontWeight="{x:Bind StoryWorldVm.CultureEntertainmentFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Entertainment" FontWeight="{x:Bind StoryWorldVm.CultureNav.CurrentItem.Entertainment, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentCultureEntertainment, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.CultureNav.CurrentItem.Entertainment, Mode=TwoWay}"
                                         PlaceholderText="What games, sports, and leisure activities do they enjoy?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -473,28 +478,28 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
-                                        <Button Command="{x:Bind StoryWorldVm.PreviousCultureCommand}"
-                                                IsEnabled="{x:Bind StoryWorldVm.HasPreviousCulture, Mode=OneWay}"
+                                        <Button Command="{x:Bind StoryWorldVm.CultureNav.PreviousCommand}"
+                                                IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasPrevious, Mode=OneWay}"
                                                 Padding="8,8" ToolTipService.ToolTip="Previous Culture">
                                             <SymbolIcon Symbol="Back"/>
                                         </Button>
-                                        <TextBlock Text="{x:Bind StoryWorldVm.CulturePositionDisplay, Mode=OneWay}"
+                                        <TextBlock Text="{x:Bind StoryWorldVm.CultureNav.PositionDisplay, Mode=OneWay}"
                                                    VerticalAlignment="Center" MinWidth="50" TextAlignment="Center"/>
-                                        <Button Command="{x:Bind StoryWorldVm.NextCultureCommand}"
-                                                IsEnabled="{x:Bind StoryWorldVm.HasNextCulture, Mode=OneWay}"
+                                        <Button Command="{x:Bind StoryWorldVm.CultureNav.NextCommand}"
+                                                IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasNext, Mode=OneWay}"
                                                 Padding="8,8" ToolTipService.ToolTip="Next Culture">
                                             <SymbolIcon Symbol="Forward"/>
                                         </Button>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                                        <Button Command="{x:Bind StoryWorldVm.AddCultureCommand}" Padding="12,8">
+                                        <Button Command="{x:Bind StoryWorldVm.CultureNav.AddCommand}" Padding="12,8">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <SymbolIcon Symbol="Add"/>
                                                 <TextBlock Text="Add Culture"/>
                                             </StackPanel>
                                         </Button>
-                                        <Button Command="{x:Bind StoryWorldVm.RemoveCurrentCultureCommand}"
-                                                IsEnabled="{x:Bind StoryWorldVm.HasCultures, Mode=OneWay}" Padding="12,8">
+                                        <Button Command="{x:Bind StoryWorldVm.CultureNav.RemoveCurrentCommand}"
+                                                IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}" Padding="12,8">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <SymbolIcon Symbol="Delete"/>
                                                 <TextBlock Text="Remove Culture"/>
@@ -517,17 +522,17 @@
 
                         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
                             <StackPanel Spacing="4" Padding="0,0,12,0">
-                                <TextBox Text="{x:Bind StoryWorldVm.CurrentGovernmentName, Mode=TwoWay}"
+                                <TextBox Text="{x:Bind StoryWorldVm.GovernmentNav.CurrentItem.Name, Mode=TwoWay}"
                                          PlaceholderText="Government name" Header="Name"
-                                         IsEnabled="{x:Bind StoryWorldVm.HasGovernments, Mode=OneWay}"/>
+                                         IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}"/>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasGovernments, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Type" FontWeight="{x:Bind StoryWorldVm.GovernmentTypeFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Type" FontWeight="{x:Bind StoryWorldVm.GovernmentNav.CurrentItem.Type, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentGovernmentType, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.GovernmentNav.CurrentItem.Type, Mode=TwoWay}"
                                         PlaceholderText="What form of government is this? (democracy, monarchy, theocracy, etc.)"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -535,12 +540,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasGovernments, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Power Structures" FontWeight="{x:Bind StoryWorldVm.GovernmentPowerStructuresFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Power Structures" FontWeight="{x:Bind StoryWorldVm.GovernmentNav.CurrentItem.PowerStructures, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentGovernmentPowerStructures, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.GovernmentNav.CurrentItem.PowerStructures, Mode=TwoWay}"
                                         PlaceholderText="Who holds power? How is it gained, maintained, and transferred?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -548,12 +553,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasGovernments, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Laws" FontWeight="{x:Bind StoryWorldVm.GovernmentLawsFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Laws" FontWeight="{x:Bind StoryWorldVm.GovernmentNav.CurrentItem.Laws, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentGovernmentLaws, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.GovernmentNav.CurrentItem.Laws, Mode=TwoWay}"
                                         PlaceholderText="What is the legal system? How are laws enforced and violations punished?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -561,12 +566,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasGovernments, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Class Structure" FontWeight="{x:Bind StoryWorldVm.GovernmentClassStructureFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Class Structure" FontWeight="{x:Bind StoryWorldVm.GovernmentNav.CurrentItem.ClassStructure, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentGovernmentClassStructure, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.GovernmentNav.CurrentItem.ClassStructure, Mode=TwoWay}"
                                         PlaceholderText="What is the social hierarchy? Can people move between classes?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -574,12 +579,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasGovernments, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Foreign Relations" FontWeight="{x:Bind StoryWorldVm.GovernmentForeignRelationsFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Foreign Relations" FontWeight="{x:Bind StoryWorldVm.GovernmentNav.CurrentItem.ForeignRelations, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentGovernmentForeignRelations, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.GovernmentNav.CurrentItem.ForeignRelations, Mode=TwoWay}"
                                         PlaceholderText="Who are the allies and enemies? What treaties and trade agreements exist?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -598,28 +603,28 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
-                                    <Button Command="{x:Bind StoryWorldVm.PreviousGovernmentCommand}"
-                                            IsEnabled="{x:Bind StoryWorldVm.HasPreviousGovernment, Mode=OneWay}"
+                                    <Button Command="{x:Bind StoryWorldVm.GovernmentNav.PreviousCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasPrevious, Mode=OneWay}"
                                             Padding="8,8" ToolTipService.ToolTip="Previous Government">
                                         <SymbolIcon Symbol="Back"/>
                                     </Button>
-                                    <TextBlock Text="{x:Bind StoryWorldVm.GovernmentPositionDisplay, Mode=OneWay}"
+                                    <TextBlock Text="{x:Bind StoryWorldVm.GovernmentNav.PositionDisplay, Mode=OneWay}"
                                                VerticalAlignment="Center" MinWidth="50" TextAlignment="Center"/>
-                                    <Button Command="{x:Bind StoryWorldVm.NextGovernmentCommand}"
-                                            IsEnabled="{x:Bind StoryWorldVm.HasNextGovernment, Mode=OneWay}"
+                                    <Button Command="{x:Bind StoryWorldVm.GovernmentNav.NextCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasNext, Mode=OneWay}"
                                             Padding="8,8" ToolTipService.ToolTip="Next Government">
                                         <SymbolIcon Symbol="Forward"/>
                                     </Button>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                                    <Button Command="{x:Bind StoryWorldVm.AddGovernmentCommand}" Padding="12,8">
+                                    <Button Command="{x:Bind StoryWorldVm.GovernmentNav.AddCommand}" Padding="12,8">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Add"/>
                                             <TextBlock Text="Add Government"/>
                                         </StackPanel>
                                     </Button>
-                                    <Button Command="{x:Bind StoryWorldVm.RemoveCurrentGovernmentCommand}"
-                                            IsEnabled="{x:Bind StoryWorldVm.HasGovernments, Mode=OneWay}" Padding="12,8">
+                                    <Button Command="{x:Bind StoryWorldVm.GovernmentNav.RemoveCurrentCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}" Padding="12,8">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Delete"/>
                                             <TextBlock Text="Remove Government"/>
@@ -642,17 +647,17 @@
 
                         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
                             <StackPanel Spacing="4" Padding="0,0,12,0">
-                                <TextBox Text="{x:Bind StoryWorldVm.CurrentReligionName, Mode=TwoWay}"
+                                <TextBox Text="{x:Bind StoryWorldVm.ReligionNav.CurrentItem.Name, Mode=TwoWay}"
                                          PlaceholderText="Religion name" Header="Name"
-                                         IsEnabled="{x:Bind StoryWorldVm.HasReligions, Mode=OneWay}"/>
+                                         IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}"/>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasReligions, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Deities" FontWeight="{x:Bind StoryWorldVm.ReligionDeitiesFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Deities" FontWeight="{x:Bind StoryWorldVm.ReligionNav.CurrentItem.Deities, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentReligionDeities, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.ReligionNav.CurrentItem.Deities, Mode=TwoWay}"
                                         PlaceholderText="What gods, spirits, or divine beings are worshipped?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -660,12 +665,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasReligions, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Beliefs" FontWeight="{x:Bind StoryWorldVm.ReligionBeliefsFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Beliefs" FontWeight="{x:Bind StoryWorldVm.ReligionNav.CurrentItem.Beliefs, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentReligionBeliefs, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.ReligionNav.CurrentItem.Beliefs, Mode=TwoWay}"
                                         PlaceholderText="What are the core tenets? What happens after death? What is moral?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -673,12 +678,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasReligions, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Practices" FontWeight="{x:Bind StoryWorldVm.ReligionPracticesFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Practices" FontWeight="{x:Bind StoryWorldVm.ReligionNav.CurrentItem.Practices, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentReligionPractices, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.ReligionNav.CurrentItem.Practices, Mode=TwoWay}"
                                         PlaceholderText="What rituals, prayers, holy days, and ceremonies are observed?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -686,12 +691,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasReligions, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Organizations" FontWeight="{x:Bind StoryWorldVm.ReligionOrganizationsFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Organizations" FontWeight="{x:Bind StoryWorldVm.ReligionNav.CurrentItem.Organizations, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentReligionOrganizations, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.ReligionNav.CurrentItem.Organizations, Mode=TwoWay}"
                                         PlaceholderText="What temples, clergy, hierarchies, and sects exist?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -699,12 +704,12 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.HasReligions, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}">
                                     <Expander.Header>
-                                        <TextBlock Text="Creation Myths" FontWeight="{x:Bind StoryWorldVm.ReligionCreationMythsFontWeight, Mode=OneWay}"/>
+                                        <TextBlock Text="Creation Myths" FontWeight="{x:Bind StoryWorldVm.ReligionNav.CurrentItem.CreationMyths, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
                                     <usercontrols:RichEditBoxExtended
-                                        RtfText="{x:Bind StoryWorldVm.CurrentReligionCreationMyths, Mode=TwoWay}"
+                                        RtfText="{x:Bind StoryWorldVm.ReligionNav.CurrentItem.CreationMyths, Mode=TwoWay}"
                                         PlaceholderText="What are the origin stories, cosmology, and sacred narratives?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
@@ -723,28 +728,28 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
-                                    <Button Command="{x:Bind StoryWorldVm.PreviousReligionCommand}"
-                                            IsEnabled="{x:Bind StoryWorldVm.HasPreviousReligion, Mode=OneWay}"
+                                    <Button Command="{x:Bind StoryWorldVm.ReligionNav.PreviousCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasPrevious, Mode=OneWay}"
                                             Padding="8,8" ToolTipService.ToolTip="Previous Religion">
                                         <SymbolIcon Symbol="Back"/>
                                     </Button>
-                                    <TextBlock Text="{x:Bind StoryWorldVm.ReligionPositionDisplay, Mode=OneWay}"
+                                    <TextBlock Text="{x:Bind StoryWorldVm.ReligionNav.PositionDisplay, Mode=OneWay}"
                                                VerticalAlignment="Center" MinWidth="50" TextAlignment="Center"/>
-                                    <Button Command="{x:Bind StoryWorldVm.NextReligionCommand}"
-                                            IsEnabled="{x:Bind StoryWorldVm.HasNextReligion, Mode=OneWay}"
+                                    <Button Command="{x:Bind StoryWorldVm.ReligionNav.NextCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasNext, Mode=OneWay}"
                                             Padding="8,8" ToolTipService.ToolTip="Next Religion">
                                         <SymbolIcon Symbol="Forward"/>
                                     </Button>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                                    <Button Command="{x:Bind StoryWorldVm.AddReligionCommand}" Padding="12,8">
+                                    <Button Command="{x:Bind StoryWorldVm.ReligionNav.AddCommand}" Padding="12,8">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Add"/>
                                             <TextBlock Text="Add Religion"/>
                                         </StackPanel>
                                     </Button>
-                                    <Button Command="{x:Bind StoryWorldVm.RemoveCurrentReligionCommand}"
-                                            IsEnabled="{x:Bind StoryWorldVm.HasReligions, Mode=OneWay}" Padding="12,8">
+                                    <Button Command="{x:Bind StoryWorldVm.ReligionNav.RemoveCurrentCommand}"
+                                            IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}" Padding="12,8">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Delete"/>
                                             <TextBlock Text="Remove Religion"/>
@@ -763,7 +768,7 @@
                         <StackPanel Spacing="4" Padding="12">
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Founding Events" FontWeight="{x:Bind StoryWorldVm.FoundingEventsFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Founding Events" FontWeight="{x:Bind StoryWorldVm.FoundingEvents, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.FoundingEvents, Mode=TwoWay}"
@@ -775,7 +780,7 @@
 
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Major Conflicts" FontWeight="{x:Bind StoryWorldVm.MajorConflictsFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Major Conflicts" FontWeight="{x:Bind StoryWorldVm.MajorConflicts, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.MajorConflicts, Mode=TwoWay}"
@@ -787,7 +792,7 @@
 
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Eras" FontWeight="{x:Bind StoryWorldVm.ErasFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Eras" FontWeight="{x:Bind StoryWorldVm.Eras, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.Eras, Mode=TwoWay}"
@@ -799,7 +804,7 @@
 
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Technological Shifts" FontWeight="{x:Bind StoryWorldVm.TechnologicalShiftsFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Technological Shifts" FontWeight="{x:Bind StoryWorldVm.TechnologicalShifts, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.TechnologicalShifts, Mode=TwoWay}"
@@ -811,7 +816,7 @@
 
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Lost Knowledge" FontWeight="{x:Bind StoryWorldVm.LostKnowledgeFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Lost Knowledge" FontWeight="{x:Bind StoryWorldVm.LostKnowledge, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.LostKnowledge, Mode=TwoWay}"
@@ -831,7 +836,7 @@
                         <StackPanel Spacing="4" Padding="12">
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Economic System" FontWeight="{x:Bind StoryWorldVm.EconomicSystemFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Economic System" FontWeight="{x:Bind StoryWorldVm.EconomicSystem, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.EconomicSystem, Mode=TwoWay}"
@@ -843,7 +848,7 @@
 
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Currency" FontWeight="{x:Bind StoryWorldVm.CurrencyFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Currency" FontWeight="{x:Bind StoryWorldVm.Currency, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.Currency, Mode=TwoWay}"
@@ -855,7 +860,7 @@
 
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Trade Routes" FontWeight="{x:Bind StoryWorldVm.TradeRoutesFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Trade Routes" FontWeight="{x:Bind StoryWorldVm.TradeRoutes, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.TradeRoutes, Mode=TwoWay}"
@@ -867,7 +872,7 @@
 
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Professions" FontWeight="{x:Bind StoryWorldVm.ProfessionsFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Professions" FontWeight="{x:Bind StoryWorldVm.Professions, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.Professions, Mode=TwoWay}"
@@ -879,7 +884,7 @@
 
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Wealth Distribution" FontWeight="{x:Bind StoryWorldVm.WealthDistributionFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Wealth Distribution" FontWeight="{x:Bind StoryWorldVm.WealthDistribution, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.WealthDistribution, Mode=TwoWay}"
@@ -903,7 +908,7 @@
 
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Source" FontWeight="{x:Bind StoryWorldVm.SourceFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Source" FontWeight="{x:Bind StoryWorldVm.Source, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.Source, Mode=TwoWay}"
@@ -915,7 +920,7 @@
 
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Rules" FontWeight="{x:Bind StoryWorldVm.RulesFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Rules" FontWeight="{x:Bind StoryWorldVm.Rules, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.Rules, Mode=TwoWay}"
@@ -927,7 +932,7 @@
 
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Limitations" FontWeight="{x:Bind StoryWorldVm.LimitationsFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Limitations" FontWeight="{x:Bind StoryWorldVm.Limitations, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.Limitations, Mode=TwoWay}"
@@ -939,7 +944,7 @@
 
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Cost" FontWeight="{x:Bind StoryWorldVm.CostFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Cost" FontWeight="{x:Bind StoryWorldVm.Cost, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.Cost, Mode=TwoWay}"
@@ -951,7 +956,7 @@
 
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Practitioners" FontWeight="{x:Bind StoryWorldVm.PractitionersFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Practitioners" FontWeight="{x:Bind StoryWorldVm.Practitioners, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.Practitioners, Mode=TwoWay}"
@@ -963,7 +968,7 @@
 
                             <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                 <Expander.Header>
-                                    <TextBlock Text="Social Impact" FontWeight="{x:Bind StoryWorldVm.SocialImpactFontWeight, Mode=OneWay}"/>
+                                    <TextBlock Text="Social Impact" FontWeight="{x:Bind StoryWorldVm.SocialImpact, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
                                 <usercontrols:RichEditBoxExtended
                                     RtfText="{x:Bind StoryWorldVm.SocialImpact, Mode=TwoWay}"

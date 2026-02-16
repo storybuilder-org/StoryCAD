@@ -173,45 +173,41 @@ public class StoryWorldViewModelTests
     }
 
     [TestMethod]
-    public void FontWeight_IsBold_WhenFieldHasContent()
+    public void HasContentToFontWeightConverter_ReturnsBold_WhenFieldHasContent()
     {
         // Arrange
-        var viewModel = Ioc.Default.GetRequiredService<StoryWorldViewModel>();
-        var appState = Ioc.Default.GetRequiredService<AppState>();
-        var storyModel = new StoryModel();
-        appState.CurrentDocument = new StoryDocument(storyModel);
-        var model = new StoryWorldModel("Test", storyModel, null);
-        viewModel.Activate(model);
+        var converter = new StoryCADLib.Converters.HasContentToFontWeightConverter();
 
-        // Add a culture entry
-        viewModel.AddCultureCommand.Execute(null);
-
-        // Act - set content (RichEditBoxExtended normalizes to RTF, but any non-empty string works)
-        viewModel.CurrentCultureValues = "Some content";
+        // Act
+        var result = (Windows.UI.Text.FontWeight)converter.Convert("Some content", typeof(Windows.UI.Text.FontWeight), null, null);
 
         // Assert - should be bold (weight 700)
-        Assert.AreEqual((ushort)700, viewModel.CultureValuesFontWeight.Weight);
+        Assert.AreEqual((ushort)700, result.Weight);
     }
 
     [TestMethod]
-    public void FontWeight_IsNormal_WhenFieldIsEmpty()
+    public void HasContentToFontWeightConverter_ReturnsNormal_WhenFieldIsEmpty()
     {
         // Arrange
-        var viewModel = Ioc.Default.GetRequiredService<StoryWorldViewModel>();
-        var appState = Ioc.Default.GetRequiredService<AppState>();
-        var storyModel = new StoryModel();
-        appState.CurrentDocument = new StoryDocument(storyModel);
-        var model = new StoryWorldModel("Test", storyModel, null);
-        viewModel.Activate(model);
+        var converter = new StoryCADLib.Converters.HasContentToFontWeightConverter();
 
-        // Add a culture entry with content
-        viewModel.AddCultureCommand.Execute(null);
-        viewModel.CurrentCultureValues = "Some content";
-
-        // Act - clear content (RichEditBoxExtended sets to "" when plain text is empty)
-        viewModel.CurrentCultureValues = "";
+        // Act - empty string
+        var result = (Windows.UI.Text.FontWeight)converter.Convert("", typeof(Windows.UI.Text.FontWeight), null, null);
 
         // Assert - should be normal (weight 400)
-        Assert.AreEqual((ushort)400, viewModel.CultureValuesFontWeight.Weight);
+        Assert.AreEqual((ushort)400, result.Weight);
+    }
+
+    [TestMethod]
+    public void HasContentToFontWeightConverter_ReturnsNormal_WhenFieldIsNull()
+    {
+        // Arrange
+        var converter = new StoryCADLib.Converters.HasContentToFontWeightConverter();
+
+        // Act - null
+        var result = (Windows.UI.Text.FontWeight)converter.Convert(null, typeof(Windows.UI.Text.FontWeight), null, null);
+
+        // Assert - should be normal (weight 400)
+        Assert.AreEqual((ushort)400, result.Weight);
     }
 }

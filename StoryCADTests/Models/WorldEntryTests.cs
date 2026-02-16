@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using StoryCADLib.Models;
 using StoryCADLib.Models.StoryWorld;
 
@@ -37,6 +38,20 @@ public class WorldEntryTests
         Assert.AreEqual("Cold and thin atmosphere", entry.Climate);
     }
 
+    [TestMethod]
+    public void PhysicalWorldEntry_PropertyChanged_RaisesNotification()
+    {
+        var entry = new PhysicalWorldEntry();
+        var changed = new List<string>();
+        entry.PropertyChanged += (_, e) => changed.Add(e.PropertyName!);
+
+        entry.Name = "Terra";
+        entry.Geography = "Mountains";
+
+        CollectionAssert.Contains(changed, nameof(PhysicalWorldEntry.Name));
+        CollectionAssert.Contains(changed, nameof(PhysicalWorldEntry.Geography));
+    }
+
     #endregion
 
     #region SpeciesEntry Tests
@@ -67,6 +82,20 @@ public class WorldEntryTests
         Assert.AreEqual("Elves", entry.Name);
         Assert.AreEqual("Tall, pointed ears, ageless", entry.PhysicalTraits);
         Assert.AreEqual("Immortal", entry.Lifespan);
+    }
+
+    [TestMethod]
+    public void SpeciesEntry_PropertyChanged_RaisesNotification()
+    {
+        var entry = new SpeciesEntry();
+        var changed = new List<string>();
+        entry.PropertyChanged += (_, e) => changed.Add(e.PropertyName!);
+
+        entry.Name = "Dwarves";
+        entry.PhysicalTraits = "Short and sturdy";
+
+        CollectionAssert.Contains(changed, nameof(SpeciesEntry.Name));
+        CollectionAssert.Contains(changed, nameof(SpeciesEntry.PhysicalTraits));
     }
 
     #endregion
@@ -102,6 +131,20 @@ public class WorldEntryTests
         Assert.AreEqual("Showing weakness, admitting failure", entry.Taboos);
     }
 
+    [TestMethod]
+    public void CultureEntry_PropertyChanged_RaisesNotification()
+    {
+        var entry = new CultureEntry();
+        var changed = new List<string>();
+        entry.PropertyChanged += (_, e) => changed.Add(e.PropertyName!);
+
+        entry.Name = "Samurai";
+        entry.Values = "Honor, discipline";
+
+        CollectionAssert.Contains(changed, nameof(CultureEntry.Name));
+        CollectionAssert.Contains(changed, nameof(CultureEntry.Values));
+    }
+
     #endregion
 
     #region GovernmentEntry Tests
@@ -134,6 +177,20 @@ public class WorldEntryTests
         Assert.AreEqual("Statute of Secrecy", entry.Laws);
     }
 
+    [TestMethod]
+    public void GovernmentEntry_PropertyChanged_RaisesNotification()
+    {
+        var entry = new GovernmentEntry();
+        var changed = new List<string>();
+        entry.PropertyChanged += (_, e) => changed.Add(e.PropertyName!);
+
+        entry.Name = "Senate";
+        entry.Type = "Republic";
+
+        CollectionAssert.Contains(changed, nameof(GovernmentEntry.Name));
+        CollectionAssert.Contains(changed, nameof(GovernmentEntry.Type));
+    }
+
     #endregion
 
     #region ReligionEntry Tests
@@ -164,6 +221,20 @@ public class WorldEntryTests
         Assert.AreEqual("Faith of the Seven", entry.Name);
         Assert.AreEqual("Seven aspects of one god", entry.Deities);
         Assert.AreEqual("Sept worship, trials by combat", entry.Practices);
+    }
+
+    [TestMethod]
+    public void ReligionEntry_PropertyChanged_RaisesNotification()
+    {
+        var entry = new ReligionEntry();
+        var changed = new List<string>();
+        entry.PropertyChanged += (_, e) => changed.Add(e.PropertyName!);
+
+        entry.Name = "Old Gods";
+        entry.Deities = "Nameless nature spirits";
+
+        CollectionAssert.Contains(changed, nameof(ReligionEntry.Name));
+        CollectionAssert.Contains(changed, nameof(ReligionEntry.Deities));
     }
 
     #endregion

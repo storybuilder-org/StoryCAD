@@ -46,7 +46,7 @@ public sealed partial class StoryWorldPage : Page
         var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
         if (result == ContentDialogResult.Primary)
         {
-            StoryWorldVm.RemovePhysicalWorld(entry);
+            StoryWorldVm.PhysicalWorldNav.Remove(entry);
         }
     }
 
@@ -65,7 +65,7 @@ public sealed partial class StoryWorldPage : Page
         var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
         if (result == ContentDialogResult.Primary)
         {
-            StoryWorldVm.RemoveSpecies(entry);
+            StoryWorldVm.SpeciesNav.Remove(entry);
         }
     }
 
@@ -84,7 +84,7 @@ public sealed partial class StoryWorldPage : Page
         var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
         if (result == ContentDialogResult.Primary)
         {
-            StoryWorldVm.RemoveCulture(entry);
+            StoryWorldVm.CultureNav.Remove(entry);
         }
     }
 
@@ -103,7 +103,7 @@ public sealed partial class StoryWorldPage : Page
         var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
         if (result == ContentDialogResult.Primary)
         {
-            StoryWorldVm.RemoveGovernment(entry);
+            StoryWorldVm.GovernmentNav.Remove(entry);
         }
     }
 
@@ -122,7 +122,7 @@ public sealed partial class StoryWorldPage : Page
         var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
         if (result == ContentDialogResult.Primary)
         {
-            StoryWorldVm.RemoveReligion(entry);
+            StoryWorldVm.ReligionNav.Remove(entry);
         }
     }
 
