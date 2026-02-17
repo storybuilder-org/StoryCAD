@@ -1,6 +1,7 @@
 #pragma warning disable CS8632 // Nullable annotations used without nullable context
 using StoryCADLib.Models;
 using StoryCADLib.Services.API;
+using StoryCADLib.Services.Logging;
 
 namespace StoryCADLib.Services.Collaborator.Contracts;
 
@@ -18,8 +19,9 @@ public interface ICollaborator
 /// <param name="hostWindow">Host-created window for Collaborator UI</param>
 /// <param name="hostFrame">Host-created frame (with region) for navigation</param>
 /// <param name="filePath">Path to the story file for saving via API</param>
+/// <param name="logger">StoryCAD's logger for high-level audit events (null if unavailable)</param>
 /// <returns>The window hosting Collaborator's UI</returns>
-Task<Window> OpenAsync(IStoryCADAPI api, StoryModel model, Window hostWindow, Frame hostFrame, string filePath);
+Task<Window> OpenAsync(IStoryCADAPI api, StoryModel model, Window hostWindow, Frame hostFrame, string filePath, ILogService? logger = null);
 
 /// <summary>
 ///     Signals that the host is closing Collaborator and retrieves a session summary.

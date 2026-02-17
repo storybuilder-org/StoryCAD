@@ -105,7 +105,7 @@ public class CollaboratorService
                 // DIAG-55: Log before OpenAsync - verify both references match
                 _logService.Log(LogLevel.Info, $"DIAG-55: Before OpenAsync - storyModel hash={RuntimeHelpers.GetHashCode(storyModel)}, api.CurrentModel hash={RuntimeHelpers.GetHashCode(api.CurrentModel)}");
                 var filePath = _appState.CurrentDocument?.FilePath ?? string.Empty;
-                await _collaboratorInterface.OpenAsync(api, storyModel, CollaboratorWindow, hostFrame, filePath);
+                await _collaboratorInterface.OpenAsync(api, storyModel, CollaboratorWindow, hostFrame, filePath, _logService);
             }
             catch (Exception ex)
             {
