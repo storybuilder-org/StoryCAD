@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -8,21 +7,22 @@ namespace StoryCADLib.ViewModels;
 /// <summary>
 /// Generic list navigation helper for StoryWorld entry lists.
 /// Manages index tracking, Previous/Next/Add/Remove commands,
-/// and PropertyChanged subscription forwarding for change detection.
+/// and fires callbacks for change detection and proxy property re-notification.
 /// </summary>
-public class ListNavigator<T> : ObservableObject where T : ObservableObject
+public class ListNavigator<T> : ObservableObject where T : class
 {
     private readonly ObservableCollection<T> _items;
     private readonly Func<T> _factory;
     private readonly Action _onChanged;
-    private INotifyPropertyChanged _subscribedEntry;
+    private readonly Action _onNavigated;
     private int _currentIndex;
 
-    public ListNavigator(ObservableCollection<T> items, Func<T> factory, Action onChanged)
+    public ListNavigator(ObservableCollection<T> items, Func<T> factory, Action onChanged, Action onNavigated)
     {
         _items = items;
         _factory = factory;
         _onChanged = onChanged;
+        _onNavigated = onNavigated;
 
         PreviousCommand = new RelayCommand(() => { if (HasPrevious) CurrentIndex--; });
         NextCommand = new RelayCommand(() => { if (HasNext) CurrentIndex++; });
@@ -96,22 +96,11 @@ public class ListNavigator<T> : ObservableObject where T : ObservableObject
 
     private void NotifyNavigationChanged()
     {
-        // Manage entry PropertyChanged subscription
-        if (_subscribedEntry != null)
-            _subscribedEntry.PropertyChanged -= OnEntryPropertyChanged;
-        _subscribedEntry = CurrentItem;
-        if (_subscribedEntry != null)
-            _subscribedEntry.PropertyChanged += OnEntryPropertyChanged;
-
         OnPropertyChanged(nameof(HasItems));
         OnPropertyChanged(nameof(HasPrevious));
         OnPropertyChanged(nameof(HasNext));
         OnPropertyChanged(nameof(PositionDisplay));
         OnPropertyChanged(nameof(CurrentItem));
-    }
-
-    private void OnEntryPropertyChanged(object sender, PropertyChangedEventArgs e)
-    {
-        _onChanged();
+        _onNavigated();
     }
 }

@@ -41,8 +41,12 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
 
     #region StoryElement Properties
 
-    [ObservableProperty]
     private Guid _uuid;
+    public Guid Uuid
+    {
+        get => _uuid;
+        set => SetProperty(ref _uuid, value);
+    }
 
     private string _name;
     public string Name
@@ -89,23 +93,47 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
         }
     }
 
-    [ObservableProperty]
-    private string _ontology = string.Empty;
+    private string _ontology;
+    public string Ontology
+    {
+        get => _ontology;
+        set => SetProperty(ref _ontology, value);
+    }
 
-    [ObservableProperty]
-    private string _worldRelation = string.Empty;
+    private string _worldRelation;
+    public string WorldRelation
+    {
+        get => _worldRelation;
+        set => SetProperty(ref _worldRelation, value);
+    }
 
-    [ObservableProperty]
-    private string _ruleTransparency = string.Empty;
+    private string _ruleTransparency;
+    public string RuleTransparency
+    {
+        get => _ruleTransparency;
+        set => SetProperty(ref _ruleTransparency, value);
+    }
 
-    [ObservableProperty]
-    private string _scaleOfDifference = string.Empty;
+    private string _scaleOfDifference;
+    public string ScaleOfDifference
+    {
+        get => _scaleOfDifference;
+        set => SetProperty(ref _scaleOfDifference, value);
+    }
 
-    [ObservableProperty]
-    private string _agencySource = string.Empty;
+    private string _agencySource;
+    public string AgencySource
+    {
+        get => _agencySource;
+        set => SetProperty(ref _agencySource, value);
+    }
 
-    [ObservableProperty]
-    private string _toneLogic = string.Empty;
+    private string _toneLogic;
+    public string ToneLogic
+    {
+        get => _toneLogic;
+        set => SetProperty(ref _toneLogic, value);
+    }
 
     #endregion
 
@@ -116,6 +144,526 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
     public ListNavigator<CultureEntry> CultureNav { get; private set; }
     public ListNavigator<GovernmentEntry> GovernmentNav { get; private set; }
     public ListNavigator<ReligionEntry> ReligionNav { get; private set; }
+
+    #endregion
+
+    #region Physical World Proxy Properties
+
+    public string CurrentPhysicalWorldName
+    {
+        get => PhysicalWorldNav.CurrentItem?.Name ?? string.Empty;
+        set
+        {
+            if (PhysicalWorldNav.CurrentItem != null)
+            {
+                PhysicalWorldNav.CurrentItem.Name = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentPhysicalWorldGeography
+    {
+        get => PhysicalWorldNav.CurrentItem?.Geography ?? string.Empty;
+        set
+        {
+            if (PhysicalWorldNav.CurrentItem != null)
+            {
+                PhysicalWorldNav.CurrentItem.Geography = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentPhysicalWorldClimate
+    {
+        get => PhysicalWorldNav.CurrentItem?.Climate ?? string.Empty;
+        set
+        {
+            if (PhysicalWorldNav.CurrentItem != null)
+            {
+                PhysicalWorldNav.CurrentItem.Climate = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentPhysicalWorldNaturalResources
+    {
+        get => PhysicalWorldNav.CurrentItem?.NaturalResources ?? string.Empty;
+        set
+        {
+            if (PhysicalWorldNav.CurrentItem != null)
+            {
+                PhysicalWorldNav.CurrentItem.NaturalResources = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentPhysicalWorldFlora
+    {
+        get => PhysicalWorldNav.CurrentItem?.Flora ?? string.Empty;
+        set
+        {
+            if (PhysicalWorldNav.CurrentItem != null)
+            {
+                PhysicalWorldNav.CurrentItem.Flora = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentPhysicalWorldFauna
+    {
+        get => PhysicalWorldNav.CurrentItem?.Fauna ?? string.Empty;
+        set
+        {
+            if (PhysicalWorldNav.CurrentItem != null)
+            {
+                PhysicalWorldNav.CurrentItem.Fauna = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentPhysicalWorldAstronomy
+    {
+        get => PhysicalWorldNav.CurrentItem?.Astronomy ?? string.Empty;
+        set
+        {
+            if (PhysicalWorldNav.CurrentItem != null)
+            {
+                PhysicalWorldNav.CurrentItem.Astronomy = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    private void NotifyPhysicalWorldProperties()
+    {
+        OnPropertyChanged(nameof(CurrentPhysicalWorldName));
+        OnPropertyChanged(nameof(CurrentPhysicalWorldGeography));
+        OnPropertyChanged(nameof(CurrentPhysicalWorldClimate));
+        OnPropertyChanged(nameof(CurrentPhysicalWorldNaturalResources));
+        OnPropertyChanged(nameof(CurrentPhysicalWorldFlora));
+        OnPropertyChanged(nameof(CurrentPhysicalWorldFauna));
+        OnPropertyChanged(nameof(CurrentPhysicalWorldAstronomy));
+    }
+
+    #endregion
+
+    #region Species Proxy Properties
+
+    public string CurrentSpeciesName
+    {
+        get => SpeciesNav.CurrentItem?.Name ?? string.Empty;
+        set
+        {
+            if (SpeciesNav.CurrentItem != null)
+            {
+                SpeciesNav.CurrentItem.Name = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentSpeciesPhysicalTraits
+    {
+        get => SpeciesNav.CurrentItem?.PhysicalTraits ?? string.Empty;
+        set
+        {
+            if (SpeciesNav.CurrentItem != null)
+            {
+                SpeciesNav.CurrentItem.PhysicalTraits = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentSpeciesLifespan
+    {
+        get => SpeciesNav.CurrentItem?.Lifespan ?? string.Empty;
+        set
+        {
+            if (SpeciesNav.CurrentItem != null)
+            {
+                SpeciesNav.CurrentItem.Lifespan = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentSpeciesOrigins
+    {
+        get => SpeciesNav.CurrentItem?.Origins ?? string.Empty;
+        set
+        {
+            if (SpeciesNav.CurrentItem != null)
+            {
+                SpeciesNav.CurrentItem.Origins = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentSpeciesSocialStructure
+    {
+        get => SpeciesNav.CurrentItem?.SocialStructure ?? string.Empty;
+        set
+        {
+            if (SpeciesNav.CurrentItem != null)
+            {
+                SpeciesNav.CurrentItem.SocialStructure = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentSpeciesDiversity
+    {
+        get => SpeciesNav.CurrentItem?.Diversity ?? string.Empty;
+        set
+        {
+            if (SpeciesNav.CurrentItem != null)
+            {
+                SpeciesNav.CurrentItem.Diversity = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    private void NotifySpeciesProperties()
+    {
+        OnPropertyChanged(nameof(CurrentSpeciesName));
+        OnPropertyChanged(nameof(CurrentSpeciesPhysicalTraits));
+        OnPropertyChanged(nameof(CurrentSpeciesLifespan));
+        OnPropertyChanged(nameof(CurrentSpeciesOrigins));
+        OnPropertyChanged(nameof(CurrentSpeciesSocialStructure));
+        OnPropertyChanged(nameof(CurrentSpeciesDiversity));
+    }
+
+    #endregion
+
+    #region Culture Proxy Properties
+
+    public string CurrentCultureName
+    {
+        get => CultureNav.CurrentItem?.Name ?? string.Empty;
+        set
+        {
+            if (CultureNav.CurrentItem != null)
+            {
+                CultureNav.CurrentItem.Name = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentCultureValues
+    {
+        get => CultureNav.CurrentItem?.Values ?? string.Empty;
+        set
+        {
+            if (CultureNav.CurrentItem != null)
+            {
+                CultureNav.CurrentItem.Values = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentCultureCustoms
+    {
+        get => CultureNav.CurrentItem?.Customs ?? string.Empty;
+        set
+        {
+            if (CultureNav.CurrentItem != null)
+            {
+                CultureNav.CurrentItem.Customs = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentCultureTaboos
+    {
+        get => CultureNav.CurrentItem?.Taboos ?? string.Empty;
+        set
+        {
+            if (CultureNav.CurrentItem != null)
+            {
+                CultureNav.CurrentItem.Taboos = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentCultureArt
+    {
+        get => CultureNav.CurrentItem?.Art ?? string.Empty;
+        set
+        {
+            if (CultureNav.CurrentItem != null)
+            {
+                CultureNav.CurrentItem.Art = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentCultureDailyLife
+    {
+        get => CultureNav.CurrentItem?.DailyLife ?? string.Empty;
+        set
+        {
+            if (CultureNav.CurrentItem != null)
+            {
+                CultureNav.CurrentItem.DailyLife = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentCultureEntertainment
+    {
+        get => CultureNav.CurrentItem?.Entertainment ?? string.Empty;
+        set
+        {
+            if (CultureNav.CurrentItem != null)
+            {
+                CultureNav.CurrentItem.Entertainment = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    private void NotifyCultureProperties()
+    {
+        OnPropertyChanged(nameof(CurrentCultureName));
+        OnPropertyChanged(nameof(CurrentCultureValues));
+        OnPropertyChanged(nameof(CurrentCultureCustoms));
+        OnPropertyChanged(nameof(CurrentCultureTaboos));
+        OnPropertyChanged(nameof(CurrentCultureArt));
+        OnPropertyChanged(nameof(CurrentCultureDailyLife));
+        OnPropertyChanged(nameof(CurrentCultureEntertainment));
+    }
+
+    #endregion
+
+    #region Government Proxy Properties
+
+    public string CurrentGovernmentName
+    {
+        get => GovernmentNav.CurrentItem?.Name ?? string.Empty;
+        set
+        {
+            if (GovernmentNav.CurrentItem != null)
+            {
+                GovernmentNav.CurrentItem.Name = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentGovernmentType
+    {
+        get => GovernmentNav.CurrentItem?.Type ?? string.Empty;
+        set
+        {
+            if (GovernmentNav.CurrentItem != null)
+            {
+                GovernmentNav.CurrentItem.Type = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentGovernmentPowerStructures
+    {
+        get => GovernmentNav.CurrentItem?.PowerStructures ?? string.Empty;
+        set
+        {
+            if (GovernmentNav.CurrentItem != null)
+            {
+                GovernmentNav.CurrentItem.PowerStructures = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentGovernmentLaws
+    {
+        get => GovernmentNav.CurrentItem?.Laws ?? string.Empty;
+        set
+        {
+            if (GovernmentNav.CurrentItem != null)
+            {
+                GovernmentNav.CurrentItem.Laws = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentGovernmentClassStructure
+    {
+        get => GovernmentNav.CurrentItem?.ClassStructure ?? string.Empty;
+        set
+        {
+            if (GovernmentNav.CurrentItem != null)
+            {
+                GovernmentNav.CurrentItem.ClassStructure = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentGovernmentForeignRelations
+    {
+        get => GovernmentNav.CurrentItem?.ForeignRelations ?? string.Empty;
+        set
+        {
+            if (GovernmentNav.CurrentItem != null)
+            {
+                GovernmentNav.CurrentItem.ForeignRelations = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    private void NotifyGovernmentProperties()
+    {
+        OnPropertyChanged(nameof(CurrentGovernmentName));
+        OnPropertyChanged(nameof(CurrentGovernmentType));
+        OnPropertyChanged(nameof(CurrentGovernmentPowerStructures));
+        OnPropertyChanged(nameof(CurrentGovernmentLaws));
+        OnPropertyChanged(nameof(CurrentGovernmentClassStructure));
+        OnPropertyChanged(nameof(CurrentGovernmentForeignRelations));
+    }
+
+    #endregion
+
+    #region Religion Proxy Properties
+
+    public string CurrentReligionName
+    {
+        get => ReligionNav.CurrentItem?.Name ?? string.Empty;
+        set
+        {
+            if (ReligionNav.CurrentItem != null)
+            {
+                ReligionNav.CurrentItem.Name = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentReligionDeities
+    {
+        get => ReligionNav.CurrentItem?.Deities ?? string.Empty;
+        set
+        {
+            if (ReligionNav.CurrentItem != null)
+            {
+                ReligionNav.CurrentItem.Deities = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentReligionBeliefs
+    {
+        get => ReligionNav.CurrentItem?.Beliefs ?? string.Empty;
+        set
+        {
+            if (ReligionNav.CurrentItem != null)
+            {
+                ReligionNav.CurrentItem.Beliefs = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentReligionPractices
+    {
+        get => ReligionNav.CurrentItem?.Practices ?? string.Empty;
+        set
+        {
+            if (ReligionNav.CurrentItem != null)
+            {
+                ReligionNav.CurrentItem.Practices = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentReligionOrganizations
+    {
+        get => ReligionNav.CurrentItem?.Organizations ?? string.Empty;
+        set
+        {
+            if (ReligionNav.CurrentItem != null)
+            {
+                ReligionNav.CurrentItem.Organizations = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    public string CurrentReligionCreationMyths
+    {
+        get => ReligionNav.CurrentItem?.CreationMyths ?? string.Empty;
+        set
+        {
+            if (ReligionNav.CurrentItem != null)
+            {
+                ReligionNav.CurrentItem.CreationMyths = value;
+                OnPropertyChanged();
+                if (_changeable) { _changed = true; ShellViewModel.ShowChange(); }
+            }
+        }
+    }
+
+    private void NotifyReligionProperties()
+    {
+        OnPropertyChanged(nameof(CurrentReligionName));
+        OnPropertyChanged(nameof(CurrentReligionDeities));
+        OnPropertyChanged(nameof(CurrentReligionBeliefs));
+        OnPropertyChanged(nameof(CurrentReligionPractices));
+        OnPropertyChanged(nameof(CurrentReligionOrganizations));
+        OnPropertyChanged(nameof(CurrentReligionCreationMyths));
+    }
 
     #endregion
 
@@ -234,64 +782,132 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
 
     #region History Tab Properties
 
-    [ObservableProperty]
     private string _foundingEvents = string.Empty;
+    public string FoundingEvents
+    {
+        get => _foundingEvents;
+        set => SetProperty(ref _foundingEvents, value);
+    }
 
-    [ObservableProperty]
     private string _majorConflicts = string.Empty;
+    public string MajorConflicts
+    {
+        get => _majorConflicts;
+        set => SetProperty(ref _majorConflicts, value);
+    }
 
-    [ObservableProperty]
     private string _eras = string.Empty;
+    public string Eras
+    {
+        get => _eras;
+        set => SetProperty(ref _eras, value);
+    }
 
-    [ObservableProperty]
     private string _technologicalShifts = string.Empty;
+    public string TechnologicalShifts
+    {
+        get => _technologicalShifts;
+        set => SetProperty(ref _technologicalShifts, value);
+    }
 
-    [ObservableProperty]
     private string _lostKnowledge = string.Empty;
+    public string LostKnowledge
+    {
+        get => _lostKnowledge;
+        set => SetProperty(ref _lostKnowledge, value);
+    }
 
     #endregion
 
     #region Economy Tab Properties
 
-    [ObservableProperty]
     private string _economicSystem = string.Empty;
+    public string EconomicSystem
+    {
+        get => _economicSystem;
+        set => SetProperty(ref _economicSystem, value);
+    }
 
-    [ObservableProperty]
     private string _currency = string.Empty;
+    public string Currency
+    {
+        get => _currency;
+        set => SetProperty(ref _currency, value);
+    }
 
-    [ObservableProperty]
     private string _tradeRoutes = string.Empty;
+    public string TradeRoutes
+    {
+        get => _tradeRoutes;
+        set => SetProperty(ref _tradeRoutes, value);
+    }
 
-    [ObservableProperty]
     private string _professions = string.Empty;
+    public string Professions
+    {
+        get => _professions;
+        set => SetProperty(ref _professions, value);
+    }
 
-    [ObservableProperty]
     private string _wealthDistribution = string.Empty;
+    public string WealthDistribution
+    {
+        get => _wealthDistribution;
+        set => SetProperty(ref _wealthDistribution, value);
+    }
 
     #endregion
 
     #region Magic/Technology Tab Properties
 
-    [ObservableProperty]
     private string _systemType = string.Empty;
+    public string SystemType
+    {
+        get => _systemType;
+        set => SetProperty(ref _systemType, value);
+    }
 
-    [ObservableProperty]
     private string _source = string.Empty;
+    public string Source
+    {
+        get => _source;
+        set => SetProperty(ref _source, value);
+    }
 
-    [ObservableProperty]
     private string _rules = string.Empty;
+    public string Rules
+    {
+        get => _rules;
+        set => SetProperty(ref _rules, value);
+    }
 
-    [ObservableProperty]
     private string _limitations = string.Empty;
+    public string Limitations
+    {
+        get => _limitations;
+        set => SetProperty(ref _limitations, value);
+    }
 
-    [ObservableProperty]
     private string _cost = string.Empty;
+    public string Cost
+    {
+        get => _cost;
+        set => SetProperty(ref _cost, value);
+    }
 
-    [ObservableProperty]
     private string _practitioners = string.Empty;
+    public string Practitioners
+    {
+        get => _practitioners;
+        set => SetProperty(ref _practitioners, value);
+    }
 
-    [ObservableProperty]
     private string _socialImpact = string.Empty;
+    public string SocialImpact
+    {
+        get => _socialImpact;
+        set => SetProperty(ref _socialImpact, value);
+    }
 
     #endregion
 
@@ -351,12 +967,12 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
             Model.AgencySource = AgencySource;
             Model.ToneLogic = ToneLogic;
 
-            // Lists - copy from ObservableCollection to List
-            Model.PhysicalWorlds = new List<PhysicalWorldEntry>(PhysicalWorlds);
-            Model.Species = new List<SpeciesEntry>(Species);
-            Model.Cultures = new List<CultureEntry>(Cultures);
-            Model.Governments = new List<GovernmentEntry>(Governments);
-            Model.Religions = new List<ReligionEntry>(Religions);
+            // Lists - clone from ObservableCollection back to Model
+            Model.PhysicalWorlds = PhysicalWorlds.Select(e => e.Clone()).ToList();
+            Model.Species = Species.Select(e => e.Clone()).ToList();
+            Model.Cultures = Cultures.Select(e => e.Clone()).ToList();
+            Model.Governments = Governments.Select(e => e.Clone()).ToList();
+            Model.Religions = Religions.Select(e => e.Clone()).ToList();
 
             // History tab
             Model.FoundingEvents = FoundingEvents;
@@ -420,20 +1036,20 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
         AgencySource = Model.AgencySource;
         ToneLogic = Model.ToneLogic;
 
-        // Lists - copy from Model to ObservableCollection and reset navigators
-        ReloadCollection(PhysicalWorlds, Model.PhysicalWorlds);
+        // Lists - clone from Model into ObservableCollection and reset navigators
+        ReloadCollection(PhysicalWorlds, Model.PhysicalWorlds.Select(e => e.Clone()).ToList());
         PhysicalWorldNav.Reset();
 
-        ReloadCollection(Species, Model.Species);
+        ReloadCollection(Species, Model.Species.Select(e => e.Clone()).ToList());
         SpeciesNav.Reset();
 
-        ReloadCollection(Cultures, Model.Cultures);
+        ReloadCollection(Cultures, Model.Cultures.Select(e => e.Clone()).ToList());
         CultureNav.Reset();
 
-        ReloadCollection(Governments, Model.Governments);
+        ReloadCollection(Governments, Model.Governments.Select(e => e.Clone()).ToList());
         GovernmentNav.Reset();
 
-        ReloadCollection(Religions, Model.Religions);
+        ReloadCollection(Religions, Model.Religions.Select(e => e.Clone()).ToList());
         ReligionNav.Reset();
 
         // History tab
@@ -464,7 +1080,7 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
 
     #endregion
 
-    private static void ReloadCollection<T>(ObservableCollection<T> target, List<T> source)
+    private static void ReloadCollection<TEntry>(ObservableCollection<TEntry> target, List<TEntry> source)
     {
         target.Clear();
         foreach (var entry in source)
@@ -690,7 +1306,7 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
         WorldTypeDescription = "Select a World Type to see its description.";
         WorldTypeExamples = string.Empty;
 
-        // Initialize non-[ObservableProperty] string properties
+        // Initialize string properties
         Name = string.Empty;
         WorldType = string.Empty;
 
@@ -701,11 +1317,11 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
         Governments = new ObservableCollection<GovernmentEntry>();
         Religions = new ObservableCollection<ReligionEntry>();
 
-        PhysicalWorldNav = new(PhysicalWorlds, () => new PhysicalWorldEntry { Name = "New World" }, OnListChanged);
-        SpeciesNav = new(Species, () => new SpeciesEntry { Name = "New Species" }, OnListChanged);
-        CultureNav = new(Cultures, () => new CultureEntry { Name = "New Culture" }, OnListChanged);
-        GovernmentNav = new(Governments, () => new GovernmentEntry { Name = "New Government" }, OnListChanged);
-        ReligionNav = new(Religions, () => new ReligionEntry { Name = "New Religion" }, OnListChanged);
+        PhysicalWorldNav = new(PhysicalWorlds, () => new PhysicalWorldEntry { Name = "New World" }, OnListChanged, NotifyPhysicalWorldProperties);
+        SpeciesNav = new(Species, () => new SpeciesEntry { Name = "New Species" }, OnListChanged, NotifySpeciesProperties);
+        CultureNav = new(Cultures, () => new CultureEntry { Name = "New Culture" }, OnListChanged, NotifyCultureProperties);
+        GovernmentNav = new(Governments, () => new GovernmentEntry { Name = "New Government" }, OnListChanged, NotifyGovernmentProperties);
+        ReligionNav = new(Religions, () => new ReligionEntry { Name = "New Religion" }, OnListChanged, NotifyReligionProperties);
 
         // Load ComboBox source collections from ListData
         var _lists = listData.ListControlSource;

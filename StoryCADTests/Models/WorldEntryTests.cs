@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using StoryCADLib.Models;
 using StoryCADLib.Models.StoryWorld;
 
 namespace StoryCADTests.Models;
@@ -39,17 +37,20 @@ public class WorldEntryTests
     }
 
     [TestMethod]
-    public void PhysicalWorldEntry_PropertyChanged_RaisesNotification()
+    public void PhysicalWorldEntry_Clone_CreatesIndependentCopy()
     {
-        var entry = new PhysicalWorldEntry();
-        var changed = new List<string>();
-        entry.PropertyChanged += (_, e) => changed.Add(e.PropertyName!);
+        var original = new PhysicalWorldEntry
+        {
+            Name = "Earth", Geography = "Varied", Climate = "Temperate",
+            NaturalResources = "Abundant", Flora = "Diverse", Fauna = "Rich", Astronomy = "One moon"
+        };
 
-        entry.Name = "Terra";
-        entry.Geography = "Mountains";
+        var clone = original.Clone();
+        clone.Name = "Modified";
 
-        CollectionAssert.Contains(changed, nameof(PhysicalWorldEntry.Name));
-        CollectionAssert.Contains(changed, nameof(PhysicalWorldEntry.Geography));
+        Assert.AreEqual("Earth", original.Name);
+        Assert.AreEqual("Modified", clone.Name);
+        Assert.AreEqual("Varied", clone.Geography);
     }
 
     #endregion
@@ -85,17 +86,15 @@ public class WorldEntryTests
     }
 
     [TestMethod]
-    public void SpeciesEntry_PropertyChanged_RaisesNotification()
+    public void SpeciesEntry_Clone_CreatesIndependentCopy()
     {
-        var entry = new SpeciesEntry();
-        var changed = new List<string>();
-        entry.PropertyChanged += (_, e) => changed.Add(e.PropertyName!);
+        var original = new SpeciesEntry { Name = "Dwarves", PhysicalTraits = "Short" };
+        var clone = original.Clone();
+        clone.Name = "Modified";
 
-        entry.Name = "Dwarves";
-        entry.PhysicalTraits = "Short and sturdy";
-
-        CollectionAssert.Contains(changed, nameof(SpeciesEntry.Name));
-        CollectionAssert.Contains(changed, nameof(SpeciesEntry.PhysicalTraits));
+        Assert.AreEqual("Dwarves", original.Name);
+        Assert.AreEqual("Modified", clone.Name);
+        Assert.AreEqual("Short", clone.PhysicalTraits);
     }
 
     #endregion
@@ -132,17 +131,15 @@ public class WorldEntryTests
     }
 
     [TestMethod]
-    public void CultureEntry_PropertyChanged_RaisesNotification()
+    public void CultureEntry_Clone_CreatesIndependentCopy()
     {
-        var entry = new CultureEntry();
-        var changed = new List<string>();
-        entry.PropertyChanged += (_, e) => changed.Add(e.PropertyName!);
+        var original = new CultureEntry { Name = "Samurai", Values = "Honor" };
+        var clone = original.Clone();
+        clone.Name = "Modified";
 
-        entry.Name = "Samurai";
-        entry.Values = "Honor, discipline";
-
-        CollectionAssert.Contains(changed, nameof(CultureEntry.Name));
-        CollectionAssert.Contains(changed, nameof(CultureEntry.Values));
+        Assert.AreEqual("Samurai", original.Name);
+        Assert.AreEqual("Modified", clone.Name);
+        Assert.AreEqual("Honor", clone.Values);
     }
 
     #endregion
@@ -178,17 +175,15 @@ public class WorldEntryTests
     }
 
     [TestMethod]
-    public void GovernmentEntry_PropertyChanged_RaisesNotification()
+    public void GovernmentEntry_Clone_CreatesIndependentCopy()
     {
-        var entry = new GovernmentEntry();
-        var changed = new List<string>();
-        entry.PropertyChanged += (_, e) => changed.Add(e.PropertyName!);
+        var original = new GovernmentEntry { Name = "Senate", Type = "Republic" };
+        var clone = original.Clone();
+        clone.Name = "Modified";
 
-        entry.Name = "Senate";
-        entry.Type = "Republic";
-
-        CollectionAssert.Contains(changed, nameof(GovernmentEntry.Name));
-        CollectionAssert.Contains(changed, nameof(GovernmentEntry.Type));
+        Assert.AreEqual("Senate", original.Name);
+        Assert.AreEqual("Modified", clone.Name);
+        Assert.AreEqual("Republic", clone.Type);
     }
 
     #endregion
@@ -224,17 +219,15 @@ public class WorldEntryTests
     }
 
     [TestMethod]
-    public void ReligionEntry_PropertyChanged_RaisesNotification()
+    public void ReligionEntry_Clone_CreatesIndependentCopy()
     {
-        var entry = new ReligionEntry();
-        var changed = new List<string>();
-        entry.PropertyChanged += (_, e) => changed.Add(e.PropertyName!);
+        var original = new ReligionEntry { Name = "Old Gods", Deities = "Nameless" };
+        var clone = original.Clone();
+        clone.Name = "Modified";
 
-        entry.Name = "Old Gods";
-        entry.Deities = "Nameless nature spirits";
-
-        CollectionAssert.Contains(changed, nameof(ReligionEntry.Name));
-        CollectionAssert.Contains(changed, nameof(ReligionEntry.Deities));
+        Assert.AreEqual("Old Gods", original.Name);
+        Assert.AreEqual("Modified", clone.Name);
+        Assert.AreEqual("Nameless", clone.Deities);
     }
 
     #endregion
