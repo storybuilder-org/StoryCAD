@@ -31,7 +31,7 @@ public class CollaboratorInterfaceTests
     /// </summary>
     private class MockCollaborator : ICollaborator
     {
-        public Task<Window> OpenAsync(IStoryCADAPI api, StoryModel model, Window hostWindow, Frame hostFrame, string filePath)
+        public Task<Window> OpenAsync(IStoryCADAPI api, StoryModel model, Window hostWindow, Frame hostFrame, string filePath, StoryCADLib.Services.Logging.ILogService? logger = null)
         {
             return Task.FromResult<Window>(null);
         }
