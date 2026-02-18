@@ -28,7 +28,7 @@ StoryCAD Collaborator is an AI-powered writing assistant that helps fiction writ
 
 - **No library of copyrighted works.** Collaborator does not store, index, or search through novels or other copyrighted works. It does not pull from or reference specific published books.
 
-- **How the AI works.** When you ask Collaborator for help, it sends a structured request to a commercial AI service and returns the response. You do not need to set up or pay for a separate AI account; Collaborator handles this through StoryCAD. (If you are a developer building with the StoryCAD programming interface, consult the [StoryCAD API documentation](https://github.com/storybuilder-org/StoryCADAPI) for technical requirements.)
+- **How the AI works.** When you ask Collaborator for help, it sends a structured request to a commercial AI service and returns the response. You do not need to set up or pay for a separate AI account; Collaborator handles this through StoryCAD. (If you are a developer building with the StoryCAD programming interface, consult the StoryCAD API documentation for technical requirements.)
 
 - **A note about AI training data.** The AI models that power Collaborator were trained by their providers on broad collections of text from across the internet, which may include published copyrighted works. Because Collaborator focuses on story structure rather than prose, the risk of copyrighted material appearing in its suggestions is low — but we cannot guarantee it is zero. This is a reality across the AI industry, not something unique to our tools.
 
