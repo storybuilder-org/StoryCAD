@@ -1,6 +1,6 @@
 # StoryCAD Roadmap
 
-> Last updated: 2026-02-16
+> Last updated: 2026-02-18
 >
 > Working document for prioritization across the StoryBuilder org.
 > Issues are tracked in [StoryCAD](https://github.com/storybuilder-org/StoryCAD/issues),
@@ -31,6 +31,17 @@
 
 > **Cross-repo**: The Fiction Prompt Generator spans StoryCAD [#1302](https://github.com/storybuilder-org/StoryCAD/issues/1302) and Collaborator [#61](https://github.com/storybuilder-org/Collaborator/issues/61).
 
+## Release 4.3 — Collaborator
+
+| Issue | Repo | Summary | Status |
+|-------|------|---------|--------|
+| [#1136](https://github.com/storybuilder-org/StoryCAD/issues/1136) | StoryCAD | Implement Cloudflare Worker proxy for Collaborator LLM APIs | Backlog |
+| [#1135](https://github.com/storybuilder-org/StoryCAD/issues/1135) | StoryCAD | Collaborator plug-in for macOS | Out of Scope (UNO) |
+| [#30](https://github.com/storybuilder-org/Collaborator/issues/30) | Collaborator | Bundle Collaborator with StoryCAD for Store Distribution | Backlog |
+| [#59](https://github.com/storybuilder-org/Collaborator/issues/59) | Collaborator | World-Type-Aware Worldbuilding Workflows | |
+| [#53](https://github.com/storybuilder-org/Collaborator/issues/53) | Collaborator | Review abbreviated prompts — add examples | Backlog |
+| [#49](https://github.com/storybuilder-org/Collaborator/issues/49) | Collaborator | ApplySettings() needs precision improvements | Backlog |
+
 ---
 
 ## Backlog (unmilestoned)
@@ -41,10 +52,6 @@
 |-------|------|---------|--------|
 | [#1301](https://github.com/storybuilder-org/StoryCAD/issues/1301) | StoryCAD | iPadOS Support? | |
 | [#1300](https://github.com/storybuilder-org/StoryCAD/issues/1300) | StoryCAD | Linux Support? | |
-| [#1135](https://github.com/storybuilder-org/StoryCAD/issues/1135) | StoryCAD | Collaborator plug-in for macOS | Out of Scope (UNO) |
-| [#30](https://github.com/storybuilder-org/Collaborator/issues/30) | Collaborator | Bundle Collaborator with StoryCAD for Store Distribution | Backlog |
-
-> **Cross-repo**: Collaborator macOS distribution spans StoryCAD [#1135](https://github.com/storybuilder-org/StoryCAD/issues/1135) and Collaborator [#30](https://github.com/storybuilder-org/Collaborator/issues/30).
 
 ### Collaborator / AI
 
@@ -52,22 +59,12 @@
 |-------|------|---------|--------|
 | [#1302](https://github.com/storybuilder-org/StoryCAD/issues/1302) | StoryCAD | Fiction Prompt Generator for StoryCAD | See Release 4.2 |
 | [#1233](https://github.com/storybuilder-org/StoryCAD/issues/1233) | StoryCAD | Dramatic Situations: Revise data model, UI, and add API support | |
-| [#1136](https://github.com/storybuilder-org/StoryCAD/issues/1136) | StoryCAD | Implement Cloudflare Worker proxy for Collaborator LLM APIs | Backlog |
-| [#60](https://github.com/storybuilder-org/Collaborator/issues/60) | Collaborator | Collaborator Workflow: Suggest Complication | Backlog |
-| [#59](https://github.com/storybuilder-org/Collaborator/issues/59) | Collaborator | World-Type-Aware Worldbuilding Workflows | |
-| [#54](https://github.com/storybuilder-org/Collaborator/issues/54) | Collaborator | PromptTestRunner Help button non-functional | Backlog |
-| [#53](https://github.com/storybuilder-org/Collaborator/issues/53) | Collaborator | Review abbreviated prompts — add examples | Backlog |
-| [#52](https://github.com/storybuilder-org/Collaborator/issues/52) | Collaborator | WorkflowRunner logging integration with StoryCAD | Backlog |
-| [#51](https://github.com/storybuilder-org/Collaborator/issues/51) | Collaborator | UI refresh after workflow completes | Backlog |
-| [#50](https://github.com/storybuilder-org/Collaborator/issues/50) | Collaborator | Context management between workflows — clear chat log on switch | Backlog |
-| [#49](https://github.com/storybuilder-org/Collaborator/issues/49) | Collaborator | ApplySettings() needs precision improvements | Backlog |
 
 ### Core Features
 
 | Issue | Repo | Summary | Status |
 |-------|------|---------|--------|
 | [#1278](https://github.com/storybuilder-org/StoryCAD/issues/1278) | StoryCAD | Implement Theme Picker using existing motif/theme data | |
-| [#1276](https://github.com/storybuilder-org/StoryCAD/issues/1276) | StoryCAD | Refactor StoryWorld content indicator implementation | |
 | [#1174](https://github.com/storybuilder-org/StoryCAD/issues/1174) | StoryCAD | Cut and paste for story elements | |
 | [#1144](https://github.com/storybuilder-org/StoryCAD/issues/1144) | StoryCAD | Complete Scrivener Notes Preservation Feature | |
 | [#1257](https://github.com/storybuilder-org/StoryCAD/issues/1257) | StoryCAD | Mark Stuff as bindable | Out of Scope |
