@@ -36,4 +36,11 @@ public class PhysicalWorldEntry
 
     [JsonInclude] [JsonPropertyName("Astronomy")]
     public string Astronomy { get => _astronomy; set => _astronomy = value; }
+
+    public PhysicalWorldEntry Clone() => new()
+    {
+        Name = Name, Geography = Geography, Climate = Climate,
+        NaturalResources = NaturalResources, Flora = Flora,
+        Fauna = Fauna, Astronomy = Astronomy
+    };
 }

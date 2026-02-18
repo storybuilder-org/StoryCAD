@@ -32,4 +32,11 @@ public class ReligionEntry
 
     [JsonInclude] [JsonPropertyName("CreationMyths")]
     public string CreationMyths { get => _creationMyths; set => _creationMyths = value; }
+
+    public ReligionEntry Clone() => new()
+    {
+        Name = Name, Deities = Deities, Beliefs = Beliefs,
+        Practices = Practices, Organizations = Organizations,
+        CreationMyths = CreationMyths
+    };
 }

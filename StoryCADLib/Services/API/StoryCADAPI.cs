@@ -527,6 +527,9 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         {
             // Create the new element using the OutlineService.
             var newElement = outlineService.AddStoryElement(CurrentModel, typeToAdd, parent.Node);
+            if (newElement == null)
+                return OperationResult<Guid>.Failure("Only one StoryWorld element is allowed per story.");
+
             if (DesiredGuid != Guid.Empty)
             {
                 newElement.UpdateGuid(CurrentModel, DesiredGuid);
@@ -604,13 +607,13 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         {
             // Create the new element using the OutlineService.
             var newElement = outlineService.AddStoryElement(CurrentModel, typeToAdd, parent.Node);
+            if (newElement == null)
+                return OperationResult<Guid>.Failure("Only one StoryWorld element is allowed per story.");
 
             if (DesiredGuid != Guid.Empty)
             {
                 newElement.UpdateGuid(CurrentModel, DesiredGuid);
             }
-
-            newElement.Name = name;
 
             newElement.Name = name;
             UpdateElementProperties(newElement.Uuid, properties);

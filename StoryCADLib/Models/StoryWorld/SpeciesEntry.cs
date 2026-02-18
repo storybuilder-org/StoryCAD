@@ -32,4 +32,10 @@ public class SpeciesEntry
 
     [JsonInclude] [JsonPropertyName("Diversity")]
     public string Diversity { get => _diversity; set => _diversity = value; }
+
+    public SpeciesEntry Clone() => new()
+    {
+        Name = Name, PhysicalTraits = PhysicalTraits, Lifespan = Lifespan,
+        Origins = Origins, SocialStructure = SocialStructure, Diversity = Diversity
+    };
 }

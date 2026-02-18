@@ -37,4 +37,11 @@ public class CultureEntry
 
     [JsonInclude] [JsonPropertyName("Entertainment")]
     public string Entertainment { get => _entertainment; set => _entertainment = value; }
+
+    public CultureEntry Clone() => new()
+    {
+        Name = Name, Values = Values, Customs = Customs,
+        Taboos = Taboos, Art = Art, DailyLife = DailyLife,
+        Entertainment = Entertainment
+    };
 }

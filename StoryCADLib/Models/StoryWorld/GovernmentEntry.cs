@@ -32,4 +32,11 @@ public class GovernmentEntry
 
     [JsonInclude] [JsonPropertyName("ForeignRelations")]
     public string ForeignRelations { get => _foreignRelations; set => _foreignRelations = value; }
+
+    public GovernmentEntry Clone() => new()
+    {
+        Name = Name, Type = Type, PowerStructures = PowerStructures,
+        Laws = Laws, ClassStructure = ClassStructure,
+        ForeignRelations = ForeignRelations
+    };
 }

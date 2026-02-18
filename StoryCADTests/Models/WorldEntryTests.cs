@@ -1,4 +1,3 @@
-using StoryCADLib.Models;
 using StoryCADLib.Models.StoryWorld;
 
 namespace StoryCADTests.Models;
@@ -37,6 +36,23 @@ public class WorldEntryTests
         Assert.AreEqual("Cold and thin atmosphere", entry.Climate);
     }
 
+    [TestMethod]
+    public void PhysicalWorldEntry_Clone_CreatesIndependentCopy()
+    {
+        var original = new PhysicalWorldEntry
+        {
+            Name = "Earth", Geography = "Varied", Climate = "Temperate",
+            NaturalResources = "Abundant", Flora = "Diverse", Fauna = "Rich", Astronomy = "One moon"
+        };
+
+        var clone = original.Clone();
+        clone.Name = "Modified";
+
+        Assert.AreEqual("Earth", original.Name);
+        Assert.AreEqual("Modified", clone.Name);
+        Assert.AreEqual("Varied", clone.Geography);
+    }
+
     #endregion
 
     #region SpeciesEntry Tests
@@ -67,6 +83,18 @@ public class WorldEntryTests
         Assert.AreEqual("Elves", entry.Name);
         Assert.AreEqual("Tall, pointed ears, ageless", entry.PhysicalTraits);
         Assert.AreEqual("Immortal", entry.Lifespan);
+    }
+
+    [TestMethod]
+    public void SpeciesEntry_Clone_CreatesIndependentCopy()
+    {
+        var original = new SpeciesEntry { Name = "Dwarves", PhysicalTraits = "Short" };
+        var clone = original.Clone();
+        clone.Name = "Modified";
+
+        Assert.AreEqual("Dwarves", original.Name);
+        Assert.AreEqual("Modified", clone.Name);
+        Assert.AreEqual("Short", clone.PhysicalTraits);
     }
 
     #endregion
@@ -102,6 +130,18 @@ public class WorldEntryTests
         Assert.AreEqual("Showing weakness, admitting failure", entry.Taboos);
     }
 
+    [TestMethod]
+    public void CultureEntry_Clone_CreatesIndependentCopy()
+    {
+        var original = new CultureEntry { Name = "Samurai", Values = "Honor" };
+        var clone = original.Clone();
+        clone.Name = "Modified";
+
+        Assert.AreEqual("Samurai", original.Name);
+        Assert.AreEqual("Modified", clone.Name);
+        Assert.AreEqual("Honor", clone.Values);
+    }
+
     #endregion
 
     #region GovernmentEntry Tests
@@ -134,6 +174,18 @@ public class WorldEntryTests
         Assert.AreEqual("Statute of Secrecy", entry.Laws);
     }
 
+    [TestMethod]
+    public void GovernmentEntry_Clone_CreatesIndependentCopy()
+    {
+        var original = new GovernmentEntry { Name = "Senate", Type = "Republic" };
+        var clone = original.Clone();
+        clone.Name = "Modified";
+
+        Assert.AreEqual("Senate", original.Name);
+        Assert.AreEqual("Modified", clone.Name);
+        Assert.AreEqual("Republic", clone.Type);
+    }
+
     #endregion
 
     #region ReligionEntry Tests
@@ -164,6 +216,18 @@ public class WorldEntryTests
         Assert.AreEqual("Faith of the Seven", entry.Name);
         Assert.AreEqual("Seven aspects of one god", entry.Deities);
         Assert.AreEqual("Sept worship, trials by combat", entry.Practices);
+    }
+
+    [TestMethod]
+    public void ReligionEntry_Clone_CreatesIndependentCopy()
+    {
+        var original = new ReligionEntry { Name = "Old Gods", Deities = "Nameless" };
+        var clone = original.Clone();
+        clone.Name = "Modified";
+
+        Assert.AreEqual("Old Gods", original.Name);
+        Assert.AreEqual("Modified", clone.Name);
+        Assert.AreEqual("Nameless", clone.Deities);
     }
 
     #endregion
