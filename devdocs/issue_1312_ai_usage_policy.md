@@ -2,62 +2,68 @@
 
 > Last updated: 2026-02-18
 
-Artificial Intelligence (AI) is reshaping creative practices and workflows at an unprecedented pace, but we at StoryBuilder Foundation believe that human storytelling and human insight remain at the heart of artistic creation. This policy outlines our principles and guidelines for using AI in our tools — StoryCAD and StoryCAD Collaborator — and our commitment to ensuring that AI is used to **assist** rather than replace the human creative process.
+Artificial intelligence is changing how creative work gets done, and fast. But at StoryBuilder Foundation, we believe that human storytelling and human insight remain at the heart of artistic creation.
+
+This policy explains how AI is used in our tools — StoryCAD and its Collaborator plugin — and our commitment to making sure AI **assists** your creative process rather than replacing it.
 
 ## Core Principles
 
-1. **Creator Ownership**
-   The creator of a story or outline retains complete ownership of their work, including all intellectual property rights. Users are encouraged to copyright their works. Control over access to one's prose or outline remains solely with the creator. StoryBuilder Foundation tools do not claim any rights over user content.
+1. **You Own Your Work**
+   You retain complete ownership of everything you create with our tools, including all intellectual property rights. StoryBuilder Foundation claims no rights over your content. You control who sees your outlines and your prose — always.
 
-2. **Human-Centric Creativity**
-   StoryBuilder Foundation's AI tools are designed to assist and enhance your creative process — not to generate complete, publishable works of fiction autonomously. Our tools focus on developing the structure and "bones" of a story in the form of outlines. They do not provide an end-to-end creative solution.
+2. **AI Assists; You Create**
+   Our AI tools help you develop the structure and "bones" of a story — the outline. They are not designed to generate complete, publishable fiction. The creative vision is yours.
 
-3. **Transparency and Disclosure**
-   When AI is used to assist with outlining or other aspects of the creative process, its role should be clearly acknowledged. Following the example of organizations such as SFWA, which requires that "works that used LLMs at any point during the writing process must disclose this upon acceptance of the nomination," we encourage users to be transparent about AI involvement when submitting work to publishers, agents, contests, or other venues.
+3. **Be Transparent About AI Use**
+   When AI plays a role in your creative process, that role should be acknowledged. Organizations like the Science Fiction and Fantasy Writers Association (SFWA) already require disclosure of AI involvement in award nominations. We encourage you to be upfront about AI use when submitting work to publishers, agents, contests, or other venues. (See "Third-Party AI Policies" below for more detail.)
 
-4. **Compliance with Applicable Laws**
-   StoryBuilder Foundation adheres to all applicable laws and regulations regarding data privacy, intellectual property, and AI. We expect our users to do the same.
+4. **Follow the Law**
+   StoryBuilder Foundation complies with all applicable laws regarding data privacy, intellectual property, and AI. We expect our users to do the same.
 
 ## How Collaborator Works
 
-StoryCAD Collaborator is an AI-powered writing assistant that helps fiction writers develop story outlines and structure. Understanding its architecture is important to understanding the scope of AI involvement in your work:
+StoryCAD Collaborator is an AI-powered writing assistant that helps fiction writers develop story outlines and structure. Here is what you need to know about how it works and what it does with your information:
 
-- **Structure, not prose.** Collaborator assists with story elements — characters, settings, plot structure, scenes — at the outline level. It is not designed to generate finished prose or publishable text.
-- **No copyrighted works stored or indexed.** Collaborator does not maintain a database of novels or other copyrighted works. It does not retrieve from or reference specific published works.
-- **LLM-powered.** Collaborator sends structured prompts to commercial large language model (LLM) APIs and receives responses. Users do not need to obtain their own API keys; Collaborator manages this through the StoryCAD application. (Developers building with the StoryCAD API should consult [StoryCADAPI](https://github.com/storybuilder-org/StoryCADAPI) for API key requirements.)
-- **Training data considerations.** The underlying LLM models were trained by their providers on broad datasets that may include published copyrighted works. While Collaborator's focus on structure rather than prose minimizes the risk of copyrighted material surfacing in output, we cannot guarantee that LLM responses are entirely free of such influence. This is an industry-wide reality, not specific to our tools.
+- **Structure, not prose.** Collaborator helps you develop story elements — characters, settings, plot structure, scenes — at the outline level. It does not generate finished prose or publishable text.
+
+- **No library of copyrighted works.** Collaborator does not store, index, or search through novels or other copyrighted works. It does not pull from or reference specific published books.
+
+- **How the AI works.** When you ask Collaborator for help, it sends a structured request to a commercial AI service and returns the response. You do not need to set up or pay for a separate AI account; Collaborator handles this through StoryCAD. (If you are a developer building with the StoryCAD programming interface, consult the [StoryCAD API documentation](https://github.com/storybuilder-org/StoryCADAPI) for technical requirements.)
+
+- **A note about AI training data.** The AI models that power Collaborator were trained by their providers on broad collections of text from across the internet, which may include published copyrighted works. Because Collaborator focuses on story structure rather than prose, the risk of copyrighted material appearing in its suggestions is low — but we cannot guarantee it is zero. This is a reality across the AI industry, not something unique to our tools.
 
 ## Third-Party AI Policies
 
-The publishing industry, literary agencies, writing contests, and writers' organizations are actively developing their own AI usage policies. These policies vary significantly:
+The publishing industry, literary agencies, writing contests, and writers' organizations are actively developing their own rules around AI. These policies vary widely. Some examples:
 
 - Some publishers (e.g., Penguin Random House) prohibit use of their published works for AI training.
-- Some contests (e.g., RWA) prohibit AI-generated narrative or dialogue in submissions.
-- Some organizations (e.g., SFWA) require disclosure of LLM use in award nominations.
-- Some publishers (e.g., Hachette) require authors to disclose AI tool usage at manuscript submission.
+- Some contests (e.g., the Romance Writers of America) prohibit AI-generated narrative or dialogue in submissions.
+- Some organizations (e.g., SFWA) require disclosure of AI use in award nominations.
+- Some publishers (e.g., Hachette) require authors to disclose AI tool usage when submitting manuscripts.
 
-**Users are responsible for knowing and complying with the AI policies of any organization, publisher, agent, contest, or venue to which they submit their work.** StoryBuilder Foundation cannot track or enforce third-party policies on behalf of users.
+**You are responsible for knowing and following the AI policies of any organization, publisher, agent, contest, or venue where you submit your work.** StoryBuilder Foundation cannot track or enforce third-party policies on your behalf.
 
-We recommend that before submitting work, you:
+Before submitting work, we recommend that you:
+
 - Review the AI policy of the receiving organization
 - Understand what level of AI involvement they permit
-- Disclose your use of AI tools as required by their policies
+- Disclose your use of AI tools as their policies require
 
 ## Content Integrity
 
-- **Human judgment is essential.** AI-generated suggestions are starting points, not final answers. The human creator must guide the final form of any work.
-- **Bias awareness.** AI systems learn from existing data and may reflect biases present in that data. Users should review AI-assisted content critically.
-- **No impersonation or fabrication.** AI tools should not be used to impersonate other individuals or to fabricate content in a misleading or harmful way.
+- **Use your judgment.** AI suggestions are starting points, not final answers. You must evaluate, revise, and shape the final form of your work.
+- **Watch for bias.** AI systems learn from existing text and may reflect biases present in that text — cultural, historical, or otherwise. Review AI-assisted content with a critical eye.
+- **No impersonation or fabrication.** Do not use AI tools to impersonate real individuals or to create content that is deliberately misleading or harmful.
 
 ## Accountability
 
-- **User responsibility.** Users are ultimately responsible for their creative output and for how they represent it to others. Any mistakes, misrepresentations, or policy violations arising from AI-assisted work are the responsibility of the user.
-- **No warranty.** StoryBuilder Foundation provides its AI tools on an as-is basis. We do not warrant that AI-generated suggestions are free from bias, factual error, or inadvertent similarity to existing works. We are not liable for consequences arising from a user's submission of AI-assisted work to third parties.
-- **Policy updates.** The field of AI-assisted creative work is evolving rapidly. This policy will be reviewed and updated periodically. Users will be informed of significant revisions.
+- **You are responsible for your work.** You are ultimately responsible for your creative output and for how you represent it to others. Any errors, misrepresentations, or policy violations that arise from AI-assisted work are your responsibility, not ours.
+- **No warranty.** StoryBuilder Foundation provides its AI tools on an as-is basis. We do not guarantee that AI-generated suggestions are free from bias, factual error, or inadvertent similarity to existing works. We are not liable for consequences that arise from your use of AI-assisted work with third parties.
+- **This policy will evolve.** AI-assisted creative work is a rapidly changing field. We will review and update this policy periodically, and we will inform users of significant changes.
 
 ## Acceptance
 
-By using StoryBuilder Foundation AI tools, you acknowledge the principles and guidelines outlined in this policy.
+By using StoryBuilder Foundation's AI tools, you acknowledge the principles and guidelines outlined in this policy.
 
 ---
 
