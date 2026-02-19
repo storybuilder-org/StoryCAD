@@ -273,12 +273,16 @@ else
     fail "ROADMAP.md not found"
 fi
 
-# 19. Release notes devdoc
-RELEASE_NOTES=$(find "$REPO/devdocs" -iname "*1124*" -o -iname "*release*notes*" -o -iname "*4.0*release*" 2>/dev/null | head -5)
+# 19. Release notes - look for an actual release notes file (not comments, not scripts)
+RELEASE_NOTES=$(find "$REPO/devdocs" -iname "*release*notes*" ! -iname "*comments*" ! -name "*.sh" 2>/dev/null | head -5)
+if [ -z "$RELEASE_NOTES" ]; then
+    # Fallback: check docs/ for release notes
+    RELEASE_NOTES=$(find "$REPO/docs" -iname "*release*notes*" ! -iname "*comments*" 2>/dev/null | head -5)
+fi
 if [ -n "$RELEASE_NOTES" ]; then
-    pass "Release notes devdoc(s) found: $(echo "$RELEASE_NOTES" | xargs -I{} basename {})"
+    pass "Release notes found: $(echo "$RELEASE_NOTES" | xargs -I{} basename {})"
 else
-    fail "No release notes devdoc found in devdocs/ (expected *1124* or *release*notes*)"
+    fail "No release notes found in devdocs/ or docs/"
 fi
 
 # 20. User manual has macOS/platform references
