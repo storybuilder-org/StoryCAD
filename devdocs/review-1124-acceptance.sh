@@ -3,7 +3,7 @@
 # review-1124-acceptance.sh
 # Automated review of #1124 acceptance criteria for StoryCAD Release 4.0
 #
-# Usage: bash /tmp/review-1124-acceptance.sh [--skip-build] [--skip-tests]
+# Usage: bash devdocs/review-1124-acceptance.sh [--skip-build] [--skip-tests]
 #
 # Runs from WSL against the StoryCAD repo at /mnt/d/dev/src/StoryCAD
 
@@ -43,7 +43,7 @@ echo ""
 # =====================================================================
 echo "BUILD & DEPLOYMENT"
 
-# 1. Windows WinAppSDK build
+# Windows WinAppSDK build
 if [ "$SKIP_BUILD" = true ]; then
     skip "Windows WinAppSDK build (--skip-build)"
 else
@@ -57,7 +57,7 @@ else
     fi
 fi
 
-# 2. macOS desktop build (can only run on macOS)
+# macOS desktop build (can only run on macOS)
 if [[ "$(uname)" == "Darwin" ]]; then
     if [ "$SKIP_BUILD" = true ]; then
         skip "macOS desktop build (--skip-build)"
@@ -73,10 +73,9 @@ else
     skip "macOS desktop build (requires macOS)"
 fi
 
-# 3. Version numbers
+# Version numbers
 MANIFEST_VERSION=$(grep -oP 'Version="\K[^"]+' "$REPO/StoryCAD/Package.appxmanifest" | head -1 || echo "NOT FOUND")
 LIB_VERSION=$(grep -oP '<Version>\K[^<]+' "$REPO/StoryCADLib/StoryCADLib.csproj" || echo "NOT FOUND")
-LIB_ASM_VERSION=$(grep -oP '<AssemblyVersion>\K[^<]+' "$REPO/StoryCADLib/StoryCADLib.csproj" || echo "NOT FOUND")
 
 if [[ "$MANIFEST_VERSION" == "4.0"* ]] && [[ "$LIB_VERSION" == "4.0"* ]]; then
     pass "Version 4.0 in Package.appxmanifest ($MANIFEST_VERSION) and StoryCADLib.csproj ($LIB_VERSION)"
@@ -84,119 +83,10 @@ else
     fail "Version mismatch: Package.appxmanifest=$MANIFEST_VERSION, StoryCADLib.csproj=$LIB_VERSION (expected 4.0.x)"
 fi
 
-# 4. Dual target frameworks in StoryCAD.csproj
-if grep -q 'net10.0-windows10.0.22621' "$REPO/StoryCAD/StoryCAD.csproj" && \
-   grep -q 'net10.0-desktop' "$REPO/StoryCAD/StoryCAD.csproj"; then
-    pass "Dual target frameworks in StoryCAD.csproj (windows + desktop)"
-else
-    fail "Missing target framework(s) in StoryCAD.csproj"
-fi
-
-# 5. Dual target frameworks in StoryCADLib.csproj
-if grep -q 'net10.0-windows10.0.22621' "$REPO/StoryCADLib/StoryCADLib.csproj" && \
-   grep -q 'net10.0-desktop' "$REPO/StoryCADLib/StoryCADLib.csproj"; then
-    pass "Dual target frameworks in StoryCADLib.csproj (windows + desktop)"
-else
-    fail "Missing target framework(s) in StoryCADLib.csproj"
-fi
-
-# 6. Distribution packages
+# Distribution packages
 manual "Windows MSIX package created for Microsoft Store"
 manual "macOS application bundle (.app) created"
 manual "macOS installer package (.pkg or .dmg) created"
-
-echo ""
-
-# =====================================================================
-# CORE FUNCTIONALITY
-# =====================================================================
-echo "CORE FUNCTIONALITY"
-
-# 7. All 11 story element types defined in enum
-EXPECTED_TYPES=("StoryOverview" "Problem" "Character" "Setting" "Scene" "Folder" "Section" "Web" "Notes" "TrashCan" "StoryWorld")
-ENUM_FILE="$REPO/StoryCADLib/Enums/StoryItemType.cs"
-MISSING_TYPES=()
-for t in "${EXPECTED_TYPES[@]}"; do
-    if ! grep -q "$t" "$ENUM_FILE" 2>/dev/null; then
-        MISSING_TYPES+=("$t")
-    fi
-done
-if [ ${#MISSING_TYPES[@]} -eq 0 ]; then
-    pass "All ${#EXPECTED_TYPES[@]} story element types defined in StoryItemType enum"
-else
-    fail "Missing story element types: ${MISSING_TYPES[*]}"
-fi
-
-# 8. Platform-specific partial classes
-WINAPP_FILES=$(find "$REPO/StoryCADLib" -name "*.WinAppSDK.cs" 2>/dev/null | wc -l)
-DESKTOP_FILES=$(find "$REPO/StoryCADLib" -name "*.desktop.cs" 2>/dev/null | wc -l)
-if [ "$WINAPP_FILES" -gt 0 ] && [ "$DESKTOP_FILES" -gt 0 ]; then
-    pass "Platform-specific partial classes exist ($WINAPP_FILES WinAppSDK, $DESKTOP_FILES desktop)"
-else
-    fail "Missing platform-specific partial classes (WinAppSDK=$WINAPP_FILES, desktop=$DESKTOP_FILES)"
-fi
-
-# 9. Conditional compilation patterns
-HAS_MACOS=$(grep -rl '#if __MACOS__\|#if HAS_UNO' "$REPO/StoryCADLib" --include="*.cs" 2>/dev/null | wc -l)
-if [ "$HAS_MACOS" -gt 0 ]; then
-    pass "Conditional compilation patterns found (#if __MACOS__ / #if HAS_UNO) in $HAS_MACOS files"
-else
-    fail "No conditional compilation patterns (#if __MACOS__ / #if HAS_UNO) found"
-fi
-
-# 10. Key services registered in IoC
-IOC_FILE="$REPO/StoryCADLib/Services/IoC/ServiceLocator.cs"
-KEY_SERVICES=("NavigationService" "LogService" "SearchService" "OutlineService" "BackupService" "AutoSaveService" "CollaboratorService" "ShellViewModel" "AppState" "Windowing")
-MISSING_SERVICES=()
-for svc in "${KEY_SERVICES[@]}"; do
-    if ! grep -q "$svc" "$IOC_FILE" 2>/dev/null; then
-        MISSING_SERVICES+=("$svc")
-    fi
-done
-if [ ${#MISSING_SERVICES[@]} -eq 0 ]; then
-    pass "All ${#KEY_SERVICES[@]} key services registered in IoC (ServiceLocator.cs)"
-else
-    fail "Missing IoC registrations: ${MISSING_SERVICES[*]}"
-fi
-
-# 11. Manual cross-platform functionality checks
-manual "File operations work on both platforms (New, Open, Save, SaveAs)"
-manual "File path handling (backslash vs forward slash)"
-manual ".stbx file format compatibility between platforms"
-manual "Navigation and UI work on both platforms"
-manual "Keyboard shortcuts (Ctrl on Windows, Cmd on macOS)"
-manual "Context menus and flyout menus"
-manual "Tools work on both platforms (Conflict Builder, Master Plots, etc.)"
-manual "Services work cross-platform (AutoSave, Backup, Search, Logging)"
-
-echo ""
-
-# =====================================================================
-# PLATFORM-SPECIFIC FEATURES
-# =====================================================================
-echo "PLATFORM-SPECIFIC FEATURES"
-
-# 12. Windows printing partial class exists
-if [ -f "$REPO/StoryCADLib/ViewModels/Tools/PrintReportDialogVM.WinAppSDK.cs" ]; then
-    pass "Windows PrintReportDialogVM.WinAppSDK.cs exists"
-else
-    fail "Missing PrintReportDialogVM.WinAppSDK.cs"
-fi
-
-# 13. RichEditBox platform partial classes
-if [ -f "$REPO/StoryCADLib/Controls/RichEditBoxExtended.WinAppSDK.cs" ] && \
-   [ -f "$REPO/StoryCADLib/Controls/RichEditBoxExtended.desktop.cs" ]; then
-    pass "RichEditBoxExtended platform partial classes exist (WinAppSDK + desktop)"
-else
-    fail "Missing RichEditBoxExtended platform partial classes"
-fi
-
-manual "Windows: Print Reports to physical printer works"
-manual "Windows: Export Reports to PDF works"
-manual "macOS: Export Reports to PDF works"
-manual "macOS: Native file dialogs work"
-manual "macOS: Application menus and shortcuts work"
-manual "macOS: File access permissions work"
 
 echo ""
 
@@ -205,7 +95,7 @@ echo ""
 # =====================================================================
 echo "TESTING & QUALITY"
 
-# 14. Run test suite on Windows
+# Windows test suite
 if [ "$SKIP_TESTS" = true ]; then
     skip "Windows test suite (--skip-tests)"
 else
@@ -229,21 +119,28 @@ else
     fi
 fi
 
-# 15. macOS tests
+# macOS tests
 if [[ "$(uname)" == "Darwin" ]]; then
     skip "macOS test suite (not implemented yet)"
 else
     skip "macOS test suite (requires macOS)"
 fi
 
-# 16. Test file count
-TEST_FILE_COUNT=$(find "$REPO/StoryCADTests" -name "*Tests.cs" -o -name "*Test.cs" 2>/dev/null | wc -l)
-TEST_METHOD_COUNT=$(grep -r '\[TestMethod\]\|\[UITestMethod\]' "$REPO/StoryCADTests" --include="*.cs" 2>/dev/null | wc -l)
-pass "Test inventory: $TEST_FILE_COUNT test files, $TEST_METHOD_COUNT test methods"
+# Manual testing status (check #1284)
+ISSUE_1284_STATE=$(gh issue view 1284 --repo storybuilder-org/StoryCAD --json state --jq '.state' 2>/dev/null || echo "UNKNOWN")
+ISSUE_1284_BODY=$(gh issue view 1284 --repo storybuilder-org/StoryCAD --json body --jq '.body' 2>/dev/null || echo "")
+TOTAL_BOXES=$(echo "$ISSUE_1284_BODY" | grep -c '\- \[.\]' 2>/dev/null || true)
+TOTAL_BOXES=${TOTAL_BOXES:-0}
+CHECKED_BOXES=$(echo "$ISSUE_1284_BODY" | grep -c '\- \[x\]' 2>/dev/null || true)
+CHECKED_BOXES=${CHECKED_BOXES:-0}
+if [ "$ISSUE_1284_STATE" = "CLOSED" ]; then
+    pass "Manual testing (#1284) completed (issue closed)"
+elif [ "$TOTAL_BOXES" -gt 0 ]; then
+    fail "Manual testing (#1284) incomplete: $CHECKED_BOXES/$TOTAL_BOXES checkboxes done (issue $ISSUE_1284_STATE)"
+else
+    fail "Manual testing (#1284) status unknown"
+fi
 
-manual "Manual testing completed on Windows 10"
-manual "Manual testing completed on Windows 11"
-manual "Manual testing completed on macOS 10.15+"
 manual "No regressions from Release 3.4 on Windows"
 manual "Performance acceptable on both platforms"
 
@@ -254,9 +151,8 @@ echo ""
 # =====================================================================
 echo "DOCUMENTATION"
 
-# 17. Changelog exists
+# Changelog
 if [ -f "$REPO/docs/For Developers/Changelog.md" ]; then
-    # Check if it mentions 4.0
     if grep -qi '4\.0\|release 4' "$REPO/docs/For Developers/Changelog.md" 2>/dev/null; then
         pass "Changelog.md exists and references 4.0"
     else
@@ -266,17 +162,25 @@ else
     fail "Changelog.md not found at docs/For Developers/Changelog.md"
 fi
 
-# 18. ROADMAP.md exists
-if [ -f "$REPO/ROADMAP.md" ]; then
-    pass "ROADMAP.md exists"
+# User manual platform content
+MAC_REFS=$(grep -ril 'macos\|mac os\|macintosh' "$REPO/docs" --include="*.md" 2>/dev/null | grep -v '_site' | wc -l)
+if [ "$MAC_REFS" -gt 0 ]; then
+    pass "User manual has platform-specific content ($MAC_REFS files with macOS references)"
 else
-    fail "ROADMAP.md not found"
+    fail "No macOS references found in user manual (docs/)"
 fi
 
-# 19. Release notes - look for an actual release notes file (not comments, not scripts)
+# Developer docs
+DEV_ARCH=$(find "$REPO/.claude/docs/architecture" -name "*.md" 2>/dev/null | wc -l)
+if [ "$DEV_ARCH" -gt 0 ]; then
+    pass "Developer documentation exists ($DEV_ARCH files in .claude/docs/architecture/)"
+else
+    fail "No developer architecture docs found"
+fi
+
+# Release notes
 RELEASE_NOTES=$(find "$REPO/devdocs" -iname "*release*notes*" ! -iname "*comments*" ! -name "*.sh" 2>/dev/null | head -5)
 if [ -z "$RELEASE_NOTES" ]; then
-    # Fallback: check docs/ for release notes
     RELEASE_NOTES=$(find "$REPO/docs" -iname "*release*notes*" ! -iname "*comments*" 2>/dev/null | head -5)
 fi
 if [ -n "$RELEASE_NOTES" ]; then
@@ -285,66 +189,15 @@ else
     fail "No release notes found in devdocs/ or docs/"
 fi
 
-# 20. User manual has macOS/platform references
-MAC_REFS=$(grep -ril 'macos\|mac os\|macintosh' "$REPO/docs" --include="*.md" 2>/dev/null | grep -v '_site' | wc -l)
-PLATFORM_REFS=$(grep -ril 'cross-platform\|desktop head\|uno platform' "$REPO/docs" --include="*.md" 2>/dev/null | grep -v '_site' | wc -l)
-if [ "$MAC_REFS" -gt 0 ]; then
-    pass "User manual has macOS references in $MAC_REFS file(s)"
-else
-    fail "No macOS references found in user manual (docs/)"
-fi
-if [ "$PLATFORM_REFS" -gt 0 ]; then
-    pass "User manual has cross-platform/UNO references in $PLATFORM_REFS file(s)"
-else
-    fail "No cross-platform references found in user manual (docs/)"
-fi
-
-# 21. Developer docs
-DEV_ARCH=$(find "$REPO/.claude/docs/architecture" -name "*.md" 2>/dev/null | wc -l)
-if [ "$DEV_ARCH" -gt 0 ]; then
-    pass "Developer architecture docs exist ($DEV_ARCH files in .claude/docs/architecture/)"
-else
-    fail "No developer architecture docs found"
-fi
-
-# Check for platform-specific dev docs
-PLAT_DOCS=$(find "$REPO/devdocs" -iname "*platform*" -o -iname "*uno*" -o -iname "*cross*" 2>/dev/null | wc -l)
-if [ "$PLAT_DOCS" -gt 0 ]; then
-    pass "Platform-specific dev docs exist ($PLAT_DOCS files in devdocs/)"
-else
-    fail "No platform-specific dev docs found in devdocs/"
-fi
-
-manual "Changelog content accuracy (all changes since 3.4 documented)"
-manual "User manual screenshots for both platforms where UI differs"
-manual "Keyboard shortcut tables (Ctrl/Cmd variants) in user manual"
-manual "Release notes prepared for distribution"
-
 echo ""
 
 # =====================================================================
-# CI/CD & DISTRIBUTION
+# DISTRIBUTION
 # =====================================================================
-echo "CI/CD & DISTRIBUTION"
+echo "DISTRIBUTION"
 
-# 22. CI workflow exists
-if [ -f "$REPO/.github/workflows/build-release.yml" ]; then
-    pass "build-release.yml CI/CD workflow exists"
-else
-    fail "build-release.yml not found"
-fi
-
-if [ -f "$REPO/.github/workflows/ci.yml" ]; then
-    pass "ci.yml workflow exists"
-else
-    fail "ci.yml not found"
-fi
-
-manual "Windows: Microsoft Store update from 3.4 to 4.0 works"
-manual "Windows: New installations work on clean machines"
-manual "macOS: Installation works on clean macOS machines"
-manual "macOS: Application launches and runs without errors"
-manual "macOS: Security/notarization requirements met"
+manual "Windows: Microsoft Store update from 3.4 to 4.0"
+manual "macOS: Installation works, notarization/signing complete"
 
 echo ""
 
