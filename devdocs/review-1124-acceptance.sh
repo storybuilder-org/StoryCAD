@@ -141,7 +141,6 @@ else
     fail "Manual testing (#1284) status unknown"
 fi
 
-manual "No regressions from Release 3.4 on Windows"
 manual "Performance acceptable on both platforms"
 
 echo ""
