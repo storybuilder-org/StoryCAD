@@ -16,11 +16,12 @@
 |-------|------|---------|
 | [#1284](https://github.com/storybuilder-org/StoryCAD/issues/1284) | StoryCAD | Release 4.0 macOS Testing Plan |
 
-## Release 4.1 — Subscription tiers (requires board approval)
+## Release 4.1 — Subscription tiers
 
 | Issue | Repo | Summary |
 |-------|------|---------|
 | [#1297](https://github.com/storybuilder-org/StoryCAD/issues/1297) | StoryCAD | Implement subscription tiers for StoryCAD 4.0 |
+|TBA|StoryCAD|Code Cleanup|
 
 ## Release 4.2 — API guidance and Prompt Generator
 
