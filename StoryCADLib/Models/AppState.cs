@@ -77,6 +77,13 @@ public class AppState
     public bool DeveloperBuild => Debugger.IsAttached || !EnvPresent || Package.Current.Id.Version.Revision != 0;
 
     /// <summary>
+    ///     Base URL for the user manual. Points to BetaManual on dev builds, StoryCAD on production.
+    /// </summary>
+    public string ManualBaseUrl => DeveloperBuild
+        ? "https://storybuilder-org.github.io/BetaManual/"
+        : "https://storybuilder-org.github.io/StoryCAD/";
+
+    /// <summary>
     ///     The current version of StoryCADLib
     /// </summary>
     public string Version
