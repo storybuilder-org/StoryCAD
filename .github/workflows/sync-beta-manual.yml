@@ -8,6 +8,10 @@ on:
 
   workflow_dispatch:
 
+concurrency:
+  group: sync-beta-manual
+  cancel-in-progress: true
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -27,11 +31,8 @@ jobs:
 
       - name: Sync docs content
         run: |
-          # Remove existing docs content in BetaManual (handles deletions)
-          rm -rf beta-manual/docs
-
-          # Copy docs from StoryCAD, excluding .obsidian
-          rsync -a --exclude='.obsidian' docs/ beta-manual/docs/
+          # Atomic sync: --delete removes stale files without intermediate broken state
+          rsync -a --delete --exclude='.obsidian' docs/ beta-manual/docs/
 
       - name: Commit and push
         run: |

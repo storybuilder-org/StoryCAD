@@ -364,7 +364,7 @@ public class StoryIO
             {
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = _appState.ManualBaseUrl + "docs/Miscellaneous/Troubleshooting_Cloud_Storage_Providers.html",
+                    FileName = new Uri(new Uri(_appState.ManualBaseUrl), "docs/Miscellaneous/Troubleshooting_Cloud_Storage_Providers.html").ToString(),
                     UseShellExecute = true
                 });
             }

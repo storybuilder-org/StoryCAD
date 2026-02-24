@@ -4,13 +4,11 @@ namespace StoryCADLib.Services.Dialogs;
 
 public sealed partial class HelpPage : Page
 {
+    public HelpPageViewModel ViewModel { get; } = new();
+
     public HelpPage()
     {
         InitializeComponent();
-
-        var appState = Ioc.Default.GetRequiredService<AppState>();
-        TutorialLink.NavigateUri = new Uri(appState.ManualBaseUrl + "docs/Tutorial%20Creating%20a%20Story/Tutorial_Creating_a_Story.html");
-        ManualLink.NavigateUri = new Uri(appState.ManualBaseUrl);
     }
 
     /// <summary>
