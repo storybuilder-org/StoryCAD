@@ -7,7 +7,7 @@ If you have a question, make sure it isn't already answered. Our goal is to prov
 
 Another source of information is our Discord server. You can join it from [this link][4].
 
-For developer documentation, see the [For Developers](https://storybuilder-org.github.io/StoryCAD/docs/For%20Developers/For_Developers.html) section of the manual.
+For developer documentation, see the [For Developers](https://manual.storybuilder.org/docs/For%20Developers/For_Developers.html) section of the manual.
 
 The rest of this document discusses possible ways to help.
 
@@ -67,7 +67,7 @@ They're the deconstruction champs.
 
 The StoryCAD user manual is built with Jekyll and located in the `docs` folder. You can preview changes locally before submitting a pull request.
 
-See [Updating the Manual](https://storybuilder-org.github.io/StoryCAD/docs/For%20Developers/Updating_the_Manual.html) for instructions on serving the documentation locally and adding new pages.
+See [Updating the Manual](https://manual.storybuilder.org/docs/For%20Developers/Updating_the_Manual.html) for instructions on serving the documentation locally and adding new pages.
 
 ## Licensing of Contributions
 

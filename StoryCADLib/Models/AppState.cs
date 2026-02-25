@@ -98,8 +98,8 @@ public class AppState
             var prefs = Ioc.Default.GetService<PreferenceService>();
             var useBeta = prefs?.Model.UseBetaDocumentation ?? IsBetaDistribution;
             return useBeta
-                ? "https://storybuilder-org.github.io/BetaManual/"
-                : "https://storybuilder-org.github.io/StoryCAD/";
+                ? "https://beta.manual.storybuilder.org/"
+                : "https://manual.storybuilder.org/";
         }
     }
 
