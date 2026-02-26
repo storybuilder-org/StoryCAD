@@ -77,6 +77,33 @@ public class AppState
     public bool DeveloperBuild => Debugger.IsAttached || !EnvPresent || Package.Current.Id.Version.Revision != 0;
 
     /// <summary>
+    ///     Compile-time flag indicating this is a beta distribution.
+    ///     Set by passing -p:IsBetaBuild=true at build time.
+    /// </summary>
+    public static bool IsBetaDistribution =>
+#if BETA_BUILD
+        true;
+#else
+        false;
+#endif
+
+    /// <summary>
+    ///     Base URL for the user manual. Uses the UseBetaDocumentation preference
+    ///     (which defaults to IsBetaDistribution but can be overridden by the user).
+    /// </summary>
+    public string ManualBaseUrl
+    {
+        get
+        {
+            var prefs = Ioc.Default.GetService<PreferenceService>();
+            var useBeta = prefs?.Model.UseBetaDocumentation ?? IsBetaDistribution;
+            return useBeta
+                ? "https://beta.manual.storybuilder.org/"
+                : "https://manual.storybuilder.org/";
+        }
+    }
+
+    /// <summary>
     ///     The current version of StoryCADLib
     /// </summary>
     public string Version

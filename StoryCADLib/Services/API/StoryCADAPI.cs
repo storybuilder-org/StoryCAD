@@ -17,7 +17,7 @@ namespace StoryCADLib.Services.API;
 ///     something that's not AI, you probably want to use OutlineService directly.
 /// 
 ///     For detailed documentation on using the StoryCAD API, please refer to:
-///     https://storybuilder-org.github.io/StoryCAD/docs/For%20Developers/Using_the_API.html
+///     https://manual.storybuilder.org/docs/For%20Developers/Using_the_API.html
 /// 
 ///     Usage:
 ///     - State Handling: The API operates on a CurrentModel property which holds the active StoryModel instance.

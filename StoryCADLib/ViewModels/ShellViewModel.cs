@@ -319,7 +319,7 @@ public class ShellViewModel : ObservableRecipient
 
         Process.Start(new ProcessStartInfo
         {
-            FileName = "https://Storybuilder-org.github.io/StoryCAD/",
+            FileName = appState.ManualBaseUrl,
             UseShellExecute = true
         });
 

@@ -199,7 +199,8 @@ Detailed technical documentation (memory files provide condensed versions):
 ### User Manual
 
 - **Location**: `/mnt/d/dev/src/StoryCAD/docs/`
-- **Production URL**: https://storybuilder-org.github.io/StoryCAD/
+- **Production URL**: https://manual.storybuilder.org/
+- **Beta URL**: https://beta.manual.storybuilder.org/
 - **Format**: Jekyll with Just the Docs theme (115+ markdown files)
 - **Audience**: Fiction writers (non-technical users)
 

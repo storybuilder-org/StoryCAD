@@ -47,6 +47,7 @@ public class PreferencesModel : ObservableObject
         LastReviewDate = DateTime.MinValue;
         ShowStartupDialog = true;
         ShowFilePickerOnStartup = true;
+        UseBetaDocumentation = AppState.IsBetaDistribution;
     }
 
     #endregion
@@ -252,6 +253,14 @@ public class PreferencesModel : ObservableObject
     [JsonInclude]
     [JsonPropertyName("ShowFilePickerOnStartup")]
     public bool ShowFilePickerOnStartup { get; set; }
+
+    /// <summary>
+    ///     When true, help links point to the beta manual (BetaManual repo).
+    ///     Defaults to IsBetaDistribution at construction; user can override in Preferences.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("UseBetaDocumentation")]
+    public bool UseBetaDocumentation { get; set; }
 
     #endregion
 }

@@ -112,7 +112,7 @@ StoryCAD is part of a larger ecosystem of repositories under the StoryBuilder or
 - **Visibility**: Public
 - **Purpose**: End-user documentation for StoryCAD
 - **Technology**: Jekyll with Just the Docs theme
-- **URL**: [User Manual](https://storybuilder-org.github.io/ManualTest/) (if published)
+- **URL**: [User Manual](https://manual.storybuilder.org/)
 
 **Content Structure**:
 ```
@@ -310,11 +310,11 @@ API-Samples
 
 ### Location and Purpose
 
-StoryCAD's user-facing documentation is maintained in the **ManualTest repository**:
+StoryCAD's user-facing documentation is maintained in the **StoryCAD repository** (`docs/` folder):
 
-- **Repository**: [github.com/storybuilder-org/ManualTest](https://github.com/storybuilder-org/ManualTest)
-- **Local Path**: `/mnt/d/dev/src/ManualTest/`
-- **Published (Staging)**: https://storybuilder-org.github.io/StoryBuilder-Manual/
+- **Repository**: [github.com/storybuilder-org/StoryCAD](https://github.com/storybuilder-org/StoryCAD)
+- **Production**: https://manual.storybuilder.org/
+- **Beta**: https://beta.manual.storybuilder.org/
 - **Format**: Jekyll static site with Just the Docs theme
 - **Content**: 115 markdown files organized in 11 thematic sections
 - **Audience**: Fiction writers (non-technical users)

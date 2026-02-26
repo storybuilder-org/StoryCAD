@@ -85,6 +85,9 @@
                     <CheckBox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center"
                               Content="Show file picker on startup" Margin="8"
                               IsChecked="{x:Bind PreferencesVm.ShowFilePickerOnStartup, Mode=TwoWay}" />
+                    <CheckBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"
+                              Content="Use beta documentation" Margin="8"
+                              IsChecked="{x:Bind PreferencesVm.UseBetaDocumentation, Mode=TwoWay}" />
 
                     <ComboBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Width="300"
                               Header="Preferred Theme" HorizontalAlignment="Stretch"
