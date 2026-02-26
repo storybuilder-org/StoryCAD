@@ -17,7 +17,7 @@ namespace StoryCADLib.Services.API;
 ///     something that's not AI, you probably want to use OutlineService directly.
 /// 
 ///     For detailed documentation on using the StoryCAD API, please refer to:
-///     https://storybuilder-org.github.io/StoryCAD/docs/For%20Developers/Using_the_API.html
+///     https://manual.storybuilder.org/docs/For%20Developers/Using_the_API.html
 /// 
 ///     Usage:
 ///     - State Handling: The API operates on a CurrentModel property which holds the active StoryModel instance.
@@ -26,7 +26,7 @@ namespace StoryCADLib.Services.API;
 ///     - Calling Standard: All public API methods return OperationResult<T> to ensure safe external consumption.
 ///         No exceptions are thrown to external callers; all errors are communicated through the OperationResult
 ///         pattern with IsSuccess flags and descriptive ErrorMessage strings.
-public class SemanticKernelApi(OutlineService outlineService, ListData listData, ControlData controlData, ToolsData toolsData) : IStoryCADAPI
+public class StoryCADApi(OutlineService outlineService, ListData listData, ControlData controlData, ToolsData toolsData) : IStoryCADAPI
 {
     public StoryModel CurrentModel { get; set; }
 
@@ -144,8 +144,9 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
     [Description("""
                  Gets all story elements of a specific type from the current model.
                  Use this to find all Characters, Scenes, Settings, Problems, etc.
-                 Valid types: Problem, Character, Setting, Scene, Folder, Section, Web, Notes.
-                 Note: StoryOverview and TrashCan types exist but are singleton elements.
+                 Valid types: Problem, Character, Setting, Scene, Folder, Section, Web, Notes, StoryWorld.
+                 Note: StoryOverview, TrashCan, and StoryWorld types exist but are singleton elements.
+                 For StoryWorld specifically, consider using GetStoryWorld() for convenience.
                  Returns a list of matching elements with their GUIDs and properties.
                  """)]
     public OperationResult<List<StoryElement>> GetElementsByType(StoryItemType elementType)
@@ -184,6 +185,44 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
         {
             return OperationResult<List<StoryElement>>.Failure(
                 $"Error retrieving elements by type: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    ///     Gets the StoryWorld element from the current model.
+    ///     StoryWorld is a singleton element (at most one per story) used for worldbuilding content.
+    /// </summary>
+    /// <returns>
+    ///     OperationResult with the StoryWorld element as payload if it exists,
+    ///     or success with null payload if no StoryWorld exists in the story.
+    /// </returns>
+    [KernelFunction]
+    [Description("""
+                 Gets the StoryWorld element from the current model.
+                 StoryWorld is a singleton element (at most one per story) containing worldbuilding information:
+                 world type classification, physical worlds, species, cultures, governments, religions,
+                 history, economy, and magic/technology systems.
+                 Returns the StoryWorld element if it exists, or null if the story has no StoryWorld.
+                 """)]
+    public OperationResult<StoryElement> GetStoryWorld()
+    {
+        if (CurrentModel == null)
+        {
+            return OperationResult<StoryElement>.Failure(
+                "No StoryModel available. Create a model first.");
+        }
+
+        try
+        {
+            var storyWorld = CurrentModel.StoryElements
+                .FirstOrDefault(e => e.ElementType == StoryItemType.StoryWorld);
+
+            return OperationResult<StoryElement>.Success(storyWorld);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<StoryElement>.Failure(
+                $"Error retrieving StoryWorld: {ex.Message}");
         }
     }
 
@@ -488,6 +527,9 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
         {
             // Create the new element using the OutlineService.
             var newElement = outlineService.AddStoryElement(CurrentModel, typeToAdd, parent.Node);
+            if (newElement == null)
+                return OperationResult<Guid>.Failure("Only one StoryWorld element is allowed per story.");
+
             if (DesiredGuid != Guid.Empty)
             {
                 newElement.UpdateGuid(CurrentModel, DesiredGuid);
@@ -565,13 +607,13 @@ public class SemanticKernelApi(OutlineService outlineService, ListData listData,
         {
             // Create the new element using the OutlineService.
             var newElement = outlineService.AddStoryElement(CurrentModel, typeToAdd, parent.Node);
+            if (newElement == null)
+                return OperationResult<Guid>.Failure("Only one StoryWorld element is allowed per story.");
 
             if (DesiredGuid != Guid.Empty)
             {
                 newElement.UpdateGuid(CurrentModel, DesiredGuid);
             }
-
-            newElement.Name = name;
 
             newElement.Name = name;
             UpdateElementProperties(newElement.Uuid, properties);

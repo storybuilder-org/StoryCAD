@@ -27,7 +27,14 @@ public class ListData
                 // Convert to ObservableCollection format
                 foreach (var kvp in jsonLists)
                 {
-                    ListControlSource[kvp.Key] = new ObservableCollection<string>(kvp.Value);
+                    var list = new ObservableCollection<string>(kvp.Value);
+                    // Insert a space at index 0 for proper SelectedItem binding on non-editable ComboBoxes.
+                    // This allows the ComboBox to display a blank selection when the bound value is empty.
+                    // NOTE: We use " " (space) instead of "" (empty string) because UNO Platform has a bug
+                    // where empty string is treated as null, causing x:Bind to fall back to the DataContext
+                    // and display the ViewModel's ToString(). See Issue #1267.
+                    list.Insert(0, " ");
+                    ListControlSource[kvp.Key] = list;
                 }
             }).Wait();
 

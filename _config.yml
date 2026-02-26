@@ -2,10 +2,10 @@ title: StoryCAD Manual
 description: A help manual for StoryCAD
 theme: just-the-docs
 
-url: https://storybuilder-org.github.io/StoryCAD/
+url: https://manual.storybuilder.org/
 
 aux_links:
-  StoryCAD Manual: https://storybuilder-org.github.io/StoryCAD/docs/
+  StoryCAD Manual: https://manual.storybuilder.org/docs/
 
 # Footer "Edit this page on GitHub" link text
 gh_edit_link: true # show or hide edit this page link

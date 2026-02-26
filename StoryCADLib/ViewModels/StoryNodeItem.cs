@@ -553,6 +553,9 @@ public class StoryNodeItem : INotifyPropertyChanged
             case StoryItemType.Notes:
                 Symbol = Symbol.TwoPage;
                 break;
+            case StoryItemType.StoryWorld:
+                Symbol = Symbol.Map;
+                break;
         }
 
         Parent = parent;
@@ -620,6 +623,9 @@ public class StoryNodeItem : INotifyPropertyChanged
                 break;
             case StoryItemType.Notes:
                 Symbol = Symbol.TwoPage;
+                break;
+            case StoryItemType.StoryWorld:
+                Symbol = Symbol.Map;
                 break;
         }
 

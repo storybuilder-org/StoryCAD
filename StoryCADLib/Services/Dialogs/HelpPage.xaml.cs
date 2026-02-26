@@ -4,6 +4,8 @@ namespace StoryCADLib.Services.Dialogs;
 
 public sealed partial class HelpPage : Page
 {
+    public HelpPageViewModel ViewModel { get; } = new();
+
     public HelpPage()
     {
         InitializeComponent();

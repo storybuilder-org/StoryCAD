@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using StoryCADLib.Services;
+using StoryCADLib.ViewModels;
 
 #nullable enable
 
@@ -22,6 +23,12 @@ public class AppState
     ///     Suppresses graphical output if True
     /// </summary>
     public bool Headless;
+
+    /// <summary>
+    ///     Indicates the application is in the process of shutting down.
+    ///     Used to guard UI operations that would fail after window destruction.
+    /// </summary>
+    public bool IsClosing;
 
     /// <summary>
     ///     Returns true if the app has loaded with a version change.
@@ -70,6 +77,33 @@ public class AppState
     public bool DeveloperBuild => Debugger.IsAttached || !EnvPresent || Package.Current.Id.Version.Revision != 0;
 
     /// <summary>
+    ///     Compile-time flag indicating this is a beta distribution.
+    ///     Set by passing -p:IsBetaBuild=true at build time.
+    /// </summary>
+    public static bool IsBetaDistribution =>
+#if BETA_BUILD
+        true;
+#else
+        false;
+#endif
+
+    /// <summary>
+    ///     Base URL for the user manual. Uses the UseBetaDocumentation preference
+    ///     (which defaults to IsBetaDistribution but can be overridden by the user).
+    /// </summary>
+    public string ManualBaseUrl
+    {
+        get
+        {
+            var prefs = Ioc.Default.GetService<PreferenceService>();
+            var useBeta = prefs?.Model.UseBetaDocumentation ?? IsBetaDistribution;
+            return useBeta
+                ? "https://beta.manual.storybuilder.org/"
+                : "https://manual.storybuilder.org/";
+        }
+    }
+
+    /// <summary>
     ///     The current version of StoryCADLib
     /// </summary>
     public string Version
@@ -98,6 +132,33 @@ public class AppState
     ///     Null for pages without editable content (Home, Reports, etc.).
     /// </summary>
     public ISaveable? CurrentSaveable { get; set; }
+
+    #region Navigation State (Issue #1146)
+    // These properties were moved from ShellViewModel to enable service-layer access
+    // without ViewModel dependencies. All access must occur on the UI thread.
+
+    /// <summary>
+    ///     The current view type (Explorer or Narrator).
+    ///     Set by ShellViewModel.ViewChanged() when user switches views.
+    /// </summary>
+    public StoryViewType CurrentViewType { get; set; }
+
+    /// <summary>
+    ///     The currently selected node in the tree view.
+    ///     Set by ShellViewModel.TreeViewNodeClicked() when user clicks a node.
+    ///     Null when no node is selected.
+    /// </summary>
+    public StoryNodeItem? CurrentNode { get; set; }
+
+    /// <summary>
+    ///     The node that was right-clicked to open a context menu.
+    ///     Set by Shell.xaml.cs right-click handler.
+    ///     Used by tools that operate on the right-clicked node.
+    ///     Null when no node has been right-clicked.
+    /// </summary>
+    public StoryNodeItem? RightTappedNode { get; set; }
+
+    #endregion
 
     /// <summary>
     ///     The currently open story document, combining the model and its file path.

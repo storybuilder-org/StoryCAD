@@ -42,6 +42,12 @@ public class PrintReports
             _documentText += FormatText(rtf);
         }
 
+        if (_vm.CreateStoryWorld)
+        {
+            rtf = await _formatter.FormatStoryWorldReport();
+            _documentText += FormatText(rtf);
+        }
+
         if (_vm.CreateSummary)
         {
             rtf = await _formatter.FormatSynopsisReport();

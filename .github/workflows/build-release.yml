@@ -4,23 +4,23 @@ on:
   push:
     branches: [main, dev]
     paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '**/*.{png,jpg,jpeg,svg,gif}'
+      - "**/*.md"
+      - "docs/**"
+      - "**/*.{png,jpg,jpeg,svg,gif}"
   pull_request:
     branches: [main, dev]
     paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '**/*.{png,jpg,jpeg,svg,gif}'
+      - "**/*.md"
+      - "docs/**"
+      - "**/*.{png,jpg,jpeg,svg,gif}"
   workflow_dispatch:
     inputs:
       version:
-        description: 'Tag / version (e.g. v4.0.0)'
+        description: "Tag / version (e.g. v4.0.0)"
         required: true
         type: string
       skip_release:
-        description: 'Skip creating a release (build only)'
+        description: "Skip creating a release (build only)"
         required: false
         type: boolean
         default: true
@@ -79,8 +79,8 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.100'
-          global-json-file: './global.json'
+          dotnet-version: "10.0.100"
+          global-json-file: "./global.json"
           cache: true
           cache-dependency-path: |
             **/*.csproj
@@ -89,7 +89,17 @@ jobs:
       - name: Install Uno macOS workload
         if: matrix.os == 'macos-latest'
         run: dotnet workload install macos
-        
+
+      - name: Determine beta status
+        id: beta
+        shell: pwsh
+        run: |
+          # Only a full release (workflow_dispatch with skip_release=false) is NOT beta
+          $isRelease = "${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ github.event.inputs.skip_release }}" -eq "false"
+          $isBeta = -not $isRelease
+          "is_beta=$($isBeta.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+          Write-Host "Beta build: $isBeta"
+
       - name: Generate version
         id: version
         shell: pwsh
@@ -107,9 +117,9 @@ jobs:
             $v = "1.0.${{ github.run_number }}.65534"
           }
           "version=$v"       >> $env:GITHUB_OUTPUT
-          "tag_version=v$v"  >> $env:GITHUB_OUTPUT
+          "tag_version=$v"   >> $env:GITHUB_OUTPUT
           Write-Host "Generated version: $v"
-          
+
       - name: Restore
         run: dotnet restore StoryCAD.sln
 
@@ -157,7 +167,7 @@ jobs:
 
       - name: Run tests (Windows x64)
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
-        run: dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:Platform=${{ matrix.platform }} -f net10.0-desktop
+        run: dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:Platform=${{ matrix.platform }} -p:IsBetaBuild=${{ steps.beta.outputs.is_beta }} -f net10.0-desktop
 
       - name: Write .env (macOS)
         if: matrix.os == 'macos-latest'
@@ -197,7 +207,7 @@ jobs:
 
       - name: Run all tests (macOS)
         if: matrix.os == 'macos-latest'
-        run: dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -f net10.0-desktop
+        run: dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:IsBetaBuild=${{ steps.beta.outputs.is_beta }} -f net10.0-desktop
 
       # 10 ─ Setup MSBuild (Windows only)
       - name: Setup MSBuild
@@ -221,7 +231,8 @@ jobs:
             "/p:PackageCertificateKeyFile=$pfx",
             "/p:AppxPackageDir=${{ github.workspace }}\StoryCAD\Packages\",
             '/p:GenerateAppxPackageOnBuild=true',
-            '/p:PublishReadyToRun=false'
+            '/p:PublishReadyToRun=false',
+            '/p:IsBetaBuild=${{ steps.beta.outputs.is_beta }}'
           )
           if ("${{ secrets.PFX_PASSWORD }}".Length -gt 0) {
             $msbuildArgs += "/p:PackageCertificatePassword=${{ secrets.PFX_PASSWORD }}"
@@ -253,6 +264,7 @@ jobs:
           dotnet publish StoryCAD/StoryCAD.csproj -c Release -f ${{ matrix.fw }} -r ${{ matrix.rid }} \
             -p:SelfContained=true \
             -p:PackageFormat=app \
+            -p:IsBetaBuild=${{ steps.beta.outputs.is_beta }} \
             -p:UnoMacOSEntitlements="$ENTITLEMENTS" \
             -p:UnoMacOSIncludeCreateDump=false
 

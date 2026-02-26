@@ -211,6 +211,7 @@
         <Content Remove="Assets\Install\reports\Setting Description.txt" />
         <Content Remove="Assets\Install\reports\Story Overview.txt" />
         <Content Remove="Assets\Install\reports\Story Synopsis.txt" />
+        <Content Remove="Assets\Install\reports\Story World.txt" />
         <Content Remove="Assets\Install\reports\Structure Beats.txt" />
         <Content Remove="Assets\Install\samples\A Doll%27s House.stbx" />
         <Content Remove="Assets\Install\samples\Danger Calls.stbx" />
@@ -233,10 +234,12 @@
         <EmbeddedResource Include="Assets\Install\reports\Setting Description.txt" />
         <EmbeddedResource Include="Assets\Install\reports\Story Overview.txt" />
         <EmbeddedResource Include="Assets\Install\reports\Story Synopsis.txt" />
+        <EmbeddedResource Include="Assets\Install\reports\Story World.txt" />
         <EmbeddedResource Include="Assets\Install\reports\Structure Beats.txt" />
         <EmbeddedResource Include="Assets\Install\samples\A Doll's House.stbx" />
         <EmbeddedResource Include="Assets\Install\samples\Danger Calls.stbx" />
         <EmbeddedResource Include="Assets\Install\samples\Hamlet.stbx" />
+        <EmbeddedResource Include="Assets\Install\samples\Land of Oz.stbx" />
         <EmbeddedResource Include="Assets\Install\samples\Rocky.stbx" />
         <EmbeddedResource Include="Assets\Install\samples\Snow White.stbx" />
         <EmbeddedResource Include="Assets\Install\samples\The Glass Menagerie.stbx" />

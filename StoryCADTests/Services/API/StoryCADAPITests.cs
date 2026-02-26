@@ -11,9 +11,9 @@ using StoryCADLib.ViewModels;
 namespace StoryCADTests.Services.API;
 
 [TestClass]
-public class SemanticKernelApiTests
+public class StoryCADApiTests
 {
-    private readonly SemanticKernelApi _api = new(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
+    private readonly StoryCADApi _api = new(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
     [TestMethod]
     public async Task CreateOutlineWithInvalidTemplate()
@@ -317,7 +317,7 @@ public class SemanticKernelApiTests
         Assert.IsTrue(writeResult.IsSuccess, "WriteOutline should succeed.");
 
         // Act: Create a new API instance and open the written file.
-        var newApi = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
+        var newApi = new StoryCADApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
         var openResult = await newApi.OpenOutline(filePath);
 
         // Assert
@@ -417,7 +417,7 @@ public class SemanticKernelApiTests
     public async Task SetCurrentModel_WithValidModel_SetsCurrentModel()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
+        var api = new StoryCADApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Create a test model
         var createResult = await api.CreateEmptyOutline("Test Story", "Test Author", "0");
@@ -449,7 +449,7 @@ public class SemanticKernelApiTests
     public void SetCurrentModel_WithNullModel_SetsCurrentModelToNull()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
+        var api = new StoryCADApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         api.SetCurrentModel(null);
@@ -465,7 +465,7 @@ public class SemanticKernelApiTests
     public async Task SetCurrentModel_AllowsOperationsOnNewModel()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
+        var api = new StoryCADApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Create first model
         var firstResult = await api.CreateEmptyOutline("First Story", "Author 1", "0");
@@ -559,7 +559,7 @@ public class SemanticKernelApiTests
     public void DeleteStoryElement_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
+        var api = new StoryCADApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = api.DeleteStoryElement(Guid.NewGuid().ToString());
@@ -600,7 +600,7 @@ public class SemanticKernelApiTests
     public async Task DeleteElement_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
+        var api = new StoryCADApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = await api.DeleteElement(Guid.NewGuid());
@@ -664,7 +664,7 @@ public class SemanticKernelApiTests
     public async Task RestoreFromTrash_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
+        var api = new StoryCADApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = await api.RestoreFromTrash(Guid.NewGuid());
@@ -731,7 +731,7 @@ public class SemanticKernelApiTests
     public async Task EmptyTrash_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
+        var api = new StoryCADApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = await api.EmptyTrash();
@@ -776,7 +776,7 @@ public class SemanticKernelApiTests
     public void GetStoryElement_WithNoCurrentModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
+        var api = new StoryCADApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
         var someGuid = Guid.NewGuid();
 
         // Act
@@ -835,7 +835,7 @@ public class SemanticKernelApiTests
     public void SearchForText_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
+        var api = new StoryCADApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = api.SearchForText("test");
@@ -937,7 +937,7 @@ public class SemanticKernelApiTests
     public void SearchForReferences_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
+        var api = new StoryCADApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = api.SearchForReferences(Guid.NewGuid());
@@ -1024,7 +1024,7 @@ public class SemanticKernelApiTests
     public void RemoveReferences_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
+        var api = new StoryCADApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = api.RemoveReferences(Guid.NewGuid());
@@ -1115,7 +1115,7 @@ public class SemanticKernelApiTests
     public void SearchInSubtree_WithNoModel_ReturnsFailure()
     {
         // Arrange
-        var api = new SemanticKernelApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
+        var api = new StoryCADApi(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 
         // Act
         var result = api.SearchInSubtree(Guid.NewGuid(), "test");
@@ -2230,7 +2230,7 @@ public class SemanticKernelApiTests
     public void GetElementsByType_WithNoModel_ReturnsFailure()
     {
         // Arrange - create fresh API instance with no model
-        var api = new SemanticKernelApi(
+        var api = new StoryCADApi(
             Ioc.Default.GetRequiredService<OutlineService>(),
             Ioc.Default.GetRequiredService<ListData>(),
             Ioc.Default.GetRequiredService<ControlData>(),
@@ -2293,6 +2293,110 @@ public class SemanticKernelApiTests
         Assert.IsTrue(result.IsSuccess, "GetElementsByType should succeed even with no matches");
         Assert.IsNotNull(result.Payload, "Payload should not be null");
         Assert.AreEqual(0, result.Payload.Count, "Should return empty list when no elements match");
+    }
+
+    #endregion
+
+    #region StoryWorld API Tests (Issue #782)
+
+    /// <summary>
+    /// Tests that GetStoryWorld returns failure when no model is loaded
+    /// </summary>
+    [TestMethod]
+    public void GetStoryWorld_WithNoModel_ReturnsFailure()
+    {
+        // Arrange - create fresh API instance with no model
+        var api = new StoryCADApi(
+            Ioc.Default.GetRequiredService<OutlineService>(),
+            Ioc.Default.GetRequiredService<ListData>(),
+            Ioc.Default.GetRequiredService<ControlData>(),
+            Ioc.Default.GetRequiredService<ToolsData>());
+
+        // Act
+        var result = api.GetStoryWorld();
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess, "GetStoryWorld should fail without a model");
+        Assert.IsNull(result.Payload, "Payload should be null");
+        Assert.AreEqual("No StoryModel available. Create a model first.", result.ErrorMessage);
+    }
+
+    /// <summary>
+    /// Tests that GetStoryWorld returns null payload when no StoryWorld exists
+    /// </summary>
+    [TestMethod]
+    public async Task GetStoryWorld_WithNoStoryWorld_ReturnsSuccessWithNullPayload()
+    {
+        // Arrange - create model without StoryWorld
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+
+        // Act
+        var result = _api.GetStoryWorld();
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetStoryWorld should succeed even when no StoryWorld exists");
+        Assert.IsNull(result.Payload, "Payload should be null when no StoryWorld exists");
+    }
+
+    /// <summary>
+    /// Tests that GetStoryWorld returns the StoryWorld element when it exists
+    /// </summary>
+    [TestMethod]
+    public async Task GetStoryWorld_WithStoryWorld_ReturnsStoryWorld()
+    {
+        // Arrange - create model and add StoryWorld
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var addResult = _api.AddElement(StoryItemType.StoryWorld, overviewGuid.ToString(), "My World");
+        Assert.IsTrue(addResult.IsSuccess, "Adding StoryWorld should succeed");
+
+        // Act
+        var result = _api.GetStoryWorld();
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetStoryWorld should succeed");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.AreEqual(StoryItemType.StoryWorld, result.Payload.ElementType, "Element should be StoryWorld type");
+        Assert.AreEqual("My World", result.Payload.Name, "StoryWorld name should match");
+    }
+
+    /// <summary>
+    /// Tests that GetElementsByType returns StoryWorld when requested (singleton handling)
+    /// </summary>
+    [TestMethod]
+    public async Task GetElementsByType_WithStoryWorld_ReturnsStoryWorldAsList()
+    {
+        // Arrange - create model and add StoryWorld
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        _api.AddElement(StoryItemType.StoryWorld, overviewGuid.ToString(), "Test World");
+
+        // Act
+        var result = _api.GetElementsByType(StoryItemType.StoryWorld);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetElementsByType should succeed for StoryWorld");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.AreEqual(1, result.Payload.Count, "Should return exactly 1 StoryWorld (singleton)");
+        Assert.AreEqual(StoryItemType.StoryWorld, result.Payload[0].ElementType, "Element should be StoryWorld type");
+    }
+
+    /// <summary>
+    /// Tests that GetElementsByType returns empty list when no StoryWorld exists
+    /// </summary>
+    [TestMethod]
+    public async Task GetElementsByType_WithNoStoryWorld_ReturnsEmptyList()
+    {
+        // Arrange - create model without StoryWorld
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+
+        // Act
+        var result = _api.GetElementsByType(StoryItemType.StoryWorld);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "GetElementsByType should succeed even with no StoryWorld");
+        Assert.IsNotNull(result.Payload, "Payload should not be null");
+        Assert.AreEqual(0, result.Payload.Count, "Should return empty list when no StoryWorld exists");
     }
 
     #endregion

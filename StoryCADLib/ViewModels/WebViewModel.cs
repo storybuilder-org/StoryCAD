@@ -43,14 +43,18 @@ public class WebViewModel : ObservableRecipient, INavigable, ISaveable, IReloada
 
     public void Activate(object parameter)
     {
+        var param = parameter as WebModel;
+        _logger.Log(LogLevel.Info, $"WebViewModel.Activate: parameter={param?.Name} (Uuid={param?.Uuid})");
         _changeable = false;  // Disable change tracking before setting Model
         _changed = false;
         Model = (WebModel)parameter;
+        _logger.Log(LogLevel.Info, $"WebViewModel.Activate: Model set to {Model?.Name} (Uuid={Model?.Uuid})");
         LoadModel();
     }
 
     public void Deactivate(object parameter)
     {
+        _logger.Log(LogLevel.Info, $"WebViewModel.Deactivate: Saving to Model={Model?.Name} (Uuid={Model?.Uuid})");
         SaveModel();
     }
 

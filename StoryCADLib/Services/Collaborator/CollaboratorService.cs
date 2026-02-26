@@ -81,7 +81,7 @@ public class CollaboratorService
         var toolsData = Ioc.Default.GetService<ToolsData>();
         if (outlineService != null && listData != null && controlData != null && toolsData != null)
         {
-            var api = new SemanticKernelApi(outlineService, listData, controlData, toolsData);
+            var api = new StoryCADApi(outlineService, listData, controlData, toolsData);
             api.SetCurrentModel(storyModel);
             // DIAG-55: Log API.CurrentModel after SetCurrentModel
             _logService.Log(LogLevel.Info, $"DIAG-55: After SetCurrentModel - api.CurrentModel hash={RuntimeHelpers.GetHashCode(api.CurrentModel)}");
@@ -105,7 +105,7 @@ public class CollaboratorService
                 // DIAG-55: Log before OpenAsync - verify both references match
                 _logService.Log(LogLevel.Info, $"DIAG-55: Before OpenAsync - storyModel hash={RuntimeHelpers.GetHashCode(storyModel)}, api.CurrentModel hash={RuntimeHelpers.GetHashCode(api.CurrentModel)}");
                 var filePath = _appState.CurrentDocument?.FilePath ?? string.Empty;
-                await _collaboratorInterface.OpenAsync(api, storyModel, CollaboratorWindow, hostFrame, filePath);
+                await _collaboratorInterface.OpenAsync(api, storyModel, CollaboratorWindow, hostFrame, filePath, _logService);
             }
             catch (Exception ex)
             {

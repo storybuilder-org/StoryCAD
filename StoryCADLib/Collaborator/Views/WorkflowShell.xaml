@@ -39,6 +39,27 @@
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE897;" />
                     </AppBarButton.Icon>
+                    <AppBarButton.Flyout>
+                        <Flyout>
+                            <Flyout.FlyoutPresenterStyle>
+                                <Style TargetType="FlyoutPresenter">
+                                    <Setter Property="MaxWidth" Value="620" />
+                                    <Setter Property="MinWidth" Value="500" />
+                                </Style>
+                            </Flyout.FlyoutPresenterStyle>
+                            <ScrollViewer MaxHeight="600" HorizontalScrollBarVisibility="Disabled">
+                                <StackPanel Spacing="12" Padding="4" Width="580">
+                                    <TextBlock Text="Story Collaborator Help" FontWeight="Bold" FontSize="16" />
+                                    <TextBlock TextWrapping="Wrap" Text="Workflows — The left panel lists available workflows for your story. Each workflow guides you through developing a specific aspect (premise, characters, settings, scenes, etc.). Select one to begin." />
+                                    <TextBlock TextWrapping="Wrap" Text="Execute — Runs the selected workflow. Collaborator analyzes your story elements and suggests updates using AI." />
+                                    <TextBlock TextWrapping="Wrap" Text="Review Results — After execution, review each suggested property update. Use Accept to apply individual changes, or Accept All to apply everything at once." />
+                                    <TextBlock TextWrapping="Wrap" Text="Chat — After a workflow runs, use the chat panel to discuss the results, ask for alternatives, or refine suggestions." />
+                                    <TextBlock TextWrapping="Wrap" Text="Save — Saves your outline changes back to StoryCAD." />
+                                    <TextBlock TextWrapping="Wrap" Text="Exit — Closes Collaborator and returns to StoryCAD. Any accepted changes are preserved." />
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Flyout>
+                    </AppBarButton.Flyout>
                 </AppBarButton>
                 <AppBarButton Label="Settings" ToolTipService.ToolTip="Collaborator Settings" Margin="5"
                               Click="SettingsButton_Click">

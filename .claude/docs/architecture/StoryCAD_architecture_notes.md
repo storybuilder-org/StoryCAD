@@ -112,7 +112,7 @@ StoryCAD is part of a larger ecosystem of repositories under the StoryBuilder or
 - **Visibility**: Public
 - **Purpose**: End-user documentation for StoryCAD
 - **Technology**: Jekyll with Just the Docs theme
-- **URL**: [User Manual](https://storybuilder-org.github.io/ManualTest/) (if published)
+- **URL**: [User Manual](https://manual.storybuilder.org/)
 
 **Content Structure**:
 ```
@@ -134,7 +134,7 @@ ManualTest/docs/
 **Usage**:
 - Reference via CLAUDE.md "User Manual Navigation"
 - Search with Glob/Grep rather than reading all files
-- See: `CLAUDE.md` for navigation guidance
+-  # Get current issue contentgh issue view 1067 --repo storybuilder-org/StoryCAD --json body -q .body > current-issue.md​# Edit the file to add tasks or check off completed ones# Then update the issuegh issue edit 1067 --repo storybuilder-org/StoryCAD --body-file current-issue.mdbash
 
 ---
 
@@ -184,7 +184,7 @@ ManualTest/docs/
 - Integration examples
 - Test scenarios for API consumers
 
-**Note**: StoryCAD has a public API (SemanticKernelAPI) that external tools can use
+**Note**: StoryCAD has a public API (StoryCADAPI) that external tools can use
 
 
 ### Repository Relationships
@@ -310,11 +310,11 @@ API-Samples
 
 ### Location and Purpose
 
-StoryCAD's user-facing documentation is maintained in the **ManualTest repository**:
+StoryCAD's user-facing documentation is maintained in the **StoryCAD repository** (`docs/` folder):
 
-- **Repository**: [github.com/storybuilder-org/ManualTest](https://github.com/storybuilder-org/ManualTest)
-- **Local Path**: `/mnt/d/dev/src/ManualTest/`
-- **Published (Staging)**: https://storybuilder-org.github.io/StoryBuilder-Manual/
+- **Repository**: [github.com/storybuilder-org/StoryCAD](https://github.com/storybuilder-org/StoryCAD)
+- **Production**: https://manual.storybuilder.org/
+- **Beta**: https://beta.manual.storybuilder.org/
 - **Format**: Jekyll static site with Just the Docs theme
 - **Content**: 115 markdown files organized in 11 thematic sections
 - **Audience**: Fiction writers (non-technical users)
@@ -405,7 +405,7 @@ Architecture documentation links to:
 | Navigation | `StoryCAD/Views/Shell.xaml` | `Quick Start/Navigating_in_StoryCAD.md` |
 | Reports | `StoryCADLib/Services/Reports/` | `Reports/` (4 files) |
 | Preferences | `StoryCAD/Views/Preferences.xaml` | `Preferences/Preferences.md` |
-| API | `StoryCADLib/SemanticKernelAPI.cs` | `For Developers/Using_the_API.md` |
+| API | `StoryCADLib/StoryCADAPI.cs` | `For Developers/Using_the_API.md` |
 | Collaborator (AI features) | `CollaboratorLib/` (separate repo) | User docs TBD (feature in development) |
 
 ### Documentation Standards for Developers
@@ -761,7 +761,7 @@ StoryCADLib/
 │
 ├── /API/ (External integration layer)
 │   ├── IStoryCADAPI.cs
-│   ├── SemanticKernelAPI.cs
+│   ├── StoryCADAPI.cs
 │   └── OperationResult.cs
 │
 ├── /DAL/ (Data Access Layer)
@@ -819,7 +819,7 @@ StoryCADTests/
 │
 ├── /UnitTests/
 │   ├── OutlineServiceTests.cs (Service layer tests)
-│   ├── SemanticKernelAPITests.cs (API layer tests)
+│   ├── StoryCADAPITests.cs (API layer tests)
 │   ├── StoryModelTests.cs
 │   ├── CharacterModelTests.cs
 │   ├── RelationshipTests.cs
@@ -961,7 +961,7 @@ StoryCADTests/
 │                      API LAYER (External Integration)              │
 │                                                                    │
 │  ┌─────────────────────────────────────────────────────────┐     │
-│  │  SemanticKernelAPI (IStoryCADAPI)                       │     │
+│  │  StoryCADAPI (IStoryCADAPI)                       │     │
 │  │  - Implements IStoryCADAPI interface                    │     │
 │  │  - All operations return OperationResult<T>             │     │
 │  │  - Wraps OutlineService calls in try-catch              │     │
@@ -1170,7 +1170,7 @@ Services → Services
   - All methods return OperationResult<T>
   - Versioned for compatibility
 
-- **SemanticKernelAPI**: Implementation of IStoryCADAPI
+- **StoryCADAPI**: Implementation of IStoryCADAPI
   - Calls OutlineService directly
   - All operations wrapped in try-catch
   - Thread-safe with SerializationLock
@@ -1709,7 +1709,7 @@ using (var serializationLock = new SerializationLock(autoSaveService, backupServ
 
 **Used in**:
 - OutlineService (all state-modifying operations)
-- SemanticKernelAPI (all API operations)
+- StoryCADAPI (all API operations)
 - StoryIO (file read/write operations)
 
 **Prevents**:
@@ -1976,7 +1976,7 @@ StoryCAD uses several message types for different communication needs:
    {
        public StatusChangedMessage(StatusMessage value) : base(value) { }
    }
-
+   
    // Usage - sending from any ViewModel or service:
    Messenger.Send(new StatusChangedMessage(
        new StatusMessage("File saved successfully", LogLevel.Info, true)));
@@ -1988,7 +1988,7 @@ StoryCAD uses several message types for different communication needs:
    {
        public IsChangedMessage(bool value) : base(value) { }
    }
-
+   
    // Usage - notifying document changed:
    Messenger.Send(new IsChangedMessage(true));
    ```
@@ -1996,7 +1996,7 @@ StoryCAD uses several message types for different communication needs:
 3. **IsChangedRequestMessage**: Request current changed state (request/response pattern)
    ```csharp
    public class IsChangedRequestMessage : RequestMessage<bool> { }
-
+   
    // Usage - requesting information:
    var isChanged = Messenger.Send(new IsChangedRequestMessage());
    ```
@@ -2007,7 +2007,7 @@ StoryCAD uses several message types for different communication needs:
    {
        public NameChangedMessage(NameChangeMessage value) : base(value) { }
    }
-
+   
    // Usage - from OverviewViewModel when name changes:
    NameChangeMessage msg = new(oldName, newName);
    Messenger.Send(new NameChangedMessage(msg));
@@ -2566,7 +2566,7 @@ public Guid AddStoryElement(Guid parentGuid, ...)
 ### Coverage Requirements
 
 **Critical Components**:
-- SemanticKernelAPI: 100% coverage achieved
+- StoryCADAPI: 100% coverage achieved
 - OutlineService: 100% coverage achieved
 - Critical paths have integration tests
 - Thread safety verified in tests
@@ -3131,7 +3131,7 @@ public interface IPlatformService
 
 ### API Evolution
 
-**Current**: SemanticKernelAPI for LLM integration
+**Current**: StoryCADAPI for LLM integration
 
 **Future Possibilities**:
 - RESTful API for web integration
@@ -3156,7 +3156,7 @@ public interface IPlatformService
 ### AI/LLM Integration
 
 **Current**:
-- Via SemanticKernelAPI
+- Via StoryCADAPI
 - CollaboratorService for AI assistance
 - Microsoft.SemanticKernel 1.41.0
 
@@ -3173,7 +3173,7 @@ public interface IPlatformService
 ### External Tools
 
 **API Enablement**:
-- SemanticKernelAPI enables external tool integration
+- StoryCADAPI enables external tool integration
 - OperationResult<T> for safe consumption
 - Thread-safe operations
 

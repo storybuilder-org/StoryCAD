@@ -289,14 +289,18 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable, IRe
 
     public void Activate(object parameter)
     {
+        var param = parameter as OverviewModel;
+        _logger.Log(LogLevel.Info, $"OverviewViewModel.Activate: parameter={param?.Name} (Uuid={param?.Uuid})");
         _changeable = false;  // Disable change tracking before setting Model
         _changed = false;
         Model = (OverviewModel)parameter;
+        _logger.Log(LogLevel.Info, $"OverviewViewModel.Activate: Model set to {Model?.Name} (Uuid={Model?.Uuid})");
         LoadModel();
     }
 
     public void Deactivate(object parameter)
     {
+        _logger.Log(LogLevel.Info, $"OverviewViewModel.Deactivate: Saving to Model={Model?.Name} (Uuid={Model?.Uuid})");
         SaveModel();
     }
 

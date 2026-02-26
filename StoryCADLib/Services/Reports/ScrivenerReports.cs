@@ -447,6 +447,9 @@ public class ScrivenerReports
                 case StoryItemType.StoryOverview:
                     await GenerateStoryOverviewReport(node, element);
                     break;
+                case StoryItemType.StoryWorld:
+                    await GenerateStoryWorldReport(node, element);
+                    break;
                 case StoryItemType.Problem:
                     await GenerateProblemReport(node, element);
                     break;
@@ -483,6 +486,18 @@ public class ScrivenerReports
         var contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
         var rtf = await _formatter.FormatStoryOverviewReport();
+
+        // Write the report
+        await FileIO.WriteTextAsync(contents, rtf);
+    }
+
+    private async Task GenerateStoryWorldReport(BinderItem node, StoryElement element)
+    {
+        // Locate and open the output content.rtf report
+        var di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
+        var contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
+
+        var rtf = await _formatter.FormatStoryWorldReport();
 
         // Write the report
         await FileIO.WriteTextAsync(contents, rtf);
