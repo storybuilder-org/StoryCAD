@@ -8,8 +8,8 @@
         <!-- App Identifier -->
         <ApplicationId>com.storybuilder.storycad</ApplicationId>
         <!-- Versions -->
-        <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-        <ApplicationVersion>1</ApplicationVersion>
+        <ApplicationDisplayVersion>4.0.0</ApplicationDisplayVersion>
+        <ApplicationVersion>2</ApplicationVersion>
         <!-- Package Description -->
         <Description>StoryCAD powered by Uno Platform.</Description>
     </PropertyGroup>
