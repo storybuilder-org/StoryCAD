@@ -47,6 +47,13 @@
         </ItemGroup>
     </Target>
 
+    <!-- Copy icon.icns to Contents/Resources/ where macOS expects it (CFBundleIconFile) -->
+    <Target Name="_CopyMacOSIcon" AfterTargets="_UnoPublishAppBundle">
+        <Copy SourceFiles="Assets/Icons/icon.icns"
+              DestinationFolder="$(PublishDir)/StoryCAD.app/Contents/Resources/"
+              Condition="Exists('$(PublishDir)/StoryCAD.app')" />
+    </Target>
+
     <PropertyGroup>
         <!-- MSIX Configuration for Windows -->
         <UseWinUI Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</UseWinUI>
