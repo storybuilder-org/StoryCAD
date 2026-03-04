@@ -48,14 +48,14 @@ Use this template when adding new test cases:
 - StoryCAD is running
 
 **Steps:**
-1. Click File > New Story  
-   **Expected:** New outline opens with "Untitled" Story Overview node
-   
-2. Enter "Test Story" in the Story Name field  
-   **Expected:** Tree view updates to show "Test Story" as root
+1. Click File > New Story
+   **Expected:** New Story dialog opens; enter "Test Story" as name and click Create
 
-3. Click File > Save  
-   **Expected:** Save dialog appears
+2. Verify tree view shows "Test Story" as root node
+   **Expected:** Overview node has the story name
+
+3. Click File > Save (Ctrl+S / Cmd+S)
+   **Expected:** File saves silently
 
 4. Navigate to TestInputs/TestSession and save as "TC001_NewStory.stbx"  
    **Expected:** File saves, title bar shows filename
@@ -532,17 +532,17 @@ Use this template when adding new test cases:
 **Time:** ~2 minutes
 
 **Setup:**
-- Problem or Scene element selected
+- Problem element selected
 
 **Steps:**
-1. Open Conflict Builder from Tools  
+1. On the Problem tab, click the Conflict Builder button
    **Expected:** Conflict categories appear
 
-2. Select conflict type  
+2. Select conflict type
    **Expected:** Examples and details shown
 
-3. Apply to current element  
-   **Expected:** Conflict added to element
+3. Apply to current element
+   **Expected:** Conflict added to Problem
 
 **Cleanup:**
 - None
@@ -598,25 +598,8 @@ Use this template when adding new test cases:
 
 ---
 
-### TC-041: Undo and Redo
-**Priority:** Critical  
-**Time:** ~2 minutes
-
-**Setup:**
-- Outline open
-
-**Steps:**
-1. Make a change (add element or edit text)  
-   **Expected:** Change applied
-
-2. Press Ctrl+Z  
-   **Expected:** Change undone
-
-3. Press Ctrl+Y  
-   **Expected:** Change redone
-
-**Cleanup:**
-- None
+### ~~TC-041: Undo and Redo~~ REMOVED
+> **Reason:** StoryCAD does not have an undo/redo feature. This test is invalid.
 
 ---
 
@@ -757,8 +740,8 @@ Use this template when adding new test cases:
 - StoryCAD running
 
 **Steps:**
-1. Press Ctrl+N  
-   **Expected:** New story created
+1. Press Ctrl+N (Cmd+N on macOS)
+   **Expected:** Narrative Editor opens (not New Story)
 
 2. Press Ctrl+O  
    **Expected:** Open dialog appears
@@ -804,14 +787,13 @@ Use this template when adding new test cases:
 - Outline open
 
 **Steps:**
-1. Press F6  
-   **Expected:** Focus moves between panes
-
-2. Press Tab  
+1. Press Tab
    **Expected:** Focus moves to next control
 
-3. Press Shift+Tab  
+2. Press Shift+Tab
    **Expected:** Focus moves to previous control
+
+> **Note:** F6 pane switching is not implemented in StoryCAD. Removed from test.
 
 **Cleanup:**
 - None
@@ -956,11 +938,16 @@ Use this template when adding new test cases:
 - Sample outline open
 
 **Steps:**
-1. Try to save sample outline  
-   **Expected:** Save As dialog appears (cannot overwrite)
+1. Open a sample outline (File > Open Sample Outline)
+   **Expected:** Sample opens from a temp copy
 
-2. Cancel save  
-   **Expected:** Outline remains open read-only
+2. Make an edit and press Ctrl+S (Cmd+S on macOS)
+   **Expected:** Save succeeds silently (writes to temp copy)
+
+3. Close the sample
+   **Expected:** No save prompt; temp copy is discarded and edits are lost
+
+> **Note:** Samples are not read-only. They are copied to a temp file; Save writes to that temp file, which is discarded on close. Use Save As to persist edits to a chosen location.
 
 **Cleanup:**
 - None

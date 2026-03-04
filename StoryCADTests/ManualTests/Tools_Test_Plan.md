@@ -2,6 +2,18 @@
 **Time**: ~15 minutes  
 **Purpose**: Verify all Tools menu functions work correctly
 
+## Platform Notes
+
+| Action | Windows | macOS |
+|--------|---------|-------|
+| Search | Ctrl+F | Cmd+F |
+| Tools menu | Toolbar dropdown | Same |
+| Dialog behavior | Windows ContentDialog | UNO ContentDialog (same visual) |
+
+**macOS testers**: All tools use ContentDialog overlays — behavior should be identical on both platforms. The Search shortcut is Cmd+F on macOS.
+
+**Missing tools**: This plan does not cover Copy Elements (see Copy_Elements_Test_Plan.md) or Beat Sheets/Flaw Builder (not yet implemented).
+
 ## Setup
 1. Launch StoryCAD
 2. Open sample outline "Danger Calls" (File > Open Sample Outline)

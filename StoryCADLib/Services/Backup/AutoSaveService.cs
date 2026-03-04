@@ -102,7 +102,7 @@ public class AutoSaveService : IDisposable
         }
     }
 
-    private async Task AutoSaveProjectAsync()
+    internal async Task AutoSaveProjectAsync()
     {
         if (!_preferenceService.Model.AutoSave)
         {
@@ -123,8 +123,11 @@ public class AutoSaveService : IDisposable
 
         await SerializationLock.RunExclusiveAsync(async ct =>
         {
-            // flush UI edits on the UI thread and await completion
-            await _windowing.GlobalDispatcher.EnqueueAsync(() => { _editFlushService.FlushCurrentEdits(); });
+            // flush UI edits — use dispatcher in UI mode, direct call in headless
+            if (!_appState.Headless)
+                await _windowing.GlobalDispatcher.EnqueueAsync(() => { _editFlushService.FlushCurrentEdits(); });
+            else
+                _editFlushService.FlushCurrentEdits();
 
             // perform the file write under the same lock
             await _outlineService.WriteModel(

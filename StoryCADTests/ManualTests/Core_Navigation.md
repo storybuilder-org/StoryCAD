@@ -2,6 +2,17 @@
 **Time**: ~10 minutes  
 **Purpose**: Verify navigation between elements and views
 
+## Platform Notes
+
+| Action | Windows | macOS |
+|--------|---------|-------|
+| Search | Ctrl+F | Cmd+F |
+| Tree keyboard nav | Arrow keys | Arrow keys |
+| Drag and drop | Standard mouse drag | Standard mouse/trackpad drag |
+| Context menu | Right-click | Right-click or Ctrl+click |
+
+**macOS testers**: Drag-and-drop on macOS trackpad uses click-hold-drag. If using a Magic Mouse, click-hold-drag works the same. Search shortcut is Cmd+F.
+
 ## Setup
 1. Launch StoryCAD
 2. Open sample outline "Danger Calls" or similar with multiple elements
@@ -47,8 +58,8 @@
 4. Press Left arrow on expanded parent  
    **Expected:** Node collapses
 
-5. Press Enter on node  
-   **Expected:** Node expands/collapses
+5. Press Enter on node
+   **Expected:** Node is selected and its content loads in the detail pane
 
 **Pass/Fail:** ______
 

@@ -2,10 +2,22 @@
 **Time**: ~10 minutes  
 **Purpose**: Verify creation and editing of all story element types
 
+## Platform Notes
+
+| Action | Windows | macOS |
+|--------|---------|-------|
+| Context menu | Right-click | Right-click or Ctrl+click |
+| Tab switching | Click tab | Click tab |
+| Text entry | Standard | Standard |
+
+**macOS testers**: Right-click works on macOS with a two-button mouse or trackpad. Alternatively, Ctrl+click opens context menus. All element types should behave identically on both platforms.
+
+**Missing element types**: This plan covers Character, Problem, Scene, Setting, and Notes. WebPage, Section, and StoryWorld are tested in their own plans (see StoryWorld_Test_Plan.md).
+
 ## Setup
 1. Launch StoryCAD
 2. Create new story or use existing test file
-3. Save as "ElementsTest.stbx" in TestInputs/CoreTests
+3. Save as "ElementsTest.stbx" in a test folder
 
 ---
 
@@ -26,8 +38,8 @@
 4. Select "Major" for Story Role  
    **Expected:** Selection saved
 
-5. Switch to Physical tab and add description  
-   **Expected:** Text saves when switching tabs
+5. Switch to Physical tab and fill in a field (e.g., Age, Build, or Appearance)
+   **Expected:** Data saves when switching tabs
 
 **Pass/Fail:** ______
 
@@ -95,7 +107,7 @@
 3. Add "Downtown Seattle" as Locale  
    **Expected:** Field accepts text
 
-4. Set Time as "Present Day"  
+4. Set Period as "Present Day"
    **Expected:** Field accepts text
 
 **Pass/Fail:** ______

@@ -444,7 +444,7 @@ public class OutlineViewModel : ObservableRecipient
                         }
 
                         logger.Log(LogLevel.Info,
-                            $"Testing filename validity for {saveAsVm.ParentFolder}\\{saveAsVm.ProjectName}");
+                            $"Testing filename validity for {saveAsVm.ParentFolder}{Path.DirectorySeparatorChar}{saveAsVm.ProjectName}");
                         // Copy the current file to the new location/name
                         var currentFile = await StorageFile.GetFileFromPathAsync(appState.CurrentDocument.FilePath);
                         var folder = await StorageFolder.GetFolderFromPathAsync(saveAsVm.ParentFolder);
