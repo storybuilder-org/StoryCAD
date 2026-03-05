@@ -328,6 +328,7 @@ public class WebViewModel : ObservableRecipient, INavigable, ISaveable, IReloada
     /// </summary>
     public async Task InstallWebView()
     {
+#if WINDOWS10_0_18362_0_OR_GREATER
         try
         {
             _logger.Log(LogLevel.Error, "Installing WebView runtime");
@@ -372,6 +373,10 @@ public class WebViewModel : ObservableRecipient, INavigable, ISaveable, IReloada
             _logger.LogException(LogLevel.Warn, _ex, $"Error installing WebView runtime. " +
                                                      $"({_ex.Message})");
         }
+#else
+        _logger.Log(LogLevel.Warn, "WebView installation skipped, not on WinAppSDK");
+        await Task.CompletedTask;
+#endif
     }
 
     #endregion

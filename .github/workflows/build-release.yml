@@ -4,23 +4,23 @@ on:
   push:
     branches: [main, dev]
     paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '**/*.{png,jpg,jpeg,svg,gif}'
+      - "**/*.md"
+      - "docs/**"
+      - "**/*.{png,jpg,jpeg,svg,gif}"
   pull_request:
     branches: [main, dev]
     paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '**/*.{png,jpg,jpeg,svg,gif}'
+      - "**/*.md"
+      - "docs/**"
+      - "**/*.{png,jpg,jpeg,svg,gif}"
   workflow_dispatch:
     inputs:
       version:
-        description: 'Tag / version (e.g. v4.0.0)'
+        description: "Tag / version (e.g. v4.0.0)"
         required: true
         type: string
       skip_release:
-        description: 'Skip creating a release (build only)'
+        description: "Skip creating a release (build only)"
         required: false
         type: boolean
         default: true
@@ -79,8 +79,8 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.100'
-          global-json-file: './global.json'
+          dotnet-version: "10.0.100"
+          global-json-file: "./global.json"
           cache: true
           cache-dependency-path: |
             **/*.csproj
@@ -89,7 +89,7 @@ jobs:
       - name: Install Uno macOS workload
         if: matrix.os == 'macos-latest'
         run: dotnet workload install macos
-        
+
       - name: Determine beta status
         id: beta
         shell: pwsh
@@ -119,7 +119,7 @@ jobs:
           "version=$v"       >> $env:GITHUB_OUTPUT
           "tag_version=$v"   >> $env:GITHUB_OUTPUT
           Write-Host "Generated version: $v"
-          
+
       - name: Restore
         run: dotnet restore StoryCAD.sln
 
@@ -177,6 +177,38 @@ jobs:
             echo "${{ secrets.ENV }}" > "${{ github.workspace }}/StoryCADTests/.env"
           fi
 
+      - name: Setup macOS signing
+        if: matrix.os == 'macos-latest'
+        env:
+          APPLE_CERTIFICATES_BASE64: ${{ secrets.APPLE_CERTIFICATES_BASE64 }}
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+          MACOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          # Create temporary keychain
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          # Import certificates
+          echo "$APPLE_CERTIFICATES_BASE64" | base64 --decode > $RUNNER_TEMP/certs.p12
+          security import $RUNNER_TEMP/certs.p12 -P "$APPLE_CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+
+          # Verify signing identity is available
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+
+          # Save provisioning profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$MACOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > $RUNNER_TEMP/storycad.provisionprofile
+
+          # Clean up cert file
+          rm $RUNNER_TEMP/certs.p12
+
       - name: Run all tests (macOS)
         if: matrix.os == 'macos-latest'
         run: dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:IsBetaBuild=${{ steps.beta.outputs.is_beta }} -f net10.0-desktop
@@ -229,16 +261,43 @@ jobs:
       - name: Publish macOS package
         if: matrix.os == 'macos-latest'
         run: |
-          PUBLISH_DIR="${{ github.workspace }}/StoryCAD/bin/Release/${{ matrix.fw }}/${{ matrix.rid }}/publish"
-          dotnet publish StoryCAD/StoryCAD.csproj \
-            -f ${{ matrix.fw }} \
-            -r ${{ matrix.rid }} \
-            -c Release \
-            -p:PackageFormat=pkg \
+          ENTITLEMENTS="StoryCAD/Platforms/Desktop/Entitlements.plist"
+          CERT="Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)"
+
+          # Publish (UNO creates .app bundle automatically with PackageFormat=app)
+          dotnet publish StoryCAD/StoryCAD.csproj -c Release -f ${{ matrix.fw }} -r ${{ matrix.rid }} \
             -p:SelfContained=true \
+            -p:PackageFormat=app \
             -p:IsBetaBuild=${{ steps.beta.outputs.is_beta }} \
-            -p:AppBundlePath="${PUBLISH_DIR}/StoryCAD.app"
-          cp "${PUBLISH_DIR}/StoryCAD.pkg" storycad-${{ matrix.art }}.pkg
+            -p:UnoMacOSEntitlements="$ENTITLEMENTS" \
+            -p:UnoMacOSIncludeCreateDump=false
+
+          APP_DIR="StoryCAD/bin/Release/${{ matrix.fw }}/${{ matrix.rid }}/publish/StoryCAD.app"
+
+          # Post-publish fixups
+          cp $RUNNER_TEMP/storycad.provisionprofile "$APP_DIR/Contents/embedded.provisionprofile"
+          xattr -cr "$APP_DIR"
+
+          # Move json files to Resources (required for App Store validation)
+          mv "$APP_DIR/Contents/MacOS/StoryCAD.deps.json" "$APP_DIR/Contents/Resources/"
+          mv "$APP_DIR/Contents/MacOS/StoryCAD.runtimeconfig.json" "$APP_DIR/Contents/Resources/"
+          ln -s ../Resources/StoryCAD.deps.json "$APP_DIR/Contents/MacOS/StoryCAD.deps.json"
+          ln -s ../Resources/StoryCAD.runtimeconfig.json "$APP_DIR/Contents/MacOS/StoryCAD.runtimeconfig.json"
+
+          # Sign dylibs, then executable, then bundle
+          find "$APP_DIR/Contents/MacOS" -name "*.dylib" -exec codesign --force --sign "$CERT" {} \;
+          codesign --force --options runtime --sign "$CERT" --entitlements "$ENTITLEMENTS" "$APP_DIR/Contents/MacOS/StoryCAD"
+          codesign --force --options runtime --sign "$CERT" --entitlements "$ENTITLEMENTS" "$APP_DIR"
+
+          # Verify signature
+          codesign --verify --deep --strict "$APP_DIR"
+
+          # Create PKG
+          xattr -cr "$APP_DIR"
+          productbuild --component "$APP_DIR" /Applications --sign "3rd Party Mac Developer Installer: StoryBuilder Foundation (3T4DPS2D5Y)" storycad-${{ matrix.art }}.pkg
+
+          # Delete build .app to prevent installer relocation bug
+          rm -rf "$APP_DIR"
 
       - name: Zip MSIX artifacts (Windows)
         if: matrix.os == 'windows-latest'
@@ -262,6 +321,13 @@ jobs:
           name: storycad-${{ matrix.art }}
           path: storycad-${{ matrix.art }}.pkg
           if-no-files-found: error
+
+      - name: Cleanup macOS signing
+        if: matrix.os == 'macos-latest' && always()
+        continue-on-error: true
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db 2>/dev/null || true
+          rm -f $RUNNER_TEMP/storycad.provisionprofile
 
   release:
     needs: build

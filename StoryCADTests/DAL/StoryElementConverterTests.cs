@@ -195,4 +195,139 @@ public class StoryElementConverterTests
     }
 
     #endregion
+
+    #region Description Field Migration Tests
+
+    [TestMethod]
+    public void Read_LegacyStoryIdea_MigratesToDescription()
+    {
+        // Arrange — legacy StoryOverview with StoryIdea but no Description
+        var json = """
+        {
+            "Type": "StoryOverview",
+            "Uuid": "11111111-1111-1111-1111-111111111111",
+            "Name": "My Story",
+            "StoryIdea": "A hero's journey through time"
+        }
+        """;
+
+        // Act
+        var element = JsonSerializer.Deserialize<StoryElement>(json, _serializerOptions);
+
+        // Assert
+        Assert.IsNotNull(element);
+        Assert.IsInstanceOfType(element, typeof(OverviewModel));
+        Assert.AreEqual("A hero's journey through time", element.Description);
+    }
+
+    [TestMethod]
+    public void Read_AllLegacyFieldNames_MigrateToDescription()
+    {
+        // Each tuple: (Type discriminator, legacy field name, legacy value)
+        var legacyCases = new (string type, string legacyField, string value)[]
+        {
+            ("StoryOverview", "StoryIdea", "idea text"),
+            ("Problem", "StoryQuestion", "question text"),
+            ("Character", "CharacterSketch", "sketch text"),
+            ("Setting", "Summary", "summary text"),
+            ("Scene", "Remarks", "remarks text"),
+            ("Folder", "Notes", "notes text"),
+        };
+
+        foreach (var (type, legacyField, value) in legacyCases)
+        {
+            var json = $$"""
+            {
+                "Type": "{{type}}",
+                "Uuid": "22222222-2222-2222-2222-222222222222",
+                "Name": "Test Element",
+                "{{legacyField}}": "{{value}}"
+            }
+            """;
+
+            var element = JsonSerializer.Deserialize<StoryElement>(json, _serializerOptions);
+
+            Assert.IsNotNull(element, $"Failed for type {type}");
+            Assert.AreEqual(value, element.Description,
+                $"Migration failed for type={type}, field={legacyField}");
+        }
+    }
+
+    #endregion
+
+    #region Unknown Element Type Test
+
+    [TestMethod]
+    public void Read_UnknownType_ThrowsJsonException()
+    {
+        var json = """
+        {
+            "Type": "FutureElement",
+            "Uuid": "33333333-3333-3333-3333-333333333333",
+            "Name": "Unknown"
+        }
+        """;
+
+        var ex = Assert.ThrowsExactly<JsonException>(
+            () => JsonSerializer.Deserialize<StoryElement>(json, _serializerOptions));
+        Assert.IsTrue(ex.Message.Contains("FutureElement"),
+            $"Exception message should mention the unknown type. Actual: {ex.Message}");
+    }
+
+    #endregion
+
+    #region StoryWorld List Tests
+
+    [TestMethod]
+    public void RoundTrip_StoryWorldModel_PreservesSpeciesList()
+    {
+        // Arrange
+        var model = new StoryModel();
+        var storyWorld = new StoryWorldModel(model, null);
+        storyWorld.PhysicalWorlds.Add(new PhysicalWorldEntry { Name = "Continent A", Geography = "Plains" });
+        storyWorld.PhysicalWorlds.Add(new PhysicalWorldEntry { Name = "Continent B", Climate = "Tropical" });
+        storyWorld.Species.Add(new SpeciesEntry { Name = "Elves", Lifespan = "Immortal" });
+        storyWorld.Species.Add(new SpeciesEntry { Name = "Dwarves", PhysicalTraits = "Short and stocky" });
+
+        // Act
+        var json = JsonSerializer.Serialize<StoryElement>(storyWorld, _serializerOptions);
+        var deserialized = (StoryWorldModel)JsonSerializer.Deserialize<StoryElement>(json, _serializerOptions);
+
+        // Assert
+        Assert.AreEqual(2, deserialized.PhysicalWorlds.Count);
+        Assert.AreEqual("Continent A", deserialized.PhysicalWorlds[0].Name);
+        Assert.AreEqual("Continent B", deserialized.PhysicalWorlds[1].Name);
+        Assert.AreEqual(2, deserialized.Species.Count);
+        Assert.AreEqual("Elves", deserialized.Species[0].Name);
+        Assert.AreEqual("Immortal", deserialized.Species[0].Lifespan);
+        Assert.AreEqual("Dwarves", deserialized.Species[1].Name);
+        Assert.AreEqual("Short and stocky", deserialized.Species[1].PhysicalTraits);
+    }
+
+    [TestMethod]
+    public void Deserialize_StoryWorldModel_MissingLists_InitializesEmpty()
+    {
+        // Arrange — JSON with no PhysicalWorlds or Species keys
+        var json = """
+        {
+            "Type": "StoryWorld",
+            "Uuid": "44444444-4444-4444-4444-444444444444",
+            "Name": "Bare World",
+            "WorldType": "Natural"
+        }
+        """;
+
+        // Act
+        var element = JsonSerializer.Deserialize<StoryElement>(json, _serializerOptions);
+
+        // Assert
+        Assert.IsInstanceOfType(element, typeof(StoryWorldModel));
+        var storyWorld = (StoryWorldModel)element;
+        Assert.IsNotNull(storyWorld.PhysicalWorlds, "PhysicalWorlds should not be null");
+        Assert.IsNotNull(storyWorld.Species, "Species should not be null");
+        Assert.AreEqual(0, storyWorld.PhysicalWorlds.Count);
+        Assert.AreEqual(0, storyWorld.Species.Count);
+    }
+
+    #endregion
 }

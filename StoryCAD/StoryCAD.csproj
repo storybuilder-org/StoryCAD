@@ -8,8 +8,8 @@
         <!-- App Identifier -->
         <ApplicationId>com.storybuilder.storycad</ApplicationId>
         <!-- Versions -->
-        <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-        <ApplicationVersion>1</ApplicationVersion>
+        <ApplicationDisplayVersion>4.0.0</ApplicationDisplayVersion>
+        <ApplicationVersion>2</ApplicationVersion>
         <!-- Package Description -->
         <Description>StoryCAD powered by Uno Platform.</Description>
     </PropertyGroup>
@@ -45,6 +45,13 @@
             <_UnoIcnsInput Include="Assets/Icons/icon512x512@1x.png" />
             <_UnoIcnsInput Include="Assets/Icons/icon512x512@2x.png" />
         </ItemGroup>
+    </Target>
+
+    <!-- Copy icon.icns to Contents/Resources/ where macOS expects it (CFBundleIconFile) -->
+    <Target Name="_CopyMacOSIcon" AfterTargets="_UnoPublishAppBundle">
+        <Copy SourceFiles="Assets/Icons/icon.icns"
+              DestinationFolder="$(PublishDir)/StoryCAD.app/Contents/Resources/"
+              Condition="Exists('$(PublishDir)/StoryCAD.app')" />
     </Target>
 
     <PropertyGroup>

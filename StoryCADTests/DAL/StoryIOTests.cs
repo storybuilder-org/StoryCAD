@@ -5,6 +5,7 @@ using StoryCADLib.Services.API;
 using StoryCADLib.Services.Logging;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.Models.Tools;
+using StoryCADLib.Models.StoryWorld;
 using StoryCADLib.ViewModels;
 using StoryCADLib.ViewModels.SubViewModels;
 
@@ -419,6 +420,61 @@ public partial class StoryIOTests
         Assert.AreEqual(1, movedFolder.Children.Count, "Folder should still have its child");
         Assert.AreEqual(scene.Node.Uuid, movedFolder.Children[0].Uuid,
             "Child scene should be preserved with same UUID");
+    }
+
+    #endregion
+
+    #region StoryWorld Round-Trip via StoryIO
+
+    [TestMethod]
+    public async Task RoundTrip_StoryWorldModel_ViaStoryIO()
+    {
+        // Arrange — build a story with a StoryWorld containing populated lists
+        var outlineVM = Ioc.Default.GetRequiredService<OutlineViewModel>();
+        var filePath = Path.Combine(App.ResultsDir, "StoryWorldRoundTrip.stbx");
+        var storyModel = new StoryModel();
+        _appState.CurrentDocument = new StoryDocument(storyModel, filePath);
+
+        var overview = new OverviewModel("StoryWorld Test", storyModel, null)
+        {
+            DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
+            Author = "Test"
+        };
+        storyModel.ExplorerView.Add(overview.Node);
+
+        var trash = new TrashCanModel(storyModel, null);
+        storyModel.ExplorerView.Add(trash.Node);
+
+        var narrative = new FolderModel("Narrative View", storyModel, StoryItemType.Folder, null);
+        storyModel.NarratorView.Add(narrative.Node);
+
+        var storyWorld = new StoryWorldModel(storyModel, overview.Node);
+        storyWorld.WorldType = "Constructed World";
+        storyWorld.PhysicalWorlds.Add(new PhysicalWorldEntry { Name = "Continent A", Geography = "Mountains" });
+        storyWorld.Species.Add(new SpeciesEntry { Name = "Elves", Lifespan = "Immortal" });
+
+        if (File.Exists(filePath)) File.Delete(filePath);
+
+        // Act — write then read back
+        await outlineVM.WriteModel();
+        Thread.Sleep(1000);
+        Assert.IsTrue(File.Exists(filePath), "File should have been written");
+
+        var file = await StorageFile.GetFileFromPathAsync(filePath);
+        var loaded = await _storyIO.ReadStory(file);
+
+        // Assert
+        var loadedWorld = loaded.StoryElements.OfType<StoryWorldModel>().FirstOrDefault();
+        Assert.IsNotNull(loadedWorld, "StoryWorldModel should survive round-trip");
+        Assert.AreEqual("Constructed World", loadedWorld.WorldType);
+        Assert.AreEqual(1, loadedWorld.PhysicalWorlds.Count);
+        Assert.AreEqual("Continent A", loadedWorld.PhysicalWorlds[0].Name);
+        Assert.AreEqual(1, loadedWorld.Species.Count);
+        Assert.AreEqual("Elves", loadedWorld.Species[0].Name);
+        Assert.AreEqual("Immortal", loadedWorld.Species[0].Lifespan);
+
+        // Cleanup
+        if (File.Exists(filePath)) File.Delete(filePath);
     }
 
     #endregion

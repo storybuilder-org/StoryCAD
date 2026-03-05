@@ -115,9 +115,7 @@ public class ToolsData
 
                 if (topicData.Type == "notepad")
                 {
-                    var path = topicData.Filename.IndexOf('\\') >= 0
-                        ? topicData.Filename
-                        : Path.Combine(Path.GetTempPath(), topicData.Filename);
+                    var path = ResolveTopicPath(topicData.Filename);
                     topics[kvp.Key] = new TopicModel(kvp.Key, path);
                 }
                 else if (topicData.Type == "inline" && topicData.SubTopics != null)
@@ -137,6 +135,16 @@ public class ToolsData
         }
 
         return topics;
+    }
+
+    /// <summary>
+    /// Returns the original path if rooted, otherwise combines with temp directory.
+    /// </summary>
+    internal static string ResolveTopicPath(string filename)
+    {
+        return Path.IsPathRooted(filename)
+            ? filename
+            : Path.Combine(Path.GetTempPath(), filename);
     }
 
     private static List<PlotPatternModel> LoadMasterPlots(ToolsJson toolsData)
