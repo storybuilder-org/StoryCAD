@@ -2,9 +2,20 @@
 **Time**: ~5 minutes  
 **Purpose**: Verify build is stable enough for further testing
 
+## Platform Notes
+
+| Action | Windows | macOS |
+|--------|---------|-------|
+| Launch | Double-click icon or Start menu | Double-click in Applications or Dock |
+| Save shortcut | Ctrl+S | Cmd+S |
+| File dialogs | Windows native | macOS native |
+| Exit | File > Exit or Alt+F4 | File > Exit, Cmd+Q, or red traffic light |
+
+**macOS testers**: Substitute Cmd for Ctrl in all keyboard shortcuts below. File dialogs will be macOS-native.
+
 ## Prerequisites
 - Fresh StoryCAD installation or update
-- Windows 10/11 system
+- Windows 10/11 or macOS 10.15+
 
 ---
 

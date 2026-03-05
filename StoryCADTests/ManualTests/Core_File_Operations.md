@@ -2,10 +2,23 @@
 **Time**: ~10 minutes  
 **Purpose**: Verify essential file operations work correctly
 
+## Platform Notes
+
+| Action | Windows | macOS |
+|--------|---------|-------|
+| Save | Ctrl+S | Cmd+S |
+| Open | Ctrl+O | Cmd+O |
+| Save As | Ctrl+Shift+S | Cmd+Shift+S |
+| New | Ctrl+N | Cmd+N |
+| File dialogs | Windows native | macOS native |
+| Test folder location | Documents\TestInputs | ~/Documents/TestInputs |
+
+**macOS testers**: Substitute Cmd for Ctrl. File pickers are macOS-native — use the sidebar to navigate. The test folder path will use forward slashes.
+
 ## Setup
 1. Launch StoryCAD
 2. Note: Sample outlines in File > Open Sample Outline
-3. Create test folder: TestInputs/CoreTests
+3. Create test folder: TestInputs/CoreTests (in Documents or a convenient location)
 
 ---
 
@@ -14,8 +27,8 @@
 **Time:** ~2 minutes
 
 **Steps:**
-1. Click File > New Story (or Ctrl+N)  
-   **Expected:** New outline with "Untitled" Story Overview
+1. Click File > New Story
+   **Expected:** New Story dialog opens; enter story name and click Create
 
 2. Enter "Core Test Story" in Story Name field  
    **Expected:** Tree updates to show name
@@ -35,8 +48,8 @@
 **Time:** ~2 minutes
 
 **Steps:**
-1. With new story from CF-001, press Ctrl+S  
-   **Expected:** Save dialog appears
+1. With new story from CF-001, press Ctrl+S (Cmd+S on macOS)
+   **Expected:** File saves silently (no dialog for previously saved files)
 
 2. Navigate to TestInputs/CoreTests  
    **Expected:** Folder is accessible
@@ -59,16 +72,13 @@
 **Time:** ~2 minutes
 
 **Steps:**
-1. Click File > New Story  
-   **Expected:** New blank story
-
-2. Click File > Open Story (or Ctrl+O)  
+1. Click File > Open Story (or Ctrl+O / Cmd+O)
    **Expected:** Open dialog appears
 
-3. Select CF002_TestSave.stbx  
+2. Select CF002_TestSave.stbx from the CoreTests folder
    **Expected:** File opens
 
-4. Verify content preserved  
+3. Verify content preserved
    **Expected:** "Core Test Story" and idea text present
 
 **Pass/Fail:** ______
@@ -107,11 +117,11 @@
 2. Select "Hamlet"  
    **Expected:** Sample opens
 
-3. Verify read-only behavior  
-   **Expected:** Can edit but prompts Save As
+3. Browse the outline content
+   **Expected:** Can navigate and view all elements
 
-4. Close without saving  
-   **Expected:** No errors
+4. Close the sample
+   **Expected:** No save prompt; temp copy is silently discarded
 
 **Pass/Fail:** ______
 
