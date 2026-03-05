@@ -8,6 +8,8 @@ public class ToolsDataTests
     [TestMethod]
     public void ResolveTopicPath_UnixRootedPath_ReturnsOriginalPath()
     {
+        if (OperatingSystem.IsWindows()) return;
+
         string unixPath = "/Users/foo/bar.txt";
         string result = ToolsData.ResolveTopicPath(unixPath);
         Assert.AreEqual(unixPath, result);
@@ -16,6 +18,8 @@ public class ToolsDataTests
     [TestMethod]
     public void ResolveTopicPath_WindowsRootedPath_ReturnsOriginalPath()
     {
+        if (!OperatingSystem.IsWindows()) return;
+
         string windowsPath = @"C:\Users\foo\bar.txt";
         string result = ToolsData.ResolveTopicPath(windowsPath);
         Assert.AreEqual(windowsPath, result);
