@@ -341,6 +341,36 @@ public class OutlineViewModelTests
     }
 
     [TestMethod]
+    public async Task MasterPlotTool_WhenTargetIsTrash_DoesNotCreateElements()
+    {
+        // Arrange
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("MasterPlotTrash", "StoryBuilder", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+
+        // Get the TrashCan node
+        var trashCanNode = appState.CurrentDocument.Model.TrashView
+            .FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
+        Assert.IsNotNull(trashCanNode, "TrashCan node should exist");
+        appState.RightTappedNode = trashCanNode;
+
+        // Configure tool with valid selection
+        var masterPlotsVM = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
+        masterPlotsVM.PlotPatternName = masterPlotsVM.PlotPatternNames[0];
+
+        var countBefore = appState.CurrentDocument.Model.StoryElements.Count;
+
+        // Act
+        await outlineVM.MasterPlotTool();
+
+        // Assert - no elements should have been created
+        var countAfter = appState.CurrentDocument.Model.StoryElements.Count;
+        Assert.AreEqual(countBefore, countAfter,
+            "MasterPlotTool should not create elements when target is in trash");
+    }
+
+    [TestMethod]
     public async Task TestDramaticSituationsTool()
     {
         //Create outline
@@ -397,6 +427,35 @@ public class OutlineViewModelTests
     }
 
     [TestMethod]
+    public async Task DramaticSituationsTool_WhenTargetIsTrash_DoesNotCreateElements()
+    {
+        // Arrange
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("DramaticTrash", "StoryBuilder", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+
+        // Get the TrashCan node
+        var trashCanNode = appState.CurrentDocument.Model.TrashView
+            .FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
+        Assert.IsNotNull(trashCanNode, "TrashCan node should exist");
+        appState.RightTappedNode = trashCanNode;
+
+        // Configure tool with valid selection
+        Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().SituationName = "Abduction";
+
+        var countBefore = appState.CurrentDocument.Model.StoryElements.Count;
+
+        // Act
+        await outlineVM.DramaticSituationsTool();
+
+        // Assert - no elements should have been created
+        var countAfter = appState.CurrentDocument.Model.StoryElements.Count;
+        Assert.AreEqual(countBefore, countAfter,
+            "DramaticSituationsTool should not create elements when target is in trash");
+    }
+
+    [TestMethod]
     public async Task TestStockScenesTool()
     {
         //Create outline
@@ -417,6 +476,35 @@ public class OutlineViewModelTests
 
         Assert.IsTrue(appState.CurrentDocument.Model.StoryElements[3].Name == "The police join the chase",
             "Stock scene not added.");
+    }
+
+    [TestMethod]
+    public async Task StockScenesTool_WhenTargetIsTrash_DoesNotCreateElements()
+    {
+        // Arrange
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("StockTrash", "StoryBuilder", 0);
+        appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "StockTrash.stbx"));
+        outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+
+        // Get the TrashCan node
+        var trashCanNode = appState.CurrentDocument.Model.TrashView
+            .FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
+        Assert.IsNotNull(trashCanNode, "TrashCan node should exist");
+        appState.RightTappedNode = trashCanNode;
+
+        // Configure tool with valid selection
+        Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName = "The police join the chase";
+
+        var countBefore = appState.CurrentDocument.Model.StoryElements.Count;
+
+        // Act
+        await outlineVM.StockScenesTool();
+
+        // Assert - no elements should have been created
+        var countAfter = appState.CurrentDocument.Model.StoryElements.Count;
+        Assert.AreEqual(countBefore, countAfter,
+            "StockScenesTool should not create elements when target is in trash");
     }
 
 
