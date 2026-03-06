@@ -199,7 +199,7 @@ public class ShellViewModel : ObservableRecipient
             new AsyncRelayCommand(OutlineManager.RemoveStoryElement, SerializationLock.CanExecuteCommands);
         RestoreStoryElementCommand =
             new RelayCommand(OutlineManager.RestoreStoryElement, SerializationLock.CanExecuteCommands);
-        EmptyTrashCommand = new RelayCommand(OutlineManager.EmptyTrash, SerializationLock.CanExecuteCommands);
+        EmptyTrashCommand = new AsyncRelayCommand(OutlineManager.EmptyTrash, SerializationLock.CanExecuteCommands);
         // Copy to Narrative command
         AddToNarrativeCommand = new RelayCommand(OutlineManager.CopyToNarrative, SerializationLock.CanExecuteCommands);
         RemoveFromNarrativeCommand =
@@ -420,7 +420,7 @@ public class ShellViewModel : ObservableRecipient
     // Remove command (move to trash)
     public AsyncRelayCommand RemoveStoryElementCommand { get; }
     public RelayCommand RestoreStoryElementCommand { get; }
-    public RelayCommand EmptyTrashCommand { get; }
+    public AsyncRelayCommand EmptyTrashCommand { get; }
 
     // Copy to Narrative command
     public RelayCommand AddToNarrativeCommand { get; }

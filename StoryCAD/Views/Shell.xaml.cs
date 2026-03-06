@@ -24,7 +24,7 @@ public sealed partial class Shell : Page
 {
     public LogService Logger;
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
-    private CommandBarFlyout _contextFlyout;
+    private MenuFlyout _contextFlyout;
 
     public Shell()
     {
@@ -52,7 +52,7 @@ public sealed partial class Shell : Page
         }
 
         ShellVm.SplitViewFrame = SplitViewFrame;
-        _contextFlyout = (CommandBarFlyout)ShellPage.Resources["AddStoryElementFlyout"];
+        _contextFlyout = (MenuFlyout)ShellPage.Resources["AddStoryElementFlyout"];
     }
 
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();

@@ -1279,7 +1279,7 @@ public class OutlineViewModel : ObservableRecipient
     /// <summary>
     ///     Clears trash
     /// </summary>
-    public void EmptyTrash()
+    public async Task EmptyTrash()
     {
         if (appState.CurrentDocument?.Model == null)
         {
@@ -1306,6 +1306,22 @@ public class OutlineViewModel : ObservableRecipient
                     appState.RightTappedNode = null;
                     appState.CurrentNode = null;
                     return;
+                }
+
+                // Confirm before permanently deleting
+                if (!appState.Headless)
+                {
+                    ContentDialog confirmDialog = new()
+                    {
+                        Title = "Empty Trash",
+                        Content = "Are you sure you want to permanently delete all items in the trash?",
+                        PrimaryButtonText = "Empty",
+                        SecondaryButtonText = "Cancel"
+                    };
+                    if (await window.ShowContentDialog(confirmDialog) != ContentDialogResult.Primary)
+                    {
+                        return;
+                    }
                 }
 
                 try
