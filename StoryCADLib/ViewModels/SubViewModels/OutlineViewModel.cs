@@ -845,6 +845,13 @@ public class OutlineViewModel : ObservableRecipient
 
                 if (result == ContentDialogResult.Primary) // Copy command
                 {
+                    if (StoryNodeItem.RootNodeType(appState.RightTappedNode) == StoryItemType.TrashCan)
+                    {
+                        Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot add to Deleted Items",
+                            LogLevel.Warn, true)));
+                        return;
+                    }
+
                     var masterPlotsVm = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
                     var masterPlotName = masterPlotsVm.PlotPatternName;
                     var model = masterPlotsVm.MasterPlots[masterPlotName];
@@ -918,6 +925,13 @@ public class OutlineViewModel : ObservableRecipient
                     return;
                 }
 
+                if (StoryNodeItem.RootNodeType(appState.RightTappedNode) == StoryItemType.TrashCan)
+                {
+                    Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot add to Deleted Items",
+                        LogLevel.Warn, true)));
+                    return;
+                }
+
                 string msg;
 
                 if (result == ContentDialogResult.Primary)
@@ -983,6 +997,13 @@ public class OutlineViewModel : ObservableRecipient
 
                     if (result == ContentDialogResult.Primary) // Copy command
                     {
+                        if (StoryNodeItem.RootNodeType(appState.RightTappedNode) == StoryItemType.TrashCan)
+                        {
+                            Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot add to Deleted Items",
+                                LogLevel.Warn, true)));
+                            return;
+                        }
+
                         if (string.IsNullOrWhiteSpace(Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName))
                         {
                             Messenger.Send(new StatusChangedMessage(new StatusMessage(
