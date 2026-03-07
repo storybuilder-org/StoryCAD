@@ -257,6 +257,7 @@ public class ShellViewModel : ObservableRecipient
             }
 
             appState.CurrentViewType = appState.CurrentDocument.Model.CurrentViewType;
+            appState.RightTappedNode = appState.CurrentDocument.Model.CurrentView[0];
             TreeViewNodeClicked(appState.CurrentDocument.Model.CurrentView[0]);
         }
     }

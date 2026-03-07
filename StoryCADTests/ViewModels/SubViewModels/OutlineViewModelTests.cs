@@ -371,6 +371,38 @@ public class OutlineViewModelTests
     }
 
     [TestMethod]
+    public async Task MasterPlotTool_WhenTargetIsNarratorView_DoesNotCreateElements()
+    {
+        // Arrange
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("MasterPlotNarrator", "StoryBuilder", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+
+        // Create a scene and copy it to narrator view
+        var scene = outlineService.AddStoryElement(appState.CurrentDocument.Model, StoryItemType.Scene,
+            appState.CurrentDocument.Model.ExplorerView[0]);
+        scene.Node.CopyToNarratorView(appState.CurrentDocument.Model);
+
+        // Set RightTappedNode to the narrative view root (simulating stale state after view switch)
+        appState.RightTappedNode = appState.CurrentDocument.Model.NarratorView[0];
+
+        // Configure tool with valid selection
+        var masterPlotsVM = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
+        masterPlotsVM.PlotPatternName = masterPlotsVM.PlotPatternNames[0];
+
+        var countBefore = appState.CurrentDocument.Model.StoryElements.Count;
+
+        // Act
+        await outlineVM.MasterPlotTool();
+
+        // Assert - no elements should have been created
+        var countAfter = appState.CurrentDocument.Model.StoryElements.Count;
+        Assert.AreEqual(countBefore, countAfter,
+            "MasterPlotTool should not create elements when target is in narrator view");
+    }
+
+    [TestMethod]
     public async Task TestDramaticSituationsTool()
     {
         //Create outline
@@ -456,6 +488,37 @@ public class OutlineViewModelTests
     }
 
     [TestMethod]
+    public async Task DramaticSituationsTool_WhenTargetIsNarratorView_DoesNotCreateElements()
+    {
+        // Arrange
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("DramaticNarrator", "StoryBuilder", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+
+        // Create a scene and copy it to narrator view
+        var scene = outlineService.AddStoryElement(appState.CurrentDocument.Model, StoryItemType.Scene,
+            appState.CurrentDocument.Model.ExplorerView[0]);
+        scene.Node.CopyToNarratorView(appState.CurrentDocument.Model);
+
+        // Set RightTappedNode to the narrative view root
+        appState.RightTappedNode = appState.CurrentDocument.Model.NarratorView[0];
+
+        // Configure tool with valid selection
+        Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().SituationName = "Abduction";
+
+        var countBefore = appState.CurrentDocument.Model.StoryElements.Count;
+
+        // Act
+        await outlineVM.DramaticSituationsTool();
+
+        // Assert - no elements should have been created
+        var countAfter = appState.CurrentDocument.Model.StoryElements.Count;
+        Assert.AreEqual(countBefore, countAfter,
+            "DramaticSituationsTool should not create elements when target is in narrator view");
+    }
+
+    [TestMethod]
     public async Task TestStockScenesTool()
     {
         //Create outline
@@ -505,6 +568,37 @@ public class OutlineViewModelTests
         var countAfter = appState.CurrentDocument.Model.StoryElements.Count;
         Assert.AreEqual(countBefore, countAfter,
             "StockScenesTool should not create elements when target is in trash");
+    }
+
+    [TestMethod]
+    public async Task StockScenesTool_WhenTargetIsNarratorView_DoesNotCreateElements()
+    {
+        // Arrange
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("StockNarrator", "StoryBuilder", 0);
+        appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "StockNarrator.stbx"));
+        outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+
+        // Create a scene and copy it to narrator view
+        var scene = outlineService.AddStoryElement(appState.CurrentDocument.Model, StoryItemType.Scene,
+            appState.CurrentDocument.Model.ExplorerView[0]);
+        scene.Node.CopyToNarratorView(appState.CurrentDocument.Model);
+
+        // Set RightTappedNode to the narrative view root
+        appState.RightTappedNode = appState.CurrentDocument.Model.NarratorView[0];
+
+        // Configure tool with valid selection
+        Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName = "The police join the chase";
+
+        var countBefore = appState.CurrentDocument.Model.StoryElements.Count;
+
+        // Act
+        await outlineVM.StockScenesTool();
+
+        // Assert - no elements should have been created
+        var countAfter = appState.CurrentDocument.Model.StoryElements.Count;
+        Assert.AreEqual(countBefore, countAfter,
+            "StockScenesTool should not create elements when target is in narrator view");
     }
 
 
