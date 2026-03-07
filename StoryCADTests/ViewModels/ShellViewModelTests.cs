@@ -537,6 +537,35 @@ public class ShellViewModelTests
     #region ViewChanged Tests
 
     /// <summary>
+    ///     Tests that ViewChanged resets RightTappedNode to the new view's root
+    /// </summary>
+    [TestMethod]
+    public async Task ViewChanged_WhenSwitchingViews_ResetsRightTappedNode()
+    {
+        // Arrange
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var outlineService = Ioc.Default.GetService<OutlineService>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("TestViewSwitch", "TestAuthor", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+
+        // Set RightTappedNode to an explorer node (simulating a right-click)
+        var explorerRoot = appState.CurrentDocument.Model.ExplorerView[0];
+        appState.RightTappedNode = explorerRoot;
+
+        // Switch to Narrator view
+        shell.CurrentView = "Story Explorer View";
+        shell.SelectedView = "Story Narrator View";
+        shell.ViewChanged();
+
+        // Assert - RightTappedNode should now be the narrator view root
+        var narratorRoot = appState.CurrentDocument.Model.NarratorView[0];
+        Assert.AreEqual(narratorRoot, appState.RightTappedNode,
+            "RightTappedNode should be reset to the new view's root node after switching views");
+    }
+
+    /// <summary>
     ///     Tests that ViewChanged switches from Explorer to Narrator view
     /// </summary>
     [TestMethod]
