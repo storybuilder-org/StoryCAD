@@ -25,6 +25,11 @@ public sealed partial class Shell : Page
     public LogService Logger;
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
     private CommandBarFlyout _contextFlyout;
+#if HAS_UNO
+    private MenuFlyout _addElementsFlyout;
+    private DispatcherTimer _submenuCloseTimer;
+    private bool _cancelNextClose;
+#endif
 
     public Shell()
     {
@@ -53,6 +58,27 @@ public sealed partial class Shell : Page
 
         ShellVm.SplitViewFrame = SplitViewFrame;
         _contextFlyout = (CommandBarFlyout)ShellPage.Resources["AddStoryElementFlyout"];
+#if HAS_UNO
+        // Part 2 of #1323: Timer-based closing cancellation for diagonal mouse movement on UNO Skia.
+        // See devdocs/issue_1323_right_click_menu_fix_v2.md for design rationale.
+        if (_contextFlyout.SecondaryCommands[0] is AppBarButton addBtn
+            && addBtn.Flyout is MenuFlyout mf)
+        {
+            _addElementsFlyout = mf;
+            _addElementsFlyout.Closing += AddElementsFlyout_Closing;
+            _addElementsFlyout.Closed += (_, _) =>
+            {
+                _submenuCloseTimer.Stop();
+                _cancelNextClose = false;
+            };
+
+            _submenuCloseTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(400)
+            };
+            _submenuCloseTimer.Tick += SubmenuCloseTimer_Tick;
+        }
+#endif
     }
 
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
@@ -596,4 +622,31 @@ public sealed partial class Shell : Page
             Logger?.LogException(LogLevel.Error, ex, "Error handling keyboard shortcut");
         }
     }
+
+#if HAS_UNO
+    /// <summary>
+    /// Intercepts submenu dismissal during diagonal mouse movement on UNO Skia.
+    /// Cancels the close and starts a 400ms grace timer. If the timer expires
+    /// without interaction, the submenu closes. See issue #1323.
+    /// </summary>
+    private void AddElementsFlyout_Closing(object sender, FlyoutBaseClosingEventArgs args)
+    {
+        if (_cancelNextClose)
+        {
+            _cancelNextClose = false;
+            return; // Allow the timer-initiated close through
+        }
+
+        args.Cancel = true;
+        _submenuCloseTimer.Stop();
+        _submenuCloseTimer.Start();
+    }
+
+    private void SubmenuCloseTimer_Tick(object sender, object e)
+    {
+        _submenuCloseTimer.Stop();
+        _cancelNextClose = true;
+        _addElementsFlyout.Hide();
+    }
+#endif
 }
