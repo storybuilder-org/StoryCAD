@@ -24,6 +24,11 @@
                                   Visibility="{x:Bind ShellVm.AddButtonVisibility, Mode=OneWay}">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
+                                <MenuFlyout.MenuFlyoutPresenterStyle>
+                                    <Style TargetType="MenuFlyoutPresenter">
+                                        <Setter Property="Margin" Value="-16,0,0,0"/>
+                                    </Style>
+                                </MenuFlyout.MenuFlyoutPresenterStyle>
                                 <MenuFlyoutItem Icon="Folder"
                                                 Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
