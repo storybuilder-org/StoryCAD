@@ -383,19 +383,11 @@ public sealed partial class Shell : Page
                 return;
             }
 
-            // Don't process if the original source is a TextBox or other input control
-            // to avoid interfering with text entry
-            if (e.OriginalSource is TextBox || e.OriginalSource is RichEditBox ||
-                e.OriginalSource is AutoSuggestBox || e.OriginalSource is PasswordBox)
-            {
-                return;
-            }
-
             var ctrl = KeyboardHelper.IsControlPressed();
             var shift = KeyboardHelper.IsShiftPressed();
             var alt = KeyboardHelper.IsAltPressed();
 
-            // File Menu shortcuts
+            // Global shortcuts that work regardless of focus (file operations, etc.)
             if (ctrl && !shift && !alt && e.Key == VirtualKey.O)
             {
                 ShellVm.OpenFileOpenMenuCommand.Execute(null);
@@ -421,6 +413,13 @@ public sealed partial class Shell : Page
             {
                 ShellVm.CreateBackupCommand.Execute(null);
                 e.Handled = true;
+                return;
+            }
+
+            // Don't process element-specific shortcuts if focus is in a text input control
+            if (e.OriginalSource is TextBox || e.OriginalSource is RichEditBox ||
+                e.OriginalSource is AutoSuggestBox || e.OriginalSource is PasswordBox)
+            {
                 return;
             }
 
