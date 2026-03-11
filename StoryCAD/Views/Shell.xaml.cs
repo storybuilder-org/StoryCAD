@@ -29,6 +29,7 @@ public sealed partial class Shell : Page
     private MenuFlyout _addElementsFlyout;
     private DispatcherTimer _submenuCloseTimer;
     private bool _cancelNextClose;
+    private bool _emptyTrashFlyoutIsOpen;
 #endif
 
     public Shell()
@@ -78,6 +79,11 @@ public sealed partial class Shell : Page
             };
             _submenuCloseTimer.Tick += SubmenuCloseTimer_Tick;
         }
+
+        // Attach Closing handler to Empty Trash flyout to prevent dismissal during pointer movement
+        EmptyTrashFlyout.Closing += EmptyTrashFlyout_Closing;
+        EmptyTrashFlyout.Opened += (_, _) => { _emptyTrashFlyoutIsOpen = true; };
+        EmptyTrashFlyout.Closed += (_, _) => { _emptyTrashFlyoutIsOpen = false; };
 #endif
     }
 
@@ -647,6 +653,23 @@ public sealed partial class Shell : Page
         _submenuCloseTimer.Stop();
         _cancelNextClose = true;
         _addElementsFlyout.Hide();
+    }
+
+    /// <summary>
+    /// Prevents the Empty Trash confirmation flyout from dismissing when the pointer
+    /// moves from the button to the flyout popup. Cancels the first close attempt after
+    /// the flyout opens, allowing the pointer to reach the content.
+    /// </summary>
+    private void EmptyTrashFlyout_Closing(object sender, FlyoutBaseClosingEventArgs args)
+    {
+        // If the flag is set, this is the first close attempt (pointer exiting button)
+        // Cancel it to allow pointer to reach the flyout content
+        if (_emptyTrashFlyoutIsOpen)
+        {
+            args.Cancel = true;
+            _emptyTrashFlyoutIsOpen = false; // Next close attempt will proceed normally
+        }
+        // Otherwise, allow the close (user clicked outside, pressed Escape, or clicked button)
     }
 #endif
 }
