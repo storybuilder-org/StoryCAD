@@ -64,12 +64,19 @@
                     HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyCommand}" />
             <Button ToolTipService.ToolTip="Add unused scene to narrative view" Content="Add all unused Scenes"
                     Margin="5,0" HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyAllUnusedCommand}" />
-            <Button ToolTipService.ToolTip="Move node up" FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                    Margin="5,0" Content="&#xE09C;" Click="Move" Tag="UP" />
-            <Button ToolTipService.ToolTip="Move node down" FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                    Content="&#xE09D;" Margin="5,0" Click="Move" Tag="DN" />
-            <Button ToolTipService.ToolTip="Add Section" FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                    Content="&#xE8B7;" Margin="5,0">
+            <Button ToolTipService.ToolTip="Move node up"
+                    Margin="5,0" Click="Move" Tag="UP">
+                <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE70E;" />
+            </Button>
+            <Button ToolTipService.ToolTip="Move node down"
+                    Margin="5,0" Click="Move" Tag="DN">
+                <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE70D;" />
+            </Button>
+            <Button ToolTipService.ToolTip="Add Section"
+                    Margin="5,0">
+                <Button.Content>
+                    <SymbolIcon Symbol="Add" />
+                </Button.Content>
                 <Button.Flyout>
                     <Flyout>
                         <StackPanel>
@@ -81,8 +88,10 @@
                     </Flyout>
                 </Button.Flyout>
             </Button>
-            <Button FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE74D;" HorizontalAlignment="Center"
-                    Margin="5,0" Command="{x:Bind ToolVM.DeleteCommand}" />
+            <Button HorizontalAlignment="Center"
+                    Margin="5,0" Command="{x:Bind ToolVM.DeleteCommand}">
+                <SymbolIcon Symbol="Delete" />
+            </Button>
         </StackPanel>
     </Grid>
 </Page>
