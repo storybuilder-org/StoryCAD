@@ -150,6 +150,13 @@ jobs:
           $xml.Save($csprojPath)
           Write-Host "Updated StoryCADLib.csproj version to ${{ steps.version.outputs.version }}"
 
+      - name: Update CFBundleVersion (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${{ github.run_number }}" \
+            StoryCAD/Platforms/Desktop/Info.plist
+          echo "Updated CFBundleVersion to ${{ github.run_number }}"
+
       - name: Decode real PFX and write .env (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
