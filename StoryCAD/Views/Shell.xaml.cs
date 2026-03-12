@@ -1,4 +1,5 @@
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Foundation;
 using Windows.System;
 using Windows.UI.ViewManagement;
 using Microsoft.UI;
@@ -27,7 +28,9 @@ public sealed partial class Shell : Page
     private CommandBarFlyout _contextFlyout;
 #if HAS_UNO
     private MenuFlyout _addElementsFlyout;
-    private DispatcherTimer _submenuCloseTimer;
+    private AppBarButton _addElementsButton;
+    private Point _lastPointerPosition;
+    private DispatcherTimer _safetyTimer;
     private bool _cancelNextClose;
     private bool _emptyTrashFlyoutIsOpen;
 #endif
@@ -60,24 +63,57 @@ public sealed partial class Shell : Page
         ShellVm.SplitViewFrame = SplitViewFrame;
         _contextFlyout = (CommandBarFlyout)ShellPage.Resources["AddStoryElementFlyout"];
 #if HAS_UNO
-        // Part 2 of #1323: Timer-based closing cancellation for diagonal mouse movement on UNO Skia.
-        // See devdocs/issue_1323_right_click_menu_fix_v2.md for design rationale.
+        // Issue #1323 Part 2: Safe triangle for diagonal mouse movement on UNO Skia.
+        //
+        // Problem: UNO's Skia backend fires PointerEntered on sibling AppBarButtons when
+        // the cursor moves diagonally from "Add Elements" toward a lower submenu item.
+        // This causes UNO's internal logic to close the submenu prematurely.
+        //
+        // Solution: When the submenu's Closing event fires, check whether the cursor is
+        // inside a "safe triangle" — the region between the Add Elements button and the
+        // submenu popup. If the cursor is heading toward the submenu (inside the triangle),
+        // cancel the close. If not, allow it.
+        //
+        // The triangle is computed from the Add Elements button's geometry plus fixed
+        // offset estimates for the submenu position and size. This avoids calling
+        // TransformToVisual across popup boundaries, which is unreliable on UNO Skia
+        // (the submenu lives in a separate Popup with its own coordinate space).
+        //
+        // See also: macOS "safe triangle" (Tognazzini & Batson, 1980s), WinUI #5617.
         if (_contextFlyout.SecondaryCommands[0] is AppBarButton addBtn
             && addBtn.Flyout is MenuFlyout mf)
         {
+            _addElementsButton = addBtn;
             _addElementsFlyout = mf;
             _addElementsFlyout.Closing += AddElementsFlyout_Closing;
             _addElementsFlyout.Closed += (_, _) =>
             {
-                _submenuCloseTimer.Stop();
+                _safetyTimer?.Stop();
                 _cancelNextClose = false;
             };
 
-            _submenuCloseTimer = new DispatcherTimer
+            // Track pointer position on the Add Elements button so we have a current
+            // cursor location when the Closing event fires. We track on the button
+            // (a UIElement) because CommandBarFlyout inherits from FlyoutBase, not
+            // UIElement, and does not support pointer events directly.
+            _addElementsButton.PointerMoved += (s, e) =>
             {
-                Interval = TimeSpan.FromMilliseconds(400)
+                _lastPointerPosition = e.GetCurrentPoint((UIElement)s).Position;
             };
-            _submenuCloseTimer.Tick += SubmenuCloseTimer_Tick;
+
+            // Safety net: if a submenu gets stuck open (e.g., Closing fires repeatedly
+            // with the cursor inside the triangle but the user never reaches the submenu),
+            // force-close after 5 seconds so the menu never gets permanently stuck.
+            _safetyTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(5)
+            };
+            _safetyTimer.Tick += (_, _) =>
+            {
+                _safetyTimer.Stop();
+                _cancelNextClose = true;
+                _addElementsFlyout.Hide();
+            };
         }
 
         // Attach Closing handler to Empty Trash flyout to prevent dismissal during pointer movement
@@ -632,27 +668,99 @@ public sealed partial class Shell : Page
 #if HAS_UNO
     /// <summary>
     /// Intercepts submenu dismissal during diagonal mouse movement on UNO Skia.
-    /// Cancels the close and starts a 400ms grace timer. If the timer expires
-    /// without interaction, the submenu closes. See issue #1323.
+    ///
+    /// Uses a "safe triangle" to decide whether to cancel the close. The triangle
+    /// is defined by three points:
+    ///   A = center-right edge of the "Add Elements" button
+    ///   B = estimated top-right corner of the submenu popup
+    ///   C = estimated bottom-right corner of the submenu popup
+    ///
+    /// If the cursor (_lastPointerPosition) is inside this triangle, the user is
+    /// likely moving diagonally toward the submenu, so we cancel the close.
+    /// If outside, the user has moved away, so we allow the close.
+    ///
+    /// The submenu corner positions are approximated using fixed offsets from the
+    /// button's position rather than calling TransformToVisual on the MenuFlyoutItem
+    /// elements. This is intentional: the submenu lives in a separate UNO Popup with
+    /// its own coordinate space, and TransformToVisual across popup boundaries is
+    /// unreliable on UNO Skia. The fixed offsets are conservative estimates that
+    /// create a triangle larger than the actual submenu, which is safe — a larger
+    /// triangle only means we're more permissive about keeping the submenu open.
+    ///
+    /// Constants:
+    ///   SubmenuWidthEstimate (220px) — widest item is "Add StoryWorld  ⌥B" (~200px)
+    ///     plus padding. Overestimate is harmless.
+    ///   SubmenuHeightEstimate (300px) — 9 items × ~32px + padding. Overestimate is
+    ///     harmless.
+    ///   HorizontalGap (-16px applied via negative margin in XAML, so effective gap ≈ 0)
+    ///
+    /// A 5-second safety timer prevents the submenu from getting permanently stuck
+    /// open if Closing fires repeatedly with the cursor inside the triangle.
+    ///
+    /// See issue #1323, macOS safe triangle (Tognazzini & Batson, 1980s), WinUI #5617.
     /// </summary>
     private void AddElementsFlyout_Closing(object sender, FlyoutBaseClosingEventArgs args)
     {
+        // Allow programmatic close (from safety timer) through without cancellation.
         if (_cancelNextClose)
         {
             _cancelNextClose = false;
-            return; // Allow the timer-initiated close through
+            return;
         }
 
-        args.Cancel = true;
-        _submenuCloseTimer.Stop();
-        _submenuCloseTimer.Start();
+        // Compute the safe triangle from the Add Elements button's geometry.
+        // Coordinates are relative to the button itself (origin 0,0) since
+        // _lastPointerPosition is captured via PointerMoved on the same button.
+        var buttonOrigin = new Point(0, 0);
+        double buttonWidth = _addElementsButton.ActualWidth;
+        double buttonHeight = _addElementsButton.ActualHeight;
+
+        const double SubmenuWidthEstimate = 220;
+        const double SubmenuHeightEstimate = 300;
+
+        // Vertex A: center-right edge of the button (where the user starts moving from)
+        Point a = new(buttonOrigin.X + buttonWidth, buttonOrigin.Y + buttonHeight / 2);
+        // Vertex B: estimated top-right corner of the submenu
+        Point b = new(buttonOrigin.X + buttonWidth + SubmenuWidthEstimate, buttonOrigin.Y);
+        // Vertex C: estimated bottom-right corner of the submenu
+        Point c = new(buttonOrigin.X + buttonWidth + SubmenuWidthEstimate, buttonOrigin.Y + SubmenuHeightEstimate);
+
+        if (IsPointInTriangle(_lastPointerPosition, a, b, c))
+        {
+            // Cursor is heading toward the submenu — keep it open.
+            args.Cancel = true;
+            _safetyTimer.Stop();
+            _safetyTimer.Start();
+        }
+        // Otherwise: cursor is not heading toward submenu — allow close.
     }
 
-    private void SubmenuCloseTimer_Tick(object sender, object e)
+    /// <summary>
+    /// Determines whether point <paramref name="p"/> lies inside the triangle
+    /// defined by vertices <paramref name="a"/>, <paramref name="b"/>, and
+    /// <paramref name="c"/> using the cross-product sign method.
+    ///
+    /// Returns true if the point is inside or on the edge of the triangle.
+    /// </summary>
+    private static bool IsPointInTriangle(Point p, Point a, Point b, Point c)
     {
-        _submenuCloseTimer.Stop();
-        _cancelNextClose = true;
-        _addElementsFlyout.Hide();
+        double d1 = CrossProduct(p, a, b);
+        double d2 = CrossProduct(p, b, c);
+        double d3 = CrossProduct(p, c, a);
+
+        bool hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+        bool hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+        return !(hasNeg && hasPos);
+    }
+
+    /// <summary>
+    /// Computes the 2D cross product of vectors (p1→p2) and (p1→p3).
+    /// Positive if p3 is counter-clockwise from p2 relative to p1.
+    /// </summary>
+    private static double CrossProduct(Point p1, Point p2, Point p3)
+    {
+        return (p2.X - p1.X) * (p3.Y - p1.Y) - (p3.X - p1.X) * (p2.Y - p1.Y);
     }
 
     /// <summary>
