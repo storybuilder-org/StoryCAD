@@ -30,8 +30,7 @@ public sealed partial class Shell : Page
     private MenuFlyout _addElementsFlyout;
     private AppBarButton _addElementsButton;
     private Point _lastPointerPosition;
-    private DispatcherTimer _safetyTimer;
-    private bool _cancelNextClose;
+    private bool _allowNextClose;
     private bool _emptyTrashFlyoutIsOpen;
 #endif
 
@@ -88,8 +87,7 @@ public sealed partial class Shell : Page
             _addElementsFlyout.Closing += AddElementsFlyout_Closing;
             _addElementsFlyout.Closed += (_, _) =>
             {
-                _safetyTimer?.Stop();
-                _cancelNextClose = false;
+                _allowNextClose = false;
             };
 
             // Track pointer position on the Add Elements button so we have a current
@@ -101,19 +99,6 @@ public sealed partial class Shell : Page
                 _lastPointerPosition = e.GetCurrentPoint((UIElement)s).Position;
             };
 
-            // Safety net: if a submenu gets stuck open (e.g., Closing fires repeatedly
-            // with the cursor inside the triangle but the user never reaches the submenu),
-            // force-close after 5 seconds so the menu never gets permanently stuck.
-            _safetyTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(5)
-            };
-            _safetyTimer.Tick += (_, _) =>
-            {
-                _safetyTimer.Stop();
-                _cancelNextClose = true;
-                _addElementsFlyout.Hide();
-            };
         }
 
         // Attach Closing handler to Empty Trash flyout to prevent dismissal during pointer movement
@@ -694,17 +679,17 @@ public sealed partial class Shell : Page
     ///     harmless.
     ///   HorizontalGap (-16px applied via negative margin in XAML, so effective gap ≈ 0)
     ///
-    /// A 5-second safety timer prevents the submenu from getting permanently stuck
-    /// open if Closing fires repeatedly with the cursor inside the triangle.
+    /// Normal dismissal (click outside, Escape, selecting an item) still works because
+    /// those paths either don't trigger Closing or the cursor is outside the triangle.
     ///
     /// See issue #1323, macOS safe triangle (Tognazzini & Batson, 1980s), WinUI #5617.
     /// </summary>
     private void AddElementsFlyout_Closing(object sender, FlyoutBaseClosingEventArgs args)
     {
-        // Allow programmatic close (from safety timer) through without cancellation.
-        if (_cancelNextClose)
+        // _allowNextClose is set when we programmatically call Hide() — let it through.
+        if (_allowNextClose)
         {
-            _cancelNextClose = false;
+            _allowNextClose = false;
             return;
         }
 
@@ -729,8 +714,6 @@ public sealed partial class Shell : Page
         {
             // Cursor is heading toward the submenu — keep it open.
             args.Cancel = true;
-            _safetyTimer.Stop();
-            _safetyTimer.Start();
         }
         // Otherwise: cursor is not heading toward submenu — allow close.
     }
