@@ -25,6 +25,11 @@ public sealed partial class Shell : Page
     public LogService Logger;
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
     private CommandBarFlyout _contextFlyout;
+#if HAS_UNO
+    private bool _addElementsFlyoutIsOpen;
+    private bool _pointerInSubmenu;
+    private bool _emptyTrashFlyoutIsOpen;
+#endif
 
     public Shell()
     {
@@ -53,6 +58,48 @@ public sealed partial class Shell : Page
 
         ShellVm.SplitViewFrame = SplitViewFrame;
         _contextFlyout = (CommandBarFlyout)ShellPage.Resources["AddStoryElementFlyout"];
+#if HAS_UNO
+        // Issue #1323 Part 2: Pointer-tracked submenu for diagonal mouse movement on UNO Skia.
+        //
+        // Problem: UNO's Skia backend fires PointerEntered on sibling AppBarButtons when
+        // the cursor moves diagonally from "Add Elements" toward a lower submenu item.
+        // This causes UNO's internal logic to close the submenu prematurely.
+        //
+        // Solution: Track whether the pointer is inside the submenu via PointerEntered/
+        // PointerExited on each MenuFlyoutItem. Cancel Closing while the pointer is in
+        // the submenu. Also cancel the first Closing after open (before pointer reaches
+        // the submenu) to handle the initial diagonal movement.
+        // See issue #1323, WinUI #5617.
+        if (_contextFlyout.SecondaryCommands[0] is AppBarButton addBtn
+            && addBtn.Flyout is MenuFlyout mf)
+        {
+            mf.Closing += AddElementsFlyout_Closing;
+            mf.Opened += (_, _) =>
+            {
+                _addElementsFlyoutIsOpen = true;
+                _pointerInSubmenu = false;
+            };
+            mf.Closed += (_, _) =>
+            {
+                _addElementsFlyoutIsOpen = false;
+                _pointerInSubmenu = false;
+            };
+
+            // Track pointer presence on each submenu item.
+            foreach (var item in mf.Items)
+            {
+                item.PointerEntered += (s, e) => _pointerInSubmenu = true;
+                item.PointerExited += (s, e) => _pointerInSubmenu = false;
+                if (item is MenuFlyoutItem mfi)
+                    mfi.Click += (s, e) => _pointerInSubmenu = false;
+            }
+        }
+
+        // Attach Closing handler to Empty Trash flyout to prevent dismissal during pointer movement
+        EmptyTrashFlyout.Closing += EmptyTrashFlyout_Closing;
+        EmptyTrashFlyout.Opened += (_, _) => { _emptyTrashFlyoutIsOpen = true; };
+        EmptyTrashFlyout.Closed += (_, _) => { _emptyTrashFlyoutIsOpen = false; };
+#endif
     }
 
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
@@ -595,4 +642,39 @@ public sealed partial class Shell : Page
             Logger?.LogException(LogLevel.Error, ex, "Error handling keyboard shortcut");
         }
     }
+
+#if HAS_UNO
+    /// <summary>
+    /// Keeps the Add Elements submenu open while the pointer is inside it.
+    /// Cancels spurious Closing events from UNO Skia's sibling PointerEntered handling.
+    /// Also cancels the first close after opening to cover the initial diagonal movement
+    /// before the pointer reaches the submenu.
+    /// See issue #1323, WinUI #5617.
+    /// </summary>
+    private void AddElementsFlyout_Closing(object sender, FlyoutBaseClosingEventArgs args)
+    {
+        if (_pointerInSubmenu || _addElementsFlyoutIsOpen)
+        {
+            args.Cancel = true;
+            _addElementsFlyoutIsOpen = false;
+        }
+    }
+
+    /// <summary>
+    /// Prevents the Empty Trash confirmation flyout from dismissing when the pointer
+    /// moves from the button to the flyout popup. Cancels the first close attempt after
+    /// the flyout opens, allowing the pointer to reach the content.
+    /// </summary>
+    private void EmptyTrashFlyout_Closing(object sender, FlyoutBaseClosingEventArgs args)
+    {
+        // If the flag is set, this is the first close attempt (pointer exiting button)
+        // Cancel it to allow pointer to reach the flyout content
+        if (_emptyTrashFlyoutIsOpen)
+        {
+            args.Cancel = true;
+            _emptyTrashFlyoutIsOpen = false; // Next close attempt will proceed normally
+        }
+        // Otherwise, allow the close (user clicked outside, pressed Escape, or clicked button)
+    }
+#endif
 }
