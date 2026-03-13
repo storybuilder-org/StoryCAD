@@ -26,7 +26,6 @@ public sealed partial class Shell : Page
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
     private CommandBarFlyout _contextFlyout;
 #if HAS_UNO
-    private bool _allowNextClose;
     private bool _addElementsFlyoutIsOpen;
     private bool _pointerInSubmenu;
     private bool _emptyTrashFlyoutIsOpen;
@@ -82,7 +81,6 @@ public sealed partial class Shell : Page
             };
             mf.Closed += (_, _) =>
             {
-                _allowNextClose = false;
                 _addElementsFlyoutIsOpen = false;
                 _pointerInSubmenu = false;
             };
@@ -656,12 +654,6 @@ public sealed partial class Shell : Page
     /// </summary>
     private void AddElementsFlyout_Closing(object sender, FlyoutBaseClosingEventArgs args)
     {
-        if (_allowNextClose)
-        {
-            _allowNextClose = false;
-            return;
-        }
-
         if (_pointerInSubmenu || _addElementsFlyoutIsOpen)
         {
             args.Cancel = true;
