@@ -29,8 +29,9 @@ however are still a good place to get started"
                                  NavigateUri="https://www.youtube.com/watch?v=qFpTI15-q7A" />
                 <HyperlinkButton Content="Frequently Asked Questions" NavigateUri="https://www.storybuilder.org/faq" />
                 <HyperlinkButton Content="Tutorial"
-                                 NavigateUri="https://storybuilder-org.github.io/StoryCAD/docs/Tutorial%20Creating%20a%20Story/Tutorial_Creating_a_Story.html" />
-                <HyperlinkButton Content="User manual" NavigateUri="https://storybuilder-org.github.io/StoryCAD/" />
+                                 NavigateUri="{x:Bind ViewModel.TutorialUri, Mode=OneTime}" />
+                <HyperlinkButton Content="User manual"
+                                 NavigateUri="{x:Bind ViewModel.ManualUri, Mode=OneTime}" />
                 <HyperlinkButton Content="Events" NavigateUri="https://storybuilder.org/events/" />
             </StackPanel>
         </ScrollViewer>

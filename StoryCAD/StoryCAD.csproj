@@ -6,26 +6,53 @@
         <!-- Display name -->
         <ApplicationTitle>StoryCAD</ApplicationTitle>
         <!-- App Identifier -->
-        <ApplicationId>net.storybuilder.storycad</ApplicationId>
+        <ApplicationId>com.storybuilder.storycad</ApplicationId>
         <!-- Versions -->
-        <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-        <ApplicationVersion>1</ApplicationVersion>
+        <ApplicationDisplayVersion>4.0.0</ApplicationDisplayVersion>
+        <ApplicationVersion>2</ApplicationVersion>
         <!-- Package Description -->
         <Description>StoryCAD powered by Uno Platform.</Description>
     </PropertyGroup>
 
     <!-- On Windows, build both WinAppSDK and Skia Desktop -->
+    <!-- Windows must be first for MSIX packaged debugging to work in VS -->
+    <!-- Suppress UNOB0012 warning about framework order - we need windows first for MSIX -->
     <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
+        <NoWarn>$(NoWarn);UNOB0012</NoWarn>
         <TargetFrameworks>
-            net9.0-windows10.0.22621;
-            net9.0-desktop
+            net10.0-windows10.0.22621;
+            net10.0-desktop
         </TargetFrameworks>
     </PropertyGroup>
 
     <!-- On macOS/Linux, build only Skia Desktop -->
     <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
-        <TargetFrameworks>net9.0-desktop</TargetFrameworks>
+        <TargetFrameworks>net10.0-desktop</TargetFrameworks>
+        <UnoMacOSCustomInfoPlist>Platforms/Desktop/Info.plist</UnoMacOSCustomInfoPlist>
     </PropertyGroup>
+
+    <!-- macOS PKG packaging - provide icon sizes for app bundle -->
+    <Target Name="_AddMacOSIcons" BeforeTargets="_UnoPublishAppBundle">
+        <ItemGroup>
+            <_UnoIcnsInput Include="Assets/Icons/icon16x16@1x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon16x16@2x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon32x32@1x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon32x32@2x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon128x128@1x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon128x128@2x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon256x256@1x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon256x256@2x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon512x512@1x.png" />
+            <_UnoIcnsInput Include="Assets/Icons/icon512x512@2x.png" />
+        </ItemGroup>
+    </Target>
+
+    <!-- Copy icon.icns to Contents/Resources/ where macOS expects it (CFBundleIconFile) -->
+    <Target Name="_CopyMacOSIcon" AfterTargets="_UnoPublishAppBundle">
+        <Copy SourceFiles="Assets/Icons/icon.icns"
+              DestinationFolder="$(PublishDir)/StoryCAD.app/Contents/Resources/"
+              Condition="Exists('$(PublishDir)/StoryCAD.app')" />
+    </Target>
 
     <PropertyGroup>
         <!-- MSIX Configuration for Windows -->
@@ -72,7 +99,7 @@
     <!-- Include .env file in output -->
     <ItemGroup>
         <None Update=".env">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
     <ItemGroup>

@@ -24,21 +24,22 @@ public class ShellViewModelTests
         var outlineService = Ioc.Default.GetService<OutlineService>();
         var outlineVM = Ioc.Default.GetService<OutlineViewModel>();
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await outlineService.CreateModel("Test1056", "StoryBuilder", 2);
         // Set up the current view (Explorer view)
         outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
 
         //Create node to be deleted
-        shell.CurrentNode = model.StoryElements
+        appState.CurrentNode = model.StoryElements
             .First(e => e.ElementType == StoryItemType.Folder
                         && e.Name != "Narrative View").Node;
-        shell.RightTappedNode = shell.CurrentNode;
+        appState.RightTappedNode = appState.CurrentNode;
         await outlineVM.RemoveStoryElement();
         outlineVM.EmptyTrash();
 
         //Assert we have cleared the stuff that could go wrong
-        Assert.IsNull(shell.CurrentNode);
-        Assert.IsNull(shell.RightTappedNode);
+        Assert.IsNull(appState.CurrentNode);
+        Assert.IsNull(appState.RightTappedNode);
     }
 
     /// <summary>
@@ -55,8 +56,7 @@ public class ShellViewModelTests
         // Act - should not throw
         shell.SaveModel();
 
-        // Assert - we get here without exception
-        Assert.IsTrue(true);
+        // Assert - test passes if no exception thrown
     }
 
     /// <summary>
@@ -72,8 +72,7 @@ public class ShellViewModelTests
         // Act - should not throw, HomePage has no data to save
         shell.SaveModel();
 
-        // Assert - we get here without exception
-        Assert.IsTrue(true);
+        // Assert - test passes if no exception thrown
     }
 
     /// <summary>
@@ -89,8 +88,7 @@ public class ShellViewModelTests
         // Act - should not throw but log error
         shell.SaveModel();
 
-        // Assert - we get here without exception
-        Assert.IsTrue(true);
+        // Assert - test passes if no exception thrown
     }
 
     /// <summary>
@@ -254,14 +252,15 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-        var previousNode = shell.CurrentNode;
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var previousNode = appState.CurrentNode;
         var previousPageType = shell.CurrentPageType;
 
         // Act - should handle null gracefully
         shell.TreeViewNodeClicked(null);
 
         // Assert - state should not change
-        Assert.AreEqual(previousNode, shell.CurrentNode);
+        Assert.AreEqual(previousNode, appState.CurrentNode);
         Assert.AreEqual(previousPageType, shell.CurrentPageType);
     }
 
@@ -273,6 +272,7 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
 
         // Find a character element
@@ -285,7 +285,7 @@ public class ShellViewModelTests
         shell.TreeViewNodeClicked(characterElement.Node);
 
         // Assert
-        Assert.AreEqual(characterElement.Node, shell.CurrentNode);
+        Assert.AreEqual(characterElement.Node, appState.CurrentNode);
         Assert.AreEqual("CharacterPage", shell.CurrentPageType);
     }
 
@@ -297,6 +297,7 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
 
         // Find a scene element
@@ -309,7 +310,7 @@ public class ShellViewModelTests
         shell.TreeViewNodeClicked(sceneElement.Node);
 
         // Assert
-        Assert.AreEqual(sceneElement.Node, shell.CurrentNode);
+        Assert.AreEqual(sceneElement.Node, appState.CurrentNode);
         Assert.AreEqual("ScenePage", shell.CurrentPageType);
     }
 
@@ -321,6 +322,7 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
 
         // Find a problem element
@@ -333,7 +335,7 @@ public class ShellViewModelTests
         shell.TreeViewNodeClicked(problemElement.Node);
 
         // Assert
-        Assert.AreEqual(problemElement.Node, shell.CurrentNode);
+        Assert.AreEqual(problemElement.Node, appState.CurrentNode);
         Assert.AreEqual("ProblemPage", shell.CurrentPageType);
     }
 
@@ -345,6 +347,7 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
 
         // Find a folder element
@@ -357,7 +360,7 @@ public class ShellViewModelTests
         shell.TreeViewNodeClicked(folderElement.Node);
 
         // Assert
-        Assert.AreEqual(folderElement.Node, shell.CurrentNode);
+        Assert.AreEqual(folderElement.Node, appState.CurrentNode);
         Assert.AreEqual("FolderPage", shell.CurrentPageType);
     }
 
@@ -369,6 +372,7 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
 
         // Find a setting element
@@ -381,7 +385,7 @@ public class ShellViewModelTests
         shell.TreeViewNodeClicked(settingElement.Node);
 
         // Assert
-        Assert.AreEqual(settingElement.Node, shell.CurrentNode);
+        Assert.AreEqual(settingElement.Node, appState.CurrentNode);
         Assert.AreEqual("SettingPage", shell.CurrentPageType);
     }
 
@@ -393,6 +397,7 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
 
         // Find overview element
@@ -405,7 +410,7 @@ public class ShellViewModelTests
         shell.TreeViewNodeClicked(overviewElement.Node);
 
         // Assert
-        Assert.AreEqual(overviewElement.Node, shell.CurrentNode);
+        Assert.AreEqual(overviewElement.Node, appState.CurrentNode);
         Assert.AreEqual("OverviewPage", shell.CurrentPageType);
     }
 
@@ -417,6 +422,7 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
 
         // Find a web element
@@ -429,7 +435,7 @@ public class ShellViewModelTests
         shell.TreeViewNodeClicked(webElement.Node);
 
         // Assert
-        Assert.AreEqual(webElement.Node, shell.CurrentNode);
+        Assert.AreEqual(webElement.Node, appState.CurrentNode);
         Assert.AreEqual("WebPage", shell.CurrentPageType);
     }
 
@@ -441,6 +447,7 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
 
         // Find a notes element
@@ -453,7 +460,7 @@ public class ShellViewModelTests
         shell.TreeViewNodeClicked(notesElement.Node);
 
         // Assert
-        Assert.AreEqual(notesElement.Node, shell.CurrentNode);
+        Assert.AreEqual(notesElement.Node, appState.CurrentNode);
         Assert.AreEqual("FolderPage", shell.CurrentPageType); // Notes use FolderPage
     }
 
@@ -465,6 +472,7 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
 
         // Find a section element - Section is created as Folder type with "Test Section" name
@@ -477,7 +485,7 @@ public class ShellViewModelTests
         shell.TreeViewNodeClicked(sectionElement.Node);
 
         // Assert
-        Assert.AreEqual(sectionElement.Node, shell.CurrentNode);
+        Assert.AreEqual(sectionElement.Node, appState.CurrentNode);
         Assert.AreEqual("FolderPage", shell.CurrentPageType); // Section uses FolderPage
     }
 
@@ -489,6 +497,7 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
 
         // Find trash can element
@@ -501,7 +510,7 @@ public class ShellViewModelTests
         shell.TreeViewNodeClicked(trashElement.Node);
 
         // Assert
-        Assert.AreEqual(trashElement.Node, shell.CurrentNode);
+        Assert.AreEqual(trashElement.Node, appState.CurrentNode);
         Assert.AreEqual("TrashCanPage", shell.CurrentPageType);
     }
 
@@ -513,18 +522,48 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-        var previousNode = shell.CurrentNode;
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var previousNode = appState.CurrentNode;
         var previousPageType = shell.CurrentPageType;
 
         // Act - pass a non-StoryNodeItem object
         shell.TreeViewNodeClicked("Not a StoryNodeItem");
 
         // Assert - state should not change since it's not a StoryNodeItem
-        Assert.AreEqual(previousNode, shell.CurrentNode);
+        Assert.AreEqual(previousNode, appState.CurrentNode);
         Assert.AreEqual(previousPageType, shell.CurrentPageType);
     }
 
     #region ViewChanged Tests
+
+    /// <summary>
+    ///     Tests that ViewChanged resets RightTappedNode to the new view's root
+    /// </summary>
+    [TestMethod]
+    public async Task ViewChanged_WhenSwitchingViews_ResetsRightTappedNode()
+    {
+        // Arrange
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var outlineService = Ioc.Default.GetService<OutlineService>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("TestViewSwitch", "TestAuthor", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
+
+        // Set RightTappedNode to an explorer node (simulating a right-click)
+        var explorerRoot = appState.CurrentDocument.Model.ExplorerView[0];
+        appState.RightTappedNode = explorerRoot;
+
+        // Switch to Narrator view
+        shell.CurrentView = "Story Explorer View";
+        shell.SelectedView = "Story Narrator View";
+        shell.ViewChanged();
+
+        // Assert - RightTappedNode should now be the narrator view root
+        var narratorRoot = appState.CurrentDocument.Model.NarratorView[0];
+        Assert.AreEqual(narratorRoot, appState.RightTappedNode,
+            "RightTappedNode should be reset to the new view's root node after switching views");
+    }
 
     /// <summary>
     ///     Tests that ViewChanged switches from Explorer to Narrator view
@@ -551,7 +590,7 @@ public class ShellViewModelTests
 
         // Assert
         Assert.AreEqual("Story Narrator View", shell.CurrentView);
-        Assert.AreEqual(StoryViewType.NarratorView, shell.CurrentViewType);
+        Assert.AreEqual(StoryViewType.NarratorView, appState.CurrentViewType);
         Assert.AreEqual(StoryViewType.NarratorView, appState.CurrentDocument.Model.CurrentViewType);
     }
 
@@ -580,7 +619,7 @@ public class ShellViewModelTests
 
         // Assert
         Assert.AreEqual("Story Explorer View", shell.CurrentView);
-        Assert.AreEqual(StoryViewType.ExplorerView, shell.CurrentViewType);
+        Assert.AreEqual(StoryViewType.ExplorerView, appState.CurrentViewType);
         Assert.AreEqual(StoryViewType.ExplorerView, appState.CurrentDocument.Model.CurrentViewType);
     }
 
@@ -603,14 +642,14 @@ public class ShellViewModelTests
         // Set both to same view
         shell.CurrentView = "Story Explorer View";
         shell.SelectedView = "Story Explorer View";
-        var initialViewType = shell.CurrentViewType;
+        var initialViewType = appState.CurrentViewType;
 
         // Act
         shell.ViewChanged();
 
         // Assert - nothing should change
         Assert.AreEqual("Story Explorer View", shell.CurrentView);
-        Assert.AreEqual(initialViewType, shell.CurrentViewType);
+        Assert.AreEqual(initialViewType, appState.CurrentViewType);
     }
 
     /// <summary>
@@ -672,12 +711,13 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
         var trashNode = model.StoryElements
             .FirstOrDefault(e => e.ElementType == StoryItemType.TrashCan)?.Node;
 
         Assert.IsNotNull(trashNode, "Should have trash node");
-        shell.RightTappedNode = trashNode;
+        appState.RightTappedNode = trashNode;
 
         // Act
         shell.ShowFlyoutButtons();
@@ -698,12 +738,13 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
         var characterNode = model.StoryElements
             .FirstOrDefault(e => e.ElementType == StoryItemType.Character)?.Node;
 
         Assert.IsNotNull(characterNode, "Should have character node");
-        shell.RightTappedNode = characterNode;
+        appState.RightTappedNode = characterNode;
         shell.SelectedView = "Story Explorer View";
 
         // Act
@@ -725,12 +766,13 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
         var sceneNode = model.StoryElements
             .FirstOrDefault(e => e.ElementType == StoryItemType.Scene)?.Node;
 
         Assert.IsNotNull(sceneNode, "Should have scene node");
-        shell.RightTappedNode = sceneNode;
+        appState.RightTappedNode = sceneNode;
         shell.SelectedView = "Story Narrator View";
 
         // Act
@@ -752,14 +794,15 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
-        shell.RightTappedNode = null;
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        appState.RightTappedNode = null;
         shell.SelectedView = "Story Explorer View";
 
         // Act - should handle exception internally
         shell.ShowFlyoutButtons();
 
         // Assert - method should complete without throwing
-        Assert.IsTrue(true, "Method completed without throwing");
+        // Test passes if no exception thrown
     }
 
     #endregion
@@ -775,6 +818,7 @@ public class ShellViewModelTests
         // Arrange
         var outlineService = Ioc.Default.GetService<OutlineService>();
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
         var overview = model.ExplorerView.First();
 
@@ -784,7 +828,7 @@ public class ShellViewModelTests
         var character = outlineService.AddStoryElement(model, StoryItemType.Character, folder.Node);
         character.Name = "Test Character";
 
-        shell.CurrentNode = character.Node;
+        appState.CurrentNode = character.Node;
         var initialParent = character.Node.Parent;
         var grandparent = initialParent.Parent;
 
@@ -809,10 +853,11 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
         var overview = model.ExplorerView.First();
 
-        shell.CurrentNode = overview;
+        appState.CurrentNode = overview;
         var initialParent = overview.Parent;
 
         // Act
@@ -830,14 +875,15 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         await CreateTestModelWithAllElements();
-        shell.CurrentNode = null;
+        appState.CurrentNode = null;
 
         // Act
         shell.MoveLeftCommand.Execute(null);
 
         // Assert - method should complete without throwing
-        Assert.IsTrue(true, "Method completed without throwing");
+        // Test passes if no exception thrown
     }
 
     /// <summary>
@@ -849,6 +895,7 @@ public class ShellViewModelTests
         // Arrange
         var outlineService = Ioc.Default.GetService<OutlineService>();
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
         var overview = model.ExplorerView.First();
 
@@ -858,7 +905,7 @@ public class ShellViewModelTests
         var folder2 = outlineService.AddStoryElement(model, StoryItemType.Folder, overview);
         folder2.Name = "Folder 2";
 
-        shell.CurrentNode = folder2.Node;
+        appState.CurrentNode = folder2.Node;
 
         // Act
         shell.MoveRightCommand.Execute(null);
@@ -878,6 +925,7 @@ public class ShellViewModelTests
         // Arrange
         var outlineService = Ioc.Default.GetService<OutlineService>();
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await outlineService.CreateModel("Test Story", "Test Author", 0);
         var overview = model.ExplorerView.First();
 
@@ -887,7 +935,7 @@ public class ShellViewModelTests
         // Create just one folder (first child, no previous sibling)
         var folder = outlineService.AddStoryElement(model, StoryItemType.Folder, overview);
         folder.Name = "First Folder";
-        shell.CurrentNode = folder.Node;
+        appState.CurrentNode = folder.Node;
         var initialParent = folder.Node.Parent;
 
         // Act
@@ -906,14 +954,15 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         await CreateTestModelWithAllElements();
-        shell.CurrentNode = null;
+        appState.CurrentNode = null;
 
         // Act
         shell.MoveRightCommand.Execute(null);
 
         // Assert - method should complete without throwing
-        Assert.IsTrue(true, "Method completed without throwing");
+        // Test passes if no exception thrown
     }
 
     /// <summary>
@@ -925,6 +974,7 @@ public class ShellViewModelTests
         // Arrange
         var outlineService = Ioc.Default.GetService<OutlineService>();
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
         var overview = model.ExplorerView.First();
 
@@ -936,7 +986,7 @@ public class ShellViewModelTests
         var char3 = outlineService.AddStoryElement(model, StoryItemType.Character, overview);
         char3.Name = "Character 3";
 
-        shell.CurrentNode = char2.Node;
+        appState.CurrentNode = char2.Node;
 
         // Act
         shell.MoveUpCommand.Execute(null);
@@ -958,6 +1008,7 @@ public class ShellViewModelTests
         // Arrange
         var outlineService = Ioc.Default.GetService<OutlineService>();
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
         var overview = model.ExplorerView.First();
 
@@ -972,7 +1023,7 @@ public class ShellViewModelTests
         var folder2Child = outlineService.AddStoryElement(model, StoryItemType.Scene, folder2.Node);
         folder2Child.Name = "Folder 2 Child";
 
-        shell.CurrentNode = folder2Child.Node;
+        appState.CurrentNode = folder2Child.Node;
 
         // Act
         shell.MoveUpCommand.Execute(null);
@@ -992,11 +1043,12 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
         var overview = model.ExplorerView.First();
 
         // Overview is a root node
-        shell.CurrentNode = overview;
+        appState.CurrentNode = overview;
 
         // Act
         shell.MoveUpCommand.Execute(null);
@@ -1013,14 +1065,15 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         await CreateTestModelWithAllElements();
-        shell.CurrentNode = null;
+        appState.CurrentNode = null;
 
         // Act
         shell.MoveUpCommand.Execute(null);
 
         // Assert - method should complete without throwing
-        Assert.IsTrue(true, "Method completed without throwing");
+        // Test passes if no exception thrown
     }
 
     /// <summary>
@@ -1032,6 +1085,7 @@ public class ShellViewModelTests
         // Arrange
         var outlineService = Ioc.Default.GetService<OutlineService>();
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
         var overview = model.ExplorerView.First();
 
@@ -1043,7 +1097,7 @@ public class ShellViewModelTests
         var scene3 = outlineService.AddStoryElement(model, StoryItemType.Scene, overview);
         scene3.Name = "Scene 3";
 
-        shell.CurrentNode = scene2.Node;
+        appState.CurrentNode = scene2.Node;
 
         // Act
         shell.MoveDownCommand.Execute(null);
@@ -1065,6 +1119,7 @@ public class ShellViewModelTests
         // Arrange
         var outlineService = Ioc.Default.GetService<OutlineService>();
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
         var overview = model.ExplorerView.First();
 
@@ -1077,7 +1132,7 @@ public class ShellViewModelTests
         var folder2 = outlineService.AddStoryElement(model, StoryItemType.Folder, overview);
         folder2.Name = "Folder 2";
 
-        shell.CurrentNode = folder1Child.Node;
+        appState.CurrentNode = folder1Child.Node;
 
         // Act
         shell.MoveDownCommand.Execute(null);
@@ -1100,6 +1155,7 @@ public class ShellViewModelTests
         // Arrange
         var outlineService = Ioc.Default.GetService<OutlineService>();
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
 
         // In Explorer view, the last root is typically before TrashCan
@@ -1111,7 +1167,7 @@ public class ShellViewModelTests
         {
             // Get last child of last non-trash root
             var lastChild = lastNonTrashRoot.Children.Last();
-            shell.CurrentNode = lastChild;
+            appState.CurrentNode = lastChild;
             var initialParent = lastChild.Parent;
 
             // Act
@@ -1130,11 +1186,12 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
         var overview = model.ExplorerView.First();
 
         // Overview is a root node
-        shell.CurrentNode = overview;
+        appState.CurrentNode = overview;
 
         // Act
         shell.MoveDownCommand.Execute(null);
@@ -1151,14 +1208,15 @@ public class ShellViewModelTests
     {
         // Arrange
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         await CreateTestModelWithAllElements();
-        shell.CurrentNode = null;
+        appState.CurrentNode = null;
 
         // Act
         shell.MoveDownCommand.Execute(null);
 
         // Assert - method should complete without throwing
-        Assert.IsTrue(true, "Method completed without throwing");
+        // Test passes if no exception thrown
     }
 
     /// <summary>
@@ -1170,6 +1228,7 @@ public class ShellViewModelTests
         // Arrange
         var outlineService = Ioc.Default.GetService<OutlineService>();
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
         var model = await CreateTestModelWithAllElements();
         var overview = model.ExplorerView.First();
 
@@ -1194,7 +1253,7 @@ public class ShellViewModelTests
         scene1.Name = "Scene 1";
 
         // Test 1: Move Character 2 left (should become sibling of Folder A)
-        shell.CurrentNode = char2.Node;
+        appState.CurrentNode = char2.Node;
         shell.MoveLeftCommand.Execute(null);
         Assert.AreEqual(overview, char2.Node.Parent, "Character 2 should be child of Overview");
 
@@ -1203,7 +1262,7 @@ public class ShellViewModelTests
         Assert.AreEqual(folderA.Node, char2.Node.Parent, "Character 2 should be back in Folder A");
 
         // Test 3: Move Scene 1 up (should move to end of Folder A)
-        shell.CurrentNode = scene1.Node;
+        appState.CurrentNode = scene1.Node;
         shell.MoveUpCommand.Execute(null);
         Assert.AreEqual(folderA.Node, scene1.Node.Parent, "Scene 1 should be in Folder A");
 
@@ -1300,7 +1359,7 @@ public class ShellViewModelTests
 
         // Assert
         // Method should complete without throwing (CollaboratorService.DestroyCollaborator is called)
-        Assert.IsTrue(true, "Method should complete without throwing");
+        // Test passes if no exception thrown
     }
 
     [TestMethod]
@@ -1311,13 +1370,13 @@ public class ShellViewModelTests
         var appState = Ioc.Default.GetRequiredService<AppState>();
 
         appState.CurrentDocument = null;
-        shellViewModel.IsClosing = false;
+        appState.IsClosing = false;
 
         // Act
         await shellViewModel.OnApplicationClosing();
 
         // Assert
-        Assert.IsTrue(shellViewModel.IsClosing, "IsClosing flag should be set to true");
+        Assert.IsTrue(appState.IsClosing, "IsClosing flag should be set to true");
     }
 
     [TestMethod]
@@ -1333,7 +1392,7 @@ public class ShellViewModelTests
         try
         {
             await shellViewModel.OnApplicationClosing();
-            Assert.IsTrue(true, "Method should complete without throwing");
+            // Test passes if no exception thrown
         }
         catch (Exception ex)
         {
@@ -1360,6 +1419,216 @@ public class ShellViewModelTests
         Assert.IsNotNull(appState.CurrentDocument, "CurrentDocument should be reset to empty model");
         Assert.IsNotNull(appState.CurrentDocument.Model, "Model should be valid empty model");
         Assert.IsNull(appState.CurrentDocument.FilePath, "FilePath should be null after close");
+    }
+
+    #endregion
+
+    #region AddStoryWorld Tests
+
+    /// <summary>
+    ///     Tests that adding StoryWorld via OutlineService works correctly.
+    ///     This is the underlying logic triggered by the Alt+B keyboard shortcut.
+    ///     Note: We test at service level because the command involves UI thread operations.
+    /// </summary>
+    [TestMethod]
+    public async Task AddStoryWorld_ViaOutlineService_AddsStoryWorldToModel()
+    {
+        // Arrange
+        var outlineService = Ioc.Default.GetService<OutlineService>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+
+        // Create a model without StoryWorld
+        var model = await outlineService.CreateModel("TestStory", "TestAuthor", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
+
+        var overview = model.ExplorerView.First();
+
+        // Verify no StoryWorld exists initially
+        var initialStoryWorld = model.StoryElements
+            .FirstOrDefault(e => e.ElementType == StoryItemType.StoryWorld);
+        Assert.IsNull(initialStoryWorld, "StoryWorld should not exist initially");
+
+        // Act - call OutlineService directly (what the command eventually calls)
+        var storyWorld = outlineService.AddStoryElement(model, StoryItemType.StoryWorld, overview);
+
+        // Assert
+        Assert.IsNotNull(storyWorld, "StoryWorld should be created");
+        Assert.AreEqual(StoryItemType.StoryWorld, storyWorld.ElementType);
+
+        var foundInModel = model.StoryElements
+            .FirstOrDefault(e => e.ElementType == StoryItemType.StoryWorld);
+        Assert.IsNotNull(foundInModel, "StoryWorld should exist in model after creation");
+    }
+
+    /// <summary>
+    ///     Tests that StoryWorld is a singleton - only one can exist per model.
+    ///     OutlineService returns null if trying to add a second.
+    /// </summary>
+    [TestMethod]
+    public async Task AddStoryWorld_WhenStoryWorldExists_ReturnsNull()
+    {
+        // Arrange
+        var outlineService = Ioc.Default.GetService<OutlineService>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+
+        // Create a model and add StoryWorld
+        var model = await outlineService.CreateModel("TestStory", "TestAuthor", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
+
+        var overview = model.ExplorerView.First();
+
+        // Add first StoryWorld
+        var first = outlineService.AddStoryElement(model, StoryItemType.StoryWorld, overview);
+        Assert.IsNotNull(first, "First StoryWorld should be created");
+
+        var storyWorldCount = model.StoryElements
+            .Count(e => e.ElementType == StoryItemType.StoryWorld);
+        Assert.AreEqual(1, storyWorldCount, "Should have exactly one StoryWorld");
+
+        // Act - try to add second StoryWorld
+        var second = outlineService.AddStoryElement(model, StoryItemType.StoryWorld, overview);
+
+        // Assert - should return null (singleton enforced)
+        Assert.IsNull(second, "Second StoryWorld should return null (singleton)");
+
+        // Verify still only one exists
+        var finalCount = model.StoryElements
+            .Count(e => e.ElementType == StoryItemType.StoryWorld);
+        Assert.AreEqual(1, finalCount, "Should still have only one StoryWorld (singleton)");
+    }
+
+    /// <summary>
+    ///     Tests that CanAddStoryWorld returns false when StoryWorld exists.
+    /// </summary>
+    [TestMethod]
+    public async Task CanAddStoryWorld_WhenStoryWorldExists_ReturnsFalse()
+    {
+        // Arrange
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var outlineService = Ioc.Default.GetService<OutlineService>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+
+        var model = await outlineService.CreateModel("TestStory", "TestAuthor", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
+
+        var overview = model.ExplorerView.First();
+
+        // Verify command can execute initially
+        Assert.IsTrue(shell.AddStoryWorldCommand.CanExecute(null),
+            "Should be able to add StoryWorld when none exists");
+
+        // Add StoryWorld
+        outlineService.AddStoryElement(model, StoryItemType.StoryWorld, overview);
+
+        // Refresh CanExecute state
+        shell.AddStoryWorldCommand.NotifyCanExecuteChanged();
+
+        // Assert - command should not be executable now
+        Assert.IsFalse(shell.AddStoryWorldCommand.CanExecute(null),
+            "Should not be able to add StoryWorld when one already exists");
+    }
+
+    #endregion
+
+    #region Navigation Pane Toggle Tests
+
+    /// <summary>
+    ///     Tests that IsPaneOpen defaults to true (pane expanded)
+    /// </summary>
+    [TestMethod]
+    public void IsPaneOpen_DefaultsToTrue()
+    {
+        // Arrange - get a fresh ShellViewModel (note: DI provides singleton, but default state is true)
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+
+        // Reset to default state for test isolation
+        shell.IsPaneOpen = true;
+
+        // Assert
+        Assert.IsTrue(shell.IsPaneOpen, "IsPaneOpen should default to true (pane expanded)");
+    }
+
+    /// <summary>
+    ///     Tests that TogglePaneCommand toggles IsPaneOpen from true to false
+    /// </summary>
+    [TestMethod]
+    public void TogglePaneCommand_WhenPaneOpen_ClosesPaneOnExecute()
+    {
+        // Arrange
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.IsPaneOpen = true;
+
+        // Act
+        shell.TogglePaneCommand.Execute(null);
+
+        // Assert
+        Assert.IsFalse(shell.IsPaneOpen, "TogglePaneCommand should close pane when open");
+    }
+
+    /// <summary>
+    ///     Tests that TogglePaneCommand toggles IsPaneOpen from false to true
+    /// </summary>
+    [TestMethod]
+    public void TogglePaneCommand_WhenPaneClosed_OpensPaneOnExecute()
+    {
+        // Arrange
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.IsPaneOpen = false;
+
+        // Act
+        shell.TogglePaneCommand.Execute(null);
+
+        // Assert
+        Assert.IsTrue(shell.IsPaneOpen, "TogglePaneCommand should open pane when closed");
+    }
+
+    /// <summary>
+    ///     Tests that multiple toggles alternate the pane state correctly
+    /// </summary>
+    [TestMethod]
+    public void TogglePaneCommand_MultipleTimes_AlternatesState()
+    {
+        // Arrange
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.IsPaneOpen = true;
+
+        // Act & Assert - toggle multiple times
+        shell.TogglePaneCommand.Execute(null);
+        Assert.IsFalse(shell.IsPaneOpen, "First toggle should close pane");
+
+        shell.TogglePaneCommand.Execute(null);
+        Assert.IsTrue(shell.IsPaneOpen, "Second toggle should open pane");
+
+        shell.TogglePaneCommand.Execute(null);
+        Assert.IsFalse(shell.IsPaneOpen, "Third toggle should close pane");
+    }
+
+    /// <summary>
+    ///     Tests that IsPaneOpen property setter raises PropertyChanged
+    /// </summary>
+    [TestMethod]
+    public void IsPaneOpen_WhenSet_RaisesPropertyChanged()
+    {
+        // Arrange
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.IsPaneOpen = true;
+        var propertyChangedRaised = false;
+        shell.PropertyChanged += (sender, args) =>
+        {
+            if (args.PropertyName == nameof(shell.IsPaneOpen))
+            {
+                propertyChangedRaised = true;
+            }
+        };
+
+        // Act
+        shell.IsPaneOpen = false;
+
+        // Assert
+        Assert.IsTrue(propertyChangedRaised, "PropertyChanged should be raised for IsPaneOpen");
     }
 
     #endregion

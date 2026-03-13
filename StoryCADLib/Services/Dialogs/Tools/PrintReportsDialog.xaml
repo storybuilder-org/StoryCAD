@@ -11,20 +11,22 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock Text="Create reports for the following:" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+            <TextBlock Text="Create reports for the following:" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                        Margin="0,0,0,10" />
             <CheckBox Content="Story Overview" Grid.Column="0" Grid.Row="1"
                       IsChecked="{x:Bind PrintVM.CreateOverview, Mode=TwoWay}" />
-            <CheckBox Content="Story Synopsis" Grid.Column="1" Grid.Row="1" Margin="10,0"
-                      IsChecked="{x:Bind PrintVM.CreateSummary, Mode=TwoWay}" Checked="EmptySynopsisWarningCheck" />
-            <CheckBox Content="Story Problem Structure" Grid.Row="1" Grid.Column="2"
+            <CheckBox Content="Story Problem Structure" Grid.Row="1" Grid.Column="1" Margin="20,0,0,0"
                       IsChecked="{x:Bind PrintVM.CreateStructure, Mode=TwoWay}" />
+            <CheckBox Content="Story Synopsis" Grid.Column="0" Grid.Row="2" Margin="0,5,0,0"
+                      IsChecked="{x:Bind PrintVM.CreateSummary, Mode=TwoWay}" Checked="EmptySynopsisWarningCheck" />
+            <CheckBox Content="Story World" Grid.Row="2" Grid.Column="1" Margin="20,5,0,0"
+                      IsChecked="{x:Bind PrintVM.CreateStoryWorld, Mode=TwoWay}" />
         </Grid>
 
 

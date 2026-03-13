@@ -33,6 +33,7 @@ public class ShellViewModel : ObservableRecipient
     private const string SettingPage = "SettingPage";
     private const string TrashCanPage = "TrashCanPage";
     private const string WebPage = "WebPage";
+    private const string StoryWorldPage = "StoryWorldPage";
     public readonly AutoSaveService _autoSaveService;
     public readonly BackupService _BackupService;
     private readonly NavigationService _navigationService;
@@ -47,7 +48,7 @@ public class ShellViewModel : ObservableRecipient
 
     public readonly ScrivenerIo Scrivener;
     private readonly SearchService Search;
-    private readonly AppState State;
+    private readonly AppState appState;
     private readonly Windowing Window;
     public ContentDialog _contentDialog;
     public ObservableCollection<StoryNodeItem> _sourceChildren;
@@ -55,16 +56,12 @@ public class ShellViewModel : ObservableRecipient
     private ObservableCollection<StoryNodeItem> _targetCollection;
     private int _targetIndex;
 
-    public StoryViewType CurrentViewType;
-
     //File opened (if StoryCAD was opened via an STBX file)
     public string FilePathToLaunch;
-    public bool IsClosing;
     public TreeViewItem LastClickedTreeviewItem;
 
     //List of new nodes that have a background, these are cleared on navigation
     public List<StoryNodeItem> NewNodeHighlightCache = new();
-    public StoryNodeItem RightTappedNode;
 
     // The right-hand (detail) side of ShellView
     public Frame SplitViewFrame;
@@ -83,7 +80,7 @@ public class ShellViewModel : ObservableRecipient
         _autoSaveService = autoSaveService;
         _BackupService = backupService;
         Window = window;
-        State = appState;
+        this.appState = appState;
         Scrivener = scrivener;
         Preferences = preferenceService;
         _navigationService = navigationService;
@@ -94,7 +91,7 @@ public class ShellViewModel : ObservableRecipient
 
         // Register inter-MVVM messaging
         Messenger.Register<IsChangedRequestMessage>(this,
-            (_, m) => { m.Reply(State.CurrentDocument?.Model?.Changed ?? false); });
+            (_, m) => { m.Reply(this.appState.CurrentDocument?.Model?.Changed ?? false); });
         Messenger.Register<ShellViewModel, IsChangedMessage>(this, static (r, m) => r.IsChangedMessageReceived(m));
         Messenger.Register<ShellViewModel, IsBackupStatusMessage>(this,
             static (r, m) => r.BackupStatusMessageReceived(m));
@@ -105,10 +102,10 @@ public class ShellViewModel : ObservableRecipient
         Messenger.Register<ShellViewModel, ThemeChangedMessage>(this, static (r, m) => r.ThemeChangedMessageReceived());
         Messenger.Register<ShellViewModel, ActivateInstanceMessage>(this, static (r, m) => r.ActivateInstanceMessageReceived());
 
-        State.CurrentDocument = new StoryDocument(new StoryModel());
+        this.appState.CurrentDocument = new StoryDocument(new StoryModel());
 
         //Skip status timer initialization in Tests.
-        if (!State.Headless)
+        if (!this.appState.Headless)
         {
             _statusTimer = new DispatcherTimer();
             _statusTimer.Tick += statusTimer_Tick;
@@ -124,6 +121,9 @@ public class ShellViewModel : ObservableRecipient
             new AsyncRelayCommand(OutlineManager.OpenFileOpenMenu, SerializationLock.CanExecuteCommands);
         NarrativeToolCommand =
             new RelayCommand(async () => await Ioc.Default.GetRequiredService<NarrativeToolVM>().OpenNarrativeTool(),
+                SerializationLock.CanExecuteCommands);
+        CopyElementsCommand =
+            new RelayCommand(async () => await Ioc.Default.GetRequiredService<CopyElementsDialogVM>().OpenCopyElementsDialog(),
                 SerializationLock.CanExecuteCommands);
         PrintNodeCommand = new RelayCommand(async () => await OutlineManager.PrintCurrentNodeAsync(),
             SerializationLock.CanExecuteCommands);
@@ -187,6 +187,8 @@ public class ShellViewModel : ObservableRecipient
             SerializationLock.CanExecuteCommands);
         AddSceneCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.Scene),
             SerializationLock.CanExecuteCommands);
+        AddStoryWorldCommand = new RelayCommand(() => OutlineManager.AddStoryElement(StoryItemType.StoryWorld),
+            CanAddStoryWorld);
         ConvertToSceneCommand =
             new RelayCommand(OutlineManager.ConvertProblemToScene, SerializationLock.CanExecuteCommands);
         ConvertToProblemCommand =
@@ -225,8 +227,6 @@ public class ShellViewModel : ObservableRecipient
     // Public property for debugging PrintManager state
     public PrintReportDialogVM PrintReportDialog { get; }
 
-    // Navigation navigation landmark nodes
-    public StoryNodeItem CurrentNode { get; set; }
     public DateTime AppStartTime { get; set; } = DateTime.Now;
 
     // Track the current page type for SaveModel (testable without UI)
@@ -234,7 +234,7 @@ public class ShellViewModel : ObservableRecipient
 
     public void ViewChanged()
     {
-        if (State.CurrentDocument?.Model?.CurrentView == null || State.CurrentDocument.Model.CurrentView.Count == 0)
+        if (appState.CurrentDocument?.Model?.CurrentView == null || appState.CurrentDocument.Model.CurrentView.Count == 0)
         {
             Messenger.Send(
                 new StatusChangedMessage(new StatusMessage("You need to load a story first!", LogLevel.Warn)));
@@ -249,15 +249,16 @@ public class ShellViewModel : ObservableRecipient
             switch (CurrentView)
             {
                 case "Story Explorer View":
-                    outlineService.SetCurrentView(State.CurrentDocument.Model, StoryViewType.ExplorerView);
+                    outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
                     break;
                 case "Story Narrator View":
-                    outlineService.SetCurrentView(State.CurrentDocument.Model, StoryViewType.NarratorView);
+                    outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.NarratorView);
                     break;
             }
 
-            CurrentViewType = State.CurrentDocument.Model.CurrentViewType;
-            TreeViewNodeClicked(State.CurrentDocument.Model.CurrentView[0]);
+            appState.CurrentViewType = appState.CurrentDocument.Model.CurrentViewType;
+            appState.RightTappedNode = appState.CurrentDocument.Model.CurrentView[0];
+            TreeViewNodeClicked(appState.CurrentDocument.Model.CurrentView[0]);
         }
     }
 
@@ -273,7 +274,7 @@ public class ShellViewModel : ObservableRecipient
         try
         {
             //Trash Can - View Hide all buttons except Empty Trash.
-            if (StoryNodeItem.RootNodeType(RightTappedNode) == StoryItemType.TrashCan)
+            if (StoryNodeItem.RootNodeType(appState.RightTappedNode) == StoryItemType.TrashCan)
             {
                 ExplorerVisibility = Visibility.Collapsed;
                 NarratorVisibility = Visibility.Collapsed;
@@ -305,7 +306,7 @@ public class ShellViewModel : ObservableRecipient
         catch (Exception e) //errors (is RightTappedNode null?
         {
             Logger.Log(LogLevel.Error, $"An error occurred in ShowFlyoutButtons() \n{e.Message}\n" +
-                                       $"- For reference RightTappedNode is " + RightTappedNode);
+                                       $"- For reference RightTappedNode is " + appState.RightTappedNode);
         }
     }
 
@@ -319,7 +320,7 @@ public class ShellViewModel : ObservableRecipient
 
         Process.Start(new ProcessStartInfo
         {
-            FileName = "https://Storybuilder-org.github.io/StoryCAD/",
+            FileName = appState.ManualBaseUrl,
             UseShellExecute = true
         });
 
@@ -410,10 +411,12 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand AddNotesCommand { get; }
     public RelayCommand AddSettingCommand { get; }
     public RelayCommand AddSceneCommand { get; }
+    public RelayCommand AddStoryWorldCommand { get; }
     public RelayCommand ConvertToSceneCommand { get; }
     public RelayCommand ConvertToProblemCommand { get; }
     public RelayCommand PrintNodeCommand { get; }
     public RelayCommand NarrativeToolCommand { get; }
+    public RelayCommand CopyElementsCommand { get; }
 
     // Remove command (move to trash)
     public AsyncRelayCommand RemoveStoryElementCommand { get; }
@@ -597,7 +600,7 @@ public class ShellViewModel : ObservableRecipient
     /// </summary>
     public async Task CreateBackupNow()
     {
-        if (State.CurrentDocument?.Model?.CurrentView == null || State.CurrentDocument.Model.CurrentView.Count == 0)
+        if (appState.CurrentDocument?.Model?.CurrentView == null || appState.CurrentDocument.Model.CurrentView.Count == 0)
         {
             Messenger.Send(
                 new StatusChangedMessage(new StatusMessage("You need to load a story first!", LogLevel.Warn)));
@@ -613,7 +616,7 @@ public class ShellViewModel : ObservableRecipient
             PrimaryButtonText = "Create Backup",
             SecondaryButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
-            Content = new BackupNow(Path.GetFileNameWithoutExtension(State.CurrentDocument?.FilePath))
+            Content = new BackupNow(Path.GetFileNameWithoutExtension(appState.CurrentDocument?.FilePath))
         });
 
         //Check result
@@ -643,8 +646,8 @@ public class ShellViewModel : ObservableRecipient
         {
             if (selectedItem is StoryNodeItem node)
             {
-                CurrentNode = node;
-                var element = outlineService.GetStoryElementByGuid(State.CurrentDocument!.Model, node.Uuid);
+                appState.CurrentNode = node;
+                var element = outlineService.GetStoryElementByGuid(appState.CurrentDocument!.Model, node.Uuid);
                 switch (element.ElementType)
                 {
                     case StoryItemType.Character:
@@ -687,9 +690,13 @@ public class ShellViewModel : ObservableRecipient
                         CurrentPageType = TrashCanPage;
                         _navigationService.NavigateTo(SplitViewFrame, TrashCanPage, element);
                         break;
+                    case StoryItemType.StoryWorld:
+                        CurrentPageType = StoryWorldPage;
+                        _navigationService.NavigateTo(SplitViewFrame, StoryWorldPage, element);
+                        break;
                 }
 
-                CurrentNode.IsExpanded = true;
+                appState.CurrentNode.IsExpanded = true;
             }
 
             //Clears background of new nodes on navigation as well as the last node.
@@ -736,7 +743,7 @@ public class ShellViewModel : ObservableRecipient
 
     public void ShowHomePage()
     {
-        if (!State.Headless)
+        if (!appState.Headless)
         {
             Logger.Log(LogLevel.Info, "ShowHomePage");
 
@@ -842,6 +849,10 @@ public class ShellViewModel : ObservableRecipient
                 // TrashCanPage doesn't have data to save
                 Logger.Log(LogLevel.Trace, "TrashCanPage has no data to save");
                 break;
+            case StoryWorldPage:
+                var storyWorldVm = Ioc.Default.GetRequiredService<StoryWorldViewModel>();
+                storyWorldVm.SaveModel();
+                break;
             default:
                 Logger.Log(LogLevel.Error, $"SaveModel: Unrecognized page type {pageType}");
                 break;
@@ -850,7 +861,7 @@ public class ShellViewModel : ObservableRecipient
 
     public void ResetModel()
     {
-        State.CurrentDocument = new StoryDocument(new StoryModel());
+        appState.CurrentDocument = new StoryDocument(new StoryModel());
     }
 
     #endregion
@@ -861,7 +872,7 @@ public class ShellViewModel : ObservableRecipient
     {
         // Don't update command state during application shutdown
         // COM infrastructure may be shutting down, causing E_UNEXPECTED exceptions
-        if (IsClosing)
+        if (appState.IsClosing)
         {
             return;
         }
@@ -869,6 +880,7 @@ public class ShellViewModel : ObservableRecipient
         TogglePaneCommand.NotifyCanExecuteChanged();
         OpenFileOpenMenuCommand.NotifyCanExecuteChanged();
         NarrativeToolCommand.NotifyCanExecuteChanged();
+        CopyElementsCommand.NotifyCanExecuteChanged();
         PrintNodeCommand.NotifyCanExecuteChanged();
         OpenFileCommand.NotifyCanExecuteChanged();
         SaveFileCommand.NotifyCanExecuteChanged();
@@ -898,6 +910,7 @@ public class ShellViewModel : ObservableRecipient
         AddNotesCommand.NotifyCanExecuteChanged();
         AddSettingCommand.NotifyCanExecuteChanged();
         AddSceneCommand.NotifyCanExecuteChanged();
+        AddStoryWorldCommand.NotifyCanExecuteChanged();
         ConvertToSceneCommand.NotifyCanExecuteChanged();
         ConvertToProblemCommand.NotifyCanExecuteChanged();
         RemoveStoryElementCommand.NotifyCanExecuteChanged();
@@ -907,6 +920,18 @@ public class ShellViewModel : ObservableRecipient
         RemoveFromNarrativeCommand.NotifyCanExecuteChanged();
     }
 
+    /// <summary>
+    /// Determines if StoryWorld can be added.
+    /// Returns false if commands are blocked or a StoryWorld already exists.
+    /// </summary>
+    private bool CanAddStoryWorld()
+    {
+        if (!SerializationLock.CanExecuteCommands())
+            return false;
+        if (appState.CurrentDocument?.Model == null)
+            return false;
+        return !outlineService.StoryWorldExists(appState.CurrentDocument.Model);
+    }
 
     private async void OpenPreferences()
     {
@@ -960,7 +985,7 @@ public class ShellViewModel : ObservableRecipient
     {
         if (SerializationLock.CanExecuteCommands())
         {
-            //if (CurrentNode == null)
+            //if (appState.CurrentNode == null)
             //{
             //    Messenger.Send(new StatusChangedMessage(new("Select a node to collaborate on", LogLevel.Warn, true)));
             //    return;
@@ -1002,45 +1027,45 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
 
-        _sourceChildren = CurrentNode.Parent.Children;
-        _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
+        _sourceChildren = appState.CurrentNode.Parent.Children;
+        _sourceIndex = _sourceChildren.IndexOf(appState.CurrentNode);
         _targetCollection = null;
         _targetIndex = -1;
-        var targetParent = CurrentNode.Parent.Parent;
+        var targetParent = appState.CurrentNode.Parent.Parent;
         // The source must become the parent's successor
-        _targetCollection = CurrentNode.Parent.Parent.Children;
-        _targetIndex = _targetCollection.IndexOf(CurrentNode.Parent) + 1;
+        _targetCollection = appState.CurrentNode.Parent.Parent.Children;
+        _targetIndex = _targetCollection.IndexOf(appState.CurrentNode.Parent) + 1;
 
         _sourceChildren.RemoveAt(_sourceIndex);
         if (_targetIndex == -1)
         {
-            _targetCollection.Add(CurrentNode);
+            _targetCollection.Add(appState.CurrentNode);
         }
         else
         {
-            _targetCollection.Insert(_targetIndex, CurrentNode);
+            _targetCollection.Insert(_targetIndex, appState.CurrentNode);
         }
 
-        CurrentNode.Parent = targetParent;
+        appState.CurrentNode.Parent = targetParent;
         ShowChange();
-        Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} left to parent {CurrentNode.Parent.Name}");
+        Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} left to parent {appState.CurrentNode.Parent.Name}");
     }
 
     private bool MoveLeftIsValid()
     {
-        if (CurrentNode == null)
+        if (appState.CurrentNode == null)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("Click or touch a node to move", LogLevel.Warn)));
             return false;
         }
 
-        if (CurrentNode.Parent != null && CurrentNode.Parent.IsRoot)
+        if (appState.CurrentNode.Parent != null && appState.CurrentNode.Parent.IsRoot)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot move further left", LogLevel.Warn)));
             return false;
         }
 
-        if (CurrentNode.Parent == null)
+        if (appState.CurrentNode.Parent == null)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot move root node.", LogLevel.Warn)));
             return false;
@@ -1062,10 +1087,10 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
 
-        if (CurrentNode.Parent != null)
+        if (appState.CurrentNode.Parent != null)
         {
-            _sourceChildren = CurrentNode.Parent.Children;
-            _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
+            _sourceChildren = appState.CurrentNode.Parent.Children;
+            _sourceIndex = _sourceChildren.IndexOf(appState.CurrentNode);
             _targetCollection = null;
             _targetIndex = -1;
         }
@@ -1076,7 +1101,7 @@ public class ShellViewModel : ObservableRecipient
         }
 
 
-        var sourceIndex = _sourceChildren.IndexOf(CurrentNode);
+        var sourceIndex = _sourceChildren.IndexOf(appState.CurrentNode);
         StoryNodeItem targetParent;
         ObservableCollection<StoryNodeItem> targetCollection;
         int targetIndex;
@@ -1089,8 +1114,8 @@ public class ShellViewModel : ObservableRecipient
         }
         else
         {
-            var grandparentCollection = CurrentNode.Parent.Parent.Children;
-            var siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
+            var grandparentCollection = appState.CurrentNode.Parent.Parent.Children;
+            var siblingIndex = grandparentCollection.IndexOf(appState.CurrentNode.Parent) - 1;
 
             if (siblingIndex >= 0)
             {
@@ -1117,28 +1142,28 @@ public class ShellViewModel : ObservableRecipient
         }
 
         _sourceChildren.RemoveAt(sourceIndex);
-        targetCollection.Insert(targetIndex, CurrentNode);
-        CurrentNode.Parent = targetParent;
+        targetCollection.Insert(targetIndex, appState.CurrentNode);
+        appState.CurrentNode.Parent = targetParent;
         ShowChange();
-        Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} right to parent {CurrentNode.Parent.Name}");
+        Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} right to parent {appState.CurrentNode.Parent.Name}");
     }
 
     private bool MoveRightIsValid()
     {
-        if (CurrentNode == null)
+        if (appState.CurrentNode == null)
         {
             ShowStatusMessage("Click or touch a node to move", LogLevel.Warn);
             return false;
         }
 
-        if (CurrentNode.Parent == null)
+        if (appState.CurrentNode.Parent == null)
         {
             ShowStatusMessage("Cannot move root node.", LogLevel.Warn);
             return false;
         }
 
-        if (CurrentNode.Parent.Parent == null
-            && CurrentNode.Parent.Children.IndexOf(CurrentNode) == 0)
+        if (appState.CurrentNode.Parent.Parent == null
+            && appState.CurrentNode.Parent.Children.IndexOf(appState.CurrentNode) == 0)
         {
             ShowStatusMessage("Cannot move further right", LogLevel.Warn);
             return false;
@@ -1155,22 +1180,22 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
 
-        _sourceChildren = CurrentNode.Parent.Children;
-        _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
+        _sourceChildren = appState.CurrentNode.Parent.Children;
+        _sourceIndex = _sourceChildren.IndexOf(appState.CurrentNode);
         _targetCollection = null;
         _targetIndex = -1;
-        var targetParent = CurrentNode.Parent;
+        var targetParent = appState.CurrentNode.Parent;
 
         if (_sourceIndex == 0)
         {
-            if (CurrentNode.Parent.Parent == null)
+            if (appState.CurrentNode.Parent.Parent == null)
             {
                 ShowStatusMessage("Cannot move up further", LogLevel.Warn);
                 return;
             }
 
-            var grandparentCollection = CurrentNode.Parent.Parent.Children;
-            var siblingIndex = grandparentCollection.IndexOf(CurrentNode.Parent) - 1;
+            var grandparentCollection = appState.CurrentNode.Parent.Parent.Children;
+            var siblingIndex = grandparentCollection.IndexOf(appState.CurrentNode.Parent) - 1;
 
             if (siblingIndex >= 0)
             {
@@ -1195,27 +1220,27 @@ public class ShellViewModel : ObservableRecipient
 
         if (_targetIndex == -1)
         {
-            _targetCollection.Add(CurrentNode);
+            _targetCollection.Add(appState.CurrentNode);
         }
         else
         {
-            _targetCollection.Insert(_targetIndex, CurrentNode);
+            _targetCollection.Insert(_targetIndex, appState.CurrentNode);
         }
 
-        CurrentNode.Parent = targetParent;
+        appState.CurrentNode.Parent = targetParent;
         ShowChange();
-        Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} up to parent {CurrentNode.Parent.Name}");
+        Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} up to parent {appState.CurrentNode.Parent.Name}");
     }
 
     private bool MoveUpIsValid()
     {
-        if (CurrentNode == null)
+        if (appState.CurrentNode == null)
         {
             ShowStatusMessage("Click or touch a node to move", LogLevel.Warn);
             return false;
         }
 
-        if (CurrentNode.IsRoot)
+        if (appState.CurrentNode.IsRoot)
         {
             ShowStatusMessage("Cannot move up further", LogLevel.Warn);
             return false;
@@ -1232,18 +1257,18 @@ public class ShellViewModel : ObservableRecipient
             return;
         }
 
-        _sourceChildren = CurrentNode.Parent.Children;
-        _sourceIndex = _sourceChildren.IndexOf(CurrentNode);
+        _sourceChildren = appState.CurrentNode.Parent.Children;
+        _sourceIndex = _sourceChildren.IndexOf(appState.CurrentNode);
         _targetCollection = null;
         _targetIndex = 0;
-        var targetParent = CurrentNode.Parent;
+        var targetParent = appState.CurrentNode.Parent;
 
         // If last child, must move to end parent's successor (sibling node).
         // If there are no siblings, we're at the bottom of the tree?
         if (_sourceIndex == _sourceChildren.Count - 1)
         {
             // Find the next sibling of the parent.
-            var nextParentSibling = GetNextSibling(CurrentNode.Parent);
+            var nextParentSibling = GetNextSibling(appState.CurrentNode.Parent);
 
             // If there's no next sibling, then we're at the bottom of the first root's children.
             if (nextParentSibling == null)
@@ -1271,11 +1296,11 @@ public class ShellViewModel : ObservableRecipient
         }
 
         _sourceChildren.RemoveAt(_sourceIndex);
-        _targetCollection.Insert(_targetIndex, CurrentNode);
-        CurrentNode.Parent = targetParent;
+        _targetCollection.Insert(_targetIndex, appState.CurrentNode);
+        appState.CurrentNode.Parent = targetParent;
 
         ShowChange();
-        Logger.Log(LogLevel.Info, $"Moving {CurrentNode.Name} down up to parent {CurrentNode.Parent.Name}");
+        Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} down up to parent {appState.CurrentNode.Parent.Name}");
     }
 
     public StoryNodeItem GetNextSibling(StoryNodeItem node)
@@ -1298,13 +1323,13 @@ public class ShellViewModel : ObservableRecipient
 
     private bool MoveDownIsValid()
     {
-        if (CurrentNode == null)
+        if (appState.CurrentNode == null)
         {
             ShowStatusMessage("Click or touch a node to move", LogLevel.Warn);
             return false;
         }
 
-        if (CurrentNode.IsRoot)
+        if (appState.CurrentNode.IsRoot)
         {
             ShowStatusMessage("Cannot move a root node", LogLevel.Warn);
             return false;
@@ -1320,12 +1345,12 @@ public class ShellViewModel : ObservableRecipient
 
     private void IsChangedMessageReceived(IsChangedMessage isDirty)
     {
-        if (State.CurrentDocument?.Model != null)
+        if (appState.CurrentDocument?.Model != null)
         {
-            State.CurrentDocument.Model.Changed = isDirty.Value;
+            appState.CurrentDocument.Model.Changed = isDirty.Value;
         }
 
-        if (State.CurrentDocument?.Model?.Changed == true)
+        if (appState.CurrentDocument?.Model?.Changed == true)
         {
             ChangeStatusColor = Colors.Red;
         }
@@ -1377,7 +1402,7 @@ public class ShellViewModel : ObservableRecipient
     private void StatusMessageReceived(StatusChangedMessage statusMessage)
     {
         // Bypass if in headless mode or if the app is closing
-        if (State.Headless || IsClosing)
+        if (appState.Headless || appState.IsClosing)
         {
             return;
         }
@@ -1450,7 +1475,7 @@ public class ShellViewModel : ObservableRecipient
             Logger.Log(LogLevel.Info, "Application closing - starting cleanup");
 
             // Set closing flag immediately to prevent UI updates during shutdown
-            IsClosing = true;
+            appState.IsClosing = true;
 
             // 1. Update cumulative time used and save preferences
             var prefs = Ioc.Default.GetRequiredService<PreferenceService>();
@@ -1464,7 +1489,7 @@ public class ShellViewModel : ObservableRecipient
 
             // 2. Close the current document if one is open
             // This handles AutoSave stop, BackupService stop, and document cleanup
-            if (State.CurrentDocument != null)
+            if (appState.CurrentDocument != null)
             {
                 Logger.Log(LogLevel.Info, "Closing open document");
                 await OutlineManager.CloseFile();
@@ -1510,8 +1535,8 @@ public class ShellViewModel : ObservableRecipient
     private void NameMessageReceived(NameChangedMessage name)
     {
         var _msg = name.Value;
-        CurrentNode.Name = _msg.NewName;
-        switch (CurrentNode.Type)
+        appState.CurrentNode.Name = _msg.NewName;
+        switch (appState.CurrentNode.Type)
         {
             case StoryItemType.Character:
                 //int charIndex = CharacterModel.CharacterNames.IndexOf(msg.OldName);

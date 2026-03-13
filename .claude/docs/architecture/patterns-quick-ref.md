@@ -98,7 +98,7 @@ using (var serializationLock = new SerializationLock(autoSaveService, backupServ
 
 **Used In**:
 - `OutlineService` - All state-modifying operations
-- `SemanticKernelAPI` - All API operations
+- `StoryCADAPI` - All API operations
 - `StoryIO` - File read/write operations
 
 **Prevents**:
@@ -169,7 +169,7 @@ protected override void OnNavigatedFrom(NavigationEventArgs e)
 
 **Purpose**: Safe error handling for API operations
 
-**When to Use**: All SemanticKernelAPI methods
+**When to Use**: All StoryCADAPI methods
 
 **Implementation**:
 ```csharp

@@ -14,7 +14,7 @@ using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.ViewModels;
 
-public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
+public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     #region Constructors
 
@@ -904,6 +904,14 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable
         {
             _logger.LogException(LogLevel.Error,
                 ex, $"Failed to save problem model - {ex.Message}");
+        }
+    }
+
+    public void ReloadFromModel()
+    {
+        if (Model != null)
+        {
+            LoadModel();
         }
     }
 

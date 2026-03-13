@@ -14,7 +14,7 @@ If you use Scrivener, clicking Scrivener Reports will open a file picker to allo
 
 ![](../media/Scrivener-Reports-Generated-Status-Message.png)
 
-You can open your Scrivener project. You'll see a set of nodes added to the Binder, which contain your reports. Each story element from your StoryCAD outline is added to the Scrivener project as an RTF document, preserving any text formatting from Windows.
+You can open your Scrivener project. You'll see a set of nodes added to the Binder, which contain your reports. Each story element from your StoryCAD outline is added to the Scrivener project as an RTF document, preserving any text formatting from Windows. This includes Story World elements, giving you easy access to your worldbuilding notes while drafting.
 
 ![](../media/Scrivener-Binder-with-StoryCAD-Outline.png)
 

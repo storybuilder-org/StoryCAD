@@ -206,7 +206,7 @@ public sealed partial class Shell : Page
         var item = (TreeViewItem)sender;
         item.Background = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
 
-        ShellVm.RightTappedNode = (StoryNodeItem)item.DataContext;
+        AppState.RightTappedNode = (StoryNodeItem)item.DataContext;
         ShellVm.LastClickedTreeviewItem = item; //We can't set the background through RightTappedNode so
         //we set a reference to the node itself to reset the background later
         ShellVm.ShowFlyoutButtons();
@@ -293,9 +293,13 @@ public sealed partial class Shell : Page
 
     private void AdjustSplitViewPane(double width)
     {
-        if (ShellSplitView != null && ShellSplitView.IsPaneOpen)
+        // Always set OpenPaneLength regardless of pane state, so when the pane
+        // opens (e.g., via VisualStateManager), it has the correct width
+        if (ShellSplitView != null)
         {
-            var pane = Math.Max(200, width * 0.3);
+            // In narrow mode (<800px), pane should fill entire width for full-screen toggle
+            // In wide mode (>=800px), pane should be 30% of width (min 200px)
+            var pane = width < 800 ? width : Math.Max(200, width * 0.3);
             ShellSplitView.OpenPaneLength = pane;
         }
     }
@@ -379,19 +383,11 @@ public sealed partial class Shell : Page
                 return;
             }
 
-            // Don't process if the original source is a TextBox or other input control
-            // to avoid interfering with text entry
-            if (e.OriginalSource is TextBox || e.OriginalSource is RichEditBox ||
-                e.OriginalSource is AutoSuggestBox || e.OriginalSource is PasswordBox)
-            {
-                return;
-            }
-
             var ctrl = KeyboardHelper.IsControlPressed();
             var shift = KeyboardHelper.IsShiftPressed();
             var alt = KeyboardHelper.IsAltPressed();
 
-            // File Menu shortcuts
+            // Global shortcuts that work regardless of focus (file operations, etc.)
             if (ctrl && !shift && !alt && e.Key == VirtualKey.O)
             {
                 ShellVm.OpenFileOpenMenuCommand.Execute(null);
@@ -420,7 +416,17 @@ public sealed partial class Shell : Page
                 return;
             }
 
+            // Don't process element-specific shortcuts if focus is in a text input control
+            if (e.OriginalSource is TextBox || e.OriginalSource is RichEditBox ||
+                e.OriginalSource is AutoSuggestBox || e.OriginalSource is PasswordBox)
+            {
+                return;
+            }
+
             // Add Menu shortcuts (Alt+Letter)
+            // Note: On macOS, Option+Letter normally produces special characters (e.g., ñ, ß).
+            // UNO Platform's Skia backend may intercept these before the OS does.
+            // If Alt+Letter shortcuts don't work on macOS, consider Ctrl+Shift+Letter alternatives.
             if (!ctrl && !shift && alt && e.Key == VirtualKey.F && ShellVm.ExplorerVisibility == Visibility.Visible)
             {
                 ShellVm.AddFolderCommand.Execute(null);
@@ -477,6 +483,13 @@ public sealed partial class Shell : Page
                 return;
             }
 
+            if (!ctrl && !shift && alt && e.Key == VirtualKey.B && ShellVm.ExplorerVisibility == Visibility.Visible)
+            {
+                ShellVm.AddStoryWorldCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
             // Delete key (no modifiers)
             if (!ctrl && !shift && !alt && e.Key == VirtualKey.Delete && ShellVm.ExplorerVisibility == Visibility.Visible)
             {
@@ -522,8 +535,15 @@ public sealed partial class Shell : Page
                 return;
             }
 
+            if (ctrl && !shift && !alt && e.Key == VirtualKey.K)
+            {
+                ShellVm.KeyQuestionsCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
             // Reports Menu shortcuts
-            // Note: Ctrl+P is platform-specific - Print on Windows, Preferences elsewhere
+            // Ctrl+P: Print Reports on Windows, PDF Export on macOS (Print is unsupported on macOS)
 #if HAS_UNO_WINUI
             if (ctrl && !shift && !alt && e.Key == VirtualKey.P)
             {
@@ -534,7 +554,7 @@ public sealed partial class Shell : Page
 #else
             if (ctrl && !shift && !alt && e.Key == VirtualKey.P)
             {
-                ShellVm.PreferencesCommand.Execute(null);
+                ShellVm.ExportReportsToPdfCommand.Execute(null);
                 e.Handled = true;
                 return;
             }
@@ -550,6 +570,14 @@ public sealed partial class Shell : Page
             if (ctrl && !shift && !alt && e.Key == VirtualKey.R)
             {
                 ShellVm.ScrivenerReportsCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            // Preferences shortcut (Ctrl+, / ⌘,)
+            if (ctrl && !shift && !alt && e.Key == (VirtualKey)188)
+            {
+                ShellVm.PreferencesCommand.Execute(null);
                 e.Handled = true;
                 return;
             }

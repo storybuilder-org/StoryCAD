@@ -93,8 +93,8 @@ StoryCAD 3.4 completes the migration from WinUI 3 to UNO Platform on Windows, pr
 
 **Technical Changes:**
 - Migration to UNO Platform SDK 6.4.13
-- .NET 9.0 SDK 9.0.306
-- Dual-targeting: `net9.0-windows10.0.22621` (WinAppSDK) and `net9.0-desktop` (Desktop)
+- .NET 10.0 SDK 10.0.100
+- Dual-targeting: `net10.0-windows10.0.22621` (WinAppSDK) and `net10.0-desktop` (Desktop)
 - Build system updates for multi-platform support
 
 **Benefits for Windows Users:**

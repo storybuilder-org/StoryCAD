@@ -1,0 +1,49 @@
+name: Sync docs to BetaManual
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'docs/**'
+
+  workflow_dispatch:
+
+concurrency:
+  group: sync-beta-manual
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout StoryCAD dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Checkout BetaManual
+        uses: actions/checkout@v4
+        with:
+          repository: storybuilder-org/BetaManual
+          token: ${{ secrets.BETA_MANUAL_PAT }}
+          path: beta-manual
+          ref: main
+
+      - name: Sync docs content
+        run: |
+          # Atomic sync: --delete removes stale files without intermediate broken state
+          rsync -a --delete --exclude='.obsidian' docs/ beta-manual/docs/
+
+      - name: Commit and push
+        run: |
+          cd beta-manual
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          # Only commit and push if there are changes
+          if git diff --cached --quiet; then
+            echo "No changes to sync"
+          else
+            git commit -m "sync: update from StoryCAD dev (${{ github.sha }})"
+            git push
+          fi

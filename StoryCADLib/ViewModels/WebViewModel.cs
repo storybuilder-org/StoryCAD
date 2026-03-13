@@ -10,7 +10,7 @@ using StoryCADLib.Services.Navigation;
 
 namespace StoryCADLib.ViewModels;
 
-public class WebViewModel : ObservableRecipient, INavigable, ISaveable
+public class WebViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     public delegate void GoBackDelegate();
 
@@ -70,6 +70,14 @@ public class WebViewModel : ObservableRecipient, INavigable, ISaveable
         catch (Exception ex)
         {
             _logger.LogException(LogLevel.Error, ex, $"Failed to save WebVM {ex.Message}");
+        }
+    }
+
+    public void ReloadFromModel()
+    {
+        if (Model != null)
+        {
+            LoadModel();
         }
     }
 
@@ -320,6 +328,7 @@ public class WebViewModel : ObservableRecipient, INavigable, ISaveable
     /// </summary>
     public async Task InstallWebView()
     {
+#if WINDOWS10_0_18362_0_OR_GREATER
         try
         {
             _logger.Log(LogLevel.Error, "Installing WebView runtime");
@@ -364,6 +373,10 @@ public class WebViewModel : ObservableRecipient, INavigable, ISaveable
             _logger.LogException(LogLevel.Warn, _ex, $"Error installing WebView runtime. " +
                                                      $"({_ex.Message})");
         }
+#else
+        _logger.Log(LogLevel.Warn, "WebView installation skipped, not on WinAppSDK");
+        await Task.CompletedTask;
+#endif
     }
 
     #endregion

@@ -50,7 +50,6 @@ public class ScrivenerReports
     public async Task GenerateReports()
     {
         await _scrivener.LoadScrivenerProject(); // Load the Scrivener project
-        await _formatter.LoadReportTemplates(); // Load text report templates
         _binderNode = _scrivener.BuildBinderItemTree(); // Build a BinderItem model
         UpdateStoryCADOutline(); // Replace or add StoryCAD BinderItems to model
 
@@ -448,6 +447,9 @@ public class ScrivenerReports
                 case StoryItemType.StoryOverview:
                     await GenerateStoryOverviewReport(node, element);
                     break;
+                case StoryItemType.StoryWorld:
+                    await GenerateStoryWorldReport(node, element);
+                    break;
                 case StoryItemType.Problem:
                     await GenerateProblemReport(node, element);
                     break;
@@ -483,7 +485,19 @@ public class ScrivenerReports
         var di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
         var contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-        var rtf = _formatter.FormatStoryOverviewReport();
+        var rtf = await _formatter.FormatStoryOverviewReport();
+
+        // Write the report
+        await FileIO.WriteTextAsync(contents, rtf);
+    }
+
+    private async Task GenerateStoryWorldReport(BinderItem node, StoryElement element)
+    {
+        // Locate and open the output content.rtf report
+        var di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
+        var contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
+
+        var rtf = await _formatter.FormatStoryWorldReport();
 
         // Write the report
         await FileIO.WriteTextAsync(contents, rtf);
@@ -505,7 +519,7 @@ public class ScrivenerReports
         var di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
         var contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-        var rtf = _formatter.FormatProblemReport(element);
+        var rtf = await _formatter.FormatProblemReport(element);
 
         // Write the report
         await FileIO.WriteTextAsync(contents, rtf);
@@ -527,7 +541,7 @@ public class ScrivenerReports
         var di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
         var contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-        var rtf = _formatter.FormatCharacterReport(element);
+        var rtf = await _formatter.FormatCharacterReport(element);
 
         // Write the report
         await FileIO.WriteTextAsync(contents, rtf);
@@ -551,7 +565,7 @@ public class ScrivenerReports
         var di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
         var contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-        var rtf = _formatter.FormatSettingReport(element);
+        var rtf = await _formatter.FormatSettingReport(element);
 
         // Write the report
         await FileIO.WriteTextAsync(contents, rtf);
@@ -575,7 +589,7 @@ public class ScrivenerReports
         var di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
         var contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-        var rtf = _formatter.FormatSceneReport(element);
+        var rtf = await _formatter.FormatSceneReport(element);
 
         // Write the report
         await FileIO.WriteTextAsync(contents, rtf);
@@ -587,7 +601,7 @@ public class ScrivenerReports
         var di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
         var contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-        var rtf = _formatter.FormatFolderReport(element);
+        var rtf = await _formatter.FormatFolderReport(element);
 
         // Write the report
         await FileIO.WriteTextAsync(contents, rtf);
@@ -599,7 +613,7 @@ public class ScrivenerReports
         var di = await _scrivener.GetSubFolder(node.Uuid); // Get subfolder path
         var contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-        var rtf = _formatter.FormatSectionReport(element);
+        var rtf = await _formatter.FormatSectionReport(element);
 
         // Write the report
         await FileIO.WriteTextAsync(contents, rtf);
@@ -611,7 +625,7 @@ public class ScrivenerReports
         var di = await _scrivener.GetSubFolder(node.Uuid);
         var contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
 
-        var rtf = _formatter.FormatSynopsisReport();
+        var rtf = await _formatter.FormatSynopsisReport();
 
         // Write the report
         await FileIO.WriteTextAsync(contents, rtf);

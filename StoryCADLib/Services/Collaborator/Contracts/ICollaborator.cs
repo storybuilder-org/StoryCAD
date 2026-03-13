@@ -1,6 +1,7 @@
 #pragma warning disable CS8632 // Nullable annotations used without nullable context
 using StoryCADLib.Models;
 using StoryCADLib.Services.API;
+using StoryCADLib.Services.Logging;
 
 namespace StoryCADLib.Services.Collaborator.Contracts;
 
@@ -11,17 +12,33 @@ namespace StoryCADLib.Services.Collaborator.Contracts;
 public interface ICollaborator
 {
     /// <summary>
-///     Opens a Collaborator session for the provided story.
-/// </summary>
+    ///     Opens a Collaborator session for the provided story using a host-supplied frame for navigation.
+    /// </summary>
 /// <param name="api">API surfaced to the plugin for interacting with StoryCAD data</param>
 /// <param name="model">The story model Collaborator should operate on</param>
+/// <param name="hostWindow">Host-created window for Collaborator UI</param>
+/// <param name="hostFrame">Host-created frame (with region) for navigation</param>
+/// <param name="filePath">Path to the story file for saving via API</param>
+/// <param name="logger">StoryCAD's logger for high-level audit events (null if unavailable)</param>
 /// <returns>The window hosting Collaborator's UI</returns>
-Window Open(IStoryCADAPI api, StoryModel model);
+Task<Window> OpenAsync(IStoryCADAPI api, StoryModel model, Window hostWindow, Frame hostFrame, string filePath, ILogService? logger = null);
 
 /// <summary>
 ///     Signals that the host is closing Collaborator and retrieves a session summary.
 /// </summary>
 CollaboratorResult Close();
+
+/// <summary>
+///     Sets Collaborator settings. Can be called before or after OpenAsync.
+/// </summary>
+/// <param name="settings">Settings to apply</param>
+void SetSettings(CollaboratorSettings settings);
+
+/// <summary>
+///     Gets the current Collaborator settings.
+/// </summary>
+/// <returns>Current settings</returns>
+CollaboratorSettings GetSettings();
 
 /// <summary>
 ///     Disposes of resources used by the Collaborator plugin.

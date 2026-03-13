@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml.Controls;
 using StoryCADLib.Models;
 using StoryCADLib.ViewModels.SubViewModels;
 
@@ -7,6 +8,26 @@ namespace StoryCADTests.ViewModels;
 [TestClass]
 public class StoryNodeItemTests
 {
+    /// <summary>
+    ///     Verifies that StoryWorld nodes get the Map icon.
+    ///     This test ensures new story element types have their icons configured.
+    /// </summary>
+    [TestMethod]
+    public void StoryWorld_Node_HasMapSymbol()
+    {
+        // Arrange
+        StoryModel model = new();
+        OverviewModel overview = new("Overview", model, null);
+        model.ExplorerView.Add(overview.Node);
+
+        // Act
+        StoryWorldModel storyWorld = new("Test World", model, overview.Node);
+
+        // Assert
+        Assert.AreEqual(Symbol.Map, storyWorld.Node.Symbol,
+            "StoryWorld nodes should display the Map icon in TreeView");
+    }
+
     /// <summary>
     ///     Creates a new node and tries to delete it.
     /// </summary>

@@ -42,10 +42,13 @@ The API exposes several core functions, including:
 - **AddElement(StoryItemType typeToAdd, string parentGUID):**  
   Creates a new StoryElement under a specified parent element (usually the StoryOverview).
 
-- **AddCastMember(Guid scene, Guid character):**  
-  Adds a character as part of a scene’s cast.
+- **AddCastMember(Guid scene, Guid character):**
+  Adds a character as part of a scene's cast.
 
-- **Additional Functions:**  
+- **GetElementsByType(StoryItemType elementType):**
+  Returns all story elements of a specific type (Character, Scene, Setting, Problem, etc.).
+
+- **Additional Functions:**
   The API also includes functions for deleting elements, retrieving element details, and creating relationships between characters.
 
 The API is designed for both direct user interaction (through desktop or console apps) and for AI-powered processing where detailed human-like guidelines are embedded into prompts for automated execution.
@@ -68,8 +71,8 @@ namespace StoryCADConsoleSample
     {
         static async Task Main(string[] args)
         {
-            // Create a new instance of the SemanticKernelApi (assuming dependency injection or manual instantiation)
-            var api = new SemanticKernelApi();
+            // Create a new instance of the StoryCADApi (assuming dependency injection or manual instantiation)
+            var api = new StoryCADApi();
             
             // Create an empty outline
             var outlineResult = await api.CreateEmptyOutline("The Great Adventure", "Jane Doe", "0");

@@ -2,7 +2,15 @@
 
 This file provides project-specific guidance for StoryCAD development.
 
-## Primary Directive: Simplicity First
+**BEFORE ANY IMPLEMENTATION WORK:**
+
+- You must present a plan.
+- You must ask for explicit approval.
+- You must not proceed until approval is given.
+
+
+
+## **Simplicity First**
 
 **When solving StoryCAD problems, always choose the simplest approach:**
 - Direct method calls over reflection
@@ -16,11 +24,11 @@ This file provides project-specific guidance for StoryCAD development.
 ### Multi-Targeting Strategy
 
 **Windows builds both targets**:
-- `net9.0-windows10.0.22621` (WinAppSDK head) - Windows 10/11, Windows Store
-- `net9.0-desktop` (Desktop head) - Windows 7/8/10/11, macOS, Linux
+- `net10.0-windows10.0.22621` (WinAppSDK head) - Windows 10/11, Windows Store
+- `net10.0-desktop` (Desktop head) - Windows 7/8/10/11, macOS, Linux
 
 **macOS builds desktop only**:
-- `net9.0-desktop` (Desktop head) - macOS, also runs on Windows/Linux
+- `net10.0-desktop` (Desktop head) - macOS, also runs on Windows/Linux
 
 **Critical Concept - Platform-Specific Code**:
 
@@ -44,17 +52,17 @@ See `/devdocs/platform_targeting_guidelines.md` for complete workflows and decis
 
 ### Cross-Machine Development Workflow
 
-**Primary Strategy**: Develop on Windows (VS2022), test on Mac (Rider)
+**Primary Strategy**: Develop on Windows (VS2026), test on Mac (Rider)
 
 1. **Code on Windows**:
-   - Write code in VS2022 (familiar environment)
+   - Write code in VS2026 (familiar environment)
    - Test on Windows (WinAppSDK head)
    - Commit and push
 
 2. **Test on Mac**:
    ```bash
    git pull
-   dotnet run -f net9.0-desktop  # Quick verification
+   dotnet run -f net10.0-desktop  # Quick verification
    ```
 
 3. **Debug on Mac** (if needed):
@@ -91,7 +99,7 @@ Use this decision tree to determine where to develop:
 **Quick Manual Test (Mac)**:
 ```bash
 # No IDE needed:
-dotnet run -f net9.0-desktop
+dotnet run -f net10.0-desktop
 ```
 
 **Debugging (Mac)**:
@@ -151,7 +159,7 @@ StoryCAD is a free, open-source application for fiction writers that provides st
 ## Quick Reference
 
 ### Technology Stack (UNO Platform - Branch: UNOTestBranch)
-- **Framework**: .NET 9.0 with UNO Platform 5.x
+- **Framework**: .NET 10.0 with UNO Platform 5.x
 - **UI Framework**: WinUI 3 (cross-platform via UNO)
 - **Platform Targets**:
   - **Windows**: WinAppSDK head (Windows 10/11, minimum 10.0.19041.0)
@@ -162,7 +170,7 @@ StoryCAD is a free, open-source application for fiction writers that provides st
 - **Shared Code**: ~90% across all platforms
 
 ### Production Stack (Main Branch - Version 3.x)
-- **Framework**: .NET 9.0 with WinUI 3, Windows App SDK 1.6
+- **Framework**: .NET 10.0 with WinUI 3, Windows App SDK 1.6
 - **Platform**: Windows 10/11 only
 
 ### Project Structure
@@ -172,21 +180,14 @@ StoryCAD is a free, open-source application for fiction writers that provides st
 
 ## Documentation Resources
 
-### Core Memory Files (`/home/tcox/.claude/memory/`)
+### Memory Files
 
-Essential architecture and development documentation accessible to all sessions:
+See `/mnt/d/dev/src/CLAUDE.md` for full list of shared memory files. Key ones for StoryCAD:
+- **patterns.md** - 9 architectural patterns (ISaveable, SerializationLock, etc.)
+- **architecture.md** - ADRs, navigation lifecycle, StoryDocument rules
+- **gotchas.md** - Common pitfalls, headless mode, platform issues
 
-- **[patterns.md](/home/tcox/.claude/memory/patterns.md)** - 9 architectural patterns (MVVM, ISaveable, SerializationLock, OperationResult, Stateless Services, IMessenger, Platform-Specific Code, StoryDocument, DI)
-- **[architecture.md](/home/tcox/.claude/memory/architecture.md)** - Critical dated decisions (2025-10-12), circular dependencies, navigation lifecycle, StoryDocument never-null rule, theme management
-- **[gotchas.md](/home/tcox/.claude/memory/gotchas.md)** - Common pitfalls, headless mode behavior, platform-specific gotchas, ISaveable registration, navigation timing
-- **[cross-platform.md](/home/tcox/.claude/memory/cross-platform.md)** - Cross-platform development workflows, multi-targeting, when to build where
-- **[testing.md](/home/tcox/.claude/memory/testing.md)** - Test patterns, naming conventions (MethodName_Scenario_ExpectedResult), TDD workflow, test data creation
-- **[build-commands.md](/home/tcox/.claude/memory/build-commands.md)** - WSL/Windows/Mac build and test commands, TDD red-green-refactor cycle, cross-machine workflow
-- **[dependencies.md](/home/tcox/.claude/memory/dependencies.md)** - UNO Platform 6.2.36, MVVM Toolkit 8.4.0, Semantic Kernel 1.41.0 usage patterns
-
-**Usage**: All memory files cross-reference each other. Start with patterns.md for quick lookup, then drill into specific topics.
-
-### Comprehensive Documentation (`.claude/docs/`)
+### StoryCAD-Specific Docs (`.claude/docs/`)
 
 Detailed technical documentation (memory files provide condensed versions):
 
@@ -195,38 +196,25 @@ Detailed technical documentation (memory files provide condensed versions):
 - **Code Examples**: `.claude/docs/examples/` - Copy-paste templates for ViewModels, Services, platform-specific code
 - **Troubleshooting**: `.claude/docs/troubleshooting/` - Common errors with solutions
 
-### User Manual (ManualTest Repository)
+### User Manual
 
-- **Repository**: [github.com/storybuilder-org/ManualTest](https://github.com/storybuilder-org/ManualTest)
-- **AI Agent Guide**: [ManualTest/CLAUDE.md](/mnt/d/dev/src/ManualTest/CLAUDE.md) - Comprehensive guidance for working with user documentation
-- **Location**: `/mnt/d/dev/src/ManualTest/docs/`
-- **Published (Staging)**: https://storybuilder-org.github.io/StoryBuilder-Manual/
-- **Format**: Jekyll with Just the Docs theme (115 markdown files)
-- **Index**: `/mnt/d/dev/src/ManualTest/docs/index.md` - Complete index with file summaries (always current)
+- **Location**: `/mnt/d/dev/src/StoryCAD/docs/`
+- **Production URL**: https://manual.storybuilder.org/
+- **Beta URL**: https://beta.manual.storybuilder.org/
+- **Format**: Jekyll with Just the Docs theme (115+ markdown files)
 - **Audience**: Fiction writers (non-technical users)
 
-**Search Strategy**:
-- **DO NOT** read all 115 files sequentially
-- **DO** use index file for quick lookup
-- **DO** use Grep to search specific sections
-- **DO** read ManualTest/CLAUDE.md for detailed search guidance
+**See `user-manual.md` in shared memory files** for complete guidance on:
+- Workflow (branch-based staging)
+- Documentation structure (11 sections)
+- Front matter requirements
+- Writing style for non-technical audience
+- Adding new story element documentation
 
-**Key Manual Sections**:
-- `Front Matter/` - Introduction, help resources, legal information (4 files)
-- `Quick Start/` - UI basics, navigation, file operations, keyboard shortcuts (23 files)
-- `Story Elements/` - Forms and tabs for each story element type (30 files)
-- `Tools/` - Master Plots, Dramatic Situations, Stock Scenes, Conflict Builder (10 files)
-- `Writing with StoryCAD/` - Outlining philosophy, workflow, plotting techniques (17 files)
-- `Tutorial Creating a Story/` - Step-by-step story creation guide (10 files)
-- `Reports/` - Print reports and Scrivener integration (4 files)
-- `Preferences/` - Application settings and configuration (1 file)
-- `For Developers/` - API documentation, changelog, developer notes (6 files)
-
-**When to Reference User Documentation**:
-- Before implementing UI changes (understand user workflows)
+**When to Update User Documentation**:
 - When adding new story elements (follow established patterns)
-- When changing features (update corresponding user docs)
-- See architecture notes for feature-to-documentation mapping
+- When changing UI features (update corresponding docs)
+- When adding new tools or reports
 
 ### Context7 MCP Server
 
@@ -240,13 +228,13 @@ StoryCAD uses Context7 MCP server for up-to-date documentation of public depende
 ### Build from WSL
 ```bash
 # Build solution
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64
+"/mnt/c/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64
 
-# Run all tests
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
+# Run all tests (use vstest.console.exe - has access to Windows environment variables)
+"/mnt/c/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll"
 ```
 
-For detailed commands, see [Build & Test Commands](/home/tcox/.claude/memory/build-commands.md).
+For detailed commands, see `build-commands.md` in shared memory files.
 
 ## Key Services
 
@@ -258,7 +246,7 @@ For detailed commands, see [Build & Test Commands](/home/tcox/.claude/memory/bui
 - **SearchService**: Full-text search across story content
 - **LogService**: Comprehensive logging with NLog and elmah.io integration
 
-For detailed architecture information, see [Architecture Memory](/home/tcox/.claude/memory/architecture.md) and [Patterns](/home/tcox/.claude/memory/patterns.md).
+For detailed architecture, see `architecture.md` and `patterns.md` in shared memory files.
 
 ## Important Notes
 
@@ -360,7 +348,7 @@ When creating pull requests, include any design documentation directly in the PR
 
 ### Test File Naming
 - **Pattern**: `[SourceFileName]Tests.cs`
-- **Example**: `SemanticKernelAPITests.cs` for source file `SemanticKernelAPI.cs`
+- **Example**: `StoryCADAPITests.cs` for source file `StoryCADAPI.cs`
 - **Location**: Test files in StoryCADTests project, mirroring source structure where practical
 
 ### Test Method Naming
@@ -390,9 +378,9 @@ The following commands are pre-approved for automated execution without user con
 
 ### Build Commands
 ```bash
-# Visual Studio MSBuild (WSL path)
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Release -p:Platform=x64
+# Visual Studio 2026 MSBuild (WSL path)
+"/mnt/c/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64
+"/mnt/c/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCAD.sln -t:Build -p:Configuration=Release -p:Platform=x64
 
 # Standard MSBuild
 msbuild StoryCAD.sln /t:Build /p:Configuration=Debug /p:Platform=x64
@@ -401,18 +389,13 @@ msbuild StoryCAD.sln /t:Build /p:Configuration=Release /p:Platform=x64
 
 ### Test Commands
 ```bash
-# Visual Studio Test Console (WSL path) - All wildcarded patterns
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*.*
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*,*
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*,*,*,*
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll" --Tests:*
+# Use vstest.console.exe - has access to Windows environment variables needed for integration tests
 
-# Standard test commands
-dotnet test StoryCADTests/StoryCADTests.csproj --configuration Debug
-vstest.console.exe "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621.0/StoryCADTests.dll"
+# From WSL (recommended)
+"/mnt/c/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll"
+
+# Run specific test class
+"/mnt/c/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll" /Tests:StoryModelTests
 ```
 
 ### Git Commands
@@ -447,5 +430,5 @@ git commit -m "message"
 ### Circular Dependencies
 - Watch for circular dependencies when adding constructor parameters
 - If encountered, document with TODO and leave specific Ioc.Default calls rather than forcing bad design
-- Example: Windowing ↔ OutlineViewModel (documented in /home/tcox/.claude/memory/architecture.md)
+- Example: Windowing ↔ OutlineViewModel (documented in `architecture.md`)
 - Do not memorise or document any information about Storybuilder-miscellaneous in the StoryCAD Repo.

@@ -96,9 +96,8 @@ public class SearchServiceTests
             _searchService.SearchString(heroNode, "test", _testModel);
         }
 
-        // Assert - If this completes quickly, the cache is working
+        // Assert - test passes if multiple searches complete efficiently
         // (In a real scenario, you might measure execution time)
-        Assert.IsTrue(true, "Multiple searches should complete efficiently using cache");
     }
 
     #endregion

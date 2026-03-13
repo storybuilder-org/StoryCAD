@@ -241,6 +241,15 @@ public class PreferencesViewModel : ObservableValidator
         set => SetProperty(ref _ShowFilePickerOnStartup, value);
     }
 
+    // Use beta documentation (BetaManual) instead of production manual.
+    private bool _useBetaDocumentation;
+
+    public bool UseBetaDocumentation
+    {
+        get => _useBetaDocumentation;
+        set => SetProperty(ref _useBetaDocumentation, value);
+    }
+
     /// <summary>
     /// Tracks if theme preference changed during this save (requires restart)
     /// </summary>
@@ -280,6 +289,7 @@ public class PreferencesViewModel : ObservableValidator
         HideKeyFileWarning = CurrentModel.HideKeyFileWarning;
         ShowStartupPage = CurrentModel.ShowStartupDialog;
         ShowFilePickerOnStartup = CurrentModel.ShowFilePickerOnStartup;
+        UseBetaDocumentation = CurrentModel.UseBetaDocumentation;
     }
 
     internal void SaveModel()
@@ -316,6 +326,7 @@ public class PreferencesViewModel : ObservableValidator
         CurrentModel.ThemePreference = PreferedTheme;
         CurrentModel.ShowStartupDialog = ShowStartupPage;
         CurrentModel.ShowFilePickerOnStartup = ShowFilePickerOnStartup;
+        CurrentModel.UseBetaDocumentation = UseBetaDocumentation;
     }
 
     /// <summary>

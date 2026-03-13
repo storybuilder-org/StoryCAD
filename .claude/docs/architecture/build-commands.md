@@ -69,32 +69,32 @@ dotnet build StoryCAD/StoryCAD.csproj --configuration Release
 "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCADTests/StoryCADTests.csproj -t:Build -p:Configuration=Debug -p:Platform=x64
 
 # Step 2: Run all tests
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621/StoryCADTests.dll"
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll"
 ```
 
 Or combine into one command:
 ```bash
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCADTests/StoryCADTests.csproj -t:Build -p:Configuration=Debug -p:Platform=x64 && "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621/StoryCADTests.dll"
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" StoryCADTests/StoryCADTests.csproj -t:Build -p:Configuration=Debug -p:Platform=x64 && "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll"
 ```
 
 Run specific test class:
 ```bash
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621/StoryCADTests.dll" /Tests:StoryModelTests
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll" /Tests:StoryModelTests
 ```
 
 Run specific test method:
 ```bash
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621/StoryCADTests.dll" /Tests:FileTests.TestAPIWrite
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll" /Tests:FileTests.TestAPIWrite
 ```
 
 Run multiple test classes:
 ```bash
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621/StoryCADTests.dll" /Tests:StoryModelTests,OutlineServiceTests
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll" /Tests:StoryModelTests,OutlineServiceTests
 ```
 
 Run with verbose output:
 ```bash
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621/StoryCADTests.dll" /logger:console;verbosity=detailed
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll" /logger:console;verbosity=detailed
 ```
 
 ### Using dotnet CLI (from Windows Command Prompt/PowerShell)
@@ -133,19 +133,19 @@ vim StoryCADTests/MyNewTests.cs
 
 3. Run test (see it fail):
 ```bash
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621/StoryCADTests.dll" /Tests:MyNewTests
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll" /Tests:MyNewTests
 ```
 
 4. Implement feature
 
 5. Run test again (see it pass):
 ```bash
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621/StoryCADTests.dll" /Tests:MyNewTests
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll" /Tests:MyNewTests
 ```
 
 6. Run all tests to ensure no regression:
 ```bash
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621/StoryCADTests.dll"
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll"
 ```
 
 ## Common Issues
@@ -165,7 +165,7 @@ For detailed build output:
 ### Test Discovery Issues
 List all available tests:
 ```bash
-"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621/StoryCADTests.dll" /ListTests
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe" "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll" /ListTests
 ```
 
 ## Environment Variables
@@ -174,7 +174,7 @@ For repeated use, consider setting:
 ```bash
 export MSBUILD="/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe"
 export VSTEST="/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe"
-export TESTDLL="StoryCADTests/bin/x64/Debug/net9.0-windows10.0.22621/StoryCADTests.dll"
+export TESTDLL="StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll"
 ```
 
 Then use:
@@ -182,3 +182,26 @@ Then use:
 "$MSBUILD" StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64
 "$VSTEST" "$TESTDLL"
 ```
+
+## macOS Build & App Store Submission
+
+For the complete macOS App Store build guide, see **[/devdocs/macos-app-store-build-guide.md](/devdocs/macos-app-store-build-guide.md)**.
+
+### Quick Reference
+
+Build for macOS (UNO creates .app bundle automatically):
+```bash
+dotnet publish StoryCAD/StoryCAD.csproj -c Release -f net10.0-desktop -r osx-arm64 \
+  -p:SelfContained=true -p:PackageFormat=app \
+  -p:UnoMacOSEntitlements=Platforms/Desktop/Entitlements.plist \
+  -p:UnoMacOSIncludeCreateDump=false
+```
+
+Key points:
+- `PackageFormat=app` creates the `.app` bundle, icon, and Info.plist automatically
+- Bundle ID: `com.storybuilder.storycad`
+- Minimum macOS: 12.0 (required for arm64-only)
+- Bump `CFBundleVersion` in `StoryCAD/Platforms/Desktop/Info.plist` before each upload
+- Move `.deps.json` and `.runtimeconfig.json` to `Contents/Resources/` with symlinks
+- Run `xattr -cr` after copying provisioning profile
+- Sign only dylibs, then executable, then bundle (do NOT use `--deep`)

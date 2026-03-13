@@ -116,6 +116,14 @@ public partial class PrintReportDialogVM : ObservableRecipient
         set => SetProperty(ref _createOverview, value);
     }
 
+    private bool _createStoryWorld;
+
+    public bool CreateStoryWorld
+    {
+        get => _createStoryWorld;
+        set => SetProperty(ref _createStoryWorld, value);
+    }
+
     private bool _problemList;
 
     public bool ProblemList
@@ -468,6 +476,10 @@ public partial class PrintReportDialogVM : ObservableRecipient
         {
             CreateOverview = true;
         }
+        else if (elementItem.Type == StoryItemType.StoryWorld)
+        {
+            CreateStoryWorld = true;
+        }
         else
         {
             SelectedNodes.Add(elementItem);
@@ -477,5 +489,6 @@ public partial class PrintReportDialogVM : ObservableRecipient
 
         SelectedNodes.Clear();
         CreateOverview = false;
+        CreateStoryWorld = false;
     }
 }

@@ -12,7 +12,7 @@ using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.ViewModels;
 
-public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
+public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     #region Fields
 
@@ -714,6 +714,14 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
         Model.BackStory = BackStory;
     }
 
+    public void ReloadFromModel()
+    {
+        if (Model != null)
+        {
+            LoadModel();
+        }
+    }
+
     private void AddTrait()
     {
         if (!string.IsNullOrEmpty(NewTrait))
@@ -1049,21 +1057,21 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable
             StoryRoleList = _lists["StoryRole"];
             ArchetypeList = _lists["Archetype"];
             BuildList = _lists["Build"];
-            NationalityList = _lists["Country"];
-            EyesList = _lists["EyeColor"];
-            HairList = _lists["HairColor"];
+            NationalityList = _lists["Nationality"];
+            EyesList = _lists["Eyes"];
+            HairList = _lists["Hair"];
             SkinList = _lists["Complexion"];
             RaceList = _lists["Race"];
             EnneagramList = _lists["Enneagram"];
             IntelligenceList = _lists["Intelligence"];
-            ValuesList = _lists["Value"];
-            AbnormalityList = _lists["MentalIllness"];
+            ValuesList = _lists["Values"];
+            AbnormalityList = _lists["Abnormality"];
             FocusList = _lists["Focus"];
-            AdventurousnessList = _lists["Adventurous"];
-            AggressionList = _lists["Aggressiveness"];
+            AdventurousnessList = _lists["Adventureousness"];
+            AggressionList = _lists["Aggression"];
             ConfidenceList = _lists["Confidence"];
             ConscientiousnessList = _lists["Conscientiousness"];
-            CreativityList = _lists["Creativeness"];
+            CreativityList = _lists["Creativity"];
             DominanceList = _lists["Dominance"];
             EnthusiasmList = _lists["Enthusiasm"];
             AssuranceList = _lists["Assurance"];

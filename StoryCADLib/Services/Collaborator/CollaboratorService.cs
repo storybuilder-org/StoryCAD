@@ -1,8 +1,12 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 using Windows.ApplicationModel.AppExtensions;
 using Windows.ApplicationModel.Resources.Core;
 using Windows.Storage;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Markup;
+using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator.Contracts;
@@ -22,10 +26,6 @@ public class CollaboratorService
     private ICollaborator _collaboratorInterface; // Interface-based reference
     private Assembly CollabAssembly;
     private AssemblyLoadContext _pluginLoadContext; // Custom load context for plugin dependencies
-#pragma warning disable CS0169 // Field is used in platform-specific code
-    private object collaborator;
-    private Type collaboratorType;
-#pragma warning restore CS0169
     public Window CollaboratorWindow; // The secondary window for Collaborator
 #pragma warning disable CS0169, CS0414 // CS0169: unused on macOS, CS0414: assigned but unused on Windows - tracked for Issue #1126
     private bool dllExists;     // Used in Windows-only FindDll() method
@@ -56,7 +56,7 @@ public class CollaboratorService
     ///     Opens the Collaborator window with the current story context.
     ///     Collaborator handles all workflow operations internally.
     /// </summary>
-    public void OpenCollaborator()
+    public async void OpenCollaborator()
     {
         if (_collaboratorInterface == null)
         {
@@ -66,6 +66,8 @@ public class CollaboratorService
 
         // Get the current StoryModel from AppState
         var storyModel = _appState.CurrentDocument?.Model;
+        // DIAG-55: Log StoryModel identity from AppState
+        _logService.Log(LogLevel.Info, $"DIAG-55: AppState.CurrentDocument.Model hash={RuntimeHelpers.GetHashCode(storyModel)}");
         if (storyModel == null)
         {
             _logService.Log(LogLevel.Error, "No StoryModel available - no document is open");
@@ -74,14 +76,36 @@ public class CollaboratorService
 
         // Create the API instance for Collaborator to use
         var outlineService = Ioc.Default.GetService<OutlineService>();
-        if (outlineService != null)
+        var listData = Ioc.Default.GetService<ListData>();
+        var controlData = Ioc.Default.GetService<ControlData>();
+        var toolsData = Ioc.Default.GetService<ToolsData>();
+        if (outlineService != null && listData != null && controlData != null && toolsData != null)
         {
-            var api = new SemanticKernelApi(outlineService);
+            var api = new StoryCADApi(outlineService, listData, controlData, toolsData);
             api.SetCurrentModel(storyModel);
+            // DIAG-55: Log API.CurrentModel after SetCurrentModel
+            _logService.Log(LogLevel.Info, $"DIAG-55: After SetCurrentModel - api.CurrentModel hash={RuntimeHelpers.GetHashCode(api.CurrentModel)}");
 
             try
             {
-                CollaboratorWindow = _collaboratorInterface.Open(api, storyModel);
+                // Host supplies the root frame for navigation
+                var hostRoot = new StoryCADLib.Collaborator.Views.CollaboratorHostRoot();
+                var hostFrame = hostRoot.RootFrameControl;
+                if (hostFrame == null)
+                {
+                    _logService.Log(LogLevel.Error, "Collaborator host frame not found");
+                    return;
+                }
+
+                // Create the window on the host side
+                CollaboratorWindow = new Window { Content = hostRoot, Title = "Story Collaborator" };
+                CollaboratorWindow.Activate();
+
+                // Let the plugin drive the provided frame
+                // DIAG-55: Log before OpenAsync - verify both references match
+                _logService.Log(LogLevel.Info, $"DIAG-55: Before OpenAsync - storyModel hash={RuntimeHelpers.GetHashCode(storyModel)}, api.CurrentModel hash={RuntimeHelpers.GetHashCode(api.CurrentModel)}");
+                var filePath = _appState.CurrentDocument?.FilePath ?? string.Empty;
+                await _collaboratorInterface.OpenAsync(api, storyModel, CollaboratorWindow, hostFrame, filePath, _logService);
             }
             catch (Exception ex)
             {
@@ -92,7 +116,7 @@ public class CollaboratorService
             if (CollaboratorWindow != null)
             {
                 CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
-                CollaboratorWindow.Activate();
+                // Window is already activated in WindowManager.CreateWindowAsync
                 _logService.Log(LogLevel.Info, "Collaborator window opened");
             }
             else
@@ -112,29 +136,10 @@ public class CollaboratorService
     /// </summary>
     public void ConnectCollaborator()
     {
-        // Use custom load context to resolve plugin dependencies
+        // Use custom load context to resolve plugin dependencies when an explicit path is provided
         _pluginLoadContext = new PluginLoadContext(dllPath);
         CollabAssembly = _pluginLoadContext.LoadFromAssemblyPath(dllPath);
         _logService.Log(LogLevel.Info, "Loaded CollaboratorLib.dll with custom load context");
-
-        //debugging
-        Type[] collaboratorTypes;
-        try
-        {
-            collaboratorTypes = CollabAssembly.GetTypes();
-        }
-        catch (ReflectionTypeLoadException ex)
-        {
-            // Log each loader exception
-            foreach (var loaderEx in ex.LoaderExceptions)
-            {
-                if (loaderEx != null)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Loader Exception: {loaderEx.Message}");
-                }
-            }
-            throw;
-        }
 
         // Get the type of the Collaborator class
         var collaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
@@ -147,7 +152,6 @@ public class CollaboratorService
         // Create an instance of the Collaborator class using parameterless constructor
         _logService.Log(LogLevel.Info, "Creating Collaborator instance.");
 
-        // Find the parameterless constructor
         var constructor = collaboratorType.GetConstructor(Type.EmptyTypes);
         if (constructor == null)
         {
@@ -193,12 +197,11 @@ public class CollaboratorService
         }
 
         // Allow loading if:
-        // 1. Developer build AND plugin found
-        // 2. OR if STORYCAD_PLUGIN_DIR is set (for JIT debugging without F5)
+        // 1. Developer build (bundled CollaboratorLib) or
+        // 2. STORYCAD_PLUGIN_DIR is set (for JIT debugging without F5)
         var hasPluginDir = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(EnvPluginDirVar));
 
-        return (_appState.DeveloperBuild || hasPluginDir)
-               && await FindDll();
+        return hasPluginDir && await FindDll();
     }
 
     /// <summary>
@@ -206,7 +209,7 @@ public class CollaboratorService
     ///
     ///     For development/debugging:
     ///     - Set STORYCAD_PLUGIN_DIR to CollaboratorLib build output directory
-    ///     - Example: D:\dev\src\Collaborator\CollaboratorLib\bin\x64\Debug\net9.0-windows10.0.22621
+    ///     - Example: D:\dev\src\Collaborator\CollaboratorLib\bin\x64\Debug\net10.0-windows10.0.22621
     ///
     ///     For production deployment:
     ///     - Plugin will be bundled in MSIX package at AppContext.BaseDirectory
@@ -357,7 +360,35 @@ public class CollaboratorService
         }
 
         CollaboratorWindow = null;
+
+        // Reload current ViewModel from Model to pick up Collaborator's changes
+        ReloadCurrentViewModel();
+
         FinishedCallback();
+    }
+
+    /// <summary>
+    ///     Reloads the current ViewModel from the Model after Collaborator updates.
+    ///     This ensures the UI reflects changes made by Collaborator.
+    /// </summary>
+    private void ReloadCurrentViewModel()
+    {
+        try
+        {
+            if (_appState.CurrentSaveable is IReloadable reloadable)
+            {
+                _logService.Log(LogLevel.Info, "Reloading current ViewModel from Model after Collaborator close");
+                reloadable.ReloadFromModel();
+            }
+            else
+            {
+                _logService.Log(LogLevel.Debug, "No reloadable ViewModel active - skipping reload");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Error, $"Error reloading ViewModel after Collaborator close: {ex.Message}");
+        }
     }
 
     #endregion

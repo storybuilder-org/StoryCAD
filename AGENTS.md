@@ -1,13 +1,13 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-`StoryCAD/` is the WinUI 3 desktop shell (App.xaml, views, assets, manifests). Cross-cutting models, data access, and services belong in `StoryCADLib/`, which should stay UI-agnostic so tests can consume it directly. `StoryCADTests/` hosts the MSTest harness, manual-check spreadsheets, fixtures under `TestInputs/`, and coverage artifacts. Shared build knobs live in `Directory.Build.*` plus `global.json`, which pins Uno.Sdk 6.4.13 on .NET SDK 9.0.305.
+`StoryCAD/` is the WinUI 3 desktop shell (App.xaml, views, assets, manifests). Cross-cutting models, data access, and services belong in `StoryCADLib/`, which should stay UI-agnostic so tests can consume it directly. `StoryCADTests/` hosts the MSTest harness, manual-check spreadsheets, fixtures under `TestInputs/`, and coverage artifacts. Shared build knobs live in `Directory.Build.*` plus `global.json`, which pins Uno.Sdk 6.4.13 on .NET SDK 10.0.100.
 
 ## Build, Test, and Development Commands
 - `dotnet restore StoryCAD.sln` — hydrate NuGet/Uno feeds; run after branch switches.
 - `dotnet build StoryCAD.sln -c Debug` — verify both WinUI and desktop targets; add `-c Release` before packaging.
 - `dotnet run --project StoryCAD/StoryCAD.csproj` — launch the client for quick smoke tests.
-- `dotnet test StoryCADTests/StoryCADTests.csproj --settings StoryCADTests/mstest.runsettings --logger trx` — executes MSTest suites; append `-f net9.0-windows10.0.22621` to exercise WinUI-specific code.
+- `dotnet test StoryCADTests/StoryCADTests.csproj --settings StoryCADTests/mstest.runsettings --logger trx` — executes MSTest suites; append `-f net10.0-windows10.0.22621` to exercise WinUI-specific code.
 - `dotnet format StoryCAD.sln` — enforces EditorConfig and Roslyn analyzer suggestions prior to commits.
 
 ## Coding Style & Naming Conventions

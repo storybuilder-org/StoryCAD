@@ -28,7 +28,7 @@
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" VerticalAlignment="Stretch">
-                    <Border Height="50" />
+                    <Border Height="10" />
                     <TextBox PlaceholderText="What's your first name?" Margin="15" VerticalAlignment="Center"
                              Text="{x:Bind _initVM.Preferences.FirstName, Mode=TwoWay}" />
                     <TextBox PlaceholderText="What's your surname?" Margin="15" VerticalAlignment="Center"
@@ -62,7 +62,7 @@
                 <TextBlock Text="{x:Bind _initVM.ErrorMessage, Mode=TwoWay}" Foreground="Red" Grid.Row="3"
                            HorizontalAlignment="Center" />
                 <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button Content="Continue" Margin="25" HorizontalAlignment="Center" Click="Check" />
+                    <Button Content="Continue" Margin="25,10" HorizontalAlignment="Center" Click="Check" />
                     <Button Content="Join our community discord!" Background="#5865F2" Foreground="White" Margin="25"
                             HorizontalAlignment="Center" Click="Discord" />
                 </StackPanel>

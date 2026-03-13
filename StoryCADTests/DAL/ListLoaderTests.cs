@@ -15,7 +15,7 @@ public class ListLoaderTests
     [TestMethod]
     public void TestListLoaderLists()
     {
-        Assert.AreEqual(66, lists.Count);
+        Assert.AreEqual(74, lists.Count);
         // OverViewModel lists
         Assert.IsTrue(lists.ContainsKey("StoryType"));
         Assert.IsTrue(lists.ContainsKey("Voice"));
@@ -40,21 +40,21 @@ public class ListLoaderTests
         Assert.IsTrue(lists.ContainsKey("StoryRole"));
         Assert.IsTrue(lists.ContainsKey("Archetype"));
         Assert.IsTrue(lists.ContainsKey("Build"));
-        Assert.IsTrue(lists.ContainsKey("Country"));
-        Assert.IsTrue(lists.ContainsKey("EyeColor"));
-        Assert.IsTrue(lists.ContainsKey("HairColor"));
+        Assert.IsTrue(lists.ContainsKey("Nationality"));
+        Assert.IsTrue(lists.ContainsKey("Eyes"));
+        Assert.IsTrue(lists.ContainsKey("Hair"));
         Assert.IsTrue(lists.ContainsKey("Complexion"));
         Assert.IsTrue(lists.ContainsKey("Race"));
         Assert.IsTrue(lists.ContainsKey("Enneagram"));
         Assert.IsTrue(lists.ContainsKey("Intelligence"));
-        Assert.IsTrue(lists.ContainsKey("Value"));
-        Assert.IsTrue(lists.ContainsKey("MentalIllness"));
+        Assert.IsTrue(lists.ContainsKey("Values"));
+        Assert.IsTrue(lists.ContainsKey("Abnormality"));
         Assert.IsTrue(lists.ContainsKey("Focus"));
-        Assert.IsTrue(lists.ContainsKey("Adventurous"));
-        Assert.IsTrue(lists.ContainsKey("Aggressiveness"));
+        Assert.IsTrue(lists.ContainsKey("Adventureousness"));
+        Assert.IsTrue(lists.ContainsKey("Aggression"));
         Assert.IsTrue(lists.ContainsKey("Confidence"));
         Assert.IsTrue(lists.ContainsKey("Conscientiousness"));
-        Assert.IsTrue(lists.ContainsKey("Creativeness"));
+        Assert.IsTrue(lists.ContainsKey("Creativity"));
         Assert.IsTrue(lists.ContainsKey("Dominance"));
         Assert.IsTrue(lists.ContainsKey("Enthusiasm"));
         Assert.IsTrue(lists.ContainsKey("Assurance"));
@@ -78,6 +78,15 @@ public class ListLoaderTests
         Assert.IsTrue(lists.ContainsKey("Outcome"));
         Assert.IsTrue(lists.ContainsKey("Viewpoint"));
         Assert.IsTrue(lists.ContainsKey("ValueExchange"));
+        // StoryWorldViewModel lists
+        Assert.IsTrue(lists.ContainsKey("WorldType"));
+        Assert.IsTrue(lists.ContainsKey("Ontology"));
+        Assert.IsTrue(lists.ContainsKey("WorldRelation"));
+        Assert.IsTrue(lists.ContainsKey("RuleTransparency"));
+        Assert.IsTrue(lists.ContainsKey("ScaleOfDifference"));
+        Assert.IsTrue(lists.ContainsKey("AgencySource"));
+        Assert.IsTrue(lists.ContainsKey("ToneLogic"));
+        Assert.IsTrue(lists.ContainsKey("SystemType"));
         // Counts include empty string at index 0 for SelectedItem binding (Issue #1267)
         Assert.AreEqual(8, lists["Season"].Count);
         Assert.AreEqual(6, lists["Viewpoint"].Count);

@@ -291,6 +291,13 @@ public class OutlineService
             throw new InvalidOperationException("Cannot add a new node to the Trash Can.");
         }
 
+        // StoryWorld is a singleton - only one per story
+        if (typeToAdd == StoryItemType.StoryWorld && StoryWorldExists(model))
+        {
+            _log.Log(LogLevel.Warn, "StoryWorld already exists - only one allowed per story");
+            return null;
+        }
+
         StoryElement newElement = typeToAdd switch
         {
             StoryItemType.Folder => new FolderModel("New Folder",model,StoryItemType.Folder, parent),
@@ -301,10 +308,22 @@ public class OutlineService
             StoryItemType.Scene => new SceneModel(model, parent),
             StoryItemType.Web => new WebModel(model, parent),
             StoryItemType.Notes => new FolderModel("New Note", model, StoryItemType.Notes, parent),
+            StoryItemType.StoryWorld => new StoryWorldModel(model, parent),
             _ => throw new InvalidOperationException("Cannot add a new element of type " + typeToAdd)
         };
         _log.Log(LogLevel.Info, "AddStoryElement completed.");
         return newElement;
+    }
+
+    /// <summary>
+    ///     Checks if a StoryWorld element already exists in the model.
+    ///     StoryWorld is a singleton - only one per story.
+    /// </summary>
+    /// <param name="model">The StoryModel to check</param>
+    /// <returns>True if a StoryWorld exists, false otherwise</returns>
+    internal bool StoryWorldExists(StoryModel model)
+    {
+        return model.StoryElements.Any(e => e.ElementType == StoryItemType.StoryWorld);
     }
 
     /// <summary>

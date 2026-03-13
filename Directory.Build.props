@@ -25,4 +25,9 @@
         <!-- Disable out-of-process task host for embedded resources (CI compatibility) -->
         <DisableOutOfProcTaskHost>true</DisableOutOfProcTaskHost>
     </PropertyGroup>
+
+    <!-- Beta build compile constant: pass -p:IsBetaBuild=true from CI to define BETA_BUILD -->
+    <PropertyGroup Condition="'$(IsBetaBuild)' == 'true'">
+        <DefineConstants>$(DefineConstants);BETA_BUILD</DefineConstants>
+    </PropertyGroup>
 </Project>

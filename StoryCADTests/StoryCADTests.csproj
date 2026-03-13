@@ -4,14 +4,20 @@
         <UnoSingleProject>true</UnoSingleProject>
         <LangVersion>latest</LangVersion>
         <RootNamespace>StoryCADTests</RootNamespace>
+        <DefaultLanguage>en-us</DefaultLanguage>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
         <IsTestProject>true</IsTestProject>
         <TestProjectType>UnitTest</TestProjectType>
         <EnableMSTestRunner>true</EnableMSTestRunner>
+        <GenerateUnoMain>false</GenerateUnoMain>
         <GenerateLibraryLayout>true</GenerateLibraryLayout>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <WarningsAsErrors>UNO0001</WarningsAsErrors>
+        <!-- Suppress CS8892: MSTest and Uno both generate Main entry points, this is expected -->
+        <NoWarn>$(NoWarn);CS8892</NoWarn>
+        <!-- Platforms must be unconditional so VS sees them regardless of which TFM is evaluated first -->
+        <Platforms>x86;x64;arm64</Platforms>
 
         <!-- Test features -->
         <UnoFeatures>
@@ -21,25 +27,26 @@
 
     <!-- Target frameworks based on OS -->
     <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
-        <TargetFrameworks>net9.0-windows10.0.22621;net9.0-desktop</TargetFrameworks>
+        <TargetFrameworks>net10.0-desktop;net10.0-windows10.0.22621</TargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
-        <TargetFrameworks>net9.0-desktop</TargetFrameworks>
+        <TargetFrameworks>net10.0-desktop</TargetFrameworks>
     </PropertyGroup>
 
     <!-- Windows-specific settings -->
-    <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
+    <PropertyGroup Condition="'$(TargetFramework)'=='net10.0-windows10.0.22621'">
         <UseWinUI>true</UseWinUI>
         <EnableMsixTooling>false</EnableMsixTooling>
         <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
         <ApplicationManifest>app.manifest</ApplicationManifest>
-        <Platforms>x86;x64;arm64</Platforms>
         <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+        <!-- Disable Uno-generated Program.cs to avoid conflict with MSTest entry point -->
+        <GenerateProgramFile>false</GenerateProgramFile>
     </PropertyGroup>
 
     <!-- Desktop-specific settings -->
-    <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-desktop'">
+    <PropertyGroup Condition="'$(TargetFramework)'=='net10.0-desktop'">
         <UseWinUI>false</UseWinUI>
     </PropertyGroup>
 
@@ -76,7 +83,7 @@
     </ItemGroup>
 
     <!-- Windows-specific content -->
-    <ItemGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.22621'">
+    <ItemGroup Condition="'$(TargetFramework)'=='net10.0-windows10.0.22621'">
         <AppxManifest Include="Package.appxmanifest">
             <SubType>Designer</SubType>
         </AppxManifest>

@@ -31,14 +31,23 @@ public class CollaboratorInterfaceTests
     /// </summary>
     private class MockCollaborator : ICollaborator
     {
-        public Window Open(IStoryCADAPI api, StoryModel model)
+        public Task<Window> OpenAsync(IStoryCADAPI api, StoryModel model, Window hostWindow, Frame hostFrame, string filePath, StoryCADLib.Services.Logging.ILogService? logger = null)
         {
-            return null;
+            return Task.FromResult<Window>(null);
         }
 
         public CollaboratorResult Close()
         {
             return new CollaboratorResult { Completed = true, Summary = "mock" };
+        }
+
+        public void SetSettings(CollaboratorSettings settings)
+        {
+        }
+
+        public CollaboratorSettings GetSettings()
+        {
+            return new CollaboratorSettings();
         }
 
         public void Dispose()

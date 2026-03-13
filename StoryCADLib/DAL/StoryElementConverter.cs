@@ -39,6 +39,7 @@ public class StoryElementConverter : JsonConverter<StoryElement>
                 "Web" => typeof(WebModel),
                 "Notes" => typeof(FolderModel),
                 "TrashCan" => typeof(TrashCanModel),
+                "StoryWorld" => typeof(StoryWorldModel),
                 _ => null
             };
 
@@ -103,6 +104,7 @@ public class StoryElementConverter : JsonConverter<StoryElement>
                 FolderModel { ElementType: StoryItemType.Section } => "Section",
                 WebModel _ => "Web",
                 TrashCanModel _ => "TrashCan",
+                StoryWorldModel _ => "StoryWorld",
                 _ => "Unknown"
             };
 

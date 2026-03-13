@@ -31,9 +31,7 @@ public class Changelog
             }
 
             //Returns body of release
-            var version = _appDat.Version.Replace("Version: ", "") + ".0";
-
-            return (await _client.Repository.Release.Get("StoryBuilder-org", "StoryCAD", version)).Body;
+            return (await _client.Repository.Release.Get("StoryBuilder-org", "StoryCAD", _appDat.Version)).Body;
         }
         catch (Exception _e)
         {
