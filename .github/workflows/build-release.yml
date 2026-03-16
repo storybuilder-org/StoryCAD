@@ -258,13 +258,6 @@ jobs:
           Remove-Item "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx" -Force -ErrorAction SilentlyContinue
           Remove-Item "${{ github.workspace }}\StoryCAD\.env","${{ github.workspace }}\StoryCADTests\.env" -Force -ErrorAction SilentlyContinue
 
-      - name: Remove .env (macOS)
-        if: matrix.os == 'macos-latest'
-        continue-on-error: true
-        run: |
-          rm -f "${{ github.workspace }}/StoryCAD/.env"
-          rm -f "${{ github.workspace }}/StoryCADTests/.env"
-
       - name: Publish macOS package
         if: matrix.os == 'macos-latest'
         run: |
@@ -305,6 +298,13 @@ jobs:
 
           # Delete build .app to prevent installer relocation bug
           rm -rf "$APP_DIR"
+
+      - name: Remove .env (macOS)
+        if: matrix.os == 'macos-latest'
+        continue-on-error: true
+        run: |
+          rm -f "${{ github.workspace }}/StoryCAD/.env"
+          rm -f "${{ github.workspace }}/StoryCADTests/.env"
 
       - name: Zip MSIX artifacts (Windows)
         if: matrix.os == 'windows-latest'
