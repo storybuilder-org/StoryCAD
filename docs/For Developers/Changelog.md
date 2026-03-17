@@ -7,6 +7,98 @@ parent: For Developers
 has_toc: false
 ---
 ## StoryCAD ChangeLog
+## StoryCAD Release Notes
+
+### Release 4.0 (March 2026)
+
+**Bug Fixes**
+- CommandBar overflow menu on narrow windows (#1282)
+- Crash during shutdown in UpdateWindowTitle (#1293)
+- Tools inserting into trash node (#1325)
+- Tools inserting into narrative view (#1327)
+- [macOS] CTRL/CMD+O not working (#1336)
+- [macOS] Narrative editor glyph rendering (#1335)
+- [macOS] Context menu submenu dismissal on Uno Desktop (#1323)
+
+**Refactors & Improvements**
+- Navigation state moved from ShellViewModel to AppState (#1146)
+- SemanticKernel renamed to StoryCADApi (#1304)
+- ILogService added to Collaborator (#52)
+- Collaborator Help flyout (#54)
+- PreferenceInitialisation dialog sizing adjusted
+- Storyworld data cleanup
+- Test coverage gaps closed (#1320)
+
+**Dependencies**
+- SemanticKernel updated to 1.70.0 (#1305)
+- Uno Platform SDK updated
+
+**Distribution & CI**
+- [macOS] App Store distribution enabled (#1298, #1321)
+- CFBundleVersion auto-set from GitHub Actions run number (#1340)
+- Updated binds
+
+**Docs**
+- Roadmap update (#1312)
+- Manual URL updated
+- Beta manual added with syncing support
+
+---
+
+### Release 3.4.1.0 (January 2026)
+
+- Fixed ComboBox data retention on Role tab (#1267)
+- Fixed AddRelationship NullReferenceException (#1219)
+- Removed BOM and fixed typo in Tools.json
+- Disabled ReadyToRun in MSIX generation
+- Updated architecture mappings
+- Added diagnostic logging to navigation and ViewModels (#55)
+- Added updated licensing terms and carve-outs
+- README and CONTRIBUTING updates
+- Updated developer name to StoryBuilder Foundation
+
+---
+
+### Release 3.4.0.0 (December 2025)
+
+**Features**
+- TabView replacement for all Pivot controls (#1116)
+- RadioButtons for Scene/Problem toggle in Structure tab (#1179)
+- macOS support via Uno Platform Desktop head (#1159, #1130)
+- Autosave status icon (#1183)
+- Searchable Beatsheets (#1176)
+- PDF print option (#962)
+- Hide file menu option
+- Overview auto-opens when opening an outline
+
+**Bug Fixes**
+- Cascading MySQL errors on connection failure (#1202)
+- CI/CD compilation errors
+- Windows MSIX deployment issues (#1161)
+- COM exception during shutdown
+- Change indicator going red when navigating between nodes (#1175)
+- Beat selection in Structure tab
+- Move Story Elements arrow glyphs not displaying (#1136)
+- Reports menu icon on desktop head (#1136)
+- Missing checkbox in Uno Desktop Getting Started dialog
+- Collaborator XAML resources loading (#1088)
+- Lock contention in GetStoryElementByGuid
+- Window exceeding screen bounds on small displays (#1212)
+- Unpersisted writes crash on close (#1211)
+
+**Improvements**
+- DPI scaling updates (#1160, #1212, #1213)
+- Manual updated (#1205)
+- Code cleanup and documentation
+- BackendService StartupRecording exception handling tests
+- Removed completed devdocs
+
+**API Changes**
+- Namespace reorganisation
+- ViewType removed from delete function
+- `DeleteStoryElement` → `DeleteElement`
+- `SetCurrentModel` removed (set directly)
+- API consumers must now be a Uno project
 
 #### Release 3.3.0.0
 StoryCAD 3.3.0.0 was released in September 2025.

@@ -24,6 +24,11 @@
                                   Visibility="{x:Bind ShellVm.AddButtonVisibility, Mode=OneWay}">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
+                                <MenuFlyout.MenuFlyoutPresenterStyle>
+                                    <Style TargetType="MenuFlyoutPresenter">
+                                        <Setter Property="Margin" Value="-16,0,0,0"/>
+                                    </Style>
+                                </MenuFlyout.MenuFlyoutPresenterStyle>
                                 <MenuFlyoutItem Icon="Folder"
                                                 Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
@@ -111,7 +116,12 @@
                             <ToolTip Content="Empty trash" />
                         </ToolTipService.ToolTip>
                         <AppBarButton.Flyout>
-                            <Flyout>
+                            <Flyout x:Name="EmptyTrashFlyout">
+                                <Flyout.FlyoutPresenterStyle>
+                                    <Style TargetType="FlyoutPresenter">
+                                        <Setter Property="Margin" Value="-16,0,0,0"/>
+                                    </Style>
+                                </Flyout.FlyoutPresenterStyle>
                                 <StackPanel>
                                     <TextBlock Text="Are you sure you want to empty the trash?"
                                                HorizontalAlignment="Center" Margin="0,0,0,10" />
