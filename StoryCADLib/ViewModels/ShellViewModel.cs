@@ -472,7 +472,7 @@ public class ShellViewModel : ObservableRecipient
 
     /// <summary>
     ///     Controls visibility for elements that should only be shown in the Trash view.
-    /// </summary
+    /// </summary>
     public Visibility TrashButtonVisibility
     {
         get => _trashButtonVisibility;

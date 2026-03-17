@@ -22,6 +22,10 @@
     -->
         <WarningsAsErrors>UNO0001</WarningsAsErrors>
 
+        <!-- Generate XML documentation for API reference -->
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+
     </PropertyGroup>
 
     <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">

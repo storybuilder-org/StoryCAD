@@ -13,32 +13,32 @@ using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.Services.API;
 
+/// <summary>
 ///     This class is designed for integration with Semantic Kernel, if you are writing
 ///     something that's not AI, you probably want to use OutlineService directly.
-/// 
+///
 ///     For detailed documentation on using the StoryCAD API, please refer to:
 ///     https://manual.storybuilder.org/docs/For%20Developers/Using_the_API.html
-/// 
+///
 ///     Usage:
 ///     - State Handling: The API operates on a CurrentModel property which holds the active StoryModel instance.
 ///     This model must be set before most operations can be performed, either via SetCurrentModel() or by
 ///     creating a new outline with CreateEmptyOutline().
-///     - Calling Standard: All public API methods return OperationResult<T> to ensure safe external consumption.
+///     - Calling Standard: All public API methods return OperationResult&lt;T&gt; to ensure safe external consumption.
 ///         No exceptions are thrown to external callers; all errors are communicated through the OperationResult
 ///         pattern with IsSuccess flags and descriptive ErrorMessage strings.
+/// </summary>
 public class StoryCADApi(OutlineService outlineService, ListData listData, ControlData controlData, ToolsData toolsData) : IStoryCADAPI
 {
     public StoryModel CurrentModel { get; set; }
 
     /// <summary>
     ///     Creates a new empty story outline based on a template.
-    ///     Parameters:
-    ///     filePath - full path to the file that will back the outline
-    ///     name - the name to use for the outline's Overview element
-    ///     author - the author name for the overview
-    ///     templateIndex - index (as a string) specifying the template to use
-    ///     Returns a JSON-serialized OperationResult payload containing a list of the StoryElement Guids.
     /// </summary>
+    /// <param name="name">The name to use for the outline's Overview element.</param>
+    /// <param name="author">The author name for the overview.</param>
+    /// <param name="templateIndex">Index (as a string) specifying the template to use.</param>
+    /// <returns>An OperationResult containing a list of the StoryElement Guids.</returns>
     [KernelFunction]
     [Description("Creates a new empty story outline from a template.")]
     public async Task<OperationResult<List<Guid>>> CreateEmptyOutline(string name, string author, string templateIndex)
@@ -379,9 +379,6 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         or if any error occurs (such as a type conversion issue), the operation will fails.
         You should use AddCastMember and AddRelationship for updating those fields when updating those fields.
         """)]
-    /// <summary>
-    /// Implementation of IStoryCADAPI.UpdateElementProperty with compatible return type
-    /// </summary>
     OperationResult<object> IStoryCADAPI.UpdateElementProperty(Guid elementUuid, string propertyName, object value)
     {
         var result = UpdateElementProperty(elementUuid, propertyName, value);
