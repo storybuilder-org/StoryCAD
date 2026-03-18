@@ -80,9 +80,9 @@ public interface INavigationService
     ///     a specified frame.
     ///     Depending on the platforms, the navigation service might
     ///     have to be configured with a key/page list.
-    ///     <param name="frame"> The frame or subframe on which to display the page </param>
-    ///     <param name="pageKey">The key corresponding to the page that should be displayed.</param>
     /// </summary>
+    /// <param name="frame">The frame or subframe on which to display the page.</param>
+    /// <param name="pageKey">The key corresponding to the page that should be displayed.</param>
     void NavigateTo(Frame frame, string pageKey);
 
     /// <summary>
@@ -92,7 +92,7 @@ public interface INavigationService
     ///     Depending on the platforms, the navigation service might
     ///     have to be Configure with a key/page list.
     /// </summary>
-    /// <param name="frame"> The frame or subframe on which to display the page </Param>
+    /// <param name="frame"> The frame or subframe on which to display the page </param>
     /// <param name="pageKey">
     ///     The key corresponding to the page
     ///     that should be displayed.

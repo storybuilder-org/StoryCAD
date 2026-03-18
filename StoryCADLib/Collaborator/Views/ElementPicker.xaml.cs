@@ -87,9 +87,4 @@ public sealed partial class ElementPicker : Page
             }
         }
     }
-
-    /// <summary>
-    /// Custom XAML initialization for dynamically loaded plugin DLL.
-    /// See WorkflowShell.xaml.cs for detailed explanation of this pattern.
-    /// </summary>
 }

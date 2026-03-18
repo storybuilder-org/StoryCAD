@@ -484,9 +484,10 @@ public class OutlineService
     /// <summary>
     ///     Adds a new cast member to a scene.
     /// </summary>
-    /// <param name="source">Scene element you are adding the cast member to </param>
+    /// <param name="Model">The story model containing the elements.</param>
+    /// <param name="source">Scene element you are adding the cast member to.</param>
     /// <param name="castMember">Cast member you want to add.</param>
-    /// <returns></returns>
+    /// <returns>True if the cast member was added successfully.</returns>
     internal bool AddCastMember(StoryModel Model, StoryElement source, Guid castMember)
     {
         if (source == null)
@@ -744,10 +745,10 @@ public class OutlineService
     /// <summary>
     ///     Add beat to a ProblemModel.
     /// </summary>
-    /// <param name="Parent"></param>
-    /// <param name="Title"></param>
-    /// <param name="Description"></param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <param name="Parent">The problem model to add the beat to.</param>
+    /// <param name="Title">The title of the beat.</param>
+    /// <param name="Description">The description of the beat.</param>
+    /// <exception cref="ArgumentNullException">Thrown when Parent is null.</exception>
     internal void CreateBeat(ProblemModel Parent, string Title, string Description)
     {
         if (Parent == null)
@@ -760,10 +761,11 @@ public class OutlineService
     }
 
     /// <summary>
-    ///     Deletes a beat and unbinds elements if nesscessary.
+    ///     Deletes a beat and unbinds elements if necessary.
     /// </summary>
-    /// <param name="Model"></param>
-    /// <param name="Index"></param>
+    /// <param name="Model">The story model containing the elements.</param>
+    /// <param name="Parent">The problem model containing the beat.</param>
+    /// <param name="Index">The index of the beat to delete.</param>
     internal void DeleteBeat(StoryModel Model, ProblemModel Parent, int Index)
     {
         if (Model == null)
@@ -811,16 +813,17 @@ public class OutlineService
     }
 
     /// <summary>
-    ///     Sets basic infomation about the beat sheet/creates a new one
+    ///     Sets basic information about the beat sheet/creates a new one.
     ///     If one exists, it will be overwritten and any beats in it will be unbound.
     /// </summary>
-    /// <param name="Description">Description of you beatsheet, i.e. what is its structure?</param>
-    /// <param name="Model">Problem element you are trying to add the beatsheet to</param>
+    /// <param name="Model">The story model containing the elements.</param>
+    /// <param name="Parent">Problem element you are trying to add the beat sheet to.</param>
+    /// <param name="Description">Description of your beat sheet, i.e. what is its structure?</param>
     /// <param name="Title">
-    ///     This is the title of your beat sheet,
-    ///     if it is not Custom Beat Sheet it will not be editable within the StoryCAD app.
+    ///     This is the title of your beat sheet.
+    ///     If it is not "Custom Beat Sheet" it will not be editable within the StoryCAD app.
     /// </param>
-    /// <param name="Beats">Beats that this sheet will contain, can be added later</param>
+    /// <param name="Beats">Beats that this sheet will contain, can be added later.</param>
     public void SetBeatSheet(StoryModel Model, ProblemModel Parent, string Description,
         string Title = "Custom Beat Sheet", ObservableCollection<StructureBeatViewModel> Beats = null)
     {
