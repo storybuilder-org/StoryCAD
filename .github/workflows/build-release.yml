@@ -426,6 +426,16 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Decode changelog
+        id: changelog
+        if: needs.generate-changelog.outputs.changelog_b64 != ''
+        shell: bash
+        run: |
+          BODY=$(echo "${{ needs.generate-changelog.outputs.changelog_b64 }}" | base64 -d)
+          echo "body<<CHANGELOG_EOF" >> $GITHUB_OUTPUT
+          echo "$BODY" >> $GITHUB_OUTPUT
+          echo "CHANGELOG_EOF" >> $GITHUB_OUTPUT
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
 
@@ -434,6 +444,7 @@ jobs:
         with:
           tag_name: ${{ needs.build.outputs.tag_version }}
           name: Release ${{ needs.build.outputs.tag_version }}
+          body: ${{ steps.changelog.outputs.body }}
           files: |
             storycad-msix-win-x64/storycad-msix-win-x64.zip
             storycad-msix-win-arm64/storycad-msix-win-arm64.zip
