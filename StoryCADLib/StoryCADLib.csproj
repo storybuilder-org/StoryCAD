@@ -203,6 +203,7 @@
 
     <ItemGroup>
         <Content Remove="Assets\Icon.png" />
+        <Content Remove="Assets\Install\changelog.txt" />
         <Content Remove="Assets\Install\Bibliog.txt" />
         <Content Remove="Assets\Install\Controls.json" />
         <Content Remove="Assets\Install\Lists.json" />
@@ -226,6 +227,7 @@
         <Content Remove="Assets\Install\samples\The Maltese Falcon.stbx" />
         <Content Remove="Assets\Install\samples\The Old Man and the Sea.stbx" />
         <Content Remove="Assets\Install\Symbols.json" />
+        <EmbeddedResource Include="Assets\Install\changelog.txt" />
         <EmbeddedResource Include="Assets\Install\Bibliog.txt" />
         <EmbeddedResource Include="Assets\Install\Controls.json" />
         <EmbeddedResource Include="Assets\Install\Lists.json" />

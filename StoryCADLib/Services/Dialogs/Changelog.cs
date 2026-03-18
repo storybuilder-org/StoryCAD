@@ -1,4 +1,4 @@
-﻿using Octokit;
+using System.Reflection;
 
 namespace StoryCADLib.Services.Dialogs;
 
@@ -8,7 +8,6 @@ namespace StoryCADLib.Services.Dialogs;
 public class Changelog
 {
     private readonly AppState _appDat;
-    private readonly GitHubClient _client = new(new ProductHeaderValue("STB"));
     private readonly ILogService _logger;
 
     public Changelog(ILogService logger, AppState appState)
@@ -25,34 +24,22 @@ public class Changelog
     {
         try
         {
-            if (_appDat.Version.Contains("Built on:")) //Checks user isn't running a development version of StoryCAD
+            await using var stream = Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream("StoryCADLib.Assets.Install.changelog.txt");
+
+            if (stream is null)
             {
-                return "Changelogs are unavailable for development versions of StoryCAD.";
+                _logger.Log(LogLevel.Warn, "changelog.txt embedded resource not found");
+                return "Changelog is unavailable.";
             }
 
-            //Returns body of release
-            return (await _client.Repository.Release.Get("StoryBuilder-org", "StoryCAD", _appDat.Version)).Body;
+            using var reader = new StreamReader(stream);
+            return await reader.ReadToEndAsync();
         }
-        catch (Exception _e)
+        catch (Exception e)
         {
-            if (_e.Source!.Contains("Net"))
-            {
-                _logger.Log(LogLevel.Info,
-                    "Error with network, user probably isn't connected to wifi or is using an auto build");
-            }
-
-            if (_e.Source!.Contains("Octokit.NotFoundException"))
-            {
-                _logger.Log(LogLevel.Info, "Error finding changelog for this version");
-            }
-
-            //Return error message
-            return
-                """
-                Failed to get changelog for this version, this because either:
-                 - You are using a development version of StoryCAD
-                 - An issue was encountered connecting to GitHub to get the release information
-                """;
+            _logger.LogException(LogLevel.Error, e, "Error reading embedded changelog");
+            return "Failed to load changelog.";
         }
     }
 
