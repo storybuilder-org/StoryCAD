@@ -9,6 +9,7 @@ namespace StoryCADLib.ViewModels;
 /// Manages index tracking, Previous/Next/Add/Remove commands,
 /// and fires callbacks for change detection and proxy property re-notification.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class ListNavigator<T> : ObservableObject where T : class
 {
     private readonly ObservableCollection<T> _items;

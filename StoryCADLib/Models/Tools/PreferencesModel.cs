@@ -12,6 +12,7 @@ namespace StoryCADLib.Models.Tools;
 ///     If Preferences.json doesn't exist, it will be created once the user hits done within
 ///     the preferences initialisation screen.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class PreferencesModel : ObservableObject
 {
     #region Constructor

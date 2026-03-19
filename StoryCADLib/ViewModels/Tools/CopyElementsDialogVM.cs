@@ -14,6 +14,7 @@ namespace StoryCADLib.ViewModels.Tools;
 /// Allows copying story elements (Character, Setting, StoryWorld, Problem, Notes, Web)
 /// from the current outline to another outline file.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class CopyElementsDialogVM : ObservableRecipient
 {
     private readonly AppState _appState;

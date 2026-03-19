@@ -3,6 +3,7 @@ using StoryCADLib.Services;
 
 namespace StoryCADLib.Models;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class WebModel : StoryElement
 {
     [JsonInclude] [JsonPropertyName("Timestamp")]

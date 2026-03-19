@@ -8,6 +8,7 @@ namespace StoryCADLib.Models;
 /// Contains worldbuilding information organized by category.
 /// Single instance per story (like StoryOverview), but optional.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class StoryWorldModel : StoryElement
 {
     #region Structure Tab Properties (World Type Classification)

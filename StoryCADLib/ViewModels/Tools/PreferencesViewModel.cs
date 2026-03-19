@@ -18,6 +18,7 @@ namespace StoryCADLib.ViewModels.Tools;
 ///     https://xamlbrewer.wordpress.com/2021/06/07/data-validation-with-the-microsoft-mvvm-toolkit/
 ///     https://learn.microsoft.com/en-us/dotnet/api/system.componentmodel.dataannotations?view=net-7.0
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class PreferencesViewModel : ObservableValidator
 {
     private readonly BackendService _backendService;

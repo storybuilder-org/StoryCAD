@@ -15,6 +15,7 @@ namespace StoryCADLib.ViewModels;
 ///     another Section as its parent. Sections are Chapters, Acts,
 ///     etc.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     #region Fields

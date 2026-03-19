@@ -10,6 +10,7 @@ namespace StoryCADLib.ViewModels.Tools;
 /// <summary>
 ///     This is the PreferencesInitialization ViewModel, this data
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class InitVM : ObservableRecipient
 {
     private readonly BackendService _backendService;

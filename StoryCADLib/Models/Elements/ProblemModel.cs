@@ -4,6 +4,7 @@ using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.Models;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class ProblemModel : StoryElement
 {
     #region Properties

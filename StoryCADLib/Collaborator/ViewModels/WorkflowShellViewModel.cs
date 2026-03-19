@@ -11,6 +11,7 @@ namespace StoryCADLib.Collaborator.ViewModels;
 /// <summary>
 /// ViewModel for WorkflowShell - manages the navigation menu and shell-level operations
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public partial class WorkflowShellViewModel : ObservableRecipient
 {
     public WorkflowShellViewModel()

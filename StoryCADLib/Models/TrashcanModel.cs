@@ -4,6 +4,7 @@
 ///     The TrashCanModel is a container for deleted StoryElements. It's the second root node
 ///     in both the Explorer View and Narrator Views, and contains no properties.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class TrashCanModel : StoryElement
 {
     #region Constructors

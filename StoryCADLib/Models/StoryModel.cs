@@ -8,6 +8,7 @@ using StoryCADLib.DAL;
 namespace StoryCADLib.Models;
 
 // This class implements ObservableObject and contains view-specific logic
+[Microsoft.UI.Xaml.Data.Bindable]
 public class StoryModel : ObservableObject
 {
     /// <summary>

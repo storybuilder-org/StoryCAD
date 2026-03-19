@@ -10,6 +10,7 @@ namespace StoryCADLib.Models;
 /// <summary>
 ///     This class holds developer tools and app data.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class AppState
 {
     private StoryDocument? _currentDocument;

@@ -9,6 +9,7 @@ namespace StoryCADLib.Models;
 ///     collections when StoryElementCollection has elements added or
 ///     removed.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class StoryElementCollection : ObservableCollection<StoryElement>
 {
     public ObservableCollection<StoryElement> Characters;

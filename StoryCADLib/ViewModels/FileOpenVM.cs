@@ -16,6 +16,7 @@ namespace StoryCADLib.ViewModels;
 ///     FileOpen Menu shows the most recent files, sample stories and
 ///     allows a user create a new story.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class FileOpenVM : ObservableRecipient
 {
     private readonly FileCreateService _fileCreateService;

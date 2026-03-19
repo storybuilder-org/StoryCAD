@@ -4,6 +4,7 @@ using StoryCADLib.Models.Tools;
 
 namespace StoryCADLib.ViewModels.Tools;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class StockScenesViewModel : ObservableRecipient
 {
     #region Combobox and ListBox sources

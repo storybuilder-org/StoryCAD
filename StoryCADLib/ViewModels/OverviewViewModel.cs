@@ -14,6 +14,7 @@ namespace StoryCADLib.ViewModels;
 ///     There is only one OverviewModel instance for each story. It's also the root of the Shell Page's
 ///     StoryExplorer TreeView.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     #region Fields
