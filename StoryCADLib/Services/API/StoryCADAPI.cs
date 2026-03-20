@@ -1699,28 +1699,29 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         if (CurrentModel == null)
             return OperationResult<bool>.Failure("No StoryModel available");
 
-        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == elementGuid);
-        if (element == null)
-            return OperationResult<bool>.Failure($"Element with GUID '{elementGuid}' not found");
-
-        var newParent = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == newParentGuid);
-        if (newParent == null)
-            return OperationResult<bool>.Failure($"New parent with GUID '{newParentGuid}' not found");
-
-        if (element.Node == null || newParent.Node == null)
-            return OperationResult<bool>.Failure("Element or new parent has no node in the tree");
-
-        if (element.Node.IsRoot)
-            return OperationResult<bool>.Failure("Cannot move the root element");
-
-        if (element.ElementType == StoryItemType.TrashCan)
-            return OperationResult<bool>.Failure("Cannot move the TrashCan");
+        if (CurrentModel.ExplorerView == null || CurrentModel.ExplorerView.Count == 0)
+            return OperationResult<bool>.Failure("ExplorerView is not available");
 
         if (elementGuid == newParentGuid)
             return OperationResult<bool>.Failure("Cannot move an element to itself");
 
+        // Find nodes in the ExplorerView tree (not element.Node, which may point to NarratorView)
+        var elementNode = FindNodeInTree(CurrentModel.ExplorerView[0], elementGuid);
+        if (elementNode == null)
+            return OperationResult<bool>.Failure($"Element with GUID '{elementGuid}' not found in ExplorerView");
+
+        var newParentNode = FindNodeInTree(CurrentModel.ExplorerView[0], newParentGuid);
+        if (newParentNode == null)
+            return OperationResult<bool>.Failure($"New parent with GUID '{newParentGuid}' not found in ExplorerView");
+
+        if (elementNode.IsRoot)
+            return OperationResult<bool>.Failure("Cannot move the root element");
+
+        if (elementNode.Type == StoryItemType.TrashCan)
+            return OperationResult<bool>.Failure("Cannot move the TrashCan");
+
         // Check for circular reference: walk up from newParent to ensure element is not an ancestor
-        var current = newParent.Node;
+        var current = newParentNode;
         while (current != null)
         {
             if (current.Uuid == elementGuid)
@@ -1728,16 +1729,34 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
             current = current.Parent;
         }
 
-        // Perform the move
-        var oldParent = element.Node.Parent;
+        // Perform the move in the ExplorerView tree
+        var oldParent = elementNode.Parent;
         if (oldParent == null)
             return OperationResult<bool>.Failure("Element has no parent to detach from");
 
-        oldParent.Children.Remove(element.Node);
-        element.Node.Parent = newParent.Node;
-        newParent.Node.Children.Add(element.Node);
+        oldParent.Children.Remove(elementNode);
+        elementNode.Parent = newParentNode;
+        newParentNode.Children.Add(elementNode);
 
         return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Finds a StoryNodeItem by GUID in a tree by recursive depth-first search.
+    /// </summary>
+    private static StoryNodeItem FindNodeInTree(StoryNodeItem root, Guid guid)
+    {
+        if (root.Uuid == guid)
+            return root;
+
+        foreach (var child in root.Children)
+        {
+            var found = FindNodeInTree(child, guid);
+            if (found != null)
+                return found;
+        }
+
+        return null;
     }
 
     /// <summary>
