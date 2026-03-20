@@ -8,6 +8,7 @@ namespace StoryCADLib.Models;
 ///     There is only one OverviewModel instance for each story. It's also the root of the Shell Page's
 ///     StoryExplorer TreeView.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class OverviewModel : StoryElement
 {
     /* Handing date fields and author:

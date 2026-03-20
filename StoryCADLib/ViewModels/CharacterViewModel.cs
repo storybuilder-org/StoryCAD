@@ -12,6 +12,7 @@ using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.ViewModels;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     #region Fields

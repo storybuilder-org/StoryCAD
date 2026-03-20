@@ -5,6 +5,7 @@ using StoryCADLib.DAL;
 
 namespace StoryCADLib.Models;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class StoryElement : ObservableObject
 {
     #region Properties

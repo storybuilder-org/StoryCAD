@@ -2,6 +2,7 @@
 
 namespace StoryCADLib.ViewModels;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class SaveAsViewModel : ObservableRecipient
 {
     #region Properties

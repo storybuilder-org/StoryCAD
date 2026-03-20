@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace StoryCADLib.Models;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class SettingModel : StoryElement
 {
     #region Static Properties

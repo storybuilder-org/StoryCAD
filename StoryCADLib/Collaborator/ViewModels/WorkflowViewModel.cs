@@ -13,6 +13,7 @@ namespace StoryCADLib.Collaborator.ViewModels;
 /// - Initialize(WorkflowModel) is called from WorkflowPage.OnNavigatedTo
 /// - Do NOT pull from service in constructor - receive data from navigation
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public partial class WorkflowViewModel : ObservableRecipient
 {
     public WorkflowViewModel()

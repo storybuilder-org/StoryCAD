@@ -8,6 +8,7 @@ using StoryCADLib.Services.Navigation;
 
 namespace StoryCADLib.ViewModels;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     #region Constructors

@@ -1,5 +1,6 @@
 ﻿namespace StoryCADLib.Models;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class FolderModel : StoryElement
 {
     #region Constructor

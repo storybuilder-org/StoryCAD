@@ -5,6 +5,7 @@ namespace StoryCADLib.ViewModels;
 /// <summary>
 ///     Viewmodel for the backup view model.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class BackupNowVM : ObservableRecipient
 {
     private string _location;

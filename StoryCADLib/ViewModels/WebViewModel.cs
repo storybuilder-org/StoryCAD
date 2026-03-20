@@ -10,6 +10,7 @@ using StoryCADLib.Services.Navigation;
 
 namespace StoryCADLib.ViewModels;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class WebViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     public delegate void GoBackDelegate();

@@ -22,6 +22,7 @@ using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.ViewModels;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class ShellViewModel : ObservableRecipient
 {
     private const string HomePage = "HomePage";

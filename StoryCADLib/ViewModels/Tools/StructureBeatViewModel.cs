@@ -7,6 +7,7 @@ namespace StoryCADLib.ViewModels.Tools;
 /// <summary>
 ///     Model for how the StructureModelTitle Tab works in problem.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class StructureBeatViewModel : ObservableObject
 {
     private readonly AppState _appState;

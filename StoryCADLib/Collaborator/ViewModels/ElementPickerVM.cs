@@ -7,6 +7,7 @@ namespace StoryCADLib.Collaborator.ViewModels;
 /// <summary>
 ///     ViewModel for the Element Picker
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class ElementPickerVM
 {
     /// <summary>

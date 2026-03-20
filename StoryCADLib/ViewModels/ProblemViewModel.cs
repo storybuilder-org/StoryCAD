@@ -14,6 +14,7 @@ using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.ViewModels;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     #region Constructors

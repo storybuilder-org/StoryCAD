@@ -2,6 +2,7 @@
 
 namespace StoryCADLib.Models.Tools;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class KeyQuestionModel : ObservableObject
 {
     #region Constructor
