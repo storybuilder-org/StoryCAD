@@ -1684,6 +1684,63 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
     }
 
     /// <summary>
+    /// Moves a story element from its current parent to a new parent node.
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Moves a story element to a new parent in the outline tree.
+                 elementGuid is the GUID of the element to move.
+                 newParentGuid is the GUID of the element that will become the new parent.
+                 Cannot move root elements, TrashCan elements, or create circular references.
+                 Call save_outline after to persist.
+                 """)]
+    public OperationResult<bool> MoveElement(Guid elementGuid, Guid newParentGuid)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == elementGuid);
+        if (element == null)
+            return OperationResult<bool>.Failure($"Element with GUID '{elementGuid}' not found");
+
+        var newParent = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == newParentGuid);
+        if (newParent == null)
+            return OperationResult<bool>.Failure($"New parent with GUID '{newParentGuid}' not found");
+
+        if (element.Node == null || newParent.Node == null)
+            return OperationResult<bool>.Failure("Element or new parent has no node in the tree");
+
+        if (element.Node.IsRoot)
+            return OperationResult<bool>.Failure("Cannot move the root element");
+
+        if (element.ElementType == StoryItemType.TrashCan)
+            return OperationResult<bool>.Failure("Cannot move the TrashCan");
+
+        if (elementGuid == newParentGuid)
+            return OperationResult<bool>.Failure("Cannot move an element to itself");
+
+        // Check for circular reference: walk up from newParent to ensure element is not an ancestor
+        var current = newParent.Node;
+        while (current != null)
+        {
+            if (current.Uuid == elementGuid)
+                return OperationResult<bool>.Failure("Cannot move an element to one of its own descendants");
+            current = current.Parent;
+        }
+
+        // Perform the move
+        var oldParent = element.Node.Parent;
+        if (oldParent == null)
+            return OperationResult<bool>.Failure("Element has no parent to detach from");
+
+        oldParent.Children.Remove(element.Node);
+        element.Node.Parent = newParent.Node;
+        newParent.Node.Children.Add(element.Node);
+
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
     /// Saves a Problem's beat sheet structure to a .stbeat file
     /// </summary>
     [KernelFunction]
