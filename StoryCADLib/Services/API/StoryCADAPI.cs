@@ -546,7 +546,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
     }
 
 
-    [KernelFunction]
+    [KernelFunction("AddElementWithProperties")]
     [Description("""
                  Adds a new StoryElement to the current StoryModel and sets some properties.
                  This function returns a objectthe Guid of the element that was added.
