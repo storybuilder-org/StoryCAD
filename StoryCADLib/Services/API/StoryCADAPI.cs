@@ -1536,7 +1536,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         if (targetElement.ElementType != StoryItemType.Scene && targetElement.ElementType != StoryItemType.Problem)
             return OperationResult<bool>.Failure("Only Scene or Problem elements can be assigned to beats");
 
-        problem.StructureBeats[beatIndex].Guid = elementGuid;
+        outlineService.AssignElementToBeat(CurrentModel, problem, beatIndex, elementGuid);
         return OperationResult<bool>.Success(true);
     }
 
@@ -1564,7 +1564,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
             return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
 
-        problem.StructureBeats[beatIndex].Guid = Guid.Empty;
+        outlineService.UnasignBeat(CurrentModel, problem, beatIndex);
         return OperationResult<bool>.Success(true);
     }
 
@@ -1648,7 +1648,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
             return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
 
-        problem.StructureBeats.RemoveAt(beatIndex);
+        outlineService.DeleteBeat(CurrentModel, problem, beatIndex);
         return OperationResult<bool>.Success(true);
     }
 

@@ -428,6 +428,146 @@ public class ProblemViewModelTests
         Assert.IsTrue(propertyChangedFired);
     }
 
+    #region Phase 0 Characterization Tests (Issue #1339)
+
+    [TestMethod]
+    public void AssignBeat_SceneGuid_UpdatesElementName()
+    {
+        // StoryElement constructor auto-registers in model.StoryElements (and StoryElementGuids).
+        var scene = new SceneModel("Registered Scene", _storyModel, null);
+        _viewModel.Activate(_problemModel);
+        var beat = CreateTestBeat("Test Beat");
+        _viewModel.StructureBeats.Add(beat);
+
+        beat.Guid = scene.Uuid;
+
+        Assert.AreEqual(scene.Name, beat.ElementName);
+    }
+
+    [TestMethod]
+    public void AssignBeat_ProblemGuid_UpdatesElementName()
+    {
+        var problem = new ProblemModel("Registered Problem", _storyModel, null);
+        _viewModel.Activate(_problemModel);
+        var beat = CreateTestBeat("Test Beat");
+        _viewModel.StructureBeats.Add(beat);
+
+        beat.Guid = problem.Uuid;
+
+        Assert.AreEqual(problem.Name, beat.ElementName);
+    }
+
+    [TestMethod]
+    public void UnboundBeat_ElementName_ReturnsNoElementSelected()
+    {
+        var beat = CreateTestBeat("Test Beat");
+
+        Assert.AreEqual("No element Selected", beat.ElementName);
+    }
+
+    [TestMethod]
+    public void AssignBeat_SetGuidToEmpty_RestoresNoElementSelected()
+    {
+        _viewModel.Activate(_problemModel);
+        var beat = CreateTestBeat("Test Beat");
+        var scene = _storyModel.StoryElements.Scenes.First();
+        beat.Guid = scene.Uuid;
+
+        beat.Guid = Guid.Empty;
+
+        Assert.AreEqual("No element Selected", beat.ElementName);
+    }
+
+    [TestMethod]
+    public void ElementIcon_Scene_ReturnsWorldSymbol()
+    {
+        var scene = new SceneModel("Icon Test Scene", _storyModel, null);
+        _viewModel.Activate(_problemModel);
+        var beat = CreateTestBeat("Test Beat");
+
+        beat.Guid = scene.Uuid;
+
+        Assert.AreEqual(Symbol.World, beat.ElementIcon);
+    }
+
+    [TestMethod]
+    public void ElementIcon_Problem_ReturnsHelpSymbol()
+    {
+        var problem = new ProblemModel("Icon Test Problem", _storyModel, null);
+        _viewModel.Activate(_problemModel);
+        var beat = CreateTestBeat("Test Beat");
+
+        beat.Guid = problem.Uuid;
+
+        Assert.AreEqual(Symbol.Help, beat.ElementIcon);
+    }
+
+    [TestMethod]
+    public void ElementIcon_Unassigned_ReturnsCancelSymbol()
+    {
+        var beat = CreateTestBeat("Test Beat");
+
+        Assert.AreEqual(Symbol.Cancel, beat.ElementIcon);
+    }
+
+    [TestMethod]
+    public void UnbindElement_WithBoundBeat_ClearsGuid()
+    {
+        _viewModel.Activate(_problemModel);
+        var beat = CreateTestBeat("Test Beat");
+        var scene = _storyModel.StoryElements.Scenes.First();
+        beat.Guid = scene.Uuid;
+        _viewModel.StructureBeats.Add(beat);
+        _viewModel.SelectedBeat = beat;
+        _viewModel.SelectedBeatIndex = 0;
+
+        _viewModel.UnbindElement(null, null);
+
+        Assert.AreEqual(Guid.Empty, beat.Guid);
+    }
+
+    [TestMethod]
+    public void UnbindElement_WithNullSelectedBeat_DoesNotCrash()
+    {
+        _viewModel.Activate(_problemModel);
+        _viewModel.SelectedBeat = null;
+
+        _viewModel.UnbindElement(null, null);
+
+        // No exception = pass
+    }
+
+    [TestMethod]
+    public void UnbindElement_WithEmptyGuidBeat_DoesNothing()
+    {
+        _viewModel.Activate(_problemModel);
+        var beat = CreateTestBeat("Test Beat");
+        _viewModel.StructureBeats.Add(beat);
+        _viewModel.SelectedBeat = beat;
+        _viewModel.SelectedBeatIndex = 0;
+
+        _viewModel.UnbindElement(null, null);
+
+        Assert.AreEqual(Guid.Empty, beat.Guid);
+    }
+
+    [TestMethod]
+    public void StructureBeatViewModel_SerializationRoundTrip_PreservesData()
+    {
+        var beat = CreateTestBeat("Test Title", "Test Description");
+        var testGuid = Guid.NewGuid();
+        beat.Guid = testGuid;
+
+        var json = System.Text.Json.JsonSerializer.Serialize(beat);
+        var deserialized = System.Text.Json.JsonSerializer.Deserialize<StructureBeatViewModel>(json);
+
+        Assert.AreEqual("Test Title", deserialized.Title);
+        Assert.AreEqual("Test Description", deserialized.Description);
+        Assert.AreEqual(testGuid, deserialized.Guid);
+    }
+
+    #endregion
+
     #region Helper Methods
 
     /// <summary>
