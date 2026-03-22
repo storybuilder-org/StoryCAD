@@ -527,18 +527,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
         set { BeatEditorVm.Problems = value; OnPropertyChanged(); }
     }
 
-    public bool IsBeatSheetReadOnly
-    {
-        get => BeatEditorVm.IsBeatSheetReadOnly;
-        set { BeatEditorVm.IsBeatSheetReadOnly = value; OnPropertyChanged(); }
-    }
-
-    public Visibility BeatsheetEditButtonsVisibility
-    {
-        get => BeatEditorVm.BeatsheetEditButtonsVisibility;
-        set { BeatEditorVm.BeatsheetEditButtonsVisibility = value; OnPropertyChanged(); }
-    }
-
     public int SelectedBeatIndex
     {
         get => BeatEditorVm.SelectedBeatIndex;
@@ -834,18 +822,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
             value = "Custom Beat Sheet";
             StructureModelTitle = value;
             LoadBeatSheet();
-        }
-
-        //Enable/disable edit buttons based on selection
-        if (value == "Custom Beat Sheet")
-        {
-            BeatsheetEditButtonsVisibility = Visibility.Visible;
-            IsBeatSheetReadOnly = false;
-        }
-        else
-        {
-            BeatsheetEditButtonsVisibility = Visibility.Collapsed;
-            IsBeatSheetReadOnly = true;
         }
 
         if (Result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))

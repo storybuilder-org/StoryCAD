@@ -87,23 +87,8 @@ public class BeatEditorViewModelTests
         Assert.AreEqual(2, _beatEditor.StructureBeats.Count);
     }
 
-    [TestMethod]
-    public void DeleteBeatCommand_WithValidSelection_ShouldRemoveBeat()
-    {
-        // Arrange — need StoryModel context for DeleteBeat
-        _beatEditor.SetStoryModel(_storyModel);
-        _beatEditor.SetProblemModel(_problemModel);
-        _problemModel.StructureBeats = _beatEditor.StructureBeats;
-        _beatEditor.StructureBeats.Add(CreateTestBeat("Beat 1"));
-        _beatEditor.SelectedBeat = _beatEditor.StructureBeats[0];
-        _beatEditor.SelectedBeatIndex = 0;
-
-        // Act
-        _beatEditor.DeleteBeatCommand.Execute(null);
-
-        // Assert
-        Assert.AreEqual(0, _beatEditor.StructureBeats.Count);
-    }
+    // DeleteBeatCommand execution requires a UI dialog (confirmation),
+    // so we only test CanExecute here. Full delete flow is an integration test.
 
     [TestMethod]
     public void DeleteBeatCommand_CanExecute_FalseWhenNoBeatSelected()
@@ -338,30 +323,6 @@ public class BeatEditorViewModelTests
         _beatEditor.LoadBeats(_problemModel, _storyModel);
 
         Assert.AreEqual("Save the Cat", _beatEditor.StructureModelTitle);
-    }
-
-    [TestMethod]
-    public void LoadBeats_CustomSheet_SetsEditableTrue()
-    {
-        _problemModel.StructureTitle = "Custom Beat Sheet";
-        _problemModel.StructureBeats = new ObservableCollection<StructureBeat>();
-
-        _beatEditor.LoadBeats(_problemModel, _storyModel);
-
-        Assert.IsFalse(_beatEditor.IsBeatSheetReadOnly);
-        Assert.AreEqual(Visibility.Visible, _beatEditor.BeatsheetEditButtonsVisibility);
-    }
-
-    [TestMethod]
-    public void LoadBeats_TemplateSheet_SetsReadOnlyTrue()
-    {
-        _problemModel.StructureTitle = "Save the Cat";
-        _problemModel.StructureBeats = new ObservableCollection<StructureBeat>();
-
-        _beatEditor.LoadBeats(_problemModel, _storyModel);
-
-        Assert.IsTrue(_beatEditor.IsBeatSheetReadOnly);
-        Assert.AreEqual(Visibility.Collapsed, _beatEditor.BeatsheetEditButtonsVisibility);
     }
 
     [TestMethod]

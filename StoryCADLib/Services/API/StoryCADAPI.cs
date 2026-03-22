@@ -1822,7 +1822,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
             var savedBeatSheet = outlineService.LoadBeatsheet(filePath);
             var problem = (ProblemModel)element;
 
-            problem.StructureTitle = "Custom Beat Sheet";
+            problem.StructureTitle = Path.GetFileNameWithoutExtension(filePath);
             problem.StructureDescription = savedBeatSheet.Description;
             problem.StructureBeats.Clear();
             foreach (var beat in savedBeatSheet.Beats)

@@ -24,6 +24,7 @@ public class BeatEditorViewModel : ObservableObject
     private readonly AppState _appState;
     private readonly BeatSheetsViewModel _beatSheetsViewModel;
     private readonly OutlineService _outlineService;
+    private readonly Windowing _windowing;
     private readonly Action _notifyDirty;
 
     private StoryModel _storyModel;
@@ -39,6 +40,7 @@ public class BeatEditorViewModel : ObservableObject
         _appState = Ioc.Default.GetRequiredService<AppState>();
         _beatSheetsViewModel = Ioc.Default.GetRequiredService<BeatSheetsViewModel>();
         _outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        _windowing = Ioc.Default.GetRequiredService<Windowing>();
         _notifyDirty = notifyDirty;
 
         StructureBeats = new ObservableCollection<StructureBeat>();
@@ -48,7 +50,7 @@ public class BeatEditorViewModel : ObservableObject
 
         // Commands
         CreateBeatCommand = new RelayCommand(CreateBeat);
-        DeleteBeatCommand = new RelayCommand(DeleteBeat, () => SelectedBeat != null);
+        DeleteBeatCommand = new AsyncRelayCommand(DeleteBeatAsync, () => SelectedBeat != null);
         MoveUpCommand = new RelayCommand(MoveUp, () => SelectedBeat != null && SelectedBeatIndex > 0);
         MoveDownCommand = new RelayCommand(MoveDown, () => SelectedBeat != null && SelectedBeatIndex < StructureBeats.Count - 1);
         UnbindElementCommand = new RelayCommand(UnbindElement, CanUnbindElement);
@@ -153,26 +155,12 @@ public class BeatEditorViewModel : ObservableObject
         set => SetProperty(ref _boundStructure, value);
     }
 
-    private bool _isBeatSheetReadOnly;
-    public bool IsBeatSheetReadOnly
-    {
-        get => _isBeatSheetReadOnly;
-        set => SetProperty(ref _isBeatSheetReadOnly, value);
-    }
-
-    private Visibility _beatsheetEditButtonsVisibility;
-    public Visibility BeatsheetEditButtonsVisibility
-    {
-        get => _beatsheetEditButtonsVisibility;
-        set => SetProperty(ref _beatsheetEditButtonsVisibility, value);
-    }
-
     #endregion
 
     #region Commands
 
     public RelayCommand CreateBeatCommand { get; }
-    public RelayCommand DeleteBeatCommand { get; }
+    public IRelayCommand DeleteBeatCommand { get; }
     public RelayCommand MoveUpCommand { get; }
     public RelayCommand MoveDownCommand { get; }
     public RelayCommand UnbindElementCommand { get; }
@@ -217,18 +205,6 @@ public class BeatEditorViewModel : ObservableObject
         Problems = storyModel.StoryElements.Problems;
         Scenes = storyModel.StoryElements.Scenes;
         CurrentElementSource = Scenes;
-
-        // Set editability based on beat sheet type
-        if (StructureModelTitle == "Custom Beat Sheet")
-        {
-            BeatsheetEditButtonsVisibility = Visibility.Visible;
-            IsBeatSheetReadOnly = false;
-        }
-        else
-        {
-            BeatsheetEditButtonsVisibility = Visibility.Collapsed;
-            IsBeatSheetReadOnly = true;
-        }
     }
 
     /// <summary>
@@ -265,8 +241,27 @@ public class BeatEditorViewModel : ObservableObject
         StructureBeats.Add(new StructureBeat("New Beat", "Describe your beat here"));
     }
 
-    private void DeleteBeat()
+    private async Task DeleteBeatAsync()
     {
+        if (SelectedBeat == null)
+            return;
+
+        var beatTitle = SelectedBeat.Title ?? "this beat";
+        var message = SelectedBeat.Guid != Guid.Empty
+            ? $"Delete beat '{beatTitle}'? This will also remove its scene/problem assignment."
+            : $"Delete beat '{beatTitle}'?";
+
+        var result = await _windowing.ShowContentDialog(new ContentDialog
+        {
+            Title = "Delete Beat",
+            Content = message,
+            PrimaryButtonText = "Delete",
+            SecondaryButtonText = "Cancel"
+        });
+
+        if (result != ContentDialogResult.Primary)
+            return;
+
         try
         {
             _outlineService.DeleteBeat(_storyModel, _problemModel, SelectedBeatIndex);

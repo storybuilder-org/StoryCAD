@@ -36,7 +36,6 @@ public class ProblemViewModelTests
         _viewModel.PropertyChanged += _viewModel.OnPropertyChanged;
 
         _viewModel.StructureBeats = new ObservableCollection<StructureBeat>();
-        _viewModel.StructureModelTitle = "Custom Beat Sheet"; // Enable editing
     }
 
     [TestMethod]

@@ -850,15 +850,13 @@ public class OutlineService
     ///     Sets basic infomation about the beat sheet/creates a new one
     ///     If one exists, it will be overwritten and any beats in it will be unbound.
     /// </summary>
-    /// <param name="Description">Description of you beatsheet, i.e. what is its structure?</param>
-    /// <param name="Model">Problem element you are trying to add the beatsheet to</param>
-    /// <param name="Title">
-    ///     This is the title of your beat sheet,
-    ///     if it is not Custom Beat Sheet it will not be editable within the StoryCAD app.
-    /// </param>
-    /// <param name="Beats">Beats that this sheet will contain, can be added later</param>
+    /// <param name="Model">The story model containing the elements.</param>
+    /// <param name="Parent">Problem element you are trying to add the beat sheet to.</param>
+    /// <param name="Description">Description of your beat sheet, i.e. what is its structure?</param>
+    /// <param name="Title">The title of your beat sheet.</param>
+    /// <param name="Beats">Beats that this sheet will contain, can be added later.</param>
     public void SetBeatSheet(StoryModel Model, ProblemModel Parent, string Description,
-        string Title = "Custom Beat Sheet", ObservableCollection<StructureBeat> Beats = null)
+        string Title, ObservableCollection<StructureBeat> Beats = null)
     {
         Parent.StructureTitle = Title;
         Parent.StructureDescription = Description;

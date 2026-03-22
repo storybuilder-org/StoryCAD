@@ -241,7 +241,6 @@
                                 <usercontrols:RichEditBoxExtended
                     Header="Beat Sheet Description:"
                     RtfText="{x:Bind BeatEditorVm.StructureDescription, Mode=TwoWay}"
-                    IsReadOnly="{x:Bind BeatEditorVm.IsBeatSheetReadOnly}"
                     AcceptsReturn="False"
                     IsSpellCheckEnabled="False"
                     TextWrapping="Wrap"
@@ -349,32 +348,27 @@
                                             Content="+"
                                             Width="32"
                                             Height="32" FontWeight="Bold"
-                                            Command="{x:Bind BeatEditorVm.CreateBeatCommand}"
-                                            Visibility="{x:Bind BeatEditorVm.BeatsheetEditButtonsVisibility, Mode=OneWay}" />
+                                            Command="{x:Bind BeatEditorVm.CreateBeatCommand}" />
                                     <Button x:Name="DeleteBeatButton"
                                             Content="-"
                                             Width="32"
                                             Height="32" FontWeight="Bold"
-                                            Command="{x:Bind BeatEditorVm.DeleteBeatCommand}"
-                                            Visibility="{x:Bind BeatEditorVm.BeatsheetEditButtonsVisibility, Mode=OneWay}" />
+                                            Command="{x:Bind BeatEditorVm.DeleteBeatCommand}" />
                                     <Button x:Name="MoveUpButton"
                                             Content="∧"
                                             Width="32"
                                             Height="32"
-                                            Command="{x:Bind BeatEditorVm.MoveUpCommand}"
-                                            Visibility="{x:Bind BeatEditorVm.BeatsheetEditButtonsVisibility, Mode=OneWay}" />
+                                            Command="{x:Bind BeatEditorVm.MoveUpCommand}" />
                                     <Button x:Name="MoveDownButton"
                                             Content="∨"
                                             Width="32"
                                             Height="32" FontWeight="Bold"
-                                            Command="{x:Bind BeatEditorVm.MoveDownCommand}"
-                                            Visibility="{x:Bind BeatEditorVm.BeatsheetEditButtonsVisibility, Mode=OneWay}" />
+                                            Command="{x:Bind BeatEditorVm.MoveDownCommand}" />
                                     <Button x:Name="SaveBeatSheetButton"
                                             Content="S"
                                             Width="32"
                                             Height="32" FontWeight="Bold"
-                                            Click="{x:Bind ProblemVm.SaveBeatSheet}"
-                                            Visibility="{x:Bind BeatEditorVm.BeatsheetEditButtonsVisibility, Mode=OneWay}" />
+                                            Click="{x:Bind ProblemVm.SaveBeatSheet}" />
                                 </StackPanel>
 
                                 <!-- Right vertical line -->
@@ -416,7 +410,7 @@
                      TextWrapping="Wrap"
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Stretch"
-                     IsReadOnly="{x:Bind BeatEditorVm.IsBeatSheetReadOnly}" />
+ />
 
                             <Rectangle Grid.Column="1"
                        Width="1"
