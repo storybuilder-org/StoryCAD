@@ -11,32 +11,27 @@ public sealed partial class ProblemPage : Page
     public BeatSheetsViewModel BeatSheetsViewModel = Ioc.Default.GetService<BeatSheetsViewModel>();
     public LogService LogService = Ioc.Default.GetService<LogService>();
     public ProblemViewModel ProblemVm;
+    public BeatEditorViewModel BeatEditorVm;
 
     public ProblemPage()
     {
         ProblemVm = Ioc.Default.GetService<ProblemViewModel>();
+        BeatEditorVm = ProblemVm.BeatEditorVm;
         InitializeComponent();
-        // Responsive XAML: layout made scrollable/stretchy; window enforces the only min-size.
         DataContext = ProblemVm;
     }
 
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public OutlineViewModel OutlineVM => Ioc.Default.GetService<OutlineViewModel>();
 
-    private void ExpanderSet(Expander sender, ExpanderExpandingEventArgs args)
-    {
-        ProblemVm.SelectedBeat = (StructureBeatViewModel)sender.DataContext;
-        ProblemVm.SelectedBeatIndex = ProblemVm.StructureBeats.IndexOf(ProblemVm.SelectedBeat);
-    }
-
     private void ListViewItem_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
         var container = sender as FrameworkElement;
-        var clickedItem = container?.DataContext as StructureBeatViewModel;
+        var clickedItem = container?.DataContext as StructureBeat;
         if (clickedItem != null)
         {
-            ProblemVm.SelectedBeat = clickedItem;
-            ProblemVm.SelectedBeatIndex = ProblemVm.StructureBeats.IndexOf(clickedItem);
+            BeatEditorVm.SelectedBeat = clickedItem;
+            BeatEditorVm.SelectedBeatIndex = BeatEditorVm.StructureBeats.IndexOf(clickedItem);
         }
     }
 

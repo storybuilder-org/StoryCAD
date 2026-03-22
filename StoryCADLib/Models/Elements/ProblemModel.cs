@@ -223,14 +223,14 @@ public class ProblemModel : StoryElement
         set => _structureDescription = value;
     }
 
-    [JsonIgnore] private ObservableCollection<StructureBeatViewModel> structureBeats;
+    [JsonIgnore] private ObservableCollection<StructureBeat> structureBeats;
 
     /// <summary>
     ///     Beat nodes of the structure
     /// </summary>
     [JsonInclude]
     [JsonPropertyName("StructureBeats")]
-    public ObservableCollection<StructureBeatViewModel> StructureBeats
+    public ObservableCollection<StructureBeat> StructureBeats
     {
         get => structureBeats;
         set => structureBeats = value;
@@ -276,7 +276,7 @@ public class ProblemModel : StoryElement
         Notes = string.Empty;
         StructureTitle = string.Empty;
         StructureDescription = string.Empty;
-        StructureBeats = new ObservableCollection<StructureBeatViewModel>();
+        StructureBeats = new ObservableCollection<StructureBeat>();
         BoundStructure = string.Empty;
     }
 
@@ -304,7 +304,7 @@ public class ProblemModel : StoryElement
         Notes = string.Empty;
         StructureTitle = string.Empty;
         StructureDescription = string.Empty;
-        StructureBeats = new ObservableCollection<StructureBeatViewModel>();
+        StructureBeats = new ObservableCollection<StructureBeat>();
         BoundStructure = string.Empty;
     }
 

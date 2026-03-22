@@ -627,7 +627,7 @@ public class ReportFormatter
         return output.ToString();
     }
 
-    private void ProcessBeat(StructureBeatViewModel beat, StringBuilder output, StoryModel storyModel, int indentLevel,
+    private void ProcessBeat(StructureBeat beat, StringBuilder output, StoryModel storyModel, int indentLevel,
         HashSet<Guid> processedElements)
     {
         var indent = new string('\t', indentLevel);

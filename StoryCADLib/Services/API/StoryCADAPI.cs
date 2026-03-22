@@ -1463,7 +1463,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
 
         foreach (var scene in beatSheet.PlotPatternScenes)
         {
-            problem.StructureBeats.Add(new StructureBeatViewModel(scene.SceneTitle, scene.Notes));
+            problem.StructureBeats.Add(new StructureBeat(scene.SceneTitle, scene.Notes));
         }
 
         return OperationResult<bool>.Success(true);
@@ -1590,7 +1590,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
             return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
 
         var problem = (ProblemModel)element;
-        problem.StructureBeats.Add(new StructureBeatViewModel(title, description));
+        problem.StructureBeats.Add(new StructureBeat(title, description));
         return OperationResult<bool>.Success(true);
     }
 
@@ -1827,7 +1827,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
             problem.StructureBeats.Clear();
             foreach (var beat in savedBeatSheet.Beats)
             {
-                problem.StructureBeats.Add(new StructureBeatViewModel(beat.Title, beat.Description));
+                problem.StructureBeats.Add(new StructureBeat(beat.Title, beat.Description));
             }
 
             return OperationResult<bool>.Success(true);

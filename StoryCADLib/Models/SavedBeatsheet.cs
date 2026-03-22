@@ -18,5 +18,5 @@ public class SavedBeatsheet
     ///     Story beats
     /// </summary>
     [JsonInclude]
-    public List<StructureBeatViewModel> Beats { get; set; }
+    public List<StructureBeat> Beats { get; set; }
 }

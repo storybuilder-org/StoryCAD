@@ -2336,7 +2336,7 @@ public class OutlineServiceTests
         var (model, problem) = await CreateModelWithProblem();
         _outlineService.CreateBeat(problem, "Old", "Old");
 
-        var newBeats = new ObservableCollection<StructureBeatViewModel>
+        var newBeats = new ObservableCollection<StructureBeat>
         {
             new("B1", "D1"),
             new("B2", "D2")
@@ -2356,7 +2356,7 @@ public class OutlineServiceTests
     {
         SetupBeatTestPath();
 
-        var beats = new List<StructureBeatViewModel>
+        var beats = new List<StructureBeat>
         {
             new("Intro", "D1") { Guid = Guid.NewGuid() },
             new("Middle", "D2") { Guid = Guid.NewGuid() }

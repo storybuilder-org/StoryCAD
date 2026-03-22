@@ -9,18 +9,19 @@ namespace StoryCADLib.ViewModels.Tools;
 ///     Serialized as part of the story file via ProblemModel.StructureBeats.
 ///     Element resolution (ElementName, ElementIcon, etc.) uses lazy service lookup.
 /// </summary>
-public class StructureBeatViewModel : ObservableObject
+[Microsoft.UI.Xaml.Data.Bindable]
+public class StructureBeat : ObservableObject
 {
     #region Constructor
 
-    public StructureBeatViewModel(string title, string description)
+    public StructureBeat(string title, string description)
     {
         Title = title;
         Description = description;
     }
 
     // Parameterless constructor for JSON deserialization
-    public StructureBeatViewModel() { }
+    public StructureBeat() { }
 
     #endregion
 

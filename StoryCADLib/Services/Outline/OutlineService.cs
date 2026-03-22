@@ -792,7 +792,7 @@ public class OutlineService
         }
 
         //Create and add beat.
-        Parent.StructureBeats.Add(new StructureBeatViewModel(Title, Description));
+        Parent.StructureBeats.Add(new StructureBeat(Title, Description));
     }
 
     /// <summary>
@@ -858,7 +858,7 @@ public class OutlineService
     /// </param>
     /// <param name="Beats">Beats that this sheet will contain, can be added later</param>
     public void SetBeatSheet(StoryModel Model, ProblemModel Parent, string Description,
-        string Title = "Custom Beat Sheet", ObservableCollection<StructureBeatViewModel> Beats = null)
+        string Title = "Custom Beat Sheet", ObservableCollection<StructureBeat> Beats = null)
     {
         Parent.StructureTitle = Title;
         Parent.StructureDescription = Description;
@@ -870,7 +870,7 @@ public class OutlineService
         }
 
         //Create/Add beats.
-        Parent.StructureBeats = Beats ?? new ObservableCollection<StructureBeatViewModel>();
+        Parent.StructureBeats = Beats ?? new ObservableCollection<StructureBeat>();
     }
 
     /// <summary>
@@ -879,13 +879,13 @@ public class OutlineService
     /// <param name="Path">File path to save to</param>
     /// <param name="Description"> Beatsheet Description</param>
     /// <param name="Beats">Beats</param>
-    internal void SaveBeatsheet(string Path, string Description, List<StructureBeatViewModel> Beats)
+    internal void SaveBeatsheet(string Path, string Description, List<StructureBeat> Beats)
     {
         SavedBeatsheet Model = new();
         Model.Beats = Beats = Beats
             .Select(b =>
             {
-                var copy = new StructureBeatViewModel(b.Title, b.Description);
+                var copy = new StructureBeat(b.Title, b.Description);
                 return copy;
             })
             .ToList();

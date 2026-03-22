@@ -35,7 +35,7 @@ public class ProblemViewModelTests
         _viewModel.PropertyChanged -= _viewModel.OnPropertyChanged;
         _viewModel.PropertyChanged += _viewModel.OnPropertyChanged;
 
-        _viewModel.StructureBeats = new ObservableCollection<StructureBeatViewModel>();
+        _viewModel.StructureBeats = new ObservableCollection<StructureBeat>();
         _viewModel.StructureModelTitle = "Custom Beat Sheet"; // Enable editing
     }
 
@@ -283,7 +283,7 @@ public class ProblemViewModelTests
         };
 
         // Act
-        _viewModel.StructureBeats = new ObservableCollection<StructureBeatViewModel>();
+        _viewModel.StructureBeats = new ObservableCollection<StructureBeat>();
 
         // Assert
         Assert.IsTrue(propertyChangedFired);
@@ -552,14 +552,14 @@ public class ProblemViewModelTests
     }
 
     [TestMethod]
-    public void StructureBeatViewModel_SerializationRoundTrip_PreservesData()
+    public void StructureBeat_SerializationRoundTrip_PreservesData()
     {
         var beat = CreateTestBeat("Test Title", "Test Description");
         var testGuid = Guid.NewGuid();
         beat.Guid = testGuid;
 
         var json = System.Text.Json.JsonSerializer.Serialize(beat);
-        var deserialized = System.Text.Json.JsonSerializer.Deserialize<StructureBeatViewModel>(json);
+        var deserialized = System.Text.Json.JsonSerializer.Deserialize<StructureBeat>(json);
 
         Assert.AreEqual("Test Title", deserialized.Title);
         Assert.AreEqual("Test Description", deserialized.Description);
@@ -641,10 +641,10 @@ public class ProblemViewModelTests
     /// <summary>
     ///     Helper method to create test beats without relying on IoC container
     /// </summary>
-    private StructureBeatViewModel CreateTestBeat(string title, string description = "Test Description")
+    private StructureBeat CreateTestBeat(string title, string description = "Test Description")
     {
         // Create a beat with the required constructor parameters
-        StructureBeatViewModel beat = new(title, description);
+        StructureBeat beat = new(title, description);
 
         return beat;
     }
