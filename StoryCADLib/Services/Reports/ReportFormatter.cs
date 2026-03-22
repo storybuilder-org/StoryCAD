@@ -674,26 +674,190 @@ public class ReportFormatter
         }
     }
 
-    private string FormatStructureBeatsElements(ProblemModel problem)
+    internal string FormatStructureBeatsElements(ProblemModel problem)
     {
         StringBuilder beats = new();
+
+        // Build set of template beat titles for custom beat detection
+        var beatSheets = Ioc.Default.GetService<BeatSheetsViewModel>();
+        HashSet<string> templateTitles = new();
+        if (beatSheets != null &&
+            !string.IsNullOrEmpty(problem.StructureTitle) &&
+            beatSheets.BeatSheets.TryGetValue(problem.StructureTitle, out var template))
+        {
+            templateTitles = template.PlotPatternScenes.Select(s => s.SceneTitle).ToHashSet();
+        }
+
+        bool hasCustomBeats = false;
+        int beatIndex = 0;
         foreach (var beat in problem.StructureBeats)
         {
-            beats.AppendLine(beat.Title);
+            beatIndex++;
+            bool isCustom = !templateTitles.Contains(beat.Title);
+            if (isCustom) hasCustomBeats = true;
+
+            // Numbered title with custom marker
+            var marker = isCustom ? " *" : "";
+            beats.AppendLine($"{beatIndex}. {beat.Title}{marker}");
             beats.AppendLine(beat.Description);
 
-            //Don't print element stuff if one is unassigned.
-            // Don't print element stuff if one is unassigned.
+            // Show element assignment or "Unassigned"
             if (beat.Guid != Guid.Empty)
             {
                 beats.AppendLine(beat.ElementName);
                 beats.AppendLine(beat.ElementDescription);
             }
+            else
+            {
+                beats.AppendLine("Unassigned");
+            }
 
             beats.AppendLine("\t\t-------------");
         }
 
+        // Legend
+        if (hasCustomBeats)
+        {
+            beats.AppendLine("* = custom beat (not from template)");
+        }
+
         return beats.ToString();
+    }
+
+    /// <summary>
+    ///     Hierarchical view of how problems connect through beat sheets.
+    ///     Shows only problems (no scenes, no descriptions) — the structural skeleton.
+    /// </summary>
+    public string FormatPlotStructureDiagram()
+    {
+        if (_storyModel?.StoryElements == null)
+            return string.Empty;
+
+        var overview = _storyModel.StoryElements
+            .OfType<OverviewModel>()
+            .FirstOrDefault(e => e.ElementType == StoryItemType.StoryOverview);
+
+        if (overview == null || overview.StoryProblem == Guid.Empty)
+            return string.Empty;
+
+        if (!_storyModel.StoryElements.StoryElementGuids.TryGetValue(overview.StoryProblem, out var rootElement) ||
+            rootElement is not ProblemModel storyProblem)
+            return string.Empty;
+
+        var output = new StringBuilder();
+        output.AppendLine("Plot Structure Diagram");
+        output.AppendLine("======================");
+        output.AppendLine();
+
+        var processedElements = new HashSet<Guid>();
+        BuildPlotDiagram(storyProblem, output, 0, processedElements);
+
+        return output.ToString();
+    }
+
+    private void BuildPlotDiagram(ProblemModel problem, StringBuilder output, int indentLevel,
+        HashSet<Guid> processedElements)
+    {
+        if (processedElements.Contains(problem.Uuid))
+            return;
+        processedElements.Add(problem.Uuid);
+
+        var indent = new string('\t', indentLevel);
+        output.AppendLine($"{indent}{problem.Name}");
+
+        if (problem.StructureBeats == null || !problem.StructureBeats.Any())
+            return;
+
+        foreach (var beat in problem.StructureBeats)
+        {
+            if (beat.Guid == Guid.Empty)
+                continue;
+
+            // Only show beats that link to problems (skip scenes)
+            if (_storyModel.StoryElements.StoryElementGuids.TryGetValue(beat.Guid, out var element) &&
+                element is ProblemModel subProblem)
+            {
+                output.AppendLine($"{indent}\t{beat.Title} \u2192 {subProblem.Name}");
+                BuildPlotDiagram(subProblem, output, indentLevel + 2, processedElements);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Lists problems and scenes not assigned to any beat sheet.
+    /// </summary>
+    public string FormatUnassignedElementsReport()
+    {
+        var output = new StringBuilder();
+        output.AppendLine("StoryCAD - Unassigned Elements Report");
+        output.AppendLine();
+
+        // Collect all scene GUIDs that are referenced in any beat sheet
+        var assignedSceneGuids = new HashSet<Guid>();
+        foreach (var element in _storyModel.StoryElements)
+        {
+            if (element is ProblemModel problem)
+            {
+                foreach (var beat in problem.StructureBeats)
+                {
+                    if (beat.Guid != Guid.Empty)
+                    {
+                        assignedSceneGuids.Add(beat.Guid);
+                    }
+                }
+            }
+        }
+
+        // Unassigned Problems (not bound as a beat in any other problem's beat sheet)
+        output.AppendLine("============== Unassigned Problems =============");
+        var unassignedProblems = _storyModel.StoryElements
+            .OfType<ProblemModel>()
+            .Where(p => string.IsNullOrEmpty(p.BoundStructure))
+            .ToList();
+
+        // Exclude the Story Problem (it's the root, not an orphan)
+        var overview = _storyModel.StoryElements
+            .OfType<OverviewModel>()
+            .FirstOrDefault();
+        if (overview != null && overview.StoryProblem != Guid.Empty)
+        {
+            unassignedProblems.RemoveAll(p => p.Uuid == overview.StoryProblem);
+        }
+
+        if (unassignedProblems.Any())
+        {
+            foreach (var problem in unassignedProblems)
+            {
+                output.AppendLine($"  {problem.Name}");
+            }
+        }
+        else
+        {
+            output.AppendLine("  None");
+        }
+
+        output.AppendLine();
+
+        // Unassigned Scenes (not referenced by any beat in any problem)
+        output.AppendLine("============== Unassigned Scenes =============");
+        var unassignedScenes = _storyModel.StoryElements
+            .OfType<SceneModel>()
+            .Where(s => !assignedSceneGuids.Contains(s.Uuid))
+            .ToList();
+
+        if (unassignedScenes.Any())
+        {
+            foreach (var scene in unassignedScenes)
+            {
+                output.AppendLine($"  {scene.Name}");
+            }
+        }
+        else
+        {
+            output.AppendLine("  None");
+        }
+
+        return output.ToString();
     }
 
     public async Task<string> FormatCharacterRelationshipReport(StoryElement element)

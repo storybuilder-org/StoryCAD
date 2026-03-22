@@ -45,3 +45,17 @@ The original template is never modified — reloading "Save the Cat" from the dr
 **Card-style lists:** Both the beats list and elements list now have a subtle card border with rounded corners, providing clearer visual boundaries without the heavy vertical separator lines that were removed.
 
 **Separator cleanup:** The vertical line separators between the lists and buttons, and between the two description panels, have been removed. The card borders and column spacing provide sufficient visual separation.
+
+### Phase 4: Improved Reports
+
+Three report improvements in the Generate Reports dialog:
+
+**Beat Sheet Detail (improved):** When printing a Problem report, the Structure section now shows:
+- **Numbered beats** (1, 2, 3...) for easy reference
+- **Custom beat marker** — beats added by the writer (not from the original template) are marked with `*`
+- **"Unassigned"** label for beats that don't have a scene or problem assigned yet (previously these showed nothing)
+- **Legend** at the bottom explaining the `*` marker
+
+**Unassigned Elements (new report):** Lists problems and scenes that aren't assigned to any beat sheet. Helps writers find "orphan" story elements that may have been forgotten or need to be integrated into the plot structure. Two sections: "Unassigned Problems" and "Unassigned Scenes."
+
+**Plot Structure Diagram (new report):** A hierarchical view showing how the story's problems connect through beat sheets. Starting from the Story Problem, it shows which beats link to sub-problems, and recurses into those sub-problems' beat sheets. Scenes are excluded — this is purely the structural skeleton of the plot. Useful for seeing the "big picture" of how subplots and complications relate to the main story problem.
