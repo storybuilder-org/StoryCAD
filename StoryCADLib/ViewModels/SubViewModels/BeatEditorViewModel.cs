@@ -134,6 +134,21 @@ public class BeatEditorViewModel : ObservableObject
         set => SetProperty(ref _currentElementDescription, value);
     }
 
+    private string _selectedBeatDescription;
+    public string SelectedBeatDescription
+    {
+        get => _selectedBeatDescription;
+        set
+        {
+            if (SetProperty(ref _selectedBeatDescription, value))
+            {
+                // Write back to the beat model
+                if (SelectedBeat != null)
+                    SelectedBeat.Description = value;
+            }
+        }
+    }
+
     private string _structureModelTitle;
     public string StructureModelTitle
     {
@@ -228,6 +243,7 @@ public class BeatEditorViewModel : ObservableObject
         if (args.PropertyName == nameof(SelectedBeat))
         {
             CurrentElementDescription = SelectedBeat?.ElementDescription;
+            SelectedBeatDescription = SelectedBeat?.Description;
         }
 
         if (args.PropertyName == nameof(SelectedListElement))

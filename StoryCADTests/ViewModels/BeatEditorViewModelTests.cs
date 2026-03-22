@@ -277,6 +277,49 @@ public class BeatEditorViewModelTests
     }
 
     [TestMethod]
+    public void SelectedBeat_WhenChanged_UpdatesSelectedBeatDescription()
+    {
+        // Arrange
+        var beat = CreateTestBeat("Beat 1", "My beat description");
+        _beatEditor.StructureBeats.Add(beat);
+
+        // Act
+        _beatEditor.SelectedBeat = beat;
+
+        // Assert
+        Assert.AreEqual("My beat description", _beatEditor.SelectedBeatDescription);
+    }
+
+    [TestMethod]
+    public void SelectedBeat_WhenNull_ClearsSelectedBeatDescription()
+    {
+        // Arrange
+        var beat = CreateTestBeat("Beat 1", "My beat description");
+        _beatEditor.StructureBeats.Add(beat);
+        _beatEditor.SelectedBeat = beat;
+
+        // Act
+        _beatEditor.SelectedBeat = null;
+
+        // Assert
+        Assert.IsNull(_beatEditor.SelectedBeatDescription);
+    }
+
+    [TestMethod]
+    public void SelectedListElement_WhenSet_UpdatesCurrentElementDescription()
+    {
+        // Arrange — use a scene with a description
+        var scene = _storyModel.StoryElements.Scenes.First(s => s.Uuid != Guid.Empty);
+        scene.Description = "A test scene description";
+
+        // Act
+        _beatEditor.SelectedListElement = scene;
+
+        // Assert
+        Assert.AreEqual("A test scene description", _beatEditor.CurrentElementDescription);
+    }
+
+    [TestMethod]
     public void SelectedBeat_WhenChanged_NotifiesCanExecuteOnCommands()
     {
         // Arrange

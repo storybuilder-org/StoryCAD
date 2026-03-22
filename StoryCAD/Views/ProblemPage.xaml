@@ -383,8 +383,7 @@
                           Grid.Row="0"
                           ItemsSource="{x:Bind BeatEditorVm.CurrentElementSource, Mode=TwoWay}"
                           SelectedItem="{x:Bind BeatEditorVm.SelectedListElement, Mode=TwoWay}"
-                          IsItemClickEnabled="True"
-                          ItemClick="{x:Bind ProblemVm.AssignBeat}"
+                          SelectionMode="Single"
                           DisplayMemberPath="Name"
                           BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                           BorderThickness="1"
@@ -403,7 +402,7 @@
                             <!-- Beat Description -->
                             <TextBox Grid.Column="0"
                      Header="Beat Description"
-                     Text="{x:Bind BeatEditorVm.SelectedBeat.Description, Mode=TwoWay}"
+                     Text="{x:Bind BeatEditorVm.SelectedBeatDescription, Mode=TwoWay}"
                      TextWrapping="Wrap"
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Stretch" />

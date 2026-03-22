@@ -98,6 +98,10 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
             return;
         }
 
+        // Set SelectedListElement so Element Description panel updates
+        // (IsItemClickEnabled suppresses ListView selection)
+        BeatEditorVm.SelectedListElement = e.ClickedItem as StoryElement;
+
         var DesiredBind = (e.ClickedItem as StoryElement).Uuid;
 
         try
@@ -800,16 +804,21 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
             // Only delete beats if user confirmed (fixes data-loss bug)
             if (Result == ContentDialogResult.Primary)
             {
+                // Clear beats directly via OutlineService (no per-beat confirmation dialog)
+                var outlineService = Ioc.Default.GetService<OutlineService>();
                 for (var i = StructureBeats.Count - 1; i >= 0; i--)
                 {
-                    SelectedBeat = StructureBeats[i];
-                    SelectedBeatIndex = i;
-                    DeleteBeat(null, null);
+                    outlineService.DeleteBeat(_storyModel, Model, i);
                 }
             }
             else
             {
-                return; // User canceled — don't change anything
+                // Revert ComboBox to the current title
+                var comboBox = sender as ComboBox;
+                _changeable = false;
+                comboBox.SelectedValue = StructureModelTitle;
+                _changeable = true;
+                return;
             }
         }
         else
