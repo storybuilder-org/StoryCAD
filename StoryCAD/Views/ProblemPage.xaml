@@ -253,11 +253,11 @@
                         <Grid Grid.Row="1"
               ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="5*" />
                                 <!-- beats -->
                                 <ColumnDefinition Width="Auto" />
                                 <!-- buttons -->
-                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="4*" />
                                 <!-- elements list -->
                             </Grid.ColumnDefinitions>
 
@@ -267,7 +267,9 @@
                       SelectedItem="{x:Bind BeatEditorVm.SelectedBeat, Mode=TwoWay}"
                       SelectedIndex="{x:Bind BeatEditorVm.SelectedBeatIndex, Mode=TwoWay}"
                       SelectionMode="Single"
-                      BorderThickness="0"
+                      BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                      BorderThickness="1"
+                      CornerRadius="4"
                       HorizontalAlignment="Stretch">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">
@@ -317,65 +319,58 @@
                                 </ListView.ItemTemplate>
                             </ListView>
 
-                            <!-- Command buttons with vertical separators -->
-                            <Grid Grid.Column="1" VerticalAlignment="Stretch">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
+                            <!-- Command buttons -->
+                            <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center"
+                                        Margin="8,0">
+                                <!-- Assignment group -->
+                                <Button x:Name="AssignButton"
+                                        Width="40" Height="40"
+                                        ToolTipService.ToolTip="Assign element to beat">
+                                    <FontIcon Glyph="&#xE72B;" FontSize="18" FontWeight="SemiBold" />
+                                </Button>
+                                <Button x:Name="UnassignButton"
+                                        Width="40" Height="40"
+                                        Command="{x:Bind BeatEditorVm.UnbindElementCommand}"
+                                        ToolTipService.ToolTip="Remove assignment">
+                                    <FontIcon Glyph="&#xE72A;" FontSize="18" FontWeight="SemiBold" />
+                                </Button>
 
-                                <!-- Left vertical line -->
-                                <Rectangle Grid.Column="0" Width="1"
-                                           Fill="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                                           Margin="0,0,8,0" />
+                                <!-- Spacer -->
+                                <Rectangle Height="1" Margin="0,4"
+                                           Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" />
 
-                                <!-- Buttons -->
-                                <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
-                                    <Button x:Name="AssignButton"
-                                            Content="&lt;"
-                                            Width="32"
-                                            Height="32" />
-                                    <Button x:Name="UnassignButton"
-                                            Content="&gt;"
-                                            Width="32"
-                                            Height="32" FontWeight="Bold"
-                                            Command="{x:Bind BeatEditorVm.UnbindElementCommand}" />
-                                    <Rectangle Height="1"
-                                               Margin="0,8"
-                                               Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" />
-                                    <Button x:Name="AddBeatButton"
-                                            Content="+"
-                                            Width="32"
-                                            Height="32" FontWeight="Bold"
-                                            Command="{x:Bind BeatEditorVm.CreateBeatCommand}" />
-                                    <Button x:Name="DeleteBeatButton"
-                                            Content="-"
-                                            Width="32"
-                                            Height="32" FontWeight="Bold"
-                                            Command="{x:Bind BeatEditorVm.DeleteBeatCommand}" />
-                                    <Button x:Name="MoveUpButton"
-                                            Content="∧"
-                                            Width="32"
-                                            Height="32"
-                                            Command="{x:Bind BeatEditorVm.MoveUpCommand}" />
-                                    <Button x:Name="MoveDownButton"
-                                            Content="∨"
-                                            Width="32"
-                                            Height="32" FontWeight="Bold"
-                                            Command="{x:Bind BeatEditorVm.MoveDownCommand}" />
-                                    <Button x:Name="SaveBeatSheetButton"
-                                            Content="S"
-                                            Width="32"
-                                            Height="32" FontWeight="Bold"
-                                            Click="{x:Bind ProblemVm.SaveBeatSheet}" />
-                                </StackPanel>
-
-                                <!-- Right vertical line -->
-                                <Rectangle Grid.Column="2" Width="1"
-                                           Fill="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                                           Margin="8,0,0,0" />
-                            </Grid>
+                                <!-- Beat management group -->
+                                <Button x:Name="AddBeatButton"
+                                        Width="40" Height="40"
+                                        Command="{x:Bind BeatEditorVm.CreateBeatCommand}"
+                                        ToolTipService.ToolTip="Add a new beat">
+                                    <FontIcon Glyph="&#xE710;" FontSize="18" FontWeight="SemiBold" />
+                                </Button>
+                                <Button x:Name="DeleteBeatButton"
+                                        Width="40" Height="40"
+                                        Command="{x:Bind BeatEditorVm.DeleteBeatCommand}"
+                                        ToolTipService.ToolTip="Delete selected beat">
+                                    <FontIcon Glyph="&#xE74D;" FontSize="18" FontWeight="SemiBold" />
+                                </Button>
+                                <Button x:Name="MoveUpButton"
+                                        Width="40" Height="40"
+                                        Command="{x:Bind BeatEditorVm.MoveUpCommand}"
+                                        ToolTipService.ToolTip="Move beat up">
+                                    <FontIcon Glyph="&#xE70E;" FontSize="18" FontWeight="SemiBold" />
+                                </Button>
+                                <Button x:Name="MoveDownButton"
+                                        Width="40" Height="40"
+                                        Command="{x:Bind BeatEditorVm.MoveDownCommand}"
+                                        ToolTipService.ToolTip="Move beat down">
+                                    <FontIcon Glyph="&#xE70D;" FontSize="18" FontWeight="SemiBold" />
+                                </Button>
+                                <Button x:Name="SaveBeatSheetButton"
+                                        Width="40" Height="40"
+                                        Click="{x:Bind ProblemVm.SaveBeatSheet}"
+                                        ToolTipService.ToolTip="Save beat sheet to file">
+                                    <FontIcon Glyph="&#xE74E;" FontSize="18" FontWeight="SemiBold" />
+                                </Button>
+                            </StackPanel>
 
                             <!-- Elements list (Scenes / Problems) -->
                             <Grid Grid.Column="2">
@@ -390,7 +385,10 @@
                           SelectedItem="{x:Bind BeatEditorVm.SelectedListElement, Mode=TwoWay}"
                           IsItemClickEnabled="True"
                           ItemClick="{x:Bind ProblemVm.AssignBeat}"
-                          DisplayMemberPath="Name" />
+                          DisplayMemberPath="Name"
+                          BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                          BorderThickness="1"
+                          CornerRadius="4" />
                             </Grid>
                         </Grid>
 
@@ -399,7 +397,6 @@
               ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
@@ -409,15 +406,10 @@
                      Text="{x:Bind BeatEditorVm.SelectedBeat.Description, Mode=TwoWay}"
                      TextWrapping="Wrap"
                      HorizontalAlignment="Stretch"
-                     VerticalAlignment="Stretch"
- />
-
-                            <Rectangle Grid.Column="1"
-                       Width="1"
-                       Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" />
+                     VerticalAlignment="Stretch" />
 
                             <!-- Element Description -->
-                            <usercontrols:RichEditBoxExtended Grid.Column="2"
+                            <usercontrols:RichEditBoxExtended Grid.Column="1"
                                               Header="Element Description"
                                               HorizontalAlignment="Stretch"
                                               VerticalAlignment="Stretch"

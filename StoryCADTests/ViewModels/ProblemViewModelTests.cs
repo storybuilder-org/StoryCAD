@@ -461,11 +461,11 @@ public class ProblemViewModelTests
     {
         var beat = CreateTestBeat("Test Beat");
 
-        Assert.AreEqual("No element Selected", beat.ElementName);
+        Assert.AreEqual("Unassigned", beat.ElementName);
     }
 
     [TestMethod]
-    public void AssignBeat_SetGuidToEmpty_RestoresNoElementSelected()
+    public void AssignBeat_SetGuidToEmpty_RestoresUnassigned()
     {
         _viewModel.Activate(_problemModel);
         var beat = CreateTestBeat("Test Beat");
@@ -474,7 +474,7 @@ public class ProblemViewModelTests
 
         beat.Guid = Guid.Empty;
 
-        Assert.AreEqual("No element Selected", beat.ElementName);
+        Assert.AreEqual("Unassigned", beat.ElementName);
     }
 
     [TestMethod]
@@ -502,11 +502,11 @@ public class ProblemViewModelTests
     }
 
     [TestMethod]
-    public void ElementIcon_Unassigned_ReturnsCancelSymbol()
+    public void ElementIcon_Unassigned_ReturnsBulletsSymbol()
     {
         var beat = CreateTestBeat("Test Beat");
 
-        Assert.AreEqual(Symbol.Cancel, beat.ElementIcon);
+        Assert.AreEqual(Symbol.Bullets, beat.ElementIcon);
     }
 
     [TestMethod]

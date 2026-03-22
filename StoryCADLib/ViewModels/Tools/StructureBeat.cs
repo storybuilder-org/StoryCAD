@@ -109,7 +109,7 @@ public class StructureBeat : ObservableObject
         {
             if (Element.Uuid == Guid.Empty)
             {
-                return "No element Selected";
+                return "Unassigned";
             }
 
             return Element.Name;
@@ -159,7 +159,7 @@ public class StructureBeat : ObservableObject
                 }
             }
 
-            return Symbol.Cancel;
+            return Symbol.Bullets;
         }
     }
 
