@@ -546,7 +546,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
     }
 
 
-    [KernelFunction]
+    [KernelFunction("AddElementWithProperties")]
     [Description("""
                  Adds a new StoryElement to the current StoryModel and sets some properties.
                  This function returns a objectthe Guid of the element that was added.
@@ -1681,6 +1681,82 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
 
         problem.StructureBeats.Move(fromIndex, toIndex);
         return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Moves a story element from its current parent to a new parent node.
+    /// </summary>
+    [KernelFunction]
+    [Description("""
+                 Moves a story element to a new parent in the outline tree.
+                 elementGuid is the GUID of the element to move.
+                 newParentGuid is the GUID of the element that will become the new parent.
+                 Cannot move root elements, TrashCan elements, or create circular references.
+                 Call save_outline after to persist.
+                 """)]
+    public OperationResult<bool> MoveElement(Guid elementGuid, Guid newParentGuid)
+    {
+        if (CurrentModel == null)
+            return OperationResult<bool>.Failure("No StoryModel available");
+
+        if (CurrentModel.ExplorerView == null || CurrentModel.ExplorerView.Count == 0)
+            return OperationResult<bool>.Failure("ExplorerView is not available");
+
+        if (elementGuid == newParentGuid)
+            return OperationResult<bool>.Failure("Cannot move an element to itself");
+
+        // Find nodes in the ExplorerView tree (not element.Node, which may point to NarratorView)
+        var elementNode = FindNodeInTree(CurrentModel.ExplorerView[0], elementGuid);
+        if (elementNode == null)
+            return OperationResult<bool>.Failure($"Element with GUID '{elementGuid}' not found in ExplorerView");
+
+        var newParentNode = FindNodeInTree(CurrentModel.ExplorerView[0], newParentGuid);
+        if (newParentNode == null)
+            return OperationResult<bool>.Failure($"New parent with GUID '{newParentGuid}' not found in ExplorerView");
+
+        if (elementNode.IsRoot)
+            return OperationResult<bool>.Failure("Cannot move the root element");
+
+        if (elementNode.Type == StoryItemType.TrashCan)
+            return OperationResult<bool>.Failure("Cannot move the TrashCan");
+
+        // Check for circular reference: walk up from newParent to ensure element is not an ancestor
+        var current = newParentNode;
+        while (current != null)
+        {
+            if (current.Uuid == elementGuid)
+                return OperationResult<bool>.Failure("Cannot move an element to one of its own descendants");
+            current = current.Parent;
+        }
+
+        // Perform the move in the ExplorerView tree
+        var oldParent = elementNode.Parent;
+        if (oldParent == null)
+            return OperationResult<bool>.Failure("Element has no parent to detach from");
+
+        oldParent.Children.Remove(elementNode);
+        elementNode.Parent = newParentNode;
+        newParentNode.Children.Add(elementNode);
+
+        return OperationResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// Finds a StoryNodeItem by GUID in a tree by recursive depth-first search.
+    /// </summary>
+    private static StoryNodeItem FindNodeInTree(StoryNodeItem root, Guid guid)
+    {
+        if (root.Uuid == guid)
+            return root;
+
+        foreach (var child in root.Children)
+        {
+            var found = FindNodeInTree(child, guid);
+            if (found != null)
+                return found;
+        }
+
+        return null;
     }
 
     /// <summary>

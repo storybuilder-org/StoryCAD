@@ -2400,4 +2400,113 @@ public class StoryCADApiTests
     }
 
     #endregion
+
+    #region MoveElement Tests
+
+    [TestMethod]
+    public async Task MoveElement_WithValidGuids_Succeeds()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Move Test", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview).Uuid;
+
+        var folder1Result = _api.AddElement(StoryItemType.Folder, overviewGuid.ToString(), "Folder1");
+        Assert.IsTrue(folder1Result.IsSuccess);
+        var folder2Result = _api.AddElement(StoryItemType.Folder, overviewGuid.ToString(), "Folder2");
+        Assert.IsTrue(folder2Result.IsSuccess);
+
+        var sceneResult = _api.AddElement(StoryItemType.Scene, folder1Result.Payload.ToString(), "Test Scene");
+        Assert.IsTrue(sceneResult.IsSuccess);
+
+        // Act — move scene from Folder1 to Folder2
+        var result = _api.MoveElement(sceneResult.Payload, folder2Result.Payload);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, $"MoveElement should succeed: {result.ErrorMessage}");
+
+        var scene = _api.CurrentModel.StoryElements.First(e => e.Uuid == sceneResult.Payload);
+        Assert.AreEqual(folder2Result.Payload, scene.Node.Parent.Uuid, "Scene's parent should be Folder2");
+
+        var folder1 = _api.CurrentModel.StoryElements.First(e => e.Uuid == folder1Result.Payload);
+        Assert.IsFalse(folder1.Node.Children.Any(c => c.Uuid == sceneResult.Payload), "Folder1 should no longer contain the scene");
+
+        var folder2 = _api.CurrentModel.StoryElements.First(e => e.Uuid == folder2Result.Payload);
+        Assert.IsTrue(folder2.Node.Children.Any(c => c.Uuid == sceneResult.Payload), "Folder2 should contain the scene");
+    }
+
+    [TestMethod]
+    public async Task MoveElement_WithNoModel_ReturnsFailure()
+    {
+        // Arrange — ensure no model
+        _api.SetCurrentModel(null!);
+
+        // Act
+        var result = _api.MoveElement(Guid.NewGuid(), Guid.NewGuid());
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess);
+        Assert.IsTrue(result.ErrorMessage.Contains("No StoryModel"));
+    }
+
+    [TestMethod]
+    public async Task MoveElement_ToSelf_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Move Self Test", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview).Uuid;
+        var folderResult = _api.AddElement(StoryItemType.Folder, overviewGuid.ToString(), "Folder");
+        Assert.IsTrue(folderResult.IsSuccess);
+
+        // Act
+        var result = _api.MoveElement(folderResult.Payload, folderResult.Payload);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess);
+        Assert.IsTrue(result.ErrorMessage.Contains("itself"));
+    }
+
+    [TestMethod]
+    public async Task MoveElement_ToOwnDescendant_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Move Circular Test", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview).Uuid;
+
+        var parentResult = _api.AddElement(StoryItemType.Folder, overviewGuid.ToString(), "Parent");
+        Assert.IsTrue(parentResult.IsSuccess);
+        var childResult = _api.AddElement(StoryItemType.Folder, parentResult.Payload.ToString(), "Child");
+        Assert.IsTrue(childResult.IsSuccess);
+        var grandchildResult = _api.AddElement(StoryItemType.Folder, childResult.Payload.ToString(), "Grandchild");
+        Assert.IsTrue(grandchildResult.IsSuccess);
+
+        // Act — try to move Parent under Grandchild (circular)
+        var result = _api.MoveElement(parentResult.Payload, grandchildResult.Payload);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess);
+        Assert.IsTrue(result.ErrorMessage.Contains("descendants"));
+    }
+
+    [TestMethod]
+    public async Task MoveElement_Root_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Move Root Test", "Test Author", "0");
+        var overview = _api.CurrentModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview);
+        var folderResult = _api.AddElement(StoryItemType.Folder, overview.Uuid.ToString(), "Folder");
+        Assert.IsTrue(folderResult.IsSuccess);
+
+        // Act — try to move the root
+        var result = _api.MoveElement(overview.Uuid, folderResult.Payload);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess);
+        Assert.IsTrue(result.ErrorMessage.Contains("root"));
+    }
+
+    #endregion
 }
