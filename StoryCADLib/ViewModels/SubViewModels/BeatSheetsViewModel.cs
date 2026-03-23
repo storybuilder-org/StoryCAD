@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using StoryCADLib.Models.Tools;
 
-namespace StoryCADLib.ViewModels.Tools;
+namespace StoryCADLib.ViewModels.SubViewModels;
 
 public class BeatSheetsViewModel : ObservableRecipient
 {

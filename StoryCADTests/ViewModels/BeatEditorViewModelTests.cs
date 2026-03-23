@@ -319,22 +319,6 @@ public class BeatEditorViewModelTests
         Assert.AreEqual("A test scene description", _beatEditor.CurrentElementDescription);
     }
 
-    [TestMethod]
-    public void SelectedBeat_WhenChanged_NotifiesCanExecuteOnCommands()
-    {
-        // Arrange
-        var beat = CreateTestBeat("Beat 1");
-        _beatEditor.StructureBeats.Add(beat);
-        var canExecuteChangedFired = false;
-        _beatEditor.DeleteBeatCommand.CanExecuteChanged += (_, _) => canExecuteChangedFired = true;
-
-        // Act
-        _beatEditor.SelectedBeat = beat;
-
-        // Assert
-        Assert.IsTrue(canExecuteChangedFired);
-    }
-
     #endregion
 
     #region Step 6: LoadBeats / SaveBeats Tests

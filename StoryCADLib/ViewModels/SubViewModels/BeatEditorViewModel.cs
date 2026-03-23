@@ -80,16 +80,7 @@ public class BeatEditorViewModel : ObservableObject
     public StructureBeat SelectedBeat
     {
         get => _selectedBeat;
-        set
-        {
-            if (SetProperty(ref _selectedBeat, value))
-            {
-                DeleteBeatCommand.NotifyCanExecuteChanged();
-                MoveUpCommand.NotifyCanExecuteChanged();
-                MoveDownCommand.NotifyCanExecuteChanged();
-                UnbindElementCommand.NotifyCanExecuteChanged();
-            }
-        }
+        set => SetProperty(ref _selectedBeat, value);
     }
 
     private int _selectedBeatIndex = -1;
