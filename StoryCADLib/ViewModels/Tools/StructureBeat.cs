@@ -155,11 +155,11 @@ public class StructureBeat : ObservableObject
 
                 if (Element.ElementType == StoryItemType.Scene)
                 {
-                    return Symbol.World;
+                    return Symbol.AllApps;
                 }
             }
 
-            return Symbol.Bullets;
+            return Symbol.ClearSelection;
         }
     }
 

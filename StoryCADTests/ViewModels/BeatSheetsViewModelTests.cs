@@ -424,7 +424,7 @@ public class BeatSheetsViewModelTests
 
         beat.Guid = scene.Uuid;
 
-        Assert.AreEqual(Symbol.World, beat.ElementIcon);
+        Assert.AreEqual(Symbol.AllApps, beat.ElementIcon);
     }
 
     [TestMethod]
@@ -444,7 +444,7 @@ public class BeatSheetsViewModelTests
     {
         var beat = CreateTestBeat("Test Beat");
 
-        Assert.AreEqual(Symbol.Bullets, beat.ElementIcon);
+        Assert.AreEqual(Symbol.ClearSelection, beat.ElementIcon);
     }
 
     [TestMethod]
