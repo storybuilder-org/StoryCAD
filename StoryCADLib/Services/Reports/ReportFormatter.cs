@@ -748,8 +748,8 @@ public class ReportFormatter
             return string.Empty;
 
         var output = new StringBuilder();
-        output.AppendLine("Plot Structure Diagram");
-        output.AppendLine("======================");
+        output.AppendLine("Plot Structure Problem Diagram");
+        output.AppendLine("==============================");
         output.AppendLine();
 
         var processedElements = new HashSet<Guid>();
