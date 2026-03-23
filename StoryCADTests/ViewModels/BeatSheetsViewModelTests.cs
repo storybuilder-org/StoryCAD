@@ -103,6 +103,27 @@ public class BeatSheetsViewModelTests
     }
 
     [TestMethod]
+    public void CreateBeatCommand_WithBeatSelected_InsertsAfterSelection()
+    {
+        // Arrange — load beats, select the first one
+        _beatEditor.StructureModelTitle = "Save the Cat";
+        _beatEditor.StructureBeats.Add(CreateTestBeat("Beat 1"));
+        _beatEditor.StructureBeats.Add(CreateTestBeat("Beat 2"));
+        _beatEditor.SelectedBeat = _beatEditor.StructureBeats[0];
+        _beatEditor.SelectedBeatIndex = 0;
+
+        // Act
+        _beatEditor.CreateBeatCommand.Execute(null);
+
+        // Assert — new beat inserted after Beat 1, before Beat 2
+        Assert.AreEqual(3, _beatEditor.StructureBeats.Count);
+        Assert.AreEqual("Beat 1", _beatEditor.StructureBeats[0].Title);
+        Assert.AreEqual("New Beat", _beatEditor.StructureBeats[1].Title);
+        Assert.AreEqual("Beat 2", _beatEditor.StructureBeats[2].Title);
+        Assert.AreEqual(_beatEditor.StructureBeats[1], _beatEditor.SelectedBeat);
+    }
+
+    [TestMethod]
     public void DeleteBeatCommand_WithNoSelection_DoesNotRemove()
     {
         _beatEditor.LoadBeats(_problemModel, _storyModel);

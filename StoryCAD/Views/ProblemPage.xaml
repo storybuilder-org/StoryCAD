@@ -319,17 +319,17 @@
                             </ListView>
 
                             <!-- Command buttons -->
-                            <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center"
-                                        Margin="8,0">
+                            <StackPanel Grid.Column="1" Spacing="1" Padding="0" VerticalAlignment="Center"
+                                        Margin="4,0">
                                 <!-- Assignment group -->
                                 <Button x:Name="AssignButton"
-                                        Width="40" Height="40"
+                                        Width="44" Height="40"
                                         Command="{x:Bind BeatSheetsVm.AssignBeatCommand}"
                                         ToolTipService.ToolTip="Assign element to beat">
                                     <FontIcon Glyph="&#xE72B;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
                                 <Button x:Name="UnassignButton"
-                                        Width="40" Height="40"
+                                        Width="44" Height="40"
                                         Command="{x:Bind BeatSheetsVm.UnbindElementCommand}"
                                         ToolTipService.ToolTip="Remove assignment">
                                     <FontIcon Glyph="&#xE72A;" FontSize="18" FontWeight="SemiBold" />
@@ -341,31 +341,31 @@
 
                                 <!-- Beat management group -->
                                 <Button x:Name="AddBeatButton"
-                                        Width="40" Height="40"
+                                        Width="44" Height="40"
                                         Command="{x:Bind BeatSheetsVm.CreateBeatCommand}"
                                         ToolTipService.ToolTip="Add a new beat">
                                     <FontIcon Glyph="&#xE710;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
                                 <Button x:Name="DeleteBeatButton"
-                                        Width="40" Height="40"
+                                        Width="44" Height="40"
                                         Command="{x:Bind BeatSheetsVm.DeleteBeatCommand}"
                                         ToolTipService.ToolTip="Delete selected beat">
                                     <FontIcon Glyph="&#xE74D;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
                                 <Button x:Name="MoveUpButton"
-                                        Width="40" Height="40"
+                                        Width="44" Height="40"
                                         Command="{x:Bind BeatSheetsVm.MoveUpCommand}"
                                         ToolTipService.ToolTip="Move beat up">
                                     <FontIcon Glyph="&#xE70E;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
                                 <Button x:Name="MoveDownButton"
-                                        Width="40" Height="40"
+                                        Width="44" Height="40"
                                         Command="{x:Bind BeatSheetsVm.MoveDownCommand}"
                                         ToolTipService.ToolTip="Move beat down">
                                     <FontIcon Glyph="&#xE70D;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
                                 <Button x:Name="SaveBeatSheetButton"
-                                        Width="40" Height="40"
+                                        Width="44" Height="40"
                                         Command="{x:Bind BeatSheetsVm.SaveBeatSheetCommand}"
                                         ToolTipService.ToolTip="Save beat sheet to file">
                                     <FontIcon Glyph="&#xE74E;" FontSize="18" FontWeight="SemiBold" />

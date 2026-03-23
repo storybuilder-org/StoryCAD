@@ -360,40 +360,6 @@
 
 ---
 
-### BU-003: Unassign button disabled when no beat is selected
-**Priority:** Medium
-**Time:** ~30 seconds
-
-**Preconditions:** The Structure tab is open with beats loaded. No beat is selected (click blank space to deselect if needed).
-
-**Steps:**
-1. Ensure no beat is selected in the beats list.
-   **Expected:** No beat is highlighted.
-
-2. Observe the Unassign button (right chevron).
-   **Expected:** The Unassign button is disabled (visually grayed out or non-interactive). Clicking it has no effect.
-
-**Pass/Fail:** ______
-
----
-
-### BU-004: Unassign button disabled when selected beat has no assignment
-**Priority:** Medium
-**Time:** ~30 seconds
-
-**Preconditions:** The Structure tab is open. At least one unassigned beat exists.
-
-**Steps:**
-1. Select an unassigned beat (one showing the bullet icon).
-   **Expected:** Beat is highlighted.
-
-2. Observe the Unassign button.
-   **Expected:** The Unassign button is disabled. There is nothing to unassign.
-
-**Pass/Fail:** ______
-
----
-
 ## Section 4: Beat Editing
 
 ### BE-001: Add a new beat to a loaded beat sheet

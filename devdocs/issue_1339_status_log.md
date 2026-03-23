@@ -16,6 +16,29 @@
 - **Cause**: ComboBox SelectionChanged fires during navigation/data binding, not just from user interaction.
 - **Screenshot**: `/mnt/c/temp/this_will_clear_on_select_problem.png`
 
+### 3. Missing beat assignment validation — circular and Story Problem assignment
+- **Severity**: Medium — allows invalid data structures
+- **Location**: `AssignBeatAsync` in BeatSheetsViewModel, `AssignElementToBeat` in OutlineService
+- **Symptom**: Two missing validations:
+  1. **Story Problem** (the root problem identified on the Overview Premise tab) can be assigned as a beat on another problem. It should be rejected — the root of the problem tree can never be a beat.
+  2. **Mutual assignment** creates a loop: if Main Problem's beat sheet has Sub-Problem A assigned to a beat, then Sub-Problem A's beat sheet can also assign Main Problem to a beat. This creates a circular reference (Ab<B and Bb<A). Should be rejected.
+- **Reproduction**: Open an outline. Main Problem has a beat sheet with Sub-Problem A assigned to B-Story. Navigate to Sub-Problem A, give it a custom beat sheet, add a beat, assign Main Problem to it — it succeeds when it should be blocked.
+- **Screenshot**: `/mnt/c/temp/main_problem_makes_loop.png`
+
+### 4. Reassigning a problem doesn't clear the old beat assignment
+- **Severity**: High — violates the one-assignment rule
+- **Location**: `AssignElementToBeat` in OutlineService / `AssignBeatAsync` in BeatSheetsViewModel
+- **Symptom**: A problem can only be assigned to one beat, period. When reassigning a problem that is already assigned, the old beat should be cleared. Instead, the problem ends up assigned to both beats.
+- **Reproduction**: On Main Problem's Save The Cat beat sheet, assign Sub-Problem A to B Story. Then assign Sub-Problem A to Midpoint. Both B Story and Midpoint now show Sub-Problem A.
+- **Rule**: A problem can only be assigned once — to one beat on one problem's beat sheet. Any new assignment must clear the previous one.
+- **Screenshot**: `/mnt/c/temp/reassign_problem.png`
+
+### 5. No way to edit beat title inline
+- **Severity**: Low — enhancement
+- **Location**: Beat ListView item template in `ProblemPage.xaml`
+- **Symptom**: Beat titles are displayed in a read-only TextBlock. There is no inline editing mechanism (e.g., double-click to edit, or a TextBox swap) to rename a beat.
+- **Note**: Beat descriptions are editable via the Beat Description panel below. Only the title lacks an edit path.
+
 ## Completed Work
 
 - Phase 0: Characterization tests

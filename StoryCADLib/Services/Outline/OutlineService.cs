@@ -707,15 +707,33 @@ public class OutlineService
                 throw new InvalidOperationException("Cannot assign a Problem as a beat on itself.");
             }
 
-            //Clear old parent's beat if problem is already assigned elsewhere
-            if (problem.BoundStructure != Guid.Empty &&
-                problem.BoundStructure != Parent.Uuid &&
-                Model.StoryElements.StoryElementGuids.TryGetValue(problem.BoundStructure, out var oldParent) &&
-                oldParent is ProblemModel oldProblem)
+            //Cannot assign the Story Problem to any beat
+            var overview = Model.StoryElements.OfType<OverviewModel>().FirstOrDefault();
+            if (overview != null && problem.Uuid == overview.StoryProblem)
             {
-                var oldBeat = oldProblem.StructureBeats.FirstOrDefault(b => b.Guid == problem.Uuid);
-                if (oldBeat != null)
-                    oldBeat.Guid = Guid.Empty;
+                throw new InvalidOperationException("Cannot assign the Story Problem to a beat.");
+            }
+
+            //Clear old beat if problem is already assigned elsewhere or on a different beat in the same sheet
+            if (problem.BoundStructure != Guid.Empty)
+            {
+                ProblemModel oldProblem = null;
+                if (problem.BoundStructure == Parent.Uuid)
+                {
+                    oldProblem = Parent;
+                }
+                else if (Model.StoryElements.StoryElementGuids.TryGetValue(problem.BoundStructure, out var oldParent) &&
+                         oldParent is ProblemModel op)
+                {
+                    oldProblem = op;
+                }
+
+                if (oldProblem != null)
+                {
+                    var oldBeat = oldProblem.StructureBeats.FirstOrDefault(b => b.Guid == problem.Uuid);
+                    if (oldBeat != null)
+                        oldBeat.Guid = Guid.Empty;
+                }
             }
 
             //Set BoundStructure reverse pointer

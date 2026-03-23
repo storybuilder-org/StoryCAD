@@ -345,6 +345,15 @@ public class BeatSheetsViewModel : ObservableObject
             return;
         }
 
+        // Cannot assign the Story Problem to any beat
+        var overview = _storyModel.StoryElements.OfType<OverviewModel>().FirstOrDefault();
+        if (overview != null && desiredBind == overview.StoryProblem)
+        {
+            WeakReferenceMessenger.Default.Send(
+                new StatusChangedMessage(new StatusMessage("Cannot assign the Story Problem to a beat", LogLevel.Warn)));
+            return;
+        }
+
         try
         {
             // If assigning a problem, check if it's already bound elsewhere and confirm
@@ -400,7 +409,20 @@ public class BeatSheetsViewModel : ObservableObject
                 new StatusChangedMessage(new StatusMessage("Select a beat sheet first", LogLevel.Warn)));
             return;
         }
-        StructureBeats.Add(new StructureBeat("New Beat", "Describe your beat here"));
+        var newBeat = new StructureBeat("New Beat", "Describe your beat here");
+        if (SelectedBeatIndex >= 0 && SelectedBeatIndex < StructureBeats.Count)
+        {
+            StructureBeats.Insert(SelectedBeatIndex + 1, newBeat);
+            SelectedBeatIndex = SelectedBeatIndex + 1;
+        }
+        else
+        {
+            StructureBeats.Add(newBeat);
+            SelectedBeatIndex = StructureBeats.Count - 1;
+        }
+        SelectedBeat = newBeat;
+        WeakReferenceMessenger.Default.Send(
+            new StatusChangedMessage(new StatusMessage("Beat added", LogLevel.Info)));
     }
 
     private async Task DeleteBeatAsync()
@@ -430,6 +452,8 @@ public class BeatSheetsViewModel : ObservableObject
         try
         {
             _outlineService.DeleteBeat(_storyModel, _problemModel, SelectedBeatIndex);
+            WeakReferenceMessenger.Default.Send(
+                new StatusChangedMessage(new StatusMessage("Beat deleted", LogLevel.Info)));
         }
         catch (Exception ex)
         {
