@@ -227,7 +227,7 @@
                                     <ComboBox Grid.Row="1"
                               Grid.Column="0"
                               ItemsSource="{x:Bind BeatSheetsVm.PlotPatternNames}"
-                              SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}"
+                              SelectionChanged="{x:Bind BeatSheetsVm.UpdateSelectedBeat}"
                               PlaceholderText="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=OneWay}"
                               SelectedValue="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=OneWay}"
                               Text="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=OneWay}"

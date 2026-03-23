@@ -29,6 +29,7 @@ public class BeatSheetsViewModel : ObservableObject
 
     private StoryModel _storyModel;
     private ProblemModel _problemModel;
+    private bool _isLoading;
 
     #endregion
 
@@ -243,6 +244,7 @@ public class BeatSheetsViewModel : ObservableObject
     /// </summary>
     public void LoadBeats(ProblemModel model, StoryModel storyModel)
     {
+        _isLoading = true;
         _storyModel = storyModel;
         _problemModel = model;
 
@@ -258,6 +260,7 @@ public class BeatSheetsViewModel : ObservableObject
         Problems = storyModel.StoryElements.Problems;
         Scenes = storyModel.StoryElements.Scenes;
         CurrentElementSource = Scenes;
+        _isLoading = false;
     }
 
     /// <summary>
@@ -364,6 +367,66 @@ public class BeatSheetsViewModel : ObservableObject
         if (SelectedBeatIndex < StructureBeats.Count - 1)
         {
             StructureBeats.Move(SelectedBeatIndex, SelectedBeatIndex + 1);
+        }
+    }
+
+    public async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isLoading)
+            return;
+
+        var value = (sender as ComboBox).SelectedValue.ToString();
+
+        ContentDialogResult result;
+        if (!string.IsNullOrEmpty(StructureModelTitle))
+        {
+            result = await _windowing.ShowContentDialog(new ContentDialog
+            {
+                Title = "This will clear selected story beats",
+                PrimaryButtonText = "Confirm",
+                SecondaryButtonText = "Cancel"
+            });
+
+            if (result == ContentDialogResult.Primary)
+            {
+                for (var i = StructureBeats.Count - 1; i >= 0; i--)
+                {
+                    _outlineService.DeleteBeat(_storyModel, _problemModel, i);
+                }
+            }
+            else
+            {
+                var comboBox = sender as ComboBox;
+                _isLoading = true;
+                comboBox.SelectedValue = StructureModelTitle;
+                _isLoading = false;
+                return;
+            }
+        }
+        else
+        {
+            result = ContentDialogResult.Primary;
+        }
+
+        if (value == "Load Custom Beat Sheet from file...")
+        {
+            value = "Custom Beat Sheet";
+            StructureModelTitle = value;
+            LoadBeatSheet();
+        }
+
+        if (result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))
+        {
+            StructureModelTitle = value;
+
+            var beatSheet = BeatSheets[value];
+            StructureDescription = beatSheet.PlotPatternNotes;
+
+            StructureBeats.Clear();
+            foreach (var item in beatSheet.PlotPatternScenes)
+            {
+                StructureBeats.Add(new StructureBeat(item.SceneTitle, item.Notes));
+            }
         }
     }
 
