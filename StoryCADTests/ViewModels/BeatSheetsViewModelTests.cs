@@ -87,26 +87,6 @@ public class BeatSheetsViewModelTests
         Assert.AreEqual(2, _beatEditor.StructureBeats.Count);
     }
 
-    // DeleteBeatCommand execution requires a UI dialog (confirmation),
-    // so we only test CanExecute here. Full delete flow is an integration test.
-
-    [TestMethod]
-    public void DeleteBeatCommand_CanExecute_FalseWhenNoBeatSelected()
-    {
-        _beatEditor.SelectedBeat = null;
-        Assert.IsFalse(_beatEditor.DeleteBeatCommand.CanExecute(null));
-    }
-
-    [TestMethod]
-    public void DeleteBeatCommand_CanExecute_TrueWhenBeatSelected()
-    {
-        _beatEditor.StructureBeats.Add(CreateTestBeat("Beat 1"));
-        _beatEditor.SelectedBeat = _beatEditor.StructureBeats[0];
-        _beatEditor.SelectedBeatIndex = 0;
-
-        Assert.IsTrue(_beatEditor.DeleteBeatCommand.CanExecute(null));
-    }
-
     #endregion
 
     #region Step 3: Move Command Tests
@@ -129,23 +109,6 @@ public class BeatSheetsViewModelTests
     }
 
     [TestMethod]
-    public void MoveUpCommand_CanExecute_FalseWhenAtTop()
-    {
-        _beatEditor.StructureBeats.Add(CreateTestBeat("Beat 1"));
-        _beatEditor.SelectedBeat = _beatEditor.StructureBeats[0];
-        _beatEditor.SelectedBeatIndex = 0;
-
-        Assert.IsFalse(_beatEditor.MoveUpCommand.CanExecute(null));
-    }
-
-    [TestMethod]
-    public void MoveUpCommand_CanExecute_FalseWhenNoBeatSelected()
-    {
-        _beatEditor.SelectedBeat = null;
-        Assert.IsFalse(_beatEditor.MoveUpCommand.CanExecute(null));
-    }
-
-    [TestMethod]
     public void MoveDownCommand_AtIndexZero_ShouldMoveToIndexOne()
     {
         // Arrange
@@ -160,23 +123,6 @@ public class BeatSheetsViewModelTests
         // Assert
         Assert.AreEqual("Beat 2", _beatEditor.StructureBeats[0].Title);
         Assert.AreEqual("Beat 1", _beatEditor.StructureBeats[1].Title);
-    }
-
-    [TestMethod]
-    public void MoveDownCommand_CanExecute_FalseWhenAtBottom()
-    {
-        _beatEditor.StructureBeats.Add(CreateTestBeat("Beat 1"));
-        _beatEditor.SelectedBeat = _beatEditor.StructureBeats[0];
-        _beatEditor.SelectedBeatIndex = 0;
-
-        Assert.IsFalse(_beatEditor.MoveDownCommand.CanExecute(null));
-    }
-
-    [TestMethod]
-    public void MoveDownCommand_CanExecute_FalseWhenNoBeatSelected()
-    {
-        _beatEditor.SelectedBeat = null;
-        Assert.IsFalse(_beatEditor.MoveDownCommand.CanExecute(null));
     }
 
     #endregion
@@ -207,25 +153,6 @@ public class BeatSheetsViewModelTests
         Assert.AreEqual(Guid.Empty, beat.Guid);
         Assert.IsNull(_beatEditor.SelectedBeat);
         Assert.AreEqual(-1, _beatEditor.SelectedBeatIndex);
-    }
-
-    [TestMethod]
-    public void UnbindElementCommand_CanExecute_FalseWhenNoBeatSelected()
-    {
-        _beatEditor.SelectedBeat = null;
-        Assert.IsFalse(_beatEditor.UnbindElementCommand.CanExecute(null));
-    }
-
-    [TestMethod]
-    public void UnbindElementCommand_CanExecute_FalseWhenBeatHasNoBinding()
-    {
-        var beat = CreateTestBeat("Beat 1");
-        beat.Guid = Guid.Empty;
-        _beatEditor.StructureBeats.Add(beat);
-        _beatEditor.SelectedBeat = beat;
-        _beatEditor.SelectedBeatIndex = 0;
-
-        Assert.IsFalse(_beatEditor.UnbindElementCommand.CanExecute(null));
     }
 
     #endregion

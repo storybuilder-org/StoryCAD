@@ -66,12 +66,12 @@ public class BeatSheetsViewModel : ObservableObject
         PropertyChanged += OnPropertyChanged;
 
         // Commands (order matches button layout top to bottom)
-        AssignBeatCommand = new AsyncRelayCommand(AssignBeatAsync, () => SelectedBeat != null && SelectedListElement != null);
-        UnbindElementCommand = new RelayCommand(UnbindElement, CanUnbindElement);
+        AssignBeatCommand = new AsyncRelayCommand(AssignBeatAsync);
+        UnbindElementCommand = new RelayCommand(UnbindElement);
         CreateBeatCommand = new RelayCommand(CreateBeat);
-        DeleteBeatCommand = new AsyncRelayCommand(DeleteBeatAsync, () => SelectedBeat != null);
-        MoveUpCommand = new RelayCommand(MoveUp, () => SelectedBeat != null && SelectedBeatIndex > 0);
-        MoveDownCommand = new RelayCommand(MoveDown, () => SelectedBeat != null && SelectedBeatIndex < StructureBeats.Count - 1);
+        DeleteBeatCommand = new AsyncRelayCommand(DeleteBeatAsync);
+        MoveUpCommand = new RelayCommand(MoveUp);
+        MoveDownCommand = new RelayCommand(MoveDown);
         SaveBeatSheetCommand = new AsyncRelayCommand(SaveBeatSheetAsync);
     }
 
@@ -359,11 +359,6 @@ public class BeatSheetsViewModel : ObservableObject
         // Clear selection
         SelectedBeat = null;
         SelectedBeatIndex = -1;
-    }
-
-    private bool CanUnbindElement()
-    {
-        return SelectedBeat != null && SelectedBeat.Guid != Guid.Empty;
     }
 
     private void CreateBeat()
