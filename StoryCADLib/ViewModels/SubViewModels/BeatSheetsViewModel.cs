@@ -72,6 +72,7 @@ public class BeatSheetsViewModel : ObservableObject
         MoveDownCommand = new RelayCommand(MoveDown, () => SelectedBeat != null && SelectedBeatIndex < StructureBeats.Count - 1);
         UnbindElementCommand = new RelayCommand(UnbindElement, CanUnbindElement);
         AssignBeatCommand = new AsyncRelayCommand(AssignBeatAsync, () => SelectedBeat != null && SelectedListElement != null);
+        SaveBeatSheetCommand = new AsyncRelayCommand(SaveBeatSheetAsync);
     }
 
     #endregion
@@ -218,6 +219,7 @@ public class BeatSheetsViewModel : ObservableObject
     public RelayCommand MoveDownCommand { get; }
     public RelayCommand UnbindElementCommand { get; }
     public IRelayCommand AssignBeatCommand { get; }
+    public IRelayCommand SaveBeatSheetCommand { get; }
 
     #endregion
 
@@ -430,7 +432,7 @@ public class BeatSheetsViewModel : ObservableObject
         }
     }
 
-    public async void SaveBeatSheet()
+    private async Task SaveBeatSheetAsync()
     {
         try
         {
