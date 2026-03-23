@@ -290,8 +290,7 @@
                               VerticalAlignment="Center"
                               Margin="8,8,8,8"
                               RowDefinitions="Auto,Auto"
-                              Background="Transparent"
-                              PointerPressed="ListViewItem_PointerPressed">
+                              Background="Transparent">
                                             <!-- Icon spans both rows -->
                                             <SymbolIcon Grid.Column="0"
                                         Grid.RowSpan="2"

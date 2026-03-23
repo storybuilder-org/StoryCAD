@@ -1,8 +1,6 @@
-using Microsoft.UI.Xaml.Input;
 using StoryCADLib.Services;
 using StoryCADLib.Services.Logging;
 using StoryCADLib.ViewModels.SubViewModels;
-using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCAD.Views;
 
@@ -22,17 +20,6 @@ public sealed partial class ProblemPage : Page
 
     public ShellViewModel ShellVm => Ioc.Default.GetService<ShellViewModel>();
     public OutlineViewModel OutlineVM => Ioc.Default.GetService<OutlineViewModel>();
-
-    private void ListViewItem_PointerPressed(object sender, PointerRoutedEventArgs e)
-    {
-        var container = sender as FrameworkElement;
-        var clickedItem = container?.DataContext as StructureBeat;
-        if (clickedItem != null)
-        {
-            BeatSheetsVm.SelectedBeat = clickedItem;
-            BeatSheetsVm.SelectedBeatIndex = BeatSheetsVm.StructureBeats.IndexOf(clickedItem);
-        }
-    }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
