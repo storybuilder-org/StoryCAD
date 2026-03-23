@@ -15,6 +15,17 @@ namespace StoryCADLib.ViewModels.SubViewModels;
 /// <summary>
 ///     Owns all beat sheet template data, editing state, and commands for the Structure tab.
 ///     Created by ProblemViewModel, not registered in IoC.
+///
+///     Referenced data classes:
+///       StructureBeat (ViewModels/Tools/) — A single beat in a beat sheet. Has Title, Description,
+///         and a Guid linking it to a scene or problem. Serialized as part of ProblemModel.StructureBeats
+///         in the story file. Resolves its linked element lazily via IoC for display (ElementName, ElementIcon,
+///         ElementDescription).
+///       PlotPatternModel (Models/Tools/) — A beat sheet template (e.g., "Save the Cat", "Hero's Journey").
+///         Has a name, notes, and a list of PlotPatternScenes. Loaded from ToolsData at startup.
+///       PlotPatternScene (Models/Tools/) — A single scene/beat within a template. Has SceneTitle and Notes.
+///       SavedBeatsheet (Models/) — Serialization wrapper for saving/loading custom beat sheets to .stbeat files.
+///         Contains a Description and a list of StructureBeats.
 /// </summary>
 [Microsoft.UI.Xaml.Data.Bindable]
 public class BeatSheetsViewModel : ObservableObject
