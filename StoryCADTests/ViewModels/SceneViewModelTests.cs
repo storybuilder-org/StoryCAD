@@ -277,7 +277,7 @@ public class SceneViewModelTests
 
         // Set specific values to verify loading
         sceneModel.Name = "Test Scene Name";
-        sceneModel.SceneDescription = "Test Scene Description";
+        sceneModel.Description = "Test Scene Description";
         sceneModel.Date = "2025-01-15";
         sceneModel.Time = "Morning";
         sceneModel.SceneType = "Action";
