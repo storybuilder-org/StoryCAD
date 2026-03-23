@@ -408,11 +408,11 @@
                      VerticalAlignment="Stretch" />
 
                             <!-- Element Description -->
-                            <TextBox Grid.Column="1"
+                            <usercontrols:RichEditBoxExtended Grid.Column="1"
                                      Header="Element Description"
-                                     Text="{x:Bind BeatSheetsVm.CurrentElementDescription, Mode=OneWay}"
-                                     TextWrapping="Wrap"
+                                     RtfText="{x:Bind BeatSheetsVm.CurrentElementDescription, Mode=OneWay}"
                                      IsReadOnly="True"
+                                     TextWrapping="Wrap"
                                      HorizontalAlignment="Stretch"
                                      VerticalAlignment="Stretch" />
                         </Grid>

@@ -42,6 +42,7 @@ public class ProblemViewModelTests
     public void CreateBeat_ShouldAddNewBeatToCollection()
     {
         // Arrange
+        _viewModel.BeatSheetsVm.StructureModelTitle = "Save the Cat";
         var initialCount = _viewModel.BeatSheetsVm.StructureBeats.Count;
 
         // Act
@@ -58,6 +59,7 @@ public class ProblemViewModelTests
     public void CreateBeat_MultipleCalls_ShouldAddMultipleBeats()
     {
         // Arrange
+        _viewModel.BeatSheetsVm.StructureModelTitle = "Save the Cat";
         var initialCount = _viewModel.BeatSheetsVm.StructureBeats.Count;
 
         // Act
@@ -244,6 +246,7 @@ public class ProblemViewModelTests
     public void BeatOperations_IntegrationTest_ShouldWorkTogether()
     {
         // Arrange - Start with empty collection
+        _viewModel.BeatSheetsVm.StructureModelTitle = "Save the Cat";
         Assert.AreEqual(0, _viewModel.BeatSheetsVm.StructureBeats.Count);
 
         // Act & Assert - Create beats
