@@ -216,8 +216,8 @@
                                    VerticalAlignment="Center"
                                    Margin="0,0,8,0" />
                                         <RadioButtons
-                                            ItemsSource="{x:Bind BeatEditorVm.ElementSource}"
-                                            SelectedItem="{x:Bind BeatEditorVm.SelectedElementSource, Mode=TwoWay}"
+                                            ItemsSource="{x:Bind BeatSheetsVm.ElementSource}"
+                                            SelectedItem="{x:Bind BeatSheetsVm.SelectedElementSource, Mode=TwoWay}"
                                             MaxColumns="2"
                                             VerticalAlignment="Center">
                                         </RadioButtons>
@@ -226,11 +226,11 @@
                                     <!-- Row 1, Col 0: Beat Sheet ComboBox (bindings unchanged) -->
                                     <ComboBox Grid.Row="1"
                               Grid.Column="0"
-                              ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
+                              ItemsSource="{x:Bind BeatSheetsVm.PlotPatternNames}"
                               SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}"
-                              PlaceholderText="{x:Bind BeatEditorVm.StructureModelTitle, Mode=OneWay}"
-                              SelectedValue="{x:Bind BeatEditorVm.StructureModelTitle, Mode=OneWay}"
-                              Text="{x:Bind BeatEditorVm.StructureModelTitle, Mode=OneWay}"
+                              PlaceholderText="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=OneWay}"
+                              SelectedValue="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=OneWay}"
+                              Text="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=OneWay}"
                               MinWidth="240" />
                                     <!-- Row 1, Col 1 left empty; Expander chevron will sit at far right -->
                                 </Grid>
@@ -240,7 +240,7 @@
                             <Expander.Content>
                                 <usercontrols:RichEditBoxExtended
                     Header="Beat Sheet Description:"
-                    RtfText="{x:Bind BeatEditorVm.StructureDescription, Mode=TwoWay}"
+                    RtfText="{x:Bind BeatSheetsVm.StructureDescription, Mode=TwoWay}"
                     AcceptsReturn="False"
                     IsSpellCheckEnabled="False"
                     TextWrapping="Wrap"
@@ -263,9 +263,9 @@
 
                             <!-- Beats list -->
                             <ListView Grid.Column="0"
-                      ItemsSource="{x:Bind BeatEditorVm.StructureBeats, Mode=TwoWay}"
-                      SelectedItem="{x:Bind BeatEditorVm.SelectedBeat, Mode=TwoWay}"
-                      SelectedIndex="{x:Bind BeatEditorVm.SelectedBeatIndex, Mode=TwoWay}"
+                      ItemsSource="{x:Bind BeatSheetsVm.StructureBeats, Mode=TwoWay}"
+                      SelectedItem="{x:Bind BeatSheetsVm.SelectedBeat, Mode=TwoWay}"
+                      SelectedIndex="{x:Bind BeatSheetsVm.SelectedBeatIndex, Mode=TwoWay}"
                       SelectionMode="Single"
                       BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                       BorderThickness="1"
@@ -330,7 +330,7 @@
                                 </Button>
                                 <Button x:Name="UnassignButton"
                                         Width="40" Height="40"
-                                        Command="{x:Bind BeatEditorVm.UnbindElementCommand}"
+                                        Command="{x:Bind BeatSheetsVm.UnbindElementCommand}"
                                         ToolTipService.ToolTip="Remove assignment">
                                     <FontIcon Glyph="&#xE72A;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
@@ -342,25 +342,25 @@
                                 <!-- Beat management group -->
                                 <Button x:Name="AddBeatButton"
                                         Width="40" Height="40"
-                                        Command="{x:Bind BeatEditorVm.CreateBeatCommand}"
+                                        Command="{x:Bind BeatSheetsVm.CreateBeatCommand}"
                                         ToolTipService.ToolTip="Add a new beat">
                                     <FontIcon Glyph="&#xE710;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
                                 <Button x:Name="DeleteBeatButton"
                                         Width="40" Height="40"
-                                        Command="{x:Bind BeatEditorVm.DeleteBeatCommand}"
+                                        Command="{x:Bind BeatSheetsVm.DeleteBeatCommand}"
                                         ToolTipService.ToolTip="Delete selected beat">
                                     <FontIcon Glyph="&#xE74D;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
                                 <Button x:Name="MoveUpButton"
                                         Width="40" Height="40"
-                                        Command="{x:Bind BeatEditorVm.MoveUpCommand}"
+                                        Command="{x:Bind BeatSheetsVm.MoveUpCommand}"
                                         ToolTipService.ToolTip="Move beat up">
                                     <FontIcon Glyph="&#xE70E;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
                                 <Button x:Name="MoveDownButton"
                                         Width="40" Height="40"
-                                        Command="{x:Bind BeatEditorVm.MoveDownCommand}"
+                                        Command="{x:Bind BeatSheetsVm.MoveDownCommand}"
                                         ToolTipService.ToolTip="Move beat down">
                                     <FontIcon Glyph="&#xE70D;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
@@ -381,8 +381,8 @@
                                 <!-- Dynamic Elements List (Scenes or Problems based on RadioButtons) -->
                                 <ListView x:Name="ElementsList"
                           Grid.Row="0"
-                          ItemsSource="{x:Bind BeatEditorVm.CurrentElementSource, Mode=TwoWay}"
-                          SelectedItem="{x:Bind BeatEditorVm.SelectedListElement, Mode=TwoWay}"
+                          ItemsSource="{x:Bind BeatSheetsVm.CurrentElementSource, Mode=TwoWay}"
+                          SelectedItem="{x:Bind BeatSheetsVm.SelectedListElement, Mode=TwoWay}"
                           SelectionMode="Single"
                           DisplayMemberPath="Name"
                           BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -402,7 +402,7 @@
                             <!-- Beat Description -->
                             <TextBox Grid.Column="0"
                      Header="Beat Description"
-                     Text="{x:Bind BeatEditorVm.SelectedBeatDescription, Mode=TwoWay}"
+                     Text="{x:Bind BeatSheetsVm.SelectedBeatDescription, Mode=TwoWay}"
                      TextWrapping="Wrap"
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Stretch" />
@@ -410,7 +410,7 @@
                             <!-- Element Description -->
                             <TextBox Grid.Column="1"
                                      Header="Element Description"
-                                     Text="{x:Bind BeatEditorVm.CurrentElementDescription, Mode=OneWay}"
+                                     Text="{x:Bind BeatSheetsVm.CurrentElementDescription, Mode=OneWay}"
                                      TextWrapping="Wrap"
                                      IsReadOnly="True"
                                      HorizontalAlignment="Stretch"

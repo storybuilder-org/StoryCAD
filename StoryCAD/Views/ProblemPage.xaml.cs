@@ -1,4 +1,4 @@
-﻿using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Input;
 using StoryCADLib.Services;
 using StoryCADLib.Services.Logging;
 using StoryCADLib.ViewModels.SubViewModels;
@@ -8,15 +8,14 @@ namespace StoryCAD.Views;
 
 public sealed partial class ProblemPage : Page
 {
-    public BeatSheetsViewModel BeatSheetsViewModel = Ioc.Default.GetService<BeatSheetsViewModel>();
     public LogService LogService = Ioc.Default.GetService<LogService>();
     public ProblemViewModel ProblemVm;
-    public BeatEditorViewModel BeatEditorVm;
+    public BeatSheetsViewModel BeatSheetsVm;
 
     public ProblemPage()
     {
         ProblemVm = Ioc.Default.GetService<ProblemViewModel>();
-        BeatEditorVm = ProblemVm.BeatEditorVm;
+        BeatSheetsVm = ProblemVm.BeatSheetsVm;
         InitializeComponent();
         DataContext = ProblemVm;
     }
@@ -30,8 +29,8 @@ public sealed partial class ProblemPage : Page
         var clickedItem = container?.DataContext as StructureBeat;
         if (clickedItem != null)
         {
-            BeatEditorVm.SelectedBeat = clickedItem;
-            BeatEditorVm.SelectedBeatIndex = BeatEditorVm.StructureBeats.IndexOf(clickedItem);
+            BeatSheetsVm.SelectedBeat = clickedItem;
+            BeatSheetsVm.SelectedBeatIndex = BeatSheetsVm.StructureBeats.IndexOf(clickedItem);
         }
     }
 

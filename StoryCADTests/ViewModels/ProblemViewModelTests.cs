@@ -35,21 +35,21 @@ public class ProblemViewModelTests
         _viewModel.PropertyChanged -= _viewModel.OnPropertyChanged;
         _viewModel.PropertyChanged += _viewModel.OnPropertyChanged;
 
-        _viewModel.StructureBeats = new ObservableCollection<StructureBeat>();
+        _viewModel.BeatSheetsVm.StructureBeats = new ObservableCollection<StructureBeat>();
     }
 
     [TestMethod]
     public void CreateBeat_ShouldAddNewBeatToCollection()
     {
         // Arrange
-        var initialCount = _viewModel.StructureBeats.Count;
+        var initialCount = _viewModel.BeatSheetsVm.StructureBeats.Count;
 
         // Act
-        _viewModel.CreateBeat(null, null);
+        _viewModel.BeatSheetsVm.CreateBeatCommand.Execute(null);
 
         // Assert
-        Assert.AreEqual(initialCount + 1, _viewModel.StructureBeats.Count);
-        var newBeat = _viewModel.StructureBeats.Last();
+        Assert.AreEqual(initialCount + 1, _viewModel.BeatSheetsVm.StructureBeats.Count);
+        var newBeat = _viewModel.BeatSheetsVm.StructureBeats.Last();
         Assert.AreEqual("New Beat", newBeat.Title);
         Assert.AreEqual("Describe your beat here", newBeat.Description);
     }
@@ -58,30 +58,30 @@ public class ProblemViewModelTests
     public void CreateBeat_MultipleCalls_ShouldAddMultipleBeats()
     {
         // Arrange
-        var initialCount = _viewModel.StructureBeats.Count;
+        var initialCount = _viewModel.BeatSheetsVm.StructureBeats.Count;
 
         // Act
-        _viewModel.CreateBeat(null, null);
-        _viewModel.CreateBeat(null, null);
-        _viewModel.CreateBeat(null, null);
+        _viewModel.BeatSheetsVm.CreateBeatCommand.Execute(null);
+        _viewModel.BeatSheetsVm.CreateBeatCommand.Execute(null);
+        _viewModel.BeatSheetsVm.CreateBeatCommand.Execute(null);
 
         // Assert
-        Assert.AreEqual(initialCount + 3, _viewModel.StructureBeats.Count);
+        Assert.AreEqual(initialCount + 3, _viewModel.BeatSheetsVm.StructureBeats.Count);
     }
 
     [TestMethod]
     public void DeleteBeat_WithNullSelectedBeat_ShouldNotRemoveAnyBeat()
     {
         // Arrange
-        _viewModel.StructureBeats.Add(CreateTestBeat("Test Beat"));
-        _viewModel.SelectedBeat = null;
-        var initialCount = _viewModel.StructureBeats.Count;
+        _viewModel.BeatSheetsVm.StructureBeats.Add(CreateTestBeat("Test Beat"));
+        _viewModel.BeatSheetsVm.SelectedBeat = null;
+        var initialCount = _viewModel.BeatSheetsVm.StructureBeats.Count;
 
         // Act
-        _viewModel.DeleteBeat(null, null);
+        _viewModel.BeatSheetsVm.DeleteBeatCommand.Execute(null);
 
         // Assert
-        Assert.AreEqual(initialCount, _viewModel.StructureBeats.Count);
+        Assert.AreEqual(initialCount, _viewModel.BeatSheetsVm.StructureBeats.Count);
     }
 
     [TestMethod]
@@ -90,17 +90,17 @@ public class ProblemViewModelTests
         // Arrange
         var beat1 = CreateTestBeat("Beat 1");
         var beat2 = CreateTestBeat("Beat 2");
-        _viewModel.StructureBeats.Add(beat1);
-        _viewModel.StructureBeats.Add(beat2);
-        _viewModel.SelectedBeat = beat1;
-        _viewModel.SelectedBeatIndex = 0;
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat1);
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat2);
+        _viewModel.BeatSheetsVm.SelectedBeat = beat1;
+        _viewModel.BeatSheetsVm.SelectedBeatIndex = 0;
 
         // Act
-        _viewModel.MoveUp(null, null);
+        _viewModel.BeatSheetsVm.MoveUpCommand.Execute(null);
 
         // Assert
-        Assert.AreEqual(0, _viewModel.StructureBeats.IndexOf(beat1));
-        Assert.AreEqual(1, _viewModel.StructureBeats.IndexOf(beat2));
+        Assert.AreEqual(0, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat1));
+        Assert.AreEqual(1, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat2));
     }
 
     [TestMethod]
@@ -109,17 +109,17 @@ public class ProblemViewModelTests
         // Arrange
         var beat1 = CreateTestBeat("Beat 1");
         var beat2 = CreateTestBeat("Beat 2");
-        _viewModel.StructureBeats.Add(beat1);
-        _viewModel.StructureBeats.Add(beat2);
-        _viewModel.SelectedBeat = beat2;
-        _viewModel.SelectedBeatIndex = 1;
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat1);
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat2);
+        _viewModel.BeatSheetsVm.SelectedBeat = beat2;
+        _viewModel.BeatSheetsVm.SelectedBeatIndex = 1;
 
         // Act
-        _viewModel.MoveUp(null, null);
+        _viewModel.BeatSheetsVm.MoveUpCommand.Execute(null);
 
         // Assert
-        Assert.AreEqual(1, _viewModel.StructureBeats.IndexOf(beat1));
-        Assert.AreEqual(0, _viewModel.StructureBeats.IndexOf(beat2));
+        Assert.AreEqual(1, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat1));
+        Assert.AreEqual(0, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat2));
     }
 
     [TestMethod]
@@ -128,16 +128,16 @@ public class ProblemViewModelTests
         // Arrange
         var beat1 = CreateTestBeat("Beat 1");
         var beat2 = CreateTestBeat("Beat 2");
-        _viewModel.StructureBeats.Add(beat1);
-        _viewModel.StructureBeats.Add(beat2);
-        _viewModel.SelectedBeat = null;
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat1);
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat2);
+        _viewModel.BeatSheetsVm.SelectedBeat = null;
 
         // Act
-        _viewModel.MoveUp(null, null);
+        _viewModel.BeatSheetsVm.MoveUpCommand.Execute(null);
 
         // Assert
-        Assert.AreEqual(0, _viewModel.StructureBeats.IndexOf(beat1));
-        Assert.AreEqual(1, _viewModel.StructureBeats.IndexOf(beat2));
+        Assert.AreEqual(0, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat1));
+        Assert.AreEqual(1, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat2));
     }
 
     [TestMethod]
@@ -146,17 +146,17 @@ public class ProblemViewModelTests
         // Arrange
         var beat1 = CreateTestBeat("Beat 1");
         var beat2 = CreateTestBeat("Beat 2");
-        _viewModel.StructureBeats.Add(beat1);
-        _viewModel.StructureBeats.Add(beat2);
-        _viewModel.SelectedBeat = beat2;
-        _viewModel.SelectedBeatIndex = 1;
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat1);
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat2);
+        _viewModel.BeatSheetsVm.SelectedBeat = beat2;
+        _viewModel.BeatSheetsVm.SelectedBeatIndex = 1;
 
         // Act
-        _viewModel.MoveDown(null, null);
+        _viewModel.BeatSheetsVm.MoveDownCommand.Execute(null);
 
         // Assert
-        Assert.AreEqual(0, _viewModel.StructureBeats.IndexOf(beat1));
-        Assert.AreEqual(1, _viewModel.StructureBeats.IndexOf(beat2));
+        Assert.AreEqual(0, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat1));
+        Assert.AreEqual(1, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat2));
     }
 
     [TestMethod]
@@ -165,17 +165,17 @@ public class ProblemViewModelTests
         // Arrange
         var beat1 = CreateTestBeat("Beat 1");
         var beat2 = CreateTestBeat("Beat 2");
-        _viewModel.StructureBeats.Add(beat1);
-        _viewModel.StructureBeats.Add(beat2);
-        _viewModel.SelectedBeat = beat1;
-        _viewModel.SelectedBeatIndex = 0;
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat1);
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat2);
+        _viewModel.BeatSheetsVm.SelectedBeat = beat1;
+        _viewModel.BeatSheetsVm.SelectedBeatIndex = 0;
 
         // Act
-        _viewModel.MoveDown(null, null);
+        _viewModel.BeatSheetsVm.MoveDownCommand.Execute(null);
 
         // Assert
-        Assert.AreEqual(1, _viewModel.StructureBeats.IndexOf(beat1));
-        Assert.AreEqual(0, _viewModel.StructureBeats.IndexOf(beat2));
+        Assert.AreEqual(1, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat1));
+        Assert.AreEqual(0, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat2));
     }
 
     [TestMethod]
@@ -184,16 +184,16 @@ public class ProblemViewModelTests
         // Arrange
         var beat1 = CreateTestBeat("Beat 1");
         var beat2 = CreateTestBeat("Beat 2");
-        _viewModel.StructureBeats.Add(beat1);
-        _viewModel.StructureBeats.Add(beat2);
-        _viewModel.SelectedBeat = null;
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat1);
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat2);
+        _viewModel.BeatSheetsVm.SelectedBeat = null;
 
         // Act
-        _viewModel.MoveDown(null, null);
+        _viewModel.BeatSheetsVm.MoveDownCommand.Execute(null);
 
         // Assert
-        Assert.AreEqual(0, _viewModel.StructureBeats.IndexOf(beat1));
-        Assert.AreEqual(1, _viewModel.StructureBeats.IndexOf(beat2));
+        Assert.AreEqual(0, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat1));
+        Assert.AreEqual(1, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat2));
     }
 
     [TestMethod]
@@ -203,19 +203,19 @@ public class ProblemViewModelTests
         var beat1 = CreateTestBeat("Beat 1");
         var beat2 = CreateTestBeat("Beat 2");
         var beat3 = CreateTestBeat("Beat 3");
-        _viewModel.StructureBeats.Add(beat1);
-        _viewModel.StructureBeats.Add(beat2);
-        _viewModel.StructureBeats.Add(beat3);
-        _viewModel.SelectedBeat = beat2;
-        _viewModel.SelectedBeatIndex = 1;
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat1);
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat2);
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat3);
+        _viewModel.BeatSheetsVm.SelectedBeat = beat2;
+        _viewModel.BeatSheetsVm.SelectedBeatIndex = 1;
 
         // Act
-        _viewModel.MoveDown(null, null);
+        _viewModel.BeatSheetsVm.MoveDownCommand.Execute(null);
 
         // Assert
-        Assert.AreEqual(0, _viewModel.StructureBeats.IndexOf(beat1));
-        Assert.AreEqual(2, _viewModel.StructureBeats.IndexOf(beat2));
-        Assert.AreEqual(1, _viewModel.StructureBeats.IndexOf(beat3));
+        Assert.AreEqual(0, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat1));
+        Assert.AreEqual(2, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat2));
+        Assert.AreEqual(1, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat3));
     }
 
     [TestMethod]
@@ -225,47 +225,47 @@ public class ProblemViewModelTests
         var beat1 = CreateTestBeat("Beat 1");
         var beat2 = CreateTestBeat("Beat 2");
         var beat3 = CreateTestBeat("Beat 3");
-        _viewModel.StructureBeats.Add(beat1);
-        _viewModel.StructureBeats.Add(beat2);
-        _viewModel.StructureBeats.Add(beat3);
-        _viewModel.SelectedBeat = beat2;
-        _viewModel.SelectedBeatIndex = 1;
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat1);
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat2);
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat3);
+        _viewModel.BeatSheetsVm.SelectedBeat = beat2;
+        _viewModel.BeatSheetsVm.SelectedBeatIndex = 1;
 
         // Act
-        _viewModel.MoveUp(null, null);
+        _viewModel.BeatSheetsVm.MoveUpCommand.Execute(null);
 
         // Assert
-        Assert.AreEqual(1, _viewModel.StructureBeats.IndexOf(beat1));
-        Assert.AreEqual(0, _viewModel.StructureBeats.IndexOf(beat2));
-        Assert.AreEqual(2, _viewModel.StructureBeats.IndexOf(beat3));
+        Assert.AreEqual(1, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat1));
+        Assert.AreEqual(0, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat2));
+        Assert.AreEqual(2, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(beat3));
     }
 
     [TestMethod]
     public void BeatOperations_IntegrationTest_ShouldWorkTogether()
     {
         // Arrange - Start with empty collection
-        Assert.AreEqual(0, _viewModel.StructureBeats.Count);
+        Assert.AreEqual(0, _viewModel.BeatSheetsVm.StructureBeats.Count);
 
         // Act & Assert - Create beats
-        _viewModel.CreateBeat(null, null);
-        _viewModel.CreateBeat(null, null);
-        _viewModel.CreateBeat(null, null);
-        Assert.AreEqual(3, _viewModel.StructureBeats.Count);
+        _viewModel.BeatSheetsVm.CreateBeatCommand.Execute(null);
+        _viewModel.BeatSheetsVm.CreateBeatCommand.Execute(null);
+        _viewModel.BeatSheetsVm.CreateBeatCommand.Execute(null);
+        Assert.AreEqual(3, _viewModel.BeatSheetsVm.StructureBeats.Count);
 
         // Act & Assert - Move middle beat up
-        _viewModel.SelectedBeat = _viewModel.StructureBeats[1];
-        _viewModel.SelectedBeatIndex = 1;
-        _viewModel.MoveUp(null, null);
-        Assert.AreEqual(0, _viewModel.StructureBeats.IndexOf(_viewModel.SelectedBeat));
+        _viewModel.BeatSheetsVm.SelectedBeat = _viewModel.BeatSheetsVm.StructureBeats[1];
+        _viewModel.BeatSheetsVm.SelectedBeatIndex = 1;
+        _viewModel.BeatSheetsVm.MoveUpCommand.Execute(null);
+        Assert.AreEqual(0, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(_viewModel.BeatSheetsVm.SelectedBeat));
 
         // Act & Assert - Move it down twice
-        _viewModel.SelectedBeatIndex = 0;
-        _viewModel.MoveDown(null, null);
-        Assert.AreEqual(1, _viewModel.StructureBeats.IndexOf(_viewModel.SelectedBeat));
+        _viewModel.BeatSheetsVm.SelectedBeatIndex = 0;
+        _viewModel.BeatSheetsVm.MoveDownCommand.Execute(null);
+        Assert.AreEqual(1, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(_viewModel.BeatSheetsVm.SelectedBeat));
 
-        _viewModel.SelectedBeatIndex = 1;
-        _viewModel.MoveDown(null, null);
-        Assert.AreEqual(2, _viewModel.StructureBeats.IndexOf(_viewModel.SelectedBeat));
+        _viewModel.BeatSheetsVm.SelectedBeatIndex = 1;
+        _viewModel.BeatSheetsVm.MoveDownCommand.Execute(null);
+        Assert.AreEqual(2, _viewModel.BeatSheetsVm.StructureBeats.IndexOf(_viewModel.BeatSheetsVm.SelectedBeat));
     }
 
     [TestMethod]
@@ -273,16 +273,16 @@ public class ProblemViewModelTests
     {
         // Arrange
         var propertyChangedFired = false;
-        _viewModel.PropertyChanged += (sender, e) =>
+        _viewModel.BeatSheetsVm.PropertyChanged += (sender, e) =>
         {
-            if (e.PropertyName == nameof(_viewModel.StructureBeats))
+            if (e.PropertyName == nameof(_viewModel.BeatSheetsVm.StructureBeats))
             {
                 propertyChangedFired = true;
             }
         };
 
         // Act
-        _viewModel.StructureBeats = new ObservableCollection<StructureBeat>();
+        _viewModel.BeatSheetsVm.StructureBeats = new ObservableCollection<StructureBeat>();
 
         // Assert
         Assert.IsTrue(propertyChangedFired);
@@ -299,8 +299,8 @@ public class ProblemViewModelTests
         _viewModel.Activate(_problemModel);
 
         // Assert
-        Assert.IsNotNull(_viewModel.CurrentElementSource);
-        Assert.AreSame(_viewModel.Scenes, _viewModel.CurrentElementSource);
+        Assert.IsNotNull(_viewModel.BeatSheetsVm.CurrentElementSource);
+        Assert.AreSame(_viewModel.BeatSheetsVm.Scenes, _viewModel.BeatSheetsVm.CurrentElementSource);
     }
 
     [TestMethod]
@@ -312,10 +312,10 @@ public class ProblemViewModelTests
         _viewModel.Activate(_problemModel);
 
         // Act
-        _viewModel.SelectedElementSource = "Scene";
+        _viewModel.BeatSheetsVm.SelectedElementSource = "Scene";
 
         // Assert
-        Assert.AreSame(_viewModel.Scenes, _viewModel.CurrentElementSource);
+        Assert.AreSame(_viewModel.BeatSheetsVm.Scenes, _viewModel.BeatSheetsVm.CurrentElementSource);
     }
 
     [TestMethod]
@@ -325,17 +325,17 @@ public class ProblemViewModelTests
         _viewModel.Activate(_problemModel);
 
         // Verify initial state
-        Assert.AreEqual("Scene", _viewModel.SelectedElementSource, "Initial SelectedElementSource should be 'Scene'");
-        Assert.IsNotNull(_viewModel.Problems, "Problems should not be null");
-        Assert.IsNotNull(_viewModel.Scenes, "Scenes should not be null");
-        Assert.AreSame(_viewModel.Scenes, _viewModel.CurrentElementSource, "Initial CurrentElementSource should be Scenes");
+        Assert.AreEqual("Scene", _viewModel.BeatSheetsVm.SelectedElementSource, "Initial SelectedElementSource should be 'Scene'");
+        Assert.IsNotNull(_viewModel.BeatSheetsVm.Problems, "Problems should not be null");
+        Assert.IsNotNull(_viewModel.BeatSheetsVm.Scenes, "Scenes should not be null");
+        Assert.AreSame(_viewModel.BeatSheetsVm.Scenes, _viewModel.BeatSheetsVm.CurrentElementSource, "Initial CurrentElementSource should be Scenes");
 
         // Act
-        _viewModel.SelectedElementSource = "Problem";
+        _viewModel.BeatSheetsVm.SelectedElementSource = "Problem";
 
         // Assert
-        Assert.AreEqual("Problem", _viewModel.SelectedElementSource, "SelectedElementSource should be 'Problem'");
-        Assert.AreSame(_viewModel.Problems, _viewModel.CurrentElementSource);
+        Assert.AreEqual("Problem", _viewModel.BeatSheetsVm.SelectedElementSource, "SelectedElementSource should be 'Problem'");
+        Assert.AreSame(_viewModel.BeatSheetsVm.Problems, _viewModel.BeatSheetsVm.CurrentElementSource);
     }
 
     [TestMethod]
@@ -345,19 +345,19 @@ public class ProblemViewModelTests
         _viewModel.Activate(_problemModel);
 
         // Ensure we start from a known state (Scene) since singleton may have stale state
-        _viewModel.SelectedElementSource = "Scene";
+        _viewModel.BeatSheetsVm.SelectedElementSource = "Scene";
 
         var propertyChangedFired = false;
-        _viewModel.PropertyChanged += (sender, e) =>
+        _viewModel.BeatSheetsVm.PropertyChanged += (sender, e) =>
         {
-            if (e.PropertyName == nameof(_viewModel.CurrentElementSource))
+            if (e.PropertyName == nameof(_viewModel.BeatSheetsVm.CurrentElementSource))
             {
                 propertyChangedFired = true;
             }
         };
 
         // Act - Toggle from Scene to Problem
-        _viewModel.SelectedElementSource = "Problem";
+        _viewModel.BeatSheetsVm.SelectedElementSource = "Problem";
 
         // Assert
         Assert.IsTrue(propertyChangedFired);
@@ -370,13 +370,13 @@ public class ProblemViewModelTests
         _viewModel.Activate(_problemModel);
         var beat = CreateTestBeat("Test Beat");
         beat.Guid = _storyModel.StoryElements.Scenes.First().Uuid;
-        _viewModel.StructureBeats.Add(beat);
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat);
 
         // Act
-        _viewModel.SelectedBeat = beat;
+        _viewModel.BeatSheetsVm.SelectedBeat = beat;
 
         // Assert
-        Assert.AreEqual(beat.ElementDescription, _viewModel.CurrentElementDescription);
+        Assert.AreEqual(beat.ElementDescription, _viewModel.BeatSheetsVm.CurrentElementDescription);
     }
 
     [TestMethod]
@@ -385,13 +385,13 @@ public class ProblemViewModelTests
         // Arrange
         _viewModel.Activate(_problemModel);
         var beat = CreateTestBeat("Test Beat");
-        _viewModel.StructureBeats.Add(beat);
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat);
 
         // Act
-        _viewModel.SelectedBeat = beat;
+        _viewModel.BeatSheetsVm.SelectedBeat = beat;
 
         // Assert
-        Assert.IsNull(_viewModel.CurrentElementDescription);
+        Assert.IsNull(_viewModel.BeatSheetsVm.CurrentElementDescription);
     }
 
     [TestMethod]
@@ -402,10 +402,10 @@ public class ProblemViewModelTests
         var scene = _storyModel.StoryElements.Scenes.First();
 
         // Act
-        _viewModel.SelectedListElement = scene;
+        _viewModel.BeatSheetsVm.SelectedListElement = scene;
 
         // Assert
-        Assert.AreEqual(scene.Description, _viewModel.CurrentElementDescription);
+        Assert.AreEqual(scene.Description, _viewModel.BeatSheetsVm.CurrentElementDescription);
     }
 
     [TestMethod]
@@ -414,14 +414,14 @@ public class ProblemViewModelTests
         // Arrange
         _viewModel.Activate(_problemModel);
         var propertyChangedFired = false;
-        _viewModel.PropertyChanged += (sender, e) =>
+        _viewModel.BeatSheetsVm.PropertyChanged += (sender, e) =>
         {
-            if (e.PropertyName == nameof(_viewModel.SelectedListElement))
+            if (e.PropertyName == nameof(_viewModel.BeatSheetsVm.SelectedListElement))
                 propertyChangedFired = true;
         };
 
         // Act
-        _viewModel.SelectedListElement = _storyModel.StoryElements.Scenes.First();
+        _viewModel.BeatSheetsVm.SelectedListElement = _storyModel.StoryElements.Scenes.First();
 
         // Assert
         Assert.IsTrue(propertyChangedFired);
@@ -436,7 +436,7 @@ public class ProblemViewModelTests
         var scene = new SceneModel("Registered Scene", _storyModel, null);
         _viewModel.Activate(_problemModel);
         var beat = CreateTestBeat("Test Beat");
-        _viewModel.StructureBeats.Add(beat);
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat);
 
         beat.Guid = scene.Uuid;
 
@@ -449,7 +449,7 @@ public class ProblemViewModelTests
         var problem = new ProblemModel("Registered Problem", _storyModel, null);
         _viewModel.Activate(_problemModel);
         var beat = CreateTestBeat("Test Beat");
-        _viewModel.StructureBeats.Add(beat);
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat);
 
         beat.Guid = problem.Uuid;
 
@@ -516,11 +516,11 @@ public class ProblemViewModelTests
         var beat = CreateTestBeat("Test Beat");
         var scene = _storyModel.StoryElements.Scenes.First();
         beat.Guid = scene.Uuid;
-        _viewModel.StructureBeats.Add(beat);
-        _viewModel.SelectedBeat = beat;
-        _viewModel.SelectedBeatIndex = 0;
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat);
+        _viewModel.BeatSheetsVm.SelectedBeat = beat;
+        _viewModel.BeatSheetsVm.SelectedBeatIndex = 0;
 
-        _viewModel.UnbindElement(null, null);
+        _viewModel.BeatSheetsVm.UnbindElementCommand.Execute(null);
 
         Assert.AreEqual(Guid.Empty, beat.Guid);
     }
@@ -529,9 +529,9 @@ public class ProblemViewModelTests
     public void UnbindElement_WithNullSelectedBeat_DoesNotCrash()
     {
         _viewModel.Activate(_problemModel);
-        _viewModel.SelectedBeat = null;
+        _viewModel.BeatSheetsVm.SelectedBeat = null;
 
-        _viewModel.UnbindElement(null, null);
+        _viewModel.BeatSheetsVm.UnbindElementCommand.Execute(null);
 
         // No exception = pass
     }
@@ -541,11 +541,11 @@ public class ProblemViewModelTests
     {
         _viewModel.Activate(_problemModel);
         var beat = CreateTestBeat("Test Beat");
-        _viewModel.StructureBeats.Add(beat);
-        _viewModel.SelectedBeat = beat;
-        _viewModel.SelectedBeatIndex = 0;
+        _viewModel.BeatSheetsVm.StructureBeats.Add(beat);
+        _viewModel.BeatSheetsVm.SelectedBeat = beat;
+        _viewModel.BeatSheetsVm.SelectedBeatIndex = 0;
 
-        _viewModel.UnbindElement(null, null);
+        _viewModel.BeatSheetsVm.UnbindElementCommand.Execute(null);
 
         Assert.AreEqual(Guid.Empty, beat.Guid);
     }

@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text;
 using NRtfTree.Util;
 using StoryCADLib.Models.StoryWorld;
+using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.ViewModels.SubViewModels;
 using StoryCADLib.ViewModels.Tools;
@@ -679,13 +680,15 @@ public class ReportFormatter
         StringBuilder beats = new();
 
         // Build set of template beat titles for custom beat detection
-        var beatSheets = Ioc.Default.GetService<BeatSheetsViewModel>();
+        var toolsData = Ioc.Default.GetService<ToolsData>();
         HashSet<string> templateTitles = new();
-        if (beatSheets != null &&
-            !string.IsNullOrEmpty(problem.StructureTitle) &&
-            beatSheets.BeatSheets.TryGetValue(problem.StructureTitle, out var template))
+        if (toolsData != null && !string.IsNullOrEmpty(problem.StructureTitle))
         {
-            templateTitles = template.PlotPatternScenes.Select(s => s.SceneTitle).ToHashSet();
+            var template = toolsData.BeatSheetSource.FirstOrDefault(b => b.PlotPatternName == problem.StructureTitle);
+            if (template != null)
+            {
+                templateTitles = template.PlotPatternScenes.Select(s => s.SceneTitle).ToHashSet();
+            }
         }
 
         bool hasCustomBeats = false;

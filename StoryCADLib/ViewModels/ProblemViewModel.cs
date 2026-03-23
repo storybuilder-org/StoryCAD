@@ -18,14 +18,13 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
 {
     #region Constructors
 
-    public ProblemViewModel(ILogService logger, AppState appState, BeatSheetsViewModel beatSheetsViewModel)
+    public ProblemViewModel(ILogService logger, AppState appState)
     {
         _logger = logger;
-        _beatSheetsViewModel = beatSheetsViewModel;
         _appState = appState;
 
-        // Create BeatEditorViewModel (owns all beat-editing state and commands)
-        BeatEditorVm = new BeatEditorViewModel(() =>
+        // Create BeatSheetsViewModel (owns all beat sheet state and commands)
+        BeatSheetsVm = new BeatSheetsViewModel(() =>
         {
             if (_changeable)
             {
@@ -81,18 +80,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
 
     #endregion
 
-    // Beat method wrappers — delegate to BeatEditorVm (temporary until XAML binds to BeatEditorVm directly)
-
-    public void CreateBeat(object sender, RoutedEventArgs e) => BeatEditorVm.CreateBeatCommand.Execute(null);
-    public void DeleteBeat(object sender, RoutedEventArgs e) => BeatEditorVm.DeleteBeatCommand.Execute(null);
-    public void MoveUp(object sender, RoutedEventArgs e) => BeatEditorVm.MoveUpCommand.Execute(null);
-    public void MoveDown(object sender, RoutedEventArgs e) => BeatEditorVm.MoveDownCommand.Execute(null);
-
-    // AssignBeat stays on ProblemViewModel for now (has UI dialog dependency)
-    // Will move to BeatEditorViewModel when XAML is rebound
     public async void AssignBeat(object sender, ItemClickEventArgs e)
     {
-        if (SelectedBeat == null)
+        if (BeatSheetsVm.SelectedBeat == null)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("Select a beat", LogLevel.Warn)));
             return;
@@ -100,7 +90,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
 
         // Set SelectedListElement so Element Description panel updates
         // (IsItemClickEnabled suppresses ListView selection)
-        BeatEditorVm.SelectedListElement = e.ClickedItem as StoryElement;
+        BeatSheetsVm.SelectedListElement = e.ClickedItem as StoryElement;
 
         var DesiredBind = (e.ClickedItem as StoryElement).Uuid;
 
@@ -136,7 +126,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
 
                 if (problem.Uuid == Uuid)
                 {
-                    BoundStructure = Uuid.ToString();
+                    BeatSheetsVm.BoundStructure = Uuid.ToString();
                 }
                 else
                 {
@@ -145,9 +135,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
                 }
             }
 
-            SelectedBeat.Guid = DesiredBind;
-            SelectedBeat = null;
-            SelectedBeatIndex = -1;
+            BeatSheetsVm.SelectedBeat.Guid = DesiredBind;
+            BeatSheetsVm.SelectedBeat = null;
+            BeatSheetsVm.SelectedBeatIndex = -1;
         }
         catch (Exception ex)
         {
@@ -155,15 +145,13 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
         }
     }
 
-    public void UnbindElement(object sender, RoutedEventArgs e) => BeatEditorVm.UnbindElementCommand.Execute(null);
-
     private void removeBindData(ProblemModel ContainingStructure, ProblemModel problem)
     {
         if (problem.BoundStructure.Equals(Uuid.ToString()))
         {
             var oldStructure = ContainingStructure.StructureBeats.First(g => g.Guid == problem.Uuid);
-            var index = StructureBeats.IndexOf(oldStructure);
-            StructureBeats[index].Guid = Guid.Empty;
+            var index = BeatSheetsVm.StructureBeats.IndexOf(oldStructure);
+            BeatSheetsVm.StructureBeats[index].Guid = Guid.Empty;
         }
         else
         {
@@ -187,7 +175,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
                 return;
 
             Ioc.Default.GetService<OutlineService>()
-                .SaveBeatsheet(FilePath.Path, StructureDescription, StructureBeats.ToList());
+                .SaveBeatsheet(FilePath.Path, BeatSheetsVm.StructureDescription, BeatSheetsVm.StructureBeats.ToList());
         }
         catch (Exception)
         {
@@ -204,8 +192,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
                 return;
 
             var model = Ioc.Default.GetService<OutlineService>().LoadBeatsheet(FilePath.Path);
-            StructureDescription = model.Description;
-            StructureBeats = new ObservableCollection<StructureBeat>(model.Beats);
+            BeatSheetsVm.StructureDescription = model.Description;
+            BeatSheetsVm.StructureBeats = new ObservableCollection<StructureBeat>(model.Beats);
         }
         catch (Exception)
         {
@@ -217,7 +205,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
 
     private readonly ILogService _logger;
     private readonly AppState _appState;
-    private readonly BeatSheetsViewModel _beatSheetsViewModel;
     private OverviewModel _overviewModel;
     private StoryModel _storyModel;
     private bool _changeable;
@@ -236,9 +223,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
     #region Properties
 
     /// <summary>
-    ///     Sub-ViewModel owning all beat-editing state and commands for the Structure tab.
+    ///     Owns all beat sheet state, template data, and editing commands for the Structure tab.
     /// </summary>
-    public BeatEditorViewModel BeatEditorVm { get; }
+    public BeatSheetsViewModel BeatSheetsVm { get; }
 
     // StoryElement data
 
@@ -493,101 +480,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
         set => SetProperty(ref _characters, value);
     }
 
-    #region Beat-related delegation properties (temporary — removed when XAML binds to BeatEditorVm directly)
-
-    public string StructureModelTitle
-    {
-        get => BeatEditorVm.StructureModelTitle;
-        set { BeatEditorVm.StructureModelTitle = value; OnPropertyChanged(); }
-    }
-
-    public string StructureDescription
-    {
-        get => BeatEditorVm.StructureDescription;
-        set { BeatEditorVm.StructureDescription = value; OnPropertyChanged(); }
-    }
-
-    public ObservableCollection<StructureBeat> StructureBeats
-    {
-        get => BeatEditorVm.StructureBeats;
-        set { BeatEditorVm.StructureBeats = value; OnPropertyChanged(); }
-    }
-
-    public string BoundStructure
-    {
-        get => BeatEditorVm.BoundStructure;
-        set { BeatEditorVm.BoundStructure = value; OnPropertyChanged(); }
-    }
-
-    public ObservableCollection<StoryElement> Scenes
-    {
-        get => BeatEditorVm.Scenes;
-        set { BeatEditorVm.Scenes = value; OnPropertyChanged(); }
-    }
-
-    public ObservableCollection<StoryElement> Problems
-    {
-        get => BeatEditorVm.Problems;
-        set { BeatEditorVm.Problems = value; OnPropertyChanged(); }
-    }
-
-    public int SelectedBeatIndex
-    {
-        get => BeatEditorVm.SelectedBeatIndex;
-        set { BeatEditorVm.SelectedBeatIndex = value; OnPropertyChanged(); }
-    }
-
-    public StructureBeat SelectedBeat
-    {
-        get => BeatEditorVm.SelectedBeat;
-        set
-        {
-            BeatEditorVm.SelectedBeat = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(CurrentElementDescription));
-        }
-    }
-
-    public IReadOnlyList<string> ElementSource => BeatEditorVm.ElementSource;
-
-    public string SelectedElementSource
-    {
-        get => BeatEditorVm.SelectedElementSource;
-        set
-        {
-            BeatEditorVm.SelectedElementSource = value;
-            OnPropertyChanged();
-            // BeatEditorVm's PropertyChanged cascade updates CurrentElementSource,
-            // so notify ProblemViewModel listeners too
-            OnPropertyChanged(nameof(CurrentElementSource));
-        }
-    }
-
-    public ObservableCollection<StoryElement> CurrentElementSource
-    {
-        get => BeatEditorVm.CurrentElementSource;
-        set { BeatEditorVm.CurrentElementSource = value; OnPropertyChanged(); }
-    }
-
-    public StoryElement SelectedListElement
-    {
-        get => BeatEditorVm.SelectedListElement;
-        set
-        {
-            BeatEditorVm.SelectedListElement = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(CurrentElementDescription));
-        }
-    }
-
-    public string CurrentElementDescription
-    {
-        get => BeatEditorVm.CurrentElementDescription;
-        set { BeatEditorVm.CurrentElementDescription = value; OnPropertyChanged(); }
-    }
-
-    #endregion
-
     #endregion
 
     #region Methods
@@ -675,8 +567,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
             _syncPremise = false;
         }
 
-        // Delegate beat-related loading to BeatEditorViewModel
-        BeatEditorVm.LoadBeats(Model, _storyModel);
+        // Delegate beat-related loading to BeatSheetsViewModel
+        BeatSheetsVm.LoadBeats(Model, _storyModel);
 
         _changeable = true;
 
@@ -720,8 +612,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
 
             Model.Notes = Notes;
 
-            // Delegate beat-related saving to BeatEditorViewModel
-            BeatEditorVm.SaveBeats(Model);
+            // Delegate beat-related saving to BeatSheetsViewModel
+            BeatSheetsVm.SaveBeats(Model);
         }
         catch (Exception ex)
         {
@@ -791,7 +683,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
 
         //Show dialog if structure has been set previously
         ContentDialogResult Result;
-        if (!string.IsNullOrEmpty(StructureModelTitle))
+        if (!string.IsNullOrEmpty(BeatSheetsVm.StructureModelTitle))
         {
             Result = await Ioc.Default.GetRequiredService<Windowing>()
                 .ShowContentDialog(new ContentDialog
@@ -806,7 +698,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
             {
                 // Clear beats directly via OutlineService (no per-beat confirmation dialog)
                 var outlineService = Ioc.Default.GetService<OutlineService>();
-                for (var i = StructureBeats.Count - 1; i >= 0; i--)
+                for (var i = BeatSheetsVm.StructureBeats.Count - 1; i >= 0; i--)
                 {
                     outlineService.DeleteBeat(_storyModel, Model, i);
                 }
@@ -816,7 +708,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
                 // Revert ComboBox to the current title
                 var comboBox = sender as ComboBox;
                 _changeable = false;
-                comboBox.SelectedValue = StructureModelTitle;
+                comboBox.SelectedValue = BeatSheetsVm.StructureModelTitle;
                 _changeable = true;
                 return;
             }
@@ -829,26 +721,26 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
         if (value == "Load Custom Beat Sheet from file...")
         {
             value = "Custom Beat Sheet";
-            StructureModelTitle = value;
+            BeatSheetsVm.StructureModelTitle = value;
             LoadBeatSheet();
         }
 
         if (Result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))
         {
             //Update value
-            StructureModelTitle = value;
+            BeatSheetsVm.StructureModelTitle = value;
 
             //Resolve master plot model if not empty
-            var BeatSheet = _beatSheetsViewModel.BeatSheets[value];
+            var BeatSheet = BeatSheetsVm.BeatSheets[value];
 
-            StructureDescription = BeatSheet.PlotPatternNotes;
+            BeatSheetsVm.StructureDescription = BeatSheet.PlotPatternNotes;
 
             //Set model
-            StructureBeats.Clear();
+            BeatSheetsVm.StructureBeats.Clear();
 
             foreach (var item in BeatSheet.PlotPatternScenes)
             {
-                StructureBeats.Add(new StructureBeat(item.SceneTitle, item.Notes));
+                BeatSheetsVm.StructureBeats.Add(new StructureBeat(item.SceneTitle, item.Notes));
             }
         }
     }

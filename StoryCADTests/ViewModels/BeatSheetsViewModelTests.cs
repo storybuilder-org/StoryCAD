@@ -11,9 +11,9 @@ using StoryCADLib.ViewModels.Tools;
 namespace StoryCADTests.ViewModels;
 
 [TestClass]
-public class BeatEditorViewModelTests
+public class BeatSheetsViewModelTests
 {
-    private BeatEditorViewModel _beatEditor;
+    private BeatSheetsViewModel _beatEditor;
     private StoryModel _storyModel;
     private ProblemModel _problemModel;
     private bool _dirtyNotified;
@@ -32,7 +32,7 @@ public class BeatEditorViewModelTests
         // Set up AppState with document so element resolution works
         appState.CurrentDocument = new StoryDocument(_storyModel);
 
-        _beatEditor = new BeatEditorViewModel(() => _dirtyNotified = true);
+        _beatEditor = new BeatSheetsViewModel(() => _dirtyNotified = true);
     }
 
     #region Step 1: Construction Tests
