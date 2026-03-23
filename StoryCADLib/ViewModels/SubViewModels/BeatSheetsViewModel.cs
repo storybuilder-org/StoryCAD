@@ -70,6 +70,7 @@ public class BeatSheetsViewModel : ObservableObject
         MoveUpCommand = new RelayCommand(MoveUp, () => SelectedBeat != null && SelectedBeatIndex > 0);
         MoveDownCommand = new RelayCommand(MoveDown, () => SelectedBeat != null && SelectedBeatIndex < StructureBeats.Count - 1);
         UnbindElementCommand = new RelayCommand(UnbindElement, CanUnbindElement);
+        AssignBeatCommand = new AsyncRelayCommand(AssignBeatAsync, () => SelectedBeat != null && SelectedListElement != null);
     }
 
     #endregion
@@ -215,6 +216,7 @@ public class BeatSheetsViewModel : ObservableObject
     public RelayCommand MoveUpCommand { get; }
     public RelayCommand MoveDownCommand { get; }
     public RelayCommand UnbindElementCommand { get; }
+    public IRelayCommand AssignBeatCommand { get; }
 
     #endregion
 
@@ -362,6 +364,91 @@ public class BeatSheetsViewModel : ObservableObject
         if (SelectedBeatIndex < StructureBeats.Count - 1)
         {
             StructureBeats.Move(SelectedBeatIndex, SelectedBeatIndex + 1);
+        }
+    }
+
+    private async Task AssignBeatAsync()
+    {
+        if (SelectedBeat == null)
+        {
+            WeakReferenceMessenger.Default.Send(
+                new StatusChangedMessage(new StatusMessage("Select a beat", LogLevel.Warn)));
+            return;
+        }
+
+        if (SelectedListElement == null)
+        {
+            WeakReferenceMessenger.Default.Send(
+                new StatusChangedMessage(new StatusMessage("Select an element", LogLevel.Warn)));
+            return;
+        }
+
+        var desiredBind = SelectedListElement.Uuid;
+
+        try
+        {
+            var element = _appState.CurrentDocument!.Model.StoryElements.First(g => g.Uuid == desiredBind);
+            var elementIndex = _appState.CurrentDocument.Model.StoryElements.IndexOf(element);
+
+            if (element.ElementType == StoryItemType.Problem)
+            {
+                var problem = (ProblemModel)element;
+                if (!string.IsNullOrEmpty(problem.BoundStructure))
+                {
+                    var containingStructure = (ProblemModel)_appState.CurrentDocument.Model.StoryElements
+                        .First(g => g.Uuid == Guid.Parse(problem.BoundStructure));
+                    var res = await _windowing.ShowContentDialog(new ContentDialog
+                    {
+                        Title = "Already assigned!",
+                        Content =
+                            $"This problem is already assigned to a different structure ({containingStructure.Name}) " +
+                            $"Would you like to assign it here instead?",
+                        PrimaryButtonText = "Assign here",
+                        SecondaryButtonText = "Cancel"
+                    });
+
+                    if (res != ContentDialogResult.Primary)
+                        return;
+
+                    RemoveBindData(containingStructure, problem);
+                }
+
+                if (problem.Uuid == _problemModel.Uuid)
+                {
+                    BoundStructure = _problemModel.Uuid.ToString();
+                }
+                else
+                {
+                    problem.BoundStructure = _problemModel.Uuid.ToString();
+                    _appState.CurrentDocument.Model.StoryElements[elementIndex] = problem;
+                }
+            }
+
+            SelectedBeat.Guid = desiredBind;
+            SelectedBeat = null;
+            SelectedBeatIndex = -1;
+        }
+        catch (Exception ex)
+        {
+            _logger.Log(LogLevel.Warn, "Failed to bind valid element (Structure Tab) " + ex.Message);
+        }
+    }
+
+    private void RemoveBindData(ProblemModel containingStructure, ProblemModel problem)
+    {
+        if (problem.BoundStructure.Equals(_problemModel.Uuid.ToString()))
+        {
+            var oldStructure = containingStructure.StructureBeats.First(g => g.Guid == problem.Uuid);
+            var index = StructureBeats.IndexOf(oldStructure);
+            StructureBeats[index].Guid = Guid.Empty;
+        }
+        else
+        {
+            var oldStructure = containingStructure.StructureBeats.First(g => g.Guid == problem.Uuid);
+            var index = containingStructure.StructureBeats.IndexOf(oldStructure);
+            containingStructure.StructureBeats[index].Guid = Guid.Empty;
+            var containingStructIndex = _appState.CurrentDocument.Model.StoryElements.IndexOf(containingStructure);
+            _appState.CurrentDocument.Model.StoryElements[containingStructIndex] = containingStructure;
         }
     }
 

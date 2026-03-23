@@ -325,6 +325,7 @@
                                 <!-- Assignment group -->
                                 <Button x:Name="AssignButton"
                                         Width="40" Height="40"
+                                        Command="{x:Bind BeatSheetsVm.AssignBeatCommand}"
                                         ToolTipService.ToolTip="Assign element to beat">
                                     <FontIcon Glyph="&#xE72B;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
