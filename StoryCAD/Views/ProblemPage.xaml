@@ -367,7 +367,7 @@
                                 </Button>
                                 <Button x:Name="SaveBeatSheetButton"
                                         Width="40" Height="40"
-                                        Click="{x:Bind ProblemVm.SaveBeatSheet}"
+                                        Click="{x:Bind BeatSheetsVm.SaveBeatSheet}"
                                         ToolTipService.ToolTip="Save beat sheet to file">
                                     <FontIcon Glyph="&#xE74E;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>

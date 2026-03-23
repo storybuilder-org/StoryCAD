@@ -367,6 +367,42 @@ public class BeatSheetsViewModel : ObservableObject
         }
     }
 
+    public async void SaveBeatSheet()
+    {
+        try
+        {
+            var filePath = await _windowing.ShowFileSavePicker("Save", ".stbeat");
+            if (filePath == null)
+                return;
+
+            _outlineService.SaveBeatsheet(filePath.Path, StructureDescription, StructureBeats.ToList());
+        }
+        catch (Exception)
+        {
+            WeakReferenceMessenger.Default.Send(
+                new StatusChangedMessage(new StatusMessage("Failed to save Beatsheet", LogLevel.Error)));
+        }
+    }
+
+    public async void LoadBeatSheet()
+    {
+        try
+        {
+            var filePath = await _windowing.ShowFilePicker("Load", ".stbeat");
+            if (filePath == null)
+                return;
+
+            var model = _outlineService.LoadBeatsheet(filePath.Path);
+            StructureDescription = model.Description;
+            StructureBeats = new ObservableCollection<StructureBeat>(model.Beats);
+        }
+        catch (Exception)
+        {
+            WeakReferenceMessenger.Default.Send(
+                new StatusChangedMessage(new StatusMessage("Failed to Load Beatsheet", LogLevel.Error)));
+        }
+    }
+
     private async Task AssignBeatAsync()
     {
         if (SelectedBeat == null)

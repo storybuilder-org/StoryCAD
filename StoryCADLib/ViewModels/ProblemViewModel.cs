@@ -80,42 +80,6 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
 
     #endregion
 
-    public async void SaveBeatSheet()
-    {
-        try
-        {
-            var FilePath = await Ioc.Default.GetRequiredService<Windowing>()
-                .ShowFileSavePicker("Save", ".stbeat");
-
-            if (FilePath == null)
-                return;
-
-            Ioc.Default.GetService<OutlineService>()
-                .SaveBeatsheet(FilePath.Path, BeatSheetsVm.StructureDescription, BeatSheetsVm.StructureBeats.ToList());
-        }
-        catch (Exception)
-        {
-            Messenger.Send(new StatusChangedMessage(new StatusMessage("Failed to save Beatsheet", LogLevel.Error)));
-        }
-    }
-
-    public async void LoadBeatSheet()
-    {
-        try
-        {
-            var FilePath = await Ioc.Default.GetRequiredService<Windowing>().ShowFilePicker("Load", ".stbeat");
-            if (FilePath == null)
-                return;
-
-            var model = Ioc.Default.GetService<OutlineService>().LoadBeatsheet(FilePath.Path);
-            BeatSheetsVm.StructureDescription = model.Description;
-            BeatSheetsVm.StructureBeats = new ObservableCollection<StructureBeat>(model.Beats);
-        }
-        catch (Exception)
-        {
-            Messenger.Send(new StatusChangedMessage(new StatusMessage("Failed to Load Beatsheet", LogLevel.Error)));
-        }
-    }
 
     #region Fields
 
@@ -638,7 +602,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
         {
             value = "Custom Beat Sheet";
             BeatSheetsVm.StructureModelTitle = value;
-            LoadBeatSheet();
+            BeatSheetsVm.LoadBeatSheet();
         }
 
         if (Result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))
