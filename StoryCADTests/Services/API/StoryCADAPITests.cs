@@ -2243,7 +2243,7 @@ public class StoryCADApiTests
 
         // Assert - BoundStructure IS set (fixed behavior)
         var problem2 = (ProblemModel)_api.CurrentModel.StoryElements.StoryElementGuids[problem2Guid];
-        Assert.AreEqual(problem1Guid.ToString(), problem2.BoundStructure,
+        Assert.AreEqual(problem1Guid, problem2.BoundStructure,
             "BoundStructure should be set to parent Problem's GUID");
     }
 
@@ -2265,7 +2265,7 @@ public class StoryCADApiTests
 
         // Verify BoundStructure was set by assign
         var problem2 = (ProblemModel)_api.CurrentModel.StoryElements.StoryElementGuids[problem2Guid];
-        Assert.AreEqual(problem1Guid.ToString(), problem2.BoundStructure,
+        Assert.AreEqual(problem1Guid, problem2.BoundStructure,
             "BoundStructure should be set after assignment");
 
         // Act
@@ -2273,7 +2273,7 @@ public class StoryCADApiTests
 
         // Assert - BoundStructure IS cleared (fixed behavior)
         problem2 = (ProblemModel)_api.CurrentModel.StoryElements.StoryElementGuids[problem2Guid];
-        Assert.IsTrue(string.IsNullOrEmpty(problem2.BoundStructure),
+        Assert.AreEqual(Guid.Empty, problem2.BoundStructure,
             "BoundStructure should be cleared after unassignment");
     }
 
@@ -2331,6 +2331,38 @@ public class StoryCADApiTests
         var structure = _api.GetProblemStructure(problemGuid).Payload;
         var firstBeat = structure.Beats.First();
         Assert.AreEqual(sceneGuid, firstBeat.LinkedElement);
+    }
+
+    [TestMethod]
+    public async Task AssignElementToBeat_ProblemAlreadyBound_ClearsOldParentBeat()
+    {
+        // Arrange - two problems with beat sheets, and a third problem to reassign
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var problemAGuid = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Problem A").Payload;
+        var problemBGuid = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Problem B").Payload;
+        var problemCGuid = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Problem C").Payload;
+
+        _api.CreateBeat(problemAGuid, "Beat on A", "Desc");
+        _api.CreateBeat(problemCGuid, "Beat on C", "Desc");
+
+        // Assign problem B as a beat on problem A
+        _api.AssignElementToBeat(problemAGuid, 0, problemBGuid);
+
+        // Act - reassign problem B to problem C
+        var result = _api.AssignElementToBeat(problemCGuid, 0, problemBGuid);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "Reassignment should succeed");
+
+        var structA = _api.GetProblemStructure(problemAGuid).Payload;
+        Assert.IsNull(structA.Beats.First().LinkedElement, "Old parent's beat should be cleared");
+
+        var structC = _api.GetProblemStructure(problemCGuid).Payload;
+        Assert.AreEqual(problemBGuid, structC.Beats.First().LinkedElement, "New parent's beat should point to B");
+
+        var problemB = (ProblemModel)_api.CurrentModel.StoryElements.First(e => e.Uuid == problemBGuid);
+        Assert.AreEqual(problemCGuid, problemB.BoundStructure, "BoundStructure should point to new parent");
     }
 
     #endregion

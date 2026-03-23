@@ -26,6 +26,11 @@ namespace StoryCADLib.ViewModels.SubViewModels;
 ///       PlotPatternScene (Models/Tools/) — A single scene/beat within a template. Has SceneTitle and Notes.
 ///       SavedBeatsheet (Models/) — Serialization wrapper for saving/loading custom beat sheets to .stbeat files.
 ///         Contains a Description and a list of StructureBeats.
+///
+///     OutlineService usage:
+///       All beat mutations (assign, unassign, create, delete, save, load) delegate to OutlineService
+///       so that both the UI and the StoryCAD API share the same logic. This ViewModel adds only
+///       UI concerns (guards with status messages, confirmation dialogs, selection management).
 /// </summary>
 [Microsoft.UI.Xaml.Data.Bindable]
 public class BeatSheetsViewModel : ObservableObject
@@ -239,8 +244,8 @@ public class BeatSheetsViewModel : ObservableObject
         set => SetProperty(ref _structureDescription, value);
     }
 
-    private string _boundStructure;
-    public string BoundStructure
+    private Guid _boundStructure;
+    public Guid BoundStructure
     {
         get => _boundStructure;
         set => SetProperty(ref _boundStructure, value);
@@ -315,7 +320,7 @@ public class BeatSheetsViewModel : ObservableObject
 
     // Command methods (order matches button layout top to bottom)
 
-    private async Task AssignBeatAsync()
+    internal async Task AssignBeatAsync()
     {
         if (SelectedBeat == null)
         {
@@ -333,23 +338,27 @@ public class BeatSheetsViewModel : ObservableObject
 
         var desiredBind = SelectedListElement.Uuid;
 
+        if (desiredBind == _problemModel.Uuid)
+        {
+            WeakReferenceMessenger.Default.Send(
+                new StatusChangedMessage(new StatusMessage("Cannot assign a problem as a beat on itself", LogLevel.Warn)));
+            return;
+        }
+
         try
         {
-            var element = _appState.CurrentDocument!.Model.StoryElements.First(g => g.Uuid == desiredBind);
-            var elementIndex = _appState.CurrentDocument.Model.StoryElements.IndexOf(element);
-
-            if (element.ElementType == StoryItemType.Problem)
+            // If assigning a problem, check if it's already bound elsewhere and confirm
+            var element = _storyModel.StoryElements.FirstOrDefault(g => g.Uuid == desiredBind);
+            if (element is ProblemModel problem)
             {
-                var problem = (ProblemModel)element;
-                if (!string.IsNullOrEmpty(problem.BoundStructure))
+                var existingParent = _outlineService.GetExistingBeatAssignment(problem);
+                if (existingParent != null && !_appState.Headless)
                 {
-                    var containingStructure = (ProblemModel)_appState.CurrentDocument.Model.StoryElements
-                        .First(g => g.Uuid == Guid.Parse(problem.BoundStructure));
                     var res = await _windowing.ShowContentDialog(new ContentDialog
                     {
                         Title = "Already assigned!",
                         Content =
-                            $"This problem is already assigned to a different structure ({containingStructure.Name}) " +
+                            $"This problem is already assigned to a different structure ({existingParent.Name}) " +
                             $"Would you like to assign it here instead?",
                         PrimaryButtonText = "Assign here",
                         SecondaryButtonText = "Cancel"
@@ -357,22 +366,10 @@ public class BeatSheetsViewModel : ObservableObject
 
                     if (res != ContentDialogResult.Primary)
                         return;
-
-                    RemoveBindData(containingStructure, problem);
-                }
-
-                if (problem.Uuid == _problemModel.Uuid)
-                {
-                    BoundStructure = _problemModel.Uuid.ToString();
-                }
-                else
-                {
-                    problem.BoundStructure = _problemModel.Uuid.ToString();
-                    _appState.CurrentDocument.Model.StoryElements[elementIndex] = problem;
                 }
             }
 
-            SelectedBeat.Guid = desiredBind;
+            _outlineService.AssignElementToBeat(_storyModel, _problemModel, SelectedBeatIndex, desiredBind);
             SelectedBeat = null;
             SelectedBeatIndex = -1;
         }
@@ -382,7 +379,7 @@ public class BeatSheetsViewModel : ObservableObject
         }
     }
 
-    private void UnbindElement()
+    internal void UnbindElement()
     {
         if (SelectedBeat == null || SelectedBeat.Guid == Guid.Empty)
             return;
@@ -405,21 +402,24 @@ public class BeatSheetsViewModel : ObservableObject
         if (SelectedBeat == null)
             return;
 
-        var beatTitle = SelectedBeat.Title ?? "this beat";
-        var message = SelectedBeat.Guid != Guid.Empty
-            ? $"Delete beat '{beatTitle}'? This will also remove its scene/problem assignment."
-            : $"Delete beat '{beatTitle}'?";
-
-        var result = await _windowing.ShowContentDialog(new ContentDialog
+        if (!_appState.Headless)
         {
-            Title = "Delete Beat",
-            Content = message,
-            PrimaryButtonText = "Delete",
-            SecondaryButtonText = "Cancel"
-        });
+            var beatTitle = SelectedBeat.Title ?? "this beat";
+            var message = SelectedBeat.Guid != Guid.Empty
+                ? $"Delete beat '{beatTitle}'? This will also remove its scene/problem assignment."
+                : $"Delete beat '{beatTitle}'?";
 
-        if (result != ContentDialogResult.Primary)
-            return;
+            var result = await _windowing.ShowContentDialog(new ContentDialog
+            {
+                Title = "Delete Beat",
+                Content = message,
+                PrimaryButtonText = "Delete",
+                SecondaryButtonText = "Cancel"
+            });
+
+            if (result != ContentDialogResult.Primary)
+                return;
+        }
 
         try
         {
@@ -552,23 +552,6 @@ public class BeatSheetsViewModel : ObservableObject
         }
     }
 
-    private void RemoveBindData(ProblemModel containingStructure, ProblemModel problem)
-    {
-        if (problem.BoundStructure.Equals(_problemModel.Uuid.ToString()))
-        {
-            var oldStructure = containingStructure.StructureBeats.First(g => g.Guid == problem.Uuid);
-            var index = StructureBeats.IndexOf(oldStructure);
-            StructureBeats[index].Guid = Guid.Empty;
-        }
-        else
-        {
-            var oldStructure = containingStructure.StructureBeats.First(g => g.Guid == problem.Uuid);
-            var index = containingStructure.StructureBeats.IndexOf(oldStructure);
-            containingStructure.StructureBeats[index].Guid = Guid.Empty;
-            var containingStructIndex = _appState.CurrentDocument.Model.StoryElements.IndexOf(containingStructure);
-            _appState.CurrentDocument.Model.StoryElements[containingStructIndex] = containingStructure;
-        }
-    }
 
     #endregion
 }

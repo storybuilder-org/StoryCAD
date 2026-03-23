@@ -815,7 +815,7 @@ public class ReportFormatter
         output.AppendLine("============== Unassigned Problems =============");
         var unassignedProblems = _storyModel.StoryElements
             .OfType<ProblemModel>()
-            .Where(p => string.IsNullOrEmpty(p.BoundStructure))
+            .Where(p => p.BoundStructure == Guid.Empty)
             .ToList();
 
         // Exclude the Story Problem (it's the root, not an orphan)

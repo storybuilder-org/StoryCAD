@@ -707,8 +707,19 @@ public class OutlineService
                 throw new InvalidOperationException("Cannot assign a Problem as a beat on itself.");
             }
 
+            //Clear old parent's beat if problem is already assigned elsewhere
+            if (problem.BoundStructure != Guid.Empty &&
+                problem.BoundStructure != Parent.Uuid &&
+                Model.StoryElements.StoryElementGuids.TryGetValue(problem.BoundStructure, out var oldParent) &&
+                oldParent is ProblemModel oldProblem)
+            {
+                var oldBeat = oldProblem.StructureBeats.FirstOrDefault(b => b.Guid == problem.Uuid);
+                if (oldBeat != null)
+                    oldBeat.Guid = Guid.Empty;
+            }
+
             //Set BoundStructure reverse pointer
-            problem.BoundStructure = Parent.Uuid.ToString();
+            problem.BoundStructure = Parent.Uuid;
         }
 
         //Bind
@@ -721,16 +732,14 @@ public class OutlineService
     /// </summary>
     internal ProblemModel GetExistingBeatAssignment(ProblemModel problem)
     {
-        if (string.IsNullOrEmpty(problem.BoundStructure))
+        if (problem.BoundStructure == Guid.Empty)
             return null;
 
         var appState = Ioc.Default.GetRequiredService<AppState>();
         if (appState.CurrentDocument == null)
             return null;
 
-        if (Guid.TryParse(problem.BoundStructure, out var containingGuid) &&
-            containingGuid != Guid.Empty &&
-            appState.CurrentDocument.Model.StoryElements.StoryElementGuids.TryGetValue(containingGuid, out var element) &&
+        if (appState.CurrentDocument.Model.StoryElements.StoryElementGuids.TryGetValue(problem.BoundStructure, out var element) &&
             element is ProblemModel containingProblem)
         {
             return containingProblem;
@@ -770,7 +779,7 @@ public class OutlineService
             Model.StoryElements.StoryElementGuids.TryGetValue(beatGuid, out var element) &&
             element is ProblemModel problem)
         {
-            problem.BoundStructure = string.Empty;
+            problem.BoundStructure = Guid.Empty;
         }
 
         //unbind

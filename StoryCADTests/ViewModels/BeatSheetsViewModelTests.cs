@@ -87,6 +87,34 @@ public class BeatSheetsViewModelTests
         Assert.AreEqual(2, _beatEditor.StructureBeats.Count);
     }
 
+    [TestMethod]
+    public void DeleteBeatCommand_WithNoSelection_DoesNotRemove()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.CreateBeatCommand.Execute(null);
+        Assert.AreEqual(1, _beatEditor.StructureBeats.Count);
+
+        // No selection
+        _beatEditor.SelectedBeat = null;
+        _beatEditor.DeleteBeatCommand.Execute(null);
+
+        Assert.AreEqual(1, _beatEditor.StructureBeats.Count);
+    }
+
+    [TestMethod]
+    public void DeleteBeatCommand_WithSelection_RemovesBeat()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.CreateBeatCommand.Execute(null);
+        Assert.AreEqual(1, _beatEditor.StructureBeats.Count);
+
+        _beatEditor.SelectedBeat = _beatEditor.StructureBeats[0];
+        _beatEditor.SelectedBeatIndex = 0;
+        _beatEditor.DeleteBeatCommand.Execute(null);
+
+        Assert.AreEqual(0, _beatEditor.StructureBeats.Count);
+    }
+
     #endregion
 
     #region Step 3: Move Command Tests
@@ -123,36 +151,6 @@ public class BeatSheetsViewModelTests
         // Assert
         Assert.AreEqual("Beat 2", _beatEditor.StructureBeats[0].Title);
         Assert.AreEqual("Beat 1", _beatEditor.StructureBeats[1].Title);
-    }
-
-    #endregion
-
-    #region Step 4: Unbind Command Tests
-
-    [TestMethod]
-    public void UnbindElementCommand_WithBoundBeat_ClearsGuid()
-    {
-        // Arrange
-        _beatEditor.LoadBeats(_problemModel, _storyModel);
-        var scene = _storyModel.StoryElements.Scenes.First(s => s.Uuid != Guid.Empty);
-        var beat = CreateTestBeat("Beat 1");
-        beat.Guid = scene.Uuid;
-        _beatEditor.StructureBeats.Add(beat);
-        _problemModel.StructureBeats = _beatEditor.StructureBeats;
-        _beatEditor.SelectedBeat = beat;
-        _beatEditor.SelectedBeatIndex = 0;
-
-        // Verify CanExecute is true before executing
-        Assert.IsTrue(_beatEditor.UnbindElementCommand.CanExecute(null),
-            $"CanExecute should be true. SelectedBeat={_beatEditor.SelectedBeat != null}, Guid={_beatEditor.SelectedBeat?.Guid}");
-
-        // Act
-        _beatEditor.UnbindElementCommand.Execute(null);
-
-        // Assert
-        Assert.AreEqual(Guid.Empty, beat.Guid);
-        Assert.IsNull(_beatEditor.SelectedBeat);
-        Assert.AreEqual(-1, _beatEditor.SelectedBeatIndex);
     }
 
     #endregion
@@ -302,11 +300,12 @@ public class BeatSheetsViewModelTests
     {
         _problemModel.StructureBeats = new ObservableCollection<StructureBeat>();
         _beatEditor.LoadBeats(_problemModel, _storyModel);
-        _beatEditor.BoundStructure = "some-guid-string";
+        var testGuid = Guid.NewGuid();
+        _beatEditor.BoundStructure = testGuid;
 
         _beatEditor.SaveBeats(_problemModel);
 
-        Assert.AreEqual("some-guid-string", _problemModel.BoundStructure);
+        Assert.AreEqual(testGuid, _problemModel.BoundStructure);
     }
 
     #endregion
@@ -361,6 +360,45 @@ public class BeatSheetsViewModelTests
     }
 
     [TestMethod]
+    public async Task AssignBeatAsync_ProblemToSelf_RejectsAssignment()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        var beat = CreateTestBeat("Test Beat");
+        _beatEditor.StructureBeats.Add(beat);
+        _beatEditor.SelectedBeat = beat;
+        _beatEditor.SelectedListElement = _problemModel;
+
+        await _beatEditor.AssignBeatAsync();
+
+        Assert.AreEqual(Guid.Empty, beat.Guid, "Beat should remain unassigned when assigning problem to itself");
+    }
+
+    [TestMethod]
+    public async Task AssignBeatAsync_ProblemAlreadyBound_ClearsOldParentBeat()
+    {
+        // Problem A has a beat sheet with problem B assigned
+        var problemA = _storyModel.StoryElements.OfType<ProblemModel>().First(p => p.Name == "Test Story Problem");
+        var problemB = new ProblemModel("Problem B", _storyModel, null);
+        var beatOnA = new StructureBeat("Beat on A", "Desc") { Guid = problemB.Uuid };
+        problemA.StructureBeats.Add(beatOnA);
+        problemB.BoundStructure = problemA.Uuid;
+
+        // Our test problem (_problemModel) has a beat we want to assign B to
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        var beat = CreateTestBeat("Beat on test problem");
+        _beatEditor.StructureBeats.Add(beat);
+        _beatEditor.SelectedBeat = beat;
+        _beatEditor.SelectedBeatIndex = 0;
+        _beatEditor.SelectedListElement = problemB;
+
+        await _beatEditor.AssignBeatAsync();
+
+        Assert.AreEqual(Guid.Empty, beatOnA.Guid, "Old parent's beat should be cleared");
+        Assert.AreEqual(problemB.Uuid, beat.Guid, "New beat should point to problem B");
+        Assert.AreEqual(_problemModel.Uuid, problemB.BoundStructure, "BoundStructure should point to new parent");
+    }
+
+    [TestMethod]
     public void ElementIcon_Scene_ReturnsWorldSymbol()
     {
         var scene = new SceneModel("Icon Test Scene", _storyModel, null);
@@ -397,15 +435,18 @@ public class BeatSheetsViewModelTests
     {
         _beatEditor.LoadBeats(_problemModel, _storyModel);
         var beat = CreateTestBeat("Test Beat");
-        var scene = _storyModel.StoryElements.Scenes.First();
+        var scene = _storyModel.StoryElements.Scenes.First(s => s.Name == "Test Scene");
         beat.Guid = scene.Uuid;
         _beatEditor.StructureBeats.Add(beat);
+        _problemModel.StructureBeats = _beatEditor.StructureBeats;
         _beatEditor.SelectedBeat = beat;
         _beatEditor.SelectedBeatIndex = 0;
 
-        _beatEditor.UnbindElementCommand.Execute(null);
+        _beatEditor.UnbindElement();
 
         Assert.AreEqual(Guid.Empty, beat.Guid);
+        Assert.IsNull(_beatEditor.SelectedBeat);
+        Assert.AreEqual(-1, _beatEditor.SelectedBeatIndex);
     }
 
     [TestMethod]
@@ -414,7 +455,7 @@ public class BeatSheetsViewModelTests
         _beatEditor.LoadBeats(_problemModel, _storyModel);
         _beatEditor.SelectedBeat = null;
 
-        _beatEditor.UnbindElementCommand.Execute(null);
+        _beatEditor.UnbindElement();
     }
 
     [TestMethod]
@@ -426,7 +467,7 @@ public class BeatSheetsViewModelTests
         _beatEditor.SelectedBeat = beat;
         _beatEditor.SelectedBeatIndex = 0;
 
-        _beatEditor.UnbindElementCommand.Execute(null);
+        _beatEditor.UnbindElement();
 
         Assert.AreEqual(Guid.Empty, beat.Guid);
     }
@@ -478,7 +519,7 @@ public class BeatSheetsViewModelTests
         _beatEditor.LoadBeats(_problemModel, _storyModel);
         _dirtyNotified = false;
 
-        _beatEditor.BoundStructure = Guid.NewGuid().ToString();
+        _beatEditor.BoundStructure = Guid.NewGuid();
 
         Assert.IsTrue(_dirtyNotified);
     }

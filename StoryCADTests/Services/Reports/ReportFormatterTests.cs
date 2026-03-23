@@ -281,7 +281,7 @@ public class ReportFormatterTests
 
         // Create a problem that IS bound to a structure
         var problem = new ProblemModel("Bound Problem", storyModel, null);
-        problem.BoundStructure = Guid.NewGuid().ToString(); // bound
+        problem.BoundStructure = Guid.NewGuid(); // bound
 
         var formatter = new ReportFormatter(appState);
         var result = formatter.FormatUnassignedElementsReport();
@@ -323,7 +323,7 @@ public class ReportFormatterTests
         overview.StoryProblem = storyProblem.Uuid;
 
         var subProblem = new ProblemModel("Sub Conflict", storyModel, null);
-        subProblem.BoundStructure = storyProblem.Uuid.ToString();
+        subProblem.BoundStructure = storyProblem.Uuid;
 
         storyProblem.StructureBeats = new ObservableCollection<StructureBeat>
         {

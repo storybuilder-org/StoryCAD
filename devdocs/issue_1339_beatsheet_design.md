@@ -97,7 +97,7 @@ Group 2 — Beat Management:
 | Move Down | FontIcon `\uE70D` (ChevronDown) | "Move beat down" |
 | Save Sheet | `Symbol.Save` or FontIcon `\uE74E` | "Save beat sheet to file" |
 
-All buttons use `CanExecute` for disabled states (e.g., Assign disabled when no beat or element selected, MoveUp disabled when beat is first).
+Buttons are always enabled — each command method guards itself with early returns and status bar messages (e.g., Assign checks for selected beat and element, rejects self-assignment).
 
 **Elements ListView (Column 2):**
 
@@ -213,30 +213,39 @@ public string BoundStructure { get; set; }         // GUID string of parent prob
 
 All currently in `ProblemViewModel.cs`:
 
-**CreateBeat** (line 81):
+**CreateBeat** (line 398):
 ```csharp
-public void CreateBeat(object sender, RoutedEventArgs e)
+private void CreateBeat()
 {
-    StructureBeats.Add(new StructureBeatViewModel("New Beat", "Describe your beat here"));
+    StructureBeats.Add(new StructureBeat("New Beat", "Describe your beat here"));
 }
 ```
 
-**DeleteBeat** (line 89): Delegates to `OutlineService.DeleteBeat(_storyModel, Model, SelectedBeatIndex)`.
+**DeleteBeatAsync** (line 400):
+1. Guard: if `SelectedBeat == null`, returns
+2. If not headless, shows confirmation dialog (context-aware message if beat is bound)
+3. If user cancels, returns
+4. Calls `_outlineService.DeleteBeat(_storyModel, _problemModel, SelectedBeatIndex)`
+5. Catches exceptions and sends status warning
 
-**MoveUp** (line 104): `StructureBeats.Move(SelectedBeatIndex, SelectedBeatIndex - 1)` with bounds check.
+**MoveUp** (line 435): `StructureBeats.Move(SelectedBeatIndex, SelectedBeatIndex - 1)` with bounds check.
 
-**MoveDown** (line 126): `StructureBeats.Move(SelectedBeatIndex, SelectedBeatIndex + 1)` with bounds check.
+**MoveDown** (line 446): `StructureBeats.Move(SelectedBeatIndex, SelectedBeatIndex + 1)` with bounds check.
 
-**AssignBeat** (line 150) — the most complex method:
-1. Gets clicked element's UUID from `ItemClickEventArgs.ClickedItem`
-2. Looks up element in `StoryElements` by UUID
-3. If element is a Problem:
-   a. Checks if problem already has a `BoundStructure` (assigned elsewhere)
+**AssignBeatAsync** — the most complex method:
+1. Guard: if no beat selected, sends status warning "Select a beat" and returns
+2. Guard: if no element selected, sends status warning "Select an element" and returns
+3. Guard: if selected element is the problem whose beat sheet we're editing, sends status warning "Cannot assign a problem as a beat on itself" and returns
+4. Looks up element in `StoryElements` by UUID
+5. If element is a Problem:
+   a. Checks if problem already has a `BoundStructure` (Guid, assigned elsewhere)
    b. If yes, shows dialog: "Already assigned to {name}. Assign here instead?"
-   c. If user confirms, calls `removeBindData` to clear old binding
-   d. Sets `problem.BoundStructure = this problem's Uuid.ToString()`
-4. Sets `SelectedBeat.Guid = element's UUID` (this triggers PropertyChanged cascade on the beat)
-5. Clears selection
+   c. If user confirms, calls `RemoveBindData` to clear old binding
+   d. Sets `problem.BoundStructure = this problem's Uuid`
+6. Sets `SelectedBeat.Guid = element's UUID`
+7. Clears beat selection (`SelectedBeat = null`, `SelectedBeatIndex = -1`)
+
+No `CanExecute` — the method guards itself with status bar messages.
 
 **UnbindElement** (line 223):
 1. Checks SelectedBeat is not null and has a bound GUID
@@ -248,7 +257,7 @@ public void CreateBeat(object sender, RoutedEventArgs e)
 - Finds the beat in the old containing structure that points to the problem
 - Sets that beat's Guid to `Guid.Empty`
 
-**SaveBeatSheet** (line 269): File picker → `OutlineService.SaveBeatsheet(path, description, beats)`. Has null check on picker result.
+**SaveBeatSheetAsync** (line 457): File picker → null check → `OutlineService.SaveBeatsheet(path, description, beats)`. Try/catch with status error message.
 
 **LoadBeatSheet** (line 292): File picker → `OutlineService.LoadBeatsheet(path)`. **Missing null check on picker result** (bug).
 
@@ -484,16 +493,16 @@ Owns all beat manipulation logic and element resolution for the UI.
 
 **Commands (RelayCommand/AsyncRelayCommand):**
 
-| Command | CanExecute |
-|---------|------------|
-| `CreateBeatCommand` | Always |
-| `DeleteBeatCommand` | `SelectedBeat != null` |
-| `MoveUpCommand` | `SelectedBeat != null && SelectedBeatIndex > 0` |
-| `MoveDownCommand` | `SelectedBeat != null && SelectedBeatIndex < Count - 1` |
-| `AssignBeatCommand` | `SelectedBeat != null && SelectedListElement != null` |
-| `UnbindElementCommand` | `SelectedBeat != null && SelectedBeat.Guid != Guid.Empty` |
-| `SaveBeatSheetCommand` | AsyncRelayCommand, always enabled |
-| `LoadBeatSheetCommand` | AsyncRelayCommand, always enabled |
+| Command | Guard logic (inline, no CanExecute) |
+|---------|--------------------------------------|
+| `CreateBeatCommand` | None — always executes |
+| `DeleteBeatCommand` | Returns if `SelectedBeat == null` |
+| `MoveUpCommand` | Returns if `SelectedBeat == null` or already first |
+| `MoveDownCommand` | Returns if `SelectedBeat == null` or already last |
+| `AssignBeatCommand` | Returns with status warning if no beat selected, no element selected, or self-assignment |
+| `UnbindElementCommand` | Returns if `SelectedBeat == null` or beat has no assignment |
+| `SaveBeatSheetCommand` | None — always executes |
+| `LoadBeatSheetCommand` | None — always executes |
 
 **Dirty tracking:**
 - Subscribe to `StructureBeats.CollectionChanged`

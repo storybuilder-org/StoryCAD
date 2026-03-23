@@ -236,14 +236,14 @@ public class ProblemModel : StoryElement
         set => structureBeats = value;
     }
 
-    [JsonIgnore] private string _boundStructure;
+    [JsonIgnore] private Guid _boundStructure;
 
     /// <summary>
     ///     A problem cannot be bound to more than one structure
     /// </summary>
     [JsonInclude]
     [JsonPropertyName("BoundStructure")]
-    public string BoundStructure
+    public Guid BoundStructure
     {
         get => _boundStructure;
         set => _boundStructure = value;
@@ -277,7 +277,7 @@ public class ProblemModel : StoryElement
         StructureTitle = string.Empty;
         StructureDescription = string.Empty;
         StructureBeats = new ObservableCollection<StructureBeat>();
-        BoundStructure = string.Empty;
+        BoundStructure = Guid.Empty;
     }
 
     public ProblemModel(string name, StoryModel model, StoryNodeItem Node) : base(name, StoryItemType.Problem, model,
@@ -305,7 +305,7 @@ public class ProblemModel : StoryElement
         StructureTitle = string.Empty;
         StructureDescription = string.Empty;
         StructureBeats = new ObservableCollection<StructureBeat>();
-        BoundStructure = string.Empty;
+        BoundStructure = Guid.Empty;
     }
 
     public ProblemModel()

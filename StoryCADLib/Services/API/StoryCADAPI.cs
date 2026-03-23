@@ -1496,6 +1496,9 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         var beats = problem.StructureBeats.Select(b => (
             b.Title,
             b.Description,
+            // TODO: API should use Guid.Empty instead of null? StoryCAD uses Guid.Empty
+            // everywhere else for "unassigned". Returning null here means API consumers
+            // see a different convention than the rest of the codebase.
             b.Guid == Guid.Empty ? (Guid?)null : b.Guid
         ));
 
