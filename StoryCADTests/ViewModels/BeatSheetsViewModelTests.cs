@@ -187,8 +187,7 @@ public class BeatSheetsViewModelTests
     public void UnbindElementCommand_WithBoundBeat_ClearsGuid()
     {
         // Arrange
-        _beatEditor.SetStoryModel(_storyModel);
-        _beatEditor.SetProblemModel(_problemModel);
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
         var scene = _storyModel.StoryElements.Scenes.First(s => s.Uuid != Guid.Empty);
         var beat = CreateTestBeat("Beat 1");
         beat.Guid = scene.Uuid;

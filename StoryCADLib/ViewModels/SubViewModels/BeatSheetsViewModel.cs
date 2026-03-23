@@ -65,13 +65,13 @@ public class BeatSheetsViewModel : ObservableObject
 
         PropertyChanged += OnPropertyChanged;
 
-        // Commands
+        // Commands (order matches button layout top to bottom)
+        AssignBeatCommand = new AsyncRelayCommand(AssignBeatAsync, () => SelectedBeat != null && SelectedListElement != null);
+        UnbindElementCommand = new RelayCommand(UnbindElement, CanUnbindElement);
         CreateBeatCommand = new RelayCommand(CreateBeat);
         DeleteBeatCommand = new AsyncRelayCommand(DeleteBeatAsync, () => SelectedBeat != null);
         MoveUpCommand = new RelayCommand(MoveUp, () => SelectedBeat != null && SelectedBeatIndex > 0);
         MoveDownCommand = new RelayCommand(MoveDown, () => SelectedBeat != null && SelectedBeatIndex < StructureBeats.Count - 1);
-        UnbindElementCommand = new RelayCommand(UnbindElement, CanUnbindElement);
-        AssignBeatCommand = new AsyncRelayCommand(AssignBeatAsync, () => SelectedBeat != null && SelectedListElement != null);
         SaveBeatSheetCommand = new AsyncRelayCommand(SaveBeatSheetAsync);
     }
 
@@ -211,35 +211,19 @@ public class BeatSheetsViewModel : ObservableObject
 
     #endregion
 
-    #region Commands
+    #region Commands (order matches button layout top to bottom)
 
+    public IRelayCommand AssignBeatCommand { get; }
+    public RelayCommand UnbindElementCommand { get; }
     public RelayCommand CreateBeatCommand { get; }
     public IRelayCommand DeleteBeatCommand { get; }
     public RelayCommand MoveUpCommand { get; }
     public RelayCommand MoveDownCommand { get; }
-    public RelayCommand UnbindElementCommand { get; }
-    public IRelayCommand AssignBeatCommand { get; }
     public IRelayCommand SaveBeatSheetCommand { get; }
 
     #endregion
 
     #region Methods
-
-    /// <summary>
-    ///     Sets the StoryModel context for beat operations that need it.
-    /// </summary>
-    public void SetStoryModel(StoryModel storyModel)
-    {
-        _storyModel = storyModel;
-    }
-
-    /// <summary>
-    ///     Sets the ProblemModel context for beat operations that need it.
-    /// </summary>
-    public void SetProblemModel(ProblemModel problemModel)
-    {
-        _problemModel = problemModel;
-    }
 
     /// <summary>
     ///     Loads beat-related data from the ProblemModel during navigation.
@@ -295,178 +279,7 @@ public class BeatSheetsViewModel : ObservableObject
         }
     }
 
-    private void CreateBeat()
-    {
-        StructureBeats.Add(new StructureBeat("New Beat", "Describe your beat here"));
-    }
-
-    private async Task DeleteBeatAsync()
-    {
-        if (SelectedBeat == null)
-            return;
-
-        var beatTitle = SelectedBeat.Title ?? "this beat";
-        var message = SelectedBeat.Guid != Guid.Empty
-            ? $"Delete beat '{beatTitle}'? This will also remove its scene/problem assignment."
-            : $"Delete beat '{beatTitle}'?";
-
-        var result = await _windowing.ShowContentDialog(new ContentDialog
-        {
-            Title = "Delete Beat",
-            Content = message,
-            PrimaryButtonText = "Delete",
-            SecondaryButtonText = "Cancel"
-        });
-
-        if (result != ContentDialogResult.Primary)
-            return;
-
-        try
-        {
-            _outlineService.DeleteBeat(_storyModel, _problemModel, SelectedBeatIndex);
-        }
-        catch (Exception ex)
-        {
-            WeakReferenceMessenger.Default.Send(
-                new StatusChangedMessage(new StatusMessage(ex.Message, LogLevel.Warn, true)));
-        }
-    }
-
-    private void MoveUp()
-    {
-        if (SelectedBeat == null)
-            return;
-
-        if (SelectedBeatIndex > 0)
-        {
-            StructureBeats.Move(SelectedBeatIndex, SelectedBeatIndex - 1);
-        }
-    }
-
-    private bool CanUnbindElement()
-    {
-        return SelectedBeat != null && SelectedBeat.Guid != Guid.Empty;
-    }
-
-    private void UnbindElement()
-    {
-        if (SelectedBeat == null || SelectedBeat.Guid == Guid.Empty)
-            return;
-
-        _outlineService.UnasignBeat(_storyModel, _problemModel, SelectedBeatIndex);
-        SelectedBeat.Guid = Guid.Empty;
-
-        // Clear selection
-        SelectedBeat = null;
-        SelectedBeatIndex = -1;
-    }
-
-    private void MoveDown()
-    {
-        if (SelectedBeat == null)
-            return;
-
-        if (SelectedBeatIndex < StructureBeats.Count - 1)
-        {
-            StructureBeats.Move(SelectedBeatIndex, SelectedBeatIndex + 1);
-        }
-    }
-
-    public async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
-    {
-        if (_isLoading)
-            return;
-
-        var value = (sender as ComboBox).SelectedValue.ToString();
-
-        ContentDialogResult result;
-        if (!string.IsNullOrEmpty(StructureModelTitle))
-        {
-            result = await _windowing.ShowContentDialog(new ContentDialog
-            {
-                Title = "This will clear selected story beats",
-                PrimaryButtonText = "Confirm",
-                SecondaryButtonText = "Cancel"
-            });
-
-            if (result == ContentDialogResult.Primary)
-            {
-                for (var i = StructureBeats.Count - 1; i >= 0; i--)
-                {
-                    _outlineService.DeleteBeat(_storyModel, _problemModel, i);
-                }
-            }
-            else
-            {
-                var comboBox = sender as ComboBox;
-                _isLoading = true;
-                comboBox.SelectedValue = StructureModelTitle;
-                _isLoading = false;
-                return;
-            }
-        }
-        else
-        {
-            result = ContentDialogResult.Primary;
-        }
-
-        if (value == "Load Custom Beat Sheet from file...")
-        {
-            value = "Custom Beat Sheet";
-            StructureModelTitle = value;
-            LoadBeatSheet();
-        }
-
-        if (result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))
-        {
-            StructureModelTitle = value;
-
-            var beatSheet = BeatSheets[value];
-            StructureDescription = beatSheet.PlotPatternNotes;
-
-            StructureBeats.Clear();
-            foreach (var item in beatSheet.PlotPatternScenes)
-            {
-                StructureBeats.Add(new StructureBeat(item.SceneTitle, item.Notes));
-            }
-        }
-    }
-
-    private async Task SaveBeatSheetAsync()
-    {
-        try
-        {
-            var filePath = await _windowing.ShowFileSavePicker("Save", ".stbeat");
-            if (filePath == null)
-                return;
-
-            _outlineService.SaveBeatsheet(filePath.Path, StructureDescription, StructureBeats.ToList());
-        }
-        catch (Exception)
-        {
-            WeakReferenceMessenger.Default.Send(
-                new StatusChangedMessage(new StatusMessage("Failed to save Beatsheet", LogLevel.Error)));
-        }
-    }
-
-    public async void LoadBeatSheet()
-    {
-        try
-        {
-            var filePath = await _windowing.ShowFilePicker("Load", ".stbeat");
-            if (filePath == null)
-                return;
-
-            var model = _outlineService.LoadBeatsheet(filePath.Path);
-            StructureDescription = model.Description;
-            StructureBeats = new ObservableCollection<StructureBeat>(model.Beats);
-        }
-        catch (Exception)
-        {
-            WeakReferenceMessenger.Default.Send(
-                new StatusChangedMessage(new StatusMessage("Failed to Load Beatsheet", LogLevel.Error)));
-        }
-    }
+    // Command methods (order matches button layout top to bottom)
 
     private async Task AssignBeatAsync()
     {
@@ -532,6 +345,181 @@ public class BeatSheetsViewModel : ObservableObject
         catch (Exception ex)
         {
             _logger.Log(LogLevel.Warn, "Failed to bind valid element (Structure Tab) " + ex.Message);
+        }
+    }
+
+    private void UnbindElement()
+    {
+        if (SelectedBeat == null || SelectedBeat.Guid == Guid.Empty)
+            return;
+
+        _outlineService.UnasignBeat(_storyModel, _problemModel, SelectedBeatIndex);
+        SelectedBeat.Guid = Guid.Empty;
+
+        // Clear selection
+        SelectedBeat = null;
+        SelectedBeatIndex = -1;
+    }
+
+    private bool CanUnbindElement()
+    {
+        return SelectedBeat != null && SelectedBeat.Guid != Guid.Empty;
+    }
+
+    private void CreateBeat()
+    {
+        StructureBeats.Add(new StructureBeat("New Beat", "Describe your beat here"));
+    }
+
+    private async Task DeleteBeatAsync()
+    {
+        if (SelectedBeat == null)
+            return;
+
+        var beatTitle = SelectedBeat.Title ?? "this beat";
+        var message = SelectedBeat.Guid != Guid.Empty
+            ? $"Delete beat '{beatTitle}'? This will also remove its scene/problem assignment."
+            : $"Delete beat '{beatTitle}'?";
+
+        var result = await _windowing.ShowContentDialog(new ContentDialog
+        {
+            Title = "Delete Beat",
+            Content = message,
+            PrimaryButtonText = "Delete",
+            SecondaryButtonText = "Cancel"
+        });
+
+        if (result != ContentDialogResult.Primary)
+            return;
+
+        try
+        {
+            _outlineService.DeleteBeat(_storyModel, _problemModel, SelectedBeatIndex);
+        }
+        catch (Exception ex)
+        {
+            WeakReferenceMessenger.Default.Send(
+                new StatusChangedMessage(new StatusMessage(ex.Message, LogLevel.Warn, true)));
+        }
+    }
+
+    private void MoveUp()
+    {
+        if (SelectedBeat == null)
+            return;
+
+        if (SelectedBeatIndex > 0)
+        {
+            StructureBeats.Move(SelectedBeatIndex, SelectedBeatIndex - 1);
+        }
+    }
+
+    private void MoveDown()
+    {
+        if (SelectedBeat == null)
+            return;
+
+        if (SelectedBeatIndex < StructureBeats.Count - 1)
+        {
+            StructureBeats.Move(SelectedBeatIndex, SelectedBeatIndex + 1);
+        }
+    }
+
+    private async Task SaveBeatSheetAsync()
+    {
+        try
+        {
+            var filePath = await _windowing.ShowFileSavePicker("Save", ".stbeat");
+            if (filePath == null)
+                return;
+
+            _outlineService.SaveBeatsheet(filePath.Path, StructureDescription, StructureBeats.ToList());
+        }
+        catch (Exception)
+        {
+            WeakReferenceMessenger.Default.Send(
+                new StatusChangedMessage(new StatusMessage("Failed to save Beatsheet", LogLevel.Error)));
+        }
+    }
+
+    // Supporting methods
+
+    public async void LoadBeatSheet()
+    {
+        try
+        {
+            var filePath = await _windowing.ShowFilePicker("Load", ".stbeat");
+            if (filePath == null)
+                return;
+
+            var model = _outlineService.LoadBeatsheet(filePath.Path);
+            StructureDescription = model.Description;
+            StructureBeats = new ObservableCollection<StructureBeat>(model.Beats);
+        }
+        catch (Exception)
+        {
+            WeakReferenceMessenger.Default.Send(
+                new StatusChangedMessage(new StatusMessage("Failed to Load Beatsheet", LogLevel.Error)));
+        }
+    }
+
+    public async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isLoading)
+            return;
+
+        var value = (sender as ComboBox).SelectedValue.ToString();
+
+        ContentDialogResult result;
+        if (!string.IsNullOrEmpty(StructureModelTitle))
+        {
+            result = await _windowing.ShowContentDialog(new ContentDialog
+            {
+                Title = "This will clear selected story beats",
+                PrimaryButtonText = "Confirm",
+                SecondaryButtonText = "Cancel"
+            });
+
+            if (result == ContentDialogResult.Primary)
+            {
+                for (var i = StructureBeats.Count - 1; i >= 0; i--)
+                {
+                    _outlineService.DeleteBeat(_storyModel, _problemModel, i);
+                }
+            }
+            else
+            {
+                var comboBox = sender as ComboBox;
+                _isLoading = true;
+                comboBox.SelectedValue = StructureModelTitle;
+                _isLoading = false;
+                return;
+            }
+        }
+        else
+        {
+            result = ContentDialogResult.Primary;
+        }
+
+        if (value == "Load Custom Beat Sheet from file...")
+        {
+            value = "Custom Beat Sheet";
+            StructureModelTitle = value;
+            LoadBeatSheet();
+        }
+
+        if (result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))
+        {
+            StructureModelTitle = value;
+
+            var beatSheet = BeatSheets[value];
+            StructureDescription = beatSheet.PlotPatternNotes;
+
+            StructureBeats.Clear();
+            foreach (var item in beatSheet.PlotPatternScenes)
+            {
+                StructureBeats.Add(new StructureBeat(item.SceneTitle, item.Notes));
+            }
         }
     }
 
