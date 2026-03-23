@@ -64,9 +64,23 @@ public class BeatSheetsViewModelTests
     #region Step 2: Beat CRUD Command Tests
 
     [TestMethod]
+    public void CreateBeatCommand_NoBeatSheetSelected_DoesNotAddBeat()
+    {
+        // Arrange — no beat sheet loaded, StructureModelTitle is null
+        Assert.AreEqual(0, _beatEditor.StructureBeats.Count);
+
+        // Act
+        _beatEditor.CreateBeatCommand.Execute(null);
+
+        // Assert
+        Assert.AreEqual(0, _beatEditor.StructureBeats.Count);
+    }
+
+    [TestMethod]
     public void CreateBeatCommand_ShouldAddNewBeat()
     {
         // Arrange
+        _beatEditor.StructureModelTitle = "Save the Cat";
         Assert.AreEqual(0, _beatEditor.StructureBeats.Count);
 
         // Act
@@ -81,6 +95,7 @@ public class BeatSheetsViewModelTests
     [TestMethod]
     public void CreateBeatCommand_MultipleCalls_ShouldAddMultipleBeats()
     {
+        _beatEditor.StructureModelTitle = "Save the Cat";
         _beatEditor.CreateBeatCommand.Execute(null);
         _beatEditor.CreateBeatCommand.Execute(null);
 
@@ -91,6 +106,7 @@ public class BeatSheetsViewModelTests
     public void DeleteBeatCommand_WithNoSelection_DoesNotRemove()
     {
         _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.StructureModelTitle = "Save the Cat";
         _beatEditor.CreateBeatCommand.Execute(null);
         Assert.AreEqual(1, _beatEditor.StructureBeats.Count);
 
@@ -105,6 +121,7 @@ public class BeatSheetsViewModelTests
     public void DeleteBeatCommand_WithSelection_RemovesBeat()
     {
         _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.StructureModelTitle = "Save the Cat";
         _beatEditor.CreateBeatCommand.Execute(null);
         Assert.AreEqual(1, _beatEditor.StructureBeats.Count);
 

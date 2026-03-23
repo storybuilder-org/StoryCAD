@@ -394,6 +394,12 @@ public class BeatSheetsViewModel : ObservableObject
 
     private void CreateBeat()
     {
+        if (string.IsNullOrEmpty(StructureModelTitle))
+        {
+            WeakReferenceMessenger.Default.Send(
+                new StatusChangedMessage(new StatusMessage("Select a beat sheet first", LogLevel.Warn)));
+            return;
+        }
         StructureBeats.Add(new StructureBeat("New Beat", "Describe your beat here"));
     }
 
