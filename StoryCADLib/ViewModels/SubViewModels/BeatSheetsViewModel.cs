@@ -30,6 +30,7 @@ public class BeatSheetsViewModel : ObservableObject
     private StoryModel _storyModel;
     private ProblemModel _problemModel;
     private bool _isLoading;
+    private bool _suppressDirty;
 
     #endregion
 
@@ -121,14 +122,29 @@ public class BeatSheetsViewModel : ObservableObject
     public string SelectedElementSource
     {
         get => _selectedElementSource;
-        set => SetProperty(ref _selectedElementSource, value);
+        set
+        {
+            if (SetProperty(ref _selectedElementSource, value))
+            {
+                CurrentElementSource = value == "Scene" ? Scenes : Problems;
+            }
+        }
     }
 
     private StructureBeat _selectedBeat;
     public StructureBeat SelectedBeat
     {
         get => _selectedBeat;
-        set => SetProperty(ref _selectedBeat, value);
+        set
+        {
+            if (SetProperty(ref _selectedBeat, value))
+            {
+                CurrentElementDescription = _selectedBeat?.ElementDescription;
+                _suppressDirty = true;
+                SelectedBeatDescription = _selectedBeat?.Description;
+                _suppressDirty = false;
+            }
+        }
     }
 
     private int _selectedBeatIndex = -1;
@@ -163,7 +179,13 @@ public class BeatSheetsViewModel : ObservableObject
     public StoryElement SelectedListElement
     {
         get => _selectedListElement;
-        set => SetProperty(ref _selectedListElement, value);
+        set
+        {
+            if (SetProperty(ref _selectedListElement, value))
+            {
+                CurrentElementDescription = _selectedListElement?.Description;
+            }
+        }
     }
 
     private string _currentElementDescription;
@@ -183,7 +205,11 @@ public class BeatSheetsViewModel : ObservableObject
             {
                 // Write back to the beat model
                 if (SelectedBeat != null)
+                {
                     SelectedBeat.Description = value;
+                    if (!_suppressDirty)
+                        _notifyDirty();
+                }
             }
         }
     }
@@ -262,20 +288,17 @@ public class BeatSheetsViewModel : ObservableObject
 
     private void OnPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs args)
     {
-        if (args.PropertyName == nameof(SelectedElementSource))
-        {
-            CurrentElementSource = SelectedElementSource == "Scene" ? Scenes : Problems;
-        }
+        if (_isLoading)
+            return;
 
-        if (args.PropertyName == nameof(SelectedBeat))
+        switch (args.PropertyName)
         {
-            CurrentElementDescription = SelectedBeat?.ElementDescription;
-            SelectedBeatDescription = SelectedBeat?.Description;
-        }
-
-        if (args.PropertyName == nameof(SelectedListElement))
-        {
-            CurrentElementDescription = SelectedListElement?.Description;
+            case nameof(StructureModelTitle):
+            case nameof(StructureDescription):
+            case nameof(StructureBeats):
+            case nameof(BoundStructure):
+                _notifyDirty();
+                break;
         }
     }
 

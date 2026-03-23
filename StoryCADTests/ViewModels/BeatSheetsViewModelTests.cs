@@ -448,6 +448,103 @@ public class BeatSheetsViewModelTests
 
     #endregion
 
+    #region Dirty Tracking Tests
+
+    [TestMethod]
+    public void StructureModelTitle_WhenChanged_NotifiesDirty()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _dirtyNotified = false;
+
+        _beatEditor.StructureModelTitle = "New Title";
+
+        Assert.IsTrue(_dirtyNotified);
+    }
+
+    [TestMethod]
+    public void StructureDescription_WhenChanged_NotifiesDirty()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _dirtyNotified = false;
+
+        _beatEditor.StructureDescription = "New Description";
+
+        Assert.IsTrue(_dirtyNotified);
+    }
+
+    [TestMethod]
+    public void BoundStructure_WhenChanged_NotifiesDirty()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _dirtyNotified = false;
+
+        _beatEditor.BoundStructure = Guid.NewGuid().ToString();
+
+        Assert.IsTrue(_dirtyNotified);
+    }
+
+    [TestMethod]
+    public void SelectedBeatDescription_WhenEdited_NotifiesDirty()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        var beat = CreateTestBeat("Beat 1", "Original");
+        _beatEditor.StructureBeats.Add(beat);
+        _beatEditor.SelectedBeat = beat;
+        _dirtyNotified = false;
+
+        _beatEditor.SelectedBeatDescription = "Edited description";
+
+        Assert.IsTrue(_dirtyNotified);
+    }
+
+    [TestMethod]
+    public void LoadBeats_DoesNotNotifyDirty()
+    {
+        _dirtyNotified = false;
+
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+
+        Assert.IsFalse(_dirtyNotified);
+    }
+
+    [TestMethod]
+    public void SelectedBeat_WhenChanged_DoesNotNotifyDirty()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        var beat = CreateTestBeat("Beat 1");
+        _beatEditor.StructureBeats.Add(beat);
+        _dirtyNotified = false;
+
+        _beatEditor.SelectedBeat = beat;
+
+        Assert.IsFalse(_dirtyNotified);
+    }
+
+    [TestMethod]
+    public void SelectedListElement_WhenChanged_DoesNotNotifyDirty()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        var scene = _storyModel.StoryElements.Scenes.First();
+        _dirtyNotified = false;
+
+        _beatEditor.SelectedListElement = scene;
+
+        Assert.IsFalse(_dirtyNotified);
+    }
+
+    [TestMethod]
+    public void SelectedElementSource_WhenChanged_DoesNotNotifyDirty()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _dirtyNotified = false;
+
+        _beatEditor.SelectedElementSource = "Problem";
+
+        Assert.IsFalse(_dirtyNotified);
+    }
+
+    #endregion
+
     #region Helper Methods
 
     private StoryModel CreateTestStoryModel()
