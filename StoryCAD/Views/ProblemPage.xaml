@@ -216,8 +216,8 @@
                                    VerticalAlignment="Center"
                                    Margin="0,0,8,0" />
                                         <RadioButtons
-                                            ItemsSource="{x:Bind ProblemVm.ElementSource}"
-                                            SelectedItem="{x:Bind ProblemVm.SelectedElementSource, Mode=TwoWay}"
+                                            ItemsSource="{x:Bind BeatSheetsVm.ElementSource}"
+                                            SelectedItem="{x:Bind BeatSheetsVm.SelectedElementSource, Mode=TwoWay}"
                                             MaxColumns="2"
                                             VerticalAlignment="Center">
                                         </RadioButtons>
@@ -226,11 +226,10 @@
                                     <!-- Row 1, Col 0: Beat Sheet ComboBox (bindings unchanged) -->
                                     <ComboBox Grid.Row="1"
                               Grid.Column="0"
-                              ItemsSource="{x:Bind BeatSheetsViewModel.PlotPatternNames}"
-                              SelectionChanged="{x:Bind ProblemVm.UpdateSelectedBeat}"
-                              PlaceholderText="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
-                              SelectedValue="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
-                              Text="{x:Bind ProblemVm.StructureModelTitle, Mode=OneWay}"
+                              ItemsSource="{x:Bind BeatSheetsVm.PlotPatternNames}"
+                              PlaceholderText="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=OneWay}"
+                              SelectedValue="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=TwoWay}"
+                              Text="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=OneWay}"
                               MinWidth="240" />
                                     <!-- Row 1, Col 1 left empty; Expander chevron will sit at far right -->
                                 </Grid>
@@ -240,8 +239,7 @@
                             <Expander.Content>
                                 <usercontrols:RichEditBoxExtended
                     Header="Beat Sheet Description:"
-                    RtfText="{x:Bind ProblemVm.StructureDescription, Mode=TwoWay}"
-                    IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}"
+                    RtfText="{x:Bind BeatSheetsVm.StructureDescription, Mode=TwoWay}"
                     AcceptsReturn="False"
                     IsSpellCheckEnabled="False"
                     TextWrapping="Wrap"
@@ -254,21 +252,23 @@
                         <Grid Grid.Row="1"
               ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="5*" />
                                 <!-- beats -->
                                 <ColumnDefinition Width="Auto" />
                                 <!-- buttons -->
-                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="4*" />
                                 <!-- elements list -->
                             </Grid.ColumnDefinitions>
 
                             <!-- Beats list -->
                             <ListView Grid.Column="0"
-                      ItemsSource="{x:Bind ProblemVm.StructureBeats, Mode=TwoWay}"
-                      SelectedItem="{x:Bind ProblemVm.SelectedBeat, Mode=TwoWay}"
-                      SelectedIndex="{x:Bind ProblemVm.SelectedBeatIndex, Mode=TwoWay}"
+                      ItemsSource="{x:Bind BeatSheetsVm.StructureBeats, Mode=TwoWay}"
+                      SelectedItem="{x:Bind BeatSheetsVm.SelectedBeat, Mode=TwoWay}"
+                      SelectedIndex="{x:Bind BeatSheetsVm.SelectedBeatIndex, Mode=TwoWay}"
                       SelectionMode="Single"
-                      BorderThickness="0"
+                      BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                      BorderThickness="1"
+                      CornerRadius="4"
                       HorizontalAlignment="Stretch">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">
@@ -284,13 +284,12 @@
                                 </ListView.ItemContainerStyle>
 
                                 <ListView.ItemTemplate>
-                                    <DataTemplate x:DataType="tools:StructureBeatViewModel">
+                                    <DataTemplate x:DataType="tools:StructureBeat">
                                         <Grid ColumnDefinitions="Auto,*"
                               VerticalAlignment="Center"
                               Margin="8,8,8,8"
                               RowDefinitions="Auto,Auto"
-                              Background="Transparent"
-                              PointerPressed="ListViewItem_PointerPressed">
+                              Background="Transparent">
                                             <!-- Icon spans both rows -->
                                             <SymbolIcon Grid.Column="0"
                                         Grid.RowSpan="2"
@@ -318,70 +317,59 @@
                                 </ListView.ItemTemplate>
                             </ListView>
 
-                            <!-- Command buttons with vertical separators -->
-                            <Grid Grid.Column="1" VerticalAlignment="Stretch">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
+                            <!-- Command buttons -->
+                            <StackPanel Grid.Column="1" Spacing="1" Padding="0" VerticalAlignment="Center"
+                                        Margin="4,0">
+                                <!-- Assignment group -->
+                                <Button x:Name="AssignButton"
+                                        Width="44" Height="40"
+                                        Command="{x:Bind BeatSheetsVm.AssignBeatCommand}"
+                                        ToolTipService.ToolTip="Assign element to beat">
+                                    <FontIcon Glyph="&#xE72B;" FontSize="18" FontWeight="SemiBold" />
+                                </Button>
+                                <Button x:Name="UnassignButton"
+                                        Width="44" Height="40"
+                                        Command="{x:Bind BeatSheetsVm.UnbindElementCommand}"
+                                        ToolTipService.ToolTip="Remove assignment">
+                                    <FontIcon Glyph="&#xE72A;" FontSize="18" FontWeight="SemiBold" />
+                                </Button>
 
-                                <!-- Left vertical line -->
-                                <Rectangle Grid.Column="0" Width="1"
-                                           Fill="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                                           Margin="0,0,8,0" />
+                                <!-- Spacer -->
+                                <Rectangle Height="1" Margin="0,4"
+                                           Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" />
 
-                                <!-- Buttons -->
-                                <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
-                                    <Button x:Name="AssignButton"
-                                            Content="&lt;"
-                                            Width="32"
-                                            Height="32" />
-                                    <Button x:Name="UnassignButton"
-                                            Content="&gt;"
-                                            Width="32"
-                                            Height="32" FontWeight="Bold"
-                                            Click="{x:Bind ProblemVm.UnbindElement}" />
-                                    <Rectangle Height="1"
-                                               Margin="0,8"
-                                               Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" />
-                                    <Button x:Name="AddBeatButton"
-                                            Content="+"
-                                            Width="32"
-                                            Height="32" FontWeight="Bold"
-                                            Click="{x:Bind ProblemVm.CreateBeat}"
-                                            Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}" />
-                                    <Button x:Name="DeleteBeatButton"
-                                            Content="-"
-                                            Width="32"
-                                            Height="32" FontWeight="Bold"
-                                            Click="{x:Bind ProblemVm.DeleteBeat}"
-                                            Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}" />
-                                    <Button x:Name="MoveUpButton"
-                                            Content="∧"
-                                            Width="32"
-                                            Height="32"
-                                            Click="{x:Bind ProblemVm.MoveUp}"
-                                            Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}" />
-                                    <Button x:Name="MoveDownButton"
-                                            Content="∨"
-                                            Width="32"
-                                            Height="32" FontWeight="Bold"
-                                            Click="{x:Bind ProblemVm.MoveDown}"
-                                            Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}" />
-                                    <Button x:Name="SaveBeatSheetButton"
-                                            Content="S"
-                                            Width="32"
-                                            Height="32" FontWeight="Bold"
-                                            Click="{x:Bind ProblemVm.SaveBeatSheet}"
-                                            Visibility="{x:Bind ProblemVm.BeatsheetEditButtonsVisibility, Mode=OneWay}" />
-                                </StackPanel>
-
-                                <!-- Right vertical line -->
-                                <Rectangle Grid.Column="2" Width="1"
-                                           Fill="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                                           Margin="8,0,0,0" />
-                            </Grid>
+                                <!-- Beat management group -->
+                                <Button x:Name="AddBeatButton"
+                                        Width="44" Height="40"
+                                        Command="{x:Bind BeatSheetsVm.CreateBeatCommand}"
+                                        ToolTipService.ToolTip="Add a new beat">
+                                    <FontIcon Glyph="&#xE710;" FontSize="18" FontWeight="SemiBold" />
+                                </Button>
+                                <Button x:Name="DeleteBeatButton"
+                                        Width="44" Height="40"
+                                        Command="{x:Bind BeatSheetsVm.DeleteBeatCommand}"
+                                        ToolTipService.ToolTip="Delete selected beat">
+                                    <FontIcon Glyph="&#xE74D;" FontSize="18" FontWeight="SemiBold" />
+                                </Button>
+                                <Button x:Name="MoveUpButton"
+                                        Width="44" Height="40"
+                                        Command="{x:Bind BeatSheetsVm.MoveUpCommand}"
+                                        ToolTipService.ToolTip="Move beat up">
+                                    <FontIcon Glyph="&#xE70E;" FontSize="18" FontWeight="SemiBold" />
+                                </Button>
+                                <Button x:Name="MoveDownButton"
+                                        Width="44" Height="40"
+                                        Command="{x:Bind BeatSheetsVm.MoveDownCommand}"
+                                        ToolTipService.ToolTip="Move beat down">
+                                    <FontIcon Glyph="&#xE70D;" FontSize="18" FontWeight="SemiBold" />
+                                </Button>
+                                <Button x:Name="SaveBeatSheetButton"
+                                        Width="44" Height="40"
+                                        Command="{x:Bind BeatSheetsVm.SaveBeatSheetCommand}"
+                                        ToolTipService.ToolTip="Save beat sheet to file">
+                                    <FontIcon Glyph="&#xE74E;" FontSize="18" FontWeight="SemiBold" />
+                                </Button>
+                            </StackPanel>
 
                             <!-- Elements list (Scenes / Problems) -->
                             <Grid Grid.Column="2">
@@ -392,11 +380,13 @@
                                 <!-- Dynamic Elements List (Scenes or Problems based on RadioButtons) -->
                                 <ListView x:Name="ElementsList"
                           Grid.Row="0"
-                          ItemsSource="{x:Bind ProblemVm.CurrentElementSource, Mode=TwoWay}"
-                          SelectedItem="{x:Bind ProblemVm.SelectedListElement, Mode=TwoWay}"
-                          IsItemClickEnabled="True"
-                          ItemClick="{x:Bind ProblemVm.AssignBeat}"
-                          DisplayMemberPath="Name" />
+                          ItemsSource="{x:Bind BeatSheetsVm.CurrentElementSource, Mode=TwoWay}"
+                          SelectedItem="{x:Bind BeatSheetsVm.SelectedListElement, Mode=TwoWay}"
+                          SelectionMode="Single"
+                          DisplayMemberPath="Name"
+                          BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                          BorderThickness="1"
+                          CornerRadius="4" />
                             </Grid>
                         </Grid>
 
@@ -405,34 +395,25 @@
               ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
                             <!-- Beat Description -->
                             <TextBox Grid.Column="0"
                      Header="Beat Description"
-                     Text="{x:Bind ProblemVm.SelectedBeat.Description, Mode=TwoWay}"
+                     Text="{x:Bind BeatSheetsVm.SelectedBeatDescription, Mode=TwoWay}"
                      TextWrapping="Wrap"
                      HorizontalAlignment="Stretch"
-                     VerticalAlignment="Stretch"
-                     IsReadOnly="{x:Bind ProblemVm.IsBeatSheetReadOnly}" />
-
-                            <Rectangle Grid.Column="1"
-                       Width="1"
-                       Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" />
+                     VerticalAlignment="Stretch" />
 
                             <!-- Element Description -->
-                            <usercontrols:RichEditBoxExtended Grid.Column="2"
-                                              Header="Element Description"
-                                              HorizontalAlignment="Stretch"
-                                              VerticalAlignment="Stretch"
-                                              RtfText="{x:Bind ProblemVm.CurrentElementDescription, Mode=OneWay}"
-                                              IsReadOnly="True"
-                                              AcceptsReturn="False"
-                                              IsSpellCheckEnabled="False"
-                                              TextWrapping="Wrap"
-                                              ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                            <usercontrols:RichEditBoxExtended Grid.Column="1"
+                                     Header="Element Description"
+                                     RtfText="{x:Bind BeatSheetsVm.CurrentElementDescription, Mode=OneWay}"
+                                     IsReadOnly="True"
+                                     TextWrapping="Wrap"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Stretch" />
                         </Grid>
                     </Grid>
                 </TabViewItem>

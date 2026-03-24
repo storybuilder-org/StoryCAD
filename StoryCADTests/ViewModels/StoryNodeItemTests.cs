@@ -24,8 +24,8 @@ public class StoryNodeItemTests
         StoryWorldModel storyWorld = new("Test World", model, overview.Node);
 
         // Assert
-        Assert.AreEqual(Symbol.Map, storyWorld.Node.Symbol,
-            "StoryWorld nodes should display the Map icon in TreeView");
+        Assert.AreEqual(Symbol.World, storyWorld.Node.Symbol,
+            "StoryWorld nodes should display the World icon in TreeView");
     }
 
     /// <summary>

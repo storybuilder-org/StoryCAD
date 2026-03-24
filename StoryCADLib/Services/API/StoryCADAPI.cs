@@ -1463,7 +1463,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
 
         foreach (var scene in beatSheet.PlotPatternScenes)
         {
-            problem.StructureBeats.Add(new StructureBeatViewModel(scene.SceneTitle, scene.Notes));
+            problem.StructureBeats.Add(new StructureBeat(scene.SceneTitle, scene.Notes));
         }
 
         return OperationResult<bool>.Success(true);
@@ -1496,6 +1496,9 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         var beats = problem.StructureBeats.Select(b => (
             b.Title,
             b.Description,
+            // TODO: API should use Guid.Empty instead of null? StoryCAD uses Guid.Empty
+            // everywhere else for "unassigned". Returning null here means API consumers
+            // see a different convention than the rest of the codebase.
             b.Guid == Guid.Empty ? (Guid?)null : b.Guid
         ));
 
@@ -1536,7 +1539,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         if (targetElement.ElementType != StoryItemType.Scene && targetElement.ElementType != StoryItemType.Problem)
             return OperationResult<bool>.Failure("Only Scene or Problem elements can be assigned to beats");
 
-        problem.StructureBeats[beatIndex].Guid = elementGuid;
+        outlineService.AssignElementToBeat(CurrentModel, problem, beatIndex, elementGuid);
         return OperationResult<bool>.Success(true);
     }
 
@@ -1564,7 +1567,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
             return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
 
-        problem.StructureBeats[beatIndex].Guid = Guid.Empty;
+        outlineService.UnasignBeat(CurrentModel, problem, beatIndex);
         return OperationResult<bool>.Success(true);
     }
 
@@ -1590,7 +1593,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
             return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
 
         var problem = (ProblemModel)element;
-        problem.StructureBeats.Add(new StructureBeatViewModel(title, description));
+        problem.StructureBeats.Add(new StructureBeat(title, description));
         return OperationResult<bool>.Success(true);
     }
 
@@ -1648,7 +1651,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
             return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
 
-        problem.StructureBeats.RemoveAt(beatIndex);
+        outlineService.DeleteBeat(CurrentModel, problem, beatIndex);
         return OperationResult<bool>.Success(true);
     }
 
@@ -1822,12 +1825,12 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
             var savedBeatSheet = outlineService.LoadBeatsheet(filePath);
             var problem = (ProblemModel)element;
 
-            problem.StructureTitle = "Custom Beat Sheet";
+            problem.StructureTitle = Path.GetFileNameWithoutExtension(filePath);
             problem.StructureDescription = savedBeatSheet.Description;
             problem.StructureBeats.Clear();
             foreach (var beat in savedBeatSheet.Beats)
             {
-                problem.StructureBeats.Add(new StructureBeatViewModel(beat.Title, beat.Description));
+                problem.StructureBeats.Add(new StructureBeat(beat.Title, beat.Description));
             }
 
             return OperationResult<bool>.Success(true);

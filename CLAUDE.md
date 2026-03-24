@@ -248,6 +248,17 @@ For detailed commands, see `build-commands.md` in shared memory files.
 
 For detailed architecture, see `architecture.md` and `patterns.md` in shared memory files.
 
+## Collaborator Development
+
+**Status Log**: `Collaborator/devdocs/collaborator_status_log.md` (in sibling Collaborator repo)
+
+This log tracks all Collaborator-related work across issues and sessions. **Update it during any Collaborator work** with dated entries documenting:
+- Current status and blocking issues
+- Solutions identified or implemented
+- Testing results
+
+The Collaborator plugin lives in a sibling repository (`../Collaborator/` relative to StoryCAD) and integrates via `ICollaborator` and `IStoryCADAPI` interfaces defined in `StoryCADLib/Services/Collaborator/Contracts/`.
+
 ## Important Notes
 
 ### Running the Application

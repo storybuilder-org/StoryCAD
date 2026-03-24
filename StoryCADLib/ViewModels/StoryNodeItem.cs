@@ -554,7 +554,7 @@ public class StoryNodeItem : INotifyPropertyChanged
                 Symbol = Symbol.TwoPage;
                 break;
             case StoryItemType.StoryWorld:
-                Symbol = Symbol.Map;
+                Symbol = Symbol.World;
                 break;
         }
 
@@ -625,7 +625,7 @@ public class StoryNodeItem : INotifyPropertyChanged
                 Symbol = Symbol.TwoPage;
                 break;
             case StoryItemType.StoryWorld:
-                Symbol = Symbol.Map;
+                Symbol = Symbol.World;
                 break;
         }
 

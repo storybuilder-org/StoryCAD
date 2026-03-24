@@ -2319,6 +2319,33 @@ public class OutlineServiceTests
     }
 
     [TestMethod]
+    public async Task AssignElementToBeat_ProblemAlreadyBound_ClearsOldParentBeat()
+    {
+        var (model, problemA) = await CreateModelWithProblem();
+        var problemB = new ProblemModel("Problem B", model, problemA.Node);
+        var problemC = new ProblemModel("Problem C", model, problemA.Node);
+
+        // Give A and C each a beat
+        _outlineService.CreateBeat(problemA, "Beat on A", "Desc");
+        _outlineService.CreateBeat(problemC, "Beat on C", "Desc");
+
+        // Assign problem B as a beat on problem A
+        _outlineService.AssignElementToBeat(model, problemA, 0, problemB.Uuid);
+        Assert.AreEqual(problemB.Uuid, problemA.StructureBeats[0].Guid);
+        Assert.AreEqual(problemA.Uuid, problemB.BoundStructure);
+
+        // Now reassign problem B as a beat on problem C
+        _outlineService.AssignElementToBeat(model, problemC, 0, problemB.Uuid);
+
+        // Old parent's beat should be cleared
+        Assert.AreEqual(Guid.Empty, problemA.StructureBeats[0].Guid, "Old parent beat should be cleared");
+        // New parent's beat should point to B
+        Assert.AreEqual(problemB.Uuid, problemC.StructureBeats[0].Guid, "New parent beat should point to B");
+        // BoundStructure should point to new parent
+        Assert.AreEqual(problemC.Uuid, problemB.BoundStructure, "BoundStructure should point to new parent");
+    }
+
+    [TestMethod]
     public async Task DeleteBeat_ShouldRemoveBeat()
     {
         var (model, problem) = await CreateModelWithProblem();
@@ -2336,7 +2363,7 @@ public class OutlineServiceTests
         var (model, problem) = await CreateModelWithProblem();
         _outlineService.CreateBeat(problem, "Old", "Old");
 
-        var newBeats = new ObservableCollection<StructureBeatViewModel>
+        var newBeats = new ObservableCollection<StructureBeat>
         {
             new("B1", "D1"),
             new("B2", "D2")
@@ -2356,7 +2383,7 @@ public class OutlineServiceTests
     {
         SetupBeatTestPath();
 
-        var beats = new List<StructureBeatViewModel>
+        var beats = new List<StructureBeat>
         {
             new("Intro", "D1") { Guid = Guid.NewGuid() },
             new("Middle", "D2") { Guid = Guid.NewGuid() }
