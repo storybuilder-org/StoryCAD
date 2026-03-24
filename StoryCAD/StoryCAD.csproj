@@ -29,6 +29,7 @@
     <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
         <TargetFrameworks>net10.0-desktop</TargetFrameworks>
         <UnoMacOSCustomInfoPlist>Platforms/Desktop/Info.plist</UnoMacOSCustomInfoPlist>
+        <UnoMacOSEntitlements>Platforms/Desktop/Entitlements.plist</UnoMacOSEntitlements>
     </PropertyGroup>
 
     <!-- macOS PKG packaging - provide icon sizes for app bundle -->

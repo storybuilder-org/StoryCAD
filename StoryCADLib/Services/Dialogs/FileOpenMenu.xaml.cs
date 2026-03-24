@@ -52,20 +52,34 @@ public sealed partial class FileOpenMenuPage : Page
         }
 
         // Get files from the backup directory in order of creation.
-        // Ensure the directory exists to avoid exceptions on first run.
+        // On macOS, the sandbox may deny access if the folder was only granted
+        // via a previous session's folder picker. Gracefully handle this.
         var backupDir = Ioc.Default.GetRequiredService<PreferenceService>().Model.BackupDirectory;
         FileOpenVM.BackupPaths = Array.Empty<string>();
         if (!string.IsNullOrWhiteSpace(backupDir))
         {
-            if (!Directory.Exists(backupDir))
+            try
             {
-                Directory.CreateDirectory(backupDir);
-            }
+                if (!Directory.Exists(backupDir))
+                {
+                    Directory.CreateDirectory(backupDir);
+                }
 
-            FileOpenVM.BackupPaths = Directory
-                .GetFiles(backupDir)
-                .OrderByDescending(File.GetLastWriteTime)
-                .ToArray();
+                FileOpenVM.BackupPaths = Directory
+                    .GetFiles(backupDir)
+                    .OrderByDescending(File.GetLastWriteTime)
+                    .ToArray();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Ioc.Default.GetRequiredService<ILogService>().Log(LogLevel.Warn,
+                    $"Sandbox denied access to backup directory '{backupDir}'. Backups tab will be empty.");
+            }
+            catch (IOException ex)
+            {
+                Ioc.Default.GetRequiredService<ILogService>().Log(LogLevel.Warn,
+                    $"Cannot access backup directory '{backupDir}': {ex.Message}");
+            }
         }
 
         foreach (var file in FileOpenVM.BackupPaths)
