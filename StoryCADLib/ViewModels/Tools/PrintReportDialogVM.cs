@@ -124,6 +124,10 @@ public partial class PrintReportDialogVM : ObservableRecipient
         set => SetProperty(ref _createStoryWorld, value);
     }
 
+    // Unassigned Elements and Plot Structure Diagram are currently generated
+    // as part of Story Problem Structure. If they become separate reports,
+    // add CreateUnassigned and CreatePlotDiagram bool properties here.
+
     private bool _problemList;
 
     public bool ProblemList

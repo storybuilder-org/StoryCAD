@@ -2221,6 +2221,152 @@ public class StoryCADApiTests
 
     #endregion
 
+    #region Phase 0 Characterization Tests - BoundStructure Gaps (Issue #1339)
+
+    /// <summary>
+    /// Verifies that AssignElementToBeat sets BoundStructure on the assigned Problem.
+    /// Fixed in issue #1339 — OutlineService now manages BoundStructure.
+    /// </summary>
+    [TestMethod]
+    public async Task AssignElementToBeat_Problem_SetsBoundStructure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var problem1Guid = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Parent Problem").Payload;
+        var problem2Guid = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Child Problem").Payload;
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problem1Guid, beatSheetName);
+
+        // Act
+        _api.AssignElementToBeat(problem1Guid, 0, problem2Guid);
+
+        // Assert - BoundStructure IS set (fixed behavior)
+        var problem2 = (ProblemModel)_api.CurrentModel.StoryElements.StoryElementGuids[problem2Guid];
+        Assert.AreEqual(problem1Guid, problem2.BoundStructure,
+            "BoundStructure should be set to parent Problem's GUID");
+    }
+
+    /// <summary>
+    /// Verifies that ClearBeatAssignment clears BoundStructure on the Problem.
+    /// Fixed in issue #1339 — OutlineService now manages BoundStructure.
+    /// </summary>
+    [TestMethod]
+    public async Task ClearBeatAssignment_Problem_ClearsBoundStructure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var problem1Guid = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Parent Problem").Payload;
+        var problem2Guid = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Child Problem").Payload;
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problem1Guid, beatSheetName);
+        _api.AssignElementToBeat(problem1Guid, 0, problem2Guid);
+
+        // Verify BoundStructure was set by assign
+        var problem2 = (ProblemModel)_api.CurrentModel.StoryElements.StoryElementGuids[problem2Guid];
+        Assert.AreEqual(problem1Guid, problem2.BoundStructure,
+            "BoundStructure should be set after assignment");
+
+        // Act
+        _api.ClearBeatAssignment(problem1Guid, 0);
+
+        // Assert - BoundStructure IS cleared (fixed behavior)
+        problem2 = (ProblemModel)_api.CurrentModel.StoryElements.StoryElementGuids[problem2Guid];
+        Assert.AreEqual(Guid.Empty, problem2.BoundStructure,
+            "BoundStructure should be cleared after unassignment");
+    }
+
+    /// <summary>
+    /// Characterization: documents correct behavior — scenes can appear in multiple beats.
+    /// </summary>
+    [TestMethod]
+    public async Task AssignElementToBeat_SceneToMultipleBeats_Succeeds()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var problemGuid = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem").Payload;
+        var sceneGuid = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Test Scene").Payload;
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        var structure = _api.GetProblemStructure(problemGuid).Payload;
+        if (structure.Beats.Count() < 2)
+        {
+            _api.CreateBeat(problemGuid, "Extra Beat", "Extra");
+        }
+
+        // Act
+        var result1 = _api.AssignElementToBeat(problemGuid, 0, sceneGuid);
+        var result2 = _api.AssignElementToBeat(problemGuid, 1, sceneGuid);
+
+        // Assert
+        Assert.IsTrue(result1.IsSuccess, "First assignment should succeed");
+        Assert.IsTrue(result2.IsSuccess, "Second assignment of same scene should succeed");
+
+        var beats = _api.GetProblemStructure(problemGuid).Payload.Beats.ToList();
+        Assert.AreEqual(sceneGuid, beats[0].LinkedElement);
+        Assert.AreEqual(sceneGuid, beats[1].LinkedElement);
+    }
+
+    /// <summary>
+    /// Characterization: scenes should NOT get BoundStructure (only Problems do).
+    /// </summary>
+    [TestMethod]
+    public async Task AssignElementToBeat_Scene_NoBoundStructureSet()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var problemGuid = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Test Problem").Payload;
+        var sceneGuid = _api.AddElement(StoryItemType.Scene, overviewGuid.ToString(), "Test Scene").Payload;
+        var beatSheetName = _api.GetBeatSheetNames().Payload.First();
+        _api.ApplyBeatSheetToProblem(problemGuid, beatSheetName);
+
+        // Act
+        _api.AssignElementToBeat(problemGuid, 0, sceneGuid);
+
+        // Assert - assignment works, and SceneModel has no BoundStructure to corrupt
+        var structure = _api.GetProblemStructure(problemGuid).Payload;
+        var firstBeat = structure.Beats.First();
+        Assert.AreEqual(sceneGuid, firstBeat.LinkedElement);
+    }
+
+    [TestMethod]
+    public async Task AssignElementToBeat_ProblemAlreadyBound_ClearsOldParentBeat()
+    {
+        // Arrange - two problems with beat sheets, and a third problem to reassign
+        await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.ExplorerView.First().Uuid;
+        var problemAGuid = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Problem A").Payload;
+        var problemBGuid = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Problem B").Payload;
+        var problemCGuid = _api.AddElement(StoryItemType.Problem, overviewGuid.ToString(), "Problem C").Payload;
+
+        _api.CreateBeat(problemAGuid, "Beat on A", "Desc");
+        _api.CreateBeat(problemCGuid, "Beat on C", "Desc");
+
+        // Assign problem B as a beat on problem A
+        _api.AssignElementToBeat(problemAGuid, 0, problemBGuid);
+
+        // Act - reassign problem B to problem C
+        var result = _api.AssignElementToBeat(problemCGuid, 0, problemBGuid);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, "Reassignment should succeed");
+
+        var structA = _api.GetProblemStructure(problemAGuid).Payload;
+        Assert.IsNull(structA.Beats.First().LinkedElement, "Old parent's beat should be cleared");
+
+        var structC = _api.GetProblemStructure(problemCGuid).Payload;
+        Assert.AreEqual(problemBGuid, structC.Beats.First().LinkedElement, "New parent's beat should point to B");
+
+        var problemB = (ProblemModel)_api.CurrentModel.StoryElements.First(e => e.Uuid == problemBGuid);
+        Assert.AreEqual(problemCGuid, problemB.BoundStructure, "BoundStructure should point to new parent");
+    }
+
+    #endregion
+
     #region GetElementsByType Tests (Issue #1249)
 
     /// <summary>
@@ -2397,6 +2543,115 @@ public class StoryCADApiTests
         Assert.IsTrue(result.IsSuccess, "GetElementsByType should succeed even with no StoryWorld");
         Assert.IsNotNull(result.Payload, "Payload should not be null");
         Assert.AreEqual(0, result.Payload.Count, "Should return empty list when no StoryWorld exists");
+    }
+
+    #endregion
+
+    #region MoveElement Tests
+
+    [TestMethod]
+    public async Task MoveElement_WithValidGuids_Succeeds()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Move Test", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview).Uuid;
+
+        var folder1Result = _api.AddElement(StoryItemType.Folder, overviewGuid.ToString(), "Folder1");
+        Assert.IsTrue(folder1Result.IsSuccess);
+        var folder2Result = _api.AddElement(StoryItemType.Folder, overviewGuid.ToString(), "Folder2");
+        Assert.IsTrue(folder2Result.IsSuccess);
+
+        var sceneResult = _api.AddElement(StoryItemType.Scene, folder1Result.Payload.ToString(), "Test Scene");
+        Assert.IsTrue(sceneResult.IsSuccess);
+
+        // Act — move scene from Folder1 to Folder2
+        var result = _api.MoveElement(sceneResult.Payload, folder2Result.Payload);
+
+        // Assert
+        Assert.IsTrue(result.IsSuccess, $"MoveElement should succeed: {result.ErrorMessage}");
+
+        var scene = _api.CurrentModel.StoryElements.First(e => e.Uuid == sceneResult.Payload);
+        Assert.AreEqual(folder2Result.Payload, scene.Node.Parent.Uuid, "Scene's parent should be Folder2");
+
+        var folder1 = _api.CurrentModel.StoryElements.First(e => e.Uuid == folder1Result.Payload);
+        Assert.IsFalse(folder1.Node.Children.Any(c => c.Uuid == sceneResult.Payload), "Folder1 should no longer contain the scene");
+
+        var folder2 = _api.CurrentModel.StoryElements.First(e => e.Uuid == folder2Result.Payload);
+        Assert.IsTrue(folder2.Node.Children.Any(c => c.Uuid == sceneResult.Payload), "Folder2 should contain the scene");
+    }
+
+    [TestMethod]
+    public async Task MoveElement_WithNoModel_ReturnsFailure()
+    {
+        // Arrange — ensure no model
+        _api.SetCurrentModel(null!);
+
+        // Act
+        var result = _api.MoveElement(Guid.NewGuid(), Guid.NewGuid());
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess);
+        Assert.IsTrue(result.ErrorMessage.Contains("No StoryModel"));
+    }
+
+    [TestMethod]
+    public async Task MoveElement_ToSelf_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Move Self Test", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview).Uuid;
+        var folderResult = _api.AddElement(StoryItemType.Folder, overviewGuid.ToString(), "Folder");
+        Assert.IsTrue(folderResult.IsSuccess);
+
+        // Act
+        var result = _api.MoveElement(folderResult.Payload, folderResult.Payload);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess);
+        Assert.IsTrue(result.ErrorMessage.Contains("itself"));
+    }
+
+    [TestMethod]
+    public async Task MoveElement_ToOwnDescendant_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Move Circular Test", "Test Author", "0");
+        var overviewGuid = _api.CurrentModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview).Uuid;
+
+        var parentResult = _api.AddElement(StoryItemType.Folder, overviewGuid.ToString(), "Parent");
+        Assert.IsTrue(parentResult.IsSuccess);
+        var childResult = _api.AddElement(StoryItemType.Folder, parentResult.Payload.ToString(), "Child");
+        Assert.IsTrue(childResult.IsSuccess);
+        var grandchildResult = _api.AddElement(StoryItemType.Folder, childResult.Payload.ToString(), "Grandchild");
+        Assert.IsTrue(grandchildResult.IsSuccess);
+
+        // Act — try to move Parent under Grandchild (circular)
+        var result = _api.MoveElement(parentResult.Payload, grandchildResult.Payload);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess);
+        Assert.IsTrue(result.ErrorMessage.Contains("descendants"));
+    }
+
+    [TestMethod]
+    public async Task MoveElement_Root_ReturnsFailure()
+    {
+        // Arrange
+        await _api.CreateEmptyOutline("Move Root Test", "Test Author", "0");
+        var overview = _api.CurrentModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview);
+        var folderResult = _api.AddElement(StoryItemType.Folder, overview.Uuid.ToString(), "Folder");
+        Assert.IsTrue(folderResult.IsSuccess);
+
+        // Act — try to move the root
+        var result = _api.MoveElement(overview.Uuid, folderResult.Payload);
+
+        // Assert
+        Assert.IsFalse(result.IsSuccess);
+        Assert.IsTrue(result.ErrorMessage.Contains("root"));
     }
 
     #endregion

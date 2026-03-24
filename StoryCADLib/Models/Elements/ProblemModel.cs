@@ -223,27 +223,27 @@ public class ProblemModel : StoryElement
         set => _structureDescription = value;
     }
 
-    [JsonIgnore] private ObservableCollection<StructureBeatViewModel> structureBeats;
+    [JsonIgnore] private ObservableCollection<StructureBeat> structureBeats;
 
     /// <summary>
     ///     Beat nodes of the structure
     /// </summary>
     [JsonInclude]
     [JsonPropertyName("StructureBeats")]
-    public ObservableCollection<StructureBeatViewModel> StructureBeats
+    public ObservableCollection<StructureBeat> StructureBeats
     {
         get => structureBeats;
         set => structureBeats = value;
     }
 
-    [JsonIgnore] private string _boundStructure;
+    [JsonIgnore] private Guid _boundStructure;
 
     /// <summary>
     ///     A problem cannot be bound to more than one structure
     /// </summary>
     [JsonInclude]
     [JsonPropertyName("BoundStructure")]
-    public string BoundStructure
+    public Guid BoundStructure
     {
         get => _boundStructure;
         set => _boundStructure = value;
@@ -276,8 +276,8 @@ public class ProblemModel : StoryElement
         Notes = string.Empty;
         StructureTitle = string.Empty;
         StructureDescription = string.Empty;
-        StructureBeats = new ObservableCollection<StructureBeatViewModel>();
-        BoundStructure = string.Empty;
+        StructureBeats = new ObservableCollection<StructureBeat>();
+        BoundStructure = Guid.Empty;
     }
 
     public ProblemModel(string name, StoryModel model, StoryNodeItem Node) : base(name, StoryItemType.Problem, model,
@@ -304,8 +304,8 @@ public class ProblemModel : StoryElement
         Notes = string.Empty;
         StructureTitle = string.Empty;
         StructureDescription = string.Empty;
-        StructureBeats = new ObservableCollection<StructureBeatViewModel>();
-        BoundStructure = string.Empty;
+        StructureBeats = new ObservableCollection<StructureBeat>();
+        BoundStructure = Guid.Empty;
     }
 
     public ProblemModel()

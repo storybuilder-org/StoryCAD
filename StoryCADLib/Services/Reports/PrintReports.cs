@@ -56,7 +56,13 @@ public class PrintReports
 
         if (_vm.CreateStructure)
         {
+            rtf = _formatter.FormatPlotStructureDiagram();
+            _documentText += FormatText(rtf);
+
             rtf = _formatter.FormatStoryProblemStructureReport();
+            _documentText += FormatText(rtf);
+
+            rtf = _formatter.FormatUnassignedElementsReport();
             _documentText += FormatText(rtf);
         }
 
