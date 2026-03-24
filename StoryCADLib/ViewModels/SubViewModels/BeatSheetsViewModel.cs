@@ -234,7 +234,26 @@ public class BeatSheetsViewModel : ObservableObject
     public string StructureModelTitle
     {
         get => _structureModelTitle;
-        set => SetProperty(ref _structureModelTitle, value);
+        set
+        {
+            if (_isLoading || value == _structureModelTitle)
+                return;
+
+            if (value == "Load Custom Beat Sheet from file...")
+            {
+                SetProperty(ref _structureModelTitle, "Custom Beat Sheet");
+                LoadBeatSheet();
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(_structureModelTitle))
+            {
+                _ = ConfirmAndApplyBeatSheet(value);
+                return;
+            }
+
+            ApplyBeatSheet(value);
+        }
     }
 
     private string _structureDescription;
@@ -276,7 +295,7 @@ public class BeatSheetsViewModel : ObservableObject
         _storyModel = storyModel;
         _problemModel = model;
 
-        StructureModelTitle = model.StructureTitle;
+        _structureModelTitle = model.StructureTitle;
         StructureDescription = model.StructureDescription;
         StructureBeats = model.StructureBeats;
         BoundStructure = model.BoundStructure;
@@ -522,55 +541,41 @@ public class BeatSheetsViewModel : ObservableObject
         }
     }
 
-    public async void UpdateSelectedBeat(object sender, SelectionChangedEventArgs e)
+    private async Task ConfirmAndApplyBeatSheet(string value)
     {
-        if (_isLoading)
-            return;
-
-        var value = (sender as ComboBox).SelectedValue.ToString();
-
-        ContentDialogResult result;
-        if (!string.IsNullOrEmpty(StructureModelTitle))
+        if (!_appState.Headless)
         {
-            result = await _windowing.ShowContentDialog(new ContentDialog
+            var result = await _windowing.ShowContentDialog(new ContentDialog
             {
                 Title = "This will clear selected story beats",
                 PrimaryButtonText = "Confirm",
                 SecondaryButtonText = "Cancel"
             });
 
-            if (result == ContentDialogResult.Primary)
+            if (result != ContentDialogResult.Primary)
             {
-                for (var i = StructureBeats.Count - 1; i >= 0; i--)
-                {
-                    _outlineService.DeleteBeat(_storyModel, _problemModel, i);
-                }
-            }
-            else
-            {
-                var comboBox = sender as ComboBox;
+                // Revert ComboBox without re-triggering setter logic
                 _isLoading = true;
-                comboBox.SelectedValue = StructureModelTitle;
+                SetProperty(ref _structureModelTitle, _structureModelTitle);
                 _isLoading = false;
                 return;
             }
         }
-        else
+
+        for (var i = StructureBeats.Count - 1; i >= 0; i--)
         {
-            result = ContentDialogResult.Primary;
+            _outlineService.DeleteBeat(_storyModel, _problemModel, i);
         }
 
-        if (value == "Load Custom Beat Sheet from file...")
-        {
-            value = "Custom Beat Sheet";
-            StructureModelTitle = value;
-            LoadBeatSheet();
-        }
+        ApplyBeatSheet(value);
+    }
 
-        if (result == ContentDialogResult.Primary && !string.IsNullOrEmpty(value))
-        {
-            StructureModelTitle = value;
+    private void ApplyBeatSheet(string value)
+    {
+        SetProperty(ref _structureModelTitle, value);
 
+        if (BeatSheets.ContainsKey(value))
+        {
             var beatSheet = BeatSheets[value];
             StructureDescription = beatSheet.PlotPatternNotes;
 

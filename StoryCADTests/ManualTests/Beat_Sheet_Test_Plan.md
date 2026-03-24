@@ -812,7 +812,7 @@
 1. Note the current state of the beats list assignments.
    **Expected:** Assignments are visible.
 
-2. Collapse the navigation tree panel (if there is a collapse button or splitter).
+2. Collapse the navigation tree panel using the Hamburger menu button.
    **Expected:** The Structure tab content area expands to use the available space. Beat sheet content remains intact.
 
 3. Expand the navigation tree again.

@@ -227,9 +227,8 @@
                                     <ComboBox Grid.Row="1"
                               Grid.Column="0"
                               ItemsSource="{x:Bind BeatSheetsVm.PlotPatternNames}"
-                              SelectionChanged="{x:Bind BeatSheetsVm.UpdateSelectedBeat}"
                               PlaceholderText="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=OneWay}"
-                              SelectedValue="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=OneWay}"
+                              SelectedValue="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=TwoWay}"
                               Text="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=OneWay}"
                               MinWidth="240" />
                                     <!-- Row 1, Col 1 left empty; Expander chevron will sit at far right -->

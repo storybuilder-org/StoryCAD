@@ -915,7 +915,7 @@ public class OutlineService
             })
             .ToList();
         Model.Description = Description;
-        var data = JsonSerializer.Serialize(Model);
+        var data = JsonSerializer.Serialize(Model, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(Path, data);
     }
 

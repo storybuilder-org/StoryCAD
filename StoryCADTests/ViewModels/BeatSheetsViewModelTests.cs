@@ -79,47 +79,47 @@ public class BeatSheetsViewModelTests
     [TestMethod]
     public void CreateBeatCommand_ShouldAddNewBeat()
     {
-        // Arrange
-        _beatEditor.StructureModelTitle = "Save the Cat";
-        Assert.AreEqual(0, _beatEditor.StructureBeats.Count);
+        // Arrange — Save The Cat loads 15 template beats
+        _beatEditor.StructureModelTitle = "Save The Cat";
+        Assert.AreEqual(15, _beatEditor.StructureBeats.Count);
 
         // Act
         _beatEditor.CreateBeatCommand.Execute(null);
 
         // Assert
-        Assert.AreEqual(1, _beatEditor.StructureBeats.Count);
-        Assert.AreEqual("New Beat", _beatEditor.StructureBeats[0].Title);
-        Assert.AreEqual("Describe your beat here", _beatEditor.StructureBeats[0].Description);
+        Assert.AreEqual(16, _beatEditor.StructureBeats.Count);
+        Assert.AreEqual("New Beat", _beatEditor.StructureBeats[15].Title);
+        Assert.AreEqual("Describe your beat here", _beatEditor.StructureBeats[15].Description);
     }
 
     [TestMethod]
     public void CreateBeatCommand_MultipleCalls_ShouldAddMultipleBeats()
     {
-        _beatEditor.StructureModelTitle = "Save the Cat";
+        _beatEditor.StructureModelTitle = "Save The Cat";
         _beatEditor.CreateBeatCommand.Execute(null);
         _beatEditor.CreateBeatCommand.Execute(null);
 
-        Assert.AreEqual(2, _beatEditor.StructureBeats.Count);
+        Assert.AreEqual(17, _beatEditor.StructureBeats.Count);
     }
 
     [TestMethod]
     public void CreateBeatCommand_WithBeatSelected_InsertsAfterSelection()
     {
-        // Arrange — load beats, select the first one
-        _beatEditor.StructureModelTitle = "Save the Cat";
-        _beatEditor.StructureBeats.Add(CreateTestBeat("Beat 1"));
-        _beatEditor.StructureBeats.Add(CreateTestBeat("Beat 2"));
+        // Arrange — Save The Cat loads 15 template beats; select the first one
+        _beatEditor.StructureModelTitle = "Save The Cat";
+        var firstBeatTitle = _beatEditor.StructureBeats[0].Title;
+        var secondBeatTitle = _beatEditor.StructureBeats[1].Title;
         _beatEditor.SelectedBeat = _beatEditor.StructureBeats[0];
         _beatEditor.SelectedBeatIndex = 0;
 
         // Act
         _beatEditor.CreateBeatCommand.Execute(null);
 
-        // Assert — new beat inserted after Beat 1, before Beat 2
-        Assert.AreEqual(3, _beatEditor.StructureBeats.Count);
-        Assert.AreEqual("Beat 1", _beatEditor.StructureBeats[0].Title);
+        // Assert — new beat inserted after first template beat
+        Assert.AreEqual(16, _beatEditor.StructureBeats.Count);
+        Assert.AreEqual(firstBeatTitle, _beatEditor.StructureBeats[0].Title);
         Assert.AreEqual("New Beat", _beatEditor.StructureBeats[1].Title);
-        Assert.AreEqual("Beat 2", _beatEditor.StructureBeats[2].Title);
+        Assert.AreEqual(secondBeatTitle, _beatEditor.StructureBeats[2].Title);
         Assert.AreEqual(_beatEditor.StructureBeats[1], _beatEditor.SelectedBeat);
     }
 
@@ -127,30 +127,30 @@ public class BeatSheetsViewModelTests
     public void DeleteBeatCommand_WithNoSelection_DoesNotRemove()
     {
         _beatEditor.LoadBeats(_problemModel, _storyModel);
-        _beatEditor.StructureModelTitle = "Save the Cat";
+        _beatEditor.StructureModelTitle = "Save The Cat";
         _beatEditor.CreateBeatCommand.Execute(null);
-        Assert.AreEqual(1, _beatEditor.StructureBeats.Count);
+        Assert.AreEqual(16, _beatEditor.StructureBeats.Count);
 
         // No selection
         _beatEditor.SelectedBeat = null;
         _beatEditor.DeleteBeatCommand.Execute(null);
 
-        Assert.AreEqual(1, _beatEditor.StructureBeats.Count);
+        Assert.AreEqual(16, _beatEditor.StructureBeats.Count);
     }
 
     [TestMethod]
     public void DeleteBeatCommand_WithSelection_RemovesBeat()
     {
         _beatEditor.LoadBeats(_problemModel, _storyModel);
-        _beatEditor.StructureModelTitle = "Save the Cat";
+        _beatEditor.StructureModelTitle = "Save The Cat";
         _beatEditor.CreateBeatCommand.Execute(null);
-        Assert.AreEqual(1, _beatEditor.StructureBeats.Count);
+        Assert.AreEqual(16, _beatEditor.StructureBeats.Count);
 
         _beatEditor.SelectedBeat = _beatEditor.StructureBeats[0];
         _beatEditor.SelectedBeatIndex = 0;
         _beatEditor.DeleteBeatCommand.Execute(null);
 
-        Assert.AreEqual(0, _beatEditor.StructureBeats.Count);
+        Assert.AreEqual(15, _beatEditor.StructureBeats.Count);
     }
 
     #endregion
@@ -306,12 +306,12 @@ public class BeatSheetsViewModelTests
     [TestMethod]
     public void LoadBeats_ShouldSetStructureModelTitle()
     {
-        _problemModel.StructureTitle = "Save the Cat";
+        _problemModel.StructureTitle = "Save The Cat";
         _problemModel.StructureBeats = new ObservableCollection<StructureBeat>();
 
         _beatEditor.LoadBeats(_problemModel, _storyModel);
 
-        Assert.AreEqual("Save the Cat", _beatEditor.StructureModelTitle);
+        Assert.AreEqual("Save The Cat", _beatEditor.StructureModelTitle);
     }
 
     [TestMethod]
@@ -535,7 +535,7 @@ public class BeatSheetsViewModelTests
         _beatEditor.LoadBeats(_problemModel, _storyModel);
         _dirtyNotified = false;
 
-        _beatEditor.StructureModelTitle = "New Title";
+        _beatEditor.StructureModelTitle = "Save The Cat";
 
         Assert.IsTrue(_dirtyNotified);
     }
