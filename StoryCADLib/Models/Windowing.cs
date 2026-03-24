@@ -3,6 +3,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Dispatching;
 using System.Runtime.InteropServices;
+using StoryCADLib.DAL;
+using StoryCADLib.Services;
 using StoryCADLib.Services.Messages;
 using Windows.Storage.Pickers;
 using Windows.UI;
@@ -284,11 +286,20 @@ public class Windowing : ObservableRecipient
 				return null;
 			}
 
-			logger.Log(LogLevel.Info, $"Picked folder {file.Path}");
+			logger.Log(LogLevel.Info, $"Picked file {file.Path}");
 
             #if !HAS_UNO
                 logger.Log(LogLevel.Info, $"Picked file attributes {file.Attributes}");
             #endif
+
+			// Save a security-scoped bookmark so the sandbox grant persists across restarts
+			if (OperatingSystem.IsMacOS())
+			{
+				var prefs = Ioc.Default.GetRequiredService<PreferenceService>();
+				MacSecurityBookmarks.SaveBookmark(file.Path, prefs.Model.SecurityBookmarks, logger);
+				await new PreferencesIo().WritePreferences(prefs.Model);
+			}
+
 			return file;
 		}
 	    catch (Exception e)
@@ -380,6 +391,15 @@ public class Windowing : ObservableRecipient
             #if !HAS_UNO
                 logger.Log(LogLevel.Info, $"Picked folder attributes {folder.Attributes}");
             #endif
+
+			// Save a security-scoped bookmark so the sandbox grant persists across restarts
+			if (OperatingSystem.IsMacOS())
+			{
+				var prefs = Ioc.Default.GetRequiredService<PreferenceService>();
+				MacSecurityBookmarks.SaveBookmark(folder.Path, prefs.Model.SecurityBookmarks, logger);
+				await new PreferencesIo().WritePreferences(prefs.Model);
+			}
+
 			return folder;
 	    }
 	    catch (Exception e)

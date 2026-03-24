@@ -34,10 +34,21 @@ public class InitVM : ObservableRecipient
     {
         preference = preferenceService;
         _backendService = backendService;
-        ProjectDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryCAD",
-            "Projects");
-        BackupDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryCAD",
-            "Backups");
+
+        if (OperatingSystem.IsMacOS())
+        {
+            // On macOS, paths must be selected via the folder picker
+            // to grant the sandboxed app permission to write there.
+            ProjectDir = string.Empty;
+            BackupDir = string.Empty;
+        }
+        else
+        {
+            ProjectDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryCAD",
+                "Projects");
+            BackupDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryCAD",
+                "Backups");
+        }
 
         PropertyChanged += OnPropertyChanged;
     }
@@ -80,6 +91,9 @@ public class InitVM : ObservableRecipient
         //Save paths
         Preferences.ProjectDirectory = ProjectDir;
         Preferences.BackupDirectory = BackupDir;
+
+        // Preserve any security bookmarks saved during folder picker usage
+        Preferences.SecurityBookmarks = preference.Model.SecurityBookmarks;
 
         //Make sure prefs init page isn't shown again
         Preferences.PreferencesInitialized = true;
