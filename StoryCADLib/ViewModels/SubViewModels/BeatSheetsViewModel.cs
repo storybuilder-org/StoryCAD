@@ -357,22 +357,6 @@ public class BeatSheetsViewModel : ObservableObject
 
         var desiredBind = SelectedListElement.Uuid;
 
-        if (desiredBind == _problemModel.Uuid)
-        {
-            WeakReferenceMessenger.Default.Send(
-                new StatusChangedMessage(new StatusMessage("Cannot assign a problem as a beat on itself", LogLevel.Warn)));
-            return;
-        }
-
-        // Cannot assign the Story Problem to any beat
-        var overview = _storyModel.StoryElements.OfType<OverviewModel>().FirstOrDefault();
-        if (overview != null && desiredBind == overview.StoryProblem)
-        {
-            WeakReferenceMessenger.Default.Send(
-                new StatusChangedMessage(new StatusMessage("Cannot assign the Story Problem to a beat", LogLevel.Warn)));
-            return;
-        }
-
         try
         {
             // If assigning a problem, check if it's already bound elsewhere and confirm
@@ -400,6 +384,11 @@ public class BeatSheetsViewModel : ObservableObject
             _outlineService.AssignElementToBeat(_storyModel, _problemModel, SelectedBeatIndex, desiredBind);
             SelectedBeat = null;
             SelectedBeatIndex = -1;
+        }
+        catch (InvalidOperationException ex)
+        {
+            WeakReferenceMessenger.Default.Send(
+                new StatusChangedMessage(new StatusMessage(ex.Message, LogLevel.Warn)));
         }
         catch (Exception ex)
         {
