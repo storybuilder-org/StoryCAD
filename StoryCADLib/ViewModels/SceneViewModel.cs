@@ -531,7 +531,7 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
             IsTextBoxFocused = true;
         }
 
-        Description = Model.SceneDescription;
+        Description = Model.Description;
         Date = Model.Date;
         Time = Model.Time;
         Setting = Model.Setting;
@@ -574,7 +574,7 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
         Outcome = Model.Outcome;
         Emotion = Model.Emotion;
         NewGoal = Model.NewGoal;
-        Description = Model.SceneDescription;
+        Description = Model.Description;
         Events = Model.Events;
         Consequences = Model.Consequences;
         Significance = Model.Significance;
@@ -649,7 +649,8 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
         // Story.Uuid is read-only and cannot be assigned
         Model.Name = Name;
         IsTextBoxFocused = false;
-        Model.SceneDescription = Description;
+        Model.Description = Description;
+        Model.SceneDescription = Description; // Backward compatibility with older versions
         Model.ViewpointCharacter = ViewpointCharacter;
         Model.Date = Date;
         Model.Time = Time;
@@ -683,7 +684,8 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
         Model.NewGoal = NewGoal;
 
         // Write RTF files
-        Model.SceneDescription = Description;
+        Model.Description = Description;
+        Model.SceneDescription = Description; // Backward compatibility with older versions
         Model.Events = Events;
         Model.Consequences = Consequences;
         Model.Significance = Significance;

@@ -311,29 +311,42 @@ public class OutlineViewModel : ObservableRecipient
     {
         logger.Log(LogLevel.Info, "Opening File Menu");
 
-        var fileOpenVM = Ioc.Default.GetRequiredService<FileOpenVM>();
-        shellVm._contentDialog = new ContentDialog
+        try
         {
-            Content = new FileOpenMenuPage(),
-            PrimaryButtonText = fileOpenVM.ConfirmButtonText,
-            CloseButtonText = "Close",
-            BorderThickness = new Thickness(0)
-        };
-        shellVm._contentDialog.PrimaryButtonClick += (_, _) => fileOpenVM.ConfirmClicked();
-        fileOpenVM.PropertyChanged += (_, args) =>
-        {
-            if (args.PropertyName == nameof(FileOpenVM.ConfirmButtonText))
-                shellVm._contentDialog.PrimaryButtonText = fileOpenVM.ConfirmButtonText;
-        };
-        if (window.RequestedTheme == ElementTheme.Light)
-        {
-            shellVm._contentDialog.RequestedTheme = window.RequestedTheme;
-            shellVm._contentDialog.Background = new SolidColorBrush(Colors.LightGray);
-        }
+            var fileOpenVM = Ioc.Default.GetRequiredService<FileOpenVM>();
+            shellVm._contentDialog = new ContentDialog
+            {
+                Content = new FileOpenMenuPage(),
+                PrimaryButtonText = fileOpenVM.ConfirmButtonText,
+                CloseButtonText = "Close",
+                BorderThickness = new Thickness(0)
+            };
+            shellVm._contentDialog.PrimaryButtonClick += (_, _) => fileOpenVM.ConfirmClicked();
+            fileOpenVM.PropertyChanged += (_, args) =>
+            {
+                if (args.PropertyName == nameof(FileOpenVM.ConfirmButtonText))
+                    shellVm._contentDialog.PrimaryButtonText = fileOpenVM.ConfirmButtonText;
+            };
+            if (window.RequestedTheme == ElementTheme.Light)
+            {
+                shellVm._contentDialog.RequestedTheme = window.RequestedTheme;
+                shellVm._contentDialog.Background = new SolidColorBrush(Colors.LightGray);
+            }
 
-        logger.Log(LogLevel.Info, "Showing File Menu");
-        await window.ShowContentDialog(shellVm._contentDialog);
-        logger.Log(LogLevel.Info, "Closed File Menu");
+            logger.Log(LogLevel.Info, "Showing File Menu");
+            await window.ShowContentDialog(shellVm._contentDialog);
+            logger.Log(LogLevel.Info, "Closed File Menu");
+        }
+        catch (Exception ex)
+        {
+            logger.Log(LogLevel.Error, $"OpenFileOpenMenu failed: {ex}");
+            await window.ShowContentDialog(new ContentDialog
+            {
+                Title = "Error",
+                Content = $"Failed to open the file menu: {ex.Message}",
+                PrimaryButtonText = "OK"
+            }, true);
+        }
     }
 
     /// <summary>

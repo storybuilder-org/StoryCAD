@@ -6,45 +6,112 @@ nav_order: 41
 parent: Problem Form
 has_toc: false
 ---
-### Structure Tab
-Structure Tab
 
-The Problem Form’s Structure tab lets you manage your story's plot by associating a beat sheet with your problem and match the beats in the beats sheet to Scene or Problem story elements. A beat sheet is a list of the key emotional and plot points of a story. It breaks the story into "beats": pivotal moments or events that drive the narrative forward. StoryCAD lets you choose from popular beat sheets. It will also allow you to create your own beat sheet. 
+## Structure Tab
 
-Your story can (and usually will) have more than one problem, each with its own structure tab. But only one of these problems is the story problem, which is identified on the  story overview It’s the spine of your story; when it’s resolved, your story is over. It's 
+The Problem form's Structure tab helps you organize your story's plot using **beat sheets** -- structured templates that break a story into key moments called "beats." Each beat represents a pivotal moment or event that drives your narrative forward.
 
-Plot is the sequence of events that make up your story. These events unfold in scenes, so the plot is a scene list. But where do your scenes come from, and how are they connected to each other? Beat sheets answer these questions.
+You assign scenes and sub-problems to beats, building a structural map of how your story unfolds.
 
-A problem consists of a character's goal, motivation, and conflict. The goal is what your character wants; the motivation is why they want it, and the conflict is what they’ll have to overcome to achieve the goal. Your characters' efforts to resolve their problems are the events you describe in Scenes, and this tab is how you relate a Scene to this Problem by assigning it to beats. 
+### Why Beat Sheets Matter
 
+Plot is the sequence of events that make up your story. Those events unfold in scenes, but where do your scenes come from, and how do they connect to each other? Beat sheets answer these questions.
 
+A problem consists of a character's goal, motivation, and conflict. Your characters' efforts to resolve their problems are the events you describe in scenes. The Structure tab is where you relate those scenes (and sub-problems) to the beats in a beat sheet, giving your plot a deliberate shape.
 
-but only one of your Problem story elements is the Story Problem. You identify the Story Problem by selecting one of your  Problem pages on the Story Overview Form's Premise tab. You can 
+### The Story Problem
 
+Your outline can contain many problems -- complications, subplots, sequences -- but only one is the **Story Problem**. You identify the Story Problem on the Story Overview form's Premise tab. It is the spine of your story; when it is resolved, your story is over.
 
+We recommend starting with the Story Problem's Structure tab before working on sub-problems.
 
-Your story can (and usually will) have more than one Problem,  but only one of your Problem story elements is the Story Problem. It’s the spine of your story; when it’s resolved, your story is over. Select one of your  Problem pages from the drop-down list as the ‘Story Problem’ (here, ‘Hamlet wants to avenge his father’s murder’.)
+### Choosing a Beat Sheet
 
-A story usually contains multiple problems. The structure tab accounts for this by allowing you to attach another problem
+![](../media/StructureTab.png)
 
-Story structure starts with the Story Problem defined in the Story Overview form, and whose Premise summarizes the entire story. Your outline can contain other Problem story elements, which are complications, subplots, and sequences. Problem story elements are plotted as a set of Scene story elements that ultimately describe them. At that level, every scene, with its conflict or value exchange, also presents a problem to be solved. Finding your story problem, and building great scenes, are discussed elsewhere. Developing the middle structure of your story is what the Problem Structure tab is about. By putting a beat sheet on each problem story element, StoryCAD helps you to use them to structure your story. We recommend using simplified (‘mini’) beat sheets for subproblems, where a more complicated beat sheet can work well with the story problem (identified in the Story Overview.)
+Open the Structure tab on any Problem element and select a beat sheet from the dropdown. StoryCAD includes several popular templates:
 
-To use the Structure Tab, select a beat sheet for your problem using the Structure dropdown. We recommend starting at the top, with the story problem which you identified for your Story Overview. 
+- **Save the Cat** (15 beats)
+- **Hero's Journey**
+- **Seven Point Story Structure**
+- And others
 
-![](../media/Image1.png)
+When you select a template, its beats load into the left list. Each beat has a title and a description explaining what that moment in the story should accomplish.
 
-Here’s how you tie your plot-related story elements (scenes and problems) together: Pick a beat you want to identify, and click on Show Problems/Scenes to display a list of your outline’s problems and scenes. Select the problem or scene, and drag it to the beat’s drop area, the box which reads ‘No element Selected’:
-![](../media/Image1-1.png)
- Repeat this process to fill in as much of the beat sheet as you like.
+**Tip:** Use a full-featured beat sheet (like Save the Cat) for your Story Problem. For sub-problems, simpler beat sheets work better -- think of them as "mini" beat sheets that keep subplots focused without overcomplicating the structure.
 
-Here are a few things to keep in mind:
+### Assigning Elements to Beats
 
-You can assign either sub-problems or scenes to a beat, and a beat sheet can contain a mixture of the two. Ultimately, you’re going to have to draft your story from the scenes in your outline, so when you’re assigning a sub-problem, you’re making a promise to yourself to plot that problem into scenes as well. You can use that problem’s Structure tab to do so. [NOTE: a discussion of the not-yet-written report goes here. The report should integrate the problems’ beat assignments.]
+The Structure tab has two lists side by side:
 
-A scene can belong to more than one beat. This makes sense since a scene can and should accomplish more than one thing (refer to Purpose of Scene on the Scene form’s Development tab.). It is also possible to assign a scene to more than one problem, tying them together. However, you can only use a subproblem once, in one (parent) problem. 
+- **Left list (Beats):** The beats from your chosen beat sheet.
+- **Right list (Elements):** Your outline's scenes or problems, toggled by the Scene/Problem radio buttons above the list.
 
-Not all beats in a beat sheet need to be used. However, when you’re reviewing your outline, you may find that a plot hole corresponds to a beat you haven’t used. Beat sheets help solve other plotting issues as well, such as lack of structure, pacing issues, weak character arcs, subplot integration, and weak endings. 
+To assign an element to a beat:
 
-Remember that a beat sheet is a pattern for your plotting, and once you pick it, you’re freezing an aspect of your story structure. This is especially important when dealing with subplot integration.
+1. Select a beat in the left list.
+2. Use the radio buttons to show either scenes or problems in the right list.
+3. Select the element you want to assign.
+4. Click the **Assign** button (left chevron) between the two lists.
 
-Additionally, selecting the reports menu option to generate a report for “Story Problem Structure” will create a report of all beats of the Story Problem specified within the Overview element and all attached problems to the beats within that element recursively. If your story does not a have a story problem set, this report will be blank.
+The beat now shows the assigned element's name and icon. To remove an assignment, select the beat and click the **Unassign** button (right chevron).
+
+**Comparing descriptions:** The bottom of the tab shows two description panels side by side. The left panel displays the selected beat's description (what this moment in the story needs). The right panel displays the selected element's description (what the scene or problem contains). Compare the two to decide whether the assignment makes sense.
+
+### Button Reference
+
+Seven buttons sit between the two lists. Each button displays a tooltip when you hover over it:
+
+| Button | Icon | What it does |
+|--------|------|--------------|
+| Assign | Left chevron | Assign the selected element to the selected beat |
+| Unassign | Right chevron | Remove the assignment from the selected beat |
+| Add | Plus sign | Add a new beat to the beat sheet |
+| Delete | Trash can | Delete the selected beat (asks for confirmation) |
+| Move Up | Up arrow | Move the selected beat up in the list |
+| Move Down | Down arrow | Move the selected beat down in the list |
+| Save | Floppy disk | Save the current beat sheet to a file for reuse |
+
+### Editing Beats
+
+Every beat sheet is an editable starting point. When you load Save the Cat, you get its 15 standard beats, but you can reshape the template to fit your story:
+
+- **Add** new beats to fill gaps the template does not cover.
+- **Delete** beats that do not apply to your story. A confirmation dialog appears to prevent accidental loss.
+- **Rename** beats by editing their title and description directly.
+- **Reorder** beats using the Move Up and Move Down buttons to match your story's flow.
+- **Save** your modified beat sheet to a file so you can reuse it on other projects.
+
+The original template is never modified. Selecting Save the Cat from the dropdown again restores the original beats -- but be aware that reloading a template clears all your existing beat assignments for that problem.
+
+### Beat Sheet Rules
+
+Keep these guidelines in mind as you work:
+
+- **Scenes can appear in multiple beats.** A scene can and should accomplish more than one thing (see the Purpose of Scene on the Scene form's Development tab). You can also assign a scene to beats on different problems, tying those problems together.
+
+- **Sub-problems can only appear once.** You can assign a sub-problem to one beat in one parent problem. When you assign a sub-problem, you are making a promise to yourself to plot that problem into scenes as well, using its own Structure tab.
+
+- **Not every beat needs to be filled.** When reviewing your outline, you may find that a plot hole corresponds to a beat you left empty. Beat sheets also help diagnose other plotting issues: lack of structure, pacing problems, weak character arcs, subplot integration, and weak endings.
+
+- **A beat sheet is a pattern, not a cage.** Once you choose a beat sheet, you are shaping an aspect of your story's structure. Edit the beats freely to make the template serve your story rather than the other way around.
+
+### Reports
+
+The Generate Reports dialog includes a **Story Problem Structure** checkbox. When selected, it produces three reports:
+
+- **Recursive Structure Report:** Walks through the Story Problem's beat sheet, then recurses into every sub-problem's beat sheet, showing the full hierarchy of your plot.
+
+- **Plot Structure Diagram:** A problems-only tree showing how sub-problems connect through beat sheets, starting from the Story Problem. Scenes are excluded -- this is purely the structural skeleton of your plot. Use it to see the big picture of how subplots and complications relate to the main story.
+
+- **Unassigned Elements:** Lists problems and scenes that are not assigned to any beat sheet. Use this to find "orphan" story elements that may have been forgotten or need to be integrated into your plot structure.
+
+If you have not set a Story Problem on the Story Overview form, these reports will be blank.
+
+### Tips
+
+- **Start at the top.** Work on the Story Problem's beat sheet first, then drill into sub-problems.
+- **Use the descriptions.** Read the beat description and the element description side by side before assigning. If they do not match well, that is useful information about your story.
+- **Save custom beat sheets.** If you modify a template in a way you like, save it. You will thank yourself on the next project.
+- **Review empty beats.** An empty beat is not necessarily a problem, but it is worth asking why. The answer might reveal a gap in your story -- or confirm that your story genuinely does not need that beat.
+- **Check the Unassigned Elements report.** After building out your beat sheets, run this report to catch any scenes or problems that slipped through the cracks.

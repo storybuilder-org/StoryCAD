@@ -678,35 +678,93 @@ public class OutlineService
             throw new ArgumentNullException(nameof(DesiredBind));
         }
 
-        //Get desired bind
-        StoryElement DesiredBindElement;
-        Model.StoryElements.StoryElementGuids.TryGetValue(DesiredBind, out DesiredBindElement);
-        Parent.StructureBeats[Index].Guid = DesiredBind;
+        //Check Index is valid
+        if (Index < 0 || Index >= Parent.StructureBeats.Count)
+        {
+            throw new InvalidOperationException("Index is out of bounds.");
+        }
 
-        //Check element really exists.
-        if (DesiredBindElement == null)
+        //Get desired bind element
+        if (!Model.StoryElements.StoryElementGuids.TryGetValue(DesiredBind, out var DesiredBindElement))
         {
             throw new NullReferenceException($"GUID: {DesiredBind} does not exist within StoryModel");
         }
 
-        //Check we are binding the correct element
+        //Check we are binding the correct element type
         if (DesiredBindElement.ElementType != StoryItemType.Problem &&
             DesiredBindElement.ElementType != StoryItemType.Scene)
         {
             throw new InvalidOperationException("You can only bind Scene or Problem Elements.");
         }
 
-        //Check Index is valid
-        if (Index >= 0 && Parent.StructureBeats.Count - 1 >= Index)
+        //For Problems, enforce one-parent rule and manage BoundStructure
+        if (DesiredBindElement.ElementType == StoryItemType.Problem)
         {
-            //Bind
-            Parent.StructureBeats[Index].Guid = DesiredBind;
+            var problem = (ProblemModel)DesiredBindElement;
+
+            //Cannot assign a problem to itself
+            if (problem.Uuid == Parent.Uuid)
+            {
+                throw new InvalidOperationException("Cannot assign a Problem as a beat on itself.");
+            }
+
+            //Cannot assign the Story Problem to any beat
+            var overview = Model.StoryElements.OfType<OverviewModel>().FirstOrDefault();
+            if (overview != null && problem.Uuid == overview.StoryProblem)
+            {
+                throw new InvalidOperationException("Cannot assign the Story Problem to a beat.");
+            }
+
+            //Clear old beat if problem is already assigned elsewhere or on a different beat in the same sheet
+            if (problem.BoundStructure != Guid.Empty)
+            {
+                ProblemModel oldProblem = null;
+                if (problem.BoundStructure == Parent.Uuid)
+                {
+                    oldProblem = Parent;
+                }
+                else if (Model.StoryElements.StoryElementGuids.TryGetValue(problem.BoundStructure, out var oldParent) &&
+                         oldParent is ProblemModel op)
+                {
+                    oldProblem = op;
+                }
+
+                if (oldProblem != null)
+                {
+                    var oldBeat = oldProblem.StructureBeats.FirstOrDefault(b => b.Guid == problem.Uuid);
+                    if (oldBeat != null)
+                        oldBeat.Guid = Guid.Empty;
+                }
+            }
+
+            //Set BoundStructure reverse pointer
+            problem.BoundStructure = Parent.Uuid;
         }
-        else
+
+        //Bind
+        Parent.StructureBeats[Index].Guid = DesiredBind;
+    }
+
+    /// <summary>
+    ///     Checks if a Problem is already assigned as a beat elsewhere.
+    ///     Returns the containing ProblemModel if so, null if not.
+    /// </summary>
+    internal ProblemModel GetExistingBeatAssignment(ProblemModel problem)
+    {
+        if (problem.BoundStructure == Guid.Empty)
+            return null;
+
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        if (appState.CurrentDocument == null)
+            return null;
+
+        if (appState.CurrentDocument.Model.StoryElements.StoryElementGuids.TryGetValue(problem.BoundStructure, out var element) &&
+            element is ProblemModel containingProblem)
         {
-            // out of bounds
-            throw new InvalidOperationException("Index is out of bounds.");
+            return containingProblem;
         }
+
+        return null;
     }
 
     /// <summary>
@@ -728,18 +786,23 @@ public class OutlineService
             throw new ArgumentNullException(nameof(Parent));
         }
 
-
         //Check Index is valid
-        if (Index >= 0 && Parent.StructureBeats.Count - 1 >= Index)
+        if (Index < 0 || Index >= Parent.StructureBeats.Count)
         {
-            //unbind
-            Parent.StructureBeats[Index].Guid = Guid.Empty;
-        }
-        else
-        {
-            // out of bounds
             throw new InvalidOperationException("Index is out of bounds.");
         }
+
+        //Clear BoundStructure on Problem elements
+        var beatGuid = Parent.StructureBeats[Index].Guid;
+        if (beatGuid != Guid.Empty &&
+            Model.StoryElements.StoryElementGuids.TryGetValue(beatGuid, out var element) &&
+            element is ProblemModel problem)
+        {
+            problem.BoundStructure = Guid.Empty;
+        }
+
+        //unbind
+        Parent.StructureBeats[Index].Guid = Guid.Empty;
     }
 
     /// <summary>
@@ -757,7 +820,7 @@ public class OutlineService
         }
 
         //Create and add beat.
-        Parent.StructureBeats.Add(new StructureBeatViewModel(Title, Description));
+        Parent.StructureBeats.Add(new StructureBeat(Title, Description));
     }
 
     /// <summary>
@@ -825,7 +888,7 @@ public class OutlineService
     /// </param>
     /// <param name="Beats">Beats that this sheet will contain, can be added later.</param>
     public void SetBeatSheet(StoryModel Model, ProblemModel Parent, string Description,
-        string Title = "Custom Beat Sheet", ObservableCollection<StructureBeatViewModel> Beats = null)
+        string Title, ObservableCollection<StructureBeat> Beats = null)
     {
         Parent.StructureTitle = Title;
         Parent.StructureDescription = Description;
@@ -837,7 +900,7 @@ public class OutlineService
         }
 
         //Create/Add beats.
-        Parent.StructureBeats = Beats ?? new ObservableCollection<StructureBeatViewModel>();
+        Parent.StructureBeats = Beats ?? new ObservableCollection<StructureBeat>();
     }
 
     /// <summary>
@@ -846,18 +909,18 @@ public class OutlineService
     /// <param name="Path">File path to save to</param>
     /// <param name="Description"> Beatsheet Description</param>
     /// <param name="Beats">Beats</param>
-    internal void SaveBeatsheet(string Path, string Description, List<StructureBeatViewModel> Beats)
+    internal void SaveBeatsheet(string Path, string Description, List<StructureBeat> Beats)
     {
         SavedBeatsheet Model = new();
         Model.Beats = Beats = Beats
             .Select(b =>
             {
-                var copy = new StructureBeatViewModel(b.Title, b.Description);
+                var copy = new StructureBeat(b.Title, b.Description);
                 return copy;
             })
             .ToList();
         Model.Description = Description;
-        var data = JsonSerializer.Serialize(Model);
+        var data = JsonSerializer.Serialize(Model, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(Path, data);
     }
 

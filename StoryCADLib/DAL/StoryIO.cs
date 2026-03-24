@@ -144,6 +144,15 @@ public class StoryIO
                 }
             }
 
+            // Migrate SceneDescription to base Description for scenes (Issue #1358)
+            foreach (var scene in _model.StoryElements.OfType<SceneModel>())
+            {
+                if (string.IsNullOrEmpty(scene.Description) && !string.IsNullOrEmpty(scene.SceneDescription))
+                {
+                    scene.Description = scene.SceneDescription;
+                }
+            }
+
             // Re-attach collection change handlers (they're not serialized)
             _model.ReattachCollectionHandlers();
 
@@ -335,6 +344,38 @@ public class StoryIO
         if (!File.Exists(filePath))
         {
             return false;
+        }
+
+        // On macOS, check for sandbox permission denial before the general availability check.
+        // The sandbox reports File.Exists=true but denies reads for paths not granted via
+        // the folder picker in the current session.
+        if (OperatingSystem.IsMacOS())
+        {
+            try
+            {
+                using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                fs.ReadByte();
+                // Sandbox read succeeded — file is accessible, skip the general availability check
+                return true;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                _logService.Log(LogLevel.Warn,
+                    $"Sandbox denied access to {filePath}. User needs to re-select the folder.");
+                await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new ContentDialog
+                {
+                    Title = "Permission required",
+                    Content = "StoryCAD does not have permission to access this file.\n\n" +
+                              "Please open the file using File > Open, or update your project " +
+                              "folder in Preferences to re-grant access.",
+                    PrimaryButtonText = "OK"
+                }, true);
+                return false;
+            }
+            catch (IOException)
+            {
+                // Fall through to general availability check
+            }
         }
 
         // Check if file is available using cross-platform helper

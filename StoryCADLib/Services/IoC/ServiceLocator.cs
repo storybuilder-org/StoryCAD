@@ -6,6 +6,7 @@ using StoryCADLib.Services.Backend;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator;
 using StoryCADLib.Services.Dialogs;
+using StoryCADLib.Services.MacMenuBar;
 using StoryCADLib.Services.Navigation;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.Services.Ratings;
@@ -129,7 +130,7 @@ public static class BootStrapper
         Services.AddSingleton<KeyQuestionsViewModel>();
         Services.AddSingleton<TopicsViewModel>();
         Services.AddSingleton<MasterPlotsViewModel>();
-        Services.AddSingleton<BeatSheetsViewModel>();
+
         Services.AddSingleton<StockScenesViewModel>();
         Services.AddSingleton<DramaticSituationsViewModel>();
         Services.AddSingleton<SaveAsViewModel>();
@@ -137,5 +138,6 @@ public static class BootStrapper
         Services.AddSingleton<FlawViewModel>();
         Services.AddSingleton<TraitsViewModel>();
         Services.AddSingleton<OutlineService>();
+        Services.AddSingleton<MacMenuBarService>();
     }
 }

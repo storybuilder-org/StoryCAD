@@ -277,7 +277,7 @@ public class SceneViewModelTests
 
         // Set specific values to verify loading
         sceneModel.Name = "Test Scene Name";
-        sceneModel.SceneDescription = "Test Scene Description";
+        sceneModel.Description = "Test Scene Description";
         sceneModel.Date = "2025-01-15";
         sceneModel.Time = "Morning";
         sceneModel.SceneType = "Action";
@@ -320,7 +320,7 @@ public class SceneViewModelTests
 
         // Verify initial state
         var originalName = _sceneModel.Name;
-        var originalDescription = _sceneModel.SceneDescription;
+        var originalDescription = _sceneModel.Description;
         var originalDate = _sceneModel.Date;
 
         // Act - Modify properties in ViewModel
@@ -337,7 +337,8 @@ public class SceneViewModelTests
 
         // Assert - Verify SceneModel was updated
         Assert.AreEqual("Modified Scene Name", _sceneModel.Name, "Name should be updated");
-        Assert.AreEqual("Modified description", _sceneModel.SceneDescription, "Description should be updated");
+        Assert.AreEqual("Modified description", _sceneModel.Description, "Base Description should be updated");
+        Assert.AreEqual("Modified description", _sceneModel.SceneDescription, "SceneDescription should be updated for backward compatibility");
         Assert.AreEqual("2025-10-04", _sceneModel.Date, "Date should be updated");
         Assert.AreEqual("Evening", _sceneModel.Time, "Time should be updated");
         Assert.AreEqual("Dialogue", _sceneModel.SceneType, "SceneType should be updated");
@@ -360,6 +361,149 @@ public class SceneViewModelTests
 
         // Assert - Verify changes were saved to model
         Assert.AreEqual(modifiedName, _sceneModel.Name, "Deactivate should save Name changes");
+    }
+
+    #endregion
+
+    #region Issue #1358: SceneDescription Migration Tests
+
+    [TestMethod]
+    public void LoadModel_LegacyFile_SceneDescriptionOnly_LoadsCorrectly()
+    {
+        // Arrange — simulate a pre-fix file: SceneDescription has data, base Description is empty
+        _sceneModel.SceneDescription = "Legacy scene text";
+        _sceneModel.Description = string.Empty;
+
+        // Act
+        _viewModel.Activate(_sceneModel);
+
+        // Assert — ViewModel should load from base Description, which is empty.
+        // The StoryIO migration is responsible for copying SceneDescription to Description
+        // before the ViewModel ever sees it. This test confirms the ViewModel reads Description.
+        Assert.AreEqual(string.Empty, _viewModel.Description,
+            "ViewModel reads base Description, not SceneDescription — StoryIO migration handles legacy files");
+    }
+
+    [TestMethod]
+    public void LoadModel_PostFixFile_BaseDescriptionPopulated_LoadsCorrectly()
+    {
+        // Arrange — post-fix file: base Description has data
+        _sceneModel.Description = "Post-fix scene text";
+        _sceneModel.SceneDescription = "Post-fix scene text";
+
+        // Act
+        _viewModel.Activate(_sceneModel);
+
+        // Assert
+        Assert.AreEqual("Post-fix scene text", _viewModel.Description);
+    }
+
+    [TestMethod]
+    public void SaveModel_WithoutUserChanges_PopulatesBothFields()
+    {
+        // Arrange — load a scene with description
+        _sceneModel.Description = "Original text";
+        _sceneModel.SceneDescription = string.Empty;
+        _viewModel.Activate(_sceneModel);
+
+        // Act — save immediately without editing
+        _viewModel.SaveModel();
+
+        // Assert — both fields should have the same value
+        Assert.AreEqual("Original text", _sceneModel.Description,
+            "Base Description should be preserved");
+        Assert.AreEqual("Original text", _sceneModel.SceneDescription,
+            "SceneDescription should be synced for backward compatibility");
+    }
+
+    [TestMethod]
+    public void SaveModel_WithUserChanges_PopulatesBothFields()
+    {
+        // Arrange
+        _sceneModel.Description = "Original text";
+        _viewModel.Activate(_sceneModel);
+
+        // Act — user edits, then save
+        _viewModel.Description = "User edited text";
+        _viewModel.SaveModel();
+
+        // Assert — both fields should have the new value
+        Assert.AreEqual("User edited text", _sceneModel.Description,
+            "Base Description should have new text");
+        Assert.AreEqual("User edited text", _sceneModel.SceneDescription,
+            "SceneDescription should have new text for backward compatibility");
+    }
+
+    [TestMethod]
+    public void RoundTrip_LoadSaveLoad_PreservesDescription()
+    {
+        // Arrange — start with data in base Description
+        _sceneModel.Description = "Round-trip text";
+        _sceneModel.SceneDescription = "Round-trip text";
+
+        // Act — load, save, then reload
+        _viewModel.Activate(_sceneModel);
+        _viewModel.SaveModel();
+
+        // Create a fresh ViewModel and reload from the same model
+        var viewModel2 = SetupViewModelWithStory();
+        viewModel2.Activate(_sceneModel);
+
+        // Assert
+        Assert.AreEqual("Round-trip text", viewModel2.Description,
+            "Description should survive round-trip");
+        Assert.AreEqual("Round-trip text", _sceneModel.Description,
+            "Base Description should be intact");
+        Assert.AreEqual("Round-trip text", _sceneModel.SceneDescription,
+            "SceneDescription should be intact");
+    }
+
+    [TestMethod]
+    public void RoundTrip_LegacyFileMigratedByStoryIO_PreservesDescription()
+    {
+        // Arrange — simulate what StoryIO migration does to a legacy file:
+        // SceneDescription has data, base Description is empty, then migration copies it
+        _sceneModel.SceneDescription = "Legacy text";
+        _sceneModel.Description = string.Empty;
+
+        // Simulate StoryIO migration
+        if (string.IsNullOrEmpty(_sceneModel.Description) && !string.IsNullOrEmpty(_sceneModel.SceneDescription))
+        {
+            _sceneModel.Description = _sceneModel.SceneDescription;
+        }
+
+        // Act — load, user doesn't change anything, save
+        _viewModel.Activate(_sceneModel);
+        _viewModel.SaveModel();
+
+        // Assert — both fields populated after round-trip
+        Assert.AreEqual("Legacy text", _sceneModel.Description,
+            "Base Description should have migrated text");
+        Assert.AreEqual("Legacy text", _sceneModel.SceneDescription,
+            "SceneDescription should be preserved for backward compatibility");
+    }
+
+    [TestMethod]
+    public void RoundTrip_LegacyFileMigratedByStoryIO_WithUserChanges_UpdatesBothFields()
+    {
+        // Arrange — simulate StoryIO migration of legacy file
+        _sceneModel.SceneDescription = "Legacy text";
+        _sceneModel.Description = string.Empty;
+        if (string.IsNullOrEmpty(_sceneModel.Description) && !string.IsNullOrEmpty(_sceneModel.SceneDescription))
+        {
+            _sceneModel.Description = _sceneModel.SceneDescription;
+        }
+
+        // Act — load, user edits, save
+        _viewModel.Activate(_sceneModel);
+        _viewModel.Description = "User updated legacy text";
+        _viewModel.SaveModel();
+
+        // Assert — both fields should have the new text
+        Assert.AreEqual("User updated legacy text", _sceneModel.Description,
+            "Base Description should have user's new text");
+        Assert.AreEqual("User updated legacy text", _sceneModel.SceneDescription,
+            "SceneDescription should have user's new text for backward compatibility");
     }
 
     #endregion
@@ -1317,7 +1461,7 @@ public class SceneViewModelTests
         // Set common scene properties
         scene.Date = "2025-01-01";
         scene.Time = "Morning";
-        scene.SceneDescription = "Test scene description";
+        scene.Description = "Test scene description";
         scene.SceneType = "Action";
         scene.ValueExchange = "+/-";
         scene.Events = "Test events";
