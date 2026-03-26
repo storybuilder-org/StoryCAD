@@ -1,34 +1,27 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StoryCADLib.Services.Outline;
 
 namespace StoryCADLib.ViewModels.Tools;
 
 /// <summary>
-///     Model for how the StructureModelTitle Tab works in problem.
+///     Plain data object representing a single beat in a beat sheet.
+///     Serialized as part of the story file via ProblemModel.StructureBeats.
+///     Element resolution (ElementName, ElementIcon, etc.) uses lazy service lookup.
 /// </summary>
-public class StructureBeatViewModel : ObservableObject
+[Microsoft.UI.Xaml.Data.Bindable]
+public class StructureBeat : ObservableObject
 {
-    private readonly AppState _appState;
-    private readonly OutlineService _outlineService;
-    public ProblemViewModel ProblemViewModel;
-    public Windowing Windowing;
-
     #region Constructor
 
-    public StructureBeatViewModel(string title, string description)
+    public StructureBeat(string title, string description)
     {
-        // Get services internally like StoryNodeItem does
-        Windowing = Ioc.Default.GetRequiredService<Windowing>();
-        ProblemViewModel = Ioc.Default.GetRequiredService<ProblemViewModel>();
-        _appState = Ioc.Default.GetRequiredService<AppState>();
-        _outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-
         Title = title;
         Description = description;
-
-        PropertyChanged += ProblemViewModel.OnPropertyChanged;
     }
+
+    // Parameterless constructor for JSON deserialization
+    public StructureBeat() { }
 
     #endregion
 
@@ -81,7 +74,7 @@ public class StructureBeatViewModel : ObservableObject
     }
 
     /// <summary>
-    ///     Link to element
+    ///     Link to element (resolved lazily via service lookup)
     /// </summary>
     [JsonIgnore]
     internal StoryElement Element
@@ -92,9 +85,11 @@ public class StructureBeatViewModel : ObservableObject
             {
                 try
                 {
-                    return _outlineService.GetStoryElementByGuid(_appState.CurrentDocument!.Model, guid);
+                    var appState = Ioc.Default.GetRequiredService<AppState>();
+                    var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+                    return outlineService.GetStoryElementByGuid(appState.CurrentDocument!.Model, guid);
                 }
-                catch (InvalidOperationException)
+                catch
                 {
                     return new StoryElement();
                 }
@@ -114,7 +109,7 @@ public class StructureBeatViewModel : ObservableObject
         {
             if (Element.Uuid == Guid.Empty)
             {
-                return "No element Selected";
+                return "Unassigned";
             }
 
             return Element.Name;
@@ -160,11 +155,11 @@ public class StructureBeatViewModel : ObservableObject
 
                 if (Element.ElementType == StoryItemType.Scene)
                 {
-                    return Symbol.World;
+                    return Symbol.AllApps;
                 }
             }
 
-            return Symbol.Cancel;
+            return Symbol.ClearSelection;
         }
     }
 

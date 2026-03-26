@@ -178,7 +178,7 @@ public class SearchService
                 elementCollection.StoryElementGuids.TryGetValue(guid, out var el) &&
                 el.Name?.ToLower().Contains(searchString) == true);
 
-        if (elementType == typeof(StructureBeatViewModel))
+        if (elementType == typeof(StructureBeat))
             return SearchStructureBeats(collection, searchString, elementCollection);
 
         if (elementType == typeof(RelationshipModel))
@@ -195,7 +195,7 @@ public class SearchService
         if (elementType == typeof(Guid))
             return SearchEnumerable<Guid>(collection, guid => guid == targetUuid);
 
-        if (elementType == typeof(StructureBeatViewModel))
+        if (elementType == typeof(StructureBeat))
             return SearchEnumerable(collection, beat =>
                 GetPropertyValue<Guid>(beat, "Guid") == targetUuid);
 
@@ -231,7 +231,7 @@ public class SearchService
         }
 
         // StructureBeat collections - clear Guid property
-        if (elementType == typeof(StructureBeatViewModel) && collection is IEnumerable beats)
+        if (elementType == typeof(StructureBeat) && collection is IEnumerable beats)
         {
             var found = false;
             foreach (var beat in beats)

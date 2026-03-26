@@ -165,6 +165,13 @@ public partial class App : Application
         //Load user preferences or initialise them.
         await new PreferencesIo().ReadPreferences();
 
+        // Restore macOS security-scoped bookmarks so previously selected folders remain accessible
+        if (OperatingSystem.IsMacOS())
+        {
+            var prefs = Ioc.Default.GetRequiredService<PreferenceService>();
+            MacSecurityBookmarks.RestoreAllBookmarks(prefs.Model.SecurityBookmarks, _log);
+        }
+
         MainWindow = new Window();
 #if DEBUG
         MainWindow.UseStudio();

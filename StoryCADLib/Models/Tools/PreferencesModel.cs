@@ -27,6 +27,7 @@ public class PreferencesModel : ObservableObject
         LastSelectedTemplate = 0;
         WrapNodeNames = TextWrapping.Wrap;
         RecentFiles = new List<string>();
+        SecurityBookmarks = new Dictionary<string, string>();
 
         AutoSave = true;
         AutoSaveInterval = 15;
@@ -177,6 +178,15 @@ public class PreferencesModel : ObservableObject
     [JsonInclude]
     [JsonPropertyName("RecentFiles")]
     public List<string> RecentFiles { get; set; }
+
+    /// <summary>
+    ///     macOS security-scoped bookmarks (path -> base64 bookmark data).
+    ///     Persists sandbox folder/file access across app launches.
+    ///     Capped at 50 entries; ignored on non-macOS platforms.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("SecurityBookmarks")]
+    public Dictionary<string, string> SecurityBookmarks { get; set; }
 
     /// <summary>
     ///     Tracks last version of StoryCAD that was opened

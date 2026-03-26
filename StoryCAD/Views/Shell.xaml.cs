@@ -14,6 +14,7 @@ using StoryCADLib.Services.Collaborator;
 using StoryCADLib.Services.Dialogs;
 using StoryCADLib.Services.Locking;
 using StoryCADLib.Services.Logging;
+using StoryCADLib.Services.MacMenuBar;
 using StoryCADLib.Services.Ratings;
 using StoryCADLib.ViewModels.SubViewModels;
 using StoryCADLib.ViewModels.Tools;
@@ -121,6 +122,9 @@ public sealed partial class Shell : Page
         {
             ShellVm.CollaboratorVisibility = Visibility.Collapsed;
         }
+
+        // Initialize native macOS menu bar (no-op on Windows)
+        Ioc.Default.GetRequiredService<MacMenuBarService>().Initialize();
 
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();
@@ -434,29 +438,33 @@ public sealed partial class Shell : Page
             var shift = KeyboardHelper.IsShiftPressed();
             var alt = KeyboardHelper.IsAltPressed();
 
+            // On macOS, the native menu bar handles Cmd+key shortcuts.
+            // Skip Ctrl/Cmd shortcuts here to avoid double-firing.
+            bool macMenuHandlesCtrl = OperatingSystem.IsMacOS() && ctrl;
+
             // Global shortcuts that work regardless of focus (file operations, etc.)
-            if (ctrl && !shift && !alt && e.Key == VirtualKey.O)
+            if (!macMenuHandlesCtrl && ctrl && !shift && !alt && e.Key == VirtualKey.O)
             {
                 ShellVm.OpenFileOpenMenuCommand.Execute(null);
                 e.Handled = true;
                 return;
             }
 
-            if (ctrl && !shift && !alt && e.Key == VirtualKey.S)
+            if (!macMenuHandlesCtrl && ctrl && !shift && !alt && e.Key == VirtualKey.S)
             {
                 ShellVm.SaveFileCommand.Execute(null);
                 e.Handled = true;
                 return;
             }
 
-            if (ctrl && shift && !alt && e.Key == VirtualKey.S)
+            if (!macMenuHandlesCtrl && ctrl && shift && !alt && e.Key == VirtualKey.S)
             {
                 ShellVm.SaveAsCommand.Execute(null);
                 e.Handled = true;
                 return;
             }
 
-            if (ctrl && !shift && !alt && e.Key == VirtualKey.B)
+            if (!macMenuHandlesCtrl && ctrl && !shift && !alt && e.Key == VirtualKey.B)
             {
                 ShellVm.CreateBackupCommand.Execute(null);
                 e.Handled = true;
@@ -546,7 +554,7 @@ public sealed partial class Shell : Page
             }
 
             // Exit shortcut (Cmd+Q on macOS, Ctrl+Q on Windows)
-            if (ctrl && !shift && !alt && e.Key == VirtualKey.Q)
+            if (!macMenuHandlesCtrl && ctrl && !shift && !alt && e.Key == VirtualKey.Q)
             {
                 ShellVm.ExitCommand.Execute(null);
                 e.Handled = true;
@@ -554,35 +562,35 @@ public sealed partial class Shell : Page
             }
 
             // Tools Menu shortcuts
-            if (ctrl && !shift && !alt && e.Key == VirtualKey.N)
+            if (!macMenuHandlesCtrl && ctrl && !shift && !alt && e.Key == VirtualKey.N)
             {
                 ShellVm.NarrativeToolCommand.Execute(null);
                 e.Handled = true;
                 return;
             }
 
-            if (ctrl && !shift && !alt && e.Key == VirtualKey.M)
+            if (!macMenuHandlesCtrl && ctrl && !shift && !alt && e.Key == VirtualKey.M)
             {
                 ShellVm.MasterPlotsCommand.Execute(null);
                 e.Handled = true;
                 return;
             }
 
-            if (ctrl && !shift && !alt && e.Key == VirtualKey.D)
+            if (!macMenuHandlesCtrl && ctrl && !shift && !alt && e.Key == VirtualKey.D)
             {
                 ShellVm.DramaticSituationsCommand.Execute(null);
                 e.Handled = true;
                 return;
             }
 
-            if (ctrl && !shift && !alt && e.Key == VirtualKey.L)
+            if (!macMenuHandlesCtrl && ctrl && !shift && !alt && e.Key == VirtualKey.L)
             {
                 ShellVm.StockScenesCommand.Execute(null);
                 e.Handled = true;
                 return;
             }
 
-            if (ctrl && !shift && !alt && e.Key == VirtualKey.K)
+            if (!macMenuHandlesCtrl && ctrl && !shift && !alt && e.Key == VirtualKey.K)
             {
                 ShellVm.KeyQuestionsCommand.Execute(null);
                 e.Handled = true;
@@ -592,14 +600,14 @@ public sealed partial class Shell : Page
             // Reports Menu shortcuts
             // Ctrl+P: Print Reports on Windows, PDF Export on macOS (Print is unsupported on macOS)
 #if HAS_UNO_WINUI
-            if (ctrl && !shift && !alt && e.Key == VirtualKey.P)
+            if (!macMenuHandlesCtrl && ctrl && !shift && !alt && e.Key == VirtualKey.P)
             {
                 ShellVm.PrintReportsCommand.Execute(null);
                 e.Handled = true;
                 return;
             }
 #else
-            if (ctrl && !shift && !alt && e.Key == VirtualKey.P)
+            if (!macMenuHandlesCtrl && ctrl && !shift && !alt && e.Key == VirtualKey.P)
             {
                 ShellVm.ExportReportsToPdfCommand.Execute(null);
                 e.Handled = true;
@@ -607,14 +615,14 @@ public sealed partial class Shell : Page
             }
 #endif
 
-            if (ctrl && shift && !alt && e.Key == VirtualKey.P)
+            if (!macMenuHandlesCtrl && ctrl && shift && !alt && e.Key == VirtualKey.P)
             {
                 ShellVm.ExportReportsToPdfCommand.Execute(null);
                 e.Handled = true;
                 return;
             }
 
-            if (ctrl && !shift && !alt && e.Key == VirtualKey.R)
+            if (!macMenuHandlesCtrl && ctrl && !shift && !alt && e.Key == VirtualKey.R)
             {
                 ShellVm.ScrivenerReportsCommand.Execute(null);
                 e.Handled = true;
@@ -622,7 +630,7 @@ public sealed partial class Shell : Page
             }
 
             // Preferences shortcut (Ctrl+, / ⌘,)
-            if (ctrl && !shift && !alt && e.Key == (VirtualKey)188)
+            if (!macMenuHandlesCtrl && ctrl && !shift && !alt && e.Key == (VirtualKey)188)
             {
                 ShellVm.PreferencesCommand.Execute(null);
                 e.Handled = true;

@@ -442,7 +442,7 @@ public class SearchServiceTests
 
         // Bind the Scene to the Problem's first structure beat
         var problemModel = (ProblemModel)problem;
-        problemModel.StructureBeats.Add(new StructureBeatViewModel("Beat 1", "First beat"));
+        problemModel.StructureBeats.Add(new StructureBeat("Beat 1", "First beat"));
         problemModel.StructureBeats[0].Guid = scene.Uuid;
 
         // Act - Search for the Problem name while on the Scene node
@@ -469,7 +469,7 @@ public class SearchServiceTests
 
         // Bind the Scene to the Problem's structure beat
         var problemModel = (ProblemModel)problem;
-        problemModel.StructureBeats.Add(new StructureBeatViewModel("Beat 1", "First beat"));
+        problemModel.StructureBeats.Add(new StructureBeat("Beat 1", "First beat"));
         problemModel.StructureBeats[0].Guid = scene.Uuid;
 
         // Act - Search for the Scene name while on the Problem node (forward search)
@@ -515,13 +515,13 @@ public class SearchServiceTests
         var problem1 = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
         problem1.Name = "Primary Problem";
         var problemModel1 = (ProblemModel)problem1;
-        problemModel1.StructureBeats.Add(new StructureBeatViewModel("Beat 1", ""));
+        problemModel1.StructureBeats.Add(new StructureBeat("Beat 1", ""));
         problemModel1.StructureBeats[0].Guid = scene.Uuid;
 
         var problem2 = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
         problem2.Name = "Secondary Problem";
         var problemModel2 = (ProblemModel)problem2;
-        problemModel2.StructureBeats.Add(new StructureBeatViewModel("Beat 1", ""));
+        problemModel2.StructureBeats.Add(new StructureBeat("Beat 1", ""));
         problemModel2.StructureBeats[0].Guid = scene.Uuid;
 
         // Act - Search for first Problem while on Scene
@@ -550,7 +550,7 @@ public class SearchServiceTests
 
         // Bind child Problem to parent's structure beat
         var parentModel = (ProblemModel)parentProblem;
-        parentModel.StructureBeats.Add(new StructureBeatViewModel("Beat 1", ""));
+        parentModel.StructureBeats.Add(new StructureBeat("Beat 1", ""));
         parentModel.StructureBeats[0].Guid = childProblem.Uuid;
 
         // Act - Search for parent Problem name while on child Problem
@@ -575,7 +575,7 @@ public class SearchServiceTests
         problem.Name = "Test Problem";
 
         var problemModel = (ProblemModel)problem;
-        problemModel.StructureBeats.Add(new StructureBeatViewModel("Inciting Incident", "This is the description"));
+        problemModel.StructureBeats.Add(new StructureBeat("Inciting Incident", "This is the description"));
 
         // Act - Search for text in beat title
         var result = _searchService.SearchString(problem.Node, "Inciting", model);
@@ -595,7 +595,7 @@ public class SearchServiceTests
         problem.Name = "Test Problem";
 
         var problemModel = (ProblemModel)problem;
-        problemModel.StructureBeats.Add(new StructureBeatViewModel("Beat 1", "The hero discovers a mysterious artifact"));
+        problemModel.StructureBeats.Add(new StructureBeat("Beat 1", "The hero discovers a mysterious artifact"));
 
         // Act - Search for text in beat description
         var result = _searchService.SearchString(problem.Node, "artifact", model);
@@ -615,7 +615,7 @@ public class SearchServiceTests
         problem.Name = "Test Problem";
 
         var problemModel = (ProblemModel)problem;
-        problemModel.StructureBeats.Add(new StructureBeatViewModel("CLIMAX", "Final BATTLE"));
+        problemModel.StructureBeats.Add(new StructureBeat("CLIMAX", "Final BATTLE"));
 
         // Act - Search with different case
         var result1 = _searchService.SearchString(problem.Node, "climax", model);
@@ -640,7 +640,7 @@ public class SearchServiceTests
         scene.Name = "Meeting Scene";
 
         var problemModel = (ProblemModel)problem;
-        problemModel.StructureBeats.Add(new StructureBeatViewModel("First Kiss", "Romantic moment under stars"));
+        problemModel.StructureBeats.Add(new StructureBeat("First Kiss", "Romantic moment under stars"));
         problemModel.StructureBeats[0].Guid = scene.Uuid;
 
         // Act - Search for beat text while viewing the Scene (reverse search)
@@ -661,7 +661,7 @@ public class SearchServiceTests
         problem.Name = "Test Problem";
 
         var problemModel = (ProblemModel)problem;
-        problemModel.StructureBeats.Add(new StructureBeatViewModel("Beat 1", "Some description"));
+        problemModel.StructureBeats.Add(new StructureBeat("Beat 1", "Some description"));
 
         // Act - Search for text not in beats
         var result = _searchService.SearchString(problem.Node, "nonexistent", model);
