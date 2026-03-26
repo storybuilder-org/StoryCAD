@@ -649,7 +649,6 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
         Model.Name = Name;
         IsTextBoxFocused = false;
         Model.Description = Description;
-        Model.SceneDescription = string.Empty; // Clear deprecated field so migration won't revert edits
         Model.ViewpointCharacter = ViewpointCharacter;
         Model.Date = Date;
         Model.Time = Time;
@@ -684,7 +683,6 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
 
         // Write RTF files
         Model.Description = Description;
-        Model.SceneDescription = string.Empty; // Clear deprecated field so migration won't revert edits
         Model.Events = Events;
         Model.Consequences = Consequences;
         Model.Significance = Significance;
