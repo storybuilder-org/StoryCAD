@@ -47,11 +47,20 @@ public class StoryElementConverter : JsonConverter<StoryElement>
             {
                 var element = (StoryElement)jsonObject.Deserialize(targetType, options);
 
-                // Check if Description is empty and migrate old fields
+                // Migrate legacy description fields to StoryElement.Description.
+                // Each element type historically stored its summary under a different
+                // JSON key. When Description (JSON "ElementDescription") is empty,
+                // we check for the old key and copy the value forward.
+                //
+                // Scene migration (Issue #1367): SceneModel formerly had its own
+                // SceneDescription property (JSON key "Description") that shadowed
+                // the base StoryElement.Description (JSON key "ElementDescription").
+                // That property has been removed. On read, if ElementDescription is
+                // empty, we pull from the orphaned "Description" JSON key here.
+                // The "Remarks" case handles even older Scene files.
                 if (element != null && string.IsNullOrEmpty(element.Description))
                 {
                     string migratedDescription =
-                        // Map of type discriminators to old field names
                         typeDiscriminator switch
                     {
                         "StoryOverview" when jsonObject.TryGetProperty("StoryIdea", out var prop)
@@ -63,6 +72,9 @@ public class StoryElementConverter : JsonConverter<StoryElement>
                         "Character" when jsonObject.TryGetProperty("CharacterSketch", out var prop)
                             => prop.GetString(),
                         "Setting" when jsonObject.TryGetProperty("Summary", out var prop)
+                            => prop.GetString(),
+                        "Scene" when jsonObject.TryGetProperty("Description", out var prop)
+                            && !string.IsNullOrEmpty(prop.GetString())
                             => prop.GetString(),
                         "Scene" when jsonObject.TryGetProperty("Remarks", out var prop)
                             => prop.GetString(),
