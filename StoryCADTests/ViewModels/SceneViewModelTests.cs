@@ -338,7 +338,6 @@ public class SceneViewModelTests
         // Assert - Verify SceneModel was updated
         Assert.AreEqual("Modified Scene Name", _sceneModel.Name, "Name should be updated");
         Assert.AreEqual("Modified description", _sceneModel.Description, "Base Description should be updated");
-        Assert.AreEqual("Modified description", _sceneModel.SceneDescription, "SceneDescription should be updated for backward compatibility");
         Assert.AreEqual("2025-10-04", _sceneModel.Date, "Date should be updated");
         Assert.AreEqual("Evening", _sceneModel.Time, "Time should be updated");
         Assert.AreEqual("Dialogue", _sceneModel.SceneType, "SceneType should be updated");
@@ -399,7 +398,7 @@ public class SceneViewModelTests
     }
 
     [TestMethod]
-    public void SaveModel_WithoutUserChanges_PopulatesBothFields()
+    public void SaveModel_WithoutUserChanges_PreservesBaseDescription()
     {
         // Arrange — load a scene with description
         _sceneModel.Description = "Original text";
@@ -409,15 +408,13 @@ public class SceneViewModelTests
         // Act — save immediately without editing
         _viewModel.SaveModel();
 
-        // Assert — both fields should have the same value
+        // Assert — base Description should be preserved
         Assert.AreEqual("Original text", _sceneModel.Description,
             "Base Description should be preserved");
-        Assert.AreEqual("Original text", _sceneModel.SceneDescription,
-            "SceneDescription should be synced for backward compatibility");
     }
 
     [TestMethod]
-    public void SaveModel_WithUserChanges_PopulatesBothFields()
+    public void SaveModel_WithUserChanges_UpdatesBaseDescription()
     {
         // Arrange
         _sceneModel.Description = "Original text";
@@ -427,11 +424,9 @@ public class SceneViewModelTests
         _viewModel.Description = "User edited text";
         _viewModel.SaveModel();
 
-        // Assert — both fields should have the new value
+        // Assert — base Description should have the new value
         Assert.AreEqual("User edited text", _sceneModel.Description,
             "Base Description should have new text");
-        Assert.AreEqual("User edited text", _sceneModel.SceneDescription,
-            "SceneDescription should have new text for backward compatibility");
     }
 
     [TestMethod]
@@ -454,8 +449,6 @@ public class SceneViewModelTests
             "Description should survive round-trip");
         Assert.AreEqual("Round-trip text", _sceneModel.Description,
             "Base Description should be intact");
-        Assert.AreEqual("Round-trip text", _sceneModel.SceneDescription,
-            "SceneDescription should be intact");
     }
 
     [TestMethod]
@@ -476,15 +469,13 @@ public class SceneViewModelTests
         _viewModel.Activate(_sceneModel);
         _viewModel.SaveModel();
 
-        // Assert — both fields populated after round-trip
+        // Assert — base Description populated after round-trip
         Assert.AreEqual("Legacy text", _sceneModel.Description,
             "Base Description should have migrated text");
-        Assert.AreEqual("Legacy text", _sceneModel.SceneDescription,
-            "SceneDescription should be preserved for backward compatibility");
     }
 
     [TestMethod]
-    public void RoundTrip_LegacyFileMigratedByStoryIO_WithUserChanges_UpdatesBothFields()
+    public void RoundTrip_LegacyFileMigratedByStoryIO_WithUserChanges_UpdatesBaseDescription()
     {
         // Arrange — simulate StoryIO migration of legacy file
         _sceneModel.SceneDescription = "Legacy text";
@@ -499,11 +490,9 @@ public class SceneViewModelTests
         _viewModel.Description = "User updated legacy text";
         _viewModel.SaveModel();
 
-        // Assert — both fields should have the new text
+        // Assert — base Description should have the new text
         Assert.AreEqual("User updated legacy text", _sceneModel.Description,
             "Base Description should have user's new text");
-        Assert.AreEqual("User updated legacy text", _sceneModel.SceneDescription,
-            "SceneDescription should have user's new text for backward compatibility");
     }
 
     #endregion

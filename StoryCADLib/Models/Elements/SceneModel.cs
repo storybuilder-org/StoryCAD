@@ -6,6 +6,10 @@ public class SceneModel : StoryElement
 {
     #region Properties
 
+    // DEPRECATED (Issue #1367): SceneDescription is kept only for JSON deserialization
+    // of old .stbx files that stored scene summaries under the "Description" key.
+    // All new reads/writes use StoryElement.Description (base class).
+    // StoryIO migrates this field to the base Description on load.
     [JsonIgnore] private string _sceneDescription;
 
     [JsonInclude]
