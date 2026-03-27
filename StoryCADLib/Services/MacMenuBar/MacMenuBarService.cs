@@ -328,11 +328,15 @@ public class MacMenuBarService
         SetSubmenu(reportsMenuItem, reportsMenu);
         AddItemToMenu(mainMenu, reportsMenuItem);
 
-        // PDF Reports
+        // Print Reports (Cmd+Shift+P)
+        AddActionItem(reportsMenu, "Print Reports", "printReports:", "P",
+            NSEventModifierFlagCommand | NSEventModifierFlagShift, () => _shellVm.PrintReportsCommand.Execute(null));
+
+        // PDF Reports (Cmd+P)
         AddActionItem(reportsMenu, "PDF Reports", "pdfReports:", "p",
             NSEventModifierFlagCommand, () => _shellVm.ExportReportsToPdfCommand.Execute(null));
 
-        // Scrivener Reports
+        // Scrivener Reports (Cmd+R)
         AddActionItem(reportsMenu, "Scrivener Reports", "scrivenerReports:", "r",
             NSEventModifierFlagCommand, () => _shellVm.ScrivenerReportsCommand.Execute(null));
     }
