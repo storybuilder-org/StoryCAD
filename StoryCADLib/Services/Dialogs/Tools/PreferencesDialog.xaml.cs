@@ -58,6 +58,64 @@ public sealed partial class PreferencesDialog : Page
         });
     }
 
+    /// <summary>
+    ///     Handles the Delete My Data button click.
+    ///     Shows a confirmation dialog, deletes backend + local data
+    ///     on confirm, then exits the application.
+    /// </summary>
+    private async void DeleteMyData_Click(object sender, RoutedEventArgs e)
+    {
+        ContentDialog confirmDialog = new()
+        {
+            Title = "Delete My Data?",
+            Content = "This will permanently delete:\n" +
+                      "\u2022 Your account from our servers\n" +
+                      "\u2022 Error reporting preferences\n" +
+                      "\u2022 Version tracking history\n" +
+                      "\u2022 Newsletter subscription\n\n" +
+                      "Your local story files will NOT be deleted.\n\n" +
+                      "StoryCAD will close after deletion.",
+            PrimaryButtonText = "Delete My Data",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = this.XamlRoot
+        };
+
+        var result = await confirmDialog.ShowAsync();
+        if (result != ContentDialogResult.Primary)
+            return;
+
+        bool success = await PreferencesVm.DeleteMyDataAsync();
+
+        if (success)
+        {
+            ContentDialog goodbyeDialog = new()
+            {
+                Title = "Data Deleted",
+                Content = "Your data has been deleted. Thank you for using StoryCAD.",
+                CloseButtonText = "OK",
+                XamlRoot = this.XamlRoot
+            };
+            await goodbyeDialog.ShowAsync();
+
+            // Exit the application
+            Application.Current.Exit();
+        }
+        else
+        {
+            ContentDialog failDialog = new()
+            {
+                Title = "Deletion Failed",
+                Content = "We could not reach our server to delete your data. " +
+                          "Your local data has not been changed.\n\n" +
+                          "Please try again later, or contact support@storybuilder.org.",
+                CloseButtonText = "OK",
+                XamlRoot = this.XamlRoot
+            };
+            await failDialog.ShowAsync();
+        }
+    }
+
     private void OnBackupPathSelected(object sender, string path)
     {
         PreferencesVm.BackupDirectory = path;

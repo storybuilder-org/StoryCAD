@@ -343,6 +343,46 @@ public class PreferencesViewModel : ObservableValidator
         await _backendService.PostPreferences(_preferenceService.Model);
     }
 
+    /// <summary>
+    ///     Deletes all user data from the backend database and clears
+    ///     local preferences. Returns true if deletion succeeded and
+    ///     local data was cleared. Returns false if the backend delete
+    ///     failed — in that case local data is NOT cleared so the user
+    ///     can retry.
+    ///
+    ///     If the backend was never configured (no Doppler keys), there
+    ///     is no remote data to delete, so local data is cleared and
+    ///     the method returns true.
+    /// </summary>
+    public async Task<bool> DeleteMyDataAsync()
+    {
+        // If backend is configured, attempt remote deletion first
+        if (_backendService.IsConnectionConfigured)
+        {
+            bool backendDeleted = await _backendService.DeleteUserData();
+            if (!backendDeleted)
+                return false; // Don't clear local data — user can retry
+        }
+
+        // Clear local preferences
+        CurrentModel.FirstName = string.Empty;
+        CurrentModel.LastName = string.Empty;
+        CurrentModel.Email = string.Empty;
+        CurrentModel.UserId = 0;
+        CurrentModel.ErrorCollectionConsent = false;
+        CurrentModel.Newsletter = false;
+        CurrentModel.PreferencesInitialized = false;
+        CurrentModel.RecordPreferencesStatus = false;
+        CurrentModel.RecordVersionStatus = false;
+
+        // Persist cleared state to disk
+        PreferencesIo prfIo = new();
+        await prfIo.WritePreferences(CurrentModel);
+        _preferenceService.Model = CurrentModel;
+
+        return true;
+    }
+
     private void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
         _changed = true;

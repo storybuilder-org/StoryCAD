@@ -3,7 +3,11 @@ using StoryCADLib.DAL;
 using StoryCADLib.Models;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services;
+using StoryCADLib.Services.Backend;
+using StoryCADLib.Services.Json;
+using StoryCADLib.Services.Ratings;
 using StoryCADLib.ViewModels.Tools;
+using StoryCADTests.Services.Backend;
 
 #nullable disable
 
@@ -389,6 +393,111 @@ public class PreferencesViewModelTests
 
         // Assert
         Assert.IsTrue(propertyChanged);
+    }
+
+    #endregion
+
+    #region C1: DeleteMyDataAsync Tests
+
+    [TestMethod]
+    public async Task DeleteMyDataAsync_WhenBackendSucceeds_ClearsLocalDataAndReturnsTrue()
+    {
+        // Arrange
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testLogger = new TestLogService();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        var backendService = new BackendService(testLogger,
+            Ioc.Default.GetRequiredService<AppState>(), preferenceService, testSqlIo);
+        var vm = new PreferencesViewModel(preferenceService, backendService,
+            Ioc.Default.GetRequiredService<RatingService>(),
+            Ioc.Default.GetRequiredService<Windowing>());
+
+        preferenceService.Model.FirstName = "Test";
+        preferenceService.Model.LastName = "User";
+        preferenceService.Model.Email = "test@example.com";
+        preferenceService.Model.UserId = 42;
+        preferenceService.Model.PreferencesInitialized = true;
+        preferenceService.Model.ErrorCollectionConsent = true;
+        preferenceService.Model.Newsletter = true;
+        vm.CurrentModel = preferenceService.Model;
+        vm.LoadModel();
+
+        // Act
+        var result = await vm.DeleteMyDataAsync();
+
+        // Assert
+        Assert.IsTrue(result);
+        Assert.AreEqual(string.Empty, preferenceService.Model.FirstName);
+        Assert.AreEqual(string.Empty, preferenceService.Model.LastName);
+        Assert.AreEqual(string.Empty, preferenceService.Model.Email);
+        Assert.AreEqual(0, preferenceService.Model.UserId);
+        Assert.IsFalse(preferenceService.Model.PreferencesInitialized);
+        Assert.IsFalse(preferenceService.Model.ErrorCollectionConsent);
+        Assert.IsFalse(preferenceService.Model.Newsletter);
+    }
+
+    [TestMethod]
+    public async Task DeleteMyDataAsync_WhenBackendFails_DoesNotClearLocalDataAndReturnsFalse()
+    {
+        // Arrange
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testLogger = new TestLogService();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        testSqlIo.ExceptionToThrow = new Exception("Connection lost");
+        var backendService = new BackendService(testLogger,
+            Ioc.Default.GetRequiredService<AppState>(), preferenceService, testSqlIo);
+        var vm = new PreferencesViewModel(preferenceService, backendService,
+            Ioc.Default.GetRequiredService<RatingService>(),
+            Ioc.Default.GetRequiredService<Windowing>());
+
+        preferenceService.Model.FirstName = "Test";
+        preferenceService.Model.LastName = "User";
+        preferenceService.Model.Email = "test@example.com";
+        preferenceService.Model.UserId = 42;
+        preferenceService.Model.PreferencesInitialized = true;
+        vm.CurrentModel = preferenceService.Model;
+        vm.LoadModel();
+
+        // Act
+        var result = await vm.DeleteMyDataAsync();
+
+        // Assert — local data should NOT be cleared
+        Assert.IsFalse(result);
+        Assert.AreEqual("Test", preferenceService.Model.FirstName);
+        Assert.AreEqual("test@example.com", preferenceService.Model.Email);
+        Assert.IsTrue(preferenceService.Model.PreferencesInitialized);
+    }
+
+    [TestMethod]
+    public async Task DeleteMyDataAsync_WhenBackendNotConfigured_ClearsLocalDataAndReturnsTrue()
+    {
+        // Arrange — no backend configured means no remote data exists
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testLogger = new TestLogService();
+        var testSqlIo = new TestMySqlIo(); // not configured
+        var backendService = new BackendService(testLogger,
+            Ioc.Default.GetRequiredService<AppState>(), preferenceService, testSqlIo);
+        var vm = new PreferencesViewModel(preferenceService, backendService,
+            Ioc.Default.GetRequiredService<RatingService>(),
+            Ioc.Default.GetRequiredService<Windowing>());
+
+        preferenceService.Model.FirstName = "Test";
+        preferenceService.Model.LastName = "User";
+        preferenceService.Model.Email = "test@example.com";
+        preferenceService.Model.PreferencesInitialized = true;
+        vm.CurrentModel = preferenceService.Model;
+        vm.LoadModel();
+
+        // Act
+        var result = await vm.DeleteMyDataAsync();
+
+        // Assert — local data cleared since no remote data existed
+        Assert.IsTrue(result);
+        Assert.AreEqual(string.Empty, preferenceService.Model.FirstName);
+        Assert.AreEqual(string.Empty, preferenceService.Model.Email);
+        Assert.IsFalse(preferenceService.Model.PreferencesInitialized);
     }
 
     #endregion

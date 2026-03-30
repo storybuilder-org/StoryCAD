@@ -120,6 +120,10 @@ Each step follows strict TDD: write a failing test first (RED), then write the m
 
 The existing schema files (`STORYBUILDER.sql`, `STORYBUILDER_ALTERATION1.sql`) may not reflect the current live schema. Export the current schema (structure only, **no data**) from ScaleGrid via MySQL Workbench to establish the true baseline.
 
+**Exported to**: `/mnt/c/temp/StoryBuilder DDL.txt`
+
+**Schema drift found**: Live `users` table has `first_name`, `last_name`, `email_verified` columns and `user_name` widened to `VARCHAR(128)` — none captured in the stale alteration files.
+
 ### 0.2: Set Up Local MySQL Test Database
 
 Using the existing local MySQL installation and MySQL Workbench:
@@ -134,23 +138,25 @@ Three new stored procedures to add to the existing `spAddUser`. These scripts ar
 
 **`spAddOrUpdatePreferences`** (replaces inline SQL in `AddOrUpdatePreferences`):
 
+Parameter names use bare names (no `p_` prefix) to match the existing `spAddUser` convention.
+
 ```sql
 DELIMITER $$
 
 CREATE PROCEDURE spAddOrUpdatePreferences(
-    IN p_user_id INT,
-    IN p_elmah BOOL,
-    IN p_newsletter BOOL,
-    IN p_version VARCHAR(64)
+    IN user_id INT,
+    IN elmah BOOL,
+    IN newsletter BOOL,
+    IN version VARCHAR(64)
 )
 BEGIN
     INSERT INTO StoryBuilder.preferences
         (user_id, elmah_consent, newsletter_consent, version)
-    VALUES (p_user_id, p_elmah, p_newsletter, p_version)
+    VALUES (user_id, elmah, newsletter, version)
     ON DUPLICATE KEY UPDATE
-        elmah_consent = p_elmah,
-        newsletter_consent = p_newsletter,
-        version = p_version;
+        elmah_consent = elmah,
+        newsletter_consent = newsletter,
+        version = version;
 END$$
 
 DELIMITER ;
@@ -162,17 +168,17 @@ DELIMITER ;
 DELIMITER $$
 
 CREATE PROCEDURE spAddOrUpdateVersion(
-    IN p_user_id INT,
-    IN p_current VARCHAR(64),
-    IN p_previous VARCHAR(64)
+    IN user_id INT,
+    IN current_ver VARCHAR(64),
+    IN previous_ver VARCHAR(64)
 )
 BEGIN
     INSERT INTO StoryBuilder.versions
         (user_id, current_version, previous_version)
-    VALUES (p_user_id, p_current, p_previous)
+    VALUES (user_id, current_ver, previous_ver)
     ON DUPLICATE KEY UPDATE
-        current_version = p_current,
-        previous_version = p_previous;
+        current_version = current_ver,
+        previous_version = previous_ver;
 END$$
 
 DELIMITER ;
@@ -184,13 +190,13 @@ DELIMITER ;
 DELIMITER $$
 
 CREATE PROCEDURE spDeleteUser(
-    IN p_email VARCHAR(128)
+    IN email VARCHAR(128)
 )
 BEGIN
     DECLARE v_user_id INT;
 
     -- Look up user by email
-    SELECT id INTO v_user_id FROM StoryBuilder.users WHERE email = p_email;
+    SELECT id INTO v_user_id FROM StoryBuilder.users WHERE users.email = email;
 
     -- If user not found, do nothing
     IF v_user_id IS NOT NULL THEN
@@ -212,14 +218,21 @@ DELIMITER ;
 
 Run all three CREATE PROCEDURE statements against the local test database. Verify they work with the seeded test data.
 
-### 0.5: Configure Test Connection
+**NOTE**: The SPs created on 2026-03-29 used `p_` prefixed parameter names. They must be dropped and recreated with bare parameter names (matching `spAddUser` convention) before Phase B0.
 
-**Open question**: The current code calls Doppler to get connection credentials. For local testing, Doppler isn't needed — a local MySQL connection has no SSL certs or secret management. The test setup needs a way to bypass Doppler and connect directly to the local instance. Options to explore during implementation:
-- Test-only connection string that bypasses `SetConnectionString`
-- Environment variable check in test setup
-- Direct `MySqlConnection` in test without going through `BackendService`
+### 0.5: Extract `IMySqlIo` Interface
 
-The existing `CheckConnection` test in `BackendServiceTests.cs` uses Doppler for the live DB. Integration tests for deletion must use the local DB instead.
+Automated tests in `StoryCADTests` cannot depend on a local MySQL instance — other contributors (e.g., Jake) won't have it, and connection credentials would be a security problem in the repo. Instead, we mock the DAL layer.
+
+**Steps**:
+1. Create `IMySqlIo` interface in `StoryCADLib/DAL/` with the 3 existing methods + new `DeleteUser`
+2. `MySqlIo` implements `IMySqlIo`
+3. Register `IMySqlIo` → `MySqlIo` in IoC (instead of concrete `MySqlIo`)
+4. `BackendService` resolves `IMySqlIo` instead of `MySqlIo`
+
+**For automated tests**: Create `TestMySqlIo` (implements `IMySqlIo`) in `BackendServiceTests.cs` — records calls and returns preset results, no database connection. Follows the existing pattern of `TestSaveable : ISaveable` and `MockCollaborator : ICollaborator`.
+
+**For manual verification**: The real stored procedures are tested manually against the local DB. See `StoryCADTests/ManualTests/Account_Deletion_Test_Plan.md`.
 
 ---
 
@@ -612,7 +625,7 @@ public void AutoSave_WhenSet_RaisesPropertyChanged()
 
 ### B0: Refactor existing inline SQL to stored procedures
 
-**Prerequisite**: Phase 0 stored procedures (`spAddOrUpdatePreferences`, `spAddOrUpdateVersion`) are created on the local test DB.
+**Prerequisite**: Phase 0 stored procedures (`spAddOrUpdatePreferences`, `spAddOrUpdateVersion`) are recreated on the local test DB with bare parameter names.
 
 **File**: `StoryCADLib/DAL/MySqLIO.cs`
 
@@ -623,10 +636,10 @@ public async Task AddOrUpdatePreferences(MySqlConnection conn, int id, bool elma
 {
     await using MySqlCommand cmd = new("spAddOrUpdatePreferences", conn);
     cmd.CommandType = CommandType.StoredProcedure;
-    cmd.Parameters.AddWithValue("p_user_id", id);
-    cmd.Parameters.AddWithValue("p_elmah", elmah);
-    cmd.Parameters.AddWithValue("p_newsletter", newsletter);
-    cmd.Parameters.AddWithValue("p_version", version);
+    cmd.Parameters.AddWithValue("user_id", id);
+    cmd.Parameters.AddWithValue("elmah", elmah);
+    cmd.Parameters.AddWithValue("newsletter", newsletter);
+    cmd.Parameters.AddWithValue("version", version);
     await cmd.ExecuteNonQueryAsync();
 }
 ```
@@ -638,44 +651,34 @@ public async Task AddVersion(MySqlConnection conn, int id, string currentVersion
 {
     await using MySqlCommand cmd = new("spAddOrUpdateVersion", conn);
     cmd.CommandType = CommandType.StoredProcedure;
-    cmd.Parameters.AddWithValue("p_user_id", id);
-    cmd.Parameters.AddWithValue("p_current", currentVersion);
-    cmd.Parameters.AddWithValue("p_previous", previousVersion);
+    cmd.Parameters.AddWithValue("user_id", id);
+    cmd.Parameters.AddWithValue("current_ver", currentVersion);
+    cmd.Parameters.AddWithValue("previous_ver", previousVersion);
     await cmd.ExecuteNonQueryAsync();
 }
 ```
 
-**Verification**: Run existing `CheckConnection` test against local test DB — should still pass since the stored procedures have identical behavior to the inline SQL they replace.
+**Verification**: Manually test against local DB to confirm stored procedures behave identically to the inline SQL they replace. The existing `CheckConnection` test uses Doppler/ScaleGrid and is not affected by this change until SPs are deployed to production.
 
 ---
 
-### B1: RED — BackendService.DeleteUserData (connection not configured)
+### B1: Add DeleteUser to IMySqlIo / MySqlIo
 
-**Test file**: `StoryCADTests/Services/Backend/BackendServiceTests.cs`
+**File**: `StoryCADLib/DAL/MySqLIO.cs`
 
 ```csharp
-[TestMethod]
-public async Task DeleteUserData_WhenConnectionNotConfigured_ReturnsFalse()
+public async Task DeleteUser(MySqlConnection conn, string email)
 {
-    // Arrange
-    var testLogger = new TestLogService();
-    var appState = Ioc.Default.GetRequiredService<AppState>();
-    var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
-    var backendService = new BackendService(testLogger, appState, preferenceService);
-    // IsConnectionConfigured defaults to false (no SetConnectionString called)
-
-    // Act
-    var result = await backendService.DeleteUserData("test@example.com");
-
-    // Assert
-    Assert.IsFalse(result);
-    Assert.IsTrue(testLogger.HasWarning("Skipping DeleteUserData"));
+    await using MySqlCommand cmd = new("spDeleteUser", conn);
+    cmd.CommandType = CommandType.StoredProcedure;
+    cmd.Parameters.AddWithValue("email", email);
+    await cmd.ExecuteNonQueryAsync();
 }
 ```
 
-**Build → RED (DeleteUserData does not exist)**
+Add `DeleteUser` to the `IMySqlIo` interface as well.
 
-### B1: GREEN — Add DeleteUserData to BackendService
+### B2: Add DeleteUserData to BackendService
 
 **File**: `StoryCADLib/Services/Backend/BackendService.cs`
 
@@ -689,7 +692,7 @@ public async Task<bool> DeleteUserData(string email)
     }
 
     _logService.Log(LogLevel.Info, "Deleting user data from backend database");
-    var sql = Ioc.Default.GetService<MySqlIo>();
+    var sql = Ioc.Default.GetService<IMySqlIo>();
     MySqlConnection conn = new(connection);
 
     try
@@ -711,55 +714,69 @@ public async Task<bool> DeleteUserData(string email)
 }
 ```
 
-**Build → GREEN**
-
----
-
-### B2: RED — MySqlIo.DeleteUser (via spDeleteUser)
+### B3: Automated Tests (Mocked — no database)
 
 **Test file**: `StoryCADTests/Services/Backend/BackendServiceTests.cs`
 
+`TestMySqlIo` implements `IMySqlIo` — records calls and returns preset results. Follows the existing `TestSaveable`, `MockCollaborator` patterns. Defined as a private class inside the test file.
+
 ```csharp
+[TestMethod]
+public async Task DeleteUserData_WhenConnectionNotConfigured_ReturnsFalse()
+{
+    // Arrange
+    var testLogger = new TestLogService();
+    var appState = Ioc.Default.GetRequiredService<AppState>();
+    var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+    var backendService = new BackendService(testLogger, appState, preferenceService);
+    // IsConnectionConfigured defaults to false (no SetConnectionString called)
+
+    // Act
+    var result = await backendService.DeleteUserData("test@example.com");
+
+    // Assert
+    Assert.IsFalse(result);
+    Assert.IsTrue(testLogger.HasWarning("Skipping DeleteUserData"));
+}
+
 [TestMethod]
 public async Task DeleteUserData_WhenConnectionConfigured_CallsDeleteAndReturnsTrue()
 {
-    // Arrange — uses LOCAL test database (never live ScaleGrid)
-    // TODO: Configure local test DB connection
-    var Prefs = Ioc.Default.GetService<PreferenceService>();
-    var backendService = Ioc.Default.GetRequiredService<BackendService>();
-    // backendService connection must point to local test DB
-
-    // Seed a test user first
-    Prefs.Model.FirstName = "DeleteTest";
-    Prefs.Model.LastName = "User";
-    Prefs.Model.Email = "deletetest@test.local";
-    await backendService.PostPreferences(Prefs.Model);
+    // Arrange — uses TestMySqlIo (no real database)
+    var testLogger = new TestLogService();
+    var appState = Ioc.Default.GetRequiredService<AppState>();
+    var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+    var backendService = new BackendService(testLogger, appState, preferenceService);
+    // TODO: Configure backendService with TestMySqlIo registered in IoC
 
     // Act
-    var result = await backendService.DeleteUserData("deletetest@test.local");
+    var result = await backendService.DeleteUserData("test@example.com");
 
     // Assert
     Assert.IsTrue(result);
+    // Verify TestMySqlIo.DeleteUser was called with correct email
 }
-```
 
-**Build → RED (MySqlIo.DeleteUser does not exist)**
-
-### B2: GREEN — Add DeleteUser to MySqlIo (calling spDeleteUser)
-
-**File**: `StoryCADLib/DAL/MySqLIO.cs`
-
-```csharp
-public async Task DeleteUser(MySqlConnection conn, string email)
+[TestMethod]
+public async Task DeleteUserData_WhenDatabaseThrows_ReturnsFalse()
 {
-    await using MySqlCommand cmd = new("spDeleteUser", conn);
-    cmd.CommandType = CommandType.StoredProcedure;
-    cmd.Parameters.AddWithValue("p_email", email);
-    await cmd.ExecuteNonQueryAsync();
+    // Arrange — TestMySqlIo configured to throw
+    var testLogger = new TestLogService();
+    var appState = Ioc.Default.GetRequiredService<AppState>();
+    var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+    var backendService = new BackendService(testLogger, appState, preferenceService);
+    // TODO: Configure TestMySqlIo to throw on DeleteUser
+
+    // Act
+    var result = await backendService.DeleteUserData("test@example.com");
+
+    // Assert
+    Assert.IsFalse(result);
+    Assert.IsTrue(testLogger.HasError("Failed to delete user data"));
 }
 ```
 
-**Build + run tests against local DB → GREEN**
+**Real stored procedure behavior is verified manually** — see Phase M (Manual Testing).
 
 ---
 
@@ -1044,25 +1061,27 @@ The PreferencesDialog is shown as a ContentDialog from `ShellViewModel.OpenPrefe
 
 | # | Phase | What | File |
 |---|-------|------|------|
-| 0.1 | SETUP | Export current schema from ScaleGrid (structure only, no data) | MySQL Workbench |
+| 0.1 | SETUP | Export current schema from ScaleGrid (structure only, no data) | `/mnt/c/temp/StoryBuilder DDL.txt` |
 | 0.2 | SETUP | Create local test DB from exported schema, seed fake test data | MySQL Workbench |
-| 0.3 | SETUP | Write 3 stored procedure SQL scripts (local only, not committed yet) | Local SQL files |
+| 0.3 | SETUP | Write 3 stored procedure SQL scripts (bare parameter names) | Local SQL files |
 | 0.4 | SETUP | Apply stored procedures to local test DB | MySQL Workbench |
-| 0.5 | SETUP | Configure test connection (bypass Doppler for local DB) | Test config |
+| 0.4a | FIX | Recreate local SPs with bare parameter names (were `p_` prefixed) | MySQL Workbench |
+| 0.5 | SETUP | Extract `IMySqlIo` interface, register in IoC | IMySqlIo.cs, MySqLIO.cs, IoC registration |
 | A1 | GREEN | LoadModel tests (5 tests — baseline, existing code) | PreferencesViewModelTests.cs (new) |
 | A2 | GREEN | SaveModel tests (5 tests — baseline, existing code) | PreferencesViewModelTests.cs |
 | A3 | GREEN | SaveAsync tests (2 tests — baseline, existing code) | PreferencesViewModelTests.cs |
 | A4 | GREEN | Computed property tests (4 tests — baseline) | PreferencesViewModelTests.cs |
 | A5 | GREEN | PropertyChanged tests (3 tests — baseline) | PreferencesViewModelTests.cs |
 | B0 | REFACTOR | Convert `AddOrUpdatePreferences` + `AddVersion` to stored procedure calls | MySqLIO.cs |
-| B0 | VERIFY | Run existing `CheckConnection` test against local DB | BackendServiceTests.cs |
-| B1 | RED→GREEN | `DeleteUserData_WhenConnectionNotConfigured_ReturnsFalse` | BackendServiceTests.cs + BackendService.cs |
-| B2 | RED→GREEN | `DeleteUserData_WhenConnectionConfigured_CallsDeleteAndReturnsTrue` (local DB) | BackendServiceTests.cs + MySqLIO.cs |
+| B1 | CODE | Add `DeleteUser` to `IMySqlIo` / `MySqlIo` | IMySqlIo.cs, MySqLIO.cs |
+| B2 | CODE | Add `DeleteUserData` to `BackendService` | BackendService.cs |
+| B3 | TEST | Mocked delete tests (3 tests) using `TestMySqlIo` — no database | BackendServiceTests.cs |
 | B-audit | GATE | DAL security audit: all 4 SPs, MySqlIo.cs, BackendService.cs | Issue #1370 comment |
 | C1 | RED→GREEN | DeleteMyDataAsync tests (4 tests) | PreferencesViewModelTests.cs + PreferencesViewModel.cs |
-| D1-D5 | MANUAL | XAML tab restructure + Delete button + click handler | PreferencesDialog.xaml/.cs |
+| D1-D5 | UI | XAML tab restructure + Delete button + click handler | PreferencesDialog.xaml/.cs |
+| M | MANUAL | Run manual test script against local DB (SP verification + end-to-end) | ManualTests/Account_Deletion_Test_Plan.md |
 | — | POST | Commit STORYBUILDER_ALTERATION2.sql to storybuilder-miscellaneous | storybuilder-miscellaneous/mysql/ |
-| — | POST | Update schema files in storybuilder-miscellaneous | storybuilder-miscellaneous/mysql/ |
+| — | POST | Replace stale schema files with exported schema | storybuilder-miscellaneous/mysql/ |
 | — | DEPLOY | Apply stored procedures to live ScaleGrid | MySQL Workbench |
 | — | DEPLOY | Verify existing functionality against live ScaleGrid | Manual |
 | — | MANUAL | End-to-end on Mac device, screen recording (Cmd+Shift+5) | Physical Mac |
@@ -1073,15 +1092,17 @@ The PreferencesDialog is shown as a ContentDialog from `ShellViewModel.OpenPrefe
 | File | Change |
 |------|--------|
 | `storybuilder-miscellaneous/mysql/STORYBUILDER_ALTERATION2.sql` | **New file** (committed post-testing) — 3 stored procedures |
-| `storybuilder-miscellaneous/mysql/` (schema files) | Updated with exported current schema from ScaleGrid |
-| `StoryCADTests/ManualTests/Account_Deletion_Test_Plan.md` | **New file** — manual testing checklist + Apple screen recording procedure |
+| `storybuilder-miscellaneous/mysql/` (schema files) | Replaced with exported current schema from ScaleGrid (`/mnt/c/temp/StoryBuilder DDL.txt`) |
+| `StoryCADTests/ManualTests/Account_Deletion_Test_Plan.md` | **New file** — manual DB testing checklist + Apple screen recording procedure |
 | `StoryCADTests/ViewModels/PreferencesViewModelTests.cs` | **New file** — full VM coverage (~19 tests) + deletion tests |
-| `StoryCADTests/Services/Backend/BackendServiceTests.cs` | Add deletion tests (B1, B2), update integration tests for local DB |
-| `StoryCADLib/DAL/MySqLIO.cs` | Refactor `AddOrUpdatePreferences` + `AddVersion` to stored procs, add `DeleteUser()` via spDeleteUser |
-| `StoryCADLib/Services/Backend/BackendService.cs` | Add `DeleteUserData()` method |
+| `StoryCADTests/Services/Backend/BackendServiceTests.cs` | Add `TestMySqlIo`, mocked deletion tests (B3) |
+| `StoryCADLib/DAL/IMySqlIo.cs` | **New file** — interface for `MySqlIo` (Phase 0.5) |
+| `StoryCADLib/DAL/MySqLIO.cs` | Implement `IMySqlIo`, refactor to stored procs, add `DeleteUser()` |
+| `StoryCADLib/Services/Backend/BackendService.cs` | Resolve `IMySqlIo` instead of `MySqlIo`, add `DeleteUserData()` |
 | `StoryCADLib/ViewModels/Tools/PreferencesViewModel.cs` | Add `DeleteMyDataAsync()` method |
 | `StoryCADLib/Services/Dialogs/Tools/PreferencesDialog.xaml` | Rename General→Account, add Save Locations tab, move directories, add Delete My Data button |
 | `StoryCADLib/Services/Dialogs/Tools/PreferencesDialog.xaml.cs` | Add `DeleteMyData_Click` handler with confirmation dialog |
+| IoC registration (likely `App.xaml.cs` or service registration) | Register `IMySqlIo` → `MySqlIo` |
 
 ## Manual Testing
 

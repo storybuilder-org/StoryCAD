@@ -56,6 +56,15 @@ public class PreferencesModel : ObservableObject
     #region Properties
 
     /// <summary>
+    ///     The user's backend database ID, returned by spAddUser.
+    ///     Stored locally so subsequent operations (preferences, versions,
+    ///     deletion) can identify the user without re-querying.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("UserId")]
+    internal int UserId { get; set; }
+
+    /// <summary>
     ///     This is the user's first name
     /// </summary>
     [JsonInclude]
