@@ -21,8 +21,25 @@
                     <Button Content="Delete My Data"
                             Foreground="Red"
                             HorizontalAlignment="Center"
-                            Margin="8,16,8,8"
-                            Click="DeleteMyData_Click" />
+                            Margin="8,16,8,8">
+                        <Button.Flyout>
+                            <Flyout>
+                                <StackPanel MaxWidth="300" Spacing="8">
+                                    <TextBlock TextWrapping="Wrap"
+                                               Text="This will permanently delete your account, error reporting preferences, and version tracking history from our servers. Your local story files will NOT be deleted. This does not automatically remove you from our email list. To stop receiving product or marketing emails, use the 'Unsubscribe' link included in the footer of any email we send you. StoryCAD will close after deletion." />
+                                    <Button Content="Yes, Delete My Data"
+                                            Foreground="Red"
+                                            HorizontalAlignment="Center"
+                                            Click="DeleteMyData_Confirmed" />
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                    <TextBlock x:Name="DeleteStatusText"
+                               HorizontalAlignment="Center"
+                               Margin="8,4,8,4"
+                               TextWrapping="Wrap"
+                               MaxWidth="300" />
                 </StackPanel>
                 </TabViewItem>
                 <TabViewItem Header="Save Locations" IsClosable="False" VerticalContentAlignment="Center" VerticalAlignment="Center">
