@@ -13,6 +13,7 @@ using StoryCADLib.Services.Navigation;
 
 namespace StoryCADLib.ViewModels;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     #region Fields

@@ -2,19 +2,15 @@
 
 namespace StoryCADLib.Models;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class SceneModel : StoryElement
 {
     #region Properties
 
-    [JsonIgnore] private string _sceneDescription;
-
-    [JsonInclude]
-    [JsonPropertyName("Description")]
-    public string SceneDescription
-    {
-        get => _sceneDescription;
-        set => _sceneDescription = value;
-    }
+    // SceneDescription property removed (Issue #1367). Scene summaries now use
+    // StoryElement.Description (base class, JSON key "ElementDescription") like
+    // all other element types. Old .stbx files that stored scene summaries under
+    // JSON key "Description" are migrated by StoryElementConverter on load.
 
     [JsonIgnore] private Guid _viewpointCharacter;
 
@@ -263,7 +259,6 @@ public class SceneModel : StoryElement
 
     public SceneModel(StoryModel model, StoryNodeItem Node) : base("New Scene", StoryItemType.Scene, model, Node)
     {
-        SceneDescription = string.Empty;
         ViewpointCharacter = Guid.Empty;
         Date = string.Empty;
         Time = string.Empty;
@@ -294,7 +289,6 @@ public class SceneModel : StoryElement
     public SceneModel(string name, StoryModel model, StoryNodeItem Node) : base(name, StoryItemType.Scene, model, Node)
 
     {
-        SceneDescription = string.Empty;
         ViewpointCharacter = Guid.Empty;
         Date = string.Empty;
         Time = string.Empty;

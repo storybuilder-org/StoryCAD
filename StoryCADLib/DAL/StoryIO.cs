@@ -144,15 +144,6 @@ public class StoryIO
                 }
             }
 
-            // Migrate SceneDescription to base Description for scenes (Issue #1358)
-            foreach (var scene in _model.StoryElements.OfType<SceneModel>())
-            {
-                if (string.IsNullOrEmpty(scene.Description) && !string.IsNullOrEmpty(scene.SceneDescription))
-                {
-                    scene.Description = scene.SceneDescription;
-                }
-            }
-
             // Re-attach collection change handlers (they're not serialized)
             _model.ReattachCollectionHandlers();
 

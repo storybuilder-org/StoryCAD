@@ -8,6 +8,7 @@ using StoryCADLib.Services.Navigation;
 
 namespace StoryCADLib.ViewModels;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
 {
     #region Constructors
@@ -649,7 +650,6 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
         Model.Name = Name;
         IsTextBoxFocused = false;
         Model.Description = Description;
-        Model.SceneDescription = Description; // Backward compatibility with older versions
         Model.ViewpointCharacter = ViewpointCharacter;
         Model.Date = Date;
         Model.Time = Time;
@@ -684,7 +684,6 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
 
         // Write RTF files
         Model.Description = Description;
-        Model.SceneDescription = Description; // Backward compatibility with older versions
         Model.Events = Events;
         Model.Consequences = Consequences;
         Model.Significance = Significance;

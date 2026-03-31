@@ -22,6 +22,7 @@ using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.ViewModels;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class ShellViewModel : ObservableRecipient
 {
     private const string HomePage = "HomePage";
@@ -472,7 +473,7 @@ public class ShellViewModel : ObservableRecipient
 
     /// <summary>
     ///     Controls visibility for elements that should only be shown in the Trash view.
-    /// </summary
+    /// </summary>
     public Visibility TrashButtonVisibility
     {
         get => _trashButtonVisibility;

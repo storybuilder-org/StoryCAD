@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace StoryCADLib.ViewModels.Tools;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class TraitsViewModel : ObservableRecipient
 {
     #region Public Methods

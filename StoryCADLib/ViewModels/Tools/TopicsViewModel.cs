@@ -6,6 +6,7 @@ using StoryCADLib.Models.Tools;
 
 namespace StoryCADLib.ViewModels.Tools;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class TopicsViewModel : ObservableRecipient
 {
     private readonly ToolsData _toolsData;

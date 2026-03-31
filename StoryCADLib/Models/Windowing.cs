@@ -20,6 +20,7 @@ namespace StoryCADLib.Models;
 /// <summary>
 /// This class contains window (MainWindow) related items etc.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class Windowing : ObservableRecipient
 {
     private readonly AppState _appState;

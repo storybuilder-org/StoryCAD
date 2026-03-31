@@ -29,6 +29,7 @@ namespace StoryCADLib.ViewModels;
 ///     In the Shell, the user can switch between the two views by loading one or the other ObservableCollection.
 ///     NavigationTree will thus point to one or the other of the collections as its bindings.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class StoryNodeItem : INotifyPropertyChanged
 {
     private readonly AppState _appState;

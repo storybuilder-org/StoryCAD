@@ -17,6 +17,7 @@ namespace StoryCADLib.ViewModels.Tools;
 ///     To open Narrative Tool you can press CTRL + N or access it
 ///     through the Shell via the Tools Menu (Spanner Icon)
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class NarrativeToolVM : ObservableRecipient
 {
     private readonly AppState _appState;

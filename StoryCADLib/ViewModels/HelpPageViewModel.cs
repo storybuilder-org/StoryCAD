@@ -1,9 +1,11 @@
+
 namespace StoryCADLib.ViewModels;
 
 /// <summary>
 ///     ViewModel for HelpPage. Computes manual URLs from AppState.ManualBaseUrl
 ///     and a constant table of relative paths.
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class HelpPageViewModel
 {
     private const string TutorialRelativePath = "docs/Tutorial%20Creating%20a%20Story/Tutorial_Creating_a_Story.html";

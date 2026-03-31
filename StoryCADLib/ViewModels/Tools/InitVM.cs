@@ -10,6 +10,7 @@ namespace StoryCADLib.ViewModels.Tools;
 /// <summary>
 ///     This is the PreferencesInitialization ViewModel, this data
 /// </summary>
+[Microsoft.UI.Xaml.Data.Bindable]
 public class InitVM : ObservableRecipient
 {
     private readonly BackendService _backendService;
@@ -102,9 +103,7 @@ public class InitVM : ObservableRecipient
         PreferencesIo _prfIo = new();
         await _prfIo.WritePreferences(Preferences);
         await _prfIo.ReadPreferences();
-        if (preference.Model.RecordPreferencesStatus)
-        {
-            await _backendService.PostPreferences(preference.Model);
-        }
+        await _backendService.PostPreferences(preference.Model);
+        await _backendService.PostVersion();
     }
 }

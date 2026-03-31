@@ -58,6 +58,35 @@ public sealed partial class PreferencesDialog : Page
         });
     }
 
+    /// <summary>
+    ///     Handles the confirmed Delete My Data action from the Flyout.
+    ///     Deletes backend + local data, shows result, exits on success.
+    /// </summary>
+    private async void DeleteMyData_Confirmed(object sender, RoutedEventArgs e)
+    {
+        // Close the flyout
+        if (sender is Button btn && btn.Parent is StackPanel panel
+            && panel.Parent is Flyout flyout)
+        {
+            flyout.Hide();
+        }
+
+        bool success = await PreferencesVm.DeleteMyDataAsync();
+
+        if (success)
+        {
+            DeleteStatusText.Text = "Your data has been deleted. Thank you for using StoryCAD.";
+            DeleteStatusText.Foreground = new SolidColorBrush(Microsoft.UI.Colors.Green);
+            await Task.Delay(2000);
+            Application.Current.Exit();
+        }
+        else
+        {
+            DeleteStatusText.Foreground = new SolidColorBrush(Microsoft.UI.Colors.Red);
+            DeleteStatusText.Text = "Deletion failed. Please try again later, or contact support@storybuilder.org.";
+        }
+    }
+
     private void OnBackupPathSelected(object sender, string path)
     {
         PreferencesVm.BackupDirectory = path;

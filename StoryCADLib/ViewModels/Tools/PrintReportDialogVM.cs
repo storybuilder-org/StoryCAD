@@ -10,6 +10,7 @@ using StoryCADLib.Services.Reports;
 
 namespace StoryCADLib.ViewModels.Tools;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public partial class PrintReportDialogVM : ObservableRecipient
 {
     public ContentDialog Dialog;

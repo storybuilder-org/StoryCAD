@@ -5,6 +5,7 @@ using StoryCADLib.Services.Json;
 
 namespace StoryCADLib.ViewModels.Tools;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class FeedbackViewModel : ObservableRecipient
 {
     /// <summary>

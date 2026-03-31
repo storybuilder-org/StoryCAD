@@ -17,6 +17,7 @@ using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.ViewModels.SubViewModels;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class OutlineViewModel : ObservableRecipient
 {
     private readonly AutoSaveService _autoSaveService;

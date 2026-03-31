@@ -2,6 +2,7 @@
 
 namespace StoryCADLib.Models;
 
+[Microsoft.UI.Xaml.Data.Bindable]
 public class RelationType : ObservableObject
 {
     public string MemberRole;
