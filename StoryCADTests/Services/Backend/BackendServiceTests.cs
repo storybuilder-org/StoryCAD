@@ -1,5 +1,6 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using MySql.Data.MySqlClient;
+using StoryCADLib.DAL;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
 using StoryCADLib.Services.Backend;
@@ -13,40 +14,145 @@ namespace StoryCADTests.Services.Backend;
 [TestClass]
 public class BackendTests
 {
+    #region PostVersion / PostPreferences Skip Tests
+
     /// <summary>
-    ///     This checks that the Backend Server connection
-    ///     works correctly. (Requires .ENV)
+    ///     Verifies that PostVersion skips gracefully
+    ///     when the backend connection is not configured.
     /// </summary>
     [TestMethod]
-    public void CheckConnection()
+    public async Task PostVersion_WhenConnectionNotConfigured_SkipsGracefully()
     {
-        var Prefs = Ioc.Default.GetService<PreferenceService>();
+        // Arrange
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo(); // IsConnectionConfigured defaults to false
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
 
-        //Load keys.
-        Doppler doppler = new();
-        Doppler keys = new();
-        Task.Run(async () =>
-        {
-            keys = await doppler.FetchSecretsAsync();
-            await Ioc.Default.GetRequiredService<BackendService>().SetConnectionString(keys);
-        }).Wait();
+        preferenceService.Model.RecordVersionStatus = false;
 
-        //Make sure app logic thinks versions need syncing
-        Prefs.Model.RecordVersionStatus = false;
-        Prefs.Model.FirstName = "StoryCAD";
-        Prefs.Model.LastName = "Tests";
-        Prefs.Model.Email = "sysadmin@storybuilder.org";
+        // Act
+        await backendService.PostVersion();
 
-        //Call backend service to check connection
-        Task.Run(async () =>
-        {
-            await Ioc.Default.GetRequiredService<BackendService>().PostVersion();
-            await Ioc.Default.GetRequiredService<BackendService>().PostPreferences(Prefs.Model);
-        }).Wait();
-
-        //Check if test passed (RecordVersionStatus should be true now)
-        Assert.IsTrue(Prefs.Model.RecordVersionStatus);
+        // Assert — should skip without error
+        Assert.IsFalse(preferenceService.Model.RecordVersionStatus);
+        Assert.IsTrue(testLogger.HasWarning("Skipping PostVersion"));
     }
+
+    /// <summary>
+    ///     Verifies that PostPreferences skips gracefully
+    ///     when the backend connection is not configured.
+    /// </summary>
+    [TestMethod]
+    public async Task PostPreferences_WhenConnectionNotConfigured_SkipsGracefully()
+    {
+        // Arrange
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.FirstName = "StoryCAD";
+        preferenceService.Model.LastName = "Tests";
+        preferenceService.Model.Email = "sysadmin@storybuilder.org";
+
+        // Act
+        await backendService.PostPreferences(preferenceService.Model);
+
+        // Assert — should skip without error
+        Assert.IsTrue(testLogger.HasWarning("Skipping PostPreferences"));
+    }
+
+    #endregion
+
+    #region DeleteUserData Tests
+
+    [TestMethod]
+    public async Task DeleteUserData_WhenConnectionNotConfigured_ReturnsFalse()
+    {
+        // Arrange
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo(); // not configured
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        // Act
+        var result = await backendService.DeleteUserData();
+
+        // Assert
+        Assert.IsFalse(result);
+        Assert.IsTrue(testLogger.HasWarning("Skipping DeleteUserData"));
+    }
+
+    [TestMethod]
+    public async Task DeleteUserData_WhenNoUserId_ReturnsFalse()
+    {
+        // Arrange
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.UserId = 0; // no stored user ID
+
+        // Act
+        var result = await backendService.DeleteUserData();
+
+        // Assert
+        Assert.IsFalse(result);
+        Assert.IsTrue(testLogger.HasWarning("no UserId stored"));
+    }
+
+    [TestMethod]
+    public async Task DeleteUserData_WhenConfigured_CallsDeleteAndReturnsTrue()
+    {
+        // Arrange
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.UserId = 42;
+
+        // Act
+        var result = await backendService.DeleteUserData();
+
+        // Assert
+        Assert.IsTrue(result);
+        Assert.AreEqual(1, testSqlIo.DeleteUserCalls.Count);
+        Assert.AreEqual(42, testSqlIo.DeleteUserCalls[0]);
+    }
+
+    [TestMethod]
+    public async Task DeleteUserData_WhenDatabaseThrows_ReturnsFalse()
+    {
+        // Arrange
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        testSqlIo.ExceptionToThrow = new Exception("Connection lost");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.UserId = 42;
+
+        // Act
+        var result = await backendService.DeleteUserData();
+
+        // Assert
+        Assert.IsFalse(result);
+        Assert.IsTrue(testLogger.HasError("Failed to delete user data"));
+    }
+
+    #endregion
 
     #region StartupRecording Exception Handling Tests
 
@@ -61,14 +167,10 @@ public class BackendTests
         var testLogger = new TestLogService();
         var appState = Ioc.Default.GetRequiredService<AppState>();
         var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
 
-        // Create a BackendService with test logger
-        var backendService = new TestableBackendService(testLogger, appState, preferenceService);
-
-        // Configure to throw TaskCanceledException
+        var backendService = new TestableBackendService(testLogger, appState, preferenceService, testSqlIo);
         backendService.SetPostVersionException(new TaskCanceledException("Connection timeout"));
-
-        // Set up conditions to trigger PostVersion call
         preferenceService.Model.RecordVersionStatus = false;
 
         // Act
@@ -77,8 +179,6 @@ public class BackendTests
         // Assert
         Assert.IsTrue(testLogger.HasWarning("Backend operation timed out during startup"),
             "Should log TaskCanceledException as Warning");
-
-        // The retry message is logged at Info level
         var hasInfoRetry = testLogger.LogCalls.Any(x =>
             x.level == LogLevel.Info && x.message.Contains("Backend telemetry will retry on next startup"));
         Assert.IsTrue(hasInfoRetry, "Should log retry message at Info level");
@@ -91,14 +191,10 @@ public class BackendTests
         var testLogger = new TestLogService();
         var appState = Ioc.Default.GetRequiredService<AppState>();
         var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
 
-        // Create a BackendService with test logger
-        var backendService = new TestableBackendService(testLogger, appState, preferenceService);
-
-        // Configure to throw OperationCanceledException
+        var backendService = new TestableBackendService(testLogger, appState, preferenceService, testSqlIo);
         backendService.SetPostVersionException(new OperationCanceledException("Operation was cancelled"));
-
-        // Set up conditions to trigger PostVersion call
         preferenceService.Model.RecordVersionStatus = false;
 
         // Act
@@ -116,15 +212,11 @@ public class BackendTests
         var testLogger = new TestLogService();
         var appState = Ioc.Default.GetRequiredService<AppState>();
         var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
 
-        // Create a BackendService with test logger
-        var backendService = new TestableBackendService(testLogger, appState, preferenceService);
-
-        // Configure to throw MySqlException with auth failure code 1045
+        var backendService = new TestableBackendService(testLogger, appState, preferenceService, testSqlIo);
         var authException = CreateMySqlException(1045, "Access denied for user");
         backendService.SetPostVersionException(authException);
-
-        // Set up conditions to trigger PostVersion call
         preferenceService.Model.RecordVersionStatus = false;
 
         // Act
@@ -144,15 +236,11 @@ public class BackendTests
         var testLogger = new TestLogService();
         var appState = Ioc.Default.GetRequiredService<AppState>();
         var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
 
-        // Create a BackendService with test logger
-        var backendService = new TestableBackendService(testLogger, appState, preferenceService);
-
-        // Configure to throw MySqlException with timeout code 2013
+        var backendService = new TestableBackendService(testLogger, appState, preferenceService, testSqlIo);
         var timeoutException = CreateMySqlException(2013, "Lost connection to MySQL server");
         backendService.SetPostVersionException(timeoutException);
-
-        // Set up conditions to trigger PostVersion call
         preferenceService.Model.RecordVersionStatus = false;
 
         // Act
@@ -163,8 +251,6 @@ public class BackendTests
             "Should log MySQL timeout as Warning");
         Assert.IsTrue(testLogger.HasWarning("Code 2013"),
             "Should log error code 2013");
-
-        // Should also have the retry message
         var hasInfoRetry = testLogger.LogCalls.Any(x =>
             x.level == LogLevel.Info && x.message.Contains("Backend telemetry will retry on next startup"));
         Assert.IsTrue(hasInfoRetry, "Should log retry message at Info level");
@@ -177,15 +263,11 @@ public class BackendTests
         var testLogger = new TestLogService();
         var appState = Ioc.Default.GetRequiredService<AppState>();
         var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
 
-        // Create a BackendService with test logger
-        var backendService = new TestableBackendService(testLogger, appState, preferenceService);
-
-        // Configure to throw MySqlException with connection refused code 2003
+        var backendService = new TestableBackendService(testLogger, appState, preferenceService, testSqlIo);
         var connRefusedException = CreateMySqlException(2003, "Can't connect to MySQL server");
         backendService.SetPostVersionException(connRefusedException);
-
-        // Set up conditions to trigger PostVersion call
         preferenceService.Model.RecordVersionStatus = false;
 
         // Act
@@ -196,8 +278,6 @@ public class BackendTests
             "Should log MySQL connection refused as Warning");
         Assert.IsTrue(testLogger.HasWarning("Code 2003"),
             "Should log error code 2003");
-
-        // Should also have the retry message
         var hasInfoRetry = testLogger.LogCalls.Any(x =>
             x.level == LogLevel.Info && x.message.Contains("Backend telemetry will retry on next startup"));
         Assert.IsTrue(hasInfoRetry, "Should log retry message at Info level");
@@ -210,16 +290,11 @@ public class BackendTests
         var testLogger = new TestLogService();
         var appState = Ioc.Default.GetRequiredService<AppState>();
         var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
 
-        // Create a BackendService with test logger
-        var backendService = new TestableBackendService(testLogger, appState, preferenceService);
-
-        // Configure to throw IOException
+        var backendService = new TestableBackendService(testLogger, appState, preferenceService, testSqlIo);
         var ioException = new IOException("Unable to write to file");
         backendService.SetWritePreferencesException(ioException);
-
-        // Set up conditions to trigger version mismatch path (which writes preferences)
-        // AppState.Version is readonly, but we can set preferenceService.Model.Version to differ from it
         preferenceService.Model.Version = "different-version-to-trigger-mismatch";
 
         // Act
@@ -237,16 +312,11 @@ public class BackendTests
         var testLogger = new TestLogService();
         var appState = Ioc.Default.GetRequiredService<AppState>();
         var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
 
-        // Create a BackendService with test logger
-        var backendService = new TestableBackendService(testLogger, appState, preferenceService);
-
-        // Configure to throw UnauthorizedAccessException
+        var backendService = new TestableBackendService(testLogger, appState, preferenceService, testSqlIo);
         var unauthorizedException = new UnauthorizedAccessException("Access to path is denied");
         backendService.SetWritePreferencesException(unauthorizedException);
-
-        // Set up conditions to trigger version mismatch path (which writes preferences)
-        // AppState.Version is readonly, but we can set preferenceService.Model.Version to differ from it
         preferenceService.Model.Version = "different-version-to-trigger-mismatch";
 
         // Act
@@ -264,15 +334,11 @@ public class BackendTests
         var testLogger = new TestLogService();
         var appState = Ioc.Default.GetRequiredService<AppState>();
         var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
 
-        // Create a BackendService with test logger
-        var backendService = new TestableBackendService(testLogger, appState, preferenceService);
-
-        // Configure to throw unexpected exception (e.g., NullReferenceException)
+        var backendService = new TestableBackendService(testLogger, appState, preferenceService, testSqlIo);
         var unexpectedException = new NullReferenceException("Unexpected null reference");
         backendService.SetPostVersionException(unexpectedException);
-
-        // Set up conditions to trigger PostVersion call
         preferenceService.Model.RecordVersionStatus = false;
 
         // Act
@@ -288,12 +354,11 @@ public class BackendTests
     #region Helper Methods
 
     /// <summary>
-    /// Creates a MySqlException with a specific error code for testing
-    /// Uses reflection since MySqlException constructor is internal
+    /// Creates a MySqlException with a specific error code for testing.
+    /// Uses reflection since MySqlException constructor is internal.
     /// </summary>
     private static MySqlException CreateMySqlException(int errorCode, string message)
     {
-        // MySqlException has an internal constructor, so we use reflection to create it
         var constructor = typeof(MySqlException).GetConstructor(
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
             null,
@@ -305,7 +370,6 @@ public class BackendTests
             return (MySqlException)constructor.Invoke(new object[] { message, errorCode });
         }
 
-        // Fallback: Try to create with different constructor signature
         var constructors = typeof(MySqlException).GetConstructors(
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
@@ -318,7 +382,6 @@ public class BackendTests
             }
         }
 
-        // Last resort: throw a generic exception that will be caught
         throw new InvalidOperationException($"Cannot create MySqlException with code {errorCode}");
     }
 
@@ -328,7 +391,7 @@ public class BackendTests
 #region Test Infrastructure
 
 /// <summary>
-/// Test double for ILogService that captures log calls for verification
+/// Test double for ILogService that captures log calls for verification.
 /// </summary>
 public class TestLogService : ILogService
 {
@@ -351,7 +414,6 @@ public class TestLogService : ILogService
     public bool AddElmahTarget() => false;
     public void Flush() { }
 
-    // Helper methods for test assertions
     public bool HasWarning(string containing) =>
         LogCalls.Any(x => x.level == LogLevel.Warn && x.message.Contains(containing));
 
@@ -365,8 +427,62 @@ public class TestLogService : ILogService
 }
 
 /// <summary>
-/// Testable version of BackendService that allows injecting exceptions for testing
-/// StartupRecording exception handling by simulating exceptions from internal operations
+/// Test double for IMySqlIo that records calls and returns preset results.
+/// No database connection is ever made. Follows the same pattern as
+/// TestSaveable, MockCollaborator, and TestLogService.
+/// </summary>
+public class TestMySqlIo : IMySqlIo
+{
+    public bool IsConnectionConfigured { get; private set; }
+    public Exception ExceptionToThrow { get; set; }
+
+    // Call recording
+    public List<(string name, string email)> AddOrUpdateUserCalls { get; } = new();
+    public List<(int id, bool elmah, bool newsletter, string version)> AddOrUpdatePreferencesCalls { get; } = new();
+    public List<(int id, string current, string previous)> AddVersionCalls { get; } = new();
+    public List<int> DeleteUserCalls { get; } = new();
+
+    public int AddOrUpdateUserReturnId { get; set; } = 1;
+
+    public void SetConnectionString(string connectionString)
+    {
+        IsConnectionConfigured = true;
+    }
+
+    public Task<int> AddOrUpdateUser(string name, string email)
+    {
+        AddOrUpdateUserCalls.Add((name, email));
+        if (ExceptionToThrow != null) throw ExceptionToThrow;
+        return Task.FromResult(AddOrUpdateUserReturnId);
+    }
+
+    public Task AddOrUpdatePreferences(int id, bool elmah, bool newsletter, string version)
+    {
+        AddOrUpdatePreferencesCalls.Add((id, elmah, newsletter, version));
+        if (ExceptionToThrow != null) throw ExceptionToThrow;
+        return Task.CompletedTask;
+    }
+
+    public Task AddVersion(int id, string currentVersion, string previousVersion)
+    {
+        AddVersionCalls.Add((id, currentVersion, previousVersion));
+        if (ExceptionToThrow != null) throw ExceptionToThrow;
+        return Task.CompletedTask;
+    }
+
+    public bool DeleteUserReturnValue { get; set; } = true;
+
+    public Task<bool> DeleteUser(int id)
+    {
+        DeleteUserCalls.Add(id);
+        if (ExceptionToThrow != null) throw ExceptionToThrow;
+        return Task.FromResult(DeleteUserReturnValue);
+    }
+}
+
+/// <summary>
+/// Testable version of BackendService that allows injecting exceptions
+/// for testing StartupRecording exception handling.
 /// </summary>
 public class TestableBackendService : BackendService
 {
@@ -375,8 +491,9 @@ public class TestableBackendService : BackendService
     private readonly AppState _testAppState;
     private readonly PreferenceService _testPreferenceService;
 
-    public TestableBackendService(ILogService logService, AppState appState, PreferenceService preferenceService)
-        : base(logService, appState, preferenceService)
+    public TestableBackendService(ILogService logService, AppState appState,
+        PreferenceService preferenceService, IMySqlIo sqlIo)
+        : base(logService, appState, preferenceService, sqlIo)
     {
         _testLogService = logService;
         _testAppState = appState;
@@ -388,15 +505,14 @@ public class TestableBackendService : BackendService
     public void SetWritePreferencesException(Exception ex) => _exceptionToThrow = ex;
 
     /// <summary>
-    /// Override StartupRecording to inject exceptions for testing
-    /// This simulates exceptions that would come from PostPreferences, PostVersion, or WritePreferences
+    /// Override StartupRecording to inject exceptions for testing.
+    /// Simulates exceptions from PostPreferences, PostVersion, or WritePreferences.
     /// </summary>
     public new async Task StartupRecording()
     {
         try
         {
-            await Task.CompletedTask; // Async signature required for base class compatibility
-            // Simulate the logic from base.StartupRecording but throw injected exception
+            await Task.CompletedTask;
             if (_testPreferenceService.Model.RecordPreferencesStatus)
             {
                 if (_exceptionToThrow != null)

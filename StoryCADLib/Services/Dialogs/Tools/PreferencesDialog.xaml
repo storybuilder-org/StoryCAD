@@ -8,7 +8,7 @@
         <TabView Name="PivotView" Height="381" Width="500" VerticalAlignment="Stretch"
                  TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
             <TabView.TabItems>
-                <TabViewItem Header="General" IsClosable="False" VerticalContentAlignment="Stretch" VerticalAlignment="Center">
+                <TabViewItem Header="Account" IsClosable="False" VerticalContentAlignment="Stretch" VerticalAlignment="Center">
                 <StackPanel>
                     <TextBox Header="Your first name:" PlaceholderText="Put the first name want to publish under here"
                              HorizontalAlignment="Center" Margin="8" Width="300"
@@ -18,6 +18,32 @@
                              Text="{x:Bind PreferencesVm.LastName, Mode=TwoWay}" />
                     <TextBox Header="Your email:" PlaceholderText="Put your email here" Margin="8" Width="300"
                              Text="{x:Bind PreferencesVm.Email, Mode=TwoWay}" />
+                    <Button Content="Delete My Data"
+                            Foreground="Red"
+                            HorizontalAlignment="Center"
+                            Margin="8,16,8,8">
+                        <Button.Flyout>
+                            <Flyout>
+                                <StackPanel MaxWidth="300" Spacing="8">
+                                    <TextBlock TextWrapping="Wrap"
+                                               Text="This will permanently delete your account, error reporting preferences, and version tracking history from our servers. Your local story files will NOT be deleted. This does not automatically remove you from our email list. To stop receiving product or marketing emails, use the 'Unsubscribe' link included in the footer of any email we send you. StoryCAD will close after deletion." />
+                                    <Button Content="Yes, Delete My Data"
+                                            Foreground="Red"
+                                            HorizontalAlignment="Center"
+                                            Click="DeleteMyData_Confirmed" />
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                    <TextBlock x:Name="DeleteStatusText"
+                               HorizontalAlignment="Center"
+                               Margin="8,4,8,4"
+                               TextWrapping="Wrap"
+                               MaxWidth="300" />
+                </StackPanel>
+                </TabViewItem>
+                <TabViewItem Header="Save Locations" IsClosable="False" VerticalContentAlignment="Center" VerticalAlignment="Center">
+                <StackPanel>
                     <controls:BrowseTextBox
                         HorizontalAlignment="Right"
                         Header="Project directory:"
@@ -25,6 +51,14 @@
                         Path="{x:Bind PreferencesVm.ProjectDirectory, Mode=TwoWay}"
                         BrowseMode="Folder"
                         PathSelected="OnProjectPathSelected" />
+                    <controls:BrowseTextBox
+                        x:Name="BackupDirBrowse2"
+                        HorizontalAlignment="Right"
+                        Header="Backup directory:"
+                        PlaceholderText="Where do you want to store your backups?"
+                        Path="{x:Bind PreferencesVm.BackupDirectory, Mode=TwoWay}"
+                        BrowseMode="Folder"
+                        PathSelected="OnBackupPathSelected" />
                 </StackPanel>
                 </TabViewItem>
                 <TabViewItem Header="Backup" IsClosable="False" VerticalAlignment="Stretch" VerticalContentAlignment="Center">
@@ -45,14 +79,6 @@
                     <NumberBox Header="How often should backups be made? (Minutes)" Maximum="300" Minimum="1"
                                Margin="4" Width="300" HorizontalAlignment="Left"
                                Value="{x:Bind PreferencesVm.TimedBackupInterval, Mode=TwoWay}" />
-                    <controls:BrowseTextBox
-                        x:Name="BackupDirBrowse"
-                        HorizontalAlignment="Right"
-                        Header="Backup directory:"
-                        PlaceholderText="Where do you want to store your backups?"
-                        Path="{x:Bind PreferencesVm.BackupDirectory, Mode=TwoWay}"
-                        BrowseMode="Folder"
-                        PathSelected="OnBackupPathSelected" />
                 </StackPanel>
                 </TabViewItem>
                 <TabViewItem Header="Other" IsClosable="False" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch">

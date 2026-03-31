@@ -1,51 +1,87 @@
-﻿using System.Data;
+using System.Data;
 using MySql.Data.MySqlClient;
 
 namespace StoryCADLib.DAL;
 
-public class MySqlIo
+/// <summary>
+///     MySQL data access layer. Each method opens its own connection,
+///     executes a stored procedure, and closes the connection.
+///     Connection string is set once via SetConnectionString (called
+///     by BackendService after Doppler key retrieval).
+/// </summary>
+public class MySqlIo : IMySqlIo
 {
-    public async Task<int> AddOrUpdateUser(MySqlConnection conn, string name, string email)
+    private string _connectionString = string.Empty;
+
+    /// <inheritdoc />
+    public bool IsConnectionConfigured { get; private set; }
+
+    /// <inheritdoc />
+    public void SetConnectionString(string connectionString)
     {
-        await using MySqlCommand _cmd = new("spAddUser", conn);
-        _cmd.CommandType = CommandType.StoredProcedure;
-        _cmd.Parameters.AddWithValue("name", name);
-        _cmd.Parameters.AddWithValue("email", email);
-        _cmd.Parameters.Add("@user_id", MySqlDbType.Int32);
-        _cmd.Parameters["@user_id"].Direction = ParameterDirection.Output;
-        await _cmd.ExecuteNonQueryAsync();
-        var _id = (int)_cmd.Parameters["@user_id"].Value;
-        return _id;
+        if (string.IsNullOrWhiteSpace(connectionString))
+            return;
+        _connectionString = connectionString;
+        IsConnectionConfigured = true;
     }
 
-    public async Task AddOrUpdatePreferences(MySqlConnection conn, int id, bool elmah, bool newsletter, string version)
+    /// <inheritdoc />
+    public async Task<int> AddOrUpdateUser(string name, string email)
     {
-        const string sql = "INSERT INTO StoryBuilder.preferences" +
-                           " (user_id, elmah_consent, newsletter_consent, version)" +
-                           " VALUES (@user_id,@elmah,@newsletter, @version)" +
-                           " ON DUPLICATE KEY UPDATE elmah_consent = @elmah, newsletter_consent = @newsletter, version = @version";
-        await using MySqlCommand _cmd = new(sql, conn);
-        _cmd.Parameters.AddWithValue("@user_id", id);
-        _cmd.Parameters.AddWithValue("@elmah", elmah);
-        _cmd.Parameters.AddWithValue("@newsletter", newsletter);
-        _cmd.Parameters.AddWithValue("@version", version);
-        await _cmd.ExecuteNonQueryAsync();
+        await using var conn = new MySqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using MySqlCommand cmd = new("spAddUser", conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.AddWithValue("name", name);
+        cmd.Parameters.AddWithValue("email", email);
+        cmd.Parameters.Add("@user_id", MySqlDbType.Int32);
+        cmd.Parameters["@user_id"].Direction = ParameterDirection.Output;
+        await cmd.ExecuteNonQueryAsync();
+        return (int)cmd.Parameters["@user_id"].Value;
     }
 
-    public async Task AddVersion(MySqlConnection conn, int id, string currentVersion, string previousVersion)
+    /// <inheritdoc />
+    public async Task AddOrUpdatePreferences(int id, bool elmah, bool newsletter, string version)
     {
-        const string sql = "INSERT INTO StoryBuilder.versions" +
-                           " (user_id, current_version, previous_version)" +
-                           " VALUES (@user_id, @current, @previous)" +
-                           " ON DUPLICATE KEY UPDATE" +
-                           " current_version = @current, previous_version = @previous";
+        await using var conn = new MySqlConnection(_connectionString);
+        await conn.OpenAsync();
 
-        await using (MySqlCommand _cmd = new(sql, conn))
-        {
-            _cmd.Parameters.AddWithValue("@user_id", id);
-            _cmd.Parameters.AddWithValue("@current", currentVersion);
-            _cmd.Parameters.AddWithValue("@previous", previousVersion);
-            await _cmd.ExecuteNonQueryAsync();
-        }
+        await using MySqlCommand cmd = new("spAddOrUpdatePreferences", conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.AddWithValue("user_id", id);
+        cmd.Parameters.AddWithValue("elmah", elmah);
+        cmd.Parameters.AddWithValue("newsletter", newsletter);
+        cmd.Parameters.AddWithValue("ver", version);
+        await cmd.ExecuteNonQueryAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task AddVersion(int id, string currentVersion, string previousVersion)
+    {
+        await using var conn = new MySqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using MySqlCommand cmd = new("spAddOrUpdateVersion", conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.AddWithValue("user_id", id);
+        cmd.Parameters.AddWithValue("current_ver", currentVersion);
+        cmd.Parameters.AddWithValue("previous_ver", previousVersion);
+        await cmd.ExecuteNonQueryAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DeleteUser(int id)
+    {
+        await using var conn = new MySqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using MySqlCommand cmd = new("spDeleteUser", conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.AddWithValue("user_id", id);
+        cmd.Parameters.Add("@deleted", MySqlDbType.Byte);
+        cmd.Parameters["@deleted"].Direction = ParameterDirection.Output;
+        await cmd.ExecuteNonQueryAsync();
+        return Convert.ToBoolean(cmd.Parameters["@deleted"].Value);
     }
 }

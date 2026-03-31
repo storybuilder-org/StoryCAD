@@ -84,7 +84,7 @@ public static class BootStrapper
         Services.AddSingleton<JSONResourceLoader>();
         Services.AddSingleton<ScrivenerIo>();
         Services.AddSingleton<StoryIO>();
-        Services.AddSingleton<MySqlIo>();
+        Services.AddSingleton<IMySqlIo, MySqlIo>();
         Services.AddSingleton<OutlineService>();
         Services.AddSingleton<StoryCADApi>();
         Services.AddSingleton<BackupService>();
