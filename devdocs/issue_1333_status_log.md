@@ -6,10 +6,29 @@
 - Created branch `issue-1333-usage-statistics` off `dev`
 - Researched OpenTelemetry as suggested by Jake (Rarisma) in issue comment
 - Produced research document: `devdocs/issue_1333_opentelemetry_research.md`
+- Mapped all telemetry instrumentation points in the codebase: `devdocs/issue_1333_instrumentation_points.md`
+  - Session lifecycle: `App.OnLaunched()` / `OutlineViewModel.ExitApp()`
+  - Outline lifecycle: `FileOpenService.OpenFile()` / `FileCreateService.CreateFile()` / `OutlineViewModel.CloseFile()`
+  - Element operations: `AddStoryElement()` / `RemoveStoryElement()` / `MoveTreeViewItem*()`
+  - Feature usage: 9 tools identified (Collaborator, Key Questions, Topics, Master Plots, Dramatic Situations, Stock Scenes, Scrivener Export, Print, Search)
+  - Existing infrastructure: `BackendService`, `IMySqlIo`, `PreferencesModel` consent flags, Doppler secrets
 
-### Key Decisions
+### Key Findings (Exploratory — Nothing Settled)
 
-**OpenTelemetry: Not recommended.** Core mismatch — OTel produces aggregated metrics and distributed trace spans; StoryCAD needs per-session, per-outline rows in MySQL. No MySQL exporter exists, and standing up an OTel Collector + trace backend is unjustified for ~2,000 users. Custom telemetry using existing `IMySqlIo`/stored procedure pattern is the right approach.
+**OpenTelemetry data model: Better fit than initially assessed.** The initial research concluded OTel was a poor fit because it aggregates rather than producing per-row data. However, the proposed MySQL tables are intended for summarization, not per-session granularity. OTel's aggregated metrics map well to the actual requirements:
+- Session duration → Histogram (avg, p50, p95, p99)
+- Genre/story form distribution → Counters with attributes
+- Element counts by type → Histograms with attributes
+- Feature usage → Counters with feature_name attribute
+- These directly serve the stated goals: product development insights, community stats, resource allocation, subscription tier design
+
+**OpenTelemetry infrastructure: Still a concern.** Even with good data model fit, practical issues remain:
+- No MySQL exporter — would require a new backend (Prometheus, Grafana Cloud, etc.)
+- New infrastructure to maintain for a volunteer team
+- Existing codebase has `IMySqlIo`/stored procedure patterns that custom telemetry would reuse
+- OTel requires building something new rather than extending what exists
+
+**Decision on OTel approach is open.** The tradeoff is data model fit (decent) vs infrastructure fit (poor). Further exploration needed.
 
 **Integer user_id vs GUID: No privacy difference.** Both are pseudonymous — as long as the `users` table maps either to an email, the user is identifiable. Consent gating is the real privacy mechanism, not identifier format.
 
@@ -23,6 +42,7 @@
 
 ### Artifacts
 - `devdocs/issue_1333_opentelemetry_research.md` — Full research document (committed f885b1c7)
+- `devdocs/issue_1333_instrumentation_points.md` — Codebase instrumentation map (approach-independent)
 
 ### Next Steps
 - Design phase planning for issue 1333 (schema, consent model, implementation approach)
