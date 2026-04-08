@@ -52,6 +52,24 @@ internal static class ObjCRuntime
     [DllImport(ObjCLib, EntryPoint = "objc_msgSend")]
     internal static extern IntPtr objc_msgSend(IntPtr receiver, IntPtr selector, ulong arg1);
 
+    // For dataWithBytes:length: (IntPtr bytes, nuint length)
+    [DllImport(ObjCLib, EntryPoint = "objc_msgSend")]
+    internal static extern IntPtr objc_msgSend(IntPtr receiver, IntPtr selector, IntPtr arg1, nuint arg2);
+
+    // For printOperationForPrintInfo:scalingMode:autoRotate:
+    [DllImport(ObjCLib, EntryPoint = "objc_msgSend")]
+    internal static extern IntPtr objc_msgSend(IntPtr receiver, IntPtr selector, IntPtr arg1, long arg2, bool arg3);
+
+    // For methods returning BOOL (e.g. runOperation)
+    [DllImport(ObjCLib, EntryPoint = "objc_msgSend")]
+    internal static extern byte objc_msgSend_bool(IntPtr receiver, IntPtr selector);
+
+    // For loading frameworks (e.g. Quartz.framework for PDFKit)
+    [DllImport("libdl.dylib")]
+    internal static extern IntPtr dlopen(string path, int mode);
+
+    internal const int RTLD_LAZY = 1;
+
     // --- Delegate type for ObjC action methods (target-action pattern) ---
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
