@@ -1,0 +1,173 @@
+---
+title: CI/CD Pipeline
+layout: default
+nav_enabled: true
+nav_order: 119
+parent: For Developers
+has_toc: true
+---
+
+# CI/CD Pipeline
+
+StoryCAD uses GitHub Actions for continuous integration, documentation deployment, and release distribution. This page documents all workflows, what they produce, and how to use them.
+
+---
+
+## Workflows Overview
+
+| Workflow | File | Purpose |
+|----------|------|---------|
+| Build & Release | `build-release.yml` | Build, test, sign, and release for Windows and macOS |
+| Deploy Jekyll site to Pages | `pages.yml` | Build and deploy the user manual to GitHub Pages |
+| Sync Beta Manual | `sync-beta-manual.yml` | Sync docs from dev branch to the beta manual site |
+| Publish to Microsoft Store | `store-publish.yml` | Submit Windows packages to the Microsoft Store |
+
+---
+
+## Build & Release
+
+**File:** `.github/workflows/build-release.yml`
+
+### Triggers
+
+- **Push** to `main` or `dev` (ignores markdown, docs, and images)
+- **Pull request** to `main` or `dev`
+- **Manual** via `workflow_dispatch` with:
+  - `version` (required): Tag/version string, e.g. `v4.0.0`
+  - `skip_release` (optional, default: true): Build only, skip creating a GitHub release
+
+### Platform Matrix
+
+| Runner | RID | Architecture | Output |
+|--------|-----|-------------|--------|
+| `windows-latest` | win-x64 | x64 | MSIX package |
+| `windows-latest` | win-x86 | x86 | MSIX package |
+| `windows-11-arm` | win-arm64 | ARM64 | MSIX package |
+| `macos-latest` | osx-arm64 | arm64 | PKG installer |
+
+### What It Does
+
+1. **Changelog generation** (release builds only): Fetches raw release notes from the GitHub API, then transforms them into a user-friendly format via OpenAI. Falls back to raw notes if the API key is unavailable.
+
+2. **Build and test**: Restores packages, updates version numbers in `Package.appxmanifest` and `StoryCADLib.csproj`, runs tests on all platforms, then packages.
+
+3. **Code signing**:
+   - **Windows**: Decodes a base64-encoded PFX certificate from secrets and signs the MSIX package during build.
+   - **macOS**: Creates a temporary keychain, imports Apple Distribution certificates, signs the app bundle and dylibs, then builds a signed PKG installer.
+
+4. **Artifact upload**: Each platform/architecture uploads its package as a GitHub Actions artifact.
+
+5. **Release creation** (when `skip_release` is false): Downloads all artifacts and creates a GitHub release with the generated changelog.
+
+### Versioning
+
+- **Release builds** (`workflow_dispatch` with `skip_release=false`): Uses the provided version string verbatim (e.g. `4.0.0`).
+- **Draft/CI builds**: Uses `major.minor.run_number.65534` format, where `65534` indicates a non-release build.
+
+### Artifacts
+
+After a successful build, artifacts are available on the Actions run page:
+
+- `storycad-msix-win-x64.zip` — Windows x64 MSIX package
+- `storycad-msix-win-x86.zip` — Windows x86 MSIX package
+- `storycad-msix-win-arm64.zip` — Windows ARM64 MSIX package
+- `storycad-osx-arm64.pkg` — macOS PKG installer
+
+### Required Secrets
+
+| Secret | Purpose |
+|--------|---------|
+| `BASE64_ENCODED_PFX` | Windows code signing certificate (base64) |
+| `PFX_PASSWORD` | Password for the PFX certificate |
+| `ENV` | Environment variables file for the app |
+| `OPENAI_API_KEY` | Optional: AI-enhanced changelog generation |
+| `APPLE_CERTIFICATES_BASE64` | macOS signing certificates (base64) |
+| `APPLE_CERT_PASSWORD` | Password for macOS certificates |
+| `MACOS_PROVISIONING_PROFILE_BASE64` | macOS provisioning profile (base64) |
+
+---
+
+## Deploy Jekyll Site to Pages
+
+**File:** `.github/workflows/pages.yml`
+
+### Triggers
+
+- **Push** to `main` or `gh-pages`
+- **Pull request** (build only, no deployment)
+- **Manual** via `workflow_dispatch`
+
+### What It Does
+
+Builds the Jekyll user manual site and deploys it to GitHub Pages at [manual.storybuilder.org](https://manual.storybuilder.org/). On pull requests, it only validates the build without deploying.
+
+---
+
+## Sync Beta Manual
+
+**File:** `.github/workflows/sync-beta-manual.yml`
+
+### Triggers
+
+- **Push** to `dev` when files under `docs/` change
+- **Manual** via `workflow_dispatch`
+
+### What It Does
+
+Syncs the `docs/` directory from the `dev` branch to the external [BetaManual repository](https://github.com/storybuilder-org/BetaManual) using `rsync`. This keeps the beta documentation site at [beta.manual.storybuilder.org](https://beta.manual.storybuilder.org/) up to date with the latest development changes.
+
+### Required Secrets
+
+| Secret | Purpose |
+|--------|---------|
+| `BETA_MANUAL_PAT` | Personal access token for the BetaManual repository |
+
+---
+
+## Publish to Microsoft Store
+
+**File:** `.github/workflows/store-publish.yml`
+
+### Triggers
+
+- **Release published**: Automatically submits when a GitHub release is created
+- **Manual** via `workflow_dispatch` with a release tag
+
+### What It Does
+
+Builds a Store-ready MSIX package (using `StoreUpload` mode with signing disabled, since the Store re-signs packages), then submits it to the Microsoft Store via the `msstore` CLI.
+
+### Required Secrets
+
+| Secret | Purpose |
+|--------|---------|
+| `PARTNER_CENTER_TENANT_ID` | Azure AD tenant ID |
+| `PARTNER_CENTER_SELLER_ID` | Partner Center seller ID |
+| `PARTNER_CENTER_CLIENT_ID` | Azure AD app client ID |
+| `PARTNER_CENTER_CLIENT_SECRET` | Azure AD app client secret |
+
+### Setup
+
+Before this workflow can run, you need to:
+
+1. Register an Azure AD application in the [Azure Portal](https://portal.azure.com/)
+2. Associate it with your Partner Center account
+3. Add the four secrets above to the repository's GitHub Actions secrets
+4. Ensure at least one manual submission has been completed in Partner Center
+
+---
+
+## Finding Artifacts
+
+### From GitHub Actions
+
+1. Go to the [Actions tab](https://github.com/storybuilder-org/StoryCAD/actions)
+2. Click on a workflow run
+3. Scroll to the **Artifacts** section at the bottom
+4. Download the package for your platform
+
+### From GitHub Releases
+
+1. Go to the [Releases page](https://github.com/storybuilder-org/StoryCAD/releases)
+2. Find the release version
+3. Download from the **Assets** section

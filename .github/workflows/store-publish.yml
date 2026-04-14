@@ -1,0 +1,155 @@
+name: Publish to Microsoft Store
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (e.g. v4.0.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: store-publish
+  cancel-in-progress: false
+
+jobs:
+  build-store-package:
+    runs-on: windows-latest
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || github.event.inputs.tag }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.100"
+          global-json-file: "./global.json"
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Determine version
+        id: version
+        shell: pwsh
+        run: |
+          $tag = "${{ github.event.release.tag_name || github.event.inputs.tag }}"
+          $v = $tag.TrimStart('v')
+          "version=$v" >> $env:GITHUB_OUTPUT
+          Write-Host "Version: $v"
+
+      - name: Update Package.appxmanifest version
+        shell: pwsh
+        run: |
+          $manifestPath = Join-Path "${{ github.workspace }}" "StoryCAD\Package.appxmanifest"
+          [xml]$xml = Get-Content $manifestPath
+          $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+          $ns.AddNamespace('ns', $xml.DocumentElement.NamespaceURI)
+          $identity = $xml.SelectSingleNode('/ns:Package/ns:Identity', $ns)
+          $identity.SetAttribute('Version', '${{ steps.version.outputs.version }}')
+          $xml.Save($manifestPath)
+
+      - name: Update StoryCADLib.csproj version
+        shell: pwsh
+        run: |
+          $csprojPath = Join-Path "${{ github.workspace }}" "StoryCADLib\StoryCADLib.csproj"
+          [xml]$xml = Get-Content $csprojPath
+          $versionNode = $xml.SelectSingleNode('//Version')
+          $assemblyVersionNode = $xml.SelectSingleNode('//AssemblyVersion')
+          $fileVersionNode = $xml.SelectSingleNode('//FileVersion')
+          if ($versionNode) { $versionNode.InnerText = '${{ steps.version.outputs.version }}' }
+          if ($assemblyVersionNode) { $assemblyVersionNode.InnerText = '${{ steps.version.outputs.version }}' }
+          if ($fileVersionNode) { $fileVersionNode.InnerText = '${{ steps.version.outputs.version }}' }
+          $xml.Save($csprojPath)
+
+      - name: Write .env
+        if: ${{ secrets.ENV != '' }}
+        shell: pwsh
+        run: |
+          [IO.File]::WriteAllText("${{ github.workspace }}\StoryCAD\.env", "${{ secrets.ENV }}")
+
+      - name: Restore
+        run: dotnet restore StoryCAD.sln
+
+      - name: Build MSIX for Store
+        shell: pwsh
+        run: |
+          $msbuildArgs = @(
+            'StoryCAD.sln',
+            '/m',
+            '/p:Configuration=Release',
+            '/p:Platform=x64',
+            '/p:UapAppxPackageBuildMode=StoreUpload',
+            '/p:AppxBundle=Never',
+            '/p:AppxPackageSigningEnabled=false',
+            '/p:GenerateAppxPackageOnBuild=true',
+            "/p:AppxPackageDir=${{ github.workspace }}\StorePackages\",
+            '/p:PublishReadyToRun=false',
+            '/p:IsBetaBuild=false'
+          )
+          & msbuild @msbuildArgs
+
+      - name: Upload Store package
+        uses: actions/upload-artifact@v4
+        with:
+          name: store-package
+          path: ${{ github.workspace }}\StorePackages\**\*.msixupload
+          if-no-files-found: error
+
+      - name: Cleanup .env
+        if: always()
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          Remove-Item "${{ github.workspace }}\StoryCAD\.env" -Force -ErrorAction SilentlyContinue
+
+  publish:
+    needs: build-store-package
+    runs-on: windows-latest
+    steps:
+      - name: Download Store package
+        uses: actions/download-artifact@v4
+        with:
+          name: store-package
+          path: packages
+
+      - name: Setup Microsoft Store Developer CLI
+        uses: microsoft/microsoft-store-apppublisher@v1.3
+
+      - name: Configure Store credentials
+        run: >
+          msstore reconfigure
+          --tenantId ${{ secrets.PARTNER_CENTER_TENANT_ID }}
+          --sellerId ${{ secrets.PARTNER_CENTER_SELLER_ID }}
+          --clientId ${{ secrets.PARTNER_CENTER_CLIENT_ID }}
+          --clientSecret ${{ secrets.PARTNER_CENTER_CLIENT_SECRET }}
+
+      - name: Find MSIX upload file
+        id: find-msix
+        shell: pwsh
+        run: |
+          $file = Get-ChildItem -Path packages -Filter "*.msixupload" -Recurse | Select-Object -First 1
+          if (-not $file) {
+            $file = Get-ChildItem -Path packages -Filter "*.msix" -Recurse | Select-Object -First 1
+          }
+          if (-not $file) {
+            throw "No .msixupload or .msix file found in packages directory"
+          }
+          "MSIX_PATH=$($file.FullName)" >> $env:GITHUB_OUTPUT
+          Write-Host "Found package: $($file.FullName)"
+
+      - name: Publish to Microsoft Store
+        run: >
+          msstore publish .
+          --inputFile "${{ steps.find-msix.outputs.MSIX_PATH }}"
+          --appId 9PLBNHZV1XM2
+          --verbose
