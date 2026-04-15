@@ -26,6 +26,9 @@
 - Priority display treatment is an open design question (order only, or also UX style?)
 - Use case inventory needed before finalizing recipient generation design
 
+### Decisions
+- Admin tool: Uno Platform desktop app (same stack as StoryCAD, reuses StoryCADLib DAL)
+
 ### Next Steps
 - Design review with Terry and Jake
 - Resolve open questions (UX, admin tool platform, rich content format, priority treatment)

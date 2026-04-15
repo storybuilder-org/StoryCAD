@@ -128,10 +128,9 @@ This means the system supports two sources of messages:
 
 ## 6. Admin Tooling
 
-### Options
-- **Lightweight desktop app** (WPF/WinForms) — simplest for the small admin audience
-- **CLI tool** — simpler to build, less convenient for group management
-- **Web dashboard** — most flexible, most effort
+### Platform Decision
+
+**Uno Platform desktop app** — same tech stack as StoryCAD, reuses `StoryCADLib` DAL code (`IMySqlIo`, `BackendService`, Doppler credentials) directly. No new frameworks or DB access patterns to maintain. Runs on Windows and Mac (same as StoryCAD itself). Admin audience is very small (Terry, Jake).
 
 ### Minimum viable admin tool
 - Compose a message (subject, body, priority)
@@ -169,7 +168,7 @@ Some are **one-shot** (admin composes, selects criteria, sends). Others are **re
 2. **UX**: Modal dialog on launch, notification panel, or toast? What if there are multiple unread messages? Current new-user popup is a model to consider.
 3. **Templates**: Reusable templates for recurring messages (donation prompts, release announcements)? Deferred or MVP?
 4. **Scheduling**: MVP or deferred? Schema supports it (`scheduled_at` column).
-5. **Admin tool platform**: Desktop app, CLI, or web? Who uses it (Terry only, or Terry + Jake)?
+5. ~~Admin tool platform~~ **Decided: Uno Platform desktop app. Same stack as StoryCAD, reuses DAL.**
 6. **Platform column**: Does `preferences` need a platform field for group targeting by OS?
 7. **Message retention**: Should old messages be purged, or kept indefinitely? They're small rows.
 8. **Priority display treatment**: Does priority affect display order only, or also display style (e.g., urgent = modal, info = badge)? Or both?
