@@ -46,3 +46,42 @@
 
 ### Next Steps
 - Design phase planning for issue 1333 (schema, consent model, implementation approach)
+
+## 2026-04-14
+
+### Session Summary (Terry + Claude)
+- Consolidated `/mnt/c/temp/` documents: split issue #1297 (Collaborator/app store) from #1332 (Discord/Pro) into separate folders
+- Created design document: `devdocs/issue_1333_design.md` covering:
+  - Shared database infrastructure for #1333 and #1377 (test DB environment, DAL read capability, spDeleteUser cascade, schema migration)
+  - Usage statistics design: architecture, consent model, schema (4 tables), instrumentation points, data flow
+  - UsageTrackingService interface with 18 hook locations
+  - Single-round-trip flush via stored procedure using JSON parameters and JSON_TABLE
+  - Privacy: unlinkable `usage_id` (random GUID, no FK to users), 90-day retention with MySQL EVENT purge
+- Ran architecture and SQL agent reviews — incorporated all findings:
+  - Added UNIQUE constraint on outline_metadata, transaction/rollback in SP, indexes, created_at column, flush timeout, deprecated VALUES() fix
+- **ScaleGrid is running MySQL 5.7.30** — upgrade to 8.0 is a prerequisite (needed for JSON_TABLE and row alias syntax)
+- Decisions made: element counts by type, count per tool per session, no auto opt-in (use #1377 messaging), one flush per session end, lossy/no-retry
+
+### Session Summary (Jake)
+- Set up local MySQL 8.0 via Docker on Mac laptop
+- Got StoryCAD connecting to local Docker DB
+- Started implementing services with Claude
+- Used `StoryBuilderTest` database and `stbtest` account
+
+### Decisions
+- ScaleGrid upgrade to MySQL 8.0 is a prerequisite — will coordinate with ScaleGrid
+- Docker is the recommended cross-platform approach for the local test database
+- TDD for UsageTrackingService: mock the DB layer, test collection logic end-to-end
+
+## 2026-04-15
+
+### Morning sync (Terry + Jake)
+- Confirmed Jake is on MySQL 8 locally (Docker)
+- Discussed TDD approach for UsageTrackingService — test hooks and collection logic with mocked DB, use Claude Code's TDD agent
+- Jake to document his Docker setup procedures for Terry
+- Jake has interview + assessment today, limited availability
+
+### Next Steps
+- Jake: continue service implementation with TDD, document Docker setup
+- Terry: coordinate ScaleGrid MySQL 8 upgrade, review Jake's work when available
+- Both: design review discussion on edit tracking gap and privacy policy language
