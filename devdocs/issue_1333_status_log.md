@@ -104,4 +104,4 @@ No decisions made — problems and tradeoffs captured below.
 
 **Coordination**: Schema migration and 4.1 release must be coordinated. ScaleGrid upgrade to MySQL 8.0 is the natural time. Email drafted to Emmanuel at ScaleGrid requesting a call.
 
-**Status**: Open — no decisions made. Need further discussion.
+**Resolution**: Keep INT keys. No GUID change. The security concern (guessable sequential IDs) is not a real exposure — user IDs are behind SSL, Doppler credentials, and ScaleGrid hosting, with no public API exposing them. Adding a GUID column (agents' recommendation) or replacing the PK both add complexity without clear benefit at this scale. The INT works, the stored procedures work, old clients work. Move on.
