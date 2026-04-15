@@ -106,9 +106,23 @@ Add `DELETE FROM message_recipients WHERE user_id = ?` to the existing cascade i
 ## 5. App-Side Flow
 
 1. On launch, after `BackendService.StartupRecording()`, call `GetUnreadMessages(userId)`
-2. If messages exist, show notification indicator or display messages
+2. If messages exist, display them (see UX open question below)
 3. User reads/dismisses a message → call `MarkMessageRead(userId, messageId)`
 4. Messages with `expires_at` in the past are filtered out by the SP, not the app
+
+### Message Queue
+
+Messages accumulate until the user explicitly dismisses each one. Unread messages persist across sessions — if a user ignores a message on Monday, it's still there on Tuesday. A message stays in the queue until `read_at` is set.
+
+If multiple messages are pending, the app displays them in some order (priority, then chronological — TBD). The user works through them one at a time or sees a list.
+
+### Generalizing Existing In-App Communication
+
+The existing new-user popup (links to help resources) is a special case of a message. The messaging system could replace it — the "welcome" content becomes a system-generated message delivered to new users. Similarly, donation reminders (open issue) become recurring system messages rather than a separate feature.
+
+This means the system supports two sources of messages:
+- **Admin-composed**: written by a human, sent via the admin tool
+- **System-generated**: triggered by conditions (new user, time since last donation prompt, version change, etc.)
 
 ---
 
@@ -125,6 +139,24 @@ Add `DELETE FROM message_recipients WHERE user_id = ?` to the existing cascade i
 - Send (populate `message_recipients`) or schedule (set `scheduled_at`)
 - View message status (sent, read counts)
 
+### Recipient Generation
+
+The core admin-side problem is: **how do we generate `message_recipients` rows for a particular message?** Each use case is a different query against `users`/`preferences`/`versions`:
+
+| Use Case | Query Basis |
+|----------|-------------|
+| All users | All rows in `users` |
+| Users on a specific version | JOIN `preferences` on version |
+| Users registered before/after a date | Filter `users.date_added` |
+| New users (first session) | Triggered on first launch, not a query |
+| Donation reminder | Users not messaged with donation template in X days |
+| Version-specific announcement | JOIN `preferences` on version |
+| Individual user | Direct user_id |
+
+Some are **one-shot** (admin composes, selects criteria, sends). Others are **recurring/automated** (donation reminder fires on a schedule, new-user welcome triggers on first launch). The admin tool should support one-shot at minimum; automation can be layered on later.
+
+**This is an open design area.** The use cases above are illustrative, not exhaustive. Need to think through what messages we actually want to send before finalizing the recipient generation design.
+
 ### Connection
 - Connects directly to ScaleGrid MySQL (or local test DB)
 - Uses same Doppler credentials mechanism or a separate admin config
@@ -134,12 +166,15 @@ Add `DELETE FROM message_recipients WHERE user_id = ?` to the existing cascade i
 ## 7. Open Questions
 
 1. **Rich content**: Plain text, markdown, or HTML in message body? Plain text is simplest; markdown adds formatting without security risk.
-2. **UX**: Modal dialog on launch, notification panel, or toast? What if there are multiple unread messages?
+2. **UX**: Modal dialog on launch, notification panel, or toast? What if there are multiple unread messages? Current new-user popup is a model to consider.
 3. **Templates**: Reusable templates for recurring messages (donation prompts, release announcements)? Deferred or MVP?
 4. **Scheduling**: MVP or deferred? Schema supports it (`scheduled_at` column).
 5. **Admin tool platform**: Desktop app, CLI, or web? Who uses it (Terry only, or Terry + Jake)?
 6. **Platform column**: Does `preferences` need a platform field for group targeting by OS?
 7. **Message retention**: Should old messages be purged, or kept indefinitely? They're small rows.
+8. **Priority display treatment**: Does priority affect display order only, or also display style (e.g., urgent = modal, info = badge)? Or both?
+9. **System-generated messages**: How are automated messages (new-user welcome, donation reminders) triggered? In-app on launch conditions? Scheduled MySQL EVENT? Separate automation process?
+10. **Use case inventory**: What messages do we actually want to send? Need to enumerate before finalizing recipient generation and automation design.
 
 ---
 
