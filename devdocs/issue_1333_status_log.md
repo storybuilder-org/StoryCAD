@@ -85,3 +85,23 @@
 - Jake: continue service implementation with TDD, document Docker setup
 - Terry: coordinate ScaleGrid MySQL 8 upgrade, review Jake's work when available
 - Both: design review discussion on edit tracking gap and privacy policy language
+
+### INT→GUID User Key Migration Discussion (Terry, Jake, Claude)
+
+No decisions made — problems and tradeoffs captured below.
+
+**Why GUID**: INT keys are sequential and guessable — security risk if any API ever exposes them. Terry and Jake agreed on the change.
+
+**SP impact**: Today's `spAddUser` uses `LAST_INSERT_ID(id)` trick on `ON DUPLICATE KEY UPDATE` to return existing INT id. `LAST_INSERT_ID()` only works with integers — can't pass a CHAR(36). Proposed replacement: `INSERT IGNORE` (skip if email exists via UNIQUE constraint) + `SELECT id WHERE email = p_email`. Two statements, one SP call, one round-trip. On the duplicate path, nothing is updated — the row already exists, the SELECT just retrieves the GUID. Parameter naming must avoid column shadowing (`p_name`, `p_email`).
+
+**Migration mechanics**: ~2,000 existing users need GUIDs assigned during the migration script itself — FK tables (`preferences`, `versions`) can't contain rows without valid user_ids. Script must: add GUID column → populate with `UUID()` → update FK tables → drop old INT PK → rebuild constraints. Usage tables (#1333) unaffected (use `usage_id`). #1377's `message_recipients` should use GUID from the start.
+
+**Old client compatibility**: Pre-4.1 app calls `spAddUser` expecting INT OUT parameter. New SP returns CHAR(36) — MySql.Data client throws type mismatch. App catches exception, logs, continues without backend. Old users lose backend recording until they update. App itself works fine — backend has always been optional.
+
+**Local preferences deserialization**: `PreferencesModel.UserId` changes from `int` to `string`. Locally stored JSON has `"UserId": 42` — fails to deserialize into string. The SP call would overwrite it on next successful launch, but deserialization failure may happen first. Needs handling.
+
+**Jake's alternative — keep old tables alongside new**: Leave existing 3 tables/4 SPs untouched for old clients. Add new GUID-based tables for 4.1. Drop old after a few months. Problem: 4.1 starts with zero users — ~2,000 existing users' data isn't migrated. Still need a migration path eventually.
+
+**Coordination**: Schema migration and 4.1 release must be coordinated. ScaleGrid upgrade to MySQL 8.0 is the natural time. Email drafted to Emmanuel at ScaleGrid requesting a call.
+
+**Status**: Open — no decisions made. Need further discussion.
