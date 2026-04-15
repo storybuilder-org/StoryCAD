@@ -16,10 +16,10 @@ The existing `TestMySqlIo` pattern is the model — a fake that records calls wi
 ## Mock Boundary
 
 ```
-Hooks → IUsageTrackingService → BackendService → IMySqlIo (mock here)
+Hooks → UsageTrackingService → BackendService → IMySqlIo (mock here)
 ```
 
-Create a `TestUsageTrackingService` that implements `IUsageTrackingService` and records all calls. For testing the real `UsageTrackingService` implementation, inject a mocked `BackendService` or `IMySqlIo` so you can inspect what would have been sent to MySQL.
+Use the real `UsageTrackingService` in tests. Inject `TestMySqlIo` (already exists in `BackendServiceTests.cs`) as the mock database layer. Inspect what `TestMySqlIo` received to verify the service produced the correct payload.
 
 ---
 
@@ -77,13 +77,14 @@ Create a `TestUsageTrackingService` that implements `IUsageTrackingService` and 
 public class UsageTrackingServiceTests
 {
     private UsageTrackingService _service;
-    private TestMySqlIo _mockDb;
-    // ... setup with mocked dependencies
+    private TestMySqlIo _testSqlIo;
 
     [TestInitialize]
     public void Setup()
     {
-        // Create service with mocked BackendService/IMySqlIo
+        _testSqlIo = new TestMySqlIo();
+        _testSqlIo.SetConnectionString("fake");
+        // Create service with real BackendService wired to TestMySqlIo
         // Set UsageStatsConsent = true (default for most tests)
     }
 
@@ -103,7 +104,7 @@ public class UsageTrackingServiceTests
         // Act
         await _service.EndSession();
 
-        // Assert — inspect what was passed to the mock
+        // Assert — inspect what TestMySqlIo received
         // Session: clock_time > 0
         // Outlines: 1 record, elements_added = 2, element_count = 12
         // Features: MasterPlots (1), Search (2)
@@ -119,7 +120,7 @@ public class UsageTrackingServiceTests
         // Act
         await _service.EndSession();
 
-        // Assert — mock DB received no calls
+        // Assert — TestMySqlIo received no calls
     }
 }
 ```

@@ -360,7 +360,7 @@ public interface IUsageTrackingService
 }
 ```
 
-**Unit testability**: The interface allows a `TestUsageTrackingService` (similar to `TestMySqlIo`) that records all calls without side effects. All consumers depend on `IUsageTrackingService`, registered in IoC. Tests can verify that hooks fire with correct arguments without any database involvement.
+**Unit testability**: Tests use the real `UsageTrackingService` with `TestMySqlIo` injected underneath (the existing mock from `BackendServiceTests.cs`). Tests verify that hooks produce the correct flush payload by inspecting what `TestMySqlIo` received. No additional test doubles needed.
 
 #### Hook Locations
 
