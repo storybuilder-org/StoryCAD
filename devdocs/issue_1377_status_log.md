@@ -17,7 +17,17 @@
 - Local test database (Docker-based MySQL 8.0)
 - Environment switching (production vs test)
 
+### Design Discussion (later 2026-04-15)
+- Messages are a queue: unread messages persist across sessions until user explicitly dismisses each one
+- Existing new-user popup and donation reminders are special cases of messages — the messaging system generalizes them
+- Two message sources: admin-composed (via admin tool) and system-generated (triggered by conditions)
+- Recipient generation is the core admin-side problem — each use case is a different query (all users, by version, by date, new users, periodic reminders)
+- One-shot messages (admin sends now) vs recurring/automated (triggers on schedule or condition) — MVP is one-shot, automation layered later
+- Priority display treatment is an open design question (order only, or also UX style?)
+- Use case inventory needed before finalizing recipient generation design
+
 ### Next Steps
 - Design review with Terry and Jake
-- Resolve open questions (UX, admin tool platform, rich content format)
+- Resolve open questions (UX, admin tool platform, rich content format, priority treatment)
+- Enumerate message use cases to drive recipient generation design
 - Coordinate schema with #1333 for unified ScaleGrid migration
