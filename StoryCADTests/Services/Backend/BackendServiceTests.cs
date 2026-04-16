@@ -438,7 +438,7 @@ public class TestMySqlIo : IMySqlIo
 
     // Call recording
     public List<(string name, string email)> AddOrUpdateUserCalls { get; } = new();
-    public List<(int id, bool elmah, bool newsletter, string version)> AddOrUpdatePreferencesCalls { get; } = new();
+    public List<(int id, bool elmah, bool newsletter, string version, bool usageStats)> AddOrUpdatePreferencesCalls { get; } = new();
     public List<(int id, string current, string previous)> AddVersionCalls { get; } = new();
     public List<int> DeleteUserCalls { get; } = new();
 
@@ -456,9 +456,9 @@ public class TestMySqlIo : IMySqlIo
         return Task.FromResult(AddOrUpdateUserReturnId);
     }
 
-    public Task AddOrUpdatePreferences(int id, bool elmah, bool newsletter, string version)
+    public Task AddOrUpdatePreferences(int id, bool elmah, bool newsletter, string version, bool usageStats)
     {
-        AddOrUpdatePreferencesCalls.Add((id, elmah, newsletter, version));
+        AddOrUpdatePreferencesCalls.Add((id, elmah, newsletter, version, usageStats));
         if (ExceptionToThrow != null) throw ExceptionToThrow;
         return Task.CompletedTask;
     }
@@ -477,6 +477,31 @@ public class TestMySqlIo : IMySqlIo
         DeleteUserCalls.Add(id);
         if (ExceptionToThrow != null) throw ExceptionToThrow;
         return Task.FromResult(DeleteUserReturnValue);
+    }
+
+    // Read capability
+    public List<(string sp, (string name, object value)[] parameters)> ExecuteReaderCalls { get; } = new();
+    public List<Dictionary<string, object>> ExecuteReaderReturnValue { get; set; } = new();
+
+    public Task<List<Dictionary<string, object>>> ExecuteReaderAsync(
+        string storedProcedure,
+        params (string name, object value)[] parameters)
+    {
+        ExecuteReaderCalls.Add((storedProcedure, parameters));
+        if (ExceptionToThrow != null) throw ExceptionToThrow;
+        return Task.FromResult(ExecuteReaderReturnValue);
+    }
+
+    // Usage tracking
+    public List<(string usageId, DateTime start, DateTime end, int seconds, string outlines, string features)>
+        RecordSessionDataCalls { get; } = new();
+
+    public Task RecordSessionData(string usageId, DateTime sessionStart, DateTime sessionEnd,
+        int clockTimeSeconds, string outlinesJson, string featuresJson)
+    {
+        RecordSessionDataCalls.Add((usageId, sessionStart, sessionEnd, clockTimeSeconds, outlinesJson, featuresJson));
+        if (ExceptionToThrow != null) throw ExceptionToThrow;
+        return Task.CompletedTask;
     }
 }
 

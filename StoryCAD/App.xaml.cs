@@ -139,18 +139,29 @@ public partial class App : Application
 
         var Preferences = Ioc.Default.GetRequiredService<PreferenceService>();
 
-        // Obtain keys if defined
-        try
+        // Configure backend connection: use local test DB if STORYCAD_TEST_CONNECTION is set,
+        // otherwise fetch secrets from Doppler for production
+        var testConnection = Environment.GetEnvironmentVariable("STORYCAD_TEST_CONNECTION");
+        if (!string.IsNullOrEmpty(testConnection))
         {
-            Doppler doppler = new();
-            var keys = await doppler.FetchSecretsAsync();
             var backend = Ioc.Default.GetService<BackendService>();
-            await backend.SetConnectionString(keys);
-            _log.SetElmahTokens(keys);
+            backend.SetConnectionString(testConnection);
+            _log.Log(LogLevel.Info, "Using local test database connection");
         }
-        catch (Exception ex)
+        else
         {
-            _log.LogException(LogLevel.Error, ex, ex.Message);
+            try
+            {
+                Doppler doppler = new();
+                var keys = await doppler.FetchSecretsAsync();
+                var backend = Ioc.Default.GetService<BackendService>();
+                await backend.SetConnectionString(keys);
+                _log.SetElmahTokens(keys);
+            }
+            catch (Exception ex)
+            {
+                _log.LogException(LogLevel.Error, ex, ex.Message);
+            }
         }
 
         var AppDat = Ioc.Default.GetRequiredService<AppState>();
@@ -202,6 +213,7 @@ public partial class App : Application
         }
 
         await Ioc.Default.GetService<BackendService>()!.StartupRecording();
+        Ioc.Default.GetService<IUsageTrackingService>()?.StartSession();
         ConfigureNavigation();
 
         // Do not repeat app initialization when the Window already has content,

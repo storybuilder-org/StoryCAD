@@ -58,6 +58,8 @@
                               Content="Send error logs to Team StoryCAD" VerticalAlignment="Bottom" Margin="5" />
                     <CheckBox IsChecked="{x:Bind _initVM.Preferences.Newsletter, Mode=TwoWay}"
                               Content="Send me newsletters about StoryCAD" VerticalAlignment="Bottom" Margin="5" />
+                    <CheckBox IsChecked="{x:Bind _initVM.Preferences.UsageStatsConsent, Mode=TwoWay}"
+                              Content="Send anonymous usage statistics" VerticalAlignment="Bottom" Margin="5" />
                 </StackPanel>
                 <TextBlock Text="{x:Bind _initVM.ErrorMessage, Mode=TwoWay}" Foreground="Red" Grid.Row="3"
                            HorizontalAlignment="Center" />
