@@ -20,7 +20,7 @@ StoryCAD uses GitHub Actions for continuous integration, documentation deploymen
 | Build & Release | `build-release.yml` | Build, test, sign, and release for Windows and macOS |
 | Deploy Jekyll site to Pages | `pages.yml` | Build and deploy the user manual to GitHub Pages |
 | Sync Beta Manual | `sync-beta-manual.yml` | Sync docs from dev branch to the beta manual site |
-| Publish to Microsoft Store | `store-publish.yml` | Submit Windows packages to the Microsoft Store |
+| Publish to Stores | `store-publish.yml` | Submit Windows packages to the Microsoft Store and macOS packages to the Apple App Store |
 
 ---
 
@@ -124,7 +124,7 @@ Syncs the `docs/` directory from the `dev` branch to the external [BetaManual re
 
 ---
 
-## Publish to Microsoft Store
+## Publish to Stores
 
 **File:** `.github/workflows/store-publish.yml`
 
@@ -135,9 +135,14 @@ Syncs the `docs/` directory from the `dev` branch to the external [BetaManual re
 
 ### What It Does
 
-Builds a Store-ready MSIX package (using `StoreUpload` mode with signing disabled, since the Store re-signs packages), then submits it to the Microsoft Store via the `msstore` CLI.
+Runs two independent jobs in parallel on release publication:
 
-### Required Secrets
+- **`microsoft-build` + `microsoft-publish`** — builds a Store-ready MSIX (`StoreUpload` mode with signing disabled, since the Store re-signs packages) and submits it to the Microsoft Store via the `msstore` CLI.
+- **`apple-publish`** — downloads the signed `storycad-osx-arm64.pkg` asset already attached to the release (produced by `build-release.yml` with Mac App Store certs) and uploads it to App Store Connect via `xcrun altool`.
+
+Each job is gated by its `runs-on` runner (`windows-latest` / `macos-latest`). Failures in one store do not block the other.
+
+### Microsoft Store — Required Secrets
 
 | Secret | Purpose |
 |--------|---------|
@@ -146,14 +151,14 @@ Builds a Store-ready MSIX package (using `StoreUpload` mode with signing disable
 | `PARTNER_CENTER_CLIENT_ID` | Azure AD app client ID |
 | `PARTNER_CENTER_CLIENT_SECRET` | Azure AD app client secret |
 
-### Setup
+### Apple App Store — Required Secrets
 
-Before this workflow can run, you need to:
-
-1. Register an Azure AD application in the [Azure Portal](https://portal.azure.com/)
-2. Associate it with your Partner Center account
-3. Add the four secrets above to the repository's GitHub Actions secrets
-4. Ensure at least one manual submission has been completed in Partner Center
+| Secret | Purpose |
+|--------|---------|
+| `APP_STORE_CONNECT_KEY_ID` | 10-character key identifier |
+| `APP_STORE_CONNECT_ISSUER_ID` | UUID shown above the keys list in App Store Connect |
+| `APP_STORE_CONNECT_API_KEY_B64` | Base64-encoded `.p8` private key file |
+| `APPLE_APP_ID` | Numeric Apple ID of the app record (App Information → Apple ID) |
 
 ---
 

@@ -1,4 +1,4 @@
-name: Publish to Microsoft Store
+name: Publish to Stores
 
 on:
   release:
@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-store-package:
+  microsoft-build:
     runs-on: windows-latest
     env:
       DOTNET_NOLOGO: true
@@ -112,9 +112,11 @@ jobs:
         run: |
           Remove-Item "${{ github.workspace }}\StoryCAD\.env" -Force -ErrorAction SilentlyContinue
 
-  publish:
-    needs: build-store-package
+  microsoft-publish:
+    needs: microsoft-build
     runs-on: windows-latest
+    env:
+      MS_APP_ID: 9PLBNHZV1XM2
     steps:
       - name: Download Store package
         uses: actions/download-artifact@v4
@@ -122,34 +124,225 @@ jobs:
           name: store-package
           path: packages
 
-      - name: Setup Microsoft Store Developer CLI
-        uses: microsoft/microsoft-store-apppublisher@v1.3
-
-      - name: Configure Store credentials
-        run: >
-          msstore reconfigure
-          --tenantId ${{ secrets.PARTNER_CENTER_TENANT_ID }}
-          --sellerId ${{ secrets.PARTNER_CENTER_SELLER_ID }}
-          --clientId ${{ secrets.PARTNER_CENTER_CLIENT_ID }}
-          --clientSecret ${{ secrets.PARTNER_CENTER_CLIENT_SECRET }}
-
       - name: Find MSIX upload file
         id: find-msix
         shell: pwsh
         run: |
           $file = Get-ChildItem -Path packages -Filter "*.msixupload" -Recurse | Select-Object -First 1
-          if (-not $file) {
-            $file = Get-ChildItem -Path packages -Filter "*.msix" -Recurse | Select-Object -First 1
-          }
-          if (-not $file) {
-            throw "No .msixupload or .msix file found in packages directory"
-          }
+          if (-not $file) { $file = Get-ChildItem -Path packages -Filter "*.msix" -Recurse | Select-Object -First 1 }
+          if (-not $file) { throw "No .msixupload or .msix file found in packages directory" }
           "MSIX_PATH=$($file.FullName)" >> $env:GITHUB_OUTPUT
           Write-Host "Found package: $($file.FullName)"
 
-      - name: Publish to Microsoft Store
-        run: >
-          msstore publish .
-          --inputFile "${{ steps.find-msix.outputs.MSIX_PATH }}"
-          --appId 9PLBNHZV1XM2
-          --verbose
+      - name: Fetch changelog from release body
+        id: changelog
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
+        shell: pwsh
+        run: |
+          $notes = gh release view $env:TAG --repo $env:GITHUB_REPOSITORY --json body --jq .body
+          if (-not $notes) { $notes = "Release $env:TAG" }
+          # Store release notes limit is ~1500 chars per listing
+          if ($notes.Length -gt 1500) { $notes = $notes.Substring(0, 1500) }
+          Set-Content -Path changelog.txt -Value $notes -Encoding utf8
+          Write-Host "Changelog length: $($notes.Length) chars"
+
+      - name: Upload package + release notes to Partner Center (no commit)
+        env:
+          PC_TENANT_ID: ${{ secrets.PARTNER_CENTER_TENANT_ID }}
+          PC_CLIENT_ID: ${{ secrets.PARTNER_CENTER_CLIENT_ID }}
+          PC_CLIENT_SECRET: ${{ secrets.PARTNER_CENTER_CLIENT_SECRET }}
+          MSIX_PATH: ${{ steps.find-msix.outputs.MSIX_PATH }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          # 1. OAuth token against Azure AD (Store Submission API resource)
+          $tokenBody = @{
+            grant_type    = 'client_credentials'
+            client_id     = $env:PC_CLIENT_ID
+            client_secret = $env:PC_CLIENT_SECRET
+            resource      = 'https://manage.devcenter.microsoft.com'
+          }
+          $token = (Invoke-RestMethod -Method Post `
+            -Uri "https://login.microsoftonline.com/$env:PC_TENANT_ID/oauth2/token" `
+            -Body $tokenBody).access_token
+          $headers = @{ Authorization = "Bearer $token"; 'Content-Type' = 'application/json' }
+          $base = "https://manage.devcenter.microsoft.com/v1.0/my/applications/$env:MS_APP_ID"
+
+          # 2. Delete any existing pending submission so we start clean
+          $app = Invoke-RestMethod -Uri $base -Headers $headers
+          if ($app.pendingApplicationSubmission) {
+            $pendingId = $app.pendingApplicationSubmission.id
+            Write-Host "Deleting existing pending submission $pendingId"
+            Invoke-RestMethod -Method Delete -Uri "$base/submissions/$pendingId" -Headers $headers | Out-Null
+          }
+
+          # 3. Create new submission (clones last published submission's metadata)
+          $submission = Invoke-RestMethod -Method Post -Uri "$base/submissions" -Headers $headers
+          $submissionId = $submission.id
+          $fileUploadUrl = $submission.fileUploadUrl
+          Write-Host "Created submission $submissionId"
+
+          # 4. Replace release notes on all listings
+          $changelog = Get-Content -Raw changelog.txt
+          foreach ($locale in $submission.listings.PSObject.Properties.Name) {
+            $submission.listings.$locale.baseListing.releaseNotes = $changelog
+          }
+
+          # 5. Mark existing packages for deletion, add our new one
+          foreach ($pkg in $submission.applicationPackages) {
+            $pkg.fileStatus = 'PendingDelete'
+          }
+          $newPkg = [ordered]@{
+            fileName              = [System.IO.Path]::GetFileName($env:MSIX_PATH)
+            fileStatus            = 'PendingUpload'
+            minimumDirectXVersion = 'None'
+            minimumSystemRam      = 'None'
+          }
+          $submission.applicationPackages = @($submission.applicationPackages) + $newPkg
+
+          # 6. PUT the updated submission
+          $body = $submission | ConvertTo-Json -Depth 20
+          Invoke-RestMethod -Method Put -Uri "$base/submissions/$submissionId" -Headers $headers -Body $body | Out-Null
+
+          # 7. Zip the msixupload and upload to Azure Blob SAS URL
+          $zipPath = Join-Path $env:RUNNER_TEMP 'submission.zip'
+          if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
+          Compress-Archive -Path $env:MSIX_PATH -DestinationPath $zipPath
+          Invoke-WebRequest -Method Put -Uri $fileUploadUrl -InFile $zipPath `
+            -Headers @{ 'x-ms-blob-type' = 'BlockBlob' } | Out-Null
+
+          # 8. DO NOT commit. Leaves submission as draft in Partner Center.
+          Write-Host "Submission $submissionId uploaded with release notes. NOT committed."
+          Write-Host "Review and submit manually in Partner Center."
+
+  apple-publish:
+    runs-on: macos-latest
+    steps:
+      - name: Resolve tag
+        id: tag
+        run: echo "tag=${{ github.event.release.tag_name || github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+
+      - name: Download PKG from release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download "${{ steps.tag.outputs.tag }}" \
+            --repo ${{ github.repository }} \
+            --pattern 'storycad-osx-arm64.pkg' \
+            --dir .
+
+      - name: Install App Store Connect API key
+        env:
+          KEY_B64: ${{ secrets.APP_STORE_CONNECT_API_KEY_B64 }}
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$KEY_B64" | base64 --decode \
+            > ~/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8
+          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8
+
+      - name: Upload to App Store Connect
+        env:
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APPLE_APP_ID: ${{ secrets.APPLE_APP_ID }}
+        run: |
+          xcrun altool --upload-package storycad-osx-arm64.pkg \
+            --type macos \
+            --apple-id "$APPLE_APP_ID" \
+            --bundle-id com.storybuilder.storycad \
+            --apiKey "$KEY_ID" \
+            --apiIssuer "$ISSUER_ID"
+
+      - name: Fetch changelog from release body
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body > changelog.txt || true
+          if [ ! -s changelog.txt ]; then echo "Release $TAG" > changelog.txt; fi
+          # Apple whatsNew limit is 4000 chars
+          head -c 4000 changelog.txt > changelog.trimmed.txt
+          mv changelog.trimmed.txt changelog.txt
+          wc -c < changelog.txt
+
+      - name: Patch "What's New" on draft App Store version (no submit)
+        env:
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APPLE_APP_ID: ${{ secrets.APPLE_APP_ID }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          python3 -m pip install --quiet pyjwt cryptography requests
+          python3 <<'PY'
+          import jwt, os, sys, time, pathlib, requests
+
+          key_id = os.environ['KEY_ID']
+          issuer_id = os.environ['ISSUER_ID']
+          app_id = os.environ['APPLE_APP_ID']
+          tag = os.environ['TAG']
+          version_string = tag.lstrip('v')
+
+          key_path = pathlib.Path.home() / '.appstoreconnect' / 'private_keys' / f'AuthKey_{key_id}.p8'
+          private_key = key_path.read_text()
+
+          token = jwt.encode(
+              {'iss': issuer_id, 'exp': int(time.time()) + 1200, 'aud': 'appstoreconnect-v1'},
+              private_key, algorithm='ES256', headers={'kid': key_id})
+
+          s = requests.Session()
+          s.headers['Authorization'] = f'Bearer {token}'
+          BASE = 'https://api.appstoreconnect.apple.com/v1'
+
+          whats_new = pathlib.Path('changelog.txt').read_text()[:4000]
+
+          # Find a MAC_OS version in an editable state
+          editable = 'PREPARE_FOR_SUBMISSION,DEVELOPER_REJECTED,METADATA_REJECTED,REJECTED,INVALID_BINARY'
+          r = s.get(f'{BASE}/apps/{app_id}/appStoreVersions',
+                    params={'filter[platform]': 'MAC_OS', 'filter[appStoreState]': editable, 'limit': 5})
+          r.raise_for_status()
+          versions = r.json()['data']
+
+          if versions:
+              version_id = versions[0]['id']
+              print(f'Using existing editable version {version_id} (state={versions[0]["attributes"]["appStoreState"]})')
+          else:
+              payload = {'data': {
+                  'type': 'appStoreVersions',
+                  'attributes': {'platform': 'MAC_OS', 'versionString': version_string},
+                  'relationships': {'app': {'data': {'type': 'apps', 'id': app_id}}}}}
+              r = s.post(f'{BASE}/appStoreVersions', json=payload)
+              if not r.ok:
+                  print(r.text, file=sys.stderr); r.raise_for_status()
+              version_id = r.json()['data']['id']
+              print(f'Created version {version_id}')
+
+          # Find or create en-US localization, then PATCH whatsNew
+          r = s.get(f'{BASE}/appStoreVersions/{version_id}/appStoreVersionLocalizations')
+          r.raise_for_status()
+          en_us = next((l for l in r.json()['data'] if l['attributes']['locale'] == 'en-US'), None)
+
+          if en_us:
+              loc_id = en_us['id']
+              payload = {'data': {'type': 'appStoreVersionLocalizations', 'id': loc_id,
+                                  'attributes': {'whatsNew': whats_new}}}
+              r = s.patch(f'{BASE}/appStoreVersionLocalizations/{loc_id}', json=payload)
+          else:
+              payload = {'data': {
+                  'type': 'appStoreVersionLocalizations',
+                  'attributes': {'locale': 'en-US', 'whatsNew': whats_new},
+                  'relationships': {'appStoreVersion': {'data': {'type': 'appStoreVersions', 'id': version_id}}}}}
+              r = s.post(f'{BASE}/appStoreVersionLocalizations', json=payload)
+
+          if not r.ok:
+              print(r.text, file=sys.stderr); r.raise_for_status()
+          print("Patched whatsNew. Not submitting for review.")
+          PY
+
+      - name: Clean up API key
+        if: always()
+        continue-on-error: true
+        run: rm -f ~/.appstoreconnect/private_keys/AuthKey_*.p8
