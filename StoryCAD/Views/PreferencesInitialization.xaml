@@ -58,8 +58,20 @@
                               Content="Send error logs to Team StoryCAD" VerticalAlignment="Bottom" Margin="5" />
                     <CheckBox IsChecked="{x:Bind _initVM.Preferences.Newsletter, Mode=TwoWay}"
                               Content="Send me newsletters about StoryCAD" VerticalAlignment="Bottom" Margin="5" />
-                    <CheckBox IsChecked="{x:Bind _initVM.Preferences.UsageStatsConsent, Mode=TwoWay}"
-                              Content="Send anonymous usage statistics" VerticalAlignment="Bottom" Margin="5" />
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Margin="5">
+                        <CheckBox IsChecked="{x:Bind _initVM.Preferences.UsageStatsConsent, Mode=TwoWay}"
+                                  Content="Send anonymous usage statistics" />
+                        <HyperlinkButton Content="?"
+                                         Width="22" Height="22" MinWidth="22" MinHeight="22"
+                                         Padding="0" FontSize="12"
+                                         BorderThickness="1"
+                                         BorderBrush="{ThemeResource TextFillColorSecondaryBrush}"
+                                         CornerRadius="11"
+                                         Margin="6,0,0,0"
+                                         VerticalAlignment="Center"
+                                         NavigateUri="https://manual.storybuilder.org/Preferences/Usage_Statistics.html"
+                                         ToolTipService.ToolTip="Learn what's collected" />
+                    </StackPanel>
                 </StackPanel>
                 <TextBlock Text="{x:Bind _initVM.ErrorMessage, Mode=TwoWay}" Foreground="Red" Grid.Row="3"
                            HorizontalAlignment="Center" />
