@@ -957,6 +957,7 @@ public class ShellViewModel : ObservableRecipient
             case ContentDialogResult.Primary:
                 var prefsVm = Ioc.Default.GetRequiredService<PreferencesViewModel>();
                 prefsVm.SaveModel();
+                Ioc.Default.GetService<IUsageTrackingService>()?.FeatureUsed("PreferencesSaved");
                 await prefsVm.SaveAsync();
 
                 // Notify user if theme changed

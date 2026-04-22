@@ -256,8 +256,16 @@ public class PreferencesViewModel : ObservableValidator
     public bool UseBetaDocumentation
     {
         get => _useBetaDocumentation;
-        set => SetProperty(ref _useBetaDocumentation, value);
+        set
+        {
+            if (SetProperty(ref _useBetaDocumentation, value))
+                OnPropertyChanged(nameof(UsageStatsHelpUrl));
+        }
     }
+
+    public Uri UsageStatsHelpUrl => new Uri(
+        (UseBetaDocumentation ? "https://beta.manual.storybuilder.org/" : "https://manual.storybuilder.org/")
+        + "Preferences/Usage_Statistics.html");
 
     /// <summary>
     /// Tracks if theme preference changed during this save (requires restart)

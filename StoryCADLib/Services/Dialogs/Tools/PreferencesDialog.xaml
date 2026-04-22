@@ -98,7 +98,7 @@
                                          CornerRadius="11"
                                          Margin="6,0,0,0"
                                          VerticalAlignment="Center"
-                                         NavigateUri="https://manual.storybuilder.org/Preferences/Usage_Statistics.html"
+                                         NavigateUri="{x:Bind PreferencesVm.UsageStatsHelpUrl, Mode=OneWay}"
                                          ToolTipService.ToolTip="Learn what's collected" />
                     </StackPanel>
                     <CheckBox Content="Send me StoryCAD newsletters" Margin="8"

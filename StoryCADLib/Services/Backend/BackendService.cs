@@ -171,7 +171,7 @@ public class BackendService
             _preferenceService.Model.RecordPreferencesStatus = true;
             PreferencesIo loader = new();
             await loader.WritePreferences(_preferenceService.Model);
-            _logService.Log(LogLevel.Info, "Preferences posted: elmah=" + elmah + " newsletter=" + newsletter);
+            _logService.Log(LogLevel.Info, "Preferences posted: elmah=" + elmah + " newsletter=" + newsletter + " usageStats=" + usageStats);
         }
         catch (TaskCanceledException ex)
         {

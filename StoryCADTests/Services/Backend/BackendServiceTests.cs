@@ -65,6 +65,58 @@ public class BackendTests
         Assert.IsTrue(testLogger.HasWarning("Skipping PostPreferences"));
     }
 
+    /// <summary>
+    ///     Verifies that PostPreferences forwards UsageStatsConsent to
+    ///     IMySqlIo.AddOrUpdatePreferences as the usageStats argument.
+    ///     Regression guard for the claim that usage_consent stays 0 after Save.
+    /// </summary>
+    [TestMethod]
+    public async Task PostPreferences_WhenUsageStatsConsentTrue_PassesTrueToSqlIo()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.FirstName = "StoryCAD";
+        preferenceService.Model.LastName = "Tests";
+        preferenceService.Model.Email = "sysadmin@storybuilder.org";
+        preferenceService.Model.UsageStatsConsent = true;
+
+        await backendService.PostPreferences(preferenceService.Model);
+
+        Assert.AreEqual(1, testSqlIo.AddOrUpdatePreferencesCalls.Count);
+        Assert.IsTrue(testSqlIo.AddOrUpdatePreferencesCalls[0].usageStats,
+            "PostPreferences should forward UsageStatsConsent=true as usageStats=true");
+    }
+
+    /// <summary>
+    ///     Mirror of the true case — verifies false is not coerced to true.
+    /// </summary>
+    [TestMethod]
+    public async Task PostPreferences_WhenUsageStatsConsentFalse_PassesFalseToSqlIo()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.FirstName = "StoryCAD";
+        preferenceService.Model.LastName = "Tests";
+        preferenceService.Model.Email = "sysadmin@storybuilder.org";
+        preferenceService.Model.UsageStatsConsent = false;
+
+        await backendService.PostPreferences(preferenceService.Model);
+
+        Assert.AreEqual(1, testSqlIo.AddOrUpdatePreferencesCalls.Count);
+        Assert.IsFalse(testSqlIo.AddOrUpdatePreferencesCalls[0].usageStats,
+            "PostPreferences should forward UsageStatsConsent=false as usageStats=false");
+    }
+
     #endregion
 
     #region DeleteUserData Tests
