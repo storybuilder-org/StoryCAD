@@ -47,29 +47,9 @@ jobs:
           "version=$v" >> $env:GITHUB_OUTPUT
           Write-Host "Version: $v"
 
-      - name: Update Package.appxmanifest version
+      - name: Set version in manifest and csproj
         shell: pwsh
-        run: |
-          $manifestPath = Join-Path "${{ github.workspace }}" "StoryCAD\Package.appxmanifest"
-          [xml]$xml = Get-Content $manifestPath
-          $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
-          $ns.AddNamespace('ns', $xml.DocumentElement.NamespaceURI)
-          $identity = $xml.SelectSingleNode('/ns:Package/ns:Identity', $ns)
-          $identity.SetAttribute('Version', '${{ steps.version.outputs.version }}')
-          $xml.Save($manifestPath)
-
-      - name: Update StoryCADLib.csproj version
-        shell: pwsh
-        run: |
-          $csprojPath = Join-Path "${{ github.workspace }}" "StoryCADLib\StoryCADLib.csproj"
-          [xml]$xml = Get-Content $csprojPath
-          $versionNode = $xml.SelectSingleNode('//Version')
-          $assemblyVersionNode = $xml.SelectSingleNode('//AssemblyVersion')
-          $fileVersionNode = $xml.SelectSingleNode('//FileVersion')
-          if ($versionNode) { $versionNode.InnerText = '${{ steps.version.outputs.version }}' }
-          if ($assemblyVersionNode) { $assemblyVersionNode.InnerText = '${{ steps.version.outputs.version }}' }
-          if ($fileVersionNode) { $fileVersionNode.InnerText = '${{ steps.version.outputs.version }}' }
-          $xml.Save($csprojPath)
+        run: ./scripts/Set-Version.ps1 -Version '${{ steps.version.outputs.version }}'
 
       - name: Write .env
         if: ${{ secrets.ENV != '' }}
@@ -114,7 +94,7 @@ jobs:
 
   microsoft-publish:
     needs: microsoft-build
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     env:
       MS_APP_ID: 9PLBNHZV1XM2
     steps:

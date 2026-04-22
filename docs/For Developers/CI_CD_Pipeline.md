@@ -94,12 +94,12 @@ After a successful build, artifacts are available on the Actions run page:
 ### Triggers
 
 - **Push** to `main` or `gh-pages`
-- **Pull request** (build only, no deployment)
+- **Pull request** (build only — deploy step is skipped)
 - **Manual** via `workflow_dispatch`
 
 ### What It Does
 
-Builds the Jekyll user manual site and deploys it to GitHub Pages at [manual.storybuilder.org](https://manual.storybuilder.org/). On pull requests, it only validates the build without deploying.
+Builds the Jekyll user manual site and deploys it to GitHub Pages at [manual.storybuilder.org](https://manual.storybuilder.org/). On pull requests the `build` job still runs as a sanity check, but the `deploy` job is gated on `github.event_name != 'pull_request'` so nothing publishes until the PR lands.
 
 ---
 
@@ -137,8 +137,8 @@ Syncs the `docs/` directory from the `dev` branch to the external [BetaManual re
 
 Runs two independent jobs in parallel on release publication:
 
-- **`microsoft-build` + `microsoft-publish`** — builds a Store-ready MSIX (`StoreUpload` mode with signing disabled, since the Store re-signs packages) and submits it to the Microsoft Store via the `msstore` CLI.
-- **`apple-publish`** — downloads the signed `storycad-osx-arm64.pkg` asset already attached to the release (produced by `build-release.yml` with Mac App Store certs) and uploads it to App Store Connect via `xcrun altool`.
+- **`microsoft-build` + `microsoft-publish`** — builds a Store-ready MSIX (`StoreUpload` mode with signing disabled, since the Store re-signs packages), then uses the Microsoft Store Submission REST API (`manage.devcenter.microsoft.com`) to create a draft submission, replace release notes on every listing, and upload the package. The submission is left as a draft in Partner Center for manual review and commit — the workflow does not publish.
+- **`apple-publish`** — downloads the signed `storycad-osx-arm64.pkg` asset already attached to the release (produced by `build-release.yml` with Mac App Store certs), uploads it to App Store Connect via `xcrun altool`, then uses the App Store Connect API to patch `whatsNew` on the en-US draft version. The draft is left unsubmitted for manual review.
 
 Each job is gated by its `runs-on` runner (`windows-latest` / `macos-latest`). Failures in one store do not block the other.
 
@@ -147,9 +147,10 @@ Each job is gated by its `runs-on` runner (`windows-latest` / `macos-latest`). F
 | Secret | Purpose |
 |--------|---------|
 | `PARTNER_CENTER_TENANT_ID` | Azure AD tenant ID |
-| `PARTNER_CENTER_SELLER_ID` | Partner Center seller ID |
 | `PARTNER_CENTER_CLIENT_ID` | Azure AD app client ID |
 | `PARTNER_CENTER_CLIENT_SECRET` | Azure AD app client secret |
+
+The Microsoft Store app ID (`9PLBNHZV1XM2`) is hard-coded in the workflow as the `MS_APP_ID` environment variable; it is not a secret.
 
 ### Apple App Store — Required Secrets
 
