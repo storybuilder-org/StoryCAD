@@ -251,14 +251,34 @@ internal static class ObjCRuntime
     internal static extern IntPtr objc_msgSend(IntPtr receiver, IntPtr selector, CGRect arg1);
 
     /// <summary>
-    /// Creates an NSSearchField with the given frame.
+    /// Creates an NSSearchField positioned at (x, y) with the given width and height.
     /// </summary>
-    internal static IntPtr CreateSearchField(double width)
+    internal static IntPtr CreateSearchField(double x, double y, double width, double height)
     {
         IntPtr nsSearchFieldClass = objc_getClass("NSSearchField");
         IntPtr alloc = objc_msgSend(nsSearchFieldClass, sel_registerName("alloc"));
-        CGRect frame = new(0, 0, width, 28);
+        CGRect frame = new(x, y, width, height);
         return objc_msgSend(alloc, sel_registerName("initWithFrame:"), frame);
+    }
+
+    /// <summary>
+    /// Creates a bare NSView with the given frame. Useful as a padded container
+    /// for other controls inside an NSMenuItem.
+    /// </summary>
+    internal static IntPtr CreateView(double width, double height)
+    {
+        IntPtr nsViewClass = objc_getClass("NSView");
+        IntPtr alloc = objc_msgSend(nsViewClass, sel_registerName("alloc"));
+        CGRect frame = new(0, 0, width, height);
+        return objc_msgSend(alloc, sel_registerName("initWithFrame:"), frame);
+    }
+
+    /// <summary>
+    /// Adds a child view as a subview of the parent.
+    /// </summary>
+    internal static void AddSubview(IntPtr parent, IntPtr child)
+    {
+        objc_msgSend(parent, sel_registerName("addSubview:"), child);
     }
 
     /// <summary>
