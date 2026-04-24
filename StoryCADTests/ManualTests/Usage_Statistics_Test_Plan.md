@@ -415,7 +415,7 @@ outline first
 
 ## Feature Usage Tests
 
-### TC-1333-012: Feature Use Tracking — All Nine Tools
+### TC-1333-012: Feature Use Tracking — All Eleven Tools
 **Priority:** High
 **Time:** ~8 minutes
 **Focus:** Each instrumented tool writes to `feature_usage`
@@ -436,14 +436,22 @@ each tool (characters, problems, scenes as appropriate).
 | ScrivenerExport | File > Export > Scrivener | `ScrivenerExport` |
 | Print | Print current node | `Print` |
 | Search | Search within outline | `Search` |
+| ConflictBuilder | On a Problem element, invoke Conflict Finder | `ConflictBuilder` |
+| PreferencesSaved | Tools > Preferences, click Save | `PreferencesSaved` |
 
 After closing, query `feature_usage` for the session:
 
-**Expected:** Nine rows, one per feature, each with `use_count = 1`.
+**Expected:** Eleven rows, one per feature, each with `use_count = 1`.
 
-**Pass Criteria:** All nine feature names land as documented in the
+**Pass Criteria:** All eleven feature names land as documented in the
 design. Opening a tool and cancelling out should still count as a use
 (the instrumentation fires at the command, not at completion).
+
+**Note:** `PreferencesSaved` fires whenever the Preferences dialog is
+saved — including the consent-toggle tests (TC-002, TC-003, TC-004,
+TC-015). Testers running those tests should expect a `PreferencesSaved`
+row in `feature_usage` even when they're not exercising a feature tool
+path.
 
 ---
 
@@ -603,6 +611,38 @@ body purges aged rows as designed.
 
 ---
 
+## UI Tests
+
+### TC-1333-019: Usage-Stats Help Link Switches with Beta Docs Toggle
+**Priority:** Low
+**Time:** ~2 minutes
+**Focus:** `PreferencesViewModel.UsageStatsHelpUrl` tracks
+`UseBetaDocumentation` live via a `OneWay` XAML binding
+
+**Setup:** Launch StoryCAD with consent on (state doesn't matter for
+this test, but this keeps the checkbox next to the link interactive).
+
+**Steps:**
+1. Open Tools > Preferences
+2. Ensure "Use Beta Documentation" is OFF; hover the "Learn what's
+   collected" link next to the "Send anonymous usage statistics"
+   checkbox
+   **Expected:** URL tooltip is
+   `https://manual.storybuilder.org/Preferences/Usage_Statistics.html`
+
+3. Check "Use Beta Documentation" (do not close the dialog)
+4. Re-hover the same link
+   **Expected:** URL tooltip is now
+   `https://beta.manual.storybuilder.org/Preferences/Usage_Statistics.html`
+
+5. Click the link — verify the browser opens the beta URL
+
+**Pass Criteria:** The link URL updates without closing/reopening
+Preferences (`OneWay` binding fires on `UseBetaDocumentation` change).
+Both destinations resolve in the browser.
+
+---
+
 ## Regression Tests Summary
 
 Run these to make sure the usage tracking changes didn't break
@@ -674,6 +714,7 @@ anything:
 - [ ] DB unreachable: graceful, logged, non-fatal (TC-016)
 - [ ] No connection configured: silent no-op (TC-017)
 - [ ] Purge event exists and enabled (TC-018)
+- [ ] Usage-stats help link switches with beta docs toggle (TC-019)
 - [ ] No regressions in smoke, preferences, or account deletion
       flows
 
