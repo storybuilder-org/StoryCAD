@@ -1,5 +1,7 @@
+using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Text.Json;
 using StoryCADLib.DAL;
+using StoryCADLib.Models;
 
 namespace StoryCADLib.Services.Backend;
 
@@ -55,9 +57,23 @@ public class UsageTrackingService : IUsageTrackingService
             return;
         }
 
-        // Close any open outline
+        // Close any still-open outline, refreshing its metadata from AppState first.
+        // New outlines may have had genre/story_form set AFTER OutlineOpened fired
+        // (FileCreateService fires OutlineOpened at creation, before the user edits
+        // the Overview). Re-read the current overview so the flush captures the
+        // final state.
         if (_currentOutline != null)
         {
+            var doc = Ioc.Default.GetService<AppState>()?.CurrentDocument;
+            var overview = doc?.Model?.StoryElements?
+                .OfType<OverviewModel>()
+                .FirstOrDefault(o => o.Uuid == _currentOutline.OutlineGuid);
+            if (overview != null)
+            {
+                _currentOutline.Genre = overview.StoryGenre;
+                _currentOutline.StoryForm = overview.StoryType;
+                _currentOutline.ElementCount = doc.Model.StoryElements.Count;
+            }
             _currentOutline.CloseTime = DateTime.UtcNow;
             _currentOutline = null;
         }

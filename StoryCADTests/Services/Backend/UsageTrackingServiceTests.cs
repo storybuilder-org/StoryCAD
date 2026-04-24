@@ -180,6 +180,42 @@ public class UsageTrackingServiceTests
     #region Outline Tracking
 
     [TestMethod]
+    public async Task EndSession_WhenOutlineStillOpen_RefetchesCurrentMetadata()
+    {
+        // Arrange: simulate FileCreateService path where OutlineOpened fires
+        // with blank genre/story_form, then user fills them in before app close.
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var outlineService = Ioc.Default.GetRequiredService<StoryCADLib.Services.Outline.OutlineService>();
+        var model = await outlineService.CreateModel("TestRefetch", "Test Author", 0);
+        var overview = model.StoryElements.OfType<OverviewModel>().First();
+        overview.StoryGenre = "";
+        overview.StoryType = "";
+        appState.CurrentDocument = new StoryDocument(model,
+            Path.Combine(Path.GetTempPath(), "TestRefetch.stbx"));
+
+        _service.StartSession();
+        _service.OutlineOpened(overview.Uuid, "", "", model.StoryElements.Count);
+
+        // Simulate user filling in metadata after creation
+        overview.StoryGenre = "Thriller";
+        overview.StoryType = "Novel";
+
+        // Act
+        await _service.EndSession();
+
+        // Assert
+        Assert.AreEqual(1, _sqlIo.RecordSessionDataCalls.Count);
+        var call = _sqlIo.RecordSessionDataCalls[0];
+        StringAssert.Contains(call.outlines, "Thriller",
+            $"Expected outlines JSON to contain 'Thriller': {call.outlines}");
+        StringAssert.Contains(call.outlines, "Novel",
+            $"Expected outlines JSON to contain 'Novel': {call.outlines}");
+
+        // Cleanup
+        appState.CurrentDocument = null;
+    }
+
+    [TestMethod]
     public async Task OutlineOpened_TracksOutlineInFlush()
     {
         var guid = Guid.NewGuid();
