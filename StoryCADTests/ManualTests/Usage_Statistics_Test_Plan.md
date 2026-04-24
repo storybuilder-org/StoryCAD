@@ -18,8 +18,21 @@ Shell/App close flow, and the actual stored procedure execution.
 
 ### Required
 
-1. **Local test database running.** Follow
-   `StoryCADTests/TestDb/README.md` to stand up the Dockerized MySQL 8.
+1. **Local test database running.** See `StoryCADTests/TestDb/README.md`
+   for full details; the minimum is:
+
+   ```bash
+   # From StoryCADTests/TestDb/
+   docker compose up -d
+   docker ps                                              # container up
+   docker compose exec mysql mysql -ustbtest -p123 StoryBuilder -e "SHOW TABLES;"
+   ```
+
+   The `SHOW TABLES` check should list `users`, `preferences`, `versions`,
+   `sessions`, `outline_sessions`, `outline_metadata`, `feature_usage`,
+   `schema_version`. If `docker compose up -d` isn't run first, `exec`
+   fails with `service "mysql" is not running`.
+
 2. **`STORYCAD_TEST_CONNECTION` environment variable set** to the value
    documented in that README. Restart the IDE afterward.
 3. **Launch StoryCAD and confirm the log contains:**
@@ -34,6 +47,10 @@ inspection queries between steps. From the `TestDb` folder:
 ```bash
 docker compose exec mysql mysql -ustbtest -p123 StoryBuilder
 ```
+
+`mysql` appears twice on purpose: the first is the compose **service
+name** (from `docker-compose.yml`), the second is the MySQL **client
+binary** to run inside the container. `StoryBuilder` is case-sensitive.
 
 Useful queries (run inside the MySQL prompt):
 
