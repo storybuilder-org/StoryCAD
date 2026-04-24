@@ -20,6 +20,11 @@
     <PackageVersion Include="Octokit" Version="14.0.0" />
     <PackageVersion Include="SkiaSharp" Version="3.119.2" />
     <PackageVersion Include="Uno.Fonts.Fluent" Version="2.7.1" />
+    <!-- Pinned to override Uno 6.5's vulnerable transitive (GHSA-xrw6-gwf8-vvr9, high severity).
+         Uno PR #22998 bumped Tmds.DBus.Protocol to 0.92.0 on master but did NOT backport to the 6.5 line.
+         Remove this pin (and the direct PackageReference lines in StoryCAD.csproj / StoryCADTests.csproj)
+         when global.json Uno.Sdk bumps to 6.6+. Tracked by issue #1383. -->
+    <PackageVersion Include="Tmds.DBus.Protocol" Version="0.21.3" />
     <PackageVersion Include="MSTest.TestAdapter" Version="4.1.0" />
     <PackageVersion Include="MSTest.TestFramework" Version="4.1.0" />
     <PackageVersion Include="Microsoft.TestPlatform.TestHost" Version="18.3.0" />

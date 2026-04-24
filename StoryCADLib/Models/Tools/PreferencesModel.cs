@@ -102,6 +102,23 @@ public class PreferencesModel : ObservableObject
     public bool Newsletter { get; set; }
 
     /// <summary>
+    ///     Controls whether anonymous usage statistics are collected.
+    ///     When true, session/outline/feature data is sent to the backend.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("UsageStatsConsent")]
+    public bool UsageStatsConsent { get; set; }
+
+    /// <summary>
+    ///     Random GUID generated on opt-in, used as the unlinkable
+    ///     identifier for usage data. No FK to the users table.
+    ///     Regenerated if user opts out and back in.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("UsageId")]
+    public string UsageId { get; set; } = string.Empty;
+
+    /// <summary>
     ///     This switch tracks whether this is the first time StoryCAD is opened
     /// </summary>
     [JsonInclude]

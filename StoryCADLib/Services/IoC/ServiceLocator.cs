@@ -90,6 +90,7 @@ public static class BootStrapper
         Services.AddSingleton<BackupService>();
         Services.AddSingleton<AutoSaveService>();
         Services.AddSingleton<BackendService>();
+        Services.AddSingleton<IUsageTrackingService, UsageTrackingService>();
         Services.AddSingleton<CollaboratorService>();
         Services.AddSingleton<ListData>();
         Services.AddSingleton<ToolsData>();

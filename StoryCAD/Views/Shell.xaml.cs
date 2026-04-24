@@ -202,11 +202,21 @@ public sealed partial class Shell : Page
 
     }
 
+    private bool _closingHandled;
+
     /// <summary>
     ///     Handles the main window closing event. Calls ShellViewModel to perform cleanup.
+    ///     Uses cancel-then-exit: on first fire, cancel the OS close so async cleanup
+    ///     (telemetry flush, preferences save, document close) can actually finish on
+    ///     platforms (e.g. macOS) where the OS otherwise kills the process immediately.
+    ///     After cleanup, Application.Current.Exit() triggers a re-entrant call, and
+    ///     the _closingHandled flag lets it through.
     /// </summary>
     private async void OnMainWindowClosing(AppWindow sender, AppWindowClosingEventArgs args)
     {
+        if (_closingHandled) return;
+
+        args.Cancel = true;
         try
         {
             await ShellVm.OnApplicationClosing();
@@ -214,7 +224,11 @@ public sealed partial class Shell : Page
         catch (Exception ex)
         {
             Logger.LogException(LogLevel.Error, ex, "Error during application closing");
-            // Don't re-throw - let the window close even if cleanup fails
+        }
+        finally
+        {
+            _closingHandled = true;
+            Application.Current.Exit();
         }
     }
 

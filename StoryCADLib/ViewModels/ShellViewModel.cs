@@ -16,6 +16,7 @@ using StoryCADLib.Services.Locking;
 using StoryCADLib.Services.Messages;
 using StoryCADLib.Services.Navigation;
 using StoryCADLib.Services.Outline;
+using StoryCADLib.Services.Backend;
 using StoryCADLib.Services.Search;
 using StoryCADLib.ViewModels.SubViewModels;
 using StoryCADLib.ViewModels.Tools;
@@ -956,6 +957,7 @@ public class ShellViewModel : ObservableRecipient
             case ContentDialogResult.Primary:
                 var prefsVm = Ioc.Default.GetRequiredService<PreferencesViewModel>();
                 prefsVm.SaveModel();
+                Ioc.Default.GetService<IUsageTrackingService>()?.FeatureUsed("PreferencesSaved");
                 await prefsVm.SaveAsync();
 
                 // Notify user if theme changed
@@ -994,6 +996,7 @@ public class ShellViewModel : ObservableRecipient
 
 
             Logger.Log(LogLevel.Info, "Launching collaborator");
+            Ioc.Default.GetService<IUsageTrackingService>()?.FeatureUsed("Collaborator");
             var collaboratorService = Ioc.Default.GetService<CollaboratorService>();
             collaboratorService?.OpenCollaborator();
 
@@ -1478,7 +1481,15 @@ public class ShellViewModel : ObservableRecipient
             // Set closing flag immediately to prevent UI updates during shutdown
             appState.IsClosing = true;
 
-            // 1. Update cumulative time used and save preferences
+            // 1. Flush usage telemetry FIRST — macOS can kill the process
+            // mid-shutdown, so the network round-trip has to happen before any
+            // slow disk work. EndSession internally auto-closes any open outline
+            // before flushing, so CloseFile doesn't have to run first.
+            var usageTracking = Ioc.Default.GetService<IUsageTrackingService>();
+            if (usageTracking != null)
+                await usageTracking.EndSession();
+
+            // 2. Update cumulative time used and save preferences
             var prefs = Ioc.Default.GetRequiredService<PreferenceService>();
             var sessionTime = (DateTime.Now - AppStartTime).TotalSeconds;
             prefs.Model.CumulativeTimeUsed += Convert.ToInt64(sessionTime);
@@ -1488,7 +1499,7 @@ public class ShellViewModel : ObservableRecipient
             await prfIo.WritePreferences(prefs.Model);
             Logger.Log(LogLevel.Info, "Preferences saved");
 
-            // 2. Close the current document if one is open
+            // 3. Close the current document if one is open
             // This handles AutoSave stop, BackupService stop, and document cleanup
             if (appState.CurrentDocument != null)
             {

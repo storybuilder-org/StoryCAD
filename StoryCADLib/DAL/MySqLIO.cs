@@ -42,7 +42,7 @@ public class MySqlIo : IMySqlIo
     }
 
     /// <inheritdoc />
-    public async Task AddOrUpdatePreferences(int id, bool elmah, bool newsletter, string version)
+    public async Task AddOrUpdatePreferences(int id, bool elmah, bool newsletter, string version, bool usageStats)
     {
         await using var conn = new MySqlConnection(_connectionString);
         await conn.OpenAsync();
@@ -53,6 +53,7 @@ public class MySqlIo : IMySqlIo
         cmd.Parameters.AddWithValue("elmah", elmah);
         cmd.Parameters.AddWithValue("newsletter", newsletter);
         cmd.Parameters.AddWithValue("ver", version);
+        cmd.Parameters.AddWithValue("usage_stats", usageStats);
         await cmd.ExecuteNonQueryAsync();
     }
 
@@ -83,5 +84,49 @@ public class MySqlIo : IMySqlIo
         cmd.Parameters["@deleted"].Direction = ParameterDirection.Output;
         await cmd.ExecuteNonQueryAsync();
         return Convert.ToBoolean(cmd.Parameters["@deleted"].Value);
+    }
+
+    /// <inheritdoc />
+    public async Task<List<Dictionary<string, object>>> ExecuteReaderAsync(
+        string storedProcedure,
+        params (string name, object value)[] parameters)
+    {
+        await using var conn = new MySqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using MySqlCommand cmd = new(storedProcedure, conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+        foreach (var (name, value) in parameters)
+            cmd.Parameters.AddWithValue(name, value);
+
+        var results = new List<Dictionary<string, object>>();
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var row = new Dictionary<string, object>();
+            for (var i = 0; i < reader.FieldCount; i++)
+                row[reader.GetName(i)] = reader.IsDBNull(i) ? null : reader.GetValue(i);
+            results.Add(row);
+        }
+        return results;
+    }
+
+    /// <inheritdoc />
+    public async Task RecordSessionData(string usageId, DateTime sessionStart, DateTime sessionEnd,
+        int clockTimeSeconds, string outlinesJson, string featuresJson)
+    {
+        await using var conn = new MySqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using MySqlCommand cmd = new("spRecordSessionData", conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.CommandTimeout = 5; // Aggressive timeout — don't block shutdown
+        cmd.Parameters.AddWithValue("p_usage_id", usageId);
+        cmd.Parameters.AddWithValue("p_session_start", sessionStart);
+        cmd.Parameters.AddWithValue("p_session_end", sessionEnd);
+        cmd.Parameters.AddWithValue("p_clock_time_seconds", clockTimeSeconds);
+        cmd.Parameters.AddWithValue("p_outlines", outlinesJson);
+        cmd.Parameters.AddWithValue("p_features", featuresJson);
+        await cmd.ExecuteNonQueryAsync();
     }
 }

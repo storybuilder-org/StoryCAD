@@ -29,7 +29,7 @@ public interface IMySqlIo
     /// <summary>
     ///     Adds or updates user preferences (via spAddOrUpdatePreferences).
     /// </summary>
-    Task AddOrUpdatePreferences(int id, bool elmah, bool newsletter, string version);
+    Task AddOrUpdatePreferences(int id, bool elmah, bool newsletter, string version, bool usageStats);
 
     /// <summary>
     ///     Adds or updates version tracking (via spAddOrUpdateVersion).
@@ -44,4 +44,21 @@ public interface IMySqlIo
     ///     Used for Apple Guideline 5.1.1(v) account data deletion.
     /// </summary>
     Task<bool> DeleteUser(int id);
+
+    /// <summary>
+    ///     Executes a stored procedure that returns rows.
+    ///     Each row is a dictionary mapping column name to value.
+    ///     Used for read operations (e.g., fetching messages in #1377).
+    /// </summary>
+    Task<List<Dictionary<string, object>>> ExecuteReaderAsync(
+        string storedProcedure,
+        params (string name, object value)[] parameters);
+
+    /// <summary>
+    ///     Flushes a session's usage data in a single round-trip
+    ///     via spRecordSessionData. Outlines and features are passed
+    ///     as JSON arrays.
+    /// </summary>
+    Task RecordSessionData(string usageId, DateTime sessionStart, DateTime sessionEnd,
+        int clockTimeSeconds, string outlinesJson, string featuresJson);
 }

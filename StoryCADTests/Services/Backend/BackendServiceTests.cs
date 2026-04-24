@@ -65,6 +65,58 @@ public class BackendTests
         Assert.IsTrue(testLogger.HasWarning("Skipping PostPreferences"));
     }
 
+    /// <summary>
+    ///     Verifies that PostPreferences forwards UsageStatsConsent to
+    ///     IMySqlIo.AddOrUpdatePreferences as the usageStats argument.
+    ///     Regression guard for the claim that usage_consent stays 0 after Save.
+    /// </summary>
+    [TestMethod]
+    public async Task PostPreferences_WhenUsageStatsConsentTrue_PassesTrueToSqlIo()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.FirstName = "StoryCAD";
+        preferenceService.Model.LastName = "Tests";
+        preferenceService.Model.Email = "sysadmin@storybuilder.org";
+        preferenceService.Model.UsageStatsConsent = true;
+
+        await backendService.PostPreferences(preferenceService.Model);
+
+        Assert.AreEqual(1, testSqlIo.AddOrUpdatePreferencesCalls.Count);
+        Assert.IsTrue(testSqlIo.AddOrUpdatePreferencesCalls[0].usageStats,
+            "PostPreferences should forward UsageStatsConsent=true as usageStats=true");
+    }
+
+    /// <summary>
+    ///     Mirror of the true case — verifies false is not coerced to true.
+    /// </summary>
+    [TestMethod]
+    public async Task PostPreferences_WhenUsageStatsConsentFalse_PassesFalseToSqlIo()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.FirstName = "StoryCAD";
+        preferenceService.Model.LastName = "Tests";
+        preferenceService.Model.Email = "sysadmin@storybuilder.org";
+        preferenceService.Model.UsageStatsConsent = false;
+
+        await backendService.PostPreferences(preferenceService.Model);
+
+        Assert.AreEqual(1, testSqlIo.AddOrUpdatePreferencesCalls.Count);
+        Assert.IsFalse(testSqlIo.AddOrUpdatePreferencesCalls[0].usageStats,
+            "PostPreferences should forward UsageStatsConsent=false as usageStats=false");
+    }
+
     #endregion
 
     #region DeleteUserData Tests
@@ -513,7 +565,7 @@ public class TestMySqlIo : IMySqlIo
 
     // Call recording
     public List<(string name, string email)> AddOrUpdateUserCalls { get; } = new();
-    public List<(int id, bool elmah, bool newsletter, string version)> AddOrUpdatePreferencesCalls { get; } = new();
+    public List<(int id, bool elmah, bool newsletter, string version, bool usageStats)> AddOrUpdatePreferencesCalls { get; } = new();
     public List<(int id, string current, string previous)> AddVersionCalls { get; } = new();
     public List<int> DeleteUserCalls { get; } = new();
 
@@ -531,9 +583,9 @@ public class TestMySqlIo : IMySqlIo
         return Task.FromResult(AddOrUpdateUserReturnId);
     }
 
-    public Task AddOrUpdatePreferences(int id, bool elmah, bool newsletter, string version)
+    public Task AddOrUpdatePreferences(int id, bool elmah, bool newsletter, string version, bool usageStats)
     {
-        AddOrUpdatePreferencesCalls.Add((id, elmah, newsletter, version));
+        AddOrUpdatePreferencesCalls.Add((id, elmah, newsletter, version, usageStats));
         if (ExceptionToThrow != null) throw ExceptionToThrow;
         return Task.CompletedTask;
     }
@@ -552,6 +604,31 @@ public class TestMySqlIo : IMySqlIo
         DeleteUserCalls.Add(id);
         if (ExceptionToThrow != null) throw ExceptionToThrow;
         return Task.FromResult(DeleteUserReturnValue);
+    }
+
+    // Read capability
+    public List<(string sp, (string name, object value)[] parameters)> ExecuteReaderCalls { get; } = new();
+    public List<Dictionary<string, object>> ExecuteReaderReturnValue { get; set; } = new();
+
+    public Task<List<Dictionary<string, object>>> ExecuteReaderAsync(
+        string storedProcedure,
+        params (string name, object value)[] parameters)
+    {
+        ExecuteReaderCalls.Add((storedProcedure, parameters));
+        if (ExceptionToThrow != null) throw ExceptionToThrow;
+        return Task.FromResult(ExecuteReaderReturnValue);
+    }
+
+    // Usage tracking
+    public List<(string usageId, DateTime start, DateTime end, int seconds, string outlines, string features)>
+        RecordSessionDataCalls { get; } = new();
+
+    public Task RecordSessionData(string usageId, DateTime sessionStart, DateTime sessionEnd,
+        int clockTimeSeconds, string outlinesJson, string featuresJson)
+    {
+        RecordSessionDataCalls.Add((usageId, sessionStart, sessionEnd, clockTimeSeconds, outlinesJson, featuresJson));
+        if (ExceptionToThrow != null) throw ExceptionToThrow;
+        return Task.CompletedTask;
     }
 }
 
