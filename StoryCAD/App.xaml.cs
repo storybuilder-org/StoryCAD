@@ -38,12 +38,24 @@ public partial class App : Application
     /// </summary>
     public App()
     {
+#if WINDOWS10_0_18362_0_OR_GREATER
+        // Single-instance gate: if another StoryCAD is already running, forward this
+        // launch's activation (including any .stbx file) to it and exit.
+        var mainInstance = Microsoft.Windows.AppLifecycle.AppInstance.FindOrRegisterForKey("StoryCAD-main");
+        var activationArgs = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().GetActivatedEventArgs();
+        if (!mainInstance.IsCurrent)
+        {
+            mainInstance.RedirectActivationToAsync(activationArgs).AsTask().GetAwaiter().GetResult();
+            Environment.Exit(0);
+        }
+        mainInstance.Activated += OnSecondaryInstanceActivated;
+#endif
+
         //Set up IOC and the services.
         BootStrapper.Initialise(false);
-        
-        #if WINDOWS10_0_18362_0_OR_GREATER
+
+#if WINDOWS10_0_18362_0_OR_GREATER
         //Check how app was invoked and handle file activation if necessary.
-        var activationArgs = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().GetActivatedEventArgs();
         if (activationArgs != null && activationArgs.Kind == Microsoft.Windows.AppLifecycle.ExtendedActivationKind.File)
         {
             if (activationArgs.Data is Windows.ApplicationModel.Activation.IFileActivatedEventArgs fileArgs)
@@ -55,7 +67,7 @@ public partial class App : Application
                 }
             }
         }
-        #endif
+#endif
         try
         {
             // Determine if running as packaged or unpackaged
@@ -89,6 +101,34 @@ public partial class App : Application
         _log = Ioc.Default.GetService<ILogService>();
         Current.UnhandledException += OnUnhandledException;
     }
+
+#if WINDOWS10_0_18362_0_OR_GREATER
+    // Fires on the primary instance when a secondary launch was redirected here.
+    // Focus the main window and, if a .stbx was passed, open it.
+    private void OnSecondaryInstanceActivated(object sender, Microsoft.Windows.AppLifecycle.AppActivationArguments e)
+    {
+        string path = null;
+        if (e.Kind == Microsoft.Windows.AppLifecycle.ExtendedActivationKind.File &&
+            e.Data is Windows.ApplicationModel.Activation.IFileActivatedEventArgs fileArgs)
+        {
+            var file = fileArgs.Files.OfType<StorageFile>().FirstOrDefault();
+            if (file != null && file.Path.EndsWith(".stbx", StringComparison.OrdinalIgnoreCase))
+            {
+                path = file.Path;
+            }
+        }
+
+        var windowing = Ioc.Default.GetRequiredService<Windowing>();
+        windowing.GlobalDispatcher?.TryEnqueue(() =>
+        {
+            windowing.ActivateMainInstance();
+            if (path != null)
+            {
+                _ = Ioc.Default.GetRequiredService<ShellViewModel>().OutlineManager.OpenFile(path);
+            }
+        });
+    }
+#endif
 
     protected Window? MainWindow { get; private set; }
 
