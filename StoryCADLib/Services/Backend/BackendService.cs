@@ -72,7 +72,7 @@ public class BackendService
         {
             // If the previous attempt to communicate to the back-end server
             // or database failed, retry
-            if (_preferenceService.Model.RecordPreferencesStatus)
+            if (!_preferenceService.Model.RecordPreferencesStatus)
             {
                 await PostPreferences(_preferenceService.Model);
             }
