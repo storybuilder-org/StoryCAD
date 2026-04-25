@@ -9,6 +9,7 @@ using StoryCADLib.Services.IoC;
 using StoryCADLib.Services.Json;
 using StoryCADLib.Services.Locking;
 using StoryCADLib.Services.Logging;
+using StoryCADLib.Services.MacFileAssociation;
 using StoryCADLib.Services.Navigation;
 using StoryCAD.Views;
 using Uno.Extensions;
@@ -288,6 +289,16 @@ public partial class App : Application
                 if (launchPath != string.Empty)
                 {
                     Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch = launchPath;
+                }
+                else if (OperatingSystem.IsMacOS())
+                {
+                    // On macOS, a kAEOpenDocuments event may have fired during
+                    // NSApplication.finishLaunching (before IoC was ready). Drain it now.
+                    var pending = MacFileOpenService.ConsumePendingPath();
+                    if (!string.IsNullOrEmpty(pending))
+                    {
+                        Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch = pending;
+                    }
                 }
                 rootFrame.Navigate(typeof(Shell));
             }
