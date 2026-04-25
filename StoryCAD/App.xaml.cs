@@ -9,6 +9,7 @@ using StoryCADLib.Services.IoC;
 using StoryCADLib.Services.Json;
 using StoryCADLib.Services.Locking;
 using StoryCADLib.Services.Logging;
+using StoryCADLib.Services.MacFileAssociation;
 using StoryCADLib.Services.Navigation;
 using StoryCAD.Views;
 using Uno.Extensions;
@@ -40,7 +41,7 @@ public partial class App : Application
     {
         //Set up IOC and the services.
         BootStrapper.Initialise(false);
-        
+
         #if WINDOWS10_0_18362_0_OR_GREATER
         //Check how app was invoked and handle file activation if necessary.
         var activationArgs = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().GetActivatedEventArgs();
@@ -139,18 +140,29 @@ public partial class App : Application
 
         var Preferences = Ioc.Default.GetRequiredService<PreferenceService>();
 
-        // Obtain keys if defined
-        try
+        // Configure backend connection: use local test DB if STORYCAD_TEST_CONNECTION is set,
+        // otherwise fetch secrets from Doppler for production
+        var testConnection = Environment.GetEnvironmentVariable("STORYCAD_TEST_CONNECTION");
+        if (!string.IsNullOrEmpty(testConnection))
         {
-            Doppler doppler = new();
-            var keys = await doppler.FetchSecretsAsync();
             var backend = Ioc.Default.GetService<BackendService>();
-            await backend.SetConnectionString(keys);
-            _log.SetElmahTokens(keys);
+            backend.SetConnectionString(testConnection);
+            _log.Log(LogLevel.Info, "Using local test database connection");
         }
-        catch (Exception ex)
+        else
         {
-            _log.LogException(LogLevel.Error, ex, ex.Message);
+            try
+            {
+                Doppler doppler = new();
+                var keys = await doppler.FetchSecretsAsync();
+                var backend = Ioc.Default.GetService<BackendService>();
+                await backend.SetConnectionString(keys);
+                _log.SetElmahTokens(keys);
+            }
+            catch (Exception ex)
+            {
+                _log.LogException(LogLevel.Error, ex, ex.Message);
+            }
         }
 
         var AppDat = Ioc.Default.GetRequiredService<AppState>();
@@ -202,6 +214,7 @@ public partial class App : Application
         }
 
         await Ioc.Default.GetService<BackendService>()!.StartupRecording();
+        Ioc.Default.GetService<IUsageTrackingService>()?.StartSession();
         ConfigureNavigation();
 
         // Do not repeat app initialization when the Window already has content,
@@ -236,6 +249,16 @@ public partial class App : Application
                 if (launchPath != string.Empty)
                 {
                     Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch = launchPath;
+                }
+                else if (OperatingSystem.IsMacOS())
+                {
+                    // On macOS, a kAEOpenDocuments event may have fired during
+                    // NSApplication.finishLaunching (before IoC was ready). Drain it now.
+                    var pending = MacFileOpenService.ConsumePendingPath();
+                    if (!string.IsNullOrEmpty(pending))
+                    {
+                        Ioc.Default.GetRequiredService<ShellViewModel>().FilePathToLaunch = pending;
+                    }
                 }
                 rootFrame.Navigate(typeof(Shell));
             }

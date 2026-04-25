@@ -72,7 +72,7 @@ public class BackendService
         {
             // If the previous attempt to communicate to the back-end server
             // or database failed, retry
-            if (_preferenceService.Model.RecordPreferencesStatus)
+            if (!_preferenceService.Model.RecordPreferencesStatus)
             {
                 await PostPreferences(_preferenceService.Model);
             }
@@ -166,11 +166,12 @@ public class BackendService
                 version = version.Substring(9);
             }
 
-            await _sqlIo.AddOrUpdatePreferences(id, elmah, newsletter, version);
+            var usageStats = preferences.UsageStatsConsent;
+            await _sqlIo.AddOrUpdatePreferences(id, elmah, newsletter, version, usageStats);
             _preferenceService.Model.RecordPreferencesStatus = true;
             PreferencesIo loader = new();
             await loader.WritePreferences(_preferenceService.Model);
-            _logService.Log(LogLevel.Info, "Preferences posted: elmah=" + elmah + " newsletter=" + newsletter);
+            _logService.Log(LogLevel.Info, "Preferences posted: elmah=" + elmah + " newsletter=" + newsletter + " usageStats=" + usageStats);
         }
         catch (TaskCanceledException ex)
         {
@@ -309,6 +310,17 @@ public class BackendService
             _logService.LogException(LogLevel.Error, ex, "Failed to delete user data");
             return false;
         }
+    }
+
+    /// <summary>
+    ///     Configures the backend connection directly from a connection string.
+    ///     Used for local test database (no Doppler, no SSL cert needed).
+    ///     Set STORYCAD_TEST_CONNECTION environment variable to use this path.
+    /// </summary>
+    public void SetConnectionString(string connectionString)
+    {
+        _sqlIo.SetConnectionString(connectionString);
+        _logService.Log(LogLevel.Info, "Backend connection configured from direct connection string");
     }
 
     /// <summary>

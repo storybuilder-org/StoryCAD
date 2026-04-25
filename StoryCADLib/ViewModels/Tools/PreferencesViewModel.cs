@@ -102,6 +102,14 @@ public class PreferencesViewModel : ObservableValidator
         set => SetProperty(ref _newsletter, value);
     }
 
+    private bool _usageStatsConsent;
+
+    public bool UsageStatsConsent
+    {
+        get => _usageStatsConsent;
+        set => SetProperty(ref _usageStatsConsent, value);
+    }
+
     /// <summary>
     ///     This switch tracks whether this is a new
     ///     installation and if Initialization should be shown.
@@ -266,8 +274,16 @@ public class PreferencesViewModel : ObservableValidator
     public bool UseBetaDocumentation
     {
         get => _useBetaDocumentation;
-        set => SetProperty(ref _useBetaDocumentation, value);
+        set
+        {
+            if (SetProperty(ref _useBetaDocumentation, value))
+                OnPropertyChanged(nameof(UsageStatsHelpUrl));
+        }
     }
+
+    public Uri UsageStatsHelpUrl => new Uri(
+        (UseBetaDocumentation ? "https://beta.manual.storybuilder.org/" : "https://manual.storybuilder.org/")
+        + "Preferences/Usage_Statistics.html");
 
     /// <summary>
     /// Tracks if theme preference changed during this save (requires restart)
@@ -285,6 +301,7 @@ public class PreferencesViewModel : ObservableValidator
         Email = CurrentModel.Email;
         ErrorCollectionConsent = CurrentModel.ErrorCollectionConsent;
         Newsletter = CurrentModel.Newsletter;
+        UsageStatsConsent = CurrentModel.UsageStatsConsent;
         PreferencesInitialized = CurrentModel.PreferencesInitialized;
         LastSelectedTemplate = CurrentModel.LastSelectedTemplate;
         WrapNodeNames = CurrentModel.WrapNodeNames;
@@ -319,6 +336,7 @@ public class PreferencesViewModel : ObservableValidator
         CurrentModel.Email = Email;
         CurrentModel.ErrorCollectionConsent = ErrorCollectionConsent;
         CurrentModel.Newsletter = Newsletter;
+        CurrentModel.UsageStatsConsent = UsageStatsConsent;
         CurrentModel.PreferencesInitialized = PreferencesInitialized;
         CurrentModel.LastSelectedTemplate = LastSelectedTemplate;
         CurrentModel.WrapNodeNames = WrapNodeNames;
@@ -392,6 +410,8 @@ public class PreferencesViewModel : ObservableValidator
         CurrentModel.UserId = 0;
         CurrentModel.ErrorCollectionConsent = false;
         CurrentModel.Newsletter = false;
+        CurrentModel.UsageStatsConsent = false;
+        CurrentModel.UsageId = string.Empty;
         CurrentModel.PreferencesInitialized = false;
         CurrentModel.RecordPreferencesStatus = false;
         CurrentModel.RecordVersionStatus = false;

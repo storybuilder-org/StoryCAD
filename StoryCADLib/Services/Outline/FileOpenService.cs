@@ -161,6 +161,18 @@ public class FileOpenService
             }
 
             _logger.Log(LogLevel.Info, $"Opened project {_appState.CurrentDocument?.FilePath}");
+
+            // Track outline open for usage statistics
+            if (_appState.CurrentDocument?.Model != null)
+            {
+                var model = _appState.CurrentDocument.Model;
+                var overview = model.StoryElements.OfType<Models.OverviewModel>().FirstOrDefault();
+                if (overview != null)
+                {
+                    Ioc.Default.GetService<Backend.IUsageTrackingService>()?.OutlineOpened(
+                        overview.Uuid, overview.StoryGenre, overview.StoryType, model.StoryElements.Count);
+                }
+            }
         }
         catch (Exception ex)
         {

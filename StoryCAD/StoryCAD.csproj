@@ -86,6 +86,9 @@
 
     <ItemGroup>
         <PackageReference Include="Uno.Fonts.Fluent" />
+        <!-- Transitive CVE override (GHSA-xrw6-gwf8-vvr9). Version pinned in Directory.Packages.props.
+             Remove when Uno.Sdk in global.json bumps to 6.6+. Tracked by issue #1383. -->
+        <PackageReference Include="Tmds.DBus.Protocol" />
     </ItemGroup>
 
     <ItemGroup>

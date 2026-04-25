@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using StoryCADLib.Services.Logging;
 using StoryCADLib.ViewModels;
-using static StoryCADLib.Services.MacMenuBar.ObjCRuntime;
+using static StoryCADLib.Services.MacInterop.ObjCRuntime;
 
 namespace StoryCADLib.Services.MacMenuBar;
 
