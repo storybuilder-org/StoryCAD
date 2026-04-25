@@ -126,6 +126,13 @@ public sealed partial class Shell : Page
         // Initialize native macOS menu bar (no-op on Windows)
         Ioc.Default.GetRequiredService<MacMenuBarService>().Initialize();
 
+        // macOS-only: hide the in-window Shell CommandBar when the user has
+        // opted to rely on the native Mac menu bar instead.
+        if (OperatingSystem.IsMacOS() && Preferences.HideShellCommandBarOnMac)
+        {
+            ShellCommandBar.Visibility = Visibility.Collapsed;
+        }
+
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();
         Windowing.UpdateWindowTitle();
@@ -333,22 +340,6 @@ public sealed partial class Shell : Page
         }
 
         ShellVm.LastClickedTreeviewItem = (TreeViewItem)sender;
-    }
-
-    private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
-    {
-        var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new ContentDialog
-        {
-            Content = new FeedbackDialog(),
-            PrimaryButtonText = "Submit Feedback",
-            SecondaryButtonText = "Discard",
-            Title = "Submit"
-        });
-
-        if (result == ContentDialogResult.Primary)
-        {
-            Ioc.Default.GetRequiredService<FeedbackViewModel>().CreateFeedback();
-        }
     }
 
     private void ShellPage_SizeChanged(object sender, SizeChangedEventArgs e)

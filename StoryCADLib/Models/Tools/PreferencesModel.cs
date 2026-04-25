@@ -50,6 +50,7 @@ public class PreferencesModel : ObservableObject
         ShowStartupDialog = true;
         ShowFilePickerOnStartup = true;
         UseBetaDocumentation = AppState.IsBetaDistribution;
+        HideShellCommandBarOnMac = false;
     }
 
     #endregion
@@ -298,6 +299,15 @@ public class PreferencesModel : ObservableObject
     [JsonInclude]
     [JsonPropertyName("UseBetaDocumentation")]
     public bool UseBetaDocumentation { get; set; }
+
+    /// <summary>
+    ///     macOS only. When true, hides the in-window Shell CommandBar (search +
+    ///     menu buttons) since those are redundant with the native Mac menu bar.
+    ///     Takes effect on next launch.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("HideShellCommandBarOnMac")]
+    public bool HideShellCommandBarOnMac { get; set; }
 
     #endregion
 }

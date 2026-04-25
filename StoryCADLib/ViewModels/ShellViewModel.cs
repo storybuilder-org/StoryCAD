@@ -159,6 +159,8 @@ public class ShellViewModel : ObservableRecipient
 
         PreferencesCommand = new RelayCommand(OpenPreferences, SerializationLock.CanExecuteCommands);
 
+        ReportFeedbackCommand = new RelayCommand(OpenReportFeedback, SerializationLock.CanExecuteCommands);
+
         PrintReportsCommand = new RelayCommand(OpenPrintMenu, SerializationLock.CanExecuteCommands);
         ExportReportsToPdfCommand = new RelayCommand(OpenExportPdfMenu, SerializationLock.CanExecuteCommands);
         ScrivenerReportsCommand = new RelayCommand(async () => await OutlineManager.GenerateScrivenerReports(),
@@ -391,6 +393,7 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand ExportReportsToPdfCommand { get; }
     public RelayCommand ScrivenerReportsCommand { get; }
     public RelayCommand PreferencesCommand { get; }
+    public RelayCommand ReportFeedbackCommand { get; }
 
     private Visibility _collaboratorVisibility;
 
@@ -977,6 +980,22 @@ public class ShellViewModel : ObservableRecipient
             default:
                 Messenger.Send(new StatusChangedMessage(new StatusMessage("Preferences closed", LogLevel.Info, true)));
                 break;
+        }
+    }
+
+    private async void OpenReportFeedback()
+    {
+        var result = await Window.ShowContentDialog(new ContentDialog
+        {
+            Content = new FeedbackDialog(),
+            PrimaryButtonText = "Submit Feedback",
+            SecondaryButtonText = "Discard",
+            Title = "Submit"
+        });
+
+        if (result == ContentDialogResult.Primary)
+        {
+            Ioc.Default.GetRequiredService<FeedbackViewModel>().CreateFeedback();
         }
     }
 
