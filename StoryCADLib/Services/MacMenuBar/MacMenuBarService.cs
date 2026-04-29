@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using StoryCADLib.Services.Logging;
 using StoryCADLib.ViewModels;
-using static StoryCADLib.Services.MacMenuBar.ObjCRuntime;
+using static StoryCADLib.Services.MacInterop.ObjCRuntime;
 
 namespace StoryCADLib.Services.MacMenuBar;
 
@@ -69,7 +69,7 @@ public class MacMenuBarService
             // Build each top-level menu
             AddAppMenu(mainMenu);
             AddFileMenu(mainMenu);
-            AddEditMenu(mainMenu);
+            AddSearchMenu(mainMenu);
             AddStoryMenu(mainMenu);
             AddMoveMenu(mainMenu);
             AddToolsMenu(mainMenu);
@@ -183,13 +183,45 @@ public class MacMenuBarService
         AddItemToMenu(fileMenu, closeItem);
     }
 
-    private void AddEditMenu(IntPtr mainMenu)
+    private void AddSearchMenu(IntPtr mainMenu)
     {
-        IntPtr editMenu = CreateMenu("Edit");
-        SetAutoenablesItems(editMenu, false);
-        IntPtr editMenuItem = CreateMenuItem("Edit", IntPtr.Zero, "");
-        SetSubmenu(editMenuItem, editMenu);
-        AddItemToMenu(mainMenu, editMenuItem);
+        // Top-level "Search" menu. Opening it reveals an NSSearchField embedded
+        // as the submenu's sole item. Typing + Enter updates ShellVm.FilterText
+        // and runs the same SearchNodes() call that the Shell AutoSuggestBox uses.
+        IntPtr searchMenu = CreateMenu("Search");
+        SetAutoenablesItems(searchMenu, false);
+        IntPtr searchMenuItem = CreateMenuItem("Search", IntPtr.Zero, "");
+        SetSubmenu(searchMenuItem, searchMenu);
+        AddItemToMenu(mainMenu, searchMenuItem);
+
+        // Padded container view so the search field doesn't sit flush against
+        // the menu edges. The item's height is driven by the container frame.
+        const double padX = 14;
+        const double padY = 10;
+        const double fieldW = 320;
+        const double fieldH = 26;
+        IntPtr container = CreateView(fieldW + padX * 2, fieldH + padY * 2);
+
+        // Search field positioned inside the container with padding on all sides.
+        IntPtr searchField = CreateSearchField(padX, padY, fieldW, fieldH);
+        SetPlaceholderString(searchField, "Enter text to search for here");
+        AddSubview(container, searchField);
+
+        // The action fires when the user presses Enter in the search field.
+        // Capture `searchField` in the closure so we can read its current value.
+        IntPtr searchSel = _actionHandler.RegisterAction("menuBarSearch:", () =>
+        {
+            string query = GetStringValue(searchField);
+            _shellVm.FilterText = query;
+            _shellVm.OutlineManager.SearchNodes();
+        });
+        SetTarget(searchField, _actionHandler.Instance);
+        SetAction(searchField, searchSel);
+
+        // Wrap the container in a menu item via setView:.
+        IntPtr searchFieldItem = CreateMenuItem("", IntPtr.Zero, "");
+        SetView(searchFieldItem, container);
+        AddItemToMenu(searchMenu, searchFieldItem);
     }
 
     private void AddStoryMenu(IntPtr mainMenu)
@@ -361,6 +393,10 @@ public class MacMenuBarService
         IntPtr helpMenuItem = CreateMenuItem("Help", IntPtr.Zero, "");
         SetSubmenu(helpMenuItem, helpMenu);
         AddItemToMenu(mainMenu, helpMenuItem);
+
+        // Report Feedback
+        AddActionItem(helpMenu, "Report Feedback...", "reportFeedback:", "",
+            0, () => _shellVm.ReportFeedbackCommand.Execute(null));
 
         // StoryCAD Help
         AddActionItem(helpMenu, "StoryCAD Help", "showHelp:", "",

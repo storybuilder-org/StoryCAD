@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCADLib.Services.Messages;
-using static StoryCADLib.Services.MacMenuBar.ObjCRuntime;
+using static StoryCADLib.Services.MacInterop.ObjCRuntime;
 
 namespace StoryCADLib.ViewModels.Tools;
 

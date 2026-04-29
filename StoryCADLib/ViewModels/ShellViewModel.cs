@@ -102,7 +102,6 @@ public class ShellViewModel : ObservableRecipient
         Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
         Messenger.Register<ShellViewModel, NameChangedMessage>(this, static (r, m) => r.NameMessageReceived(m));
         Messenger.Register<ShellViewModel, ThemeChangedMessage>(this, static (r, m) => r.ThemeChangedMessageReceived());
-        Messenger.Register<ShellViewModel, ActivateInstanceMessage>(this, static (r, m) => r.ActivateInstanceMessageReceived());
 
         this.appState.CurrentDocument = new StoryDocument(new StoryModel());
 
@@ -158,6 +157,8 @@ public class ShellViewModel : ObservableRecipient
             SerializationLock.CanExecuteCommands);
 
         PreferencesCommand = new RelayCommand(OpenPreferences, SerializationLock.CanExecuteCommands);
+
+        ReportFeedbackCommand = new RelayCommand(OpenReportFeedback, SerializationLock.CanExecuteCommands);
 
         PrintReportsCommand = new RelayCommand(OpenPrintMenu, SerializationLock.CanExecuteCommands);
         ExportReportsToPdfCommand = new RelayCommand(OpenExportPdfMenu, SerializationLock.CanExecuteCommands);
@@ -391,6 +392,7 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand ExportReportsToPdfCommand { get; }
     public RelayCommand ScrivenerReportsCommand { get; }
     public RelayCommand PreferencesCommand { get; }
+    public RelayCommand ReportFeedbackCommand { get; }
 
     private Visibility _collaboratorVisibility;
 
@@ -977,6 +979,22 @@ public class ShellViewModel : ObservableRecipient
             default:
                 Messenger.Send(new StatusChangedMessage(new StatusMessage("Preferences closed", LogLevel.Info, true)));
                 break;
+        }
+    }
+
+    private async void OpenReportFeedback()
+    {
+        var result = await Window.ShowContentDialog(new ContentDialog
+        {
+            Content = new FeedbackDialog(),
+            PrimaryButtonText = "Submit Feedback",
+            SecondaryButtonText = "Discard",
+            Title = "Submit"
+        });
+
+        if (result == ContentDialogResult.Primary)
+        {
+            Ioc.Default.GetRequiredService<FeedbackViewModel>().CreateFeedback();
         }
     }
 
@@ -1568,14 +1586,6 @@ public class ShellViewModel : ObservableRecipient
     {
         await OutlineManager.SaveFile();
         ShowHomePage();
-    }
-
-    /// <summary>
-    /// Handles second instance activation by showing a warning message.
-    /// </summary>
-    private void ActivateInstanceMessageReceived()
-    {
-        ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
     }
 
     #endregion

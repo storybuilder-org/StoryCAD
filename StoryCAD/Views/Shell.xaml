@@ -416,7 +416,8 @@
                     </AppBarButton.Icon>
                 </AppBarButton>
                 <AppBarButton Width="50" IsCompact="True" Label="Report Feedback"
-                              ToolTipService.ToolTip="Report Feedback" Click="ButtonBase_OnClick">
+                              ToolTipService.ToolTip="Report Feedback"
+                              Command="{x:Bind ShellVm.ReportFeedbackCommand, Mode=OneWay}">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xED15;" />
                     </AppBarButton.Icon>

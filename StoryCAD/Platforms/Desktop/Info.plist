@@ -38,5 +38,45 @@
 	<string>Copyright © StoryBuilder Foundation</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>StoryCAD Outline</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>stbx</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>org.storybuilder.storycad.outline</string>
+			</array>
+		</dict>
+	</array>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>org.storybuilder.storycad.outline</string>
+			<key>UTTypeDescription</key>
+			<string>StoryCAD Outline</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>stbx</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

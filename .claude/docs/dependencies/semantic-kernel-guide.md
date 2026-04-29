@@ -70,48 +70,60 @@ public class SomeViewModel
 
 ### ICollaborator Interface
 
-**Contract between StoryCAD and plugin**:
+**Contract between StoryCAD and plugin** (defined in `StoryCADLib/Services/Collaborator/Contracts/ICollaborator.cs`, simplified by issue #1088):
+
 ```csharp
-public interface ICollaborator : IDisposable
+public interface ICollaborator
 {
-    bool Open(IStoryCADAPI api, StoryModel model);
+    Task<Window> OpenAsync(IStoryCADAPI api, StoryModel model,
+                           Window hostWindow, Frame hostFrame,
+                           string filePath, ILogService? logger = null);
+
     CollaboratorResult Close();
+
+    void SetSettings(CollaboratorSettings settings);
+    CollaboratorSettings GetSettings();
+
+    void Dispose();
 }
 ```
 
-`Open` launches the Collaborator session (StoryCAD passes the current `StoryModel` and API), and `Close` returns a session summary when the host dismisses the plugin.
+`OpenAsync` is the single handoff point — the host passes the current `StoryModel`, the API, host-supplied `Window`/`Frame` for the plugin's UI, the file path (for save-via-API), and an optional logger; the call returns the `Window` hosting Collaborator's UI. `Close` retrieves a session summary when the host dismisses the plugin. `SetSettings`/`GetSettings` can run before or after `OpenAsync`.
 
-**Implementation in CollaboratorLib**:
+**Implementation in CollaboratorLib** (`CollaboratorLib/Collaborator.cs`):
+
 ```csharp
-// In CollaboratorLib.dll
 public class Collaborator : ICollaborator
 {
-    private readonly Kernel _kernel; // Semantic Kernel instance
+    private bool _kernelInitialized;
+    private readonly object _kernelLock = new();
+    private Kernel _kernel; // built lazily
 
-    public Collaborator(CollaboratorArgs args)
+    public Collaborator()
     {
-        // Initialize Semantic Kernel here
-        _kernel = BuildKernel();
+        // Empty by design: Semantic Kernel build takes 7+ minutes.
+        // Init is deferred to first use to keep construction cheap
+        // (matters for tests and startup time).
     }
 
-    private Kernel BuildKernel()
+    private void EnsureKernelInitialized()
     {
-        var builder = Kernel.CreateBuilder();
-
-        // Add OpenAI or Azure OpenAI
-        builder.AddOpenAIChatCompletion(
-            modelId: "gpt-4",
-            apiKey: GetApiKey()
-        );
-
-        return builder.Build();
+        if (_kernelInitialized) return;
+        lock (_kernelLock)
+        {
+            if (_kernelInitialized) return;
+            // Build Kernel here (see "Building the Kernel" below).
+            _kernelInitialized = true;
+        }
     }
 
-    public async Task ProcessWorkflowAsync()
+    public async Task<Window> OpenAsync(IStoryCADAPI api, StoryModel model,
+                                        Window hostWindow, Frame hostFrame,
+                                        string filePath, ILogService? logger = null)
     {
-        // Use Semantic Kernel to execute AI workflow
-        var result = await _kernel.InvokePromptAsync(prompt);
-        // ... process result
+        EnsureKernelInitialized();
+        // Use api/model/hostWindow/hostFrame to set up the Collaborator session.
+        // Return the hosting window.
     }
 }
 ```
@@ -240,41 +252,29 @@ public async Task<string> SendChatMessage(string userMessage)
 
 ---
 
-## CollaboratorArgs Pattern
+## Data passed from StoryCAD to Collaborator
 
-**Data passed from StoryCAD to Collaborator**:
+There is no `CollaboratorArgs` bag class. Everything the plugin needs flows through `ICollaborator.OpenAsync(...)` parameters:
+
+| Parameter | Role |
+|---|---|
+| `IStoryCADAPI api` | API surface the plugin uses to read/write outline data — the only data path; no direct file access |
+| `StoryModel model` | The story the Collaborator session operates on |
+| `Window hostWindow` | Host-created window for Collaborator's UI |
+| `Frame hostFrame` | Host-created frame (with region) for the plugin's internal navigation |
+| `string filePath` | Path to the story file, used by API save operations |
+| `ILogService? logger` | StoryCAD's logger for high-level audit events; may be null |
+
+The single 6-parameter call replaced an earlier args-bag pattern under the issue #1088 interface simplification. Caller-side example:
+
 ```csharp
-public class CollaboratorArgs
-{
-    public WorkflowViewModel WorkflowVm { get; set; }
-    public Window CollaboratorWindow { get; set; }
-    public StoryElement SelectedElement { get; set; }
-    public StoryModel StoryModel { get; set; }
-}
-```
-
-**Usage**:
-```csharp
-// In StoryCAD - preparing args
-var args = new CollaboratorArgs
-{
-    WorkflowVm = _workflowViewModel,
-    CollaboratorWindow = collaboratorWindow,
-    SelectedElement = currentElement,
-    StoryModel = AppState.CurrentDocument.StoryModel
-};
-
-// CollaboratorLib constructor receives args
-public Collaborator(CollaboratorArgs args)
-{
-    _workflowVm = args.WorkflowVm;
-    _window = args.CollaboratorWindow;
-    _element = args.SelectedElement;
-    _model = args.StoryModel;
-
-    // Can now use Semantic Kernel with story context
-    _kernel = BuildKernel();
-}
+var hostingWindow = await collaborator.OpenAsync(
+    api: _storyCadApi,
+    model: AppState.CurrentDocument.Model,
+    hostWindow: collaboratorWindow,
+    hostFrame: collaboratorFrame,
+    filePath: AppState.CurrentDocument.FilePath,
+    logger: _logService);
 ```
 
 ---
@@ -436,48 +436,27 @@ public async Task<OperationResult<string>> SafeInvokePrompt(string prompt)
 
 ## Testing Semantic Kernel Code
 
-### Pattern: Mock Kernel for Tests
+### Collaborator's actual pattern: real implementations, no mocks
+
+`CollaboratorTests` does not mock `Kernel`. Per `CollaboratorTests/TestDataSetup.cs` doc-comment: *"Follows StoryCADTests pattern - uses real implementations, no mocks."* The shared assembly setup runs the real `BootStrapper.Initialise()` IoC, exposes a real `StoryCADApi` and a `Dictionary<string, StoryModel>` loaded from on-disk `TestInputs/` fixtures, and instantiates the production `Collaborator` class directly. `CollaboratorHost.ShutdownAsync()` runs in `[TestCleanup]` between tests.
 
 ```csharp
-// Test interface
-public interface IKernelService
+[AssemblyInitialize]
+public static async Task AssemblyInitAsync(TestContext context)
 {
-    Task<string> InvokePromptAsync(string prompt);
-}
-
-// Real implementation
-public class SemanticKernelService : IKernelService
-{
-    private readonly Kernel _kernel;
-
-    public async Task<string> InvokePromptAsync(string prompt)
-    {
-        var result = await _kernel.InvokePromptAsync(prompt);
-        return result.ToString();
-    }
-}
-
-// Mock for tests
-public class MockKernelService : IKernelService
-{
-    public Task<string> InvokePromptAsync(string prompt)
-    {
-        return Task.FromResult("Mocked AI response");
-    }
-}
-
-// In tests
-[TestMethod]
-public async Task ProcessWorkflow_WithMockKernel_Succeeds()
-{
-    var mockKernel = new MockKernelService();
-    var collaborator = new Collaborator(mockKernel);
-
-    var result = await collaborator.ProcessWorkflowAsync();
-
-    Assert.IsTrue(result.IsSuccess);
+    BootStrapper.Initialise();                 // real IoC
+    InputDir   = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestInputs");
+    ResultsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestResults");
+    Directory.CreateDirectory(ResultsDir);
+    // ... real StoryCADApi resolved via Ioc.Default; SharedStoryModels loaded from .stbx
 }
 ```
+
+Reasoning: mocks would mask integration issues. The test composition root is the right place to use service locators (consistent with the StoryCAD test-DI rule).
+
+### If you do need to substitute the Kernel
+
+`Kernel` itself is constructed via `Kernel.CreateBuilder()` (see "Building the Kernel" above) — substitution at the test level is achievable via standard DI swap (a fake `IChatCompletionService` registered before `builder.Build()`, or a captured-output fake provider). No project-level mocking framework is required; Collaborator does not ship one. If you introduce a substitute, document it as a deliberate departure from the no-mocks pattern.
 
 ---
 

@@ -403,6 +403,81 @@ public class BackendTests
 
     #endregion
 
+    #region StartupRecording Retry Condition Tests
+
+    /// <summary>
+    ///     Verifies that StartupRecording does NOT re-post preferences when
+    ///     RecordPreferencesStatus is already true (last post succeeded).
+    ///
+    ///     Before the fix in issue #1385, the retry guard at BackendService.cs:75
+    ///     was missing a `!`, causing every launch after a successful post to
+    ///     re-invoke the DAL (spAddUser + spAddOrUpdatePreferences). This test
+    ///     pins the correct semantics: true = already posted, skip.
+    /// </summary>
+    [TestMethod]
+    public async Task StartupRecording_WhenPreferencesAlreadyPosted_DoesNotRepost()
+    {
+        // Arrange
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.RecordPreferencesStatus = true;   // last post succeeded
+        preferenceService.Model.PreferencesInitialized = false;   // disarms the version block
+
+        // Act
+        await backendService.StartupRecording();
+
+        // Assert — no DAL calls for the preferences path
+        Assert.AreEqual(0, testSqlIo.AddOrUpdateUserCalls.Count,
+            "Should not call spAddUser when preferences were already posted successfully");
+        Assert.AreEqual(0, testSqlIo.AddOrUpdatePreferencesCalls.Count,
+            "Should not call spAddOrUpdatePreferences when flag indicates success");
+    }
+
+    /// <summary>
+    ///     Verifies that StartupRecording DOES retry the preferences post when
+    ///     RecordPreferencesStatus is false (previous attempt failed or never happened).
+    ///
+    ///     This is the retry path the comment above BackendService.cs:75 describes
+    ///     ("if the previous attempt... failed, retry"). Before the issue #1385 fix
+    ///     the guard was inverted and this path never ran.
+    /// </summary>
+    [TestMethod]
+    public async Task StartupRecording_WhenPreferencesNotYetPosted_Reposts()
+    {
+        // Arrange
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.RecordPreferencesStatus = false;  // last post failed / never happened
+        preferenceService.Model.PreferencesInitialized = false;   // disarms the version block
+        preferenceService.Model.FirstName = "StoryCAD";
+        preferenceService.Model.LastName = "Tests";
+        preferenceService.Model.Email = "sysadmin@storybuilder.org";
+        preferenceService.Model.Version = "test";
+
+        // Act
+        await backendService.StartupRecording();
+
+        // Assert — DAL called once for each stored procedure
+        Assert.AreEqual(1, testSqlIo.AddOrUpdateUserCalls.Count,
+            "Should call spAddUser when the previous preferences post was not successful");
+        Assert.AreEqual(1, testSqlIo.AddOrUpdatePreferencesCalls.Count,
+            "Should call spAddOrUpdatePreferences when the previous preferences post was not successful");
+        Assert.IsTrue(preferenceService.Model.RecordPreferencesStatus,
+            "Flag should flip to true after a successful post");
+    }
+
+    #endregion
+
     #region Messaging Tests
 
     [TestMethod]
@@ -777,7 +852,7 @@ public class TestableBackendService : BackendService
         try
         {
             await Task.CompletedTask;
-            if (_testPreferenceService.Model.RecordPreferencesStatus)
+            if (!_testPreferenceService.Model.RecordPreferencesStatus)
             {
                 if (_exceptionToThrow != null)
                     throw _exceptionToThrow;

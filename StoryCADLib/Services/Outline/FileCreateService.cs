@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCADLib.DAL;
+using StoryCADLib.Services.Backend;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Locking;
 using StoryCADLib.Services.Messages;
@@ -18,6 +19,7 @@ public class FileCreateService
     private readonly ILogService _logger;
     private readonly OutlineService _outlineService;
     private readonly PreferenceService _preferences;
+    private readonly IUsageTrackingService _usageTracking;
     private readonly Windowing _windowing;
 
     public FileCreateService(
@@ -27,7 +29,8 @@ public class FileCreateService
         PreferenceService preferences,
         Windowing windowing,
         BackupService backupService,
-        AutoSaveService autoSaveService)
+        AutoSaveService autoSaveService,
+        IUsageTrackingService usageTracking)
     {
         _logger = logger;
         _outlineService = outlineService;
@@ -36,6 +39,7 @@ public class FileCreateService
         _windowing = windowing;
         _backupService = backupService;
         _autoSaveService = autoSaveService;
+        _usageTracking = usageTracking;
     }
 
     /// <summary>
@@ -97,6 +101,21 @@ public class FileCreateService
                 // Create the new project
                 var newModel = await _outlineService.CreateModel(name, author, selectedTemplateIndex);
                 _appState.CurrentDocument = new StoryDocument(newModel, storyModelFile);
+
+                // Track outline open for usage statistics
+                if (_appState.CurrentDocument?.Model != null)
+                {
+                    var overview = _appState.CurrentDocument.Model.StoryElements
+                        .OfType<Models.OverviewModel>().FirstOrDefault();
+                    if (overview != null)
+                    {
+                        _usageTracking.OutlineOpened(
+                            overview.Uuid,
+                            overview.StoryGenre,
+                            overview.StoryType,
+                            _appState.CurrentDocument.Model.StoryElements.Count);
+                    }
+                }
 
                 // Take a backup of the project if the user has the 'backup on open' preference set.
                 if (_preferences.Model.BackupOnOpen)

@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
+using StoryCADLib.Services.Backend;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Logging;
 using StoryCADLib.Services.Messages;
@@ -21,6 +22,7 @@ public class FileCreateServiceTests
     private ILogService _logger;
     private OutlineService _outlineService;
     private PreferenceService _preferences;
+    private TestUsageTrackingService _testUsageTracking;
     private string _testFolder;
     private Windowing _windowing;
 
@@ -35,6 +37,7 @@ public class FileCreateServiceTests
         _windowing = Ioc.Default.GetRequiredService<Windowing>();
         _backupService = Ioc.Default.GetRequiredService<BackupService>();
         _autoSaveService = Ioc.Default.GetRequiredService<AutoSaveService>();
+        _testUsageTracking = new TestUsageTrackingService();
 
         _fileCreateService = new FileCreateService(
             _logger,
@@ -43,7 +46,8 @@ public class FileCreateServiceTests
             _preferences,
             _windowing,
             _backupService,
-            _autoSaveService);
+            _autoSaveService,
+            _testUsageTracking);
 
         // Create a test folder
         _testFolder = Path.Combine(Path.GetTempPath(), $"StoryCADTest_{Guid.NewGuid()}");
@@ -201,6 +205,24 @@ public class FileCreateServiceTests
     }
 
     [TestMethod]
+    public async Task CreateFile_WithValidParameters_TracksOutlineOpen()
+    {
+        // Arrange
+        var fileName = "TrackingTest.stbx";
+        var templateIndex = 0;
+
+        // Act
+        await _fileCreateService.CreateFile(_testFolder, fileName, templateIndex);
+
+        // Assert
+        Assert.AreEqual(1, _testUsageTracking.OutlineOpenedCalls.Count,
+            "CreateFile should fire OutlineOpened exactly once");
+        var overview = _appState.CurrentDocument.Model.StoryElements
+            .OfType<OverviewModel>().First();
+        Assert.AreEqual(overview.Uuid, _testUsageTracking.OutlineOpenedCalls[0].guid);
+    }
+
+    [TestMethod]
     public async Task CreateFile_WithInvalidCharacters_ReturnsNull()
     {
         // Arrange - Use an invalid filename with invalid characters
@@ -225,4 +247,39 @@ public class FileCreateServiceTests
         // Assert
         Assert.IsNull(result);
     }
+}
+
+/// <summary>
+/// Test double for IUsageTrackingService that records calls.
+/// Follows the same pattern as TestMySqlIo and TestLogService in BackendServiceTests.
+/// </summary>
+public class TestUsageTrackingService : IUsageTrackingService
+{
+    public int StartSessionCalls { get; private set; }
+    public int EndSessionCalls { get; private set; }
+    public List<(Guid guid, string genre, string storyForm, int elementCount)> OutlineOpenedCalls { get; } = new();
+    public List<(Guid guid, int elementCount)> OutlineClosedCalls { get; } = new();
+    public int ElementAddedCalls { get; private set; }
+    public int ElementRemovedCalls { get; private set; }
+    public int ElementRestoredCalls { get; private set; }
+    public List<string> FeatureUsedCalls { get; } = new();
+
+    public void StartSession() => StartSessionCalls++;
+
+    public Task EndSession()
+    {
+        EndSessionCalls++;
+        return Task.CompletedTask;
+    }
+
+    public void OutlineOpened(Guid outlineGuid, string genre, string storyForm, int elementCount)
+        => OutlineOpenedCalls.Add((outlineGuid, genre, storyForm, elementCount));
+
+    public void OutlineClosed(Guid outlineGuid, int elementCount)
+        => OutlineClosedCalls.Add((outlineGuid, elementCount));
+
+    public void ElementAdded() => ElementAddedCalls++;
+    public void ElementRemoved() => ElementRemovedCalls++;
+    public void ElementRestored() => ElementRestoredCalls++;
+    public void FeatureUsed(string featureName) => FeatureUsedCalls.Add(featureName);
 }

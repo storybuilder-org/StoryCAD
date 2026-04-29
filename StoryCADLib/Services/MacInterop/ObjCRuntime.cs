@@ -1,11 +1,11 @@
 using System.Runtime.InteropServices;
 
-namespace StoryCADLib.Services.MacMenuBar;
+namespace StoryCADLib.Services.MacInterop;
 
 /// <summary>
 /// Low-level P/Invoke declarations for the Objective-C runtime on macOS.
-/// Used to create native NSMenu/NSMenuItem objects for the macOS menu bar.
-/// All public entry points are guarded by OperatingSystem.IsMacOS().
+/// Shared primitive consumed by the macOS menu bar, print dialog, and file-association
+/// services. All public entry points are guarded by OperatingSystem.IsMacOS().
 /// </summary>
 internal static class ObjCRuntime
 {
@@ -43,6 +43,10 @@ internal static class ObjCRuntime
     [DllImport(ObjCLib, EntryPoint = "objc_msgSend")]
     internal static extern IntPtr objc_msgSend(IntPtr receiver, IntPtr selector, IntPtr arg1, IntPtr arg2, IntPtr arg3);
 
+    // For addObserver:selector:name:object: — 4 pointer-sized args.
+    [DllImport(ObjCLib, EntryPoint = "objc_msgSend")]
+    internal static extern IntPtr objc_msgSend(IntPtr receiver, IntPtr selector, IntPtr arg1, IntPtr arg2, IntPtr arg3, IntPtr arg4);
+
     [DllImport(ObjCLib, EntryPoint = "objc_msgSend")]
     internal static extern IntPtr objc_msgSend(IntPtr receiver, IntPtr selector, bool arg1);
 
@@ -64,11 +68,50 @@ internal static class ObjCRuntime
     [DllImport(ObjCLib, EntryPoint = "objc_msgSend")]
     internal static extern byte objc_msgSend_bool(IntPtr receiver, IntPtr selector);
 
+    // For methods returning int (e.g. -[NSAppleEventDescriptor numberOfItems])
+    [DllImport(ObjCLib, EntryPoint = "objc_msgSend")]
+    internal static extern int objc_msgSend_int(IntPtr receiver, IntPtr selector);
+
+    // For -[NSAppleEventDescriptor descriptorAtIndex:] (1-based)
+    [DllImport(ObjCLib, EntryPoint = "objc_msgSend")]
+    internal static extern IntPtr objc_msgSend_index(IntPtr receiver, IntPtr selector, long index);
+
+    // For -[NSAppleEventDescriptor paramDescriptorForKeyword:] where keyword is a FourCharCode (uint)
+    [DllImport(ObjCLib, EntryPoint = "objc_msgSend")]
+    internal static extern IntPtr objc_msgSend_fourcc(IntPtr receiver, IntPtr selector, uint keyword);
+
+    // For -[NSAppleEventManager setEventHandler:andSelector:forEventClass:andEventID:]
+    [DllImport(ObjCLib, EntryPoint = "objc_msgSend")]
+    internal static extern void objc_msgSend_setEventHandler(
+        IntPtr receiver, IntPtr selector,
+        IntPtr handler, IntPtr selArg,
+        uint eventClass, uint eventId);
+
     // For loading frameworks (e.g. Quartz.framework for PDFKit)
     [DllImport("libdl.dylib")]
     internal static extern IntPtr dlopen(string path, int mode);
 
     internal const int RTLD_LAZY = 1;
+
+    // FourCharCode helpers (Apple Event manager uses packed big-endian ASCII).
+    internal static uint FourCharCode(string code)
+    {
+        if (code == null || code.Length != 4)
+            throw new ArgumentException("FourCharCode must be exactly 4 ASCII characters.", nameof(code));
+        return ((uint)code[0] << 24) | ((uint)code[1] << 16) | ((uint)code[2] << 8) | (uint)code[3];
+    }
+
+    /// <summary>
+    /// Loads Cocoa.framework (AppKit + Foundation) if not already loaded.
+    /// NSApplication typically loads it at launch, but this is a safe explicit hook
+    /// for code paths that depend on AppKit/Foundation symbols being resolved.
+    /// </summary>
+    private static IntPtr _cocoaHandle;
+    internal static void LoadCocoa()
+    {
+        if (_cocoaHandle != IntPtr.Zero) return;
+        _cocoaHandle = dlopen("/System/Library/Frameworks/Cocoa.framework/Cocoa", RTLD_LAZY);
+    }
 
     // --- Delegate type for ObjC action methods (target-action pattern) ---
 
@@ -218,6 +261,27 @@ internal static class ObjCRuntime
     }
 
     /// <summary>
+    /// Converts an NSString pointer to a managed string via its UTF8 representation.
+    /// </summary>
+    internal static string NSStringToUtf8(IntPtr nsString)
+    {
+        if (nsString == IntPtr.Zero) return string.Empty;
+        IntPtr utf8Ptr = objc_msgSend(nsString, sel_registerName("UTF8String"));
+        return utf8Ptr == IntPtr.Zero ? string.Empty : Marshal.PtrToStringUTF8(utf8Ptr) ?? string.Empty;
+    }
+
+    /// <summary>
+    /// Given an NSURL pointer (file URL), returns its file-system path as a managed string.
+    /// Returns empty string if the URL is null or not a file URL.
+    /// </summary>
+    internal static string NSUrlToPath(IntPtr nsUrl)
+    {
+        if (nsUrl == IntPtr.Zero) return string.Empty;
+        IntPtr pathStr = objc_msgSend(nsUrl, sel_registerName("path"));
+        return NSStringToUtf8(pathStr);
+    }
+
+    /// <summary>
     /// Sets the string value of an NSControl/NSTextField.
     /// </summary>
     internal static void SetStringValue(IntPtr control, string value)
@@ -251,14 +315,34 @@ internal static class ObjCRuntime
     internal static extern IntPtr objc_msgSend(IntPtr receiver, IntPtr selector, CGRect arg1);
 
     /// <summary>
-    /// Creates an NSSearchField with the given frame.
+    /// Creates an NSSearchField positioned at (x, y) with the given width and height.
     /// </summary>
-    internal static IntPtr CreateSearchField(double width)
+    internal static IntPtr CreateSearchField(double x, double y, double width, double height)
     {
         IntPtr nsSearchFieldClass = objc_getClass("NSSearchField");
         IntPtr alloc = objc_msgSend(nsSearchFieldClass, sel_registerName("alloc"));
-        CGRect frame = new(0, 0, width, 28);
+        CGRect frame = new(x, y, width, height);
         return objc_msgSend(alloc, sel_registerName("initWithFrame:"), frame);
+    }
+
+    /// <summary>
+    /// Creates a bare NSView with the given frame. Useful as a padded container
+    /// for other controls inside an NSMenuItem.
+    /// </summary>
+    internal static IntPtr CreateView(double width, double height)
+    {
+        IntPtr nsViewClass = objc_getClass("NSView");
+        IntPtr alloc = objc_msgSend(nsViewClass, sel_registerName("alloc"));
+        CGRect frame = new(0, 0, width, height);
+        return objc_msgSend(alloc, sel_registerName("initWithFrame:"), frame);
+    }
+
+    /// <summary>
+    /// Adds a child view as a subview of the parent.
+    /// </summary>
+    internal static void AddSubview(IntPtr parent, IntPtr child)
+    {
+        objc_msgSend(parent, sel_registerName("addSubview:"), child);
     }
 
     /// <summary>

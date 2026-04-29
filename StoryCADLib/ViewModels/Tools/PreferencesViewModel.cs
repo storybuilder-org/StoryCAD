@@ -250,6 +250,24 @@ public class PreferencesViewModel : ObservableValidator
         set => SetProperty(ref _ShowFilePickerOnStartup, value);
     }
 
+    // macOS only: hide the in-window Shell CommandBar (search + menus)
+    // because the native Mac menu bar already provides the same commands.
+    private bool _hideShellCommandBarOnMac;
+
+    public bool HideShellCommandBarOnMac
+    {
+        get => _hideShellCommandBarOnMac;
+        set => SetProperty(ref _hideShellCommandBarOnMac, value);
+    }
+
+    /// <summary>
+    /// Controls visibility of the mac-only preferences row in the dialog.
+    /// </summary>
+    public Microsoft.UI.Xaml.Visibility MacOnlyVisibility =>
+        OperatingSystem.IsMacOS()
+            ? Microsoft.UI.Xaml.Visibility.Visible
+            : Microsoft.UI.Xaml.Visibility.Collapsed;
+
     // Use beta documentation (BetaManual) instead of production manual.
     private bool _useBetaDocumentation;
 
@@ -308,6 +326,7 @@ public class PreferencesViewModel : ObservableValidator
         ShowStartupPage = CurrentModel.ShowStartupDialog;
         ShowFilePickerOnStartup = CurrentModel.ShowFilePickerOnStartup;
         UseBetaDocumentation = CurrentModel.UseBetaDocumentation;
+        HideShellCommandBarOnMac = CurrentModel.HideShellCommandBarOnMac;
     }
 
     internal void SaveModel()
@@ -346,6 +365,7 @@ public class PreferencesViewModel : ObservableValidator
         CurrentModel.ShowStartupDialog = ShowStartupPage;
         CurrentModel.ShowFilePickerOnStartup = ShowFilePickerOnStartup;
         CurrentModel.UseBetaDocumentation = UseBetaDocumentation;
+        CurrentModel.HideShellCommandBarOnMac = HideShellCommandBarOnMac;
     }
 
     /// <summary>
