@@ -6,9 +6,11 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using StoryCADLib.DAL;
 using StoryCADLib.Helpers;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services;
+using StoryCADLib.Services.Backend;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator;
 using StoryCADLib.Services.Dialogs;
@@ -167,6 +169,8 @@ public sealed partial class Shell : Page
             await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
         }
 
+        await ShowAdminMessagesAsync();
+
         AdjustSplitViewPane(ShellPage.ActualWidth);
 
         //If StoryCAD was loaded from a .STBX File then instead of showing the file open menu
@@ -203,6 +207,57 @@ public sealed partial class Shell : Page
     }
 
     private bool _closingHandled;
+
+    /// <summary>
+    ///     Issue #1377: Displays unread admin-to-user messages on launch.
+    ///     Each message is a mandatory popup with an OK button. Multiple
+    ///     unread messages are shown sequentially. On acknowledge, the
+    ///     message is marked read on the backend.
+    /// </summary>
+    private async Task ShowAdminMessagesAsync()
+    {
+        var backend = Ioc.Default.GetService<BackendService>();
+        if (backend is null || backend.UnreadMessages.Count == 0)
+        {
+            return;
+        }
+
+        var windowing = Ioc.Default.GetRequiredService<Windowing>();
+        foreach (var msg in backend.UnreadMessages)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = msg.Subject,
+                Content = BuildMessageContent(msg),
+                PrimaryButtonText = "OK"
+            };
+            await windowing.ShowContentDialog(dialog);
+            await backend.MarkMessageRead(msg.MessageId);
+        }
+    }
+
+    private static UIElement BuildMessageContent(UserMessage msg)
+    {
+        var stack = new StackPanel { Spacing = 12 };
+        stack.Children.Add(new TextBlock
+        {
+            Text = msg.Body,
+            TextWrapping = TextWrapping.Wrap
+        });
+
+        if (!string.IsNullOrWhiteSpace(msg.LinkUrl) &&
+            !string.IsNullOrWhiteSpace(msg.LinkText) &&
+            Uri.TryCreate(msg.LinkUrl, UriKind.Absolute, out var uri))
+        {
+            stack.Children.Add(new HyperlinkButton
+            {
+                Content = msg.LinkText,
+                NavigateUri = uri
+            });
+        }
+
+        return stack;
+    }
 
     /// <summary>
     ///     Handles the main window closing event. Calls ShellViewModel to perform cleanup.
