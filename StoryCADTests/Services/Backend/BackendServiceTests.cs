@@ -403,7 +403,7 @@ public class BackendTests
 
     #endregion
 
-    #region Messaging Tests (Issue #1377)
+    #region Messaging Tests
 
     [TestMethod]
     public async Task StartupRecording_WhenConfigured_FetchesUnreadMessages()
@@ -524,6 +524,24 @@ public class BackendTests
         var testSqlIo = new TestMySqlIo();
 
         preferenceService.Model.UserId = 42;
+
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        await backendService.MarkMessageRead(messageId: 99);
+
+        Assert.AreEqual(0, testSqlIo.MarkMessageReadCalls.Count);
+    }
+
+    [TestMethod]
+    public async Task MarkMessageRead_NoUserId_SilentSkip()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+
+        preferenceService.Model.UserId = 0;
 
         var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
 
@@ -685,7 +703,7 @@ public class TestMySqlIo : IMySqlIo
         return Task.FromResult(DeleteUserReturnValue);
     }
 
-    // Read capability (#1333)
+    // Read capability
     public List<(string sp, (string name, object value)[] parameters)> ExecuteReaderCalls { get; } = new();
     public List<Dictionary<string, object>> ExecuteReaderReturnValue { get; set; } = new();
 
@@ -698,7 +716,7 @@ public class TestMySqlIo : IMySqlIo
         return Task.FromResult(ExecuteReaderReturnValue);
     }
 
-    // Usage tracking (#1333)
+    // Usage tracking
     public List<(string usageId, DateTime start, DateTime end, int seconds, string outlines, string features)>
         RecordSessionDataCalls { get; } = new();
 
@@ -710,7 +728,7 @@ public class TestMySqlIo : IMySqlIo
         return Task.CompletedTask;
     }
 
-    // Messaging (#1377)
+    // Messaging
     public Task<List<UserMessage>> GetUnreadMessages(int userId)
     {
         GetUnreadMessagesCalls.Add(userId);

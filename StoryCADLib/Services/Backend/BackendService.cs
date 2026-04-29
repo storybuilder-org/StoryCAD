@@ -144,9 +144,6 @@ public class BackendService
             _logService.LogException(LogLevel.Error, ex, "Unexpected error in StartupRecording method");
         }
 
-        // Fetch unread admin-to-user messages (#1377). Has its own try/catch
-        // so a failure here doesn't affect the version/preferences flow above
-        // and a failure above doesn't suppress this fetch.
         await FetchUnreadMessages();
     }
 

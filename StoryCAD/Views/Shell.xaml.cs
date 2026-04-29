@@ -6,7 +6,6 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
-using StoryCADLib.DAL;
 using StoryCADLib.Helpers;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services;
@@ -209,10 +208,10 @@ public sealed partial class Shell : Page
     private bool _closingHandled;
 
     /// <summary>
-    ///     Issue #1377: Displays unread admin-to-user messages on launch.
-    ///     Each message is a mandatory popup with an OK button. Multiple
-    ///     unread messages are shown sequentially. On acknowledge, the
-    ///     message is marked read on the backend.
+    ///     Displays unread admin-to-user messages on launch as sequential
+    ///     mandatory popups. Each acknowledgement marks the message read.
+    ///     Mark-as-read is fire-and-forget — failure leaves the message
+    ///     unread so it re-appears on next launch (per design).
     /// </summary>
     private async Task ShowAdminMessagesAsync()
     {
@@ -228,35 +227,12 @@ public sealed partial class Shell : Page
             var dialog = new ContentDialog
             {
                 Title = msg.Subject,
-                Content = BuildMessageContent(msg),
+                Content = new AdminMessagePage(msg),
                 PrimaryButtonText = "OK"
             };
             await windowing.ShowContentDialog(dialog);
-            await backend.MarkMessageRead(msg.MessageId);
+            _ = backend.MarkMessageRead(msg.MessageId);
         }
-    }
-
-    private static UIElement BuildMessageContent(UserMessage msg)
-    {
-        var stack = new StackPanel { Spacing = 12 };
-        stack.Children.Add(new TextBlock
-        {
-            Text = msg.Body,
-            TextWrapping = TextWrapping.Wrap
-        });
-
-        if (!string.IsNullOrWhiteSpace(msg.LinkUrl) &&
-            !string.IsNullOrWhiteSpace(msg.LinkText) &&
-            Uri.TryCreate(msg.LinkUrl, UriKind.Absolute, out var uri))
-        {
-            stack.Children.Add(new HyperlinkButton
-            {
-                Content = msg.LinkText,
-                NavigateUri = uri
-            });
-        }
-
-        return stack;
     }
 
     /// <summary>
