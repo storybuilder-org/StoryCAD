@@ -493,7 +493,8 @@ public class BackendTests
             new(MessageId: 7, Subject: "Welcome", Body: "Hi", LinkUrl: null, LinkText: null, CreatedAt: DateTime.UtcNow)
         };
 
-        preferenceService.Model.RecordPreferencesStatus = false;
+        // Skip PostPreferences so it doesn't overwrite UserId via AddOrUpdateUser
+        preferenceService.Model.RecordPreferencesStatus = true;
         preferenceService.Model.PreferencesInitialized = false;
         preferenceService.Model.UserId = 42;
 
@@ -536,7 +537,8 @@ public class BackendTests
         var testSqlIo = new TestMySqlIo();
         testSqlIo.SetConnectionString("fake");
 
-        preferenceService.Model.RecordPreferencesStatus = false;
+        // Skip PostPreferences so UserId stays 0 (mirrors a failed-prefs-post state)
+        preferenceService.Model.RecordPreferencesStatus = true;
         preferenceService.Model.PreferencesInitialized = false;
         preferenceService.Model.UserId = 0; // first-launch user
 
