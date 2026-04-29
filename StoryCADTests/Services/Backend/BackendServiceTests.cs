@@ -478,6 +478,177 @@ public class BackendTests
 
     #endregion
 
+    #region Messaging Tests
+
+    [TestMethod]
+    public async Task StartupRecording_WhenConfigured_FetchesUnreadMessages()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        testSqlIo.GetUnreadMessagesReturnValue = new List<UserMessage>
+        {
+            new(MessageId: 7, Subject: "Welcome", Body: "Hi", LinkUrl: null, LinkText: null, CreatedAt: DateTime.UtcNow)
+        };
+
+        // Skip PostPreferences so it doesn't overwrite UserId via AddOrUpdateUser
+        preferenceService.Model.RecordPreferencesStatus = true;
+        preferenceService.Model.PreferencesInitialized = false;
+        preferenceService.Model.UserId = 42;
+
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        await backendService.StartupRecording();
+
+        Assert.AreEqual(1, testSqlIo.GetUnreadMessagesCalls.Count);
+        Assert.AreEqual(42, testSqlIo.GetUnreadMessagesCalls[0]);
+        Assert.AreEqual(1, backendService.UnreadMessages.Count);
+        Assert.AreEqual(7, backendService.UnreadMessages[0].MessageId);
+    }
+
+    [TestMethod]
+    public async Task StartupRecording_NotConfigured_SkipsMessageFetch()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo(); // not configured
+
+        preferenceService.Model.RecordPreferencesStatus = false;
+        preferenceService.Model.PreferencesInitialized = false;
+        preferenceService.Model.UserId = 42;
+
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        await backendService.StartupRecording();
+
+        Assert.AreEqual(0, testSqlIo.GetUnreadMessagesCalls.Count);
+        Assert.AreEqual(0, backendService.UnreadMessages.Count);
+    }
+
+    [TestMethod]
+    public async Task StartupRecording_NoUserId_SkipsMessageFetch()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+
+        // Skip PostPreferences so UserId stays 0 (mirrors a failed-prefs-post state)
+        preferenceService.Model.RecordPreferencesStatus = true;
+        preferenceService.Model.PreferencesInitialized = false;
+        preferenceService.Model.UserId = 0; // first-launch user
+
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        await backendService.StartupRecording();
+
+        Assert.AreEqual(0, testSqlIo.GetUnreadMessagesCalls.Count);
+        Assert.AreEqual(0, backendService.UnreadMessages.Count);
+    }
+
+    [TestMethod]
+    public async Task StartupRecording_FetchThrows_LeavesEmptyListAndLogsWarning()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        testSqlIo.ExceptionToThrow = new Exception("Connection lost");
+
+        preferenceService.Model.RecordPreferencesStatus = false;
+        preferenceService.Model.PreferencesInitialized = false;
+        preferenceService.Model.UserId = 42;
+
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        await backendService.StartupRecording();
+
+        Assert.AreEqual(1, testSqlIo.GetUnreadMessagesCalls.Count);
+        Assert.AreEqual(0, backendService.UnreadMessages.Count);
+        Assert.IsTrue(testLogger.HasWarning("Failed to fetch unread messages"));
+    }
+
+    [TestMethod]
+    public async Task MarkMessageRead_WhenConfigured_DelegatesToSqlIo()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+
+        preferenceService.Model.UserId = 42;
+
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        await backendService.MarkMessageRead(messageId: 99);
+
+        Assert.AreEqual(1, testSqlIo.MarkMessageReadCalls.Count);
+        Assert.AreEqual((42, 99), testSqlIo.MarkMessageReadCalls[0]);
+    }
+
+    [TestMethod]
+    public async Task MarkMessageRead_NotConfigured_SilentSkip()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+
+        preferenceService.Model.UserId = 42;
+
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        await backendService.MarkMessageRead(messageId: 99);
+
+        Assert.AreEqual(0, testSqlIo.MarkMessageReadCalls.Count);
+    }
+
+    [TestMethod]
+    public async Task MarkMessageRead_NoUserId_SilentSkip()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+
+        preferenceService.Model.UserId = 0;
+
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        await backendService.MarkMessageRead(messageId: 99);
+
+        Assert.AreEqual(0, testSqlIo.MarkMessageReadCalls.Count);
+    }
+
+    [TestMethod]
+    public async Task MarkMessageRead_SqlIoThrows_SilentlyLogsWarning()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        testSqlIo.ExceptionToThrow = new Exception("Network down");
+
+        preferenceService.Model.UserId = 42;
+
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        await backendService.MarkMessageRead(messageId: 99);
+
+        Assert.AreEqual(1, testSqlIo.MarkMessageReadCalls.Count);
+        Assert.IsTrue(testLogger.HasWarning("Failed to mark message 99 as read"));
+    }
+
+    #endregion
+
     #region Helper Methods
 
     /// <summary>
@@ -568,8 +739,11 @@ public class TestMySqlIo : IMySqlIo
     public List<(int id, bool elmah, bool newsletter, string version, bool usageStats)> AddOrUpdatePreferencesCalls { get; } = new();
     public List<(int id, string current, string previous)> AddVersionCalls { get; } = new();
     public List<int> DeleteUserCalls { get; } = new();
+    public List<int> GetUnreadMessagesCalls { get; } = new();
+    public List<(int userId, int messageId)> MarkMessageReadCalls { get; } = new();
 
     public int AddOrUpdateUserReturnId { get; set; } = 1;
+    public List<UserMessage> GetUnreadMessagesReturnValue { get; set; } = new();
 
     public void SetConnectionString(string connectionString)
     {
@@ -627,6 +801,21 @@ public class TestMySqlIo : IMySqlIo
         int clockTimeSeconds, string outlinesJson, string featuresJson)
     {
         RecordSessionDataCalls.Add((usageId, sessionStart, sessionEnd, clockTimeSeconds, outlinesJson, featuresJson));
+        if (ExceptionToThrow != null) throw ExceptionToThrow;
+        return Task.CompletedTask;
+    }
+
+    // Messaging
+    public Task<List<UserMessage>> GetUnreadMessages(int userId)
+    {
+        GetUnreadMessagesCalls.Add(userId);
+        if (ExceptionToThrow != null) throw ExceptionToThrow;
+        return Task.FromResult(GetUnreadMessagesReturnValue);
+    }
+
+    public Task MarkMessageRead(int userId, int messageId)
+    {
+        MarkMessageReadCalls.Add((userId, messageId));
         if (ExceptionToThrow != null) throw ExceptionToThrow;
         return Task.CompletedTask;
     }

@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Input;
 using StoryCADLib.Helpers;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services;
+using StoryCADLib.Services.Backend;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator;
 using StoryCADLib.Services.Dialogs;
@@ -174,6 +175,8 @@ public sealed partial class Shell : Page
             await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
         }
 
+        await ShowAdminMessagesAsync();
+
         AdjustSplitViewPane(ShellPage.ActualWidth);
 
         //If StoryCAD was loaded from a .STBX File then instead of showing the file open menu
@@ -210,6 +213,34 @@ public sealed partial class Shell : Page
     }
 
     private bool _closingHandled;
+
+    /// <summary>
+    ///     Displays unread admin-to-user messages on launch as sequential
+    ///     mandatory popups. Each acknowledgement marks the message read.
+    ///     Mark-as-read is fire-and-forget — failure leaves the message
+    ///     unread so it re-appears on next launch (per design).
+    /// </summary>
+    private async Task ShowAdminMessagesAsync()
+    {
+        var backend = Ioc.Default.GetService<BackendService>();
+        if (backend is null || backend.UnreadMessages.Count == 0)
+        {
+            return;
+        }
+
+        var windowing = Ioc.Default.GetRequiredService<Windowing>();
+        foreach (var msg in backend.UnreadMessages)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = msg.Subject,
+                Content = new AdminMessagePage(msg),
+                PrimaryButtonText = "OK"
+            };
+            await windowing.ShowContentDialog(dialog);
+            _ = backend.MarkMessageRead(msg.MessageId);
+        }
+    }
 
     /// <summary>
     ///     Handles the main window closing event. Calls ShellViewModel to perform cleanup.

@@ -129,4 +129,44 @@ public class MySqlIo : IMySqlIo
         cmd.Parameters.AddWithValue("p_features", featuresJson);
         await cmd.ExecuteNonQueryAsync();
     }
+
+    /// <inheritdoc />
+    public async Task<List<UserMessage>> GetUnreadMessages(int userId)
+    {
+        await using var conn = new MySqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using MySqlCommand cmd = new("spGetUnreadMessages", conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.AddWithValue("in_user_id", userId);
+
+        // Column order matches spGetUnreadMessages SELECT:
+        // message_id, subject, body, link_url, link_text, created_at
+        var results = new List<UserMessage>();
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            results.Add(new UserMessage(
+                MessageId: reader.GetInt32(0),
+                Subject:   reader.GetString(1),
+                Body:      reader.GetString(2),
+                LinkUrl:   reader.IsDBNull(3) ? null : reader.GetString(3),
+                LinkText:  reader.IsDBNull(4) ? null : reader.GetString(4),
+                CreatedAt: reader.GetDateTime(5)));
+        }
+        return results;
+    }
+
+    /// <inheritdoc />
+    public async Task MarkMessageRead(int userId, int messageId)
+    {
+        await using var conn = new MySqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using MySqlCommand cmd = new("spMarkMessageRead", conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.AddWithValue("in_user_id", userId);
+        cmd.Parameters.AddWithValue("in_message_id", messageId);
+        await cmd.ExecuteNonQueryAsync();
+    }
 }
