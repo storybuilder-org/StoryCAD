@@ -1,10 +1,10 @@
 # Issue 1379: Complete IStoryCADAPI Interface and Remove Deprecated SK Planner Dependency
 
 ## Current Status
-- **Phase**: Code section approved. Test verifications complete (Windows + sibling builds). macOS step pending user. Then Evaluate + commit/PR.
-- **Last updated**: 2026-04-29 (end of session 2)
-- **Repo / branch**: `/mnt/d/dev/src/StoryCAD`, branch `issue-1379-complete-storycadapi-interface` (off `dev`). Local-only — not pushed. No commits yet on the branch.
-- **Working-tree state**: 4 modified files (interface, class, csproj, packages.props), 3 new test files, 2 new devdocs files. No commits yet.
+- **Phase**: Design ✅ Code ✅ Test ✅ Evaluate in progress (lessons-learned + PR).
+- **Last updated**: 2026-04-30
+- **Repo / branch**: `/mnt/d/dev/src/StoryCAD`, branch `issue-1379-complete-storycadapi-interface` (off `dev`). Pushed to `origin`; commit `0c4f2c92`.
+- **Working-tree state**: clean.
 - **Tests**: 991 total / 977 passed / 14 skipped / **0 failed**. Full regression clean. Build clean on both `net10.0-desktop` and `net10.0-windows10.0.22621`.
 - **Milestone**: Release 4.1. **Prerequisite for** #1246.
 
@@ -48,6 +48,25 @@ TDD throughout (red-green per change).
 - Mocks (we don't use them).
 
 ## Session Log
+
+### 2026-04-30 (session 3 — Test close-out + Evaluate)
+- macOS `net10.0-desktop` verification ran by user on Mac Mini. All tests pass; a few additional Windows-only tests correctly skipped. Test section closed (final approval ticked).
+- Filed StoryCADAPI#7 — the deferred MCP-side issue for the new collection-entry tools. Body emphasizes the integrated cross-repo testing path: because StoryCADMcp uses `ProjectReference` to local StoryCADLib, the new MCP tools can be developed and exercised end-to-end against #1379's branch immediately, without waiting for Release 4.1.
+- Branch committed as `0c4f2c92` and pushed to `origin`. Working tree clean. PR creation URL: https://github.com/storybuilder-org/StoryCAD/pull/new/issue-1379-complete-storycadapi-interface.
+
+### Lessons learned
+- **Plan churn correlates 1:1 with scope creep.** Five decisions reached the plan only after two reversals (D2 deprecation+migration rolled back; D5 fake-async fix dropped). Each was added during analysis without an explicit ask. Lesson: when an audit surfaces an "incidental" cleanup, default to filing a separate issue. Adding it inline costs more in plan iterations than the cleanup saves.
+- **TDD red-state for interface-only signatures.** For "this method must exist on the interface" tests, calling the method through an `IStoryCADAPI`-typed reference gives a compile-time red state without reflection plumbing. Worked cleanly here (14 CS1061 errors → 0 after the additions).
+- **Sibling-repo verification by `ProjectReference`.** Because StoryCADAPI and Collaborator both reference StoryCADLib by relative path, the additive-only contract was validated by simply building those repos against the local working tree. No NuGet bump needed pre-merge. Worth remembering for future cross-repo issues.
+- **Pre-existing build issues confound verification.** The UNOB0005 Uno SDK conflict in `StoryCADMcp.Tests` and `HeadlessTest` looked like #1379-introduced breakage on first build. Stashing my changes and reproducing the same error against clean `dev` confirmed pre-existing. Lesson: always reproduce a failure with the change reverted before claiming it's caused by the change.
+- **MCP-side work was the right deferral.** Bundling the MCP tools into #1379 would have required either touching the in-flight `issue-1246-repo-reorg` branch in StoryCADAPI or stashing it — both bad. A separate StoryCADAPI issue (filed as #7) keeps scope clean and lets the user-visible bug fix progress incrementally.
+- **One-question-at-a-time discipline mattered.** Branching the conversation when the user signaled "wait" or "1" let the code work continue without the deferred MCP question stalling progress. The follow-up issue could be filed as a discrete decision rather than a contested in-scope debate.
+
+### Agent effectiveness
+- **test-automator** (called once for task 1 — interface-presence tests): provided the analysis but the file write happened directly, since the agent's full output was small and SendMessage wasn't available. Net useful as a context-gathering pass; not strictly needed since the task was small.
+- **code-reviewer** (called once on the full diff): produced 5 important + 5 minor findings in one pass, with clear severity grouping and file:line citations. Highest-value finding (#3, missing JSON conversion path tests) wouldn't have been caught by the implementer who knew the contract; that justifies the cost of the independent pass. Will use again on similar API-surface work.
+- **No agent used for**: dependency-manager (Planner removal was 2 lines, not worth the indirection); refactoring-specialist (no orphaned imports to clean up); architect-reviewer (architectural choices already settled in plan §5). All correct skips.
+- **Lesson**: independent code review is the highest-leverage agent slot on a focused API change. Test-authoring delegation was less valuable here because the test file was small and the contract was already nailed down in the plan.
 
 ### 2026-04-29 (session 2 — Test phase)
 - Code section closed (Human final approval ticked). Test plan posted (5 verification tasks); user approved.
