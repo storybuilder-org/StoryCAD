@@ -1,14 +1,13 @@
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Text.Json.Serialization;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.SemanticKernel;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.Collaborator.Contracts;
-using StoryCADLib.Services.Logging;
 using StoryCADLib.Services.Outline;
-using StoryCADLib.ViewModels;
 using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.Services.API;
@@ -676,6 +675,12 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
                 throw new InvalidOperationException($"Property '{propertyName}' is read-only.");
             }
 
+            if (property.PropertyType.IsGenericType
+                && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                return OperationResult<StoryElement>.Failure(
+                    $"Property '{propertyName}' is a collection. Use AddCollectionEntry, UpdateCollectionEntry, or RemoveCollectionEntry.");
+            }
 
             if (property.PropertyType == typeof(Guid) && typeof(string) == value.GetType())
             {
@@ -713,6 +718,135 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         catch (Exception ex)
         {
             return OperationResult<StoryElement>.Failure($"Error updating property: {ex.Message}");
+        }
+    }
+
+    public OperationResult<int> AddCollectionEntry(Guid elementGuid, string propertyName, object entry)
+    {
+        if (entry == null)
+            return OperationResult<int>.Failure("Entry cannot be null.");
+
+        var target = ResolveListTarget(elementGuid, propertyName, out var error);
+        if (target == null)
+            return OperationResult<int>.Failure(error);
+
+        var converted = DeserializeEntry(entry, target.EntryType, out var convertError);
+        if (converted == null)
+            return OperationResult<int>.Failure($"Entry type does not match collection element type {target.EntryType.Name}: {convertError}");
+
+        var list = (IList)target.Property.GetValue(target.Element);
+        if (list == null)
+        {
+            list = (IList)Activator.CreateInstance(target.Property.PropertyType);
+            target.Property.SetValue(target.Element, list);
+        }
+
+        list.Add(converted);
+        CurrentModel.Changed = true;
+        return OperationResult<int>.Success(list.Count - 1);
+    }
+
+    public OperationResult<bool> UpdateCollectionEntry(Guid elementGuid, string propertyName, int index, object entry)
+    {
+        if (entry == null)
+            return OperationResult<bool>.Failure("Entry cannot be null.");
+
+        var target = ResolveListTarget(elementGuid, propertyName, out var error);
+        if (target == null)
+            return OperationResult<bool>.Failure(error);
+
+        var converted = DeserializeEntry(entry, target.EntryType, out var convertError);
+        if (converted == null)
+            return OperationResult<bool>.Failure($"Entry type does not match collection element type {target.EntryType.Name}: {convertError}");
+
+        var list = (IList)target.Property.GetValue(target.Element);
+        if (list == null || index < 0 || index >= list.Count)
+            return OperationResult<bool>.Failure("Index out of range.");
+
+        list[index] = converted;
+        CurrentModel.Changed = true;
+        return OperationResult<bool>.Success(true);
+    }
+
+    public OperationResult<bool> RemoveCollectionEntry(Guid elementGuid, string propertyName, int index)
+    {
+        var target = ResolveListTarget(elementGuid, propertyName, out var error);
+        if (target == null)
+            return OperationResult<bool>.Failure(error);
+
+        var list = (IList)target.Property.GetValue(target.Element);
+        if (list == null || index < 0 || index >= list.Count)
+            return OperationResult<bool>.Failure("Index out of range.");
+
+        list.RemoveAt(index);
+        CurrentModel.Changed = true;
+        return OperationResult<bool>.Success(true);
+    }
+
+    private sealed record ListTarget(StoryElement Element, System.Reflection.PropertyInfo Property, Type EntryType);
+
+    private ListTarget ResolveListTarget(Guid elementGuid, string propertyName, out string error)
+    {
+        error = null;
+
+        if (CurrentModel == null)
+        {
+            error = "No StoryModel available. Create a model first.";
+            return null;
+        }
+
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == elementGuid);
+        if (element == null)
+        {
+            error = "StoryElement not found.";
+            return null;
+        }
+
+        var property = element.GetType().GetProperty(propertyName);
+        if (property == null)
+        {
+            error = $"Property '{propertyName}' not found on type {element.GetType().Name}.";
+            return null;
+        }
+
+        if (!Attribute.IsDefined(property, typeof(JsonIncludeAttribute)) || !property.CanWrite)
+        {
+            error = $"Property '{propertyName}' is not editable.";
+            return null;
+        }
+
+        if (!property.PropertyType.IsGenericType
+            || property.PropertyType.GetGenericTypeDefinition() != typeof(List<>))
+        {
+            error = $"Property '{propertyName}' is not a collection.";
+            return null;
+        }
+
+        return new ListTarget(element, property, property.PropertyType.GetGenericArguments()[0]);
+    }
+
+    private static object DeserializeEntry(object entry, Type targetType, out string error)
+    {
+        error = null;
+
+        if (targetType.IsInstanceOfType(entry))
+            return entry;
+
+        try
+        {
+            var json = entry is JsonElement je ? je : JsonSerializer.SerializeToElement(entry);
+            var result = json.Deserialize(targetType);
+            if (result == null)
+            {
+                error = $"Conversion of '{entry.GetType().Name}' to '{targetType.Name}' produced null.";
+                return null;
+            }
+            return result;
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+            return null;
         }
     }
 
