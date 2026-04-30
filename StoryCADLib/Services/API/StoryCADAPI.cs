@@ -4,13 +4,10 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.SemanticKernel;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.Collaborator.Contracts;
-using StoryCADLib.Services.Logging;
 using StoryCADLib.Services.Outline;
-using StoryCADLib.ViewModels;
 using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.Services.API;
@@ -729,17 +726,19 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         if (entry == null)
             return OperationResult<int>.Failure("Entry cannot be null.");
 
-        if (!TryResolveListProperty(elementGuid, propertyName, out var element, out var property, out var elementType, out var error))
+        var target = ResolveListTarget(elementGuid, propertyName, out var error);
+        if (target == null)
             return OperationResult<int>.Failure(error);
 
-        if (!TryConvertEntry(entry, elementType, out var converted, out var convertError))
-            return OperationResult<int>.Failure($"Entry type does not match collection element type {elementType.Name}: {convertError}");
+        var converted = DeserializeEntry(entry, target.EntryType, out var convertError);
+        if (converted == null)
+            return OperationResult<int>.Failure($"Entry type does not match collection element type {target.EntryType.Name}: {convertError}");
 
-        var list = (IList)property.GetValue(element);
+        var list = (IList)target.Property.GetValue(target.Element);
         if (list == null)
         {
-            list = (IList)Activator.CreateInstance(property.PropertyType);
-            property.SetValue(element, list);
+            list = (IList)Activator.CreateInstance(target.Property.PropertyType);
+            target.Property.SetValue(target.Element, list);
         }
 
         list.Add(converted);
@@ -752,13 +751,15 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         if (entry == null)
             return OperationResult<bool>.Failure("Entry cannot be null.");
 
-        if (!TryResolveListProperty(elementGuid, propertyName, out var element, out var property, out var elementType, out var error))
+        var target = ResolveListTarget(elementGuid, propertyName, out var error);
+        if (target == null)
             return OperationResult<bool>.Failure(error);
 
-        if (!TryConvertEntry(entry, elementType, out var converted, out var convertError))
-            return OperationResult<bool>.Failure($"Entry type does not match collection element type {elementType.Name}: {convertError}");
+        var converted = DeserializeEntry(entry, target.EntryType, out var convertError);
+        if (converted == null)
+            return OperationResult<bool>.Failure($"Entry type does not match collection element type {target.EntryType.Name}: {convertError}");
 
-        var list = (IList)property.GetValue(element);
+        var list = (IList)target.Property.GetValue(target.Element);
         if (list == null || index < 0 || index >= list.Count)
             return OperationResult<bool>.Failure("Index out of range.");
 
@@ -769,10 +770,11 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
 
     public OperationResult<bool> RemoveCollectionEntry(Guid elementGuid, string propertyName, int index)
     {
-        if (!TryResolveListProperty(elementGuid, propertyName, out var element, out var property, out _, out var error))
+        var target = ResolveListTarget(elementGuid, propertyName, out var error);
+        if (target == null)
             return OperationResult<bool>.Failure(error);
 
-        var list = (IList)property.GetValue(element);
+        var list = (IList)target.Property.GetValue(target.Element);
         if (list == null || index < 0 || index >= list.Count)
             return OperationResult<bool>.Failure("Index out of range.");
 
@@ -781,89 +783,70 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         return OperationResult<bool>.Success(true);
     }
 
-    private bool TryResolveListProperty(Guid elementGuid, string propertyName,
-        out StoryElement element, out System.Reflection.PropertyInfo property,
-        out Type listElementType, out string error)
+    private sealed record ListTarget(StoryElement Element, System.Reflection.PropertyInfo Property, Type EntryType);
+
+    private ListTarget ResolveListTarget(Guid elementGuid, string propertyName, out string error)
     {
-        element = null;
-        property = null;
-        listElementType = null;
         error = null;
 
         if (CurrentModel == null)
         {
             error = "No StoryModel available. Create a model first.";
-            return false;
+            return null;
         }
 
-        element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == elementGuid);
+        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == elementGuid);
         if (element == null)
         {
             error = "StoryElement not found.";
-            return false;
+            return null;
         }
 
-        property = element.GetType().GetProperty(propertyName);
+        var property = element.GetType().GetProperty(propertyName);
         if (property == null)
         {
             error = $"Property '{propertyName}' not found on type {element.GetType().Name}.";
-            return false;
+            return null;
         }
 
         if (!Attribute.IsDefined(property, typeof(JsonIncludeAttribute)) || !property.CanWrite)
         {
             error = $"Property '{propertyName}' is not editable.";
-            return false;
+            return null;
         }
 
         if (!property.PropertyType.IsGenericType
             || property.PropertyType.GetGenericTypeDefinition() != typeof(List<>))
         {
             error = $"Property '{propertyName}' is not a collection.";
-            return false;
+            return null;
         }
 
-        listElementType = property.PropertyType.GetGenericArguments()[0];
-        return true;
+        return new ListTarget(element, property, property.PropertyType.GetGenericArguments()[0]);
     }
 
-    private static bool TryConvertEntry(object entry, Type targetType, out object converted, out string error)
+    private static object DeserializeEntry(object entry, Type targetType, out string error)
     {
-        converted = null;
         error = null;
 
         if (targetType.IsInstanceOfType(entry))
-        {
-            converted = entry;
-            return true;
-        }
+            return entry;
 
         try
         {
-            switch (entry)
-            {
-                case JsonElement je:
-                    converted = JsonSerializer.Deserialize(je.GetRawText(), targetType);
-                    break;
-                case Dictionary<string, object> dict:
-                    converted = JsonSerializer.Deserialize(JsonSerializer.Serialize(dict), targetType);
-                    break;
-                default:
-                    converted = Convert.ChangeType(entry, targetType);
-                    break;
-            }
-
-            if (converted == null && targetType.IsValueType)
+            var json = entry is JsonElement je ? je : JsonSerializer.SerializeToElement(entry);
+            var result = json.Deserialize(targetType);
+            if (result == null)
             {
                 error = $"Conversion of '{entry.GetType().Name}' to '{targetType.Name}' produced null.";
-                return false;
+                return null;
             }
-            return true;
+            return result;
         }
         catch (Exception ex)
         {
             error = ex.Message;
-            return false;
+            return null;
         }
     }
 
