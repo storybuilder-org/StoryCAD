@@ -56,7 +56,6 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.SemanticKernel" />
         <PackageReference Include="Microsoft.SemanticKernel.Abstractions" />
-        <PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" />
         <PackageReference Include="CommunityToolkit.Mvvm" />
         <PackageReference Include="dotenv.net" />
         <PackageReference Include="Elmah.Io.NLog" />

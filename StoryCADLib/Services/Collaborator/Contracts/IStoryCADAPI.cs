@@ -74,6 +74,40 @@ public interface IStoryCADAPI
     /// <returns>OperationResult containing the story element if found, or error message if not</returns>
     OperationResult<StoryElement> GetStoryElement(Guid guid);
 
+    OperationResult<Guid> AddElement(StoryItemType typeToAdd, string parentGUID, string name, string GUIDOverride = "");
+
+    OperationResult<Guid> AddElement(StoryItemType typeToAdd, string parentGUID, string name, Dictionary<string, object> properties, string GUIDOverride = "");
+
+    OperationResult<StoryElement> GetStoryWorld();
+
+    Task<OperationResult<bool>> OpenOutline(string path);
+
+    Task<OperationResult<bool>> DeleteElement(Guid elementToDelete);
+
+    OperationResult<bool> AddCastMember(Guid scene, Guid character);
+
+    OperationResult<bool> AddRelationship(Guid source, Guid recipient, string desc, bool mirror = false);
+
+    OperationResult<bool> MoveElement(Guid elementGuid, Guid newParentGuid);
+
+    OperationResult<List<Dictionary<string, object>>> SearchForText(string searchText);
+
+    OperationResult<List<Dictionary<string, object>>> SearchForReferences(Guid targetUuid);
+
+    OperationResult<int> RemoveReferences(Guid targetUuid);
+
+    OperationResult<List<Dictionary<string, object>>> SearchInSubtree(Guid rootNodeGuid, string searchText);
+
+    Task<OperationResult<bool>> RestoreFromTrash(Guid elementToRestore);
+
+    Task<OperationResult<bool>> EmptyTrash();
+
+    OperationResult<int> AddCollectionEntry(Guid elementGuid, string propertyName, object entry);
+
+    OperationResult<bool> UpdateCollectionEntry(Guid elementGuid, string propertyName, int index, object entry);
+
+    OperationResult<bool> RemoveCollectionEntry(Guid elementGuid, string propertyName, int index);
+
     #region Resource API (Issue #1223)
 
     /// <summary>
