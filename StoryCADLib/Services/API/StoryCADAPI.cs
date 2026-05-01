@@ -1652,26 +1652,33 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
                  """)]
     public OperationResult<bool> AssignElementToBeat(Guid problemGuid, int beatIndex, Guid elementGuid)
     {
-        if (CurrentModel == null)
-            return OperationResult<bool>.Failure("No StoryModel available");
+        try
+        {
+            if (CurrentModel == null)
+                return OperationResult<bool>.Failure("No StoryModel available");
 
-        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
-        if (element == null || element.ElementType != StoryItemType.Problem)
-            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+            var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+            if (element == null || element.ElementType != StoryItemType.Problem)
+                return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
 
-        var problem = (ProblemModel)element;
-        if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
-            return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
+            var problem = (ProblemModel)element;
+            if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
+                return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
 
-        // Verify the element to assign exists and is a Scene or Problem
-        var targetElement = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == elementGuid);
-        if (targetElement == null)
-            return OperationResult<bool>.Failure($"Element with GUID '{elementGuid}' not found");
-        if (targetElement.ElementType != StoryItemType.Scene && targetElement.ElementType != StoryItemType.Problem)
-            return OperationResult<bool>.Failure("Only Scene or Problem elements can be assigned to beats");
+            // Verify the element to assign exists and is a Scene or Problem
+            var targetElement = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == elementGuid);
+            if (targetElement == null)
+                return OperationResult<bool>.Failure($"Element with GUID '{elementGuid}' not found");
+            if (targetElement.ElementType != StoryItemType.Scene && targetElement.ElementType != StoryItemType.Problem)
+                return OperationResult<bool>.Failure("Only Scene or Problem elements can be assigned to beats");
 
-        outlineService.AssignElementToBeat(CurrentModel, problem, beatIndex, elementGuid);
-        return OperationResult<bool>.Success(true);
+            outlineService.AssignElementToBeat(CurrentModel, problem, beatIndex, elementGuid);
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error in AssignElementToBeat: {ex.Message}");
+        }
     }
 
     /// <summary>
