@@ -61,4 +61,15 @@ public interface IMySqlIo
     /// </summary>
     Task RecordSessionData(string usageId, DateTime sessionStart, DateTime sessionEnd,
         int clockTimeSeconds, string outlinesJson, string featuresJson);
+
+    /// <summary>
+    ///     Fetches unread, currently-visible messages for a user (via spGetUnreadMessages).
+    ///     Filters out scheduled-future and expired messages server-side.
+    /// </summary>
+    Task<List<UserMessage>> GetUnreadMessages(int userId);
+
+    /// <summary>
+    ///     Marks a message as read/dismissed for a user (via spMarkMessageRead).
+    /// </summary>
+    Task MarkMessageRead(int userId, int messageId);
 }
