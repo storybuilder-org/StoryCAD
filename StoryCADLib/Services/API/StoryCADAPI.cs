@@ -1832,10 +1832,12 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
                  Moves a story element to a new parent in the outline tree.
                  elementGuid is the GUID of the element to move.
                  newParentGuid is the GUID of the element that will become the new parent.
+                 index is an optional 0-based position within the new parent's children;
+                 omit or pass null to append. Valid range is 0..Children.Count (post-detach).
                  Cannot move root elements, TrashCan elements, or create circular references.
                  Call save_outline after to persist.
                  """)]
-    public OperationResult<bool> MoveElement(Guid elementGuid, Guid newParentGuid)
+    public OperationResult<bool> MoveElement(Guid elementGuid, Guid newParentGuid, int? index = null)
     {
         if (CurrentModel == null)
             return OperationResult<bool>.Failure("No StoryModel available");
@@ -1875,9 +1877,21 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         if (oldParent == null)
             return OperationResult<bool>.Failure("Element has no parent to detach from");
 
+        // Validate index against the post-removal child count of the target parent
+        // BEFORE mutating tree state, so a bad index leaves the tree unchanged.
+        int targetCount = (oldParent == newParentNode)
+            ? newParentNode.Children.Count - 1
+            : newParentNode.Children.Count;
+        if (index.HasValue && (index.Value < 0 || index.Value > targetCount))
+            return OperationResult<bool>.Failure($"Index {index} is out of range");
+
         oldParent.Children.Remove(elementNode);
         elementNode.Parent = newParentNode;
-        newParentNode.Children.Add(elementNode);
+
+        if (!index.HasValue || index.Value == newParentNode.Children.Count)
+            newParentNode.Children.Add(elementNode);
+        else
+            newParentNode.Children.Insert(index.Value, elementNode);
 
         return OperationResult<bool>.Success(true);
     }
