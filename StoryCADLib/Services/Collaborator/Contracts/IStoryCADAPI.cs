@@ -88,7 +88,7 @@ public interface IStoryCADAPI
 
     OperationResult<bool> AddRelationship(Guid source, Guid recipient, string desc, bool mirror = false);
 
-    OperationResult<bool> MoveElement(Guid elementGuid, Guid newParentGuid);
+    OperationResult<bool> MoveElement(Guid elementGuid, Guid newParentGuid, int? index = null);
 
     OperationResult<List<Dictionary<string, object>>> SearchForText(string searchText);
 

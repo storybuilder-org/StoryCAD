@@ -1652,26 +1652,33 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
                  """)]
     public OperationResult<bool> AssignElementToBeat(Guid problemGuid, int beatIndex, Guid elementGuid)
     {
-        if (CurrentModel == null)
-            return OperationResult<bool>.Failure("No StoryModel available");
+        try
+        {
+            if (CurrentModel == null)
+                return OperationResult<bool>.Failure("No StoryModel available");
 
-        var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
-        if (element == null || element.ElementType != StoryItemType.Problem)
-            return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
+            var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == problemGuid);
+            if (element == null || element.ElementType != StoryItemType.Problem)
+                return OperationResult<bool>.Failure($"Problem with GUID '{problemGuid}' not found");
 
-        var problem = (ProblemModel)element;
-        if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
-            return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
+            var problem = (ProblemModel)element;
+            if (beatIndex < 0 || beatIndex >= problem.StructureBeats.Count)
+                return OperationResult<bool>.Failure($"Beat index {beatIndex} is out of range");
 
-        // Verify the element to assign exists and is a Scene or Problem
-        var targetElement = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == elementGuid);
-        if (targetElement == null)
-            return OperationResult<bool>.Failure($"Element with GUID '{elementGuid}' not found");
-        if (targetElement.ElementType != StoryItemType.Scene && targetElement.ElementType != StoryItemType.Problem)
-            return OperationResult<bool>.Failure("Only Scene or Problem elements can be assigned to beats");
+            // Verify the element to assign exists and is a Scene or Problem
+            var targetElement = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == elementGuid);
+            if (targetElement == null)
+                return OperationResult<bool>.Failure($"Element with GUID '{elementGuid}' not found");
+            if (targetElement.ElementType != StoryItemType.Scene && targetElement.ElementType != StoryItemType.Problem)
+                return OperationResult<bool>.Failure("Only Scene or Problem elements can be assigned to beats");
 
-        outlineService.AssignElementToBeat(CurrentModel, problem, beatIndex, elementGuid);
-        return OperationResult<bool>.Success(true);
+            outlineService.AssignElementToBeat(CurrentModel, problem, beatIndex, elementGuid);
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error in AssignElementToBeat: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -1825,10 +1832,12 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
                  Moves a story element to a new parent in the outline tree.
                  elementGuid is the GUID of the element to move.
                  newParentGuid is the GUID of the element that will become the new parent.
+                 index is an optional 0-based position within the new parent's children;
+                 omit or pass null to append. Valid range is 0..Children.Count (post-detach).
                  Cannot move root elements, TrashCan elements, or create circular references.
                  Call save_outline after to persist.
                  """)]
-    public OperationResult<bool> MoveElement(Guid elementGuid, Guid newParentGuid)
+    public OperationResult<bool> MoveElement(Guid elementGuid, Guid newParentGuid, int? index = null)
     {
         if (CurrentModel == null)
             return OperationResult<bool>.Failure("No StoryModel available");
@@ -1868,9 +1877,21 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         if (oldParent == null)
             return OperationResult<bool>.Failure("Element has no parent to detach from");
 
+        // Validate index against the post-removal child count of the target parent
+        // BEFORE mutating tree state, so a bad index leaves the tree unchanged.
+        int targetCount = (oldParent == newParentNode)
+            ? newParentNode.Children.Count - 1
+            : newParentNode.Children.Count;
+        if (index.HasValue && (index.Value < 0 || index.Value > targetCount))
+            return OperationResult<bool>.Failure($"Index {index} is out of range");
+
         oldParent.Children.Remove(elementNode);
         elementNode.Parent = newParentNode;
-        newParentNode.Children.Add(elementNode);
+
+        if (!index.HasValue || index.Value == newParentNode.Children.Count)
+            newParentNode.Children.Add(elementNode);
+        else
+            newParentNode.Children.Insert(index.Value, elementNode);
 
         return OperationResult<bool>.Success(true);
     }
