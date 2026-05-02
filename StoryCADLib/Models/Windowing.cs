@@ -245,16 +245,11 @@ public class Windowing : ObservableRecipient
 
     /// <summary>
     /// When a second instance is opened, this code will be ran on the main (first) instance
-    /// It will bring up the main window.
+    /// to bring the main window forward.
     /// </summary>
     public void ActivateMainInstance()
     {
         MainWindow.Activate();
-
-        GlobalDispatcher.TryEnqueue(() =>
-        {
-            WeakReferenceMessenger.Default.Send(new ActivateInstanceMessage());
-        });
     }
 
     /// <summary>

@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using StoryCADLib.Controls;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services;
+using StoryCADLib.Services.Backend;
 using StoryCADLib.Services.Messages;
 using StoryCADLib.Services.Navigation;
 using StoryCADLib.Services.Outline;
@@ -516,6 +517,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
     /// </summary>
     public async void ConflictTool()
     {
+        Ioc.Default.GetService<IUsageTrackingService>()?.FeatureUsed("ConflictBuilder");
         _logger.Log(LogLevel.Info, "Displaying Conflict Finder tool dialog");
 
         //Creates and shows content

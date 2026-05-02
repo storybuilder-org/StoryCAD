@@ -56,7 +56,6 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.SemanticKernel" />
         <PackageReference Include="Microsoft.SemanticKernel.Abstractions" />
-        <PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" />
         <PackageReference Include="CommunityToolkit.Mvvm" />
         <PackageReference Include="dotenv.net" />
         <PackageReference Include="Elmah.Io.NLog" />
@@ -260,5 +259,9 @@
 
     <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'windows'">
         <Compile Remove="ViewModels\Tools\PrintReportDialogVM.WinAppSDK.cs" />
+    </ItemGroup>
+
+    <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+        <Compile Remove="ViewModels\Tools\PrintReportDialogVM.desktop.cs" />
     </ItemGroup>
 </Project>

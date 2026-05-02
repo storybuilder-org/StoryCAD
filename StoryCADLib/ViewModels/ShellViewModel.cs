@@ -16,6 +16,7 @@ using StoryCADLib.Services.Locking;
 using StoryCADLib.Services.Messages;
 using StoryCADLib.Services.Navigation;
 using StoryCADLib.Services.Outline;
+using StoryCADLib.Services.Backend;
 using StoryCADLib.Services.Search;
 using StoryCADLib.ViewModels.SubViewModels;
 using StoryCADLib.ViewModels.Tools;
@@ -101,7 +102,6 @@ public class ShellViewModel : ObservableRecipient
         Messenger.Register<ShellViewModel, StatusChangedMessage>(this, static (r, m) => r.StatusMessageReceived(m));
         Messenger.Register<ShellViewModel, NameChangedMessage>(this, static (r, m) => r.NameMessageReceived(m));
         Messenger.Register<ShellViewModel, ThemeChangedMessage>(this, static (r, m) => r.ThemeChangedMessageReceived());
-        Messenger.Register<ShellViewModel, ActivateInstanceMessage>(this, static (r, m) => r.ActivateInstanceMessageReceived());
 
         this.appState.CurrentDocument = new StoryDocument(new StoryModel());
 
@@ -157,6 +157,8 @@ public class ShellViewModel : ObservableRecipient
             SerializationLock.CanExecuteCommands);
 
         PreferencesCommand = new RelayCommand(OpenPreferences, SerializationLock.CanExecuteCommands);
+
+        ReportFeedbackCommand = new RelayCommand(OpenReportFeedback, SerializationLock.CanExecuteCommands);
 
         PrintReportsCommand = new RelayCommand(OpenPrintMenu, SerializationLock.CanExecuteCommands);
         ExportReportsToPdfCommand = new RelayCommand(OpenExportPdfMenu, SerializationLock.CanExecuteCommands);
@@ -390,6 +392,7 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand ExportReportsToPdfCommand { get; }
     public RelayCommand ScrivenerReportsCommand { get; }
     public RelayCommand PreferencesCommand { get; }
+    public RelayCommand ReportFeedbackCommand { get; }
 
     private Visibility _collaboratorVisibility;
 
@@ -956,6 +959,7 @@ public class ShellViewModel : ObservableRecipient
             case ContentDialogResult.Primary:
                 var prefsVm = Ioc.Default.GetRequiredService<PreferencesViewModel>();
                 prefsVm.SaveModel();
+                Ioc.Default.GetService<IUsageTrackingService>()?.FeatureUsed("PreferencesSaved");
                 await prefsVm.SaveAsync();
 
                 // Notify user if theme changed
@@ -978,6 +982,22 @@ public class ShellViewModel : ObservableRecipient
         }
     }
 
+    private async void OpenReportFeedback()
+    {
+        var result = await Window.ShowContentDialog(new ContentDialog
+        {
+            Content = new FeedbackDialog(),
+            PrimaryButtonText = "Submit Feedback",
+            SecondaryButtonText = "Discard",
+            Title = "Submit"
+        });
+
+        if (result == ContentDialogResult.Primary)
+        {
+            Ioc.Default.GetRequiredService<FeedbackViewModel>().CreateFeedback();
+        }
+    }
+
     /// <summary>
     ///     This method is invoked when the user clicks the Collaborator AppBarButton
     ///     on the Shell CommandBar. It Activates and displays the WizardShell.
@@ -994,6 +1014,7 @@ public class ShellViewModel : ObservableRecipient
 
 
             Logger.Log(LogLevel.Info, "Launching collaborator");
+            Ioc.Default.GetService<IUsageTrackingService>()?.FeatureUsed("Collaborator");
             var collaboratorService = Ioc.Default.GetService<CollaboratorService>();
             collaboratorService?.OpenCollaborator();
 
@@ -1478,7 +1499,15 @@ public class ShellViewModel : ObservableRecipient
             // Set closing flag immediately to prevent UI updates during shutdown
             appState.IsClosing = true;
 
-            // 1. Update cumulative time used and save preferences
+            // 1. Flush usage telemetry FIRST — macOS can kill the process
+            // mid-shutdown, so the network round-trip has to happen before any
+            // slow disk work. EndSession internally auto-closes any open outline
+            // before flushing, so CloseFile doesn't have to run first.
+            var usageTracking = Ioc.Default.GetService<IUsageTrackingService>();
+            if (usageTracking != null)
+                await usageTracking.EndSession();
+
+            // 2. Update cumulative time used and save preferences
             var prefs = Ioc.Default.GetRequiredService<PreferenceService>();
             var sessionTime = (DateTime.Now - AppStartTime).TotalSeconds;
             prefs.Model.CumulativeTimeUsed += Convert.ToInt64(sessionTime);
@@ -1488,7 +1517,7 @@ public class ShellViewModel : ObservableRecipient
             await prfIo.WritePreferences(prefs.Model);
             Logger.Log(LogLevel.Info, "Preferences saved");
 
-            // 2. Close the current document if one is open
+            // 3. Close the current document if one is open
             // This handles AutoSave stop, BackupService stop, and document cleanup
             if (appState.CurrentDocument != null)
             {
@@ -1557,14 +1586,6 @@ public class ShellViewModel : ObservableRecipient
     {
         await OutlineManager.SaveFile();
         ShowHomePage();
-    }
-
-    /// <summary>
-    /// Handles second instance activation by showing a warning message.
-    /// </summary>
-    private void ActivateInstanceMessageReceived()
-    {
-        ShowMessage(LogLevel.Warn, "You can only have one file open at once", false);
     }
 
     #endregion

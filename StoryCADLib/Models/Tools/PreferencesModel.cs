@@ -50,6 +50,7 @@ public class PreferencesModel : ObservableObject
         ShowStartupDialog = true;
         ShowFilePickerOnStartup = true;
         UseBetaDocumentation = AppState.IsBetaDistribution;
+        HideShellCommandBarOnMac = false;
     }
 
     #endregion
@@ -100,6 +101,23 @@ public class PreferencesModel : ObservableObject
     [JsonInclude]
     [JsonPropertyName("NewsletterConsent")]
     public bool Newsletter { get; set; }
+
+    /// <summary>
+    ///     Controls whether anonymous usage statistics are collected.
+    ///     When true, session/outline/feature data is sent to the backend.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("UsageStatsConsent")]
+    public bool UsageStatsConsent { get; set; }
+
+    /// <summary>
+    ///     Random GUID generated on opt-in, used as the unlinkable
+    ///     identifier for usage data. No FK to the users table.
+    ///     Regenerated if user opts out and back in.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("UsageId")]
+    public string UsageId { get; set; } = string.Empty;
 
     /// <summary>
     ///     This switch tracks whether this is the first time StoryCAD is opened
@@ -281,6 +299,15 @@ public class PreferencesModel : ObservableObject
     [JsonInclude]
     [JsonPropertyName("UseBetaDocumentation")]
     public bool UseBetaDocumentation { get; set; }
+
+    /// <summary>
+    ///     macOS only. When true, hides the in-window Shell CommandBar (search +
+    ///     menu buttons) since those are redundant with the native Mac menu bar.
+    ///     Takes effect on next launch.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("HideShellCommandBarOnMac")]
+    public bool HideShellCommandBarOnMac { get; set; }
 
     #endregion
 }

@@ -55,6 +55,13 @@ public class BackendService
     public bool IsConnectionConfigured => _sqlIo.IsConnectionConfigured;
 
     /// <summary>
+    ///     Unread admin-to-user messages fetched during StartupRecording.
+    ///     Populated by FetchUnreadMessages; consumed by Shell after navigation
+    ///     is configured. Empty list when fetch fails or no messages are pending.
+    /// </summary>
+    public IReadOnlyList<UserMessage> UnreadMessages { get; private set; } = Array.Empty<UserMessage>();
+
+    /// <summary>
     ///     Do any necessary posting to the backend MySQL server on app
     ///     startup. This will include either preferences or versions
     ///     posting that weren't successful during the last run.
@@ -72,7 +79,7 @@ public class BackendService
         {
             // If the previous attempt to communicate to the back-end server
             // or database failed, retry
-            if (_preferenceService.Model.RecordPreferencesStatus)
+            if (!_preferenceService.Model.RecordPreferencesStatus)
             {
                 await PostPreferences(_preferenceService.Model);
             }
@@ -136,6 +143,63 @@ public class BackendService
         {
             _logService.LogException(LogLevel.Error, ex, "Unexpected error in StartupRecording method");
         }
+
+        await FetchUnreadMessages();
+    }
+
+    private async Task FetchUnreadMessages()
+    {
+        if (!IsConnectionConfigured)
+        {
+            return;
+        }
+
+        var userId = _preferenceService.Model.UserId;
+        if (userId <= 0)
+        {
+            // First-launch user with no UserId yet — nothing to fetch.
+            return;
+        }
+
+        try
+        {
+            UnreadMessages = await _sqlIo.GetUnreadMessages(userId);
+            _logService.Log(LogLevel.Info, $"Fetched {UnreadMessages.Count} unread admin messages");
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"Failed to fetch unread messages: {ex.Message}");
+            UnreadMessages = Array.Empty<UserMessage>();
+        }
+    }
+
+    /// <summary>
+    ///     Marks an admin-to-user message as read for the current user.
+    ///     Called by the Shell after the user acknowledges the popup.
+    ///     Silent on failure — eventual consistency is acceptable per the
+    ///     design (the message will simply re-appear on next launch).
+    /// </summary>
+    public async Task MarkMessageRead(int messageId)
+    {
+        if (!IsConnectionConfigured)
+        {
+            return;
+        }
+
+        var userId = _preferenceService.Model.UserId;
+        if (userId <= 0)
+        {
+            return;
+        }
+
+        try
+        {
+            await _sqlIo.MarkMessageRead(userId, messageId);
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"Failed to mark message {messageId} as read: {ex.Message}");
+        }
     }
 
     public async Task PostPreferences(PreferencesModel preferences)
@@ -166,11 +230,12 @@ public class BackendService
                 version = version.Substring(9);
             }
 
-            await _sqlIo.AddOrUpdatePreferences(id, elmah, newsletter, version);
+            var usageStats = preferences.UsageStatsConsent;
+            await _sqlIo.AddOrUpdatePreferences(id, elmah, newsletter, version, usageStats);
             _preferenceService.Model.RecordPreferencesStatus = true;
             PreferencesIo loader = new();
             await loader.WritePreferences(_preferenceService.Model);
-            _logService.Log(LogLevel.Info, "Preferences posted: elmah=" + elmah + " newsletter=" + newsletter);
+            _logService.Log(LogLevel.Info, "Preferences posted: elmah=" + elmah + " newsletter=" + newsletter + " usageStats=" + usageStats);
         }
         catch (TaskCanceledException ex)
         {
@@ -309,6 +374,17 @@ public class BackendService
             _logService.LogException(LogLevel.Error, ex, "Failed to delete user data");
             return false;
         }
+    }
+
+    /// <summary>
+    ///     Configures the backend connection directly from a connection string.
+    ///     Used for local test database (no Doppler, no SSL cert needed).
+    ///     Set STORYCAD_TEST_CONNECTION environment variable to use this path.
+    /// </summary>
+    public void SetConnectionString(string connectionString)
+    {
+        _sqlIo.SetConnectionString(connectionString);
+        _logService.Log(LogLevel.Info, "Backend connection configured from direct connection string");
     }
 
     /// <summary>

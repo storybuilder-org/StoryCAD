@@ -16,9 +16,7 @@ public partial class PrintReportDialogVM : ObservableRecipient
     public ContentDialog Dialog;
     public PrintTask PrintJobManager;
 
-#pragma warning disable CS0169 // Field is used in WinAppSDK platform-specific partial class
     private bool _isPrinting;
-#pragma warning restore CS0169
 
     private readonly AppState _appState;
     private readonly Windowing Window;
@@ -258,14 +256,6 @@ public partial class PrintReportDialogVM : ObservableRecipient
         }
     }
 
-#if !WINDOWS10_0_18362_0_OR_GREATER
-    private async void StartPrintMenu()
-    {
-        await ExportReportsToPdfAsync();
-    }
-#endif
-
-
     private async Task<IReadOnlyList<IReadOnlyList<string>>> BuildReportPagesAsync(int? linesPerPageOverride = null)
     {
         var report = await new PrintReports(this, _appState, _logService).Generate();
@@ -327,11 +317,86 @@ public partial class PrintReportDialogVM : ObservableRecipient
     }
 
 
-#if WINDOWS10_0_18362_0_OR_GREATER
-    // GeneratePrintDocumentReportAsync is defined in PrintReportDialogVM.WinAppSDK.cs
-#else
-    public Task GeneratePrintDocumentReportAsync() => Task.CompletedTask;
-#endif
+    private async Task<byte[]> GeneratePdfBytesAsync()
+    {
+        using var memoryStream = new MemoryStream();
+        using (var document = SKDocument.CreatePdf(memoryStream))
+        {
+            if (document is null)
+            {
+                return Array.Empty<byte>();
+            }
+
+            using var font = new SKFont(SKTypeface.Default, PdfFontSize);
+            using var paint = new SKPaint
+            {
+                Color = SKColors.Black,
+                IsAntialias = true
+            };
+
+            var lineHeight = font.Spacing;
+            if (lineHeight <= 0)
+            {
+                lineHeight = PdfFontSize * 1.2f;
+            }
+
+            var printableHeight = PdfPageHeight - PdfMarginTop - PdfMarginBottom;
+            if (printableHeight <= 0)
+            {
+                printableHeight = PdfPageHeight;
+            }
+
+            var linesPerPdfPage = Math.Max(1, (int)Math.Floor(printableHeight / lineHeight));
+            var pages = await BuildReportPagesAsync(linesPerPdfPage);
+
+            foreach (var pageLines in pages)
+            {
+                var lineIndex = 0;
+
+                while (lineIndex < pageLines.Count)
+                {
+                    var canvas = document.BeginPage(PdfPageWidth, PdfPageHeight);
+                    if (canvas is null)
+                    {
+                        break;
+                    }
+
+                    try
+                    {
+                        var y = PdfMarginTop + lineHeight;
+
+                        while (lineIndex < pageLines.Count)
+                        {
+                            canvas.DrawText(pageLines[lineIndex] ?? string.Empty, PdfMarginLeft, y, SKTextAlign.Left, font, paint);
+                            lineIndex++;
+
+                            if (lineIndex >= pageLines.Count)
+                            {
+                                break;
+                            }
+
+                            var nextY = y + lineHeight;
+                            if (nextY > PdfPageHeight - PdfMarginBottom)
+                            {
+                                break;
+                            }
+
+                            y = nextY;
+                        }
+                    }
+                    finally
+                    {
+                        document.EndPage();
+                        canvas.Dispose();
+                    }
+                }
+            }
+
+            document.Close();
+        }
+
+        return memoryStream.ToArray();
+    }
 
     private async Task ExportReportsToPdfAsync()
     {
@@ -344,91 +409,21 @@ public partial class PrintReportDialogVM : ObservableRecipient
                 return;
             }
 
-            using var memoryStream = new MemoryStream();
-            using (var document = SKDocument.CreatePdf(memoryStream))
+            var pdfBytes = await GeneratePdfBytesAsync();
+            if (pdfBytes.Length == 0)
             {
-                if (document is null)
+                Messenger.Send(new StatusChangedMessage(
+                    new StatusMessage("Unable to create a PDF document for export.", LogLevel.Error)));
+                await Window.ShowContentDialog(new ContentDialog
                 {
-                    Messenger.Send(new StatusChangedMessage(
-                        new StatusMessage("Unable to create a PDF document for export.", LogLevel.Error)));
-                    await Window.ShowContentDialog(new ContentDialog
-                    {
-                        Title = "Export error",
-                        Content = "Unable to create a PDF document for export.",
-                        PrimaryButtonText = "OK"
-                    }, true);
-                    return;
-                }
-
-                using var font = new SKFont(SKTypeface.Default, PdfFontSize);
-                using var paint = new SKPaint
-                {
-                    Color = SKColors.Black,
-                    IsAntialias = true
-                };
-
-                var lineHeight = font.Spacing;
-                if (lineHeight <= 0)
-                {
-                    lineHeight = PdfFontSize * 1.2f;
-                }
-
-                var printableHeight = PdfPageHeight - PdfMarginTop - PdfMarginBottom;
-                if (printableHeight <= 0)
-                {
-                    printableHeight = PdfPageHeight;
-                }
-
-                var linesPerPdfPage = Math.Max(1, (int)Math.Floor(printableHeight / lineHeight));
-                var pages = await BuildReportPagesAsync(linesPerPdfPage);
-
-                foreach (var pageLines in pages)
-                {
-                    var lineIndex = 0;
-
-                    while (lineIndex < pageLines.Count)
-                    {
-                        var canvas = document.BeginPage(PdfPageWidth, PdfPageHeight);
-                        if (canvas is null)
-                        {
-                            break;
-                        }
-
-                        try
-                        {
-                            var y = PdfMarginTop + lineHeight;
-
-                            while (lineIndex < pageLines.Count)
-                            {
-                                canvas.DrawText(pageLines[lineIndex] ?? string.Empty, PdfMarginLeft, y, SKTextAlign.Left, font, paint);
-                                lineIndex++;
-
-                                if (lineIndex >= pageLines.Count)
-                                {
-                                    break;
-                                }
-
-                                var nextY = y + lineHeight;
-                                if (nextY > PdfPageHeight - PdfMarginBottom)
-                                {
-                                    break;
-                                }
-
-                                y = nextY;
-                            }
-                        }
-                        finally
-                        {
-                            document.EndPage();
-                            canvas.Dispose();
-                        }
-                    }
-                }
-
-                document.Close();
+                    Title = "Export error",
+                    Content = "Unable to create a PDF document for export.",
+                    PrimaryButtonText = "OK"
+                }, true);
+                return;
             }
 
-            await File.WriteAllBytesAsync(exportFile.Path, memoryStream.ToArray());
+            await File.WriteAllBytesAsync(exportFile.Path, pdfBytes);
             Messenger.Send(new StatusChangedMessage(new StatusMessage($"Reports exported to PDF: {exportFile.Path}",
                 LogLevel.Info)));
         }

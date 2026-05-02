@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using StoryCADLib.Services.Logging;
+using StoryCADLib.Services.MacInterop;
 
 namespace StoryCADLib.Services.MacMenuBar;
 

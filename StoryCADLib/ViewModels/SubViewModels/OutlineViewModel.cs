@@ -25,6 +25,7 @@ public class OutlineViewModel : ObservableRecipient
     private readonly BackupService _backupService;
     private readonly EditFlushService _editFlushService;
     private readonly ToolValidationService _toolValidationService;
+    private readonly IUsageTrackingService _usageTracking;
     private readonly AppState appState;
     private readonly ILogService logger;
     private readonly OutlineService outlineService;
@@ -47,7 +48,8 @@ public class OutlineViewModel : ObservableRecipient
     public OutlineViewModel(ILogService logService, PreferenceService preferenceService,
         Windowing windowing, OutlineService outlineService, AppState appState,
         SearchService searchService, BackendService backendService, EditFlushService editFlushService,
-        AutoSaveService autoSaveService, BackupService backupService, ToolValidationService toolValidationService)
+        AutoSaveService autoSaveService, BackupService backupService, ToolValidationService toolValidationService,
+        IUsageTrackingService usageTracking)
     {
         logger = logService;
         preferences = preferenceService;
@@ -60,6 +62,7 @@ public class OutlineViewModel : ObservableRecipient
         _autoSaveService = autoSaveService;
         _backupService = backupService;
         _toolValidationService = toolValidationService;
+        _usageTracking = usageTracking;
     }
 
     #endregion
@@ -290,6 +293,15 @@ public class OutlineViewModel : ObservableRecipient
 
                 shellVm.TreeViewNodeClicked(appState.CurrentDocument.Model.ExplorerView[0]);
                 window.UpdateWindowTitle();
+            }
+
+            // Track outline open for usage statistics
+            if (appState.CurrentDocument?.Model != null)
+            {
+                var model = appState.CurrentDocument.Model;
+                var overview = model.StoryElements.OfType<OverviewModel>().FirstOrDefault();
+                if (overview != null)
+                    _usageTracking.OutlineOpened(overview.Uuid, overview.StoryGenre, overview.StoryType, model.StoryElements.Count);
             }
 
             Messenger.Send(
@@ -555,6 +567,15 @@ public class OutlineViewModel : ObservableRecipient
             window.UpdateWindowTitle();
             _backupService.StopTimedBackup();
         }
+        // Track outline close
+        if (appState.CurrentDocument?.Model != null)
+        {
+            var model = appState.CurrentDocument.Model;
+            var overview = model.StoryElements.OfType<OverviewModel>().FirstOrDefault();
+            if (overview != null)
+                _usageTracking.OutlineClosed(overview.Uuid, model.StoryElements.Count);
+        }
+
         Messenger.Send(
             new StatusChangedMessage(new StatusMessage("Close story command completed", LogLevel.Info, true)));
     }
@@ -583,6 +604,19 @@ public class OutlineViewModel : ObservableRecipient
                     await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
                 }
             }
+
+            // Flush telemetry here for menu-Exit (on UNO/macOS, Application.Current.Exit
+            // doesn't fire AppWindow.Closing, so OnApplicationClosing wouldn't run).
+            // Window-X path runs EndSession via OnApplicationClosing; the guard in
+            // EndSession makes a second call a no-op if both happen.
+            if (appState.CurrentDocument?.Model != null)
+            {
+                var model = appState.CurrentDocument.Model;
+                var overview = model.StoryElements.OfType<OverviewModel>().FirstOrDefault();
+                if (overview != null)
+                    _usageTracking.OutlineClosed(overview.Uuid, model.StoryElements.Count);
+            }
+            await _usageTracking.EndSession();
 
             await _backendService.DeleteWorkFile();
             try
@@ -662,6 +696,7 @@ public class OutlineViewModel : ObservableRecipient
 
     public void SearchNodes()
     {
+        _usageTracking.FeatureUsed("Search");
         using (new SerializationLock(logger))
         {
             logger.Log(LogLevel.Info, $"Search started, Searching for {shellVm.FilterText}");
@@ -734,6 +769,7 @@ public class OutlineViewModel : ObservableRecipient
 
     public async Task GenerateScrivenerReports()
     {
+        _usageTracking.FeatureUsed("ScrivenerExport");
         if (appState.CurrentDocument?.Model?.CurrentView == null ||
             appState.CurrentDocument.Model.CurrentView.Count == 0)
         {
@@ -770,6 +806,7 @@ public class OutlineViewModel : ObservableRecipient
 
     public Task PrintCurrentNodeAsync()
     {
+        _usageTracking.FeatureUsed("Print");
         using (new SerializationLock(logger))
         {
             if (appState.RightTappedNode == null)
@@ -787,6 +824,7 @@ public class OutlineViewModel : ObservableRecipient
 
     public async Task KeyQuestionsTool()
     {
+        _usageTracking.FeatureUsed("KeyQuestions");
         logger.Log(LogLevel.Info, "Displaying KeyQuestions tool dialog");
         using (new SerializationLock(logger))
         {
@@ -812,6 +850,7 @@ public class OutlineViewModel : ObservableRecipient
 
     public async Task TopicsTool()
     {
+        _usageTracking.FeatureUsed("Topics");
         logger.Log(LogLevel.Info, "Displaying Topics tool dialog");
         using (new SerializationLock(logger))
         {
@@ -837,6 +876,7 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public async Task MasterPlotTool()
     {
+        _usageTracking.FeatureUsed("MasterPlots");
         using (new SerializationLock(logger))
         {
             logger.Log(LogLevel.Info, "Displaying MasterPlot tool dialog");
@@ -911,6 +951,7 @@ public class OutlineViewModel : ObservableRecipient
 
     public async Task DramaticSituationsTool()
     {
+        _usageTracking.FeatureUsed("DramaticSituations");
         logger.Log(LogLevel.Info, "Displaying Dramatic Situations tool dialog");
         using (new SerializationLock(logger))
         {
@@ -1002,6 +1043,7 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public async Task StockScenesTool()
     {
+        _usageTracking.FeatureUsed("StockScenes");
         logger.Log(LogLevel.Info, "Displaying Stock Scenes tool dialog");
         if (_toolValidationService.VerifyToolUse(true, true))
         {
@@ -1115,6 +1157,7 @@ public class OutlineViewModel : ObservableRecipient
                 shellVm.NewNodeHighlightCache.Add(newNode.Node);
             }
             logger.Log(LogLevel.Info, $"Added Story Element {newNode.Uuid}");
+            _usageTracking.ElementAdded();
 
             Messenger.Send(new IsChangedMessage(true));
             Messenger.Send(new StatusChangedMessage(new StatusMessage($"Added new {typeToAdd}", LogLevel.Info, true)));
@@ -1218,6 +1261,7 @@ public class OutlineViewModel : ObservableRecipient
                             }
 
                             // Mark the model as changed
+                            _usageTracking.ElementRemoved();
                             Messenger.Send(new IsChangedMessage(true));
                             Messenger.Send(
                                 new StatusChangedMessage(new StatusMessage("Element moved to trash", LogLevel.Info)));
@@ -1261,6 +1305,7 @@ public class OutlineViewModel : ObservableRecipient
             {
                 // Use the new OutlineService method to restore from trash
                 outlineService.RestoreFromTrash(appState.RightTappedNode, appState.CurrentDocument.Model);
+                _usageTracking.ElementRestored();
 
                 // Mark the model as changed
                 Messenger.Send(new IsChangedMessage(true));

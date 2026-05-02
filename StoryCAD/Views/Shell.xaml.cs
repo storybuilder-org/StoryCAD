@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Input;
 using StoryCADLib.Helpers;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services;
+using StoryCADLib.Services.Backend;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator;
 using StoryCADLib.Services.Dialogs;
@@ -126,6 +127,13 @@ public sealed partial class Shell : Page
         // Initialize native macOS menu bar (no-op on Windows)
         Ioc.Default.GetRequiredService<MacMenuBarService>().Initialize();
 
+        // macOS-only: hide the in-window Shell CommandBar when the user has
+        // opted to rely on the native Mac menu bar instead.
+        if (OperatingSystem.IsMacOS() && Preferences.HideShellCommandBarOnMac)
+        {
+            ShellCommandBar.Visibility = Visibility.Collapsed;
+        }
+
         ShellVm.ShowHomePage();
         ShellVm.ShowConnectionStatus();
         Windowing.UpdateWindowTitle();
@@ -167,6 +175,8 @@ public sealed partial class Shell : Page
             await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(cd);
         }
 
+        await ShowAdminMessagesAsync();
+
         AdjustSplitViewPane(ShellPage.ActualWidth);
 
         //If StoryCAD was loaded from a .STBX File then instead of showing the file open menu
@@ -202,11 +212,49 @@ public sealed partial class Shell : Page
 
     }
 
+    private bool _closingHandled;
+
+    /// <summary>
+    ///     Displays unread admin-to-user messages on launch as sequential
+    ///     mandatory popups. Each acknowledgement marks the message read.
+    ///     Mark-as-read is fire-and-forget — failure leaves the message
+    ///     unread so it re-appears on next launch (per design).
+    /// </summary>
+    private async Task ShowAdminMessagesAsync()
+    {
+        var backend = Ioc.Default.GetService<BackendService>();
+        if (backend is null || backend.UnreadMessages.Count == 0)
+        {
+            return;
+        }
+
+        var windowing = Ioc.Default.GetRequiredService<Windowing>();
+        foreach (var msg in backend.UnreadMessages)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = msg.Subject,
+                Content = new AdminMessagePage(msg),
+                PrimaryButtonText = "OK"
+            };
+            await windowing.ShowContentDialog(dialog);
+            _ = backend.MarkMessageRead(msg.MessageId);
+        }
+    }
+
     /// <summary>
     ///     Handles the main window closing event. Calls ShellViewModel to perform cleanup.
+    ///     Uses cancel-then-exit: on first fire, cancel the OS close so async cleanup
+    ///     (telemetry flush, preferences save, document close) can actually finish on
+    ///     platforms (e.g. macOS) where the OS otherwise kills the process immediately.
+    ///     After cleanup, Application.Current.Exit() triggers a re-entrant call, and
+    ///     the _closingHandled flag lets it through.
     /// </summary>
     private async void OnMainWindowClosing(AppWindow sender, AppWindowClosingEventArgs args)
     {
+        if (_closingHandled) return;
+
+        args.Cancel = true;
         try
         {
             await ShellVm.OnApplicationClosing();
@@ -214,7 +262,11 @@ public sealed partial class Shell : Page
         catch (Exception ex)
         {
             Logger.LogException(LogLevel.Error, ex, "Error during application closing");
-            // Don't re-throw - let the window close even if cleanup fails
+        }
+        finally
+        {
+            _closingHandled = true;
+            Application.Current.Exit();
         }
     }
 
@@ -319,22 +371,6 @@ public sealed partial class Shell : Page
         }
 
         ShellVm.LastClickedTreeviewItem = (TreeViewItem)sender;
-    }
-
-    private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
-    {
-        var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new ContentDialog
-        {
-            Content = new FeedbackDialog(),
-            PrimaryButtonText = "Submit Feedback",
-            SecondaryButtonText = "Discard",
-            Title = "Submit"
-        });
-
-        if (result == ContentDialogResult.Primary)
-        {
-            Ioc.Default.GetRequiredService<FeedbackViewModel>().CreateFeedback();
-        }
     }
 
     private void ShellPage_SizeChanged(object sender, SizeChangedEventArgs e)

@@ -114,6 +114,19 @@ public class PreferencesIo
     {
         try
         {
+            // Invariants (design §2.7):
+            //   consent=true  → populate usage_id if empty
+            //   consent=false → clear usage_id so a later opt-in gets a fresh one
+            if (_model.UsageStatsConsent)
+            {
+                if (string.IsNullOrEmpty(_model.UsageId))
+                    _model.UsageId = Guid.NewGuid().ToString();
+            }
+            else
+            {
+                _model.UsageId = string.Empty;
+            }
+
             await SerializationLock.RunExclusiveAsync(async _ =>
             {
                 //Write file

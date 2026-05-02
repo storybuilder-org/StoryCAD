@@ -422,3 +422,6 @@ _site/
 .jekyll-cache/
 .jekyll-metadata
 Gemfile.lock
+
+# macOS
+**/.DS_Store
