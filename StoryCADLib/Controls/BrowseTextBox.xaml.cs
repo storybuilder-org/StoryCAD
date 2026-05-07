@@ -9,7 +9,7 @@ public sealed partial class BrowseTextBox : UserControl
         nameof(Path), typeof(string), typeof(BrowseTextBox), new PropertyMetadata(string.Empty));
 
     public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register(
-        nameof(Header), typeof(string), typeof(BrowseTextBox), new PropertyMetadata(string.Empty));
+        nameof(Header), typeof(string), typeof(BrowseTextBox), new PropertyMetadata(null));
 
     public static readonly DependencyProperty PlaceholderTextProperty = DependencyProperty.Register(
         nameof(PlaceholderText), typeof(string), typeof(BrowseTextBox), new PropertyMetadata(string.Empty));
