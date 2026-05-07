@@ -24,6 +24,11 @@ on:
         required: false
         type: boolean
         default: true
+      changelog_override:
+        description: "Optional: paste a finished changelog here to bypass auto-generation. Should contain '### Bug Fixes', '### Features & Improvements', '### Infrastructure', '### Documentation'."
+        required: false
+        type: string
+        default: ""
 permissions:
   contents: write
 
@@ -45,41 +50,77 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CHANGELOG_OVERRIDE: ${{ github.event.inputs.changelog_override }}
         run: |
+          set -euo pipefail
           VERSION="${{ github.event.inputs.version }}"
           VERSION_TRIMMED="${VERSION#v}"
 
-          # Get previous release tag
-          PREV_TAG=$(gh release list --repo storybuilder-org/StoryCAD --limit 1 \
-            --json tagName -q '.[0].tagName' 2>/dev/null || echo "")
+          # ── MANUAL OVERRIDE ─────────────────────────────────────────────
+          # If a changelog was pasted into the dispatch input, use it verbatim
+          # and skip gh-api + OpenAI entirely. Header check is a warning, not
+          # a hard fail — you've taken explicit ownership by overriding.
+          if [ -n "${CHANGELOG_OVERRIDE:-}" ]; then
+            echo "Using manual changelog override (${#CHANGELOG_OVERRIDE} chars)."
+            FINAL="$CHANGELOG_OVERRIDE"
 
-          # Generate raw release notes via GitHub API
-          RAW_NOTES=""
-          if [ -n "$PREV_TAG" ]; then
-            RAW_NOTES=$(gh api repos/storybuilder-org/StoryCAD/releases/generate-notes \
-              -f tag_name="$VERSION" \
-              -f previous_tag_name="$PREV_TAG" \
-              -f target_commitish="${{ github.sha }}" \
-              --jq '.body' 2>/dev/null || echo "")
-          fi
+            missing=0
+            for h in '### Bug Fixes' '### Features & Improvements' '### Infrastructure' '### Documentation'; do
+              if ! echo "$FINAL" | grep -qF "$h"; then
+                echo "::warning::Override is missing header: $h"
+                missing=1
+              fi
+            done
+            if [ "$missing" -eq 1 ]; then
+              echo "::warning::Override missing one or more required headers. Shipping anyway — the in-app changelog view may render incorrectly."
+            fi
 
-          if [ -z "$RAW_NOTES" ]; then
-            FINAL="Release $VERSION_TRIMMED"
+            if [ "$(echo "$FINAL" | wc -c)" -lt 50 ]; then
+              echo "::error::Override is shorter than 50 chars. Refusing to ship."
+              exit 1
+            fi
+
             echo "changelog_b64=$(echo "$FINAL" | base64 -w 0)" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          # Transform via OpenAI if key available
-          if [ -n "$OPENAI_API_KEY" ]; then
-            SYSTEM_PROMPT="You are a technical writer for StoryCAD, a fiction writing app. Transform raw GitHub release notes into a user-friendly changelog. Group into: Bug Fixes, Features & Improvements, Infrastructure, Documentation. Write concise one-liners. Include issue/PR numbers in parentheses. Remove @mentions and URLs. Output plain text only."
+          # ── AUTO PATH ───────────────────────────────────────────────────
+          PREV_TAG=$(gh release list --repo storybuilder-org/StoryCAD --limit 1 \
+            --json tagName -q '.[0].tagName' 2>/dev/null || echo "")
 
+          if [ -z "$PREV_TAG" ]; then
+            echo "::error::Could not resolve previous release tag. Refusing to ship empty changelog."
+            exit 1
+          fi
+          echo "Previous tag: $PREV_TAG"
+
+          # Generate raw release notes via GitHub API. Do NOT swallow errors —
+          # we must know if this fails so we don't ship a placeholder.
+          RAW_NOTES=$(gh api repos/storybuilder-org/StoryCAD/releases/generate-notes \
+            -f tag_name="$VERSION" \
+            -f previous_tag_name="$PREV_TAG" \
+            -f target_commitish="${{ github.sha }}" \
+            --jq '.body')
+
+          if [ -z "$RAW_NOTES" ]; then
+            echo "::error::GitHub generate-notes returned empty body. Aborting."
+            exit 1
+          fi
+          echo "Raw notes length: ${#RAW_NOTES}"
+
+          FINAL=""
+          if [ -n "${OPENAI_API_KEY:-}" ]; then
+            SYSTEM_PROMPT="You are a technical writer for StoryCAD, a fiction writing app. Transform raw GitHub release notes into a user-friendly changelog. Output MUST contain exactly these four section headers, in this order, each on its own line preceded by '### ': 'Bug Fixes', 'Features & Improvements', 'Infrastructure', 'Documentation'. Under each header, write concise one-liner bullets ('- ...'). If a section has no items, write '- None.' under that header — never omit a header. Include issue/PR numbers in parentheses. Remove @mentions and URLs. Output plain text only, no preamble."
+
+            # gpt-5.4-mini is a reasoning model: temperature must be omitted
+            # (only the default of 1 is accepted). Use reasoning_effort instead.
             PAYLOAD=$(jq -n \
               --arg model "gpt-5.4-mini" \
               --arg system "$SYSTEM_PROMPT" \
               --arg user "$RAW_NOTES" \
               '{
                 model: $model,
-                temperature: 0.3,
+                reasoning_effort: "low",
                 max_completion_tokens: 8192,
                 messages: [
                   {role: "system", content: $system},
@@ -87,29 +128,52 @@ jobs:
                 ]
               }')
 
-            curl -s --max-time 60 https://api.openai.com/v1/chat/completions \
+            HTTP_CODE=$(curl -s --max-time 120 -o /tmp/openai_response.json -w "%{http_code}" \
+              https://api.openai.com/v1/chat/completions \
               -H "Content-Type: application/json" \
               -H "Authorization: Bearer $OPENAI_API_KEY" \
-              -d "$PAYLOAD" -o /tmp/openai_response.json 2>/dev/null || true
+              -d "$PAYLOAD" || echo "000")
 
-            CHANGELOG=$(jq -r '.choices[0].message.content // empty' /tmp/openai_response.json 2>/dev/null)
-
-            if [ -n "$CHANGELOG" ]; then
-              FINAL="$CHANGELOG"
+            if [ "$HTTP_CODE" != "200" ]; then
+              echo "::warning::OpenAI returned HTTP $HTTP_CODE:"
+              cat /tmp/openai_response.json || true
+              echo "Falling back to raw GitHub notes."
             else
-              echo "AI generation failed, falling back to raw notes."
-              FINAL="$RAW_NOTES"
+              CHANGELOG=$(jq -r '.choices[0].message.content // empty' /tmp/openai_response.json)
+              # Validate the LLM produced all four expected section headers.
+              if echo "$CHANGELOG" | grep -q '^### Bug Fixes$' \
+                 && echo "$CHANGELOG" | grep -q '^### Features & Improvements$' \
+                 && echo "$CHANGELOG" | grep -q '^### Infrastructure$' \
+                 && echo "$CHANGELOG" | grep -q '^### Documentation$'; then
+                FINAL="$CHANGELOG"
+                echo "LLM output passed structural validation."
+              else
+                echo "::warning::LLM output missing one or more required section headers. Falling back to raw notes."
+              fi
             fi
           else
-            echo "No OpenAI API key, using raw release notes."
+            echo "No OpenAI API key configured."
+          fi
+
+          if [ -z "$FINAL" ]; then
             FINAL="$RAW_NOTES"
           fi
 
+          # Final guard: refuse to ship a stub. The in-app comparator can't
+          # do anything useful with "Release X.Y.Z" alone.
+          if [ "$(echo "$FINAL" | wc -c)" -lt 50 ]; then
+            echo "::error::Final changelog is suspiciously short (<50 chars). Refusing to ship."
+            echo "Content was:"
+            echo "$FINAL"
+            exit 1
+          fi
+
+          echo "Final changelog length: $(echo "$FINAL" | wc -c) chars"
           echo "changelog_b64=$(echo "$FINAL" | base64 -w 0)" >> $GITHUB_OUTPUT
 
   build:
     needs: [generate-changelog]
-    if: always()
+    if: always() && (needs.generate-changelog.result == 'success' || needs.generate-changelog.result == 'skipped')
     runs-on: ${{ matrix.os }}
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -157,7 +221,35 @@ jobs:
         if: needs.generate-changelog.outputs.changelog_b64 != ''
         shell: bash
         run: |
-          echo "${{ needs.generate-changelog.outputs.changelog_b64 }}" | base64 -d > StoryCADLib/Assets/Install/changelog.txt
+          set -euo pipefail
+          mkdir -p StoryCADLib/Assets/Install
+          echo "${{ needs.generate-changelog.outputs.changelog_b64 }}" \
+            | base64 -d > StoryCADLib/Assets/Install/changelog.txt
+
+      # Sanity check BEFORE building. If we're doing a release dispatch and the
+      # embedded changelog is missing or trivially small, fail loudly here
+      # rather than shipping another build that says "no release notes".
+      - name: Verify embedded changelog
+        if: github.event_name == 'workflow_dispatch' && !inputs.skip_release
+        shell: bash
+        run: |
+          set -euo pipefail
+          path="StoryCADLib/Assets/Install/changelog.txt"
+          if [ ! -s "$path" ]; then
+            echo "::error::$path is missing or empty."
+            exit 1
+          fi
+          size=$(wc -c < "$path")
+          if [ "$size" -lt 50 ]; then
+            echo "::error::$path is only $size bytes. Refusing to build."
+            head -c 200 "$path"
+            exit 1
+          fi
+          echo "changelog.txt OK ($size bytes)."
+          echo "----- preview -----"
+          head -c 400 "$path"
+          echo
+          echo "-------------------"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -219,16 +311,19 @@ jobs:
       - name: Decode real PFX and write .env (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
+        env:
+          PFX_B64: ${{ secrets.BASE64_ENCODED_PFX }}
+          APP_ENV: ${{ secrets.ENV }}
         run: |
-          if ("${{ secrets.BASE64_ENCODED_PFX }}".Length -eq 0) {
+          if ([string]::IsNullOrEmpty($env:PFX_B64)) {
             throw "Real PFX not available. Forked PRs cannot access secrets."
           }
-          $bytes = [Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
+          $bytes = [Convert]::FromBase64String($env:PFX_B64)
           $pfxPath = "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx"
           [IO.File]::WriteAllBytes($pfxPath, $bytes)
-          if ("${{ secrets.ENV }}".Length -gt 0) {
-            [IO.File]::WriteAllText("${{ github.workspace }}\StoryCAD\.env", "${{ secrets.ENV }}")
-            [IO.File]::WriteAllText("${{ github.workspace }}\StoryCADTests\.env", "${{ secrets.ENV }}")
+          if (-not [string]::IsNullOrEmpty($env:APP_ENV)) {
+            [IO.File]::WriteAllText("${{ github.workspace }}\StoryCAD\.env", $env:APP_ENV)
+            [IO.File]::WriteAllText("${{ github.workspace }}\StoryCADTests\.env", $env:APP_ENV)
           }
 
       - name: Run tests (Windows x64)
@@ -237,10 +332,12 @@ jobs:
 
       - name: Write .env (macOS)
         if: matrix.os == 'macos-latest'
+        env:
+          APP_ENV: ${{ secrets.ENV }}
         run: |
-          if [ -n "${{ secrets.ENV }}" ]; then
-            echo "${{ secrets.ENV }}" > "${{ github.workspace }}/StoryCAD/.env"
-            echo "${{ secrets.ENV }}" > "${{ github.workspace }}/StoryCADTests/.env"
+          if [ -n "${APP_ENV:-}" ]; then
+            printf '%s' "$APP_ENV" > "${{ github.workspace }}/StoryCAD/.env"
+            printf '%s' "$APP_ENV" > "${{ github.workspace }}/StoryCADTests/.env"
           fi
 
       - name: Setup macOS signing
@@ -288,6 +385,8 @@ jobs:
       - name: Create MSIX package
         if: matrix.os == 'windows-latest'
         shell: pwsh
+        env:
+          PFX_PASSWORD: ${{ secrets.PFX_PASSWORD }}
         run: |
           $pfx = "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx"
           if (-not (Test-Path $pfx)) { throw "PFX missing. Cannot sign MSIX." }
@@ -304,8 +403,8 @@ jobs:
             '/p:PublishReadyToRun=false',
             '/p:IsBetaBuild=${{ steps.beta.outputs.is_beta }}'
           )
-          if ("${{ secrets.PFX_PASSWORD }}".Length -gt 0) {
-            $msbuildArgs += "/p:PackageCertificatePassword=${{ secrets.PFX_PASSWORD }}"
+          if (-not [string]::IsNullOrEmpty($env:PFX_PASSWORD)) {
+            $msbuildArgs += "/p:PackageCertificatePassword=$env:PFX_PASSWORD"
           }
           & msbuild @msbuildArgs
 
