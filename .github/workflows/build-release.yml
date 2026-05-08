@@ -479,6 +479,22 @@ jobs:
           path: storycad-msix-${{ matrix.art }}.zip
           if-no-files-found: error
 
+      # Pack StoryCADLib as a NuGet on Windows x64 only — Windows builds both
+      # net10.0-desktop and net10.0-windows10.0.22621, so the package covers
+      # both heads. IsPackable=true overrides Uno.Sdk's default for single-project libs.
+      - name: Pack StoryCADLib NuGet
+        if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
+        shell: pwsh
+        run: dotnet pack StoryCADLib/StoryCADLib.csproj -c Release -p:IsPackable=true -o "${{ github.workspace }}\nupkg"
+
+      - name: Upload NuGet (Windows x64)
+        if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: storycad-nupkg
+          path: ${{ github.workspace }}\nupkg\*.nupkg
+          if-no-files-found: error
+
       - name: Upload PKG (macOS)
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
@@ -525,6 +541,7 @@ jobs:
             storycad-msix-win-arm64/storycad-msix-win-arm64.zip
             storycad-msix-win-x86/storycad-msix-win-x86.zip
             storycad-osx-arm64/storycad-osx-arm64.pkg
+            storycad-nupkg/*.nupkg
           draft: false
           prerelease: false
         env:
