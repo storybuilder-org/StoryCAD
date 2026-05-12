@@ -18,109 +18,42 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  microsoft-build:
-    runs-on: windows-latest
-    env:
-      DOTNET_NOLOGO: true
-      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.release.tag_name || github.event.inputs.tag }}
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "10.0.100"
-          global-json-file: "./global.json"
-
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
-
-      - name: Determine version
-        id: version
-        shell: pwsh
-        run: |
-          $tag = "${{ github.event.release.tag_name || github.event.inputs.tag }}"
-          $v = $tag.TrimStart('v')
-          "version=$v" >> $env:GITHUB_OUTPUT
-          Write-Host "Version: $v"
-
-      - name: Set version in manifest and csproj
-        shell: pwsh
-        run: ./scripts/Set-Version.ps1 -Version '${{ steps.version.outputs.version }}'
-
-      # Fixed: cannot reference `secrets` directly in `if`. Pass through env
-      # and no-op inside the script when the secret is empty.
-      - name: Write .env
-        shell: pwsh
-        env:
-          APP_ENV: ${{ secrets.ENV }}
-        run: |
-          if ([string]::IsNullOrEmpty($env:APP_ENV)) {
-            Write-Host "ENV secret not set; skipping .env creation."
-          } else {
-            [IO.File]::WriteAllText("${{ github.workspace }}\StoryCAD\.env", $env:APP_ENV)
-            Write-Host "Wrote .env ($($env:APP_ENV.Length) chars)."
-          }
-
-      - name: Restore
-        run: dotnet restore StoryCAD.sln
-
-      - name: Build MSIX for Store
-        shell: pwsh
-        run: |
-          $msbuildArgs = @(
-            'StoryCAD.sln',
-            '/m',
-            '/p:Configuration=Release',
-            '/p:Platform=x64',
-            '/p:UapAppxPackageBuildMode=StoreUpload',
-            '/p:AppxBundle=Never',
-            '/p:AppxPackageSigningEnabled=false',
-            '/p:GenerateAppxPackageOnBuild=true',
-            "/p:AppxPackageDir=${{ github.workspace }}\StorePackages\",
-            '/p:PublishReadyToRun=false',
-            '/p:IsBetaBuild=false'
-          )
-          & msbuild @msbuildArgs
-
-      - name: Upload Store package
-        uses: actions/upload-artifact@v4
-        with:
-          name: store-package
-          path: ${{ github.workspace }}\StorePackages\**\*.msixupload
-          if-no-files-found: error
-
-      - name: Cleanup .env
-        if: always()
-        shell: pwsh
-        continue-on-error: true
-        run: |
-          Remove-Item "${{ github.workspace }}\StoryCAD\.env" -Force -ErrorAction SilentlyContinue
-
   microsoft-publish:
-    needs: microsoft-build
     runs-on: ubuntu-latest
     env:
       MS_APP_ID: 9PLBNHZV1XM2
     steps:
-      - name: Download Store package
-        uses: actions/download-artifact@v4
-        with:
-          name: store-package
-          path: packages
+      - name: Resolve tag
+        id: tag
+        run: echo "tag=${{ github.event.release.tag_name || github.event.inputs.tag }}" >> $GITHUB_OUTPUT
 
-      - name: Find MSIX upload file
-        id: find-msix
+      - name: Download MSIX zips from release (all 3 archs)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p packages
+          for arch in win-x64 win-arm64 win-x86; do
+            gh release download "${{ steps.tag.outputs.tag }}" \
+              --repo ${{ github.repository }} \
+              --pattern "storycad-msix-$arch.zip" \
+              --dir packages
+          done
+          ls -la packages
+
+      - name: Extract MSIX files
         shell: pwsh
         run: |
-          $file = Get-ChildItem -Path packages -Filter "*.msixupload" -Recurse | Select-Object -First 1
-          if (-not $file) { $file = Get-ChildItem -Path packages -Filter "*.msix" -Recurse | Select-Object -First 1 }
-          if (-not $file) { throw "No .msixupload or .msix file found in packages directory" }
-          "MSIX_PATH=$($file.FullName)" >> $env:GITHUB_OUTPUT
-          Write-Host "Found package: $($file.FullName)"
+          $zips = Get-ChildItem -Path packages -Filter '*.zip'
+          if ($zips.Count -ne 3) { throw "Expected 3 MSIX zips (x64, arm64, x86), got $($zips.Count)" }
+          foreach ($zip in $zips) {
+            $extract = Join-Path 'packages' $zip.BaseName
+            Expand-Archive -Path $zip.FullName -DestinationPath $extract -Force
+          }
+          $msixFiles = Get-ChildItem -Path packages -Filter '*.msix' -Recurse |
+            Where-Object { $_.Extension -eq '.msix' }
+          if ($msixFiles.Count -ne 3) { throw "Expected 3 .msix files (one per arch), got $($msixFiles.Count): $($msixFiles.FullName -join ', ')" }
+          Write-Host "Found MSIX files:"
+          $msixFiles | ForEach-Object { Write-Host "  $($_.FullName)" }
 
       - name: Fetch changelog from release body
         id: changelog
@@ -138,15 +71,19 @@ jobs:
           Set-Content -Path changelog.txt -Value $notes -Encoding utf8
           Write-Host "Changelog length: $($notes.Length) chars"
 
-      - name: Upload package + release notes to Partner Center (no commit)
+      - name: Upload packages + release notes to Partner Center (no commit)
         env:
           PC_TENANT_ID: ${{ secrets.PARTNER_CENTER_TENANT_ID }}
           PC_CLIENT_ID: ${{ secrets.PARTNER_CENTER_CLIENT_ID }}
           PC_CLIENT_SECRET: ${{ secrets.PARTNER_CENTER_CLIENT_SECRET }}
-          MSIX_PATH: ${{ steps.find-msix.outputs.MSIX_PATH }}
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
+
+          # Collect all .msix files (x64, arm64, x86 — one each)
+          $msixFiles = Get-ChildItem -Path packages -Filter '*.msix' -Recurse |
+            Where-Object { $_.Extension -eq '.msix' }
+          if ($msixFiles.Count -ne 3) { throw "Expected 3 .msix files, got $($msixFiles.Count)" }
 
           # 1. OAuth token against Azure AD (Store Submission API resource)
           $tokenBody = @{
@@ -181,31 +118,34 @@ jobs:
             $submission.listings.$locale.baseListing.releaseNotes = $changelog
           }
 
-          # 5. Mark existing packages for deletion, add our new one
+          # 5. Mark existing packages for deletion, add one entry per architecture
           foreach ($pkg in $submission.applicationPackages) {
             $pkg.fileStatus = 'PendingDelete'
           }
-          $newPkg = [ordered]@{
-            fileName              = [System.IO.Path]::GetFileName($env:MSIX_PATH)
-            fileStatus            = 'PendingUpload'
-            minimumDirectXVersion = 'None'
-            minimumSystemRam      = 'None'
+          $newPkgs = @()
+          foreach ($msix in $msixFiles) {
+            $newPkgs += [ordered]@{
+              fileName              = $msix.Name
+              fileStatus            = 'PendingUpload'
+              minimumDirectXVersion = 'None'
+              minimumSystemRam      = 'None'
+            }
           }
-          $submission.applicationPackages = @($submission.applicationPackages) + $newPkg
+          $submission.applicationPackages = @($submission.applicationPackages) + $newPkgs
 
           # 6. PUT the updated submission
           $body = $submission | ConvertTo-Json -Depth 20
           Invoke-RestMethod -Method Put -Uri "$base/submissions/$submissionId" -Headers $headers -Body $body | Out-Null
 
-          # 7. Zip the msixupload and upload to Azure Blob SAS URL
+          # 7. Bundle all 3 msix files into one zip, upload to Azure Blob SAS URL
           $zipPath = Join-Path $env:RUNNER_TEMP 'submission.zip'
           if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
-          Compress-Archive -Path $env:MSIX_PATH -DestinationPath $zipPath
+          Compress-Archive -Path $msixFiles.FullName -DestinationPath $zipPath
           Invoke-WebRequest -Method Put -Uri $fileUploadUrl -InFile $zipPath `
             -Headers @{ 'x-ms-blob-type' = 'BlockBlob' } | Out-Null
 
           # 8. DO NOT commit. Leaves submission as draft in Partner Center.
-          Write-Host "Submission $submissionId uploaded with release notes. NOT committed."
+          Write-Host "Submission $submissionId uploaded with $($msixFiles.Count) packages. NOT committed."
           Write-Host "Review and submit manually in Partner Center."
 
   apple-publish:

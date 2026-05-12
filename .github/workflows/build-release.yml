@@ -482,10 +482,35 @@ jobs:
       # Pack StoryCADLib as a NuGet on Windows x64 only — Windows builds both
       # net10.0-desktop and net10.0-windows10.0.22621, so the package covers
       # both heads. IsPackable=true overrides Uno.Sdk's default for single-project libs.
+      # TargetFrameworks is pinned explicitly so a future csproj edit can't silently
+      # drop a TFM from the published package.
       - name: Pack StoryCADLib NuGet
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
         shell: pwsh
-        run: dotnet pack StoryCADLib/StoryCADLib.csproj -c Release -p:IsPackable=true -o "${{ github.workspace }}\nupkg"
+        run: dotnet pack StoryCADLib/StoryCADLib.csproj -c Release -p:IsPackable=true "-p:TargetFrameworks=net10.0-desktop;net10.0-windows10.0.22621" -o "${{ github.workspace }}\nupkg"
+
+      # Fail loudly if either TFM is missing from the package — protects the release
+      # contract for consumers like the API-Samples Outliner.
+      - name: Verify NuGet contains both TFMs
+        if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
+        shell: pwsh
+        run: |
+          $nupkg = Get-ChildItem "${{ github.workspace }}\nupkg\StoryCADLib.*.nupkg" | Select-Object -First 1
+          if (-not $nupkg) { throw "No StoryCADLib nupkg produced." }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [System.IO.Compression.ZipFile]::OpenRead($nupkg.FullName)
+          try {
+            $libs = $zip.Entries | Where-Object { $_.FullName -like 'lib/*' } |
+              ForEach-Object { ($_.FullName -split '/')[1] } | Sort-Object -Unique
+          } finally { $zip.Dispose() }
+          Write-Host "Package: $($nupkg.Name)"
+          Write-Host "lib/ TFMs: $($libs -join ', ')"
+          # Prefix-match: NuGet normalizes 'net10.0-desktop' to 'net10.0-desktop1.0'
+          # and could change Windows TPV in future. Match the family, not the exact folder.
+          $hasDesktop = $libs | Where-Object { $_ -like 'net10.0-desktop*' }
+          $hasWindows = $libs | Where-Object { $_ -like 'net10.0-windows*' }
+          if (-not $hasDesktop) { throw "nupkg is missing the net10.0-desktop TFM." }
+          if (-not $hasWindows) { throw "nupkg is missing the net10.0-windows TFM." }
 
       - name: Upload NuGet (Windows x64)
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
@@ -516,6 +541,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write   # required for `gh workflow run` to dispatch store-publish.yml
     steps:
       - name: Decode changelog
         id: changelog
@@ -542,7 +568,20 @@ jobs:
             storycad-msix-win-x86/storycad-msix-win-x86.zip
             storycad-osx-arm64/storycad-osx-arm64.pkg
             storycad-nupkg/*.nupkg
+          fail_on_unmatched_files: true
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # workflow_dispatch is an explicit exception to the GITHUB_TOKEN
+      # "no downstream triggers" rule, so this fires store-publish.yml even
+      # though we authenticate with GITHUB_TOKEN.
+      - name: Trigger store publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run store-publish.yml \
+            --repo ${{ github.repository }} \
+            --ref ${{ github.ref_name }} \
+            -f tag=${{ needs.build.outputs.tag_version }}
