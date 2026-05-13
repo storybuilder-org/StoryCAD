@@ -479,18 +479,15 @@ jobs:
           path: storycad-msix-${{ matrix.art }}.zip
           if-no-files-found: error
 
-      # Pack StoryCADLib as a NuGet on Windows x64 only — Windows builds both
-      # net10.0-desktop and net10.0-windows10.0.22621, so the package covers
-      # both heads. IsPackable=true overrides Uno.Sdk's default for single-project libs.
-      # TargetFrameworks is pinned explicitly so a future csproj edit can't silently
-      # drop a TFM from the published package.
+      # Pack StoryCADLib as a NuGet on Windows x64 only — the csproj already
+      # multi-targets net10.0-desktop + net10.0-windows10.0.22621 on Windows.
+      # We don't pass -p:TargetFrameworks: `dotnet pack` mistakenly applies it
+      # to the singular TargetFramework too, tripping NETSDK1046. The verify
+      # step below is the regression guard if the csproj is ever changed.
       - name: Pack StoryCADLib NuGet
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
         shell: pwsh
-        # %3B is MSBuild's escape for ';' inside a property value. Plain ';' gets
-        # parsed by the pwsh runner as an argument boundary, leaving MSBuild with
-        # `net10.0-windows10.0.22621` as a standalone switch → MSB1006.
-        run: dotnet pack StoryCADLib/StoryCADLib.csproj -c Release -p:IsPackable=true -p:TargetFrameworks=net10.0-desktop%3Bnet10.0-windows10.0.22621 -o "${{ github.workspace }}\nupkg"
+        run: dotnet pack StoryCADLib/StoryCADLib.csproj -c Release -p:IsPackable=true -o "${{ github.workspace }}\nupkg"
 
       # Fail loudly if either TFM is missing from the package — protects the release
       # contract for consumers like the API-Samples Outliner.
