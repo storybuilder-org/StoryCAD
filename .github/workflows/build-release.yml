@@ -487,7 +487,10 @@ jobs:
       - name: Pack StoryCADLib NuGet
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
         shell: pwsh
-        run: dotnet pack StoryCADLib/StoryCADLib.csproj -c Release -p:IsPackable=true "-p:TargetFrameworks=net10.0-desktop;net10.0-windows10.0.22621" -o "${{ github.workspace }}\nupkg"
+        # %3B is MSBuild's escape for ';' inside a property value. Plain ';' gets
+        # parsed by the pwsh runner as an argument boundary, leaving MSBuild with
+        # `net10.0-windows10.0.22621` as a standalone switch → MSB1006.
+        run: dotnet pack StoryCADLib/StoryCADLib.csproj -c Release -p:IsPackable=true -p:TargetFrameworks=net10.0-desktop%3Bnet10.0-windows10.0.22621 -o "${{ github.workspace }}\nupkg"
 
       # Fail loudly if either TFM is missing from the package — protects the release
       # contract for consumers like the API-Samples Outliner.
