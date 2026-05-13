@@ -16,6 +16,7 @@
     <Description>Core library for StoryCAD, the outline creation and manipulation tool for fiction writers.</Description>
     <PackageProjectUrl>https://github.com/storybuilder-org/StoryCAD</PackageProjectUrl>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <!--
       UnoFeatures let's you quickly add and manage implicit package references based on the features you want to use.
       https://aka.platform.uno/singleproject-features
@@ -50,6 +51,9 @@
   <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
     <TargetFrameworks>net10.0-desktop</TargetFrameworks>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SemanticKernel" />
     <PackageReference Include="Microsoft.SemanticKernel.Abstractions" />
