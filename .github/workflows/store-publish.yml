@@ -231,9 +231,63 @@ jobs:
             throw "Blob upload returned non-success status: $($blobResp.StatusCode)"
           }
 
-          # 8. DO NOT commit. Leaves submission as draft in Partner Center.
-          Write-Host "Submission $submissionId uploaded with $($msixFiles.Count) packages. NOT committed."
-          Write-Host "Review and submit manually in Partner Center."
+          # 8. Commit the submission. The legacy v1 API has no "parse but don't
+          #    submit" state — without commit, the uploaded zip is never
+          #    ingested and the Partner Center UI keeps showing the previously
+          #    published packages. Commit kicks off real certification; you can
+          #    still withdraw from Partner Center before publication.
+          Write-Host "Committing submission $submissionId..."
+          try {
+            Invoke-RestMethod -Method Post -Uri "$base/submissions/$submissionId/commit" `
+              -Headers $headers | Out-Null
+          } catch {
+            $resp = $_.Exception.Response
+            if ($resp) {
+              $reader = [System.IO.StreamReader]::new($resp.GetResponseStream())
+              Write-Host "Commit failed with $($resp.StatusCode):"
+              Write-Host ($reader.ReadToEnd())
+            }
+            throw
+          }
+
+          # 9. Poll status until we either pass CommitStarted (success) or hit
+          #    a *Failed terminal. Don't wait for full certification — that
+          #    can take hours/days. Pre-processing surfaces package-level
+          #    rejects within minutes, which is the thing worth gating on.
+          $statusUri = "$base/submissions/$submissionId/status"
+          $deadline = (Get-Date).AddMinutes(10)
+          $passStates = @('PreProcessing', 'Certification', 'Release',
+                          'PendingPublication', 'Publishing', 'Published')
+          $failStates = @('CommitFailed', 'PreProcessingFailed',
+                          'CertificationFailed', 'ReleaseFailed',
+                          'PublishFailed', 'Canceled')
+          $lastStatus = ''
+          while ((Get-Date) -lt $deadline) {
+            $st = Invoke-RestMethod -Uri $statusUri -Headers $headers
+            $cur = $st.status
+            if ($cur -ne $lastStatus) {
+              Write-Host "Submission status: $cur"
+              $lastStatus = $cur
+            }
+            if ($failStates -contains $cur) {
+              if ($st.statusDetails) {
+                $errs = @($st.statusDetails.errors)
+                if ($errs.Count) {
+                  Write-Host "statusDetails.errors:"
+                  $errs | ForEach-Object { Write-Host "  [$($_.code)] $($_.details)" }
+                }
+              }
+              throw "Submission entered terminal state $cur."
+            }
+            if ($passStates -contains $cur) { break }
+            Start-Sleep -Seconds 15
+          }
+          if ($passStates -notcontains $lastStatus) {
+            Write-Host "::warning::Submission still in '$lastStatus' after 10 minutes. Check Partner Center."
+          }
+
+          Write-Host "Submission $submissionId committed. Final observed status: $lastStatus."
+          Write-Host "Track the rest of certification in Partner Center."
 
   apple-publish:
     if: github.event_name == 'release' || inputs.publish_appstore
@@ -320,8 +374,11 @@ jobs:
           APPLE_APP_ID: ${{ secrets.APPLE_APP_ID }}
           TAG: ${{ steps.tag.outputs.tag }}
         run: |
-          python3 -m pip install --quiet pyjwt cryptography requests
-          python3 <<'PY'
+          # macos-15 runners enforce PEP 668: system Python refuses pip install.
+          # Use a throwaway venv instead of --break-system-packages.
+          python3 -m venv "$RUNNER_TEMP/asc-venv"
+          "$RUNNER_TEMP/asc-venv/bin/pip" install --quiet pyjwt cryptography requests
+          "$RUNNER_TEMP/asc-venv/bin/python" <<'PY'
           import jwt, os, sys, time, pathlib, requests
 
           key_id = os.environ['KEY_ID']
