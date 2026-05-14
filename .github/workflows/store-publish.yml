@@ -9,6 +9,21 @@ on:
         description: "Release tag to publish (e.g. v4.0.0)"
         required: true
         type: string
+      publish_msstore:
+        description: "Publish to Microsoft Store"
+        required: false
+        type: boolean
+        default: true
+      publish_appstore:
+        description: "Publish to Apple App Store"
+        required: false
+        type: boolean
+        default: true
+      publish_nuget:
+        description: "Publish to NuGet"
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -19,13 +34,14 @@ concurrency:
 
 jobs:
   microsoft-publish:
+    if: github.event_name == 'release' || inputs.publish_msstore
     runs-on: ubuntu-latest
     env:
       MS_APP_ID: 9PLBNHZV1XM2
     steps:
       - name: Resolve tag
         id: tag
-        run: echo "tag=${{ github.event.release.tag_name || github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+        run: echo "tag=${{ github.event.release.tag_name || inputs.tag }}" >> $GITHUB_OUTPUT
 
       - name: Download MSIX zips from release (all 3 archs)
         env:
@@ -59,7 +75,7 @@ jobs:
         id: changelog
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
         shell: pwsh
         run: |
           $notes = gh release view $env:TAG --repo $env:GITHUB_REPOSITORY --json body --jq .body
@@ -118,42 +134,114 @@ jobs:
             $submission.listings.$locale.baseListing.releaseNotes = $changelog
           }
 
-          # 5. Mark existing packages for deletion, add one entry per architecture
+          # 5. Mark existing packages for deletion, add one entry per architecture.
+          #    Build new entries as [pscustomobject] (not [ordered]@{}) so the
+          #    resulting applicationPackages array is homogeneous PSCustomObject —
+          #    ConvertTo-Json was previously dropping shape from mixed types and
+          #    the API silently kept the cloned package list.
           foreach ($pkg in $submission.applicationPackages) {
             $pkg.fileStatus = 'PendingDelete'
           }
-          $newPkgs = @()
-          foreach ($msix in $msixFiles) {
-            $newPkgs += [ordered]@{
+          $newPkgs = foreach ($msix in $msixFiles) {
+            [pscustomobject]@{
               fileName              = $msix.Name
               fileStatus            = 'PendingUpload'
               minimumDirectXVersion = 'None'
               minimumSystemRam      = 'None'
             }
           }
-          $submission.applicationPackages = @($submission.applicationPackages) + $newPkgs
+          $submission.applicationPackages = @($submission.applicationPackages) + @($newPkgs)
 
-          # 6. PUT the updated submission
+          Write-Host "applicationPackages payload before PUT:"
+          $submission.applicationPackages |
+            Select-Object fileName, fileStatus |
+            Format-Table | Out-String | Write-Host
+
+          # 6. PUT the updated submission. Capture the response so we can see
+          #    statusDetails / errors instead of swallowing them with Out-Null.
           $body = $submission | ConvertTo-Json -Depth 20
-          Invoke-RestMethod -Method Put -Uri "$base/submissions/$submissionId" -Headers $headers -Body $body | Out-Null
+          try {
+            $putResp = Invoke-RestMethod -Method Put -Uri "$base/submissions/$submissionId" `
+              -Headers $headers -ContentType 'application/json' -Body $body
+          } catch {
+            $resp = $_.Exception.Response
+            if ($resp) {
+              $reader = [System.IO.StreamReader]::new($resp.GetResponseStream())
+              $errBody = $reader.ReadToEnd()
+              # Body is API JSON describing the field error — no token in there.
+              Write-Host "PUT failed with $($resp.StatusCode):"
+              Write-Host $errBody
+            }
+            throw
+          }
 
-          # 7. Bundle all 3 msix files into one zip, upload to Azure Blob SAS URL
+          if ($putResp.statusDetails) {
+            $errs = @($putResp.statusDetails.errors)
+            $warns = @($putResp.statusDetails.warnings)
+            if ($errs.Count) {
+              Write-Host "PUT returned $($errs.Count) error(s):"
+              $errs | ForEach-Object { Write-Host "  [$($_.code)] $($_.details)" }
+              throw "Submission PUT reported errors. Refusing to upload zip."
+            }
+            if ($warns.Count) {
+              Write-Host "PUT returned $($warns.Count) warning(s):"
+              $warns | ForEach-Object { Write-Host "  [$($_.code)] $($_.details)" }
+            }
+          }
+
+          # 6b. Verify the API actually persisted our package changes before we
+          #     bother uploading the zip. If the PendingUpload entries aren't
+          #     present, the SAS upload has nothing to attach to.
+          $verify = Invoke-RestMethod -Uri "$base/submissions/$submissionId" -Headers $headers
+          $expected = $msixFiles | ForEach-Object { $_.Name } | Sort-Object
+          $pending = @($verify.applicationPackages |
+            Where-Object { $_.fileStatus -eq 'PendingUpload' } |
+            ForEach-Object { $_.fileName } | Sort-Object)
+
+          Write-Host "Server-side applicationPackages after PUT:"
+          $verify.applicationPackages |
+            Select-Object fileName, fileStatus |
+            Format-Table | Out-String | Write-Host
+
+          $missing = $expected | Where-Object { $pending -notcontains $_ }
+          if ($missing) {
+            throw "Submission did not register PendingUpload entries for: $($missing -join ', ')"
+          }
+
+          # 7. Bundle all 3 msix files into one zip, upload to Azure Blob SAS URL.
+          #    fileUploadUrl is a SAS URL — never log it.
           $zipPath = Join-Path $env:RUNNER_TEMP 'submission.zip'
           if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
           Compress-Archive -Path $msixFiles.FullName -DestinationPath $zipPath
-          Invoke-WebRequest -Method Put -Uri $fileUploadUrl -InFile $zipPath `
-            -Headers @{ 'x-ms-blob-type' = 'BlockBlob' } | Out-Null
+          $zipBytes = (Get-Item $zipPath).Length
+          Write-Host "Uploading submission.zip ($zipBytes bytes) to Azure Blob SAS URL"
+
+          try {
+            $blobResp = Invoke-WebRequest -Method Put -Uri $fileUploadUrl -InFile $zipPath `
+              -Headers @{ 'x-ms-blob-type' = 'BlockBlob' } -UseBasicParsing
+          } catch {
+            $resp = $_.Exception.Response
+            if ($resp) {
+              Write-Host "Blob upload failed with $($resp.StatusCode)."
+            }
+            throw
+          }
+          Write-Host "Blob upload returned HTTP $($blobResp.StatusCode)."
+          if ($blobResp.StatusCode -lt 200 -or $blobResp.StatusCode -ge 300) {
+            throw "Blob upload returned non-success status: $($blobResp.StatusCode)"
+          }
 
           # 8. DO NOT commit. Leaves submission as draft in Partner Center.
           Write-Host "Submission $submissionId uploaded with $($msixFiles.Count) packages. NOT committed."
           Write-Host "Review and submit manually in Partner Center."
 
   apple-publish:
+    if: github.event_name == 'release' || inputs.publish_appstore
     runs-on: macos-latest
     steps:
       - name: Resolve tag
         id: tag
-        run: echo "tag=${{ github.event.release.tag_name || github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+        run: echo "tag=${{ github.event.release.tag_name || inputs.tag }}" >> $GITHUB_OUTPUT
 
       - name: Download PKG from release
         env:
@@ -190,6 +278,26 @@ jobs:
           mv changelog.trimmed.txt changelog.txt
           echo "Changelog length: $(wc -c < changelog.txt) chars"
 
+      - name: Extract bundle versions from PKG
+        id: pkgver
+        run: |
+          set -euo pipefail
+          # PKGs are xar archives. Expand, then read the .app's Info.plist so
+          # the values we pass to altool match exactly what's signed inside.
+          rm -rf pkg-expanded
+          pkgutil --expand-full storycad-osx-arm64.pkg pkg-expanded
+          PLIST=$(find pkg-expanded -path '*/StoryCAD.app/Contents/Info.plist' -print -quit)
+          if [ -z "$PLIST" ]; then
+            echo "::error::Could not locate StoryCAD.app/Contents/Info.plist inside pkg" >&2
+            exit 1
+          fi
+          SHORT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST")
+          BUNDLE=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST")
+          echo "short=$SHORT" >> $GITHUB_OUTPUT
+          echo "bundle=$BUNDLE" >> $GITHUB_OUTPUT
+          echo "CFBundleShortVersionString=$SHORT  CFBundleVersion=$BUNDLE"
+          rm -rf pkg-expanded
+
       - name: Upload to App Store Connect
         env:
           KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
@@ -200,6 +308,8 @@ jobs:
             --type macos \
             --apple-id "$APPLE_APP_ID" \
             --bundle-id com.storybuilder.storycad \
+            --bundle-short-version-string "${{ steps.pkgver.outputs.short }}" \
+            --bundle-version "${{ steps.pkgver.outputs.bundle }}" \
             --apiKey "$KEY_ID" \
             --apiIssuer "$ISSUER_ID"
 
@@ -285,11 +395,12 @@ jobs:
         run: rm -f ~/.appstoreconnect/private_keys/AuthKey_*.p8
 
   nuget-publish:
+    if: github.event_name == 'release' || inputs.publish_nuget
     runs-on: ubuntu-latest
     steps:
       - name: Resolve tag
         id: tag
-        run: echo "tag=${{ github.event.release.tag_name || github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+        run: echo "tag=${{ github.event.release.tag_name || inputs.tag }}" >> $GITHUB_OUTPUT
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
