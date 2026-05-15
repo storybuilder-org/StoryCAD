@@ -18,19 +18,18 @@ and suspenseful plots, and settings that appeal to the senses.
 	<img src="/.github/msbadge.svg" width="200"/>
 </a>
 <a href="[https://apps.apple.com/app/id<YOUR_APP_ID>](https://apps.apple.com/gb/app/storycad/id6756433272)">
-  <img src="./assets/mac.svg" alt="Download on the Mac App Store" height="50">
+  <img src="/.github/mac.png" alt="Download on the Mac App Store" height="50">
 </a>
 
 ## Built With
 
-* [WinUI 3][1]
-* [Windows App SDK][2]
+* [UNO Platform](https://platform.uno/)
 * [Windows Community Toolkit][3]
 * [elmah.io][4]
 * [NRtfTree][5] (maintained separately with asynchronous IO support)
 * [Scrivener][6]
 
-UNO Frameword is the UI Framework for StoryCAD and is [open-source](https://github.com/unoplatform/uno)
+UNO Framework is the UI Framework for StoryCAD and is [open-source](https://github.com/unoplatform/uno)
 
 Windows Community Toolkit is available under the [MIT License][14].
 
@@ -114,7 +113,7 @@ We are most grateful for all of them especially those who toil in the arena:
 [22]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/PRIVACY_POLICY.TXT
 [23]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/LICENSE.TXT
 [24]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/ROADMAP.md
-[25]:https://manual.storybuilder.org/docs/For%20Developers/CHANGELOG.html
+[25]:https://manual.storybuilder.org/docs/For%20Developers/Changelog.html
 [26]:https://StoryBuilder.org/
 [27]:https://apps.microsoft.com/store/detail/StoryCAD/9PLBNHZV1XM2?hl=en-us&gl=us
 [28]:https://www.youtube.com/watch?v=Oi7G9TEKsro
