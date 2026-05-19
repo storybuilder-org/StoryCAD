@@ -803,6 +803,10 @@ public class ShellViewModel : ObservableRecipient
             IsPaneOpen = !nowStacked;
             IsStacked = nowStacked;
         }
+        else if (IsStacked && IsPaneOpen)
+        {
+            OpenPaneLength = width;
+        }
     }
 
     /// <summary>

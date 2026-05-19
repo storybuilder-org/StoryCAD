@@ -1776,5 +1776,44 @@ public class ShellViewModelTests
         Assert.IsFalse(displayModeChanged, "Wide-to-wide resize must not re-set DisplayMode");
     }
 
+    [TestMethod]
+    public void HandleSizeChanged_WhenStackedAndPaneOpen_TracksPaneToNewWidth()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(1200);
+        shell.HandleSizeChanged(700);
+        shell.IsPaneOpen = true;
+
+        shell.HandleSizeChanged(500);
+
+        Assert.AreEqual(500, shell.OpenPaneLength, "OpenPaneLength must track the new window width while stacked with pane open");
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_WhenStackedAndPaneClosed_DoesNotChangePaneLength()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(1200);
+        shell.HandleSizeChanged(700);
+        shell.IsPaneOpen = false;
+        var lengthBefore = shell.OpenPaneLength;
+
+        shell.HandleSizeChanged(500);
+
+        Assert.AreEqual(lengthBefore, shell.OpenPaneLength, "OpenPaneLength must not change while stacked with pane closed");
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_WhenWide_DoesNotApplyStackedSizing()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(600);
+        shell.HandleSizeChanged(1200);
+
+        shell.HandleSizeChanged(1500);
+
+        Assert.AreNotEqual(1500, shell.OpenPaneLength, "Wide resize must not apply the full-width stacked rule");
+    }
+
     #endregion
 }
