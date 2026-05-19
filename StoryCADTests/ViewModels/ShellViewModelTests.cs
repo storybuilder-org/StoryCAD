@@ -1708,6 +1708,7 @@ public class ShellViewModelTests
     public void HandleSizeChanged_WidthAbove800_DisplayModeIsInline()
     {
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(600);
         shell.HandleSizeChanged(1200);
         Assert.AreEqual(Microsoft.UI.Xaml.Controls.SplitViewDisplayMode.Inline, shell.DisplayMode);
     }
@@ -1716,6 +1717,7 @@ public class ShellViewModelTests
     public void HandleSizeChanged_WidthBelow800_DisplayModeIsOverlay()
     {
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(1200);
         shell.HandleSizeChanged(600);
         Assert.AreEqual(Microsoft.UI.Xaml.Controls.SplitViewDisplayMode.Overlay, shell.DisplayMode);
     }
@@ -1724,6 +1726,7 @@ public class ShellViewModelTests
     public void HandleSizeChanged_WidthAbove800_OpenPaneLengthIsThirtyPercent()
     {
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(600);
         shell.HandleSizeChanged(1200);
         Assert.AreEqual(360, shell.OpenPaneLength);
     }
@@ -1732,8 +1735,45 @@ public class ShellViewModelTests
     public void HandleSizeChanged_WidthBelow800_OpenPaneLengthIsWidth()
     {
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(1200);
         shell.HandleSizeChanged(600);
         Assert.AreEqual(600, shell.OpenPaneLength);
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_NarrowToNarrow_DoesNotRaiseDisplayModeChanged()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(600);
+
+        var displayModeChanged = false;
+        shell.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(shell.DisplayMode))
+                displayModeChanged = true;
+        };
+
+        shell.HandleSizeChanged(500);
+
+        Assert.IsFalse(displayModeChanged, "Narrow-to-narrow resize must not re-set DisplayMode");
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_WideToWide_DoesNotRaiseDisplayModeChanged()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(1200);
+
+        var displayModeChanged = false;
+        shell.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(shell.DisplayMode))
+                displayModeChanged = true;
+        };
+
+        shell.HandleSizeChanged(1500);
+
+        Assert.IsFalse(displayModeChanged, "Wide-to-wide resize must not re-set DisplayMode");
     }
 
     #endregion

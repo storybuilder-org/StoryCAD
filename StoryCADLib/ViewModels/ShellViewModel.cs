@@ -796,11 +796,10 @@ public class ShellViewModel : ObservableRecipient
     {
         var nowStacked = width < 800;
 
-        OpenPaneLength = nowStacked ? width : Math.Max(200, width * 0.3);
-        DisplayMode = nowStacked ? SplitViewDisplayMode.Overlay : SplitViewDisplayMode.Inline;
-
         if (nowStacked != IsStacked)
         {
+            OpenPaneLength = nowStacked ? width : Math.Max(200, width * 0.3);
+            DisplayMode = nowStacked ? SplitViewDisplayMode.Overlay : SplitViewDisplayMode.Inline;
             IsPaneOpen = !nowStacked;
             IsStacked = nowStacked;
         }
