@@ -114,7 +114,46 @@
 
 ---
 
-## WINDOW MANAGEMENT RESULT: _____ / 5 Passed
+### WM-006: Hamburger Button and Stacked Mode at Narrow Width
+**Priority:** High
+**Time:** ~3 minutes
+
+**Steps:**
+1. Start with window wider than 800px
+   **Expected:** Navigation Pane and Content Pane visible side-by-side
+
+2. Click the hamburger button (three-line icon, left of command bar)
+   **Expected:** Navigation Pane hides; Content Pane widens
+
+3. Click the hamburger button again
+   **Expected:** Navigation Pane reappears; side-by-side restored
+
+4. Drag window narrower than 800px
+   **Expected:** Layout switches to stacked mode; only Content Pane visible (Navigation Pane hidden, not squeezed side-by-side)
+
+5. Click the hamburger button
+   **Expected:** Navigation Pane appears full-width; Content Pane hidden
+
+6. Click any node in the Navigation Pane
+   **Expected:** Navigation works as in wide mode
+
+7. Click the hamburger button again
+   **Expected:** Returns to Content-only view (not side-by-side)
+
+8. While still narrow, open the Navigation Pane via the hamburger, then drag the window slightly narrower (still < 800px)
+   **Expected:** Navigation Pane stays open across the resize
+
+9. Drag the window back to wider than 800px
+   **Expected:** Side-by-side restored; pane reopens
+
+10. On a rotatable device (e.g. HP Spectre), rotate the display to portrait
+    **Expected:** If window auto-resizes below 800px, stacked mode engages; if window retains landscape width, stacked mode does not engage (known follow-up to #1411)
+
+**Pass/Fail:** ______
+
+---
+
+## WINDOW MANAGEMENT RESULT: _____ / 6 Passed
 
 **Critical Issues**: ________________
 

@@ -156,28 +156,21 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Responsive Layout: Adapt SplitView based on window width -->
+        <!-- Issue #1411: SplitView layout (DisplayMode, OpenPaneLength, IsPaneOpen)
+             is now VM-driven via ShellViewModel.HandleSizeChanged. The VSM kept
+             here only flips CommandBar.OverflowButtonVisibility on narrow widths. -->
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
-                <!-- Wide layout: side-by-side (800px and above) -->
                 <VisualState x:Name="WideState">
                     <VisualState.StateTriggers>
                         <AdaptiveTrigger MinWindowWidth="800" />
                     </VisualState.StateTriggers>
-                    <VisualState.Setters>
-                        <Setter Target="ShellSplitView.DisplayMode" Value="Inline" />
-                        <Setter Target="ShellSplitView.IsPaneOpen" Value="True" />
-                    </VisualState.Setters>
                 </VisualState>
-                <!-- Narrow layout: overlay full-width (below 800px) -->
                 <VisualState x:Name="NarrowState">
                     <VisualState.StateTriggers>
                         <AdaptiveTrigger MinWindowWidth="0" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <Setter Target="ShellSplitView.DisplayMode" Value="Overlay" />
-                        <Setter Target="ShellSplitView.IsPaneOpen" Value="False" />
-                        <Setter Target="ShellSplitView.OpenPaneLength" Value="2000" />
                         <Setter Target="ShellCommandBar.OverflowButtonVisibility" Value="Auto" />
                     </VisualState.Setters>
                 </VisualState>
@@ -433,7 +426,8 @@
         <!-- SplitView: Navigation Tree and Story Element Pages -->
         <SplitView x:Name="ShellSplitView" Grid.Row="1" IsPaneOpen="{x:Bind ShellVm.IsPaneOpen, Mode=TwoWay}"
                    VerticalAlignment="Stretch"
-                   DisplayMode="Inline"
+                   DisplayMode="{x:Bind ShellVm.DisplayMode, Mode=OneWay}"
+                   OpenPaneLength="{x:Bind ShellVm.OpenPaneLength, Mode=OneWay}"
                    FontFamily="Segoe UI">
             <!-- Nav tree -->
             <SplitView.Pane>

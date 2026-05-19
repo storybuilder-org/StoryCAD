@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI;
+using Microsoft.UI.Xaml.Controls;
 using StoryCADLib.DAL;
 using StoryCADLib.Services;
 using StoryCADLib.Services.Backup;
@@ -449,6 +450,29 @@ public class ShellViewModel : ObservableRecipient
         set => SetProperty(ref _isPaneOpen, value);
     }
 
+    // Issue #1411: VM-driven responsive layout. See HandleSizeChanged.
+
+    private bool _isStacked;
+    internal bool IsStacked
+    {
+        get => _isStacked;
+        private set => SetProperty(ref _isStacked, value);
+    }
+
+    private SplitViewDisplayMode _displayMode = SplitViewDisplayMode.Inline;
+    public SplitViewDisplayMode DisplayMode
+    {
+        get => _displayMode;
+        private set => SetProperty(ref _displayMode, value);
+    }
+
+    private double _openPaneLength = 300;
+    public double OpenPaneLength
+    {
+        get => _openPaneLength;
+        private set => SetProperty(ref _openPaneLength, value);
+    }
+
 
     private Visibility _explorerVisibility;
 
@@ -760,6 +784,26 @@ public class ShellViewModel : ObservableRecipient
     {
         Logger.Log(LogLevel.Trace, $"TogglePane from {IsPaneOpen} to {!IsPaneOpen}");
         IsPaneOpen = !IsPaneOpen;
+    }
+
+    /// <summary>
+    ///     Issue #1411. Responsive-layout decision for the SplitView panes.
+    ///     Called by Shell code-behind from SizeChanged. Owns DisplayMode,
+    ///     OpenPaneLength, and the wide↔narrow IsPaneOpen transition guard
+    ///     so the SplitView no longer fights its TwoWay binding to IsPaneOpen.
+    /// </summary>
+    internal void HandleSizeChanged(double width)
+    {
+        var nowStacked = width < 800;
+
+        OpenPaneLength = nowStacked ? width : Math.Max(200, width * 0.3);
+        DisplayMode = nowStacked ? SplitViewDisplayMode.Overlay : SplitViewDisplayMode.Inline;
+
+        if (nowStacked != IsStacked)
+        {
+            IsPaneOpen = !nowStacked;
+            IsStacked = nowStacked;
+        }
     }
 
     /// <summary>
