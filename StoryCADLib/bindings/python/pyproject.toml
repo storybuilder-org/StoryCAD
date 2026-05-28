@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling>=1.21", "pefile>=2023.2.7"]
+requires = ["hatchling>=1.27", "pefile>=2023.2.7"]
 build-backend = "hatchling.build"
 
 [project]
@@ -7,12 +7,17 @@ name = "storycad"
 dynamic = ["version", "description", "authors"]
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "GPL-3.0-or-later" }
+# SPDX expression captures the base license. GPLv3 §7 additional permissions
+# (Collaborator module exception, App Store distribution) live in
+# ADDITIONAL-LICENSE-PERMISSIONS.TXT — both files are bundled in the wheel
+# via license-files below. SPDX has no expression form for our §7 carve-out,
+# so the file is the source of truth.
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE.TXT", "ADDITIONAL-LICENSE-PERMISSIONS.TXT"]
 keywords = ["storycad", "writing", "outline", "story", "pythonnet"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
@@ -49,6 +54,9 @@ path = "hatch_build.py"
 include = [
     "storycad/**/*.py",
     "_meta.py",
+    "hatch_build.py",
     "README.md",
     "pyproject.toml",
+    "LICENSE.TXT",
+    "ADDITIONAL-LICENSE-PERMISSIONS.TXT",
 ]

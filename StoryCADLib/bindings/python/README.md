@@ -14,8 +14,8 @@ The wheel bundles a published build of `StoryCADLib` under
 
 - Python 3.10+
 - .NET 10 runtime installed on the host (https://dotnet.microsoft.com/download)
-- A wheel matching your platform (wheels are platform-specific: macOS arm64,
-  macOS x64, Linux x64, Linux arm64, …)
+- A wheel matching your platform. Wheels are platform-specific; CI builds:
+  Linux x64, Linux arm64, macOS arm64, Windows x64.
 
 ## Install
 

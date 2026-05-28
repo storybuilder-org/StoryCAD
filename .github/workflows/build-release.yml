@@ -535,8 +535,79 @@ jobs:
           security delete-keychain $RUNNER_TEMP/app-signing.keychain-db 2>/dev/null || true
           rm -f $RUNNER_TEMP/storycad.provisionprofile
 
+  # Python wheels: build, run pytest, upload. Runs on every push/PR/dispatch
+  # (matrix scoped per trigger — see below) so a broken binding or csproj
+  # change surfaces immediately, not weeks later at release time. The
+  # `release` job downloads these artifacts and attaches them to the GitHub
+  # Release when one is being cut.
+  python-wheels:
+    strategy:
+      fail-fast: false
+      # Push and PR runs only smoke-test on linux-x64 — the binding code is
+      # shared Python and the .NET publish is the same incantation per RID,
+      # so platform-specific wheel breakage is rare and best caught at
+      # dispatch/release time. Workflow_dispatch (release or otherwise) gets
+      # the full 4-platform matrix so a release dispatch fails loud if any
+      # platform's wheel can't build.
+      matrix:
+        include: ${{ fromJSON((github.event_name == 'push' || github.event_name == 'pull_request') && '[{"os":"ubuntu-latest","rid":"linux-x64"}]' || '[{"os":"ubuntu-latest","rid":"linux-x64"},{"os":"ubuntu-24.04-arm","rid":"linux-arm64"},{"os":"macos-latest","rid":"osx-arm64"},{"os":"windows-latest","rid":"win-x64"}]') }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: StoryCADLib/bindings/python
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: "./global.json"
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            **/packages.lock.json
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python build tooling
+        run: python -m pip install --upgrade pip build "pytest>=7"
+
+      # Stamp the csproj version so the published DLL's FileVersion (which
+      # _meta.py reads into the wheel's `version` field) matches the release
+      # tag. Only runs when an actual release is being cut — push/PR wheels
+      # keep the committed csproj version and never reach PyPI.
+      - name: Set version
+        if: github.event_name == 'workflow_dispatch' && !inputs.skip_release
+        working-directory: ${{ github.workspace }}
+        shell: bash
+        run: |
+          V="${{ inputs.version }}"
+          pwsh ./scripts/Set-Version.ps1 -Version "${V#v}"
+
+      - name: Build wheel
+        env:
+          PYTHON: python
+        run: ./build-wheel.sh
+
+      # The staged runtime/ doubles as the DLL search path for the tests.
+      - name: Run tests
+        env:
+          STORYCAD_DLL_PATH: ${{ github.workspace }}/StoryCADLib/bindings/python/storycad/runtime
+        run: python -m pytest tests/test_pure.py tests/test_api.py -v
+
+      - name: Upload wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: storycad-pypi-wheel-${{ matrix.rid }}
+          path: StoryCADLib/bindings/python/dist/*.whl
+          if-no-files-found: error
+
   release:
-    needs: [build, generate-changelog]
+    needs: [build, python-wheels, generate-changelog]
     if: github.event_name == 'workflow_dispatch' && !inputs.skip_release
     runs-on: ubuntu-latest
     permissions:
@@ -568,6 +639,7 @@ jobs:
             storycad-msix-win-x86/storycad-msix-win-x86.zip
             storycad-osx-arm64/storycad-osx-arm64.pkg
             storycad-nupkg/*.nupkg
+            storycad-pypi-wheel-*/*.whl
           fail_on_unmatched_files: true
           draft: false
           prerelease: false

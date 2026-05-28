@@ -24,6 +24,11 @@ on:
         required: false
         type: boolean
         default: true
+      publish_pypi:
+        description: "Publish Python wheels to PyPI"
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -482,3 +487,47 @@ jobs:
             --source https://api.nuget.org/v3/index.json \
             --api-key "$NUGET_API_KEY" \
             --skip-duplicate
+
+  pypi-publish:
+    if: github.event_name == 'release' || inputs.publish_pypi
+    runs-on: ubuntu-latest
+    # Trusted Publishing (OIDC). Requires a one-time PyPI-side config: add
+    # a pending publisher under the `storycad` project pointing at
+    # storybuilder-org/StoryCAD, workflow `store-publish.yml`, environment
+    # `pypi`. No secret needed once configured.
+    environment:
+      name: pypi
+      url: https://pypi.org/p/storycad
+    permissions:
+      contents: read
+      id-token: write   # OIDC token used by pypa/gh-action-pypi-publish
+    steps:
+      - name: Resolve tag
+        id: tag
+        run: echo "tag=${{ github.event.release.tag_name || inputs.tag }}" >> $GITHUB_OUTPUT
+
+      - name: Download wheels from release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          gh release download "${{ steps.tag.outputs.tag }}" \
+            --repo ${{ github.repository }} \
+            --pattern '*.whl' \
+            --dir dist
+          ls -la dist
+          # Sanity check: every CI-built platform should be present.
+          for rid in linux_x86_64 linux_aarch64 macosx_*_arm64 win_amd64; do
+            if ! ls dist/*-${rid}.whl >/dev/null 2>&1; then
+              echo "::warning::No wheel matching pattern *-${rid}.whl in release assets."
+            fi
+          done
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          # skip-existing lets re-runs of the same release no-op instead of failing
+          # if PyPI already has that version's wheels.
+          skip-existing: true

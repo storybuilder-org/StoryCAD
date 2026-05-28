@@ -32,7 +32,6 @@ __all__ = [
 # `pythonnet` / point at a publish dir before paying the cost.
 
 _BUNDLED_RUNTIME_DIR = Path(__file__).parent / "runtime"
-_DEV_FALLBACK_PUBLISH_DIR = Path("/Users/jake/Repos/StoryCAD/publish")
 
 _loaded = False
 _api_type = None
@@ -56,7 +55,6 @@ def _resolve_publish_dir(publish_dir: Path | None) -> Path:
     2. STORYCAD_DLL_PATH env var (file or directory; STORYCAD_PUBLISH_DIR
        is also honoured for backwards compatibility).
     3. Bundled runtime/ directory inside this package.
-    4. Dev fallback at /Users/jake/Repos/StoryCAD/publish.
     """
     tried: list[Path] = []
 
@@ -81,11 +79,6 @@ def _resolve_publish_dir(publish_dir: Path | None) -> Path:
     tried.append(bundled)
     if (bundled / "StoryCADLib.dll").exists():
         return bundled
-
-    dev = _DEV_FALLBACK_PUBLISH_DIR.resolve()
-    tried.append(dev)
-    if (dev / "StoryCADLib.dll").exists():
-        return dev
 
     paths = "\n  ".join(str(p) for p in tried)
     raise StoryCADError(
@@ -155,10 +148,19 @@ def _from_net_guid(g: Any) -> uuid.UUID | None:
 
 
 def _to_net_dict(d: dict[str, Any]) -> Any:
+    # Flat only: values are inserted as-is (no recursive marshaling). Nested
+    # dicts/lists will land as Python objects in the .NET dictionary, which
+    # the C# property setters won't know how to coerce.
     nd = _NetDict[_NetString, _NetObject]()
     for k, v in d.items():
         nd[k] = v
     return nd
+
+
+def _dict_from_net(d: Any) -> dict[str, Any]:
+    # Iterating a .NET Dictionary yields KeyValuePair objects, not (k, v)
+    # tuples, so access .Key/.Value explicitly rather than unpacking.
+    return {str(kv.Key): kv.Value for kv in d}
 
 
 # ─── dataclasses ────────────────────────────────────────────────────────────
@@ -301,11 +303,17 @@ class StoryCAD:
             "update_element_properties",
         )
 
-    def update_story_element(self, new_element: Any, guid: uuid.UUID) -> None:
-        # `new_element` is a JSON-serialized StoryElement string (or any object whose
-        # ToString() yields the JSON the C# side will deserialise).
+    def update_story_element(self, new_element: str | dict, guid: uuid.UUID) -> None:
+        # `new_element` is a JSON-serialized StoryElement string, or a dict that
+        # this method serialises for you. Anything else gets a confusing JSON
+        # parse error from C# (it calls .ToString() and tries to deserialise),
+        # so reject it up front.
         if isinstance(new_element, dict):
             new_element = json.dumps(new_element)
+        elif not isinstance(new_element, str):
+            raise TypeError(
+                f"update_story_element expects str or dict, got {type(new_element).__name__}"
+            )
         _unwrap(
             self._api.UpdateStoryElement(new_element, _to_net_guid(guid)),
             "update_story_element",
@@ -344,9 +352,9 @@ class StoryCAD:
     # ── search ────────────────────────────────────────────────────────────
     def search_for_text(self, search_text: str) -> list[dict[str, Any]]:
         raw = _unwrap(self._api.SearchForText(search_text), "search_for_text")
-        return [{str(k): v for k, v in d} for d in raw]
+        return [_dict_from_net(d) for d in raw]
 
-    # Alias for the C# name parity, since test.py used this name.
+    # Alias for parity with the C# `Search` name.
     search = search_for_text
 
     def search_for_references(self, target_uuid: uuid.UUID) -> list[dict[str, Any]]:
@@ -354,7 +362,7 @@ class StoryCAD:
             self._api.SearchForReferences(_to_net_guid(target_uuid)),
             "search_for_references",
         )
-        return [{str(k): v for k, v in d} for d in raw]
+        return [_dict_from_net(d) for d in raw]
 
     def remove_references(self, target_uuid: uuid.UUID) -> int:
         return int(_unwrap(self._api.RemoveReferences(_to_net_guid(target_uuid)), "remove_references"))
@@ -364,7 +372,7 @@ class StoryCAD:
             self._api.SearchInSubtree(_to_net_guid(root_node_guid), search_text),
             "search_in_subtree",
         )
-        return [{str(k): v for k, v in d} for d in raw]
+        return [_dict_from_net(d) for d in raw]
 
     # ── trash ─────────────────────────────────────────────────────────────
     def restore_from_trash(self, element_to_restore: uuid.UUID) -> None:
@@ -378,12 +386,19 @@ class StoryCAD:
 
     # ── collections ───────────────────────────────────────────────────────
     def add_collection_entry(self, element: uuid.UUID, property_name: str, entry: Any) -> int:
+        # A dict entry must be marshaled to a .NET Dictionary so the C# side
+        # can deserialize it into the collection's element type; scalar entries
+        # (e.g. a string for a List<string>) pass through unchanged.
+        if isinstance(entry, dict):
+            entry = _to_net_dict(entry)
         return int(_unwrap(
             self._api.AddCollectionEntry(_to_net_guid(element), property_name, entry),
             "add_collection_entry",
         ))
 
     def update_collection_entry(self, element: uuid.UUID, property_name: str, index: int, entry: Any) -> None:
+        if isinstance(entry, dict):
+            entry = _to_net_dict(entry)
         _unwrap(
             self._api.UpdateCollectionEntry(_to_net_guid(element), property_name, index, entry),
             "update_collection_entry",

@@ -76,6 +76,14 @@ fi
 STAGED_COUNT=$(find "$RUNTIME_DIR" -type f | wc -l | tr -d ' ')
 echo "==> Staged $STAGED_COUNT runtime files"
 
+# ─── stage license files ───────────────────────────────────────────────────
+# pyproject.toml's license-files entries are resolved relative to this dir
+# (where pyproject.toml lives). The canonical copies live at the repo root,
+# so copy them in for the duration of the build.
+echo "==> Staging license files"
+cp -p "$REPO_ROOT/LICENSE.TXT" "$HERE/LICENSE.TXT"
+cp -p "$REPO_ROOT/ADDITIONAL-LICENSE-PERMISSIONS.TXT" "$HERE/ADDITIONAL-LICENSE-PERMISSIONS.TXT"
+
 # ─── build wheel ───────────────────────────────────────────────────────────
 PYTHON_BIN="${PYTHON:-}"
 if [[ -z "$PYTHON_BIN" ]]; then

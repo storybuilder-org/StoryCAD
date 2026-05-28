@@ -62,7 +62,11 @@ class DllMetadataHook(MetadataHookInterface):  # type: ignore[misc,valid-type]
     """Populate PEP 621 dynamic fields from the bundled DLL."""
 
     def update(self, metadata: dict[str, Any]) -> None:
-        desc = _meta.get("FileDescription") or _meta.get("Comments")
+        # .NET SDK defaults FileDescription to the assembly name and stuffs
+        # the real <Description> text into Comments — so Comments is the
+        # better source. Fall back to FileDescription only if Comments is
+        # missing.
+        desc = _meta.get("Comments") or _meta.get("FileDescription")
         if desc:
             metadata["description"] = desc
         company = _meta.get("CompanyName")
