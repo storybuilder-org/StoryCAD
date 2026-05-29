@@ -272,6 +272,68 @@ public class StoryCADApiTests
     }
 
     [TestMethod]
+    public async Task AddElement_PropertiesContainUnknownKey_ReturnsFailure()
+    {
+        // Arrange
+        var outlineName = "Test Outline";
+        var author = "Test Author";
+        var createResult = await _api.CreateEmptyOutline(outlineName, author, "0");
+        Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
+        var parentGuid = createResult.Payload.First();
+        var elementCountBefore = _api.CurrentModel.StoryElements.Count;
+        var parentChildCountBefore = _api.CurrentModel.StoryElements
+            .First(e => e.Uuid == parentGuid).Node.Children.Count;
+
+        // Act: add an element with a property dictionary containing a property that does not exist.
+        var properties = new Dictionary<string, object>
+        {
+            { "ThisPropertyDoesNotExist", "x" }
+        };
+        var addResult = _api.AddElement(StoryItemType.Folder, parentGuid.ToString(), "Bad", properties);
+
+        // Assert: the failure to apply the property must be surfaced (issue #1409).
+        Assert.IsFalse(addResult.IsSuccess,
+            "AddElement should fail when a property cannot be applied.");
+        Assert.IsFalse(string.IsNullOrEmpty(addResult.ErrorMessage),
+            "A non-empty error message should describe the property failure.");
+        Assert.IsTrue(addResult.ErrorMessage.Contains("ThisPropertyDoesNotExist"),
+            "The error message should reference the offending property key.");
+
+        // Assert: the partially-created element was rolled back (issue #1409) - no orphan left
+        // in the model's element collection or under the parent node.
+        Assert.AreEqual(elementCountBefore, _api.CurrentModel.StoryElements.Count,
+            "A failed AddElement should leave no orphan element in the model.");
+        Assert.AreEqual(parentChildCountBefore, _api.CurrentModel.StoryElements
+                .First(e => e.Uuid == parentGuid).Node.Children.Count,
+            "A failed AddElement should leave no orphan node under the parent.");
+    }
+
+    [TestMethod]
+    public async Task AddElement_PropertiesAllValid_ReturnsSuccessAndApplies()
+    {
+        // Arrange
+        var outlineName = "Test Outline";
+        var author = "Test Author";
+        var createResult = await _api.CreateEmptyOutline(outlineName, author, "0");
+        Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
+        var parentGuid = createResult.Payload.First();
+
+        // Act: add an element with a valid property dictionary.
+        var properties = new Dictionary<string, object>
+        {
+            { "Name", "Renamed" }
+        };
+        var addResult = _api.AddElement(StoryItemType.Folder, parentGuid.ToString(), "Initial", properties);
+
+        // Assert: success path is unchanged and the property was applied.
+        Assert.IsTrue(addResult.IsSuccess, "AddElement should succeed when all properties are valid.");
+        Assert.AreNotEqual(Guid.Empty, addResult.Payload,
+            "The payload should not be empty for a successfully added element.");
+        var newElement = _api.CurrentModel.StoryElements.StoryElementGuids[addResult.Payload];
+        Assert.AreEqual("Renamed", newElement.Name, "The element's Name property should be applied.");
+    }
+
+    [TestMethod]
     public async Task UpdateElementProperty()
     {
         // Arrange
