@@ -17,23 +17,26 @@ and suspenseful plots, and settings that appeal to the senses.
 <a href="https://apps.microsoft.com/detail/9PLBNHZV1XM2?mode=direct">
 	<img src="/.github/msbadge.svg" width="200"/>
 </a>
+<a href="https://apps.apple.com/gb/app/storycad/id6756433272">
+  <img src="/.github/mac.png" alt="Download on the Mac App Store" height="50">
+</a>
 
 ## Built With
 
-* [WinUI 3][1]
-* [Windows App SDK][2]
+* [UNO Platform](https://platform.uno/)
 * [Windows Community Toolkit][3]
 * [elmah.io][4]
 * [NRtfTree][5] (maintained separately with asynchronous IO support)
 * [Scrivener][6]
 
-WinUI is the UI Framework for StoryCAD and is [source available](https://github.com/microsoft/microsoft-ui-xaml/tree/main/src)
+UNO Framework is the UI Framework for StoryCAD and is [open-source](https://github.com/unoplatform/uno)
 
 Windows Community Toolkit is available under the [MIT License][14].
 
-elmah.io is a commercial cloud-based error logging and uptime monitor service. elmah.io graciously provides a [free subscription][15] to public repository open source projects. We are grateful for their support.
+elmah.io is a commercial cloud-based error logging and uptime monitor service. 
+elmah.io graciously provides a [free subscription][15] to public repository open source project and we are grateful for their support.
 
-NRtfTree is available under the [GNU GPL V3 License][16]. We maintain our asynchronous IO fork in a separate repository.
+NRtfTree is available under the [GNU GPL V3 License][16]. We maintain our asynchronous IO fork in a [separate repository](https://github.com/storybuilder-org/NRTFTree-Async).
 
 [Scrivener][6] is a commercial writing application widely used by novelists, screenwriters, playwrights, and short fiction writers. 
 StoryCAD contains a feature that inserts StoryCAD reports into a Scrivener project using their Scrivener 3 File Formatting Specification API. 
@@ -48,7 +51,7 @@ If you are (or want to be) a fiction writer, welcome! StoryCAD is for you. An in
 
 Our [YouTube videos][28] will help you learn more about StoryCAD.
 
-You're welcome to try the software for yourself (it's free.) 
+You're welcome to try the software for yourself (it's free!) 
 
 You can find complete documentation in the [User Manual][8], which also serves as online help for the program.
 
@@ -56,7 +59,7 @@ You can find complete documentation in the [User Manual][8], which also serves a
 
 If you're a developer, welcome! A good starting place is to learn what StoryCAD is about, using the same [User Documentation][9].
 
-Strictly from the code side, take a look at [Programmer Notes][10].
+Strictly from the code side, take a look at the [for developers][10] section.
 
 ## Usage
 
@@ -110,7 +113,7 @@ We are most grateful for all of them especially those who toil in the arena:
 [22]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/PRIVACY_POLICY.TXT
 [23]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/LICENSE.TXT
 [24]:https://github.com/StoryBuilder-org/StoryCAD/blob/main/ROADMAP.md
-[25]:https://manual.storybuilder.org/docs/For%20Developers/CHANGELOG.html
+[25]:https://manual.storybuilder.org/docs/For%20Developers/Changelog.html
 [26]:https://StoryBuilder.org/
 [27]:https://apps.microsoft.com/store/detail/StoryCAD/9PLBNHZV1XM2?hl=en-us&gl=us
 [28]:https://www.youtube.com/watch?v=Oi7G9TEKsro
