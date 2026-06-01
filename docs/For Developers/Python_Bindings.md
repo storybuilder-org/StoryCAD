@@ -30,19 +30,16 @@ The source lives in the repository under
 **Prerequisites**
 
 - Python 3.10 or newer
-- The [.NET 10 runtime](https://dotnet.microsoft.com/download) installed on your
-  machine (the SDK is *not* required)
-
-**Install the wheel** — wheels are platform-specific, so pick the one matching
-your operating system and CPU. CI builds wheels for Linux x64, Linux arm64,
-macOS arm64, and Windows x64:
+- The [.NET 10 runtime](https://dotnet.microsoft.com/download) (the runtime, not
+  the full SDK)
 
 ```bash
-pip install storycad-<version>-<platform>.whl
+pip install storycad
 ```
 
-The wheel bundles a published build of `StoryCADLib`, so end users do not need
-to build anything. To build a wheel from source, see
+That installs everything — the package carries its own copy of the StoryCAD
+engine, so there is nothing else to build or download. Contributors working
+from a repo checkout build it locally instead; see
 [Building from source](#building-from-source).
 
 ---

@@ -11,10 +11,17 @@ import os
 import sys
 import uuid
 from dataclasses import dataclass
+from importlib.metadata import PackageNotFoundError, version as _pkg_version
 from pathlib import Path
 from typing import Any
 
-__version__ = "0.1.0"
+try:
+    # Single source of truth: the version baked into the installed wheel
+    # (derived from StoryCADLib.dll's FileVersion at build time). Falls back
+    # when running from an un-installed source checkout.
+    __version__ = _pkg_version("storycad")
+except PackageNotFoundError:
+    __version__ = "0.0.0+source"
 __all__ = [
     "StoryCAD",
     "StoryCADError",

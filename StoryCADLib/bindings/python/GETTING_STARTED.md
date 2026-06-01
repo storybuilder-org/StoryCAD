@@ -16,18 +16,15 @@ surface. You don't need to know any C# to use it.
 **Prerequisites**
 
 - Python 3.10 or newer
-- The [.NET 10 runtime](https://dotnet.microsoft.com/download) installed on your
-  machine (the wheel is framework-dependent, so the SDK is *not* required)
-
-**Install the wheel** (wheels are platform-specific — pick the one matching your
-OS and CPU):
+- The [.NET 10 runtime](https://dotnet.microsoft.com/download) (the runtime, not
+  the full SDK)
 
 ```bash
-pip install storycad-<version>-<platform>.whl
+pip install storycad
 ```
 
-If you're working from a source checkout instead of a wheel, see
-[Running against a source build](#appendix-running-against-a-source-build).
+Contributors working from a repo checkout build the package locally instead —
+see [Running against a source build](#appendix-running-against-a-source-build).
 
 ---
 
