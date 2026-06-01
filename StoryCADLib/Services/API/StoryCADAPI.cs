@@ -612,7 +612,18 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
             }
 
             newElement.Name = name;
-            UpdateElementProperties(newElement.Uuid, properties);
+
+            // Surface any property-application failure instead of swallowing it (issue #1409).
+            var propertyResult = UpdateElementProperties(newElement.Uuid, properties);
+            if (!propertyResult.IsSuccess)
+            {
+                // Roll back the just-created element so a failed AddElement leaves no orphan.
+                // Reverse AddStoryElement: detach the node from its parent and remove the
+                // element from the model (StoryElementGuids is updated via CollectionChanged).
+                newElement.Node.Parent?.Children.Remove(newElement.Node);
+                CurrentModel.StoryElements.Remove(newElement);
+                return OperationResult<Guid>.Failure(propertyResult.ErrorMessage);
+            }
 
             return OperationResult<Guid>.Success(newElement.Uuid);
         }

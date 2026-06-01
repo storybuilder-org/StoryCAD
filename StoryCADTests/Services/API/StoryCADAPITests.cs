@@ -272,6 +272,228 @@ public class StoryCADApiTests
     }
 
     [TestMethod]
+    public async Task AddElement_PropertiesContainUnknownKey_ReturnsFailure()
+    {
+        // Arrange
+        var outlineName = "Test Outline";
+        var author = "Test Author";
+        var createResult = await _api.CreateEmptyOutline(outlineName, author, "0");
+        Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
+        var parentGuid = createResult.Payload.First();
+        var elementCountBefore = _api.CurrentModel.StoryElements.Count;
+        var guidMapCountBefore = _api.CurrentModel.StoryElements.StoryElementGuids.Count;
+        var parentChildCountBefore = _api.CurrentModel.StoryElements
+            .First(e => e.Uuid == parentGuid).Node.Children.Count;
+
+        // Act: add an element with a property dictionary containing a property that does not exist.
+        var properties = new Dictionary<string, object>
+        {
+            { "ThisPropertyDoesNotExist", "x" }
+        };
+        var addResult = _api.AddElement(StoryItemType.Folder, parentGuid.ToString(), "Bad", properties);
+
+        // Assert: the failure to apply the property must be surfaced (issue #1409).
+        Assert.IsFalse(addResult.IsSuccess,
+            "AddElement should fail when a property cannot be applied.");
+        Assert.IsFalse(string.IsNullOrEmpty(addResult.ErrorMessage),
+            "A non-empty error message should describe the property failure.");
+        Assert.IsTrue(addResult.ErrorMessage.Contains("ThisPropertyDoesNotExist"),
+            "The error message should reference the offending property key.");
+
+        // Assert: the partially-created element was rolled back (issue #1409) - no orphan left
+        // in the model's element collection, the GUID lookup map, or under the parent node.
+        Assert.AreEqual(elementCountBefore, _api.CurrentModel.StoryElements.Count,
+            "A failed AddElement should leave no orphan element in the model.");
+        Assert.AreEqual(guidMapCountBefore, _api.CurrentModel.StoryElements.StoryElementGuids.Count,
+            "A failed AddElement should leave no orphan entry in the GUID lookup map.");
+        Assert.AreEqual(parentChildCountBefore, _api.CurrentModel.StoryElements
+                .First(e => e.Uuid == parentGuid).Node.Children.Count,
+            "A failed AddElement should leave no orphan node under the parent.");
+        Assert.IsFalse(_api.CurrentModel.StoryElements.Any(e => e.Name == "Bad"),
+            "The rolled-back element must not be reachable by name.");
+    }
+
+    [TestMethod]
+    public async Task AddElement_PropertiesAllValid_ReturnsSuccessAndApplies()
+    {
+        // Arrange
+        var outlineName = "Test Outline";
+        var author = "Test Author";
+        var createResult = await _api.CreateEmptyOutline(outlineName, author, "0");
+        Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
+        var parentGuid = createResult.Payload.First();
+
+        // Act: add an element with a valid property dictionary.
+        var properties = new Dictionary<string, object>
+        {
+            { "Name", "Renamed" }
+        };
+        var addResult = _api.AddElement(StoryItemType.Folder, parentGuid.ToString(), "Initial", properties);
+
+        // Assert: success path is unchanged and the property was applied.
+        Assert.IsTrue(addResult.IsSuccess, "AddElement should succeed when all properties are valid.");
+        Assert.AreNotEqual(Guid.Empty, addResult.Payload,
+            "The payload should not be empty for a successfully added element.");
+        var newElement = _api.CurrentModel.StoryElements.StoryElementGuids[addResult.Payload];
+        Assert.AreEqual("Renamed", newElement.Name, "The element's Name property should be applied.");
+    }
+
+    // ---------------------------------------------------------------------
+    // Issue #1409 hardening: AddElement is the most critical write path in
+    // StoryCAD, and UpdateElementProperty has several distinct failure modes
+    // (unknown name, missing [JsonInclude], collection property, bad value
+    // type/GUID). Every one must surface a failure AND fully roll back the
+    // partially-created element. These tests exercise each failure path plus
+    // the partial-application and GUID-override-release rollback properties.
+    // ---------------------------------------------------------------------
+
+    [TestMethod]
+    public async Task AddElement_MixedValidThenInvalidKey_RollsBackFully()
+    {
+        // This is the exact #1409 corruption scenario: valid keys are applied
+        // before a bad key aborts the batch. The whole element must be discarded
+        // - not left behind with the good property applied.
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Outline", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
+        var parentGuid = createResult.Payload.First();
+        var elementCountBefore = _api.CurrentModel.StoryElements.Count;
+        var guidMapCountBefore = _api.CurrentModel.StoryElements.StoryElementGuids.Count;
+
+        // Act: a good key first, then a bad one (dictionaries preserve insertion order).
+        var properties = new Dictionary<string, object>
+        {
+            { "Name", "GoodName" },
+            { "ThisPropertyDoesNotExist", "x" }
+        };
+        var addResult = _api.AddElement(StoryItemType.Folder, parentGuid.ToString(), "Initial", properties);
+
+        // Assert: failure surfaced and the partially-mutated element is gone entirely.
+        Assert.IsFalse(addResult.IsSuccess, "A bad key after a good one must still fail.");
+        Assert.AreEqual(elementCountBefore, _api.CurrentModel.StoryElements.Count,
+            "The partially-applied element must be removed from the model.");
+        Assert.AreEqual(guidMapCountBefore, _api.CurrentModel.StoryElements.StoryElementGuids.Count,
+            "The partially-applied element must be removed from the GUID lookup map.");
+        Assert.IsFalse(_api.CurrentModel.StoryElements.Any(e => e.Name == "GoodName"),
+            "No element with the applied-then-rolled-back value may survive.");
+    }
+
+    [TestMethod]
+    public async Task AddElement_CollectionProperty_ReturnsFailureAndRollsBack()
+    {
+        // Collection properties return Failure WITHOUT throwing - a different
+        // path into the rollback than the exception-based failures.
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Outline", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
+        var parentGuid = createResult.Payload.First();
+        var elementCountBefore = _api.CurrentModel.StoryElements.Count;
+
+        // Act: ScenePurpose is a List<string>; it must be edited via the collection API.
+        var properties = new Dictionary<string, object>
+        {
+            { "ScenePurpose", "not a list" }
+        };
+        var addResult = _api.AddElement(StoryItemType.Scene, parentGuid.ToString(), "Bad", properties);
+
+        // Assert
+        Assert.IsFalse(addResult.IsSuccess, "Setting a collection property via AddElement must fail.");
+        Assert.IsTrue(addResult.ErrorMessage.Contains("ScenePurpose"),
+            "The error should reference the offending collection property.");
+        Assert.AreEqual(elementCountBefore, _api.CurrentModel.StoryElements.Count,
+            "A failed collection-property AddElement must roll back.");
+    }
+
+    [TestMethod]
+    public async Task AddElement_InvalidGuidValueForValidProperty_ReturnsFailureAndRollsBack()
+    {
+        // A valid property name with a value that can't be converted (here an
+        // unparseable GUID) is the "Specified cast is not valid" family from #1409.
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Outline", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
+        var parentGuid = createResult.Payload.First();
+        var elementCountBefore = _api.CurrentModel.StoryElements.Count;
+
+        // Act: Protagonist is a Guid property; a non-GUID string cannot be applied.
+        var properties = new Dictionary<string, object>
+        {
+            { "Protagonist", "not-a-guid" }
+        };
+        var addResult = _api.AddElement(StoryItemType.Problem, parentGuid.ToString(), "Bad", properties);
+
+        // Assert
+        Assert.IsFalse(addResult.IsSuccess, "An invalid value for a valid property must fail.");
+        Assert.IsTrue(addResult.ErrorMessage.Contains("Protagonist"),
+            "The error should reference the offending property.");
+        Assert.AreEqual(elementCountBefore, _api.CurrentModel.StoryElements.Count,
+            "A failed value-conversion AddElement must roll back.");
+    }
+
+    [TestMethod]
+    public async Task AddElement_PropertyMissingJsonInclude_ReturnsFailureAndRollsBack()
+    {
+        // Only [JsonInclude] properties are updatable. IsSelected is public and
+        // writable but [JsonIgnore], so it must be rejected.
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Outline", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
+        var parentGuid = createResult.Payload.First();
+        var elementCountBefore = _api.CurrentModel.StoryElements.Count;
+
+        // Act
+        var properties = new Dictionary<string, object>
+        {
+            { "IsSelected", "true" }
+        };
+        var addResult = _api.AddElement(StoryItemType.Folder, parentGuid.ToString(), "Bad", properties);
+
+        // Assert
+        Assert.IsFalse(addResult.IsSuccess, "Setting a non-[JsonInclude] property must fail.");
+        Assert.IsTrue(addResult.ErrorMessage.Contains("IsSelected"),
+            "The error should reference the offending property.");
+        Assert.AreEqual(elementCountBefore, _api.CurrentModel.StoryElements.Count,
+            "A failed AddElement on a non-updatable property must roll back.");
+    }
+
+    [TestMethod]
+    public async Task AddElement_GuidOverrideWithBadProperty_RollsBackAndFreesGuid()
+    {
+        // When a GUID override is supplied and the property batch fails, rollback
+        // must also release that GUID so a corrected retry with the same GUID works.
+        // Arrange
+        var createResult = await _api.CreateEmptyOutline("Test Outline", "Test Author", "0");
+        Assert.IsTrue(createResult.IsSuccess, "Model creation should succeed.");
+        var parentGuid = createResult.Payload.First();
+        var overrideGuid = Guid.NewGuid();
+
+        // Act 1: fail with a bad property while claiming the override GUID.
+        var badProperties = new Dictionary<string, object>
+        {
+            { "ThisPropertyDoesNotExist", "x" }
+        };
+        var failResult = _api.AddElement(StoryItemType.Folder, parentGuid.ToString(), "Bad",
+            badProperties, overrideGuid.ToString());
+
+        // Assert: failed and the GUID was released (not left registered).
+        Assert.IsFalse(failResult.IsSuccess, "AddElement with a bad property must fail.");
+        Assert.IsFalse(_api.CurrentModel.StoryElements.StoryElementGuids.ContainsKey(overrideGuid),
+            "A rolled-back override GUID must be released from the lookup map.");
+
+        // Act 2: retry the SAME GUID via the property-less overload - it must now succeed.
+        var retryResult = _api.AddElement(StoryItemType.Folder, parentGuid.ToString(), "Retry",
+            overrideGuid.ToString());
+
+        // Assert: the GUID was genuinely free for reuse.
+        Assert.IsTrue(retryResult.IsSuccess,
+            "Retrying with the released GUID should succeed; got: " + retryResult.ErrorMessage);
+        Assert.AreEqual(overrideGuid, retryResult.Payload,
+            "The retried element should own the previously-failed GUID.");
+        Assert.IsTrue(_api.CurrentModel.StoryElements.StoryElementGuids.ContainsKey(overrideGuid),
+            "The successfully-added element should be registered under the override GUID.");
+    }
+
+    [TestMethod]
     public async Task UpdateElementProperty()
     {
         // Arrange
