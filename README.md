@@ -17,7 +17,7 @@ and suspenseful plots, and settings that appeal to the senses.
 <a href="https://apps.microsoft.com/detail/9PLBNHZV1XM2?mode=direct">
 	<img src="/.github/msbadge.svg" width="200"/>
 </a>
-<a href="[https://apps.apple.com/app/id<YOUR_APP_ID>](https://apps.apple.com/gb/app/storycad/id6756433272)">
+<a href="https://apps.apple.com/gb/app/storycad/id6756433272">
   <img src="/.github/mac.png" alt="Download on the Mac App Store" height="50">
 </a>
 
