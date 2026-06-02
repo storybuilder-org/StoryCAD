@@ -799,11 +799,11 @@ public class ShellViewModel : ObservableRecipient
         if (nowStacked != IsStacked)
         {
             OpenPaneLength = nowStacked ? width : Math.Max(200, width * 0.3);
-            DisplayMode = nowStacked ? SplitViewDisplayMode.Overlay : SplitViewDisplayMode.Inline;
+            DisplayMode = SplitViewDisplayMode.Inline;
             IsPaneOpen = !nowStacked;
             IsStacked = nowStacked;
         }
-        else if (IsStacked && IsPaneOpen)
+        else if (IsStacked)
         {
             OpenPaneLength = width;
         }

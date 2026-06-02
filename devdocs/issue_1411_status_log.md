@@ -2,7 +2,7 @@
 
 **Branch:** `issue-1411-hamburger-stacked-mode` (based on `main` / `dev` — they were at the same commit at branch time)
 **Issue:** https://github.com/storybuilder-org/StoryCAD/issues/1411
-**Last update:** 2026-05-19, end of session.
+**Last update:** 2026-06-02, end of session.
 
 ---
 
@@ -12,54 +12,122 @@
 2. `a1c591fe` — Fix narrow-resize closing the pane (#1411 regression)
 3. `af59b025` — Fix stacked-mode hamburger toggle at narrow widths (#1411)
 
-Nothing pushed. Push decision pending — see "Open" below.
+Nothing new committed. The 2026-06-02 work below is **uncommitted in the working tree**.
 
-## What is done
+## Current status: NOT FIXED
 
-- **Diagnosis** (delegated to debugger agent): `ShellSplitView.IsPaneOpen` was bound `TwoWay` to `ShellViewModel.IsPaneOpen` (default `true`); the `VisualStateManager`'s `NarrowState` setter `IsPaneOpen=False` was immediately overridden by the binding back-flow. Same root cause on HP-Spectre-style rotation because Windows does not resize a non-maximized window on rotation, so the `MinWindowWidth` trigger never fires.
-- **Code change**:
-  - `ShellViewModel`: added `internal HandleSizeChanged(double width)`, `internal IsStacked`, public `DisplayMode` (`SplitViewDisplayMode`), public `OpenPaneLength` (`double`). All are notifying properties (`SetProperty`).
-  - `Shell.xaml`: removed `IsPaneOpen`/`DisplayMode`/`OpenPaneLength` setters from the VSM; bound `DisplayMode` and `OpenPaneLength` OneWay to the VM; kept the `CommandBar.OverflowButtonVisibility` VSM setter.
-  - `Shell.xaml.cs`: `ShellPage_SizeChanged` is now a one-line `ShellVm.HandleSizeChanged(e.NewSize.Width)`. `AdjustSplitViewPane` is gone. `Shell_Loaded` calls the VM method too.
-  - `StoryCADLib/Properties/AssemblyInfo.cs`: added `InternalsVisibleTo("StoryCAD")` so the executable project can see the internal VM method.
-- **Final shape of `HandleSizeChanged`**:
-  - On wide↔narrow crossing: set `OpenPaneLength` (full window in stacked, `Math.Max(200, width*0.3)` in wide), `DisplayMode`, `IsPaneOpen=!nowStacked`, `IsStacked=nowStacked`.
-  - Within stacked, with pane open: `OpenPaneLength = width` so the pane never exceeds window width.
-  - All other cases: no-op.
-- **Tests** (13 new VM tests in `StoryCADTests/ViewModels/ShellViewModelTests.cs`, all green):
-  - Truth-table for transitions, DisplayMode, OpenPaneLength
-  - `NarrowToNarrow_DoesNotChangeIsPaneOpen`, `NarrowAndUserOpenedPane_DoesNotForceClose`
-  - `NarrowToNarrow_DoesNotRaiseDisplayModeChanged`, `WideToWide_DoesNotRaiseDisplayModeChanged`
-  - `WhenStackedAndPaneOpen_TracksPaneToNewWidth`
-  - `WhenStackedAndPaneClosed_DoesNotChangePaneLength`
-  - `WhenWide_DoesNotApplyStackedSizing`
-  - Full suite: 1005 passed / 14 skipped / 0 failed (1019 total).
-- **Manual test added**: `StoryCADTests/ManualTests/Window_Management.md` WM-006 "Hamburger Button and Stacked Mode at Narrow Width", 10 steps including portrait-rotation note.
-- **Issue body**: Design and Implementation sections both have Plan + Approve checked. Integration section has Plan checked with WM-006 citation.
+Manual testing on a real build (2026-06-02) shows the narrow-mode hamburger still does
+not work both ways: when narrow, the hamburger switches from content to the navigation
+pane once, but a second click does not switch back to content.
 
-## What is open / blocked
+## 2026-06-02 session
 
-- **WM-006 step 8 manual confirmation**: I committed `14758eed` and stated desk-debug shows the fix works, but Terry has not yet run the build and confirmed step 8 actually passes in the running app. **This is the next blocker.** If it's still broken, the next move is diagnostic (logging — see below), not another guess.
-- **WM-001 step 3 expected-outcome update**: at ~400px the window now enters stacked mode; the existing expected outcome doesn't mention that. I proposed an edit; Terry said "No" — wording or approach pending direction.
-- **Window_Management.md restructure**: Terry asked for Windows tests grouped, then macOS tests grouped (WM-004 currently sits in the middle), with better macOS coverage. Not started. Scope of the macOS additions to be agreed before doing.
-- **Push decision**: this is a fix against production behavior described in the user manual.
-  - Option A: hotfix → rebase onto `main`, PR to `main`, ship as 4.1.2 (Windows MSIX + Mac App Store + NuGet.org). The blog post can publish on schedule.
-  - Option B: ride `dev` to 4.2 — no new release needed, but the marketing blog post about the hamburger button has to be held until 4.2 ships.
-  - Terry is talking to Jake. The branch sits cleanly on either base today because `main` HEAD == `origin/dev` HEAD.
+### What was changed (all uncommitted in the working tree)
 
-## Logging — gap to address
+- `StoryCADLib/ViewModels/ShellViewModel.cs`
+  - Added Info-level logging in the `IsPaneOpen`, `IsStacked`, `DisplayMode`, and
+    `OpenPaneLength` property setters (logs old -> new on change).
+  - `HandleSizeChanged(double width)` — added Info logging of the branch taken
+    (wide<->narrow transition / narrow resize / no-op). The no-op log line was
+    later removed as noise; transition and narrow-resize logging remain.
+  - `TogglePane()` — existing log line raised from Trace to Info.
+  - Added `internal bool ShouldCancelPaneClose() => IsStacked && IsPaneOpen;`
+- `StoryCAD/Views/Shell.xaml`
+  - `ShellSplitView`: `IsPaneOpen` binding changed from TwoWay to OneWay.
+  - Added `PaneClosing="ShellSplitView_PaneClosing"`.
+- `StoryCAD/Views/Shell.xaml.cs`
+  - Added `ShellSplitView_PaneClosing` handler: `if (ShellVm.ShouldCancelPaneClose()) args.Cancel = true;`
+- `StoryCADTests/ViewModels/ShellViewModelTests.cs`
+  - Added `ShouldCancelPaneClose_WhenStackedAndNavShown_CancelsResizeClose`,
+    `ShouldCancelPaneClose_WhenStackedAndContentShown_DoesNotCancel`,
+    `ShouldCancelPaneClose_WhenWide_DoesNotCancel`.
 
-`HandleSizeChanged` has no logging. The notifying setters for `IsPaneOpen` / `IsStacked` / `DisplayMode` / `OpenPaneLength` have no logging. The model right above is `TogglePane`, which traces (`Logger.Log(LogLevel.Trace, ...)`).
+### What the changes were trying to do
 
-If WM-006 step 8 turns out to still be broken on the manual retest, **the right next step is to add tracing — not to write another hypothesis-driven patch**. Specifically:
-- `HandleSizeChanged` should trace its inputs and the branch it takes.
-- The `IsPaneOpen` setter should trace its caller (stack frame is enough). That will tell us deterministically which code path is closing the pane, removing the "Option A vs Option B / closes vs clips" guesswork from earlier sessions.
+The earlier symptom was that a resize in narrow mode closed the navigation pane on its
+own. The logging confirmed the SplitView closes its own open pane during a resize and
+(under the old TwoWay binding) wrote that close back into the view-model. The change made
+`IsPaneOpen` OneWay so only the view-model sets it, and used the `PaneClosing` event to
+cancel a close while stacked with the pane open.
 
-This was flagged by the debugger agent and not acted on. Adding it as standing follow-up regardless of whether step 8 passes — the methods are too central to leave silent.
+### Result
+
+- Unit tests pass (full `ShellViewModelTests` class: 98 passed, 7 skipped, 0 failed).
+- The app still fails: the second hamburger click in narrow mode does nothing.
+
+### Key evidence not yet explained
+
+In the manual-test log, the first hamburger click logs `TogglePane from False to True`.
+The **second** click logs **nothing at all** — no `TogglePane` line. `TogglePane` always
+logs when it runs, so on the second click the command is not being invoked. None of the
+view-model changes above can affect this, because the code that would run on a click is
+never reached on the second click.
+
+An earlier guess that the open navigation pane covers the hamburger button was checked and
+is wrong: the hamburger `AppBarButton` is in the `CommandBar` in page Grid row 0
+(`Shell.xaml:192`), while the `SplitView` is in row 1, so the pane does not overlap the
+button.
+
+Cause of "second click invokes nothing" is still unknown. It needs evidence, not another
+guess: confirm the manual-test log is complete through the second click, and determine
+which element actually receives the second click (and whether `TogglePaneCommand`'s
+CanExecute is false at that point).
+
+## Open items carried over from prior sessions
+
+- WM-001 step 3 expected-outcome wording — proposed edit was rejected; awaiting direction.
+- Window_Management.md restructure — group Windows tests, then macOS tests; add macOS
+  coverage. Not started.
+- Push decision — 4.1.2 hotfix off `main` vs. ride `dev` to 4.2.
 
 ## Pickup notes for next session
 
-1. **First action**: confirm with Terry whether WM-006 step 8 now passes on a real build. Do not assume.
-2. If step 8 still broken: add the logging described above; reproduce; let the trace name the culprit.
-3. If step 8 passes: pick up the open items in this order — WM-001 step-3 wording (re-propose, get direction), then Window_Management.md restructure (scope macOS additions first), then push decision once Jake responds.
-4. Do not delegate design while pre-listing solution candidates. Memory: there is no formal memory file on this lesson (the proposed one was rejected); the rule is "describe the bug and constraints, let the agent propose its own shape".
+1. The narrow-mode hamburger is not fixed. Start from the unexplained evidence above:
+   the second click invokes no command.
+2. Get a complete manual-test log through the second click before theorizing.
+3. The 2026-06-02 changes are uncommitted; decide whether to keep the logging, keep/revert
+   the OneWay + PaneClosing approach, or revert all of it.
+
+## Codex handoff — 2026-06-02
+
+User clarified the intended behavior:
+- Wide mode: Navigation and Content panes are side-by-side; hamburger hides/shows Navigation.
+- Narrow/portrait stacked mode: only one pane is visible at a time. Entering narrow should show Content.
+  Hamburger switches to Navigation; next hamburger switches back to Content. Narrow-to-narrow resize must
+  not change the user's current pane.
+
+Working direction approved by user: keep the fix small and VM-centered. Avoid new code-behind events and
+avoid workaround tests for control events. Use `ShellViewModel.HandleSizeChanged` for layout state and keep
+`TogglePaneCommand` as the pane switch.
+
+Current content changes made by Codex:
+- `StoryCADLib/ViewModels/ShellViewModel.cs`
+  - In `HandleSizeChanged`, narrow mode now keeps `DisplayMode = SplitViewDisplayMode.Inline` instead of
+    `Overlay`.
+  - While `IsStacked`, `OpenPaneLength` tracks the current width regardless of `IsPaneOpen`.
+- `StoryCADTests/ViewModels/ShellViewModelTests.cs`
+  - Narrow display-mode test now expects `Inline`.
+  - Stacked/narrow resize test now expects `OpenPaneLength` to track width even when the pane is closed.
+  - Removed misleading test comment about fighting the TwoWay binding.
+
+Important: use the repo's WinAppSDK verification path only. Do not use `dotnet test` or chase Uno test
+side paths.
+- Build:
+  `C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe StoryCAD.sln -t:Build -p:Configuration=Debug -p:Platform=x64`
+- Tests:
+  `C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe "StoryCADTests\bin\x64\Debug\net10.0-windows10.0.22621\StoryCADTests.dll"`
+
+Verification status:
+- Build command failed before compilation with `MSB3491: Access to the path is denied` while writing generated
+  files under `obj\x64\Debug\...`.
+- User deleted all `bin`/`obj` folders and the exact build still failed immediately on generated `GlobalUsings.g.cs`
+  and `FileListAbsolute.txt` writes.
+- No compiler errors from the code change were observed.
+- Tests were not run because the test DLL was not rebuilt.
+- User is rebooting before retrying.
+
+Next pickup:
+1. After reboot, rerun the exact MSBuild command above.
+2. If build succeeds, run the exact `vstest.console` command above.
+3. Then manually smoke narrow stacked hamburger: enter narrow -> content visible; click hamburger -> nav visible;
+   click hamburger again -> content visible; narrow resize must not switch panes.

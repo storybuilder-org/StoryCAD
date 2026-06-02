@@ -1632,8 +1632,7 @@ public class ShellViewModelTests
     }
 
     // Issue #1411: stacked-mode behavior for the Navigation/Content panes.
-    // HandleSizeChanged owns the wide↔narrow decision so the SplitView no
-    // longer fights its TwoWay binding to IsPaneOpen. Transition guard:
+    // HandleSizeChanged owns the wide↔narrow decision. Transition guard:
     // IsPaneOpen flips only when crossing the threshold; resizes within a
     // mode leave the user's toggle choice alone.
 
@@ -1714,12 +1713,12 @@ public class ShellViewModelTests
     }
 
     [TestMethod]
-    public void HandleSizeChanged_WidthBelow800_DisplayModeIsOverlay()
+    public void HandleSizeChanged_WidthBelow800_DisplayModeIsInline()
     {
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
         shell.HandleSizeChanged(1200);
         shell.HandleSizeChanged(600);
-        Assert.AreEqual(Microsoft.UI.Xaml.Controls.SplitViewDisplayMode.Overlay, shell.DisplayMode);
+        Assert.AreEqual(Microsoft.UI.Xaml.Controls.SplitViewDisplayMode.Inline, shell.DisplayMode);
     }
 
     [TestMethod]
@@ -1790,17 +1789,16 @@ public class ShellViewModelTests
     }
 
     [TestMethod]
-    public void HandleSizeChanged_WhenStackedAndPaneClosed_DoesNotChangePaneLength()
+    public void HandleSizeChanged_WhenStackedAndPaneClosed_TracksPaneToNewWidth()
     {
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
         shell.HandleSizeChanged(1200);
         shell.HandleSizeChanged(700);
         shell.IsPaneOpen = false;
-        var lengthBefore = shell.OpenPaneLength;
 
         shell.HandleSizeChanged(500);
 
-        Assert.AreEqual(lengthBefore, shell.OpenPaneLength, "OpenPaneLength must not change while stacked with pane closed");
+        Assert.AreEqual(500, shell.OpenPaneLength, "OpenPaneLength must track the new window width while stacked");
     }
 
     [TestMethod]
