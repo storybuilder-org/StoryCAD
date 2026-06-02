@@ -543,14 +543,15 @@ jobs:
   python-wheels:
     strategy:
       fail-fast: false
-      # Push and PR runs only smoke-test on linux-x64 — the binding code is
-      # shared Python and the .NET publish is the same incantation per RID,
-      # so platform-specific wheel breakage is rare and best caught at
+      # Push and PR runs only smoke-test on win-x64 — Windows is StoryCAD's
+      # primary platform, so the per-PR check runs there. The binding code is
+      # shared Python and the .NET publish is the same incantation per RID, so
+      # platform-specific wheel breakage is rare and best caught at
       # dispatch/release time. Workflow_dispatch (release or otherwise) gets
       # the full 4-platform matrix so a release dispatch fails loud if any
       # platform's wheel can't build.
       matrix:
-        include: ${{ fromJSON((github.event_name == 'push' || github.event_name == 'pull_request') && '[{"os":"ubuntu-latest","rid":"linux-x64"}]' || '[{"os":"ubuntu-latest","rid":"linux-x64"},{"os":"ubuntu-24.04-arm","rid":"linux-arm64"},{"os":"macos-latest","rid":"osx-arm64"},{"os":"windows-latest","rid":"win-x64"}]') }}
+        include: ${{ fromJSON((github.event_name == 'push' || github.event_name == 'pull_request') && '[{"os":"windows-latest","rid":"win-x64"}]' || '[{"os":"ubuntu-latest","rid":"linux-x64"},{"os":"ubuntu-24.04-arm","rid":"linux-arm64"},{"os":"macos-latest","rid":"osx-arm64"},{"os":"windows-latest","rid":"win-x64"}]') }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -592,6 +593,13 @@ jobs:
         env:
           PYTHON: python
         run: ./build-wheel.sh
+
+      # Install the freshly built wheel so its runtime dependency (pythonnet)
+      # is resolved into the environment — the API tests import it to boot the
+      # CLR. Installing the wheel (rather than `pip install pythonnet`) also
+      # verifies the wheel installs cleanly and that its declared deps resolve.
+      - name: Install built wheel
+        run: python -m pip install dist/*.whl
 
       # The staged runtime/ doubles as the DLL search path for the tests.
       - name: Run tests

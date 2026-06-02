@@ -14,13 +14,13 @@ The wheel bundles a published build of `StoryCADLib` under
 
 - Python 3.10+
 - .NET 10 runtime installed on the host (https://dotnet.microsoft.com/download)
-- A wheel matching your platform. Wheels are platform-specific; CI builds:
+- A supported platform (`pip` picks the matching wheel automatically):
   Linux x64, Linux arm64, macOS arm64, Windows x64.
 
 ## Install
 
 ```bash
-pip install storycad-<version>-<platform>.whl
+pip install StoryCADLib
 ```
 
 ## Quick example

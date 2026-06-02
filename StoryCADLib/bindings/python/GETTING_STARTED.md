@@ -20,7 +20,7 @@ surface. You don't need to know any C# to use it.
   the full SDK)
 
 ```bash
-pip install storycad
+pip install StoryCADLib
 ```
 
 Contributors working from a repo checkout build the package locally instead —

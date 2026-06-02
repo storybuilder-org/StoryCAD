@@ -6,6 +6,7 @@ empty values so hatch can still resolve the project.
 """
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 
@@ -49,7 +50,11 @@ def _read_pe_string_table() -> dict[str, str]:
 
 _meta = _read_pe_string_table()
 _raw_version = _meta.get("FileVersion") or _meta.get("ProductVersion") or "0.0.0"
-version = _normalise_version(_raw_version)
+# Explicit PEP 440 override for test/pre-release wheels (e.g.
+# STORYCAD_WHEEL_VERSION=4.1.0rc1). The DLL FileVersion is numeric-only and
+# can't carry a pre-release suffix, so this is the only way to stamp one. Used
+# verbatim — not normalised, so the suffix survives.
+version = os.environ.get("STORYCAD_WHEEL_VERSION") or _normalise_version(_raw_version)
 
 
 try:

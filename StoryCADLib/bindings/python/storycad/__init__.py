@@ -19,7 +19,7 @@ try:
     # Single source of truth: the version baked into the installed wheel
     # (derived from StoryCADLib.dll's FileVersion at build time). Falls back
     # when running from an un-installed source checkout.
-    __version__ = _pkg_version("storycad")
+    __version__ = _pkg_version("StoryCADLib")
 except PackageNotFoundError:
     __version__ = "0.0.0+source"
 __all__ = [

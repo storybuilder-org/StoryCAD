@@ -492,12 +492,12 @@ jobs:
     if: github.event_name == 'release' || inputs.publish_pypi
     runs-on: ubuntu-latest
     # Trusted Publishing (OIDC). Requires a one-time PyPI-side config: add
-    # a pending publisher under the `storycad` project pointing at
+    # a pending publisher under the `StoryCADLib` project pointing at
     # storybuilder-org/StoryCAD, workflow `store-publish.yml`, environment
     # `pypi`. No secret needed once configured.
     environment:
       name: pypi
-      url: https://pypi.org/p/storycad
+      url: https://pypi.org/p/storycadlib
     permissions:
       contents: read
       id-token: write   # OIDC token used by pypa/gh-action-pypi-publish

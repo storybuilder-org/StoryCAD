@@ -34,7 +34,7 @@ The source lives in the repository under
   the full SDK)
 
 ```bash
-pip install storycad
+pip install StoryCADLib
 ```
 
 That installs everything — the package carries its own copy of the StoryCAD
