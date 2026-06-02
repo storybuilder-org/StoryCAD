@@ -67,6 +67,14 @@ public partial class PrintReportDialogVM : ObservableRecipient
         set => SetProperty(ref _createStructure, value);
     }
 
+    private bool _createRelationships;
+
+    public bool CreateRelationships
+    {
+        get => _createRelationships;
+        set => SetProperty(ref _createRelationships, value);
+    }
+
     private bool _selectAllProblems;
 
     public bool SelectAllProblems
