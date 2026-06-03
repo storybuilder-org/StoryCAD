@@ -314,6 +314,18 @@ internal static class ObjCRuntime
     [DllImport(ObjCLib, EntryPoint = "objc_msgSend")]
     internal static extern IntPtr objc_msgSend(IntPtr receiver, IntPtr selector, CGRect arg1);
 
+    // --- CGSize for setMinSize: ---
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct CGSize
+    {
+        public double Width, Height;
+        public CGSize(double width, double height) { Width = width; Height = height; }
+    }
+
+    [DllImport(ObjCLib, EntryPoint = "objc_msgSend")]
+    internal static extern void objc_msgSend(IntPtr receiver, IntPtr selector, CGSize size);
+
     /// <summary>
     /// Creates an NSSearchField positioned at (x, y) with the given width and height.
     /// </summary>

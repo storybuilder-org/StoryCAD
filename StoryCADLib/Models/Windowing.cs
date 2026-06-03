@@ -14,6 +14,9 @@ using LogLevel = StoryCADLib.Services.Logging.LogLevel;
 using Microsoft.UI.Windowing;
 using Windows.Graphics;
 #endif
+#if HAS_UNO
+using StoryCADLib.Services.MacInterop;
+#endif
 
 namespace StoryCADLib.Models;
 
@@ -407,6 +410,41 @@ public class Windowing : ObservableRecipient
 		    throw;
 	    }
 
+    }
+
+    /// <summary>
+    /// Prevents the user from resizing the window below a usable minimum.
+    /// </summary>
+    public void SetMinimumSize(Window window, int minWidthDip = 400, int minHeightDip = 600)
+    {
+#if WINDOWS && !HAS_UNO
+        var appWindow = window?.AppWindow;
+        if (appWindow?.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.PreferredMinimumWidth  = minWidthDip;
+            presenter.PreferredMinimumHeight = minHeightDip;
+            _logService.Log(LogLevel.Info, $"SetMinimumSize (Windows): {minWidthDip}x{minHeightDip}");
+        }
+#elif HAS_UNO
+        if (!OperatingSystem.IsMacOS()) return;
+        try
+        {
+            var nsApp    = ObjCRuntime.objc_msgSend(
+                               ObjCRuntime.objc_getClass("NSApplication"),
+                               ObjCRuntime.sel_registerName("sharedApplication"));
+            var nsWindow = ObjCRuntime.objc_msgSend(nsApp,
+                               ObjCRuntime.sel_registerName("mainWindow"));
+            if (nsWindow == IntPtr.Zero) return;
+            ObjCRuntime.objc_msgSend(nsWindow,
+                ObjCRuntime.sel_registerName("setMinSize:"),
+                new ObjCRuntime.CGSize(minWidthDip, minHeightDip));
+            _logService.Log(LogLevel.Info, $"SetMinimumSize (macOS): {minWidthDip}x{minHeightDip}");
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"SetMinimumSize (macOS) failed: {ex.Message}");
+        }
+#endif
     }
 
     /// <summary>
