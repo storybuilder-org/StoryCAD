@@ -425,3 +425,4 @@ Gemfile.lock
 
 # macOS
 **/.DS_Store
+/StoryCADLib/bindings/python/.idea

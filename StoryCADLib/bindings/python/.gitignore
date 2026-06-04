@@ -1,0 +1,11 @@
+storycad/runtime/*
+!storycad/runtime/.gitkeep
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+# Staged by build-wheel.sh from repo root; canonical copies live at the top
+# of the tree. Never commit the copies here.
+LICENSE.TXT
+ADDITIONAL-LICENSE-PERMISSIONS.TXT
