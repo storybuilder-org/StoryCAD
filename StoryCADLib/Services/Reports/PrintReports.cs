@@ -66,6 +66,12 @@ public class PrintReports
             _documentText += FormatText(rtf);
         }
 
+        if (_vm.CreateRelationships)
+        {
+            rtf = _formatter.FormatCharacterRelationshipsMapReport();
+            _documentText += FormatText(rtf);
+        }
+
         if (_vm.ProblemList)
         {
             rtf = _formatter.FormatListReport(StoryItemType.Problem);

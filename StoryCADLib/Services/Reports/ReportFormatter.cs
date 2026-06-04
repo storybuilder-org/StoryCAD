@@ -863,6 +863,107 @@ public class ReportFormatter
         return output.ToString();
     }
 
+    /// <summary>
+    ///     Produces a whole-story map of every character's relationships.
+    ///     For each character it lists each relationship and the inverse
+    ///     relationship (the counterpart's view back at this character).
+    ///     Because inverse relationships are created opt-in, the inverse
+    ///     side is often absent; in that case this report states so
+    ///     explicitly rather than implying symmetry.
+    /// </summary>
+    public string FormatCharacterRelationshipsMapReport()
+    {
+        var output = new StringBuilder();
+        output.AppendLine("StoryCAD - Character Relationships Map");
+        output.AppendLine("======================================");
+        output.AppendLine();
+
+        if (_storyModel?.StoryElements == null)
+            return output.ToString();
+
+        // Characters collection holds a "(none)" placeholder StoryElement that is
+        // not a CharacterModel, so filter to actual CharacterModels.
+        var characters = _storyModel.StoryElements.Characters
+            .OfType<CharacterModel>()
+            .ToList();
+
+        if (characters.Count == 0)
+        {
+            output.AppendLine("  (no characters)");
+            return output.ToString();
+        }
+
+        foreach (var character in characters)
+        {
+            output.AppendLine(character.Name);
+
+            var relationships = character.RelationshipList;
+            if (relationships == null || relationships.Count == 0)
+            {
+                output.AppendLine("    (no relationships)");
+                output.AppendLine();
+                continue;
+            }
+
+            foreach (var rel in relationships)
+            {
+                // Look the partner up directly rather than via StoryElement.GetByGuid:
+                // a dangling relationship in a report is expected data hygiene, so a
+                // missing partner should log a Warn, not an Error. Errors alert via
+                // elmah.io and imply action is needed (issue #156).
+                string partnerName;
+                if (!_storyModel.StoryElements.StoryElementGuids.TryGetValue(rel.PartnerUuid, out var partner))
+                {
+                    Ioc.Default.GetService<ILogService>()?.Log(LogLevel.Warn,
+                        $"Relationships report: character '{character.Name}' references missing partner GUID {rel.PartnerUuid}");
+                    partnerName = "(unknown character)";
+                }
+                else
+                {
+                    partnerName = partner is { ElementType: StoryItemType.Character }
+                        ? partner.Name
+                        : "(unknown character)";
+                }
+
+                var relType = string.IsNullOrEmpty(rel.RelationType) ? "(unspecified)" : rel.RelationType;
+                output.AppendLine($"    -> {partnerName}  ({relType})");
+
+                if (!string.IsNullOrEmpty(rel.Trait) || !string.IsNullOrEmpty(rel.Attitude))
+                    output.AppendLine($"       Trait: {rel.Trait}   Attitude: {rel.Attitude}");
+
+                var notes = GetText(rel.Notes);
+                if (!string.IsNullOrEmpty(notes))
+                    output.AppendLine($"       Notes: {notes}");
+
+                // Inverse view: look up the counterpart's relationship back to this character.
+                var reciprocal = (partner as CharacterModel)?.RelationshipList?
+                    .FirstOrDefault(r => r.PartnerUuid == character.Uuid);
+                if (reciprocal == null)
+                {
+                    output.AppendLine("       Reciprocal: (no reciprocal relationship defined)");
+                }
+                else
+                {
+                    var reciprocalType = string.IsNullOrEmpty(reciprocal.RelationType)
+                        ? "(unspecified)"
+                        : reciprocal.RelationType;
+                    output.AppendLine($"       Reciprocal: {partnerName} -> {character.Name}  ({reciprocalType})");
+
+                    if (!string.IsNullOrEmpty(reciprocal.Trait) || !string.IsNullOrEmpty(reciprocal.Attitude))
+                        output.AppendLine($"          Trait: {reciprocal.Trait}   Attitude: {reciprocal.Attitude}");
+
+                    var reciprocalNotes = GetText(reciprocal.Notes);
+                    if (!string.IsNullOrEmpty(reciprocalNotes))
+                        output.AppendLine($"          Notes: {reciprocalNotes}");
+                }
+            }
+
+            output.AppendLine();
+        }
+
+        return output.ToString();
+    }
+
     public async Task<string> FormatCharacterRelationshipReport(StoryElement element)
     {
         await EnsureTemplatesLoadedAsync();

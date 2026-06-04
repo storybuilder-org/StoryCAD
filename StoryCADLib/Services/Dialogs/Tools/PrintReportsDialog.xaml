@@ -12,6 +12,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -27,6 +28,8 @@
                       IsChecked="{x:Bind PrintVM.CreateSummary, Mode=TwoWay}" Checked="EmptySynopsisWarningCheck" />
             <CheckBox Content="Story World" Grid.Row="2" Grid.Column="1" Margin="20,5,0,0"
                       IsChecked="{x:Bind PrintVM.CreateStoryWorld, Mode=TwoWay}" />
+            <CheckBox Content="Character Relationships" Grid.Column="0" Grid.Row="3" Margin="0,5,0,0"
+                      IsChecked="{x:Bind PrintVM.CreateRelationships, Mode=TwoWay}" />
         </Grid>
 
 
