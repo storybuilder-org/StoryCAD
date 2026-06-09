@@ -323,7 +323,7 @@ public partial class App : Application
         window.WindowHandle = hwnd;
 
 // SetMinimumSize must come after Activate: on macOS the NSWindow doesn't exist until then
-        window.SetMinimumSize(MainWindow, minWidthDip: 450);
+        window.SetMinimumSize(MainWindow, minWidthDip: 520);
 
 // Now Win32 centering works on a valid HWND
         window.CenterOnScreen(MainWindow);

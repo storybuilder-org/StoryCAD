@@ -429,8 +429,11 @@ public class Windowing : ObservableRecipient
         _newWndProc  = MinSizeWndProc;
         _prevWndProc = SetWindowLongPtr(WindowHandle, GWLP_WNDPROC,
                            Marshal.GetFunctionPointerForDelegate(_newWndProc));
-        _logService.Log(LogLevel.Info,
-            $"SetMinimumSize (Windows): {minWidthDip}x{minHeightDip} DIPs = {_minWidthPx}x{_minHeightPx} px (DPI={dpi})");
+        if (_prevWndProc == IntPtr.Zero)
+            _logService.Log(LogLevel.Warn, "SetMinimumSize (Windows): SetWindowLongPtr failed — minimum not enforced");
+        else
+            _logService.Log(LogLevel.Info,
+                $"SetMinimumSize (Windows): {minWidthDip}x{minHeightDip} DIPs = {_minWidthPx}x{_minHeightPx} px (DPI={dpi}), WndProc subclassed");
 #elif HAS_UNO
         if (!OperatingSystem.IsMacOS()) return;
         try
