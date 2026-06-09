@@ -414,17 +414,23 @@ public class Windowing : ObservableRecipient
 
     /// <summary>
     /// Prevents the user from resizing the window below a usable minimum.
+    /// Uses WM_GETMINMAXINFO subclassing on Windows (hard minimum) and
+    /// NSWindow.setMinSize: on macOS.
+    /// Must be called after MainWindow.Activate() on both platforms.
     /// </summary>
     public void SetMinimumSize(Window window, int minWidthDip = 400, int minHeightDip = 600)
     {
 #if WINDOWS && !HAS_UNO
-        var appWindow = window?.AppWindow;
-        if (appWindow?.Presenter is OverlappedPresenter presenter)
-        {
-            presenter.PreferredMinimumWidth  = minWidthDip;
-            presenter.PreferredMinimumHeight = minHeightDip;
-            _logService.Log(LogLevel.Info, $"SetMinimumSize (Windows): {minWidthDip}x{minHeightDip}");
-        }
+        if (WindowHandle == IntPtr.Zero) return;
+        var dpi = GetDpiForWindow(WindowHandle);
+        float scale = dpi / 96f;
+        _minWidthPx  = (int)(minWidthDip  * scale);
+        _minHeightPx = (int)(minHeightDip * scale);
+        _newWndProc  = MinSizeWndProc;
+        _prevWndProc = SetWindowLongPtr(WindowHandle, GWLP_WNDPROC,
+                           Marshal.GetFunctionPointerForDelegate(_newWndProc));
+        _logService.Log(LogLevel.Info,
+            $"SetMinimumSize (Windows): {minWidthDip}x{minHeightDip} DIPs = {_minWidthPx}x{_minHeightPx} px (DPI={dpi})");
 #elif HAS_UNO
         if (!OperatingSystem.IsMacOS()) return;
         try
@@ -577,6 +583,48 @@ public class Windowing : ObservableRecipient
     }
 
 #if WINDOWS && !HAS_UNO
+    // --- Minimum-size enforcement via WM_GETMINMAXINFO ---
+
+    private delegate IntPtr WndProcDelegate(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam);
+    private WndProcDelegate _newWndProc;
+    private IntPtr _prevWndProc;
+    private int _minWidthPx;
+    private int _minHeightPx;
+
+    private const int  GWLP_WNDPROC      = -4;
+    private const uint WM_GETMINMAXINFO  = 0x0024;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct POINT { public int x, y; }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MINMAXINFO
+    {
+        public POINT ptReserved;
+        public POINT ptMaxSize;
+        public POINT ptMaxPosition;
+        public POINT ptMinTrackSize;
+        public POINT ptMaxTrackSize;
+    }
+
+    [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW")]
+    private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+    private IntPtr MinSizeWndProc(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam)
+    {
+        if (msg == WM_GETMINMAXINFO)
+        {
+            var mmi = Marshal.PtrToStructure<MINMAXINFO>(lParam);
+            mmi.ptMinTrackSize.x = _minWidthPx;
+            mmi.ptMinTrackSize.y = _minHeightPx;
+            Marshal.StructureToPtr(mmi, lParam, false);
+        }
+        return CallWindowProc(_prevWndProc, hwnd, msg, wParam, lParam);
+    }
+
     [DllImport("user32.dll")]
     private static extern uint GetDpiForWindow(IntPtr hwnd);
 
