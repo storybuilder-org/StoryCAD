@@ -101,9 +101,9 @@ public class MacMenuBarService
 
     private void AddToggleViewButton(IntPtr mainMenu)
     {
-        IntPtr toggleMenu = CreateMenu("Toggle view");
+        IntPtr toggleMenu = CreateMenu("Toggle");
         SetAutoenablesItems(toggleMenu, false);
-        IntPtr toggleMenuItem = CreateMenuItem("Toggle view", IntPtr.Zero, "");
+        IntPtr toggleMenuItem = CreateMenuItem("Toggle", IntPtr.Zero, "");
         SetSubmenu(toggleMenuItem, toggleMenu);
         AddItemToMenu(mainMenu, toggleMenuItem);
 
