@@ -450,7 +450,22 @@ public class Windowing : ObservableRecipient
             }
             if (nsWindow == IntPtr.Zero)
             {
-                _logService.Log(LogLevel.Warn, "SetMinimumSize (macOS): no main or key window found, minimum not enforced");
+                // Neither mainWindow nor keyWindow is set yet (UNO startup timing).
+                // Fall back to the first window in the application's window list.
+                var windows = ObjCRuntime.objc_msgSend(nsApp, ObjCRuntime.sel_registerName("windows"));
+                int count = windows != IntPtr.Zero
+                    ? ObjCRuntime.objc_msgSend_int(windows, ObjCRuntime.sel_registerName("count"))
+                    : 0;
+                if (count > 0)
+                {
+                    nsWindow = ObjCRuntime.objc_msgSend_index(windows,
+                        ObjCRuntime.sel_registerName("objectAtIndex:"), 0);
+                    _logService.Log(LogLevel.Info, "SetMinimumSize (macOS): using windows[0] as fallback");
+                }
+            }
+            if (nsWindow == IntPtr.Zero)
+            {
+                _logService.Log(LogLevel.Warn, "SetMinimumSize (macOS): no window found, minimum not enforced");
                 return;
             }
             ObjCRuntime.objc_msgSend(nsWindow,
