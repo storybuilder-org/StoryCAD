@@ -443,7 +443,16 @@ public class Windowing : ObservableRecipient
                                ObjCRuntime.sel_registerName("sharedApplication"));
             var nsWindow = ObjCRuntime.objc_msgSend(nsApp,
                                ObjCRuntime.sel_registerName("mainWindow"));
-            if (nsWindow == IntPtr.Zero) return;
+            if (nsWindow == IntPtr.Zero)
+            {
+                _logService.Log(LogLevel.Info, "SetMinimumSize (macOS): mainWindow is nil, trying keyWindow");
+                nsWindow = ObjCRuntime.objc_msgSend(nsApp, ObjCRuntime.sel_registerName("keyWindow"));
+            }
+            if (nsWindow == IntPtr.Zero)
+            {
+                _logService.Log(LogLevel.Warn, "SetMinimumSize (macOS): no main or key window found, minimum not enforced");
+                return;
+            }
             ObjCRuntime.objc_msgSend(nsWindow,
                 ObjCRuntime.sel_registerName("setMinSize:"),
                 new ObjCRuntime.CGSize(minWidthDip, minHeightDip));
