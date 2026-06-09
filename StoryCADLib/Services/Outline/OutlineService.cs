@@ -16,15 +16,25 @@ public class OutlineService
     private readonly ILogService _log = Ioc.Default.GetRequiredService<ILogService>();
 
     /// <summary>
-    ///     Creates a new story model
+    ///     Creates a new story model from a template.
     /// </summary>
     /// <param name="name">name of the outline, i.e. old man and the sea</param>
     /// <param name="author">Creator of the outline</param>
-    /// <param name="selectedTemplateIndex">Template index</param>
+    /// <param name="selectedTemplateIndex">Legacy template index. Prefer the <see cref="OutlineTemplate"/> overload.</param>
     /// <returns>A story outline variable.</returns>
     internal Task<StoryModel> CreateModel(string name, string author, int selectedTemplateIndex)
+        => CreateModel(name, author, (OutlineTemplate)selectedTemplateIndex);
+
+    /// <summary>
+    ///     Creates a new story model from a template.
+    /// </summary>
+    /// <param name="name">name of the outline, i.e. old man and the sea</param>
+    /// <param name="author">Creator of the outline</param>
+    /// <param name="template">The template to build the outline from.</param>
+    /// <returns>A story outline variable.</returns>
+    internal Task<StoryModel> CreateModel(string name, string author, OutlineTemplate template)
     {
-        _log.Log(LogLevel.Info, $"Creating new model: {name} by {author} with index {selectedTemplateIndex}");
+        _log.Log(LogLevel.Info, $"Creating new model: {name} by {author} with template {template}");
 
         StoryModel model = new();
 
@@ -43,12 +53,12 @@ public class OutlineService
         model.NarratorView.Add(narrative.Node);
 
         // branch on template type
-        switch (selectedTemplateIndex)
+        switch (template)
         {
-            case 0: // Blank Outline
+            case OutlineTemplate.BlankOutline:
                 break;
 
-            case 1: // Overview and Story Problem
+            case OutlineTemplate.OverviewAndStoryProblem:
             {
                 StoryElement storyProblem = new ProblemModel("Story Problem", model, overview.Node);
                 StoryElement storyProtag = new CharacterModel("Protagonist", model, storyProblem.Node);
@@ -69,7 +79,7 @@ public class OutlineService
                 break;
             }
 
-            case 2: // Folders
+            case OutlineTemplate.Folders:
             {
                 StoryElement problems = new FolderModel("Problems", model, StoryItemType.Folder, overview.Node);
                 StoryElement characters = new FolderModel("Characters", model, StoryItemType.Folder, overview.Node);
@@ -83,7 +93,7 @@ public class OutlineService
                 break;
             }
 
-            case 3: // External and Internal Problems
+            case OutlineTemplate.ExternalAndInternalProblems:
             {
                 StoryElement external = new ProblemModel("External Problem", model, overview.Node);
                 StoryElement protag = new CharacterModel("Protagonist", model, external.Node);
@@ -119,7 +129,7 @@ public class OutlineService
                 break;
             }
 
-            case 4: // Protagonist and Antagonist
+            case OutlineTemplate.ProtagonistAndAntagonist:
             {
                 StoryElement protag = new CharacterModel("Protagonist", model, overview.Node);
                 StoryElement antag = new CharacterModel("Antagonist", model, overview.Node);
@@ -140,7 +150,7 @@ public class OutlineService
                 break;
             }
 
-            case 5: // Problems and Characters
+            case OutlineTemplate.ProblemsAndCharacters:
             {
                 StoryElement problemsFolder = new FolderModel("Problems", model, StoryItemType.Folder, overview.Node);
                 StoryElement charactersFolder =
@@ -185,7 +195,7 @@ public class OutlineService
             }
 
             default:
-                throw new ArgumentOutOfRangeException(nameof(selectedTemplateIndex));
+                throw new ArgumentOutOfRangeException(nameof(template));
         }
 
         // Reset Changed flag after template creation

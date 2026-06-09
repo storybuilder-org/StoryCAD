@@ -36,17 +36,25 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
     /// </summary>
     /// <param name="name">The name to use for the outline's Overview element.</param>
     /// <param name="author">The author name for the overview.</param>
-    /// <param name="templateIndex">Index (as a string) specifying the template to use.</param>
+    /// <param name="templateIndex">
+    ///     The template to use, given as either a template name (case-insensitive, e.g. "Folders")
+    ///     or a legacy numeric index ("0"-"5").
+    /// </param>
     /// <returns>An OperationResult containing a list of the StoryElement Guids.</returns>
     [KernelFunction]
-    [Description("Creates a new empty story outline from a template.")]
+    [Description("Creates a new empty story outline from a template. The template may be given as a " +
+                 "template name (BlankOutline, OverviewAndStoryProblem, Folders, ExternalAndInternalProblems, " +
+                 "ProtagonistAndAntagonist, ProblemsAndCharacters) or a numeric index (0-5).")]
     public async Task<OperationResult<List<Guid>>> CreateEmptyOutline(string name, string author, string templateIndex)
     {
         var response = new OperationResult<List<Guid>>();
-        if (!int.TryParse(templateIndex, out var idx))
+        if (!TryParseTemplate(templateIndex, out var template))
         {
             response.IsSuccess = false;
-            response.ErrorMessage = $"'{templateIndex}' is not a valid template index.";
+            response.ErrorMessage =
+                $"'{templateIndex}' is not a valid template. Use a template name " +
+                $"({string.Join(", ", Enum.GetNames<OutlineTemplate>())}) or a numeric index " +
+                $"(0-{(int)OutlineTemplate.ProblemsAndCharacters}).";
             return response;
         }
 
@@ -54,7 +62,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         {
             // Create a new StoryModel using the OutlineService.
             var result =
-                await OperationResult<StoryModel>.SafeExecuteAsync(outlineService.CreateModel(name, author, idx));
+                await OperationResult<StoryModel>.SafeExecuteAsync(outlineService.CreateModel(name, author, template));
             //var result = 
             if (!result.IsSuccess || result.Payload == null)
             {
@@ -77,6 +85,30 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         }
 
         return response;
+    }
+
+    /// <summary>
+    ///     Resolves a template specifier to an <see cref="OutlineTemplate"/>.
+    ///     Accepts either a member name (case-insensitive, e.g. "Folders") or a
+    ///     legacy numeric index ("0"-"5"). Unknown names and out-of-range indexes fail.
+    /// </summary>
+    private static bool TryParseTemplate(string value, out OutlineTemplate template)
+    {
+        template = default;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        // Legacy numeric index ("0".."5").
+        if (int.TryParse(value, out var idx))
+        {
+            template = (OutlineTemplate)idx;
+            return Enum.IsDefined(template);
+        }
+
+        // Template name (case-insensitive).
+        return Enum.TryParse(value, true, out template) && Enum.IsDefined(template);
     }
 
     /// <summary>

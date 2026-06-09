@@ -43,12 +43,21 @@ public class FileCreateService
     }
 
     /// <summary>
-    ///     Creates a new story file
+    ///     Creates a new story file.
     /// </summary>
     /// <param name="outlineFolder">Folder to create the file in</param>
     /// <param name="outlineName">Name of the outline file</param>
-    /// <param name="selectedTemplateIndex">Template index to use for creation</param>
-    public async Task<string> CreateFile(string outlineFolder, string outlineName, int selectedTemplateIndex)
+    /// <param name="selectedTemplateIndex">Legacy template index. Prefer the <see cref="OutlineTemplate"/> overload.</param>
+    public Task<string> CreateFile(string outlineFolder, string outlineName, int selectedTemplateIndex)
+        => CreateFile(outlineFolder, outlineName, (OutlineTemplate)selectedTemplateIndex);
+
+    /// <summary>
+    ///     Creates a new story file.
+    /// </summary>
+    /// <param name="outlineFolder">Folder to create the file in</param>
+    /// <param name="outlineName">Name of the outline file</param>
+    /// <param name="template">The template to build the outline from.</param>
+    public async Task<string> CreateFile(string outlineFolder, string outlineName, OutlineTemplate template)
     {
         _logger.Log(LogLevel.Info, "FileCreateService - Creating new file");
 
@@ -99,7 +108,7 @@ public class FileCreateService
                 var author = _preferences.Model.FirstName + " " + _preferences.Model.LastName;
 
                 // Create the new project
-                var newModel = await _outlineService.CreateModel(name, author, selectedTemplateIndex);
+                var newModel = await _outlineService.CreateModel(name, author, template);
                 _appState.CurrentDocument = new StoryDocument(newModel, storyModelFile);
 
                 // Track outline open for usage statistics
