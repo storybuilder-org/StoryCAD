@@ -14,6 +14,9 @@ using LogLevel = StoryCADLib.Services.Logging.LogLevel;
 using Microsoft.UI.Windowing;
 using Windows.Graphics;
 #endif
+#if HAS_UNO
+using StoryCADLib.Services.MacInterop;
+#endif
 
 namespace StoryCADLib.Models;
 
@@ -410,6 +413,74 @@ public class Windowing : ObservableRecipient
     }
 
     /// <summary>
+    /// Prevents the user from resizing the window below a usable minimum.
+    /// Uses WM_GETMINMAXINFO subclassing on Windows (hard minimum) and
+    /// NSWindow.setMinSize: on macOS.
+    /// Must be called after MainWindow.Activate() on both platforms.
+    /// </summary>
+    public void SetMinimumSize(Window window, int minWidthDip = 400, int minHeightDip = 600)
+    {
+#if WINDOWS && !HAS_UNO
+        if (WindowHandle == IntPtr.Zero) return;
+        var dpi = GetDpiForWindow(WindowHandle);
+        float scale = dpi / 96f;
+        _minWidthPx  = (int)(minWidthDip  * scale);
+        _minHeightPx = (int)(minHeightDip * scale);
+        _newWndProc  = MinSizeWndProc;
+        _prevWndProc = SetWindowLongPtr(WindowHandle, GWLP_WNDPROC,
+                           Marshal.GetFunctionPointerForDelegate(_newWndProc));
+        if (_prevWndProc == IntPtr.Zero)
+            _logService.Log(LogLevel.Warn, "SetMinimumSize (Windows): SetWindowLongPtr failed — minimum not enforced");
+        else
+            _logService.Log(LogLevel.Info,
+                $"SetMinimumSize (Windows): {minWidthDip}x{minHeightDip} DIPs = {_minWidthPx}x{_minHeightPx} px (DPI={dpi}), WndProc subclassed");
+#elif HAS_UNO
+        if (!OperatingSystem.IsMacOS()) return;
+        try
+        {
+            var nsApp    = ObjCRuntime.objc_msgSend(
+                               ObjCRuntime.objc_getClass("NSApplication"),
+                               ObjCRuntime.sel_registerName("sharedApplication"));
+            var nsWindow = ObjCRuntime.objc_msgSend(nsApp,
+                               ObjCRuntime.sel_registerName("mainWindow"));
+            if (nsWindow == IntPtr.Zero)
+            {
+                _logService.Log(LogLevel.Info, "SetMinimumSize (macOS): mainWindow is nil, trying keyWindow");
+                nsWindow = ObjCRuntime.objc_msgSend(nsApp, ObjCRuntime.sel_registerName("keyWindow"));
+            }
+            if (nsWindow == IntPtr.Zero)
+            {
+                // Neither mainWindow nor keyWindow is set yet (UNO startup timing).
+                // Fall back to the first window in the application's window list.
+                var windows = ObjCRuntime.objc_msgSend(nsApp, ObjCRuntime.sel_registerName("windows"));
+                int count = windows != IntPtr.Zero
+                    ? ObjCRuntime.objc_msgSend_int(windows, ObjCRuntime.sel_registerName("count"))
+                    : 0;
+                if (count > 0)
+                {
+                    nsWindow = ObjCRuntime.objc_msgSend_index(windows,
+                        ObjCRuntime.sel_registerName("objectAtIndex:"), 0);
+                    _logService.Log(LogLevel.Info, "SetMinimumSize (macOS): using windows[0] as fallback");
+                }
+            }
+            if (nsWindow == IntPtr.Zero)
+            {
+                _logService.Log(LogLevel.Warn, "SetMinimumSize (macOS): no window found, minimum not enforced");
+                return;
+            }
+            ObjCRuntime.objc_msgSend(nsWindow,
+                ObjCRuntime.sel_registerName("setMinSize:"),
+                new ObjCRuntime.CGSize(minWidthDip, minHeightDip));
+            _logService.Log(LogLevel.Info, $"SetMinimumSize (macOS): {minWidthDip}x{minHeightDip}");
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"SetMinimumSize (macOS) failed: {ex.Message}");
+        }
+#endif
+    }
+
+    /// <summary>
     /// Sets the window size in physical pixels (consistent across all platforms regardless of DPI)
     /// </summary>
     /// <param name="window">The Window to resize</param>
@@ -539,6 +610,48 @@ public class Windowing : ObservableRecipient
     }
 
 #if WINDOWS && !HAS_UNO
+    // --- Minimum-size enforcement via WM_GETMINMAXINFO ---
+
+    private delegate IntPtr WndProcDelegate(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam);
+    private WndProcDelegate _newWndProc;
+    private IntPtr _prevWndProc;
+    private int _minWidthPx;
+    private int _minHeightPx;
+
+    private const int  GWLP_WNDPROC      = -4;
+    private const uint WM_GETMINMAXINFO  = 0x0024;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct POINT { public int x, y; }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MINMAXINFO
+    {
+        public POINT ptReserved;
+        public POINT ptMaxSize;
+        public POINT ptMaxPosition;
+        public POINT ptMinTrackSize;
+        public POINT ptMaxTrackSize;
+    }
+
+    [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW")]
+    private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+    private IntPtr MinSizeWndProc(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam)
+    {
+        if (msg == WM_GETMINMAXINFO)
+        {
+            var mmi = Marshal.PtrToStructure<MINMAXINFO>(lParam);
+            mmi.ptMinTrackSize.x = _minWidthPx;
+            mmi.ptMinTrackSize.y = _minHeightPx;
+            Marshal.StructureToPtr(mmi, lParam, false);
+        }
+        return CallWindowProc(_prevWndProc, hwnd, msg, wParam, lParam);
+    }
+
     [DllImport("user32.dll")]
     private static extern uint GetDpiForWindow(IntPtr hwnd);
 

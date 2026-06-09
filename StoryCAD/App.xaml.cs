@@ -311,10 +311,8 @@ public partial class App : Application
 // Configure SerializationLock to properly detect UI thread
         SerializationLock.ConfigureUi(() => window.GlobalDispatcher?.HasThreadAccess == true);
 
-// Size first via AppWindow (safe before HWND exists)
-        //window.SetMinimumSize(MainWindow);                // Prevent manual resize below minimum
+// Size via AppWindow before activation (safe on all platforms)
        window.SetWindowSize(MainWindow, 1800, 1200);     // Initial size in physical pixels (consistent across platforms)
-       //MainWindow.AppWindow.Resize(new Windows.Graphics.SizeInt32 { Width = 1200, Height = 800 } );
 // Realize the native window so a real HWND is created by Uno
         MainWindow.Activate();
 
@@ -323,6 +321,9 @@ public partial class App : Application
 
 // Store it for later interop and Win32 sizing/centering
         window.WindowHandle = hwnd;
+
+// SetMinimumSize must come after Activate: on macOS the NSWindow doesn't exist until then
+        window.SetMinimumSize(MainWindow, minWidthDip: 520);
 
 // Now Win32 centering works on a valid HWND
         window.CenterOnScreen(MainWindow);

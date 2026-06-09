@@ -10,6 +10,10 @@ has_toc: false
 
 StoryCAD is available on Windows and macOS. All outlining and story planning features work identically across platforms, with differences only in text editing capabilities.
 
+### Menu Bar
+
+On macOS, StoryCAD provides a native menu bar at the top of the screen covering the same commands as the in-window toolbar. See [Menu Bar](../Quick Start/Menu_Bar.md) for details.
+
 ### Text Editing
 
 | Feature | Windows | macOS |

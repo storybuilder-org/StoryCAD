@@ -67,6 +67,7 @@ public class MacMenuBarService
             SetAutoenablesItems(mainMenu, false);
 
             // Build each top-level menu
+            AddToggleViewButton(mainMenu);
             AddAppMenu(mainMenu);
             AddFileMenu(mainMenu);
             AddSearchMenu(mainMenu);
@@ -97,6 +98,18 @@ public class MacMenuBarService
     }
 
     #region Menu Construction
+
+    private void AddToggleViewButton(IntPtr mainMenu)
+    {
+        IntPtr toggleMenu = CreateMenu("Toggle");
+        SetAutoenablesItems(toggleMenu, false);
+        IntPtr toggleMenuItem = CreateMenuItem("Toggle", IntPtr.Zero, "");
+        SetSubmenu(toggleMenuItem, toggleMenu);
+        AddItemToMenu(mainMenu, toggleMenuItem);
+
+        AddActionItem(toggleMenu, "Toggle view", "toggleViewButton:", "", 0,
+            () => _shellVm.TogglePaneCommand.Execute(null));
+    }
 
     private void AddAppMenu(IntPtr mainMenu)
     {

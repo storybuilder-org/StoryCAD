@@ -1631,5 +1631,187 @@ public class ShellViewModelTests
         Assert.IsTrue(propertyChangedRaised, "PropertyChanged should be raised for IsPaneOpen");
     }
 
+    // Issue #1411: stacked-mode behavior for the Navigation/Content panes.
+    // HandleSizeChanged owns the wide↔narrow decision. Transition guard:
+    // IsPaneOpen flips only when crossing the threshold; resizes within a
+    // mode leave the user's toggle choice alone.
+
+    [TestMethod]
+    public void HandleSizeChanged_WidthAbove800_NotStacked()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(1200);
+        Assert.IsFalse(shell.IsStacked);
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_WidthBelow800_Stacked()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(600);
+        Assert.IsTrue(shell.IsStacked);
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_WideToNarrowTransition_ClosesPane()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(1200);
+        shell.IsPaneOpen = true;
+
+        shell.HandleSizeChanged(600);
+
+        Assert.IsFalse(shell.IsPaneOpen, "Crossing into narrow should close the pane");
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_NarrowToWideTransition_OpensPane()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(600);
+        shell.IsPaneOpen = false;
+
+        shell.HandleSizeChanged(1200);
+
+        Assert.IsTrue(shell.IsPaneOpen, "Crossing into wide should open the pane");
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_NarrowToNarrow_DoesNotChangeIsPaneOpen()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(1200);
+        shell.IsPaneOpen = true;
+        shell.HandleSizeChanged(600);
+        Assert.IsFalse(shell.IsPaneOpen, "Precondition: narrow entry closed pane");
+
+        shell.HandleSizeChanged(500);
+
+        Assert.IsFalse(shell.IsPaneOpen, "Narrow-to-narrow resize must not change IsPaneOpen");
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_NarrowAndUserOpenedPane_DoesNotForceClose()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(1200);
+        shell.HandleSizeChanged(600);
+        shell.IsPaneOpen = true;
+
+        shell.HandleSizeChanged(500);
+
+        Assert.IsTrue(shell.IsPaneOpen, "Narrow resize must respect user-opened pane");
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_WidthAbove800_DisplayModeIsInline()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(600);
+        shell.HandleSizeChanged(1200);
+        Assert.AreEqual(Microsoft.UI.Xaml.Controls.SplitViewDisplayMode.Inline, shell.DisplayMode);
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_WidthBelow800_DisplayModeIsInline()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(1200);
+        shell.HandleSizeChanged(600);
+        Assert.AreEqual(Microsoft.UI.Xaml.Controls.SplitViewDisplayMode.Inline, shell.DisplayMode);
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_WidthAbove800_OpenPaneLengthIsThirtyPercent()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(600);
+        shell.HandleSizeChanged(1200);
+        Assert.AreEqual(360, shell.OpenPaneLength);
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_WidthBelow800_OpenPaneLengthIsWidth()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(1200);
+        shell.HandleSizeChanged(600);
+        Assert.AreEqual(600, shell.OpenPaneLength);
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_NarrowToNarrow_DoesNotRaiseDisplayModeChanged()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(600);
+
+        var displayModeChanged = false;
+        shell.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(shell.DisplayMode))
+                displayModeChanged = true;
+        };
+
+        shell.HandleSizeChanged(500);
+
+        Assert.IsFalse(displayModeChanged, "Narrow-to-narrow resize must not re-set DisplayMode");
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_WideToWide_DoesNotRaiseDisplayModeChanged()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(1200);
+
+        var displayModeChanged = false;
+        shell.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(shell.DisplayMode))
+                displayModeChanged = true;
+        };
+
+        shell.HandleSizeChanged(1500);
+
+        Assert.IsFalse(displayModeChanged, "Wide-to-wide resize must not re-set DisplayMode");
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_WhenStackedAndPaneOpen_TracksPaneToNewWidth()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(1200);
+        shell.HandleSizeChanged(700);
+        shell.IsPaneOpen = true;
+
+        shell.HandleSizeChanged(500);
+
+        Assert.AreEqual(500, shell.OpenPaneLength, "OpenPaneLength must track the new window width while stacked with pane open");
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_WhenStackedAndPaneClosed_TracksPaneToNewWidth()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(1200);
+        shell.HandleSizeChanged(700);
+        shell.IsPaneOpen = false;
+
+        shell.HandleSizeChanged(500);
+
+        Assert.AreEqual(500, shell.OpenPaneLength, "OpenPaneLength must track the new window width while stacked");
+    }
+
+    [TestMethod]
+    public void HandleSizeChanged_WhenWide_DoesNotApplyStackedSizing()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.HandleSizeChanged(600);
+        shell.HandleSizeChanged(1200);
+
+        shell.HandleSizeChanged(1500);
+
+        Assert.AreNotEqual(1500, shell.OpenPaneLength, "Wide resize must not apply the full-width stacked rule");
+    }
+
     #endregion
 }

@@ -177,7 +177,7 @@ public sealed partial class Shell : Page
 
         await ShowAdminMessagesAsync();
 
-        AdjustSplitViewPane(ShellPage.ActualWidth);
+        ShellVm.HandleSizeChanged(ShellPage.ActualWidth);
 
         //If StoryCAD was loaded from a .STBX File then instead of showing the file open menu
         //We will instead load the file instead.
@@ -375,20 +375,7 @@ public sealed partial class Shell : Page
 
     private void ShellPage_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        AdjustSplitViewPane(e.NewSize.Width);
-    }
-
-    private void AdjustSplitViewPane(double width)
-    {
-        // Always set OpenPaneLength regardless of pane state, so when the pane
-        // opens (e.g., via VisualStateManager), it has the correct width
-        if (ShellSplitView != null)
-        {
-            // In narrow mode (<800px), pane should fill entire width for full-screen toggle
-            // In wide mode (>=800px), pane should be 30% of width (min 200px)
-            var pane = width < 800 ? width : Math.Max(200, width * 0.3);
-            ShellSplitView.OpenPaneLength = pane;
-        }
+        ShellVm.HandleSizeChanged(e.NewSize.Width);
     }
 
     /* Drag-and-drop overview
