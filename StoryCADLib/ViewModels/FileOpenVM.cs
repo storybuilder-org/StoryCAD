@@ -46,7 +46,9 @@ public class FileOpenVM : ObservableRecipient
         SampleNames = _samplePaths.Select(name => name.Split('.')[4].Replace('_', ' '))
             .ToList();
 
-        //Initialize project template names
+        //Initialize project template names.
+        //Order MUST stay aligned with the OutlineTemplate enum: the ComboBox's
+        //SelectedIndex is cast directly to OutlineTemplate when creating a file.
         ProjectTemplateNames =
         [
             "Blank Outline",
@@ -211,7 +213,8 @@ public class FileOpenVM : ObservableRecipient
         if (StoryIO.IsValidPath(filePath))
         {
             _preferences.Model.LastSelectedTemplate = SelectedTemplateIndex;
-            var createdPath = await _fileCreateService.CreateFile(OutlineFolder, OutlineName, SelectedTemplateIndex);
+            var createdPath = await _fileCreateService.CreateFile(OutlineFolder, OutlineName,
+                (OutlineTemplate)SelectedTemplateIndex);
             return createdPath ?? "";
         }
 

@@ -27,9 +27,57 @@ public class StoryCADApiTests
         var result = await _api.CreateEmptyOutline(name, author, invalidTemplateIndex);
 
         // Assert
-        Assert.IsFalse(result.IsSuccess, "Result should be a failure for an invalid template index.");
-        Assert.IsTrue(result.ErrorMessage.Contains("is not a valid template index"),
-            "Error message should indicate the template index is invalid.");
+        Assert.IsFalse(result.IsSuccess, "Result should be a failure for an invalid template.");
+        Assert.IsTrue(result.ErrorMessage.Contains("is not a valid template"),
+            "Error message should indicate the template is invalid.");
+    }
+
+    [TestMethod]
+    public async Task CreateEmptyOutline_WithOutOfRangeIndex_ReturnsFailure()
+    {
+        // "99" parses as an int but is not a defined OutlineTemplate.
+        var result = await _api.CreateEmptyOutline("Test Outline", "Test Author", "99");
+
+        Assert.IsFalse(result.IsSuccess, "An out-of-range numeric index should fail.");
+        Assert.IsTrue(result.ErrorMessage.Contains("is not a valid template"));
+    }
+
+    [TestMethod]
+    public async Task CreateEmptyOutline_WithTemplateName_Succeeds()
+    {
+        // The API should accept an OutlineTemplate member name, not just a numeric index.
+        var result = await _api.CreateEmptyOutline("Test Outline", "Test Author",
+            nameof(OutlineTemplate.Folders));
+
+        Assert.IsTrue(result.IsSuccess, "A valid template name should succeed.");
+        Assert.IsNotNull(result.Payload);
+        Assert.IsTrue(result.Payload.Count > 0);
+    }
+
+    [TestMethod]
+    public async Task CreateEmptyOutline_TemplateNameMatchesLegacyIndex()
+    {
+        // "Folders" and its legacy index "2" must produce the same outline structure.
+        var byName = await _api.CreateEmptyOutline("By Name", "Test Author",
+            nameof(OutlineTemplate.Folders));
+        var byIndex = await _api.CreateEmptyOutline("By Index", "Test Author",
+            ((int)OutlineTemplate.Folders).ToString());
+        var blank = await _api.CreateEmptyOutline("Blank", "Test Author",
+            nameof(OutlineTemplate.BlankOutline));
+
+        Assert.IsTrue(byName.IsSuccess && byIndex.IsSuccess && blank.IsSuccess);
+        Assert.AreEqual(byIndex.Payload.Count, byName.Payload.Count,
+            "Creating by name and by legacy index should yield identical element counts.");
+        Assert.AreNotEqual(blank.Payload.Count, byName.Payload.Count,
+            "The Folders template should differ from a blank outline.");
+    }
+
+    [TestMethod]
+    public async Task CreateEmptyOutline_TemplateName_IsCaseInsensitive()
+    {
+        var result = await _api.CreateEmptyOutline("Test Outline", "Test Author", "folders");
+
+        Assert.IsTrue(result.IsSuccess, "Template name matching should be case-insensitive.");
     }
 
     [TestMethod]

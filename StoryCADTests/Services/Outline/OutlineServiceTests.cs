@@ -114,6 +114,30 @@ public class OutlineServiceTests
     }
 
     /// <summary>
+    ///     The OutlineTemplate overload and the legacy int overload are equivalent:
+    ///     the enum value is pinned to the historical index, so both build the same outline.
+    /// </summary>
+    [TestMethod]
+    public async Task CreateModel_EnumOverload_MatchesLegacyIndex()
+    {
+        var byEnum = await _outlineService.CreateModel("Enum", "Author", OutlineTemplate.Folders);
+        var byIndex = await _outlineService.CreateModel("Index", "Author", (int)OutlineTemplate.Folders);
+
+        Assert.AreEqual(byIndex.StoryElements.Count, byEnum.StoryElements.Count,
+            "The enum and legacy-int overloads should build the same outline.");
+    }
+
+    /// <summary>
+    ///     An OutlineTemplate value with no matching case (e.g. an out-of-range cast) throws.
+    /// </summary>
+    [TestMethod]
+    public async Task CreateModel_UndefinedTemplate_Throws()
+    {
+        await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(
+            async () => await _outlineService.CreateModel("Bad", "Author", (OutlineTemplate)99));
+    }
+
+    /// <summary>
     ///     Tests that WriteModel successfully writes a StoryModel to disk.
     ///     Verifies that the file is created and contains expected content (i.e., the outline name).
     /// </summary>
