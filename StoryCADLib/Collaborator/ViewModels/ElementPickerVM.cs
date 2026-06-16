@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryCADLib.Models;
+using StoryCADLib.Services.Collaborator.Contracts;
 
 namespace StoryCADLib.Collaborator.ViewModels;
 
@@ -14,6 +15,8 @@ public class ElementPickerVM
     ///     Instance of element picker
     /// </summary>
     private ContentDialog dialog;
+
+    private IStoryCADAPI? _storyApi;
 
     /// <summary>
     ///     Currently selected item
@@ -60,7 +63,8 @@ public class ElementPickerVM
     /// <param name="currentSelection">GUID of currently selected element for pre-selection</param>
     /// <returns>The GUID of element the user picked</returns>
     public async Task<string> ShowPicker(StoryModel Model,
-        XamlRoot XAMLRoot, StoryItemType? Type = null, string label = null, Guid? currentSelection = null)
+        XamlRoot XAMLRoot, StoryItemType? Type = null, string label = null, Guid? currentSelection = null,
+        IStoryCADAPI? storyApi = null)
     {
         //Reset VM
         SelectedType = null;
@@ -70,6 +74,7 @@ public class ElementPickerVM
         StoryModel = Model;
         PickerLabel = label;
         CurrentSelection = currentSelection;
+        _storyApi = storyApi;
 
         //Spawn new picker, passing this VM so Page uses the same instance
         var ui = new Views.ElementPicker(this);
@@ -105,50 +110,34 @@ public class ElementPickerVM
     /// </summary>
     public void CreateNode()
     {
-        /*
-            StoryElement NewElement;
-            StoryItemType type;
-            if (ForcedType == null)
-            {
-                //Get elements
-                ComboBoxItem Type = SelectedType as ComboBoxItem;
-                type = Enum.Parse<StoryItemType>(Type.Content.ToString()!,
-                    true);
-            }
-            else
-            {
-                type = (StoryItemType)ForcedType;
-            }
+        if (_storyApi == null || StoryModel == null)
+            return;
 
+        StoryItemType type;
+        if (ForcedType != null)
+        {
+            type = (StoryItemType)ForcedType;
+        }
+        else
+        {
+            var comboItem = SelectedType as ComboBoxItem;
+            if (comboItem == null) return;
+            type = Enum.Parse<StoryItemType>(comboItem.Content.ToString()!, true);
+        }
 
-            throw new NotImplementedException("This code needs to updated.");
-            /*
-            switch (type)
-            {
-                case StoryItemType.Problem:
-                    NewElement = new ProblemModel(NewNodeName, StoryModel,);
-                    break;
-                case StoryItemType.Character:
-                    NewElement = new CharacterModel(NewNodeName, StoryModel);
-                    break;
-                case StoryItemType.Setting:
-                    NewElement = new SettingModel(NewNodeName, StoryModel);
-                    break;
-                case StoryItemType.Scene:
-                    NewElement = new SceneModel(NewNodeName, StoryModel);
-                    break;
-                default:
-                    //Throw an exception if we are asked to create a node type we don't expect
-                    throw new Exception(
-                        $"Unexpected element type {type}");
-            }
+        var overview = StoryModel.StoryElements
+            .FirstOrDefault(e => e.ElementType == StoryItemType.StoryOverview);
+        if (overview == null) return;
 
-            //Persist node to tree and set as selected element
-            StoryNodeItem Node = new(NewElement, StoryModel.ExplorerView[0]);
-            SelectedElement = NewElement;
+        var name = string.IsNullOrWhiteSpace(NewNodeName) ? $"New {type}" : NewNodeName;
+        var addResult = _storyApi.AddElement(type, overview.Uuid.ToString(), name);
+        if (!addResult.IsSuccess) return;
 
-            //Close popup
-            if (dialog is not null)
-                dialog.Hide();*/
+        var lookupResult = _storyApi.GetStoryElement(addResult.Payload);
+        if (lookupResult?.IsSuccess == true && lookupResult.Payload != null)
+        {
+            SelectedElement = lookupResult.Payload;
+            dialog?.Hide();
+        }
     }
 }
