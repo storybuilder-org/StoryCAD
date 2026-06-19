@@ -114,4 +114,12 @@
     <ItemGroup>
       <UnoSplashScreen Remove="Assets\Splash\splash_screen.svg" />
     </ItemGroup>
+
+    <!-- Conditionally load collaborator if present.-->
+    <PropertyGroup Condition="Exists('..\..\Collaborator\CollaboratorLib\CollaboratorLib.csproj')">
+        <DefineConstants>$(DefineConstants);COLLABORATOR</DefineConstants>
+    </PropertyGroup>
+    <ItemGroup Condition="Exists('..\..\Collaborator\CollaboratorLib\CollaboratorLib.csproj')">
+        <ProjectReference Include="..\..\Collaborator\CollaboratorLib\CollaboratorLib.csproj" />
+    </ItemGroup>
 </Project>

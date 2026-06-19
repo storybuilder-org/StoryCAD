@@ -1,6 +1,4 @@
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.Loader;
 using Windows.ApplicationModel.AppExtensions;
 using Windows.ApplicationModel.Resources.Core;
 using Windows.Storage;
@@ -16,40 +14,38 @@ namespace StoryCADLib.Services.Collaborator;
 
 public class CollaboratorService
 {
-    private const string PluginFileName = "CollaboratorLib.dll";
-    private const string EnvPluginDirVar = "STORYCAD_PLUGIN_DIR";
     private readonly AppState _appState;
     private readonly AutoSaveService _autoSaveService;
     private readonly BackupService _backupService;
     private readonly ILogService _logService;
     private readonly PreferenceService _preferenceService;
-    private ICollaborator _collaboratorInterface; // Interface-based reference
-    private Assembly CollabAssembly;
-    private AssemblyLoadContext _pluginLoadContext; // Custom load context for plugin dependencies
+
+    // Factory supplied by the composition root (StoryCAD head) when CollaboratorLib
+    // is compiled in. Null when Collaborator is absent (public/free build), which is
+    // how StoryCAD runs Collaborator-free. A factory (not a single instance) lets us
+    // create a fresh Collaborator per session and dispose it on close.
+    private readonly Func<ICollaborator> _collaboratorFactory;
+    private ICollaborator _collaboratorInterface; // Current session instance (null between sessions)
     public Window CollaboratorWindow; // The secondary window for Collaborator
-#pragma warning disable CS0169, CS0414 // CS0169: unused on macOS, CS0414: assigned but unused on Windows - tracked for Issue #1126
-    private bool dllExists;     // Used in Windows-only FindDll() method
-#pragma warning restore CS0169, CS0414
-#pragma warning disable CS0649 // Field will be assigned in future macOS implementation (Issue #1126)
-    private string dllPath;     // Used in ConnectCollaborator() - will be needed for macOS (Issue #1126)
-#pragma warning restore CS0649
 
     public CollaboratorService(AppState appState, ILogService logService, PreferenceService preferenceService,
-        AutoSaveService autoSaveService, BackupService backupService)
+        AutoSaveService autoSaveService, BackupService backupService, Func<ICollaborator> collaboratorFactory = null)
     {
         _appState = appState;
         _logService = logService;
         _preferenceService = preferenceService;
         _autoSaveService = autoSaveService;
         _backupService = backupService;
+        _collaboratorFactory = collaboratorFactory;
     }
 
     #region Collaborator calls
 
     /// <summary>
-    ///     Gets whether a collaborator is available
+    ///     Gets whether a collaborator is available (i.e. CollaboratorLib was compiled in
+    ///     and a factory was registered at the composition root).
     /// </summary>
-    public bool HasCollaborator => _collaboratorInterface != null;
+    public bool HasCollaborator => _collaboratorFactory != null;
 
 
     /// <summary>
@@ -58,9 +54,9 @@ public class CollaboratorService
     /// </summary>
     public async void OpenCollaborator()
     {
-        if (_collaboratorInterface == null)
+        if (_collaboratorFactory == null)
         {
-            _logService.Log(LogLevel.Warn, "Collaborator plugin not available - plugin DLL not found or failed to load");
+            _logService.Log(LogLevel.Warn, "Collaborator not available - no Collaborator implementation registered");
             return;
         }
 
@@ -101,6 +97,9 @@ public class CollaboratorService
                 CollaboratorWindow = new Window { Content = hostRoot, Title = "Story Collaborator" };
                 CollaboratorWindow.Activate();
 
+                // Create a fresh Collaborator instance for this session (disposed on close).
+                _collaboratorInterface = _collaboratorFactory();
+
                 // Let the plugin drive the provided frame
                 // DIAG-55: Log before OpenAsync - verify both references match
                 _logService.Log(LogLevel.Info, $"DIAG-55: Before OpenAsync - storyModel hash={RuntimeHelpers.GetHashCode(storyModel)}, api.CurrentModel hash={RuntimeHelpers.GetHashCode(api.CurrentModel)}");
@@ -124,148 +123,6 @@ public class CollaboratorService
                 _logService.Log(LogLevel.Error, "Failed to create Collaborator window");
             }
         }
-    }
-
-    #endregion
-
-    #region Collaboratorlib connection
-
-    /// <summary>
-    ///     If the plugin is active, connect to CollaboratorLib and create an instance
-    ///     of Collaborator.
-    /// </summary>
-    public void ConnectCollaborator()
-    {
-        // Use custom load context to resolve plugin dependencies when an explicit path is provided
-        _pluginLoadContext = new PluginLoadContext(dllPath);
-        CollabAssembly = _pluginLoadContext.LoadFromAssemblyPath(dllPath);
-        _logService.Log(LogLevel.Info, "Loaded CollaboratorLib.dll with custom load context");
-
-        // Get the type of the Collaborator class
-        var collaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
-        if (collaboratorType == null)
-        {   
-            _logService.Log(LogLevel.Error, "Could not find Collaborator type in assembly");
-            return;
-        }
-
-        // Create an instance of the Collaborator class using parameterless constructor
-        _logService.Log(LogLevel.Info, "Creating Collaborator instance.");
-
-        var constructor = collaboratorType.GetConstructor(Type.EmptyTypes);
-        if (constructor == null)
-        {
-            _logService.Log(LogLevel.Error, "Could not find parameterless constructor for Collaborator");
-            throw new InvalidOperationException("Collaborator must have a parameterless constructor");
-        }
-
-        var collaborator = constructor.Invoke(null);
-        _logService.Log(LogLevel.Info, "Collaborator instance created.");
-
-        // Cast to interface
-        _collaboratorInterface = collaborator as ICollaborator;
-        if (_collaboratorInterface == null)
-        {
-            _logService.Log(LogLevel.Error, "Collaborator does not implement ICollaborator interface");
-            throw new InvalidOperationException("CollaboratorLib must implement ICollaborator interface");
-        }
-
-        _logService.Log(LogLevel.Info, "Collaborator successfully loaded with ICollaborator interface.");
-    }
-
-    public async Task<bool> CollaboratorEnabled()
-    {
-        if (!OperatingSystem.IsWindows())
-        {
-            _logService.Log(LogLevel.Warn, "Collaborator interface not supported on this platform");
-            return false;
-        }
-        
-        // COLLAB_DEBUG environment variable provides runtime control over Collaborator loading
-        // - "0" = disable loading (useful for testing StoryCAD without Collaborator overhead)
-        // - "1" or unset = enable loading (normal operation)
-        //
-        // Why environment variable instead of #if DEBUG?
-        // - Runtime flexibility: can disable/enable without rebuilding
-        // - Test scenarios: can test Store deployment behavior in debug builds
-        // - CI/CD: can run tests with/without Collaborator via environment config
-        var collabDebug = Environment.GetEnvironmentVariable("COLLAB_DEBUG");
-        if (collabDebug == "0")
-        {
-            _logService.Log(LogLevel.Info, "Collaborator disabled by COLLAB_DEBUG=0");
-            return false;
-        }
-
-        // Allow loading if:
-        // 1. Developer build (bundled CollaboratorLib) or
-        // 2. STORYCAD_PLUGIN_DIR is set (for JIT debugging without F5)
-        var hasPluginDir = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(EnvPluginDirVar));
-
-        return hasPluginDir && await FindDll();
-    }
-
-    /// <summary>
-    ///     Locates CollaboratorLib.dll using STORYCAD_PLUGIN_DIR environment variable.
-    ///
-    ///     For development/debugging:
-    ///     - Set STORYCAD_PLUGIN_DIR to CollaboratorLib build output directory
-    ///     - Example: D:\dev\src\Collaborator\CollaboratorLib\bin\x64\Debug\net10.0-windows10.0.22621
-    ///
-    ///     For production deployment:
-    ///     - Plugin will be bundled in MSIX package at AppContext.BaseDirectory
-    ///     - See issue #30 for production deployment strategy
-    /// </summary>
-    /// <returns>True if CollaboratorLib.dll was found and is accessible, false otherwise.</returns>
-    private async Task<bool> FindDll()
-    {
-#if !HAS_UNO
-        await Task.CompletedTask; // Async signature required for cross-platform compatibility
-        _logService.Log(LogLevel.Info, "Locating CollaboratorLib...");
-
-        if (TryResolveFromEnv(out var envPath))
-        {
-            dllPath = envPath;
-            dllExists = true;
-            _logService.Log(LogLevel.Info, $"Found via {EnvPluginDirVar}: {dllPath}");
-            return true;
-        }
-
-        _logService.Log(LogLevel.Info, "CollaboratorLib.dll not found. Set STORYCAD_PLUGIN_DIR environment variable.");
-        dllPath = null;
-        dllExists = false;
-        return false;
-#else
-        // macOS plugin loading tracked in Issue #1126 and #1135
-        await Task.CompletedTask;  // Placeholder until macOS implementation
-        _logService.Log(LogLevel.Error, "Collaborator is not supported on this platform.");
-        return false;
-#endif
-    }
-
-    private bool TryResolveFromEnv(out string path)
-    {
-        path = null;
-        var dir = Environment.GetEnvironmentVariable(EnvPluginDirVar);
-        if (string.IsNullOrWhiteSpace(dir))
-        {
-            return false;
-        }
-
-        var candidate = Path.Combine(dir, PluginFileName);
-        if (!File.Exists(candidate))
-        {
-            _logService.Log(LogLevel.Warn, $"{EnvPluginDirVar} set but file missing: {candidate}");
-            return false;
-        }
-
-        var pdb = Path.ChangeExtension(candidate, ".pdb");
-        if (!File.Exists(pdb))
-        {
-            _logService.Log(LogLevel.Warn, $"PDB missing next to DLL: {pdb}");
-        }
-
-        path = candidate;
-        return true;
     }
 
     #endregion
@@ -325,15 +182,8 @@ public class CollaboratorService
             _logService.Log(LogLevel.Info, "Closed collaborator window");
         }
 
-        // Null objects to deallocate them
         _collaboratorInterface = null;
-        CollabAssembly = null;
         _logService.Log(LogLevel.Info, "Nulled collaborator objects");
-
-        // Run garbage collection to clean up any remnants
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        _logService.Log(LogLevel.Info, "Garbage collection finished.");
     }
 
     public void CollaboratorClosed()
@@ -359,6 +209,7 @@ public class CollaboratorService
             _logService.Log(LogLevel.Error, $"Collaborator Close failed: {ex.Message}");
         }
 
+        _collaboratorInterface = null;
         CollaboratorWindow = null;
 
         // Reload current ViewModel from Model to pick up Collaborator's changes
@@ -392,45 +243,4 @@ public class CollaboratorService
     }
 
     #endregion
-
-    /// <summary>
-    /// Custom AssemblyLoadContext that resolves plugin dependencies from the plugin directory.
-    /// Uses AssemblyDependencyResolver to find dependencies next to the plugin DLL.
-    /// </summary>
-    private class PluginLoadContext : AssemblyLoadContext
-    {
-        private readonly AssemblyDependencyResolver _resolver;
-
-        public PluginLoadContext(string pluginPath)
-        {
-            _resolver = new AssemblyDependencyResolver(pluginPath);
-        }
-
-        protected override Assembly Load(AssemblyName assemblyName)
-        {
-            // Simple strategy: prefer what's already loaded, otherwise load from plugin
-            // This ensures StoryCADLib and other shared assemblies use the same instance
-            // while allowing plugin-specific dependencies to load from plugin directory
-
-            var existingAssembly = Default.Assemblies
-                .FirstOrDefault(a => AssemblyName.ReferenceMatchesDefinition(
-                    a.GetName(), assemblyName));
-
-            if (existingAssembly != null)
-            {
-                // Assembly already loaded in default context - use that instance
-                return null;
-            }
-
-            // Not in default context - try to load from plugin directory
-            string assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
-            if (assemblyPath != null)
-            {
-                return LoadFromAssemblyPath(assemblyPath);
-            }
-
-            // Not found anywhere - let runtime handle it
-            return null;
-        }
-    }
 }
