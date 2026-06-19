@@ -6,8 +6,8 @@ Where StoryCAD is going, how the team plans new features, and how you can sugges
 
 ## The short version
 
-- StoryCAD is currently at version **4.0.2**. The next public release is **4.1**.
-- After 4.1, the team is planning **4.2** and **4.3**; both already have work assigned.
+- StoryCAD is currently at version **4.2**. The next public release is **4.3**.
+- Work on **4.3** is already underway. It covers the optional **Collaborator** AI plugin (including macOS support) and **subscription tiers**. You can track progress on the GitHub milestone page; nothing is planned publicly beyond 4.3 yet.
 - All public planning lives on **GitHub**: <https://github.com/storybuilder-org/StoryCAD>.
 - Releases ship when they're ready. There is **no fixed calendar** for any version, by design.
 
@@ -23,9 +23,9 @@ Click any release to see the issues in it. Closed issues are done; open issues a
 
 To see only the issues in a specific release, use a search like:
 
-**<https://github.com/storybuilder-org/StoryCAD/issues?q=is%3Aissue+milestone%3A%22Release+4.1%22>**
+**<https://github.com/storybuilder-org/StoryCAD/issues?q=is%3Aissue+milestone%3A%22Release+4.3%22>**
 
-Replace `Release+4.1` with `Release+4.2` or `Release+4.3` for future releases.
+Replace `Release+4.3` with another release name (for example `Release+4.1` or `Release+4.2`) to see a different release.
 
 You don't need a GitHub account to read any of this; everything in the StoryCAD repository is public.
 
@@ -102,7 +102,7 @@ StoryCAD has an optional AI plugin called **Collaborator** that, when it's relea
 | What you want | Where to go |
 |---|---|
 | All planned releases | <https://github.com/storybuilder-org/StoryCAD/milestones> |
-| What's in 4.1 specifically | <https://github.com/storybuilder-org/StoryCAD/milestone/4> |
+| What's in 4.3 specifically | <https://github.com/storybuilder-org/StoryCAD/milestone/6> |
 | File a bug or feature request | <https://github.com/storybuilder-org/StoryCAD/issues/new> |
 | Suggest an idea informally | `#feature-suggestions` on Discord |
 | Vote on quarterly priorities (Pro) | `#feature-voting` on Discord |
