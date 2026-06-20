@@ -149,18 +149,6 @@ public class StoryWorldViewModelTests
     }
 
     [TestMethod]
-    public void OntologyList_LoadedFromListData()
-    {
-        // Arrange
-        var viewModel = Ioc.Default.GetRequiredService<StoryWorldViewModel>();
-        var listData = Ioc.Default.GetRequiredService<ListData>();
-
-        // Assert
-        Assert.IsNotNull(viewModel.OntologyList);
-        Assert.AreSame(listData.ListControlSource["Ontology"], viewModel.OntologyList);
-    }
-
-    [TestMethod]
     public void SystemTypeList_LoadedFromListData()
     {
         // Arrange

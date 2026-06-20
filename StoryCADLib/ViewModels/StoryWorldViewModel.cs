@@ -919,13 +919,6 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
     /// </summary>
     public ObservableCollection<string> WorldTypeList { get; private set; }
 
-    // 6 Axis lists for advanced options
-    public ObservableCollection<string> OntologyList { get; private set; }
-    public ObservableCollection<string> WorldRelationList { get; private set; }
-    public ObservableCollection<string> RuleTransparencyList { get; private set; }
-    public ObservableCollection<string> ScaleOfDifferenceList { get; private set; }
-    public ObservableCollection<string> AgencySourceList { get; private set; }
-    public ObservableCollection<string> ToneLogicList { get; private set; }
     public ObservableCollection<string> SystemTypeList { get; private set; }
 
     #endregion
@@ -1327,12 +1320,6 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
         // Load ComboBox source collections from ListData
         var _lists = listData.ListControlSource;
         WorldTypeList = _lists["WorldType"];
-        OntologyList = _lists["Ontology"];
-        WorldRelationList = _lists["WorldRelation"];
-        RuleTransparencyList = _lists["RuleTransparency"];
-        ScaleOfDifferenceList = _lists["ScaleOfDifference"];
-        AgencySourceList = _lists["AgencySource"];
-        ToneLogicList = _lists["ToneLogic"];
         SystemTypeList = _lists["SystemType"];
     }
 
