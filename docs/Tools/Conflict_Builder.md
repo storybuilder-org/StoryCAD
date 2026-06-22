@@ -7,31 +7,42 @@ parent: Tools
 has_toc: false
 ---
 ## Conflict Builder
-Conflict Builder
-
 
 ![](../media/ConflictBuilderDialog.png)
 
+The Conflict Builder is a dialog invoked by the **Conflict** button on the Protagonist and Antagonist tabs of the Problem form. It helps you find and name the specific conflict driving your story's central problem.
 
-The Conflict Builder tool, invoked by buttons on the Protagonist and Antagonist tabs of the Problem Form.
+### What the taxonomy is
 
-Conflict Categories
-Conflict Builder classifies conflicts according to a series of categories and subcategories and provides examples of each. The categories are as follows:
+The Conflict Builder's categories come from two sources. The core five (Relationship, Information, Interest, Structural, and Value) are drawn from the five-category conflict framework that conflict resolution practitioners use to classify disputes by root cause rather than surface behavior. Criminal Activities and Criminal Psychology were added as a fiction-specific extension, because crime drives a large portion of plotted fiction and doesn't fit cleanly into the original five categories.
 
-Criminal activities
-The subcategories of criminal activity makes it easier to understand the motives and patterns of each.
-Criminal psychology
+### How to use it
 
-This alternative way to approach crime focuses on the character of the criminal.
-Identify conflicts
-Identity conflict is a psychological phenomenon in which an individual experiences a discrepancy between their self-perception and their perceived social identity. This can occur when an individual feels that their personal values or beliefs are not aligned with the expectations or norms of the group or society to which they belong. Identity conflicts can lead to feelings of confusion, anxiety, and distress. They can also result in behaviors such as resistance, rebellion, or withdrawal from the group or society.
-Relationship Conflicts
-Relationship conflicts occur because of negative behavior patterns by or both parties,  strong negative emotions, misconceptions and stereotypes, and poor (or no) communication. They frequently involve pressure from other non-relationship issues (such as money) or third-parties. Relationship problems often follow a downward spiral of destructive actions. 
-Information Conflicts
-Information conflicts occur when people lack the information necessary to make good choices, are accidentally or intentionally misinformed, disagree on what data is important or how the data  should be interpreted. They frequently involve poor communication between the adversaries.
-Interest Conflicts
-Interest conflicts are caused by competition over perceived incompatible needs. Conflicts of interest result when one or more of the parties believe that in order to satisfy his or her needs, the needs and interests of an opponent must be sacrificed- that a zero-sum game is being played. Interest-based conflict will commonly be expressed as power struggles and rank pulling. Interest conflicts may occur over substantive issues (such as money, physical resources, time, property crimes, etc.); procedural issues (the way the dispute is to be resolved); and psychological issues (assault and crimes of person, dominance, perceptions of trust, fairness, desire for participation, respect, etc.)
-Structural Conflicts
-Structural conflicts are caused by forces external to the people in dispute. Limited physical resources or authority, geographic constraints (distance or proximity), time (too little or too much), organizational changes, and so forth can make structural conflict seem like a crisis. One possible outcome of a structural conflict- rare in fiction- is cooperation or a structural change. 
-Value Conflicts
-Value conflicts are caused by perceived or actual incompatible belief systems. Values are beliefs that people use to give meaning to their lives. People frequently coach values in terms of right and wrong. Value disputes arise when people attempt to force one set of values on others or lay claim to exclusive value systems that do not allow for divergent beliefs. Value conflicts are generally intractable.
+Open the Conflict Builder from either the Protagonist or Antagonist tab of the Problem form. Choose a category that describes the type of friction between your characters. Then pick a subcategory and select or adapt an example that fits your story.
+
+The example you choose populates the Protagonist Conflict or Antagonist Conflict field on the Problem form. These fields describe the specific clash each party faces — not the overall problem, but the particular pressure point that makes the conflict personal to that character.
+
+A protagonist facing a land dispute (Interest > Ownership) and an antagonist who views the same dispute as a matter of family honor (Value > Family) are in the same story but in different conflicts. The Conflict Builder lets you name both.
+
+### Categories
+
+**Relationship**
+Relationship conflicts arise from negative behavior patterns, strong emotions, poor communication, or pressure from third parties. They tend to follow a downward spiral of destructive actions.
+
+**Information**
+Information conflicts arise when people lack data to make good decisions, are deliberately or accidentally misinformed, or disagree about how to interpret the same data.
+
+**Interest**
+Interest conflicts are driven by competition over needs each party believes are incompatible. Often expressed as power struggles. Subcategories cover substantive issues (money, resources), procedural issues (how a dispute is resolved), and psychological issues (fairness, respect, trust).
+
+**Structural**
+Structural conflicts are imposed by external forces: limited resources, geographic constraints, organizational changes, time pressure. The conflict isn't between the people so much as between the people and their circumstances.
+
+**Value**
+Value conflicts arise from incompatible belief systems. They're the most resistant to resolution because they aren't about facts or resources — they're about what each party believes is right.
+
+**Criminal Activities**
+This extension category covers conflicts driven by criminal behavior, organized by crime type. Useful for crime fiction, thrillers, and any story where a law is broken.
+
+**Criminal Psychology**
+This extension category approaches crime from the offender's psychology rather than the act itself. Useful for character-driven stories where the antagonist's inner life matters as much as what they do.
