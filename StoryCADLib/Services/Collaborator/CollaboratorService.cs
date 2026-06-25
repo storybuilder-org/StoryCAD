@@ -70,6 +70,13 @@ public class CollaboratorService
             return;
         }
 
+        bool devEnabled = Environment.GetEnvironmentVariable("COLLAB_DEV_ENABLED") == "1";
+        if (!devEnabled && !IsPurchaseVerified())
+        {
+            // TODO #30: show purchase prompt
+            return;
+        }
+
         // Create the API instance for Collaborator to use
         var outlineService = Ioc.Default.GetService<OutlineService>();
         var listData = Ioc.Default.GetService<ListData>();
@@ -124,6 +131,8 @@ public class CollaboratorService
             }
         }
     }
+
+    private static bool IsPurchaseVerified() => false; // TODO #30: wire real JWT/Store verification
 
     #endregion
 
