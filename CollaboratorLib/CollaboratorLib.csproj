@@ -12,8 +12,6 @@
 		<WarningsAsErrors>UNO0001</WarningsAsErrors>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<UnoFeatures>
-			Hosting;
-			Logging;
 		</UnoFeatures>
 	</PropertyGroup>
 
@@ -51,9 +49,7 @@
 		<PackageReference Include="NLog.Extensions.Logging" />
 		<PackageReference Include="Elmah.Io.NLog" />
 		<PackageReference Include="Elmah.Io.Client" />
-		<PackageReference Include="Uno.Extensions.Hosting.WinUI" />
-		<PackageReference Include="Uno.Extensions.Logging.WinUI" />
-		<PackageReference Include="NRTFTree-Async" />
+<PackageReference Include="NRTFTree-Async" />
 	</ItemGroup>
 
 

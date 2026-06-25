@@ -5,7 +5,6 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using NLog.Extensions.Logging;
 using StoryCADLib.Models;
 using StoryCADLib.Services.Collaborator.Contracts;
-using StoryCollaborator.Infrastructure.Hosting;
 using StoryCollaborator.Services;
 using StoryCollaborator.Models;
 using StoryCollaborator.Workflows;
@@ -94,15 +93,17 @@ public class Collaborator : ICollaborator
         _hostWindow = hostWindow;
         _auditLogger = logger;
 
-        // Initialize host and resolve services
-        var host = CollaboratorHost.GetOrCreate();
-        var services = host.Services;
-
-        _logger = services.GetRequiredService<ILogger<Collaborator>>();
-        _loggerFactory = services.GetRequiredService<ILoggerFactory>();
+        // Initialize logging and services
+        _loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder.SetMinimumLevel(LogLevel.Information);
+            if (NLog.LogManager.Configuration != null)
+                builder.AddNLog(NLog.LogManager.Configuration);
+        });
+        _logger = _loggerFactory.CreateLogger<Collaborator>();
         _elementResolver = new ElementResolver(api, _loggerFactory.CreateLogger<ElementResolver>());
-        _sessionService = services.GetRequiredService<SessionService>();
-        _workflowService = services.GetRequiredService<WorkflowService>();
+        _sessionService = new SessionService(_loggerFactory.CreateLogger<SessionService>());
+        _workflowService = new WorkflowService(_loggerFactory.CreateLogger<WorkflowService>(), _loggerFactory, _sessionService);
 
         // Initialize Semantic Kernel lazily (expensive operation, ~7 min if done in constructor)
         EnsureKernelInitialized();
@@ -110,9 +111,6 @@ public class Collaborator : ICollaborator
         // Start session and configure workflow
         _sessionService.StartSession();
         _workflowService.SetContext(api, model);
-
-        // Ensure host is fully started before creating window (required for Region setup)
-        await CollaboratorHost.EnsureStartedAsync();
 
         // Navigate the host-provided frame to the shell
         hostFrame.Navigate(typeof(StoryCADLib.Collaborator.Views.WorkflowShell));
