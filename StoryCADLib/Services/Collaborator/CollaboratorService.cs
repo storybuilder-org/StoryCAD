@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Windows.ApplicationModel.AppExtensions;
 using Windows.ApplicationModel.Resources.Core;
 using Windows.Storage;
@@ -64,8 +63,6 @@ public class CollaboratorService
 
         // Get the current StoryModel from AppState
         var storyModel = _appState.CurrentDocument?.Model;
-        // DIAG-55: Log StoryModel identity from AppState
-        _logService.Log(LogLevel.Info, $"DIAG-55: AppState.CurrentDocument.Model hash={RuntimeHelpers.GetHashCode(storyModel)}");
         if (storyModel == null)
         {
             _logService.Log(LogLevel.Error, "No StoryModel available - no document is open");
@@ -103,8 +100,6 @@ public class CollaboratorService
             // Create a fresh Collaborator instance for this session (disposed on close).
             _collaboratorInterface = _collaboratorFactory();
 
-            // DIAG-55: Log before OpenAsync - verify both references match
-            _logService.Log(LogLevel.Info, $"DIAG-55: Before OpenAsync - storyModel hash={RuntimeHelpers.GetHashCode(storyModel)}, api.CurrentModel hash={RuntimeHelpers.GetHashCode(_storyCADApi.CurrentModel)}");
             var filePath = _appState.CurrentDocument?.FilePath ?? string.Empty;
             await _collaboratorInterface.OpenAsync(_storyCADApi, storyModel, CollaboratorWindow, hostFrame, filePath, _logService);
         }
