@@ -81,6 +81,10 @@ public class CollaboratorService
 
         _storyCADApi.SetCurrentModel(storyModel);
 
+        // Pause background services while Collaborator holds the model
+        _backupService.StopTimedBackup();
+        _autoSaveService.StopAutoSave();
+
         try
         {
             // Host supplies the root frame for navigation
