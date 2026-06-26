@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
+using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator;
 using StoryCADLib.Services.Collaborator.Contracts;
@@ -20,6 +21,7 @@ public class CollaboratorServiceTests
             Ioc.Default.GetRequiredService<PreferenceService>(),
             Ioc.Default.GetRequiredService<AutoSaveService>(),
             Ioc.Default.GetRequiredService<BackupService>(),
+            Ioc.Default.GetRequiredService<StoryCADApi>(),
             factory);
 
     /// <summary>

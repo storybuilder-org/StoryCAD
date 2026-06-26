@@ -8,7 +8,6 @@ using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator.Contracts;
-using StoryCADLib.Services.Outline;
 
 namespace StoryCADLib.Services.Collaborator;
 
@@ -19,6 +18,7 @@ public class CollaboratorService
     private readonly BackupService _backupService;
     private readonly ILogService _logService;
     private readonly PreferenceService _preferenceService;
+    private readonly StoryCADApi _storyCADApi;
 
     // Factory supplied by the composition root (StoryCAD head) when CollaboratorLib
     // is compiled in. Null when Collaborator is absent (public/free build), which is
@@ -29,13 +29,15 @@ public class CollaboratorService
     public Window CollaboratorWindow; // The secondary window for Collaborator
 
     public CollaboratorService(AppState appState, ILogService logService, PreferenceService preferenceService,
-        AutoSaveService autoSaveService, BackupService backupService, Func<ICollaborator> collaboratorFactory = null)
+        AutoSaveService autoSaveService, BackupService backupService, StoryCADApi storyCADApi,
+        Func<ICollaborator> collaboratorFactory = null)
     {
         _appState = appState;
         _logService = logService;
         _preferenceService = preferenceService;
         _autoSaveService = autoSaveService;
         _backupService = backupService;
+        _storyCADApi = storyCADApi;
         _collaboratorFactory = collaboratorFactory;
     }
 
@@ -77,58 +79,46 @@ public class CollaboratorService
             return;
         }
 
-        // Create the API instance for Collaborator to use
-        var outlineService = Ioc.Default.GetService<OutlineService>();
-        var listData = Ioc.Default.GetService<ListData>();
-        var controlData = Ioc.Default.GetService<ControlData>();
-        var toolsData = Ioc.Default.GetService<ToolsData>();
-        if (outlineService != null && listData != null && controlData != null && toolsData != null)
+        _storyCADApi.SetCurrentModel(storyModel);
+
+        try
         {
-            var api = new StoryCADApi(outlineService, listData, controlData, toolsData);
-            api.SetCurrentModel(storyModel);
-            // DIAG-55: Log API.CurrentModel after SetCurrentModel
-            _logService.Log(LogLevel.Info, $"DIAG-55: After SetCurrentModel - api.CurrentModel hash={RuntimeHelpers.GetHashCode(api.CurrentModel)}");
-
-            try
+            // Host supplies the root frame for navigation
+            var hostRoot = new StoryCADLib.Collaborator.Views.CollaboratorHostRoot();
+            var hostFrame = hostRoot.RootFrameControl;
+            if (hostFrame == null)
             {
-                // Host supplies the root frame for navigation
-                var hostRoot = new StoryCADLib.Collaborator.Views.CollaboratorHostRoot();
-                var hostFrame = hostRoot.RootFrameControl;
-                if (hostFrame == null)
-                {
-                    _logService.Log(LogLevel.Error, "Collaborator host frame not found");
-                    return;
-                }
-
-                // Create the window on the host side
-                CollaboratorWindow = new Window { Content = hostRoot, Title = "Story Collaborator" };
-                CollaboratorWindow.Activate();
-
-                // Create a fresh Collaborator instance for this session (disposed on close).
-                _collaboratorInterface = _collaboratorFactory();
-
-                // Let the plugin drive the provided frame
-                // DIAG-55: Log before OpenAsync - verify both references match
-                _logService.Log(LogLevel.Info, $"DIAG-55: Before OpenAsync - storyModel hash={RuntimeHelpers.GetHashCode(storyModel)}, api.CurrentModel hash={RuntimeHelpers.GetHashCode(api.CurrentModel)}");
-                var filePath = _appState.CurrentDocument?.FilePath ?? string.Empty;
-                await _collaboratorInterface.OpenAsync(api, storyModel, CollaboratorWindow, hostFrame, filePath, _logService);
-            }
-            catch (Exception ex)
-            {
-                _logService.Log(LogLevel.Error, $"Failed to open Collaborator: {ex.Message}");
+                _logService.Log(LogLevel.Error, "Collaborator host frame not found");
                 return;
             }
 
-            if (CollaboratorWindow != null)
-            {
-                CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
-                // Window is already activated in WindowManager.CreateWindowAsync
-                _logService.Log(LogLevel.Info, "Collaborator window opened");
-            }
-            else
-            {
-                _logService.Log(LogLevel.Error, "Failed to create Collaborator window");
-            }
+            // Create the window on the host side
+            CollaboratorWindow = new Window { Content = hostRoot, Title = "Story Collaborator" };
+            CollaboratorWindow.Activate();
+
+            // Create a fresh Collaborator instance for this session (disposed on close).
+            _collaboratorInterface = _collaboratorFactory();
+
+            // DIAG-55: Log before OpenAsync - verify both references match
+            _logService.Log(LogLevel.Info, $"DIAG-55: Before OpenAsync - storyModel hash={RuntimeHelpers.GetHashCode(storyModel)}, api.CurrentModel hash={RuntimeHelpers.GetHashCode(_storyCADApi.CurrentModel)}");
+            var filePath = _appState.CurrentDocument?.FilePath ?? string.Empty;
+            await _collaboratorInterface.OpenAsync(_storyCADApi, storyModel, CollaboratorWindow, hostFrame, filePath, _logService);
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Error, $"Failed to open Collaborator: {ex.Message}");
+            return;
+        }
+
+        if (CollaboratorWindow != null)
+        {
+            CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
+            // Window is already activated in WindowManager.CreateWindowAsync
+            _logService.Log(LogLevel.Info, "Collaborator window opened");
+        }
+        else
+        {
+            _logService.Log(LogLevel.Error, "Failed to create Collaborator window");
         }
     }
 
