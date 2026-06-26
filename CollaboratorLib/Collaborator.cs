@@ -24,7 +24,6 @@ public class Collaborator : ICollaborator
     private ILogger<Collaborator>? _logger;
     private ILoggerFactory? _loggerFactory;
     private SessionService? _sessionService;
-    private WorkflowService? _workflowService;
 
     // Semantic Kernel (lazy initialized - expensive to create)
     private Kernel? _kernel;
@@ -103,14 +102,11 @@ public class Collaborator : ICollaborator
         _logger = _loggerFactory.CreateLogger<Collaborator>();
         _elementResolver = new ElementResolver(api, _loggerFactory.CreateLogger<ElementResolver>());
         _sessionService = new SessionService(_loggerFactory.CreateLogger<SessionService>());
-        _workflowService = new WorkflowService(_loggerFactory.CreateLogger<WorkflowService>(), _loggerFactory, _sessionService);
 
         // Initialize Semantic Kernel lazily (expensive operation, ~7 min if done in constructor)
         EnsureKernelInitialized();
 
-        // Start session and configure workflow
         _sessionService.StartSession();
-        _workflowService.SetContext(api, model);
 
         // Navigate the host-provided frame to the shell
         hostFrame.Navigate(typeof(StoryCADLib.Collaborator.Views.WorkflowShell));
@@ -301,8 +297,6 @@ public class Collaborator : ICollaborator
     {
         if (_disposed) return;
         _disposed = true;
-
-        _workflowService?.ClearWorkflow();
 
         // Null assignments commented out - likely unnecessary since Collaborator
         // won't outlive its fields. The _disposed flag prevents re-entry.
