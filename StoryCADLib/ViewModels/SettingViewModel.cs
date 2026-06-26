@@ -19,6 +19,12 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable, IRel
     private bool _changeable; // process property changes for this story element
     private bool _changed; // this story element has changed
 
+    /// <summary>Backing for the Images tab gallery.</summary>
+    public ElementImageGallery ImageGallery { get; }
+
+    /// <summary>Tiles bound by the Images tab's gallery control.</summary>
+    public ObservableCollection<ImageGalleryItem> Images => ImageGallery.Items;
+
     #endregion
 
     #region Properties
@@ -218,6 +224,16 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable, IRel
         }
     }
 
+    /// <summary>Marks the element dirty when images or captions change.</summary>
+    private void OnImagesChanged()
+    {
+        if (_changeable)
+        {
+            _changed = true;
+            ShellViewModel.ShowChange();
+        }
+    }
+
     private void LoadModel()
     {
         _changeable = false;
@@ -243,6 +259,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable, IRel
         Touch = Model.Touch;
         SmellTaste = Model.SmellTaste;
         Notes = Model.Notes;
+        ImageGallery.Load(Model.Images);
 
         _changeable = true;
     }
@@ -269,6 +286,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable, IRel
             Model.Touch = Touch;
             Model.SmellTaste = SmellTaste;
             Model.Notes = Notes;
+            Model.Images = ImageGallery.ToModelList();
         }
         catch (Exception ex)
         {
@@ -296,11 +314,12 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable, IRel
 
     #region Constructor
 
-    public SettingViewModel(ILogService logger, ListData listData, Windowing windowing)
+    public SettingViewModel(ILogService logger, ListData listData, Windowing windowing, ImageService imageService)
     {
         _logger = logger;
         _listData = listData;
         _windowing = windowing;
+        ImageGallery = new ElementImageGallery(imageService, logger, OnImagesChanged);
 
         Locale = string.Empty;
         Season = string.Empty;

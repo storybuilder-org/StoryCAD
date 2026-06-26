@@ -1,3 +1,4 @@
+using System.Text;
 using Windows.Graphics.Printing;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
@@ -6,6 +7,7 @@ using StoryCADLib.Services;
 using StoryCADLib.Services.Dialogs.Tools;
 using StoryCADLib.Services.Locking;
 using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Outline;
 using StoryCADLib.Services.Reports;
 
 namespace StoryCADLib.ViewModels.Tools;
@@ -173,6 +175,19 @@ public partial class PrintReportDialogVM : ObservableRecipient
     {
         get => _webList;
         set => SetProperty(ref _webList, value);
+    }
+
+    private bool _includeImagesAppendix = true;
+
+    /// <summary>
+    ///     When set, the PDF report appends an "Images" section showing the
+    ///     attached pictures (with captions) of each selected Character, Setting,
+    ///     and Scene. No-op when no selected element has images.
+    /// </summary>
+    public bool IncludeImagesAppendix
+    {
+        get => _includeImagesAppendix;
+        set => SetProperty(ref _includeImagesAppendix, value);
     }
 
     private List<StoryNodeItem> _selectedNodes = new();
@@ -400,10 +415,216 @@ public partial class PrintReportDialogVM : ObservableRecipient
                 }
             }
 
+            if (IncludeImagesAppendix)
+            {
+                DrawImageAppendix(document, font, paint, lineHeight);
+            }
+
             document.Close();
         }
 
         return memoryStream.ToArray();
+    }
+
+    /// <summary>
+    ///     Appends an "Images" section to the PDF: for each selected Character,
+    ///     Setting, and Scene that has attached pictures, draws a heading and the
+    ///     images (scaled to the printable width) with their captions, paginating
+    ///     onto fresh pages as needed. Images decode straight from their stored
+    ///     bytes via SkiaSharp (WebP/PNG/JPEG), so no transcode is required.
+    ///     No-op when no selected element has images.
+    /// </summary>
+    private void DrawImageAppendix(SKDocument document, SKFont font, SKPaint paint, float lineHeight)
+    {
+        var sections = GatherAppendixImages();
+        if (sections.Count == 0)
+        {
+            return;
+        }
+
+        var pageBottom = PdfPageHeight - PdfMarginBottom;
+        var maxImageWidth = PdfPageWidth - PdfMarginLeft * 2;
+        var maxImageHeight = pageBottom - PdfMarginTop - lineHeight * 2;
+        var sampling = new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.None);
+
+        using var headingFont = new SKFont(SKTypeface.Default, PdfFontSize + 2f);
+
+        SKCanvas canvas = null;
+        float y = 0;
+
+        void StartPage()
+        {
+            canvas = document.BeginPage(PdfPageWidth, PdfPageHeight);
+            y = PdfMarginTop + lineHeight;
+        }
+
+        void FinishPage()
+        {
+            document.EndPage();
+            canvas?.Dispose();
+            canvas = null;
+        }
+
+        StartPage();
+        canvas.DrawText("Images", PdfMarginLeft, y, SKTextAlign.Left, headingFont, paint);
+        y += lineHeight * 2;
+
+        try
+        {
+            foreach (var section in sections)
+            {
+                // Keep a heading with at least its following image: break first if cramped.
+                if (y + lineHeight * 2 > pageBottom)
+                {
+                    FinishPage();
+                    StartPage();
+                }
+
+                canvas.DrawText(section.Heading, PdfMarginLeft, y, SKTextAlign.Left, headingFont, paint);
+                y += lineHeight * 1.5f;
+
+                foreach (var storyImage in section.Images)
+                {
+                    byte[] bytes = ImageService.GetBytes(storyImage);
+                    if (bytes.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    using SKImage image = SKImage.FromEncodedData(SKData.CreateCopy(bytes));
+                    if (image is null)
+                    {
+                        continue;
+                    }
+
+                    var (drawWidth, drawHeight) = ScaleToFit(image.Width, image.Height, maxImageWidth, maxImageHeight);
+
+                    var captionLines = string.IsNullOrEmpty(storyImage.Caption)
+                        ? new List<string>()
+                        : WrapText(storyImage.Caption, font, maxImageWidth);
+                    var blockHeight = drawHeight + captionLines.Count * lineHeight + lineHeight;
+
+                    if (y + blockHeight > pageBottom)
+                    {
+                        FinishPage();
+                        StartPage();
+                    }
+
+                    canvas.DrawImage(image, SKRect.Create(PdfMarginLeft, y, drawWidth, drawHeight), sampling, paint);
+                    y += drawHeight + lineHeight * 0.25f;
+
+                    foreach (var captionLine in captionLines)
+                    {
+                        y += lineHeight;
+                        canvas.DrawText(captionLine, PdfMarginLeft, y, SKTextAlign.Left, font, paint);
+                    }
+
+                    y += lineHeight; // gap before the next image
+                }
+            }
+        }
+        finally
+        {
+            FinishPage();
+        }
+    }
+
+    /// <summary>
+    ///     Collects the selected Character/Setting/Scene elements that have
+    ///     attached images, paired with a display heading, in selection order.
+    /// </summary>
+    private List<(string Heading, List<StoryImage> Images)> GatherAppendixImages()
+    {
+        var sections = new List<(string, List<StoryImage>)>();
+        var model = _appState.CurrentDocument?.Model;
+        if (model is null)
+        {
+            return sections;
+        }
+
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        foreach (var node in SelectedNodes)
+        {
+            StoryElement element = null;
+            try
+            {
+                element = outlineService.GetStoryElementByGuid(model, node.Uuid);
+            }
+            catch (InvalidOperationException)
+            {
+                // Element not found; skip it.
+            }
+
+            if (element is null)
+            {
+                continue;
+            }
+
+            List<StoryImage> images = element switch
+            {
+                CharacterModel character => character.Images,
+                SettingModel setting => setting.Images,
+                SceneModel scene => scene.Images,
+                _ => null
+            };
+
+            if (images is { Count: > 0 })
+            {
+                sections.Add(($"{node.Type}: {element.Name}", images));
+            }
+        }
+
+        return sections;
+    }
+
+    /// <summary>
+    ///     Scales a source image to fit within the given bounds, preserving aspect
+    ///     ratio and never enlarging it beyond its natural size. Pure; testable.
+    /// </summary>
+    internal static (float Width, float Height) ScaleToFit(int sourceWidth, int sourceHeight,
+        float maxWidth, float maxHeight)
+    {
+        if (sourceWidth <= 0 || sourceHeight <= 0)
+        {
+            return (0f, 0f);
+        }
+
+        var scale = Math.Min(maxWidth / sourceWidth, maxHeight / sourceHeight);
+        scale = Math.Min(scale, 1f); // don't upscale a small image into a blurry one
+        return (sourceWidth * scale, sourceHeight * scale);
+    }
+
+    /// <summary>
+    ///     Word-wraps text to fit within <paramref name="maxWidth"/> using the
+    ///     given font's measured widths. Long single words are kept whole.
+    /// </summary>
+    private static List<string> WrapText(string text, SKFont font, float maxWidth)
+    {
+        var lines = new List<string>();
+        var current = new StringBuilder();
+
+        foreach (var word in text.Split(' '))
+        {
+            var candidate = current.Length == 0 ? word : current + " " + word;
+            if (current.Length > 0 && font.MeasureText(candidate) > maxWidth)
+            {
+                lines.Add(current.ToString());
+                current.Clear();
+                current.Append(word);
+            }
+            else
+            {
+                current.Clear();
+                current.Append(candidate);
+            }
+        }
+
+        if (current.Length > 0)
+        {
+            lines.Add(current.ToString());
+        }
+
+        return lines;
     }
 
     private async Task ExportReportsToPdfAsync()

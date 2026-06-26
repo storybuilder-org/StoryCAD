@@ -98,6 +98,7 @@ public static class BootStrapper
         Services.AddSingleton<AppState>();
         Services.AddSingleton<EditFlushService>();
         Services.AddSingleton<Windowing>();
+        Services.AddSingleton<ImageService>();
         Services.AddSingleton<FileOpenService>();
         Services.AddSingleton<FileCreateService>();
         Services.AddSingleton<ToolValidationService>();

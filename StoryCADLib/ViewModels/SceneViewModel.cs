@@ -13,10 +13,11 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
 {
     #region Constructors
 
-    public SceneViewModel(ILogService logger, AppState appState)
+    public SceneViewModel(ILogService logger, AppState appState, ImageService imageService)
     {
         _logger = logger;
         _appState = appState;
+        ImageGallery = new ElementImageGallery(imageService, logger, OnImagesChanged);
         Date = string.Empty;
         Time = string.Empty;
         Setting = Guid.Empty;
@@ -87,6 +88,12 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
     private readonly AppState _appState;
     private bool _changeable; // process property changes for this story element
     private bool _changed; // this story element has changed
+
+    /// <summary>Backing for the Images tab gallery.</summary>
+    public ElementImageGallery ImageGallery { get; }
+
+    /// <summary>Tiles bound by the Images tab's gallery control.</summary>
+    public ObservableCollection<ImageGalleryItem> Images => ImageGallery.Items;
 
     #endregion
 
@@ -515,6 +522,16 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
         }
     }
 
+    /// <summary>Marks the element dirty when images or captions change.</summary>
+    private void OnImagesChanged()
+    {
+        if (_changeable)
+        {
+            _changed = true;
+            ShellViewModel.ShowChange();
+        }
+    }
+
     private void LoadModel()
     {
         _changeable = false;
@@ -581,6 +598,7 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
         Realization = Model.Realization;
         Review = Model.Review;
         Notes = Model.Notes;
+        ImageGallery.Load(Model.Images);
         UpdateViewpointCharacterTip();
         _changeable = true;
 
@@ -690,6 +708,7 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
         Model.Realization = Realization;
         Model.Review = Review;
         Model.Notes = Notes;
+        Model.Images = ImageGallery.ToModelList();
 
         //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
         //Messenger.Send(new IsChangedMessage(Changed));

@@ -25,6 +25,12 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable, IR
     private readonly AppState _appState;
     private StoryModel _storyModel;
 
+    /// <summary>Backing for the Images tab gallery.</summary>
+    public ElementImageGallery ImageGallery { get; }
+
+    /// <summary>Tiles bound by the Images tab's gallery control.</summary>
+    public ObservableCollection<ImageGalleryItem> Images => ImageGallery.Items;
+
     #endregion
 
     #region Properties
@@ -643,7 +649,19 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable, IR
             CharacterRelationships.Add(_relation);
         }
 
+        ImageGallery.Load(Model.Images);
+
         _changeable = true;
+    }
+
+    /// <summary>Marks the element dirty when images or captions change.</summary>
+    private void OnImagesChanged()
+    {
+        if (_changeable)
+        {
+            _changed = true;
+            ShellViewModel.ShowChange();
+        }
     }
 
     public void SaveModel()
@@ -713,6 +731,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable, IR
         Model.Notes = Notes;
         Model.Flaw = Flaw;
         Model.BackStory = BackStory;
+        Model.Images = ImageGallery.ToModelList();
     }
 
     public void ReloadFromModel()
@@ -1045,11 +1064,13 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable, IR
 
     #region Constructors
 
-    public CharacterViewModel(ILogService logger, AppState appState, Windowing windowing, ListData listData)
+    public CharacterViewModel(ILogService logger, AppState appState, Windowing windowing, ListData listData,
+        ImageService imageService)
     {
         _logger = logger;
         _appState = appState;
         _windowing = windowing;
+        ImageGallery = new ElementImageGallery(imageService, logger, OnImagesChanged);
 
         try
         {

@@ -1,6 +1,8 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml;
 using StoryCADLib.Services;
 using StoryCADLib.Services.Messages;
 using StoryCADLib.Services.Navigation;
@@ -84,6 +86,20 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IRelo
         set => _model = value;
     }
 
+    // Image gallery, shown only when this element is a Notes (not a Folder/Section).
+    public ElementImageGallery ImageGallery { get; }
+
+    public ObservableCollection<ImageGalleryItem> Images => ImageGallery.Items;
+
+    /// <summary>True when the current element is a Notes node.</summary>
+    public bool IsNotes => Model?.ElementType == StoryItemType.Notes;
+
+    /// <summary>Plain (untabbed) notes view: shown for Folder and Section.</summary>
+    public Visibility PlainNotesVisibility => IsNotes ? Visibility.Collapsed : Visibility.Visible;
+
+    /// <summary>Tabbed Notes + Images view: shown only for Notes.</summary>
+    public Visibility NotesTabsVisibility => IsNotes ? Visibility.Visible : Visibility.Collapsed;
+
     #endregion
 
     #region Methods
@@ -141,6 +157,15 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IRelo
         }
 
         Description = Model.Description;
+        ImageGallery.Load(Model.Images);
+
+        // ElementType is fixed per element, but the page is cached and reused
+        // across Folder/Section/Notes, so refresh the type-driven visibility.
+        // base. is required: the local OnPropertyChanged(object, args) handler
+        // hides the base string raiser from overload resolution.
+        base.OnPropertyChanged(nameof(IsNotes));
+        base.OnPropertyChanged(nameof(PlainNotesVisibility));
+        base.OnPropertyChanged(nameof(NotesTabsVisibility));
 
         _changeable = true;
     }
@@ -153,6 +178,16 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IRelo
 
         // Write RYG file
         Model.Description = Description;
+        Model.Images = ImageGallery.ToModelList();
+    }
+
+    private void OnImagesChanged()
+    {
+        if (_changeable)
+        {
+            _changed = true;
+            ShellViewModel.ShowChange();
+        }
     }
 
     public void ReloadFromModel()
@@ -167,10 +202,11 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IRelo
 
     #region Constructor
 
-    public FolderViewModel(ILogService logger)
+    public FolderViewModel(ILogService logger, ImageService imageService)
     {
         _logger = logger;
         Description = string.Empty;
+        ImageGallery = new ElementImageGallery(imageService, logger, OnImagesChanged);
         PropertyChanged += OnPropertyChanged;
     }
 

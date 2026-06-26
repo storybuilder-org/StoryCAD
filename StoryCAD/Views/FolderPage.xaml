@@ -18,11 +18,33 @@
         <TextBox Header="Name" Grid.Row="0"
                  Text="{x:Bind FolderVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  viewModels:TextBoxFocus.IsFocused="{x:Bind FolderVm.IsTextBoxFocused, Mode=TwoWay}"/>
+        <!-- Folder and Section: plain notes field, untabbed (unchanged look). -->
         <usercontrols:RichEditBoxExtended Header="Notes" Grid.Row="1"
+                                          Visibility="{x:Bind FolderVm.PlainNotesVisibility, Mode=OneWay}"
                                           RtfText="{x:Bind FolderVm.Description, Mode=TwoWay}"
                                           AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                           VerticalAlignment="Stretch"
                                           ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+        <!-- Notes element only: tabbed Notes + Images. -->
+        <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False"
+                 IsAddTabButtonVisible="False"
+                 Visibility="{x:Bind FolderVm.NotesTabsVisibility, Mode=OneWay}">
+            <TabView.TabItems>
+                <TabViewItem Header="Notes" IsClosable="False"
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                    <usercontrols:RichEditBoxExtended
+                        RtfText="{x:Bind FolderVm.Description, Mode=TwoWay}"
+                        AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
+                        VerticalAlignment="Stretch"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                </TabViewItem>
+                <TabViewItem Header="Images" IsClosable="False"
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                    <usercontrols:ImageGalleryControl ItemsSource="{x:Bind FolderVm.Images, Mode=OneWay}" />
+                </TabViewItem>
+            </TabView.TabItems>
+        </TabView>
     </Grid>
 
 </Page>

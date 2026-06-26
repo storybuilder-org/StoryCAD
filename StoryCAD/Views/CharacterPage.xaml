@@ -428,6 +428,12 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
+
+                <TabViewItem Header="Images" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                    <usercontrols:ImageGalleryControl ItemsSource="{x:Bind CharVm.Images, Mode=OneWay}" />
+                </TabViewItem>
             </TabView.TabItems>
         </TabView>
     </Grid>
