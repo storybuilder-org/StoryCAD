@@ -72,6 +72,7 @@ public class CollaboratorService
         bool devEnabled = Environment.GetEnvironmentVariable("COLLAB_DEV_ENABLED") == "1";
         if (!devEnabled && !IsPurchaseVerified())
         {
+            _logService.Log(LogLevel.Warn, "Collaborator blocked: purchase not verified and COLLAB_DEV_ENABLED != 1");
             // TODO #30: show purchase prompt
             return;
         }
