@@ -14,9 +14,10 @@ using StoryCADLib.Collaborator.Models;
 namespace StoryCollaborator;
 
 /// <summary>
-/// Collaborator is the main entry point for the StoryCollaborator plugin.
-/// It implements ICollaborator to integrate with StoryCAD and delegates
-/// to specialized services for specific functionality.
+/// Implements <see cref="ICollaborator"/> for StoryCAD's AI features.
+/// Call <see cref="OpenAsync"/> to start a session: it initializes Semantic Kernel,
+/// navigates the host frame to <c>WorkflowShell</c>, populates the workflow menu,
+/// and wires navigation and callback handlers for the UI.
 /// </summary>
 public class Collaborator : ICollaborator
 {
@@ -76,7 +77,7 @@ public class Collaborator : ICollaborator
     public async Task<Window> OpenAsync(IStoryCADAPI api, StoryModel model, Window hostWindow, Frame hostFrame, string filePath, StoryCADLib.Services.Logging.ILogService? logger = null)
     {
 #if DEBUG
-        // Force debugger attachment for plugin debugging (controlled by COLLAB_DEBUG env var)
+        // Attach or break into debugger when COLLAB_DEBUG=1.
         if (CollabDebug)
         {
             if (!System.Diagnostics.Debugger.IsAttached)

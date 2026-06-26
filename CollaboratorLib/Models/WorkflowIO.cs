@@ -3,9 +3,8 @@ using System.Collections.Generic;
 namespace StoryCollaborator.Models
 {
     /// <summary>
-    /// Defines the input and output contract for a workflow.
-    /// This replaces the StoryPropertyTemplate approach with a cleaner,
-    /// element-based model that works directly with the StoryCAD API.
+    /// Defines the input and output contract for a workflow: required inputs,
+    /// optional inputs, outputs, and the example-list names the workflow needs injected.
     /// </summary>
     public class WorkflowIO
     {
