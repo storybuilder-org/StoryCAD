@@ -22,6 +22,8 @@ namespace StoryCollaborator
 
     internal class WorkflowRunner
     {
+        private static readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromMinutes(3) };
+
         private Kernel _kernel;
         private IStoryCADAPI _storyApi;
         private StoryModel storyModel;
@@ -884,9 +886,7 @@ namespace StoryCollaborator
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", proxyToken);
             request.Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
 
-            using var httpClient = new HttpClient();
-            httpClient.Timeout = TimeSpan.FromMinutes(3);
-            var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 
             string? templateHash = null;
