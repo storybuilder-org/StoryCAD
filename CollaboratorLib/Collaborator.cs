@@ -47,7 +47,7 @@ public class Collaborator : ICollaborator
 
     // Debug control - initialized from env var, tests can override directly
     internal static bool CollabDebug =
-        Environment.GetEnvironmentVariable("COLLAB_DEBUG")?.ToLower() != "false";
+        Environment.GetEnvironmentVariable("COLLAB_DEBUG") == "1";
 
     public Collaborator()
     {
