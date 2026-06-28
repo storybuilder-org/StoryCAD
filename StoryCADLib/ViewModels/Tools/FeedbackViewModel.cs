@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.UI.Xaml;
 using Octokit;
 using StoryCADLib.Services;
 using StoryCADLib.Services.Json;
@@ -8,6 +10,9 @@ namespace StoryCADLib.ViewModels.Tools;
 [Microsoft.UI.Xaml.Data.Bindable]
 public class FeedbackViewModel : ObservableRecipient
 {
+    private const int TitleMinLength = 10;
+    private const int BodyMinLength = 20;
+
     /// <summary>
     ///     Creates feedback on GitHub
     /// </summary>
@@ -41,9 +46,19 @@ public class FeedbackViewModel : ObservableRecipient
                               """;
             }
 
+            Issue.Body += $"\nFeedback ID: {_preferenceService.Model.Email.Substring(0, 5)}";
 
-            Issue.Body += $"\nFeedback ID: {_preferenceService
-                .Model.Email.Substring(0, 5)}";
+            try
+            {
+                var logFile = Path.Combine(_appState.RootDirectory, "logs",
+                    $"StoryCAD.{DateTime.Now:yyyy-MM-dd}.log");
+                if (File.Exists(logFile))
+                {
+                    var lines = File.ReadLines(logFile).TakeLast(250);
+                    Issue.Body += $"\n\n<details><summary>Session Log</summary>\n\n```\n{string.Join("\n", lines)}\n```\n</details>";
+                }
+            }
+            catch { }
 
             await client.Issue.Create("storybuilder-org", "StoryCAD", Issue);
         }
@@ -59,11 +74,13 @@ public class FeedbackViewModel : ObservableRecipient
     private protected GitHubClient client = new(new ProductHeaderValue("StoryCADFeedbackBot"));
     private readonly ILogService _logService;
     private readonly PreferenceService _preferenceService;
+    private readonly AppState _appState;
 
-    public FeedbackViewModel(ILogService logService, PreferenceService preferenceService)
+    public FeedbackViewModel(ILogService logService, PreferenceService preferenceService, AppState appState)
     {
         _logService = logService;
         _preferenceService = preferenceService;
+        _appState = appState;
         Task.Run(async () =>
         {
             Doppler doppler = new();
@@ -78,7 +95,15 @@ public class FeedbackViewModel : ObservableRecipient
     public string Title
     {
         get => _title;
-        set => SetProperty(ref _title, value);
+        set
+        {
+            SetProperty(ref _title, value);
+            TitleError = _title.Length < TitleMinLength
+                ? $"Title must be at least {TitleMinLength} characters."
+                : string.Empty;
+            TitleErrorVisibility = string.IsNullOrEmpty(TitleError) ? Visibility.Collapsed : Visibility.Visible;
+            UpdateIsValid();
+        }
     }
 
     private string _title = "";
@@ -89,7 +114,15 @@ public class FeedbackViewModel : ObservableRecipient
     public string Body
     {
         get => _body;
-        set => SetProperty(ref _body, value);
+        set
+        {
+            SetProperty(ref _body, value);
+            BodyError = _body.Length < BodyMinLength
+                ? $"Description must be at least {BodyMinLength} characters."
+                : string.Empty;
+            BodyErrorVisibility = string.IsNullOrEmpty(BodyError) ? Visibility.Collapsed : Visibility.Visible;
+            UpdateIsValid();
+        }
     }
 
     private string _body = "";
@@ -160,6 +193,44 @@ public class FeedbackViewModel : ObservableRecipient
     }
 
     private string _ExtraStepsPlaceholderText = "";
+
+    public bool IsValid
+    {
+        get => _isValid;
+        private set => SetProperty(ref _isValid, value);
+    }
+    private bool _isValid;
+
+    public string TitleError
+    {
+        get => _titleError;
+        private set => SetProperty(ref _titleError, value);
+    }
+    private string _titleError = string.Empty;
+
+    public string BodyError
+    {
+        get => _bodyError;
+        private set => SetProperty(ref _bodyError, value);
+    }
+    private string _bodyError = string.Empty;
+
+    public Visibility TitleErrorVisibility
+    {
+        get => _titleErrorVisibility;
+        private set => SetProperty(ref _titleErrorVisibility, value);
+    }
+    private Visibility _titleErrorVisibility = Visibility.Collapsed;
+
+    public Visibility BodyErrorVisibility
+    {
+        get => _bodyErrorVisibility;
+        private set => SetProperty(ref _bodyErrorVisibility, value);
+    }
+    private Visibility _bodyErrorVisibility = Visibility.Collapsed;
+
+    private void UpdateIsValid() =>
+        IsValid = _title.Length >= TitleMinLength && _body.Length >= BodyMinLength;
 
     #endregion
 }

@@ -13,3 +13,5 @@ Occasionally, you may want to leave feedback, suggestions, or report issues you 
 
 If you wish to suggest a feature or report a problem with StoryCAD, then there is a report feedback button. This will open a menu where you can explain your feature and how it should work or about the issue you ran into and how it happened.
 ![](../media/ShellBar.png)
+
+The title must be at least 10 characters and the description at least 20 characters before the Submit button becomes active. The more detail you provide, the faster the issue can be addressed. Your current session log is attached automatically to help with diagnosis.
