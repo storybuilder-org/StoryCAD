@@ -946,6 +946,7 @@ public class ShellViewModel : ObservableRecipient
         DramaticSituationsCommand.NotifyCanExecuteChanged();
         StockScenesCommand.NotifyCanExecuteChanged();
         PreferencesCommand.NotifyCanExecuteChanged();
+        ReportFeedbackCommand.NotifyCanExecuteChanged();
         PrintReportsCommand.NotifyCanExecuteChanged();
         ExportReportsToPdfCommand.NotifyCanExecuteChanged();
         ScrivenerReportsCommand.NotifyCanExecuteChanged();

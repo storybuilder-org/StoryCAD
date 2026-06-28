@@ -54,7 +54,15 @@ public class FeedbackViewModel : ObservableRecipient
                     $"StoryCAD.{DateTime.Now:yyyy-MM-dd}.log");
                 if (File.Exists(logFile))
                 {
-                    var lines = File.ReadLines(logFile).TakeLast(250);
+                    List<string> allLines = new();
+                    using (var stream = new FileStream(logFile, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
+                    using (var reader = new StreamReader(stream))
+                    {
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
+                            allLines.Add(line);
+                    }
+                    var lines = allLines.TakeLast(250);
                     Issue.Body += $"\n\n<details><summary>Session Log</summary>\n\n```\n{string.Join("\n", lines)}\n```\n</details>";
                 }
             }
