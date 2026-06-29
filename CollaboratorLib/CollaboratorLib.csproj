@@ -36,7 +36,9 @@
 		<DebugType>portable</DebugType>
 		<Optimize>false</Optimize>
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
-		<PlatformTarget>x64</PlatformTarget>
+		<!-- No PlatformTarget pin: build AnyCPU so the assembly is architecture-neutral
+		     and loads in the arm64 (Apple Silicon) and x64 StoryCAD hosts alike.
+		     Matches StoryCADLib, which builds AnyCPU for the same reason. -->
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Configuration" />
