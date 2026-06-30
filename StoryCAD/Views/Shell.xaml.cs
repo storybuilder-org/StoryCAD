@@ -114,9 +114,10 @@ public sealed partial class Shell : Page
         Windowing.XamlRoot = XamlRoot;
         Ioc.Default.GetService<AppState>()!.StartUpTimer.Stop();
 
-        if (await Ioc.Default.GetService<CollaboratorService>()!.CollaboratorEnabled())
+        // Collaborator is compiled in (and a factory registered) → show its entry point.
+        // Absent (public/free build) → hidden. Instance is created per-session in OpenCollaborator.
+        if (Ioc.Default.GetService<CollaboratorService>()!.HasCollaborator)
         {
-            Ioc.Default.GetService<CollaboratorService>()!.ConnectCollaborator();
             ShellVm.CollaboratorVisibility = Visibility.Visible;
         }
         else

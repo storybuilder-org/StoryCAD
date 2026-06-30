@@ -42,7 +42,7 @@ public partial class App : Application
 #if WINDOWS10_0_18362_0_OR_GREATER
         // Single-instance gate: if another StoryCAD is already running, forward this
         // launch's activation (including any .stbx file) to it and exit.
-        var mainInstance = Microsoft.Windows.AppLifecycle.AppInstance.FindOrRegisterForKey("StoryCAD-main");
+        var mainInstance = Microsoft.Windows.AppLifecycle.AppInstance.FindOrRegisterForKey("StoryCAD-main"); 
         var activationArgs = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().GetActivatedEventArgs();
         if (!mainInstance.IsCurrent)
         {
@@ -53,7 +53,12 @@ public partial class App : Application
 #endif
 
         //Set up IOC and the services.
+        #if COLLABORATOR
+        BootStrapper.Initialise(false, collaboratorFactory: () => new StoryCollaborator.Collaborator());
+        #else
         BootStrapper.Initialise(false);
+        #endif
+
 
 #if WINDOWS10_0_18362_0_OR_GREATER
         //Check how app was invoked and handle file activation if necessary.

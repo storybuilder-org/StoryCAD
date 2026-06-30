@@ -5,6 +5,7 @@ using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backend;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator;
+using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCADLib.Services.Dialogs;
 using StoryCADLib.Services.MacMenuBar;
 using StoryCADLib.Services.Navigation;
@@ -34,7 +35,8 @@ public static class BootStrapper
 
     public static ServiceCollection Services { get; private set; }
 
-    public static void Initialise(bool headless = true, ServiceCollection additionalServices = null)
+    public static void Initialise(bool headless = true, ServiceCollection additionalServices = null,
+        Func<ICollaborator> collaboratorFactory = null)
     {
         //Prevent running this twice.
         if (Initalised)
@@ -46,6 +48,14 @@ public static class BootStrapper
         if (additionalServices != null)
         {
             Services = additionalServices;
+        }
+
+        //Register the Collaborator factory supplied by the head (CollaboratorLib compiled in).
+        //Null when Collaborator is absent (public/free build) - CollaboratorService then reports
+        //HasCollaborator == false and StoryCAD runs Collaborator-free.
+        if (collaboratorFactory != null)
+        {
+            Services.AddSingleton<Func<ICollaborator>>(collaboratorFactory);
         }
 
         //Add StoryCADLib Services

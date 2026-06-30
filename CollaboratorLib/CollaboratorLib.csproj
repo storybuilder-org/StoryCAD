@@ -1,0 +1,69 @@
+﻿<Project Sdk="Uno.Sdk">
+	<PropertyGroup>
+		<UnoSingleProject>true</UnoSingleProject>
+		<OutputType>Library</OutputType>
+		<UnoDisableValidateWinAppSDK3548>true</UnoDisableValidateWinAppSDK3548>
+		<RootNamespace>StoryCollaborator</RootNamespace>
+		<DefaultLanguage>en-US</DefaultLanguage>
+		<GenerateLibraryLayout>true</GenerateLibraryLayout>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Platforms>AnyCPU;x64</Platforms>
+		<WarningsAsErrors>UNO0001</WarningsAsErrors>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<UnoFeatures>
+		</UnoFeatures>
+	</PropertyGroup>
+
+	<!-- Allow tests and prompt runner to access internal members -->
+	<ItemGroup>
+		<InternalsVisibleTo Include="CollaboratorTests" />
+		<InternalsVisibleTo Include="PromptTestRunner" />
+	</ItemGroup>
+
+	<!-- on Windows, build both desktop + WinUI (desktop first for UNOB0012) -->
+	<PropertyGroup Condition="'$(OS)'=='Windows_NT'">
+		<TargetFrameworks>net10.0-desktop;net10.0-windows10.0.22621</TargetFrameworks>
+	</PropertyGroup>
+
+	<!-- on non-Windows, only build desktop -->
+	<PropertyGroup Condition="'$(OS)'!='Windows_NT'">
+		<TargetFrameworks>net10.0-desktop</TargetFrameworks>
+	</PropertyGroup>
+   
+
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<DebugType>portable</DebugType>
+		<Optimize>false</Optimize>
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<!-- No PlatformTarget pin: build AnyCPU so the assembly is architecture-neutral
+		     and loads in the arm64 (Apple Silicon) and x64 StoryCAD hosts alike.
+		     Matches StoryCADLib, which builds AnyCPU for the same reason. -->
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Configuration" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+		<PackageReference Include="Microsoft.SemanticKernel" />
+		<PackageReference Include="Microsoft.SemanticKernel.Abstractions" />
+		<PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" />
+		<PackageReference Include="Newtonsoft.Json" />
+		<PackageReference Include="NLog" />
+		<PackageReference Include="NLog.Extensions.Logging" />
+		<PackageReference Include="Elmah.Io.NLog" />
+		<PackageReference Include="Elmah.Io.Client" />
+<PackageReference Include="NRTFTree-Async" />
+	</ItemGroup>
+
+
+<!-- Exclude copied StoryCADLib XAML files from processing (avoids false positive errors) -->
+	<ItemGroup>
+		<None Remove="bin\**\StoryCADLib\**\*.xaml" />
+		<Page Remove="bin\**\StoryCADLib\**\*.xaml" />
+		<Content Remove="bin\**\StoryCADLib\**\*.xaml" />
+	</ItemGroup>
+
+<ItemGroup>
+		<ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
+	</ItemGroup>
+
+</Project>

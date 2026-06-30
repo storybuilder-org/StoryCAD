@@ -114,4 +114,11 @@
     <ItemGroup>
       <UnoSplashScreen Remove="Assets\Splash\splash_screen.svg" />
     </ItemGroup>
+
+    <PropertyGroup>
+        <DefineConstants>$(DefineConstants);COLLABORATOR</DefineConstants>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\CollaboratorLib\CollaboratorLib.csproj" />
+    </ItemGroup>
 </Project>
