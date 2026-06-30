@@ -15,7 +15,7 @@ public class ListLoaderTests
     [TestMethod]
     public void TestListLoaderLists()
     {
-        Assert.AreEqual(74, lists.Count);
+        Assert.AreEqual(68, lists.Count);
         // OverViewModel lists
         Assert.IsTrue(lists.ContainsKey("StoryType"));
         Assert.IsTrue(lists.ContainsKey("Voice"));
