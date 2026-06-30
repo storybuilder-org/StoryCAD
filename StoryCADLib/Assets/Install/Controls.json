@@ -20,7 +20,6 @@
             "A Romantic Competitor",
             "Seeing an Ex with Someone New",
             "Being Turned Down by a Potential Love Interest",
-            "Anagonist is a rival for a lover",
             "Your love interest's ex shows up",
             "Your antagonist seeks to hurt you by taking your love interest"
           ]
@@ -54,7 +53,10 @@
           "name": "Self (inner conflicts)",
           "examples": [
             "An old emotional wound hamstrings you",
-            "Lack of self-confidence holds you back"
+            "Lack of self-confidence holds you back",
+            "Your perfectionism prevents you from finishing anything",
+            "Guilt over a past decision keeps you from moving forward",
+            "Fear of intimacy causes you to push people away"
           ]
         }
       ]
@@ -90,7 +92,11 @@
         {
           "name": "Disagreement about what the data mean",
           "examples": [
-            "Antagonist defends group's incorrect beliefs"
+            "Antagonist defends group's incorrect beliefs",
+            "Two scientists interpret the same experimental results as supporting opposite conclusions",
+            "A detective and a partner disagree about whether the evidence points to the same suspect",
+            "A doctor and patient disagree about what a test result means for treatment",
+            "A historian and a politician dispute what a document proves about a historical event"
           ]
         }
       ]
@@ -141,7 +147,7 @@
             "A deadline is moved up",
             "A resource-hungry factory is consuming the water",
             "A rival tribe is hunting on your territory",
-            "Your precinct doesnt have enough officers to protect people",
+            "Your precinct doesn't have enough officers to protect people",
             "You inexplicably end up in a bidding war for a property"
           ]
         },
@@ -182,7 +188,7 @@
       "category": "Value",
       "subCategories": [
         {
-          "name": "Knowledge/Learning/Curiousity",
+          "name": "Knowledge/Learning/Curiosity",
           "examples": [
             "A scientist sticks by his findings even after being ostracized by his community",
             "A member of a cult is beginning to doubt the cult leader's statements",
@@ -198,10 +204,10 @@
           "examples": [
             "A recruit can't seem to earn his drill sergeant's respect",
             "A co-worker constantly bad-mouths the hispanics she works with",
-            "Disrespect due to ethinic background",
+            "Disrespect due to ethnic background",
             "Distrust due to religious differences",
             "Disregard due to lack of education",
-            "Distain over economic circumstances"
+            "Disdain over economic circumstances"
           ]
         },
         {
@@ -234,17 +240,20 @@
         {
           "name": "Fairness/Justice/Openness",
           "examples": [
-            "A whistle-blower is harrassed at Work",
+            "A whistle-blower is harassed at Work",
             "A supervisor plays favorites because of a long-standing relationship",
-            "An attacker isn't charge because he's a police officer",
-            "The mananger's daughter gets the job although she's not qualified"
+            "An attacker isn't charged because he's a police officer",
+            "The manager's daughter gets the job although she's not qualified"
           ]
         },
         {
           "name": "Spirituality/Faith",
           "examples": [
             "A terrible situation has made your faith falter",
-            "You turn to God in a crisis and there is no answer"
+            "You turn to God in a crisis and there is no answer",
+            "A devout believer discovers their spiritual leader has been deceiving the congregation",
+            "A dying man's family is torn between his religious wishes and the doctor's medical recommendations",
+            "A convert's new faith puts them at odds with lifelong friends"
           ]
         },
         {
@@ -253,21 +262,24 @@
             "A co-worker is hiding his drinking problem",
             "Attendance records are being falsified",
             "Evidence is altered to improve chances of conviction",
-            "A familiy illness is affecting your ability to do your job"
+            "A family illness is affecting your ability to do your job"
           ]
         },
         {
           "name": "Loyalty/Friendship",
           "examples": [
             "You've discovered a friend is cheating on his wife",
-            "You've drifted away from a friend who insists on hanging on"
+            "You've drifted away from a friend who insists on hanging on",
+            "Your best friend asks you to lie to the police on their behalf",
+            "Loyalty to a friend conflicts with your duty to report their misconduct at work",
+            "A childhood friend now holds values you find repugnant"
           ]
         },
         {
           "name": "Commitment/Dedication/Perseverance",
           "examples": [
             "Impatience over the lack of early success",
-            "Discourteous becauase of impatience",
+            "Discourteous because of impatience",
             "Avoiding starting a difficult task"
           ]
         },
@@ -275,14 +287,20 @@
           "name": "Authenticity",
           "examples": [
             "Unwillingness to state one's true opinion",
-            "Afraid to stand up for a downtrodden individual"
+            "Afraid to stand up for a downtrodden individual",
+            "You hide your true background to fit into a new social circle",
+            "A politician adopts positions they privately oppose in order to win an election",
+            "An artist abandons their original vision to meet commercial expectations"
           ]
         },
         {
           "name": "Creativity",
           "examples": [
             "Claiming credit for another's work or invention",
-            "Slighting another's creativness or contribution"
+            "Slighting another's creativeness or contribution",
+            "A collaborator insists on changes that compromise your creative vision",
+            "A publisher demands a sequel to a work you consider complete",
+            "Your creative work is dismissed as impractical by the person who controls the budget"
           ]
         },
         {
@@ -307,7 +325,10 @@
           "name": "Resilience",
           "examples": [
             "A former a victim of abuse, you're wary of a new relationship",
-            "A burned-out coach is given a gifted athlete"
+            "A burned-out coach is given a gifted athlete",
+            "A soldier back from combat can't readjust to civilian life",
+            "A bankruptcy survivor refuses to risk starting another business",
+            "A child of an alcoholic parent assumes every close relationship will end in abandonment"
           ]
         },
         {
@@ -322,22 +343,28 @@
         {
           "name": "Forgiveness",
           "examples": [
-            "Lack of foregiveness is tearing you up inside",
-            "The person who you forgave has commmited another major offense"
+            "Lack of forgiveness is tearing you up inside",
+            "The person who you forgave has committed another major offense",
+            "A victim's family is pressured to publicly forgive the perpetrator before they're ready",
+            "You must work alongside the person who betrayed you every day",
+            "Forgiving someone means letting them escape consequences they deserve"
           ]
         },
         {
-          "name": "Freedom/Indepence",
+          "name": "Freedom/Independence",
           "examples": [
             "Your father demands you skip time with friends and study",
-            "Your attempt to homestead has failed miserably"
+            "Your attempt to homestead has failed miserably",
+            "A government regulation prevents you from using your own land as you see fit",
+            "Your employer's non-compete clause blocks you from pursuing your own business",
+            "A controlling spouse monitors your location and communications"
           ]
         },
         {
           "name": "Gratitude/Appreciation",
           "examples": [
             "Not keeping in contact with old friends",
-            "Feeling upset because his car isn't the lastest model",
+            "Feeling upset because his car isn't the latest model",
             "Comparing yourself to a richer friend"
           ]
         },
@@ -345,7 +372,10 @@
           "name": "Compassion",
           "examples": [
             "An Indian soldier refuses to accept a Pakistani as other than the enemy",
-            "A former wife belittles her former hustband in front of the children"
+            "A former wife belittles her former husband in front of the children",
+            "A landlord evicts a family during winter knowing they have nowhere to go",
+            "A doctor struggles to maintain professional detachment when treating a child",
+            "A border guard must enforce a policy they believe causes unnecessary suffering"
           ]
         },
         {
@@ -354,21 +384,24 @@
             "A forced (non-collaborative) compromise leaves one or both sides unhappy",
             "The child visitation schedule after a divorce is one-sided",
             "After a  water rights court decision one party continues to overuse resources",
-            "One side gives in to avoid direct conflict, but still feels agrieved"
+            "One side gives in to avoid direct conflict, but still feels aggrieved"
           ]
         },
         {
           "name": "Accomplishment",
           "examples": [
             "You've sacrificed your family to achieve job success",
-            "A goal you've worked years for is made obsolete"
+            "A goal you've worked years for is made obsolete",
+            "The achievement you're most proud of turns out to have caused harm you didn't foresee",
+            "A rival takes credit for a breakthrough you made together",
+            "Reaching your lifelong goal leaves you empty rather than fulfilled"
           ]
         },
         {
           "name": "Wealth/Financial Security",
           "examples": [
             "A successful woman with several stores is always on the go and exhausted",
-            "Family members feud over the pastriarch's will",
+            "Family members feud over the patriarch's will",
             "Barely making ends meet and then finding you're unemployed",
             "Being coddled financially as a youth leaves a young man unprepared for life",
             "Being expected to be active part in the family business",
@@ -398,7 +431,10 @@
           "name": "Humility",
           "examples": [
             "Inability to delegate to subordinates",
-            "Unwillingness to acknowedge others' contributions"
+            "Unwillingness to acknowledge others' contributions",
+            "An expert dismisses a junior colleague's finding that turns out to be correct",
+            "A mentor takes over a student's project rather than letting them struggle through it",
+            "Admitting a mistake publicly would benefit the team but damage your reputation"
           ]
         },
         {
@@ -414,7 +450,7 @@
           "name": "Intelligence",
           "examples": [
             "Claimed intelligence demonstrates lack of emotional intelligence",
-            "Using agressive humor to disparage someone else",
+            "Using aggressive humor to disparage someone else",
             "Coworkers are mistreating a mentally challenged person"
           ]
         },
@@ -422,20 +458,30 @@
           "name": "Occupation",
           "examples": [
             "Overseas military service is ruining your marriage",
-            "An employee thinks his role includes directing others"
+            "An employee thinks his role includes directing others",
+            "A doctor is pressured by hospital administration to cut patient time to meet quotas",
+            "A journalist must choose between publishing a story and protecting a source",
+            "A teacher faces retaliation for refusing to pass a student on political grounds"
           ]
         },
         {
           "name": "Optimism",
           "examples": [
-            "A pollyanna drives her co-workers nuts"
+            "A pollyanna drives her co-workers nuts",
+            "Your refusal to acknowledge a project's problems leads the team into avoidable failure",
+            "An optimistic investor dismisses warning signs that experienced analysts are heeding",
+            "Your relentless positive framing makes it impossible for family members to voice real concerns",
+            "A coach's belief that effort beats preparation leaves the team chronically underprepared"
           ]
         },
         {
           "name": "Calm/Poise",
           "examples": [
             "A student panics at the thought of every test or examination",
-            "The victim of a crime is so calm that she becomes a suspect"
+            "The victim of a crime is so calm that she becomes a suspect",
+            "A surgeon's hands begin to shake at a critical moment in an operation",
+            "A pilot freezes during an emergency procedure they've practiced hundreds of times",
+            "A negotiator's composure breaks during a hostage standoff when the hostage is a family member"
           ]
         },
         {
@@ -451,14 +497,20 @@
           "name": "Self-reliance",
           "examples": [
             "Refusal to ask for expert help when needed",
-            "Your aging mother insists on living alone"
+            "Your aging mother insists on living alone",
+            "A team member's insistence on handling everything alone creates a bottleneck for the group",
+            "A patient refuses a second opinion and continues a treatment that isn't working",
+            "A survivalist's ideology of self-sufficiency puts their family at risk during an emergency"
           ]
         },
         {
           "name": "Serenity",
           "examples": [
             "Your coworker's snap decisions are dangerous",
-            "Your mother is a drama queen"
+            "Your mother is a drama queen",
+            "A manager's visible anxiety during crises spreads panic through the team",
+            "A paramedic's trauma responses from a past call surface during a similar emergency",
+            "A meditation teacher loses composure when challenged publicly during a class"
           ]
         },
         {
@@ -489,7 +541,10 @@
           "name": "Trustworthiness",
           "examples": [
             "Antagonist is attacking your country",
-            "Religious conflicts"
+            "Religious conflicts",
+            "A business partner is discovered to have been secretly dealing with a competitor",
+            "A government informant's reliability is questioned after their testimony changes under oath",
+            "A friend reveals a confidence you shared to gain social advantage with others"
           ]
         },
         {
@@ -506,7 +561,10 @@
           "name": "Sense of what's right or wrong",
           "examples": [
             "Antagonist seeks to escape justice",
-            "Antagonist wants revenge"
+            "Antagonist wants revenge",
+            "Two witnesses to the same crime have opposing moral convictions about whether to testify",
+            "A judge must sentence someone under a law they believe is unjust",
+            "A whistleblower must choose between loyalty to their employer and exposing wrongdoing"
           ]
         },
         {
@@ -525,7 +583,7 @@
         {
           "name": "Ethnic/racial",
           "examples": [
-            "A young African American man is torn between his love for hip-hop and his parents'' middle-class exptations.",
+            "A young African American man is torn between his love for hip-hop and his parents'' middle-class expectations.",
             "A Native American woman tries to balance her indigenous beliefs and a Western lifestyle.",
             "A Hispanic man living near the border is caught between his immigrant community and assimilation.",
             "An Asian American tries to embrace feminism but is pressured to conform by traditional parents.",
@@ -563,7 +621,7 @@
           "examples": [
             "A progressive activist who is a single mother and faces opposition from the government, media, and even friends and family when she takes a stand against an oppressive new law.",
             "A businessman who started and owns a successful retail chain faces criticism from employees and the press for his conservative policies.",
-            "A journalism major finds her college newpaper articles due to their content.",
+            "A journalism major finds her college newspaper articles due to their content.",
             "A libertarian member of his city council is attacked from both liberal and conservative peers due to his opposition to local taxes."
           ]
         }
@@ -586,9 +644,9 @@
           "examples": [
             "A wife, terrified of an abusive husband, shoots him as he sleeps.",
             "A young woman who steals a parking space finds her car keyed.",
-            "An agressive protester gets hit with his own picket sign.",
+            "An aggressive protester gets hit with his own picket sign.",
             "A stalker watches his ex-girlfriend while she sleeps.",
-            "A man kills his partner because he suspect's he's unfaithful.",
+            "A man kills his partner because he suspects he's unfaithful.",
             "Antagonist kills a witness to prevent them from testifying in a criminal case"
           ]
         },
@@ -613,11 +671,11 @@
         {
           "name": "White-collar crime",
           "examples": [
-            "A stockbroker uses priveleged information to buy and sell stocks using his sister's account.",
+            "A stockbroker uses privileged information to buy and sell stocks using his sister's account.",
             "An art dealer pairs with a hacker to sell fake NFTs of art works.",
             "A CEO embezzles millions from the company for personal gain.",
-            "A celebraty financial advisor defrauds her clients through a Ponzi scheme.",
-            "An accountanting firm tax records for their clients to reduce their liability."
+            "A celebrity financial advisor defrauds her clients through a Ponzi scheme.",
+            "An accounting firm tax records for their clients to reduce their liability."
           ]
         },
         {
@@ -671,7 +729,7 @@
             "A neighbor keeps breaking your garden ornaments because she doesn't like them.",
             "A crowd of rowdy young men hang outside a bar drinking.",
             "Football fans keep parking on your property during games.",
-            "An old man keeps a loud and agressive dog."
+            "An old man keeps a loud and aggressive dog."
           ]
         },
         {
@@ -690,16 +748,19 @@
           "name": "Sociopathy",
           "examples": [
             "A boss who belittles her assistant and anyone who does not come up to her \"standards\".",
-            "Man responds with more emotion to his goldfish than to his girlfriend."
+            "Man responds with more emotion to his goldfish than to his girlfriend.",
+            "A con artist maintains multiple false identities with no apparent guilt or strain",
+            "A politician cultivates a warm public image while privately viewing voters as tools to be managed",
+            "A charming neighbor uses detailed knowledge of residents' routines to time a series of burglaries"
           ]
         },
         {
           "name": "Psychopathy",
           "examples": [
-            "Caught copying another student's test answers, she blatently claims the other person stole hers",
-            "Seeing a jacket she likes, she tries it own and walks out of the store withough hesitation",
+            "Caught copying another student's test answers, she blatantly claims the other person stole hers",
+            "Seeing a jacket she likes, she tries it own and walks out of the store without hesitation",
             "A youth cusses at his teacher, and seems contrite in counseling, but destroys the classroom after returning",
-            "After being fired, a disgruntaled employee burns his former employer's business down"
+            "After being fired, a disgruntled employee burns his former employer's business down"
           ]
         }
       ]

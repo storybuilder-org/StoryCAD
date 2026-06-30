@@ -946,6 +946,7 @@ public class ShellViewModel : ObservableRecipient
         DramaticSituationsCommand.NotifyCanExecuteChanged();
         StockScenesCommand.NotifyCanExecuteChanged();
         PreferencesCommand.NotifyCanExecuteChanged();
+        ReportFeedbackCommand.NotifyCanExecuteChanged();
         PrintReportsCommand.NotifyCanExecuteChanged();
         ExportReportsToPdfCommand.NotifyCanExecuteChanged();
         ScrivenerReportsCommand.NotifyCanExecuteChanged();
@@ -1031,18 +1032,28 @@ public class ShellViewModel : ObservableRecipient
 
     private async void OpenReportFeedback()
     {
-        var result = await Window.ShowContentDialog(new ContentDialog
+        var feedbackVm = Ioc.Default.GetRequiredService<FeedbackViewModel>();
+        var dialog = new ContentDialog
         {
             Content = new FeedbackDialog(),
             PrimaryButtonText = "Submit Feedback",
             SecondaryButtonText = "Discard",
-            Title = "Submit"
-        });
+            Title = "Submit",
+            IsPrimaryButtonEnabled = feedbackVm.IsValid
+        };
+
+        void OnPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(FeedbackViewModel.IsValid))
+                dialog.IsPrimaryButtonEnabled = feedbackVm.IsValid;
+        }
+
+        feedbackVm.PropertyChanged += OnPropertyChanged;
+        var result = await Window.ShowContentDialog(dialog);
+        feedbackVm.PropertyChanged -= OnPropertyChanged;
 
         if (result == ContentDialogResult.Primary)
-        {
-            Ioc.Default.GetRequiredService<FeedbackViewModel>().CreateFeedback();
-        }
+            feedbackVm.CreateFeedback();
     }
 
     /// <summary>
