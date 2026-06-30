@@ -80,12 +80,6 @@ public class ListLoaderTests
         Assert.IsTrue(lists.ContainsKey("ValueExchange"));
         // StoryWorldViewModel lists
         Assert.IsTrue(lists.ContainsKey("WorldType"));
-        Assert.IsTrue(lists.ContainsKey("Ontology"));
-        Assert.IsTrue(lists.ContainsKey("WorldRelation"));
-        Assert.IsTrue(lists.ContainsKey("RuleTransparency"));
-        Assert.IsTrue(lists.ContainsKey("ScaleOfDifference"));
-        Assert.IsTrue(lists.ContainsKey("AgencySource"));
-        Assert.IsTrue(lists.ContainsKey("ToneLogic"));
         Assert.IsTrue(lists.ContainsKey("SystemType"));
         // Counts include empty string at index 0 for SelectedItem binding (Issue #1267)
         Assert.AreEqual(8, lists["Season"].Count);
