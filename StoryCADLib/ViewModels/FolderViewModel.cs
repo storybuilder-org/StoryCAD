@@ -1,8 +1,6 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.UI.Xaml;
 using StoryCADLib.Services;
 using StoryCADLib.Services.Messages;
 using StoryCADLib.Services.Navigation;
@@ -18,7 +16,7 @@ namespace StoryCADLib.ViewModels;
 ///     etc.
 /// </summary>
 [Microsoft.UI.Xaml.Data.Bindable]
-public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
+public class FolderViewModel : ElementViewModelBase, INavigable, ISaveable, IReloadable
 {
     #region Fields
 
@@ -86,19 +84,11 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IRelo
         set => _model = value;
     }
 
-    // Image gallery, shown only when this element is a Notes (not a Folder/Section).
-    public ElementImageGallery ImageGallery { get; }
-
-    public ObservableCollection<ImageGalleryItem> Images => ImageGallery.Items;
-
     /// <summary>True when the current element is a Notes node.</summary>
     public bool IsNotes => Model?.ElementType == StoryItemType.Notes;
 
     /// <summary>Plain (untabbed) notes view: shown for Folder and Section.</summary>
-    public Visibility PlainNotesVisibility => IsNotes ? Visibility.Collapsed : Visibility.Visible;
-
-    /// <summary>Tabbed Notes + Images view: shown only for Notes.</summary>
-    public Visibility NotesTabsVisibility => IsNotes ? Visibility.Visible : Visibility.Collapsed;
+    public bool IsPlainNotes => !IsNotes;
 
     #endregion
 
@@ -164,8 +154,7 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IRelo
         // base. is required: the local OnPropertyChanged(object, args) handler
         // hides the base string raiser from overload resolution.
         base.OnPropertyChanged(nameof(IsNotes));
-        base.OnPropertyChanged(nameof(PlainNotesVisibility));
-        base.OnPropertyChanged(nameof(NotesTabsVisibility));
+        base.OnPropertyChanged(nameof(IsPlainNotes));
 
         _changeable = true;
     }
@@ -181,15 +170,6 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IRelo
         Model.Images = ImageGallery.ToModelList();
     }
 
-    private void OnImagesChanged()
-    {
-        if (_changeable)
-        {
-            _changed = true;
-            ShellViewModel.ShowChange();
-        }
-    }
-
     public void ReloadFromModel()
     {
         if (Model != null)
@@ -202,11 +182,10 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IRelo
 
     #region Constructor
 
-    public FolderViewModel(ILogService logger, ImageService imageService)
+    public FolderViewModel(ILogService logger, ImageService imageService) : base(imageService, logger)
     {
         _logger = logger;
         Description = string.Empty;
-        ImageGallery = new ElementImageGallery(imageService, logger, OnImagesChanged);
         PropertyChanged += OnPropertyChanged;
     }
 

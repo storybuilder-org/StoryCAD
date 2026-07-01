@@ -36,6 +36,15 @@ public class ElementImageGallery
     /// <summary>Replaces the gallery contents from a model's image list (null-safe).</summary>
     public void Load(List<StoryImage> images)
     {
+        // ObservableCollection.Clear() raises a Reset event with OldItems == null, so
+        // OnCollectionChanged's unsubscribe loop can't see what was removed. Unsubscribe
+        // explicitly here or a still-decoding thumbnail for a since-cleared item can fire
+        // _onChanged after the gallery has moved on to a different element.
+        foreach (ImageGalleryItem item in Items)
+        {
+            item.PropertyChanged -= OnItemChanged;
+        }
+
         Items.Clear();
         if (images != null)
         {

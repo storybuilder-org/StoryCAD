@@ -177,7 +177,7 @@ public partial class PrintReportDialogVM : ObservableRecipient
         set => SetProperty(ref _webList, value);
     }
 
-    private bool _includeImagesAppendix = true;
+    private bool _includeImagesAppendix;
 
     /// <summary>
     ///     When set, the PDF report appends an "Images" section showing the
@@ -491,7 +491,8 @@ public partial class PrintReportDialogVM : ObservableRecipient
                         continue;
                     }
 
-                    using SKImage image = SKImage.FromEncodedData(SKData.CreateCopy(bytes));
+                    using SKData imageData = SKData.CreateCopy(bytes);
+                    using SKImage image = SKImage.FromEncodedData(imageData);
                     if (image is null)
                     {
                         continue;
@@ -533,7 +534,7 @@ public partial class PrintReportDialogVM : ObservableRecipient
     ///     Collects the selected Character/Setting/Scene elements that have
     ///     attached images, paired with a display heading, in selection order.
     /// </summary>
-    private List<(string Heading, List<StoryImage> Images)> GatherAppendixImages()
+    internal List<(string Heading, List<StoryImage> Images)> GatherAppendixImages()
     {
         var sections = new List<(string, List<StoryImage>)>();
         var model = _appState.CurrentDocument?.Model;
@@ -554,6 +555,10 @@ public partial class PrintReportDialogVM : ObservableRecipient
             {
                 // Element not found; skip it.
             }
+            catch (ArgumentException)
+            {
+                // Missing/invalid GUID on the node; skip it.
+            }
 
             if (element is null)
             {
@@ -565,6 +570,7 @@ public partial class PrintReportDialogVM : ObservableRecipient
                 CharacterModel character => character.Images,
                 SettingModel setting => setting.Images,
                 SceneModel scene => scene.Images,
+                FolderModel folder => folder.Images,
                 _ => null
             };
 

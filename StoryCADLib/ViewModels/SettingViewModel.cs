@@ -9,7 +9,7 @@ using StoryCADLib.Services.Navigation;
 namespace StoryCADLib.ViewModels;
 
 [Microsoft.UI.Xaml.Data.Bindable]
-public class SettingViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
+public class SettingViewModel : ElementViewModelBase, INavigable, ISaveable, IReloadable
 {
     #region Fields
 
@@ -18,12 +18,6 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable, IRel
     private readonly Windowing _windowing;
     private bool _changeable; // process property changes for this story element
     private bool _changed; // this story element has changed
-
-    /// <summary>Backing for the Images tab gallery.</summary>
-    public ElementImageGallery ImageGallery { get; }
-
-    /// <summary>Tiles bound by the Images tab's gallery control.</summary>
-    public ObservableCollection<ImageGalleryItem> Images => ImageGallery.Items;
 
     #endregion
 
@@ -224,16 +218,6 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable, IRel
         }
     }
 
-    /// <summary>Marks the element dirty when images or captions change.</summary>
-    private void OnImagesChanged()
-    {
-        if (_changeable)
-        {
-            _changed = true;
-            ShellViewModel.ShowChange();
-        }
-    }
-
     private void LoadModel()
     {
         _changeable = false;
@@ -315,11 +299,11 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable, IRel
     #region Constructor
 
     public SettingViewModel(ILogService logger, ListData listData, Windowing windowing, ImageService imageService)
+        : base(imageService, logger)
     {
         _logger = logger;
         _listData = listData;
         _windowing = windowing;
-        ImageGallery = new ElementImageGallery(imageService, logger, OnImagesChanged);
 
         Locale = string.Empty;
         Season = string.Empty;

@@ -64,6 +64,67 @@ public class ImageService
     }
 
     /// <summary>
+    ///     Like <see cref="PickImageAsync"/>, but also decodes a gallery thumbnail
+    ///     for immediate display, reusing a single SkiaSharp decode of the picked
+    ///     bytes for both the storage-sizing check and the thumbnail rather than
+    ///     decoding twice. Returns (null, null) if the user cancels; the thumbnail
+    ///     is null (but the image is still returned) if it can't be decoded or
+    ///     built. Must be called on the UI thread (thumbnail building requires it;
+    ///     see <see cref="ToImageSourceAsync"/>).
+    /// </summary>
+    public async Task<(StoryImage Image, ImageSource Thumbnail)> PickImageWithThumbnailAsync(int thumbnailDecodeWidth)
+    {
+        StorageFile file = await _windowing.ShowImagePicker();
+        if (file == null)
+        {
+            return (null, null);
+        }
+
+        IBuffer buffer = await FileIO.ReadBufferAsync(file);
+        byte[] bytes = new byte[buffer.Length];
+        using (DataReader reader = DataReader.FromBuffer(buffer))
+        {
+            reader.ReadBytes(bytes);
+        }
+
+        _logger.Log(LogLevel.Info, $"Imported image {file.Name} ({bytes.Length} bytes)");
+
+        SKBitmap decoded = null;
+        try
+        {
+            decoded = SKBitmap.Decode(bytes);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogException(LogLevel.Warn, ex,
+                $"Failed to decode picked image ({bytes.Length} bytes); storing without a thumbnail");
+        }
+
+        using (decoded)
+        {
+            // Always returns the StoryImage even if decoding/thumbnailing below fails,
+            // so a bad decode never drops the picked picture.
+            StoryImage image = CreateFromBytes(bytes, file.Name, decoded);
+
+            ImageSource thumbnail = null;
+            if (decoded != null)
+            {
+                try
+                {
+                    thumbnail = await BuildImageSourceAsync(decoded, thumbnailDecodeWidth);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogException(LogLevel.Warn, ex,
+                        $"Failed to build thumbnail for picked image ({bytes.Length} bytes)");
+                }
+            }
+
+            return (image, thumbnail);
+        }
+    }
+
+    /// <summary>
     ///     Builds a <see cref="StoryImage"/> from raw image bytes, capping the
     ///     stored resolution: an image whose long edge exceeds
     ///     <see cref="MaxImportDimension"/> is downscaled and re-encoded as WebP
@@ -71,12 +132,19 @@ public class ImageService
     ///     be decoded, are stored unchanged (lossless passthrough). Pure;
     ///     headless-testable (SkiaSharp decode/resize/encode needs no UI thread).
     /// </summary>
-    public StoryImage CreateFromBytes(byte[] bytes, string fileName)
+    public StoryImage CreateFromBytes(byte[] bytes, string fileName) => CreateFromBytes(bytes, fileName, null);
+
+    /// <summary>
+    ///     As <see cref="CreateFromBytes(byte[], string)"/>, but reuses an
+    ///     already-decoded <paramref name="preDecoded"/> bitmap (owned by the
+    ///     caller) instead of decoding <paramref name="bytes"/> again.
+    /// </summary>
+    private StoryImage CreateFromBytes(byte[] bytes, string fileName, SKBitmap preDecoded)
     {
         byte[] storedBytes = bytes;
         string contentType = DetectContentType(fileName, bytes);
 
-        byte[] reduced = ReduceForStorage(bytes);
+        byte[] reduced = ReduceForStorage(bytes, preDecoded);
         if (reduced != null)
         {
             storedBytes = reduced;
@@ -96,9 +164,11 @@ public class ImageService
     ///     quality, and keeps transparency). Returns null (store the original
     ///     bytes) when the image is already within the cap or cannot be decoded,
     ///     so a small image, an unknown format, or non-image bytes are never
-    ///     altered or lost.
+    ///     altered or lost. Pass <paramref name="preDecoded"/> to reuse a bitmap
+    ///     the caller already decoded from <paramref name="bytes"/> instead of
+    ///     decoding again; ownership/disposal of it stays with the caller.
     /// </summary>
-    private byte[] ReduceForStorage(byte[] bytes)
+    private byte[] ReduceForStorage(byte[] bytes, SKBitmap preDecoded = null)
     {
         if (bytes == null || bytes.Length == 0)
         {
@@ -107,45 +177,57 @@ public class ImageService
 
         try
         {
-            using SKBitmap decoded = SKBitmap.Decode(bytes);
-            if (decoded is null)
+            SKBitmap decoded = preDecoded ?? SKBitmap.Decode(bytes);
+            try
             {
-                return null; // not a decodable image — store as-is
-            }
+                if (decoded is null)
+                {
+                    return null; // not a decodable image — store as-is
+                }
 
-            int longEdge = Math.Max(decoded.Width, decoded.Height);
-            if (longEdge <= MaxImportDimension)
+                int longEdge = Math.Max(decoded.Width, decoded.Height);
+                if (longEdge <= MaxImportDimension)
+                {
+                    return null; // already small enough — keep original, lossless
+                }
+
+                double scale = MaxImportDimension / (double)longEdge;
+                int targetWidth = Math.Max(1, (int)Math.Round(decoded.Width * scale));
+                int targetHeight = Math.Max(1, (int)Math.Round(decoded.Height * scale));
+
+                SKSamplingOptions sampling = new(SKFilterMode.Linear, SKMipmapMode.None);
+                using SKBitmap resized = decoded.Resize(new SKImageInfo(targetWidth, targetHeight), sampling);
+                if (resized is null)
+                {
+                    return null;
+                }
+
+                using SKImage image = SKImage.FromBitmap(resized);
+                using SKData data = image.Encode(SKEncodedImageFormat.Webp, ImportImageQuality);
+                byte[] encoded = data?.ToArray();
+
+                // The downscaled WebP should always be smaller; if it somehow isn't
+                // (e.g. a tiny source the codec can't beat, or no WebP encoder), keep
+                // the original.
+                if (encoded == null || encoded.Length == 0 || encoded.Length >= bytes.Length)
+                {
+                    return null;
+                }
+
+                _logger.Log(LogLevel.Info,
+                    $"Downscaled import from {decoded.Width}x{decoded.Height} ({bytes.Length} bytes) " +
+                    $"to {targetWidth}x{targetHeight} WebP ({encoded.Length} bytes)");
+                return encoded;
+            }
+            finally
             {
-                return null; // already small enough — keep original, lossless
+                // Only dispose a bitmap we decoded ourselves; a preDecoded one is
+                // owned by the caller (who may still need it, e.g. for a thumbnail).
+                if (preDecoded is null)
+                {
+                    decoded?.Dispose();
+                }
             }
-
-            double scale = MaxImportDimension / (double)longEdge;
-            int targetWidth = Math.Max(1, (int)Math.Round(decoded.Width * scale));
-            int targetHeight = Math.Max(1, (int)Math.Round(decoded.Height * scale));
-
-            SKSamplingOptions sampling = new(SKFilterMode.Linear, SKMipmapMode.None);
-            using SKBitmap resized = decoded.Resize(new SKImageInfo(targetWidth, targetHeight), sampling);
-            if (resized is null)
-            {
-                return null;
-            }
-
-            using SKImage image = SKImage.FromBitmap(resized);
-            using SKData data = image.Encode(SKEncodedImageFormat.Webp, ImportImageQuality);
-            byte[] encoded = data?.ToArray();
-
-            // The downscaled WebP should always be smaller; if it somehow isn't
-            // (e.g. a tiny source the codec can't beat, or no WebP encoder), keep
-            // the original.
-            if (encoded == null || encoded.Length == 0 || encoded.Length >= bytes.Length)
-            {
-                return null;
-            }
-
-            _logger.Log(LogLevel.Info,
-                $"Downscaled import from {decoded.Width}x{decoded.Height} ({bytes.Length} bytes) " +
-                $"to {targetWidth}x{targetHeight} WebP ({encoded.Length} bytes)");
-            return encoded;
         }
         catch (Exception ex)
         {
@@ -175,11 +257,8 @@ public class ImageService
             return null;
         }
 
-        // Decode via SkiaSharp into a WriteableBitmap (a raw BGRA pixel buffer the
-        // UNO/Skia desktop head renders directly). BitmapImage.SetSourceAsync from an
-        // in-memory stream does not render on that head; SkiaSharp is the head's own
-        // codec so this path works on both Windows and macOS. Best-effort: a failure
-        // returns null (the tile still shows) and is logged.
+        // Decode via SkiaSharp (see BuildImageSourceAsync for why). Best-effort: a
+        // failure returns null (the tile still shows) and is logged.
         try
         {
             using SKBitmap decoded = SKBitmap.Decode(bytes);
@@ -190,33 +269,7 @@ public class ImageService
                 return null;
             }
 
-            int targetWidth = decoded.Width;
-            int targetHeight = decoded.Height;
-            if (decodePixelWidth is int w && w > 0 && decoded.Width > w)
-            {
-                targetWidth = w;
-                targetHeight = Math.Max(1, (int)Math.Round(decoded.Height * (w / (double)decoded.Width)));
-            }
-
-            // Resize (if needed) and convert to BGRA8888 in one step.
-            SKImageInfo info = new(targetWidth, targetHeight, SKColorType.Bgra8888, SKAlphaType.Premul);
-            SKSamplingOptions sampling = new(SKFilterMode.Linear, SKMipmapMode.None);
-            using SKBitmap bgra = decoded.Resize(info, sampling);
-            if (bgra is null)
-            {
-                _logger.Log(LogLevel.Warn, "SkiaSharp resize returned null while building image thumbnail");
-                return null;
-            }
-
-            WriteableBitmap writeable = new(targetWidth, targetHeight);
-            byte[] pixels = bgra.Bytes;
-            using (Stream pixelStream = writeable.PixelBuffer.AsStream())
-            {
-                await pixelStream.WriteAsync(pixels, 0, pixels.Length);
-            }
-
-            writeable.Invalidate();
-            return writeable;
+            return await BuildImageSourceAsync(decoded, decodePixelWidth);
         }
         catch (Exception ex)
         {
@@ -224,6 +277,46 @@ public class ImageService
                 $"Failed to decode image (type={image?.ContentType}, bytes={bytes.Length})");
             return null;
         }
+    }
+
+    /// <summary>
+    ///     Builds a displayable <see cref="ImageSource"/> from an already-decoded
+    ///     <paramref name="decoded"/> bitmap, resizing to <paramref name="decodePixelWidth"/>
+    ///     if given. Renders into a <see cref="WriteableBitmap"/> (a raw BGRA pixel
+    ///     buffer the UNO/Skia desktop head renders directly) — BitmapImage.SetSourceAsync
+    ///     from an in-memory stream does not render on that head; SkiaSharp is the
+    ///     head's own codec so this path works on both Windows and macOS. Must be
+    ///     called on the UI thread.
+    /// </summary>
+    private async Task<ImageSource> BuildImageSourceAsync(SKBitmap decoded, int? decodePixelWidth)
+    {
+        int targetWidth = decoded.Width;
+        int targetHeight = decoded.Height;
+        if (decodePixelWidth is int w && w > 0 && decoded.Width > w)
+        {
+            targetWidth = w;
+            targetHeight = Math.Max(1, (int)Math.Round(decoded.Height * (w / (double)decoded.Width)));
+        }
+
+        // Resize (if needed) and convert to BGRA8888 in one step.
+        SKImageInfo info = new(targetWidth, targetHeight, SKColorType.Bgra8888, SKAlphaType.Premul);
+        SKSamplingOptions sampling = new(SKFilterMode.Linear, SKMipmapMode.None);
+        using SKBitmap bgra = decoded.Resize(info, sampling);
+        if (bgra is null)
+        {
+            _logger.Log(LogLevel.Warn, "SkiaSharp resize returned null while building image thumbnail");
+            return null;
+        }
+
+        WriteableBitmap writeable = new(targetWidth, targetHeight);
+        byte[] pixels = bgra.Bytes;
+        using (Stream pixelStream = writeable.PixelBuffer.AsStream())
+        {
+            await pixelStream.WriteAsync(pixels, 0, pixels.Length);
+        }
+
+        writeable.Invalidate();
+        return writeable;
     }
 
     /// <summary>

@@ -577,6 +577,7 @@ public class CharacterModel : StoryElement
 
     public CharacterModel()
     {
+        Images = new List<StoryImage>();
     }
 
     #endregion

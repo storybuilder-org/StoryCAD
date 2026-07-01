@@ -333,6 +333,7 @@ public class SceneModel : StoryElement
 
     public SceneModel()
     {
+        Images = new List<StoryImage>();
     }
 
     #endregion

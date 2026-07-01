@@ -9,15 +9,15 @@ using StoryCADLib.Services.Navigation;
 namespace StoryCADLib.ViewModels;
 
 [Microsoft.UI.Xaml.Data.Bindable]
-public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
+public class SceneViewModel : ElementViewModelBase, INavigable, ISaveable, IReloadable
 {
     #region Constructors
 
     public SceneViewModel(ILogService logger, AppState appState, ImageService imageService)
+        : base(imageService, logger)
     {
         _logger = logger;
         _appState = appState;
-        ImageGallery = new ElementImageGallery(imageService, logger, OnImagesChanged);
         Date = string.Empty;
         Time = string.Empty;
         Setting = Guid.Empty;
@@ -88,12 +88,6 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
     private readonly AppState _appState;
     private bool _changeable; // process property changes for this story element
     private bool _changed; // this story element has changed
-
-    /// <summary>Backing for the Images tab gallery.</summary>
-    public ElementImageGallery ImageGallery { get; }
-
-    /// <summary>Tiles bound by the Images tab's gallery control.</summary>
-    public ObservableCollection<ImageGalleryItem> Images => ImageGallery.Items;
 
     #endregion
 
@@ -522,15 +516,6 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
         }
     }
 
-    /// <summary>Marks the element dirty when images or captions change.</summary>
-    private void OnImagesChanged()
-    {
-        if (_changeable)
-        {
-            _changed = true;
-            ShellViewModel.ShowChange();
-        }
-    }
 
     private void LoadModel()
     {

@@ -48,17 +48,15 @@ public sealed partial class ImageGalleryControl : UserControl
             }
 
             var imageService = Ioc.Default.GetRequiredService<ImageService>();
-            StoryImage image = await imageService.PickImageAsync();
+            var (image, thumbnail) = await imageService.PickImageWithThumbnailAsync(ThumbnailDecodeWidth);
             if (image == null)
             {
                 return; // user cancelled
             }
 
-            // Add the tile (and persist the picture) immediately, BEFORE decoding the
-            // preview, so a slow or failed thumbnail decode never drops the image.
-            var item = new ImageGalleryItem(image, null);
-            ItemsSource.Add(item);
-            item.Source = await imageService.ToImageSourceAsync(image, ThumbnailDecodeWidth);
+            // The picture is always persisted here even if thumbnail decoding above
+            // failed (thumbnail is then null and the tile just shows without a preview).
+            ItemsSource.Add(new ImageGalleryItem(image, thumbnail));
         }
         catch (Exception ex)
         {

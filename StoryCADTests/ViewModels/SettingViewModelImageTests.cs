@@ -75,4 +75,27 @@ public class SettingViewModelImageTests
 
         Assert.AreEqual(0, setting.Images.Count);
     }
+
+    /// <summary>
+    ///     The gallery's onChanged callback routes through the VM's own PropertyChanged
+    ///     pipeline (raising "Images") rather than a bespoke OnImagesChanged method, so
+    ///     it reaches the same dirty-tracking every other property already uses.
+    /// </summary>
+    [TestMethod]
+    public void ImageGalleryChange_RaisesPropertyChangedForImages()
+    {
+        var vm = Ioc.Default.GetRequiredService<SettingViewModel>();
+        SettingModel setting = NewSetting(out _);
+        vm.Activate(setting);
+
+        var raised = new List<string>();
+        vm.PropertyChanged += (_, e) => raised.Add(e.PropertyName ?? string.Empty);
+
+        var added = new StoryImage(
+            Guid.NewGuid(), Convert.ToBase64String(new byte[] { 1 }), "image/png", "y.png");
+        vm.Images.Add(new ImageGalleryItem(added, null));
+
+        Assert.IsTrue(raised.Contains(nameof(vm.Images)),
+            "adding an image should raise PropertyChanged(Images)");
+    }
 }

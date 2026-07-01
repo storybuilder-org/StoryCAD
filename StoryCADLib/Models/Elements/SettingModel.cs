@@ -194,6 +194,7 @@ public class SettingModel : StoryElement
 
     public SettingModel()
     {
+        Images = new List<StoryImage>();
     }
 
     #endregion
