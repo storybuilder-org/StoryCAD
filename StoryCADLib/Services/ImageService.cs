@@ -69,8 +69,9 @@ public class ImageService
     ///     bytes for both the storage-sizing check and the thumbnail rather than
     ///     decoding twice. Returns (null, null) if the user cancels; the thumbnail
     ///     is null (but the image is still returned) if it can't be decoded or
-    ///     built. Must be called on the UI thread (thumbnail building requires it;
-    ///     see <see cref="ToImageSourceAsync"/>).
+    ///     built. Call on the UI thread: the CPU-bound decode, storage re-encode,
+    ///     and thumbnail resize run on a background thread, but the returned
+    ///     thumbnail bitmap is built on the calling thread.
     /// </summary>
     public async Task<(StoryImage Image, ImageSource Thumbnail)> PickImageWithThumbnailAsync(int thumbnailDecodeWidth)
     {
@@ -89,39 +90,51 @@ public class ImageService
 
         _logger.Log(LogLevel.Info, $"Imported image {file.Name} ({bytes.Length} bytes)");
 
-        SKBitmap decoded = null;
-        try
+        // Decode, storage re-encoding (resize + WebP), and the thumbnail resize are
+        // all CPU-bound; run them off the UI thread so "Add Picture" doesn't block
+        // the dispatcher. Only the WriteableBitmap build needs the UI thread.
+        string fileName = file.Name;
+        var prepared = await Task.Run(() =>
         {
-            decoded = SKBitmap.Decode(bytes);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogException(LogLevel.Warn, ex,
-                $"Failed to decode picked image ({bytes.Length} bytes); storing without a thumbnail");
-        }
-
-        using (decoded)
-        {
-            // Always returns the StoryImage even if decoding/thumbnailing below fails,
-            // so a bad decode never drops the picked picture.
-            StoryImage image = CreateFromBytes(bytes, file.Name, decoded);
-
-            ImageSource thumbnail = null;
-            if (decoded != null)
+            SKBitmap decoded = null;
+            try
             {
-                try
-                {
-                    thumbnail = await BuildImageSourceAsync(decoded, thumbnailDecodeWidth);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogException(LogLevel.Warn, ex,
-                        $"Failed to build thumbnail for picked image ({bytes.Length} bytes)");
-                }
+                decoded = SKBitmap.Decode(bytes);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogException(LogLevel.Warn, ex,
+                    $"Failed to decode picked image ({bytes.Length} bytes); storing without a thumbnail");
             }
 
-            return (image, thumbnail);
-        }
+            using (decoded)
+            {
+                // Always returns the StoryImage even if decoding/thumbnailing fails,
+                // so a bad decode never drops the picked picture.
+                StoryImage image = CreateFromBytes(bytes, fileName, decoded);
+
+                (byte[] Pixels, int Width, int Height)? thumb = null;
+                if (decoded != null)
+                {
+                    try
+                    {
+                        thumb = ResizeToBgra(decoded, thumbnailDecodeWidth);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogException(LogLevel.Warn, ex,
+                            $"Failed to build thumbnail for picked image ({bytes.Length} bytes)");
+                    }
+                }
+
+                return (Image: image, Thumb: thumb);
+            }
+        });
+
+        ImageSource thumbnail = prepared.Thumb is { } t
+            ? BuildImageSource(t.Pixels, t.Width, t.Height)
+            : null;
+        return (prepared.Image, thumbnail);
     }
 
     /// <summary>
@@ -246,8 +259,9 @@ public class ImageService
     /// <summary>
     ///     Decodes a stored image into a displayable bitmap. Pass
     ///     <paramref name="decodePixelWidth"/> to decode a lightweight thumbnail
-    ///     for gallery tiles rather than the full stored image. Must be called on
-    ///     the UI thread.
+    ///     for gallery tiles rather than the full stored image. Call on the UI
+    ///     thread: the CPU-bound decode and resize run on a background thread, but
+    ///     the returned bitmap is built on the calling thread.
     /// </summary>
     public async Task<ImageSource> ToImageSourceAsync(StoryImage image, int? decodePixelWidth = null)
     {
@@ -257,38 +271,51 @@ public class ImageService
             return null;
         }
 
-        // Decode via SkiaSharp (see BuildImageSourceAsync for why). Best-effort: a
-        // failure returns null (the tile still shows) and is logged.
+        // Decode + resize are CPU-bound; run them off the UI thread so callers
+        // (click handlers) don't block the dispatcher. The await resumes on the
+        // UI thread, where the WriteableBitmap must be built.
+        (byte[] Pixels, int Width, int Height)? bgra =
+            await Task.Run(() => DecodeToBgra(bytes, decodePixelWidth, image?.ContentType));
+
+        return bgra is { } b ? BuildImageSource(b.Pixels, b.Width, b.Height) : null;
+    }
+
+    /// <summary>
+    ///     Decodes <paramref name="bytes"/> and resizes to a raw BGRA pixel buffer,
+    ///     capped to <paramref name="decodePixelWidth"/> if given. CPU-bound and
+    ///     UI-free, so it is safe to run on a background thread. Returns null
+    ///     (logged) if the bytes can't be decoded or the resize fails.
+    /// </summary>
+    private (byte[] Pixels, int Width, int Height)? DecodeToBgra(
+        byte[] bytes, int? decodePixelWidth, string contentTypeForLog)
+    {
         try
         {
             using SKBitmap decoded = SKBitmap.Decode(bytes);
             if (decoded is null)
             {
                 _logger.Log(LogLevel.Warn,
-                    $"SkiaSharp could not decode image (type={image?.ContentType}, bytes={bytes.Length})");
+                    $"SkiaSharp could not decode image (type={contentTypeForLog}, bytes={bytes.Length})");
                 return null;
             }
 
-            return await BuildImageSourceAsync(decoded, decodePixelWidth);
+            return ResizeToBgra(decoded, decodePixelWidth);
         }
         catch (Exception ex)
         {
             _logger.LogException(LogLevel.Warn, ex,
-                $"Failed to decode image (type={image?.ContentType}, bytes={bytes.Length})");
+                $"Failed to decode image (type={contentTypeForLog}, bytes={bytes.Length})");
             return null;
         }
     }
 
     /// <summary>
-    ///     Builds a displayable <see cref="ImageSource"/> from an already-decoded
-    ///     <paramref name="decoded"/> bitmap, resizing to <paramref name="decodePixelWidth"/>
-    ///     if given. Renders into a <see cref="WriteableBitmap"/> (a raw BGRA pixel
-    ///     buffer the UNO/Skia desktop head renders directly) — BitmapImage.SetSourceAsync
-    ///     from an in-memory stream does not render on that head; SkiaSharp is the
-    ///     head's own codec so this path works on both Windows and macOS. Must be
-    ///     called on the UI thread.
+    ///     Resizes an already-decoded <paramref name="decoded"/> bitmap to a raw
+    ///     BGRA8888 pixel buffer, scaled to <paramref name="decodePixelWidth"/> if
+    ///     given. CPU-bound and UI-free; safe on a background thread. Returns null
+    ///     (logged) if the resize fails.
     /// </summary>
-    private async Task<ImageSource> BuildImageSourceAsync(SKBitmap decoded, int? decodePixelWidth)
+    private (byte[] Pixels, int Width, int Height)? ResizeToBgra(SKBitmap decoded, int? decodePixelWidth)
     {
         int targetWidth = decoded.Width;
         int targetHeight = decoded.Height;
@@ -308,15 +335,39 @@ public class ImageService
             return null;
         }
 
-        WriteableBitmap writeable = new(targetWidth, targetHeight);
-        byte[] pixels = bgra.Bytes;
-        using (Stream pixelStream = writeable.PixelBuffer.AsStream())
-        {
-            await pixelStream.WriteAsync(pixels, 0, pixels.Length);
-        }
+        // SKBitmap.Bytes copies into a managed array, so the buffer outlives the
+        // disposed bitmaps and can safely cross back to the UI thread.
+        return (bgra.Bytes, targetWidth, targetHeight);
+    }
 
-        writeable.Invalidate();
-        return writeable;
+    /// <summary>
+    ///     Wraps a raw BGRA pixel buffer in a <see cref="WriteableBitmap"/>, the
+    ///     surface the UNO/Skia desktop head renders directly. BitmapImage
+    ///     .SetSourceAsync from an in-memory stream does not render on that head,
+    ///     and SkiaSharp is the head's own codec, so this path works on both
+    ///     Windows and macOS. Must be called on the UI thread. Best-effort: a
+    ///     failure is logged and returns null. The pixel write is an in-memory
+    ///     copy, so it stays synchronous.
+    /// </summary>
+    private ImageSource BuildImageSource(byte[] pixels, int width, int height)
+    {
+        try
+        {
+            WriteableBitmap writeable = new(width, height);
+            using (Stream pixelStream = writeable.PixelBuffer.AsStream())
+            {
+                pixelStream.Write(pixels, 0, pixels.Length);
+            }
+
+            writeable.Invalidate();
+            return writeable;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogException(LogLevel.Warn, ex,
+                $"Failed to build WriteableBitmap ({width}x{height})");
+            return null;
+        }
     }
 
     /// <summary>
