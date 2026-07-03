@@ -547,6 +547,7 @@
                                         </Grid.RowDefinitions>
 
                                         <!-- Shows the root node out of tree, prevents creating new roots. -->
+                                        <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). -->
                                         <TreeViewItem Tapped="RootClick" RightTapped="TreeViewItem_RightTapped"
                                                       HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
                                                       Background="Transparent" BorderBrush="Transparent"
@@ -573,6 +574,7 @@
 
                                             <muxc:TreeView.ItemTemplate>
                                                 <DataTemplate x:DataType="viewmodels:StoryNodeItem">
+                                                    <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). -->
                                                     <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
                                                                        Background="{x:Bind Background, Mode=OneWay}"
                                                                        BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
@@ -608,6 +610,7 @@
                                        AutomationProperties.AutomationId="TrashTree">
                             <muxc:TreeView.ItemTemplate>
                                 <DataTemplate x:DataType="viewmodels:StoryNodeItem">
+                                    <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). -->
                                     <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
                                                        RightTapped="TreeViewItem_RightTapped"
                                                        IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"

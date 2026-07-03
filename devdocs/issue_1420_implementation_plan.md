@@ -7,6 +7,7 @@ Written 2026-07-03 for founder review. Executes the design approved 2026-07-03 (
 - Base branch is `dev`. Every unit branches from current `dev` as `issue-1420-batch{N}-{slug}` and PRs back to `dev`.
 - Diffs are XAML attributes plus test code only. No behavior, logic, layout, or ViewModel changes. If a unit surfaces a code problem (for example an MVVM gap in a dialog), file a new issue; do not fix it in the batch PR.
 - The convention document is law. Where it is silent, propose the resolution in the PR description rather than inventing silently.
+- Where an annotation exists in a particular form because of a non-obvious platform constraint, put a one-line comment at the code site stating the constraint; the convention doc carries the full rule.
 - Every unit ends with: solution builds, full test suite green, Accessibility Insights FastPass on the touched views recorded in the PR description.
 
 ### Build and test commands (Windows, PowerShell)
@@ -84,7 +85,7 @@ Same cycle every time: branch from `dev`; extend `AnnotatedFiles` (red); annotat
 
 ### Optional spike (time-boxed, alongside Unit 2): scripted scans
 
-Accessibility Insights' scan engine ships separately as Axe.Windows with a CLI (`AxeWindowsCLI`, NuGet). A script that launches StoryCAD, scans the process, and emits results would automate the recurring per-batch bar; manual FastPass stays authoritative per the approved design, and the audit under umbrella #1441 stays manual regardless. If the spike works in under a session, add `devdocs/tools/axe_scan.ps1` and use it from Unit 3 on; if not, drop it without ceremony.
+Accessibility Insights' scan engine ships separately as Axe.Windows with a CLI (`AxeWindowsCLI`, distributed as an MSI installer or self-contained zip from the microsoft/axe-windows GitHub releases, not as a NuGet dotnet tool; spike confirmed v2.4.2 of both). A script that launches StoryCAD, scans the process, and emits results would automate the recurring per-batch bar; manual FastPass stays authoritative per the approved design, and the audit under umbrella #1441 stays manual regardless. If the spike works in under a session, add `devdocs/tools/axe_scan.ps1` and use it from Unit 3 on; if not, drop it without ceremony.
 
 ## Naming decision procedure (for the implementing agent)
 

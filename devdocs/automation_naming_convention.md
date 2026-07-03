@@ -29,6 +29,7 @@ Every interactive control gets `AutomationProperties.AutomationId`.
 | GridView | `GridView` | `ImagesGridView` *(plan-stage addition; needed for `ImageGalleryControl`)* |
 | Flyout | `Flyout` | `EmptyTrashFlyout` |
 | RadioButton | `Radio` | *(added Unit 1)* |
+| RadioButtons | `Radios` | `StructureElementsRadios` *(added Unit 2)* |
 | ToggleSwitch | `Toggle` | *(added Unit 1)* |
 | BrowseTextBox | `TextBox` | *(added Unit 1)* |
 | ItemsRepeater | `Tree` | `NavigationTree` *(added Unit 1; exists for the Shell navigation tree stand-in; revisit if a non-tree ItemsRepeater ever needs annotation)* |
@@ -56,6 +57,7 @@ Every interactive control gets `AutomationProperties.AutomationId`.
 - Never put AutomationId inside a `DataTemplate`; every realized item would report the same id. The scan test enforces this across all files from day one.
 - Annotate the items control itself (`NavigationTree`, `TrashTree`, `ElementsList`, `ImagesGridView`).
 - Inside templates, bind `AutomationProperties.Name` to the item's display property (`{x:Bind Name}`) so each realized item is announced. Tests locate items by container AutomationId plus item Name.
+- Bind Name inline on the template element itself, never via an `ItemContainerStyle`/Style `Setter`: the Windows Runtime does not evaluate bindings in `Setter.Value`, so the name silently never gets set (no error, no warning). *(added Unit 2)*
 - Static TabViewItems are not templated; each gets a `Tab`-suffixed AutomationId.
 - A composite user control (`Traits`, `RelationshipView`, `Conflict`, `Flaw`, `BrowseTextBox`, `ImageGalleryControl`) carries AutomationIds on its internal controls. If a composite is ever instantiated inside a repeater, treat it like a DataTemplate: internal ids stay, tests scope by the repeating parent's id plus a bound Name.
 

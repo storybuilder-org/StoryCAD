@@ -22,6 +22,8 @@ public class AutomationConventionTests
     {
         "StoryCAD/Views/Shell.xaml",
         "StoryCAD/Views/OverviewPage.xaml",
+        "StoryCAD/Views/ProblemPage.xaml",
+        "StoryCAD/Views/CharacterPage.xaml",
     };
 
     /// <summary>
@@ -41,7 +43,7 @@ public class AutomationConventionTests
     private static readonly HashSet<string> InteractiveElementNames = new()
     {
         "Button", "AppBarButton", "HyperlinkButton", "MenuFlyoutItem", "MenuFlyoutSubItem",
-        "ComboBox", "TextBox", "CheckBox", "RadioButton", "ToggleSwitch", "NumberBox",
+        "ComboBox", "TextBox", "CheckBox", "RadioButton", "RadioButtons", "ToggleSwitch", "NumberBox",
         "AutoSuggestBox", "TabView", "TabViewItem", "TreeView", "ListView", "GridView",
         "Flyout", "RichEditBoxExtended", "BrowseTextBox",
     };
@@ -53,7 +55,8 @@ public class AutomationConventionTests
     ///     standing in for a TreeView because the real nested TreeView is templated);
     ///     "BrowseTextBox", "RadioButton", and "ToggleSwitch" fill gaps in the convention's
     ///     original suffix table (the test spec's interactive-element list includes all three,
-    ///     but the original table did not).
+    ///     but the original table did not). "RadioButtons" (the WinUI group control) was added
+    ///     in Unit 2 for ProblemPage's Elements source selector.
     /// </summary>
     private static readonly Dictionary<string, string> SuffixByElementName = new()
     {
@@ -67,6 +70,7 @@ public class AutomationConventionTests
         ["RichEditBoxExtended"] = "RichEdit",
         ["CheckBox"] = "Check",
         ["RadioButton"] = "Radio",   // added Unit 1: gap in original convention suffix table, see class remarks
+        ["RadioButtons"] = "Radios", // added Unit 2: RadioButtons group is an items host generating focusable children
         ["ToggleSwitch"] = "Toggle", // added Unit 1: gap in original convention suffix table, see class remarks
         ["NumberBox"] = "NumberBox",
         ["AutoSuggestBox"] = "SearchBox",
@@ -346,5 +350,41 @@ public class AutomationConventionTests
 
         Assert.IsTrue(violations.Count == 0,
             $"{violations.Count} namespaced AutomationProperties attribute(s):\n{string.Join("\n", violations)}");
+    }
+
+    /// <summary>
+    ///     No Style Setter may target an AutomationProperties.* property, in any scope file,
+    ///     whatever the Value. The Windows Runtime does not evaluate bindings in Setter.Value
+    ///     (Setter class docs; unoplatform/uno#4826), so a bound Name silently never gets set;
+    ///     a literal Value would name every realized item identically. Both are always wrong:
+    ///     bind Name inline on the template element instead.
+    /// </summary>
+    [TestMethod]
+    public void SetterSafety_AllFiles_NoAutomationPropertiesInStyleSetters()
+    {
+        var violations = new List<string>();
+
+        foreach (var relPath in ScopeFiles())
+        {
+            var doc = LoadXaml(relPath);
+            foreach (var element in doc.Descendants())
+            {
+                if (element.Name.LocalName != "Setter")
+                {
+                    continue;
+                }
+
+                var property = element.Attributes()
+                    .FirstOrDefault(a => a.Name.LocalName == "Property")
+                    ?.Value;
+                if (property != null && property.StartsWith("AutomationProperties.", StringComparison.Ordinal))
+                {
+                    violations.Add($"{relPath}:{LineOf(element)} <Setter Property=\"{property}\"> sets AutomationProperties via a Style Setter (bindings in Setter.Value are never evaluated; a literal names every item identically)");
+                }
+            }
+        }
+
+        Assert.IsTrue(violations.Count == 0,
+            $"{violations.Count} AutomationProperties Style Setter(s):\n{string.Join("\n", violations)}");
     }
 }
