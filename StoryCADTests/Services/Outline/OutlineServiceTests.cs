@@ -2425,4 +2425,287 @@ public class OutlineServiceTests
     }
 
     #endregion
+
+    #region Image Tests
+
+    private static StoryImage MakeImage(Guid? id = null, string caption = "Reference") =>
+        new(id ?? Guid.NewGuid(), Convert.ToBase64String(new byte[] { 1, 2, 3, 4 }), "image/png", "pic.png")
+        {
+            Caption = caption
+        };
+
+    private async Task<(StoryModel model, StoryElement overview)> NewModelWithOverview()
+    {
+        var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+        return (model, overview);
+    }
+
+    // ----- AddImage -----
+
+    [TestMethod]
+    public async Task AddImage_ToCharacter_AddsImageAndMarksChanged()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+        var image = MakeImage();
+        model.Changed = false;
+
+        var result = _outlineService.AddImage(model, character, image);
+
+        Assert.IsTrue(result);
+        Assert.AreEqual(1, ((CharacterModel)character).Images.Count);
+        Assert.AreEqual(image.Id, ((CharacterModel)character).Images[0].Id);
+        Assert.IsTrue(model.Changed, "Adding an image should mark the model changed.");
+    }
+
+    [TestMethod]
+    public async Task AddImage_ToSetting_AddsImage()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var setting = _outlineService.AddStoryElement(model, StoryItemType.Setting, overview.Node);
+
+        var result = _outlineService.AddImage(model, setting, MakeImage());
+
+        Assert.IsTrue(result);
+        Assert.AreEqual(1, ((SettingModel)setting).Images.Count);
+    }
+
+    [TestMethod]
+    public async Task AddImage_ToScene_AddsImage()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var scene = _outlineService.AddStoryElement(model, StoryItemType.Scene, overview.Node);
+
+        var result = _outlineService.AddImage(model, scene, MakeImage());
+
+        Assert.IsTrue(result);
+        Assert.AreEqual(1, ((SceneModel)scene).Images.Count);
+    }
+
+    [TestMethod]
+    public async Task AddImage_ToNotesFolder_AddsImage()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var notes = _outlineService.AddStoryElement(model, StoryItemType.Notes, overview.Node);
+
+        var result = _outlineService.AddImage(model, notes, MakeImage());
+
+        Assert.IsTrue(result);
+        Assert.AreEqual(1, ((FolderModel)notes).Images.Count);
+    }
+
+    [TestMethod]
+    public async Task AddImage_ToNonNotesFolder_ThrowsInvalidOperation()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var folder = _outlineService.AddStoryElement(model, StoryItemType.Folder, overview.Node);
+
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
+            _outlineService.AddImage(model, folder, MakeImage()));
+    }
+
+    [TestMethod]
+    public async Task AddImage_ToUnsupportedElementType_ThrowsInvalidOperation()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var problem = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
+            _outlineService.AddImage(model, problem, MakeImage()));
+    }
+
+    [TestMethod]
+    public async Task AddImage_NullSource_ThrowsArgumentNull()
+    {
+        var (model, _) = await NewModelWithOverview();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+            _outlineService.AddImage(model, null, MakeImage()));
+    }
+
+    [TestMethod]
+    public async Task AddImage_NullImage_ThrowsArgumentNull()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+            _outlineService.AddImage(model, character, null));
+    }
+
+    [TestMethod]
+    public async Task AddImage_EmptyImageId_ThrowsArgument()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+
+        Assert.ThrowsExactly<ArgumentException>(() =>
+            _outlineService.AddImage(model, character, MakeImage(Guid.Empty)));
+    }
+
+    [TestMethod]
+    public async Task AddImage_EmptyImageData_ThrowsArgument()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+        var image = new StoryImage(Guid.NewGuid(), "", "image/png", "pic.png");
+
+        Assert.ThrowsExactly<ArgumentException>(() =>
+            _outlineService.AddImage(model, character, image));
+    }
+
+    [TestMethod]
+    public async Task AddImage_DuplicateId_DoesNotAddTwice()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+        var id = Guid.NewGuid();
+        _outlineService.AddImage(model, character, MakeImage(id));
+
+        var result = _outlineService.AddImage(model, character, MakeImage(id));
+
+        Assert.IsTrue(result, "Duplicate add should still return true.");
+        Assert.AreEqual(1, ((CharacterModel)character).Images.Count, "Duplicate Id must not be added twice.");
+    }
+
+    // ----- RemoveImage -----
+
+    [TestMethod]
+    public async Task RemoveImage_ExistingId_RemovesAndMarksChanged()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+        var image = MakeImage();
+        _outlineService.AddImage(model, character, image);
+        model.Changed = false;
+
+        var result = _outlineService.RemoveImage(model, character, image.Id);
+
+        Assert.IsTrue(result);
+        Assert.AreEqual(0, ((CharacterModel)character).Images.Count);
+        Assert.IsTrue(model.Changed, "Removing an image should mark the model changed.");
+    }
+
+    [TestMethod]
+    public async Task RemoveImage_MissingId_ReturnsFalseAndLeavesModelUnchanged()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+        _outlineService.AddImage(model, character, MakeImage());
+        model.Changed = false;
+
+        var result = _outlineService.RemoveImage(model, character, Guid.NewGuid());
+
+        Assert.IsFalse(result);
+        Assert.AreEqual(1, ((CharacterModel)character).Images.Count);
+        Assert.IsFalse(model.Changed, "A no-op remove must not mark the model changed.");
+    }
+
+    [TestMethod]
+    public async Task RemoveImage_NullSource_ThrowsArgumentNull()
+    {
+        var (model, _) = await NewModelWithOverview();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+            _outlineService.RemoveImage(model, null, Guid.NewGuid()));
+    }
+
+    [TestMethod]
+    public async Task RemoveImage_EmptyId_ThrowsArgument()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+
+        Assert.ThrowsExactly<ArgumentException>(() =>
+            _outlineService.RemoveImage(model, character, Guid.Empty));
+    }
+
+    [TestMethod]
+    public async Task RemoveImage_UnsupportedElementType_ThrowsInvalidOperation()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var problem = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
+            _outlineService.RemoveImage(model, problem, Guid.NewGuid()));
+    }
+
+    // ----- UpdateImageCaption -----
+
+    [TestMethod]
+    public async Task UpdateImageCaption_ExistingId_UpdatesCaptionAndMarksChanged()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+        var image = MakeImage(caption: "Old");
+        _outlineService.AddImage(model, character, image);
+        model.Changed = false;
+
+        var result = _outlineService.UpdateImageCaption(model, character, image.Id, "New caption");
+
+        Assert.IsTrue(result);
+        Assert.AreEqual("New caption", ((CharacterModel)character).Images[0].Caption);
+        Assert.IsTrue(model.Changed, "Updating a caption should mark the model changed.");
+    }
+
+    [TestMethod]
+    public async Task UpdateImageCaption_NullCaption_SetsEmptyString()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+        var image = MakeImage(caption: "Old");
+        _outlineService.AddImage(model, character, image);
+
+        var result = _outlineService.UpdateImageCaption(model, character, image.Id, null);
+
+        Assert.IsTrue(result);
+        Assert.AreEqual(string.Empty, ((CharacterModel)character).Images[0].Caption);
+    }
+
+    [TestMethod]
+    public async Task UpdateImageCaption_MissingId_ReturnsFalse()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+        _outlineService.AddImage(model, character, MakeImage(caption: "Old"));
+        model.Changed = false;
+
+        var result = _outlineService.UpdateImageCaption(model, character, Guid.NewGuid(), "New");
+
+        Assert.IsFalse(result);
+        Assert.AreEqual("Old", ((CharacterModel)character).Images[0].Caption);
+        Assert.IsFalse(model.Changed, "A no-op caption update must not mark the model changed.");
+    }
+
+    [TestMethod]
+    public async Task UpdateImageCaption_NullSource_ThrowsArgumentNull()
+    {
+        var (model, _) = await NewModelWithOverview();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+            _outlineService.UpdateImageCaption(model, null, Guid.NewGuid(), "x"));
+    }
+
+    [TestMethod]
+    public async Task UpdateImageCaption_EmptyId_ThrowsArgument()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+
+        Assert.ThrowsExactly<ArgumentException>(() =>
+            _outlineService.UpdateImageCaption(model, character, Guid.Empty, "x"));
+    }
+
+    [TestMethod]
+    public async Task UpdateImageCaption_UnsupportedElementType_ThrowsInvalidOperation()
+    {
+        var (model, overview) = await NewModelWithOverview();
+        var problem = _outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
+            _outlineService.UpdateImageCaption(model, problem, Guid.NewGuid(), "x"));
+    }
+
+    #endregion
 }

@@ -974,6 +974,92 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         }
     }
 
+    [KernelFunction]
+    [Description("""
+                 Attaches an image to a story element.
+                 element MUST be the GUID of a Character, Setting, Scene, or Notes element.
+                 image is a StoryImage whose ImageData is the Base64 of the picture bytes;
+                 it must have a non-empty Id used to remove or re-caption it later.
+                 """)]
+    public OperationResult<bool> AddImage(Guid element, StoryImage image)
+    {
+        try
+        {
+            if (CurrentModel == null)
+            {
+                return OperationResult<bool>.Failure("No outline is opened");
+            }
+
+            var storyElement = outlineService.GetStoryElementByGuid(CurrentModel, element);
+            outlineService.AddImage(CurrentModel, storyElement, image);
+
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error in AddImage: {ex.Message}");
+        }
+    }
+
+    [KernelFunction]
+    [Description("""
+                 Removes an attached image from a story element.
+                 element MUST be the GUID of a Character, Setting, Scene, or Notes element.
+                 imageId MUST be the Id of an image currently attached to that element.
+                 """)]
+    public OperationResult<bool> RemoveImage(Guid element, Guid imageId)
+    {
+        try
+        {
+            if (CurrentModel == null)
+            {
+                return OperationResult<bool>.Failure("No outline is opened");
+            }
+
+            var storyElement = outlineService.GetStoryElementByGuid(CurrentModel, element);
+            if (!outlineService.RemoveImage(CurrentModel, storyElement, imageId))
+            {
+                return OperationResult<bool>.Failure($"No image with Id {imageId} is attached to that element.");
+            }
+
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error in RemoveImage: {ex.Message}");
+        }
+    }
+
+    [KernelFunction]
+    [Description("""
+                 Updates the caption of an image attached to a story element.
+                 element MUST be the GUID of a Character, Setting, Scene, or Notes element.
+                 imageId MUST be the Id of an image currently attached to that element.
+                 caption is the new caption text.
+                 """)]
+    public OperationResult<bool> UpdateImageCaption(Guid element, Guid imageId, string caption)
+    {
+        try
+        {
+            if (CurrentModel == null)
+            {
+                return OperationResult<bool>.Failure("No outline is opened");
+            }
+
+            var storyElement = outlineService.GetStoryElementByGuid(CurrentModel, element);
+            if (!outlineService.UpdateImageCaption(CurrentModel, storyElement, imageId, caption))
+            {
+                return OperationResult<bool>.Failure($"No image with Id {imageId} is attached to that element.");
+            }
+
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error in UpdateImageCaption: {ex.Message}");
+        }
+    }
+
 
     [KernelFunction]
     [Description("""

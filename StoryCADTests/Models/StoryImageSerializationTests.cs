@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCADLib.Models;
 
@@ -85,6 +86,54 @@ public class StoryImageSerializationTests
 
         var restored = (CharacterModel)StoryElement.Deserialize(character.Serialize());
         Assert.IsNotNull(restored.Images);
+        Assert.AreEqual(0, restored.Images.Count);
+    }
+
+    /// <summary>Serializes <paramref name="element"/> and strips the "Images" property
+    /// entirely, reproducing a legacy .stbx written before the Images feature (which
+    /// has no "Images" key at all, not an empty array).</summary>
+    private static string SerializeWithoutImagesKey(StoryElement element)
+    {
+        JsonObject obj = JsonNode.Parse(element.Serialize())!.AsObject();
+        Assert.IsTrue(obj.Remove("Images"), "Expected serialized element to contain an Images key to remove.");
+        return obj.ToJsonString();
+    }
+
+    /// <summary>
+    ///     A legacy .stbx predating the Images feature has no "Images" key at all.
+    ///     System.Text.Json only overwrites properties present in the JSON, so the
+    ///     constructor-initialized list must survive deserialization as empty, not null.
+    /// </summary>
+    [TestMethod]
+    public void LegacyPayload_MissingImagesKey_DeserializesToEmptyList()
+    {
+        var model = new StoryModel();
+        var character = new CharacterModel("Hero", model, null);
+        string legacyJson = SerializeWithoutImagesKey(character);
+        StringAssert.DoesNotMatch(legacyJson, new System.Text.RegularExpressions.Regex("\"Images\""),
+            "The legacy payload must not contain an Images key.");
+
+        var restored = (CharacterModel)StoryElement.Deserialize(legacyJson);
+
+        Assert.IsNotNull(restored.Images, "Missing Images key must not leave the list null.");
+        Assert.AreEqual(0, restored.Images.Count);
+    }
+
+    /// <summary>
+    ///     As above for a Notes element, which declares its own Images list on
+    ///     <see cref="FolderModel"/> rather than inheriting it, so the missing-key
+    ///     invariant is verified on that separate declaration too.
+    /// </summary>
+    [TestMethod]
+    public void LegacyNotesPayload_MissingImagesKey_DeserializesToEmptyList()
+    {
+        var model = new StoryModel();
+        var notes = new FolderModel("My Note", model, StoryItemType.Notes, null);
+        string legacyJson = SerializeWithoutImagesKey(notes);
+
+        var restored = (FolderModel)StoryElement.Deserialize(legacyJson);
+
+        Assert.IsNotNull(restored.Images, "Missing Images key must not leave the list null.");
         Assert.AreEqual(0, restored.Images.Count);
     }
 }
