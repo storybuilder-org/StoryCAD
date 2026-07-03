@@ -13,7 +13,7 @@ using StoryCADLib.ViewModels.Tools;
 namespace StoryCADLib.ViewModels;
 
 [Microsoft.UI.Xaml.Data.Bindable]
-public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
+public class CharacterViewModel : ElementViewModelBase, INavigable, ISaveable, IReloadable
 {
     #region Fields
 
@@ -643,6 +643,8 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable, IR
             CharacterRelationships.Add(_relation);
         }
 
+        ImageGallery.Load(Model.Images);
+
         _changeable = true;
     }
 
@@ -713,6 +715,7 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable, IR
         Model.Notes = Notes;
         Model.Flaw = Flaw;
         Model.BackStory = BackStory;
+        Model.Images = ImageGallery.ToModelList();
     }
 
     public void ReloadFromModel()
@@ -1045,7 +1048,8 @@ public class CharacterViewModel : ObservableRecipient, INavigable, ISaveable, IR
 
     #region Constructors
 
-    public CharacterViewModel(ILogService logger, AppState appState, Windowing windowing, ListData listData)
+    public CharacterViewModel(ILogService logger, AppState appState, Windowing windowing, ListData listData,
+        ImageService imageService) : base(imageService, logger)
     {
         _logger = logger;
         _appState = appState;

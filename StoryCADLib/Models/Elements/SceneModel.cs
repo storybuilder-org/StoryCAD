@@ -253,6 +253,18 @@ public class SceneModel : StoryElement
         set => _notes = value;
     }
 
+    // Attached pictures (embedded in the outline at full resolution)
+
+    [JsonIgnore] private List<StoryImage> _images;
+
+    [JsonInclude]
+    [JsonPropertyName("Images")]
+    public List<StoryImage> Images
+    {
+        get => _images;
+        set => _images = value;
+    }
+
     #endregion
 
     #region Constructors
@@ -265,6 +277,7 @@ public class SceneModel : StoryElement
         Setting = Guid.Empty;
         SceneType = string.Empty;
         CastMembers = new List<Guid>();
+        Images = new List<StoryImage>();
         Description = string.Empty;
         ScenePurpose = new List<string>();
         ValueExchange = string.Empty;
@@ -295,6 +308,7 @@ public class SceneModel : StoryElement
         Setting = Guid.Empty;
         SceneType = string.Empty;
         CastMembers = new List<Guid>();
+        Images = new List<StoryImage>();
         Description = string.Empty;
         ScenePurpose = new List<string>();
         ValueExchange = string.Empty;
@@ -319,6 +333,7 @@ public class SceneModel : StoryElement
 
     public SceneModel()
     {
+        Images = new List<StoryImage>();
     }
 
     #endregion

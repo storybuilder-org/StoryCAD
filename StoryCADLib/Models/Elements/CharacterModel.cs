@@ -184,6 +184,18 @@ public class CharacterModel : StoryElement
         set => _relationshipList = value;
     }
 
+    // Attached pictures (embedded in the outline at full resolution)
+
+    [JsonIgnore] private List<StoryImage> _images;
+
+    [JsonInclude]
+    [JsonPropertyName("Images")]
+    public List<StoryImage> Images
+    {
+        get => _images;
+        set => _images = value;
+    }
+
     // Character social data
 
     [JsonIgnore] private string _economic;
@@ -483,6 +495,7 @@ public class CharacterModel : StoryElement
         PhysNotes = string.Empty;
         Appearance = string.Empty;
         RelationshipList = new List<RelationshipModel>();
+        Images = new List<StoryImage>();
         Economic = string.Empty;
         Education = string.Empty;
         Ethnic = string.Empty;
@@ -532,6 +545,7 @@ public class CharacterModel : StoryElement
         PhysNotes = string.Empty;
         Appearance = string.Empty;
         RelationshipList = new List<RelationshipModel>();
+        Images = new List<StoryImage>();
         Economic = string.Empty;
         Education = string.Empty;
         Ethnic = string.Empty;
@@ -563,6 +577,7 @@ public class CharacterModel : StoryElement
 
     public CharacterModel()
     {
+        Images = new List<StoryImage>();
     }
 
     #endregion

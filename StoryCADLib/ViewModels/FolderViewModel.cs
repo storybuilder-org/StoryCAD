@@ -16,7 +16,7 @@ namespace StoryCADLib.ViewModels;
 ///     etc.
 /// </summary>
 [Microsoft.UI.Xaml.Data.Bindable]
-public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
+public class FolderViewModel : ElementViewModelBase, INavigable, ISaveable, IReloadable
 {
     #region Fields
 
@@ -84,6 +84,12 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IRelo
         set => _model = value;
     }
 
+    /// <summary>True when the current element is a Notes node.</summary>
+    public bool IsNotes => Model?.ElementType == StoryItemType.Notes;
+
+    /// <summary>Plain (untabbed) notes view: shown for Folder and Section.</summary>
+    public bool IsPlainNotes => !IsNotes;
+
     #endregion
 
     #region Methods
@@ -141,6 +147,14 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IRelo
         }
 
         Description = Model.Description;
+        ImageGallery.Load(Model.Images);
+
+        // ElementType is fixed per element, but the page is cached and reused
+        // across Folder/Section/Notes, so refresh the type-driven visibility.
+        // base. is required: the local OnPropertyChanged(object, args) handler
+        // hides the base string raiser from overload resolution.
+        base.OnPropertyChanged(nameof(IsNotes));
+        base.OnPropertyChanged(nameof(IsPlainNotes));
 
         _changeable = true;
     }
@@ -153,6 +167,7 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IRelo
 
         // Write RYG file
         Model.Description = Description;
+        Model.Images = ImageGallery.ToModelList();
     }
 
     public void ReloadFromModel()
@@ -167,7 +182,7 @@ public class FolderViewModel : ObservableRecipient, INavigable, ISaveable, IRelo
 
     #region Constructor
 
-    public FolderViewModel(ILogService logger)
+    public FolderViewModel(ILogService logger, ImageService imageService) : base(imageService, logger)
     {
         _logger = logger;
         Description = string.Empty;

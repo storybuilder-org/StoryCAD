@@ -139,6 +139,12 @@
 
                 </Grid>
                 </TabViewItem>
+
+                <TabViewItem Header="Images" IsClosable="False"
+                             HorizontalContentAlignment="Stretch"
+                             VerticalContentAlignment="Stretch">
+                    <usercontrols:ImageGalleryControl ItemsSource="{x:Bind SettingVm.Images, Mode=OneWay}" />
+                </TabViewItem>
             </TabView.TabItems>
         </TabView>
     </Grid>

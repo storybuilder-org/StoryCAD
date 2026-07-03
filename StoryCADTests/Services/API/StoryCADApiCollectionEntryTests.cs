@@ -246,4 +246,46 @@ public class StoryCADApiCollectionEntryTests
         Assert.IsTrue(result.ErrorMessage.Contains("type"),
             $"Type error should win over index error, got: {result.ErrorMessage}");
     }
+
+    // ----- Images round-trip through the generic collection path -----
+
+    private async Task<Guid> CreateOutlineAndGetCharacterGuid()
+    {
+        var createResult = await _api.CreateEmptyOutline("Test Outline", "Author", "0");
+        Assert.IsTrue(createResult.IsSuccess, "Expected outline creation to succeed.");
+        var overview = _api.CurrentModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview);
+        var add = _api.AddElement(StoryItemType.Character, overview.Uuid.ToString(), "Hero");
+        Assert.IsTrue(add.IsSuccess, $"Expected Character add to succeed: {add.ErrorMessage}");
+        return add.Payload;
+    }
+
+    [TestMethod]
+    public async Task ImagesEntry_AddGetRemove_RoundTripsBase64Payload()
+    {
+        var characterGuid = await CreateOutlineAndGetCharacterGuid();
+        string base64 = Convert.ToBase64String(new byte[] { 9, 8, 7, 6, 5, 4, 3, 2, 1 });
+        var image = new StoryImage(Guid.NewGuid(), base64, "image/png", "hero.png") { Caption = "Lead actor" };
+
+        // Add via the generic reflection path (Images is a [JsonInclude] List<StoryImage>).
+        var add = _api.AddCollectionEntry(characterGuid, "Images", image);
+        Assert.IsTrue(add.IsSuccess, $"Expected Images add to succeed: {add.ErrorMessage}");
+        Assert.AreEqual(0, add.Payload, "First image should be at index 0.");
+
+        // GetElement serializes the element; the Base64 payload must survive the round trip.
+        var afterAdd = _api.GetElement(characterGuid);
+        Assert.IsTrue(afterAdd.IsSuccess, $"Expected GetElement to succeed: {afterAdd.ErrorMessage}");
+        StringAssert.Contains((string)afterAdd.Payload, base64, "Serialized element should embed the image Base64.");
+        StringAssert.Contains((string)afterAdd.Payload, "Lead actor", "Serialized element should embed the caption.");
+
+        // Remove via the generic path and confirm the payload is gone.
+        var remove = _api.RemoveCollectionEntry(characterGuid, "Images", 0);
+        Assert.IsTrue(remove.IsSuccess, $"Expected Images remove to succeed: {remove.ErrorMessage}");
+
+        var afterRemove = _api.GetElement(characterGuid);
+        Assert.IsTrue(afterRemove.IsSuccess, $"Expected GetElement to succeed: {afterRemove.ErrorMessage}");
+        StringAssert.DoesNotMatch((string)afterRemove.Payload,
+            new System.Text.RegularExpressions.Regex(System.Text.RegularExpressions.Regex.Escape(base64)),
+            "Removed image Base64 should no longer be present.");
+    }
 }

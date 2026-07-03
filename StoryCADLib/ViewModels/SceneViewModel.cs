@@ -9,11 +9,12 @@ using StoryCADLib.Services.Navigation;
 namespace StoryCADLib.ViewModels;
 
 [Microsoft.UI.Xaml.Data.Bindable]
-public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
+public class SceneViewModel : ElementViewModelBase, INavigable, ISaveable, IReloadable
 {
     #region Constructors
 
-    public SceneViewModel(ILogService logger, AppState appState)
+    public SceneViewModel(ILogService logger, AppState appState, ImageService imageService)
+        : base(imageService, logger)
     {
         _logger = logger;
         _appState = appState;
@@ -515,6 +516,7 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
         }
     }
 
+
     private void LoadModel()
     {
         _changeable = false;
@@ -581,6 +583,7 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
         Realization = Model.Realization;
         Review = Model.Review;
         Notes = Model.Notes;
+        ImageGallery.Load(Model.Images);
         UpdateViewpointCharacterTip();
         _changeable = true;
 
@@ -690,6 +693,7 @@ public class SceneViewModel : ObservableRecipient, INavigable, ISaveable, IReloa
         Model.Realization = Realization;
         Model.Review = Review;
         Model.Notes = Notes;
+        Model.Images = ImageGallery.ToModelList();
 
         //_logger.Log(LogLevel.Info, string.Format("Requesting IsDirty change to true"));
         //Messenger.Send(new IsChangedMessage(Changed));
