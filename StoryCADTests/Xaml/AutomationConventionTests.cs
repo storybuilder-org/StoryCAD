@@ -43,7 +43,7 @@ public class AutomationConventionTests
     private static readonly HashSet<string> InteractiveElementNames = new()
     {
         "Button", "AppBarButton", "HyperlinkButton", "MenuFlyoutItem", "MenuFlyoutSubItem",
-        "ComboBox", "TextBox", "CheckBox", "RadioButton", "ToggleSwitch", "NumberBox",
+        "ComboBox", "TextBox", "CheckBox", "RadioButton", "RadioButtons", "ToggleSwitch", "NumberBox",
         "AutoSuggestBox", "TabView", "TabViewItem", "TreeView", "ListView", "GridView",
         "Flyout", "RichEditBoxExtended", "BrowseTextBox",
     };
@@ -55,7 +55,8 @@ public class AutomationConventionTests
     ///     standing in for a TreeView because the real nested TreeView is templated);
     ///     "BrowseTextBox", "RadioButton", and "ToggleSwitch" fill gaps in the convention's
     ///     original suffix table (the test spec's interactive-element list includes all three,
-    ///     but the original table did not).
+    ///     but the original table did not). "RadioButtons" (the WinUI group control) was added
+    ///     in Unit 2 for ProblemPage's Elements source selector.
     /// </summary>
     private static readonly Dictionary<string, string> SuffixByElementName = new()
     {
@@ -69,6 +70,7 @@ public class AutomationConventionTests
         ["RichEditBoxExtended"] = "RichEdit",
         ["CheckBox"] = "Check",
         ["RadioButton"] = "Radio",   // added Unit 1: gap in original convention suffix table, see class remarks
+        ["RadioButtons"] = "Radios", // added Unit 2: RadioButtons group is an items host generating focusable children
         ["ToggleSwitch"] = "Toggle", // added Unit 1: gap in original convention suffix table, see class remarks
         ["NumberBox"] = "NumberBox",
         ["AutoSuggestBox"] = "SearchBox",

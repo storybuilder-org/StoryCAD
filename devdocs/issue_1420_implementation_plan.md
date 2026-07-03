@@ -84,7 +84,7 @@ Same cycle every time: branch from `dev`; extend `AnnotatedFiles` (red); annotat
 
 ### Optional spike (time-boxed, alongside Unit 2): scripted scans
 
-Accessibility Insights' scan engine ships separately as Axe.Windows with a CLI (`AxeWindowsCLI`, NuGet). A script that launches StoryCAD, scans the process, and emits results would automate the recurring per-batch bar; manual FastPass stays authoritative per the approved design, and the audit under umbrella #1441 stays manual regardless. If the spike works in under a session, add `devdocs/tools/axe_scan.ps1` and use it from Unit 3 on; if not, drop it without ceremony.
+Accessibility Insights' scan engine ships separately as Axe.Windows with a CLI (`AxeWindowsCLI`, distributed as an MSI installer or self-contained zip from the microsoft/axe-windows GitHub releases, not as a NuGet dotnet tool; spike confirmed v2.4.2 of both). A script that launches StoryCAD, scans the process, and emits results would automate the recurring per-batch bar; manual FastPass stays authoritative per the approved design, and the audit under umbrella #1441 stays manual regardless. If the spike works in under a session, add `devdocs/tools/axe_scan.ps1` and use it from Unit 3 on; if not, drop it without ceremony.
 
 ## Naming decision procedure (for the implementing agent)
 

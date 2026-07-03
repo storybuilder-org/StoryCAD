@@ -92,12 +92,12 @@
                               DisplayMemberPath="Name"
                               SelectedItem="{x:Bind ProblemVm.SelectedProtagonist, Mode=TwoWay}"
                               ItemsSource="{x:Bind ProblemVm.Characters, Mode=OneWay}"
-                              AutomationProperties.AutomationId="ProtagonistCombo" />
+                              AutomationProperties.AutomationId="ProblemProtagonistCombo" />
                         <ComboBox IsEditable="True" Header="Goal" Grid.Row="1"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               Text="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}"
-                              AutomationProperties.AutomationId="ProtagonistGoalCombo" />
+                              AutomationProperties.AutomationId="ProblemProtagonistGoalCombo" />
                         <ComboBox IsEditable="True" Header="Motivation" Grid.Row="2"
                               MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
                               Text="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}"
@@ -132,12 +132,12 @@
                               SelectedItem="{x:Bind ProblemVm.SelectedAntagonist, Mode=TwoWay}"
                               SelectedValuePath="Uuid"
                               ItemsSource="{x:Bind ProblemVm.Characters, Mode=OneWay}"
-                              AutomationProperties.AutomationId="AntagonistCombo" />
+                              AutomationProperties.AutomationId="ProblemAntagonistCombo" />
                         <ComboBox IsEditable="True" Header="Goal" Grid.Row="1"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               Text="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}"
-                              AutomationProperties.AutomationId="AntagonistGoalCombo" />
+                              AutomationProperties.AutomationId="ProblemAntagonistGoalCombo" />
                         <ComboBox IsEditable="True" Header="Motivation" Grid.Row="2"
                               MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
                               Text="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}"
@@ -170,7 +170,7 @@
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.OutcomeList}"
                               Text="{x:Bind ProblemVm.Outcome, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.Outcome, Mode=TwoWay}"
-                              AutomationProperties.AutomationId="OutcomeCombo" />
+                              AutomationProperties.AutomationId="ProblemOutcomeCombo" />
                         <ComboBox IsEditable="True" Header="Method" Grid.Row="1"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.MethodList}"
                               Text="{x:Bind ProblemVm.Method, Mode=TwoWay}"
@@ -246,7 +246,9 @@
                                             ItemsSource="{x:Bind BeatSheetsVm.ElementSource}"
                                             SelectedItem="{x:Bind BeatSheetsVm.SelectedElementSource, Mode=TwoWay}"
                                             MaxColumns="2"
-                                            VerticalAlignment="Center">
+                                            VerticalAlignment="Center"
+                                            AutomationProperties.AutomationId="StructureElementsRadios"
+                                            AutomationProperties.Name="Elements">
                                         </RadioButtons>
                                     </StackPanel>
 
@@ -311,8 +313,6 @@
                                                 Value="0,0,0,1" />
                                         <Setter Property="Padding"
                                                 Value="8,4,8,4" />
-                                        <Setter Property="AutomationProperties.Name"
-                                                Value="{Binding Title}" />
                                     </Style>
                                 </ListView.ItemContainerStyle>
 
@@ -322,7 +322,8 @@
                               VerticalAlignment="Center"
                               Margin="8,8,8,8"
                               RowDefinitions="Auto,Auto"
-                              Background="Transparent">
+                              Background="Transparent"
+                              AutomationProperties.Name="{x:Bind Title, Mode=OneWay}">
                                             <!-- Icon spans both rows -->
                                             <SymbolIcon Grid.Column="0"
                                         Grid.RowSpan="2"

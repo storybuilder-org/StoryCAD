@@ -29,6 +29,7 @@ Every interactive control gets `AutomationProperties.AutomationId`.
 | GridView | `GridView` | `ImagesGridView` *(plan-stage addition; needed for `ImageGalleryControl`)* |
 | Flyout | `Flyout` | `EmptyTrashFlyout` |
 | RadioButton | `Radio` | *(added Unit 1)* |
+| RadioButtons | `Radios` | `StructureElementsRadios` *(added Unit 2)* |
 | ToggleSwitch | `Toggle` | *(added Unit 1)* |
 | BrowseTextBox | `TextBox` | *(added Unit 1)* |
 | ItemsRepeater | `Tree` | `NavigationTree` *(added Unit 1; exists for the Shell navigation tree stand-in; revisit if a non-tree ItemsRepeater ever needs annotation)* |
