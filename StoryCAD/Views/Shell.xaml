@@ -265,7 +265,7 @@
                             </MenuFlyoutItem>
                             <MenuFlyoutItem win:Text="Exit                            Ctrl+Q" skia:Text="Quit                            ⌘Q" Command="{x:Bind ShellVm.ExitCommand, Mode=OneWay}"
                                             AutomationProperties.AutomationId="ExitMenuItem"
-                                            AutomationProperties.Name="Exit">
+                                            AutomationProperties.Name="Quit">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE106;" />
                                 </MenuFlyoutItem.Icon>
