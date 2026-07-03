@@ -1823,6 +1823,41 @@ public class OutlineServiceTests
         Assert.AreEqual(1, char1Model.RelationshipList.Count, "Should only have 1 relationship (no duplicates)");
     }
 
+    [TestMethod]
+    public async Task AddRelationship_NewRelationship_MarksModelChanged()
+    {
+        // Arrange
+        var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+        var character1 = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+        var character2 = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+        model.Changed = false;
+
+        // Act
+        _outlineService.AddRelationship(model, character1.Uuid, character2.Uuid, "Friends");
+
+        // Assert - issue #1436: an unset flag lets autosave skip the mutation
+        Assert.IsTrue(model.Changed, "Adding a relationship should mark the model changed.");
+    }
+
+    [TestMethod]
+    public async Task AddRelationship_DuplicateRelationship_DoesNotMarkModelChanged()
+    {
+        // Arrange
+        var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+        var character1 = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+        var character2 = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+        _outlineService.AddRelationship(model, character1.Uuid, character2.Uuid, "Friends");
+        model.Changed = false;
+
+        // Act - duplicate add is a no-op
+        _outlineService.AddRelationship(model, character1.Uuid, character2.Uuid, "Friends");
+
+        // Assert
+        Assert.IsFalse(model.Changed, "A no-op duplicate add must not mark the model changed.");
+    }
+
     #endregion
 
     #region AddCastMember Tests
@@ -1870,6 +1905,41 @@ public class OutlineServiceTests
         Assert.IsTrue(result, "Should return true for duplicate");
         var sceneModel = (SceneModel)scene;
         Assert.AreEqual(1, sceneModel.CastMembers.Count, "Should not add duplicate cast member");
+    }
+
+    [TestMethod]
+    public async Task AddCastMember_NewMember_MarksModelChanged()
+    {
+        // Arrange
+        var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+        var scene = _outlineService.AddStoryElement(model, StoryItemType.Scene, overview.Node);
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+        model.Changed = false;
+
+        // Act
+        _outlineService.AddCastMember(model, scene, character.Uuid);
+
+        // Assert - issue #1436: an unset flag lets autosave skip the mutation
+        Assert.IsTrue(model.Changed, "Adding a cast member should mark the model changed.");
+    }
+
+    [TestMethod]
+    public async Task AddCastMember_DuplicateCastMember_DoesNotMarkModelChanged()
+    {
+        // Arrange
+        var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+        var scene = _outlineService.AddStoryElement(model, StoryItemType.Scene, overview.Node);
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+        _outlineService.AddCastMember(model, scene, character.Uuid);
+        model.Changed = false;
+
+        // Act - duplicate add is a no-op
+        _outlineService.AddCastMember(model, scene, character.Uuid);
+
+        // Assert
+        Assert.IsFalse(model.Changed, "A no-op duplicate add must not mark the model changed.");
     }
 
     [TestMethod]

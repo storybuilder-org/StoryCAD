@@ -462,6 +462,7 @@ public class OutlineService
 
         RelationshipModel relationship = new(recipient, desc);
         sourceCharacter.RelationshipList.Add(relationship);
+        Model.Changed = true;
 
         if (mirror)
         {
@@ -530,6 +531,7 @@ public class OutlineService
         }
 
         ((SceneModel)source).CastMembers.Add(castMember);
+        Model.Changed = true;
         _log.Log(LogLevel.Info, $"AddCastMember completed for cast member {castMember}.");
         return true;
     }
