@@ -22,7 +22,7 @@
              Visibility) so the inactive editor isn't instantiated/bound at all - both editors
              bind RtfText TwoWay to the same Description, and a merely-Collapsed editor still
              re-parses RTF on every keystroke typed into the other one. -->
-        <usercontrols:RichEditBoxExtended Header="Notes" Grid.Row="1"
+        <usercontrols:RichEditBoxExtended x:Name="PlainNotesEditor" Header="Notes" Grid.Row="1"
                                           x:Load="{x:Bind FolderVm.IsPlainNotes, Mode=OneWay}"
                                           RtfText="{x:Bind FolderVm.Description, Mode=TwoWay}"
                                           AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
@@ -30,7 +30,7 @@
                                           ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
         <!-- Notes element only: tabbed Notes + Images. -->
-        <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False"
+        <TabView x:Name="NotesTabView" Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False"
                  IsAddTabButtonVisible="False"
                  x:Load="{x:Bind FolderVm.IsNotes, Mode=OneWay}">
             <TabView.TabItems>
