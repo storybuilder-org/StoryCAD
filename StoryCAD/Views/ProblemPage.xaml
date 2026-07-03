@@ -318,6 +318,7 @@
 
                                 <ListView.ItemTemplate>
                                     <DataTemplate x:DataType="tools:StructureBeat">
+                                        <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). -->
                                         <Grid ColumnDefinitions="Auto,*"
                               VerticalAlignment="Center"
                               Margin="8,8,8,8"

@@ -7,6 +7,7 @@ Written 2026-07-03 for founder review. Executes the design approved 2026-07-03 (
 - Base branch is `dev`. Every unit branches from current `dev` as `issue-1420-batch{N}-{slug}` and PRs back to `dev`.
 - Diffs are XAML attributes plus test code only. No behavior, logic, layout, or ViewModel changes. If a unit surfaces a code problem (for example an MVVM gap in a dialog), file a new issue; do not fix it in the batch PR.
 - The convention document is law. Where it is silent, propose the resolution in the PR description rather than inventing silently.
+- Where an annotation exists in a particular form because of a non-obvious platform constraint, put a one-line comment at the code site stating the constraint; the convention doc carries the full rule.
 - Every unit ends with: solution builds, full test suite green, Accessibility Insights FastPass on the touched views recorded in the PR description.
 
 ### Build and test commands (Windows, PowerShell)
