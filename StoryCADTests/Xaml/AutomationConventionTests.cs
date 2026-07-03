@@ -22,6 +22,8 @@ public class AutomationConventionTests
     {
         "StoryCAD/Views/Shell.xaml",
         "StoryCAD/Views/OverviewPage.xaml",
+        "StoryCAD/Views/ProblemPage.xaml",
+        "StoryCAD/Views/CharacterPage.xaml",
     };
 
     /// <summary>
