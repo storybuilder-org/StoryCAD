@@ -32,19 +32,19 @@ What these tests cannot see, and what covers it instead: whether the accessible 
 
 All tests live in `AutomationConventionTests`. Follow the house test naming pattern (`MethodName_Scenario_ExpectedResult` adapted to `Rule_Scope_Expectation`).
 
-**Locating the XAML source**: at test run time, walk up from `AppContext.BaseDirectory` until a directory containing `StoryCAD.sln` is found; scan the 40 convention-scope files relative to that root. Fail with a clear message if the root is not found.
+**Locating the XAML source**: at test run time, walk up from `AppContext.BaseDirectory` until a directory containing `StoryCAD.sln` is found; scan the 39 convention-scope files relative to that root. Fail with a clear message if the root is not found.
 
 **Interactive element list** (local names, namespace prefixes ignored): `Button`, `AppBarButton`, `HyperlinkButton`, `MenuFlyoutItem`, `MenuFlyoutSubItem`, `ComboBox`, `TextBox`, `CheckBox`, `RadioButton`, `ToggleSwitch`, `NumberBox`, `AutoSuggestBox`, `TabView`, `TabViewItem`, `TreeView`, `ListView`, `GridView`, `Flyout`, `RichEditBoxExtended`, `BrowseTextBox`. Elements inside a `DataTemplate` (any ancestor) are excluded from the coverage requirement.
 
 | Test | Scope | Assertion |
 |---|---|---|
 | `Coverage_AnnotatedFiles_EveryInteractiveControlHasAutomationId` | files in `AnnotatedFiles` | every interactive element outside a DataTemplate has a non-empty `AutomationProperties.AutomationId`; failure message lists file, line, element |
-| `TemplateSafety_AllFiles_NoAutomationIdInsideDataTemplate` | all 40 files, from day one | no element with a DataTemplate ancestor carries AutomationId |
+| `TemplateSafety_AllFiles_NoAutomationIdInsideDataTemplate` | all 39 files, from day one | no element with a DataTemplate ancestor carries AutomationId |
 | `Suffix_AllFiles_AutomationIdEndsWithRoleSuffix` | any AutomationId present anywhere | value ends with the suffix mapped to its element type in the convention table |
 | `Uniqueness_AllFiles_AutomationIdsGloballyUnique` | any AutomationId present anywhere | no value appears twice across all scanned files |
 | `Literalness_AllFiles_AutomationIdIsLiteral` | any AutomationId present anywhere | value contains no `{` (no bindings), only ASCII letters and digits |
 
-`AnnotatedFiles` starts as `{ Shell.xaml, OverviewPage.xaml }` in Unit 1 and grows by one batch per unit. By Unit 9 it holds all 40 files and the list can be replaced by "all scope files"; the coverage test then becomes the permanent fitness function the approved design requires.
+`AnnotatedFiles` starts as `{ Shell.xaml, OverviewPage.xaml }` in Unit 1 and grows by one batch per unit. By Unit 9 it holds all 39 files and the list can be replaced by "all scope files"; the coverage test then becomes the permanent fitness function the approved design requires.
 
 ## Units of work
 
@@ -104,7 +104,7 @@ Accessibility Insights' scan engine ships separately as Axe.Windows with a CLI (
 
 ## Definition of done
 
-- All 40 scope files in the coverage test; suite green; the five convention tests permanent.
+- All 39 scope files in the coverage test; suite green; the five convention tests permanent.
 - ~586 controls annotated (actual count reported in the closing comment on #1420).
 - FastPass on every view and dialog: zero missing-name findings on annotated controls.
 - Narrator completes the Unit 1 spot-checks; the #1441 post-annotation audit is unblocked and its trigger noted there.

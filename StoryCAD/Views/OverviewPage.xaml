@@ -108,7 +108,7 @@
                                                       IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
-                                                      AutomationProperties.AutomationId="PremiseRichEdit"
+                                                      AutomationProperties.AutomationId="OverviewPremiseRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
@@ -116,7 +116,7 @@
                 <TabViewItem Header="Structure" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
-                             AutomationProperties.AutomationId="StructureTab">
+                             AutomationProperties.AutomationId="OverviewStructureTab">
                     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -161,7 +161,7 @@
                                   DisplayMemberPath="Name"
                                   SelectedItem="{x:Bind OverviewVm.SelectedViewpointCharacter, Mode=TwoWay}"
                                   ItemsSource="{x:Bind OverviewVm.Characters, Mode=OneWay}"
-                                  AutomationProperties.AutomationId="ViewpointCharacterCombo" />
+                                  AutomationProperties.AutomationId="OverviewViewpointCharacterCombo" />
                         <Grid Grid.Row="3" HorizontalAlignment="Stretch">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*" />
