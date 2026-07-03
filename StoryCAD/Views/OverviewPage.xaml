@@ -11,16 +11,19 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <TextBox Header="Title" Text="{x:Bind OverviewVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox Header="Title" Text="{x:Bind OverviewVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 AutomationProperties.AutomationId="TitleTextBox" />
         <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
                  HorizontalAlignment="Stretch"
                  VerticalAlignment="Stretch"
                  HorizontalContentAlignment="Stretch"
-                 VerticalContentAlignment="Stretch">
+                 VerticalContentAlignment="Stretch"
+                 AutomationProperties.AutomationId="OverviewTabs">
             <TabView.TabItems>
                 <TabViewItem Header="Story Idea" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="StoryIdeaTab">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>  <!-- Author -->
@@ -30,6 +33,7 @@
 
                     <TextBox Grid.Row="0"
                              Header="Author"
+                             AutomationProperties.AutomationId="AuthorTextBox"
                              Text="{x:Bind OverviewVm.Author, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                     <Grid Grid.Row="1" ColumnSpacing="12">
@@ -38,8 +42,10 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Grid.Column="0" Header="Date Created"
+                                 AutomationProperties.AutomationId="DateCreatedTextBox"
                                  Text="{x:Bind OverviewVm.DateCreated, Mode=TwoWay}"/>
                         <TextBox Grid.Column="1" Header="Last Changed"
+                                 AutomationProperties.AutomationId="LastChangedTextBox"
                                  Text="{x:Bind OverviewVm.DateModified, Mode=TwoWay}"/>
                     </Grid>
 
@@ -49,13 +55,15 @@
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="StoryIdeaRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
 
                 <TabViewItem Header="Concept" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="ConceptTab">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -70,13 +78,15 @@
                                                       IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="ConceptRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
 
                 <TabViewItem Header="Premise" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="PremiseTab">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -88,6 +98,7 @@
                               MinWidth="300"
                               DisplayMemberPath="Name"
                               SelectedItem="{x:Bind OverviewVm.SelectedProblem, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="StoryProblemCombo"
                               ItemsSource="{x:Bind OverviewVm.Problems, Mode=OneWay}" />
                     <usercontrols:RichEditBoxExtended Grid.Row="1"
                                                       Header="Premise"
@@ -97,13 +108,15 @@
                                                       IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="PremiseRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
 
                 <TabViewItem Header="Structure" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="StructureTab">
                     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -121,10 +134,12 @@
                             </Grid.ColumnDefinitions>
                             <ComboBox Header="Type" Grid.Column="0" IsEditable="False" MinWidth="0" Margin="0,0,20,0"
                                       ItemsSource="{x:Bind OverviewVm.StoryTypeList}"
-                                      SelectedItem="{x:Bind OverviewVm.StoryType, Mode=TwoWay}" />
+                                      SelectedItem="{x:Bind OverviewVm.StoryType, Mode=TwoWay}"
+                                      AutomationProperties.AutomationId="OverviewTypeCombo" />
                             <ComboBox Header="Genre" Grid.Column="2" IsEditable="False" MinWidth="0"
                                       ItemsSource="{x:Bind OverviewVm.GenreList}"
-                                      SelectedItem="{x:Bind OverviewVm.StoryGenre, Mode=TwoWay}" />
+                                      SelectedItem="{x:Bind OverviewVm.StoryGenre, Mode=TwoWay}"
+                                      AutomationProperties.AutomationId="GenreCombo" />
                         </Grid>
                         <Grid Grid.Row="1" HorizontalAlignment="Stretch">
                             <Grid.ColumnDefinitions>
@@ -135,15 +150,18 @@
                             <ComboBox Header="Viewpoint" Grid.Column="0" IsEditable="False" MinWidth="0"
                                       Margin="0,0,20,0"
                                       ItemsSource="{x:Bind OverviewVm.ViewpointList}"
-                                      SelectedItem="{x:Bind OverviewVm.Viewpoint, Mode=TwoWay}" BorderThickness="1" />
+                                      SelectedItem="{x:Bind OverviewVm.Viewpoint, Mode=TwoWay}" BorderThickness="1"
+                                      AutomationProperties.AutomationId="ViewpointCombo" />
                             <ComboBox Header="Literary Technique" IsEditable="False" Grid.Column="2" MinWidth="0"
                                       ItemsSource="{x:Bind OverviewVm.LiteraryTechniqueList}"
-                                      SelectedItem="{x:Bind OverviewVm.LiteraryTechnique, Mode=TwoWay}" />
+                                      SelectedItem="{x:Bind OverviewVm.LiteraryTechnique, Mode=TwoWay}"
+                                      AutomationProperties.AutomationId="LiteraryTechniqueCombo" />
                         </Grid>
                         <ComboBox Header="Viewpoint Character" Grid.Row="2" IsEditable="False" MinWidth="300"
                                   DisplayMemberPath="Name"
                                   SelectedItem="{x:Bind OverviewVm.SelectedViewpointCharacter, Mode=TwoWay}"
-                                  ItemsSource="{x:Bind OverviewVm.Characters, Mode=OneWay}" />
+                                  ItemsSource="{x:Bind OverviewVm.Characters, Mode=OneWay}"
+                                  AutomationProperties.AutomationId="ViewpointCharacterCombo" />
                         <Grid Grid.Row="3" HorizontalAlignment="Stretch">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*" />
@@ -152,10 +170,12 @@
                             </Grid.ColumnDefinitions>
                             <ComboBox Header="Voice" Grid.Column="0" IsEditable="False" MinWidth="0" Margin="0,0,20,0"
                                       ItemsSource="{x:Bind OverviewVm.VoiceList}"
-                                      SelectedItem="{x:Bind OverviewVm.Voice, Mode=TwoWay}" />
+                                      SelectedItem="{x:Bind OverviewVm.Voice, Mode=TwoWay}"
+                                      AutomationProperties.AutomationId="VoiceCombo" />
                             <ComboBox Header="Tense" Grid.Column="2" IsEditable="False" MinWidth="0"
                                       ItemsSource="{x:Bind OverviewVm.TenseList}"
-                                      SelectedItem="{x:Bind OverviewVm.Tense, Mode=TwoWay}" />
+                                      SelectedItem="{x:Bind OverviewVm.Tense, Mode=TwoWay}"
+                                      AutomationProperties.AutomationId="TenseCombo" />
                         </Grid>
                         <Grid Grid.Row="4" HorizontalAlignment="Stretch">
                             <Grid.ColumnDefinitions>
@@ -165,23 +185,27 @@
                             </Grid.ColumnDefinitions>
                             <ComboBox Header="Style" Grid.Column="0" IsEditable="False" MinWidth="0" Margin="0,0,20,0"
                                       ItemsSource="{x:Bind OverviewVm.StyleList}"
-                                      SelectedItem="{x:Bind OverviewVm.Style, Mode=TwoWay}" />
+                                      SelectedItem="{x:Bind OverviewVm.Style, Mode=TwoWay}"
+                                      AutomationProperties.AutomationId="StyleCombo" />
                             <ComboBox Header="Tone" Grid.Column="2" IsEditable="False" MinWidth="0"
                                       ItemsSource="{x:Bind OverviewVm.ToneList}"
-                                      SelectedItem="{x:Bind OverviewVm.Tone, Mode=TwoWay}" />
+                                      SelectedItem="{x:Bind OverviewVm.Tone, Mode=TwoWay}"
+                                      AutomationProperties.AutomationId="ToneCombo" />
                         </Grid>
                         <usercontrols:RichEditBoxExtended Header="Structure Notes" Grid.Row="5"
                                                           RtfText="{x:Bind OverviewVm.StructureNotes, Mode=TwoWay}"
                                                           AcceptsReturn="True"
                                                           IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                           VerticalAlignment="Stretch"
+                                                          AutomationProperties.AutomationId="StructureNotesRichEdit"
                                                           ScrollViewer.VerticalScrollBarVisibility="Auto" />
                     </Grid>
                 </TabViewItem>
 
                 <TabViewItem Header="Notes" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="OverviewNotesTab">
                     <usercontrols:RichEditBoxExtended
                         Header="Notes"
                         RtfText="{x:Bind OverviewVm.Notes, Mode=TwoWay}"
@@ -189,6 +213,7 @@
                         IsSpellCheckEnabled="True"
                         TextWrapping="Wrap"
                         VerticalAlignment="Stretch"
+                        AutomationProperties.AutomationId="OverviewNotesRichEdit"
                         ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </TabViewItem>
             </TabView.TabItems>
