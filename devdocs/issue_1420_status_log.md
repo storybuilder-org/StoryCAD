@@ -2,6 +2,10 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-04 (Unit 4, close) — literal-Name ruling recorded; all PR #1451 decision items closed
+
+**Founder ruled: literal Name stands for the Expander-labeled RichEdit fields; no LabeledBy conversion.** Root cause established first by history: all 43 fields carried `Header` attributes until the #782 Expander layout (af2a93de, 2026-01-21) moved each label into its Expander header, whose FontWeight doubles as a bold-when-filled content indicator; the move silently dropped the framework-derived accessible name, unnoticed because the codebase then had zero AutomationProperties. Commit 4d3317d8 records the rule in the convention doc Name section (*(added Unit 4)* bullet) and cites the ruling in the StoryWorldPage comment block; doc and comment only, convention tests 7/7. PR #1451 now has four commits and zero open decision items; only the founder FastPass/Narrator pass remains before merge.
+
 ## 2026-07-04 (Unit 4, later) — Expander ruling implemented; button-name check answered by live probe
 
 **Founder accepted the Expander proposal on PR #1451.** Commit 273b0fc0 (same implementer agent, resumed): `Expander` added to the convention suffix table, the test's InteractiveElementNames, and SuffixByElementName; 44 Expanders annotated (43 StoryWorldPage + BeatSheetExpander on ProblemPage, which is outside its DataTemplate and became coverage-visible when the element list grew). No Names on Expanders; the probe confirmed the header text is framework-derived (GeographyExpander announces "Geography", ControlType Group).
