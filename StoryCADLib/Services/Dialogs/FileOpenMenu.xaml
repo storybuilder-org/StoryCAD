@@ -83,7 +83,8 @@
 
             <InfoBar Grid.Row="1" IsOpen="{x:Bind FileOpenVM.ShowWarning, Mode=TwoWay}" Severity="Warning"
                      IsClosable="False"
-                     Message="{x:Bind FileOpenVM.WarningText, Mode=TwoWay}" HorizontalAlignment="Center" />
+                     Message="{x:Bind FileOpenVM.WarningText, Mode=TwoWay}" HorizontalAlignment="Center"
+                     AutomationProperties.AutomationId="FileOpenWarningInfoBar" />
 
             <ScrollView Grid.Row="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" BorderThickness="0" Background="Transparent">
                 <Grid Background="Transparent" BorderThickness="0">

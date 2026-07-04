@@ -23,7 +23,8 @@
         <InfoBar Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                  Severity="Informational" HorizontalAlignment="Stretch"
                  Title="Detailed feedback is addressed quicker"
-                 IsOpen="True" IsClosable="False" Margin="10,0,10,10" />
+                 IsOpen="True" IsClosable="False" Margin="10,0,10,10"
+                 AutomationProperties.AutomationId="FeedbackTipInfoBar" />
 
         <TextBox Grid.Row="1" Grid.Column="1" Header="Issue Title"
                  Margin="10,0,0,0"

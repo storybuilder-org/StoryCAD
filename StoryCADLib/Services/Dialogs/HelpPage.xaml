@@ -16,7 +16,8 @@
 
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <InfoBar Severity="Informational" IsOpen="True" IsClosable="False">
+                <InfoBar Severity="Informational" IsOpen="True" IsClosable="False"
+                         AutomationProperties.AutomationId="HelpVideoNoteInfoBar">
                     <TextBlock
                         Text="The videos below refer to StoryCAD as StoryBuilder,
 however are still a good place to get started"
