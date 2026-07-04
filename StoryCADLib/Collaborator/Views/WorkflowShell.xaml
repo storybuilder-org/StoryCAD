@@ -20,6 +20,8 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <!-- Main navigation view UI -->
+        <!-- Container id only; MenuItemsSource-bound, so there are no NavigationViewItem
+             elements in this XAML to annotate (Unit 6 NavigationView convention row). -->
         <NavigationView x:Name="NavView"
                         Grid.Row="0"
                         IsBackButtonVisible="Collapsed"
@@ -27,7 +29,8 @@
                         SelectedItem="{x:Bind ShellViewModel.CurrentItem, Mode=TwoWay}"
                         IsSettingsVisible="False"
                         SelectionChanged="NavView_SelectionChanged"
-                        PaneDisplayMode="Left">
+                        PaneDisplayMode="Left"
+                        AutomationProperties.AutomationId="WorkflowNav">
 
             <Frame x:Name="StepFrame" Navigated="StepFrame_OnNavigated" Margin="5,0,5,5" />
         </NavigationView>
@@ -35,12 +38,14 @@
         <!-- LLM prompting buttons -->
         <CommandBar Grid.Row="1" HorizontalAlignment="Left" OverflowButtonVisibility="Collapsed">
             <CommandBar.PrimaryCommands>
-                <AppBarButton Label="Help" ToolTipService.ToolTip="Help" Margin="5">
+                <!-- Label present: name announces natively, id only (convention Name/LabeledBy rule). -->
+                <AppBarButton Label="Help" ToolTipService.ToolTip="Help" Margin="5"
+                              AutomationProperties.AutomationId="WorkflowHelpButton">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE897;" />
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
-                        <Flyout>
+                        <Flyout AutomationProperties.AutomationId="WorkflowHelpFlyout">
                             <Flyout.FlyoutPresenterStyle>
                                 <Style TargetType="FlyoutPresenter">
                                     <Setter Property="MaxWidth" Value="620" />
@@ -61,20 +66,26 @@
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
+                <!-- Prefixed: "Settings" is a common function name across dialogs, prefix to avoid collision. -->
                 <AppBarButton Label="Settings" ToolTipService.ToolTip="Collaborator Settings" Margin="5"
-                              Click="SettingsButton_Click">
+                              Click="SettingsButton_Click"
+                              AutomationProperties.AutomationId="WorkflowSettingsButton">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE713;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
+                <!-- Prefixed: Shell.xaml already claims SaveStatusButton/SaveStoryMenuItem for "Save". -->
                 <AppBarButton Label="Save" ToolTipService.ToolTip="Save outline changes" Margin="5"
-                              Command="{x:Bind ShellViewModel.SaveCommand, Mode=OneWay}">
+                              Command="{x:Bind ShellViewModel.SaveCommand, Mode=OneWay}"
+                              AutomationProperties.AutomationId="WorkflowSaveButton">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
+                <!-- Prefixed: Shell.xaml already claims ExitMenuItem for "Exit". -->
                 <AppBarButton Label="Exit" ToolTipService.ToolTip="Exit Collaborator" Margin="5"
-                              Command="{x:Bind ShellViewModel.ExitCommand, Mode=OneWay}">
+                              Command="{x:Bind ShellViewModel.ExitCommand, Mode=OneWay}"
+                              AutomationProperties.AutomationId="WorkflowExitButton">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8BB;" />
                     </AppBarButton.Icon>

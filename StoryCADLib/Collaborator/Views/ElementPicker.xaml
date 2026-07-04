@@ -9,10 +9,16 @@
     <StackPanel>
 
         <!-- ElementType Picker -->
+        <!-- No Header (PlaceholderText only): explicit Name required per convention.
+             This is a near-clone of Services/Dialogs/ElementPicker.xaml (Unit 6), sharing the same
+             x:Name values (TypeBox/ElementBox/NewButton); ids here take a distinct CollabPicker
+             prefix throughout so they don't collide with Unit 6's ElementPickerTypeCombo etc. -->
         <ComboBox SelectedItem="{x:Bind PickerVM.SelectedType, Mode=TwoWay}"
                   Name="TypeBox"
                   PlaceholderText="Click here to select an element type" HorizontalAlignment="Center"
-                  MinWidth="200" SelectionChanged="Selector_OnSelectionChanged">
+                  MinWidth="200" SelectionChanged="Selector_OnSelectionChanged"
+                  AutomationProperties.AutomationId="CollabPickerTypeCombo"
+                  AutomationProperties.Name="Element type">
             <ComboBoxItem Content="Problem" />
             <ComboBoxItem Content="Character" />
             <ComboBoxItem Content="Setting" />
@@ -24,7 +30,8 @@
             <ListView Name="ElementBox" IsEnabled="False" HorizontalAlignment="Center"
                       SelectedItem="{x:Bind PickerVM.SelectedElement, Mode=TwoWay}"
                       DisplayMemberPath="Name" Margin="0,10,0,0"
-                      MinWidth="200" SelectionMode="Single" />
+                      MinWidth="200" SelectionMode="Single"
+                      AutomationProperties.AutomationId="CollabPickerList" />
         </ScrollViewer>
 
         <Border Margin="30,10" HorizontalAlignment="Stretch"
@@ -32,14 +39,17 @@
 
         <!-- Create new element UI -->
         <Button HorizontalAlignment="Center" Content="+ Create a new element"
-                Name="NewButton" IsEnabled="False">
+                Name="NewButton" IsEnabled="False"
+                AutomationProperties.AutomationId="CollabPickerAddNewElementButton">
             <Button.Flyout>
-                <Flyout>
+                <Flyout AutomationProperties.AutomationId="CollabPickerAddNewElementFlyout">
                     <StackPanel>
                         <TextBox Header="Element name:" Width="200"
-                                 Text="{x:Bind PickerVM.NewNodeName, Mode=TwoWay}" />
+                                 Text="{x:Bind PickerVM.NewNodeName, Mode=TwoWay}"
+                                 AutomationProperties.AutomationId="CollabPickerNewElementNameTextBox" />
                         <Button Content="Create" HorizontalAlignment="Center"
-                                Margin="0,20,0,0" Click="{x:Bind PickerVM.CreateNode}" />
+                                Margin="0,20,0,0" Click="{x:Bind PickerVM.CreateNode}"
+                                AutomationProperties.AutomationId="CollabPickerCreateElementButton" />
                     </StackPanel>
                 </Flyout>
             </Button.Flyout>
