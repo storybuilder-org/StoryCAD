@@ -2,6 +2,18 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-04 (Unit 4 session) — Unit 4 PR #1451 filed; Expander gap needs a founder ruling
+
+**Unit 4 (StoryWorldPage) is in review as PR #1451** after the standard cycle: Sonnet implementer (red 80 → green, commit 328148fe), Sonnet reviewer (request changes: two decision items, code otherwise clean), full suite 1,138 total / 0 failed verified by both implementer and orchestrating session. Actual count is 80 controls against the plan's 123 (stale survey delta). 53 explicit Names: 43 on RichEditBoxExtended fields (none use Header on this page; each is labeled by a sibling Expander.Header, so the implementer mirrored the label text as a literal Name — convention doc is silent on this pattern, proposal recorded on the PR) plus 10 Previous/Next icon-only buttons named from tooltip text.
+
+**Reviewer blocker, needs founder ruling on PR #1451:** Expander is in neither the convention suffix table nor the test's interactive-element list, so the coverage test is structurally blind to it. This page has 43 (scope-wide 45: one more each on ProblemPage and RelationshipView). Options on the PR: add `Expander` to the table/test and annotate in a follow-up commit (ProblemPage's instance comes along since that file is already ratcheted), or document an exemption (the Expander peer already announces header text plus expand/collapse state).
+
+**Second pending check:** the 10 Add/Remove buttons carry AutomationId but no Name on the theory that the visible TextBlock inside their StackPanel content reaches the accessible name via the default peer fallback — documented WinUI behavior, unverified in this app. The StoryWorldPage FastPass settles it; Land of Oz contains a StoryWorld element, so the page is reachable without creating one. If they announce blank, the fix is ten Name attributes.
+
+**No scripted scan this session:** Unit 3's per-page scan driver was scratchpad-local to that session; rebuilding it counts as side tooling under the cost directive, so the per-unit bar rests on the founder FastPass. Founder FastPass/Narrator checks for Units 1-3 also remain outstanding.
+
+**Next: founder reviews/merges PR #1451 with the Expander ruling; then Unit 5 (FolderPage, WebPage, PreferencesInitialization, HomePage, TrashCanPage + StoryCADLib/Controls incl. BrowseTextBox and the HomePage duplicate-Browse fix), branch `issue-1420-batch5-...` off `dev`, fresh session, same cycle.**
+
 ## 2026-07-04 (end of session) — Unit 3 merged; six batches remain
 
 **PR #1450 merged to `dev` (efab79e0) on founder instruction.** #1420 body updated (Unit 3 checked off, header-exposure check recorded as done); wiki `log.md` entry appended. The founder FastPass and Narrator checks on ScenePage/SettingPage were not run before merge and remain outstanding, along with the beat-row announcement check (ProblemPage Structure tab). Open spin-offs: #1448 (launch crash), #1449 (dead Cast-tab ListView).
