@@ -2,6 +2,16 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-04 (Unit 4, later) — Expander ruling implemented; button-name check answered by live probe
+
+**Founder accepted the Expander proposal on PR #1451.** Commit 273b0fc0 (same implementer agent, resumed): `Expander` added to the convention suffix table, the test's InteractiveElementNames, and SuffixByElementName; 44 Expanders annotated (43 StoryWorldPage + BeatSheetExpander on ProblemPage, which is outside its DataTemplate and became coverage-visible when the element list grew). No Names on Expanders; the probe confirmed the header text is framework-derived (GeographyExpander announces "Geography", ControlType Group).
+
+**The composite-content Button theory is disproven, live.** A scratchpad probe (uia_header_probe.ps1 recipe pointed at Land of Oz, Invoke on the "Story World" row, Physical Worlds tab) showed AddWorldButton/RemoveWorldButton with Name='' — WinUI 3 does not aggregate a TextBlock inside StackPanel Content into a Button's UIA Name. Fix in commit 8f8e3f12: explicit Names on the ten Add/Remove buttons, five one-line constraint comments, and a new convention-doc rule (panel-content Buttons get explicit Names). Re-probe against the rebuilt binary: "Add World"/"Remove World" announce correctly; Previous/Next and RichEdit literal Names all surface.
+
+**FlaUI harness facts (#1422):** the new Expander ids work as live ExpandCollapse handles (the probe expanded GeographyExpander by id), and collapsed Expanders keep their RichEdit content out of the UIA tree until expanded — the harness must expand before it types.
+
+**Branch state:** three commits pushed (328148fe, 273b0fc0, 8f8e3f12); StoryWorldPage 123 ids / 63 Names, ProblemPage +1 id; suite 1,138 / 0 failed after each commit; all recorded in PR #1451 comment. Still open for merge: founder FastPass/Narrator on StoryWorldPage, and the RichEdit literal-Name-vs-LabeledBy convention proposal (unruled; shipped pattern verified working by the probe).
+
 ## 2026-07-04 (Unit 4 session) — Unit 4 PR #1451 filed; Expander gap needs a founder ruling
 
 **Unit 4 (StoryWorldPage) is in review as PR #1451** after the standard cycle: Sonnet implementer (red 80 → green, commit 328148fe), Sonnet reviewer (request changes: two decision items, code otherwise clean), full suite 1,138 total / 0 failed verified by both implementer and orchestrating session. Actual count is 80 controls against the plan's 123 (stale survey delta). 53 explicit Names: 43 on RichEditBoxExtended fields (none use Header on this page; each is labeled by a sibling Expander.Header, so the implementer mirrored the label text as a literal Name — convention doc is silent on this pattern, proposal recorded on the PR) plus 10 Previous/Next icon-only buttons named from tooltip text.
