@@ -261,10 +261,12 @@
                                 </StackPanel>
 
                                 <!-- Add/Remove controls (right) -->
+                                <!-- WinUI 3 does not derive a Button's UIA Name from composite (StackPanel) Content, so these need explicit Names; verified live 2026-07-04 (PR #1451). -->
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
                                     <Button Command="{x:Bind StoryWorldVm.PhysicalWorldNav.AddCommand}"
                                             Padding="12,8"
-                                            AutomationProperties.AutomationId="AddWorldButton">
+                                            AutomationProperties.AutomationId="AddWorldButton"
+                                            AutomationProperties.Name="Add World">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Add"/>
                                             <TextBlock Text="Add World"/>
@@ -273,7 +275,8 @@
                                     <Button Command="{x:Bind StoryWorldVm.PhysicalWorldNav.RemoveCurrentCommand}"
                                             IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
                                             Padding="12,8"
-                                            AutomationProperties.AutomationId="RemoveWorldButton">
+                                            AutomationProperties.AutomationId="RemoveWorldButton"
+                                            AutomationProperties.Name="Remove World">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Delete"/>
                                             <TextBlock Text="Remove World"/>
@@ -411,9 +414,11 @@
                                         <SymbolIcon Symbol="Forward"/>
                                     </Button>
                                 </StackPanel>
+                                <!-- WinUI 3 does not derive a Button's UIA Name from composite (StackPanel) Content, so these need explicit Names; verified live 2026-07-04 (PR #1451). -->
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
                                     <Button Command="{x:Bind StoryWorldVm.SpeciesNav.AddCommand}" Padding="12,8"
-                                            AutomationProperties.AutomationId="AddSpeciesButton">
+                                            AutomationProperties.AutomationId="AddSpeciesButton"
+                                            AutomationProperties.Name="Add Species">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Add"/>
                                             <TextBlock Text="Add Species"/>
@@ -421,7 +426,8 @@
                                     </Button>
                                     <Button Command="{x:Bind StoryWorldVm.SpeciesNav.RemoveCurrentCommand}"
                                             IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}" Padding="12,8"
-                                            AutomationProperties.AutomationId="RemoveSpeciesButton">
+                                            AutomationProperties.AutomationId="RemoveSpeciesButton"
+                                            AutomationProperties.Name="Remove Species">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Delete"/>
                                             <TextBlock Text="Remove Species"/>
@@ -575,9 +581,11 @@
                                             <SymbolIcon Symbol="Forward"/>
                                         </Button>
                                     </StackPanel>
+                                    <!-- WinUI 3 does not derive a Button's UIA Name from composite (StackPanel) Content, so these need explicit Names; verified live 2026-07-04 (PR #1451). -->
                                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
                                         <Button Command="{x:Bind StoryWorldVm.CultureNav.AddCommand}" Padding="12,8"
-                                                AutomationProperties.AutomationId="AddCultureButton">
+                                                AutomationProperties.AutomationId="AddCultureButton"
+                                                AutomationProperties.Name="Add Culture">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <SymbolIcon Symbol="Add"/>
                                                 <TextBlock Text="Add Culture"/>
@@ -585,7 +593,8 @@
                                         </Button>
                                         <Button Command="{x:Bind StoryWorldVm.CultureNav.RemoveCurrentCommand}"
                                                 IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}" Padding="12,8"
-                                                AutomationProperties.AutomationId="RemoveCultureButton">
+                                                AutomationProperties.AutomationId="RemoveCultureButton"
+                                                AutomationProperties.Name="Remove Culture">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <SymbolIcon Symbol="Delete"/>
                                                 <TextBlock Text="Remove Culture"/>
@@ -723,9 +732,11 @@
                                         <SymbolIcon Symbol="Forward"/>
                                     </Button>
                                 </StackPanel>
+                                <!-- WinUI 3 does not derive a Button's UIA Name from composite (StackPanel) Content, so these need explicit Names; verified live 2026-07-04 (PR #1451). -->
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
                                     <Button Command="{x:Bind StoryWorldVm.GovernmentNav.AddCommand}" Padding="12,8"
-                                            AutomationProperties.AutomationId="AddGovernmentButton">
+                                            AutomationProperties.AutomationId="AddGovernmentButton"
+                                            AutomationProperties.Name="Add Government">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Add"/>
                                             <TextBlock Text="Add Government"/>
@@ -733,7 +744,8 @@
                                     </Button>
                                     <Button Command="{x:Bind StoryWorldVm.GovernmentNav.RemoveCurrentCommand}"
                                             IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}" Padding="12,8"
-                                            AutomationProperties.AutomationId="RemoveGovernmentButton">
+                                            AutomationProperties.AutomationId="RemoveGovernmentButton"
+                                            AutomationProperties.Name="Remove Government">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Delete"/>
                                             <TextBlock Text="Remove Government"/>
@@ -871,9 +883,11 @@
                                         <SymbolIcon Symbol="Forward"/>
                                     </Button>
                                 </StackPanel>
+                                <!-- WinUI 3 does not derive a Button's UIA Name from composite (StackPanel) Content, so these need explicit Names; verified live 2026-07-04 (PR #1451). -->
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
                                     <Button Command="{x:Bind StoryWorldVm.ReligionNav.AddCommand}" Padding="12,8"
-                                            AutomationProperties.AutomationId="AddReligionButton">
+                                            AutomationProperties.AutomationId="AddReligionButton"
+                                            AutomationProperties.Name="Add Religion">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Add"/>
                                             <TextBlock Text="Add Religion"/>
@@ -881,7 +895,8 @@
                                     </Button>
                                     <Button Command="{x:Bind StoryWorldVm.ReligionNav.RemoveCurrentCommand}"
                                             IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}" Padding="12,8"
-                                            AutomationProperties.AutomationId="RemoveReligionButton">
+                                            AutomationProperties.AutomationId="RemoveReligionButton"
+                                            AutomationProperties.Name="Remove Religion">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Delete"/>
                                             <TextBlock Text="Remove Religion"/>
