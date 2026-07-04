@@ -9,38 +9,44 @@
     <NavigationView HorizontalContentAlignment="Stretch" OverflowLabelMode="NoLabel" IsBackButtonVisible="Collapsed"
                     SelectedItem="{x:Bind FileOpenVM.CurrentTab, Mode=TwoWay}"
                     IsSettingsVisible="False" PaneDisplayMode="Left" IsPaneToggleButtonVisible="False"
-                    Background="Transparent" BorderThickness="0">
+                    Background="Transparent" BorderThickness="0"
+                    AutomationProperties.AutomationId="FileOpenNav">
         <NavigationView.MenuItems>
             <!-- New button -->
-            <NavigationViewItem Content="Create new outline" Tag="New">
+            <NavigationViewItem Content="Create new outline" Tag="New"
+                                AutomationProperties.AutomationId="CreateNewOutlineNavItem">
                 <NavigationViewItem.Icon>
                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE710;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
 
             <!-- Recents button -->
-            <NavigationViewItem Content="Recently opened" Tag="Recent">
+            <NavigationViewItem Content="Recently opened" Tag="Recent"
+                                AutomationProperties.AutomationId="RecentlyOpenedNavItem">
                 <NavigationViewItem.Icon>
                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xEC92;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
 
             <!-- Samples button -->
-            <NavigationViewItem Content="Sample outlines" Tag="Sample">
+            <NavigationViewItem Content="Sample outlines" Tag="Sample"
+                                AutomationProperties.AutomationId="SampleOutlinesNavItem">
                 <NavigationViewItem.Icon>
                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE753;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
 
             <!-- Backup button -->
-            <NavigationViewItem Content="Backups" Tag="Backup">
+            <NavigationViewItem Content="Backups" Tag="Backup"
+                                AutomationProperties.AutomationId="BackupsNavItem">
                 <NavigationViewItem.Icon>
                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE777;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
 
             <!-- Open from file -->
-            <NavigationViewItem Content="Open from file" Tag="OpenFile">
+            <NavigationViewItem Content="Open from file" Tag="OpenFile"
+                                AutomationProperties.AutomationId="OpenFromFileNavItem">
                 <NavigationViewItem.Icon>
                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE838;" />
                 </NavigationViewItem.Icon>
@@ -50,7 +56,11 @@
         <NavigationView.FooterMenuItems>
             <!-- Settings/Preferences section at the bottom -->
             <NavigationViewItemSeparator />
-            <NavigationViewItem IsEnabled="True" SelectsOnInvoked="False">
+            <!-- Non-selecting host for the show-on-startup CheckBox (its only function); id pairs
+                 with FileOpenShowOnStartupCheck inside. No explicit Name: the item is not a
+                 navigation command, and naming it would double-announce the checkbox it hosts. -->
+            <NavigationViewItem IsEnabled="True" SelectsOnInvoked="False"
+                                AutomationProperties.AutomationId="FileOpenShowOnStartupNavItem">
                 <NavigationViewItem.Content>
                     <CheckBox Content="Show on startup"
                               IsChecked="{x:Bind FileOpenVM.ShowFilePickerOnStartup, Mode=TwoWay}"
