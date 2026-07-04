@@ -28,16 +28,15 @@
             <TextBlock Text="NarratorView View" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" />
 
             <ScrollViewer Grid.Row="1" Grid.Column="0">
-                <!-- TreeViewItem inside the ItemTemplate is not in the coverage test's interactive-
-                     element list (unlike Shell's ItemsRepeater-based tree stand-in); left unannotated
-                     pending a founder ruling on whether TreeViewItem needs its own convention row. -->
                 <TreeView ItemsSource="{x:Bind AppState.CurrentDocument.Model.ExplorerView[0].Children, Mode=OneWay}"
                           Margin="0,5" Background="{x:Bind Background}"
                           AutomationProperties.AutomationId="NarrativeExplorerTree">
                     <TreeView.ItemTemplate>
                         <DataTemplate x:DataType="viewModels:StoryNodeItem">
+                            <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). Shell.xaml precedent. -->
                             <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="True" Tapped="ItemInvoked"
-                                          Tag="Exp">
+                                          Tag="Exp"
+                                          AutomationProperties.Name="{x:Bind Name, Mode=OneWay}">
                                 <TextBlock Text="{x:Bind Name}" TextWrapping="Wrap" />
                             </TreeViewItem>
                         </DataTemplate>
@@ -51,8 +50,10 @@
                           AutomationProperties.AutomationId="NarrativeNarratorTree">
                     <TreeView.ItemTemplate>
                         <DataTemplate x:DataType="viewModels:StoryNodeItem">
+                            <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). Shell.xaml precedent. -->
                             <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="True" Tapped="ItemInvoked"
-                                          Tag="Nar">
+                                          Tag="Nar"
+                                          AutomationProperties.Name="{x:Bind Name, Mode=OneWay}">
                                 <TextBlock Text="{x:Bind Name}" TextWrapping="Wrap" />
                             </TreeViewItem>
                         </DataTemplate>

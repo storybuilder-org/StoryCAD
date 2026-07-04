@@ -28,8 +28,8 @@
                     Command="{x:Bind VM.BrowseTargetCommand}"
                     AutomationProperties.AutomationId="CopyElementsBrowseButton" />
             <!-- No Header, PlaceholderText only; visible label is the sibling "Target:" TextBlock.
-                 Per the convention's no-new-x:Name-for-LabeledBy ruling (PR #1451), the label stays
-                 unnamed and this control gets a literal Name mirroring it instead. -->
+                 Founder ruling on PR #1457: a sibling-TextBlock label is mirrored as a literal Name;
+                 LabeledBy is not used in this codebase. -->
             <TextBox Grid.Column="2" IsReadOnly="True"
                      Text="{x:Bind VM.TargetFilePath, Mode=OneWay}"
                      PlaceholderText="Select a target outline file..."
@@ -45,7 +45,7 @@
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Text="Filter:" VerticalAlignment="Center" Margin="0,0,10,0" />
             <!-- No Header, PlaceholderText only; visible label is the sibling "Filter:" TextBlock.
-                 Same no-new-x:Name-for-LabeledBy reasoning as the Target TextBox above. -->
+                 Mirrored as a literal Name per the same PR #1457 ruling as the Target TextBox above. -->
             <ComboBox Grid.Column="1" Name="FilterComboBox"
                       ItemsSource="{x:Bind VM.CopyableTypes}"
                       SelectedItem="{x:Bind VM.SelectedFilterType, Mode=TwoWay}"
