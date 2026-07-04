@@ -3,6 +3,13 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- BrowseTextBox is instantiated at multiple call sites app-wide (PreferencesInitialization,
+         PreferencesDialog, SaveAsDialog, BackupNow). The ids below are declared once here and reused
+         verbatim from the existing x:Name values per convention rule 4, but every instance shares
+         the same literal id at runtime since a UserControl has no per-instance identity to bind
+         from without a new bindable property (out of scope: attribute-only diff). Callers that place
+         more than one BrowseTextBox on the same screen must give the outer <BrowseTextBox> tag its
+         own AutomationId/Name (see PreferencesInitialization.xaml) to stay distinguishable. -->
     <StackPanel Orientation="Horizontal">
         <TextBox
             x:Name="PathTextBox"
@@ -12,12 +19,14 @@
             Text="{x:Bind Path, Mode=TwoWay}"
             Width="{x:Bind TextBoxWidth, Mode=OneWay}"
             VerticalAlignment="Center"
-            Margin="8" />
+            Margin="8"
+            AutomationProperties.AutomationId="PathTextBox" />
         <Button
             x:Name="BrowseButton"
             Content="{x:Bind ButtonText, Mode=OneWay}"
             Click="OnBrowseClick"
             VerticalAlignment="{x:Bind ButtonVerticalAlignment, Mode=OneWay}"
-            Margin="{x:Bind ButtonMargin, Mode=OneWay}" />
+            Margin="{x:Bind ButtonMargin, Mode=OneWay}"
+            AutomationProperties.AutomationId="BrowseButton" />
     </StackPanel>
 </UserControl>

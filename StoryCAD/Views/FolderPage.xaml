@@ -17,7 +17,8 @@
         </Grid.RowDefinitions>
         <TextBox Header="Name" Grid.Row="0"
                  Text="{x:Bind FolderVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 viewModels:TextBoxFocus.IsFocused="{x:Bind FolderVm.IsTextBoxFocused, Mode=TwoWay}"/>
+                 viewModels:TextBoxFocus.IsFocused="{x:Bind FolderVm.IsTextBoxFocused, Mode=TwoWay}"
+                 AutomationProperties.AutomationId="FolderNameTextBox"/>
         <!-- Folder and Section: plain notes field, untabbed (unchanged look). x:Load (not
              Visibility) so the inactive editor isn't instantiated/bound at all - both editors
              bind RtfText TwoWay to the same Description, and a merely-Collapsed editor still
@@ -27,23 +28,39 @@
                                           RtfText="{x:Bind FolderVm.Description, Mode=TwoWay}"
                                           AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                           VerticalAlignment="Stretch"
-                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                          AutomationProperties.AutomationId="FolderNotesRichEdit"/>
 
         <!-- Notes element only: tabbed Notes + Images. -->
         <TabView x:Name="NotesTabView" Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False"
                  IsAddTabButtonVisible="False"
-                 x:Load="{x:Bind FolderVm.IsNotes, Mode=OneWay}">
+                 x:Load="{x:Bind FolderVm.IsNotes, Mode=OneWay}"
+                 AutomationProperties.AutomationId="FolderNotesTabs">
             <TabView.TabItems>
                 <TabViewItem Header="Notes" IsClosable="False"
-                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="FolderNotesTab">
+                    <!-- Sibling-header-labeled field (tab Header="Notes"): the Unit 4 ruling calls
+                         for a literal AutomationProperties.Name here, but a literal Name on ANY
+                         element inside this x:Load-deferred TabView breaks the net10.0-desktop
+                         build - Uno's XAML source generator mistakes the attribute value for an
+                         element name when emitting the x:Load dematerialization cleanup and
+                         references an undeclared _{value}Subject field (CS1061; WinAppSDK head
+                         unaffected; verified 2026-07-04 on clean obj: value "Notes" -> _NotesSubject,
+                         "Zebra" -> _ZebraSubject, same on a TabViewItem, fine outside the deferred
+                         subtree). Until the generator is fixed, id only - no AutomationProperties.Name
+                         anywhere inside NotesTabView's subtree. Issue #1452 tracks the upstream
+                         report and restoring this Name; the convention-doc rule sunsets with it. -->
                     <usercontrols:RichEditBoxExtended
                         RtfText="{x:Bind FolderVm.Description, Mode=TwoWay}"
                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                         VerticalAlignment="Stretch"
-                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        AutomationProperties.AutomationId="FolderNotesTabRichEdit"/>
                 </TabViewItem>
                 <TabViewItem Header="Images" IsClosable="False"
-                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="FolderImagesTab">
                     <usercontrols:ImageGalleryControl ItemsSource="{x:Bind FolderVm.Images, Mode=OneWay}" />
                 </TabViewItem>
             </TabView.TabItems>
