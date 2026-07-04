@@ -17,7 +17,8 @@
         </Grid.RowDefinitions>
         <TextBox Header="Name" Grid.Row="0"
                  Text="{x:Bind FolderVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 viewModels:TextBoxFocus.IsFocused="{x:Bind FolderVm.IsTextBoxFocused, Mode=TwoWay}"/>
+                 viewModels:TextBoxFocus.IsFocused="{x:Bind FolderVm.IsTextBoxFocused, Mode=TwoWay}"
+                 AutomationProperties.AutomationId="FolderNameTextBox"/>
         <!-- Folder and Section: plain notes field, untabbed (unchanged look). x:Load (not
              Visibility) so the inactive editor isn't instantiated/bound at all - both editors
              bind RtfText TwoWay to the same Description, and a merely-Collapsed editor still
@@ -27,23 +28,38 @@
                                           RtfText="{x:Bind FolderVm.Description, Mode=TwoWay}"
                                           AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                           VerticalAlignment="Stretch"
-                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                          AutomationProperties.AutomationId="FolderNotesRichEdit"/>
 
         <!-- Notes element only: tabbed Notes + Images. -->
         <TabView x:Name="NotesTabView" Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False"
                  IsAddTabButtonVisible="False"
-                 x:Load="{x:Bind FolderVm.IsNotes, Mode=OneWay}">
+                 x:Load="{x:Bind FolderVm.IsNotes, Mode=OneWay}"
+                 AutomationProperties.AutomationId="FolderNotesTabs">
             <TabView.TabItems>
                 <TabViewItem Header="Notes" IsClosable="False"
-                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="FolderNotesTab">
+                    <!-- No Header here (unlike PlainNotesEditor above); the enclosing tab's own
+                         Header="Notes" is this field's only label (id only, no explicit Name):
+                         on this unnamed RichEditBoxExtended (no x:Name), Uno's desktop-head XAML
+                         source generator mis-derives an internal TwoWay-binding field name from
+                         any attribute whose LOCAL name is "Name" - AutomationProperties.Name="Notes"
+                         here produced a bogus "_NotesSubject" reference and failed net10.0-desktop
+                         compilation (net10.0-windows was unaffected). Confirmed by removing the
+                         attribute alone with no other change. Do not add AutomationProperties.Name
+                         to an x:Name-less RichEditBoxExtended; give it x:Name first if a Name is
+                         ever needed here. -->
                     <usercontrols:RichEditBoxExtended
                         RtfText="{x:Bind FolderVm.Description, Mode=TwoWay}"
                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                         VerticalAlignment="Stretch"
-                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        AutomationProperties.AutomationId="FolderNotesTabRichEdit"/>
                 </TabViewItem>
                 <TabViewItem Header="Images" IsClosable="False"
-                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="FolderImagesTab">
                     <usercontrols:ImageGalleryControl ItemsSource="{x:Bind FolderVm.Images, Mode=OneWay}" />
                 </TabViewItem>
             </TabView.TabItems>

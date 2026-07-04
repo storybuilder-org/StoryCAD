@@ -27,6 +27,17 @@ public class AutomationConventionTests
         "StoryCAD/Views/ScenePage.xaml",
         "StoryCAD/Views/SettingPage.xaml",
         "StoryCAD/Views/StoryWorldPage.xaml",
+        "StoryCAD/Views/FolderPage.xaml",
+        "StoryCAD/Views/WebPage.xaml",
+        "StoryCAD/Views/PreferencesInitialization.xaml",
+        "StoryCAD/Views/HomePage.xaml",
+        "StoryCAD/Views/TrashCanPage.xaml",
+        "StoryCADLib/Controls/BrowseTextBox.xaml",
+        "StoryCADLib/Controls/Conflict.xaml",
+        "StoryCADLib/Controls/Flaw.xaml",
+        "StoryCADLib/Controls/RelationshipView.xaml",
+        "StoryCADLib/Controls/Traits.xaml",
+        "StoryCADLib/Controls/ImageGalleryControl.xaml",
     };
 
     /// <summary>

@@ -10,7 +10,12 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Button Grid.Row="0" Margin="8" Click="OnAddClick">
+        <!-- Content is a StackPanel (SymbolIcon+TextBlock), not plain text: WinUI 3 does not
+             aggregate panel content into the Button's UIA Name (Unit 4 finding), so the visible
+             text is duplicated as an explicit Name. -->
+        <Button Grid.Row="0" Margin="8" Click="OnAddClick"
+                AutomationProperties.AutomationId="AddPictureButton"
+                AutomationProperties.Name="Add Picture">
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <SymbolIcon Symbol="Add" />
                 <TextBlock Text="Add Picture" />
@@ -22,7 +27,8 @@
                   SelectionMode="None"
                   IsItemClickEnabled="False"
                   HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch">
+                  VerticalAlignment="Stretch"
+                  AutomationProperties.AutomationId="ImagesGridView">
             <GridView.ItemTemplate>
                 <DataTemplate x:DataType="vm:ImageGalleryItem">
                     <Grid Width="220" Margin="8" Padding="6"
@@ -33,28 +39,38 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
+                        <!-- Inside a DataTemplate: no AutomationId (TemplateSafety forbids it), but
+                             Name is set inline per the convention's templated-content treatment.
+                             Content is an Image only (no text), so Name states the function. -->
                         <Button Grid.Row="0"
                                 Click="OnImageClick"
                                 Padding="0" BorderThickness="0"
                                 Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
                                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                 HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                                ToolTipService.ToolTip="Click to enlarge">
+                                ToolTipService.ToolTip="Click to enlarge"
+                                AutomationProperties.Name="View image">
                             <Image Source="{x:Bind Source, Mode=OneWay}" Stretch="Uniform" />
                         </Button>
+                        <!-- PlaceholderText only, no Header: explicit Name required. -->
                         <TextBox Grid.Row="1" Margin="0,6,0,0"
                                  PlaceholderText="Caption"
-                                 Text="{x:Bind Caption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                 Text="{x:Bind Caption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.Name="Caption" />
                         <StackPanel Grid.Row="2" Margin="0,6,0,0"
                                     Orientation="Horizontal"
                                     HorizontalAlignment="Right" Spacing="6">
-                            <Button Click="OnEnlargeClick" ToolTipService.ToolTip="Enlarge">
+                            <!-- Panel content (SymbolIcon+TextBlock): Name duplicates the visible text
+                                 per the Unit 4 composite-Button ruling. -->
+                            <Button Click="OnEnlargeClick" ToolTipService.ToolTip="Enlarge"
+                                    AutomationProperties.Name="Enlarge">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <SymbolIcon Symbol="Zoom" />
                                     <TextBlock Text="Enlarge" />
                                 </StackPanel>
                             </Button>
-                            <Button Click="OnRemoveClick" ToolTipService.ToolTip="Remove">
+                            <Button Click="OnRemoveClick" ToolTipService.ToolTip="Remove"
+                                    AutomationProperties.Name="Remove">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <SymbolIcon Symbol="Delete" />
                                     <TextBlock Text="Remove" />
