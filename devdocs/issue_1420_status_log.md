@@ -2,6 +2,34 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-04 (Unit 6, ruling) — NavigationView/NavItem join the convention; no open decision items on PR #1455
+
+**Founder ruled option 1 on the NavigationView gap: Nav/NavItem suffix rows, annotate in a follow-up commit.** Commit a7998d2e (same implementer, resumed): convention doc rows *(added Unit 6)*, both types in the coverage test's element list and suffix map, FileOpenMenu's nav strip annotated — red on exactly 7 elements, then green; convention tests 7/7; suite 1,138 / 0 failed. Zero explicit Names; the untagged footer NavItem is id-only by design (it hosts the show-on-startup CheckBox, which carries the accessible name; a host Name would double-announce — commented at the site). Unit 6 totals now 41 ids / 4 Names. WorkflowShell.xaml untouched (Unit 9; MenuItemsSource-bound items).
+
+**Founder also asked whether the Collaborator ElementPicker is accounted for in Unit 9: it is now durably.** The file was already in the plan's Unit 9 row; commit 61a52962 adds the constraint to that row — distinct id prefix required (shares literal x:Name values TypeBox/ElementBox/NewButton with Unit 6's ElementPicker) — plus the WorkflowShell Nav note (container id only). Ruling execution recorded on PR #1455; no open decision items remain, only founder review/merge.
+
+## 2026-07-04 (Unit 6 session) — Unit 6 PR #1455 filed; NavigationView gap needs a founder ruling
+
+**Unit 6 is in review as PR #1455** after the standard cycle: Sonnet implementer (red exactly 34 → green, commit e2f8c320), Sonnet reviewer (APPROVE, zero blockers, three nits), one nit applied by the same implementer pattern (33f4e2b1: constraint comment at AdminMessagePage's MessageLink — Content arrives from code-behind, so no explicit Name). Actuals 34 ids / 4 explicit Names against the plan's ~37 (ElementPicker 5→6, the create Flyout is itself tracked; FeedbackDialog ~7→4; FileOpenMenu 9→8). Suite 1,138 / 0 failed; both heads build clean; reviewer independently re-ran the convention tests and re-verified the x:Load pre-check (still zero matches).
+
+**Founder decision item on PR #1455:** FileOpenMenu's left tab strip is a NavigationView with six NavigationViewItems, and neither type is in the convention suffix table or the coverage test's element list — the same structural-blindness class as Unit 4's Expander. Options on the PR: add Nav/NavItem suffix rows and annotate in a follow-up commit, or document an exemption (the NavigationViewItem peer announces Content text and selection state natively).
+
+**Spin-off filed: #1454** — FeedbackDialog's title TextBox keeps static `Header="Issue Title"` in Feature Request mode while ChangeUIText switches the other two field headers (verified in source; dynamic text arrived in d167a013). Code fix, out of batch scope.
+
+**Unit 9 flag recorded on the PR:** Collaborator's ElementPicker.xaml is a near-clone sharing the same x:Name values (TypeBox, ElementBox, NewButton); this unit's ids deliberately avoid those bare names, and Unit 9 must prefix the Collaborator copy distinctly or the Uniqueness test will collide.
+
+**Next: founder reviews/merges PR #1455 with the NavigationView ruling. Then Unit 7 (PreferencesDialog 48 + PrintReportsDialog 26, ~74 est.), branch `issue-1420-batch7-preferences-reports` off `dev`, fresh session, same cycle, x:Load check first. Unit 7 also owes the BrowseTextBox internal-id duplication fix noted on PR #1453 (BrowseTextBox.xaml:6-12).**
+
+## 2026-07-04 (Unit 5 merge, Unit 6 open) — PR #1453 merged; #1441 audit trigger tripped; Unit 6 branch cut
+
+**PR #1453 merged to `dev` (1dc0355b) on founder instruction.** Merge cleanup done: #1420 body updated (Unit 5 checked off with the #1452 sunset and gallery-identity notes); #1441 notified that the audit trigger tripped — six main views annotated, running total on `dev` 416 AutomationIds across 16 XAML files (18 in the ratchet; HomePage and TrashCanPage hold nothing interactive), with the four inherited findings listed (TreeItem SizeOfSet, Feelings-combo duplicate names, FolderPage id-only Notes RichEdit until #1452, no full assessment pass yet); wiki `log.md` entry appended (page updates postponed to closeout, wiki tree left uncommitted for StoryCADWiki#1, same posture as Units 3-4). One merge straggler found and fixed: the batch5 status-log ruling entry (975b738b) was pushed 14 seconds after the merge and missed PR #1453; cherry-picked onto this branch (c99ec174).
+
+**Unit 6 is open on branch `issue-1420-batch6-dialogs` off `dev` @ 1dc0355b.** Scope: the eight `StoryCADLib/Services/Dialogs` files — AdminMessagePage (est. 1), BackupNow (2), ElementPicker (5), FeedbackDialog (~7), FileOpenMenu (9), HelpPage (7), NewRelationshipPage (4), SaveAsDialog (2), ~37 est. **The x:Load pre-check is done and clean: none of the eight files contains `x:Load`, so the #1452 literal-Name ban does not constrain this unit.** Same cycle: Sonnet implementer (red against the ratchet, then green), Sonnet reviewer, fixes back to the implementer, PR to `dev`. Naming rule for this unit per the plan: dialog-name id prefixes (Notes/Save/Cancel/Name-class collisions).
+
+## 2026-07-04 (Unit 5, ruling) — x:Load literal-Name ban accepted as temporary; no open decision items on PR #1453
+
+**Founder ruled on the x:Load convention proposal: agreed, but only as long as the Uno bug exists.** Commit 3793eac1 records it accordingly: the convention doc gains the rule as an explicitly temporary bullet (Name vs LabeledBy section, *(added Unit 5)*) that names #1452 as the tracker for the upstream report, the FolderPage Notes Name restore, and the bullet's own deletion; the FolderPage comment now cites #1452 for the same sunset. #1452's task list updated to match (the sunset tasks are explicit; the recording task is checked). Doc and comment only; convention tests 7/7. PR #1453 has no open decision items; only founder review/merge remains.
+
 ## 2026-07-04 (Unit 5 session) — Unit 5 PR #1453 filed; x:Load Name bug found and scoped (#1452)
 
 **Unit 5 is in review as PR #1453** after the standard cycle: Sonnet implementer (red 34 → green, commit 077778bb), Sonnet reviewer (request changes: two blockers, one nit), fixes back to the same implementer (commit 4feee9ae). Actual count 34 ids / 18 explicit Names against the plan's ~42 estimate (most Conflict/Flaw/Traits/RelationshipView combos already had Headers). Suite 1,138 / 0 failed, run three times (implementer, reviewer, post-fix); both heads build clean.

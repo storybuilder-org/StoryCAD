@@ -34,6 +34,8 @@ Every interactive control gets `AutomationProperties.AutomationId`.
 | BrowseTextBox | `TextBox` | *(added Unit 1)* |
 | ItemsRepeater | `Tree` | `NavigationTree` *(added Unit 1; exists for the Shell navigation tree stand-in; revisit if a non-tree ItemsRepeater ever needs annotation)* |
 | Expander | `Expander` | `GeographyExpander` *(added Unit 4)* |
+| NavigationView | `Nav` | `FileOpenNav` *(added Unit 6)* |
+| NavigationViewItem | `NavItem` | `RecentlyOpenedNavItem` *(added Unit 6)* |
 
 - A control type not in this table gets a proposed suffix in the PR description; the table row is added when the PR merges.
 - Values are literal strings: ASCII letters and digits, no spaces, no bindings, never a story element name, file path, date, or any other runtime value.

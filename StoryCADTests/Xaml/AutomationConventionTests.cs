@@ -38,6 +38,14 @@ public class AutomationConventionTests
         "StoryCADLib/Controls/RelationshipView.xaml",
         "StoryCADLib/Controls/Traits.xaml",
         "StoryCADLib/Controls/ImageGalleryControl.xaml",
+        "StoryCADLib/Services/Dialogs/AdminMessagePage.xaml",
+        "StoryCADLib/Services/Dialogs/BackupNow.xaml",
+        "StoryCADLib/Services/Dialogs/ElementPicker.xaml",
+        "StoryCADLib/Services/Dialogs/FeedbackDialog.xaml",
+        "StoryCADLib/Services/Dialogs/FileOpenMenu.xaml",
+        "StoryCADLib/Services/Dialogs/HelpPage.xaml",
+        "StoryCADLib/Services/Dialogs/NewRelationshipPage.xaml",
+        "StoryCADLib/Services/Dialogs/SaveAsDialog.xaml",
     };
 
     /// <summary>
@@ -60,6 +68,7 @@ public class AutomationConventionTests
         "ComboBox", "TextBox", "CheckBox", "RadioButton", "RadioButtons", "ToggleSwitch", "NumberBox",
         "AutoSuggestBox", "TabView", "TabViewItem", "TreeView", "ListView", "GridView",
         "Flyout", "RichEditBoxExtended", "BrowseTextBox", "Expander",
+        "NavigationView", "NavigationViewItem",
     };
 
     /// <summary>
@@ -97,6 +106,8 @@ public class AutomationConventionTests
         ["BrowseTextBox"] = "TextBox", // added Unit 1: gap in original convention suffix table, see class remarks
         ["ItemsRepeater"] = "Tree",    // added Unit 1, see class remarks
         ["Expander"] = "Expander",     // added Unit 4: founder-accepted Expander suffix ruling on PR #1451
+        ["NavigationView"] = "Nav",         // added Unit 6: founder ruling on PR #1455 (FileOpenMenu nav strip)
+        ["NavigationViewItem"] = "NavItem", // added Unit 6: founder ruling on PR #1455 (FileOpenMenu nav strip)
     };
 
     private const string AutomationIdAttribute = "AutomationProperties.AutomationId";
