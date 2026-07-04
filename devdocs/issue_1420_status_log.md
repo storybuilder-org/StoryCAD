@@ -2,6 +2,14 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-04 (end of session) — Unit 3 merged; six batches remain
+
+**PR #1450 merged to `dev` (efab79e0) on founder instruction.** #1420 body updated (Unit 3 checked off, header-exposure check recorded as done); wiki `log.md` entry appended. The founder FastPass and Narrator checks on ScenePage/SettingPage were not run before merge and remain outstanding, along with the beat-row announcement check (ProblemPage Structure tab). Open spin-offs: #1448 (launch crash), #1449 (dead Cast-tab ListView).
+
+**Next: Unit 4, StoryWorldPage alone (~123 controls), branch `issue-1420-batch4-storyworld` off `dev`, same implementer/reviewer cycle.**
+
+**Founder cost directive (binding for Units 4-9):** spend goes to the planned batches only — no side tooling without asking first. Run each batch in a fresh session (context length drives main-session cost), put the reviewer agent on Sonnet, timebox diagnostics. Estimated cost to finish all six batches at Unit 3's lean batch shape: $60-150 total (token counts × list prices, estimated 2026-07-04).
+
 ## 2026-07-04 (later) — Unit 3 PR #1450 filed; scripted per-page scans running
 
 **Unit 3 (ScenePage + SettingPage) is in review as PR #1450** after the standard cycle: Sonnet implementer (red 54 → green, commit 98e233e1), independent reviewer (approve, no blockers, two nits), full suite 1,138/0 failed verified by both implementer and orchestrating session. Founder steps outstanding: PR review/merge, manual FastPass, Narrator spot-check. Flagged in the PR: the two Conflict-tab Feelings combos announce identically (framework names; convention forbids overriding a Header, so any fix is UI text).
