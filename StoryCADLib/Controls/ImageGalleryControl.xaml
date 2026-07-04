@@ -31,17 +31,25 @@
                   AutomationProperties.AutomationId="ImagesGridView">
             <GridView.ItemTemplate>
                 <DataTemplate x:DataType="vm:ImageGalleryItem">
+                    <!-- Template root: no AutomationId (TemplateSafety forbids it). Item identity
+                         binds to the item's display property (Caption) per the convention's
+                         templated-content treatment and Shell's template-root precedent, so each
+                         realized tile is announced by its caption. Mode=OneWay because x:Bind
+                         defaults to OneTime and captions are editable. Tests scope by
+                         ImagesGridView + item Name, then hit the function-named controls
+                         (Caption/Enlarge/Remove) inside that tile's subtree. -->
                     <Grid Width="220" Margin="8" Padding="6"
                           BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                          BorderThickness="1" CornerRadius="4">
+                          BorderThickness="1" CornerRadius="4"
+                          AutomationProperties.Name="{x:Bind Caption, Mode=OneWay}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="200" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <!-- Inside a DataTemplate: no AutomationId (TemplateSafety forbids it), but
-                             Name is set inline per the convention's templated-content treatment.
-                             Content is an Image only (no text), so Name states the function. -->
+                        <!-- Image-only Content: this button IS the image the caption describes, so
+                             it carries the item-identifying Name (bound caption), not a static
+                             function name. -->
                         <Button Grid.Row="0"
                                 Click="OnImageClick"
                                 Padding="0" BorderThickness="0"
@@ -49,10 +57,12 @@
                                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                 HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
                                 ToolTipService.ToolTip="Click to enlarge"
-                                AutomationProperties.Name="View image">
+                                AutomationProperties.Name="{x:Bind Caption, Mode=OneWay}">
                             <Image Source="{x:Bind Source, Mode=OneWay}" Stretch="Uniform" />
                         </Button>
-                        <!-- PlaceholderText only, no Header: explicit Name required. -->
+                        <!-- PlaceholderText only, no Header: explicit Name required. Static
+                             function name; the per-item caption reaches UIA through the Value
+                             pattern, and item identity is carried by the bound Names above. -->
                         <TextBox Grid.Row="1" Margin="0,6,0,0"
                                  PlaceholderText="Caption"
                                  Text="{x:Bind Caption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -61,7 +71,8 @@
                                     Orientation="Horizontal"
                                     HorizontalAlignment="Right" Spacing="6">
                             <!-- Panel content (SymbolIcon+TextBlock): Name duplicates the visible text
-                                 per the Unit 4 composite-Button ruling. -->
+                                 per the Unit 4 composite-Button ruling; per-item disambiguation comes
+                                 from the enclosing caption-named tile, not these function names. -->
                             <Button Click="OnEnlargeClick" ToolTipService.ToolTip="Enlarge"
                                     AutomationProperties.Name="Enlarge">
                                 <StackPanel Orientation="Horizontal" Spacing="6">

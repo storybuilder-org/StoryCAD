@@ -21,7 +21,7 @@
                              template-root pattern, so each expander announces which relationship it is. -->
                         <Expander Width="auto" HorizontalAlignment="Stretch" IsExpanded="True"
                                   LosingFocus="OnLostFocus"
-                                  AutomationProperties.Name="{x:Bind Partner.Name}">
+                                  AutomationProperties.Name="{x:Bind Partner.Name, Mode=OneWay}">
                             <Expander.Header>
                                 <Grid Height="auto">
                                     <Grid.ColumnDefinitions>
