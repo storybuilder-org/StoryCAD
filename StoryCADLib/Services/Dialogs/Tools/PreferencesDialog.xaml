@@ -209,9 +209,10 @@
                                      NavigateUri="https://github.com/StoryBuilder-org/StoryCAD/graphs/contributors"
                                      Margin="5" FontSize="13"
                                      AutomationProperties.AutomationId="PreferencesContributorsButton" />
-                    <!-- Content is bound but resolves to plain text at runtime, same as a literal
-                         Content value; reaches the UIA Name without an explicit Name (FeedbackDialog
-                         bound-Header precedent). -->
+                    <!-- No explicit Name, like the literal-Content PreferencesContributorsButton
+                         above: the OneTime-bound Content resolves to a plain string before the
+                         AutomationPeer reads it, so the framework derives the UIA Name the same
+                         way. Subject to live confirmation at founder review. -->
                     <HyperlinkButton Content="{x:Bind PreferencesVm.AppStoreReviewButtonText, Mode=OneTime}" HorizontalAlignment="Center"
                                      Click="{x:Bind PreferencesVm.ShowRatingPrompt}" Margin="5" FontSize="13"
                                      AutomationProperties.AutomationId="PreferencesAppStoreReviewButton" />
