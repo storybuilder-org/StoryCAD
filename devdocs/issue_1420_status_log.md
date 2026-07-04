@@ -2,6 +2,18 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-04 (Unit 7 session) — Unit 7 PR #1456 filed; two founder decision items on the PR
+
+**Unit 7 is in review as PR #1456** after the standard cycle: Sonnet implementer (red exactly 76 → green, commit cee2042c), Sonnet reviewer (APPROVE, zero blockers, three nits), one nit applied by the same implementer (efa1c147: the AppStoreReview comment now cites the in-file literal-Content HyperlinkButton precedent instead of the FeedbackDialog bound-Header one). Actuals 76 ids / 9 Names against the plan's 74 est. (PreferencesDialog 49/9, PrintReportsDialog 27/0); prefixes `Preferences.../PrintReports...` match the merged Shell ids. Suite 1,138 / 0 failed run by implementer and reviewer; both heads verified at cee2042c and re-verified at branch head post-nit. x:Load pre-check clean across Services/Dialogs/Tools (implementer-checked, reviewer re-grepped).
+
+**The owed BrowseTextBox fix shipped as the unit's sole non-attribute diff (founder sign-off requested on the PR):** a Loaded handler in BrowseTextBox.xaml.cs derives per-instance internal ids (`{outerId}PathTextBox`/`{outerId}BrowseButton`) from each instance's outer AutomationId; XAML keeps the literal fallback ids the Coverage/Literalness tests require; reviewer hand-traced all six call sites (six distinct outer ids, six unique suffix-conformant derived pairs); the stale BrowseTextBox.xaml:6-12 comment now describes the fixed state. Static tests cannot see the derived ids — live Inspect on the six screens is the confirmation path, noted on the PR.
+
+**Second founder decision item: InfoBar.** PrintReportsDialog's SynopsisWarning InfoBar is in neither the suffix table nor the coverage element list (same class as Unit 4 Expander / Unit 6 NavigationView); three merged Unit 6 dialogs already carry unannotated InfoBars (FeedbackDialog:23, FileOpenMenu:84, HelpPage:19). Options on the PR: suffix row + element list + annotate all four in a follow-up commit, or a documented exemption (the peer announces Severity + Title + Message; the close button is templated). Left unannotated pending the ruling.
+
+**Reviewer premise correction for the record:** the five PrintReportsDialog ListViews have no ItemTemplate at all (TemplateSafety compliance is trivial there); realized-item announcements are a founder-review check, noted on the PR.
+
+**Next: founder reviews/merges PR #1456 with the two rulings. Then Unit 8 (StoryCADLib/Services/Dialogs/Tools: CopyElementsDialog 9, DramaticSituationsDialog 1, KeyQuestionsDialog 3, MasterPlotsDialog 1, NarrativeTool 10, StockScenesDialog 2, TopicsDialog 5, ~31 est.), branch `issue-1420-batch8-tools` off `dev`, fresh session, same cycle, x:Load check first (note: the Unit 7 pre-check already covered the whole Tools directory and found zero matches, but dev may move).**
+
 ## 2026-07-04 (end of session) — Unit 6 merged; three batches remain
 
 **PR #1455 merged to `dev` (175181b3) on founder instruction.** Merge cleanup done: #1420 body updated (Unit 6 checked off with the Nav/NavItem ruling, spin-off #1454, and the Unit 9 ElementPicker prefix note); wiki `log.md` entry appended (page updates postponed to closeout, wiki tree left uncommitted for StoryCADWiki#1, same posture as Units 3-5). Running total on `dev`: 457 AutomationIds across 24 XAML files (verified by grep post-merge), suite baseline 1,138 / 0 failed. No new audit trigger — #1441 was notified at Unit 5.
