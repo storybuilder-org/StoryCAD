@@ -49,7 +49,8 @@
                          unaffected; verified 2026-07-04 on clean obj: value "Notes" -> _NotesSubject,
                          "Zebra" -> _ZebraSubject, same on a TabViewItem, fine outside the deferred
                          subtree). Until the generator is fixed, id only - no AutomationProperties.Name
-                         anywhere inside NotesTabView's subtree. -->
+                         anywhere inside NotesTabView's subtree. Issue #1452 tracks the upstream
+                         report and restoring this Name; the convention-doc rule sunsets with it. -->
                     <usercontrols:RichEditBoxExtended
                         RtfText="{x:Bind FolderVm.Description, Mode=TwoWay}"
                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
