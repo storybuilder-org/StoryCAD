@@ -2,6 +2,17 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-04 — header-exposure check answered by scripted UIA probe
+
+**The #1443 founder-pending header question is answered: Header text reaches the UIA Name.** Verified against the live app (dev @ 3a143319, WinAppSDK head) with a UIA probe script, on all five controls of interest: StoryIdeaRichEdit → "Story Idea", DateCreated/LastChanged TextBoxes → their headers, and both PreferencesDialog BrowseTextBox inner text boxes → "Project directory:"/"Backup directory:". Decisions this settles: no `RichEditBoxExtended` constructor `SetName` follow-up PR; Unit 5 adds no explicit Name to `BrowseTextBox`; deferred RichEdit Names stay Header-driven where a Header exists, and only header-less controls need explicit names. Answer not yet recorded on #1443 itself.
+
+**New tool:** `devdocs/tools/uia_header_probe.ps1` — launches the exe, opens the Danger Calls sample, navigates to OverviewPage and the Preferences dialog, reads UIA properties. It is the navigation driver `axe_scan.ps1` declared out of scope, and a working proof for the #1422 FlaUI harness (the Unit 1/2 AutomationIds work as live automation handles). Unattended-launch preconditions are documented in its header: seed `Preferences.json` (Initialized, matching Version, ShowStartupDialog false, HideKeyFileWarning true), remove `.env` from the bin, no second instance.
+
+**Findings along the way:**
+- **Standalone launch crash:** `AppState.DeveloperBuild` (AppState.cs:78) evaluates `Package.Current`, which throws when the exe runs unpackaged; only a debugger or a missing `.env` short-circuits ahead of it. Any unattended launch with `.env` present dies at Shell_Loaded — this will hit `axe_scan.ps1` runs too. Expression unchanged since fbefa036 (2024-03-16). Needs an issue.
+- **Duplicate AutomationId:** both BrowseTextBox instances in PreferencesDialog expose id `PathTextBox` (the `x:Name` inside the UserControl) — same duplicate-fallback-id class as HomePage's Browse buttons already slated for Unit 5.
+- The probe's uninitialized first run registered a junk backend user (userId 3015, all consents false).
+
 ## 2026-07-03 — design approved, Units 0-2 and axe spike merged
 
 **Where things stand:** `dev` contains Units 0, 1, 2 and the scan script. 204 controls annotated (Shell 74, OverviewPage 25, ProblemPage 43, CharacterPage 62), 55 accessible names, 7 static convention tests ratcheting over 4 of 39 scope files. Full suite 1,136 tests, 0 failed.
