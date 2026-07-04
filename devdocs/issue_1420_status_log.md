@@ -2,6 +2,18 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-04 (Unit 6 session) — Unit 6 PR #1455 filed; NavigationView gap needs a founder ruling
+
+**Unit 6 is in review as PR #1455** after the standard cycle: Sonnet implementer (red exactly 34 → green, commit e2f8c320), Sonnet reviewer (APPROVE, zero blockers, three nits), one nit applied by the same implementer pattern (33f4e2b1: constraint comment at AdminMessagePage's MessageLink — Content arrives from code-behind, so no explicit Name). Actuals 34 ids / 4 explicit Names against the plan's ~37 (ElementPicker 5→6, the create Flyout is itself tracked; FeedbackDialog ~7→4; FileOpenMenu 9→8). Suite 1,138 / 0 failed; both heads build clean; reviewer independently re-ran the convention tests and re-verified the x:Load pre-check (still zero matches).
+
+**Founder decision item on PR #1455:** FileOpenMenu's left tab strip is a NavigationView with six NavigationViewItems, and neither type is in the convention suffix table or the coverage test's element list — the same structural-blindness class as Unit 4's Expander. Options on the PR: add Nav/NavItem suffix rows and annotate in a follow-up commit, or document an exemption (the NavigationViewItem peer announces Content text and selection state natively).
+
+**Spin-off filed: #1454** — FeedbackDialog's title TextBox keeps static `Header="Issue Title"` in Feature Request mode while ChangeUIText switches the other two field headers (verified in source; dynamic text arrived in d167a013). Code fix, out of batch scope.
+
+**Unit 9 flag recorded on the PR:** Collaborator's ElementPicker.xaml is a near-clone sharing the same x:Name values (TypeBox, ElementBox, NewButton); this unit's ids deliberately avoid those bare names, and Unit 9 must prefix the Collaborator copy distinctly or the Uniqueness test will collide.
+
+**Next: founder reviews/merges PR #1455 with the NavigationView ruling. Then Unit 7 (PreferencesDialog 48 + PrintReportsDialog 26, ~74 est.), branch `issue-1420-batch7-preferences-reports` off `dev`, fresh session, same cycle, x:Load check first. Unit 7 also owes the BrowseTextBox internal-id duplication fix noted on PR #1453 (BrowseTextBox.xaml:6-12).**
+
 ## 2026-07-04 (Unit 5 merge, Unit 6 open) — PR #1453 merged; #1441 audit trigger tripped; Unit 6 branch cut
 
 **PR #1453 merged to `dev` (1dc0355b) on founder instruction.** Merge cleanup done: #1420 body updated (Unit 5 checked off with the #1452 sunset and gallery-identity notes); #1441 notified that the audit trigger tripped — six main views annotated, running total on `dev` 416 AutomationIds across 16 XAML files (18 in the ratchet; HomePage and TrashCanPage hold nothing interactive), with the four inherited findings listed (TreeItem SizeOfSet, Feelings-combo duplicate names, FolderPage id-only Notes RichEdit until #1452, no full assessment pass yet); wiki `log.md` entry appended (page updates postponed to closeout, wiki tree left uncommitted for StoryCADWiki#1, same posture as Units 3-4). One merge straggler found and fixed: the batch5 status-log ruling entry (975b738b) was pushed 14 seconds after the merge and missed PR #1453; cherry-picked onto this branch (c99ec174).
