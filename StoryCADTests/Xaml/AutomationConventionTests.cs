@@ -26,6 +26,7 @@ public class AutomationConventionTests
         "StoryCAD/Views/CharacterPage.xaml",
         "StoryCAD/Views/ScenePage.xaml",
         "StoryCAD/Views/SettingPage.xaml",
+        "StoryCAD/Views/StoryWorldPage.xaml",
     };
 
     /// <summary>
@@ -47,7 +48,7 @@ public class AutomationConventionTests
         "Button", "AppBarButton", "HyperlinkButton", "MenuFlyoutItem", "MenuFlyoutSubItem",
         "ComboBox", "TextBox", "CheckBox", "RadioButton", "RadioButtons", "ToggleSwitch", "NumberBox",
         "AutoSuggestBox", "TabView", "TabViewItem", "TreeView", "ListView", "GridView",
-        "Flyout", "RichEditBoxExtended", "BrowseTextBox",
+        "Flyout", "RichEditBoxExtended", "BrowseTextBox", "Expander",
     };
 
     /// <summary>
@@ -84,6 +85,7 @@ public class AutomationConventionTests
         ["Flyout"] = "Flyout",
         ["BrowseTextBox"] = "TextBox", // added Unit 1: gap in original convention suffix table, see class remarks
         ["ItemsRepeater"] = "Tree",    // added Unit 1, see class remarks
+        ["Expander"] = "Expander",     // added Unit 4: founder-accepted Expander suffix ruling on PR #1451
     };
 
     private const string AutomationIdAttribute = "AutomationProperties.AutomationId";

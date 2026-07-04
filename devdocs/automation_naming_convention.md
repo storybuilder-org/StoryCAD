@@ -33,6 +33,7 @@ Every interactive control gets `AutomationProperties.AutomationId`.
 | ToggleSwitch | `Toggle` | *(added Unit 1)* |
 | BrowseTextBox | `TextBox` | *(added Unit 1)* |
 | ItemsRepeater | `Tree` | `NavigationTree` *(added Unit 1; exists for the Shell navigation tree stand-in; revisit if a non-tree ItemsRepeater ever needs annotation)* |
+| Expander | `Expander` | `GeographyExpander` *(added Unit 4)* |
 
 - A control type not in this table gets a proposed suffix in the PR description; the table row is added when the PR merges.
 - Values are literal strings: ASCII letters and digits, no spaces, no bindings, never a story element name, file path, date, or any other runtime value.
@@ -47,8 +48,10 @@ Every interactive control gets `AutomationProperties.AutomationId`.
 - Controls with `Header` (TextBox, ComboBox, NumberBox), `Content` (Button, CheckBox, RadioButton), or `Label` (AppBarButton) get their accessible name from the framework. Do not duplicate it with `AutomationProperties.Name`. AutomationId is still required.
 - Set `AutomationProperties.Name` where no clean visible label exists:
   - icon-only buttons (the Shell status bar save, autosave, and backup buttons; the four Move flyout arrow buttons);
+  - a Button whose `Content` is a panel rather than plain text or a `Header`: WinUI 3 does not aggregate inner TextBlock text into the UIA Name (verified live 2026-07-04, StoryWorldPage Add/Remove buttons announced blank), so the visible text is duplicated as an explicit Name;
   - every MenuFlyoutItem whose `Text` embeds a padded keyboard shortcut (`"Save Story                      Ctrl+S"`): Name carries the clean command text (`Save Story`), set once and unconditionally so the `win:`/`skia:` text variants share one accessible name;
   - AutoSuggestBox with only `PlaceholderText` (the Shell search box);
+  - a field whose visible label is a sibling `Expander.Header` TextBlock rather than a `Header` property (StoryWorldPage's #782 Expander layout, where the header doubles as a bold-when-filled content indicator): mirror the header text as a literal Name. Founder ruling 2026-07-04 on PR #1451: literal Name, not `LabeledBy`, so no `x:Name` gets added to label TextBlocks for automation; a reworded header means updating the Name with it, since the static tests cannot catch drift. *(added Unit 4)*
   - custom controls whose `Header` does not reach the automation peer. PR 1 verifies `RichEditBoxExtended` and `BrowseTextBox` with Accessibility Insights. If Header is not exposed: `BrowseTextBox` gets the Name once inside its own XAML; `RichEditBoxExtended` has no XAML (partial classes only), so the Name is set once in its C# constructor via `AutomationProperties.SetName` *(plan-stage addition: the C# path; the approved design assumed control XAML)*.
 - Use `AutomationProperties.LabeledBy` only where a separate TextBlock is the visible label, pointing at that TextBlock's `x:Name`. Most StoryCAD fields use `Header`, so LabeledBy is the rare case.
 

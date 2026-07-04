@@ -44,6 +44,16 @@
     - Outer scrollbar when total MinHeights exceed viewport (outer ScrollViewer)
     -->
 
+    <!--
+    AUTOMATION NOTE (issue #1420): the RichEditBoxExtended fields below have no Header
+    property; each field's visible label is a sibling Expander.Header TextBlock, not an
+    attached label on the control itself. AutomationProperties.LabeledBy would need an
+    x:Name on that TextBlock, but the convention forbids adding a new x:Name solely for
+    automation. So each RichEditBoxExtended gets an explicit AutomationProperties.Name
+    matching its Expander header text instead. Founder ruling 2026-07-04 (PR #1451):
+    literal Name is the sanctioned pattern here; do not convert to LabeledBy.
+    -->
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -61,12 +71,14 @@
                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                  HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
                  SelectedIndex="{x:Bind StoryWorldVm.SelectedTabIndex, Mode=TwoWay}"
-                 SelectionChanged="WorldTabView_SelectionChanged">
+                 SelectionChanged="WorldTabView_SelectionChanged"
+                 AutomationProperties.AutomationId="WorldTabs">
             <TabView.TabItems>
 
                 <!-- Tab 1: Structure (World Type Classification) -->
                 <TabViewItem Header="Structure" IsClosable="False"
-                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="StructureTab">
                     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="12">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -82,7 +94,8 @@
                         <ComboBox Grid.Row="1" Header="World Type" MinWidth="350"
                                   ItemsSource="{x:Bind StoryWorldVm.WorldTypeList}"
                                   SelectedItem="{x:Bind StoryWorldVm.WorldType, Mode=TwoWay}"
-                                  PlaceholderText="Select the type of world..."/>
+                                  PlaceholderText="Select the type of world..."
+                                  AutomationProperties.AutomationId="WorldTypeCombo"/>
 
                         <!-- Description panel -->
                         <Border Grid.Row="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -105,7 +118,8 @@
 
                 <!-- Tab 2: Physical Worlds (Single entry view with navigation) -->
                 <TabViewItem Header="Physical Worlds" IsClosable="False"
-                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="PhysicalWorldsTab">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -116,10 +130,12 @@
                             <StackPanel Spacing="4" Padding="0,0,12,0">
                                 <TextBox Text="{x:Bind StoryWorldVm.CurrentPhysicalWorldName, Mode=TwoWay}"
                                          PlaceholderText="World name" Header="Name"
-                                         IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"/>
+                                         IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
+                                         AutomationProperties.AutomationId="PhysicalWorldNameTextBox"/>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="GeographyExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Geography" FontWeight="{x:Bind StoryWorldVm.CurrentPhysicalWorldGeography, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -128,11 +144,14 @@
                                         PlaceholderText="What are the major landforms, bodies of water, and terrain features?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="GeographyRichEdit"
+                                        AutomationProperties.Name="Geography"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="ClimateExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Climate" FontWeight="{x:Bind StoryWorldVm.CurrentPhysicalWorldClimate, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -141,11 +160,14 @@
                                         PlaceholderText="What are the weather patterns, seasons, and extreme conditions?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="ClimateRichEdit"
+                                        AutomationProperties.Name="Climate"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="NaturalResourcesExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Natural Resources" FontWeight="{x:Bind StoryWorldVm.CurrentPhysicalWorldNaturalResources, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -154,11 +176,14 @@
                                         PlaceholderText="What minerals, water sources, and energy are available?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="NaturalResourcesRichEdit"
+                                        AutomationProperties.Name="Natural Resources"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="FloraExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Flora" FontWeight="{x:Bind StoryWorldVm.CurrentPhysicalWorldFlora, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -167,11 +192,14 @@
                                         PlaceholderText="What plants, trees, and vegetation exist here?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="FloraRichEdit"
+                                        AutomationProperties.Name="Flora"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="FaunaExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Fauna" FontWeight="{x:Bind StoryWorldVm.CurrentPhysicalWorldFauna, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -180,11 +208,14 @@
                                         PlaceholderText="What animals, creatures, and wildlife inhabit this world?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="FaunaRichEdit"
+                                        AutomationProperties.Name="Fauna"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="AstronomyExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Astronomy" FontWeight="{x:Bind StoryWorldVm.CurrentPhysicalWorldAstronomy, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -193,7 +224,9 @@
                                         PlaceholderText="What moons, stars, and celestial phenomena are visible?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="AstronomyRichEdit"
+                                        AutomationProperties.Name="Astronomy"/>
                                 </Expander>
                             </StackPanel>
                         </ScrollViewer>
@@ -212,22 +245,29 @@
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
                                     <Button Command="{x:Bind StoryWorldVm.PhysicalWorldNav.PreviousCommand}"
                                             IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasPrevious, Mode=OneWay}"
-                                            Padding="8,8" ToolTipService.ToolTip="Previous World">
+                                            Padding="8,8" ToolTipService.ToolTip="Previous World"
+                                            AutomationProperties.AutomationId="PreviousWorldButton"
+                                            AutomationProperties.Name="Previous World">
                                         <SymbolIcon Symbol="Back"/>
                                     </Button>
                                     <TextBlock Text="{x:Bind StoryWorldVm.PhysicalWorldNav.PositionDisplay, Mode=OneWay}"
                                                VerticalAlignment="Center" MinWidth="50" TextAlignment="Center"/>
                                     <Button Command="{x:Bind StoryWorldVm.PhysicalWorldNav.NextCommand}"
                                             IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasNext, Mode=OneWay}"
-                                            Padding="8,8" ToolTipService.ToolTip="Next World">
+                                            Padding="8,8" ToolTipService.ToolTip="Next World"
+                                            AutomationProperties.AutomationId="NextWorldButton"
+                                            AutomationProperties.Name="Next World">
                                         <SymbolIcon Symbol="Forward"/>
                                     </Button>
                                 </StackPanel>
 
                                 <!-- Add/Remove controls (right) -->
+                                <!-- WinUI 3 does not derive a Button's UIA Name from composite (StackPanel) Content, so these need explicit Names; verified live 2026-07-04 (PR #1451). -->
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
                                     <Button Command="{x:Bind StoryWorldVm.PhysicalWorldNav.AddCommand}"
-                                            Padding="12,8">
+                                            Padding="12,8"
+                                            AutomationProperties.AutomationId="AddWorldButton"
+                                            AutomationProperties.Name="Add World">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Add"/>
                                             <TextBlock Text="Add World"/>
@@ -235,7 +275,9 @@
                                     </Button>
                                     <Button Command="{x:Bind StoryWorldVm.PhysicalWorldNav.RemoveCurrentCommand}"
                                             IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
-                                            Padding="12,8">
+                                            Padding="12,8"
+                                            AutomationProperties.AutomationId="RemoveWorldButton"
+                                            AutomationProperties.Name="Remove World">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Delete"/>
                                             <TextBlock Text="Remove World"/>
@@ -249,7 +291,8 @@
 
                 <!-- Tab 3: People/Species (Single entry view with navigation) -->
                 <TabViewItem Header="People/Species" IsClosable="False"
-                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="PeopleSpeciesTab">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -260,10 +303,12 @@
                             <StackPanel Spacing="4" Padding="0,0,12,0">
                                 <TextBox Text="{x:Bind StoryWorldVm.CurrentSpeciesName, Mode=TwoWay}"
                                          PlaceholderText="Species name" Header="Name"
-                                         IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}"/>
+                                         IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}"
+                                         AutomationProperties.AutomationId="SpeciesNameTextBox"/>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="PhysicalTraitsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Physical Traits" FontWeight="{x:Bind StoryWorldVm.CurrentSpeciesPhysicalTraits, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -272,11 +317,14 @@
                                         PlaceholderText="What do they look like? What physical abilities or limitations do they have?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="PhysicalTraitsRichEdit"
+                                        AutomationProperties.Name="Physical Traits"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="LifespanExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Lifespan" FontWeight="{x:Bind StoryWorldVm.CurrentSpeciesLifespan, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -285,11 +333,14 @@
                                         PlaceholderText="How long do they live? What are their life stages?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="LifespanRichEdit"
+                                        AutomationProperties.Name="Lifespan"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="OriginsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Origins" FontWeight="{x:Bind StoryWorldVm.CurrentSpeciesOrigins, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -298,11 +349,14 @@
                                         PlaceholderText="Where did they come from? Evolution, creation, or migration?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="OriginsRichEdit"
+                                        AutomationProperties.Name="Origins"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="SocialStructureExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Social Structure" FontWeight="{x:Bind StoryWorldVm.CurrentSpeciesSocialStructure, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -311,11 +365,14 @@
                                         PlaceholderText="How do they organize? Family units, tribes, hierarchies?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="SocialStructureRichEdit"
+                                        AutomationProperties.Name="Social Structure"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="DiversityExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Diversity" FontWeight="{x:Bind StoryWorldVm.CurrentSpeciesDiversity, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -324,7 +381,9 @@
                                         PlaceholderText="What subspecies or regional variations exist?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="DiversityRichEdit"
+                                        AutomationProperties.Name="Diversity"/>
                                 </Expander>
                             </StackPanel>
                         </ScrollViewer>
@@ -341,26 +400,35 @@
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
                                     <Button Command="{x:Bind StoryWorldVm.SpeciesNav.PreviousCommand}"
                                             IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasPrevious, Mode=OneWay}"
-                                            Padding="8,8" ToolTipService.ToolTip="Previous Species">
+                                            Padding="8,8" ToolTipService.ToolTip="Previous Species"
+                                            AutomationProperties.AutomationId="PreviousSpeciesButton"
+                                            AutomationProperties.Name="Previous Species">
                                         <SymbolIcon Symbol="Back"/>
                                     </Button>
                                     <TextBlock Text="{x:Bind StoryWorldVm.SpeciesNav.PositionDisplay, Mode=OneWay}"
                                                VerticalAlignment="Center" MinWidth="50" TextAlignment="Center"/>
                                     <Button Command="{x:Bind StoryWorldVm.SpeciesNav.NextCommand}"
                                             IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasNext, Mode=OneWay}"
-                                            Padding="8,8" ToolTipService.ToolTip="Next Species">
+                                            Padding="8,8" ToolTipService.ToolTip="Next Species"
+                                            AutomationProperties.AutomationId="NextSpeciesButton"
+                                            AutomationProperties.Name="Next Species">
                                         <SymbolIcon Symbol="Forward"/>
                                     </Button>
                                 </StackPanel>
+                                <!-- WinUI 3 does not derive a Button's UIA Name from composite (StackPanel) Content, so these need explicit Names; verified live 2026-07-04 (PR #1451). -->
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                                    <Button Command="{x:Bind StoryWorldVm.SpeciesNav.AddCommand}" Padding="12,8">
+                                    <Button Command="{x:Bind StoryWorldVm.SpeciesNav.AddCommand}" Padding="12,8"
+                                            AutomationProperties.AutomationId="AddSpeciesButton"
+                                            AutomationProperties.Name="Add Species">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Add"/>
                                             <TextBlock Text="Add Species"/>
                                         </StackPanel>
                                     </Button>
                                     <Button Command="{x:Bind StoryWorldVm.SpeciesNav.RemoveCurrentCommand}"
-                                            IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}" Padding="12,8">
+                                            IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}" Padding="12,8"
+                                            AutomationProperties.AutomationId="RemoveSpeciesButton"
+                                            AutomationProperties.Name="Remove Species">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Delete"/>
                                             <TextBlock Text="Remove Species"/>
@@ -374,7 +442,8 @@
 
                 <!-- Tab 4: Cultures (Single entry view with navigation) - Using Expanders -->
                 <TabViewItem Header="Cultures" IsClosable="False"
-                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="CulturesTab">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -385,10 +454,12 @@
                             <StackPanel Spacing="4" Padding="0,0,12,0">
                                 <TextBox Text="{x:Bind StoryWorldVm.CurrentCultureName, Mode=TwoWay}"
                                          PlaceholderText="Culture name" Header="Name"
-                                         IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}"/>
+                                         IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}"
+                                         AutomationProperties.AutomationId="CultureNameTextBox"/>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="ValuesExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Values" FontWeight="{x:Bind StoryWorldVm.CurrentCultureValues, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -397,11 +468,14 @@
                                         PlaceholderText="What does this culture believe in? What matters most to them?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="ValuesRichEdit"
+                                        AutomationProperties.Name="Values"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="CustomsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Customs" FontWeight="{x:Bind StoryWorldVm.CurrentCultureCustoms, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -410,11 +484,14 @@
                                         PlaceholderText="What traditions, ceremonies, and social rituals do they practice?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="CustomsRichEdit"
+                                        AutomationProperties.Name="Customs"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="TaboosExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Taboos" FontWeight="{x:Bind StoryWorldVm.CurrentCultureTaboos, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -423,11 +500,14 @@
                                         PlaceholderText="What behaviors are forbidden or socially unacceptable?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="TaboosRichEdit"
+                                        AutomationProperties.Name="Taboos"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="ArtExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Art" FontWeight="{x:Bind StoryWorldVm.CurrentCultureArt, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -436,11 +516,14 @@
                                         PlaceholderText="What music, visual arts, literature, and performance exist?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="ArtRichEdit"
+                                        AutomationProperties.Name="Art"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="DailyLifeExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Daily Life" FontWeight="{x:Bind StoryWorldVm.CurrentCultureDailyLife, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -449,11 +532,14 @@
                                         PlaceholderText="What are their routines, meals, family life, and work patterns?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="DailyLifeRichEdit"
+                                        AutomationProperties.Name="Daily Life"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="EntertainmentExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Entertainment" FontWeight="{x:Bind StoryWorldVm.CurrentCultureEntertainment, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -462,7 +548,9 @@
                                         PlaceholderText="What games, sports, and leisure activities do they enjoy?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="EntertainmentRichEdit"
+                                        AutomationProperties.Name="Entertainment"/>
                                 </Expander>
                             </StackPanel>
                         </ScrollViewer>
@@ -479,26 +567,35 @@
                                     <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
                                         <Button Command="{x:Bind StoryWorldVm.CultureNav.PreviousCommand}"
                                                 IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasPrevious, Mode=OneWay}"
-                                                Padding="8,8" ToolTipService.ToolTip="Previous Culture">
+                                                Padding="8,8" ToolTipService.ToolTip="Previous Culture"
+                                                AutomationProperties.AutomationId="PreviousCultureButton"
+                                                AutomationProperties.Name="Previous Culture">
                                             <SymbolIcon Symbol="Back"/>
                                         </Button>
                                         <TextBlock Text="{x:Bind StoryWorldVm.CultureNav.PositionDisplay, Mode=OneWay}"
                                                    VerticalAlignment="Center" MinWidth="50" TextAlignment="Center"/>
                                         <Button Command="{x:Bind StoryWorldVm.CultureNav.NextCommand}"
                                                 IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasNext, Mode=OneWay}"
-                                                Padding="8,8" ToolTipService.ToolTip="Next Culture">
+                                                Padding="8,8" ToolTipService.ToolTip="Next Culture"
+                                                AutomationProperties.AutomationId="NextCultureButton"
+                                                AutomationProperties.Name="Next Culture">
                                             <SymbolIcon Symbol="Forward"/>
                                         </Button>
                                     </StackPanel>
+                                    <!-- WinUI 3 does not derive a Button's UIA Name from composite (StackPanel) Content, so these need explicit Names; verified live 2026-07-04 (PR #1451). -->
                                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                                        <Button Command="{x:Bind StoryWorldVm.CultureNav.AddCommand}" Padding="12,8">
+                                        <Button Command="{x:Bind StoryWorldVm.CultureNav.AddCommand}" Padding="12,8"
+                                                AutomationProperties.AutomationId="AddCultureButton"
+                                                AutomationProperties.Name="Add Culture">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <SymbolIcon Symbol="Add"/>
                                                 <TextBlock Text="Add Culture"/>
                                             </StackPanel>
                                         </Button>
                                         <Button Command="{x:Bind StoryWorldVm.CultureNav.RemoveCurrentCommand}"
-                                                IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}" Padding="12,8">
+                                                IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}" Padding="12,8"
+                                                AutomationProperties.AutomationId="RemoveCultureButton"
+                                                AutomationProperties.Name="Remove Culture">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <SymbolIcon Symbol="Delete"/>
                                                 <TextBlock Text="Remove Culture"/>
@@ -512,7 +609,8 @@
 
                 <!-- Tab 5: Governments (Single entry view with navigation) -->
                 <TabViewItem Header="Governments" IsClosable="False"
-                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="GovernmentsTab">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -523,10 +621,12 @@
                             <StackPanel Spacing="4" Padding="0,0,12,0">
                                 <TextBox Text="{x:Bind StoryWorldVm.CurrentGovernmentName, Mode=TwoWay}"
                                          PlaceholderText="Government name" Header="Name"
-                                         IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}"/>
+                                         IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}"
+                                         AutomationProperties.AutomationId="GovernmentNameTextBox"/>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="GovernmentTypeExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Type" FontWeight="{x:Bind StoryWorldVm.CurrentGovernmentType, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -535,11 +635,14 @@
                                         PlaceholderText="What form of government is this? (democracy, monarchy, theocracy, etc.)"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="GovernmentTypeRichEdit"
+                                        AutomationProperties.Name="Type"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="PowerStructuresExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Power Structures" FontWeight="{x:Bind StoryWorldVm.CurrentGovernmentPowerStructures, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -548,11 +651,14 @@
                                         PlaceholderText="Who holds power? How is it gained, maintained, and transferred?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="PowerStructuresRichEdit"
+                                        AutomationProperties.Name="Power Structures"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="LawsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Laws" FontWeight="{x:Bind StoryWorldVm.CurrentGovernmentLaws, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -561,11 +667,14 @@
                                         PlaceholderText="What is the legal system? How are laws enforced and violations punished?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="LawsRichEdit"
+                                        AutomationProperties.Name="Laws"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="ClassStructureExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Class Structure" FontWeight="{x:Bind StoryWorldVm.CurrentGovernmentClassStructure, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -574,11 +683,14 @@
                                         PlaceholderText="What is the social hierarchy? Can people move between classes?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="ClassStructureRichEdit"
+                                        AutomationProperties.Name="Class Structure"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="ForeignRelationsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Foreign Relations" FontWeight="{x:Bind StoryWorldVm.CurrentGovernmentForeignRelations, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -587,7 +699,9 @@
                                         PlaceholderText="Who are the allies and enemies? What treaties and trade agreements exist?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="ForeignRelationsRichEdit"
+                                        AutomationProperties.Name="Foreign Relations"/>
                                 </Expander>
                             </StackPanel>
                         </ScrollViewer>
@@ -604,26 +718,35 @@
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
                                     <Button Command="{x:Bind StoryWorldVm.GovernmentNav.PreviousCommand}"
                                             IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasPrevious, Mode=OneWay}"
-                                            Padding="8,8" ToolTipService.ToolTip="Previous Government">
+                                            Padding="8,8" ToolTipService.ToolTip="Previous Government"
+                                            AutomationProperties.AutomationId="PreviousGovernmentButton"
+                                            AutomationProperties.Name="Previous Government">
                                         <SymbolIcon Symbol="Back"/>
                                     </Button>
                                     <TextBlock Text="{x:Bind StoryWorldVm.GovernmentNav.PositionDisplay, Mode=OneWay}"
                                                VerticalAlignment="Center" MinWidth="50" TextAlignment="Center"/>
                                     <Button Command="{x:Bind StoryWorldVm.GovernmentNav.NextCommand}"
                                             IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasNext, Mode=OneWay}"
-                                            Padding="8,8" ToolTipService.ToolTip="Next Government">
+                                            Padding="8,8" ToolTipService.ToolTip="Next Government"
+                                            AutomationProperties.AutomationId="NextGovernmentButton"
+                                            AutomationProperties.Name="Next Government">
                                         <SymbolIcon Symbol="Forward"/>
                                     </Button>
                                 </StackPanel>
+                                <!-- WinUI 3 does not derive a Button's UIA Name from composite (StackPanel) Content, so these need explicit Names; verified live 2026-07-04 (PR #1451). -->
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                                    <Button Command="{x:Bind StoryWorldVm.GovernmentNav.AddCommand}" Padding="12,8">
+                                    <Button Command="{x:Bind StoryWorldVm.GovernmentNav.AddCommand}" Padding="12,8"
+                                            AutomationProperties.AutomationId="AddGovernmentButton"
+                                            AutomationProperties.Name="Add Government">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Add"/>
                                             <TextBlock Text="Add Government"/>
                                         </StackPanel>
                                     </Button>
                                     <Button Command="{x:Bind StoryWorldVm.GovernmentNav.RemoveCurrentCommand}"
-                                            IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}" Padding="12,8">
+                                            IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}" Padding="12,8"
+                                            AutomationProperties.AutomationId="RemoveGovernmentButton"
+                                            AutomationProperties.Name="Remove Government">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Delete"/>
                                             <TextBlock Text="Remove Government"/>
@@ -637,7 +760,8 @@
 
                 <!-- Tab 6: Religions (Single entry view with navigation) -->
                 <TabViewItem Header="Religions" IsClosable="False"
-                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="ReligionsTab">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -648,10 +772,12 @@
                             <StackPanel Spacing="4" Padding="0,0,12,0">
                                 <TextBox Text="{x:Bind StoryWorldVm.CurrentReligionName, Mode=TwoWay}"
                                          PlaceholderText="Religion name" Header="Name"
-                                         IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}"/>
+                                         IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}"
+                                         AutomationProperties.AutomationId="ReligionNameTextBox"/>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="DeitiesExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Deities" FontWeight="{x:Bind StoryWorldVm.CurrentReligionDeities, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -660,11 +786,14 @@
                                         PlaceholderText="What gods, spirits, or divine beings are worshipped?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="DeitiesRichEdit"
+                                        AutomationProperties.Name="Deities"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="BeliefsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Beliefs" FontWeight="{x:Bind StoryWorldVm.CurrentReligionBeliefs, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -673,11 +802,14 @@
                                         PlaceholderText="What are the core tenets? What happens after death? What is moral?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="BeliefsRichEdit"
+                                        AutomationProperties.Name="Beliefs"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="PracticesExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Practices" FontWeight="{x:Bind StoryWorldVm.CurrentReligionPractices, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -686,11 +818,14 @@
                                         PlaceholderText="What rituals, prayers, holy days, and ceremonies are observed?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="PracticesRichEdit"
+                                        AutomationProperties.Name="Practices"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="OrganizationsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Organizations" FontWeight="{x:Bind StoryWorldVm.CurrentReligionOrganizations, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -699,11 +834,14 @@
                                         PlaceholderText="What temples, clergy, hierarchies, and sects exist?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="OrganizationsRichEdit"
+                                        AutomationProperties.Name="Organizations"/>
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="CreationMythsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Creation Myths" FontWeight="{x:Bind StoryWorldVm.CurrentReligionCreationMyths, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -712,7 +850,9 @@
                                         PlaceholderText="What are the origin stories, cosmology, and sacred narratives?"
                                         AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                         MinHeight="150"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        AutomationProperties.AutomationId="CreationMythsRichEdit"
+                                        AutomationProperties.Name="Creation Myths"/>
                                 </Expander>
                             </StackPanel>
                         </ScrollViewer>
@@ -729,26 +869,35 @@
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
                                     <Button Command="{x:Bind StoryWorldVm.ReligionNav.PreviousCommand}"
                                             IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasPrevious, Mode=OneWay}"
-                                            Padding="8,8" ToolTipService.ToolTip="Previous Religion">
+                                            Padding="8,8" ToolTipService.ToolTip="Previous Religion"
+                                            AutomationProperties.AutomationId="PreviousReligionButton"
+                                            AutomationProperties.Name="Previous Religion">
                                         <SymbolIcon Symbol="Back"/>
                                     </Button>
                                     <TextBlock Text="{x:Bind StoryWorldVm.ReligionNav.PositionDisplay, Mode=OneWay}"
                                                VerticalAlignment="Center" MinWidth="50" TextAlignment="Center"/>
                                     <Button Command="{x:Bind StoryWorldVm.ReligionNav.NextCommand}"
                                             IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasNext, Mode=OneWay}"
-                                            Padding="8,8" ToolTipService.ToolTip="Next Religion">
+                                            Padding="8,8" ToolTipService.ToolTip="Next Religion"
+                                            AutomationProperties.AutomationId="NextReligionButton"
+                                            AutomationProperties.Name="Next Religion">
                                         <SymbolIcon Symbol="Forward"/>
                                     </Button>
                                 </StackPanel>
+                                <!-- WinUI 3 does not derive a Button's UIA Name from composite (StackPanel) Content, so these need explicit Names; verified live 2026-07-04 (PR #1451). -->
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                                    <Button Command="{x:Bind StoryWorldVm.ReligionNav.AddCommand}" Padding="12,8">
+                                    <Button Command="{x:Bind StoryWorldVm.ReligionNav.AddCommand}" Padding="12,8"
+                                            AutomationProperties.AutomationId="AddReligionButton"
+                                            AutomationProperties.Name="Add Religion">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Add"/>
                                             <TextBlock Text="Add Religion"/>
                                         </StackPanel>
                                     </Button>
                                     <Button Command="{x:Bind StoryWorldVm.ReligionNav.RemoveCurrentCommand}"
-                                            IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}" Padding="12,8">
+                                            IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}" Padding="12,8"
+                                            AutomationProperties.AutomationId="RemoveReligionButton"
+                                            AutomationProperties.Name="Remove Religion">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <SymbolIcon Symbol="Delete"/>
                                             <TextBlock Text="Remove Religion"/>
@@ -762,10 +911,12 @@
 
                 <!-- Tab 7: History (Single entry) -->
                 <TabViewItem Header="History" IsClosable="False"
-                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="HistoryTab">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Spacing="4" Padding="12">
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="FoundingEventsExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Founding Events" FontWeight="{x:Bind StoryWorldVm.FoundingEvents, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -774,10 +925,13 @@
                                     PlaceholderText="How did the current order begin? What events established this world?"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="FoundingEventsRichEdit"
+                                    AutomationProperties.Name="Founding Events"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="MajorConflictsExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Major Conflicts" FontWeight="{x:Bind StoryWorldVm.MajorConflicts, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -786,10 +940,13 @@
                                     PlaceholderText="What wars, struggles, or disasters shaped this world?"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="MajorConflictsRichEdit"
+                                    AutomationProperties.Name="Major Conflicts"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="ErasExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Eras" FontWeight="{x:Bind StoryWorldVm.Eras, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -798,10 +955,13 @@
                                     PlaceholderText="What major periods or ages define this world's history?"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="ErasRichEdit"
+                                    AutomationProperties.Name="Eras"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="TechnologicalShiftsExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Technological Shifts" FontWeight="{x:Bind StoryWorldVm.TechnologicalShifts, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -810,10 +970,13 @@
                                     PlaceholderText="What changes in technology or capability have occurred?"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="TechnologicalShiftsRichEdit"
+                                    AutomationProperties.Name="Technological Shifts"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="LostKnowledgeExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Lost Knowledge" FontWeight="{x:Bind StoryWorldVm.LostKnowledge, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -822,7 +985,9 @@
                                     PlaceholderText="What has been forgotten, destroyed, or forbidden?"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="LostKnowledgeRichEdit"
+                                    AutomationProperties.Name="Lost Knowledge"/>
                             </Expander>
                         </StackPanel>
                     </ScrollViewer>
@@ -830,10 +995,12 @@
 
                 <!-- Tab 8: Economy (Single entry) -->
                 <TabViewItem Header="Economy" IsClosable="False"
-                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="EconomyTab">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Spacing="4" Padding="12">
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="EconomicSystemExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Economic System" FontWeight="{x:Bind StoryWorldVm.EconomicSystem, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -842,10 +1009,13 @@
                                     PlaceholderText="How does the economy work? (capitalism, barter, feudalism, etc.)"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="EconomicSystemRichEdit"
+                                    AutomationProperties.Name="Economic System"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="CurrencyExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Currency" FontWeight="{x:Bind StoryWorldVm.Currency, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -854,10 +1024,13 @@
                                     PlaceholderText="What is the medium of exchange? Coins, credits, barter goods?"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="CurrencyRichEdit"
+                                    AutomationProperties.Name="Currency"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="TradeRoutesExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Trade Routes" FontWeight="{x:Bind StoryWorldVm.TradeRoutes, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -866,10 +1039,13 @@
                                     PlaceholderText="How do goods move around? What are the major trade hubs?"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="TradeRoutesRichEdit"
+                                    AutomationProperties.Name="Trade Routes"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="ProfessionsExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Professions" FontWeight="{x:Bind StoryWorldVm.Professions, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -878,10 +1054,13 @@
                                     PlaceholderText="What jobs, trades, and guilds exist in this world?"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="ProfessionsRichEdit"
+                                    AutomationProperties.Name="Professions"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="WealthDistributionExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Wealth Distribution" FontWeight="{x:Bind StoryWorldVm.WealthDistribution, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -890,7 +1069,9 @@
                                     PlaceholderText="Who has money? Who doesn't? What causes inequality?"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="WealthDistributionRichEdit"
+                                    AutomationProperties.Name="Wealth Distribution"/>
                             </Expander>
                         </StackPanel>
                     </ScrollViewer>
@@ -898,14 +1079,17 @@
 
                 <!-- Tab 9: Magic/Technology (Single entry) -->
                 <TabViewItem Header="Magic/Tech" IsClosable="False"
-                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="MagicTechTab">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Spacing="4" Padding="12">
                             <ComboBox Header="System Type" MinWidth="200"
                                       ItemsSource="{x:Bind StoryWorldVm.SystemTypeList}"
-                                      SelectedItem="{x:Bind StoryWorldVm.SystemType, Mode=TwoWay}"/>
+                                      SelectedItem="{x:Bind StoryWorldVm.SystemType, Mode=TwoWay}"
+                                      AutomationProperties.AutomationId="SystemTypeCombo"/>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="SourceExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Source" FontWeight="{x:Bind StoryWorldVm.Source, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -914,10 +1098,13 @@
                                     PlaceholderText="Where does this power come from? (mana, technology, divine gift, etc.)"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="SourceRichEdit"
+                                    AutomationProperties.Name="Source"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="RulesExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Rules" FontWeight="{x:Bind StoryWorldVm.Rules, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -926,10 +1113,13 @@
                                     PlaceholderText="What are the laws that govern how this system works?"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="RulesRichEdit"
+                                    AutomationProperties.Name="Rules"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="LimitationsExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Limitations" FontWeight="{x:Bind StoryWorldVm.Limitations, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -938,10 +1128,13 @@
                                     PlaceholderText="What can't it do? What are its boundaries and weaknesses?"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="LimitationsRichEdit"
+                                    AutomationProperties.Name="Limitations"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="CostExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Cost" FontWeight="{x:Bind StoryWorldVm.Cost, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -950,10 +1143,13 @@
                                     PlaceholderText="What price must be paid to use it? (energy, resources, health, morality)"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="CostRichEdit"
+                                    AutomationProperties.Name="Cost"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="PractitionersExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Practitioners" FontWeight="{x:Bind StoryWorldVm.Practitioners, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -962,10 +1158,13 @@
                                     PlaceholderText="Who can use it? How are they trained or identified?"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="PractitionersRichEdit"
+                                    AutomationProperties.Name="Practitioners"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="SocialImpactExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Social Impact" FontWeight="{x:Bind StoryWorldVm.SocialImpact, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -974,7 +1173,9 @@
                                     PlaceholderText="How does this system affect society, culture, and daily life?"
                                     AcceptsReturn="True" IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                     MinHeight="150"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    AutomationProperties.AutomationId="SocialImpactRichEdit"
+                                    AutomationProperties.Name="Social Impact"/>
                             </Expander>
                         </StackPanel>
                     </ScrollViewer>
