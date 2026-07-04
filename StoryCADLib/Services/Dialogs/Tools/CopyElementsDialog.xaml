@@ -22,11 +22,19 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Text="Target:" VerticalAlignment="Center" Margin="0,0,10,0" />
+            <!-- Prefixed CopyElements...: plain Button, not a controls:BrowseTextBox instance
+                 (that control's internal Browse button carries the literal id "BrowseButton"). -->
             <Button Grid.Column="1" Content="Browse..." Margin="0,0,10,0"
-                    Command="{x:Bind VM.BrowseTargetCommand}" />
+                    Command="{x:Bind VM.BrowseTargetCommand}"
+                    AutomationProperties.AutomationId="CopyElementsBrowseButton" />
+            <!-- No Header, PlaceholderText only; visible label is the sibling "Target:" TextBlock.
+                 Per the convention's no-new-x:Name-for-LabeledBy ruling (PR #1451), the label stays
+                 unnamed and this control gets a literal Name mirroring it instead. -->
             <TextBox Grid.Column="2" IsReadOnly="True"
                      Text="{x:Bind VM.TargetFilePath, Mode=OneWay}"
-                     PlaceholderText="Select a target outline file..." />
+                     PlaceholderText="Select a target outline file..."
+                     AutomationProperties.AutomationId="CopyElementsTargetTextBox"
+                     AutomationProperties.Name="Target" />
         </Grid>
 
         <!-- Row 1: Filter ComboBox -->
@@ -36,12 +44,16 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Text="Filter:" VerticalAlignment="Center" Margin="0,0,10,0" />
+            <!-- No Header, PlaceholderText only; visible label is the sibling "Filter:" TextBlock.
+                 Same no-new-x:Name-for-LabeledBy reasoning as the Target TextBox above. -->
             <ComboBox Grid.Column="1" Name="FilterComboBox"
                       ItemsSource="{x:Bind VM.CopyableTypes}"
                       SelectedItem="{x:Bind VM.SelectedFilterType, Mode=TwoWay}"
                       SelectionChanged="FilterComboBox_SelectionChanged"
                       PlaceholderText="Select element type..."
-                      MinWidth="200" />
+                      MinWidth="200"
+                      AutomationProperties.AutomationId="CopyElementsFilterCombo"
+                      AutomationProperties.Name="Filter" />
         </Grid>
 
         <!-- Row 2: Dual ListView with Button Bar -->
@@ -66,25 +78,37 @@
                                   ItemsSource="{x:Bind VM.SourceElements, Mode=OneWay}"
                                   SelectedItem="{x:Bind VM.SelectedSourceElement, Mode=TwoWay}"
                                   DisplayMemberPath="Name"
-                                  SelectionMode="Single" />
+                                  SelectionMode="Single"
+                                  AutomationProperties.AutomationId="CopyElementsSourceList" />
                     </ScrollViewer>
                 </Border>
             </Grid>
 
             <!-- Center: Button Bar -->
+            <!-- Icon-only buttons (glyph Content, no plain text): Name mirrors the ToolTip text
+                 per the Shell Move-flyout precedent. Prefixed CopyElements... because MoveUpButton/
+                 MoveDownButton are already taken globally by Shell.xaml's Move flyout. -->
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0">
                 <Button Content="&#x2192;" FontFamily="Segoe UI Symbol" Width="40" Height="40"
                         Margin="0,5" ToolTipService.ToolTip="Copy to target"
-                        Command="{x:Bind VM.CopyElementCommand}" />
+                        Command="{x:Bind VM.CopyElementCommand}"
+                        AutomationProperties.AutomationId="CopyElementsCopyButton"
+                        AutomationProperties.Name="Copy to target" />
                 <Button Content="&#x2190;" FontFamily="Segoe UI Symbol" Width="40" Height="40"
                         Margin="0,5" ToolTipService.ToolTip="Remove from target (session only)"
-                        Command="{x:Bind VM.RemoveElementCommand}" />
+                        Command="{x:Bind VM.RemoveElementCommand}"
+                        AutomationProperties.AutomationId="CopyElementsRemoveButton"
+                        AutomationProperties.Name="Remove from target (session only)" />
                 <Button Content="&#x2191;" FontFamily="Segoe UI Symbol" Width="40" Height="40"
                         Margin="0,5" ToolTipService.ToolTip="Move up"
-                        Command="{x:Bind VM.MoveUpCommand}" />
+                        Command="{x:Bind VM.MoveUpCommand}"
+                        AutomationProperties.AutomationId="CopyElementsMoveUpButton"
+                        AutomationProperties.Name="Move up" />
                 <Button Content="&#x2193;" FontFamily="Segoe UI Symbol" Width="40" Height="40"
                         Margin="0,5" ToolTipService.ToolTip="Move down"
-                        Command="{x:Bind VM.MoveDownCommand}" />
+                        Command="{x:Bind VM.MoveDownCommand}"
+                        AutomationProperties.AutomationId="CopyElementsMoveDownButton"
+                        AutomationProperties.Name="Move down" />
             </StackPanel>
 
             <!-- Right Pane: Target (Opened File) -->
@@ -101,7 +125,8 @@
                                   ItemsSource="{x:Bind VM.TargetElements, Mode=OneWay}"
                                   SelectedItem="{x:Bind VM.SelectedTargetElement, Mode=TwoWay}"
                                   DisplayMemberPath="Name"
-                                  SelectionMode="Single" />
+                                  SelectionMode="Single"
+                                  AutomationProperties.AutomationId="CopyElementsTargetList" />
                     </ScrollViewer>
                 </Border>
             </Grid>

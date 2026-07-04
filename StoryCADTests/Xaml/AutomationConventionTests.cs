@@ -48,6 +48,13 @@ public class AutomationConventionTests
         "StoryCADLib/Services/Dialogs/SaveAsDialog.xaml",
         "StoryCADLib/Services/Dialogs/Tools/PreferencesDialog.xaml",
         "StoryCADLib/Services/Dialogs/Tools/PrintReportsDialog.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/CopyElementsDialog.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/DramaticSituationsDialog.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/KeyQuestionsDialog.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/MasterPlotsDialog.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/NarrativeTool.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/StockScenesDialog.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/TopicsDialog.xaml",
     };
 
     /// <summary>
