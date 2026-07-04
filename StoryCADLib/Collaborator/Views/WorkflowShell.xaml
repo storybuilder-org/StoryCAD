@@ -38,7 +38,8 @@
         <!-- LLM prompting buttons -->
         <CommandBar Grid.Row="1" HorizontalAlignment="Left" OverflowButtonVisibility="Collapsed">
             <CommandBar.PrimaryCommands>
-                <!-- Label present: name announces natively, id only (convention Name/LabeledBy rule). -->
+                <!-- Prefixed: Shell.xaml already claims HelpButton. Label present: name announces
+                     natively, id only (convention Name/LabeledBy rule). -->
                 <AppBarButton Label="Help" ToolTipService.ToolTip="Help" Margin="5"
                               AutomationProperties.AutomationId="WorkflowHelpButton">
                     <AppBarButton.Icon>
