@@ -2,6 +2,12 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-04 (Unit 5 merge, Unit 6 open) — PR #1453 merged; #1441 audit trigger tripped; Unit 6 branch cut
+
+**PR #1453 merged to `dev` (1dc0355b) on founder instruction.** Merge cleanup done: #1420 body updated (Unit 5 checked off with the #1452 sunset and gallery-identity notes); #1441 notified that the audit trigger tripped — six main views annotated, running total on `dev` 416 AutomationIds across 16 XAML files (18 in the ratchet; HomePage and TrashCanPage hold nothing interactive), with the four inherited findings listed (TreeItem SizeOfSet, Feelings-combo duplicate names, FolderPage id-only Notes RichEdit until #1452, no full assessment pass yet); wiki `log.md` entry appended (page updates postponed to closeout, wiki tree left uncommitted for StoryCADWiki#1, same posture as Units 3-4). One merge straggler found and fixed: the batch5 status-log ruling entry (975b738b) was pushed 14 seconds after the merge and missed PR #1453; cherry-picked onto this branch (c99ec174).
+
+**Unit 6 is open on branch `issue-1420-batch6-dialogs` off `dev` @ 1dc0355b.** Scope: the eight `StoryCADLib/Services/Dialogs` files — AdminMessagePage (est. 1), BackupNow (2), ElementPicker (5), FeedbackDialog (~7), FileOpenMenu (9), HelpPage (7), NewRelationshipPage (4), SaveAsDialog (2), ~37 est. **The x:Load pre-check is done and clean: none of the eight files contains `x:Load`, so the #1452 literal-Name ban does not constrain this unit.** Same cycle: Sonnet implementer (red against the ratchet, then green), Sonnet reviewer, fixes back to the implementer, PR to `dev`. Naming rule for this unit per the plan: dialog-name id prefixes (Notes/Save/Cancel/Name-class collisions).
+
 ## 2026-07-04 (Unit 5, ruling) — x:Load literal-Name ban accepted as temporary; no open decision items on PR #1453
 
 **Founder ruled on the x:Load convention proposal: agreed, but only as long as the Uno bug exists.** Commit 3793eac1 records it accordingly: the convention doc gains the rule as an explicitly temporary bullet (Name vs LabeledBy section, *(added Unit 5)*) that names #1452 as the tracker for the upstream report, the FolderPage Notes Name restore, and the bullet's own deletion; the FolderPage comment now cites #1452 for the same sunset. #1452's task list updated to match (the sunset tasks are explicit; the recording task is checked). Doc and comment only; convention tests 7/7. PR #1453 has no open decision items; only founder review/merge remains.
