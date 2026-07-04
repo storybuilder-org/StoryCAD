@@ -2,6 +2,10 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-04 (Unit 5, ruling) — x:Load literal-Name ban accepted as temporary; no open decision items on PR #1453
+
+**Founder ruled on the x:Load convention proposal: agreed, but only as long as the Uno bug exists.** Commit 3793eac1 records it accordingly: the convention doc gains the rule as an explicitly temporary bullet (Name vs LabeledBy section, *(added Unit 5)*) that names #1452 as the tracker for the upstream report, the FolderPage Notes Name restore, and the bullet's own deletion; the FolderPage comment now cites #1452 for the same sunset. #1452's task list updated to match (the sunset tasks are explicit; the recording task is checked). Doc and comment only; convention tests 7/7. PR #1453 has no open decision items; only founder review/merge remains.
+
 ## 2026-07-04 (Unit 5 session) — Unit 5 PR #1453 filed; x:Load Name bug found and scoped (#1452)
 
 **Unit 5 is in review as PR #1453** after the standard cycle: Sonnet implementer (red 34 → green, commit 077778bb), Sonnet reviewer (request changes: two blockers, one nit), fixes back to the same implementer (commit 4feee9ae). Actual count 34 ids / 18 explicit Names against the plan's ~42 estimate (most Conflict/Flaw/Traits/RelationshipView combos already had Headers). Suite 1,138 / 0 failed, run three times (implementer, reviewer, post-fix); both heads build clean.
