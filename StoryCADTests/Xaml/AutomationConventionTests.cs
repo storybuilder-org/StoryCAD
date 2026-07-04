@@ -48,6 +48,13 @@ public class AutomationConventionTests
         "StoryCADLib/Services/Dialogs/SaveAsDialog.xaml",
         "StoryCADLib/Services/Dialogs/Tools/PreferencesDialog.xaml",
         "StoryCADLib/Services/Dialogs/Tools/PrintReportsDialog.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/CopyElementsDialog.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/DramaticSituationsDialog.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/KeyQuestionsDialog.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/MasterPlotsDialog.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/NarrativeTool.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/StockScenesDialog.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/TopicsDialog.xaml",
     };
 
     /// <summary>
@@ -68,7 +75,7 @@ public class AutomationConventionTests
     {
         "Button", "AppBarButton", "HyperlinkButton", "MenuFlyoutItem", "MenuFlyoutSubItem",
         "ComboBox", "TextBox", "CheckBox", "RadioButton", "RadioButtons", "ToggleSwitch", "NumberBox",
-        "AutoSuggestBox", "TabView", "TabViewItem", "TreeView", "ListView", "GridView",
+        "AutoSuggestBox", "TabView", "TabViewItem", "TreeView", "TreeViewItem", "ListView", "GridView",
         "Flyout", "RichEditBoxExtended", "BrowseTextBox", "Expander",
         "NavigationView", "NavigationViewItem", "InfoBar",
     };
@@ -111,6 +118,7 @@ public class AutomationConventionTests
         ["NavigationView"] = "Nav",         // added Unit 6: founder ruling on PR #1455 (FileOpenMenu nav strip)
         ["NavigationViewItem"] = "NavItem", // added Unit 6: founder ruling on PR #1455 (FileOpenMenu nav strip)
         ["InfoBar"] = "InfoBar",            // added Unit 7: founder ruling on PR #1456 (id only; the peer announces Severity+Title+Message natively, so no explicit Name)
+        ["TreeViewItem"] = "TreeItem",      // added Unit 8: founder ruling on PR #1457; all current instances are templated (Shell x3, NarrativeTool x2), so they carry a bound Name and no AutomationId (TemplateSafety); the suffix row exists for any future non-templated TreeViewItem
     };
 
     private const string AutomationIdAttribute = "AutomationProperties.AutomationId";
