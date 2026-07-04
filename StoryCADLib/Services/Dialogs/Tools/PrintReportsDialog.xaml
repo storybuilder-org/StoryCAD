@@ -21,75 +21,106 @@
             <TextBlock Text="Create reports for the following:" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                        Margin="0,0,0,10" />
             <CheckBox Content="Story Overview" Grid.Column="0" Grid.Row="1"
-                      IsChecked="{x:Bind PrintVM.CreateOverview, Mode=TwoWay}" />
+                      IsChecked="{x:Bind PrintVM.CreateOverview, Mode=TwoWay}"
+                      AutomationProperties.AutomationId="PrintReportsOverviewCheck" />
             <CheckBox Content="Story Problem Structure" Grid.Row="1" Grid.Column="1" Margin="20,0,0,0"
-                      IsChecked="{x:Bind PrintVM.CreateStructure, Mode=TwoWay}" />
+                      IsChecked="{x:Bind PrintVM.CreateStructure, Mode=TwoWay}"
+                      AutomationProperties.AutomationId="PrintReportsStructureCheck" />
             <CheckBox Content="Story Synopsis" Grid.Column="0" Grid.Row="2" Margin="0,5,0,0"
-                      IsChecked="{x:Bind PrintVM.CreateSummary, Mode=TwoWay}" Checked="EmptySynopsisWarningCheck" />
+                      IsChecked="{x:Bind PrintVM.CreateSummary, Mode=TwoWay}" Checked="EmptySynopsisWarningCheck"
+                      AutomationProperties.AutomationId="PrintReportsSynopsisCheck" />
             <CheckBox Content="Story World" Grid.Row="2" Grid.Column="1" Margin="20,5,0,0"
-                      IsChecked="{x:Bind PrintVM.CreateStoryWorld, Mode=TwoWay}" />
+                      IsChecked="{x:Bind PrintVM.CreateStoryWorld, Mode=TwoWay}"
+                      AutomationProperties.AutomationId="PrintReportsStoryWorldCheck" />
             <CheckBox Content="Character Relationships" Grid.Column="0" Grid.Row="3" Margin="0,5,0,0"
-                      IsChecked="{x:Bind PrintVM.CreateRelationships, Mode=TwoWay}" />
+                      IsChecked="{x:Bind PrintVM.CreateRelationships, Mode=TwoWay}"
+                      AutomationProperties.AutomationId="PrintReportsRelationshipsCheck" />
             <CheckBox Content="Include Images Appendix" Grid.Row="3" Grid.Column="1" Margin="20,5,0,0"
-                      IsChecked="{x:Bind PrintVM.IncludeImagesAppendix, Mode=TwoWay}" />
+                      IsChecked="{x:Bind PrintVM.IncludeImagesAppendix, Mode=TwoWay}"
+                      AutomationProperties.AutomationId="PrintReportsImagesAppendixCheck" />
         </Grid>
 
 
-        <TabView TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
+        <TabView TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
+                 AutomationProperties.AutomationId="PrintReportsTabs">
             <TabView.TabItems>
-                <TabViewItem Header="Problems" IsClosable="False" TabIndex="0">
+                <TabViewItem Header="Problems" IsClosable="False" TabIndex="0"
+                             AutomationProperties.AutomationId="PrintReportsProblemsTab">
                 <StackPanel>
                     <CheckBox Content="Print a list of all Problems"
-                              IsChecked="{x:Bind PrintVM.ProblemList, Mode=TwoWay}" />
+                              IsChecked="{x:Bind PrintVM.ProblemList, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="PrintReportsProblemListCheck" />
                     <CheckBox Content="Print all problems" IsChecked="{x:Bind PrintVM.SelectAllProblems,Mode=TwoWay}"
-                              Click="CheckboxClicked" />
+                              Click="CheckboxClicked"
+                              AutomationProperties.AutomationId="PrintReportsSelectAllProblemsCheck" />
                     <ListView SelectionMode="Multiple" Height="260" Name="ProblemsList"
                               ItemsSource="{x:Bind PrintVM.ProblemNodes, Mode=TwoWay}"
-                              SelectionChanged="UpdateSelection" />
+                              SelectionChanged="UpdateSelection"
+                              AutomationProperties.AutomationId="PrintReportsProblemsList" />
                 </StackPanel>
                 </TabViewItem>
-                <TabViewItem Header="Characters" IsClosable="False">
+                <TabViewItem Header="Characters" IsClosable="False"
+                             AutomationProperties.AutomationId="PrintReportsCharactersTab">
                 <StackPanel>
                     <CheckBox Content="Print a list of all Characters"
-                              IsChecked="{x:Bind PrintVM.CharacterList, Mode=TwoWay}" />
+                              IsChecked="{x:Bind PrintVM.CharacterList, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="PrintReportsCharacterListCheck" />
                     <CheckBox Content="Print all characters"
-                              IsChecked="{x:Bind PrintVM.SelectAllCharacters,Mode=TwoWay}" Click="CheckboxClicked" />
+                              IsChecked="{x:Bind PrintVM.SelectAllCharacters,Mode=TwoWay}" Click="CheckboxClicked"
+                              AutomationProperties.AutomationId="PrintReportsSelectAllCharactersCheck" />
                     <ListView SelectionMode="Multiple" Height="260" Name="CharactersList"
                               ItemsSource="{x:Bind PrintVM.CharacterNodes, Mode=TwoWay}"
-                              SelectionChanged="UpdateSelection" />
+                              SelectionChanged="UpdateSelection"
+                              AutomationProperties.AutomationId="PrintReportsCharactersList" />
                 </StackPanel>
                 </TabViewItem>
-                <TabViewItem Header="Scenes" IsClosable="False">
+                <TabViewItem Header="Scenes" IsClosable="False"
+                             AutomationProperties.AutomationId="PrintReportsScenesTab">
                 <StackPanel>
-                    <CheckBox Content="Print a list of all Scenes" IsChecked="{x:Bind PrintVM.SceneList, Mode=TwoWay}" />
+                    <CheckBox Content="Print a list of all Scenes" IsChecked="{x:Bind PrintVM.SceneList, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="PrintReportsSceneListCheck" />
                     <CheckBox Content="Print all scenes" IsChecked="{x:Bind PrintVM.SelectAllScenes, Mode=TwoWay}"
-                              Click="CheckboxClicked" />
+                              Click="CheckboxClicked"
+                              AutomationProperties.AutomationId="PrintReportsSelectAllScenesCheck" />
                     <ListView SelectionMode="Multiple" Height="260" Name="ScenesList"
-                              ItemsSource="{x:Bind PrintVM.SceneNodes, Mode=TwoWay}" SelectionChanged="UpdateSelection" />
+                              ItemsSource="{x:Bind PrintVM.SceneNodes, Mode=TwoWay}" SelectionChanged="UpdateSelection"
+                              AutomationProperties.AutomationId="PrintReportsScenesList" />
                 </StackPanel>
                 </TabViewItem>
-                <TabViewItem Header="Settings" IsClosable="False">
+                <TabViewItem Header="Settings" IsClosable="False"
+                             AutomationProperties.AutomationId="PrintReportsSettingsTab">
                 <StackPanel>
                     <CheckBox Content="Print a list of all Settings"
-                              IsChecked="{x:Bind PrintVM.SettingList, Mode=TwoWay}" />
+                              IsChecked="{x:Bind PrintVM.SettingList, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="PrintReportsSettingListCheck" />
                     <CheckBox Content="Print all settings" IsChecked="{x:Bind PrintVM.SelectAllSettings,Mode=TwoWay}"
-                              Click="CheckboxClicked" />
+                              Click="CheckboxClicked"
+                              AutomationProperties.AutomationId="PrintReportsSelectAllSettingsCheck" />
                     <ListView SelectionMode="Multiple" Height="260" Name="SettingsList"
                               ItemsSource="{x:Bind PrintVM.SettingNodes, Mode=TwoWay}"
-                              SelectionChanged="UpdateSelection" />
+                              SelectionChanged="UpdateSelection"
+                              AutomationProperties.AutomationId="PrintReportsSettingsList" />
                 </StackPanel>
                 </TabViewItem>
-                <TabViewItem Header="Websites" IsClosable="False">
+                <TabViewItem Header="Websites" IsClosable="False"
+                             AutomationProperties.AutomationId="PrintReportsWebsitesTab">
                 <StackPanel>
-                    <CheckBox Content="Print a list of all Websites" IsChecked="{x:Bind PrintVM.WebList, Mode=TwoWay}" />
+                    <CheckBox Content="Print a list of all Websites" IsChecked="{x:Bind PrintVM.WebList, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="PrintReportsWebListCheck" />
                     <CheckBox Content="Print all websites" IsChecked="{x:Bind PrintVM.SelectAllWeb,Mode=TwoWay}"
-                              Click="CheckboxClicked" />
+                              Click="CheckboxClicked"
+                              AutomationProperties.AutomationId="PrintReportsSelectAllWebCheck" />
                     <ListView SelectionMode="Multiple" Height="260" Name="WebList"
-                              ItemsSource="{x:Bind PrintVM.WebNodes, Mode=TwoWay}" SelectionChanged="UpdateSelection" />
+                              ItemsSource="{x:Bind PrintVM.WebNodes, Mode=TwoWay}" SelectionChanged="UpdateSelection"
+                              AutomationProperties.AutomationId="PrintReportsWebList" />
                 </StackPanel>
                 </TabViewItem>
             </TabView.TabItems>
         </TabView>
+        <!-- InfoBar: convention silence (neither the suffix table nor the coverage test's
+             interactive element list covers InfoBar). Not annotated here, matching three already-
+             merged Unit 6 dialogs with unannotated InfoBars (FeedbackDialog.xaml:23,
+             FileOpenMenu.xaml:84, HelpPage.xaml:19); see PR description for the proposed resolution. -->
         <InfoBar IsOpen="False" Name="SynopsisWarning" Severity="Warning"
                  Message="Add some scenes to your synopsis, otherwise it will be empty." Height="auto" />
     </StackPanel>

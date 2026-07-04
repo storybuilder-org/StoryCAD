@@ -46,6 +46,8 @@ public class AutomationConventionTests
         "StoryCADLib/Services/Dialogs/HelpPage.xaml",
         "StoryCADLib/Services/Dialogs/NewRelationshipPage.xaml",
         "StoryCADLib/Services/Dialogs/SaveAsDialog.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/PreferencesDialog.xaml",
+        "StoryCADLib/Services/Dialogs/Tools/PrintReportsDialog.xaml",
     };
 
     /// <summary>

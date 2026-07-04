@@ -6,31 +6,38 @@
 
     <StackPanel Width="500" Height="410">
         <TabView Name="PivotView" Height="381" Width="500" VerticalAlignment="Stretch"
-                 TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False">
+                 TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
+                 AutomationProperties.AutomationId="PreferencesTabs">
             <TabView.TabItems>
-                <TabViewItem Header="Account" IsClosable="False" VerticalContentAlignment="Stretch" VerticalAlignment="Center">
+                <TabViewItem Header="Account" IsClosable="False" VerticalContentAlignment="Stretch" VerticalAlignment="Center"
+                             AutomationProperties.AutomationId="PreferencesAccountTab">
                 <StackPanel>
                     <TextBox Header="Your first name:" PlaceholderText="Put the first name want to publish under here"
                              HorizontalAlignment="Center" Margin="8" Width="300"
-                             Text="{x:Bind PreferencesVm.FirstName, Mode=TwoWay}" />
+                             Text="{x:Bind PreferencesVm.FirstName, Mode=TwoWay}"
+                             AutomationProperties.AutomationId="PreferencesFirstNameTextBox" />
                     <TextBox Header="Your surname:" PlaceholderText="Put the surname want to publish under here"
                              HorizontalAlignment="Center" Margin="8" Width="300"
-                             Text="{x:Bind PreferencesVm.LastName, Mode=TwoWay}" />
+                             Text="{x:Bind PreferencesVm.LastName, Mode=TwoWay}"
+                             AutomationProperties.AutomationId="PreferencesLastNameTextBox" />
                     <TextBox Header="Your email:" PlaceholderText="Put your email here" Margin="8" Width="300"
-                             Text="{x:Bind PreferencesVm.Email, Mode=TwoWay}" />
+                             Text="{x:Bind PreferencesVm.Email, Mode=TwoWay}"
+                             AutomationProperties.AutomationId="PreferencesEmailTextBox" />
                     <Button Content="Delete My Data"
                             Foreground="Red"
                             HorizontalAlignment="Center"
-                            Margin="8,16,8,8">
+                            Margin="8,16,8,8"
+                            AutomationProperties.AutomationId="PreferencesDeleteMyDataButton">
                         <Button.Flyout>
-                            <Flyout>
+                            <Flyout AutomationProperties.AutomationId="PreferencesDeleteConfirmFlyout">
                                 <StackPanel MaxWidth="300" Spacing="8">
                                     <TextBlock TextWrapping="Wrap"
                                                Text="This will permanently delete your account, error reporting preferences, and version tracking history from our servers. Your local story files will NOT be deleted. This does not automatically remove you from our email list. To stop receiving product or marketing emails, use the 'Unsubscribe' link included in the footer of any email we send you. StoryCAD will close after deletion." />
                                     <Button Content="Yes, Delete My Data"
                                             Foreground="Red"
                                             HorizontalAlignment="Center"
-                                            Click="DeleteMyData_Confirmed" />
+                                            Click="DeleteMyData_Confirmed"
+                                            AutomationProperties.AutomationId="PreferencesConfirmDeleteButton" />
                                 </StackPanel>
                             </Flyout>
                         </Button.Flyout>
@@ -42,15 +49,19 @@
                                MaxWidth="300" />
                 </StackPanel>
                 </TabViewItem>
-                <TabViewItem Header="Save Locations" IsClosable="False" VerticalContentAlignment="Center" VerticalAlignment="Center">
+                <TabViewItem Header="Save Locations" IsClosable="False" VerticalContentAlignment="Center" VerticalAlignment="Center"
+                             AutomationProperties.AutomationId="PreferencesSaveLocationsTab">
                 <StackPanel>
+                    <!-- Header is set, so it reaches the internal TextBox's UIA Name (BackupNow/
+                         SaveAsDialog precedent); no explicit outer Name needed. -->
                     <controls:BrowseTextBox
                         HorizontalAlignment="Center"
                         Header="Project directory:"
                         PlaceholderText="Where do you want to store your stories?"
                         Path="{x:Bind PreferencesVm.ProjectDirectory, Mode=TwoWay}"
                         BrowseMode="Folder"
-                        PathSelected="OnProjectPathSelected" />
+                        PathSelected="OnProjectPathSelected"
+                        AutomationProperties.AutomationId="PreferencesProjectDirTextBox" />
                     <controls:BrowseTextBox
                         x:Name="BackupDirBrowse2"
                         HorizontalAlignment="Center"
@@ -58,38 +69,51 @@
                         PlaceholderText="Where do you want to store your backups?"
                         Path="{x:Bind PreferencesVm.BackupDirectory, Mode=TwoWay}"
                         BrowseMode="Folder"
-                        PathSelected="OnBackupPathSelected" />
+                        PathSelected="OnBackupPathSelected"
+                        AutomationProperties.AutomationId="PreferencesBackupDirTextBox" />
                 </StackPanel>
                 </TabViewItem>
-                <TabViewItem Header="Backup" IsClosable="False" VerticalAlignment="Stretch" VerticalContentAlignment="Center">
+                <TabViewItem Header="Backup" IsClosable="False" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                             AutomationProperties.AutomationId="PreferencesBackupTab">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
                         <CheckBox Content="Automatically Save every"
                                   IsChecked="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}" HorizontalAlignment="Left"
-                                  Margin="4" />
+                                  Margin="4"
+                                  AutomationProperties.AutomationId="PreferencesAutoSaveCheck" />
+                        <!-- PlaceholderText only, no Header: explicit Name required. -->
                         <NumberBox Minimum="15" Maximum="60" IsEnabled="{x:Bind PreferencesVm.AutoSave, Mode=TwoWay}"
                                    PlaceholderText="Enter a value (Seconds)" HorizontalAlignment="Left" Margin="8"
-                                   Value="{x:Bind PreferencesVm.AutoSaveInterval, Mode=TwoWay}" />
+                                   Value="{x:Bind PreferencesVm.AutoSaveInterval, Mode=TwoWay}"
+                                   AutomationProperties.AutomationId="PreferencesAutoSaveIntervalNumberBox"
+                                   AutomationProperties.Name="Autosave interval in seconds" />
                         <TextBlock Text="Seconds" VerticalAlignment="Center" HorizontalAlignment="Center" />
                     </StackPanel>
                     <CheckBox Content="Make a backup of the story when opened" Margin="4" HorizontalAlignment="Left"
-                              IsChecked="{x:Bind PreferencesVm.BackupOnOpen, Mode=TwoWay}" />
+                              IsChecked="{x:Bind PreferencesVm.BackupOnOpen, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="PreferencesBackupOnOpenCheck" />
                     <CheckBox Content="Make timed backups" Margin="4" HorizontalAlignment="Left"
-                              IsChecked="{x:Bind PreferencesVm.TimedBackup, Mode=TwoWay}" />
+                              IsChecked="{x:Bind PreferencesVm.TimedBackup, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="PreferencesTimedBackupCheck" />
                     <NumberBox Header="How often should backups be made? (Minutes)" Maximum="300" Minimum="1"
                                Margin="4" Width="300" HorizontalAlignment="Left"
-                               Value="{x:Bind PreferencesVm.TimedBackupInterval, Mode=TwoWay}" />
+                               Value="{x:Bind PreferencesVm.TimedBackupInterval, Mode=TwoWay}"
+                               AutomationProperties.AutomationId="PreferencesTimedBackupIntervalNumberBox" />
                 </StackPanel>
                 </TabViewItem>
-                <TabViewItem Header="Privacy" IsClosable="False" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch">
+                <TabViewItem Header="Privacy" IsClosable="False" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="PreferencesPrivacyTab">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <CheckBox Content="Send error logs" Margin="8"
                               HorizontalAlignment="Left"
-                              IsChecked="{x:Bind PreferencesVm.ErrorCollectionConsent, Mode=TwoWay}" />
+                              IsChecked="{x:Bind PreferencesVm.ErrorCollectionConsent, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="PreferencesErrorLogsCheck" />
                     <StackPanel Orientation="Horizontal" Margin="8"
                                 HorizontalAlignment="Left" VerticalAlignment="Center">
                         <CheckBox Content="Send anonymous usage statistics"
-                                  IsChecked="{x:Bind PreferencesVm.UsageStatsConsent, Mode=TwoWay}" />
+                                  IsChecked="{x:Bind PreferencesVm.UsageStatsConsent, Mode=TwoWay}"
+                                  AutomationProperties.AutomationId="PreferencesUsageStatsCheck" />
+                        <!-- Content is "?", not real label text: Name states the function. -->
                         <HyperlinkButton Content="?"
                                          Width="22" Height="22" MinWidth="22" MinHeight="22"
                                          Padding="0" FontSize="12"
@@ -99,17 +123,22 @@
                                          Margin="6,0,0,0"
                                          VerticalAlignment="Center"
                                          NavigateUri="{x:Bind PreferencesVm.UsageStatsHelpUrl, Mode=OneWay}"
-                                         ToolTipService.ToolTip="Learn what's collected" />
+                                         ToolTipService.ToolTip="Learn what's collected"
+                                         AutomationProperties.AutomationId="PreferencesUsageStatsInfoButton"
+                                         AutomationProperties.Name="Learn what's collected" />
                     </StackPanel>
                     <CheckBox Content="Send me StoryCAD newsletters" Margin="8"
                               HorizontalAlignment="Left"
-                              IsChecked="{x:Bind PreferencesVm.Newsletter, Mode=TwoWay}" />
+                              IsChecked="{x:Bind PreferencesVm.Newsletter, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="PreferencesNewsletterCheck" />
                     <CheckBox Content="Advanced logging" Margin="8"
                               HorizontalAlignment="Left"
-                              IsChecked="{x:Bind PreferencesVm.AdvancedLogging, Mode=TwoWay}" />
+                              IsChecked="{x:Bind PreferencesVm.AdvancedLogging, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="PreferencesAdvancedLoggingCheck" />
                 </StackPanel>
                 </TabViewItem>
-                <TabViewItem Header="Other" IsClosable="False" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch">
+                <TabViewItem Header="Other" IsClosable="False" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="PreferencesOtherTab">
                 <Grid HorizontalAlignment="Center">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -125,27 +154,33 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <CheckBox Grid.Row="0" Grid.Column="0" Content="Wrap node names" Margin="8"
-                              HorizontalAlignment="Left" Click="ToggleWrapping" Name="TextWrap" />
+                              HorizontalAlignment="Left" Click="ToggleWrapping" Name="TextWrap"
+                              AutomationProperties.AutomationId="PreferencesWrapNodeNamesCheck" />
                     <CheckBox Grid.Row="0" Grid.Column="1" Content="Show startup page" Margin="8"
                               HorizontalAlignment="Left"
-                              IsChecked="{x:Bind PreferencesVm.ShowStartupPage, Mode=TwoWay}" />
+                              IsChecked="{x:Bind PreferencesVm.ShowStartupPage, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="PreferencesShowStartupPageCheck" />
                     <CheckBox Grid.Row="1" Grid.Column="0" Content="Show file picker on startup" Margin="8"
                               HorizontalAlignment="Left"
-                              IsChecked="{x:Bind PreferencesVm.ShowFilePickerOnStartup, Mode=TwoWay}" />
+                              IsChecked="{x:Bind PreferencesVm.ShowFilePickerOnStartup, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="PreferencesShowFilePickerCheck" />
                     <CheckBox Grid.Row="1" Grid.Column="1" Content="Use beta documentation" Margin="8"
                               HorizontalAlignment="Left"
-                              IsChecked="{x:Bind PreferencesVm.UseBetaDocumentation, Mode=TwoWay}" />
+                              IsChecked="{x:Bind PreferencesVm.UseBetaDocumentation, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="PreferencesUseBetaDocsCheck" />
 
                     <CheckBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"
                               Content="Hide in-window toolbar"
                               ToolTipService.ToolTip="Hides the in-window search and menu buttons; use the native macOS menu bar instead. Takes effect on next launch."
                               Margin="8"
                               Visibility="{x:Bind PreferencesVm.MacOnlyVisibility}"
-                              IsChecked="{x:Bind PreferencesVm.HideShellCommandBarOnMac, Mode=TwoWay}" />
+                              IsChecked="{x:Bind PreferencesVm.HideShellCommandBarOnMac, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="PreferencesHideToolbarCheck" />
 
                     <ComboBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" Width="300"
                               Header="Preferred Theme" HorizontalAlignment="Stretch"
-                              SelectedIndex="{x:Bind PreferencesVm.PreferredThemeIndex, Mode=TwoWay}" Margin="8">
+                              SelectedIndex="{x:Bind PreferencesVm.PreferredThemeIndex, Mode=TwoWay}" Margin="8"
+                              AutomationProperties.AutomationId="PreferencesThemeCombo">
                         <ComboBoxItem Content="Use system theme" />
                         <ComboBoxItem Content="Light Theme" />
                         <ComboBoxItem Content="Dark Theme" />
@@ -153,7 +188,8 @@
                     <ComboBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="6" Width="300"
                               Header="Preferred Search Engine" HorizontalAlignment="Stretch"
                               Name="SearchEngine" SelectedIndex="{x:Bind PreferencesVm.SearchEngineIndex, Mode=TwoWay}"
-                              Margin="0,4,0,0">
+                              Margin="0,4,0,0"
+                              AutomationProperties.AutomationId="PreferencesSearchEngineCombo">
                         <ComboBoxItem Content="DuckDuckGo" />
                         <ComboBoxItem Content="Google" />
                         <ComboBoxItem Content="Bing" />
@@ -161,56 +197,78 @@
                     </ComboBox>
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="About" IsClosable="False" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
+                <TabViewItem Header="About" IsClosable="False" VerticalContentAlignment="Center" VerticalAlignment="Stretch"
+                             AutomationProperties.AutomationId="PreferencesAboutTab">
                 <StackPanel>
                     <TextBlock HorizontalAlignment="Center" Margin="5,0,0,20" Text="{x:Bind State.Version}" />
                     <Button Content="Open Logs folder" HorizontalAlignment="Center" Click="OpenLogFolder" Margin="20"
-                            Width="200" />
+                            Width="200"
+                            AutomationProperties.AutomationId="PreferencesOpenLogsButton" />
                     <HyperlinkButton Content="StoryCAD was created by Terry Cox, Jake Shaw and Contributors"
                                      HorizontalAlignment="Center"
                                      NavigateUri="https://github.com/StoryBuilder-org/StoryCAD/graphs/contributors"
-                                     Margin="5" FontSize="13" />
+                                     Margin="5" FontSize="13"
+                                     AutomationProperties.AutomationId="PreferencesContributorsButton" />
+                    <!-- Content is bound but resolves to plain text at runtime, same as a literal
+                         Content value; reaches the UIA Name without an explicit Name (FeedbackDialog
+                         bound-Header precedent). -->
                     <HyperlinkButton Content="{x:Bind PreferencesVm.AppStoreReviewButtonText, Mode=OneTime}" HorizontalAlignment="Center"
-                                     Click="{x:Bind PreferencesVm.ShowRatingPrompt}" Margin="5" FontSize="13" />
+                                     Click="{x:Bind PreferencesVm.ShowRatingPrompt}" Margin="5" FontSize="13"
+                                     AutomationProperties.AutomationId="PreferencesAppStoreReviewButton" />
                     <TextBlock Text="Keep up with StoryCAD news:" Margin="0,10" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Discord">
+                        <!-- Image-only Content, no text at all: explicit Name states the function. -->
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Discord"
+                                AutomationProperties.AutomationId="PreferencesDiscordButton"
+                                AutomationProperties.Name="Discord">
                             <Button.Content>
                                 <Image Source="/Assets/Icons/DiscordIcon.png" />
                             </Button.Content>
                         </Button>
 
-                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="FaceBook">
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="FaceBook"
+                                AutomationProperties.AutomationId="PreferencesFacebookButton"
+                                AutomationProperties.Name="Facebook">
                             <Button.Content>
                                 <Image Source="/Assets/Icons/FaceBookIcon.png" />
                             </Button.Content>
                         </Button>
 
-                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Twitter">
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Twitter"
+                                AutomationProperties.AutomationId="PreferencesTwitterButton"
+                                AutomationProperties.Name="Twitter">
                             <Button.Content>
                                 <Image Source="/Assets/Icons/TwitterIcon.png" />
                             </Button.Content>
                         </Button>
 
-                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Youtube">
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Youtube"
+                                AutomationProperties.AutomationId="PreferencesYoutubeButton"
+                                AutomationProperties.Name="YouTube">
                             <Button.Content>
                                 <Image Source="/Assets/Icons/YoutubeIcon.png" />
                             </Button.Content>
                         </Button>
 
-                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Mail">
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Mail"
+                                AutomationProperties.AutomationId="PreferencesEmailButton"
+                                AutomationProperties.Name="Email">
                             <Button.Content>
                                 <Image Source="/Assets/Icons/BootstrapEmailIcon.png" />
                             </Button.Content>
                         </Button>
 
-                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Github">
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Github"
+                                AutomationProperties.AutomationId="PreferencesGithubButton"
+                                AutomationProperties.Name="GitHub">
                             <Button.Content>
                                 <Image Source="/Assets/Icons/GithubIcon.png" />
                             </Button.Content>
                         </Button>
 
-                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Website">
+                        <Button Width="50" Height="50" Margin="5" Click="OpenURL" Tag="Website"
+                                AutomationProperties.AutomationId="PreferencesWebsiteButton"
+                                AutomationProperties.Name="Website">
                             <Button.Content>
                                 <Image Source="/Assets/Logo.png" />
                             </Button.Content>
@@ -218,21 +276,28 @@
                     </StackPanel>
                 </StackPanel>
                 </TabViewItem>
-                <TabViewItem Header="What's new" IsClosable="False">
+                <TabViewItem Header="What's new" IsClosable="False"
+                             AutomationProperties.AutomationId="PreferencesWhatsNewTab">
                 <ScrollViewer VerticalScrollBarVisibility="Visible" Height="450">
                     <TextBlock Name="Changelog" TextWrapping="Wrap" />
                 </ScrollViewer>
                 </TabViewItem>
-                <TabViewItem Header="Dev" Name="Dev" IsClosable="False">
+                <TabViewItem Header="Dev" Name="Dev" IsClosable="False"
+                             AutomationProperties.AutomationId="PreferencesDevTab">
                 <StackPanel Orientation="Horizontal">
                     <StackPanel>
-                        <Button Content="Set Init to false" Click="SetInitToFalse" Width="150" Margin="0,5" />
-                        <Button Content="Throw exception" Click="ThrowException" Width="150" Margin="0,5" />
-                        <Button Content="Attach Elmah" Click="{x:Bind Logger.AddElmahTarget}" Width="150" Margin="0,5" />
-                        <Button Content="Refresh Dev Stats" Click="RefreshDevStats" Width="150" Margin="0,5" />
+                        <Button Content="Set Init to false" Click="SetInitToFalse" Width="150" Margin="0,5"
+                                AutomationProperties.AutomationId="PreferencesSetInitFalseButton" />
+                        <Button Content="Throw exception" Click="ThrowException" Width="150" Margin="0,5"
+                                AutomationProperties.AutomationId="PreferencesThrowExceptionButton" />
+                        <Button Content="Attach Elmah" Click="{x:Bind Logger.AddElmahTarget}" Width="150" Margin="0,5"
+                                AutomationProperties.AutomationId="PreferencesAttachElmahButton" />
+                        <Button Content="Refresh Dev Stats" Click="RefreshDevStats" Width="150" Margin="0,5"
+                                AutomationProperties.AutomationId="PreferencesRefreshDevStatsButton" />
                         <CheckBox Content="Hide key file warning"
                                   IsChecked="{x:Bind PreferencesVm.HideKeyFileWarning, Mode=TwoWay}"
-                                  Width="150" Margin="0,5" />
+                                  Width="150" Margin="0,5"
+                                  AutomationProperties.AutomationId="PreferencesHideKeyWarningCheck" />
                     </StackPanel>
                     <ScrollViewer MaxHeight="400">
                         <StackPanel>
