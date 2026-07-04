@@ -50,7 +50,8 @@
     attached label on the control itself. AutomationProperties.LabeledBy would need an
     x:Name on that TextBlock, but the convention forbids adding a new x:Name solely for
     automation. So each RichEditBoxExtended gets an explicit AutomationProperties.Name
-    matching its Expander header text instead.
+    matching its Expander header text instead. Founder ruling 2026-07-04 (PR #1451):
+    literal Name is the sanctioned pattern here; do not convert to LabeledBy.
     -->
 
     <Grid>
