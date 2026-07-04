@@ -2,6 +2,12 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-04 (end of session) — Unit 6 merged; three batches remain
+
+**PR #1455 merged to `dev` (175181b3) on founder instruction.** Merge cleanup done: #1420 body updated (Unit 6 checked off with the Nav/NavItem ruling, spin-off #1454, and the Unit 9 ElementPicker prefix note); wiki `log.md` entry appended (page updates postponed to closeout, wiki tree left uncommitted for StoryCADWiki#1, same posture as Units 3-5). Running total on `dev`: 457 AutomationIds across 24 XAML files (verified by grep post-merge), suite baseline 1,138 / 0 failed. No new audit trigger — #1441 was notified at Unit 5.
+
+**Next: Unit 7 (PreferencesDialog 48 + PrintReportsDialog 26, ~74 est.), branch `issue-1420-batch7-preferences-reports` off `dev`, fresh session, same cycle: x:Load check first, Sonnet implementer red/green, Sonnet reviewer, PR to `dev`. Unit 7 also owes the BrowseTextBox internal-id duplication fix noted on PR #1453 (BrowseTextBox.xaml:6-12 — its internal BrowseButton/PathTextBox ids duplicate across all six app-wide instances).**
+
 ## 2026-07-04 (Unit 6, ruling) — NavigationView/NavItem join the convention; no open decision items on PR #1455
 
 **Founder ruled option 1 on the NavigationView gap: Nav/NavItem suffix rows, annotate in a follow-up commit.** Commit a7998d2e (same implementer, resumed): convention doc rows *(added Unit 6)*, both types in the coverage test's element list and suffix map, FileOpenMenu's nav strip annotated — red on exactly 7 elements, then green; convention tests 7/7; suite 1,138 / 0 failed. Zero explicit Names; the untagged footer NavItem is id-only by design (it hosts the show-on-startup CheckBox, which carries the accessible name; a host Name would double-announce — commented at the site). Unit 6 totals now 41 ids / 4 Names. WorkflowShell.xaml untouched (Unit 9; MenuItemsSource-bound items).
