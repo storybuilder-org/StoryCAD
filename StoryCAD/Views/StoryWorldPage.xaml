@@ -133,7 +133,8 @@
                                          AutomationProperties.AutomationId="PhysicalWorldNameTextBox"/>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="GeographyExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Geography" FontWeight="{x:Bind StoryWorldVm.CurrentPhysicalWorldGeography, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -148,7 +149,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="ClimateExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Climate" FontWeight="{x:Bind StoryWorldVm.CurrentPhysicalWorldClimate, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -163,7 +165,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="NaturalResourcesExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Natural Resources" FontWeight="{x:Bind StoryWorldVm.CurrentPhysicalWorldNaturalResources, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -178,7 +181,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="FloraExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Flora" FontWeight="{x:Bind StoryWorldVm.CurrentPhysicalWorldFlora, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -193,7 +197,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="FaunaExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Fauna" FontWeight="{x:Bind StoryWorldVm.CurrentPhysicalWorldFauna, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -208,7 +213,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.PhysicalWorldNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="AstronomyExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Astronomy" FontWeight="{x:Bind StoryWorldVm.CurrentPhysicalWorldAstronomy, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -297,7 +303,8 @@
                                          AutomationProperties.AutomationId="SpeciesNameTextBox"/>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="PhysicalTraitsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Physical Traits" FontWeight="{x:Bind StoryWorldVm.CurrentSpeciesPhysicalTraits, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -312,7 +319,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="LifespanExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Lifespan" FontWeight="{x:Bind StoryWorldVm.CurrentSpeciesLifespan, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -327,7 +335,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="OriginsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Origins" FontWeight="{x:Bind StoryWorldVm.CurrentSpeciesOrigins, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -342,7 +351,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="SocialStructureExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Social Structure" FontWeight="{x:Bind StoryWorldVm.CurrentSpeciesSocialStructure, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -357,7 +367,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.SpeciesNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="DiversityExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Diversity" FontWeight="{x:Bind StoryWorldVm.CurrentSpeciesDiversity, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -440,7 +451,8 @@
                                          AutomationProperties.AutomationId="CultureNameTextBox"/>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="ValuesExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Values" FontWeight="{x:Bind StoryWorldVm.CurrentCultureValues, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -455,7 +467,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="CustomsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Customs" FontWeight="{x:Bind StoryWorldVm.CurrentCultureCustoms, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -470,7 +483,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="TaboosExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Taboos" FontWeight="{x:Bind StoryWorldVm.CurrentCultureTaboos, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -485,7 +499,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="ArtExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Art" FontWeight="{x:Bind StoryWorldVm.CurrentCultureArt, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -500,7 +515,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="DailyLifeExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Daily Life" FontWeight="{x:Bind StoryWorldVm.CurrentCultureDailyLife, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -515,7 +531,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.CultureNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="EntertainmentExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Entertainment" FontWeight="{x:Bind StoryWorldVm.CurrentCultureEntertainment, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -598,7 +615,8 @@
                                          AutomationProperties.AutomationId="GovernmentNameTextBox"/>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="GovernmentTypeExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Type" FontWeight="{x:Bind StoryWorldVm.CurrentGovernmentType, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -613,7 +631,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="PowerStructuresExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Power Structures" FontWeight="{x:Bind StoryWorldVm.CurrentGovernmentPowerStructures, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -628,7 +647,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="LawsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Laws" FontWeight="{x:Bind StoryWorldVm.CurrentGovernmentLaws, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -643,7 +663,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="ClassStructureExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Class Structure" FontWeight="{x:Bind StoryWorldVm.CurrentGovernmentClassStructure, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -658,7 +679,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.GovernmentNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="ForeignRelationsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Foreign Relations" FontWeight="{x:Bind StoryWorldVm.CurrentGovernmentForeignRelations, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -741,7 +763,8 @@
                                          AutomationProperties.AutomationId="ReligionNameTextBox"/>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="DeitiesExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Deities" FontWeight="{x:Bind StoryWorldVm.CurrentReligionDeities, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -756,7 +779,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="BeliefsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Beliefs" FontWeight="{x:Bind StoryWorldVm.CurrentReligionBeliefs, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -771,7 +795,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="PracticesExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Practices" FontWeight="{x:Bind StoryWorldVm.CurrentReligionPractices, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -786,7 +811,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="OrganizationsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Organizations" FontWeight="{x:Bind StoryWorldVm.CurrentReligionOrganizations, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -801,7 +827,8 @@
                                 </Expander>
 
                                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}">
+                                          IsEnabled="{x:Bind StoryWorldVm.ReligionNav.HasItems, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="CreationMythsExpander">
                                     <Expander.Header>
                                         <TextBlock Text="Creation Myths" FontWeight="{x:Bind StoryWorldVm.CurrentReligionCreationMyths, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                     </Expander.Header>
@@ -872,7 +899,8 @@
                              AutomationProperties.AutomationId="HistoryTab">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Spacing="4" Padding="12">
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="FoundingEventsExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Founding Events" FontWeight="{x:Bind StoryWorldVm.FoundingEvents, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -886,7 +914,8 @@
                                     AutomationProperties.Name="Founding Events"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="MajorConflictsExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Major Conflicts" FontWeight="{x:Bind StoryWorldVm.MajorConflicts, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -900,7 +929,8 @@
                                     AutomationProperties.Name="Major Conflicts"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="ErasExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Eras" FontWeight="{x:Bind StoryWorldVm.Eras, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -914,7 +944,8 @@
                                     AutomationProperties.Name="Eras"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="TechnologicalShiftsExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Technological Shifts" FontWeight="{x:Bind StoryWorldVm.TechnologicalShifts, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -928,7 +959,8 @@
                                     AutomationProperties.Name="Technological Shifts"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="LostKnowledgeExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Lost Knowledge" FontWeight="{x:Bind StoryWorldVm.LostKnowledge, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -951,7 +983,8 @@
                              AutomationProperties.AutomationId="EconomyTab">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Spacing="4" Padding="12">
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="EconomicSystemExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Economic System" FontWeight="{x:Bind StoryWorldVm.EconomicSystem, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -965,7 +998,8 @@
                                     AutomationProperties.Name="Economic System"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="CurrencyExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Currency" FontWeight="{x:Bind StoryWorldVm.Currency, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -979,7 +1013,8 @@
                                     AutomationProperties.Name="Currency"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="TradeRoutesExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Trade Routes" FontWeight="{x:Bind StoryWorldVm.TradeRoutes, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -993,7 +1028,8 @@
                                     AutomationProperties.Name="Trade Routes"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="ProfessionsExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Professions" FontWeight="{x:Bind StoryWorldVm.Professions, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -1007,7 +1043,8 @@
                                     AutomationProperties.Name="Professions"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="WealthDistributionExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Wealth Distribution" FontWeight="{x:Bind StoryWorldVm.WealthDistribution, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -1035,7 +1072,8 @@
                                       SelectedItem="{x:Bind StoryWorldVm.SystemType, Mode=TwoWay}"
                                       AutomationProperties.AutomationId="SystemTypeCombo"/>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="SourceExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Source" FontWeight="{x:Bind StoryWorldVm.Source, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -1049,7 +1087,8 @@
                                     AutomationProperties.Name="Source"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="RulesExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Rules" FontWeight="{x:Bind StoryWorldVm.Rules, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -1063,7 +1102,8 @@
                                     AutomationProperties.Name="Rules"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="LimitationsExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Limitations" FontWeight="{x:Bind StoryWorldVm.Limitations, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -1077,7 +1117,8 @@
                                     AutomationProperties.Name="Limitations"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="CostExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Cost" FontWeight="{x:Bind StoryWorldVm.Cost, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -1091,7 +1132,8 @@
                                     AutomationProperties.Name="Cost"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="PractitionersExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Practitioners" FontWeight="{x:Bind StoryWorldVm.Practitioners, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>
@@ -1105,7 +1147,8 @@
                                     AutomationProperties.Name="Practitioners"/>
                             </Expander>
 
-                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                            <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.AutomationId="SocialImpactExpander">
                                 <Expander.Header>
                                     <TextBlock Text="Social Impact" FontWeight="{x:Bind StoryWorldVm.SocialImpact, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
                                 </Expander.Header>

@@ -213,7 +213,8 @@
                         <!-- ===== ROW 0 : BEAT SHEET HEADER + DESCRIPTION EXPANDER ===== -->
                         <Expander Grid.Row="0"
                   Margin="0,0,0,8"
-                  HorizontalAlignment="Stretch">
+                  HorizontalAlignment="Stretch"
+                  AutomationProperties.AutomationId="BeatSheetExpander">
                             <Expander.Header>
                                 <Grid ColumnSpacing="16">
                                     <Grid.RowDefinitions>
