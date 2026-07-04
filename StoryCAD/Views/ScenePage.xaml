@@ -28,16 +28,19 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <TextBox Header="Name" Text="{x:Bind SceneVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 viewModels:TextBoxFocus.IsFocused="{x:Bind SceneVm.IsTextBoxFocused, Mode=TwoWay}" />
+                 viewModels:TextBoxFocus.IsFocused="{x:Bind SceneVm.IsTextBoxFocused, Mode=TwoWay}"
+                 AutomationProperties.AutomationId="SceneNameTextBox" />
         <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
                  HorizontalAlignment="Stretch"
                  VerticalAlignment="Stretch"
                  HorizontalContentAlignment="Stretch"
-                 VerticalContentAlignment="Stretch">
+                 VerticalContentAlignment="Stretch"
+                 AutomationProperties.AutomationId="SceneTabs">
             <TabView.TabItems>
                 <TabViewItem Header="Scene" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="SceneTab">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -54,16 +57,19 @@
                             <ColumnDefinition Width="4*" />
                         </Grid.ColumnDefinitions>
                         <TextBox Header="Date" Grid.Column="0" MinWidth="150"
-                                 Text="{x:Bind SceneVm.Date, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                 Text="{x:Bind SceneVm.Date, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.AutomationId="DateTextBox" />
                         <TextBlock Grid.Column="1" MinWidth="50" />
                         <TextBox Header="Time" Grid.Column="2" MinWidth="100"
-                                 Text="{x:Bind SceneVm.Time, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                 Text="{x:Bind SceneVm.Time, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.AutomationId="TimeTextBox" />
                         <TextBlock Grid.Column="3" MinWidth="50" />
                         <ComboBox x:Name="ViewpointCharacter" Header="Viewpoint Character"
                                   Grid.Column="4" IsEditable="False" MinWidth="250"
                                   DisplayMemberPath="Name"
                                   SelectedItem="{x:Bind SceneVm.SelectedViewpointCharacter, Mode=TwoWay}"
-                                  ItemsSource="{x:Bind SceneVm.Characters, Mode=OneWay}" />
+                                  ItemsSource="{x:Bind SceneVm.Characters, Mode=OneWay}"
+                                  AutomationProperties.AutomationId="ViewpointCharacterCombo" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
@@ -75,24 +81,28 @@
                                   MinWidth="300" Margin="0,0,0,10"
                                   DisplayMemberPath="Name"
                                   SelectedItem="{x:Bind SceneVm.SelectedSetting, Mode=TwoWay}"
-                                  ItemsSource="{x:Bind SceneVm.Settings, Mode=OneWay}" />
+                                  ItemsSource="{x:Bind SceneVm.Settings, Mode=OneWay}"
+                                  AutomationProperties.AutomationId="SceneSettingCombo" />
                         <TextBlock Grid.Column="1" MinWidth="50" />
                         <ComboBox IsEditable="True" Header="SceneType" Grid.Column="2" MinWidth="200"
                                   ItemsSource="{x:Bind SceneVm.SceneTypeList}"
                                   Text="{x:Bind SceneVm.SceneType, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind SceneVm.SceneType, Mode=TwoWay}" />
+                                  PlaceholderText="{x:Bind SceneVm.SceneType, Mode=TwoWay}"
+                                  AutomationProperties.AutomationId="SceneTypeCombo" />
                     </Grid>
                     <usercontrols:RichEditBoxExtended Header="Scene Sketch" Grid.Row="3"
                                                       RtfText="{x:Bind SceneVm.Description, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="SceneSketchRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
                 <TabViewItem Header="Cast" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="CastTab">
                 <StackPanel HorizontalAlignment="Left">
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
@@ -100,7 +110,8 @@
                                           Margin="50,0,0,0"
                                           IsOn="{x:Bind  SceneVm.AllCharacters, Mode=TwoWay}"
                                           OffContent="Cast Members" OnContent="All Characters"
-                                          Toggled="{x:Bind SceneVm.SwitchCastView, Mode=OneWay}">
+                                          Toggled="{x:Bind SceneVm.SwitchCastView, Mode=OneWay}"
+                                          AutomationProperties.AutomationId="CastDisplayToggle">
                                 <ToolTipService.ToolTip>
                                     <ToolTip Content="Show or Add/Remove Cast Members" />
                                 </ToolTipService.ToolTip>
@@ -109,10 +120,13 @@
                     </StackPanel>
                     <ScrollViewer Height="500">
                         <ListView MinWidth="300" SelectionMode="Single"
-                                  ItemsSource="{x:Bind SceneVm.CastSource, Mode=TwoWay}">
+                                  ItemsSource="{x:Bind SceneVm.CastSource, Mode=TwoWay}"
+                                  AutomationProperties.AutomationId="CastList">
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="models:StoryElement">
-                                    <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). -->
+                                    <StackPanel Orientation="Horizontal" Spacing="5"
+                                                AutomationProperties.Name="{x:Bind Name, Mode=OneWay}">
                                         <CheckBox
                                             Margin="0"
                                             IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
@@ -134,7 +148,8 @@
                 </TabViewItem>
                 <TabViewItem Header="Development" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="DevelopmentTab">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -151,10 +166,13 @@
                         </Grid.ColumnDefinitions>
                         <ListView MinWidth="300" Height="125" x:Name="ScenePurpose" x:FieldModifier="public"
                                   SelectionMode="Single" Header="Purpose of Scene"
-                                  ItemsSource="{x:Bind SceneVm.ScenePurposes, Mode=TwoWay}">
+                                  ItemsSource="{x:Bind SceneVm.ScenePurposes, Mode=TwoWay}"
+                                  AutomationProperties.AutomationId="ScenePurposeList">
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="models:StringSelection">
-                                    <StackPanel Orientation="Horizontal" Spacing="2">
+                                    <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). -->
+                                    <StackPanel Orientation="Horizontal" Spacing="2"
+                                                AutomationProperties.Name="{x:Bind StringName, Mode=OneWay}">
                                         <CheckBox Margin="0"
                                                   Checked="ScenePurpose_Checked" Unchecked="ScenePurpose_Unchecked"
                                                   IsChecked="{x:Bind Selection,Mode=OneWay}" />
@@ -168,13 +186,15 @@
                         <ComboBox Header="Value Exchange" Grid.Column="2" IsEditable="False" MinWidth="250"
                                   ItemsSource="{x:Bind SceneVm.ValueExchangeList}"
                                   SelectedValue="{x:Bind SceneVm.ValueExchange, Mode=TwoWay}"
-                                  PlaceholderText="What changes for your scene's protagonist?." />
+                                  PlaceholderText="What changes for your scene's protagonist?."
+                                  AutomationProperties.AutomationId="ValueExchangeCombo" />
                     </Grid>
                     <usercontrols:RichEditBoxExtended Header="What Happens" Grid.Row="1"
                                                       RtfText="{x:Bind SceneVm.Events, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="WhatHappensRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto"
                                                       PlaceholderText="(Plot/Cause) The way the scene starts to unfold." />
                     <usercontrols:RichEditBoxExtended Header="The Consequence" Grid.Row="2"
@@ -182,6 +202,7 @@
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="TheConsequenceRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto"
                                                       PlaceholderText="(Plot/Effect) The way the scene ends (usually a disaster)." />
                     <usercontrols:RichEditBoxExtended Header="Why It Matters" Grid.Row="3"
@@ -189,6 +210,7 @@
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="WhyItMattersRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto"
                                                       PlaceholderText="(Inner Conflict/Cause) Why what happens affects or resonates with your protagonist." />
                     <usercontrols:RichEditBoxExtended Header="The Realization" Grid.Row="4"
@@ -196,13 +218,15 @@
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="TheRealizationRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto"
                                                       PlaceholderText="(Inner Conflict/Effect) How your protagonist changes or what she learns. (Consider Sequel.)" />
                 </Grid>
                 </TabViewItem>
                 <TabViewItem Header="Conflict" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="ConflictTab">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -221,22 +245,26 @@
                         <ComboBox Header="Protagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
                                   DisplayMemberPath="Name"
                                   SelectedItem="{x:Bind SceneVm.SelectedProtagonist, Mode=TwoWay}"
-                                  ItemsSource="{x:Bind SceneVm.Characters, Mode=OneWay}" />
+                                  ItemsSource="{x:Bind SceneVm.Characters, Mode=OneWay}"
+                                  AutomationProperties.AutomationId="ProtagonistCombo" />
                         <TextBlock Grid.Column="1" MinWidth="50" />
                         <ComboBox IsEditable="True" Header="Feelings" Grid.Column="2" MinWidth="200"
                                   ItemsSource="{x:Bind SceneVm.EmotionList}"
                                   Text="{x:Bind SceneVm.ProtagEmotion, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind SceneVm.ProtagEmotion, Mode=TwoWay}" />
+                                  PlaceholderText="{x:Bind SceneVm.ProtagEmotion, Mode=TwoWay}"
+                                  AutomationProperties.AutomationId="ProtagonistFeelingsCombo" />
                     </Grid>
                     <ComboBox IsEditable="True" Header="Protagonist's Goal" Grid.Row="1" MinWidth="300"
                               ItemsSource="{x:Bind SceneVm.GoalList}"
                               Text="{x:Bind SceneVm.ProtagGoal, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind SceneVm.ProtagGoal, Mode=TwoWay}" />
+                              PlaceholderText="{x:Bind SceneVm.ProtagGoal, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="ProtagonistGoalCombo" />
                     <ComboBox IsEditable="True" Header="Opposition" Grid.Row="2" Width="400"
                               ItemsSource="{x:Bind SceneVm.OppositionList}"
                               Text="{x:Bind SceneVm.Opposition, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.Opposition, Mode=TwoWay}"
-                              HorizontalAlignment="Left" />
+                              HorizontalAlignment="Left"
+                              AutomationProperties.AutomationId="OppositionCombo" />
                     <Grid Grid.Row="3" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="3*" />
@@ -246,28 +274,33 @@
                         <ComboBox Header="Antagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
                                   DisplayMemberPath="Name"
                                   SelectedItem="{x:Bind SceneVm.SelectedAntagonist, Mode=TwoWay}"
-                                  ItemsSource="{x:Bind SceneVm.Characters, Mode=OneWay}" />
+                                  ItemsSource="{x:Bind SceneVm.Characters, Mode=OneWay}"
+                                  AutomationProperties.AutomationId="AntagonistCombo" />
                         <TextBlock Grid.Column="1" MinWidth="50" />
                         <ComboBox IsEditable="True" Header="Feelings" Grid.Column="2" MinWidth="200"
                                   ItemsSource="{x:Bind SceneVm.EmotionList}"
                                   Text="{x:Bind SceneVm.AntagEmotion, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind SceneVm.AntagEmotion, Mode=TwoWay}" />
+                                  PlaceholderText="{x:Bind SceneVm.AntagEmotion, Mode=TwoWay}"
+                                  AutomationProperties.AutomationId="AntagonistFeelingsCombo" />
                     </Grid>
                     <ComboBox IsEditable="True" Header="Antagonist's Goal" Grid.Row="4" MinWidth="300"
                               ItemsSource="{x:Bind SceneVm.GoalList}"
                               Text="{x:Bind SceneVm.AntagGoal, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind SceneVm.AntagGoal, Mode=TwoWay}" />
+                              PlaceholderText="{x:Bind SceneVm.AntagGoal, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="AntagonistGoalCombo" />
                     <TextBlock Grid.Row="5" Text=" " />
                     <ComboBox IsEditable="True" Header="Outcome" Grid.Row="5" Width="400"
                               ItemsSource="{x:Bind SceneVm.OutcomeList}"
                               Text="{x:Bind SceneVm.Outcome, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.Outcome, Mode=TwoWay}"
-                              HorizontalAlignment="Left" />
+                              HorizontalAlignment="Left"
+                              AutomationProperties.AutomationId="OutcomeCombo" />
                 </Grid>
                 </TabViewItem>
                 <TabViewItem Header="Sequel" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="SequelTab">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -277,22 +310,26 @@
                     <ComboBox IsEditable="True" Header="Emotional Response" Grid.Row="0" MinWidth="200"
                               ItemsSource="{x:Bind SceneVm.EmotionList}"
                               Text="{x:Bind SceneVm.Emotion, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind SceneVm.Emotion, Mode=TwoWay}" />
+                              PlaceholderText="{x:Bind SceneVm.Emotion, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="EmotionalResponseCombo" />
                     <usercontrols:RichEditBoxExtended Header="Review and Thought" Grid.Row="1"
                                                       RtfText="{x:Bind SceneVm.Review, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="ReviewAndThoughtRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                     <ComboBox IsEditable="True" Header="New Goal" Grid.Row="2" MinWidth="400"
                               ItemsSource="{x:Bind SceneVm.GoalList}"
                               Text="{x:Bind SceneVm.NewGoal, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind SceneVm.NewGoal, Mode=TwoWay}" />
+                              PlaceholderText="{x:Bind SceneVm.NewGoal, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="NewGoalCombo" />
                 </Grid>
                 </TabViewItem>
                 <TabViewItem Header="Notes" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="SceneNotesTab">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -304,13 +341,15 @@
                                                       IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="SceneNotesRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
 
                 <TabViewItem Header="Images" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="SceneImagesTab">
                     <usercontrols:ImageGalleryControl ItemsSource="{x:Bind SceneVm.Images, Mode=OneWay}" />
                 </TabViewItem>
             </TabView.TabItems>

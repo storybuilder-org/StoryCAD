@@ -16,16 +16,19 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <TextBox Header="Name" Text="{x:Bind SettingVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 viewModels:TextBoxFocus.IsFocused="{x:Bind SettingVm.IsTextBoxFocused, Mode=TwoWay}" />
+                 viewModels:TextBoxFocus.IsFocused="{x:Bind SettingVm.IsTextBoxFocused, Mode=TwoWay}"
+                 AutomationProperties.AutomationId="SettingNameTextBox" />
         <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
                  HorizontalAlignment="Stretch"
                  VerticalAlignment="Stretch"
                  HorizontalContentAlignment="Stretch"
-                 VerticalContentAlignment="Stretch">
+                 VerticalContentAlignment="Stretch"
+                 AutomationProperties.AutomationId="SettingTabs">
             <TabView.TabItems>
                 <TabViewItem Header="Setting" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="SettingTab">
                 <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -42,10 +45,12 @@
                         </Grid.ColumnDefinitions>
                         <ComboBox IsEditable="True" Header="Locale" Grid.Column="0" MinWidth="200" Margin="0,0,20,0"
                                   ItemsSource="{x:Bind SettingVm.LocaleList}"
-                                  Text="{x:Bind SettingVm.Locale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                  Text="{x:Bind SettingVm.Locale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  AutomationProperties.AutomationId="LocaleCombo" />
                         <ComboBox IsEditable="True" Header="Season" Grid.Column="2" MinWidth="200"
                                   ItemsSource="{x:Bind SettingVm.SeasonList}"
-                                  Text="{x:Bind SettingVm.Season, Mode=TwoWay}" />
+                                  Text="{x:Bind SettingVm.Season, Mode=TwoWay}"
+                                  AutomationProperties.AutomationId="SeasonCombo" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
@@ -54,9 +59,11 @@
                             <ColumnDefinition Width="2*" />
                         </Grid.ColumnDefinitions>
                         <TextBox Header="Period" Grid.Column="0" MinWidth="200" Margin="0,0,20,0"
-                                 Text="{x:Bind SettingVm.Period, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                 Text="{x:Bind SettingVm.Period, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.AutomationId="PeriodTextBox" />
                         <TextBox Header="Lighting" Grid.Column="2" MinWidth="200"
-                                 Text="{x:Bind SettingVm.Lighting, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                 Text="{x:Bind SettingVm.Lighting, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.AutomationId="LightingTextBox" />
                     </Grid>
                     <Grid Grid.Row="2" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
@@ -65,13 +72,16 @@
                             <ColumnDefinition Width="2*" />
                         </Grid.ColumnDefinitions>
                         <TextBox Header="Weather" Grid.Column="0" MinWidth="200" Margin="0,0,20,0"
-                                 Text="{x:Bind SettingVm.Weather, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                 Text="{x:Bind SettingVm.Weather, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.AutomationId="WeatherTextBox" />
                         <TextBox Header="Temperature" Grid.Column="2" MinWidth="200"
-                                 Text="{x:Bind SettingVm.Temperature, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                 Text="{x:Bind SettingVm.Temperature, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.AutomationId="TemperatureTextBox" />
                     </Grid>
 
                     <TextBox Header="Props" Grid.Column="0" Grid.Row="3"
-                             Text="{x:Bind SettingVm.Props, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                             Text="{x:Bind SettingVm.Props, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             AutomationProperties.AutomationId="PropsTextBox" />
 
                     <usercontrols:RichEditBoxExtended Header="Setting Summary" Grid.Row="4"
                                                       RtfText="{x:Bind SettingVm.Description, Mode=TwoWay}"
@@ -79,12 +89,14 @@
                                                       IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="SettingSummaryRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
                 <TabViewItem Header="Sensations" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="SensationsTab">
                   <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                       <RowDefinition Height="*"/>
@@ -98,6 +110,7 @@
                                                       AcceptsReturn="True" IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="SightsRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                     <usercontrols:RichEditBoxExtended Grid.Row="1" Header="Sounds"
@@ -105,6 +118,7 @@
                                                       AcceptsReturn="True" IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="SoundsRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                     <usercontrols:RichEditBoxExtended Grid.Row="2" Header="Touch"
@@ -112,6 +126,7 @@
                                                       AcceptsReturn="True" IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="TouchRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                     <usercontrols:RichEditBoxExtended Grid.Row="3" Header="Smell/Taste"
@@ -119,13 +134,15 @@
                                                       AcceptsReturn="True" IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="SmellTasteRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto"/>
                   </Grid>
                 </TabViewItem>
 
                 <TabViewItem Header="Notes" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="SettingNotesTab">
                     <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -135,6 +152,7 @@
                                                           AcceptsReturn="True" IsSpellCheckEnabled="True"
                                                           TextWrapping="Wrap"
                                                           VerticalAlignment="Stretch"
+                                                          AutomationProperties.AutomationId="SettingNotesRichEdit"
                                                           ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
                 </Grid>
@@ -142,7 +160,8 @@
 
                 <TabViewItem Header="Images" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="SettingImagesTab">
                     <usercontrols:ImageGalleryControl ItemsSource="{x:Bind SettingVm.Images, Mode=OneWay}" />
                 </TabViewItem>
             </TabView.TabItems>

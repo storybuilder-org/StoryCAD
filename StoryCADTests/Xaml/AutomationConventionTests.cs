@@ -24,6 +24,8 @@ public class AutomationConventionTests
         "StoryCAD/Views/OverviewPage.xaml",
         "StoryCAD/Views/ProblemPage.xaml",
         "StoryCAD/Views/CharacterPage.xaml",
+        "StoryCAD/Views/ScenePage.xaml",
+        "StoryCAD/Views/SettingPage.xaml",
     };
 
     /// <summary>
