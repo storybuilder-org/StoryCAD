@@ -2,6 +2,18 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-04 (later) — Unit 3 PR #1450 filed; scripted per-page scans running
+
+**Unit 3 (ScenePage + SettingPage) is in review as PR #1450** after the standard cycle: Sonnet implementer (red 54 → green, commit 98e233e1), independent reviewer (approve, no blockers, two nits), full suite 1,138/0 failed verified by both implementer and orchestrating session. Founder steps outstanding: PR review/merge, manual FastPass, Narrator spot-check. Flagged in the PR: the two Conflict-tab Feelings combos announce identically (framework names; convention forbids overriding a Header, so any fix is UI text).
+
+**Per-page scripted scans work now.** A scratchpad driver (uia_header_probe navigation + AxeWindowsCLI 2.4.2, zip-installed to `%LOCALAPPDATA%\AxeWindowsCLI`) scanned Overview, Problem, Character, Scene, Setting in one launch. Result on every page including Units 1-2's: exactly one finding, the same pre-existing Shell-level element — nav-pane TreeItems fail the Section 508 SizeOfSet/PositionInSet rule. Zero missing-name findings on annotated controls anywhere, so the per-unit pass bar holds, and PR #1450's table doubles as the scan counts owed on #1443/#1447. The #1441 audit inherits the TreeItem finding.
+
+**Runtime facts the #1422 FlaUI harness will need** (learned by UIA dump): the nav "tree" renders as TreeItems inside two Tree controls whose AutomationId is `ListControl`; the XAML `NavigationTree`/`TrashTree` ids never surface because ItemsRepeater creates no automation peer (convention-doc implication: container ids on ItemsRepeater are runtime-inert — founder may want a convention note); the root outline row exposes only ExpandCollapse (no Invoke/SelectionItem); child rows expose Invoke/ExpandCollapse/SelectionItem, and **selection does not navigate — Invoke does**; the app lands on OverviewPage after opening a file.
+
+**Filed/recorded today:** #1448 (DeveloperBuild unpackaged-launch crash), #1449 (ScenePage Cast tab dead nested ListView, reviewer find), header-exposure answer on PR #1443, #1420 body checkboxes updated (Unit 3 in review, header check done).
+
+**Gotcha log additions:** Windows PowerShell 5.1 misreads BOM-less non-ASCII as CP1252 and treats the resulting curly quotes as string terminators (tool scripts are now pure ASCII); piping `gh` output through `Set-Content -NoNewline` concatenates lines without separators (mangled the #1420 body once; restored from a /tmp backup); MSYS `/tmp` paths inside heredoc python strings don't resolve for Windows python.
+
 ## 2026-07-04 — header-exposure check answered by scripted UIA probe
 
 **The #1443 founder-pending header question is answered: Header text reaches the UIA Name.** Verified against the live app (dev @ 3a143319, WinAppSDK head) with a UIA probe script, on all five controls of interest: StoryIdeaRichEdit → "Story Idea", DateCreated/LastChanged TextBoxes → their headers, and both PreferencesDialog BrowseTextBox inner text boxes → "Project directory:"/"Backup directory:". Decisions this settles: no `RichEditBoxExtended` constructor `SetName` follow-up PR; Unit 5 adds no explicit Name to `BrowseTextBox`; deferred RichEdit Names stay Header-driven where a Header exists, and only header-less controls need explicit names. Answer not yet recorded on #1443 itself.
