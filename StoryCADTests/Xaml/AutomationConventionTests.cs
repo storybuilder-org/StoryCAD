@@ -70,7 +70,7 @@ public class AutomationConventionTests
         "ComboBox", "TextBox", "CheckBox", "RadioButton", "RadioButtons", "ToggleSwitch", "NumberBox",
         "AutoSuggestBox", "TabView", "TabViewItem", "TreeView", "ListView", "GridView",
         "Flyout", "RichEditBoxExtended", "BrowseTextBox", "Expander",
-        "NavigationView", "NavigationViewItem",
+        "NavigationView", "NavigationViewItem", "InfoBar",
     };
 
     /// <summary>
@@ -110,6 +110,7 @@ public class AutomationConventionTests
         ["Expander"] = "Expander",     // added Unit 4: founder-accepted Expander suffix ruling on PR #1451
         ["NavigationView"] = "Nav",         // added Unit 6: founder ruling on PR #1455 (FileOpenMenu nav strip)
         ["NavigationViewItem"] = "NavItem", // added Unit 6: founder ruling on PR #1455 (FileOpenMenu nav strip)
+        ["InfoBar"] = "InfoBar",            // added Unit 7: founder ruling on PR #1456 (id only; the peer announces Severity+Title+Message natively, so no explicit Name)
     };
 
     private const string AutomationIdAttribute = "AutomationProperties.AutomationId";

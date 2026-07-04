@@ -36,6 +36,7 @@ Every interactive control gets `AutomationProperties.AutomationId`.
 | Expander | `Expander` | `GeographyExpander` *(added Unit 4)* |
 | NavigationView | `Nav` | `FileOpenNav` *(added Unit 6)* |
 | NavigationViewItem | `NavItem` | `RecentlyOpenedNavItem` *(added Unit 6)* |
+| InfoBar | `InfoBar` | `PrintReportsSynopsisWarningInfoBar` *(added Unit 7)* |
 
 - A control type not in this table gets a proposed suffix in the PR description; the table row is added when the PR merges.
 - Values are literal strings: ASCII letters and digits, no spaces, no bindings, never a story element name, file path, date, or any other runtime value.

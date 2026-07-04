@@ -117,11 +117,10 @@
                 </TabViewItem>
             </TabView.TabItems>
         </TabView>
-        <!-- InfoBar: convention silence (neither the suffix table nor the coverage test's
-             interactive element list covers InfoBar). Not annotated here, matching three already-
-             merged Unit 6 dialogs with unannotated InfoBars (FeedbackDialog.xaml:23,
-             FileOpenMenu.xaml:84, HelpPage.xaml:19); see PR description for the proposed resolution. -->
+        <!-- Id only, no explicit Name: the InfoBar peer announces Severity + Title + Message
+             natively (founder ruling on PR #1456, InfoBar suffix row added Unit 7). -->
         <InfoBar IsOpen="False" Name="SynopsisWarning" Severity="Warning"
-                 Message="Add some scenes to your synopsis, otherwise it will be empty." Height="auto" />
+                 Message="Add some scenes to your synopsis, otherwise it will be empty." Height="auto"
+                 AutomationProperties.AutomationId="PrintReportsSynopsisWarningInfoBar" />
     </StackPanel>
 </Page>
