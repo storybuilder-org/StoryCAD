@@ -2,6 +2,12 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-04 (end of session) — Unit 4 merged; five batches remain
+
+**PR #1451 merged to `dev` (5446c8d5) on founder instruction.** #1420 body updated (Unit 4 checked off with its three rulings noted); wiki `log.md` entry appended (page updates postponed to closeout, same posture as Unit 3; wiki tree left uncommitted for the StoryCADWiki#1 workstream). **Founder dropped the per-unit FastPass/Narrator step entirely from Unit 4 on — no scripted axe scan either.** Verification of judgment-risk controls happened in-session by UIA probe instead (composite buttons, Expander naming, literal RichEdit Names, all recorded on the PR).
+
+**Next: Unit 5, branch `issue-1420-batch5-...` off `dev`, fresh session: FolderPage (~5), WebPage (5), PreferencesInitialization (11), HomePage (0 + duplicate Browse-button fix from #1445), TrashCanPage (0), StoryCADLib/Controls: BrowseTextBox (2), Conflict (3), Flaw (2), RelationshipView (6, includes its 1 Expander now that the element list covers Expander), Traits (2), ImageGalleryControl (6). No BrowseTextBox Name needed (Header reaches UIA Name). After Unit 5 merges, the #1441 audit trigger trips (six main views annotated).**
+
 ## 2026-07-04 (Unit 4, close) — literal-Name ruling recorded; all PR #1451 decision items closed
 
 **Founder ruled: literal Name stands for the Expander-labeled RichEdit fields; no LabeledBy conversion.** Root cause established first by history: all 43 fields carried `Header` attributes until the #782 Expander layout (af2a93de, 2026-01-21) moved each label into its Expander header, whose FontWeight doubles as a bold-when-filled content indicator; the move silently dropped the framework-derived accessible name, unnoticed because the codebase then had zero AutomationProperties. Commit 4d3317d8 records the rule in the convention doc Name section (*(added Unit 4)* bullet) and cites the ruling in the StoryWorldPage comment block; doc and comment only, convention tests 7/7. PR #1451 now has four commits and zero open decision items; only the founder FastPass/Narrator pass remains before merge.
