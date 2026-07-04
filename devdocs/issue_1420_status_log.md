@@ -2,6 +2,10 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-04 (Unit 7, ruling) — InfoBar joins the convention; one decision item left on PR #1456
+
+**Founder ruled option 1 on the InfoBar gap: suffix row, annotate all four instances in a follow-up commit.** Commit cea06c8e (same implementer, resumed): convention doc row `InfoBar` *(added Unit 7)* — full type name kept as the suffix, matching NumberBox/GridView/Flyout/Expander (the table abbreviates only where the trimmed form stays distinctive; neither `Info` nor `Bar` is) — InfoBar in the coverage test's element list and suffix map, red on exactly 4, then green: `FeedbackTipInfoBar`, `FileOpenWarningInfoBar`, `HelpVideoNoteInfoBar`, `PrintReportsSynopsisWarningInfoBar`. Id-only, no Names (the peer announces Severity + Title + Message natively). Convention tests 7/7; suite 1,138 / 0 failed; both heads build clean. Unit 7 totals now 80 ids / 9 Names (76 + 4, three of the four in Unit 6 files). Ruling execution recorded on PR #1456; the sole open decision item is the BrowseTextBox code-behind sign-off, which rides with founder review/merge.
+
 ## 2026-07-04 (Unit 7 session) — Unit 7 PR #1456 filed; two founder decision items on the PR
 
 **Unit 7 is in review as PR #1456** after the standard cycle: Sonnet implementer (red exactly 76 → green, commit cee2042c), Sonnet reviewer (APPROVE, zero blockers, three nits), one nit applied by the same implementer (efa1c147: the AppStoreReview comment now cites the in-file literal-Content HyperlinkButton precedent instead of the FeedbackDialog bound-Header one). Actuals 76 ids / 9 Names against the plan's 74 est. (PreferencesDialog 49/9, PrintReportsDialog 27/0); prefixes `Preferences.../PrintReports...` match the merged Shell ids. Suite 1,138 / 0 failed run by implementer and reviewer; both heads verified at cee2042c and re-verified at branch head post-nit. x:Load pre-check clean across Services/Dialogs/Tools (implementer-checked, reviewer re-grepped).
