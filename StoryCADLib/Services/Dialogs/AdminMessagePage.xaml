@@ -10,6 +10,7 @@
 
     <StackPanel Spacing="12">
         <TextBlock x:Name="BodyText" TextWrapping="Wrap" />
-        <HyperlinkButton x:Name="MessageLink" Visibility="Collapsed" />
+        <HyperlinkButton x:Name="MessageLink" Visibility="Collapsed"
+                         AutomationProperties.AutomationId="AdminMessageLinkButton" />
     </StackPanel>
 </Page>

@@ -10,8 +10,13 @@
     mc:Ignorable="d" Width="600">
 
     <StackPanel HorizontalAlignment="Left">
-        <TextBox Header="Backup Name" Width="450" Text="{x:Bind BackupVM.Name, Mode=TwoWay}" Margin="10" />
+        <TextBox Header="Backup Name" Width="450" Text="{x:Bind BackupVM.Name, Mode=TwoWay}" Margin="10"
+                 AutomationProperties.AutomationId="BackupNameTextBox" />
+        <!-- Single BrowseTextBox instance on this page with a Header set, so the Header already
+             reaches the inner TextBox's UIA Name; an explicit outer Name is only needed to
+             disambiguate multiple same-type instances on one screen (see PreferencesInitialization). -->
         <controls:BrowseTextBox Header="Backup Location" PlaceholderText="Where do you want to store your backup?"
-                                Width="450" Path="{x:Bind BackupVM.Location, Mode=TwoWay}" />
+                                Width="450" Path="{x:Bind BackupVM.Location, Mode=TwoWay}"
+                                AutomationProperties.AutomationId="BackupLocationTextBox" />
     </StackPanel>
 </Page>
