@@ -2,6 +2,12 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-04 (Unit 6, ruling) — NavigationView/NavItem join the convention; no open decision items on PR #1455
+
+**Founder ruled option 1 on the NavigationView gap: Nav/NavItem suffix rows, annotate in a follow-up commit.** Commit a7998d2e (same implementer, resumed): convention doc rows *(added Unit 6)*, both types in the coverage test's element list and suffix map, FileOpenMenu's nav strip annotated — red on exactly 7 elements, then green; convention tests 7/7; suite 1,138 / 0 failed. Zero explicit Names; the untagged footer NavItem is id-only by design (it hosts the show-on-startup CheckBox, which carries the accessible name; a host Name would double-announce — commented at the site). Unit 6 totals now 41 ids / 4 Names. WorkflowShell.xaml untouched (Unit 9; MenuItemsSource-bound items).
+
+**Founder also asked whether the Collaborator ElementPicker is accounted for in Unit 9: it is now durably.** The file was already in the plan's Unit 9 row; commit 61a52962 adds the constraint to that row — distinct id prefix required (shares literal x:Name values TypeBox/ElementBox/NewButton with Unit 6's ElementPicker) — plus the WorkflowShell Nav note (container id only). Ruling execution recorded on PR #1455; no open decision items remain, only founder review/merge.
+
 ## 2026-07-04 (Unit 6 session) — Unit 6 PR #1455 filed; NavigationView gap needs a founder ruling
 
 **Unit 6 is in review as PR #1455** after the standard cycle: Sonnet implementer (red exactly 34 → green, commit e2f8c320), Sonnet reviewer (APPROVE, zero blockers, three nits), one nit applied by the same implementer pattern (33f4e2b1: constraint comment at AdminMessagePage's MessageLink — Content arrives from code-behind, so no explicit Name). Actuals 34 ids / 4 explicit Names against the plan's ~37 (ElementPicker 5→6, the create Flyout is itself tracked; FeedbackDialog ~7→4; FileOpenMenu 9→8). Suite 1,138 / 0 failed; both heads build clean; reviewer independently re-ran the convention tests and re-verified the x:Load pre-check (still zero matches).
