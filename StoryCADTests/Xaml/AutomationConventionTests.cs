@@ -8,55 +8,17 @@ namespace StoryCADTests.Xaml;
 ///     Parses the convention-scope XAML files as plain XML (no UI, no [UITestMethod]) and checks
 ///     them against devdocs/automation_naming_convention.md. See devdocs/issue_1420_implementation_plan.md
 ///     for the TDD cycle these tests drive.
+///     As of Unit 9, all 39 convention-scope files (see <see cref="ScopeDirectories"/>) are fully
+///     annotated: the batch-by-batch <c>AnnotatedFiles</c> allowlist that used to gate
+///     <see cref="Coverage_AllScopeFiles_EveryInteractiveControlHasAutomationId"/> is retired, and that
+///     test now scans every file <see cref="ScopeFiles"/> finds, making it (together with the other
+///     five tests below, which already scanned all scope files from day one) the permanent fitness
+///     function the approved design requires. New XAML dropped into a scope directory is covered
+///     automatically; there is nothing left to add to a list.
 /// </summary>
 [TestClass]
 public class AutomationConventionTests
 {
-    /// <summary>
-    ///     Files whose interactive controls must be fully annotated. Grows by one batch per unit
-    ///     (see the implementation plan's Units table) until Unit 9 replaces this with "all scope
-    ///     files", at which point <see cref="Coverage_AnnotatedFiles_EveryInteractiveControlHasAutomationId"/>
-    ///     becomes the permanent fitness function.
-    /// </summary>
-    private static readonly string[] AnnotatedFiles =
-    {
-        "StoryCAD/Views/Shell.xaml",
-        "StoryCAD/Views/OverviewPage.xaml",
-        "StoryCAD/Views/ProblemPage.xaml",
-        "StoryCAD/Views/CharacterPage.xaml",
-        "StoryCAD/Views/ScenePage.xaml",
-        "StoryCAD/Views/SettingPage.xaml",
-        "StoryCAD/Views/StoryWorldPage.xaml",
-        "StoryCAD/Views/FolderPage.xaml",
-        "StoryCAD/Views/WebPage.xaml",
-        "StoryCAD/Views/PreferencesInitialization.xaml",
-        "StoryCAD/Views/HomePage.xaml",
-        "StoryCAD/Views/TrashCanPage.xaml",
-        "StoryCADLib/Controls/BrowseTextBox.xaml",
-        "StoryCADLib/Controls/Conflict.xaml",
-        "StoryCADLib/Controls/Flaw.xaml",
-        "StoryCADLib/Controls/RelationshipView.xaml",
-        "StoryCADLib/Controls/Traits.xaml",
-        "StoryCADLib/Controls/ImageGalleryControl.xaml",
-        "StoryCADLib/Services/Dialogs/AdminMessagePage.xaml",
-        "StoryCADLib/Services/Dialogs/BackupNow.xaml",
-        "StoryCADLib/Services/Dialogs/ElementPicker.xaml",
-        "StoryCADLib/Services/Dialogs/FeedbackDialog.xaml",
-        "StoryCADLib/Services/Dialogs/FileOpenMenu.xaml",
-        "StoryCADLib/Services/Dialogs/HelpPage.xaml",
-        "StoryCADLib/Services/Dialogs/NewRelationshipPage.xaml",
-        "StoryCADLib/Services/Dialogs/SaveAsDialog.xaml",
-        "StoryCADLib/Services/Dialogs/Tools/PreferencesDialog.xaml",
-        "StoryCADLib/Services/Dialogs/Tools/PrintReportsDialog.xaml",
-        "StoryCADLib/Services/Dialogs/Tools/CopyElementsDialog.xaml",
-        "StoryCADLib/Services/Dialogs/Tools/DramaticSituationsDialog.xaml",
-        "StoryCADLib/Services/Dialogs/Tools/KeyQuestionsDialog.xaml",
-        "StoryCADLib/Services/Dialogs/Tools/MasterPlotsDialog.xaml",
-        "StoryCADLib/Services/Dialogs/Tools/NarrativeTool.xaml",
-        "StoryCADLib/Services/Dialogs/Tools/StockScenesDialog.xaml",
-        "StoryCADLib/Services/Dialogs/Tools/TopicsDialog.xaml",
-    };
-
     /// <summary>
     ///     Directories that make up the full convention scope (devdocs/automation_naming_convention.md
     ///     "Scope" section). Scanned recursively at test time so newly added XAML is caught automatically
@@ -186,15 +148,18 @@ public class AutomationConventionTests
     private static int LineOf(XElement element) => ((IXmlLineInfo)element).LineNumber;
 
     /// <summary>
-    ///     Every interactive element outside a DataTemplate, in every file listed in
-    ///     <see cref="AnnotatedFiles"/>, must carry a non-empty AutomationId.
+    ///     Every interactive element outside a DataTemplate, in every file under the convention
+    ///     scope directories (<see cref="ScopeFiles"/>), must carry a non-empty AutomationId.
+    ///     This is the permanent fitness function required by the approved design: Unit 9 retired
+    ///     the growing <c>AnnotatedFiles</c> allowlist once all 39 scope files were annotated
+    ///     (devdocs/issue_1420_implementation_plan.md, "TDD structure").
     /// </summary>
     [TestMethod]
-    public void Coverage_AnnotatedFiles_EveryInteractiveControlHasAutomationId()
+    public void Coverage_AllScopeFiles_EveryInteractiveControlHasAutomationId()
     {
         var violations = new List<string>();
 
-        foreach (var relPath in AnnotatedFiles)
+        foreach (var relPath in ScopeFiles())
         {
             var doc = LoadXaml(relPath);
             foreach (var element in doc.Descendants())
