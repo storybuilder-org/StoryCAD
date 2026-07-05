@@ -2,6 +2,10 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-05 (Unit 9, rulings) — both PR #1458 items ruled and executed; no open decision items
+
+**Founder ruled both in one pass; commit 06d37c4b (same implementer, resumed) executes them.** (1) Name both element-picker ListViews: `AutomationProperties.Name="Elements"` pinned on `CollabPickerList` (Collaborator/Views/ElementPicker.xaml) and on `ElementPickerList` (Services/Dialogs/ElementPicker.xaml, the merged Unit 6 file — touched under this ruling), each with a one-line comment stating the constraint (no Header to derive a name from). (2) The chat input TextBox keeps `Name="Message"` — founder accepted ("UserInput might be better. Whatever works."); "Message" kept because the accessible name is spoken aloud and "Message, edit" reads naturally where "UserInput" is identifier-style; the convention-doc bullet for label-less text inputs lands at closeout with the other postponed doc updates. Verification: both heads build 0 errors (desktop-only 0 warnings), convention tests 7/7, full suite 1,138 / 0 failed. Ruling execution recorded on PR #1458 (comment 4884894877). No open decision items remain; founder merges next, then closeout.
+
 ## 2026-07-04 (Unit 9 session) — Unit 9 PR #1458 filed; two founder decision items on the PR
 
 **Unit 9, the last batch, is in review as PR #1458** after the standard cycle: Sonnet implementer (red exactly 22 after the ratchet conversion → green, commit 21452ed1), Sonnet reviewer (APPROVE, zero blockers, one nit — the Help button comment now states its collision rationale, applied by the resumed implementer as 001aa637). Actuals 22 ids / 2 literal Names / 2 bound Names against the plan's ~20 est. (WorkflowShell 6/0, WorkflowPage 10/1+2 bound, Collaborator ElementPicker 6/1 all `CollabPicker`-prefixed, CollaboratorHostRoot 0). Suite 1,138 / 0 failed run independently by implementer and reviewer; both heads build clean; x:Load pre-check zero matches, run three times (orchestrator, implementer, reviewer). The CollabPicker prefix was collision-checked against all six Unit 6 ElementPicker ids before annotation.
