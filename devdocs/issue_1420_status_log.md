@@ -2,6 +2,12 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-05 (closeout, Evaluate executed) — only the two final-approval checkboxes remain
+
+**Founder approved both plans and signed off the Test section in full (all five boxes).** The three Evaluate tasks are executed and checked in the body: (1) PIE closing comment on #1420 (comment 4885210113) — outcome counts, the per-unit implementer/reviewer cycle and what each review caught, the live-probe lessons, convention growth from the Unit 4-9 rulings, and the spin-off inventory (#1446/#1448/#1449/#1452/#1454, all open, none blocking). (2) Spin-off inventory rode in that same comment. (3) Handoff comments posted on #1441 (comment 4885208643: coverage complete, live-check list from PRs #1456/#1458, inherited findings, the FastPass/Narrator verification debt now lives there) and #1422 (comment 4885208694: 591-id inventory, nav-tree Invoke-not-select facts, Expander expand-before-type, BrowseTextBox runtime ids, probe-script preconditions, #1448 hazard).
+
+**Remaining to close #1420: founder checks "Human final approval" on the Code and Evaluate sections, then closes the issue.** Nothing else is owed here. Parked, founder-optional: the vestigial LabeledBy phrase in the convention doc's "Do not annotate" section, and the uncommitted wiki tree held for StoryCADWiki#1.
+
 ## 2026-07-05 (closeout, resumed) — Test/Evaluate plans filed; waiting on founder plan approval
 
 **Closeout items 1 and 2 from the pause point are done.** (1) The #1420 issue body now carries the Test and Evaluate task plans with "Plan this section" checked. Test plan: no new tests — records that the 7 AutomationConventionTests ratcheting all 39 scope files (since PR #1458) are the permanent coverage, and that runtime announcement verification is delegated to the #1441 live-check list from PRs #1456/#1458. Evaluate plan: PIE closing comment (lessons/agent effectiveness), spin-off inventory (#1446/#1448/#1449/#1452/#1454), handoff notes for #1441 and #1422. (2) Approval-request comment posted (comment 4885184363): final counts 591 ids / 36 of 39 scope files / 9 PRs #1443-#1458, suite 1,138 / 0 failed, pointer to the plans.
