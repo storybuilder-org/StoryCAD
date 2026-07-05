@@ -194,6 +194,24 @@ public class AppStateTests
 
     #endregion
 
+    #region DeveloperBuild Tests (Issue #1448)
+
+    [TestMethod]
+    public void DeveloperBuild_EnvPresentAndUnpackaged_ReturnsTrueWithoutThrowing()
+    {
+        // EnvPresent = true with no debugger forces evaluation of the package-revision
+        // term. The test host runs unpackaged (EnableMsixTooling=false), so
+        // Package.Current has no identity there; before the #1448 fix this getter
+        // threw InvalidOperationException under exactly these conditions.
+        var appState = new AppState { EnvPresent = true };
+
+        bool result = appState.DeveloperBuild;
+
+        Assert.IsTrue(result);
+    }
+
+    #endregion
+
     #region IsClosing Tests (Issue #1293)
 
     [TestMethod]
