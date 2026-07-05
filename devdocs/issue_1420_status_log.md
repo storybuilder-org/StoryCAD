@@ -2,6 +2,12 @@
 
 Session-recovery state for the AutomationProperties annotation pass. Newest entry first.
 
+## 2026-07-05 (closeout, resumed) — Test/Evaluate plans filed; waiting on founder plan approval
+
+**Closeout items 1 and 2 from the pause point are done.** (1) The #1420 issue body now carries the Test and Evaluate task plans with "Plan this section" checked. Test plan: no new tests — records that the 7 AutomationConventionTests ratcheting all 39 scope files (since PR #1458) are the permanent coverage, and that runtime announcement verification is delegated to the #1441 live-check list from PRs #1456/#1458. Evaluate plan: PIE closing comment (lessons/agent effectiveness), spin-off inventory (#1446/#1448/#1449/#1452/#1454), handoff notes for #1441 and #1422. (2) Approval-request comment posted (comment 4885184363): final counts 591 ids / 36 of 39 scope files / 9 PRs #1443-#1458, suite 1,138 / 0 failed, pointer to the plans.
+
+**Next, blocked on founder:** founder checks the two "Human approves plan" boxes → execute the three Evaluate tasks (the two Test tasks are record-keeping checkoffs) → founder checks the two "Human final approval" boxes plus the Code section's → close #1420. Still parked, founder-optional: the vestigial "unless one is a LabeledBy target" phrase in the convention doc's "Do not annotate" section (line ~76), and the uncommitted wiki tree (written pages listed in the pause-point entry below, held for StoryCADWiki#1).
+
 ## 2026-07-05 (closeout, paused mid-way) — doc bullets and wiki pages done; three items remain
 
 **Closeout progress before the founder paused the session (cost directive: /clear here, resume at lower effort).** Done: (1) convention doc bullets committed to `dev` @ 40cfb966 — the Unit 9 label-less-text-input rule (`Name="Message"`) and the Units 8-9 ListView pinned-Name rulings (StockScenes "Scenes", ElementPicker "Elements"), both under "Set Name where no clean visible label exists". (2) The postponed wiki pages are WRITTEN but the wiki tree stays uncommitted per the StoryCADWiki#1 posture — do not redo them: new `wiki/repos/StoryCAD/topics/ui-automation-accessibility.md`, convention-doc snapshot at `raw/automation_naming_convention-2026-07-05.md`, "Static XAML convention tests" section in `topics/testing.md`, "XAML & UI automation" section (4 bullets) in `topics/gotchas.md`, index.md topic entry, log.md note entry.
