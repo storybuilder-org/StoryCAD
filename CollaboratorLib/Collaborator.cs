@@ -498,7 +498,6 @@ public class Collaborator : ICollaborator
                     var explanation = ExtractExplanationFromResponse(result.RawResponse);
                     if (!string.IsNullOrEmpty(explanation))
                     {
-                        viewModel.ConversationList.Add(ChatMessage.FromCollaborator(""));
                         viewModel.ConversationList.Add(ChatMessage.FromCollaborator(explanation));
                     }
                 }
@@ -668,17 +667,14 @@ public class Collaborator : ICollaborator
                         }
                     };
 
-                    viewModel.ConversationList.Add(ChatMessage.FromCollaborator(""));
                     viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
                         $"Found {result.UpdatedProperties.Count} property updates. Review them above and choose Accept All, Review Each, or Try Again."));
                 }
                 else
                 {
-                    viewModel.ConversationList.Add(ChatMessage.FromCollaborator(""));
                     viewModel.ConversationList.Add(ChatMessage.FromCollaborator("No property updates were extracted from the response."));
                 }
 
-                viewModel.ConversationList.Add(ChatMessage.FromCollaborator(""));
                 viewModel.ConversationList.Add(ChatMessage.FromCollaborator("You can ask questions or request changes using the chat below."));
             }
             else
