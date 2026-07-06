@@ -305,8 +305,8 @@ public class CharacterModel : StoryElement
     [JsonIgnore] private string _adventurousness;
 
     [JsonInclude]
-    [JsonPropertyName("Adventureousness")]
-    public string Adventureousness
+    [JsonPropertyName("Adventureousness")] // wire name kept misspelled: matches the key already persisted in existing .stbx files
+    public string Adventurousness
     {
         get => _adventurousness;
         set => _adventurousness = value;
@@ -506,7 +506,7 @@ public class CharacterModel : StoryElement
         Abnormality = string.Empty;
         Focus = string.Empty;
         PsychNotes = string.Empty;
-        Adventureousness = string.Empty;
+        Adventurousness = string.Empty;
         Aggression = string.Empty;
         Confidence = string.Empty;
         Conscientiousness = string.Empty;
@@ -556,7 +556,7 @@ public class CharacterModel : StoryElement
         Abnormality = string.Empty;
         Focus = string.Empty;
         PsychNotes = string.Empty;
-        Adventureousness = string.Empty;
+        Adventurousness = string.Empty;
         Aggression = string.Empty;
         Confidence = string.Empty;
         Conscientiousness = string.Empty;

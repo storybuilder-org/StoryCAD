@@ -357,12 +357,12 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <ComboBox IsEditable="True" Header="Adventureousness" Grid.Column="0" Grid.Row="0" MinWidth="0"
+                    <ComboBox IsEditable="True" Header="Adventurousness" Grid.Column="0" Grid.Row="0" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.AdventurousnessList}"
                               Text="{x:Bind CharVm.Adventurousness, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Adventurousness, Mode=TwoWay}"
                               HorizontalAlignment="Stretch"
-                              AutomationProperties.AutomationId="AdventureousnessCombo" />
+                              AutomationProperties.AutomationId="AdventurousnessCombo" />
                     <ComboBox IsEditable="True" Header="Confidence" Grid.Column="0" Grid.Row="1" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.ConfidenceList}"
                               Text="{x:Bind CharVm.Confidence, Mode=TwoWay}"

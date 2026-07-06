@@ -607,7 +607,7 @@ public class CharacterViewModel : ElementViewModelBase, INavigable, ISaveable, I
         Abnormality = Model.Abnormality;
         Focus = Model.Focus;
         PsychNotes = Model.PsychNotes;
-        Adventurousness = Model.Adventureousness;
+        Adventurousness = Model.Adventurousness;
         Aggression = Model.Aggression;
         Confidence = Model.Confidence;
         Conscientiousness = Model.Conscientiousness;
@@ -672,7 +672,7 @@ public class CharacterViewModel : ElementViewModelBase, INavigable, ISaveable, I
         Model.Values = Values;
         Model.Abnormality = Abnormality;
         Model.Focus = Focus;
-        Model.Adventureousness = Adventurousness;
+        Model.Adventurousness = Adventurousness;
         Model.Aggression = Aggression;
         Model.Confidence = Confidence;
         Model.Conscientiousness = Conscientiousness;
@@ -1072,7 +1072,7 @@ public class CharacterViewModel : ElementViewModelBase, INavigable, ISaveable, I
             ValuesList = _lists["Values"];
             AbnormalityList = _lists["Abnormality"];
             FocusList = _lists["Focus"];
-            AdventurousnessList = _lists["Adventureousness"];
+            AdventurousnessList = _lists["Adventurousness"];
             AggressionList = _lists["Aggression"];
             ConfidenceList = _lists["Confidence"];
             ConscientiousnessList = _lists["Conscientiousness"];
