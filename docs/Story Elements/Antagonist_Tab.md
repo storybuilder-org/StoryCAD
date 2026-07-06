@@ -8,7 +8,7 @@ has_toc: false
 ---
 ### Antagonist Tab
 
-![](Problem-Antagonist-Tab.png)
+![](../media/Elements/Problem/Problem-Antagonist-Tab.png)
 
 The problem's antagonist is the source of the opposition to the problem protagonist's goal.
 

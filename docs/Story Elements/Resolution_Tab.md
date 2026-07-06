@@ -8,7 +8,7 @@ has_toc: false
 ---
 ### Resolution Tab
 
-![](Problem-Resolution-Tab.png)
+![](../media/Elements/Problem/Problem-Resolution-Tab.png)
 
 The Resolution tab describes the Problem’s outcome. 
 
