@@ -34,15 +34,15 @@ Select ‘Folders’ for the Template. If it’s not already there, change the P
 
 Note the green pencil on the Status Bar at the bottom of the page. The green indicates that the story outline has been saved to disk:
 
-![](Tutorial-1-Danger-Calls-on-Disk.png)
+![](../media/Tutorial/Tutorial-1-Danger-Calls-on-Disk.png)
 
 Click on the  Story Overview node in the navigation pane:
 
-![](Tutorial-1-Story-Overvew-Node.png)
+![](../media/Tutorial/Tutorial-1-Story-Overvew-Node.png)
 
 The content pane will show this node’s (empty) tabs and be sitting on the empty Story Idea tab:
 
-![](Tutorial-1-Empty-Story-Idea-Tab.png)
+![](../media/Tutorial/Tutorial-1-Empty-Story-Idea-Tab.png)
 
 You can click on any of the tabs to display that tab’s contents.
 
@@ -52,11 +52,11 @@ Key whatever notes you like regarding your idea. While we're here, we might as w
 
 At the moment, the story outline for "Danger Calls" exists only in your computer's memory, but isn’t saved to disk.  Let's save what we've done so far.  We recommend you save your work frequently, and provide a number of ways to do so.  The simplest is to click on the status bar’s Changed Indicator:
 
-![](../media/Tutorial-1-Changed-Indicator--Red.png)
+![](../media/Tutorial/Tutorial-1-Changed-Indicator-Red.png)
 
 The indicator will change from red to green, indicating that all changes have been saved to disk.
 
-![](../media/Changed-Indicator-1.png)
+![](../media/Changed-Indicator.png)
 
 Alternatively, from the File menu, you can select Save Story, or enter the Ctrl+S shortcut keys.  Remember to save your work periodically.
 
@@ -66,7 +66,7 @@ This is a good place to talk about workflow. Workflow is discussed more fully in
 
 Click on the Danger Calls node’s Structure tab. As is described in the Quick Start, this tab is concerned with constraints on the order and form you place on your story, and contains a number of user interface controls for this purpose. Our story idea’s about crime and criminals, so let’s pick a genre for that. Clicking on the down-arrow key on the Genre ComboBox will display a list of choices; we’ll choose Suspense.  Set Type to Short Story (to keep our example brief.) StoryCAD has many drop-down lists. Not all lists are editable, but for the most part they’re not exhaustive, and  are editable: you can enter values other than the provided options. The lists are examples, suggestions; they’re not there to limit your creativity, but to encourage it. 
 
-![](Tutorial-1-Empty-Struture-Tab.png)
+![](../media/Tutorial/Tutorial-1-Empty-Struture-Tab.png)
 
 The Structure tab on the Story Overview is important not necessarily at the moment of conception, but early in story development, because it constrains other choices. Type affects story length and complexity, and Genre sets reader expectations: to be amused for a humor piece, to have a mystery to solve in a mystery, etc.
 

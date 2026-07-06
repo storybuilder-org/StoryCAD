@@ -8,7 +8,7 @@ has_toc: false
 ---
 ## Key Questions
 
-![](KeyQuestions.png)
+![](../media/KeyQuestions.png)
 
 Key Questions contains sub-menus which contain lists of questions appropriate to the Story Overview, Problem, Character, Setting, and Plot forms and story elements.
 
