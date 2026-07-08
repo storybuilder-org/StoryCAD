@@ -148,6 +148,17 @@ public class FeedbackViewModel : ObservableRecipient
     private int _FeedbackType;
 
     /// <summary>
+    ///     Title of the title TextBox (toggles "Issue Title"/"Feature Title" with the Type combo)
+    /// </summary>
+    public string TitleTitle
+    {
+        get => _titleTitle;
+        set => SetProperty(ref _titleTitle, value);
+    }
+
+    private string _titleTitle = "Issue Title";
+
+    /// <summary>
     ///     Title of the Description Text box
     /// </summary>
     public string DescriptionTitle

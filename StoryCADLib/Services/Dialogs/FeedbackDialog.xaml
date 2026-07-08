@@ -26,7 +26,11 @@
                  IsOpen="True" IsClosable="False" Margin="10,0,10,10"
                  AutomationProperties.AutomationId="FeedbackTipInfoBar" />
 
-        <TextBox Grid.Row="1" Grid.Column="1" Header="Issue Title"
+        <!-- Header is bound (toggles "Issue"/"Feature Title" with the Type combo) rather than
+             literal, but a bound Header still reaches the framework name at runtime like a literal
+             one, so no explicit Name is added here. -->
+        <TextBox Grid.Row="1" Grid.Column="1"
+                 Header="{x:Bind FeedbackVM.TitleTitle, Mode=TwoWay}"
                  Margin="10,0,0,0"
                  Text="{x:Bind FeedbackVM.Title, Mode=TwoWay}"
                  AutomationProperties.AutomationId="IssueTitleTextBox" />
