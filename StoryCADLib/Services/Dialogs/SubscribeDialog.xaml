@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Content body for the "Unlock StoryCAD Collaborator" ContentDialog (issue #30).
+     The dialog title and the Subscribe / Restore purchases / Not now buttons live on the
+     ContentDialog wrapper (created in code, shown via Windowing.ShowContentDialog). This Page is
+     the same on macOS (Skia) and Windows (WinAppSDK); the platform's own payment sheet appears
+     after Subscribe. Data-driven from IStoreService via SubscribeDialogViewModel (bound as Vm). -->
+<Page
+    x:Class="StoryCADLib.Services.Dialogs.SubscribeDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:store="using:StoryCADLib.Services.Store"
+    mc:Ignorable="d">
+
+    <StackPanel Width="440" Spacing="16">
+
+        <!-- What the subscription is -->
+        <TextBlock TextWrapping="Wrap"
+                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   Text="StoryCAD's AI assistant for developing your story's characters, problems, scenes, and plots." />
+
+        <!-- Plan selection, data-driven from the store. Collapses to a single row when only one
+             tier is configured; the whole block is hidden until products load. -->
+        <RadioButtons x:Name="PlanChoice"
+                      Header="Choose a plan"
+                      Visibility="{x:Bind Vm.HasPlans, Mode=OneWay}"
+                      ItemsSource="{x:Bind Vm.Plans, Mode=OneWay}"
+                      SelectedItem="{x:Bind Vm.SelectedPlan, Mode=TwoWay}">
+            <RadioButtons.ItemTemplate>
+                <DataTemplate x:DataType="store:StoreProduct">
+                    <Grid ColumnSpacing="12" MinWidth="360">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{x:Bind DisplayName}" FontWeight="SemiBold" />
+                            <TextBlock Text="{x:Bind Description}" TextWrapping="Wrap"
+                                       FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                   FontWeight="SemiBold"
+                                   Text="{x:Bind DisplayPrice}" />
+                    </Grid>
+                </DataTemplate>
+            </RadioButtons.ItemTemplate>
+        </RadioButtons>
+
+        <!-- Price / free-trial summary for the selected plan, e.g. "7-day free trial, then $4.99/month." -->
+        <TextBlock Text="{x:Bind Vm.PriceSummary, Mode=OneWay}"
+                   FontWeight="SemiBold" TextWrapping="Wrap" />
+
+        <!-- Required auto-renewal disclosure (App Store Review guideline 3.1.2). Static copy. -->
+        <TextBlock TextWrapping="Wrap" FontSize="12"
+                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   Text="Your subscription renews automatically at the price above until you cancel. Cancel anytime in your account settings. If a free trial is included, cancel before it ends to avoid a charge." />
+
+        <!-- Legal links (open in the system browser via the view model). -->
+        <StackPanel Orientation="Horizontal" Spacing="4">
+            <HyperlinkButton Content="Terms of Use" Padding="4,2"
+                             Command="{x:Bind Vm.OpenTermsCommand}" />
+            <TextBlock Text="·" VerticalAlignment="Center"
+                       Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+            <HyperlinkButton Content="Privacy Policy" Padding="4,2"
+                             Command="{x:Bind Vm.OpenPrivacyCommand}" />
+        </StackPanel>
+
+        <!-- Progress while the store round-trips (purchase / restore / activation). -->
+        <StackPanel Orientation="Horizontal" Spacing="8"
+                    Visibility="{x:Bind Vm.IsBusy, Mode=OneWay}">
+            <ProgressRing IsActive="{x:Bind Vm.IsBusy, Mode=OneWay}" Width="16" Height="16" />
+            <TextBlock Text="Contacting the store…" VerticalAlignment="Center"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+
+        <!-- Status feedback: errors ("no charge was made, here's what to do") and informational
+             outcomes (Ask-to-Buy pending, nothing to restore). Severity is view-model-driven. -->
+        <InfoBar IsOpen="{x:Bind Vm.HasStatus, Mode=OneWay}"
+                 Severity="{x:Bind Vm.StatusSeverity, Mode=OneWay}" IsClosable="False"
+                 Message="{x:Bind Vm.StatusMessage, Mode=OneWay}" />
+    </StackPanel>
+</Page>

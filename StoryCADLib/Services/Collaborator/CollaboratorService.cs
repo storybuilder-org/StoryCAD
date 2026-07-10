@@ -7,6 +7,8 @@ using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator.Contracts;
+using StoryCADLib.Services.Store;
+using StoryCADLib.ViewModels.Store;
 
 namespace StoryCADLib.Services.Collaborator;
 
@@ -73,8 +75,12 @@ public class CollaboratorService
         if (!devEnabled && !IsPurchaseVerified())
         {
             _logService.Log(LogLevel.Warn, "Collaborator blocked: purchase not verified and COLLAB_DEV_ENABLED != 1");
-            // TODO #30: show purchase prompt
-            return;
+            // Offer the subscription. If the user completes it (now Active), fall through and open
+            // Collaborator; otherwise stop here.
+            if (!await ShowSubscribeDialogAsync())
+            {
+                return;
+            }
         }
 
         _storyCADApi.SetCurrentModel(storyModel);
@@ -122,7 +128,31 @@ public class CollaboratorService
         }
     }
 
-    private static bool IsPurchaseVerified() => false; // TODO #30: wire real JWT/Store verification
+    // Gate (issue #30): Collaborator opens only when the store-activation service holds a valid
+    // Worker JWT. This is a client-side, open-time check; attaching CurrentJwt to each Collaborator
+    // Worker call (the per-call enforcement in devdocs/iap/activation-contract.md, "JWT") is the
+    // remaining #30 wiring in the CollaboratorLib/Worker track. Resolved on demand to avoid
+    // widening the constructor.
+    private static bool IsPurchaseVerified() =>
+        Ioc.Default.GetService<IStoreActivationService>()?.State == ActivationState.Active;
+
+    /// <summary>
+    ///     Offers the subscription via <see cref="SubscribeDialogViewModel.ShowAsync" /> (the view
+    ///     model owns the dialog). Returns true when the user is Active afterward. Resolved on
+    ///     demand to avoid widening the constructor.
+    /// </summary>
+    private async Task<bool> ShowSubscribeDialogAsync()
+    {
+        var windowing = Ioc.Default.GetService<Windowing>();
+        var vm = Ioc.Default.GetService<SubscribeDialogViewModel>();
+        if (windowing is null || vm is null)
+        {
+            _logService.Log(LogLevel.Warn, "Subscribe dialog unavailable; no Windowing or view model registered.");
+            return false;
+        }
+
+        return await vm.ShowAsync(windowing);
+    }
 
     #endregion
 

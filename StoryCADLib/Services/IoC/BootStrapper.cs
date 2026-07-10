@@ -12,6 +12,7 @@ using StoryCADLib.Services.Navigation;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.Services.Ratings;
 using StoryCADLib.Services.Search;
+using StoryCADLib.Services.Store;
 using StoryCADLib.ViewModels.SubViewModels;
 using StoryCADLib.ViewModels.Tools;
 
@@ -112,6 +113,28 @@ public static class BootStrapper
         Services.AddSingleton<FileCreateService>();
         Services.AddSingleton<ToolValidationService>();
         Services.AddSingleton<RatingService>();
+        // Store billing (issue #30). NullStoreService is the default so a binary runs unchanged
+        // outside a store bundle; platform heads override with a real store when one is available.
+#if HAS_UNO
+        // Factory so the dylib probe (a synchronous dlopen) runs lazily at first resolution —
+        // App.xaml.cs's fire-and-forget activation init — instead of during DI setup on the
+        // startup path. A failed macOS dylib load falls back to Null, never crashing startup.
+        Services.AddSingleton<IStoreService>(sp =>
+            OperatingSystem.IsMacOS() && StoreKitInterop.IsAvailable()
+                ? new MacStoreService(sp.GetRequiredService<Windowing>(), sp.GetRequiredService<ILogService>())
+                : new NullStoreService());
+#elif WINDOWS && !HAS_UNO
+        // Real WinAppSDK head only (same guard as WindowsStoreContextAdapter; HAS_UNO_WINUI is also
+        // defined on the desktop head, which is handled above). This TFM only runs on Windows, so
+        // register unconditionally; WindowsStoreService is plain C#, the WinRT calls live in the adapter.
+        Services.AddSingleton<IStoreContextAdapter, WindowsStoreContextAdapter>();
+        Services.AddSingleton<IStoreService, WindowsStoreService>();
+#else
+        Services.AddSingleton<IStoreService, NullStoreService>();
+#endif
+        Services.AddSingleton<IActivationClient, ProxyActivationClient>();
+        Services.AddSingleton<IStoreActivationService, StoreActivationService>();
+        Services.AddSingleton<StoryCADLib.ViewModels.Store.SubscribeDialogViewModel>();
         Services.AddSingleton<OutlineViewModel>();
         Services.AddSingleton<ShellViewModel>();
         Services.AddSingleton<PreferenceService>();

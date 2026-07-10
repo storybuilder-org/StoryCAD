@@ -51,6 +51,9 @@ public class PreferencesModel : ObservableObject
         ShowFilePickerOnStartup = true;
         UseBetaDocumentation = AppState.IsBetaDistribution;
         HideShellCommandBarOnMac = false;
+        StoreActivationJwt = string.Empty;
+        StoreActivationJwtExpiry = DateTime.MinValue;
+        StoreUserGuid = string.Empty;
     }
 
     #endregion
@@ -263,6 +266,29 @@ public class PreferencesModel : ObservableObject
     [JsonInclude]
     [JsonPropertyName("LastReview")]
     public DateTime LastReviewDate { get; set; }
+
+    /// <summary>
+    ///     Cached Worker-issued JWT that gates Collaborator (issue #30). Short-lived; treated
+    ///     as a cache, not a secret. Empty when not activated.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("StoreActivationJwt")]
+    public string StoreActivationJwt { get; set; }
+
+    /// <summary>
+    ///     UTC expiry of <see cref="StoreActivationJwt" />. Past/MinValue forces re-activation.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("StoreActivationJwtExpiry")]
+    public DateTime StoreActivationJwtExpiry { get; set; }
+
+    /// <summary>
+    ///     Stable per-user GUID embedded in the store's signed purchase proof (Apple
+    ///     appAccountToken / Microsoft publisherUserId). Must match the server users.guid.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("StoreUserGuid")]
+    public string StoreUserGuid { get; set; }
 
     /// <summary>
     ///     Should the startup dialog (HelpPage) be shown
