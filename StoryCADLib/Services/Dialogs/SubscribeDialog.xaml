@@ -27,7 +27,8 @@
                       Header="Choose a plan"
                       Visibility="{x:Bind Vm.HasPlans, Mode=OneWay}"
                       ItemsSource="{x:Bind Vm.Plans, Mode=OneWay}"
-                      SelectedItem="{x:Bind Vm.SelectedPlan, Mode=TwoWay}">
+                      SelectedItem="{x:Bind Vm.SelectedPlan, Mode=TwoWay}"
+                      AutomationProperties.AutomationId="SubscribePlanChoiceRadios">
             <RadioButtons.ItemTemplate>
                 <DataTemplate x:DataType="store:StoreProduct">
                     <Grid ColumnSpacing="12" MinWidth="360">
@@ -61,11 +62,13 @@
         <!-- Legal links (open in the system browser via the view model). -->
         <StackPanel Orientation="Horizontal" Spacing="4">
             <HyperlinkButton Content="Terms of Use" Padding="4,2"
-                             Command="{x:Bind Vm.OpenTermsCommand}" />
+                             Command="{x:Bind Vm.OpenTermsCommand}"
+                             AutomationProperties.AutomationId="SubscribeTermsOfUseButton" />
             <TextBlock Text="·" VerticalAlignment="Center"
                        Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
             <HyperlinkButton Content="Privacy Policy" Padding="4,2"
-                             Command="{x:Bind Vm.OpenPrivacyCommand}" />
+                             Command="{x:Bind Vm.OpenPrivacyCommand}"
+                             AutomationProperties.AutomationId="SubscribePrivacyPolicyButton" />
         </StackPanel>
 
         <!-- Progress while the store round-trips (purchase / restore / activation). -->
@@ -80,6 +83,7 @@
              outcomes (Ask-to-Buy pending, nothing to restore). Severity is view-model-driven. -->
         <InfoBar IsOpen="{x:Bind Vm.HasStatus, Mode=OneWay}"
                  Severity="{x:Bind Vm.StatusSeverity, Mode=OneWay}" IsClosable="False"
-                 Message="{x:Bind Vm.StatusMessage, Mode=OneWay}" />
+                 Message="{x:Bind Vm.StatusMessage, Mode=OneWay}"
+                 AutomationProperties.AutomationId="SubscribeStatusInfoBar" />
     </StackPanel>
 </Page>
