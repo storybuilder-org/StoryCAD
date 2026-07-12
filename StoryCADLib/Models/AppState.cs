@@ -87,7 +87,19 @@ public class AppState
 
             try
             {
-                return Package.Current.Id.Version.Revision != 0;
+                PackageVersion version = Package.Current.Id.Version;
+
+                // On the Uno desktop head Package.Current is a stub that doesn't
+                // throw; its version stays at the default (all-zero) in any process
+                // that never constructs an Uno Application, e.g. the test host.
+                // No real package identity ever has version 0.0.0.0, so treat it
+                // as unpackaged, same as the throw path below. (#1471)
+                if (version is { Major: 0, Minor: 0, Build: 0, Revision: 0 })
+                {
+                    return true;
+                }
+
+                return version.Revision != 0;
             }
             catch
             {
