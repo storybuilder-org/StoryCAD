@@ -101,9 +101,10 @@ namespace StoryCollaborator
                 result.AssembledPrompt = null;
                 try
                 {
-                    var (proxyContent, proxyHash) = await PostToProxyAsync(kernelArgs);
+                    var (proxyContent, proxyHash, proxyCost) = await PostToProxyAsync(kernelArgs);
                     planResult = proxyContent;
                     result.RemoteTemplateHash = proxyHash;
+                    result.Cost = proxyCost;
                 }
                 catch (HttpRequestException ex)
                 {
@@ -866,9 +867,10 @@ namespace StoryCollaborator
 
         /// <summary>
         /// Posts the workflow request to the proxy's /v1/workflow endpoint.
-        /// Returns the SSE response text and the X-Template-Hash header value (null on fallback path).
+        /// Returns the SSE response text, the X-Template-Hash header value (null on fallback path),
+        /// and the cost reported by the proxy's collab_cost event (null when absent).
         /// </summary>
-        private async Task<(string Content, string? TemplateHash)> PostToProxyAsync(KernelArguments kernelArgs)
+        private async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost)> PostToProxyAsync(KernelArguments kernelArgs)
         {
             var proxyBaseUrl = Environment.GetEnvironmentVariable("COLLAB_PROXY_URL")
                 ?? KernelFactory.DefaultProxyBaseUrl;
@@ -893,13 +895,14 @@ namespace StoryCollaborator
             if (response.Headers.TryGetValues("X-Template-Hash", out var hashValues))
                 templateHash = hashValues.FirstOrDefault();
 
-            var content = await ReadSseStreamAsync(response);
-            return (content, templateHash);
+            var (content, cost) = await ReadSseStreamAsync(response);
+            return (content, templateHash, cost);
         }
 
-        private static async Task<string> ReadSseStreamAsync(HttpResponseMessage response)
+        internal static async Task<(string Content, ProxyCostInfo? Cost)> ReadSseStreamAsync(HttpResponseMessage response)
         {
             var sb = new System.Text.StringBuilder();
+            ProxyCostInfo? cost = null;
             using var stream = await response.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream);
             string? line;
@@ -919,10 +922,23 @@ namespace StoryCollaborator
                     {
                         sb.Append(content.GetString());
                     }
+                    else if (doc.RootElement.TryGetProperty("collab_cost", out var collabCost))
+                    {
+                        try
+                        {
+                            cost = new ProxyCostInfo(
+                                collabCost.GetProperty("workflow").GetString()!,
+                                collabCost.GetProperty("model").GetString()!,
+                                collabCost.GetProperty("input_tokens").GetInt32(),
+                                collabCost.GetProperty("output_tokens").GetInt32(),
+                                collabCost.GetProperty("cost_microdollars").GetInt64());
+                        }
+                        catch (Exception) { /* malformed collab_cost — skip, Cost stays null */ }
+                    }
                 }
                 catch (JsonException) { /* malformed chunk — skip */ }
             }
-            return sb.ToString();
+            return (sb.ToString(), cost);
         }
 
 
