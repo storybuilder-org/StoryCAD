@@ -50,6 +50,12 @@ public class WorkflowResult
     public string? RemoteTemplateHash { get; set; }
 
     /// <summary>
+    /// Cost reported by the proxy's <c>collab_cost</c> SSE event.
+    /// Null when the proxy sent no cost event (old Worker, unpriced model, direct-OpenAI fallback path).
+    /// </summary>
+    public ProxyCostInfo? Cost { get; set; }
+
+    /// <summary>
     /// Creates a successful result.
     /// </summary>
     public static WorkflowResult Succeeded()
