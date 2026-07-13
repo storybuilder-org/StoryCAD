@@ -9,12 +9,15 @@ internal static class Program
 {
     // Exit-code contract per devdocs/issue_1421_dsl_design.md "Runner": 0 all steps passed,
     // 1 step failure(s), 2 script parse/lint error, 3 environment or launch failure.
+    // Until run/check are implemented, every path returns 64 (EX_USAGE-style sentinel,
+    // deliberately outside the 0-3 contract) so a scaffold invocation can never be read
+    // as a script outcome by an exit-code consumer.
     private static int Main(string[] args)
     {
         if (args.Length > 0 && args[0] is "run" or "check")
         {
             Console.Error.WriteLine($"'{args[0]}' is not implemented yet; scaffold only (issue #1421).");
-            return 2;
+            return 64;
         }
 
         Console.Error.WriteLine("StoryCAD automation runner (issue #1421)");
@@ -25,6 +28,6 @@ internal static class Program
         Console.Error.WriteLine();
         Console.Error.WriteLine("Exit codes: 0 all steps passed, 1 step failure(s), 2 script parse/lint error,");
         Console.Error.WriteLine("            3 environment or launch failure.");
-        return 2;
+        return 64;
     }
 }

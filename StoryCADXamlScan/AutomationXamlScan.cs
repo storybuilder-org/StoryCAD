@@ -18,7 +18,7 @@ public static class AutomationXamlScan
     ///     "Scope" section). Scanned recursively at scan time so newly added XAML is caught automatically
     ///     rather than by re-surveying; StoryCADLib/Services/Dialogs recursion also covers its Tools subfolder.
     /// </summary>
-    public static readonly string[] ScopeDirectories =
+    private static readonly string[] ScopeDirectories =
     {
         "StoryCAD/Views",
         "StoryCADLib/Controls",
@@ -82,7 +82,7 @@ public static class AutomationXamlScan
     private static string? _repoRoot;
 
     /// <summary>Repo root, located by walking up from the executing assembly's base directory to StoryCAD.sln.</summary>
-    public static string RepoRoot
+    private static string RepoRoot
     {
         get
         {
@@ -118,8 +118,15 @@ public static class AutomationXamlScan
                 throw new DirectoryNotFoundException($"Convention scope directory not found: {absDir}");
             }
 
-            foreach (var file in Directory.EnumerateFiles(absDir, "*.xaml", SearchOption.AllDirectories))
+            // "*" plus a suffix filter, not a "*.xaml" pattern: EnumerateFiles pattern matching
+            // is case-sensitive on Unix hosts, and this scan must stay correct for the macOS seam.
+            foreach (var file in Directory.EnumerateFiles(absDir, "*", SearchOption.AllDirectories))
             {
+                if (!file.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
                 yield return Path.GetRelativePath(RepoRoot, file).Replace('\\', '/');
             }
         }
