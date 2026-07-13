@@ -312,6 +312,10 @@ public sealed class StoryCADDriver : IUiDriver
         }
     }
 
+    /// <inheritdoc />
+    public void WaitForWindowTitle(string title, TimeSpan? timeout = null)
+        => _locator.WaitForWindow(title, Timeout(timeout));
+
     // --- pattern realizations ------------------------------------------------------------
 
     /// <inheritdoc />
@@ -574,6 +578,46 @@ public sealed class StoryCADDriver : IUiDriver
         // outline row exposes only ExpandCollapse (#1420), so navigating to it needs the
         // pointer realization instead of this helper.
         Invoke(ElementAddress.FromTreePath(treePath), timeout);
+    }
+
+    /// <inheritdoc />
+    public void InvokeMenuItem(ElementAddress leaf, TimeSpan? timeout = null)
+    {
+        var element = _locator.WaitMenuItemReady(leaf, ReadinessRequirement.Invoke, Timeout(timeout));
+        element.Patterns.Invoke.Pattern.Invoke();
+        Wait.UntilInputIsProcessed();
+    }
+
+    /// <inheritdoc />
+    public void CompleteSaveFileDialog(string path, TimeSpan? timeout = null)
+        => CompleteFileDialog(path, timeout);
+
+    /// <inheritdoc />
+    public void CompleteOpenFileDialog(string path, TimeSpan? timeout = null)
+        => CompleteFileDialog(path, timeout);
+
+    /// <summary>
+    ///     Drives the Win32 common item dialog: filename field is dialog control id "1001"
+    ///     (FileNameControlHost), the confirm button is IDOK, id "1". Save and Open pickers
+    ///     share both ids, so one choreography serves either verb. The dialog runs in-process,
+    ///     so the process-rooted search reaches it, and before it opens neither numeric id
+    ///     exists in StoryCAD's PascalCase id namespace — a miss times out with a readiness
+    ///     diagnosis instead of matching app UI. No overwrite-confirm handling in v1: dialog
+    ///     paths are {scratch}-rooted and scratch is fresh per run, so the target file cannot
+    ///     pre-exist. Live confirmation of the ids lands with the smoke script (#1421 task 8).
+    /// </summary>
+    private void CompleteFileDialog(string path, TimeSpan? timeout)
+    {
+        var t = Timeout(timeout);
+        var fileName = _locator.WaitUntilReady(
+            ElementAddress.FromAutomationId("1001"), ReadinessRequirement.SetValue, t);
+        fileName.Patterns.Value.Pattern.SetValue(path);
+        Wait.UntilInputIsProcessed();
+
+        var confirm = _locator.WaitUntilReady(
+            ElementAddress.FromAutomationId("1"), ReadinessRequirement.Invoke, t);
+        confirm.Patterns.Invoke.Pattern.Invoke();
+        Wait.UntilInputIsProcessed();
     }
 
     // --- session --------------------------------------------------------------------------

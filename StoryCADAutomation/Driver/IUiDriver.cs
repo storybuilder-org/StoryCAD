@@ -32,8 +32,15 @@ public interface IUiDriver : IDisposable
     /// <summary>Settle-then-check absence: fails if the target appears at any point in the settle window.</summary>
     void VerifyNeverAppears(ElementAddress target, TimeSpan? settle = null);
 
-    /// <summary>Waits for app process exit (the future expect-exit verb).</summary>
+    /// <summary>Waits for app process exit (the expect-exit verb).</summary>
     bool WaitForExit(TimeSpan timeout);
+
+    /// <summary>
+    ///     Waits until a window with the exact title exists: a top-level window of the app
+    ///     process, or an in-window dialog surfacing as a Window-typed element (ContentDialog).
+    ///     Serves the wait-window, expect window, and dialog verbs.
+    /// </summary>
+    void WaitForWindowTitle(string title, TimeSpan? timeout = null);
 
     // --- pattern realizations ------------------------------------------------------------
 
@@ -96,6 +103,26 @@ public interface IUiDriver : IDisposable
     ///     on a tree row reports success without navigating (2026-06-12 finding).
     /// </summary>
     void ActivateTreeRow(string treePath, TimeSpan? timeout = null);
+
+    /// <summary>
+    ///     Invokes a menu leaf, opening parent menus as needed: menu items exist in the UIA
+    ///     tree only while their flyout is open, and the design assigns the parent-opening
+    ///     choreography to the driver ("menu SaveStoryMenuItem — the driver opens parent
+    ///     menus"). The text-path menu form is interpreter-side composition of Expand/Invoke
+    ///     and does not need this.
+    /// </summary>
+    void InvokeMenuItem(ElementAddress leaf, TimeSpan? timeout = null);
+
+    /// <summary>
+    ///     Drives an already-opening native save picker to completion (the save-file-dialog
+    ///     verb; the driver owns the native-dialog choreography per the design's Dialogs
+    ///     section). The path must be fully resolved; {scratch} substitution is the
+    ///     interpreter's job.
+    /// </summary>
+    void CompleteSaveFileDialog(string path, TimeSpan? timeout = null);
+
+    /// <inheritdoc cref="CompleteSaveFileDialog" />
+    void CompleteOpenFileDialog(string path, TimeSpan? timeout = null);
 
     // --- session -----------------------------------------------------------------------
 

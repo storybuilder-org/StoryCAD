@@ -183,4 +183,51 @@ public static class AutomationXamlScan
             }
         }
     }
+
+    /// <summary>
+    ///     Attribute local names that carry a user-visible label. Label covers AppBarButton
+    ///     (top-level menu buttons carry Label, not Text); AutomationProperties.Name is included
+    ///     because it overrides the UIA Name that runtime text-path addressing matches against
+    ///     (Shell's padded menu texts pair with clean explicit Names).
+    /// </summary>
+    private static readonly string[] LabelAttributeNames =
+    {
+        "Text", "Header", "Label", "AutomationProperties.Name",
+    };
+
+    /// <summary>
+    ///     Every user-visible label attribute across all scope files, for the script linter's
+    ///     menu/tab text-path checks (devdocs/issue_1421_dsl_design.md "Script lint as a fitness
+    ///     function"). Unlike <see cref="GetAttributeValue" />, conditional variants (win:Text,
+    ///     skia:Text) ARE included: they are the per-platform runtime labels, and a text-path
+    ///     segment that matches either platform's label is valid. Values that are bindings or
+    ///     markup extensions ({x:Bind ...}) are skipped as not statically checkable; so are
+    ///     labels set via nested property elements rather than attributes.
+    /// </summary>
+    public static IEnumerable<LabelOccurrence> LabelOccurrences()
+    {
+        foreach (var relPath in ScopeFiles())
+        {
+            var doc = LoadXaml(relPath);
+            foreach (var element in doc.Descendants())
+            {
+                foreach (var attribute in element.Attributes())
+                {
+                    if (!LabelAttributeNames.Contains(attribute.Name.LocalName))
+                    {
+                        continue;
+                    }
+
+                    var value = attribute.Value;
+                    if (string.IsNullOrWhiteSpace(value) || value.StartsWith('{'))
+                    {
+                        continue;
+                    }
+
+                    yield return new LabelOccurrence(
+                        relPath, LineOf(element), element.Name.LocalName, attribute.Name.LocalName, value);
+                }
+            }
+        }
+    }
 }

@@ -11,6 +11,24 @@ namespace StoryCADAutomation.Driver;
 internal static class KeyChord
 {
     /// <summary>
+    ///     Lint-facing validation: null when the chord parses, else the parse error message.
+    ///     Exposes no FlaUI type, so the linter can call it without breaking the macOS-seam
+    ///     rule that UIA types stay out of the interpreter and lint layers.
+    /// </summary>
+    public static string? Validate(string chord)
+    {
+        try
+        {
+            Parse(chord);
+            return null;
+        }
+        catch (ArgumentException ex)
+        {
+            return ex.Message;
+        }
+    }
+
+    /// <summary>
     ///     Splits a chord into modifiers and the final key. Throws ArgumentException on
     ///     malformed chords; the script linter is expected to catch those before a live run.
     /// </summary>

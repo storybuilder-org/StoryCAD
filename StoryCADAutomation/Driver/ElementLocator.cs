@@ -141,6 +141,61 @@ internal sealed class ElementLocator
     }
 
     /// <summary>
+    ///     Waits until a window with the exact title exists. Covers both shapes StoryCAD
+    ///     presents: top-level windows of the process (main window, WinUI windowed popups,
+    ///     in-process native dialogs) and in-window dialogs that surface as a Window-typed
+    ///     descendant (ContentDialog renders inside the main window, not as its own HWND).
+    /// </summary>
+    public AutomationElement WaitForWindow(string title, TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+        while (true)
+        {
+            _ensureRunnable();
+            var window = TryFindWindow(title);
+            if (window is not null)
+            {
+                return window;
+            }
+
+            if (DateTime.UtcNow >= deadline)
+            {
+                throw new AutomationStepException(
+                    $"No window titled \"{title}\" appeared in the app process within {timeout.TotalSeconds:0.#}s.");
+            }
+
+            Thread.Sleep(PollInterval);
+        }
+    }
+
+    private AutomationElement? TryFindWindow(string title)
+    {
+        try
+        {
+            foreach (var window in AppWindows())
+            {
+                if (NameOf(window) == title)
+                {
+                    return window;
+                }
+
+                var inner = window.FindFirstDescendant(cf =>
+                    cf.ByControlType(ControlType.Window).And(cf.ByName(title)));
+                if (inner is not null)
+                {
+                    return inner;
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // Transient UIA churn; the caller's poll loop retries.
+        }
+
+        return null;
+    }
+
+    /// <summary>
     ///     Readiness wait that first makes the target reachable by expanding collapsed
     ///     Expanders: collapsed Expanders keep RichEdit content out of the UIA tree entirely
     ///     (#1420 expand-before-type fact), so a plain wait would time out without ever
@@ -576,6 +631,179 @@ internal sealed class ElementLocator
         catch (Exception)
         {
             return string.Empty;
+        }
+    }
+
+    // --- menu discovery ---------------------------------------------------------------------
+
+    /// <summary>How long a just-expanded flyout gets to realize its items before the next candidate is tried.</summary>
+    private static readonly TimeSpan FlyoutRealizeBudget = TimeSpan.FromMilliseconds(500);
+
+    /// <summary>
+    ///     Readiness wait for a menu leaf that opens parent menus as needed (design, Navigation
+    ///     verbs). Menu items enter the UIA tree only while their flyout is open, so on a direct
+    ///     miss the flyout-owning buttons are expanded one at a time, descending one
+    ///     MenuFlyoutSubItem level (Shell's Plotting Aids is the current depth maximum), until
+    ///     the leaf turns up. Probing is expansion-only and therefore side-effect-free: command
+    ///     buttons without an attached flyout expose no ExpandCollapse pattern and are never
+    ///     touched, so probing cannot execute Delete element or Empty Trash by accident.
+    /// </summary>
+    public AutomationElement WaitMenuItemReady(ElementAddress leaf, ReadinessRequirement need, TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+
+        // Fast path: the flyout is already open (a context-menu step, or a retry).
+        if (TryFind(leaf, out _) is not null)
+        {
+            return WaitUntilReady(leaf, need, Remaining(deadline));
+        }
+
+        while (true)
+        {
+            _ensureRunnable();
+            foreach (var opener in ExpandableButtons())
+            {
+                TryExpand(opener);
+                if (ProbeLeafRealized(leaf, FlyoutRealizeBudget))
+                {
+                    return WaitUntilReady(leaf, need, Remaining(deadline));
+                }
+
+                foreach (var subMenu in CollapsedSubMenuItems())
+                {
+                    TryExpand(subMenu);
+                    if (ProbeLeafRealized(leaf, FlyoutRealizeBudget))
+                    {
+                        return WaitUntilReady(leaf, need, Remaining(deadline));
+                    }
+                }
+
+                TryCollapse(opener); // don't leak an open flyout into the next probe or step
+            }
+
+            if (DateTime.UtcNow >= deadline)
+            {
+                throw new AutomationStepException(
+                    $"{leaf} was not found under any menu within {timeout.TotalSeconds:0.#}s " +
+                    "(every flyout-owning button was expanded, one sub-menu level deep).");
+            }
+
+            Thread.Sleep(PollInterval);
+        }
+    }
+
+    private static TimeSpan Remaining(DateTime deadline)
+    {
+        var remaining = deadline - DateTime.UtcNow;
+        return remaining > TimeSpan.Zero ? remaining : TimeSpan.FromMilliseconds(1);
+    }
+
+    private bool ProbeLeafRealized(ElementAddress leaf, TimeSpan budget)
+    {
+        var deadline = DateTime.UtcNow + budget;
+        while (true)
+        {
+            if (TryFind(leaf, out _) is not null)
+            {
+                return true;
+            }
+
+            if (DateTime.UtcNow >= deadline)
+            {
+                return false;
+            }
+
+            Thread.Sleep(AbsencePollInterval);
+        }
+    }
+
+    /// <summary>
+    ///     Buttons that own a flyout, in UIA tree order (File is first in Shell's command bar,
+    ///     which makes the common File-menu leaves the cheapest to discover). WinUI exposes
+    ///     ExpandCollapse on a Button peer only when a Flyout is attached; live confirmation
+    ///     of that pattern surface lands with the smoke script (issue #1421 task 8).
+    /// </summary>
+    private IEnumerable<AutomationElement> ExpandableButtons()
+    {
+        foreach (var window in AppWindows())
+        {
+            AutomationElement[] buttons;
+            try
+            {
+                buttons = window.FindAllDescendants(cf => cf.ByControlType(ControlType.Button));
+            }
+            catch (Exception)
+            {
+                continue;
+            }
+
+            foreach (var button in buttons)
+            {
+                if (SupportsExpandCollapse(button))
+                {
+                    yield return button;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Collapsed sub-menu items (MenuFlyoutSubItem surfaces as MenuItem with
+    ///     ExpandCollapse). Only open flyouts have realized menu items at all, so a global
+    ///     scan finds exactly the sub-items of whatever flyout the probe just opened.
+    /// </summary>
+    private IEnumerable<AutomationElement> CollapsedSubMenuItems()
+    {
+        foreach (var window in AppWindows())
+        {
+            AutomationElement[] items;
+            try
+            {
+                items = window.FindAllDescendants(cf => cf.ByControlType(ControlType.MenuItem));
+            }
+            catch (Exception)
+            {
+                continue;
+            }
+
+            foreach (var item in items)
+            {
+                if (SupportsExpandCollapse(item) && IsCollapsed(item))
+                {
+                    yield return item;
+                }
+            }
+        }
+    }
+
+    private static bool SupportsExpandCollapse(AutomationElement element)
+    {
+        try
+        {
+            return element.Patterns.ExpandCollapse.IsSupported;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    private static void TryCollapse(AutomationElement element)
+    {
+        try
+        {
+            if (element.Patterns.ExpandCollapse.IsSupported
+                && element.Patterns.ExpandCollapse.Pattern.ExpandCollapseState.ValueOrDefault
+                == ExpandCollapseState.Expanded)
+            {
+                element.Patterns.ExpandCollapse.Pattern.Collapse();
+                Wait.UntilInputIsProcessed();
+            }
+        }
+        catch (Exception)
+        {
+            // A stuck flyout surfaces as the next find hitting the wrong scope; the readiness
+            // wait that follows is the real gate.
         }
     }
 
