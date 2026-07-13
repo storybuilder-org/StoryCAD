@@ -926,12 +926,17 @@ namespace StoryCollaborator
                     {
                         try
                         {
-                            cost = new ProxyCostInfo(
-                                collabCost.GetProperty("workflow").GetString()!,
-                                collabCost.GetProperty("model").GetString()!,
-                                collabCost.GetProperty("input_tokens").GetInt32(),
-                                collabCost.GetProperty("output_tokens").GetInt32(),
-                                collabCost.GetProperty("cost_microdollars").GetInt64());
+                            var workflow = collabCost.GetProperty("workflow").GetString();
+                            var model = collabCost.GetProperty("model").GetString();
+                            if (workflow is not null && model is not null)
+                            {
+                                cost = new ProxyCostInfo(
+                                    workflow,
+                                    model,
+                                    collabCost.GetProperty("input_tokens").GetInt32(),
+                                    collabCost.GetProperty("output_tokens").GetInt32(),
+                                    collabCost.GetProperty("cost_microdollars").GetInt64());
+                            }
                         }
                         catch (Exception) { /* malformed collab_cost — skip, Cost stays null */ }
                     }
