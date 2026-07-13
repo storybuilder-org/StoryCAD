@@ -12,7 +12,8 @@
         </Grid.RowDefinitions>
         <TextBox Header="Name" Text="{x:Bind WebVM.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  viewModels:TextBoxFocus.IsFocused="{x:Bind WebVM.IsTextBoxFocused, Mode=TwoWay}"
-                 Grid.Row="0" />
+                 Grid.Row="0"
+                 AutomationProperties.AutomationId="WebNameTextBox" />
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -20,24 +21,35 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Margin="2,5" Command="{x:Bind WebVM.RefreshCommand, Mode=OneWay}" Grid.Column="0">
+            <!-- Icon-only buttons: Content is a SymbolIcon with no text, so Name states the
+                 function per convention rather than the glyph. -->
+            <Button Margin="2,5" Command="{x:Bind WebVM.RefreshCommand, Mode=OneWay}" Grid.Column="0"
+                    AutomationProperties.AutomationId="WebRefreshButton"
+                    AutomationProperties.Name="Refresh">
                 <Button.Content>
                     <SymbolIcon Symbol="Refresh" />
                 </Button.Content>
             </Button>
-            <Button Margin="2,5" Command="{x:Bind WebVM.GoBackCommand, Mode=OneWay}" Grid.Column="1">
+            <Button Margin="2,5" Command="{x:Bind WebVM.GoBackCommand, Mode=OneWay}" Grid.Column="1"
+                    AutomationProperties.AutomationId="WebBackButton"
+                    AutomationProperties.Name="Back">
                 <Button.Content>
                     <SymbolIcon Symbol="Back" />
                 </Button.Content>
             </Button>
-            <Button Margin="2,5" Command="{x:Bind WebVM.GoForwardCommand, Mode=OneWay}" Grid.Column="2">
+            <Button Margin="2,5" Command="{x:Bind WebVM.GoForwardCommand, Mode=OneWay}" Grid.Column="2"
+                    AutomationProperties.AutomationId="WebForwardButton"
+                    AutomationProperties.Name="Forward">
                 <Button.Content>
                     <SymbolIcon Symbol="Forward" />
                 </Button.Content>
             </Button>
+            <!-- PlaceholderText only, no Header: explicit Name required per convention. -->
             <AutoSuggestBox HorizontalAlignment="Stretch" Text="{x:Bind WebVM.Query, Mode=TwoWay}" Margin="2,8"
                             Grid.Column="3" PlaceholderText="Enter a URL or Query here!"
-                            QueryIcon="Find" QuerySubmitted="QuerySubmitted" />
+                            QueryIcon="Find" QuerySubmitted="QuerySubmitted"
+                            AutomationProperties.AutomationId="WebSearchBox"
+                            AutomationProperties.Name="Navigate or search" />
         </Grid>
         <WebView2 Name="WebView" Grid.Row="2" Source="{x:Bind WebVM.Url, Mode=TwoWay}"
                   NavigationCompleted="Web_OnNavigationCompleted" />

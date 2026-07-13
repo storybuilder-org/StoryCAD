@@ -3,6 +3,15 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- BrowseTextBox is instantiated at six call sites app-wide (PreferencesInitialization x2,
+         PreferencesDialog x2, SaveAsDialog, BackupNow). The literal ids below satisfy the Coverage
+         test (non-empty literal AutomationId required in XAML) and the Literalness test (no "{",
+         so an x:Bind here is not an option), but every instance would otherwise share the same
+         two ids at runtime, which is not unique in the UIA tree. Fixed in Unit 7 (#1420):
+         BrowseTextBox.xaml.cs reads the outer control's own AutomationId (set per call site; every
+         call site already carries one) once Loaded, and if non-empty, overrides these two literal
+         ids with ones derived from it ({outerId}PathTextBox / {outerId}BrowseButton), which keeps
+         the required role suffix at the end while making every instance's internal ids unique. -->
     <StackPanel Orientation="Horizontal">
         <TextBox
             x:Name="PathTextBox"
@@ -12,12 +21,14 @@
             Text="{x:Bind Path, Mode=TwoWay}"
             Width="{x:Bind TextBoxWidth, Mode=OneWay}"
             VerticalAlignment="Center"
-            Margin="8" />
+            Margin="8"
+            AutomationProperties.AutomationId="PathTextBox" />
         <Button
             x:Name="BrowseButton"
             Content="{x:Bind ButtonText, Mode=OneWay}"
             Click="OnBrowseClick"
             VerticalAlignment="{x:Bind ButtonVerticalAlignment, Mode=OneWay}"
-            Margin="{x:Bind ButtonMargin, Mode=OneWay}" />
+            Margin="{x:Bind ButtonMargin, Mode=OneWay}"
+            AutomationProperties.AutomationId="BrowseButton" />
     </StackPanel>
 </UserControl>

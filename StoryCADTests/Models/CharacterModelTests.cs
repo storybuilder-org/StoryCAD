@@ -27,4 +27,18 @@ public class CharacterModelTests
         CharVM.AddTraitCommand.Execute(null);
         Assert.IsTrue(CharVM.CharacterTraits.Count == 1);
     }
+
+    /// <summary>
+    ///     The parameterless constructor is used by JSON deserialization, so a legacy .stbx
+    ///     predating the Images feature (no "Images" key) must still end up with a non-null
+    ///     list, matching every other CharacterModel constructor's invariant.
+    /// </summary>
+    [TestMethod]
+    public void Constructor_Parameterless_InitializesImagesToEmptyList()
+    {
+        var character = new CharacterModel();
+
+        Assert.IsNotNull(character.Images);
+        Assert.AreEqual(0, character.Images.Count);
+    }
 }

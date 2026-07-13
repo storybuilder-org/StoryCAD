@@ -1062,7 +1062,7 @@ public class ReportFormatter
             sb.Replace("@Abnormality", character.Abnormality);
             sb.Replace("@PsychNotes", GetText(character.PsychNotes));
             //Inner Traits section
-            sb.Replace("@Adventure", character.Adventureousness);
+            sb.Replace("@Adventure", character.Adventurousness);
             sb.Replace("@Aggression", character.Aggression);
             sb.Replace("@Confidence", character.Confidence);
             sb.Replace("@Conscientious", character.Conscientiousness);

@@ -29,11 +29,14 @@
 
             <ScrollViewer Grid.Row="1" Grid.Column="0">
                 <TreeView ItemsSource="{x:Bind AppState.CurrentDocument.Model.ExplorerView[0].Children, Mode=OneWay}"
-                          Margin="0,5" Background="{x:Bind Background}">
+                          Margin="0,5" Background="{x:Bind Background}"
+                          AutomationProperties.AutomationId="NarrativeExplorerTree">
                     <TreeView.ItemTemplate>
                         <DataTemplate x:DataType="viewModels:StoryNodeItem">
+                            <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). Shell.xaml precedent. -->
                             <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="True" Tapped="ItemInvoked"
-                                          Tag="Exp">
+                                          Tag="Exp"
+                                          AutomationProperties.Name="{x:Bind Name, Mode=OneWay}">
                                 <TextBlock Text="{x:Bind Name}" TextWrapping="Wrap" />
                             </TreeViewItem>
                         </DataTemplate>
@@ -43,11 +46,14 @@
 
             <ScrollViewer Grid.Row="1" Grid.Column="2">
                 <TreeView ItemsSource="{x:Bind AppState.CurrentDocument.Model.NarratorView[0].Children, Mode=OneWay}"
-                          Margin="0,5">
+                          Margin="0,5"
+                          AutomationProperties.AutomationId="NarrativeNarratorTree">
                     <TreeView.ItemTemplate>
                         <DataTemplate x:DataType="viewModels:StoryNodeItem">
+                            <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). Shell.xaml precedent. -->
                             <TreeViewItem ItemsSource="{x:Bind Children}" IsExpanded="True" Tapped="ItemInvoked"
-                                          Tag="Nar">
+                                          Tag="Nar"
+                                          AutomationProperties.Name="{x:Bind Name, Mode=OneWay}">
                                 <TextBlock Text="{x:Bind Name}" TextWrapping="Wrap" />
                             </TreeViewItem>
                         </DataTemplate>
@@ -61,35 +67,50 @@
 
         <StackPanel Grid.Column="0" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button ToolTipService.ToolTip="Add scene to narrative view" Content="Add Scene" Margin="5,0"
-                    HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyCommand}" />
+                    HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyCommand}"
+                    AutomationProperties.AutomationId="NarrativeAddSceneButton" />
             <Button ToolTipService.ToolTip="Add unused scene to narrative view" Content="Add all unused Scenes"
-                    Margin="5,0" HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyAllUnusedCommand}" />
+                    Margin="5,0" HorizontalAlignment="Center" Command="{x:Bind ToolVM.CopyAllUnusedCommand}"
+                    AutomationProperties.AutomationId="NarrativeAddAllUnusedScenesButton" />
+            <!-- Icon-only (FontIcon child, no Content text): Name mirrors the ToolTip text. -->
             <Button ToolTipService.ToolTip="Move node up"
-                    Margin="5,0" Click="Move" Tag="UP">
+                    Margin="5,0" Click="Move" Tag="UP"
+                    AutomationProperties.AutomationId="NarrativeMoveUpButton"
+                    AutomationProperties.Name="Move node up">
                 <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE70E;" />
             </Button>
             <Button ToolTipService.ToolTip="Move node down"
-                    Margin="5,0" Click="Move" Tag="DN">
+                    Margin="5,0" Click="Move" Tag="DN"
+                    AutomationProperties.AutomationId="NarrativeMoveDownButton"
+                    AutomationProperties.Name="Move node down">
                 <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE70D;" />
             </Button>
+            <!-- Button.Content is a SymbolIcon, not plain text or a Header: Name mirrors the ToolTip. -->
             <Button ToolTipService.ToolTip="Add Section"
-                    Margin="5,0">
+                    Margin="5,0"
+                    AutomationProperties.AutomationId="NarrativeAddSectionButton"
+                    AutomationProperties.Name="Add Section">
                 <Button.Content>
                     <SymbolIcon Symbol="Add" />
                 </Button.Content>
                 <Button.Flyout>
-                    <Flyout>
+                    <Flyout AutomationProperties.AutomationId="NarrativeAddSectionFlyout">
                         <StackPanel>
                             <TextBox Header="Name of Section:" Margin="5" Width="250"
-                                     Text="{x:Bind ToolVM.NewSectionName,Mode=TwoWay}" />
+                                     Text="{x:Bind ToolVM.NewSectionName,Mode=TwoWay}"
+                                     AutomationProperties.AutomationId="NarrativeSectionNameTextBox" />
                             <Button Content="Create section" HorizontalAlignment="Center" Margin="5"
-                                    Command="{x:Bind ToolVM.CreateFlyout}" />
+                                    Command="{x:Bind ToolVM.CreateFlyout}"
+                                    AutomationProperties.AutomationId="NarrativeCreateSectionButton" />
                         </StackPanel>
                     </Flyout>
                 </Button.Flyout>
             </Button>
+            <!-- Content is a SymbolIcon, no ToolTip; Name states the function (matches the Delete glyph/command). -->
             <Button HorizontalAlignment="Center"
-                    Margin="5,0" Command="{x:Bind ToolVM.DeleteCommand}">
+                    Margin="5,0" Command="{x:Bind ToolVM.DeleteCommand}"
+                    AutomationProperties.AutomationId="NarrativeDeleteButton"
+                    AutomationProperties.Name="Delete">
                 <SymbolIcon Symbol="Delete" />
             </Button>
         </StackPanel>

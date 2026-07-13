@@ -8,12 +8,20 @@
     <ScrollViewer>
         <StackPanel Orientation="Vertical" Margin="5">
             <Button Content="Create a new relationship" Command="{x:Bind CharVm.AddRelationshipCommand, Mode=OneWay}"
-                    Margin="5" VerticalAlignment="Bottom" HorizontalAlignment="Center" />
+                    Margin="5" VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                    AutomationProperties.AutomationId="AddRelationshipButton" />
+            <!-- ItemsRepeater carries no AutomationId: per Unit 1 finding, ItemsRepeater creates no
+                 automation peer, so a container id here is runtime-inert (also not in the test's
+                 InteractiveElementNames set). -->
             <ItemsRepeater ItemsSource="{x:Bind CharVm.CharacterRelationships}">
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate x:DataType="models:RelationshipModel">
+                        <!-- Template root: no AutomationId (would collide across every realized row).
+                             Name is bound inline to Partner.Name, mirroring Shell's {x:Bind Name}
+                             template-root pattern, so each expander announces which relationship it is. -->
                         <Expander Width="auto" HorizontalAlignment="Stretch" IsExpanded="True"
-                                  LosingFocus="OnLostFocus">
+                                  LosingFocus="OnLostFocus"
+                                  AutomationProperties.Name="{x:Bind Partner.Name, Mode=OneWay}">
                             <Expander.Header>
                                 <Grid Height="auto">
                                     <Grid.ColumnDefinitions>
@@ -35,8 +43,11 @@
                                                    TextWrapping="Wrap" Margin="5,0,0,0"
                                                    IsTextScaleFactorEnabled="True" />
                                         <TextBlock Grid.Column="1" Text=" is a " VerticalAlignment="Center" />
+                                        <!-- No Header (inline sentence layout): explicit literal Name
+                                             states the field's function, same at every row. -->
                                         <TextBox Grid.Column="2" MinWidth="200" Height="20"
-                                                 Text="{x:Bind RelationType, Mode=TwoWay}" Margin="10,0" />
+                                                 Text="{x:Bind RelationType, Mode=TwoWay}" Margin="10,0"
+                                                 AutomationProperties.Name="Relationship type" />
                                         <TextBlock Grid.Column="3" Text=" to " VerticalAlignment="Center"
                                                    Margin="0,0,10,0" />
                                         <TextBlock Grid.Column="4" Text="{x:Bind Partner.Name}"

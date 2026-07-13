@@ -80,10 +80,17 @@
                         <!-- Updates List -->
                         <ListView ItemsSource="{x:Bind ViewModel.PendingUpdates, Mode=OneWay}"
                                   SelectionMode="None"
-                                  MaxHeight="200">
+                                  MaxHeight="200"
+                                  AutomationProperties.AutomationId="WorkflowPendingUpdatesList">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <StackPanel Margin="0,4">
+                                    <!-- Template root: no AutomationId (TemplateSafety forbids it). Item
+                                         identity binds to the property Key (the update's identity within
+                                         the list), not Value (its content) - convention's templated-Name
+                                         treatment, ImageGalleryControl precedent. Classic {Binding} matches
+                                         what the template already uses (no x:DataType here). -->
+                                    <StackPanel Margin="0,4"
+                                                AutomationProperties.Name="{Binding Key, Mode=OneWay}">
                                         <TextBlock Text="{Binding Key}" FontWeight="SemiBold" FontSize="12" />
                                         <TextBlock Text="{Binding Value}"
                                                    TextWrapping="Wrap"
@@ -95,18 +102,22 @@
                             </ListView.ItemTemplate>
                         </ListView>
 
-                        <!-- Action buttons -->
+                        <!-- Action buttons: page-prefixed, "Accept"/"Save"/etc. are common function
+                             names across dialogs elsewhere in scope. -->
                         <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,8,0,0">
                             <Button Content="Accept All"
                                     Command="{x:Bind ViewModel.AcceptAllCommand}"
                                     IsEnabled="{x:Bind ViewModel.HasPendingUpdates, Mode=OneWay}"
-                                    Style="{ThemeResource AccentButtonStyle}" />
+                                    Style="{ThemeResource AccentButtonStyle}"
+                                    AutomationProperties.AutomationId="WorkflowAcceptAllButton" />
                             <Button Content="Review Each"
                                     Command="{x:Bind ViewModel.ReviewEachCommand}"
-                                    IsEnabled="{x:Bind ViewModel.HasPendingUpdates, Mode=OneWay}" />
+                                    IsEnabled="{x:Bind ViewModel.HasPendingUpdates, Mode=OneWay}"
+                                    AutomationProperties.AutomationId="WorkflowReviewEachButton" />
                             <Button Content="Try Again"
                                     Command="{x:Bind ViewModel.TryAgainCommand}"
-                                    IsEnabled="{x:Bind ViewModel.HasPendingUpdates, Mode=OneWay}" />
+                                    IsEnabled="{x:Bind ViewModel.HasPendingUpdates, Mode=OneWay}"
+                                    AutomationProperties.AutomationId="WorkflowTryAgainButton" />
                         </StackPanel>
 
                         <!-- Review Mode UI -->
@@ -130,13 +141,16 @@
                                 <Button Content="Accept"
                                         Command="{x:Bind ViewModel.AcceptCurrentCommand}"
                                         IsEnabled="{x:Bind ViewModel.IsInReviewMode, Mode=OneWay}"
-                                        Style="{ThemeResource AccentButtonStyle}" />
+                                        Style="{ThemeResource AccentButtonStyle}"
+                                        AutomationProperties.AutomationId="WorkflowAcceptButton" />
                                 <Button Content="Skip"
                                         Command="{x:Bind ViewModel.SkipCurrentCommand}"
-                                        IsEnabled="{x:Bind ViewModel.IsInReviewMode, Mode=OneWay}" />
+                                        IsEnabled="{x:Bind ViewModel.IsInReviewMode, Mode=OneWay}"
+                                        AutomationProperties.AutomationId="WorkflowSkipButton" />
                                 <Button Content="Accept Remaining"
                                         Command="{x:Bind ViewModel.AcceptRemainingCommand}"
-                                        IsEnabled="{x:Bind ViewModel.IsInReviewMode, Mode=OneWay}" />
+                                        IsEnabled="{x:Bind ViewModel.IsInReviewMode, Mode=OneWay}"
+                                        AutomationProperties.AutomationId="WorkflowAcceptRemainingButton" />
                             </StackPanel>
 
                             <!-- Progress indicator -->
@@ -158,7 +172,8 @@
                   Grid.Column="1" Grid.Row="0" Grid.RowSpan="3"
                   Margin="10,0,0,10"
                   VerticalAlignment="Bottom"
-                  SelectionMode="None">
+                  SelectionMode="None"
+                  AutomationProperties.AutomationId="WorkflowConversationList">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <ItemsStackPanel VerticalAlignment="Bottom"
@@ -167,8 +182,13 @@
             </ListView.ItemsPanel>
             <ListView.ItemTemplate>
                 <DataTemplate>
+                    <!-- Template root: no AutomationId (TemplateSafety forbids it). Item identity binds
+                         to the message Text (ChatMessage has no INotifyPropertyChanged, but Mode=OneWay
+                         is explicit per convention) rather than Sender, since the message content is what
+                         a screen reader user needs from a chat row; classic {Binding} matches the template. -->
                     <StackPanel Margin="0,4,0,4"
-                                HorizontalAlignment="{Binding BubbleAlignment}">
+                                HorizontalAlignment="{Binding BubbleAlignment}"
+                                AutomationProperties.Name="{Binding Text, Mode=OneWay}">
                         <TextBlock Text="{Binding Sender}"
                                    FontWeight="SemiBold"
                                    FontSize="11"
@@ -191,13 +211,19 @@
 
         <!-- Input and send button -->
         <StackPanel Grid.Column="1" Grid.Row="3" Orientation="Vertical" Margin="10,0,0,0">
+            <!-- No Header, no PlaceholderText, no sibling label TextBlock: explicit Name required,
+                 naming the function (chat message input) since no visible label text exists to reuse. -->
             <TextBox x:Name="InputTextBox"
                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                      KeyDown="InputTextBox_KeyDown" TextWrapping="Wrap"
                      Text="{x:Bind ViewModel.InputText, Mode=TwoWay}"
-                     MinHeight="60" />
+                     MinHeight="60"
+                     AutomationProperties.AutomationId="InputTextBox"
+                     AutomationProperties.Name="Message" />
+            <!-- Content="Send": framework-derived name, id only. -->
             <Button x:Name="SendButton" Content="Send" Click="SendButton_Click"
-                    HorizontalAlignment="Right" Margin="0,5,0,0" />
+                    HorizontalAlignment="Right" Margin="0,5,0,0"
+                    AutomationProperties.AutomationId="SendButton" />
         </StackPanel>
 
         <!-- Progress bar - spans both columns at bottom -->

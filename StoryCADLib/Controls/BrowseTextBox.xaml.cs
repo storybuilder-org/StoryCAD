@@ -1,3 +1,4 @@
+using Microsoft.UI.Xaml.Automation;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
 
@@ -34,6 +35,20 @@ public sealed partial class BrowseTextBox : UserControl
     public BrowseTextBox()
     {
         InitializeComponent();
+
+        // Per-instance internal ids (issue #1420, Unit 7): the outer AutomationId isn't applied
+        // by the host XAML until after this constructor returns, so read it on Loaded rather than
+        // here. Every call site sets one (Coverage test requires it), so PathTextBox/BrowseButton's
+        // shared literal ids get overridden with ids unique to this instance.
+        Loaded += (_, _) =>
+        {
+            var outerId = AutomationProperties.GetAutomationId(this);
+            if (!string.IsNullOrEmpty(outerId))
+            {
+                AutomationProperties.SetAutomationId(PathTextBox, outerId + "PathTextBox");
+                AutomationProperties.SetAutomationId(BrowseButton, outerId + "BrowseButton");
+            }
+        };
     }
 
     public string Path

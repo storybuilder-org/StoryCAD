@@ -13,16 +13,19 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <TextBox Header="Name" Text="{x:Bind ProblemVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 viewModels:TextBoxFocus.IsFocused="{x:Bind ProblemVm.IsTextBoxFocused, Mode=TwoWay}"/>
+                 viewModels:TextBoxFocus.IsFocused="{x:Bind ProblemVm.IsTextBoxFocused, Mode=TwoWay}"
+                 AutomationProperties.AutomationId="ProblemNameTextBox"/>
         <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
                  HorizontalAlignment="Stretch"
                  VerticalAlignment="Stretch"
                  HorizontalContentAlignment="Stretch"
-                 VerticalContentAlignment="Stretch">
+                 VerticalContentAlignment="Stretch"
+                 AutomationProperties.AutomationId="ProblemTabs">
             <TabView.TabItems>
                 <TabViewItem Header="Problem" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="ProblemTab">
                     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -40,36 +43,43 @@
                             <ComboBox Grid.Column="0" IsEditable="True" Header="Problem Type" Grid.Row="0" MinWidth="200"
                                   ItemsSource="{x:Bind ProblemVm.ProblemTypeList}"
                                   Text="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}" />
+                                  PlaceholderText="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}"
+                                  AutomationProperties.AutomationId="ProblemTypeCombo" />
                             <ComboBox Grid.Column="2" IsEditable="True" Header="Conflict Type" Grid.Row="0" MinWidth="200"
                                   Margin="20,0,0,0"
                                   ItemsSource="{x:Bind ProblemVm.ConflictTypeList}"
                                   Text="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}" />
+                                  PlaceholderText="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}"
+                                  AutomationProperties.AutomationId="ConflictTypeCombo" />
                         </Grid>
                         <ComboBox IsEditable="True" Header="Problem Category" Grid.Row="1" MinWidth="300"
                               ItemsSource="{x:Bind ProblemVm.ProblemCategoryList}"
                               Text="{x:Bind ProblemVm.ProblemCategory, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind ProblemVm.ProblemCategory, Mode=TwoWay}" />
+                              PlaceholderText="{x:Bind ProblemVm.ProblemCategory, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="ProblemCategoryCombo" />
                         <ComboBox IsEditable="True" Header="Subject" Grid.Row="2" MinWidth="300"
                               ItemsSource="{x:Bind ProblemVm.SubjectList}"
                               Text="{x:Bind ProblemVm.Subject, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind ProblemVm.Subject, Mode=TwoWay}" />
+                              PlaceholderText="{x:Bind ProblemVm.Subject, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="SubjectCombo" />
                         <usercontrols:RichEditBoxExtended Header="Story Question" Grid.Row="3"
                                                       RtfText="{x:Bind ProblemVm.Description, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="StoryQuestionRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                         <ComboBox IsEditable="True" Header="Problem Source" Grid.Row="4" MinWidth="300"
                               ItemsSource="{x:Bind ProblemVm.ProblemSourceList}"
                               Text="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}" />
+                              PlaceholderText="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="ProblemSourceCombo" />
                     </Grid>
                 </TabViewItem>
                 <TabViewItem Header="Protagonist" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="ProtagonistTab">
                     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -81,28 +91,34 @@
                         <ComboBox Header="Protagonist" Grid.Row="0" IsEditable="False" MinWidth="300"
                               DisplayMemberPath="Name"
                               SelectedItem="{x:Bind ProblemVm.SelectedProtagonist, Mode=TwoWay}"
-                              ItemsSource="{x:Bind ProblemVm.Characters, Mode=OneWay}" />
+                              ItemsSource="{x:Bind ProblemVm.Characters, Mode=OneWay}"
+                              AutomationProperties.AutomationId="ProblemProtagonistCombo" />
                         <ComboBox IsEditable="True" Header="Goal" Grid.Row="1"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               Text="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}" />
+                              PlaceholderText="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="ProblemProtagonistGoalCombo" />
                         <ComboBox IsEditable="True" Header="Motivation" Grid.Row="2"
                               MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
                               Text="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}" />
+                              PlaceholderText="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="ProtagonistMotivationCombo" />
                         <Button Content="Conflict Builder" Grid.Row="3" HorizontalAlignment="Left" Margin="0,10,10,10"
-                            Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}" />
+                            Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}"
+                            AutomationProperties.AutomationId="ProtagonistConflictBuilderButton" />
                         <usercontrols:RichEditBoxExtended Header="Conflict" Grid.Row="4"
                                                       RtfText="{x:Bind ProblemVm.ProtConflict, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="ProtagonistConflictRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                     </Grid>
                 </TabViewItem>
                 <TabViewItem Header="Antagonist" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="AntagonistTab">
                     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -115,28 +131,34 @@
                               DisplayMemberPath="Name"
                               SelectedItem="{x:Bind ProblemVm.SelectedAntagonist, Mode=TwoWay}"
                               SelectedValuePath="Uuid"
-                              ItemsSource="{x:Bind ProblemVm.Characters, Mode=OneWay}" />
+                              ItemsSource="{x:Bind ProblemVm.Characters, Mode=OneWay}"
+                              AutomationProperties.AutomationId="ProblemAntagonistCombo" />
                         <ComboBox IsEditable="True" Header="Goal" Grid.Row="1"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               Text="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}" />
+                              PlaceholderText="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="ProblemAntagonistGoalCombo" />
                         <ComboBox IsEditable="True" Header="Motivation" Grid.Row="2"
                               MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
                               Text="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}" />
+                              PlaceholderText="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="AntagonistMotivationCombo" />
                         <Button Content="Conflict Builder" Grid.Row="3" HorizontalAlignment="Left" Margin="0,10,10,10"
-                            Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}" />
+                            Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}"
+                            AutomationProperties.AutomationId="AntagonistConflictBuilderButton" />
                         <usercontrols:RichEditBoxExtended Header="Conflict" Grid.Row="4"
                                                       RtfText="{x:Bind ProblemVm.AntagConflict, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="AntagonistConflictRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                     </Grid>
                 </TabViewItem>
                 <TabViewItem Header="Resolution" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="ResolutionTab">
                     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -147,20 +169,24 @@
                         <ComboBox IsEditable="True" Header="Outcome" Grid.Row="0"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.OutcomeList}"
                               Text="{x:Bind ProblemVm.Outcome, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind ProblemVm.Outcome, Mode=TwoWay}" />
+                              PlaceholderText="{x:Bind ProblemVm.Outcome, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="ProblemOutcomeCombo" />
                         <ComboBox IsEditable="True" Header="Method" Grid.Row="1"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.MethodList}"
                               Text="{x:Bind ProblemVm.Method, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind ProblemVm.Method, Mode=TwoWay}" />
+                              PlaceholderText="{x:Bind ProblemVm.Method, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="MethodCombo" />
                         <ComboBox IsEditable="True" Header="Theme" Grid.Row="2"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.ThemeList}"
                               Text="{x:Bind ProblemVm.Theme, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind ProblemVm.Theme, Mode=TwoWay}" />
+                              PlaceholderText="{x:Bind ProblemVm.Theme, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="ThemeCombo" />
                         <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="3"
                                                       RtfText="{x:Bind ProblemVm.Premise, Mode=TwoWay}"
                                                       AcceptsReturn="True"
                                                       IsSpellCheckEnabled="True" TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="ProblemPremiseRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto"
                                                       PlaceholderText="A [character] in a situation [genre, setting] wants something [goal], which brings him into [conflict] with a second character [opposition]. After [a series of conflicts], the [final battle] erupts, and [the protagonist] finally [resolves] the conflict. " />
                     </Grid>
@@ -168,7 +194,8 @@
 
                 <TabViewItem Header="Structure" IsClosable="False"
              HorizontalContentAlignment="Stretch"
-             VerticalContentAlignment="Stretch">
+             VerticalContentAlignment="Stretch"
+             AutomationProperties.AutomationId="ProblemStructureTab">
                     <Grid HorizontalAlignment="Stretch"
           VerticalAlignment="Stretch"
           RowSpacing="8">
@@ -186,7 +213,8 @@
                         <!-- ===== ROW 0 : BEAT SHEET HEADER + DESCRIPTION EXPANDER ===== -->
                         <Expander Grid.Row="0"
                   Margin="0,0,0,8"
-                  HorizontalAlignment="Stretch">
+                  HorizontalAlignment="Stretch"
+                  AutomationProperties.AutomationId="BeatSheetExpander">
                             <Expander.Header>
                                 <Grid ColumnSpacing="16">
                                     <Grid.RowDefinitions>
@@ -219,7 +247,9 @@
                                             ItemsSource="{x:Bind BeatSheetsVm.ElementSource}"
                                             SelectedItem="{x:Bind BeatSheetsVm.SelectedElementSource, Mode=TwoWay}"
                                             MaxColumns="2"
-                                            VerticalAlignment="Center">
+                                            VerticalAlignment="Center"
+                                            AutomationProperties.AutomationId="StructureElementsRadios"
+                                            AutomationProperties.Name="Elements">
                                         </RadioButtons>
                                     </StackPanel>
 
@@ -230,7 +260,9 @@
                               PlaceholderText="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=OneWay}"
                               SelectedValue="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=TwoWay}"
                               Text="{x:Bind BeatSheetsVm.StructureModelTitle, Mode=OneWay}"
-                              MinWidth="240" />
+                              MinWidth="240"
+                              AutomationProperties.AutomationId="BeatSheetCombo"
+                              AutomationProperties.Name="Beat Sheet" />
                                     <!-- Row 1, Col 1 left empty; Expander chevron will sit at far right -->
                                 </Grid>
                             </Expander.Header>
@@ -244,7 +276,8 @@
                     IsSpellCheckEnabled="False"
                     TextWrapping="Wrap"
                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                    HorizontalAlignment="Stretch" />
+                    HorizontalAlignment="Stretch"
+                    AutomationProperties.AutomationId="BeatSheetDescriptionRichEdit" />
                             </Expander.Content>
                         </Expander>
 
@@ -269,7 +302,8 @@
                       BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                       BorderThickness="1"
                       CornerRadius="4"
-                      HorizontalAlignment="Stretch">
+                      HorizontalAlignment="Stretch"
+                      AutomationProperties.AutomationId="BeatsList">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">
                                         <Setter Property="HorizontalContentAlignment"
@@ -285,11 +319,13 @@
 
                                 <ListView.ItemTemplate>
                                     <DataTemplate x:DataType="tools:StructureBeat">
+                                        <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). -->
                                         <Grid ColumnDefinitions="Auto,*"
                               VerticalAlignment="Center"
                               Margin="8,8,8,8"
                               RowDefinitions="Auto,Auto"
-                              Background="Transparent">
+                              Background="Transparent"
+                              AutomationProperties.Name="{x:Bind Title, Mode=OneWay}">
                                             <!-- Icon spans both rows -->
                                             <SymbolIcon Grid.Column="0"
                                         Grid.RowSpan="2"
@@ -324,13 +360,17 @@
                                 <Button x:Name="AssignButton"
                                         Width="44" Height="40"
                                         Command="{x:Bind BeatSheetsVm.AssignBeatCommand}"
-                                        ToolTipService.ToolTip="Assign element to beat">
+                                        ToolTipService.ToolTip="Assign element to beat"
+                                        AutomationProperties.AutomationId="AssignBeatButton"
+                                        AutomationProperties.Name="Assign Beat">
                                     <FontIcon Glyph="&#xE72B;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
                                 <Button x:Name="UnassignButton"
                                         Width="44" Height="40"
                                         Command="{x:Bind BeatSheetsVm.UnbindElementCommand}"
-                                        ToolTipService.ToolTip="Remove assignment">
+                                        ToolTipService.ToolTip="Remove assignment"
+                                        AutomationProperties.AutomationId="UnassignBeatButton"
+                                        AutomationProperties.Name="Unassign Beat">
                                     <FontIcon Glyph="&#xE72A;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
 
@@ -342,31 +382,41 @@
                                 <Button x:Name="AddBeatButton"
                                         Width="44" Height="40"
                                         Command="{x:Bind BeatSheetsVm.CreateBeatCommand}"
-                                        ToolTipService.ToolTip="Add a new beat">
+                                        ToolTipService.ToolTip="Add a new beat"
+                                        AutomationProperties.AutomationId="AddBeatButton"
+                                        AutomationProperties.Name="Add Beat">
                                     <FontIcon Glyph="&#xE710;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
                                 <Button x:Name="DeleteBeatButton"
                                         Width="44" Height="40"
                                         Command="{x:Bind BeatSheetsVm.DeleteBeatCommand}"
-                                        ToolTipService.ToolTip="Delete selected beat">
+                                        ToolTipService.ToolTip="Delete selected beat"
+                                        AutomationProperties.AutomationId="DeleteBeatButton"
+                                        AutomationProperties.Name="Delete Beat">
                                     <FontIcon Glyph="&#xE74D;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
                                 <Button x:Name="MoveUpButton"
                                         Width="44" Height="40"
                                         Command="{x:Bind BeatSheetsVm.MoveUpCommand}"
-                                        ToolTipService.ToolTip="Move beat up">
+                                        ToolTipService.ToolTip="Move beat up"
+                                        AutomationProperties.AutomationId="BeatMoveUpButton"
+                                        AutomationProperties.Name="Move Beat Up">
                                     <FontIcon Glyph="&#xE70E;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
                                 <Button x:Name="MoveDownButton"
                                         Width="44" Height="40"
                                         Command="{x:Bind BeatSheetsVm.MoveDownCommand}"
-                                        ToolTipService.ToolTip="Move beat down">
+                                        ToolTipService.ToolTip="Move beat down"
+                                        AutomationProperties.AutomationId="BeatMoveDownButton"
+                                        AutomationProperties.Name="Move Beat Down">
                                     <FontIcon Glyph="&#xE70D;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
                                 <Button x:Name="SaveBeatSheetButton"
                                         Width="44" Height="40"
                                         Command="{x:Bind BeatSheetsVm.SaveBeatSheetCommand}"
-                                        ToolTipService.ToolTip="Save beat sheet to file">
+                                        ToolTipService.ToolTip="Save beat sheet to file"
+                                        AutomationProperties.AutomationId="SaveBeatSheetButton"
+                                        AutomationProperties.Name="Save Beat Sheet">
                                     <FontIcon Glyph="&#xE74E;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
                             </StackPanel>
@@ -386,7 +436,8 @@
                           DisplayMemberPath="Name"
                           BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                           BorderThickness="1"
-                          CornerRadius="4" />
+                          CornerRadius="4"
+                          AutomationProperties.AutomationId="ElementsList" />
                             </Grid>
                         </Grid>
 
@@ -404,7 +455,8 @@
                      Text="{x:Bind BeatSheetsVm.SelectedBeatDescription, Mode=TwoWay}"
                      TextWrapping="Wrap"
                      HorizontalAlignment="Stretch"
-                     VerticalAlignment="Stretch" />
+                     VerticalAlignment="Stretch"
+                     AutomationProperties.AutomationId="BeatDescriptionTextBox" />
 
                             <!-- Element Description -->
                             <usercontrols:RichEditBoxExtended Grid.Column="1"
@@ -413,7 +465,8 @@
                                      IsReadOnly="True"
                                      TextWrapping="Wrap"
                                      HorizontalAlignment="Stretch"
-                                     VerticalAlignment="Stretch" />
+                                     VerticalAlignment="Stretch"
+                                     AutomationProperties.AutomationId="ElementDescriptionRichEdit" />
                         </Grid>
                     </Grid>
                 </TabViewItem>
@@ -421,7 +474,8 @@
 
                 <TabViewItem Header="Notes" IsClosable="False"
                              HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             VerticalContentAlignment="Stretch"
+                             AutomationProperties.AutomationId="ProblemNotesTab">
                     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -433,6 +487,7 @@
                                                       IsSpellCheckEnabled="True"
                                                       TextWrapping="Wrap"
                                                       VerticalAlignment="Stretch"
+                                                      AutomationProperties.AutomationId="ProblemNotesRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                     </Grid>
                 </TabViewItem>

@@ -15,6 +15,7 @@ public sealed partial class FeedbackDialog : Page
     {
         if (FeedbackVM.FeedbackType == 0)
         {
+            FeedbackVM.TitleTitle = "Issue Title";
             FeedbackVM.DescriptionTitle = "Issue Description";
             FeedbackVM.DescriptionPlaceholderText = """
                                                     Describe your bug in detail such as :
@@ -32,6 +33,7 @@ public sealed partial class FeedbackDialog : Page
         }
         else
         {
+            FeedbackVM.TitleTitle = "Feature Title";
             FeedbackVM.DescriptionTitle = "Feature Description";
             FeedbackVM.DescriptionPlaceholderText =
                 "Describe your feature in detail such as what your feature should do.";

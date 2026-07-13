@@ -462,6 +462,7 @@ public class OutlineService
 
         RelationshipModel relationship = new(recipient, desc);
         sourceCharacter.RelationshipList.Add(relationship);
+        Model.Changed = true;
 
         if (mirror)
         {
@@ -530,7 +531,158 @@ public class OutlineService
         }
 
         ((SceneModel)source).CastMembers.Add(castMember);
+        Model.Changed = true;
         _log.Log(LogLevel.Info, $"AddCastMember completed for cast member {castMember}.");
+        return true;
+    }
+
+    /// <summary>
+    ///     Resolves the <see cref="StoryImage"/> list an element stores its attached
+    ///     pictures in, or null when the element type does not support images.
+    ///     Images live on Character, Setting, Scene, and Notes elements; a
+    ///     <see cref="FolderModel"/> that is a plain Folder/Section (not Notes)
+    ///     deliberately has no Images tab.
+    /// </summary>
+    private static List<StoryImage> GetImageList(StoryElement source) => source switch
+    {
+        CharacterModel character => character.Images,
+        SettingModel setting => setting.Images,
+        SceneModel scene => scene.Images,
+        FolderModel { ElementType: StoryItemType.Notes } notes => notes.Images,
+        _ => null
+    };
+
+    /// <summary>
+    ///     Attaches an image to a story element. Validated/logged entry point for the
+    ///     API, mirroring <see cref="AddCastMember"/>; the editing UI mutates its
+    ///     gallery snapshot directly instead. Adding by a duplicate
+    ///     <see cref="StoryImage.Id"/> is a no-op (returns true, like AddCastMember).
+    /// </summary>
+    /// <param name="model">The story model that owns the element (marked changed on success).</param>
+    /// <param name="source">The element to attach the image to.</param>
+    /// <param name="image">The image to attach; must have a non-empty Id.</param>
+    /// <returns>True if the image was added or already present.</returns>
+    internal bool AddImage(StoryModel model, StoryElement source, StoryImage image)
+    {
+        if (source == null)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
+
+        _log.Log(LogLevel.Info, $"AddImage called on source {source.Uuid}.");
+
+        if (image == null)
+        {
+            throw new ArgumentNullException(nameof(image));
+        }
+
+        if (image.Id == Guid.Empty)
+        {
+            throw new ArgumentException("Image Id must not be empty.", nameof(image));
+        }
+
+        if (string.IsNullOrEmpty(image.ImageData))
+        {
+            throw new ArgumentException("Image ImageData must not be empty.", nameof(image));
+        }
+
+        var images = GetImageList(source);
+        if (images == null)
+        {
+            throw new InvalidOperationException("Element does not support images.");
+        }
+
+        if (images.Any(existing => existing.Id == image.Id))
+        {
+            _log.Log(LogLevel.Info, $"AddImage: image {image.Id} already present; not added.");
+            return true;
+        }
+
+        images.Add(image);
+        model.Changed = true;
+        _log.Log(LogLevel.Info, $"AddImage completed for image {image.Id}.");
+        return true;
+    }
+
+    /// <summary>
+    ///     Removes the image with the given Id from a story element.
+    /// </summary>
+    /// <param name="model">The story model that owns the element (marked changed on removal).</param>
+    /// <param name="source">The element to remove the image from.</param>
+    /// <param name="imageId">The Id of the image to remove.</param>
+    /// <returns>True if an image was removed; false if no image had that Id.</returns>
+    internal bool RemoveImage(StoryModel model, StoryElement source, Guid imageId)
+    {
+        if (source == null)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
+
+        _log.Log(LogLevel.Info, $"RemoveImage called for image {imageId} on source {source.Uuid}.");
+
+        if (imageId == Guid.Empty)
+        {
+            throw new ArgumentException("Image id must not be empty.", nameof(imageId));
+        }
+
+        var images = GetImageList(source);
+        if (images == null)
+        {
+            throw new InvalidOperationException("Element does not support images.");
+        }
+
+        var existing = images.FirstOrDefault(image => image.Id == imageId);
+        if (existing == null)
+        {
+            _log.Log(LogLevel.Info, $"RemoveImage: image {imageId} not found.");
+            return false;
+        }
+
+        images.Remove(existing);
+        model.Changed = true;
+        _log.Log(LogLevel.Info, $"RemoveImage completed for image {imageId}.");
+        return true;
+    }
+
+    /// <summary>
+    ///     Updates the caption of the image with the given Id on a story element.
+    ///     A null caption is stored as an empty string, matching the StoryImage default.
+    /// </summary>
+    /// <param name="model">The story model that owns the element (marked changed on update).</param>
+    /// <param name="source">The element whose image caption is being updated.</param>
+    /// <param name="imageId">The Id of the image to update.</param>
+    /// <param name="caption">The new caption.</param>
+    /// <returns>True if the caption was updated; false if no image had that Id.</returns>
+    internal bool UpdateImageCaption(StoryModel model, StoryElement source, Guid imageId, string caption)
+    {
+        if (source == null)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
+
+        _log.Log(LogLevel.Info, $"UpdateImageCaption called for image {imageId} on source {source.Uuid}.");
+
+        if (imageId == Guid.Empty)
+        {
+            throw new ArgumentException("Image id must not be empty.", nameof(imageId));
+        }
+
+        var images = GetImageList(source);
+        if (images == null)
+        {
+            throw new InvalidOperationException("Element does not support images.");
+        }
+
+        var existing = images.FirstOrDefault(image => image.Id == imageId);
+        if (existing == null)
+        {
+            _log.Log(LogLevel.Info, $"UpdateImageCaption: image {imageId} not found.");
+            return false;
+        }
+
+        existing.Caption = caption ?? string.Empty;
+        model.Changed = true;
+        _log.Log(LogLevel.Info, $"UpdateImageCaption completed for image {imageId}.");
         return true;
     }
 

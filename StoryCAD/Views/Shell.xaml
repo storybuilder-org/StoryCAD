@@ -21,6 +21,7 @@
             <CommandBarFlyout x:Key="AddStoryElementFlyout" Placement="Right">
                 <CommandBarFlyout.SecondaryCommands>
                     <AppBarButton Icon="Add" Label="Add Elements"
+                                  AutomationProperties.AutomationId="AddElementsButton"
                                   Visibility="{x:Bind ShellVm.AddButtonVisibility, Mode=OneWay}">
                         <AppBarButton.Flyout>
                             <MenuFlyout>
@@ -32,44 +33,63 @@
                                 <MenuFlyoutItem Icon="Folder"
                                                 Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
+                                                AutomationProperties.AutomationId="ContextAddFolderMenuItem"
+                                                AutomationProperties.Name="Add Folder"
                                                 win:Text="Add Folder         Alt+F" skia:Text="Add Folder         ⌥F" />
                                 <MenuFlyoutItem Icon="Folder"
                                                 Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=OneWay}"
+                                                AutomationProperties.AutomationId="ContextAddSectionMenuItem"
+                                                AutomationProperties.Name="Add Section"
                                                 win:Text="Add Section        Alt+A" skia:Text="Add Section        ⌥A" />
                                 <MenuFlyoutItem Icon="Help"
                                                 Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
+                                                AutomationProperties.AutomationId="ContextAddProblemMenuItem"
+                                                AutomationProperties.Name="Add Problem"
                                                 win:Text="Add Problem      Alt+P" skia:Text="Add Problem      ⌥P" />
                                 <MenuFlyoutItem Icon="Contact"
                                                 Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
+                                                AutomationProperties.AutomationId="ContextAddCharacterMenuItem"
+                                                AutomationProperties.Name="Add Character"
                                                 win:Text="Add Character    Alt+C" skia:Text="Add Character    ⌥C" />
                                 <MenuFlyoutItem Icon="Globe"
                                                 Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
+                                                AutomationProperties.AutomationId="ContextAddSettingMenuItem"
+                                                AutomationProperties.Name="Add Setting"
                                                 win:Text="Add Setting        Alt+L" skia:Text="Add Setting        ⌥L" />
                                 <MenuFlyoutItem Icon="AllApps"
                                                 Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
+                                                AutomationProperties.AutomationId="ContextAddSceneMenuItem"
+                                                AutomationProperties.Name="Add Scene"
                                                 win:Text="Add Scene          Alt+S" skia:Text="Add Scene          ⌥S" />
                                 <MenuFlyoutItem Icon="TwoPage"
                                                 Command="{x:Bind ShellVm.AddNotesCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
+                                                AutomationProperties.AutomationId="ContextAddNotesMenuItem"
+                                                AutomationProperties.Name="Add Notes"
                                                 win:Text="Add Notes          Alt+N" skia:Text="Add Notes          ⌥N" />
                                 <MenuFlyoutItem Icon="PreviewLink"
                                                 Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
+                                                AutomationProperties.AutomationId="ContextAddWebsiteMenuItem"
+                                                AutomationProperties.Name="Add Website"
                                                 win:Text="Add Website      Alt+W" skia:Text="Add Website      ⌥W" />
                                 <MenuFlyoutItem Icon="Map"
                                                 Command="{x:Bind ShellVm.AddStoryWorldCommand, Mode=OneWay}"
                                                 Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
+                                                AutomationProperties.AutomationId="ContextAddStoryWorldMenuItem"
+                                                AutomationProperties.Name="Add StoryWorld"
                                                 win:Text="Add StoryWorld  Alt+B" skia:Text="Add StoryWorld  ⌥B" />
                             </MenuFlyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
                     <AppBarSeparator />
                     <AppBarButton Icon="Delete" Label="Delete element"
+                                  AutomationProperties.AutomationId="DeleteElementButton"
                                   Command="{x:Bind ShellVm.RemoveStoryElementCommand, Mode=OneWay}"
                                   Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}">
                         <ToolTipService.ToolTip>
@@ -77,6 +97,7 @@
                         </ToolTipService.ToolTip>
                     </AppBarButton>
                     <AppBarButton Icon="Refresh" Label="Restore Element"
+                                  AutomationProperties.AutomationId="RestoreElementButton"
                                   Command="{x:Bind ShellVm.RestoreStoryElementCommand, Mode=OneWay}"
                                   Visibility="{x:Bind ShellVm.TrashButtonVisibility, Mode=OneWay}">
                         <ToolTipService.ToolTip>
@@ -84,6 +105,7 @@
                         </ToolTipService.ToolTip>
                     </AppBarButton>
                     <AppBarButton Icon="Switch" Label="Add to Narrative"
+                                  AutomationProperties.AutomationId="AddToNarrativeButton"
                                   Command="{x:Bind ShellVm.AddToNarrativeCommand, Mode=OneWay}"
                                   Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}">
                         <ToolTipService.ToolTip>
@@ -91,6 +113,7 @@
                         </ToolTipService.ToolTip>
                     </AppBarButton>
                     <AppBarButton Icon="Switch" Label="Remove from narrative"
+                                  AutomationProperties.AutomationId="RemoveFromNarrativeButton"
                                   Command="{x:Bind ShellVm.RemoveFromNarrativeCommand, Mode=OneWay}"
                                   Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=OneWay}">
                         <ToolTipService.ToolTip>
@@ -98,12 +121,15 @@
                         </ToolTipService.ToolTip>
                     </AppBarButton>
                     <AppBarButton Icon="Switch" Label="Convert to Scene"
+                                  AutomationProperties.AutomationId="ConvertToSceneButton"
                                   Command="{x:Bind ShellVm.ConvertToSceneCommand, Mode=OneWay}"
                                   Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}" />
                     <AppBarButton Icon="Switch" Label="Convert to Problem"
+                                  AutomationProperties.AutomationId="ConvertToProblemButton"
                                   Command="{x:Bind ShellVm.ConvertToProblemCommand, Mode=OneWay}"
                                   Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}" />
                     <AppBarButton Icon="Print" Label="Print node"
+                                  AutomationProperties.AutomationId="PrintNodeButton"
                                   Command="{x:Bind ShellVm.PrintNodeCommand, Mode=OneWay}"
                                   Visibility="{x:Bind ShellVm.PrintNodeVisibility, Mode=OneWay}">
                         <ToolTipService.ToolTip>
@@ -111,12 +137,13 @@
                         </ToolTipService.ToolTip>
                     </AppBarButton>
                     <AppBarButton Icon="Cancel" Label="Empty Trash"
+                                  AutomationProperties.AutomationId="EmptyTrashButton"
                                   Visibility="{x:Bind ShellVm.TrashButtonVisibility, Mode=OneWay}">
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Empty trash" />
                         </ToolTipService.ToolTip>
                         <AppBarButton.Flyout>
-                            <Flyout x:Name="EmptyTrashFlyout">
+                            <Flyout x:Name="EmptyTrashFlyout" AutomationProperties.AutomationId="EmptyTrashFlyout">
                                 <Flyout.FlyoutPresenterStyle>
                                     <Style TargetType="FlyoutPresenter">
                                         <Setter Property="Margin" Value="-16,0,0,0"/>
@@ -126,6 +153,7 @@
                                     <TextBlock Text="Are you sure you want to empty the trash?"
                                                HorizontalAlignment="Center" Margin="0,0,0,10" />
                                     <Button Command="{x:Bind ShellVm.EmptyTrashCommand, Mode=OneWay}" Content="Empty"
+                                            AutomationProperties.AutomationId="EmptyTrashConfirmButton"
                                             HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Flyout>
@@ -184,45 +212,60 @@
                 <StackPanel Orientation="Horizontal">
                     <AutoSuggestBox PlaceholderText="Enter text to search for here" QueryIcon="Find" Width="335"
                                     Margin="0,8" Padding="0,0"
+                                    AutomationProperties.AutomationId="ShellSearchBox"
+                                    AutomationProperties.Name="Search"
                                     QuerySubmitted="Search" TextChanged="ClearNodes"
                                     Text="{x:Bind ShellVm.FilterText, Mode=TwoWay}" VerticalAlignment="Center" />
                 </StackPanel>
             </CommandBar.Content>
             <CommandBar.PrimaryCommands>
                 <AppBarButton Width="50" IsCompact="True" Icon="GlobalNavigationButton" Label="Show"
+                              AutomationProperties.AutomationId="TogglePaneButton"
                               ToolTipService.ToolTip="Show/Hide Navigation Pane"
                               Command="{x:Bind ShellVm.TogglePaneCommand, Mode=OneWay}" />
                 <AppBarButton IsCompact="True" Icon="Document" Label="File" ToolTipService.ToolTip="File Menu"
+                              AutomationProperties.AutomationId="FileMenuButton"
                               Width="50">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem win:Text="Open/Create file                Ctrl+O" skia:Text="Open/Create file                ⌘O" Command="{x:Bind ShellVm.OpenFileOpenMenuCommand}">
+                            <MenuFlyoutItem win:Text="Open/Create file                Ctrl+O" skia:Text="Open/Create file                ⌘O" Command="{x:Bind ShellVm.OpenFileOpenMenuCommand}"
+                                            AutomationProperties.AutomationId="OpenCreateFileMenuItem"
+                                            AutomationProperties.Name="Open/Create file">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8F4;" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem win:Text="Save Story                      Ctrl+S" skia:Text="Save Story                      ⌘S" Command="{x:Bind ShellVm.SaveFileCommand, Mode=OneWay}">
+                            <MenuFlyoutItem win:Text="Save Story                      Ctrl+S" skia:Text="Save Story                      ⌘S" Command="{x:Bind ShellVm.SaveFileCommand, Mode=OneWay}"
+                                            AutomationProperties.AutomationId="SaveStoryMenuItem"
+                                            AutomationProperties.Name="Save Story">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem win:Text="Save Story As                   Ctrl+Shift+S" skia:Text="Save Story As                   ⇧⌘S" Command="{x:Bind ShellVm.SaveAsCommand, Mode=OneWay}">
+                            <MenuFlyoutItem win:Text="Save Story As                   Ctrl+Shift+S" skia:Text="Save Story As                   ⇧⌘S" Command="{x:Bind ShellVm.SaveAsCommand, Mode=OneWay}"
+                                            AutomationProperties.AutomationId="SaveStoryAsMenuItem"
+                                            AutomationProperties.Name="Save Story As">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE792;" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
                             <MenuFlyoutItem win:Text="Create Backup                   Ctrl+B" skia:Text="Create Backup                   ⌘B"
-                                            Command="{x:Bind ShellVm.CreateBackupCommand, Mode=OneWay}">
+                                            Command="{x:Bind ShellVm.CreateBackupCommand, Mode=OneWay}"
+                                            AutomationProperties.AutomationId="CreateBackupMenuItem"
+                                            AutomationProperties.Name="Create Backup">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xe838;" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Close Story" Command="{x:Bind ShellVm.CloseCommand, Mode=OneWay}">
+                            <MenuFlyoutItem Text="Close Story" Command="{x:Bind ShellVm.CloseCommand, Mode=OneWay}"
+                                            AutomationProperties.AutomationId="CloseStoryMenuItem">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE127;" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem win:Text="Exit                            Ctrl+Q" skia:Text="Quit                            ⌘Q" Command="{x:Bind ShellVm.ExitCommand, Mode=OneWay}">
+                            <MenuFlyoutItem win:Text="Exit                            Ctrl+Q" skia:Text="Quit                            ⌘Q" Command="{x:Bind ShellVm.ExitCommand, Mode=OneWay}"
+                                            AutomationProperties.AutomationId="ExitMenuItem"
+                                            AutomationProperties.Name="Quit">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE106;" />
                                 </MenuFlyoutItem.Icon>
@@ -231,6 +274,7 @@
                     </AppBarButton.Flyout>
                 </AppBarButton>
                 <AppBarButton IsCompact="True" Label="Add" ToolTipService.ToolTip="Add/Remove Story Elements"
+                              AutomationProperties.AutomationId="AddMenuButton"
                               Width="50">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE710;" />
@@ -239,30 +283,44 @@
                         <MenuFlyout>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddFolderCommand, Mode=OneWay}" Icon="Folder"
+                                            AutomationProperties.AutomationId="AddFolderMenuItem"
+                                            AutomationProperties.Name="Add folder"
                                             win:Text="Add folder         Alt+F" skia:Text="Add folder         ⌥F">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddSectionCommand, Mode=OneWay}" Icon="Folder"
+                                            AutomationProperties.AutomationId="AddSectionMenuItem"
+                                            AutomationProperties.Name="Add section"
                                             win:Text="Add section        Alt+A" skia:Text="Add section        ⌥A">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddProblemCommand, Mode=OneWay}" Icon="Help"
+                                            AutomationProperties.AutomationId="AddProblemMenuItem"
+                                            AutomationProperties.Name="Add problem"
                                             win:Text="Add problem      Alt+P" skia:Text="Add problem      ⌥P">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddCharacterCommand, Mode=OneWay}" Icon="Contact"
+                                            AutomationProperties.AutomationId="AddCharacterMenuItem"
+                                            AutomationProperties.Name="Add character"
                                             win:Text="Add character    Alt+C" skia:Text="Add character    ⌥C">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddSettingCommand, Mode=OneWay}" Icon="Globe"
+                                            AutomationProperties.AutomationId="AddSettingMenuItem"
+                                            AutomationProperties.Name="Add setting"
                                             win:Text="Add setting        Alt+L" skia:Text="Add setting        ⌥L">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddSceneCommand, Mode=OneWay}" Icon="AllApps"
+                                            AutomationProperties.AutomationId="AddSceneMenuItem"
+                                            AutomationProperties.Name="Add scene"
                                             win:Text="Add scene          Alt+S" skia:Text="Add scene          ⌥S">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddWebCommand, Mode=OneWay}"
+                                            AutomationProperties.AutomationId="AddWebNodeMenuItem"
+                                            AutomationProperties.Name="Add Web node"
                                             win:Text="Add Web node     Alt+W" skia:Text="Add Web node     ⌥W">
                                 <MenuFlyoutItem.Icon>
                                     <SymbolIcon Symbol="PreviewLink" />
@@ -270,6 +328,8 @@
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddNotesCommand,Mode=OneWay}"
+                                            AutomationProperties.AutomationId="AddNotesNodeMenuItem"
+                                            AutomationProperties.Name="Add Notes node"
                                             win:Text="Add Notes node   Alt+N" skia:Text="Add Notes node   ⌥N">
                                 <MenuFlyoutItem.Icon>
                                     <SymbolIcon Symbol="TwoPage" />
@@ -277,6 +337,8 @@
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddStoryWorldCommand, Mode=OneWay}"
+                                            AutomationProperties.AutomationId="AddStoryWorldMenuItem"
+                                            AutomationProperties.Name="Add StoryWorld"
                                             win:Text="Add StoryWorld  Alt+B" skia:Text="Add StoryWorld  ⌥B">
                                 <MenuFlyoutItem.Icon>
                                     <SymbolIcon Symbol="Map" />
@@ -285,32 +347,39 @@
                             <MenuFlyoutSeparator />
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.RemoveStoryElementCommand,Mode=OneWay}"
-                                            Icon="Delete" Text="Delete story element">
+                                            Icon="Delete" Text="Delete story element"
+                                            AutomationProperties.AutomationId="DeleteStoryElementMenuItem">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.TrashButtonVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.RestoreStoryElementCommand,Mode=OneWay}"
-                                            Icon="Refresh" Text="Restore Story element" />
+                                            Icon="Refresh" Text="Restore Story element"
+                                            AutomationProperties.AutomationId="RestoreStoryElementMenuItem" />
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.AddToNarrativeCommand,Mode=OneWay}" Icon="Switch"
-                                            Text="Add To Narrative" />
+                                            Text="Add To Narrative"
+                                            AutomationProperties.AutomationId="AddToNarrativeMenuItem" />
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.RemoveFromNarrativeCommand,Mode=OneWay}"
-                                            Icon="Switch" Text="Remove from Narrative" />
+                                            Icon="Switch" Text="Remove from Narrative"
+                                            AutomationProperties.AutomationId="RemoveFromNarrativeMenuItem" />
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.ConvertToSceneCommand,Mode=OneWay}" Icon="Switch"
-                                            Text="Convert to Scene" />
+                                            Text="Convert to Scene"
+                                            AutomationProperties.AutomationId="ConvertToSceneMenuItem" />
                             <MenuFlyoutItem Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}"
                                             Command="{x:Bind ShellVm.ConvertToProblemCommand,Mode=OneWay}"
-                                            Icon="Switch" Text="Convert to Problem" />
+                                            Icon="Switch" Text="Convert to Problem"
+                                            AutomationProperties.AutomationId="ConvertToProblemMenuItem" />
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton Width="50" IsCompact="True" Label="Move" ToolTipService.ToolTip="Move Story Elements">
+                <AppBarButton Width="50" IsCompact="True" Label="Move" ToolTipService.ToolTip="Move Story Elements"
+                              AutomationProperties.AutomationId="MoveMenuButton">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE759;" />
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
-                        <Flyout>
+                        <Flyout AutomationProperties.AutomationId="MoveFlyout">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="40" />
@@ -325,18 +394,26 @@
                                 <Button ToolTipService.ToolTip="Move Left"
                                         FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE76B;"
                                         Command="{x:Bind ShellVm.MoveLeftCommand, Mode=OneWay}"
+                                        AutomationProperties.AutomationId="MoveLeftButton"
+                                        AutomationProperties.Name="Move Left"
                                         Margin="0,5,0,5" Grid.Row="1" />
                                 <Button ToolTipService.ToolTip="Move Right"
                                         FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE76C;"
                                         Command="{x:Bind ShellVm.MoveRightCommand, Mode=OneWay}"
+                                        AutomationProperties.AutomationId="MoveRightButton"
+                                        AutomationProperties.Name="Move Right"
                                         Margin="0,5,0,5" Grid.Row="1" Grid.Column="2" />
                                 <Button ToolTipService.ToolTip="Move Up"
                                         FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE70E;"
                                         Command="{x:Bind ShellVm.MoveUpCommand, Mode=OneWay}"
+                                        AutomationProperties.AutomationId="MoveUpButton"
+                                        AutomationProperties.Name="Move Up"
                                         Margin="5,0,5,0" Grid.Row="0" Grid.Column="1" />
                                 <Button ToolTipService.ToolTip="Move Down"
                                         FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE70D;"
                                         Command="{x:Bind ShellVm.MoveDownCommand, Mode=OneWay}"
+                                        AutomationProperties.AutomationId="MoveDownButton"
+                                        AutomationProperties.Name="Move Down"
                                         Margin="5,0,5,0" Grid.Column="1" Grid.Row="2" />
                             </Grid>
                         </Flyout>
@@ -344,13 +421,15 @@
                 </AppBarButton>
                 <AppBarButton Width="50" IsCompact="True" Label="Collaborator"
                               ToolTipService.ToolTip="Launch Collaborator"
+                              AutomationProperties.AutomationId="CollaboratorButton"
                               Visibility="{x:Bind ShellVm.CollaboratorVisibility, Mode=OneWay}"
                               Command="{x:Bind ShellVm.CollaboratorCommand, Mode=OneWay}">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE71B;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <AppBarButton Width="50" IsCompact="True" Label="Tools" ToolTipService.ToolTip="Tools Menu">
+                <AppBarButton Width="50" IsCompact="True" Label="Tools" ToolTipService.ToolTip="Tools Menu"
+                              AutomationProperties.AutomationId="ToolsMenuButton">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE90F;" />
                     </AppBarButton.Icon>
@@ -358,31 +437,45 @@
                         <MenuFlyout>
                             <MenuFlyoutItem win:Text="Open Narrative Editor         Ctrl+N" skia:Text="Open Narrative Editor         ⌘N"
                                             Command="{x:Bind ShellVm.NarrativeToolCommand, Mode=OneWay}"
+                                            AutomationProperties.AutomationId="OpenNarrativeEditorMenuItem"
+                                            AutomationProperties.Name="Open Narrative Editor"
                                             muxc:ToolTipService.ToolTip="Opens the narrative editor to build your story as its told">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem win:Text="Key Questions                   Ctrl+K" skia:Text="Key Questions                   ⌘K"
-                                            Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}">
+                                            Command="{x:Bind ShellVm.KeyQuestionsCommand, Mode=OneWay}"
+                                            AutomationProperties.AutomationId="KeyQuestionsMenuItem"
+                                            AutomationProperties.Name="Key Questions">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem Text="Topic Information"
-                                            Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}" />
+                                            Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}"
+                                            AutomationProperties.AutomationId="TopicInformationMenuItem" />
                             <MenuFlyoutItem Text="Copy Elements to Another Outline"
                                             Command="{x:Bind ShellVm.CopyElementsCommand, Mode=OneWay}"
+                                            AutomationProperties.AutomationId="CopyElementsToAnotherOutlineMenuItem"
                                             ToolTipService.ToolTip="Copy story elements to another outline file" />
-                            <MenuFlyoutSubItem Text="Plotting Aids">
+                            <MenuFlyoutSubItem Text="Plotting Aids"
+                                               AutomationProperties.AutomationId="PlottingAidsMenuItem">
                                 <MenuFlyoutItem win:Text="Master Plots                Ctrl+M" skia:Text="Master Plots                ⌘M"
-                                                Command="{x:Bind ShellVm.MasterPlotsCommand, Mode=OneWay}">
+                                                Command="{x:Bind ShellVm.MasterPlotsCommand, Mode=OneWay}"
+                                                AutomationProperties.AutomationId="MasterPlotsMenuItem"
+                                                AutomationProperties.Name="Master Plots">
                                 </MenuFlyoutItem>
                                 <MenuFlyoutItem win:Text="Dramatic Situations         Ctrl+D" skia:Text="Dramatic Situations         ⌘D"
-                                                Command="{x:Bind ShellVm.DramaticSituationsCommand, Mode=OneWay}">
+                                                Command="{x:Bind ShellVm.DramaticSituationsCommand, Mode=OneWay}"
+                                                AutomationProperties.AutomationId="DramaticSituationsMenuItem"
+                                                AutomationProperties.Name="Dramatic Situations">
                                 </MenuFlyoutItem>
                                 <MenuFlyoutItem win:Text="Stock Scenes                Ctrl+L" skia:Text="Stock Scenes                ⌘L"
-                                                Command="{x:Bind ShellVm.StockScenesCommand, Mode=OneWay}">
+                                                Command="{x:Bind ShellVm.StockScenesCommand, Mode=OneWay}"
+                                                AutomationProperties.AutomationId="StockScenesMenuItem"
+                                                AutomationProperties.Name="Stock Scenes">
                                 </MenuFlyoutItem>
                             </MenuFlyoutSubItem>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton Width="50" IsCompact="True" Label="Reports" ToolTipService.ToolTip="Reports Menu">
+                <AppBarButton Width="50" IsCompact="True" Label="Reports" ToolTipService.ToolTip="Reports Menu"
+                              AutomationProperties.AutomationId="ReportsMenuButton">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE9F9;" />
                     </AppBarButton.Icon>
@@ -390,19 +483,26 @@
                         <MenuFlyout>
                             <MenuFlyoutItem win:Text="Print Reports                   Ctrl+P"
                                             skia:Text="Print Reports                   ⌘⇧P"
-                                            Command="{x:Bind ShellVm.PrintReportsCommand, Mode=OneWay}">
+                                            Command="{x:Bind ShellVm.PrintReportsCommand, Mode=OneWay}"
+                                            AutomationProperties.AutomationId="PrintReportsMenuItem"
+                                            AutomationProperties.Name="Print Reports">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem win:Text="PDF Reports                     Ctrl+Shift+P" skia:Text="PDF Reports                     ⌘P"
-                                            Command="{x:Bind ShellVm.ExportReportsToPdfCommand, Mode=OneWay}">
+                                            Command="{x:Bind ShellVm.ExportReportsToPdfCommand, Mode=OneWay}"
+                                            AutomationProperties.AutomationId="PdfReportsMenuItem"
+                                            AutomationProperties.Name="PDF Reports">
                             </MenuFlyoutItem>
                             <MenuFlyoutItem win:Text="Scrivener Reports               Ctrl+R" skia:Text="Scrivener Reports               ⌘R"
-                                            Command="{x:Bind ShellVm.ScrivenerReportsCommand, Mode=OneWay}">
+                                            Command="{x:Bind ShellVm.ScrivenerReportsCommand, Mode=OneWay}"
+                                            AutomationProperties.AutomationId="ScrivenerReportsMenuItem"
+                                            AutomationProperties.Name="Scrivener Reports">
                             </MenuFlyoutItem>
 
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
                 <AppBarButton Width="50" IsCompact="True" Label="Preferences" win:ToolTipService.ToolTip="Preferences (Ctrl+,)" skia:ToolTipService.ToolTip="Preferences (⌘,)"
+                              AutomationProperties.AutomationId="PreferencesButton"
                               Command="{x:Bind ShellVm.PreferencesCommand, Mode=OneWay}">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE713;" />
@@ -410,12 +510,14 @@
                 </AppBarButton>
                 <AppBarButton Width="50" IsCompact="True" Label="Report Feedback"
                               ToolTipService.ToolTip="Report Feedback"
+                              AutomationProperties.AutomationId="ReportFeedbackButton"
                               Command="{x:Bind ShellVm.ReportFeedbackCommand, Mode=OneWay}">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xED15;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
                 <AppBarButton Width="50" IsCompact="True" Label="Help" ToolTipService.ToolTip="Help (F1)"
+                              AutomationProperties.AutomationId="HelpButton"
                               Command="{x:Bind ShellVm.HelpCommand, Mode=OneWay}">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE897;" />
@@ -434,7 +536,8 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                     <StackPanel>
                         <!-- Main Navigation Tree -->
-                        <ItemsRepeater ItemsSource="{x:Bind AppState.CurrentDocument.Model.CurrentView, Mode=TwoWay}">
+                        <ItemsRepeater ItemsSource="{x:Bind AppState.CurrentDocument.Model.CurrentView, Mode=TwoWay}"
+                                       AutomationProperties.AutomationId="NavigationTree">
                             <ItemsRepeater.ItemTemplate>
                                 <DataTemplate x:DataType="viewmodels:StoryNodeItem">
                                     <Grid DataContext="{x:Bind}">
@@ -444,9 +547,11 @@
                                         </Grid.RowDefinitions>
 
                                         <!-- Shows the root node out of tree, prevents creating new roots. -->
+                                        <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). -->
                                         <TreeViewItem Tapped="RootClick" RightTapped="TreeViewItem_RightTapped"
                                                       HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
-                                                      Background="Transparent" BorderBrush="Transparent">
+                                                      Background="Transparent" BorderBrush="Transparent"
+                                                      AutomationProperties.Name="{x:Bind Name, Mode=OneWay}">
                                             <StackPanel Orientation="Horizontal"
                                                         Background="{x:Bind Background, Mode=OneWay}"
                                                         BorderBrush="{x:Bind  boarderBrush, Mode=OneWay}"
@@ -469,13 +574,15 @@
 
                                             <muxc:TreeView.ItemTemplate>
                                                 <DataTemplate x:DataType="viewmodels:StoryNodeItem">
+                                                    <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). -->
                                                     <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
                                                                        Background="{x:Bind Background, Mode=OneWay}"
                                                                        BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
                                                                        BorderThickness="1"
                                                                        RightTapped="TreeViewItem_RightTapped"
                                                                        IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                                                                       CanDrag="True">
+                                                                       CanDrag="True"
+                                                                       AutomationProperties.Name="{x:Bind Name, Mode=OneWay}">
                                                         <StackPanel Orientation="Horizontal">
                                                             <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}"
                                                                         Width="20" Height="20" />
@@ -499,13 +606,16 @@
                         <muxc:TreeView ItemsSource="{x:Bind AppState.CurrentDocument.Model.TrashView, Mode=TwoWay}"
                                        ItemInvoked="TreeViewItem_Invoked"
                                        CanDragItems="False" AllowDrop="False" CanReorderItems="False"
-                                       SelectionMode="Single">
+                                       SelectionMode="Single"
+                                       AutomationProperties.AutomationId="TrashTree">
                             <muxc:TreeView.ItemTemplate>
                                 <DataTemplate x:DataType="viewmodels:StoryNodeItem">
+                                    <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). -->
                                     <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
                                                        RightTapped="TreeViewItem_RightTapped"
                                                        IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                                                       CanDrag="False">
+                                                       CanDrag="False"
+                                                       AutomationProperties.Name="{x:Bind Name, Mode=OneWay}">
                                         <StackPanel Orientation="Horizontal">
                                             <SymbolIcon Symbol="{x:Bind Symbol, Mode=OneWay}" Width="20" Height="20" />
                                             <TextBlock Text="{x:Bind Name, Mode=TwoWay}"
@@ -549,13 +659,17 @@
             <ComboBox Grid.Column="0" IsEditable="False" Width="200" Margin="10"
                       ItemsSource="{x:Bind ShellVm.ViewList}"
                       SelectionChanged="{x:Bind ShellVm.ViewChanged, Mode=OneWay}"
-                      SelectedItem="{x:Bind ShellVm.SelectedView, Mode=TwoWay}" />
+                      SelectedItem="{x:Bind ShellVm.SelectedView, Mode=TwoWay}"
+                      AutomationProperties.AutomationId="ViewSelectorCombo"
+                      AutomationProperties.Name="View selector" />
 
             <TextBlock Grid.Column="1" Text="{x:Bind ShellVm.StatusMessage, Mode=OneWay}"
                        Foreground="{x:Bind ShellVm.StatusColor, Mode=OneWay}"
                        Width="350" FontSize="14" Margin="10" FontFamily="Segoe UI" Padding="0,5" />
 
             <Button Grid.Column="2" Background="Transparent" Command="{x:Bind ShellVm.SaveFileCommand}"
+                    AutomationProperties.AutomationId="SaveStatusButton"
+                    AutomationProperties.Name="Save"
                     BorderBrush="Transparent">
                 <Button.Content>
                     <SymbolIcon Symbol="Edit" Height="36"
@@ -569,7 +683,9 @@
 
             <!-- Spacer in Column 3 -->
 
-            <Button Grid.Column="4" Background="Transparent" BorderBrush="Transparent" HorizontalAlignment="Right">
+            <Button Grid.Column="4" Background="Transparent" BorderBrush="Transparent" HorizontalAlignment="Right"
+                    AutomationProperties.AutomationId="AutosaveStatusButton"
+                    AutomationProperties.Name="Autosave">
                 <Button.Content>
                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" Height="36"
                               ToolTipService.ToolTip="This icon is green when AutoSave is active and working.">
@@ -581,6 +697,8 @@
             </Button>
 
             <Button Grid.Column="5" Background="Transparent" Command="{x:Bind ShellVm.CreateBackupCommand}"
+                    AutomationProperties.AutomationId="BackupStatusButton"
+                    AutomationProperties.Name="Backup"
                     BorderBrush="Transparent" HorizontalAlignment="Right">
                 <Button.Content>
                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE777;" Height="36"

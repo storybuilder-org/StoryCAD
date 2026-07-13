@@ -23,15 +23,22 @@
         <InfoBar Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                  Severity="Informational" HorizontalAlignment="Stretch"
                  Title="Detailed feedback is addressed quicker"
-                 IsOpen="True" IsClosable="False" Margin="10,0,10,10" />
+                 IsOpen="True" IsClosable="False" Margin="10,0,10,10"
+                 AutomationProperties.AutomationId="FeedbackTipInfoBar" />
 
-        <TextBox Grid.Row="1" Grid.Column="1" Header="Issue Title"
+        <!-- Header is bound (toggles "Issue"/"Feature Title" with the Type combo) rather than
+             literal, but a bound Header still reaches the framework name at runtime like a literal
+             one, so no explicit Name is added here. -->
+        <TextBox Grid.Row="1" Grid.Column="1"
+                 Header="{x:Bind FeedbackVM.TitleTitle, Mode=TwoWay}"
                  Margin="10,0,0,0"
-                 Text="{x:Bind FeedbackVM.Title, Mode=TwoWay}" />
+                 Text="{x:Bind FeedbackVM.Title, Mode=TwoWay}"
+                 AutomationProperties.AutomationId="IssueTitleTextBox" />
 
         <ComboBox Grid.Row="1" Grid.Column="0" Header="Type"
                   SelectedIndex="{x:Bind FeedbackVM.FeedbackType, Mode=TwoWay}"
-                  HorizontalAlignment="Stretch" SelectionChanged="ChangeUIText">
+                  HorizontalAlignment="Stretch" SelectionChanged="ChangeUIText"
+                  AutomationProperties.AutomationId="FeedbackTypeCombo">
             <ComboBoxItem Content="Bug Report" />
             <ComboBoxItem Content="Feature Request" />
         </ComboBox>
@@ -45,16 +52,21 @@
                        Visibility="{x:Bind FeedbackVM.BodyErrorVisibility, Mode=OneWay}" />
         </StackPanel>
 
+        <!-- Header is bound (toggles "Issue"/"Feature Description" with the Type combo) rather than
+             literal, but a bound Header still reaches the framework name at runtime like a literal
+             one, so no explicit Name is added here. -->
         <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Stretch"
                  Header="{x:Bind FeedbackVM.DescriptionTitle, Mode=TwoWay}"
                  Text="{x:Bind FeedbackVM.Body, Mode=TwoWay}" TextWrapping="Wrap"
                  AcceptsReturn="True"
-                 PlaceholderText="{x:Bind FeedbackVM.DescriptionPlaceholderText, Mode=TwoWay}" />
+                 PlaceholderText="{x:Bind FeedbackVM.DescriptionPlaceholderText, Mode=TwoWay}"
+                 AutomationProperties.AutomationId="FeedbackBodyTextBox" />
 
         <TextBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Stretch"
                  Header="{x:Bind FeedbackVM.ExtraStepsTitle, Mode=TwoWay}" MinHeight="50"
                  Text="{x:Bind FeedbackVM.ExtraStepsText, Mode=TwoWay}" TextWrapping="Wrap"
                  AcceptsReturn="True"
-                 PlaceholderText="{x:Bind FeedbackVM.ExtraStepsPlaceholderText, Mode=TwoWay}" />
+                 PlaceholderText="{x:Bind FeedbackVM.ExtraStepsPlaceholderText, Mode=TwoWay}"
+                 AutomationProperties.AutomationId="FeedbackExtraStepsTextBox" />
     </Grid>
 </Page>

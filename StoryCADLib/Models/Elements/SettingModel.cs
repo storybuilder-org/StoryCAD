@@ -136,6 +136,18 @@ public class SettingModel : StoryElement
         set => _notes = value;
     }
 
+    // Attached pictures (embedded in the outline at full resolution)
+
+    [JsonIgnore] private List<StoryImage> _images;
+
+    [JsonInclude]
+    [JsonPropertyName("Images")]
+    public List<StoryImage> Images
+    {
+        get => _images;
+        set => _images = value;
+    }
+
     #endregion
 
     #region Constructors
@@ -155,6 +167,7 @@ public class SettingModel : StoryElement
         Touch = string.Empty;
         SmellTaste = string.Empty;
         Notes = string.Empty;
+        Images = new List<StoryImage>();
         SettingNames.Add(Name);
     }
 
@@ -174,12 +187,14 @@ public class SettingModel : StoryElement
         Touch = string.Empty;
         SmellTaste = string.Empty;
         Notes = string.Empty;
+        Images = new List<StoryImage>();
         SettingNames.Add(Name);
     }
 
 
     public SettingModel()
     {
+        Images = new List<StoryImage>();
     }
 
     #endregion

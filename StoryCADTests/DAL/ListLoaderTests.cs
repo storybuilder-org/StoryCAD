@@ -50,7 +50,7 @@ public class ListLoaderTests
         Assert.IsTrue(lists.ContainsKey("Values"));
         Assert.IsTrue(lists.ContainsKey("Abnormality"));
         Assert.IsTrue(lists.ContainsKey("Focus"));
-        Assert.IsTrue(lists.ContainsKey("Adventureousness"));
+        Assert.IsTrue(lists.ContainsKey("Adventurousness"));
         Assert.IsTrue(lists.ContainsKey("Aggression"));
         Assert.IsTrue(lists.ContainsKey("Confidence"));
         Assert.IsTrue(lists.ContainsKey("Conscientiousness"));

@@ -186,4 +186,14 @@ public class FeedbackViewModelTests
         // Assert
         Assert.AreEqual(Visibility.Collapsed, vm.BodyErrorVisibility);
     }
+
+    [TestMethod]
+    public void TitleTitle_ByDefault_IsIssueTitle()
+    {
+        // Arrange
+        var vm = GetFreshVm();
+
+        // Act / Assert
+        Assert.AreEqual("Issue Title", vm.TitleTitle);
+    }
 }

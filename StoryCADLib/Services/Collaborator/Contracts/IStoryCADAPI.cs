@@ -86,6 +86,12 @@ public interface IStoryCADAPI
 
     OperationResult<bool> AddCastMember(Guid scene, Guid character);
 
+    OperationResult<bool> AddImage(Guid element, StoryImage image);
+
+    OperationResult<bool> RemoveImage(Guid element, Guid imageId);
+
+    OperationResult<bool> UpdateImageCaption(Guid element, Guid imageId, string caption);
+
     OperationResult<bool> AddRelationship(Guid source, Guid recipient, string desc, bool mirror = false);
 
     OperationResult<bool> MoveElement(Guid elementGuid, Guid newParentGuid, int? index = null);

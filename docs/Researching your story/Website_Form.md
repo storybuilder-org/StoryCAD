@@ -9,7 +9,7 @@ has_toc: false
 ## Website Form
 The website form allows you to store and view web pages easily and functions like a smaller version of your web browser. The form keeps the URL you're browsing.
 
-![](WebElementOverview.png)
+![](../media/Elements/Web/WebElementOverview.png)
 
 These buttons allow you to refresh, go forwards and backward respectively.
 ![](../media/ReloadBackAndForward.png)
@@ -23,19 +23,19 @@ Example - Planning out a fictional character.
 
 1) Create a new website node, you can do this by right clicking a node and then clicking the webpage icon (ALT + W).
 
-![](WebNodeHighlighted.png)
+![](../media/Elements/Web/WebNodeHighlighted.png)
 
 2) Now navigate to it by clicking on it, it should now look similar the picture below.
 
-![](WebNodeWithSearchEngine.png)
+![](../media/Elements/Web/WebNodeWithSearchEngine.png)
 
 3) Now let's make a fictional map, so search for "fictional map generator".
 
-![](WebNodeWithSearchQuery.png)
+![](../media/Elements/Web/WebNodeWithSearchQuery.png)
 
 4) Select any website below, for this example we will use the first one.
 
-![](WebNodeExamplePage.png)
+![](../media/Elements/Web/WebNodeExamplePage.png)
 
 We have now got a map of our fictional world and can start planning our story around it.
 
