@@ -120,6 +120,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
+        <ProjectReference Include="..\StoryCADXamlScan\StoryCADXamlScan.csproj" />
     </ItemGroup>
 
 </Project>
