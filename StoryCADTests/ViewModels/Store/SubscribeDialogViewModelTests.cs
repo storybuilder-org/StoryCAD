@@ -53,12 +53,13 @@ public class SubscribeDialogViewModelTests
     }
 
     [TestMethod]
-    public void PriceSummary_MonthlyWithTrial_MentionsOneWeekTrial()
+    public void PriceSummary_MonthlyWithTrial_MentionsTrialWithoutLength()
     {
         var vm = Create(new FakeStoreService(), new FakeActivation());
         vm.SelectedPlan = Monthly;
 
-        Assert.AreEqual("1-week free trial, then $4.99/month.", vm.PriceSummary);
+        // The store payload carries no offer length, so the summary must not name one.
+        Assert.AreEqual("Includes a free trial, then $4.99/month.", vm.PriceSummary);
     }
 
     [TestMethod]
@@ -67,7 +68,7 @@ public class SubscribeDialogViewModelTests
         var vm = Create(new FakeStoreService(), new FakeActivation());
         vm.SelectedPlan = new StoreProduct("id", "Monthly", "", "", "P1M", true);
 
-        Assert.AreEqual("1-week free trial, then PLACEHOLDER/month.", vm.PriceSummary);
+        Assert.AreEqual("Includes a free trial, then PLACEHOLDER/month.", vm.PriceSummary);
     }
 
     [TestMethod]

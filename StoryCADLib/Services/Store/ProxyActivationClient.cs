@@ -7,7 +7,8 @@ using System.Threading;
 
 namespace StoryCADLib.Services.Store;
 
-// Wire body for POST /activate (devdocs/iap/activation-contract.md; do not rename members).
+// Wire body for POST /activate (activation contract in
+// StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md; do not rename members).
 // Source-generated like StoreKitJsonContext so the desktop head stays trimming-friendly.
 internal sealed class ActivationRequest
 {
@@ -47,17 +48,26 @@ public sealed class ProxyActivationClient : IActivationClient
     private const string DefaultProxyBaseUrl =
         "https://storycad-collaborator-proxy-production.storybuilder-foundation.workers.dev/v1";
 
-    private static readonly HttpClient HttpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
+    // One shared client for the process (socket reuse); the DI singleton reuses it.
+    private static readonly HttpClient SharedHttpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
 
     private readonly ILogService _logService;
+    private readonly HttpClient _httpClient;
 
     // Resolved once: the class is a DI singleton and the proxy channel cannot change mid-process.
     private readonly string _baseUrl;
     private readonly string _token;
 
-    public ProxyActivationClient(ILogService logService)
+    public ProxyActivationClient(ILogService logService) : this(logService, SharedHttpClient)
+    {
+    }
+
+    // Test seam (InternalsVisibleTo StoryCADTests): inject an HttpClient backed by a fake
+    // HttpMessageHandler so the activation contract can be exercised without a network.
+    internal ProxyActivationClient(ILogService logService, HttpClient httpClient)
     {
         _logService = logService;
+        _httpClient = httpClient;
         _baseUrl = Environment.GetEnvironmentVariable("COLLAB_PROXY_URL") ?? DefaultProxyBaseUrl;
         _token = Environment.GetEnvironmentVariable("COLLAB_PROXY_TOKEN");
     }
@@ -91,10 +101,17 @@ public sealed class ProxyActivationClient : IActivationClient
         HttpResponseMessage response;
         try
         {
-            response = await HttpClient.SendAsync(request, ct);
+            response = await _httpClient.SendAsync(request, ct);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            // Caller-requested cancellation (e.g. app shutdown), not a network failure. Let it
+            // propagate so StoreActivationService can return quietly instead of warning the user.
+            throw;
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
+            // A TaskCanceledException with the token *not* cancelled is HttpClient's 30s timeout.
             throw new StoreActivationUnreachableException("Store activation endpoint is unreachable.", ex);
         }
 
@@ -119,7 +136,7 @@ public sealed class ProxyActivationClient : IActivationClient
 
         try
         {
-            using var response = await HttpClient.SendAsync(request, ct);
+            using var response = await _httpClient.SendAsync(request, ct);
             if (!response.IsSuccessStatusCode)
             {
                 _logService.Log(LogLevel.Warn,

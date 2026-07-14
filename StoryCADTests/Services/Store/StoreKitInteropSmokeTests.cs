@@ -10,7 +10,8 @@ namespace StoryCADTests.Services.Store;
 ///     Verifies the interop's DllImport resolver actually loads the shim dylib on macOS. Only a
 ///     dlopen, no live StoreKit call, so it needs no App Store account. Self-skips off macOS or when
 ///     the dylib has not been built (run src/macos/StoreKitShim/build.sh). Not a substitute for the
-///     sandbox manual checklist in devdocs/iap/testing.md.
+///     sandbox manual checklist in the IAP testing doc
+///     (StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md).
 /// </summary>
 [TestClass]
 public class StoreKitInteropSmokeTests

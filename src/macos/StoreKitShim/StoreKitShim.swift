@@ -2,7 +2,8 @@
 // C# cannot call StoreKit 2 directly (Swift-only, async), so every export here is a
 // synchronous C function that copies its arguments, runs the async work in a Task,
 // and delivers a UTF-8 JSON payload to the caller's callback.
-// The JSON contracts are documented in devdocs/iap/shim-contract.md; keep both in sync.
+// The JSON contracts are documented in the shim contract
+// (StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md); keep both in sync.
 
 import Foundation
 import StoreKit

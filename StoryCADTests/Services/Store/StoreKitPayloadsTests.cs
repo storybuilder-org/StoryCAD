@@ -6,7 +6,8 @@ using StoryCADLib.Services.Store;
 namespace StoryCADTests.Services.Store;
 
 /// <summary>
-///     Parses each StoreKit shim contract payload (devdocs/iap/shim-contract.md) into the public store
+///     Parses each StoreKit shim contract payload (shim contract in
+///     StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md) into the public store
 ///     models, plus the error and malformed-body paths. Pure JSON mapping, so these run on any TFM.
 /// </summary>
 [TestClass]

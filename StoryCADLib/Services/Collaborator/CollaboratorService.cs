@@ -1,12 +1,14 @@
 using Windows.ApplicationModel.AppExtensions;
 using Windows.ApplicationModel.Resources.Core;
 using Windows.Storage;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Markup;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator.Contracts;
+using StoryCADLib.Services.Messages;
 using StoryCADLib.Services.Store;
 using StoryCADLib.ViewModels.Store;
 
@@ -130,7 +132,8 @@ public class CollaboratorService
 
     // Gate (issue #30): Collaborator opens only when the store-activation service holds a valid
     // Worker JWT. This is a client-side, open-time check; attaching CurrentJwt to each Collaborator
-    // Worker call (the per-call enforcement in devdocs/iap/activation-contract.md, "JWT") is the
+    // Worker call (the per-call enforcement in the activation contract, "JWT"; see
+    // StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md) is the
     // remaining #30 wiring in the CollaboratorLib/Worker track. Resolved on demand to avoid
     // widening the constructor.
     private static bool IsPurchaseVerified() =>
@@ -143,6 +146,20 @@ public class CollaboratorService
     /// </summary>
     private async Task<bool> ShowSubscribeDialogAsync()
     {
+        // No platform store (NullStoreService, e.g. any desktop build outside a store bundle) means
+        // no plans to list and a Subscribe button that can never succeed. Don't show the dialog;
+        // tell the user Collaborator needs the store edition. Resolved on demand to match above.
+        var store = Ioc.Default.GetService<IStoreService>();
+        if (store is null || !store.IsSupported)
+        {
+            // Called on the UI thread from OpenCollaboratorAsync, so send the status directly.
+            _logService.Log(LogLevel.Warn, "Subscribe dialog suppressed; no platform store is available in this build.");
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                "Collaborator requires the Microsoft Store or Mac App Store edition of StoryCAD.",
+                LogLevel.Warn, true)));
+            return false;
+        }
+
         var windowing = Ioc.Default.GetService<Windowing>();
         var vm = Ioc.Default.GetService<SubscribeDialogViewModel>();
         if (windowing is null || vm is null)

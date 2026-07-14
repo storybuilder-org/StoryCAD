@@ -137,6 +137,12 @@ public sealed class StoreActivationService : IStoreActivationService
             {
                 response = await _client.ActivateAsync(proof, ct);
             }
+            catch (OperationCanceledException)
+            {
+                // App shutting down or the caller cancelled: not a network failure. Leave state
+                // untouched and return quietly rather than flashing an "unreachable" warning.
+                return;
+            }
             catch (Exception ex)
             {
                 // No offline mode: Collaborator needs the Worker to function at all. Surface the

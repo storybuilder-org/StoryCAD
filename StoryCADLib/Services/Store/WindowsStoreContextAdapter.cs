@@ -21,7 +21,8 @@ namespace StoryCADLib.Services.Store;
 /// <remarks>
 ///     NOTE (issue #30): this file cannot be compiled or run on macOS. It is written against the
 ///     documented <c>Windows.Services.Store</c> API and must be built + exercised on Windows
-///     (the manual purchase/relaunch/restore loop in <c>devdocs/iap/testing.md</c>).
+///     (the manual purchase/relaunch/restore loop in the IAP testing checklist,
+///     <c>StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md</c>).
 /// </remarks>
 public sealed class WindowsStoreContextAdapter : IStoreContextAdapter
 {

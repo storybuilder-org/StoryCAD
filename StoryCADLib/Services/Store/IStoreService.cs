@@ -46,6 +46,14 @@ public interface IStoreService
     Task RestoreAsync(CancellationToken ct = default);
 
     /// <summary>
+    ///     The store's current entitlements for this account (empty for
+    ///     <see cref="NullStoreService" />). Callers gate on <see cref="StoreEntitlement.State" />,
+    ///     not on presence; the raising implementations already exclude lapsed/revoked where the
+    ///     platform does.
+    /// </summary>
+    Task<IReadOnlyList<StoreEntitlement>> GetCurrentEntitlementsAsync(CancellationToken ct = default);
+
+    /// <summary>
     ///     Returns the current entitlement's signed proof for the Worker handshake, or null
     ///     when the store reports no entitlement.
     /// </summary>

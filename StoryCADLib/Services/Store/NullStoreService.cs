@@ -30,6 +30,9 @@ public sealed class NullStoreService : IStoreService
 
     public Task RestoreAsync(CancellationToken ct = default) => Task.CompletedTask;
 
+    public Task<IReadOnlyList<StoreEntitlement>> GetCurrentEntitlementsAsync(CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<StoreEntitlement>>(Array.Empty<StoreEntitlement>());
+
     public Task<PurchaseProof> GetPurchaseProofAsync(string userGuid, CancellationToken ct = default) =>
         Task.FromResult<PurchaseProof>(null);
 }

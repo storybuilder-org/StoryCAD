@@ -18,6 +18,7 @@ internal sealed class FakeStoreService : IStoreService
     public PurchaseResult PurchaseResult = new(PurchaseStatus.Success);
     public string LastPurchaseUserGuid;
     public bool RestoreCalled;
+    public IReadOnlyList<StoreEntitlement> Entitlements = Array.Empty<StoreEntitlement>();
 
     public bool IsSupported => true;
 
@@ -45,6 +46,9 @@ internal sealed class FakeStoreService : IStoreService
         RestoreCalled = true;
         return Task.CompletedTask;
     }
+
+    public Task<IReadOnlyList<StoreEntitlement>> GetCurrentEntitlementsAsync(CancellationToken ct = default) =>
+        Task.FromResult(Entitlements);
 
     public Task<PurchaseProof> GetPurchaseProofAsync(string userGuid, CancellationToken ct = default)
     {

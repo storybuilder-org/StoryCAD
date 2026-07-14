@@ -8,7 +8,8 @@ using System.Threading;
 namespace StoryCADLib.Services.Store;
 
 /// <summary>
-///     Thin managed side of the StoreKit shim's C ABI (devdocs/iap/shim-contract.md). Each async
+///     Thin managed side of the StoreKit shim's C ABI (shim contract in
+///     StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md). Each async
 ///     export takes a request id and a completion callback; a single unmanaged callback fans results
 ///     back to the awaiting <see cref="TaskCompletionSource{T}" /> by id, or to the entitlement-change
 ///     handler for the id -1 transaction-updates push. Only compiled into the desktop head; the dylib

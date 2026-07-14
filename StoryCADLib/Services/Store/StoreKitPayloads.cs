@@ -5,7 +5,8 @@ using System.Text.Json.Serialization.Metadata;
 
 namespace StoryCADLib.Services.Store;
 
-// Wire DTOs and mapping for the StoreKit shim's JSON contracts (devdocs/iap/shim-contract.md).
+// Wire DTOs and mapping for the StoreKit shim's JSON contracts (shim contract in
+// StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md).
 // Platform-agnostic on purpose: no P/Invoke here, so these map cleanly and the unit tests run on
 // any TFM. The native calls live in StoreKitInterop (macOS/desktop only).
 

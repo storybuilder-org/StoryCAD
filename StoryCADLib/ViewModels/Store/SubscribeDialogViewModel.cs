@@ -79,7 +79,9 @@ public sealed class SubscribeDialogViewModel : ObservableObject
             var price = string.IsNullOrEmpty(SelectedPlan.DisplayPrice) ? "PLACEHOLDER" : SelectedPlan.DisplayPrice;
             var period = PeriodWord(SelectedPlan.SubscriptionPeriod);
             var priced = string.IsNullOrEmpty(period) ? price : $"{price}/{period}";
-            return SelectedPlan.HasIntroOffer ? $"1-week free trial, then {priced}." : $"{priced}.";
+            // The store payload only reports whether an intro offer exists, not its length, so the
+            // summary must not name a period (Apple guideline 3.1.2: purchase terms must be accurate).
+            return SelectedPlan.HasIntroOffer ? $"Includes a free trial, then {priced}." : $"{priced}.";
         }
     }
 
