@@ -229,6 +229,13 @@ public partial class App : Application
             MacSecurityBookmarks.RestoreAllBookmarks(prefs.Model.SecurityBookmarks, _log);
         }
 
+        // Store activation (issue #30): rehydrate any cached JWT and re-verify purchase proof so a
+        // subscriber is Active before they first open Collaborator; constructing the service also
+        // starts the platform store's entitlement/license listener. Must run after ReadPreferences;
+        // fire-and-forget off the UI thread (InitializeAsync itself never throws).
+        _ = Task.Run(() => Ioc.Default.GetRequiredService<StoryCADLib.Services.Store.IStoreActivationService>()
+            .InitializeAsync());
+
         MainWindow = new Window();
 #if DEBUG
         MainWindow.UseStudio();

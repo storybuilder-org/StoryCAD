@@ -76,7 +76,9 @@ namespace StoryCollaborator
                     return WorkflowResult.Failed($"Missing required element: '{requirement.ElementLabel}'");
             }
 
-            if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("COLLAB_PROXY_TOKEN")) &&
+            // A subscriber's activation JWT counts as a proxy credential; without any
+            // credential the workflow degrades to the stub rather than calling out bare.
+            if (string.IsNullOrWhiteSpace(KernelFactory.ResolveWorkflowCredential()) &&
                 string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("OPENAI_API_KEY")))
             {
                 return BuildStubResponse();
@@ -874,9 +876,13 @@ namespace StoryCollaborator
         {
             var proxyBaseUrl = Environment.GetEnvironmentVariable("COLLAB_PROXY_URL")
                 ?? KernelFactory.DefaultProxyBaseUrl;
-            var proxyToken = Environment.GetEnvironmentVariable("COLLAB_PROXY_TOKEN");
-            if (string.IsNullOrWhiteSpace(proxyToken))
-                throw new InvalidOperationException("COLLAB_PROXY_TOKEN not set; cannot call proxy workflow endpoint.");
+            // Resolved per call: a subscriber's activation JWT replaces the shared secret
+            // (the Worker retires the shared secret on /workflow under issue #90), and the
+            // JWT rotates ~12-hourly so it must never be cached across calls.
+            var credential = KernelFactory.ResolveWorkflowCredential();
+            if (string.IsNullOrWhiteSpace(credential))
+                throw new InvalidOperationException(
+                    "No activation token held and COLLAB_PROXY_TOKEN not set; refusing to call the proxy workflow endpoint without a credential.");
 
             var args = new Dictionary<string, string>();
             foreach (var kvp in kernelArgs)
@@ -884,9 +890,7 @@ namespace StoryCollaborator
 
             var payload = JsonSerializer.Serialize(new { workflowId = workflowModel.Label, args });
 
-            using var request = new HttpRequestMessage(HttpMethod.Post, $"{proxyBaseUrl}/workflow");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", proxyToken);
-            request.Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
+            using var request = CreateWorkflowRequest(proxyBaseUrl, credential, payload);
 
             var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
@@ -897,6 +901,18 @@ namespace StoryCollaborator
 
             var (content, cost) = await ReadSseStreamAsync(response);
             return (content, templateHash, cost);
+        }
+
+        /// <summary>
+        /// Builds the /workflow POST with the resolved Bearer credential attached. The
+        /// activation contract requires the credential on every Collaborator call.
+        /// </summary>
+        internal static HttpRequestMessage CreateWorkflowRequest(string proxyBaseUrl, string credential, string payload)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{proxyBaseUrl}/workflow");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", credential);
+            request.Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
+            return request;
         }
 
         internal static async Task<(string Content, ProxyCostInfo? Cost)> ReadSseStreamAsync(HttpResponseMessage response)

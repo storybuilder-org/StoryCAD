@@ -426,3 +426,12 @@ Gemfile.lock
 # macOS
 **/.DS_Store
 /StoryCADLib/bindings/python/.idea
+
+# Cloudflare Worker (Collaborator proxy) — local config only, never commit.
+# wrangler.toml holds infra/KV ids; .dev.vars holds provider secrets.
+wrangler.toml
+.dev.vars
+dev.vars
+
+# StoreKit shim build output (built by src/macos/StoreKitShim/build.sh)
+/src/macos/StoreKitShim/out/

@@ -55,6 +55,21 @@
               Condition="Exists('$(PublishDir)/StoryCAD.app')" />
     </Target>
 
+    <!-- StoreKit shim (issue #30): build the Swift dylib and drop it in Contents/MacOS/ so the
+         packaging pipeline's existing `find Contents/MacOS -name *.dylib` codesign step signs it
+         with the MAS cert before the outer bundle. Placed beside the executable, which the interop's
+         DllImport resolver finds; runs on macOS publish only, so Windows/Linux outputs are unaffected. -->
+    <!-- Inputs/Outputs (keyed on the final copied dylib) let MSBuild skip the two swiftc slices +
+         lipo when the shim source is unchanged and the bundle already holds the dylib. -->
+    <Target Name="_BuildAndCopyStoreKitShim" AfterTargets="_UnoPublishAppBundle"
+            Condition="$([MSBuild]::IsOSPlatform('OSX')) And Exists('$(PublishDir)/StoryCAD.app')"
+            Inputs="$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/StoreKitShim.swift;$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/build.sh"
+            Outputs="$(PublishDir)/StoryCAD.app/Contents/MacOS/libStoryCADStoreKit.dylib">
+        <Exec Command="bash &quot;$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/build.sh&quot;" />
+        <Copy SourceFiles="$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/out/libStoryCADStoreKit.dylib"
+              DestinationFolder="$(PublishDir)/StoryCAD.app/Contents/MacOS/" />
+    </Target>
+
     <PropertyGroup>
         <!-- MSIX Configuration for Windows -->
         <UseWinUI Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</UseWinUI>

@@ -120,6 +120,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
+        <ProjectReference Include="..\CollaboratorLib\CollaboratorLib.csproj" />
     </ItemGroup>
 
 </Project>
