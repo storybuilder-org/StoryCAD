@@ -30,6 +30,10 @@ public class StoreActivationServiceTests
         prefs.Model.StoreActivationJwt = string.Empty;
         prefs.Model.StoreActivationJwtExpiry = DateTime.MinValue;
         prefs.Model.StoreUserGuid = "11111111-1111-1111-1111-111111111111";
+
+        // Defensive reset: guards against a leaked COLLAB_DEV_ENABLED from a prior test or the
+        // outer shell environment leaking into tests that don't expect dev-platform routing.
+        Environment.SetEnvironmentVariable("COLLAB_DEV_ENABLED", null);
     }
 
     private static StoreActivationService CreateService(FakeStoreService store, FakeActivationClient client) =>
@@ -299,6 +303,52 @@ public class StoreActivationServiceTests
         await service.InitializeAsync();
 
         Assert.AreEqual(ActivationState.Active, observed);
+    }
+
+    // ── Dev/tester allowlist activation (issue #90 D7/D8, step 8 item 3) ───────
+
+    [TestMethod]
+    public async Task StoreActivationService_DevEnabled_PostsDevPlatformWithGuid()
+    {
+        Environment.SetEnvironmentVariable("COLLAB_DEV_ENABLED", "1");
+        try
+        {
+            var store = new FakeStoreService { Proof = SampleProof };
+            var client = new FakeActivationClient();
+            var service = CreateService(store, client);
+
+            await service.InitializeAsync();
+
+            Assert.AreEqual(ActivationState.Active, service.State);
+            Assert.AreEqual(1, client.ActivateCallCount);
+            Assert.IsNotNull(client.LastProof);
+            Assert.AreEqual("dev", client.LastProof.Platform);
+            Assert.AreEqual("11111111-1111-1111-1111-111111111111", client.LastProof.UserGuid);
+            Assert.AreEqual(0, store.ProofCallCount,
+                "dev activation must not ask the platform store for proof");
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("COLLAB_DEV_ENABLED", null);
+        }
+    }
+
+    [TestMethod]
+    public async Task StoreActivationService_DevDisabled_UsesStoreProof()
+    {
+        // COLLAB_DEV_ENABLED left unset: the default, store-driven path is unchanged.
+        Environment.SetEnvironmentVariable("COLLAB_DEV_ENABLED", null);
+        var store = new FakeStoreService { Proof = SampleProof };
+        var client = new FakeActivationClient();
+        var service = CreateService(store, client);
+
+        await service.InitializeAsync();
+
+        Assert.AreEqual(ActivationState.Active, service.State);
+        Assert.AreEqual(1, store.ProofCallCount, "the platform store must be asked for proof");
+        Assert.IsNotNull(client.LastProof);
+        Assert.AreEqual(SampleProof.Platform, client.LastProof.Platform);
+        Assert.AreNotEqual("dev", client.LastProof.Platform);
     }
 
     // Fakes shared with the other store test classes live in StoreTestDoubles.cs.

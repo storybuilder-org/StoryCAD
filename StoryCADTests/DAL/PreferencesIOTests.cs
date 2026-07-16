@@ -117,4 +117,33 @@ public class PreferencesIOTests
         Assert.AreEqual(expected.ThemePreference, model.ThemePreference);
         Assert.AreSame(model, Ioc.Default.GetRequiredService<PreferenceService>().Model);
     }
+
+    /// <summary>
+    ///     Pins the pure-read invariant issue #90 D8 (as amended) restates: ReadPreferences()
+    ///     must never write, even when StoreUserGuid is empty. GUID provisioning is a separate,
+    ///     explicit startup step (PreferenceService.EnsureUserGuidProvisionedAsync), not a side
+    ///     effect of the read. Runs against the same headless test fixture path
+    ///     (AppState.RootDirectory resolves to the test binary's directory, never a real user's
+    ///     roaming preferences folder) the other tests in this class use, so a headless test run
+    ///     never touches a real preferences file.
+    /// </summary>
+    [TestMethod]
+    public async Task ReadPreferences_EmptyGuid_DoesNotWriteFile()
+    {
+        var filePath = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "Preferences.json");
+        var model = new PreferencesModel { StoreUserGuid = string.Empty };
+        await File.WriteAllTextAsync(filePath, JsonSerializer.Serialize(model));
+        var beforeContent = await File.ReadAllTextAsync(filePath);
+        var beforeWriteUtc = File.GetLastWriteTimeUtc(filePath);
+
+        var _sut = new PreferencesIo();
+        var actual = await _sut.ReadPreferences();
+
+        Assert.AreEqual(string.Empty, actual.StoreUserGuid ?? string.Empty,
+            "sanity check: the fixture's empty GUID round-tripped");
+        var afterContent = await File.ReadAllTextAsync(filePath);
+        var afterWriteUtc = File.GetLastWriteTimeUtc(filePath);
+        Assert.AreEqual(beforeContent, afterContent, "ReadPreferences must not rewrite the file");
+        Assert.AreEqual(beforeWriteUtc, afterWriteUtc, "ReadPreferences must not touch the file's mtime");
+    }
 }

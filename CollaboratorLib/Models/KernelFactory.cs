@@ -8,8 +8,9 @@ using StoryCADLib.Services.Store;
 namespace StoryCollaborator.Models
 {
     /// <summary>
-    /// Single construction point for Semantic Kernel. Resolves the active path
-    /// (direct OpenAI or proxy) and logs it on every build, per D6.
+    /// Single construction point for Semantic Kernel. Resolves the proxy path from the
+    /// activation JWT alone (issue #90 step 8 items 5 and 6 retire the direct-OpenAI path and the
+    /// COLLAB_PROXY_TOKEN shared-secret fallback) and logs it on every build, per D6.
     /// </summary>
     public static class KernelFactory
     {
@@ -19,18 +20,15 @@ namespace StoryCollaborator.Models
 
         private const string ModelId = "gpt-5.4-nano";
 
-        public enum KernelPath { Direct, Proxy }
+        public enum KernelPath { Proxy }
 
         public record KernelConfig(KernelPath Path, string ModelId, string Endpoint, string Credential);
 
         /// <summary>
         /// Pure config resolution — no I/O, no side effects, injectable env/JWT sources for tests.
-        /// Resolution order:
-        ///   1. Activation JWT held (subscriber) → Proxy path; the JWT is the credential
-        ///      (issue #90 retires the shared secret on /workflow in favor of this token).
-        ///   2. COLLAB_PROXY_TOKEN set → Proxy path (developer shared secret).
-        ///   3. OPENAI_API_KEY set → Direct path (developer fallback only; reached when proxy unreachable).
-        ///   4. None → InvalidOperationException with a message naming the missing config.
+        /// Resolution: activation JWT held (subscriber, or dev/tester on the allowlist) → Proxy
+        /// path; the JWT is the sole credential (issue #90 retires the shared secret on /workflow
+        /// and the direct-OpenAI path in favor of this token). No JWT → InvalidOperationException.
         /// </summary>
         public static KernelConfig ResolveConfig(Func<string, string?>? getEnv = null,
             Func<string?>? getActivationJwt = null)
@@ -38,35 +36,26 @@ namespace StoryCollaborator.Models
             getEnv ??= Environment.GetEnvironmentVariable;
 
             var proxyUrl = getEnv("COLLAB_PROXY_URL") ?? DefaultProxyBaseUrl;
-            var credential = ResolveWorkflowCredential(getEnv, getActivationJwt);
+            var credential = ResolveWorkflowCredential(getActivationJwt);
 
             if (!string.IsNullOrWhiteSpace(credential))
                 return new KernelConfig(KernelPath.Proxy, ModelId, proxyUrl, credential);
 
-            var openAiKey = getEnv("OPENAI_API_KEY");
-            if (!string.IsNullOrWhiteSpace(openAiKey))
-                return new KernelConfig(KernelPath.Direct, ModelId, "https://api.openai.com/v1", openAiKey);
-
             throw new InvalidOperationException(
-                "AI features are unavailable: subscribe to Collaborator, or set COLLAB_PROXY_TOKEN " +
-                "for proxy access or OPENAI_API_KEY for direct OpenAI access.");
+                "AI features are unavailable: subscribe to Collaborator, or (for dev builds) enroll " +
+                "on the allowlist and set COLLAB_DEV_ENABLED=1.");
         }
 
         /// <summary>
         /// The Bearer credential for Collaborator proxy calls: the Worker-issued activation JWT
-        /// when the user is activated, else the COLLAB_PROXY_TOKEN shared secret, else null
-        /// (callers must refuse to call the proxy rather than send an unauthenticated request).
-        /// The activation contract requires the JWT on every Collaborator call
-        /// (StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md).
+        /// when the user is activated, else null (callers must refuse to call the proxy rather
+        /// than send an unauthenticated request). The activation contract requires the JWT on
+        /// every Collaborator call (StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md).
         /// </summary>
-        internal static string? ResolveWorkflowCredential(Func<string, string?>? getEnv = null,
-            Func<string?>? getActivationJwt = null)
+        internal static string? ResolveWorkflowCredential(Func<string?>? getActivationJwt = null)
         {
-            getEnv ??= Environment.GetEnvironmentVariable;
             getActivationJwt ??= GetActivationJwt;
-
-            var jwt = getActivationJwt();
-            return !string.IsNullOrWhiteSpace(jwt) ? jwt : getEnv("COLLAB_PROXY_TOKEN");
+            return getActivationJwt();
         }
 
         /// <summary>
@@ -104,10 +93,7 @@ namespace StoryCollaborator.Models
             if (loggerFactory is not null)
                 builder.Services.AddSingleton(loggerFactory);
 
-            if (config.Path == KernelPath.Direct)
-                builder.AddOpenAIChatCompletion(config.ModelId, config.Credential);
-            else
-                builder.AddOpenAIChatCompletion(config.ModelId, new Uri(config.Endpoint), config.Credential);
+            builder.AddOpenAIChatCompletion(config.ModelId, new Uri(config.Endpoint), config.Credential);
 
             return builder.Build();
         }

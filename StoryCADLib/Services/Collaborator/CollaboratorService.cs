@@ -73,10 +73,13 @@ public class CollaboratorService
             return;
         }
 
-        bool devEnabled = Environment.GetEnvironmentVariable("COLLAB_DEV_ENABLED") == "1";
-        if (!devEnabled && !IsPurchaseVerified())
+        // Issue #90 ruling of 2026-07-15: the COLLAB_DEV_ENABLED purchase-check bypass retired.
+        // Entitlement is holding a valid activation, however obtained -- including via the
+        // dev/tester allowlist, which COLLAB_DEV_ENABLED now only routes StoreActivationService
+        // toward (item 3), rather than skipping this check.
+        if (!IsPurchaseVerified())
         {
-            _logService.Log(LogLevel.Warn, "Collaborator blocked: purchase not verified and COLLAB_DEV_ENABLED != 1");
+            _logService.Log(LogLevel.Warn, "Collaborator blocked: no active store activation.");
             // Offer the subscription. If the user completes it (now Active), fall through and open
             // Collaborator; otherwise stop here.
             if (!await ShowSubscribeDialogAsync())

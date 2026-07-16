@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -36,10 +35,9 @@ public sealed class StoreActivationUnreachableException : Exception
 }
 
 /// <summary>
-///     Posts purchase proof to the Collaborator proxy Worker's <c>/activate</c> endpoint.
-///     Interim authentication reuses the shared <c>COLLAB_PROXY_TOKEN</c> Bearer channel that
-///     the Collaborator workflow client uses today; issue #30's per-install channel is a
-///     Worker-track prerequisite that will replace it.
+///     Posts purchase proof to the Collaborator proxy Worker's <c>/activate</c> endpoint. No
+///     request credential: the store's signed proof in the body is the credential (issue #90
+///     ruling of 2026-07-15); the Worker ignores any stray Authorization header.
 /// </summary>
 public sealed class ProxyActivationClient : IActivationClient
 {
@@ -56,7 +54,6 @@ public sealed class ProxyActivationClient : IActivationClient
 
     // Resolved once: the class is a DI singleton and the proxy channel cannot change mid-process.
     private readonly string _baseUrl;
-    private readonly string _token;
 
     public ProxyActivationClient(ILogService logService) : this(logService, SharedHttpClient)
     {
@@ -69,21 +66,13 @@ public sealed class ProxyActivationClient : IActivationClient
         _logService = logService;
         _httpClient = httpClient;
         _baseUrl = Environment.GetEnvironmentVariable("COLLAB_PROXY_URL") ?? DefaultProxyBaseUrl;
-        _token = Environment.GetEnvironmentVariable("COLLAB_PROXY_TOKEN");
     }
 
-    // Single home for the proxy-channel wiring (base URL + Bearer auth); issue #30's per-install
-    // credential swap lands here once, for every endpoint.
-    private HttpRequestMessage BuildRequest(HttpMethod method, string path)
-    {
-        var request = new HttpRequestMessage(method, $"{_baseUrl}{path}");
-        if (!string.IsNullOrWhiteSpace(_token))
-        {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
-        }
-
-        return request;
-    }
+    // Single home for the proxy-channel base URL; every endpoint builds its request through here.
+    // No request credential (issue #90 D6 as overruled): the store's signed proof is the
+    // credential on /activate, and /store/ticket needs none either.
+    private HttpRequestMessage BuildRequest(HttpMethod method, string path) =>
+        new(method, $"{_baseUrl}{path}");
 
     public async Task<ActivationResponse> ActivateAsync(PurchaseProof proof, CancellationToken ct = default)
     {

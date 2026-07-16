@@ -92,6 +92,7 @@ internal sealed class FakeActivationClient : IActivationClient
     public ActivationResponse Response = new(true, "jwt-token", DateTime.UtcNow.AddHours(12), null);
     public Exception ThrowOnActivate;
     public int ActivateCallCount;
+    public PurchaseProof LastProof;
     public string Ticket = "aad-service-ticket";
     public int TicketCallCount;
     public string LastTicketPurpose;
@@ -99,6 +100,7 @@ internal sealed class FakeActivationClient : IActivationClient
     public Task<ActivationResponse> ActivateAsync(PurchaseProof proof, CancellationToken ct = default)
     {
         ActivateCallCount++;
+        LastProof = proof;
         return ThrowOnActivate != null
             ? Task.FromException<ActivationResponse>(ThrowOnActivate)
             : Task.FromResult(Response);

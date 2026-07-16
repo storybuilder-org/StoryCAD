@@ -8,11 +8,9 @@ namespace StoryCADLib.Services.Store;
 ///     letting the generic <c>HttpRequestException</c> / <c>HttpOperationException</c> propagate,
 ///     so the message the user sees names the credits screen instead of reading
 ///     "Response status code does not indicate success: 429". Deliberately a distinct exception
-///     type, not <see cref="System.Net.Http.HttpRequestException" />: WorkflowRunner's existing
-///     <c>catch (HttpRequestException ex)</c> clause retries direct against OpenAI when
-///     <c>OPENAI_API_KEY</c> is set (the fallback issue #90 step 8 retires) — an out-of-credits
-///     refusal must never be caught there, or a capped user with a personal API key would route
-///     straight around the balance cutoff.
+///     type, not <see cref="System.Net.Http.HttpRequestException" />, so an out-of-credits
+///     refusal is never mistaken for an ordinary transport failure and swallowed by generic HTTP
+///     error handling.
 /// </summary>
 public sealed class OutOfCreditsException : Exception
 {

@@ -1,8 +1,9 @@
 # Collaborator Manual Test Plan
 
-Tests for the AI Collaborator feature (CollaboratorLib). Requires a valid `COLLAB_PROXY_TOKEN`
-environment variable and a document open in StoryCAD. Set `COLLAB_DEV_ENABLED=1` to bypass
-the purchase gate.
+Tests for the AI Collaborator feature (CollaboratorLib). Requires a document open in StoryCAD
+and a GUID enrolled on the dev Worker's allowlist. Set `COLLAB_DEV_ENABLED=1` to activate
+through that allowlist instead of the platform store (issue #90 D7/D8); it does not bypass the
+purchase gate, which now requires holding a valid activation however obtained.
 
 ## Session Setup (Run Once Before Testing)
 1. Launch StoryCAD
@@ -10,7 +11,7 @@ the purchase gate.
 3. Go to Backup tab; enable Automatic backups with a 1-minute interval
 4. Click OK
 5. Open the sample outline "Danger Calls" (File > Open Sample Outline)
-6. Verify `COLLAB_DEV_ENABLED=1` and `COLLAB_PROXY_TOKEN` are set in your environment
+6. Verify `COLLAB_DEV_ENABLED=1` is set in your environment and your GUID is approved on the allowlist
 
 ## Session Cleanup (After All Tests)
 1. Restore original autosave and backup preferences

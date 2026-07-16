@@ -428,6 +428,15 @@
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE71B;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
+                <AppBarButton Width="50" IsCompact="True" Label="Buy Credits"
+                              ToolTipService.ToolTip="Buy Collaborator Credits"
+                              AutomationProperties.AutomationId="BuyCreditsButton"
+                              Visibility="{x:Bind ShellVm.CollaboratorVisibility, Mode=OneWay}"
+                              Command="{x:Bind ShellVm.BuyCreditsCommand, Mode=OneWay}">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE719;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
                 <AppBarButton Width="50" IsCompact="True" Label="Tools" ToolTipService.ToolTip="Tools Menu"
                               AutomationProperties.AutomationId="ToolsMenuButton">
                     <AppBarButton.Icon>
