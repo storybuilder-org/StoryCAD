@@ -264,6 +264,35 @@ purchase gate, which now requires holding a valid activation however obtained.
 
 ---
 
+## Credits
+
+### TC-120: Buy Credits Button Opens the Dialog
+**Priority:** High
+**Time:** ~2 minutes
+
+Wiring landed in issue #90 step 8 (the dialog itself was built in step 10); this case is the manual
+click-through that a headless session cannot verify.
+
+**Setup:**
+- "Danger Calls" open
+
+**Steps:**
+1. Locate the Buy Credits button on the Shell toolbar, next to the Collaborator button
+   **Expected:** Visible exactly when the Collaborator button is; tooltip reads "Buy Collaborator Credits"
+
+2. Click the Buy Credits button
+   **Expected:** Buy Credits dialog opens (on a sideloaded dev build with no store license context,
+   the dialog's pack listing may show its failure state instead of products — the assertion is that
+   the button opens the dialog, not that the store answers)
+
+3. Close the dialog without purchasing
+   **Expected:** Dialog closes; no purchase initiated; main window responsive
+
+**Cleanup:**
+- None
+
+---
+
 ## Notes
 
 - **COLLAB_DEBUG=1**: Set this to trigger the debugger-attach dialog on Collaborator open (dev use only).
