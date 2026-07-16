@@ -25,6 +25,22 @@ namespace StoryCollaborator.Models
         public record KernelConfig(KernelPath Path, string ModelId, string Endpoint, string Credential);
 
         /// <summary>
+        /// Override for <see cref="GetActivationJwt"/>'s default Ioc-based lookup (issue #90 step
+        /// 11). PromptTestRunner and CollaboratorTests have no <c>IStoreActivationService</c>
+        /// wired up with a held JWT; when <c>COLLAB_DEV_GUID</c> is set, each host activates on
+        /// the dev/tester allowlist itself (via the same <c>IActivationClient</c> /
+        /// <c>ProxyActivationClient</c> path StoryCAD's client uses) and sets this once at
+        /// startup, so every zero-argument credential resolution -- both
+        /// <see cref="ResolveWorkflowCredential(Func{string?}?)"/>'s workflow calls and
+        /// <see cref="Build"/>'s Semantic Kernel chat path -- picks up the same token. Null (the
+        /// default) leaves the existing Ioc-based resolution unchanged; shipped CollaboratorLib
+        /// and StoryCAD code never sets this (design section 2, D6: "shipped client code never
+        /// reads it" is about the env var, not this seam, but the intent -- no shipped path
+        /// depends on dev/tester tooling -- is the same).
+        /// </summary>
+        public static Func<string?>? DevActivationJwtProvider { get; set; }
+
+        /// <summary>
         /// Pure config resolution — no I/O, no side effects, injectable env/JWT sources for tests.
         /// Resolution: activation JWT held (subscriber, or dev/tester on the allowlist) → Proxy
         /// path; the JWT is the sole credential (issue #90 retires the shared secret on /workflow
@@ -59,12 +75,16 @@ namespace StoryCollaborator.Models
         }
 
         /// <summary>
-        /// The activation JWT held by StoryCAD's store-activation service, or null when the user
-        /// is not activated or IoC is not configured (PromptTestRunner, CollaboratorTests).
-        /// Read per call, never cached here: the service refreshes the JWT as it expires.
+        /// <see cref="DevActivationJwtProvider"/> first (issue #90 step 11 hosts); otherwise the
+        /// activation JWT held by StoryCAD's store-activation service, or null when the user is
+        /// not activated or IoC is not configured. Read per call, never cached here: the service
+        /// refreshes the JWT as it expires.
         /// </summary>
         internal static string? GetActivationJwt()
         {
+            if (DevActivationJwtProvider is not null)
+                return DevActivationJwtProvider();
+
             try
             {
                 return Ioc.Default.GetService<IStoreActivationService>()?.CurrentJwt;
