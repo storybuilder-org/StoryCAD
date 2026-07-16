@@ -106,6 +106,47 @@ internal static class StoreKitPayloads
         return new PurchaseResult(MapPurchaseStatus(resp.Status));
     }
 
+    // Issue #90 design section 10 "Credit packs" (step 10): unlike ParsePurchase above, a
+    // consumable purchase needs the jws/transactionId the shim's storycad_iap_purchase response
+    // already carries (StoreKitShim.swift; ParsePurchase discards them because a subscription
+    // re-derives its proof from GetCurrentEntitlementsAsync instead, which excludes consumables).
+    // requestedProductId/userGuid fill the proof's fields the purchase response's own productId
+    // never carries the caller's userGuid, and the response's productId can be trusted to match
+    // requestedProductId (the shim purchases exactly the id it was given).
+    public static ConsumablePurchaseResult ParseConsumablePurchase(string json, string requestedProductId, string userGuid)
+    {
+        var resp = Deserialize(json, StoreKitJsonContext.Default.ShimPurchaseResponse);
+        if (resp is null)
+        {
+            return new ConsumablePurchaseResult(PurchaseStatus.Failed, Error: "Unparseable purchase response.");
+        }
+
+        if (!resp.Ok)
+        {
+            return new ConsumablePurchaseResult(PurchaseStatus.Failed, Error: resp.Error ?? "Purchase failed.");
+        }
+
+        var status = MapPurchaseStatus(resp.Status);
+        if (status != PurchaseStatus.Success)
+        {
+            return new ConsumablePurchaseResult(status);
+        }
+
+        if (string.IsNullOrEmpty(resp.Jws) || string.IsNullOrEmpty(resp.TransactionId))
+        {
+            return new ConsumablePurchaseResult(PurchaseStatus.Failed, Error: "Purchase succeeded but the store returned no proof.");
+        }
+
+        var proof = new PurchaseProof("apple", resp.Jws, resp.ProductId ?? requestedProductId, userGuid);
+        return new ConsumablePurchaseResult(PurchaseStatus.Success, proof, resp.TransactionId);
+    }
+
+    // Issue #90 design section 10 "Credit packs" (step 10): the shim's storycad_iap_finish_transaction
+    // response is a bare {"ok":true}/{"ok":false,"error":...} acknowledgement, so this reuses
+    // ShimPurchaseResponse's Ok/Error fields rather than adding a single-purpose DTO.
+    public static bool ParseFinishTransactionOk(string json) =>
+        Deserialize(json, StoreKitJsonContext.Default.ShimPurchaseResponse)?.Ok ?? false;
+
     public static IReadOnlyList<StoreEntitlement> ParseEntitlements(string json)
     {
         var resp = Deserialize(json, StoreKitJsonContext.Default.ShimEntitlementsResponse);

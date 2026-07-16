@@ -123,6 +123,74 @@ public class StoreKitPayloadsTests
         Assert.AreEqual(EntitlementState.Expired, StoreKitPayloads.ParseEntitlements(payload)[0].State);
     }
 
+    // ----- Credit packs (issue #90 design section 10, step 10) -----
+
+    // transactionId and originalTransactionId deliberately differ so a test reading the wrong
+    // field fails loudly (design section 10 step 10 correction: a pack keys on transactionId, not
+    // originalTransactionId -- the two happen to coincide for most real consumables, which would
+    // mask this exact bug if the fixture used the same value for both).
+    private const string ConsumablePurchaseSuccessPayload =
+        """{"ok":true,"status":"success","transactionId":"3000000456","originalTransactionId":"3000000000","productId":"CollabCreditPack500","jws":"pack.header.sig"}""";
+
+    [TestMethod]
+    public void ParseConsumablePurchase_Success_ReturnsProofAndTransactionId()
+    {
+        var result = StoreKitPayloads.ParseConsumablePurchase(ConsumablePurchaseSuccessPayload,
+            "CollabCreditPack500", "11111111-1111-1111-1111-111111111111");
+
+        Assert.AreEqual(PurchaseStatus.Success, result.Status);
+        Assert.AreEqual("3000000456", result.TransactionId);
+        Assert.IsNotNull(result.Proof);
+        Assert.AreEqual("apple", result.Proof.Platform);
+        Assert.AreEqual("pack.header.sig", result.Proof.Payload);
+        Assert.AreEqual("CollabCreditPack500", result.Proof.ProductId);
+        Assert.AreEqual("11111111-1111-1111-1111-111111111111", result.Proof.UserGuid);
+    }
+
+    [TestMethod]
+    public void ParseConsumablePurchase_UserCancelled_ReturnsUserCancelledNoProof()
+    {
+        var result = StoreKitPayloads.ParseConsumablePurchase(PurchaseCancelledPayload, "CollabCreditPack500", "guid");
+
+        Assert.AreEqual(PurchaseStatus.UserCancelled, result.Status);
+        Assert.IsNull(result.Proof);
+        Assert.IsNull(result.TransactionId);
+    }
+
+    [TestMethod]
+    public void ParseConsumablePurchase_ErrorPayload_ReturnsFailedWithMessage()
+    {
+        var result = StoreKitPayloads.ParseConsumablePurchase(ErrorPayload, "CollabCreditPack500", "guid");
+
+        Assert.AreEqual(PurchaseStatus.Failed, result.Status);
+        Assert.AreEqual("Cannot connect to the App Store", result.Error);
+    }
+
+    [TestMethod]
+    public void ParseConsumablePurchase_SuccessMissingJws_ReturnsFailed()
+    {
+        // A malformed shim response (ok:true, status:success, but no jws) must not hand back a
+        // "success" the activation call would then have no proof to send.
+        const string payload = """{"ok":true,"status":"success","transactionId":"1"}""";
+
+        var result = StoreKitPayloads.ParseConsumablePurchase(payload, "CollabCreditPack500", "guid");
+
+        Assert.AreEqual(PurchaseStatus.Failed, result.Status);
+    }
+
+    [TestMethod]
+    public void ParseFinishTransactionOk_OkTrue_ReturnsTrue()
+    {
+        Assert.IsTrue(StoreKitPayloads.ParseFinishTransactionOk("""{"ok":true}"""));
+    }
+
+    [TestMethod]
+    public void ParseFinishTransactionOk_OkFalseOrMalformed_ReturnsFalse()
+    {
+        Assert.IsFalse(StoreKitPayloads.ParseFinishTransactionOk("""{"ok":false,"error":"not found"}"""));
+        Assert.IsFalse(StoreKitPayloads.ParseFinishTransactionOk(MalformedPayload));
+    }
+
     [TestMethod]
     public void SerializeProductIds_TwoIds_ProducesJsonArray()
     {

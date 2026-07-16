@@ -35,4 +35,12 @@ public sealed class NullStoreService : IStoreService
 
     public Task<PurchaseProof> GetPurchaseProofAsync(string userGuid, CancellationToken ct = default) =>
         Task.FromResult<PurchaseProof>(null);
+
+    public IReadOnlyList<string> CreditPackProductIds => Array.Empty<string>();
+
+    public Task<ConsumablePurchaseResult> PurchaseConsumableAsync(string productId, string userGuid,
+        CancellationToken ct = default) =>
+        Task.FromResult(new ConsumablePurchaseResult(PurchaseStatus.Failed, Error: "No store is available in this build."));
+
+    public Task FinishConsumableAsync(string transactionId, CancellationToken ct = default) => Task.CompletedTask;
 }

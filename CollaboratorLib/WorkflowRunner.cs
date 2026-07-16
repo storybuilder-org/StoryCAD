@@ -157,6 +157,14 @@ namespace StoryCollaborator
 
                 return result;
             }
+            catch (StoryCADLib.Services.Store.OutOfCreditsException ex)
+            {
+                // Issue #90 design section 10 (step 10): shown as-is, not wrapped in
+                // "Workflow execution failed: ..." -- this is a recognized, actionable state
+                // (buy more credits or wait for renewal), not an unexpected failure.
+                _logger?.LogWarning("Workflow call refused: out of credits ({Workflow})", workflowModel.Title);
+                return WorkflowResult.Failed(ex.Message);
+            }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "WorkflowRunner.RunAsync error");
@@ -893,6 +901,7 @@ namespace StoryCollaborator
             using var request = CreateWorkflowRequest(proxyBaseUrl, credential, payload);
 
             var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            EnsureNotOutOfCredits(response);
             response.EnsureSuccessStatusCode();
 
             string? templateHash = null;
@@ -901,6 +910,26 @@ namespace StoryCollaborator
 
             var (content, cost) = await ReadSseStreamAsync(response);
             return (content, templateHash, cost);
+        }
+
+        /// <summary>
+        /// Issue #90 design section 10 "The cutoff" (ruling of 2026-07-15, step 10): the Worker
+        /// refuses a workflow call with 429 before any upstream dispatch when the caller's balance
+        /// is at or below zero. Checked before EnsureSuccessStatusCode() so the thrown exception is
+        /// StoryCADLib.Services.Store.OutOfCreditsException, not the generic HttpRequestException
+        /// EnsureSuccessStatusCode() would otherwise produce (message: "Response status code does
+        /// not indicate success: 429"). Deliberately not an HttpRequestException itself: the
+        /// existing `catch (HttpRequestException ex)` clause in RunAsync retries direct against
+        /// OpenAI when OPENAI_API_KEY is set (the enforcement-bypass fallback issue #90 step 8
+        /// retires) -- an out-of-credits refusal must never be caught there, or a capped user with a
+        /// personal API key would route straight around the balance cutoff. internal static and
+        /// side-effect-free on success, matching CreateWorkflowRequest/ReadSseStreamAsync's existing
+        /// testable-without-HTTP-transport pattern in this class.
+        /// </summary>
+        internal static void EnsureNotOutOfCredits(HttpResponseMessage response)
+        {
+            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                throw new StoryCADLib.Services.Store.OutOfCreditsException();
         }
 
         /// <summary>

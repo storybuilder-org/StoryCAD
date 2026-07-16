@@ -109,6 +109,15 @@ public sealed class WindowsStoreContextAdapter : IStoreContextAdapter
         return await _context.GetCustomerPurchaseIdAsync(serviceTicket, publisherUserId).AsTask(ct);
     }
 
+    public async Task<string> GetCustomerCollectionsIdAsync(string serviceTicket, string publisherUserId,
+        CancellationToken ct = default)
+    {
+        // Issue #90 design section 10 step 10 correction: a distinct WinRT call from
+        // GetCustomerPurchaseIdAsync above — mints a Microsoft Store ID key scoped to the
+        // *collection* API (consumables), never call with a cached/expired ticket.
+        return await _context.GetCustomerCollectionsIdAsync(serviceTicket, publisherUserId).AsTask(ct);
+    }
+
     private void EnsureWindowInitialised()
     {
         if (_windowInitialised)

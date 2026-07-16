@@ -136,6 +136,8 @@ public static class BootStrapper
         Services.AddSingleton<IActivationClient, ProxyActivationClient>();
         Services.AddSingleton<IStoreActivationService, StoreActivationService>();
         Services.AddSingleton<StoryCADLib.ViewModels.Store.SubscribeDialogViewModel>();
+        // Credit packs (issue #90 design section 10, step 10).
+        Services.AddSingleton<StoryCADLib.ViewModels.Store.BuyCreditsDialogViewModel>();
         Services.AddSingleton<OutlineViewModel>();
         Services.AddSingleton<ShellViewModel>();
         Services.AddSingleton<PreferenceService>();

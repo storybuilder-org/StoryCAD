@@ -129,10 +129,14 @@ public sealed class ProxyActivationClient : IActivationClient
             $"Store activation returned unexpected status {(int)response.StatusCode}.");
     }
 
-    public async Task<string> GetStoreTicketAsync(CancellationToken ct = default)
+    public async Task<string> GetStoreTicketAsync(string purpose = "purchase", CancellationToken ct = default)
     {
         // GET /store/ticket -> {"ticket":"<aad-access-token>"} (Worker contract, Windows only).
-        using var request = BuildRequest(HttpMethod.Get, "/store/ticket");
+        // ?purpose=collections mints the consumable-purchase ticket audience instead of the
+        // default subscription one (issue #90 design section 10 "Credit packs", step 10
+        // correction); any other value (including the default) keeps the original path unchanged.
+        var path = purpose == "collections" ? "/store/ticket?purpose=collections" : "/store/ticket";
+        using var request = BuildRequest(HttpMethod.Get, path);
 
         try
         {

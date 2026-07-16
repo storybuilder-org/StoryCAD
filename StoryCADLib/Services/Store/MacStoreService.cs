@@ -74,6 +74,37 @@ public sealed class MacStoreService : IStoreService
         return new PurchaseProof("apple", current.Jws, current.ProductId, userGuid);
     }
 
+    public IReadOnlyList<string> CreditPackProductIds => StoreConfig.AppleCreditPackProductIds;
+
+    public async Task<ConsumablePurchaseResult> PurchaseConsumableAsync(string productId, string userGuid,
+        CancellationToken ct = default)
+    {
+        // Same purchase export subscriptions use; the shim (StoreKitShim.swift) already returns
+        // jws/transactionId in the response and, for a consumable product, defers finishing the
+        // transaction until FinishConsumableAsync below confirms the Worker credited it (design
+        // section 10 "Credit packs", step 10).
+        var appAccountToken = string.IsNullOrWhiteSpace(userGuid) ? null : userGuid;
+        var payload = await StoreKitInterop.PurchaseAsync(productId, appAccountToken, ct);
+        return StoreKitPayloads.ParseConsumablePurchase(payload, productId, userGuid);
+    }
+
+    public async Task FinishConsumableAsync(string transactionId, CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(transactionId))
+        {
+            return;
+        }
+
+        var payload = await StoreKitInterop.FinishTransactionAsync(transactionId, ct);
+        if (!StoreKitPayloads.ParseFinishTransactionOk(payload))
+        {
+            // Best-effort, matching RestoreAsync's pattern below: the credit is already correctly
+            // recorded server-side at this point (the caller only reaches here after the Worker's
+            // 200), so a failed finish blocks a future repurchase, not this one.
+            _logService.Log(LogLevel.Warn, $"Failed to finish consumable transaction {transactionId}.");
+        }
+    }
+
     // Delivered on a Swift task thread; marshal to the UI thread before raising.
     private void OnNativeEntitlementChanged(string payload)
     {
