@@ -147,6 +147,75 @@ public class BuyCreditsDialogViewModelTests
     }
 
     [TestMethod]
+    public async Task BuyAsync_RetryAfterActivationUnreachable_ReactivatesHeldProofWithoutRepurchase()
+    {
+        // 2026-07-16 review finding 3: BuyAsync always started with a fresh
+        // PurchaseConsumableAsync, so a retry after the Worker was unreachable purchased AGAIN --
+        // on Apple, a second Product.purchase() on a consumable double-charges or errors on the
+        // unfinished transaction. The money from the first purchase is already spent and the
+        // proof it produced is still good, so a retry must re-activate that held proof instead.
+        var proof = new PurchaseProof("apple", "pack-jws", PackId, "user-guid-1");
+        var store = new FakeStoreService
+        {
+            Products = new[] { Pack500 },
+            ConsumableResult = new ConsumablePurchaseResult(PurchaseStatus.Success, proof, "transaction-1")
+        };
+        var client = new FakeActivationClient { ThrowOnActivate = new Exception("network down") };
+        var vm = Create(store, client);
+        await vm.LoadAsync();
+
+        var firstAttempt = await vm.BuyAsync();
+        Assert.IsFalse(firstAttempt);
+        Assert.AreEqual(1, store.PurchaseConsumableCallCount);
+        Assert.AreEqual(1, client.ActivateCallCount);
+        Assert.AreEqual(0, store.FinishConsumableCallCount);
+
+        // The Worker becomes reachable again; the user clicks Buy a second time.
+        client.ThrowOnActivate = null;
+        client.Response = new ActivationResponse(true, "jwt-token", DateTime.UtcNow.AddHours(12), null);
+
+        var secondAttempt = await vm.BuyAsync();
+
+        Assert.IsTrue(secondAttempt);
+        Assert.AreEqual(1, store.PurchaseConsumableCallCount, "the retry must not purchase a second time");
+        Assert.AreEqual(2, client.ActivateCallCount);
+        Assert.AreEqual(1, store.FinishConsumableCallCount);
+        Assert.AreEqual("transaction-1", store.LastFinishedTransactionId);
+    }
+
+    [TestMethod]
+    public async Task BuyAsync_RetryAfterActivationRefused_ReactivatesHeldProof()
+    {
+        // Same shape as the unreachable-retry test above, for the other retryable reason: a
+        // refusal (the Worker's own 403/503) rather than a transport failure.
+        var proof = new PurchaseProof("apple", "pack-jws", PackId, "user-guid-1");
+        var store = new FakeStoreService
+        {
+            Products = new[] { Pack500 },
+            ConsumableResult = new ConsumablePurchaseResult(PurchaseStatus.Success, proof, "transaction-1")
+        };
+        var client = new FakeActivationClient { Response = new ActivationResponse(false, null, null, "invalid") };
+        var vm = Create(store, client);
+        await vm.LoadAsync();
+
+        var firstAttempt = await vm.BuyAsync();
+        Assert.IsFalse(firstAttempt);
+        Assert.AreEqual(1, store.PurchaseConsumableCallCount);
+        Assert.AreEqual(1, client.ActivateCallCount);
+        Assert.AreEqual(0, store.FinishConsumableCallCount);
+
+        client.Response = new ActivationResponse(true, "jwt-token", DateTime.UtcNow.AddHours(12), null);
+
+        var secondAttempt = await vm.BuyAsync();
+
+        Assert.IsTrue(secondAttempt);
+        Assert.AreEqual(1, store.PurchaseConsumableCallCount, "the retry must not purchase a second time");
+        Assert.AreEqual(2, client.ActivateCallCount);
+        Assert.AreEqual(1, store.FinishConsumableCallCount);
+        Assert.AreEqual("transaction-1", store.LastFinishedTransactionId);
+    }
+
+    [TestMethod]
     public async Task BuyAsync_PurchaseSucceededNoProof_ReturnsFalseWithoutActivating()
     {
         var store = new FakeStoreService

@@ -60,6 +60,18 @@ public sealed class BuyCreditsDialogViewModel : ObservableObject
     // ongoing ActivationState to check afterward -- it either credited the account or it didn't).
     private bool _lastPurchaseSucceeded;
 
+    // 2026-07-16 review finding 3: a purchase that succeeded but whose activation failed for a
+    // retryable reason (the Worker unreachable, or refused) is held here so the next BuyAsync
+    // call re-activates this same proof instead of purchasing again. Without this, clicking Buy
+    // again after such a failure spent the user's money a second time: on Apple, a second
+    // Product.purchase() on a consumable either double-charges or errors on the transaction
+    // PurchaseConsumableAsync deliberately left unfinished; on Windows it happens to self-heal
+    // via AlreadyPurchased, but there's no reason to spend a second store round trip. Cleared on
+    // successful activation. This view model is a DI singleton (BootStrapper), so the field
+    // deliberately survives a dialog reopen within the session as well -- the held proof is still
+    // good and still worth retrying.
+    private ConsumablePurchaseResult _pendingUnactivatedPurchase;
+
     private string UserGuid => _preferenceService.Model.StoreUserGuid ?? string.Empty;
 
     /// <summary>Loads the configured packs from the store. Call when the dialog opens.</summary>
@@ -134,15 +146,27 @@ public sealed class BuyCreditsDialogViewModel : ObservableObject
     /// <summary>Purchases the selected pack and posts its proof to the Worker. Returns true on success.</summary>
     public async Task<bool> BuyAsync(CancellationToken ct = default)
     {
-        if (SelectedPack is null)
-        {
-            return false;
-        }
-
         IsBusy = true;
         ClearStatus();
         try
         {
+            // A prior call already spent the money and holds a proof that only failed to
+            // activate for a retryable reason (see _pendingUnactivatedPurchase above). Re-run
+            // activation on that same proof instead of starting a new purchase -- regardless of
+            // which pack is currently selected, since the money already spent is for whatever
+            // pack the held proof names, not SelectedPack.
+            if (_pendingUnactivatedPurchase is not null)
+            {
+                var pendingPurchase = _pendingUnactivatedPurchase;
+                _lastPurchaseSucceeded = await ActivatePurchaseAsync(pendingPurchase, ct);
+                return _lastPurchaseSucceeded;
+            }
+
+            if (SelectedPack is null)
+            {
+                return false;
+            }
+
             var purchase = await _store.PurchaseConsumableAsync(SelectedPack.Id, UserGuid, ct);
             switch (purchase.Status)
             {
@@ -195,8 +219,12 @@ public sealed class BuyCreditsDialogViewModel : ObservableObject
         catch (Exception ex)
         {
             _logService.Log(LogLevel.Warn, $"Credit-pack activation unreachable: {ex.Message}");
+            // Retryable: the money is already spent and this proof is still good. Held so the
+            // next BuyAsync call (the same "try again" this message asks for) re-activates it
+            // instead of purchasing a second time.
+            _pendingUnactivatedPurchase = purchase;
             SetStatus("Your purchase went through, but we couldn't add the credits yet. " +
-                      "Check your connection; try again from this screen.");
+                      "Check your connection, then use Buy again to retry.");
             return false;
         }
 
@@ -204,12 +232,16 @@ public sealed class BuyCreditsDialogViewModel : ObservableObject
         {
             // The wire contract's refusal reasons (invalid/revoked/expired) don't map to a
             // meaningful distinction for a just-completed consumable purchase; any refusal here
-            // means the Worker did not credit the account.
-            SetStatus("The store confirmed your purchase, but the credits couldn't be applied. " +
-                      "Contact support.");
+            // means the Worker did not credit the account. Retryable for the same reason as the
+            // unreachable case above (e.g. a transient 503 from the Worker) -- held so a second
+            // Buy click re-activates this proof instead of purchasing again.
+            _pendingUnactivatedPurchase = purchase;
+            SetStatus("The store confirmed your purchase, but the credits couldn't be applied yet. " +
+                      "Use Buy again to retry.");
             return false;
         }
 
+        _pendingUnactivatedPurchase = null;
         await _store.FinishConsumableAsync(purchase.TransactionId, ct);
         return true;
     }

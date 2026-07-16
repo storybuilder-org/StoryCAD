@@ -26,6 +26,7 @@ internal sealed class FakeStoreService : IStoreService
     public string LastConsumablePurchaseUserGuid;
     public string LastFinishedTransactionId;
     public int FinishConsumableCallCount;
+    public int PurchaseConsumableCallCount;
 
     public bool IsSupported => true;
 
@@ -68,6 +69,7 @@ internal sealed class FakeStoreService : IStoreService
     public Task<ConsumablePurchaseResult> PurchaseConsumableAsync(string productId, string userGuid,
         CancellationToken ct = default)
     {
+        PurchaseConsumableCallCount++;
         LastConsumablePurchaseUserGuid = userGuid;
         return Task.FromResult(ConsumableResult);
     }
