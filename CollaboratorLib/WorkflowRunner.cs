@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using CollaboratorLib.Context;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -22,7 +23,26 @@ namespace StoryCollaborator
 
     internal class WorkflowRunner
     {
-        private static readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromMinutes(3) };
+        private static HttpClient _httpClient = new() { Timeout = TimeSpan.FromMinutes(3) };
+
+        // Test-only accessor (issue #94 design section 5 item 2): lets
+        // WorkflowRunnerTruncationTests.cs observe ResetHttpClient's swap without any network activity.
+        internal static HttpClient CurrentHttpClient => _httpClient;
+
+        /// <summary>
+        /// Swaps in a fresh HttpClient, disposing the old one (issue #94 design section 5 item 2):
+        /// the truncation retry calls this to abandon the pooled connection, which server evidence
+        /// pins to a flagged Cloudflare isolate after a mid-stream kill (design doc section 2, phase
+        /// C). Safe because workflow calls are sequential -- the UI runs one workflow at a time,
+        /// PromptTestRunner and the tests included -- and the chat sidebar uses Semantic Kernel's own
+        /// HttpClient, untouched here.
+        /// </summary>
+        internal static void ResetHttpClient()
+        {
+            var fresh = new HttpClient { Timeout = TimeSpan.FromMinutes(3) };
+            var old = Interlocked.Exchange(ref _httpClient, fresh);
+            old.Dispose();
+        }
 
         private IStoryCADAPI _storyApi;
         private StoryModel storyModel;
@@ -104,11 +124,20 @@ namespace StoryCollaborator
                 // OPENAI_API_KEY on the client. A proxy failure now propagates to the outer
                 // catch clauses below rather than retrying against OpenAI directly.
                 result.AssembledPrompt = null;
-                var (proxyContent, proxyHash, proxyCost) = await PostToProxyAsync(kernelArgs);
-                string planResult = proxyContent;
+                var (proxyContent, proxyHash, proxyCost, proxyComplete) = await PostToProxyAsync(kernelArgs);
                 result.RemoteTemplateHash = proxyHash;
                 result.Cost = proxyCost;
 
+                if (!proxyComplete)
+                {
+                    // Issue #94 design section 5 item 3 ("surface, never mask"): the one truncation
+                    // retry (PostToProxyAsync -> ExecuteWithTruncationRetryAsync) still came back
+                    // incomplete. The partial text is preserved for diagnostics but must never reach
+                    // ExtractOutputs or a Success result.
+                    return BuildTruncationFailureResult(proxyContent);
+                }
+
+                string planResult = proxyContent;
                 result.RawResponse = planResult;
 
                 if (string.IsNullOrEmpty(planResult))
@@ -735,11 +764,13 @@ namespace StoryCollaborator
         }
 
         /// <summary>
-        /// Posts the workflow request to the proxy's /v1/workflow endpoint.
+        /// Posts the workflow request to the proxy's /v1/workflow endpoint, retrying once on a
+        /// fresh connection if the stream comes back truncated (issue #94 design section 5 item 2).
         /// Returns the SSE response text, the X-Template-Hash header value (null on fallback path),
-        /// and the cost reported by the proxy's collab_cost event (null when absent).
+        /// the cost reported by the proxy's collab_cost event (null when absent), and whether the
+        /// returned stream (after the retry, if one occurred) is complete.
         /// </summary>
-        private async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost)> PostToProxyAsync(KernelArguments kernelArgs)
+        private async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)> PostToProxyAsync(KernelArguments kernelArgs)
         {
             var proxyBaseUrl = Environment.GetEnvironmentVariable("COLLAB_PROXY_URL")
                 ?? KernelFactory.DefaultProxyBaseUrl;
@@ -750,6 +781,18 @@ namespace StoryCollaborator
 
             var payload = JsonSerializer.Serialize(new { workflowId = workflowModel.Label, args });
 
+            return await ExecuteWithTruncationRetryAsync(
+                () => PostToProxyOnceAsync(proxyBaseUrl, payload), ResetHttpClient);
+        }
+
+        /// <summary>
+        /// One attempt of the full send-plus-read sequence PostToProxyAsync's truncation retry
+        /// wraps: credential resolution via SendWithReactivationRetryAsync, the 401 guard,
+        /// EnsureNotOutOfCredits, EnsureSuccessStatusCode, the X-Template-Hash header read, then
+        /// ReadSseStreamAsync (issue #94 design section 5 item 2).
+        /// </summary>
+        private async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)> PostToProxyOnceAsync(string proxyBaseUrl, string payload)
+        {
             var response = await SendWithReactivationRetryAsync(
                 () => SendWorkflowRequestAsync(proxyBaseUrl, payload), ReactivateAsync);
 
@@ -771,8 +814,8 @@ namespace StoryCollaborator
             if (response.Headers.TryGetValues("X-Template-Hash", out var hashValues))
                 templateHash = hashValues.FirstOrDefault();
 
-            var (content, cost) = await ReadSseStreamAsync(response);
-            return (content, templateHash, cost);
+            var (content, cost, complete) = await ReadSseStreamAsync(response);
+            return (content, templateHash, cost, complete);
         }
 
         /// <summary>
@@ -864,10 +907,18 @@ namespace StoryCollaborator
             return request;
         }
 
-        internal static async Task<(string Content, ProxyCostInfo? Cost)> ReadSseStreamAsync(HttpResponseMessage response)
+        /// <summary>
+        /// Reads the /workflow endpoint's SSE stream to completion. Complete is true iff a
+        /// <c>data: [DONE]</c> line was actually read -- the Worker appends it on every complete
+        /// stream, including the cost-missing and unpriced-model paths, so its absence is a
+        /// truncation with no false-positive source (issue #94 design section 5 item 1). collab_cost
+        /// stays optional (ADR-002 fail-open): [DONE] without a cost event is still Complete=true.
+        /// </summary>
+        internal static async Task<(string Content, ProxyCostInfo? Cost, bool Complete)> ReadSseStreamAsync(HttpResponseMessage response)
         {
             var sb = new System.Text.StringBuilder();
             ProxyCostInfo? cost = null;
+            bool complete = false;
             using var stream = await response.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream);
             string? line;
@@ -875,7 +926,7 @@ namespace StoryCollaborator
             {
                 if (!line.StartsWith("data: ")) continue;
                 var data = line.Substring(6).Trim();
-                if (data == "[DONE]") break;
+                if (data == "[DONE]") { complete = true; break; }
                 try
                 {
                     using var doc = JsonDocument.Parse(data);
@@ -908,7 +959,48 @@ namespace StoryCollaborator
                 }
                 catch (JsonException) { /* malformed chunk — skip */ }
             }
-            return (sb.ToString(), cost);
+            return (sb.ToString(), cost, complete);
+        }
+
+        /// <summary>
+        /// Truncation-retry-once policy (issue #94 design section 5 items 2-3): a stream that comes
+        /// back incomplete (no <c>data: [DONE]</c> read -- <see cref="ReadSseStreamAsync"/>) resets
+        /// the shared HttpClient (abandoning the pooled connection -- server evidence pins it to a
+        /// flagged Cloudflare isolate after a kill, so a same-connection retry would die again) and
+        /// re-sends once end-to-end through the same credential path before returning the (possibly
+        /// still incomplete) result to the caller. Exactly one retry, mirroring
+        /// <see cref="SendWithReactivationRetryAsync"/>'s refresh-once-and-retry shape. internal
+        /// static and testable without a live HTTP transport: attempt and reset are injected,
+        /// matching this class's existing testable-without-network pattern.
+        /// </summary>
+        internal static async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)> ExecuteWithTruncationRetryAsync(
+            Func<Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)>> attempt,
+            Action reset)
+        {
+            var result = await attempt();
+            if (result.Complete)
+                return result;
+
+            reset();
+            return await attempt();
+        }
+
+        /// <summary>
+        /// Issue #94 design section 5 item 3 ("surface, never mask"): builds the failed result for a
+        /// stream that came back incomplete even after PostToProxyAsync's one truncation retry. The
+        /// partial text is preserved in RawResponse for diagnostics; it never reaches ExtractOutputs
+        /// or a Success result. internal static and pinned directly by its own test (driving RunAsync
+        /// end-to-end here would require faking HTTP), per the NO MOCKS rule in
+        /// Collaborator/CLAUDE.md.
+        /// </summary>
+        internal static WorkflowResult BuildTruncationFailureResult(string partialContent)
+        {
+            return new WorkflowResult
+            {
+                Success = false,
+                ErrorMessage = "The AI response stream ended before completion; the answer may be incomplete. Please try again.",
+                RawResponse = partialContent
+            };
         }
 
 
