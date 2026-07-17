@@ -35,7 +35,7 @@ public sealed class WindowsStoreService : IStoreService
     }
 
     // A store context is always obtainable on the Windows head; a sideloaded debug build has no license
-    // context and purchases fail there. COLLAB_DEV_ENABLED routes StoreActivationService around this
+    // context and purchases fail there. COLLAB_DEV_ACTIVATION routes StoreActivationService around this
     // store entirely (dev/tester allowlist activation, issue #90 D7/D8) rather than patching it here.
     public bool IsSupported => true;
 

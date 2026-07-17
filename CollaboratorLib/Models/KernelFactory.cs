@@ -59,7 +59,7 @@ namespace StoryCollaborator.Models
 
             throw new InvalidOperationException(
                 "AI features are unavailable: subscribe to Collaborator, or (for dev builds) enroll " +
-                "on the allowlist and set COLLAB_DEV_ENABLED=1.");
+                "on the allowlist and set COLLAB_DEV_ACTIVATION=1.");
         }
 
         /// <summary>

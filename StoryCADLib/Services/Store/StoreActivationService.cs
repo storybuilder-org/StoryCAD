@@ -125,7 +125,7 @@ public sealed class StoreActivationService : IStoreActivationService
                     "StoreUserGuid is empty; purchase proof cannot be bound to a user.");
             }
 
-            // Dev/tester allowlist activation (issue #90 D7/D8): COLLAB_DEV_ENABLED routes around
+            // Dev/tester allowlist activation (issue #90 D7/D8): COLLAB_DEV_ACTIVATION routes around
             // the platform store entirely -- there is no store proof to present, only the GUID a
             // human approved on the Worker's allowlist. payload/productId are ignored by the
             // Worker for platform "dev" (design section 6).
@@ -190,11 +190,11 @@ public sealed class StoreActivationService : IStoreActivationService
         }
     }
 
-    // COLLAB_DEV_ENABLED is a routing hint only (design section 12): it says "activate through the
+    // COLLAB_DEV_ACTIVATION is a routing hint only (design section 12): it says "activate through the
     // dev/tester allowlist instead of the platform store"; it grants nothing by itself -- the
     // Worker's allowlist row decides dev entitlement.
     private static bool IsDevActivationEnabled() =>
-        Environment.GetEnvironmentVariable("COLLAB_DEV_ENABLED") == "1";
+        Environment.GetEnvironmentVariable("COLLAB_DEV_ACTIVATION") == "1";
 
     /// <summary>
     ///     Re-presents proof to the Worker on demand (issue #90 step 8 item 7): used by a workflow

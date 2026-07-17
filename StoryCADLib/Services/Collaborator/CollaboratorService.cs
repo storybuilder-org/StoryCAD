@@ -73,10 +73,11 @@ public class CollaboratorService
             return;
         }
 
-        // Issue #90 ruling of 2026-07-15: the COLLAB_DEV_ENABLED purchase-check bypass retired.
+        // Issue #90 ruling of 2026-07-15: the old COLLAB_DEV_ENABLED purchase-check bypass retired.
         // Entitlement is holding a valid activation, however obtained -- including via the
-        // dev/tester allowlist, which COLLAB_DEV_ENABLED now only routes StoreActivationService
-        // toward (item 3), rather than skipping this check.
+        // dev/tester allowlist, which COLLAB_DEV_ACTIVATION (renamed from COLLAB_DEV_ENABLED,
+        // 2026-07-17) only routes StoreActivationService toward (item 3), rather than skipping
+        // this check.
         if (!IsPurchaseVerified())
         {
             _logService.Log(LogLevel.Warn, "Collaborator blocked: no active store activation.");

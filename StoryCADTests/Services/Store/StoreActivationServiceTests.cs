@@ -31,9 +31,9 @@ public class StoreActivationServiceTests
         prefs.Model.StoreActivationJwtExpiry = DateTime.MinValue;
         prefs.Model.StoreUserGuid = "11111111-1111-1111-1111-111111111111";
 
-        // Defensive reset: guards against a leaked COLLAB_DEV_ENABLED from a prior test or the
+        // Defensive reset: guards against a leaked COLLAB_DEV_ACTIVATION from a prior test or the
         // outer shell environment leaking into tests that don't expect dev-platform routing.
-        Environment.SetEnvironmentVariable("COLLAB_DEV_ENABLED", null);
+        Environment.SetEnvironmentVariable("COLLAB_DEV_ACTIVATION", null);
     }
 
     private static StoreActivationService CreateService(FakeStoreService store, FakeActivationClient client) =>
@@ -310,7 +310,7 @@ public class StoreActivationServiceTests
     [TestMethod]
     public async Task StoreActivationService_DevEnabled_PostsDevPlatformWithGuid()
     {
-        Environment.SetEnvironmentVariable("COLLAB_DEV_ENABLED", "1");
+        Environment.SetEnvironmentVariable("COLLAB_DEV_ACTIVATION", "1");
         try
         {
             var store = new FakeStoreService { Proof = SampleProof };
@@ -329,15 +329,15 @@ public class StoreActivationServiceTests
         }
         finally
         {
-            Environment.SetEnvironmentVariable("COLLAB_DEV_ENABLED", null);
+            Environment.SetEnvironmentVariable("COLLAB_DEV_ACTIVATION", null);
         }
     }
 
     [TestMethod]
     public async Task StoreActivationService_DevDisabled_UsesStoreProof()
     {
-        // COLLAB_DEV_ENABLED left unset: the default, store-driven path is unchanged.
-        Environment.SetEnvironmentVariable("COLLAB_DEV_ENABLED", null);
+        // COLLAB_DEV_ACTIVATION left unset: the default, store-driven path is unchanged.
+        Environment.SetEnvironmentVariable("COLLAB_DEV_ACTIVATION", null);
         var store = new FakeStoreService { Proof = SampleProof };
         var client = new FakeActivationClient();
         var service = CreateService(store, client);

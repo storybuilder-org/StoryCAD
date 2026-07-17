@@ -1,7 +1,7 @@
 # Collaborator Manual Test Plan
 
 Tests for the AI Collaborator feature (CollaboratorLib). Requires a document open in StoryCAD
-and a GUID enrolled on the dev Worker's allowlist. Set `COLLAB_DEV_ENABLED=1` to activate
+and a GUID enrolled on the dev Worker's allowlist. Set `COLLAB_DEV_ACTIVATION=1` to activate
 through that allowlist instead of the platform store (issue #90 D7/D8); it does not bypass the
 purchase gate, which now requires holding a valid activation however obtained.
 
@@ -11,7 +11,7 @@ purchase gate, which now requires holding a valid activation however obtained.
 3. Go to Backup tab; enable Automatic backups with a 1-minute interval
 4. Click OK
 5. Open the sample outline "Danger Calls" (File > Open Sample Outline)
-6. Verify `COLLAB_DEV_ENABLED=1` is set in your environment and your GUID is approved on the allowlist
+6. Verify `COLLAB_DEV_ACTIVATION=1` is set in your environment and your GUID is approved on the allowlist
 
 ## Session Cleanup (After All Tests)
 1. Restore original autosave and backup preferences
@@ -27,7 +27,7 @@ purchase gate, which now requires holding a valid activation however obtained.
 
 **Setup:**
 - "Danger Calls" outline open
-- `COLLAB_DEV_ENABLED=1`
+- `COLLAB_DEV_ACTIVATION=1`
 
 **Steps:**
 1. Click the Collaborator button in the toolbar (or Tools > Story Collaborator)
