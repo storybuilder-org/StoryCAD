@@ -65,11 +65,15 @@ public class CollaboratorService
             return;
         }
 
-        // Get the current StoryModel from AppState
+        // Get the current StoryModel from AppState. Close/Reset leaves a non-null document
+        // with an empty model (FilePath null, CurrentView empty) — same gate as Print Reports.
         var storyModel = _appState.CurrentDocument?.Model;
-        if (storyModel == null)
+        if (storyModel == null || storyModel.CurrentView.Count == 0)
         {
-            _logService.Log(LogLevel.Error, "No StoryModel available - no document is open");
+            _logService.Log(LogLevel.Warn, "No story is open; Collaborator not started.");
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(
+                new StatusMessage("No story is open. Open an outline before using Collaborator.",
+                    LogLevel.Warn)));
             return;
         }
 

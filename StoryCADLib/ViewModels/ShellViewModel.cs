@@ -945,6 +945,9 @@ public class ShellViewModel : ObservableRecipient
         CloseCommand.NotifyCanExecuteChanged();
         ExitCommand.NotifyCanExecuteChanged();
         CollaboratorCommand.NotifyCanExecuteChanged();
+        // Wired with CollaboratorCommand (issue #90 step 8); must refresh on the same cadence
+        // or the toolbar button stays stuck disabled after a serialization-lock cycle.
+        BuyCreditsCommand.NotifyCanExecuteChanged();
         KeyQuestionsCommand.NotifyCanExecuteChanged();
         TopicsCommand.NotifyCanExecuteChanged();
         MasterPlotsCommand.NotifyCanExecuteChanged();
