@@ -1,52 +1,36 @@
 # Collaborator Manual Test Plan
 
-Tests for the AI Collaborator feature (CollaboratorLib).
+Tests for the AI Collaborator feature (CollaboratorLib) as used inside StoryCAD.
 
-**Scope:** StoryCAD ↔ Collaborator ↔ proxy interactions — open/close, gates, autosave/backup pause, run a workflow without hang/timeout, accept/reject, basic proxy error, credits dialog entry. Requires a document open in StoryCAD and a GUID enrolled on the dev Worker's allowlist.
+**Scope:** Open/close, document gate, autosave/backup pause, run a workflow without hang/timeout, accept/reject, credits dialog entry. Requires a document open and Collaborator already able to open for this machine (see Prerequisites).
 
-**Out of scope:** Prompt quality, workflow content debugging, Try Again behavior, element-picker memory across runs.
+**Out of scope:** Prompt quality, workflow content debugging, Try Again behavior, element-picker memory across runs. Store purchase / paid activation paths. Administrative enrollment of a tester identity (private setup plan).
 
-Set `COLLAB_DEV_ACTIVATION=1` to activate through the allowlist instead of the platform store (issue #90 D7/D8). It is a routing hint only; the Worker's allowlist row grants access.
+**Related (private repo):** system setup, environment configuration, identity enrollment, and the proxy-unreachable case live in Collaborator `CollaboratorTests/ManualTests/Collaborator_System_Setup_Test_Plan.md`. Do not copy those steps into this public plan.
 
-## Environment variables (one method)
+---
 
-Use **Windows user environment variables** and launch StoryCAD from the **Start menu** or **File Explorer** so a new process loads them. Do not rely on PowerShell, Visual Studio F5, or an already-open StoryCAD process (those often keep an old environment block).
+## Prerequisites
 
-### Set or change a variable
+Complete **before** this suite. This plan does not document how.
 
-1. Fully quit StoryCAD (and Visual Studio if it was used only as a launcher).
-2. Open Start, search for **Edit environment variables for your account**, open it.
-3. Under **User variables**, New or Edit:
-   - Name: `COLLAB_DEV_ACTIVATION` — Value: `1` (required for these tests)
-   - Name: `COLLAB_PROXY_URL` — Value: dev Worker base, e.g. `https://storycad-collaborator-proxy.storybuilder-foundation.workers.dev/v1` (optional; omit to use the build default)
-4. OK out of all dialogs.
-5. Start StoryCAD from **Start** or **File Explorer** (sideloaded/MSIX install, or a deployed build path). Do not use a terminal or VS instance that was open before step 3.
+1. Developer or tester activation for this machine is configured so Collaborator opens without the Subscribe dialog.
+2. The AI proxy this build uses is reachable from your network.
+3. If Collaborator still offers Subscribe instead of the feature UI, stop here and finish the private system setup plan. Do not treat that as a TC-110 failure.
 
-### Temporary change (e.g. TC-118)
+## Session Setup (run once)
 
-1. Quit StoryCAD completely.
-2. Edit the user variable in the same dialog as above.
-3. Start StoryCAD again from Start or Explorer.
-4. After the case, quit StoryCAD, restore the previous value (or delete the variable), start StoryCAD again the same way.
-
-### Verify before testing
-
-- `COLLAB_DEV_ACTIVATION` is `1` (user variable).
-- Your `StoreUserGuid` is **approved** on the dev Worker allowlist (first Collaborator open with the flag set may self-enroll as `pending`; approve with category `developer` or `beta_tester` per the workflow guide). If Subscribe appears instead of Collaborator, the process did not see the flag or the GUID is not approved.
-
-## Session Setup (Run Once Before Testing)
-
-1. Set environment variables per **Environment variables** above; start StoryCAD from Start or Explorer.
-2. Tools > Preferences > Backup tab: enable autosave every **30** seconds; enable timed backups every **1** minute. Note the **Backup directory** path shown under Save Locations (that is where TC-113 looks — not a fixed LocalAppData path).
+1. Start StoryCAD the same way you will for the whole session (Start menu, File Explorer, or your usual installed build). A process that was already open may not see recent configuration changes.
+2. Tools > Preferences > Backup: enable autosave every **30** seconds; enable timed backups every **1** minute. Note the **Backup directory** under Save Locations (TC-113 uses that path).
 3. Save preferences.
 4. Open the sample outline **Danger Calls** (File > Open Sample Outline).
-5. Confirm Collaborator opens without the Subscribe dialog (allowlist activation worked).
+5. Open Collaborator once and confirm the workflow list appears (not Subscribe). Close Collaborator.
 
-## Session Cleanup (After All Tests)
+## Session Cleanup (after all tests)
 
-1. Close Collaborator if open (window X or Exit).
+1. Close Collaborator if open.
 2. Restore original autosave/backup preferences if you changed them.
-3. Restore `COLLAB_PROXY_URL` if TC-118 changed it; start StoryCAD once from Start/Explorer to confirm.
+3. If you ran the private proxy-unreachable case earlier in the day, confirm normal configuration was restored (see that plan's cleanup).
 4. Close StoryCAD.
 
 ## Collaborator session cleanup (between cases)
@@ -94,7 +78,7 @@ Closing only the outline without closing Collaborator does not fully reset Colla
 
 **Steps:**
 1. Click the Collaborator button  
-   **Expected:** Collaborator does **not** open. Status bar shows a warning such as "No story is open. Open an outline before using Collaborator." No crash. (Close leaves an empty document in AppState; the gate uses empty `CurrentView`, not a null model.)
+   **Expected:** Collaborator does **not** open. Status bar shows a warning such as "No story is open. Open an outline before using Collaborator." No crash.
 2. Confirm the main window still works  
    **Expected:** Can open a file or sample
 
@@ -112,7 +96,7 @@ Closing only the outline without closing Collaborator does not fully reset Colla
 
 **Setup:**
 - "Danger Calls" open; autosave 30 seconds (Session Setup)
-- Note the outline file's last-modified time (sample is often under `%TEMP%\Danger Calls.stbx`)
+- Note the outline file's last-modified time (sample is often under a temp folder for sample outlines)
 
 **Steps:**
 1. Open Collaborator  
@@ -138,7 +122,7 @@ Closing only the outline without closing Collaborator does not fully reset Colla
 
 **Setup:**
 - "Danger Calls" open; timed backup every 1 minute (Session Setup)
-- Note contents of the **Backup directory** from Preferences > Save Locations (e.g. a Google Drive or Documents folder). Sort by date modified.
+- Note contents of the **Backup directory** from Preferences > Save Locations. Sort by date modified.
 
 **Steps:**
 1. Open Collaborator  
@@ -246,38 +230,15 @@ Closing only the outline without closing Collaborator does not fully reset Colla
 
 ---
 
-## Error Handling
-
-### TC-118: Proxy Unreachable
-**Priority:** Medium  
-**Time:** ~3 minutes
-
-**Setup:**
-1. Quit StoryCAD completely.
-2. Set user env `COLLAB_PROXY_URL` = `https://invalid.example.com` (see **Environment variables**).
-3. Start StoryCAD from Start or Explorer; open **Danger Calls**.
-4. Keep `COLLAB_DEV_ACTIVATION=1`.
-
-**Steps:**
-1. Open Collaborator and start any workflow run  
-   **Expected:** After failure/timeout, conversation list shows an error (not a crash). Host name `invalid.example.com` may appear in the message.
-2. Use the main StoryCAD window  
-   **Expected:** Outline still navigable; Collaborator can be closed normally
-
-**Cleanup:**
-1. Close Collaborator.
-2. Quit StoryCAD.
-3. Restore `COLLAB_PROXY_URL` to the dev Worker URL (or remove the variable).
-4. Start StoryCAD from Start or Explorer and confirm a normal workflow can run again.
-
----
+## Session stability
 
 ### TC-119: Close and Reopen Collaborator in Same Session
 **Priority:** Medium  
 **Time:** ~3 minutes
 
 **Setup:**
-- "Danger Calls" open; `COLLAB_PROXY_URL` restored if TC-118 ran
+- "Danger Calls" open
+- Normal proxy configuration restored if you ran the private proxy-unreachable case earlier
 
 **Steps:**
 1. Open Collaborator  
@@ -309,7 +270,7 @@ Closing only the outline without closing Collaborator does not fully reset Colla
 1. Confirm the button is enabled (not stuck gray after a save/open). Tooltip: "Buy Collaborator Credits"  
    **Expected:** Clickable when the command bar is idle
 2. Click **Buy Credits**  
-   **Expected:** Buy Credits dialog opens. On a sideloaded/dev build, pack list may be empty or show a store error — assertion is **dialog opens**, not a successful purchase
+   **Expected:** Buy Credits dialog opens. On a sideloaded or non-store build, pack list may be empty or show a store error. Assertion is **dialog opens**, not a successful purchase.
 3. Click **Not now** (or equivalent)  
    **Expected:** Dialog closes; no purchase; main window responsive
 
@@ -320,7 +281,7 @@ Closing only the outline without closing Collaborator does not fully reset Colla
 
 ## Notes
 
-- **COLLAB_DEBUG=1**: Debugger-attach dialog on Collaborator open (dev only); set via the same user-env method if needed.
-- Proxy responses can take up to 3 minutes — do not treat a slow response as a hang before that.
-- Logs: under the app's `RootDirectory` logs folder (package or unpackaged); useful if open/activation fails.
-- Manual pass for issue #90 Test (lane A) is this suite TC-110–TC-120, not prompt review.
+- Proxy responses can take up to 3 minutes. Do not treat a slow response as a hang before that.
+- Logs: under the app's `RootDirectory` logs folder (package or unpackaged); useful if open fails after Prerequisites were believed complete.
+- Numbering: TC-118 (proxy unreachable) is intentional gap; that case is on the private system setup plan.
+- In-app product pass for Collaborator is this suite (TC-110–TC-117, TC-119–TC-120), not prompt review.
