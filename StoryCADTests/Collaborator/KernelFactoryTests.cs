@@ -89,4 +89,49 @@ public class KernelFactoryTests
         Assert.ThrowsExactly<InvalidOperationException>(
             () => KernelFactory.ResolveConfig(Env("OPENAI_API_KEY", "sk-key"), () => null));
     }
+
+    // ── CreateChatHandler (Collaborator #95) ─────────────────────────────────
+
+    [TestMethod]
+    public async Task CreateChatHandler_UsesDevActivationJwtProvider()
+    {
+        var previous = KernelFactory.DevActivationJwtProvider;
+        try
+        {
+            KernelFactory.DevActivationJwtProvider = () => "dev-jwt";
+
+            var inner = new RecordingHandler(System.Net.HttpStatusCode.OK);
+            using var handler = KernelFactory.CreateChatHandler();
+            handler.InnerHandler = inner;
+            using var client = new System.Net.Http.HttpClient(handler);
+
+            using var response = await client.SendAsync(
+                new System.Net.Http.HttpRequestMessage(
+                    System.Net.Http.HttpMethod.Get, "https://example.test/chat"));
+
+            Assert.AreEqual(System.Net.HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual(1, inner.AuthorizationHeaders.Count);
+            Assert.AreEqual("Bearer dev-jwt", inner.AuthorizationHeaders[0],
+                "CreateChatHandler must resolve through GetActivationJwt / DevActivationJwtProvider");
+        }
+        finally
+        {
+            KernelFactory.DevActivationJwtProvider = previous;
+        }
+    }
+
+    private sealed class RecordingHandler : System.Net.Http.HttpMessageHandler
+    {
+        private readonly System.Net.HttpStatusCode _status;
+        public List<string> AuthorizationHeaders { get; } = new();
+
+        public RecordingHandler(System.Net.HttpStatusCode status) => _status = status;
+
+        protected override Task<System.Net.Http.HttpResponseMessage> SendAsync(
+            System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
+        {
+            AuthorizationHeaders.Add(request.Headers.Authorization?.ToString());
+            return Task.FromResult(new System.Net.Http.HttpResponseMessage(_status));
+        }
+    }
 }
