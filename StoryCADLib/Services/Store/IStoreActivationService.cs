@@ -42,4 +42,11 @@ public interface IStoreActivationService
 
     /// <summary>The current Worker JWT, attached to Collaborator calls; null when not active.</summary>
     string CurrentJwt { get; }
+
+    /// <summary>
+    ///     Re-presents proof to the Worker on demand (issue #90 step 8 item 7). Used by a workflow
+    ///     caller that gets a 401 to refresh once before retrying, covering a session that outlives
+    ///     the ~12h JWT between the launch/purchase/restore/entitlement-change refresh points above.
+    /// </summary>
+    Task ReactivateAsync(CancellationToken ct = default);
 }

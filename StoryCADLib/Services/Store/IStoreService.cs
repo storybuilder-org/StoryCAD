@@ -58,4 +58,32 @@ public interface IStoreService
     ///     when the store reports no entitlement.
     /// </summary>
     Task<PurchaseProof> GetPurchaseProofAsync(string userGuid, CancellationToken ct = default);
+
+    /// <summary>
+    ///     The credit-pack (consumable) product identifiers this store understands (issue #90
+    ///     design section 10 "Credit packs", step 10); empty for <see cref="NullStoreService" />.
+    ///     Parallel to <see cref="ProductIds" />, which is the subscription catalog only — packs are
+    ///     a separate product family with no ongoing entitlement, so they get their own list rather
+    ///     than joining it.
+    /// </summary>
+    IReadOnlyList<string> CreditPackProductIds { get; }
+
+    /// <summary>
+    ///     Purchases a consumable (credit pack) and returns its own proof directly from the purchase
+    ///     call — unlike a subscription, a consumable has no ongoing entitlement
+    ///     <see cref="GetPurchaseProofAsync" /> could re-derive one from afterward.
+    ///     <paramref name="userGuid" /> is embedded in the proof the same way <see cref="PurchaseAsync" />
+    ///     embeds it for a subscription.
+    /// </summary>
+    Task<ConsumablePurchaseResult> PurchaseConsumableAsync(string productId, string userGuid, CancellationToken ct = default);
+
+    /// <summary>
+    ///     Finishes a consumable transaction after the Worker has confirmed the credit (design
+    ///     section 10: "the client finishes the transaction only after the Worker's 200"). Apple:
+    ///     finishes the StoreKit transaction <see cref="PurchaseConsumableAsync" /> deliberately left
+    ///     open. Windows: a no-op — the Worker itself reports consumable fulfillment to the Microsoft
+    ///     collection API (design section 10's step 10 correction), so there is nothing for the
+    ///     client to finish.
+    /// </summary>
+    Task FinishConsumableAsync(string transactionId, CancellationToken ct = default);
 }

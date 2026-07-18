@@ -65,18 +65,26 @@ public class CollaboratorService
             return;
         }
 
-        // Get the current StoryModel from AppState
+        // Get the current StoryModel from AppState. Close/Reset leaves a non-null document
+        // with an empty model (FilePath null, CurrentView empty) — same gate as Print Reports.
         var storyModel = _appState.CurrentDocument?.Model;
-        if (storyModel == null)
+        if (storyModel == null || storyModel.CurrentView.Count == 0)
         {
-            _logService.Log(LogLevel.Error, "No StoryModel available - no document is open");
+            _logService.Log(LogLevel.Warn, "No story is open; Collaborator not started.");
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(
+                new StatusMessage("No story is open. Open an outline before using Collaborator.",
+                    LogLevel.Warn)));
             return;
         }
 
-        bool devEnabled = Environment.GetEnvironmentVariable("COLLAB_DEV_ENABLED") == "1";
-        if (!devEnabled && !IsPurchaseVerified())
+        // Issue #90 ruling of 2026-07-15: the old COLLAB_DEV_ENABLED purchase-check bypass retired.
+        // Entitlement is holding a valid activation, however obtained -- including via the
+        // dev/tester allowlist, which COLLAB_DEV_ACTIVATION (renamed from COLLAB_DEV_ENABLED,
+        // 2026-07-17) only routes StoreActivationService toward (item 3), rather than skipping
+        // this check.
+        if (!IsPurchaseVerified())
         {
-            _logService.Log(LogLevel.Warn, "Collaborator blocked: purchase not verified and COLLAB_DEV_ENABLED != 1");
+            _logService.Log(LogLevel.Warn, "Collaborator blocked: no active store activation.");
             // Offer the subscription. If the user completes it (now Active), fall through and open
             // Collaborator; otherwise stop here.
             if (!await ShowSubscribeDialogAsync())
@@ -165,6 +173,38 @@ public class CollaboratorService
         if (windowing is null || vm is null)
         {
             _logService.Log(LogLevel.Warn, "Subscribe dialog unavailable; no Windowing or view model registered.");
+            return false;
+        }
+
+        return await vm.ShowAsync(windowing);
+    }
+
+    /// <summary>
+    ///     Offers a credit-pack purchase via <see cref="BuyCreditsDialogViewModel.ShowAsync" />
+    ///     (issue #90 design section 10 "Credit packs", step 10). Returns true when a pack was
+    ///     purchased and credited. Public (unlike <see cref="ShowSubscribeDialogAsync" />, which
+    ///     has no caller outside <see cref="OpenCollaborator" />'s own gate): the out-of-credits
+    ///     message the workflow and chat callers show (StoryCADLib.Services.Store.
+    ///     OutOfCreditsException) names this screen, so a menu item or in-panel button can call it
+    ///     directly once one is wired up -- no further plumbing needed on this side.
+    /// </summary>
+    public async Task<bool> ShowBuyCreditsDialogAsync()
+    {
+        var store = Ioc.Default.GetService<IStoreService>();
+        if (store is null || !store.IsSupported)
+        {
+            _logService.Log(LogLevel.Warn, "Buy Credits dialog suppressed; no platform store is available in this build.");
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                "Buying credits requires the Microsoft Store or Mac App Store edition of StoryCAD.",
+                LogLevel.Warn, true)));
+            return false;
+        }
+
+        var windowing = Ioc.Default.GetService<Windowing>();
+        var vm = Ioc.Default.GetService<BuyCreditsDialogViewModel>();
+        if (windowing is null || vm is null)
+        {
+            _logService.Log(LogLevel.Warn, "Buy Credits dialog unavailable; no Windowing or view model registered.");
             return false;
         }
 

@@ -222,6 +222,11 @@ public partial class App : Application
         //Load user preferences or initialise them.
         await new PreferencesIo().ReadPreferences();
 
+        // Explicit startup step (issue #90 D8 as amended): generate and persist the client-side
+        // user GUID on first launch, before store activation ever runs. Must run after
+        // ReadPreferences and before the activation kickoff below.
+        await Preferences.EnsureUserGuidProvisionedAsync();
+
         // Restore macOS security-scoped bookmarks so previously selected folders remain accessible
         if (OperatingSystem.IsMacOS())
         {

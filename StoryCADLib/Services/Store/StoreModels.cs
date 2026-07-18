@@ -62,6 +62,18 @@ public record StoreEntitlement(
 public record PurchaseResult(PurchaseStatus Status, string Error = null);
 
 /// <summary>
+///     Result of <see cref="IStoreService.PurchaseConsumableAsync" /> (issue #90 design section 10
+///     "Credit packs", step 10). Unlike a subscription, a consumable's proof comes directly from the
+///     purchase call itself: StoreKit's <c>Transaction.currentEntitlements</c> excludes consumables,
+///     so there is no ongoing entitlement <see cref="IStoreService.GetPurchaseProofAsync" /> could
+///     re-query afterward. <see cref="Proof" /> and <see cref="TransactionId" /> are set only when
+///     <see cref="Status" /> is <see cref="PurchaseStatus.Success" />; <see cref="TransactionId" /> is
+///     the identifier <see cref="IStoreService.FinishConsumableAsync" /> needs (Apple only —
+///     Windows has nothing to finish client-side, per the design's step 10 correction).
+/// </summary>
+public record ConsumablePurchaseResult(PurchaseStatus Status, PurchaseProof Proof = null, string TransactionId = null, string Error = null);
+
+/// <summary>
 ///     Store-signed proof of purchase sent to the Worker <c>/activate</c> endpoint.
 ///     <see cref="Platform" /> is "apple" or "microsoft"; <see cref="Payload" /> is the
 ///     JWS on macOS or the Microsoft purchase-ID key on Windows. <see cref="UserGuid" />

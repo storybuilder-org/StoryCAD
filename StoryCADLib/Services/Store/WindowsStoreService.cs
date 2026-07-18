@@ -35,7 +35,8 @@ public sealed class WindowsStoreService : IStoreService
     }
 
     // A store context is always obtainable on the Windows head; a sideloaded debug build has no license
-    // context and purchases fail there, which is exactly what the COLLAB_DEV_ENABLED dev stub is for.
+    // context and purchases fail there. COLLAB_DEV_ACTIVATION routes StoreActivationService around this
+    // store entirely (dev/tester allowlist activation, issue #90 D7/D8) rather than patching it here.
     public bool IsSupported => true;
 
     public IReadOnlyList<string> ProductIds => StoreConfig.WindowsStoreIds;
@@ -91,7 +92,7 @@ public sealed class WindowsStoreService : IStoreService
 
         // The Worker mints the AAD ticket (it holds the secret); the client only forwards it to the
         // Store. No ticket -> no proof -> activation reports NotPurchased and offers retry.
-        var ticket = await _activationClient.GetStoreTicketAsync(ct);
+        var ticket = await _activationClient.GetStoreTicketAsync(ct: ct);
         if (string.IsNullOrEmpty(ticket))
         {
             _logService.Log(LogLevel.Warn, "No store ticket available; cannot produce Microsoft purchase proof.");
@@ -105,6 +106,50 @@ public sealed class WindowsStoreService : IStoreService
         }
 
         return new PurchaseProof("microsoft", key, current.ProductId, userGuid);
+    }
+
+    public IReadOnlyList<string> CreditPackProductIds => StoreConfig.WindowsCreditPackStoreIds;
+
+    public async Task<ConsumablePurchaseResult> PurchaseConsumableAsync(string productId, string userGuid,
+        CancellationToken ct = default)
+    {
+        var purchase = await _adapter.RequestPurchaseAsync(productId, ct);
+        if (purchase.Outcome is not (StorePurchaseOutcome.Succeeded or StorePurchaseOutcome.AlreadyPurchased))
+        {
+            return purchase.Outcome == StorePurchaseOutcome.NotPurchased
+                ? new ConsumablePurchaseResult(PurchaseStatus.UserCancelled)
+                : new ConsumablePurchaseResult(PurchaseStatus.Failed,
+                    Error: purchase.ExtendedError ?? "The Microsoft Store purchase could not be completed.");
+        }
+
+        // Design section 10 "Credit packs" (step 10 correction): a consumable proof is a
+        // *collections*-audience Microsoft Store ID key (GetCustomerCollectionsIdAsync), not the
+        // purchase-audience key GetPurchaseProofAsync above uses for subscriptions — a different
+        // key kind entirely, minted against the Worker's /store/ticket?purpose=collections ticket.
+        var ticket = await _activationClient.GetStoreTicketAsync("collections", ct);
+        if (string.IsNullOrEmpty(ticket))
+        {
+            _logService.Log(LogLevel.Warn, "No collections store ticket available; cannot produce Microsoft consumable proof.");
+            return new ConsumablePurchaseResult(PurchaseStatus.Failed,
+                Error: "Couldn't reach the store. Check your connection and try again.");
+        }
+
+        var key = await _adapter.GetCustomerCollectionsIdAsync(ticket, userGuid, ct);
+        if (string.IsNullOrEmpty(key))
+        {
+            return new ConsumablePurchaseResult(PurchaseStatus.Failed,
+                Error: "Couldn't reach the store. Check your connection and try again.");
+        }
+
+        return new ConsumablePurchaseResult(PurchaseStatus.Success, new PurchaseProof("microsoft", key, productId, userGuid));
+    }
+
+    public Task FinishConsumableAsync(string transactionId, CancellationToken ct = default)
+    {
+        // The Worker itself reports the consumable fulfilled to the Microsoft collection API
+        // (design section 10's step 10 correction: POST /collections/consume); there is nothing
+        // for the Windows client to finish, unlike Apple's local StoreKit transaction.
+        return Task.CompletedTask;
     }
 
     private static StoreProduct MapProduct(StoreProductInfo p) =>

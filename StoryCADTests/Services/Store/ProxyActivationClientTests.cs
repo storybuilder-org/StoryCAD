@@ -182,6 +182,33 @@ public class ProxyActivationClientTests
         Assert.IsNull(await client.GetStoreTicketAsync());
     }
 
+    [TestMethod]
+    public async Task GetStoreTicketAsync_DefaultPurpose_NoQueryString()
+    {
+        // issue #90 design section 10 step 10 correction: the default must stay byte-for-byte the
+        // path PR #1470's shipped GetStoreTicketAsync() call already uses, so existing subscription
+        // activation is unaffected by the collections-purpose addition below.
+        var handler = StubHttpMessageHandler.Returning(HttpStatusCode.OK, "{\"ticket\":\"aad-token\"}");
+        var client = CreateClient(handler);
+
+        await client.GetStoreTicketAsync();
+
+        Assert.IsTrue(handler.LastRequest.RequestUri!.AbsolutePath.EndsWith("/store/ticket"));
+        Assert.IsTrue(string.IsNullOrEmpty(handler.LastRequest.RequestUri.Query));
+    }
+
+    [TestMethod]
+    public async Task GetStoreTicketAsync_CollectionsPurpose_AddsQueryString()
+    {
+        var handler = StubHttpMessageHandler.Returning(HttpStatusCode.OK, "{\"ticket\":\"aad-token-collections\"}");
+        var client = CreateClient(handler);
+
+        var ticket = await client.GetStoreTicketAsync("collections");
+
+        Assert.AreEqual("aad-token-collections", ticket);
+        Assert.AreEqual("?purpose=collections", handler.LastRequest.RequestUri!.Query);
+    }
+
     // ── Test double ──────────────────────────────────────────────────────────
 
     private sealed class StubHttpMessageHandler : HttpMessageHandler

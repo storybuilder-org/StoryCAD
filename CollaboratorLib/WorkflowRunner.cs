@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using CollaboratorLib.Context;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using StoryCADLib.Models;
@@ -22,9 +23,27 @@ namespace StoryCollaborator
 
     internal class WorkflowRunner
     {
-        private static readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromMinutes(3) };
+        private static HttpClient _httpClient = new() { Timeout = TimeSpan.FromMinutes(3) };
 
-        private Kernel _kernel;
+        // Test-only accessor (issue #94 design section 5 item 2): lets
+        // WorkflowRunnerTruncationTests.cs observe ResetHttpClient's swap without any network activity.
+        internal static HttpClient CurrentHttpClient => _httpClient;
+
+        /// <summary>
+        /// Swaps in a fresh HttpClient, disposing the old one (issue #94 design section 5 item 2):
+        /// the truncation retry calls this to abandon the pooled connection, which server evidence
+        /// pins to a flagged Cloudflare isolate after a mid-stream kill (design doc section 2, phase
+        /// C). Safe because workflow calls are sequential -- the UI runs one workflow at a time,
+        /// PromptTestRunner and the tests included -- and the chat sidebar uses Semantic Kernel's own
+        /// HttpClient, untouched here.
+        /// </summary>
+        internal static void ResetHttpClient()
+        {
+            var fresh = new HttpClient { Timeout = TimeSpan.FromMinutes(3) };
+            var old = Interlocked.Exchange(ref _httpClient, fresh);
+            old.Dispose();
+        }
+
         private IStoryCADAPI _storyApi;
         private StoryModel storyModel;
         private Workflow workflowModel;
@@ -32,11 +51,13 @@ namespace StoryCollaborator
         private CollaboratorSettings _settings;
         private readonly StoryCADLib.Services.Logging.ILogService? _auditLogger;
 
+        // No Kernel field: issue #90 step 8 item 5 retired the direct-OpenAI Semantic Kernel
+        // invocation path (InvokeDirectAsync), which was the only reason this class held one.
+        // PostToProxyAsync talks to the Worker over plain HttpClient, never through SK.
         internal WorkflowRunner(StoryModel model, Workflow workflow, IStoryCADAPI api, ILogger<WorkflowRunner>? logger = null, CollaboratorSettings? settings = null, StoryCADLib.Services.Logging.ILogService? auditLogger = null)
         {
             storyModel = model;
             workflowModel = workflow;
-            _kernel = KernelInitializer.Kernel;
             _logger = logger;
             _settings = settings ?? CollaboratorSettings.Default;
             _storyApi = api;
@@ -76,10 +97,10 @@ namespace StoryCollaborator
                     return WorkflowResult.Failed($"Missing required element: '{requirement.ElementLabel}'");
             }
 
-            // A subscriber's activation JWT counts as a proxy credential; without any
-            // credential the workflow degrades to the stub rather than calling out bare.
-            if (string.IsNullOrWhiteSpace(KernelFactory.ResolveWorkflowCredential()) &&
-                string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("OPENAI_API_KEY")))
+            // Without a subscriber's (or allowlisted dev/tester's) activation JWT, the workflow
+            // degrades to the stub rather than calling out bare (issue #90 step 8 item 5: the
+            // OPENAI_API_KEY direct-to-OpenAI path retired, so a held JWT is the only credential).
+            if (string.IsNullOrWhiteSpace(KernelFactory.ResolveWorkflowCredential()))
             {
                 return BuildStubResponse();
             }
@@ -99,38 +120,24 @@ namespace StoryCollaborator
                 if (workflowIO.ExampleLists.Count > 0)
                     EnrichWithExamples(kernelArgs);
 
-                string planResult;
+                // Issue #90 step 8 item 5: the direct-to-OpenAI fallback retired along with
+                // OPENAI_API_KEY on the client. A proxy failure now propagates to the outer
+                // catch clauses below rather than retrying against OpenAI directly.
                 result.AssembledPrompt = null;
-                try
+                var (proxyContent, proxyHash, proxyCost, proxyComplete) = await PostToProxyAsync(kernelArgs);
+                result.RemoteTemplateHash = proxyHash;
+                result.Cost = proxyCost;
+
+                if (!proxyComplete)
                 {
-                    var (proxyContent, proxyHash, proxyCost) = await PostToProxyAsync(kernelArgs);
-                    planResult = proxyContent;
-                    result.RemoteTemplateHash = proxyHash;
-                    result.Cost = proxyCost;
-                }
-                catch (HttpRequestException ex)
-                {
-                    var fallbackKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-                    if (!string.IsNullOrWhiteSpace(fallbackKey))
-                    {
-                        _logger?.LogWarning($"fallback: direct, reason: {ex.GetType().Name}");
-                        result.AssembledPrompt = RenderTemplate(kernelArgs);
-                        planResult = await InvokeDirectAsync(kernelArgs);
-                    }
-                    else throw;
-                }
-                catch (TaskCanceledException ex)
-                {
-                    var fallbackKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-                    if (!string.IsNullOrWhiteSpace(fallbackKey))
-                    {
-                        _logger?.LogWarning($"fallback: direct, reason: {ex.GetType().Name}");
-                        result.AssembledPrompt = RenderTemplate(kernelArgs);
-                        planResult = await InvokeDirectAsync(kernelArgs);
-                    }
-                    else throw;
+                    // Issue #94 design section 5 item 3 ("surface, never mask"): the one truncation
+                    // retry (PostToProxyAsync -> ExecuteWithTruncationRetryAsync) still came back
+                    // incomplete. The partial text is preserved for diagnostics but must never reach
+                    // ExtractOutputs or a Success result.
+                    return BuildTruncationFailureResult(proxyContent);
                 }
 
+                string planResult = proxyContent;
                 result.RawResponse = planResult;
 
                 if (string.IsNullOrEmpty(planResult))
@@ -156,6 +163,14 @@ namespace StoryCollaborator
                 }
 
                 return result;
+            }
+            catch (StoryCADLib.Services.Store.OutOfCreditsException ex)
+            {
+                // Issue #90 design section 10 (step 10): shown as-is, not wrapped in
+                // "Workflow execution failed: ..." -- this is a recognized, actionable state
+                // (buy more credits or wait for renewal), not an unexpected failure.
+                _logger?.LogWarning("Workflow call refused: out of credits ({Workflow})", workflowModel.Title);
+                return WorkflowResult.Failed(ex.Message);
             }
             catch (Exception ex)
             {
@@ -245,125 +260,6 @@ namespace StoryCollaborator
             }
 
             return kernelArgs;
-        }
-
-        /// <summary>
-        /// Loads the raw prompt template for the current workflow.
-        /// Reads from COLLAB_TEMPLATE_DIR (points directly at the WorkflowPlans source folder).
-        /// </summary>
-        internal string? LoadTemplate()
-        {
-            try
-            {
-                var templateDir = Environment.GetEnvironmentVariable("COLLAB_TEMPLATE_DIR");
-                if (string.IsNullOrEmpty(templateDir)) return null;
-
-                var templatePath = Path.Combine(templateDir, workflowModel.Label, "skprompt.txt");
-                if (!File.Exists(templatePath)) return null;
-
-                return File.ReadAllText(templatePath);
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogWarning($"Failed to load template: {ex.Message}");
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Renders the prompt template with kernel arguments substituted.
-        /// </summary>
-        internal string? RenderTemplate(KernelArguments kernelArgs)
-        {
-            var template = LoadTemplate();
-            if (string.IsNullOrEmpty(template)) return null;
-
-            try
-            {
-                foreach (var kvp in kernelArgs)
-                {
-                    var skPlaceholder = $"{{{{${kvp.Key}}}}}";
-                    var value = kvp.Value?.ToString() ?? string.Empty;
-                    template = template.Replace(skPlaceholder, value);
-
-                    var simplePlaceholder = $"{{{{{kvp.Key}}}}}";
-                    template = template.Replace(simplePlaceholder, value);
-                }
-
-                return template;
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogWarning($"Failed to render template: {ex.Message}");
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Invokes the workflow plan via Semantic Kernel (direct path; used as fallback when proxy is unavailable).
-        /// COLLAB_TEMPLATE_DIR must point at the WorkflowPlans source folder; the parent is used as the plugin base.
-        /// </summary>
-        private async Task<string> InvokeDirectAsync(KernelArguments kernelArgs)
-        {
-            var templateDir = Environment.GetEnvironmentVariable("COLLAB_TEMPLATE_DIR");
-            if (string.IsNullOrEmpty(templateDir))
-            {
-                throw new InvalidOperationException("COLLAB_TEMPLATE_DIR environment variable not set");
-            }
-            var pluginBasePath = Path.GetDirectoryName(templateDir)
-                ?? throw new InvalidOperationException("COLLAB_TEMPLATE_DIR has no parent directory");
-
-            var functionsPath = Path.Combine(pluginBasePath, "WorkflowFunctions", workflowModel.Label);
-            if (Directory.Exists(functionsPath))
-            {
-                foreach (var pluginDir in Directory.GetDirectories(functionsPath))
-                {
-                    var pluginName = System.IO.Path.GetFileName(pluginDir);
-                    if (!_kernel.Plugins.TryGetPlugin(pluginName, out _))
-                    {
-                        _kernel.ImportPluginFromPromptDirectory(pluginDir);
-                    }
-                }
-            }
-
-            var plansPath = Path.Combine(pluginBasePath, "WorkflowPlans");
-            if (!_kernel.Plugins.TryGetPlugin("WorkflowPlans", out _))
-            {
-                if (!Directory.Exists(plansPath))
-                {
-                    throw new InvalidOperationException($"Workflow plans directory not found: {plansPath}");
-                }
-                _kernel.ImportPluginFromPromptDirectory(plansPath);
-            }
-
-            if (!_kernel.Plugins.TryGetPlugin("WorkflowPlans", out var planPlugin))
-            {
-                throw new InvalidOperationException("WorkflowPlans plugin not loaded");
-            }
-
-            if (!planPlugin.TryGetFunction(workflowModel.Label, out var plan))
-            {
-                throw new InvalidOperationException($"Workflow plan not found: {workflowModel.Label}");
-            }
-
-            FunctionResult functionResult;
-            try
-            {
-                functionResult = await _kernel.InvokeAsync(plan, kernelArgs);
-            }
-            catch (Exception ex)
-            {
-                _auditLogger?.LogException(StoryCADLib.Services.Logging.LogLevel.Error, ex,
-                    $"Semantic Kernel invocation failed for workflow: {workflowModel.Label}");
-                throw;
-            }
-            var responseText = functionResult.ToString();
-
-            _logger?.LogInformation("=== RAW AI RESPONSE ===");
-            _logger?.LogInformation(responseText);
-            _logger?.LogInformation("=== END RAW AI RESPONSE ===");
-
-            return responseText;
         }
 
         /// <summary>
@@ -868,21 +764,16 @@ namespace StoryCollaborator
         }
 
         /// <summary>
-        /// Posts the workflow request to the proxy's /v1/workflow endpoint.
+        /// Posts the workflow request to the proxy's /v1/workflow endpoint, retrying once on a
+        /// fresh connection if the stream comes back truncated (issue #94 design section 5 item 2).
         /// Returns the SSE response text, the X-Template-Hash header value (null on fallback path),
-        /// and the cost reported by the proxy's collab_cost event (null when absent).
+        /// the cost reported by the proxy's collab_cost event (null when absent), and whether the
+        /// returned stream (after the retry, if one occurred) is complete.
         /// </summary>
-        private async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost)> PostToProxyAsync(KernelArguments kernelArgs)
+        private async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)> PostToProxyAsync(KernelArguments kernelArgs)
         {
             var proxyBaseUrl = Environment.GetEnvironmentVariable("COLLAB_PROXY_URL")
                 ?? KernelFactory.DefaultProxyBaseUrl;
-            // Resolved per call: a subscriber's activation JWT replaces the shared secret
-            // (the Worker retires the shared secret on /workflow under issue #90), and the
-            // JWT rotates ~12-hourly so it must never be cached across calls.
-            var credential = KernelFactory.ResolveWorkflowCredential();
-            if (string.IsNullOrWhiteSpace(credential))
-                throw new InvalidOperationException(
-                    "No activation token held and COLLAB_PROXY_TOKEN not set; refusing to call the proxy workflow endpoint without a credential.");
 
             var args = new Dictionary<string, string>();
             foreach (var kvp in kernelArgs)
@@ -890,17 +781,118 @@ namespace StoryCollaborator
 
             var payload = JsonSerializer.Serialize(new { workflowId = workflowModel.Label, args });
 
-            using var request = CreateWorkflowRequest(proxyBaseUrl, credential, payload);
+            return await ExecuteWithTruncationRetryAsync(
+                () => PostToProxyOnceAsync(proxyBaseUrl, payload), ResetHttpClient);
+        }
 
-            var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        /// <summary>
+        /// One attempt of the full send-plus-read sequence PostToProxyAsync's truncation retry
+        /// wraps: credential resolution via SendWithReactivationRetryAsync, the 401 guard,
+        /// EnsureNotOutOfCredits, EnsureSuccessStatusCode, the X-Template-Hash header read, then
+        /// ReadSseStreamAsync (issue #94 design section 5 item 2).
+        /// </summary>
+        private async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)> PostToProxyOnceAsync(string proxyBaseUrl, string payload)
+        {
+            var response = await SendWithReactivationRetryAsync(
+                () => SendWorkflowRequestAsync(proxyBaseUrl, payload), ReactivateAsync);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                response.Dispose();
+                // No activation token held (never activated, or one reactivation attempt above
+                // still didn't produce one): refuse client-side rather than let
+                // EnsureSuccessStatusCode()'s generic "does not indicate success: 401" surface.
+                throw new InvalidOperationException(
+                    "No activation token held; refusing to call the proxy workflow endpoint without " +
+                    "a credential. Subscribe to Collaborator, or (for dev builds) enroll on the allowlist.");
+            }
+
+            EnsureNotOutOfCredits(response);
             response.EnsureSuccessStatusCode();
 
             string? templateHash = null;
             if (response.Headers.TryGetValues("X-Template-Hash", out var hashValues))
                 templateHash = hashValues.FirstOrDefault();
 
-            var (content, cost) = await ReadSseStreamAsync(response);
-            return (content, templateHash, cost);
+            var (content, cost, complete) = await ReadSseStreamAsync(response);
+            return (content, templateHash, cost, complete);
+        }
+
+        /// <summary>
+        /// Sends one attempt of the workflow POST. Resolved per call: a subscriber's (or
+        /// allowlisted dev/tester's) activation JWT is the sole credential (issue #90 step 8 item
+        /// 6 retires the COLLAB_PROXY_TOKEN shared-secret fallback), and the JWT rotates
+        /// ~12-hourly so it must never be cached across calls. No credential available returns a
+        /// synthetic 401 rather than throwing, so <see cref="SendWithReactivationRetryAsync" />
+        /// handles a missing credential the same way it handles the Worker's own 401 (design
+        /// section 11's failure-mode row groups "JWT missing, invalid, or expired" together).
+        /// </summary>
+        private async Task<HttpResponseMessage> SendWorkflowRequestAsync(string proxyBaseUrl, string payload)
+        {
+            var credential = KernelFactory.ResolveWorkflowCredential();
+            if (string.IsNullOrWhiteSpace(credential))
+                return new HttpResponseMessage(System.Net.HttpStatusCode.Unauthorized);
+
+            using var request = CreateWorkflowRequest(proxyBaseUrl, credential, payload);
+            return await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        }
+
+        // Re-activation trigger for the 401-refresh-once-and-retry policy (issue #90 step 8 item
+        // 7). No-op if IoC has no activation service configured (PromptTestRunner, tests) --
+        // matches KernelFactory.GetActivationJwt's InvalidOperationException guard for the same host.
+        private static Task ReactivateAsync()
+        {
+            try
+            {
+                var service = Ioc.Default.GetService<StoryCADLib.Services.Store.IStoreActivationService>();
+                return service?.ReactivateAsync() ?? Task.CompletedTask;
+            }
+            catch (InvalidOperationException)
+            {
+                return Task.CompletedTask;
+            }
+        }
+
+        /// <summary>
+        /// 401-refresh-once-and-retry (issue #90 step 8 item 7 / design section 11's expired-token
+        /// row): a workflow call that comes back 401 refreshes the activation once through
+        /// re-activation and retries with the refreshed credential before failing. Exactly one
+        /// retry -- a second 401 is returned as-is so the caller's handling surfaces it rather than
+        /// looping. internal static and testable without a live HTTP transport or activation flow:
+        /// sendRequest and reactivate are injected, matching CreateWorkflowRequest/
+        /// EnsureNotOutOfCredits's existing testable-without-network pattern in this class.
+        /// </summary>
+        internal static async Task<HttpResponseMessage> SendWithReactivationRetryAsync(
+            Func<Task<HttpResponseMessage>> sendRequest, Func<Task> reactivate)
+        {
+            var response = await sendRequest();
+            if (response.StatusCode != System.Net.HttpStatusCode.Unauthorized)
+                return response;
+
+            response.Dispose();
+            await reactivate();
+            return await sendRequest();
+        }
+
+        /// <summary>
+        /// Issue #90 design section 10 "The cutoff" (ruling of 2026-07-15, step 10): the Worker
+        /// refuses a workflow call with 429 before any upstream dispatch when the caller's balance
+        /// is at or below zero. Checked before EnsureSuccessStatusCode() so the thrown exception is
+        /// StoryCADLib.Services.Store.OutOfCreditsException, not the generic HttpRequestException
+        /// EnsureSuccessStatusCode() would otherwise produce (message: "Response status code does
+        /// not indicate success: 429"). Deliberately not an HttpRequestException itself, so it can
+        /// never be mistaken for a transport failure and swallowed by ordinary HTTP error handling:
+        /// an out-of-credits refusal must always reach the caller as its own recognizable state
+        /// (step 8 item 5 retired the direct-to-OpenAI fallback that used to make this distinction
+        /// load-bearing for a different reason -- routing a capped user's personal API key around
+        /// the balance cutoff -- but the exception stays distinct regardless). internal static and
+        /// side-effect-free on success, matching CreateWorkflowRequest/ReadSseStreamAsync's existing
+        /// testable-without-HTTP-transport pattern in this class.
+        /// </summary>
+        internal static void EnsureNotOutOfCredits(HttpResponseMessage response)
+        {
+            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                throw new StoryCADLib.Services.Store.OutOfCreditsException();
         }
 
         /// <summary>
@@ -915,10 +907,18 @@ namespace StoryCollaborator
             return request;
         }
 
-        internal static async Task<(string Content, ProxyCostInfo? Cost)> ReadSseStreamAsync(HttpResponseMessage response)
+        /// <summary>
+        /// Reads the /workflow endpoint's SSE stream to completion. Complete is true iff a
+        /// <c>data: [DONE]</c> line was actually read -- the Worker appends it on every complete
+        /// stream, including the cost-missing and unpriced-model paths, so its absence is a
+        /// truncation with no false-positive source (issue #94 design section 5 item 1). collab_cost
+        /// stays optional (ADR-002 fail-open): [DONE] without a cost event is still Complete=true.
+        /// </summary>
+        internal static async Task<(string Content, ProxyCostInfo? Cost, bool Complete)> ReadSseStreamAsync(HttpResponseMessage response)
         {
             var sb = new System.Text.StringBuilder();
             ProxyCostInfo? cost = null;
+            bool complete = false;
             using var stream = await response.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream);
             string? line;
@@ -926,7 +926,7 @@ namespace StoryCollaborator
             {
                 if (!line.StartsWith("data: ")) continue;
                 var data = line.Substring(6).Trim();
-                if (data == "[DONE]") break;
+                if (data == "[DONE]") { complete = true; break; }
                 try
                 {
                     using var doc = JsonDocument.Parse(data);
@@ -959,7 +959,48 @@ namespace StoryCollaborator
                 }
                 catch (JsonException) { /* malformed chunk — skip */ }
             }
-            return (sb.ToString(), cost);
+            return (sb.ToString(), cost, complete);
+        }
+
+        /// <summary>
+        /// Truncation-retry-once policy (issue #94 design section 5 items 2-3): a stream that comes
+        /// back incomplete (no <c>data: [DONE]</c> read -- <see cref="ReadSseStreamAsync"/>) resets
+        /// the shared HttpClient (abandoning the pooled connection -- server evidence pins it to a
+        /// flagged Cloudflare isolate after a kill, so a same-connection retry would die again) and
+        /// re-sends once end-to-end through the same credential path before returning the (possibly
+        /// still incomplete) result to the caller. Exactly one retry, mirroring
+        /// <see cref="SendWithReactivationRetryAsync"/>'s refresh-once-and-retry shape. internal
+        /// static and testable without a live HTTP transport: attempt and reset are injected,
+        /// matching this class's existing testable-without-network pattern.
+        /// </summary>
+        internal static async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)> ExecuteWithTruncationRetryAsync(
+            Func<Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)>> attempt,
+            Action reset)
+        {
+            var result = await attempt();
+            if (result.Complete)
+                return result;
+
+            reset();
+            return await attempt();
+        }
+
+        /// <summary>
+        /// Issue #94 design section 5 item 3 ("surface, never mask"): builds the failed result for a
+        /// stream that came back incomplete even after PostToProxyAsync's one truncation retry. The
+        /// partial text is preserved in RawResponse for diagnostics; it never reaches ExtractOutputs
+        /// or a Success result. internal static and pinned directly by its own test (driving RunAsync
+        /// end-to-end here would require faking HTTP), per the NO MOCKS rule in
+        /// Collaborator/CLAUDE.md.
+        /// </summary>
+        internal static WorkflowResult BuildTruncationFailureResult(string partialContent)
+        {
+            return new WorkflowResult
+            {
+                Success = false,
+                ErrorMessage = "The AI response stream ended before completion; the answer may be incomplete. Please try again.",
+                RawResponse = partialContent
+            };
         }
 
 

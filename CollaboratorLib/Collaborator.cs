@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
@@ -5,6 +6,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using NLog.Extensions.Logging;
 using StoryCADLib.Models;
 using StoryCADLib.Services.Collaborator.Contracts;
+using StoryCADLib.Services.Store;
 using StoryCollaborator.Services;
 using StoryCollaborator.Models;
 using StoryCollaborator.Workflows;
@@ -381,13 +383,31 @@ public class Collaborator : ICollaborator
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error processing chat message");
-                throw;
+                throw TranslateChatException(ex);
             }
         };
 
         _logger?.LogInformation("Chat callback wired for workflow: {Workflow} with {Count} elements in context",
             workflow.Title, gatheredElements.Count);
     }
+
+    /// <summary>
+    /// Issue #90 design section 10 "The cutoff" (ruling of 2026-07-15, step 10): the shipped chat
+    /// sidebar sends through Semantic Kernel to the Worker's /v1/chat/completions, which refuses
+    /// with 429 (before any upstream dispatch) when the caller's balance is at or below zero.
+    /// Semantic Kernel wraps a non-success HTTP response in <see cref="HttpOperationException"/>
+    /// (its <see cref="HttpOperationException.StatusCode"/> carries the code); this recognizes the
+    /// 429 shape and translates it to <see cref="OutOfCreditsException"/> so
+    /// WorkflowViewModel.SendButtonClicked's <c>ChatMessage.Error(ex.Message)</c> shows a message
+    /// naming the credits screen instead of the raw HTTP exception text. Every other exception
+    /// passes through unchanged. internal static and side-effect-free, so it is testable without a
+    /// live kernel call: construct an HttpOperationException directly (its public 4-arg
+    /// constructor takes the status code) and assert on the returned exception's type/message.
+    /// </summary>
+    internal static Exception TranslateChatException(Exception ex) =>
+        ex is HttpOperationException { StatusCode: HttpStatusCode.TooManyRequests }
+            ? new OutOfCreditsException()
+            : ex;
 
     /// <summary>
     /// Builds a readable text context from gathered story elements for the chat system message.

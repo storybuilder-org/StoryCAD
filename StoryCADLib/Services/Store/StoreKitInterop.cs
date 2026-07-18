@@ -48,6 +48,13 @@ internal static partial class StoreKitInterop
     private static unsafe partial void storycad_iap_purchase(long requestId, string productId, string appAccountToken,
         delegate* unmanaged[Cdecl]<long, byte*, void> cb);
 
+    // Issue #90 design section 10 "Credit packs" (step 10): finishes a consumable transaction the
+    // shim deliberately left open (StoreKitShim.swift's storycad_iap_purchase), once the caller has
+    // confirmed the Worker credited it.
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    private static unsafe partial void storycad_iap_finish_transaction(long requestId, string transactionId,
+        delegate* unmanaged[Cdecl]<long, byte*, void> cb);
+
     [LibraryImport(Library)]
     private static unsafe partial void storycad_iap_current_entitlements(long requestId,
         delegate* unmanaged[Cdecl]<long, byte*, void> cb);
@@ -90,6 +97,15 @@ internal static partial class StoreKitInterop
         var (id, tcs) = NewRequest();
         storycad_iap_purchase(id, productId, appAccountToken, &OnCallback);
         return AwaitResponseAsync(id, tcs, InteractiveTimeout, ct);
+    }
+
+    internal static unsafe Task<string> FinishTransactionAsync(string transactionId, CancellationToken ct = default)
+    {
+        var (id, tcs) = NewRequest();
+        storycad_iap_finish_transaction(id, transactionId, &OnCallback);
+        // Not interactive (no system UI), but not a pure query either -- give it the same leash as
+        // PurchaseAsync since it can race a purchase's own in-flight interactive call on first use.
+        return AwaitResponseAsync(id, tcs, QueryTimeout, ct);
     }
 
     internal static unsafe Task<string> CurrentEntitlementsAsync(CancellationToken ct = default)

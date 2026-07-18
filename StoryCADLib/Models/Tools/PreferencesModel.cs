@@ -284,7 +284,9 @@ public class PreferencesModel : ObservableObject
 
     /// <summary>
     ///     Stable per-user GUID embedded in the store's signed purchase proof (Apple
-    ///     appAccountToken / Microsoft publisherUserId). Must match the server users.guid.
+    ///     appAccountToken / Microsoft publisherUserId). Generated on this machine at first
+    ///     launch if empty (issue #90 D8); no server mints or stores it, and it never appears in
+    ///     the UI or in a log.
     /// </summary>
     [JsonInclude]
     [JsonPropertyName("StoreUserGuid")]

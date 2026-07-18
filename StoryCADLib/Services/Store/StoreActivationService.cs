@@ -52,8 +52,10 @@ public sealed class StoreActivationService : IStoreActivationService
 
     public string CurrentJwt => string.IsNullOrEmpty(_jwt) ? null : _jwt;
 
-    // The stable user GUID embedded in the signed proof at purchase time. Populated from the
-    // server users.guid (issue #30 prerequisite); empty until then, which fails activation closed.
+    // The stable per-user GUID, generated on this machine at startup (issue #90 D8) and embedded
+    // in the signed proof at purchase time. Provisioned by
+    // PreferenceService.EnsureUserGuidProvisionedAsync before this service's InitializeAsync runs,
+    // so it is never empty in practice; defensively empty-coalesced below.
     private string UserGuid => _preferenceService.Model.StoreUserGuid ?? string.Empty;
 
     public async Task InitializeAsync(CancellationToken ct = default)
@@ -116,14 +118,20 @@ public sealed class StoreActivationService : IStoreActivationService
         {
             if (string.IsNullOrEmpty(UserGuid))
             {
-                // Issue #30 prerequisite: until the server populates users.guid, proofs carry an
-                // empty user GUID and the Worker cannot bind the purchase to a user. Log so the
-                // resulting refusals are diagnosable in the field.
+                // Defensive: the startup provisioning step (issue #90 D8) should have populated
+                // StoreUserGuid before this runs. Log so an unexpected empty value -- proofs
+                // carrying it cannot be bound to a user -- is diagnosable in the field.
                 _logService.Log(LogLevel.Warn,
-                    "StoreUserGuid is empty; purchase proof cannot be bound to a user (issue #30 prerequisite).");
+                    "StoreUserGuid is empty; purchase proof cannot be bound to a user.");
             }
 
-            var proof = await _store.GetPurchaseProofAsync(UserGuid, ct);
+            // Dev/tester allowlist activation (issue #90 D7/D8): COLLAB_DEV_ACTIVATION routes around
+            // the platform store entirely -- there is no store proof to present, only the GUID a
+            // human approved on the Worker's allowlist. payload/productId are ignored by the
+            // Worker for platform "dev" (design section 6).
+            var proof = IsDevActivationEnabled()
+                ? new PurchaseProof("dev", string.Empty, string.Empty, UserGuid)
+                : await _store.GetPurchaseProofAsync(UserGuid, ct);
             if (proof is null)
             {
                 // Authoritative "no purchase" from the store: drop any cached JWT.
@@ -181,6 +189,20 @@ public sealed class StoreActivationService : IStoreActivationService
             _gate.Release();
         }
     }
+
+    // COLLAB_DEV_ACTIVATION is a routing hint only (design section 12): it says "activate through the
+    // dev/tester allowlist instead of the platform store"; it grants nothing by itself -- the
+    // Worker's allowlist row decides dev entitlement.
+    private static bool IsDevActivationEnabled() =>
+        Environment.GetEnvironmentVariable("COLLAB_DEV_ACTIVATION") == "1";
+
+    /// <summary>
+    ///     Re-presents proof to the Worker on demand (issue #90 step 8 item 7): used by a workflow
+    ///     caller that gets a 401 to refresh once before retrying, covering a session that outlives
+    ///     the ~12h JWT between the launch/purchase/restore/entitlement-change refresh points above.
+    ///     Shares <see cref="RefreshActivationAsync" /> with those callers, including its gate.
+    /// </summary>
+    public Task ReactivateAsync(CancellationToken ct = default) => RefreshActivationAsync(ct);
 
     private async void OnStoreEntitlementChanged(object sender, StoreEntitlement e)
     {

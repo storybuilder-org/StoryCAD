@@ -240,5 +240,7 @@ public class SubscribeDialogViewModelTests
             State = StateAfterPurchase;
             return Task.CompletedTask;
         }
+
+        public Task ReactivateAsync(CancellationToken ct = default) => Task.CompletedTask;
     }
 }

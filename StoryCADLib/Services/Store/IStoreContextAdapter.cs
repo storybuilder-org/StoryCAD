@@ -89,4 +89,15 @@ public interface IStoreContextAdapter
     /// </summary>
     Task<string> GetCustomerPurchaseIdAsync(string serviceTicket, string publisherUserId,
         CancellationToken ct = default);
+
+    /// <summary>
+    ///     Mints the Microsoft *collections*-ID key via <c>GetCustomerCollectionsIdAsync</c> (issue
+    ///     #90 design section 10 "Credit packs", step 10 correction) — a different Microsoft Store ID
+    ///     key than <see cref="GetCustomerPurchaseIdAsync" />: consumables are queried by the
+    ///     collection API, not the purchase API, and that API needs its own key kind, minted against
+    ///     the Worker's <c>/store/ticket?purpose=collections</c> ticket. <paramref name="serviceTicket" />
+    ///     and <paramref name="publisherUserId" /> have the same meaning as the purchase-key sibling.
+    /// </summary>
+    Task<string> GetCustomerCollectionsIdAsync(string serviceTicket, string publisherUserId,
+        CancellationToken ct = default);
 }

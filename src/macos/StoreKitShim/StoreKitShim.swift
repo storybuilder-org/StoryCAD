@@ -16,6 +16,27 @@ private var transactionCallback: CompletionCallback?
 private var updatesTask: Task<Void, Never>?
 private let stateLock = NSLock()
 
+// issue #90 design section 10 "Credit packs" (step 10): consumable transactions purchase()
+// deliberately leaves unfinished (see storycad_iap_purchase), keyed by transaction id string so
+// storycad_iap_finish_transaction can find and finish the exact one the Worker just confirmed.
+// In-memory only: an app relaunch before finishing loses the entry (see the Transaction.updates
+// handling below, which -- for a consumable -- leaves a replayed-but-still-unfinished transaction
+// unfinished rather than guessing).
+private var pendingConsumableTransactions: [String: Transaction] = [:]
+private let pendingLock = NSLock()
+
+private func retainPendingConsumable(_ t: Transaction) {
+    pendingLock.lock()
+    pendingConsumableTransactions[String(t.id)] = t
+    pendingLock.unlock()
+}
+
+private func takePendingConsumable(_ transactionId: String) -> Transaction? {
+    pendingLock.lock()
+    defer { pendingLock.unlock() }
+    return pendingConsumableTransactions.removeValue(forKey: transactionId)
+}
+
 private let isoFormatter: ISO8601DateFormatter = {
     let f = ISO8601DateFormatter()
     f.formatOptions = [.withInternetDateTime]
@@ -147,6 +168,17 @@ public func storycad_iap_set_transaction_callback(_ cb: @escaping CompletionCall
                 let dict = await entitlementDict(t, jws: update.jwsRepresentation)
                 let json = jsonString(["ok": true, "entitlements": [dict]])
                 if let callback = currentTransactionCallback() { deliver(callback, -1, json) }
+                // issue #90 design section 10 step 10 correction: a replayed consumable (e.g. one
+                // left unfinished by a crash between purchase and Worker confirmation) must not
+                // auto-finish here either -- finishing before crediting is exactly what this
+                // design forbids. It stays unfinished (StoreKit keeps replaying it via
+                // Transaction.updates on future launches) rather than being silently finished
+                // with nothing credited. A full replay-driven re-credit flow is out of scope for
+                // this step; the entitlementDict/-1 channel above is also subscription-shaped and
+                // is not extended to consumables here.
+                if t.productType == .consumable {
+                    continue
+                }
                 await t.finish()
             }
         }
@@ -218,7 +250,19 @@ public func storycad_iap_purchase(_ requestId: Int64, _ productId: UnsafePointer
                         "productId": t.productID,
                         "jws": verification.jwsRepresentation,
                     ]))
-                    await t.finish()
+                    // issue #90 design section 10 "Credit packs" (step 10): a consumable's
+                    // transaction is not finished here. Finishing early risks losing the ability
+                    // to retry crediting if the Worker's /activate call fails, since StoreKit will
+                    // not replay a finished transaction; the client must finish only after the
+                    // Worker's 200 (storycad_iap_finish_transaction below). Every other product
+                    // type (subscriptions, non-consumables) keeps the existing immediate-finish
+                    // behavior unchanged -- it is what already makes Transaction.updates below
+                    // stop replaying them.
+                    if product.type == .consumable {
+                        retainPendingConsumable(t)
+                    } else {
+                        await t.finish()
+                    }
                 case .unverified(_, let verificationError):
                     deliver(cb, requestId, failureJson("transaction failed StoreKit verification", code: String(describing: verificationError)))
                 }
@@ -232,6 +276,23 @@ public func storycad_iap_purchase(_ requestId: Int64, _ productId: UnsafePointer
         } catch {
             deliver(cb, requestId, failureJson(error.localizedDescription, code: String(describing: error)))
         }
+    }
+}
+
+// issue #90 design section 10 "Credit packs" (step 10): finishes a consumable transaction
+// storycad_iap_purchase deliberately left open, once the caller (StoryCADLib's
+// FinishConsumableAsync) has confirmed the Worker credited it. A transaction not found -- already
+// finished, unknown, or lost to a relaunch before this was called -- is not an error: the tracking
+// id can be resubmitted indefinitely and a "nothing to finish" outcome is harmless, so this
+// delivers {"ok":true} either way rather than making the caller handle a distinct failure case.
+@_cdecl("storycad_iap_finish_transaction")
+public func storycad_iap_finish_transaction(_ requestId: Int64, _ transactionId: UnsafePointer<CChar>, _ cb: @escaping CompletionCallback) {
+    let id = String(cString: transactionId)
+    Task {
+        if let t = takePendingConsumable(id) {
+            await t.finish()
+        }
+        deliver(cb, requestId, jsonString(["ok": true]))
     }
 }
 

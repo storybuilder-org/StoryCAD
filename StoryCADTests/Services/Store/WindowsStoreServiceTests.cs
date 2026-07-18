@@ -213,6 +213,71 @@ public class WindowsStoreServiceTests
         Assert.IsNotNull(raised);
     }
 
+    // ----- Credit packs (issue #90 design section 10, step 10) -----
+
+    private const string PackProductId = "9PCREDITPAK1";
+
+    [TestMethod]
+    public async Task PurchaseConsumableAsync_Succeeded_ReturnsSuccessWithCollectionsProof()
+    {
+        var adapter = new FakeStoreContextAdapter
+        {
+            PurchaseResult = new StorePurchaseResult(StorePurchaseOutcome.Succeeded),
+            CollectionsId = "collections-key-1"
+        };
+        var client = new FakeActivationClient { Ticket = "aad-collections-ticket" };
+        var service = CreateService(adapter, client);
+
+        var result = await service.PurchaseConsumableAsync(PackProductId, UserGuid);
+
+        Assert.AreEqual(PurchaseStatus.Success, result.Status);
+        Assert.IsNotNull(result.Proof);
+        Assert.AreEqual("microsoft", result.Proof.Platform);
+        Assert.AreEqual("collections-key-1", result.Proof.Payload);
+        Assert.AreEqual(PackProductId, result.Proof.ProductId);
+        Assert.AreEqual(UserGuid, result.Proof.UserGuid);
+        // The collections ticket is a *different* Microsoft Store ID key from the subscription
+        // purchase-audience one (design section 10 step 10 correction).
+        Assert.AreEqual("collections", client.LastTicketPurpose);
+        Assert.AreEqual("aad-collections-ticket", adapter.LastCollectionsServiceTicket);
+        Assert.AreEqual(UserGuid, adapter.LastCollectionsPublisherUserId);
+    }
+
+    [TestMethod]
+    public async Task PurchaseConsumableAsync_NoTicket_ReturnsFailed()
+    {
+        var adapter = new FakeStoreContextAdapter { PurchaseResult = new StorePurchaseResult(StorePurchaseOutcome.Succeeded) };
+        var client = new FakeActivationClient { Ticket = null };
+        var service = CreateService(adapter, client);
+
+        var result = await service.PurchaseConsumableAsync(PackProductId, UserGuid);
+
+        Assert.AreEqual(PurchaseStatus.Failed, result.Status);
+        Assert.IsNull(result.Proof);
+    }
+
+    [TestMethod]
+    public async Task PurchaseConsumableAsync_NotPurchased_ReturnsUserCancelled()
+    {
+        var adapter = new FakeStoreContextAdapter { PurchaseResult = new StorePurchaseResult(StorePurchaseOutcome.NotPurchased) };
+        var service = CreateService(adapter, new FakeActivationClient());
+
+        var result = await service.PurchaseConsumableAsync(PackProductId, UserGuid);
+
+        Assert.AreEqual(PurchaseStatus.UserCancelled, result.Status);
+    }
+
+    [TestMethod]
+    public async Task FinishConsumableAsync_OnWindows_IsNoOp()
+    {
+        // The Worker reports fulfillment itself via the Microsoft collection API (design section
+        // 10 step 10 correction); the Windows client has nothing to call.
+        var service = CreateService(new FakeStoreContextAdapter(), new FakeActivationClient());
+
+        await service.FinishConsumableAsync("some-transaction-id");
+        // No exception, no adapter call to assert on -- the point of this test is that it's a no-op.
+    }
+
     // ----- Fakes -----
 
     private sealed class FakeStoreContextAdapter : IStoreContextAdapter
@@ -221,9 +286,12 @@ public class WindowsStoreServiceTests
         public StorePurchaseResult PurchaseResult = new(StorePurchaseOutcome.Succeeded);
         public IReadOnlyList<StoreLicenseInfo> Licenses = Array.Empty<StoreLicenseInfo>();
         public string PurchaseId = "purchase-id-key";
+        public string CollectionsId = "collections-id-key";
         public string LastServiceTicket;
         public string LastPublisherUserId;
         public string LastPurchaseProductId;
+        public string LastCollectionsServiceTicket;
+        public string LastCollectionsPublisherUserId;
 
         public event Action LicensesChanged;
 
@@ -245,6 +313,14 @@ public class WindowsStoreServiceTests
             LastServiceTicket = serviceTicket;
             LastPublisherUserId = publisherUserId;
             return Task.FromResult(PurchaseId);
+        }
+
+        public Task<string> GetCustomerCollectionsIdAsync(string serviceTicket, string publisherUserId,
+            CancellationToken ct = default)
+        {
+            LastCollectionsServiceTicket = serviceTicket;
+            LastCollectionsPublisherUserId = publisherUserId;
+            return Task.FromResult(CollectionsId);
         }
 
         public void RaiseLicensesChanged() => LicensesChanged?.Invoke();

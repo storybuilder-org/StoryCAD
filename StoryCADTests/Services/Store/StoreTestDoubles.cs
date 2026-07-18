@@ -20,9 +20,19 @@ internal sealed class FakeStoreService : IStoreService
     public bool RestoreCalled;
     public IReadOnlyList<StoreEntitlement> Entitlements = Array.Empty<StoreEntitlement>();
 
+    // issue #90 design section 10 "Credit packs" (step 10).
+    public ConsumablePurchaseResult ConsumableResult = new(PurchaseStatus.Success,
+        new PurchaseProof("apple", "pack-jws", "CollabCreditPack500", "user-guid"), "pack-transaction-1");
+    public string LastConsumablePurchaseUserGuid;
+    public string LastFinishedTransactionId;
+    public int FinishConsumableCallCount;
+    public int PurchaseConsumableCallCount;
+
     public bool IsSupported => true;
 
     public IReadOnlyList<string> ProductIds { get; set; } = new[] { "org.storycad.collaborator.monthly" };
+
+    public IReadOnlyList<string> CreditPackProductIds { get; set; } = new[] { "CollabCreditPack500" };
 
     public event EventHandler<StoreEntitlement> EntitlementChanged;
 
@@ -56,6 +66,21 @@ internal sealed class FakeStoreService : IStoreService
         return Task.FromResult(Proof);
     }
 
+    public Task<ConsumablePurchaseResult> PurchaseConsumableAsync(string productId, string userGuid,
+        CancellationToken ct = default)
+    {
+        PurchaseConsumableCallCount++;
+        LastConsumablePurchaseUserGuid = userGuid;
+        return Task.FromResult(ConsumableResult);
+    }
+
+    public Task FinishConsumableAsync(string transactionId, CancellationToken ct = default)
+    {
+        FinishConsumableCallCount++;
+        LastFinishedTransactionId = transactionId;
+        return Task.CompletedTask;
+    }
+
     public void RaiseEntitlementChanged() =>
         EntitlementChanged?.Invoke(this, new StoreEntitlement(
             "org.storycad.collaborator.monthly", "t1", "o1", DateTime.UtcNow, null,
@@ -67,20 +92,24 @@ internal sealed class FakeActivationClient : IActivationClient
     public ActivationResponse Response = new(true, "jwt-token", DateTime.UtcNow.AddHours(12), null);
     public Exception ThrowOnActivate;
     public int ActivateCallCount;
+    public PurchaseProof LastProof;
     public string Ticket = "aad-service-ticket";
     public int TicketCallCount;
+    public string LastTicketPurpose;
 
     public Task<ActivationResponse> ActivateAsync(PurchaseProof proof, CancellationToken ct = default)
     {
         ActivateCallCount++;
+        LastProof = proof;
         return ThrowOnActivate != null
             ? Task.FromException<ActivationResponse>(ThrowOnActivate)
             : Task.FromResult(Response);
     }
 
-    public Task<string> GetStoreTicketAsync(CancellationToken ct = default)
+    public Task<string> GetStoreTicketAsync(string purpose = "purchase", CancellationToken ct = default)
     {
         TicketCallCount++;
+        LastTicketPurpose = purpose;
         return Task.FromResult(Ticket);
     }
 }
