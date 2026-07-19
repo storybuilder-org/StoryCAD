@@ -41,11 +41,11 @@ Best for clearly-defined bug reports or feature requests. Go to <https://github.
 
 Be specific: describe what you want, what problem it solves, and (for bugs) the steps to reproduce. If a maintainer agrees the idea is worth pursuing, they'll assign it to a release milestone. That's when it joins the public roadmap.
 
-### 2. Post in `#feature-suggestions` on Discord (anyone)
+### 2. Post in `#feature-requests` on Discord (anyone)
 
 Best for half-formed ideas, "wouldn't it be cool if...", or just gauging whether anyone else wants the same thing before going through the trouble of writing a proper issue.
 
-The StoryBuilder Discord server is at <https://discord.gg/bpCyAQnWCa>. The `feature-suggestions` channel under StoryCAD Support is open to everyone, free members included. Post your idea and react to others' ideas with emoji to signal what you'd like to see.
+The StoryBuilder Discord server is at <https://discord.gg/bpCyAQnWCa>. The `feature-requests` channel under StoryCAD Support is open to everyone, free members included. Post your idea and react to others' ideas with emoji to signal what you'd like to see.
 
 The team reads this channel and uses it to spot patterns: ideas that get a lot of reactions are candidates for becoming proper GitHub issues and getting on a release.
 
@@ -104,7 +104,7 @@ StoryCAD has an optional AI plugin called **Collaborator** that, when it's relea
 | All planned releases | <https://github.com/storybuilder-org/StoryCAD/milestones> |
 | What's in 4.3 specifically | <https://github.com/storybuilder-org/StoryCAD/milestone/6> |
 | File a bug or feature request | <https://github.com/storybuilder-org/StoryCAD/issues/new> |
-| Suggest an idea informally | `#feature-suggestions` on Discord |
+| Suggest an idea informally | `#feature-requests` on Discord |
 | Vote on quarterly priorities (Pro) | `#feature-voting` on Discord |
 | Read the current user manual | <https://manual.storybuilder.org/> |
 | Discord server | <https://discord.gg/bpCyAQnWCa> |
