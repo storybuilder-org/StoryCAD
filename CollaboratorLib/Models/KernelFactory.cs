@@ -96,8 +96,36 @@ namespace StoryCollaborator.Models
         }
 
         /// <summary>
+        /// Production chat HTTP handler: resolves the activation JWT on every request through
+        /// <see cref="ResolveWorkflowCredential"/> (so <see cref="DevActivationJwtProvider"/> stays
+        /// first) and reactivates once on 401 (Collaborator #95). Caller sets
+        /// <see cref="DelegatingHandler.InnerHandler"/> (tests: scripted handler; Build: HttpClientHandler).
+        /// </summary>
+        internal static ActivationJwtHandler CreateChatHandler() =>
+            new(() => ResolveWorkflowCredential(), ReactivateAsync);
+
+        /// <summary>
+        /// Re-activation trigger for the 401-refresh-once-and-retry policy (workflow and chat).
+        /// No-op if IoC has no activation service (PromptTestRunner, unit tests).
+        /// </summary>
+        internal static Task ReactivateAsync()
+        {
+            try
+            {
+                var service = Ioc.Default.GetService<IStoreActivationService>();
+                return service?.ReactivateAsync() ?? Task.CompletedTask;
+            }
+            catch (InvalidOperationException)
+            {
+                return Task.CompletedTask;
+            }
+        }
+
+        /// <summary>
         /// Builds and returns a configured Kernel. Always logs the active path and endpoint
         /// host to both the supplied loggerFactory and Debug output (D6 always-on requirement).
+        /// Chat traffic uses <see cref="ActivationJwtHandler"/> so a process-lifetime kernel
+        /// still picks up a refreshed JWT (Collaborator #95).
         /// </summary>
         public static Kernel Build(ILoggerFactory? loggerFactory = null)
         {
@@ -113,7 +141,18 @@ namespace StoryCollaborator.Models
             if (loggerFactory is not null)
                 builder.Services.AddSingleton(loggerFactory);
 
-            builder.AddOpenAIChatCompletion(config.ModelId, new Uri(config.Endpoint), config.Credential);
+            var handler = CreateChatHandler();
+            handler.InnerHandler = new HttpClientHandler();
+            var httpClient = new HttpClient(handler);
+
+            // SK still takes an apiKey at construction; the handler overwrites Authorization per request.
+            builder.AddOpenAIChatCompletion(
+                config.ModelId,
+                new Uri(config.Endpoint),
+                config.Credential,
+                orgId: null,
+                serviceId: null,
+                httpClient: httpClient);
 
             return builder.Build();
         }

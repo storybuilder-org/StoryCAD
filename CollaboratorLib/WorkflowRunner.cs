@@ -794,7 +794,7 @@ namespace StoryCollaborator
         private async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)> PostToProxyOnceAsync(string proxyBaseUrl, string payload)
         {
             var response = await SendWithReactivationRetryAsync(
-                () => SendWorkflowRequestAsync(proxyBaseUrl, payload), ReactivateAsync);
+                () => SendWorkflowRequestAsync(proxyBaseUrl, payload), KernelFactory.ReactivateAsync);
 
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
@@ -837,29 +837,14 @@ namespace StoryCollaborator
             return await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         }
 
-        // Re-activation trigger for the 401-refresh-once-and-retry policy (issue #90 step 8 item
-        // 7). No-op if IoC has no activation service configured (PromptTestRunner, tests) --
-        // matches KernelFactory.GetActivationJwt's InvalidOperationException guard for the same host.
-        private static Task ReactivateAsync()
-        {
-            try
-            {
-                var service = Ioc.Default.GetService<StoryCADLib.Services.Store.IStoreActivationService>();
-                return service?.ReactivateAsync() ?? Task.CompletedTask;
-            }
-            catch (InvalidOperationException)
-            {
-                return Task.CompletedTask;
-            }
-        }
-
         /// <summary>
         /// 401-refresh-once-and-retry (issue #90 step 8 item 7 / design section 11's expired-token
         /// row): a workflow call that comes back 401 refreshes the activation once through
         /// re-activation and retries with the refreshed credential before failing. Exactly one
         /// retry -- a second 401 is returned as-is so the caller's handling surfaces it rather than
-        /// looping. internal static and testable without a live HTTP transport or activation flow:
-        /// sendRequest and reactivate are injected, matching CreateWorkflowRequest/
+        /// looping. Reactivation is <see cref="KernelFactory.ReactivateAsync"/> (shared with chat,
+        /// Collaborator #95). internal static and testable without a live HTTP transport: sendRequest
+        /// and reactivate are injected, matching CreateWorkflowRequest/
         /// EnsureNotOutOfCredits's existing testable-without-network pattern in this class.
         /// </summary>
         internal static async Task<HttpResponseMessage> SendWithReactivationRetryAsync(
