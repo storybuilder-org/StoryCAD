@@ -28,5 +28,11 @@ namespace StoryCollaborator.Models
         /// EnrichWithExamples reads this instead of scanning the template text.
         /// </summary>
         public List<string> ExampleLists { get; set; } = new();
+
+        /// <summary>
+        /// Declared collection inputs (issue #106). Runner builds each list from GetElementsByType
+        /// at the declared projection; does not invent lists from WriteVia.
+        /// </summary>
+        public List<CollectionInput> CollectionInputs { get; set; } = new();
     }
 }

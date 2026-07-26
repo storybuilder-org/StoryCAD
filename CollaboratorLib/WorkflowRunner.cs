@@ -4,12 +4,14 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using CollaboratorLib.Context;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.SemanticKernel;
+using StoryCADLib.DAL;
 using StoryCADLib.Models;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Collaborator.Contracts;
@@ -20,6 +22,15 @@ using StoryCollaborator.Workflows;
 namespace StoryCollaborator
 {
     public sealed record WorkflowRunOutcome(WorkflowResult Result, int AppliedCount);
+
+    /// <summary>
+    /// Client request body for POST /v1/workflow after issue #106.
+    /// </summary>
+    internal sealed class WorkflowProxyBody
+    {
+        public Dictionary<string, string> Args { get; init; } = new();
+        public Dictionary<string, JsonObject> Elements { get; init; } = new();
+    }
 
     internal class WorkflowRunner
     {
@@ -111,20 +122,20 @@ namespace StoryCollaborator
             {
                 result.StatusMessages.Add($"Starting workflow: {workflowModel.Title}");
 
-                var kernelArgs = BuildKernelArguments(gatheredElements);
-                result.StatusMessages.Add($"Built arguments from {gatheredElements.Count} elements");
+                var body = BuildWorkflowRequestBody(gatheredElements);
+                result.StatusMessages.Add($"Built request body from {gatheredElements.Count} elements");
 
-                EnrichWithStoryContext(kernelArgs, gatheredElements, workflowIO);
-                ApplySettings(kernelArgs);
+                EnrichWithStoryContext(body.Args, gatheredElements, workflowIO);
+                ApplySettings(body.Args);
 
                 if (workflowIO.ExampleLists.Count > 0)
-                    EnrichWithExamples(kernelArgs);
+                    EnrichWithExamples(body.Args);
 
                 // Issue #90 step 8 item 5: the direct-to-OpenAI fallback retired along with
                 // OPENAI_API_KEY on the client. A proxy failure now propagates to the outer
                 // catch clauses below rather than retrying against OpenAI directly.
                 result.AssembledPrompt = null;
-                var (proxyContent, proxyHash, proxyCost, proxyComplete) = await PostToProxyAsync(kernelArgs);
+                var (proxyContent, proxyHash, proxyCost, proxyComplete) = await PostToProxyAsync(body);
                 result.RemoteTemplateHash = proxyHash;
                 result.Cost = proxyCost;
 
@@ -181,85 +192,98 @@ namespace StoryCollaborator
             }
         }
 
-        /// <summary>
-        /// Builds KernelArguments from gathered elements and injects candidate lists
-        /// for GUID-based mechanisms (CastMembers, Relationships, BeatSheet).
-        /// </summary>
-        internal KernelArguments BuildKernelArguments(Dictionary<string, StoryElement> elements)
+        private static readonly JsonSerializerOptions ElementSerializeOptions = new()
         {
-            var kernelArgs = new KernelArguments();
-            var rtfStripper = new RichTextStripper();
+            WriteIndented = false,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            Converters =
+            {
+                new EmptyGuidConverter(),
+                new StoryElementConverter(),
+                new JsonStringEnumConverter()
+            }
+        };
 
-            foreach (var (label, element) in elements)
+        /// <summary>
+        /// Builds the #106 request body: full gathered elements (RTF stripped on outbound copy only)
+        /// plus pass-through args and declared collection lists. Does not flatten Label_Property keys
+        /// and does not invent lists from WriteVia.
+        /// </summary>
+        internal WorkflowProxyBody BuildWorkflowRequestBody(Dictionary<string, StoryElement> gatheredElements)
+        {
+            var body = new WorkflowProxyBody();
+
+            foreach (var (label, element) in gatheredElements)
             {
                 if (element == null) continue;
-
-                kernelArgs[label] = JsonSerializer.Serialize(element, new JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-                });
-
-                var elementType = element.GetType();
-                foreach (var prop in elementType.GetProperties())
-                {
-                    if (prop.CanRead)
-                    {
-                        var value = prop.GetValue(element);
-                        var stringValue = value?.ToString() ?? string.Empty;
-
-                        if (stringValue.StartsWith(@"{\rtf"))
-                        {
-                            stringValue = rtfStripper.StripRichTextFormat(stringValue);
-                        }
-
-                        kernelArgs[$"{label}_{prop.Name}"] = stringValue;
-                    }
-                }
+                body.Elements[label] = SerializeElementOutbound(element);
             }
-
-            // Inject candidate lists for GUID-based mechanisms
-            var allSpecs = workflowModel.GetIO().Outputs
-                .SelectMany(o => o.PropertiesToUpdate)
-                .ToList();
-
-            bool needsCharacters = allSpecs.Any(s =>
-                s.WriteVia == WriteVia.CastMembers || s.WriteVia == WriteVia.Relationships);
-            bool needsBeatElements = allSpecs.Any(s => s.WriteVia == WriteVia.BeatSheet);
 
             var serOpts = new JsonSerializerOptions { WriteIndented = false };
-
-            if (needsCharacters)
+            foreach (var collection in workflowModel.GetIO().CollectionInputs)
             {
-                var chars = _storyApi.GetElementsByType(StoryItemType.Character);
-                if (chars.IsSuccess)
-                {
-                    kernelArgs["CharacterChoices"] = JsonSerializer.Serialize(
-                        chars.Payload?.Select(e => new { GUID = e.Uuid, Name = e.Name }) ?? Enumerable.Empty<object>(),
-                        serOpts);
-                }
+                var listResult = _storyApi.GetElementsByType(collection.ElementType);
+                if (!listResult.IsSuccess) continue;
+
+                var projected = (listResult.Payload ?? Enumerable.Empty<StoryElement>())
+                    .Select(e => ProjectCollectionElement(e, collection.Projection))
+                    .ToList();
+                body.Args[collection.RequestName] = JsonSerializer.Serialize(projected, serOpts);
             }
 
-            if (needsBeatElements)
-            {
-                var problems = _storyApi.GetElementsByType(StoryItemType.Problem);
-                if (problems.IsSuccess)
-                {
-                    kernelArgs["ProblemChoices"] = JsonSerializer.Serialize(
-                        problems.Payload?.Select(e => new { GUID = e.Uuid, Name = e.Name }) ?? Enumerable.Empty<object>(),
-                        serOpts);
-                }
+            return body;
+        }
 
-                var scenes = _storyApi.GetElementsByType(StoryItemType.Scene);
-                if (scenes.IsSuccess)
+        /// <summary>
+        /// Serialize runtime type to a JSON object, then strip RTF on that copy only.
+        /// Never mutates the live outline element.
+        /// </summary>
+        internal JsonObject SerializeElementOutbound(StoryElement element)
+        {
+            // StoryElementConverter writes Type discriminator using runtime type.
+            var json = JsonSerializer.Serialize<StoryElement>(element, ElementSerializeOptions);
+            var node = JsonNode.Parse(json)!.AsObject();
+            StripRtfOnTopLevelStrings(node);
+            return node;
+        }
+
+        private static void StripRtfOnTopLevelStrings(JsonObject obj)
+        {
+            var stripper = new RichTextStripper();
+            foreach (var key in obj.Select(p => p.Key).ToList())
+            {
+                if (obj[key] is JsonValue jv && jv.TryGetValue<string>(out var s)
+                    && s != null && s.StartsWith(@"{\rtf", StringComparison.Ordinal))
                 {
-                    kernelArgs["SceneChoices"] = JsonSerializer.Serialize(
-                        scenes.Payload?.Select(e => new { GUID = e.Uuid, Name = e.Name }) ?? Enumerable.Empty<object>(),
-                        serOpts);
+                    obj[key] = stripper.StripRichTextFormat(s);
                 }
             }
+        }
 
-            return kernelArgs;
+        private object ProjectCollectionElement(StoryElement element, ElementProjection projection)
+        {
+            return projection switch
+            {
+                ElementProjection.IdAndName => new { GUID = element.Uuid, Name = element.Name },
+                ElementProjection.BaseStoryElement => BuildBaseProjection(element),
+                ElementProjection.FullModel => SerializeElementOutbound(element),
+                _ => new { GUID = element.Uuid, Name = element.Name }
+            };
+        }
+
+        private object BuildBaseProjection(StoryElement element)
+        {
+            var description = element.Description ?? string.Empty;
+            if (description.StartsWith(@"{\rtf", StringComparison.Ordinal))
+                description = new RichTextStripper().StripRichTextFormat(description);
+
+            return new
+            {
+                GUID = element.Uuid,
+                Name = element.Name,
+                ElementDescription = description,
+                Type = element.ElementType.ToString()
+            };
         }
 
         /// <summary>
@@ -654,9 +678,9 @@ namespace StoryCollaborator
         }
 
         /// <summary>
-        /// Fetches examples for each name declared in the workflow's ExampleLists and adds them to kernel args.
+        /// Fetches examples for each name declared in the workflow's ExampleLists and adds them to args.
         /// </summary>
-        internal void EnrichWithExamples(KernelArguments kernelArgs)
+        internal void EnrichWithExamples(Dictionary<string, string> args)
         {
             foreach (var propertyName in workflowModel.GetIO().ExampleLists)
             {
@@ -664,7 +688,7 @@ namespace StoryCollaborator
                 if (result.IsSuccess && result.Payload != null && result.Payload.Any())
                 {
                     var formatted = string.Join(", ", result.Payload);
-                    kernelArgs[$"{propertyName}_examples"] = formatted;
+                    args[$"{propertyName}_examples"] = formatted;
                     _logger?.LogInformation($"Injected examples for {propertyName}: {result.Payload.Count()} items");
                 }
                 else
@@ -675,9 +699,9 @@ namespace StoryCollaborator
         }
 
         /// <summary>
-        /// Enriches kernel arguments with story context.
+        /// Enriches args with story context (still client-built for #106).
         /// </summary>
-        internal void EnrichWithStoryContext(KernelArguments kernelArgs, Dictionary<string, StoryElement> gatheredElements, WorkflowIO workflowIO)
+        internal void EnrichWithStoryContext(Dictionary<string, string> args, Dictionary<string, StoryElement> gatheredElements, WorkflowIO workflowIO)
         {
             try
             {
@@ -713,7 +737,7 @@ namespace StoryCollaborator
                 var builder = new StoryContextBuilder(_storyApi);
                 var context = builder.BuildContext(targetElement, spec, storyModel);
 
-                kernelArgs["StoryContext"] = !string.IsNullOrWhiteSpace(context) ? context : string.Empty;
+                args["StoryContext"] = !string.IsNullOrWhiteSpace(context) ? context : string.Empty;
 
                 if (!string.IsNullOrWhiteSpace(context))
                     _logger?.LogInformation($"Enriched with story context ({context.Length} chars) for {workflowModel.Label} workflow");
@@ -723,14 +747,14 @@ namespace StoryCollaborator
             catch (Exception ex)
             {
                 _logger?.LogWarning($"Failed to enrich story context: {ex.Message}");
-                kernelArgs["StoryContext"] = string.Empty;
+                args["StoryContext"] = string.Empty;
             }
         }
 
         /// <summary>
         /// Applies user settings to the prompt as instructions.
         /// </summary>
-        internal void ApplySettings(KernelArguments kernelArgs)
+        internal void ApplySettings(Dictionary<string, string> args)
         {
             var instructions = new List<string>();
 
@@ -757,7 +781,7 @@ namespace StoryCollaborator
                 instructions.Add($"Avoid suggesting these story forms: {_settings.StoryFormDislikes}");
 
             var result = string.Join(" ", instructions.Where(s => !string.IsNullOrEmpty(s)));
-            kernelArgs["UserSettings"] = result;
+            args["UserSettings"] = result;
 
             if (!string.IsNullOrEmpty(result))
                 _logger?.LogInformation("Applied settings: {Settings}", result);
@@ -770,16 +794,17 @@ namespace StoryCollaborator
         /// the cost reported by the proxy's collab_cost event (null when absent), and whether the
         /// returned stream (after the retry, if one occurred) is complete.
         /// </summary>
-        private async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)> PostToProxyAsync(KernelArguments kernelArgs)
+        private async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)> PostToProxyAsync(WorkflowProxyBody body)
         {
             var proxyBaseUrl = Environment.GetEnvironmentVariable("COLLAB_PROXY_URL")
                 ?? KernelFactory.DefaultProxyBaseUrl;
 
-            var args = new Dictionary<string, string>();
-            foreach (var kvp in kernelArgs)
-                args[kvp.Key] = kvp.Value is string s ? s : kvp.Value?.ToString() ?? string.Empty;
-
-            var payload = JsonSerializer.Serialize(new { workflowId = workflowModel.Label, args });
+            var payload = JsonSerializer.Serialize(new
+            {
+                workflowId = workflowModel.Label,
+                args = body.Args,
+                elements = body.Elements
+            });
 
             return await ExecuteWithTruncationRetryAsync(
                 () => PostToProxyOnceAsync(proxyBaseUrl, payload), ResetHttpClient);

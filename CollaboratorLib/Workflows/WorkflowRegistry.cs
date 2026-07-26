@@ -29,7 +29,7 @@ namespace StoryCollaborator.Workflows
         /// </summary>
         private static List<Workflow> CreateWorkflows()
         {
-            return new List<Workflow>
+            var list = new List<Workflow>
             {
                 // === Overview Workflows ===
 
@@ -223,6 +223,7 @@ namespace StoryCollaborator.Workflows
                                 "and the obstacles that challenge the protagonist's progress.",
                     workflowIO: new WorkflowIO
                     {
+                        // Full characters so Worker can fill Protagonist_Name / Antagonist_Name (issue #106).
                         RequiredInputs = new List<ElementRequirement>
                         {
                             new ElementRequirement
@@ -230,16 +231,6 @@ namespace StoryCollaborator.Workflows
                                 ElementType = StoryItemType.Problem,
                                 ElementLabel = "Problem",
                                 RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = false
-                            }
-                        },
-                        OptionalInputs = new List<ElementRequirement>
-                        {
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.Problem,
-                                ElementLabel = "Problem",
-                                RequiredProperties = new List<PropertySpec> { new PropertySpec("Protagonist"), new PropertySpec("Antagonist") },
                                 CreateIfMissing = false
                             },
                             new ElementRequirement
@@ -320,14 +311,13 @@ namespace StoryCollaborator.Workflows
                                 ElementLabel = "InnerProblem",
                                 RequiredProperties = new List<PropertySpec>(),
                                 CreateIfMissing = true
-                            }
-                        },
-                        OptionalInputs = new List<ElementRequirement>
-                        {
+                            },
+                            // Full protagonist for Protagonist_Name / Flaw / BackStory placeholders (#106).
                             new ElementRequirement
                             {
                                 ElementType = StoryItemType.Character,
                                 ElementLabel = "Protagonist",
+                                ReferencedElementLabel = "OuterProblem.Protagonist",
                                 RequiredProperties = new List<PropertySpec>(),
                                 CreateIfMissing = false
                             }
@@ -461,16 +451,53 @@ namespace StoryCollaborator.Workflows
                                 "remember but which controls them still.",
                     outputProperties: new List<PropertySpec> { new PropertySpec("BackStory") }),
                 new Workflow(
-                    "Relationship", "Character Relationship",
-                    "Develop the dynamics, history, and tension between two characters.",
-                    StoryItemType.Character,
+                    label: "Relationship",
+                    title: "Character Relationship",
+                    description: "Develop the dynamics, history, and tension between two characters.",
                     explanation: "Relationships create conflict, reveal character, and drive plot. This workflow " +
                                 "explores how two characters relate—their shared history, what they want from each " +
                                 "other, sources of tension, and how the relationship might change through the story.",
-                    // RelationshipList is List<RelationshipModel>; recipient GUID injected via CharacterChoices.
-                    outputProperties: new List<PropertySpec>
+                    workflowIO: new WorkflowIO
                     {
-                        new PropertySpec("RelationshipList", WriteVia.Relationships, JsonKey: "relationship")
+                        // Primary + Partner full elements for Partner_* placeholders (#106).
+                        RequiredInputs = new List<ElementRequirement>
+                        {
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Character,
+                                ElementLabel = "Character",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            },
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Character,
+                                ElementLabel = "Partner",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            }
+                        },
+                        Outputs = new List<ElementOutput>
+                        {
+                            new ElementOutput
+                            {
+                                ElementType = StoryItemType.Character,
+                                ElementLabel = "Character",
+                                PropertiesToUpdate = new List<PropertySpec>
+                                {
+                                    new PropertySpec("RelationshipList", WriteVia.Relationships, JsonKey: "relationship")
+                                }
+                            }
+                        },
+                        CollectionInputs = new List<CollectionInput>
+                        {
+                            new CollectionInput
+                            {
+                                RequestName = "CharacterChoices",
+                                ElementType = StoryItemType.Character,
+                                Projection = ElementProjection.IdAndName
+                            }
+                        }
                     }),
 
                 // === Setting Workflows (scene-specific) ===
@@ -549,18 +576,56 @@ namespace StoryCollaborator.Workflows
                         new PropertySpec("Realization")
                     }),
                 new Workflow(
-                    "SceneConflict", "Scene Conflict",
-                    "Structure the conflict within a scene—the protagonist's goal, the opposition they face, " +
-                    "and the outcome.",
-                    StoryItemType.Scene,
+                    label: "SceneConflict",
+                    title: "Scene Conflict",
+                    description: "Structure the conflict within a scene—the protagonist's goal, the opposition they face, " +
+                                 "and the outcome.",
                     explanation: "A scene is a small story with goal, conflict, and outcome. This workflow uses the " +
                                 "Actor's Studio method to define what the scene protagonist wants, what opposes them, " +
                                 "and how the scene ends—usually in a way that makes things worse.",
-                    outputProperties: new List<PropertySpec>
+                    workflowIO: new WorkflowIO
                     {
-                        new PropertySpec("ProtagGoal"),
-                        new PropertySpec("Opposition"),
-                        new PropertySpec("Outcome")
+                        // Scene + full characters for Protagonist_Name / Antagonist_Name (#106).
+                        RequiredInputs = new List<ElementRequirement>
+                        {
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Scene,
+                                ElementLabel = "Scene",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            },
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Character,
+                                ElementLabel = "Protagonist",
+                                ReferencedElementLabel = "Scene.Protagonist",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            },
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Character,
+                                ElementLabel = "Antagonist",
+                                ReferencedElementLabel = "Scene.Antagonist",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            }
+                        },
+                        Outputs = new List<ElementOutput>
+                        {
+                            new ElementOutput
+                            {
+                                ElementType = StoryItemType.Scene,
+                                ElementLabel = "Scene",
+                                PropertiesToUpdate = new List<PropertySpec>
+                                {
+                                    new PropertySpec("ProtagGoal"),
+                                    new PropertySpec("Opposition"),
+                                    new PropertySpec("Outcome")
+                                }
+                            }
+                        }
                     }),
                 new Workflow(
                     "Sequel", "Sequel (Reaction)",
@@ -579,6 +644,21 @@ namespace StoryCollaborator.Workflows
                     }),
                 // SceneCreateImage removed; preserved on branch issue-76-image-workflows (issue #76).
             };
+
+            // Issue #106: declared collection inputs (not inferred from WriteVia).
+            var characterChoices = new CollectionInput
+            {
+                RequestName = "CharacterChoices",
+                ElementType = StoryItemType.Character,
+                Projection = ElementProjection.IdAndName
+            };
+            GetFrom(list, "CastSceneRoles")!.GetIO().CollectionInputs.Add(characterChoices);
+            // Relationship CollectionInputs are declared on its WorkflowIO above.
+
+            return list;
         }
+
+        private static Workflow? GetFrom(List<Workflow> list, string label) =>
+            list.FirstOrDefault(w => w.Label == label);
     }
 }
