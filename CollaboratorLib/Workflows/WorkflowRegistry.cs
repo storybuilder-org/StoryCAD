@@ -29,7 +29,7 @@ namespace StoryCollaborator.Workflows
         /// </summary>
         private static List<Workflow> CreateWorkflows()
         {
-            return new List<Workflow>
+            var list = new List<Workflow>
             {
                 // === Overview Workflows ===
 
@@ -579,6 +579,26 @@ namespace StoryCollaborator.Workflows
                     }),
                 // SceneCreateImage removed; preserved on branch issue-76-image-workflows (issue #76).
             };
+
+            // Issue #106: declared collection inputs (not inferred from WriteVia).
+            var characterChoices = new CollectionInput
+            {
+                RequestName = "CharacterChoices",
+                ElementType = StoryItemType.Character,
+                Projection = ElementProjection.IdAndName
+            };
+            GetFrom(list, "CastSceneRoles")!.GetIO().CollectionInputs.Add(characterChoices);
+            GetFrom(list, "Relationship")!.GetIO().CollectionInputs.Add(new CollectionInput
+            {
+                RequestName = "CharacterChoices",
+                ElementType = StoryItemType.Character,
+                Projection = ElementProjection.IdAndName
+            });
+
+            return list;
         }
+
+        private static Workflow? GetFrom(List<Workflow> list, string label) =>
+            list.FirstOrDefault(w => w.Label == label);
     }
 }
