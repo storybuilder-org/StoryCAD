@@ -6,13 +6,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel>
+    <!-- Create is above the list so ContentDialog never clips it under a tall ScrollViewer. -->
+    <StackPanel Spacing="8" Padding="0,0,0,8">
 
-        <!-- ElementType Picker -->
-        <!-- No Header (PlaceholderText only): explicit Name required per convention.
-             This is a near-clone of Services/Dialogs/ElementPicker.xaml (Unit 6), sharing the same
-             x:Name values (TypeBox/ElementBox/NewButton); ids here take a distinct CollabPicker
-             prefix throughout so they don't collide with Unit 6's ElementPickerTypeCombo etc. -->
+        <!-- ElementType Picker (hidden when ForcedType is set) -->
         <ComboBox SelectedItem="{x:Bind PickerVM.SelectedType, Mode=TwoWay}"
                   Name="TypeBox"
                   PlaceholderText="Click here to select an element type" HorizontalAlignment="Center"
@@ -25,22 +22,7 @@
             <ComboBoxItem Content="Scene" />
         </ComboBox>
 
-        <!-- Element Picker -->
-        <ScrollViewer Height="450">
-            <!-- No Header: accessible name pinned explicitly (founder ruling, PR #1458). -->
-            <ListView Name="ElementBox" IsEnabled="False" HorizontalAlignment="Center"
-                      SelectedItem="{x:Bind PickerVM.SelectedElement, Mode=TwoWay}"
-                      DisplayMemberPath="Name" Margin="0,10,0,0"
-                      MinWidth="200" SelectionMode="Single"
-                      AutomationProperties.AutomationId="CollabPickerList"
-                      AutomationProperties.Name="Elements" />
-        </ScrollViewer>
-
-        <Border Margin="30,10" HorizontalAlignment="Stretch"
-                BorderBrush="Gray" BorderThickness="1" />
-
-        <!-- Create new element UI -->
-        <!-- Create stays available whenever a type is known (empty or non-empty list). -->
+        <!-- Create always visible when a type is known (empty or non-empty list). -->
         <Button HorizontalAlignment="Center" Content="+ Create a new element"
                 Name="NewButton" IsEnabled="True"
                 AutomationProperties.AutomationId="CollabPickerAddNewElementButton">
@@ -57,5 +39,18 @@
                 </Flyout>
             </Button.Flyout>
         </Button>
+
+        <Border Margin="0,4" HorizontalAlignment="Stretch"
+                BorderBrush="Gray" BorderThickness="1" />
+
+        <!-- MaxHeight not Height: empty list must not reserve 450px and hide Create. -->
+        <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
+            <ListView Name="ElementBox" IsEnabled="False" HorizontalAlignment="Stretch"
+                      SelectedItem="{x:Bind PickerVM.SelectedElement, Mode=TwoWay}"
+                      DisplayMemberPath="Name"
+                      MinWidth="200" MinHeight="40" SelectionMode="Single"
+                      AutomationProperties.AutomationId="CollabPickerList"
+                      AutomationProperties.Name="Elements" />
+        </ScrollViewer>
     </StackPanel>
 </Page>
