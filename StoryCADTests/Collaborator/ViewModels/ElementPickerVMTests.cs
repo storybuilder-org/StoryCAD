@@ -1,12 +1,17 @@
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Collaborator.ViewModels;
 using StoryCADLib.Models;
+using StoryCADLib.Models.Tools;
+using StoryCADLib.Services.API;
+using StoryCADLib.Services.Outline;
+using ControlData = StoryCADLib.ViewModels.ControlData;
 
 #nullable disable
 
 namespace StoryCADTests.Collaborator.ViewModels;
 
 /// <summary>
-/// Unit tests for ElementPickerVM
+/// Unit tests for Collaborator ElementPickerVM
 /// </summary>
 [TestClass]
 public class ElementPickerVMTests
@@ -459,42 +464,120 @@ public class ElementPickerVMTests
 
     #endregion
 
+    #region ResolveSelectedGuid Tests
+
+    [TestMethod]
+    public void ResolveSelectedGuid_WhenNothingSelected_ReturnsNull()
+    {
+        _viewModel.SelectedElement = null;
+
+        Assert.IsNull(_viewModel.ResolveSelectedGuid());
+    }
+
+    [TestMethod]
+    public void ResolveSelectedGuid_WhenElementSelected_ReturnsUuidString()
+    {
+        var character = new CharacterModel("Hero", _storyModel, null);
+        _viewModel.SelectedElement = character;
+
+        Assert.AreEqual(character.Uuid.ToString(), _viewModel.ResolveSelectedGuid());
+    }
+
+    #endregion
+
     #region CreateNode Method Tests
 
     [TestMethod]
-    public void CreateNode_WhenCalled_DoesNotThrow()
+    public void CreateNode_WithoutApi_DoesNotThrow()
     {
-        // Arrange - CreateNode has commented-out implementation
         _viewModel.StoryModel = _storyModel;
         _viewModel.ForcedType = StoryItemType.Character;
         _viewModel.NewNodeName = "Test Node";
 
-        // Act & Assert - should not throw
         _viewModel.CreateNode();
+
+        Assert.IsNull(_viewModel.SelectedElement);
     }
 
     [TestMethod]
     public void CreateNode_WithoutForcedType_DoesNotThrow()
     {
-        // Arrange
         _viewModel.StoryModel = _storyModel;
         _viewModel.ForcedType = null;
         _viewModel.NewNodeName = "Test Node";
 
-        // Act & Assert
         _viewModel.CreateNode();
     }
 
     [TestMethod]
     public void CreateNode_WithoutStoryModel_DoesNotThrow()
     {
-        // Arrange
         _viewModel.StoryModel = null;
         _viewModel.ForcedType = StoryItemType.Scene;
         _viewModel.NewNodeName = "Test Scene";
 
-        // Act & Assert
         _viewModel.CreateNode();
+    }
+
+    [TestMethod]
+    public async Task CreateNode_WithApi_EmptyOutline_CreatesProblemAndSelectsIt()
+    {
+        var api = CreateApi();
+        var create = await api.CreateEmptyOutline("Picker Test", "Author", "0");
+        Assert.IsTrue(create.IsSuccess);
+        var model = api.CurrentModel;
+        var problemCountBefore = model.StoryElements.Count(e => e.ElementType == StoryItemType.Problem);
+
+        _viewModel.StoryModel = model;
+        _viewModel.ForcedType = StoryItemType.Problem;
+        _viewModel.NewNodeName = "Main Problem";
+        _viewModel.StoryApi = api;
+        var afterCreateCalls = 0;
+        _viewModel.AfterCreate = () => afterCreateCalls++;
+
+        _viewModel.CreateNode();
+
+        Assert.IsNotNull(_viewModel.SelectedElement);
+        var selected = (StoryElement)_viewModel.SelectedElement;
+        Assert.AreEqual("Main Problem", selected.Name);
+        Assert.AreEqual(StoryItemType.Problem, selected.ElementType);
+        Assert.AreEqual(problemCountBefore + 1,
+            model.StoryElements.Count(e => e.ElementType == StoryItemType.Problem));
+        Assert.AreEqual(selected.Uuid.ToString(), _viewModel.ResolveSelectedGuid());
+        // Page uses this hook to rebuild the list (ItemsSource is a snapshot, not live binding).
+        Assert.AreEqual(1, afterCreateCalls);
+    }
+
+    [TestMethod]
+    public async Task CreateNode_WithApi_WhenProblemsExist_StillCreatesAnother()
+    {
+        var api = CreateApi();
+        var create = await api.CreateEmptyOutline("Picker Test 2", "Author", "0");
+        Assert.IsTrue(create.IsSuccess);
+        var model = api.CurrentModel;
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+        var existing = api.AddElement(StoryItemType.Problem, overview.Uuid.ToString(), "Existing Problem");
+        Assert.IsTrue(existing.IsSuccess);
+
+        _viewModel.StoryModel = model;
+        _viewModel.ForcedType = StoryItemType.Problem;
+        _viewModel.NewNodeName = "New Problem";
+        _viewModel.StoryApi = api;
+
+        _viewModel.CreateNode();
+
+        Assert.IsNotNull(_viewModel.SelectedElement);
+        Assert.AreEqual("New Problem", ((StoryElement)_viewModel.SelectedElement).Name);
+        Assert.AreEqual(2, model.StoryElements.Count(e => e.ElementType == StoryItemType.Problem));
+    }
+
+    private static StoryCADApi CreateApi()
+    {
+        return new StoryCADApi(
+            Ioc.Default.GetRequiredService<OutlineService>(),
+            Ioc.Default.GetRequiredService<ListData>(),
+            Ioc.Default.GetRequiredService<ControlData>(),
+            Ioc.Default.GetRequiredService<ToolsData>());
     }
 
     #endregion

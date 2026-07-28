@@ -1,23 +1,22 @@
 using System.Linq;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using StoryCADLib.Collaborator.ViewModels;
 using StoryCADLib.Models;
 
 namespace StoryCADLib.Collaborator.Views;
 
 /// <summary>
-///     A simple picker allowing a user to pick the
-///     type of element they want
+/// Collaborator element picker: choose an existing element or create one.
 /// </summary>
 public sealed partial class ElementPicker : Page
 {
-    public Collaborator.ViewModels.ElementPickerVM PickerVM;
+    public ViewModels.ElementPickerVM PickerVM;
 
-    public ElementPicker(Collaborator.ViewModels.ElementPickerVM viewModel)
+    public ElementPicker(ViewModels.ElementPickerVM viewModel)
     {
         InitializeComponent();
         PickerVM = viewModel;
+        PickerVM.AfterCreate = OnAfterCreate;
 
         if (PickerVM.ForcedType != null)
         {
@@ -28,63 +27,106 @@ public sealed partial class ElementPicker : Page
     }
 
     /// <summary>
-    ///     This just handles the UI when the type Combobox is changed
+    /// After Create: close flyout, rebuild list, leave dialog open so user can Select.
     /// </summary>
+    private void OnAfterCreate()
+    {
+        NewButton.Flyout?.Hide();
+        RefreshElementList(preserveSelection: true);
+        PickerVM.NotifySelectionChanged();
+    }
+
     public void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        StoryItemType type;
-        if (PickerVM.ForcedType == null)
-        {
-            //Get elements
-            var Type = PickerVM.SelectedType as ComboBoxItem;
-            type = Enum.Parse<StoryItemType>(Type.Content.ToString()!,
-                true);
-        }
-        else
-        {
-            type = (StoryItemType)PickerVM.ForcedType;
-        }
-
-
-        //Reset the UIs, so we can't enter an invalid state
         PickerVM.SelectedElement = null;
-        ElementBox.ItemsSource = null;
+        RefreshElementList(preserveSelection: false);
+
+        // Pre-select when changing an existing linked element
+        if (ElementBox.ItemsSource is System.Collections.IEnumerable items
+            && PickerVM.CurrentSelection.HasValue
+            && PickerVM.CurrentSelection.Value != Guid.Empty)
+        {
+            var current = items.Cast<object>().FirstOrDefault(o =>
+                o is StoryElement se && se.Uuid == PickerVM.CurrentSelection.Value);
+            if (current != null)
+            {
+                ElementBox.SelectedItem = current;
+                PickerVM.SelectedElement = current;
+            }
+        }
+
+        PickerVM.NotifySelectionChanged();
+    }
+
+    private void ElementBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        PickerVM.NotifySelectionChanged();
+    }
+
+    /// <summary>
+    /// Rebuild list from live model collections (ItemsSource is a snapshot).
+    /// Count &lt;= 1 means only the "(none)" placeholder.
+    /// </summary>
+    private void RefreshElementList(bool preserveSelection)
+    {
+        var preserve = preserveSelection ? PickerVM.SelectedElement as StoryElement : null;
+
+        if (!TryGetForcedOrSelectedType(out var type))
+        {
+            ElementBox.ItemsSource = null;
+            ElementBox.IsEnabled = false;
+            NewButton.IsEnabled = false;
+            return;
+        }
+
         NewButton.IsEnabled = true;
 
-        // Use pre-filtered collections from StoryElementCollection for efficiency
         var elements = type switch
         {
-            StoryItemType.Problem => PickerVM.StoryModel.StoryElements.Problems,
-            StoryItemType.Character => PickerVM.StoryModel.StoryElements.Characters,
-            StoryItemType.Setting => PickerVM.StoryModel.StoryElements.Settings,
-            StoryItemType.Scene => PickerVM.StoryModel.StoryElements.Scenes,
+            StoryItemType.Problem => PickerVM.StoryModel?.StoryElements.Problems,
+            StoryItemType.Character => PickerVM.StoryModel?.StoryElements.Characters,
+            StoryItemType.Setting => PickerVM.StoryModel?.StoryElements.Settings,
+            StoryItemType.Scene => PickerVM.StoryModel?.StoryElements.Scenes,
             _ => null
         };
 
-        // Note: filtered collections include a "(none)" placeholder at index 0
-        // Real elements start at index 1, so check for Count > 1
         if (elements == null || elements.Count <= 1)
         {
+            ElementBox.ItemsSource = null;
             ElementBox.IsEnabled = false;
+            return;
         }
-        else
-        {
-            //Update element box with elements (skip the "(none)" placeholder)
-            ElementBox.IsEnabled = true;
-            var elementList = elements.Skip(1).ToList();
-            ElementBox.ItemsSource = elementList;
 
-            // Pre-select current element if one is specified
-            if (PickerVM.CurrentSelection.HasValue && PickerVM.CurrentSelection.Value != Guid.Empty)
+        var elementList = elements.Skip(1).ToList();
+        ElementBox.IsEnabled = true;
+        ElementBox.ItemsSource = elementList;
+
+        if (preserve != null)
+        {
+            var match = elementList.FirstOrDefault(e => e.Uuid == preserve.Uuid);
+            if (match != null)
             {
-                var currentElement = elementList.FirstOrDefault(e =>
-                    e is StoryElement se && se.Uuid == PickerVM.CurrentSelection.Value);
-                if (currentElement != null)
-                {
-                    ElementBox.SelectedItem = currentElement;
-                    PickerVM.SelectedElement = currentElement;
-                }
+                ElementBox.SelectedItem = match;
+                PickerVM.SelectedElement = match;
             }
         }
+    }
+
+    private bool TryGetForcedOrSelectedType(out StoryItemType type)
+    {
+        if (PickerVM.ForcedType != null)
+        {
+            type = (StoryItemType)PickerVM.ForcedType;
+            return true;
+        }
+
+        if (PickerVM.SelectedType is ComboBoxItem item && item.Content != null)
+        {
+            type = Enum.Parse<StoryItemType>(item.Content.ToString()!, true);
+            return true;
+        }
+
+        type = default;
+        return false;
     }
 }

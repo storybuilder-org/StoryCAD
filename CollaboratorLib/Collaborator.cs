@@ -854,10 +854,15 @@ public class Collaborator : ICollaborator
             }
         }
 
-        // Show ElementPicker - pass currentGuid for pre-selection if available
+        // Show ElementPicker - pass API so Create works; currentGuid for pre-selection
         var pickerVM = new ElementPickerVM();
         var selectedGuid = await pickerVM.ShowPicker(_storyModel!, xamlRoot,
-            requirement.ElementType, requirement.ElementLabel, currentGuid);
+            requirement.ElementType, requirement.ElementLabel, currentGuid, _storyApi);
+
+        // WinUI: sequential ContentDialogs can swallow the next ShowAsync if the previous
+        // dialog has not fully torn down. Brief yield so Problem → Protagonist → Antagonist
+        // each actually appear.
+        await Task.Delay(100);
 
         if (string.IsNullOrEmpty(selectedGuid))
         {
