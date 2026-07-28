@@ -38,6 +38,7 @@ Every interactive control gets `AutomationProperties.AutomationId`.
 | NavigationViewItem | `NavItem` | `RecentlyOpenedNavItem` *(added Unit 6)* |
 | InfoBar | `InfoBar` | `PrintReportsSynopsisWarningInfoBar` *(added Unit 7)* |
 | TreeViewItem | `TreeItem` | *(added Unit 8, founder ruling on PR #1457; navigation automation depends on manipulating tree rows. Templated TreeViewItems — stamped from a DataTemplate, which is every current instance: Shell x3, NarrativeTool x2 — carry NO AutomationId (TemplateSafety) and instead bind the accessible name: `AutomationProperties.Name="{x:Bind Name, Mode=OneWay}"`, the pattern Shell.xaml already uses)* |
+| TextBlock | `Text` | `WorkflowShellStatusText` *(added #123 / PR #1492: shell status line only when automation needs a stable locator; ordinary content TextBlocks stay unannotated)* |
 
 - A control type not in this table gets a proposed suffix in the PR description; the table row is added when the PR merges.
 - Values are literal strings: ASCII letters and digits, no spaces, no bindings, never a story element name, file path, date, or any other runtime value.

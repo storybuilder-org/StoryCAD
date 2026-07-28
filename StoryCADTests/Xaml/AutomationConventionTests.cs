@@ -81,6 +81,7 @@ public class AutomationConventionTests
         ["NavigationViewItem"] = "NavItem", // added Unit 6: founder ruling on PR #1455 (FileOpenMenu nav strip)
         ["InfoBar"] = "InfoBar",            // added Unit 7: founder ruling on PR #1456 (id only; the peer announces Severity+Title+Message natively, so no explicit Name)
         ["TreeViewItem"] = "TreeItem",      // added Unit 8: founder ruling on PR #1457; all current instances are templated (Shell x3, NarrativeTool x2), so they carry a bound Name and no AutomationId (TemplateSafety); the suffix row exists for any future non-templated TreeViewItem
+        ["TextBlock"] = "Text",             // added #123: shell status line (WorkflowShellStatusText); content TextBlocks stay unannotated
     };
 
     private const string AutomationIdAttribute = "AutomationProperties.AutomationId";
