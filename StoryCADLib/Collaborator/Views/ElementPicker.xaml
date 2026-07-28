@@ -40,8 +40,9 @@
                 BorderBrush="Gray" BorderThickness="1" />
 
         <!-- Create new element UI -->
+        <!-- Create stays available whenever a type is known (empty or non-empty list). -->
         <Button HorizontalAlignment="Center" Content="+ Create a new element"
-                Name="NewButton" IsEnabled="False"
+                Name="NewButton" IsEnabled="True"
                 AutomationProperties.AutomationId="CollabPickerAddNewElementButton">
             <Button.Flyout>
                 <Flyout AutomationProperties.AutomationId="CollabPickerAddNewElementFlyout">

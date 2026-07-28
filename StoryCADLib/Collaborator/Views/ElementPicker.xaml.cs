@@ -46,7 +46,7 @@ public sealed partial class ElementPicker : Page
         }
 
 
-        //Reset the UIs, so we can't enter an invalid state
+        // Reset selection; Create stays enabled for empty and non-empty lists.
         PickerVM.SelectedElement = null;
         ElementBox.ItemsSource = null;
         NewButton.IsEnabled = true;

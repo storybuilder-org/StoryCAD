@@ -854,10 +854,10 @@ public class Collaborator : ICollaborator
             }
         }
 
-        // Show ElementPicker - pass currentGuid for pre-selection if available
+        // Show ElementPicker - pass API so Create works; currentGuid for pre-selection
         var pickerVM = new ElementPickerVM();
         var selectedGuid = await pickerVM.ShowPicker(_storyModel!, xamlRoot,
-            requirement.ElementType, requirement.ElementLabel, currentGuid);
+            requirement.ElementType, requirement.ElementLabel, currentGuid, _storyApi);
 
         if (string.IsNullOrEmpty(selectedGuid))
         {

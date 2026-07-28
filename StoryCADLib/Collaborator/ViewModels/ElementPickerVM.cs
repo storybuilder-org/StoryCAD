@@ -16,8 +16,6 @@ public class ElementPickerVM
     /// </summary>
     private ContentDialog dialog;
 
-    private IStoryCADAPI? _storyApi;
-
     /// <summary>
     ///     Currently selected item
     /// </summary>
@@ -54,6 +52,11 @@ public class ElementPickerVM
     public Guid? CurrentSelection { get; set; }
 
     /// <summary>
+    ///     API used to create new elements from the picker. Set by <see cref="ShowPicker"/>.
+    /// </summary>
+    public IStoryCADAPI StoryApi { get; set; }
+
+    /// <summary>
     ///     Spawns an instance of the picker.
     /// </summary>
     /// <param name="Model">StoryModel to show elements from</param>
@@ -61,10 +64,11 @@ public class ElementPickerVM
     /// <param name="Type">Only allow elements of this type to be picked</param>
     /// <param name="label">Descriptive label for what we're picking (e.g., "Protagonist")</param>
     /// <param name="currentSelection">GUID of currently selected element for pre-selection</param>
-    /// <returns>The GUID of element the user picked</returns>
+    /// <param name="storyApi">API used when the user creates a new element</param>
+    /// <returns>The GUID of element the user picked, or null if cancelled / nothing selected</returns>
     public async Task<string> ShowPicker(StoryModel Model,
         XamlRoot XAMLRoot, StoryItemType? Type = null, string label = null, Guid? currentSelection = null,
-        IStoryCADAPI? storyApi = null)
+        IStoryCADAPI storyApi = null)
     {
         //Reset VM
         SelectedType = null;
@@ -74,7 +78,7 @@ public class ElementPickerVM
         StoryModel = Model;
         PickerLabel = label;
         CurrentSelection = currentSelection;
-        _storyApi = storyApi;
+        StoryApi = storyApi;
 
         //Spawn new picker, passing this VM so Page uses the same instance
         var ui = new Views.ElementPicker(this);
@@ -96,13 +100,21 @@ public class ElementPickerVM
             XamlRoot = XAMLRoot
         };
 
-        //interpret result
+        //interpret result — cancel or empty selection both return null (no crash)
         if (await dialog.ShowAsync() != ContentDialogResult.Secondary)
         {
-            return (SelectedElement as StoryElement).Uuid.ToString();
+            return ResolveSelectedGuid();
         }
 
-        return null; //Return unknown if dialog is closed or element isn't selected.
+        return null;
+    }
+
+    /// <summary>
+    ///     GUID of the selected element, or null when nothing is selected.
+    /// </summary>
+    public string ResolveSelectedGuid()
+    {
+        return (SelectedElement as StoryElement)?.Uuid.ToString();
     }
 
     /// <summary>
@@ -110,7 +122,7 @@ public class ElementPickerVM
     /// </summary>
     public void CreateNode()
     {
-        if (_storyApi == null || StoryModel == null)
+        if (StoryApi == null || StoryModel == null)
             return;
 
         StoryItemType type;
@@ -130,10 +142,10 @@ public class ElementPickerVM
         if (overview == null) return;
 
         var name = string.IsNullOrWhiteSpace(NewNodeName) ? $"New {type}" : NewNodeName;
-        var addResult = _storyApi.AddElement(type, overview.Uuid.ToString(), name);
+        var addResult = StoryApi.AddElement(type, overview.Uuid.ToString(), name);
         if (!addResult.IsSuccess) return;
 
-        var lookupResult = _storyApi.GetStoryElement(addResult.Payload);
+        var lookupResult = StoryApi.GetStoryElement(addResult.Payload);
         if (lookupResult?.IsSuccess == true && lookupResult.Payload != null)
         {
             SelectedElement = lookupResult.Payload;
