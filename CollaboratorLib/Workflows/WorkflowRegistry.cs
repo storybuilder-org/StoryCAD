@@ -334,6 +334,9 @@ namespace StoryCollaborator.Workflows
                         },
                         Outputs = new List<ElementOutput>
                         {
+                            // #120: full Inner Problem form + Protagonist.Flaw.
+                            // ConflictType + Protagonist/Antagonist GUIDs are injected after
+                            // extract (Person vs. Self; both links = gathered Protagonist).
                             new ElementOutput
                             {
                                 ElementType = StoryItemType.Problem,
@@ -343,7 +346,25 @@ namespace StoryCollaborator.Workflows
                                     new PropertySpec("Description", JsonKey: "InnerProblemDescription"),
                                     new PropertySpec("Theme", JsonKey: "theme_connection"),
                                     new PropertySpec("Method", JsonKey: "resolution_path"),
-                                    new PropertySpec("Notes", JsonKey: "explanation")
+                                    new PropertySpec("Notes", JsonKey: "explanation"),
+                                    // Craft: inner problem is usually something to decide or discover
+                                    // (Defining_Problems / Problem and Character Process).
+                                    new PropertySpec("ProblemType"),
+                                    new PropertySpec("ProtGoal"),
+                                    new PropertySpec("ProtMotive"),
+                                    new PropertySpec("ProtConflict"),
+                                    new PropertySpec("AntagGoal"),
+                                    new PropertySpec("AntagMotive"),
+                                    new PropertySpec("AntagConflict")
+                                }
+                            },
+                            new ElementOutput
+                            {
+                                ElementType = StoryItemType.Character,
+                                ElementLabel = "Protagonist",
+                                PropertiesToUpdate = new List<PropertySpec>
+                                {
+                                    new PropertySpec("Flaw")
                                 }
                             }
                         }
