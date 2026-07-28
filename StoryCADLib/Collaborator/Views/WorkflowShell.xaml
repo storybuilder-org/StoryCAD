@@ -45,7 +45,6 @@
                            MaxWidth="480"
                            Margin="12,0,8,0"
                            ToolTipService.ToolTip="{x:Bind ShellViewModel.StatusText, Mode=OneWay}"
-                           AutomationProperties.AutomationId="WorkflowShellStatusText"
                            AutomationProperties.Name="Status" />
             </CommandBar.Content>
             <CommandBar.PrimaryCommands>
