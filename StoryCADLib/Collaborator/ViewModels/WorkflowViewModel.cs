@@ -349,22 +349,31 @@ public partial class WorkflowViewModel : ObservableRecipient
         ClearPendingUpdates();
     }
 
+    /// <summary>
+    /// After accept/skip, Collaborator removes the current key from PendingUpdates.
+    /// The next remaining item slides into the same index — do not increment, or we skip it.
+    /// </summary>
     private void AdvanceReview()
     {
-        if (CurrentReviewIndex >= PendingUpdates.Count - 1 || PendingUpdates.Count == 0)
+        if (PendingUpdates == null || PendingUpdates.Count == 0)
         {
-            // Done reviewing
             IsInReviewMode = false;
             ClearPendingUpdates();
+            return;
         }
-        else
+
+        // If index is past the end (accepted the last remaining item), finish.
+        if (CurrentReviewIndex >= PendingUpdates.Count)
         {
-            // Move to next
-            CurrentReviewIndex++;
-            OnPropertyChanged(nameof(CurrentReviewKey));
-            OnPropertyChanged(nameof(CurrentReviewValue));
-            OnPropertyChanged(nameof(ReviewProgress));
+            IsInReviewMode = false;
+            ClearPendingUpdates();
+            return;
         }
+
+        // Still have an item at CurrentReviewIndex (the next after remove). Refresh UI only.
+        OnPropertyChanged(nameof(CurrentReviewKey));
+        OnPropertyChanged(nameof(CurrentReviewValue));
+        OnPropertyChanged(nameof(ReviewProgress));
     }
 
     public void ClearPendingUpdates()

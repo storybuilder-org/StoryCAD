@@ -402,6 +402,108 @@ public class WorkflowViewModelTests
 
     #endregion
 
+    #region Review Each (issue #115)
+
+    /// <summary>
+    /// Simulates Collaborator: accept/skip removes the key then SetPendingUpdates.
+    /// </summary>
+    private void WireRemoveOnAcceptOrSkip(Dictionary<string, object> store)
+    {
+        _viewModel.OnAcceptProperty = key =>
+        {
+            store.Remove(key);
+            _viewModel.SetPendingUpdates(store);
+        };
+        _viewModel.OnSkipProperty = key =>
+        {
+            store.Remove(key);
+            _viewModel.SetPendingUpdates(store);
+        };
+    }
+
+    [TestMethod]
+    public void ReviewEach_AcceptCurrent_DoesNotSkipMiddleProperty()
+    {
+        // Arrange — three updates (Ideation: Description, Concept, Premise)
+        var store = new Dictionary<string, object>
+        {
+            ["Overview.Description"] = "idea",
+            ["Overview.Concept"] = "concept",
+            ["Overview.Premise"] = "premise"
+        };
+        _viewModel.SetPendingUpdates(store);
+        WireRemoveOnAcceptOrSkip(store);
+        _viewModel.ReviewEachCommand.Execute(null);
+
+        Assert.AreEqual("Overview.Description", _viewModel.CurrentReviewKey);
+
+        // Act — accept first, then whatever is shown next
+        _viewModel.AcceptCurrentCommand.Execute(null);
+        var secondKey = _viewModel.CurrentReviewKey;
+        _viewModel.AcceptCurrentCommand.Execute(null);
+        var thirdKey = _viewModel.CurrentReviewKey;
+
+        // Assert — middle must be offered; nothing silently dropped
+        Assert.AreEqual("Overview.Concept", secondKey, "After first accept, next should be Concept (not Premise).");
+        Assert.AreEqual("Overview.Premise", thirdKey, "After second accept, next should be Premise.");
+        Assert.IsTrue(_viewModel.IsInReviewMode);
+        Assert.AreEqual(1, store.Count);
+
+        _viewModel.AcceptCurrentCommand.Execute(null);
+        Assert.IsFalse(_viewModel.IsInReviewMode);
+        Assert.AreEqual(0, store.Count, "All three accepts must leave nothing discarded.");
+    }
+
+    [TestMethod]
+    public void ReviewEach_SkipCurrent_DoesNotDropRemaining()
+    {
+        var store = new Dictionary<string, object>
+        {
+            ["Overview.Description"] = "idea",
+            ["Overview.Concept"] = "concept",
+            ["Overview.Premise"] = "premise"
+        };
+        _viewModel.SetPendingUpdates(store);
+        WireRemoveOnAcceptOrSkip(store);
+        _viewModel.ReviewEachCommand.Execute(null);
+
+        _viewModel.SkipCurrentCommand.Execute(null); // skip Description
+        Assert.AreEqual("Overview.Concept", _viewModel.CurrentReviewKey);
+        Assert.AreEqual(2, store.Count);
+
+        _viewModel.AcceptCurrentCommand.Execute(null); // accept Concept
+        Assert.AreEqual("Overview.Premise", _viewModel.CurrentReviewKey);
+        Assert.AreEqual(1, store.Count);
+
+        _viewModel.AcceptCurrentCommand.Execute(null);
+        Assert.AreEqual(0, store.Count);
+        Assert.IsFalse(_viewModel.IsInReviewMode);
+    }
+
+    [TestMethod]
+    public void ReviewEach_AcceptLastOfTwo_DoesNotClearUnreviewed()
+    {
+        // Secondary bug: accept first of two remaining while index logic treated "done" early
+        var store = new Dictionary<string, object>
+        {
+            ["A"] = 1,
+            ["B"] = 2
+        };
+        _viewModel.SetPendingUpdates(store);
+        WireRemoveOnAcceptOrSkip(store);
+        _viewModel.ReviewEachCommand.Execute(null);
+
+        _viewModel.AcceptCurrentCommand.Execute(null);
+        Assert.AreEqual("B", _viewModel.CurrentReviewKey);
+        Assert.AreEqual(1, store.Count);
+        Assert.IsTrue(store.ContainsKey("B"));
+
+        _viewModel.AcceptCurrentCommand.Execute(null);
+        Assert.AreEqual(0, store.Count);
+    }
+
+    #endregion
+
     #region ObservableRecipient Tests
 
     [TestMethod]
