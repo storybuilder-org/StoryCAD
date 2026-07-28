@@ -167,6 +167,10 @@ namespace StoryCollaborator
                 foreach (var pending in outputResult.PendingUpdates)
                     result.PendingUpdates.Add(pending);
 
+                // #120: structural fields the model must not invent (list value + GUIDs).
+                if (workflowModel.Label == "InnerOuterProblems")
+                    EnrichInnerOuterStructuralFields(result, gatheredElements);
+
                 if (!outputResult.Success)
                 {
                     result.Success = false;
@@ -284,6 +288,60 @@ namespace StoryCollaborator
                 ElementDescription = description,
                 Type = element.ElementType.ToString()
             };
+        }
+
+        /// <summary>
+        /// Issue #120: after JSON extract, set Inner Problem structure the model must not invent.
+        /// ConflictType is always Person vs. Self (Lists.json). Protagonist and Antagonist GUIDs
+        /// both equal the gathered Protagonist (self vs self). ProblemType Decision|Discover
+        /// comes from the model via PropertiesToUpdate.
+        /// </summary>
+        internal void EnrichInnerOuterStructuralFields(
+            WorkflowResult result,
+            Dictionary<string, StoryElement> gatheredElements)
+        {
+            if (!gatheredElements.TryGetValue("InnerProblem", out var inner))
+            {
+                result.StatusMessages.Add("InnerOuter structural enrich skipped: InnerProblem not gathered");
+                return;
+            }
+
+            // Fixed list value — do not trust free model text for ConflictType.
+            const string personVsSelf = "Person vs. Self";
+            AddOrReplaceScalarUpdate(result, "InnerProblem", inner.Uuid, "ConflictType", personVsSelf);
+
+            if (!gatheredElements.TryGetValue("Protagonist", out var protagonist))
+            {
+                result.StatusMessages.Add("InnerOuter structural enrich: Protagonist not gathered; links not set");
+                return;
+            }
+
+            var protGuid = protagonist.Uuid.ToString();
+            AddOrReplaceScalarUpdate(result, "InnerProblem", inner.Uuid, "Protagonist", protGuid);
+            AddOrReplaceScalarUpdate(result, "InnerProblem", inner.Uuid, "Antagonist", protGuid);
+            result.StatusMessages.Add(
+                $"InnerOuter structural enrich: ConflictType={personVsSelf}; Protagonist=Antagonist={protGuid}");
+        }
+
+        /// <summary>
+        /// Injects or replaces a scalar PendingUpdate and its UpdatedProperties display entry.
+        /// </summary>
+        private static void AddOrReplaceScalarUpdate(
+            WorkflowResult result,
+            string elementLabel,
+            Guid elementUuid,
+            string property,
+            string value)
+        {
+            var key = $"{elementLabel}.{property}";
+            result.PendingUpdates.RemoveAll(u =>
+                u.ElementLabel == elementLabel && u.Spec.Property == property);
+            result.PendingUpdates.Add(new PendingUpdate(
+                elementLabel,
+                elementUuid,
+                new PropertySpec(property),
+                value));
+            result.UpdatedProperties[key] = value;
         }
 
         /// <summary>
