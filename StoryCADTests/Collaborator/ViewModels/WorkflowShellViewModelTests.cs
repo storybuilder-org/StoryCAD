@@ -83,6 +83,40 @@ public class WorkflowShellViewModelTests
     }
 
     [TestMethod]
+    public void StatusText_Initially_IsEmpty()
+    {
+        Assert.AreEqual(string.Empty, _viewModel.StatusText);
+    }
+
+    [TestMethod]
+    public void StatusText_WhenSet_ReturnsNewValue()
+    {
+        _viewModel.StatusText = "Cancelled: Protagonist is required.";
+        Assert.AreEqual("Cancelled: Protagonist is required.", _viewModel.StatusText);
+    }
+
+    [TestMethod]
+    public void StatusText_WhenSetNull_BecomesEmpty()
+    {
+        _viewModel.StatusText = "x";
+        _viewModel.StatusText = null;
+        Assert.AreEqual(string.Empty, _viewModel.StatusText);
+    }
+
+    [TestMethod]
+    public void HasStatus_WhenStatusTextEmpty_IsFalse()
+    {
+        Assert.IsFalse(_viewModel.HasStatus);
+    }
+
+    [TestMethod]
+    public void HasStatus_WhenStatusTextSet_IsTrue()
+    {
+        _viewModel.StatusText = "Cancelled: Protagonist is required.";
+        Assert.IsTrue(_viewModel.HasStatus);
+    }
+
+    [TestMethod]
     public void OnWorkflowSelected_Initially_IsNull()
     {
         // Assert

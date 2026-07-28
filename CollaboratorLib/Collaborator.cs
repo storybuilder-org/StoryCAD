@@ -161,14 +161,20 @@ public class Collaborator : ICollaborator
                 {
                     if (viewModel.ContentFrame != null && workflowTag is Workflow workflow)
                     {
+                        // Clear shell status; gather cancel has no chat page (#123).
+                        viewModel.StatusText = string.Empty;
+
                         // Gather required input elements before navigating
                         var gatherResult = await GatherWorkflowInputsAsync(workflow, hostFrame.XamlRoot!);
                         if (gatherResult.Cancelled)
                         {
-                            // User cancelled element selection
+                            // No WorkflowPage / chat — surface cancel on the shell status line.
+                            viewModel.StatusText = FormatGatherStatusForShell(gatherResult.StatusMessages);
                             _logger?.LogInformation("Workflow cancelled - user did not select required elements");
                             return;
                         }
+
+                        viewModel.StatusText = string.Empty;
 
                         // Navigate to WorkflowPage
                         viewModel.ContentFrame.Navigate(typeof(StoryCADLib.Collaborator.Views.WorkflowPage));
@@ -755,6 +761,26 @@ public class Collaborator : ICollaborator
     }
 
     /// <summary>
+    /// One-line shell status from gather messages (skip section headers). #123
+    /// </summary>
+    private static string FormatGatherStatusForShell(List<string> statusMessages)
+    {
+        if (statusMessages == null || statusMessages.Count == 0)
+            return "Selection cancelled.";
+
+        // Prefer the last non-header line (e.g. "Cancelled: Protagonist is required.")
+        for (var i = statusMessages.Count - 1; i >= 0; i--)
+        {
+            var m = statusMessages[i];
+            if (string.IsNullOrWhiteSpace(m) || m.StartsWith("---", StringComparison.Ordinal))
+                continue;
+            return m;
+        }
+
+        return "Selection cancelled.";
+    }
+
+    /// <summary>
     /// Gathers input elements for a workflow. Uses ElementPicker dialogs for required inputs,
     /// and for optional inputs follows Guid references with picker fallback if not set.
     /// Collects status messages for display in chat interface.
@@ -836,7 +862,8 @@ public class Collaborator : ICollaborator
                 if (isRequired)
                 {
                     gatheredElements[requirement.ElementLabel] = currentElement;
-                    statusMessages.Add($"Found {requirement.ElementLabel}: {currentElement.Name}");
+                    statusMessages.Add(
+                        $"Found {requirement.ElementLabel}: {currentElement.Name} (from {requirement.ReferencedElementLabel})");
                     _logger?.LogDebug("Resolved {Label} via {Ref} to '{Name}'",
                         requirement.ElementLabel, requirement.ReferencedElementLabel, currentElement.Name);
                     return currentElement;
@@ -848,7 +875,10 @@ public class Collaborator : ICollaborator
             }
             else
             {
-                // Reference was empty/missing - fall through to picker
+                // Reference empty/missing — user-visible (#123); then picker for required
+                // (or optional) so we never run with a silent empty character.
+                statusMessages.Add(
+                    $"{requirement.ReferencedElementLabel} is not set — select {requirement.ElementLabel}.");
                 _logger?.LogDebug("Reference {Ref} empty, will prompt for {Label}",
                     requirement.ReferencedElementLabel, requirement.ElementLabel);
             }

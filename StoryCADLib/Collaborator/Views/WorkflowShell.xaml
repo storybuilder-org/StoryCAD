@@ -35,8 +35,19 @@
             <Frame x:Name="StepFrame" Navigated="StepFrame_OnNavigated" Margin="5,0,5,5" />
         </NavigationView>
 
-        <!-- LLM prompting buttons -->
-        <CommandBar Grid.Row="1" HorizontalAlignment="Left" OverflowButtonVisibility="Collapsed">
+        <!-- Shell actions + status (status survives empty content frame / gather cancel) -->
+        <CommandBar Grid.Row="1" HorizontalAlignment="Stretch" OverflowButtonVisibility="Collapsed">
+            <CommandBar.Content>
+                <!-- InfoBar: approved #1420 suffix (Unit 7). Content TextBlocks must not carry AutomationId. -->
+                <InfoBar IsOpen="{x:Bind ShellViewModel.HasStatus, Mode=OneWay}"
+                         Severity="Warning"
+                         IsClosable="False"
+                         Message="{x:Bind ShellViewModel.StatusText, Mode=OneWay}"
+                         MaxWidth="480"
+                         Margin="8,0,8,0"
+                         VerticalAlignment="Center"
+                         AutomationProperties.AutomationId="WorkflowShellStatusInfoBar" />
+            </CommandBar.Content>
             <CommandBar.PrimaryCommands>
                 <!-- Prefixed: Shell.xaml already claims HelpButton. Label present: name announces
                      natively, id only (convention Name/LabeledBy rule). -->
