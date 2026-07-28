@@ -859,6 +859,11 @@ public class Collaborator : ICollaborator
         var selectedGuid = await pickerVM.ShowPicker(_storyModel!, xamlRoot,
             requirement.ElementType, requirement.ElementLabel, currentGuid, _storyApi);
 
+        // WinUI: sequential ContentDialogs can swallow the next ShowAsync if the previous
+        // dialog has not fully torn down. Brief yield so Problem → Protagonist → Antagonist
+        // each actually appear.
+        await Task.Delay(100);
+
         if (string.IsNullOrEmpty(selectedGuid))
         {
             // User cancelled

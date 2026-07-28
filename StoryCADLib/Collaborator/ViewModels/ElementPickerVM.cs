@@ -6,77 +6,42 @@ using StoryCADLib.Services.Collaborator.Contracts;
 namespace StoryCADLib.Collaborator.ViewModels;
 
 /// <summary>
-///     ViewModel for the Element Picker
+/// ViewModel for the Collaborator Element Picker dialog.
 /// </summary>
 [Microsoft.UI.Xaml.Data.Bindable]
 public class ElementPickerVM
 {
-    /// <summary>
-    ///     Instance of element picker
-    /// </summary>
     private ContentDialog dialog;
 
-    /// <summary>
-    ///     Currently selected item
-    /// </summary>
     public StoryModel StoryModel { get; set; }
-
-    /// <summary>
-    ///     Currently selected item
-    /// </summary>
     public object SelectedType { get; set; }
-
-    /// <summary>
-    ///     Currently selected item
-    /// </summary>
     public object SelectedElement { get; set; }
-
-    /// <summary>
-    ///     Text for new node textbox.
-    /// </summary>
     public string NewNodeName { get; set; }
-
-    /// <summary>
-    ///     Type the picker forces the user to pick
-    /// </summary>
     public StoryItemType? ForcedType { get; set; }
-
-    /// <summary>
-    ///     Descriptive label for what we're picking (e.g., "Protagonist", "Story Problem")
-    /// </summary>
     public string PickerLabel { get; set; }
-
-    /// <summary>
-    ///     GUID of the currently selected element (for pre-selection when changing)
-    /// </summary>
     public Guid? CurrentSelection { get; set; }
 
     /// <summary>
-    ///     API used to create new elements from the picker. Set by <see cref="ShowPicker"/>.
+    /// API used to create new elements. Set by <see cref="ShowPicker"/>.
     /// </summary>
     public IStoryCADAPI StoryApi { get; set; }
 
     /// <summary>
-    ///     Invoked after a successful create so the page can rebuild the list
-    ///     (ItemsSource is a snapshot via ToList, not a live binding).
+    /// Page rebuilds the list after create (ItemsSource is a ToList snapshot).
     /// </summary>
     public Action AfterCreate { get; set; }
 
     /// <summary>
-    ///     Spawns an instance of the picker.
+    /// Shows the picker. Returns selected element GUID, or null if cancelled / nothing selected.
     /// </summary>
-    /// <param name="Model">StoryModel to show elements from</param>
-    /// <param name="XAMLRoot">XamlRoot for the dialog</param>
-    /// <param name="Type">Only allow elements of this type to be picked</param>
-    /// <param name="label">Descriptive label for what we're picking (e.g., "Protagonist")</param>
-    /// <param name="currentSelection">GUID of currently selected element for pre-selection</param>
-    /// <param name="storyApi">API used when the user creates a new element</param>
-    /// <returns>The GUID of element the user picked, or null if cancelled / nothing selected</returns>
-    public async Task<string> ShowPicker(StoryModel Model,
-        XamlRoot XAMLRoot, StoryItemType? Type = null, string label = null, Guid? currentSelection = null,
+    public async Task<string> ShowPicker(
+        StoryModel Model,
+        XamlRoot XAMLRoot,
+        StoryItemType? Type = null,
+        string label = null,
+        Guid? currentSelection = null,
         IStoryCADAPI storyApi = null)
     {
-        //Reset VM
         SelectedType = null;
         SelectedElement = null;
         NewNodeName = "";
@@ -86,37 +51,41 @@ public class ElementPickerVM
         CurrentSelection = currentSelection;
         StoryApi = storyApi;
 
-        //Spawn new picker, passing this VM so Page uses the same instance
         var ui = new Views.ElementPicker(this);
 
-        // Build dialog title - "Change" if there's a current selection, "Select" otherwise
         var hasCurrentSelection = currentSelection.HasValue && currentSelection.Value != Guid.Empty;
         var actionVerb = hasCurrentSelection ? "Change" : "Select";
         var title = !string.IsNullOrEmpty(label)
             ? $"{actionVerb} {label}"
-            : $"{actionVerb} {Type.ToString()} element";
+            : $"{actionVerb} {Type} element";
 
-        //create and show dialog
         dialog = new ContentDialog
         {
             Title = title,
             PrimaryButtonText = "Select",
             SecondaryButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
             Content = ui,
-            XamlRoot = XAMLRoot
+            XamlRoot = XAMLRoot,
+            // Keep dialog wide enough for list + Create; avoid a tiny “abbreviated” shell.
+            MinWidth = 400
         };
 
-        //interpret result — cancel or empty selection both return null (no crash)
-        if (await dialog.ShowAsync() != ContentDialogResult.Secondary)
-        {
-            return ResolveSelectedGuid();
-        }
+        // Pre-select when changing an existing reference
+        if (hasCurrentSelection)
+            CurrentSelection = currentSelection;
 
-        return null;
+        UpdatePrimaryEnabled();
+
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Secondary)
+            return null;
+
+        return ResolveSelectedGuid();
     }
 
     /// <summary>
-    ///     GUID of the selected element, or null when nothing is selected.
+    /// GUID of the selected element, or null when nothing is selected.
     /// </summary>
     public string ResolveSelectedGuid()
     {
@@ -124,7 +93,22 @@ public class ElementPickerVM
     }
 
     /// <summary>
-    ///     Creates a new node of the type the user selected
+    /// Called by the page when list selection changes so Primary can enable/disable.
+    /// </summary>
+    public void NotifySelectionChanged()
+    {
+        UpdatePrimaryEnabled();
+    }
+
+    private void UpdatePrimaryEnabled()
+    {
+        if (dialog != null)
+            dialog.IsPrimaryButtonEnabled = SelectedElement is StoryElement;
+    }
+
+    /// <summary>
+    /// Creates a new element of the forced/selected type, selects it in the list,
+    /// and leaves the dialog open for the user to confirm with Select.
     /// </summary>
     public void CreateNode()
     {
@@ -147,11 +131,10 @@ public class ElementPickerVM
             .FirstOrDefault(e => e.ElementType == StoryItemType.StoryOverview);
         if (overview == null) return;
 
-        var name = string.IsNullOrWhiteSpace(NewNodeName) ? $"New {type}" : NewNodeName;
+        var name = string.IsNullOrWhiteSpace(NewNodeName) ? $"New {type}" : NewNodeName.Trim();
         var addResult = StoryApi.AddElement(type, overview.Uuid.ToString(), name);
         if (!addResult.IsSuccess) return;
 
-        // Prefer the live model instance so list refresh and selection match the tree.
         StoryElement created = null;
         if (StoryModel.StoryElements.StoryElementGuids.TryGetValue(addResult.Payload, out var fromModel))
             created = fromModel;
@@ -166,7 +149,8 @@ public class ElementPickerVM
 
         SelectedElement = created;
         NewNodeName = "";
+        // Refresh list + selection; do NOT close the dialog — user confirms with Select.
         AfterCreate?.Invoke();
-        dialog?.Hide();
+        UpdatePrimaryEnabled();
     }
 }
