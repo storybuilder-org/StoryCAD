@@ -119,6 +119,9 @@ namespace StoryCollaborator.Workflows
                                 CreateIfMissing = false
                             }
                         },
+                        // Gather order: Problem, then cast. ReferencedElementLabel writes structural
+                        // GUID links at pick/create time (Collaborator #118): Overview.StoryProblem,
+                        // Problem.Protagonist, Problem.Antagonist — same path as GMC's references.
                         OptionalInputs = new List<ElementRequirement>
                         {
                             new ElementRequirement
@@ -126,21 +129,24 @@ namespace StoryCollaborator.Workflows
                                 ElementType = StoryItemType.Problem,
                                 ElementLabel = "Problem",
                                 RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = true
+                                CreateIfMissing = true,
+                                ReferencedElementLabel = "Overview.StoryProblem"
                             },
                             new ElementRequirement
                             {
                                 ElementType = StoryItemType.Character,
                                 ElementLabel = "Protagonist",
                                 RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = true
+                                CreateIfMissing = true,
+                                ReferencedElementLabel = "Problem.Protagonist"
                             },
                             new ElementRequirement
                             {
                                 ElementType = StoryItemType.Character,
                                 ElementLabel = "Antagonist",
                                 RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = true
+                                CreateIfMissing = true,
+                                ReferencedElementLabel = "Problem.Antagonist"
                             }
                         },
                         Outputs = new List<ElementOutput>
@@ -166,7 +172,11 @@ namespace StoryCollaborator.Workflows
                                     new PropertySpec("AntagGoal"),
                                     new PropertySpec("AntagMotive"),
                                     new PropertySpec("AntagConflict"),
-                                    new PropertySpec("Premise")
+                                    new PropertySpec("Premise"),
+                                    // Resolution tab (#118 option A)
+                                    new PropertySpec("Outcome"),
+                                    new PropertySpec("Method"),
+                                    new PropertySpec("Theme")
                                 },
         
                             },
