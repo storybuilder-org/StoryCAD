@@ -104,6 +104,19 @@ public class WorkflowShellViewModelTests
     }
 
     [TestMethod]
+    public void HasStatus_WhenStatusTextEmpty_IsFalse()
+    {
+        Assert.IsFalse(_viewModel.HasStatus);
+    }
+
+    [TestMethod]
+    public void HasStatus_WhenStatusTextSet_IsTrue()
+    {
+        _viewModel.StatusText = "Cancelled: Protagonist is required.";
+        Assert.IsTrue(_viewModel.HasStatus);
+    }
+
+    [TestMethod]
     public void OnWorkflowSelected_Initially_IsNull()
     {
         // Assert
