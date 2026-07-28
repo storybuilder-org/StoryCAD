@@ -532,6 +532,8 @@ public class ElementPickerVMTests
         _viewModel.ForcedType = StoryItemType.Problem;
         _viewModel.NewNodeName = "Main Problem";
         _viewModel.StoryApi = api;
+        var afterCreateCalls = 0;
+        _viewModel.AfterCreate = () => afterCreateCalls++;
 
         _viewModel.CreateNode();
 
@@ -542,6 +544,8 @@ public class ElementPickerVMTests
         Assert.AreEqual(problemCountBefore + 1,
             model.StoryElements.Count(e => e.ElementType == StoryItemType.Problem));
         Assert.AreEqual(selected.Uuid.ToString(), _viewModel.ResolveSelectedGuid());
+        // Page uses this hook to rebuild the list (ItemsSource is a snapshot, not live binding).
+        Assert.AreEqual(1, afterCreateCalls);
     }
 
     [TestMethod]

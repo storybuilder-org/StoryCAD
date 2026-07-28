@@ -18,6 +18,7 @@ public sealed partial class ElementPicker : Page
     {
         InitializeComponent();
         PickerVM = viewModel;
+        PickerVM.AfterCreate = OnAfterCreate;
 
         if (PickerVM.ForcedType != null)
         {
@@ -28,30 +29,66 @@ public sealed partial class ElementPicker : Page
     }
 
     /// <summary>
+    ///     After Create: close the flyout, rebuild the list (was a dead ToList snapshot),
+    ///     select the new element. Dialog hide is handled by the VM.
+    /// </summary>
+    private void OnAfterCreate()
+    {
+        NewButton.Flyout?.Hide();
+        RefreshElementList(preserveSelection: true);
+    }
+
+    /// <summary>
     ///     This just handles the UI when the type Combobox is changed
     /// </summary>
     public void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        PickerVM.SelectedElement = null;
+        RefreshElementList(preserveSelection: false);
+
+        // Pre-select current element if one is specified (Change flow)
+        if (ElementBox.ItemsSource is System.Collections.IEnumerable items
+            && PickerVM.CurrentSelection.HasValue
+            && PickerVM.CurrentSelection.Value != Guid.Empty)
+        {
+            var currentElement = items.Cast<object>().FirstOrDefault(e =>
+                e is StoryElement se && se.Uuid == PickerVM.CurrentSelection.Value);
+            if (currentElement != null)
+            {
+                ElementBox.SelectedItem = currentElement;
+                PickerVM.SelectedElement = currentElement;
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Rebuild ElementBox from the live model collections.
+    ///     Count &lt;= 1 means only the "(none)" placeholder — treat as empty.
+    /// </summary>
+    private void RefreshElementList(bool preserveSelection)
+    {
+        var preserve = preserveSelection ? PickerVM.SelectedElement as StoryElement : null;
+
         StoryItemType type;
         if (PickerVM.ForcedType == null)
         {
-            //Get elements
-            var Type = PickerVM.SelectedType as ComboBoxItem;
-            type = Enum.Parse<StoryItemType>(Type.Content.ToString()!,
-                true);
+            var typeItem = PickerVM.SelectedType as ComboBoxItem;
+            if (typeItem == null)
+            {
+                ElementBox.ItemsSource = null;
+                ElementBox.IsEnabled = false;
+                return;
+            }
+
+            type = Enum.Parse<StoryItemType>(typeItem.Content.ToString()!, true);
         }
         else
         {
             type = (StoryItemType)PickerVM.ForcedType;
         }
 
-
-        // Reset selection; Create stays enabled for empty and non-empty lists.
-        PickerVM.SelectedElement = null;
-        ElementBox.ItemsSource = null;
         NewButton.IsEnabled = true;
 
-        // Use pre-filtered collections from StoryElementCollection for efficiency
         var elements = type switch
         {
             StoryItemType.Problem => PickerVM.StoryModel.StoryElements.Problems,
@@ -61,29 +98,25 @@ public sealed partial class ElementPicker : Page
             _ => null
         };
 
-        // Note: filtered collections include a "(none)" placeholder at index 0
-        // Real elements start at index 1, so check for Count > 1
+        // Filtered collections include a "(none)" placeholder at index 0
         if (elements == null || elements.Count <= 1)
         {
+            ElementBox.ItemsSource = null;
             ElementBox.IsEnabled = false;
+            return;
         }
-        else
-        {
-            //Update element box with elements (skip the "(none)" placeholder)
-            ElementBox.IsEnabled = true;
-            var elementList = elements.Skip(1).ToList();
-            ElementBox.ItemsSource = elementList;
 
-            // Pre-select current element if one is specified
-            if (PickerVM.CurrentSelection.HasValue && PickerVM.CurrentSelection.Value != Guid.Empty)
+        ElementBox.IsEnabled = true;
+        var elementList = elements.Skip(1).ToList();
+        ElementBox.ItemsSource = elementList;
+
+        if (preserve != null)
+        {
+            var match = elementList.FirstOrDefault(e => e.Uuid == preserve.Uuid);
+            if (match != null)
             {
-                var currentElement = elementList.FirstOrDefault(e =>
-                    e is StoryElement se && se.Uuid == PickerVM.CurrentSelection.Value);
-                if (currentElement != null)
-                {
-                    ElementBox.SelectedItem = currentElement;
-                    PickerVM.SelectedElement = currentElement;
-                }
+                ElementBox.SelectedItem = match;
+                PickerVM.SelectedElement = match;
             }
         }
     }

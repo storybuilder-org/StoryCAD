@@ -57,6 +57,12 @@ public class ElementPickerVM
     public IStoryCADAPI StoryApi { get; set; }
 
     /// <summary>
+    ///     Invoked after a successful create so the page can rebuild the list
+    ///     (ItemsSource is a snapshot via ToList, not a live binding).
+    /// </summary>
+    public Action AfterCreate { get; set; }
+
+    /// <summary>
     ///     Spawns an instance of the picker.
     /// </summary>
     /// <param name="Model">StoryModel to show elements from</param>
@@ -145,11 +151,22 @@ public class ElementPickerVM
         var addResult = StoryApi.AddElement(type, overview.Uuid.ToString(), name);
         if (!addResult.IsSuccess) return;
 
-        var lookupResult = StoryApi.GetStoryElement(addResult.Payload);
-        if (lookupResult?.IsSuccess == true && lookupResult.Payload != null)
+        // Prefer the live model instance so list refresh and selection match the tree.
+        StoryElement created = null;
+        if (StoryModel.StoryElements.StoryElementGuids.TryGetValue(addResult.Payload, out var fromModel))
+            created = fromModel;
+        else
         {
-            SelectedElement = lookupResult.Payload;
-            dialog?.Hide();
+            var lookupResult = StoryApi.GetStoryElement(addResult.Payload);
+            if (lookupResult?.IsSuccess == true)
+                created = lookupResult.Payload;
         }
+
+        if (created == null) return;
+
+        SelectedElement = created;
+        NewNodeName = "";
+        AfterCreate?.Invoke();
+        dialog?.Hide();
     }
 }
