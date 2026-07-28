@@ -68,6 +68,17 @@ public partial class WorkflowShellViewModel : ObservableRecipient
 
     public string Title { get; set; } = "Story Collaborator";
 
+    /// <summary>
+    /// Shell-level status line (CommandBar.Content). Visible when the content
+    /// frame is empty — e.g. after gather cancel when chat is not available (#123).
+    /// </summary>
+    private string _statusText = string.Empty;
+    public string StatusText
+    {
+        get => _statusText;
+        set => SetProperty(ref _statusText, value ?? string.Empty);
+    }
+
     #endregion
 
     #region Navigation Methods

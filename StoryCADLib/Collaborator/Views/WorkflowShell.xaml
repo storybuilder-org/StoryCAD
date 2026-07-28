@@ -35,8 +35,19 @@
             <Frame x:Name="StepFrame" Navigated="StepFrame_OnNavigated" Margin="5,0,5,5" />
         </NavigationView>
 
-        <!-- LLM prompting buttons -->
-        <CommandBar Grid.Row="1" HorizontalAlignment="Left" OverflowButtonVisibility="Collapsed">
+        <!-- Shell actions + status (status survives empty content frame / gather cancel) -->
+        <CommandBar Grid.Row="1" HorizontalAlignment="Stretch" OverflowButtonVisibility="Collapsed">
+            <CommandBar.Content>
+                <TextBlock Text="{x:Bind ShellViewModel.StatusText, Mode=OneWay}"
+                           VerticalAlignment="Center"
+                           TextWrapping="NoWrap"
+                           TextTrimming="CharacterEllipsis"
+                           MaxWidth="480"
+                           Margin="12,0,8,0"
+                           ToolTipService.ToolTip="{x:Bind ShellViewModel.StatusText, Mode=OneWay}"
+                           AutomationProperties.AutomationId="WorkflowShellStatusText"
+                           AutomationProperties.Name="Status" />
+            </CommandBar.Content>
             <CommandBar.PrimaryCommands>
                 <!-- Prefixed: Shell.xaml already claims HelpButton. Label present: name announces
                      natively, id only (convention Name/LabeledBy rule). -->
