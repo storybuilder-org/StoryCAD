@@ -304,7 +304,9 @@ namespace StoryCollaborator
         {
             if (!gatheredElements.TryGetValue("InnerProblem", out var inner))
             {
-                result.StatusMessages.Add("InnerOuter structural enrich skipped: InnerProblem not gathered");
+                const string skip = "InnerOuter structural enrich skipped: InnerProblem not gathered";
+                result.StatusMessages.Add(skip);
+                _logger?.LogInformation("{Message}", skip);
                 return;
             }
 
@@ -314,15 +316,21 @@ namespace StoryCollaborator
 
             if (!gatheredElements.TryGetValue("Protagonist", out var protagonist))
             {
-                result.StatusMessages.Add("InnerOuter structural enrich: Protagonist not gathered; links not set");
+                var partial =
+                    $"InnerOuter structural enrich: ConflictType proposed={personVsSelf}; Protagonist not gathered; links not set";
+                result.StatusMessages.Add(partial);
+                _logger?.LogInformation("{Message}", partial);
                 return;
             }
 
             var protGuid = protagonist.Uuid.ToString();
             AddOrReplaceScalarUpdate(result, "InnerProblem", inner.Uuid, "Protagonist", protGuid);
             AddOrReplaceScalarUpdate(result, "InnerProblem", inner.Uuid, "Antagonist", protGuid);
-            result.StatusMessages.Add(
-                $"InnerOuter structural enrich: ConflictType={personVsSelf}; Protagonist=Antagonist={protGuid}");
+            var enrichMsg =
+                $"InnerOuter structural enrich: ConflictType proposed={personVsSelf}; Protagonist=Antagonist={protGuid}";
+            result.StatusMessages.Add(enrichMsg);
+            // Preferences log (not chat): durable record for #116 craft/overwrite diagnosis.
+            _logger?.LogInformation("{Message}", enrichMsg);
         }
 
         /// <summary>
@@ -341,6 +349,14 @@ namespace StoryCollaborator
 
             var kept = new List<PendingUpdate>();
             var display = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            var noOpCount = 0;
+            var protectCount = 0;
+            var fillCount = 0;
+            var refreshCount = 0;
+
+            _logger?.LogInformation(
+                "ClassifyScalarUpdates start: workflow={Workflow} pending={Count} sessionTouched={Touched}",
+                workflowId, result.PendingUpdates.Count, sessionTouched.Count);
 
             foreach (var update in result.PendingUpdates)
             {
@@ -348,6 +364,9 @@ namespace StoryCollaborator
                 {
                     kept.Add(update);
                     display[update.Key] = FormatDisplayValue(update);
+                    _logger?.LogInformation(
+                        "Classify {Key} kind=Unclassified (non-scalar WriteVia={WriteVia})",
+                        update.Key, update.Spec.WriteVia);
                     continue;
                 }
 
@@ -365,10 +384,26 @@ namespace StoryCollaborator
                 else
                     kind = UpdateKind.Protect;
 
+                // Preferences log: kind + values so NoOp/Protect is diagnosable without chat.
+                _logger?.LogInformation(
+                    "Classify {Key} kind={Kind} current=\"{Current}\" proposed=\"{Proposed}\"",
+                    update.Key,
+                    kind,
+                    TruncateForLog(current),
+                    TruncateForLog(proposed));
+
                 if (kind == UpdateKind.NoOp)
                 {
+                    noOpCount++;
                     result.StatusMessages.Add($"No-op (unchanged): {update.Key}");
                     continue;
+                }
+
+                switch (kind)
+                {
+                    case UpdateKind.Fill: fillCount++; break;
+                    case UpdateKind.Refresh: refreshCount++; break;
+                    case UpdateKind.Protect: protectCount++; break;
                 }
 
                 string? craft = null;
@@ -392,6 +427,19 @@ namespace StoryCollaborator
             result.UpdatedProperties.Clear();
             foreach (var kvp in display)
                 result.UpdatedProperties[kvp.Key] = kvp.Value;
+
+            _logger?.LogInformation(
+                "ClassifyScalarUpdates done: kept={Kept} fill={Fill} refresh={Refresh} protect={Protect} noop={NoOp}",
+                kept.Count, fillCount, refreshCount, protectCount, noOpCount);
+        }
+
+        /// <summary>Shorten long prose for the Preferences log; keep list values intact when short.</summary>
+        private static string TruncateForLog(string? text, int max = 120)
+        {
+            if (string.IsNullOrEmpty(text))
+                return "";
+            var t = text.Replace('\r', ' ').Replace('\n', ' ');
+            return t.Length <= max ? t : t.Substring(0, max) + "...";
         }
 
         /// <summary>
