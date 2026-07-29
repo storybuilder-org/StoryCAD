@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoryCADLib.Collaborator.Models;
@@ -19,7 +21,7 @@ public partial class WorkflowViewModel : ObservableRecipient
     public WorkflowViewModel()
     {
         ConversationList = new ObservableCollection<ChatMessage>();
-        PendingUpdates = new Dictionary<string, object>();
+        PendingUpdateItems = new ObservableCollection<PendingUpdateItem>();
 
         // Existing commands
         AcceptCommand = new RelayCommand(SaveOutputs);
@@ -95,28 +97,21 @@ public partial class WorkflowViewModel : ObservableRecipient
     #region Pending Updates Properties
 
     /// <summary>
-    /// Property updates extracted from workflow but not yet applied.
-    /// Key format: "ElementLabel.PropertyName", Value: new value
+    /// Classified property updates for the panel (issue #116).
     /// </summary>
-    public Dictionary<string, object> PendingUpdates { get; set; }
+    public ObservableCollection<PendingUpdateItem> PendingUpdateItems { get; set; }
 
-    /// <summary>
-    /// True if there are updates to display (pending or applied).
-    /// </summary>
-    public bool HasUpdates => PendingUpdates?.Count > 0;
+    /// <summary>True if there are updates to display (pending or applied).</summary>
+    public bool HasUpdates => PendingUpdateItems?.Count > 0;
 
-    /// <summary>
-    /// True if updates exist and haven't been applied yet.
-    /// </summary>
+    /// <summary>True if updates exist and haven't been fully applied yet.</summary>
     public bool HasPendingUpdates => HasUpdates && !UpdatesApplied;
 
     public Microsoft.UI.Xaml.Visibility ReviewModeVisibility =>
         IsInReviewMode ? Microsoft.UI.Xaml.Visibility.Visible : Microsoft.UI.Xaml.Visibility.Collapsed;
 
     private bool _isInReviewMode;
-    /// <summary>
-    /// True when user is reviewing updates one at a time.
-    /// </summary>
+    /// <summary>True when user is reviewing updates one at a time.</summary>
     public bool IsInReviewMode
     {
         get => _isInReviewMode;
@@ -130,64 +125,57 @@ public partial class WorkflowViewModel : ObservableRecipient
     }
 
     private int _currentReviewIndex;
-    /// <summary>
-    /// Index of the property currently being reviewed (0-based).
-    /// </summary>
+    /// <summary>Index of the property currently being reviewed (0-based).</summary>
     public int CurrentReviewIndex
     {
         get => _currentReviewIndex;
         set => SetProperty(ref _currentReviewIndex, value);
     }
 
-    /// <summary>
-    /// Display key of the property currently being reviewed.
-    /// </summary>
-    public string CurrentReviewKey => IsInReviewMode && PendingUpdates?.Count > CurrentReviewIndex
-        ? PendingUpdates.Keys.ElementAt(CurrentReviewIndex)
-        : string.Empty;
+    public string CurrentReviewKey =>
+        IsInReviewMode && PendingUpdateItems?.Count > CurrentReviewIndex
+            ? PendingUpdateItems[CurrentReviewIndex].Key
+            : string.Empty;
 
-    /// <summary>
-    /// Value of the property currently being reviewed.
-    /// </summary>
-    public string CurrentReviewValue => IsInReviewMode && PendingUpdates?.Count > CurrentReviewIndex
-        ? PendingUpdates.Values.ElementAt(CurrentReviewIndex)?.ToString() ?? "(empty)"
-        : string.Empty;
+    /// <summary>Proposed value for the row under review.</summary>
+    public string CurrentReviewValue =>
+        IsInReviewMode && PendingUpdateItems?.Count > CurrentReviewIndex
+            ? PendingUpdateItems[CurrentReviewIndex].ProposedDisplay
+            : string.Empty;
 
-    /// <summary>
-    /// Progress text for review mode (e.g., "2 of 5").
-    /// </summary>
+    /// <summary>Current outline value for the row under review.</summary>
+    public string CurrentReviewExisting =>
+        IsInReviewMode && PendingUpdateItems?.Count > CurrentReviewIndex
+            ? (string.IsNullOrEmpty(PendingUpdateItems[CurrentReviewIndex].CurrentDisplay)
+                ? "(empty)"
+                : PendingUpdateItems[CurrentReviewIndex].CurrentDisplay)
+            : string.Empty;
+
+    public string CurrentReviewCraft =>
+        IsInReviewMode && PendingUpdateItems?.Count > CurrentReviewIndex
+            ? PendingUpdateItems[CurrentReviewIndex].CraftExplanation ?? string.Empty
+            : string.Empty;
+
+    public bool CurrentReviewHasCraft => !string.IsNullOrWhiteSpace(CurrentReviewCraft);
+
+    public Microsoft.UI.Xaml.Visibility CurrentReviewCraftVisibility =>
+        CurrentReviewHasCraft ? Microsoft.UI.Xaml.Visibility.Visible : Microsoft.UI.Xaml.Visibility.Collapsed;
+
     public string ReviewProgress => IsInReviewMode
-        ? $"{CurrentReviewIndex + 1} of {PendingUpdates?.Count ?? 0}"
+        ? $"{CurrentReviewIndex + 1} of {PendingUpdateItems?.Count ?? 0}"
         : string.Empty;
 
-    /// <summary>
-    /// Callback invoked when user clicks Accept All.
-    /// Collaborator sets this to apply all pending updates.
-    /// </summary>
     public Action OnAcceptAll { get; set; }
-
-    /// <summary>
-    /// Callback invoked when user clicks Try Again.
-    /// Collaborator sets this to re-execute the workflow.
-    /// </summary>
     public Func<Task> OnTryAgain { get; set; }
-
-    /// <summary>
-    /// Callback invoked when user accepts a single property in review mode.
-    /// Parameter is the property key (e.g., "Overview.Premise").
-    /// </summary>
     public Action<string> OnAcceptProperty { get; set; }
-
-    /// <summary>
-    /// Callback invoked when user skips a single property in review mode.
-    /// Parameter is the property key (e.g., "Overview.Premise").
-    /// </summary>
     public Action<string> OnSkipProperty { get; set; }
 
-    private bool _updatesApplied;
     /// <summary>
-    /// True when updates have been applied (disables action buttons via CanExecute).
+    /// Accept remaining Fill/Refresh only; leave Protect rows (issue #116).
     /// </summary>
+    public Action OnAcceptRemainingFree { get; set; }
+
+    private bool _updatesApplied;
     public bool UpdatesApplied
     {
         get => _updatesApplied;
@@ -289,8 +277,8 @@ public partial class WorkflowViewModel : ObservableRecipient
     {
         if (!HasPendingUpdates) return;
 
+        // Collaborator applies free rows, may leave Protect, and updates this collection.
         OnAcceptAll?.Invoke();
-        ClearPendingUpdates();
     }
 
     private void ExecuteReviewEach()
@@ -299,9 +287,7 @@ public partial class WorkflowViewModel : ObservableRecipient
 
         CurrentReviewIndex = 0;
         IsInReviewMode = true;
-        OnPropertyChanged(nameof(CurrentReviewKey));
-        OnPropertyChanged(nameof(CurrentReviewValue));
-        OnPropertyChanged(nameof(ReviewProgress));
+        NotifyReviewProperties();
     }
 
     private async Task ExecuteTryAgain()
@@ -310,9 +296,7 @@ public partial class WorkflowViewModel : ObservableRecipient
 
         ClearPendingUpdates();
         if (OnTryAgain != null)
-        {
             await OnTryAgain();
-        }
     }
 
     private void ExecuteAcceptCurrent()
@@ -329,9 +313,7 @@ public partial class WorkflowViewModel : ObservableRecipient
         if (!IsInReviewMode || !HasPendingUpdates) return;
 
         var key = CurrentReviewKey;
-        // Notify Collaborator to remove from its pending updates
         OnSkipProperty?.Invoke(key);
-        // Note: Collaborator calls SetPendingUpdates which updates our PendingUpdates
         AdvanceReview();
     }
 
@@ -339,70 +321,102 @@ public partial class WorkflowViewModel : ObservableRecipient
     {
         if (!IsInReviewMode) return;
 
-        // Accept all remaining updates
-        var remainingKeys = PendingUpdates.Keys.Skip(CurrentReviewIndex).ToList();
-        foreach (var key in remainingKeys)
+        // #116: only free updates; Protect stays for Accept/Skip.
+        if (OnAcceptRemainingFree != null)
+            OnAcceptRemainingFree.Invoke();
+        else
         {
-            OnAcceptProperty?.Invoke(key);
+            // Fallback: accept free-looking rows only (no Protect label).
+            var keys = PendingUpdateItems
+                .Where(i => !i.IsProtected)
+                .Select(i => i.Key)
+                .ToList();
+            foreach (var key in keys)
+                OnAcceptProperty?.Invoke(key);
         }
 
-        ClearPendingUpdates();
+        if (PendingUpdateItems == null || PendingUpdateItems.Count == 0)
+        {
+            ClearPendingUpdates();
+            return;
+        }
+
+        CurrentReviewIndex = 0;
+        NotifyReviewProperties();
     }
 
     /// <summary>
-    /// After accept/skip, Collaborator removes the current key from PendingUpdates.
-    /// The next remaining item slides into the same index — do not increment, or we skip it.
+    /// After accept/skip, Collaborator removes the current key from the list.
+    /// The next item slides into the same index — do not increment (#115).
     /// </summary>
     private void AdvanceReview()
     {
-        if (PendingUpdates == null || PendingUpdates.Count == 0)
+        if (PendingUpdateItems == null || PendingUpdateItems.Count == 0)
         {
             IsInReviewMode = false;
             ClearPendingUpdates();
             return;
         }
 
-        // If index is past the end (accepted the last remaining item), finish.
-        if (CurrentReviewIndex >= PendingUpdates.Count)
+        if (CurrentReviewIndex >= PendingUpdateItems.Count)
         {
             IsInReviewMode = false;
-            ClearPendingUpdates();
+            if (PendingUpdateItems.Count == 0)
+                ClearPendingUpdates();
             return;
         }
 
-        // Still have an item at CurrentReviewIndex (the next after remove). Refresh UI only.
+        NotifyReviewProperties();
+    }
+
+    private void NotifyReviewProperties()
+    {
         OnPropertyChanged(nameof(CurrentReviewKey));
         OnPropertyChanged(nameof(CurrentReviewValue));
+        OnPropertyChanged(nameof(CurrentReviewExisting));
+        OnPropertyChanged(nameof(CurrentReviewCraft));
+        OnPropertyChanged(nameof(CurrentReviewHasCraft));
+        OnPropertyChanged(nameof(CurrentReviewCraftVisibility));
         OnPropertyChanged(nameof(ReviewProgress));
     }
 
     public void ClearPendingUpdates()
     {
-        PendingUpdates.Clear();
+        PendingUpdateItems.Clear();
         IsInReviewMode = false;
         UpdatesApplied = false;
         CurrentReviewIndex = 0;
-    }
-
-    /// <summary>
-    /// Receives pending updates from Collaborator after workflow execution.
-    /// </summary>
-    public void SetPendingUpdates(Dictionary<string, object> updates)
-    {
-        PendingUpdates = updates;
-        UpdatesApplied = false;
-        OnPropertyChanged(nameof(PendingUpdates));
         OnPropertyChanged(nameof(HasUpdates));
         OnPropertyChanged(nameof(HasPendingUpdates));
     }
 
     /// <summary>
-    /// Called by Collaborator after updates are applied (disables action buttons).
+    /// Receives classified pending updates from Collaborator after workflow execution (#116).
     /// </summary>
+    public void SetPendingUpdates(IReadOnlyList<PendingUpdateItem> items)
+    {
+        PendingUpdateItems.Clear();
+        if (items != null)
+        {
+            foreach (var item in items)
+                PendingUpdateItems.Add(item);
+        }
+
+        UpdatesApplied = false;
+        OnPropertyChanged(nameof(PendingUpdateItems));
+        OnPropertyChanged(nameof(HasUpdates));
+        OnPropertyChanged(nameof(HasPendingUpdates));
+        NotifyReviewProperties();
+    }
+
+    /// <summary>Called by Collaborator after all free updates are applied.</summary>
     public void MarkUpdatesApplied()
     {
         UpdatesApplied = true;
         IsInReviewMode = false;
+        PendingUpdateItems.Clear();
+        OnPropertyChanged(nameof(HasUpdates));
+        OnPropertyChanged(nameof(HasPendingUpdates));
     }
 
     #endregion

@@ -77,24 +77,22 @@
                         <!-- Header -->
                         <TextBlock Text="Property Updates" FontWeight="SemiBold" Margin="0,0,0,8" />
 
-                        <!-- Updates List -->
-                        <ListView ItemsSource="{x:Bind ViewModel.PendingUpdates, Mode=OneWay}"
+                        <!-- Updates List (#116: current vs proposed + protect/craft labels) -->
+                        <ListView ItemsSource="{x:Bind ViewModel.PendingUpdateItems, Mode=OneWay}"
                                   SelectionMode="None"
-                                  MaxHeight="200"
+                                  MaxHeight="220"
                                   AutomationProperties.AutomationId="WorkflowPendingUpdatesList">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <!-- Template root: no AutomationId (TemplateSafety forbids it). Item
-                                         identity binds to the property Key (the update's identity within
-                                         the list), not Value (its content) - convention's templated-Name
-                                         treatment, ImageGalleryControl precedent. Classic {Binding} matches
-                                         what the template already uses (no x:DataType here). -->
+                                    <!-- Template root: no AutomationId (TemplateSafety forbids it). -->
                                     <StackPanel Margin="0,4"
                                                 AutomationProperties.Name="{Binding Key, Mode=OneWay}">
                                         <TextBlock Text="{Binding Key}" FontWeight="SemiBold" FontSize="12" />
-                                        <TextBlock Text="{Binding Value}"
+                                        <TextBlock Text="{Binding SummaryLine}"
+                                                   FontSize="11"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Text="{Binding ProposedDisplay}"
                                                    TextWrapping="Wrap"
-                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                    FontSize="12"
                                                    MaxLines="3" />
                                     </StackPanel>
@@ -125,14 +123,29 @@
                                     Margin="0,8,0,0">
                             <TextBlock Text="Review Property Update" FontWeight="SemiBold" Margin="0,0,0,8" />
 
-                            <!-- Current property being reviewed -->
+                            <!-- Current property being reviewed (#116: yours vs proposed + craft) -->
                             <Border Background="{ThemeResource SystemAccentColorLight2}"
                                     CornerRadius="4" Padding="10" Margin="0,0,0,8">
                                 <StackPanel>
                                     <TextBlock Text="{x:Bind ViewModel.CurrentReviewKey, Mode=OneWay}"
                                                FontWeight="Bold" FontSize="13" />
+                                    <TextBlock Text="Yours"
+                                               FontSize="11"
+                                               Margin="0,8,0,0"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{x:Bind ViewModel.CurrentReviewExisting, Mode=OneWay}"
+                                               TextWrapping="Wrap" Margin="0,2,0,0" />
+                                    <TextBlock Text="Proposed"
+                                               FontSize="11"
+                                               Margin="0,8,0,0"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     <TextBlock Text="{x:Bind ViewModel.CurrentReviewValue, Mode=OneWay}"
-                                               TextWrapping="Wrap" Margin="0,4,0,0" />
+                                               TextWrapping="Wrap" Margin="0,2,0,0" />
+                                    <TextBlock Text="{x:Bind ViewModel.CurrentReviewCraft, Mode=OneWay}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,8,0,0"
+                                               FontSize="12"
+                                               Visibility="{x:Bind ViewModel.CurrentReviewCraftVisibility, Mode=OneWay}" />
                                 </StackPanel>
                             </Border>
 
@@ -147,10 +160,11 @@
                                         Command="{x:Bind ViewModel.SkipCurrentCommand}"
                                         IsEnabled="{x:Bind ViewModel.IsInReviewMode, Mode=OneWay}"
                                         AutomationProperties.AutomationId="WorkflowSkipButton" />
-                                <Button Content="Accept Remaining"
+                                <Button Content="Accept Free Remaining"
                                         Command="{x:Bind ViewModel.AcceptRemainingCommand}"
                                         IsEnabled="{x:Bind ViewModel.IsInReviewMode, Mode=OneWay}"
-                                        AutomationProperties.AutomationId="WorkflowAcceptRemainingButton" />
+                                        AutomationProperties.AutomationId="WorkflowAcceptRemainingButton"
+                                        ToolTipService.ToolTip="Applies empty/session fields only; leaves fields that already have your text" />
                             </StackPanel>
 
                             <!-- Progress indicator -->

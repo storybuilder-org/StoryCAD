@@ -168,6 +168,7 @@ namespace StoryCollaborator
                     result.PendingUpdates.Add(pending);
 
                 // #120: structural fields the model must not invent (list value + GUIDs).
+                // Proposes into pending only; #116 classify decides Fill vs Protect (never silent force).
                 if (workflowModel.Label == "InnerOuterProblems")
                     EnrichInnerOuterStructuralFields(result, gatheredElements);
 
@@ -291,10 +292,11 @@ namespace StoryCollaborator
         }
 
         /// <summary>
-        /// Issue #120: after JSON extract, set Inner Problem structure the model must not invent.
-        /// ConflictType is always Person vs. Self (Lists.json). Protagonist and Antagonist GUIDs
-        /// both equal the gathered Protagonist (self vs self). ProblemType Decision|Discover
-        /// comes from the model via PropertiesToUpdate.
+        /// Issue #120 / #116: after JSON extract, propose Inner Problem structure the model must not invent.
+        /// ConflictType is proposed as Person vs. Self (Lists.json craft default). Protagonist and
+        /// Antagonist GUIDs both equal the gathered Protagonist (self vs self). These land in pending
+        /// only; <see cref="ClassifyScalarUpdates"/> decides Fill vs Protect — Accept never silent-forces
+        /// a user-owned different value. ProblemType Decision|Discover comes from the model.
         /// </summary>
         internal void EnrichInnerOuterStructuralFields(
             WorkflowResult result,
@@ -302,25 +304,196 @@ namespace StoryCollaborator
         {
             if (!gatheredElements.TryGetValue("InnerProblem", out var inner))
             {
-                result.StatusMessages.Add("InnerOuter structural enrich skipped: InnerProblem not gathered");
+                const string skip = "InnerOuter structural enrich skipped: InnerProblem not gathered";
+                result.StatusMessages.Add(skip);
+                _logger?.LogInformation("{Message}", skip);
                 return;
             }
 
-            // Fixed list value — do not trust free model text for ConflictType.
+            // Craft default list value — do not trust free model text for ConflictType.
             const string personVsSelf = "Person vs. Self";
             AddOrReplaceScalarUpdate(result, "InnerProblem", inner.Uuid, "ConflictType", personVsSelf);
 
             if (!gatheredElements.TryGetValue("Protagonist", out var protagonist))
             {
-                result.StatusMessages.Add("InnerOuter structural enrich: Protagonist not gathered; links not set");
+                var partial =
+                    $"InnerOuter structural enrich: ConflictType proposed={personVsSelf}; Protagonist not gathered; links not set";
+                result.StatusMessages.Add(partial);
+                _logger?.LogInformation("{Message}", partial);
                 return;
             }
 
             var protGuid = protagonist.Uuid.ToString();
             AddOrReplaceScalarUpdate(result, "InnerProblem", inner.Uuid, "Protagonist", protGuid);
             AddOrReplaceScalarUpdate(result, "InnerProblem", inner.Uuid, "Antagonist", protGuid);
-            result.StatusMessages.Add(
-                $"InnerOuter structural enrich: ConflictType={personVsSelf}; Protagonist=Antagonist={protGuid}");
+            var enrichMsg =
+                $"InnerOuter structural enrich: ConflictType proposed={personVsSelf}; Protagonist=Antagonist={protGuid}";
+            result.StatusMessages.Add(enrichMsg);
+            // Preferences log (not chat): durable record for #116 craft/overwrite diagnosis.
+            _logger?.LogInformation("{Message}", enrichMsg);
+        }
+
+        /// <summary>
+        /// Issue #116: classify scalar pending updates against live outline values and session-touch set.
+        /// Drops NoOps. Attaches craft explanation on Protect when a <see cref="CraftFieldHints"/> entry exists.
+        /// Non-scalar updates stay <see cref="UpdateKind.Unclassified"/>.
+        /// </summary>
+        /// <param name="sessionTouched">Keys from <see cref="PendingUpdate.SessionTouchKey"/> applied this Collaborator session.</param>
+        internal void ClassifyScalarUpdates(
+            WorkflowResult result,
+            ISet<string>? sessionTouched,
+            string? workflowId = null)
+        {
+            workflowId ??= workflowModel.Label;
+            sessionTouched ??= new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            var kept = new List<PendingUpdate>();
+            var display = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            var noOpCount = 0;
+            var protectCount = 0;
+            var fillCount = 0;
+            var refreshCount = 0;
+
+            _logger?.LogInformation(
+                "ClassifyScalarUpdates start: workflow={Workflow} pending={Count} sessionTouched={Touched}",
+                workflowId, result.PendingUpdates.Count, sessionTouched.Count);
+
+            foreach (var update in result.PendingUpdates)
+            {
+                if (update.Spec.WriteVia != WriteVia.Scalar)
+                {
+                    kept.Add(update);
+                    display[update.Key] = FormatDisplayValue(update);
+                    _logger?.LogInformation(
+                        "Classify {Key} kind=Unclassified (non-scalar WriteVia={WriteVia})",
+                        update.Key, update.Spec.WriteVia);
+                    continue;
+                }
+
+                var currentRaw = ReadCurrentScalarDisplay(update.ElementUuid, update.Spec.Property);
+                var current = NormalizeCompareText(currentRaw);
+                var proposed = NormalizeCompareText(FormatDisplayValue(update));
+
+                UpdateKind kind;
+                if (string.Equals(current, proposed, StringComparison.OrdinalIgnoreCase))
+                    kind = UpdateKind.NoOp;
+                else if (string.IsNullOrEmpty(current))
+                    kind = UpdateKind.Fill;
+                else if (sessionTouched.Contains(update.SessionTouchKey))
+                    kind = UpdateKind.Refresh;
+                else
+                    kind = UpdateKind.Protect;
+
+                // Preferences log: kind + values so NoOp/Protect is diagnosable without chat.
+                _logger?.LogInformation(
+                    "Classify {Key} kind={Kind} current=\"{Current}\" proposed=\"{Proposed}\"",
+                    update.Key,
+                    kind,
+                    TruncateForLog(current),
+                    TruncateForLog(proposed));
+
+                if (kind == UpdateKind.NoOp)
+                {
+                    noOpCount++;
+                    result.StatusMessages.Add($"No-op (unchanged): {update.Key}");
+                    continue;
+                }
+
+                switch (kind)
+                {
+                    case UpdateKind.Fill: fillCount++; break;
+                    case UpdateKind.Refresh: refreshCount++; break;
+                    case UpdateKind.Protect: protectCount++; break;
+                }
+
+                string? craft = null;
+                var hint = CraftFieldHints.Find(workflowId, update.ElementLabel, update.Spec.Property);
+                if (hint != null && kind == UpdateKind.Protect)
+                    craft = hint.Explanation;
+
+                var classified = update with
+                {
+                    Kind = kind,
+                    CurrentDisplay = string.IsNullOrEmpty(currentRaw) ? string.Empty : currentRaw,
+                    CraftExplanation = craft
+                };
+                kept.Add(classified);
+                display[classified.Key] = FormatDisplayValue(classified);
+                result.StatusMessages.Add($"Classified {classified.Key} as {kind}");
+            }
+
+            result.PendingUpdates.Clear();
+            result.PendingUpdates.AddRange(kept);
+            result.UpdatedProperties.Clear();
+            foreach (var kvp in display)
+                result.UpdatedProperties[kvp.Key] = kvp.Value;
+
+            _logger?.LogInformation(
+                "ClassifyScalarUpdates done: kept={Kept} fill={Fill} refresh={Refresh} protect={Protect} noop={NoOp}",
+                kept.Count, fillCount, refreshCount, protectCount, noOpCount);
+        }
+
+        /// <summary>Shorten long prose for the Preferences log; keep list values intact when short.</summary>
+        private static string TruncateForLog(string? text, int max = 120)
+        {
+            if (string.IsNullOrEmpty(text))
+                return "";
+            var t = text.Replace('\r', ' ').Replace('\n', ' ');
+            return t.Length <= max ? t : t.Substring(0, max) + "...";
+        }
+
+        /// <summary>
+        /// True when Accept All may apply this update without an explicit per-field accept.
+        /// </summary>
+        internal static bool AcceptAllMayApply(PendingUpdate update) => update.AcceptAllMayApply;
+
+        private string ReadCurrentScalarDisplay(Guid elementUuid, string propertyName)
+        {
+            var got = _storyApi.GetStoryElement(elementUuid);
+            if (!got.IsSuccess || got.Payload == null)
+                return string.Empty;
+
+            var element = got.Payload;
+            var property = element.GetType().GetProperty(propertyName);
+            if (property == null || !property.CanRead)
+                return string.Empty;
+
+            var value = property.GetValue(element);
+            if (value == null)
+                return string.Empty;
+
+            if (value is Guid g)
+                return g == Guid.Empty ? string.Empty : g.ToString();
+
+            var text = value.ToString() ?? string.Empty;
+            if (text.StartsWith(@"{\rtf", StringComparison.Ordinal))
+                text = new RichTextStripper().StripRichTextFormat(text) ?? string.Empty;
+
+            return text.Trim();
+        }
+
+        private static string NormalizeCompareText(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return string.Empty;
+            return text.Trim();
+        }
+
+        private static string FormatDisplayValue(PendingUpdate update)
+        {
+            if (update.Value == null)
+                return string.Empty;
+
+            return update.Spec.WriteVia switch
+            {
+                WriteVia.Scalar => update.Value.ToString() ?? string.Empty,
+                WriteVia.SimpleList when update.Value is System.Collections.ICollection c => $"{c.Count} items",
+                WriteVia.BeatSheet when update.Value is System.Collections.ICollection c => $"{c.Count} beats",
+                WriteVia.CastMembers when update.Value is System.Collections.ICollection c => $"{c.Count} cast members",
+                WriteVia.Relationships when update.Value is System.Collections.ICollection c => $"{c.Count} relationships",
+                WriteVia.TypedList when update.Value is System.Collections.ICollection c => $"{c.Count} entries",
+                _ => update.Value.ToString() ?? string.Empty
+            };
         }
 
         /// <summary>

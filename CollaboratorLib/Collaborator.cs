@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -43,6 +44,13 @@ public class Collaborator : ICollaborator
     private Window? _hostWindow;
     private bool _disposed;
     private StoryCADLib.Services.Logging.ILogService? _auditLogger;
+
+    /// <summary>
+    /// Issue #116: fields Collaborator successfully wrote this plugin session
+    /// (SessionTouchKey = "{uuid:N}.{Property}"). Not persisted across app restarts.
+    /// </summary>
+    private readonly HashSet<string> _sessionTouchedFields =
+        new(StringComparer.OrdinalIgnoreCase);
 
     // Settings
     private CollaboratorSettings _settings = CollaboratorSettings.Default;
@@ -505,16 +513,23 @@ public class Collaborator : ICollaborator
                 $"Workflow started: {workflow.Title} with {gatheredElements.Count} elements");
             var result = await runner.RunAsync(gatheredElements);
 
+            // #116: classify scalars against live outline + session-touch (after extract/enrich).
+            if (result.Success)
+                runner.ClassifyScalarUpdates(result, _sessionTouchedFields, workflow.Label);
+
             // Hide progress
             viewModel.ProgressVisibility = Microsoft.UI.Xaml.Visibility.Collapsed;
 
             if (result.Success)
             {
-                // Show status messages
+                // Show status messages (omit noisy per-field classify lines from chat)
                 viewModel.ConversationList.Add(ChatMessage.FromCollaborator($"Workflow completed successfully."));
 
                 foreach (var msg in result.StatusMessages)
                 {
+                    if (msg.StartsWith("Classified ", StringComparison.Ordinal)
+                        || msg.StartsWith("No-op ", StringComparison.Ordinal))
+                        continue;
                     viewModel.ConversationList.Add(ChatMessage.FromCollaborator($"  {msg}"));
                 }
 
@@ -529,50 +544,93 @@ public class Collaborator : ICollaborator
                 }
 
                 // If there are property updates, populate the pending updates panel
-                if (result.UpdatedProperties.Count > 0)
+                if (result.PendingUpdates.Count > 0)
                 {
-                    // Populate ViewModel's pending updates panel
-                    viewModel.SetPendingUpdates(result.UpdatedProperties);
+                    PushPendingToViewModel(viewModel, result);
 
                     // Wire up command callbacks using closures (captures local state)
                     viewModel.OnAcceptAll = () =>
                     {
                         try
                         {
-                            var count = runner.ApplyUpdates(result, gatheredElements);
+                            var free = result.PendingUpdates.Where(WorkflowRunner.AcceptAllMayApply).ToList();
+                            var protect = result.PendingUpdates
+                                .Where(u => u.Kind == UpdateKind.Protect)
+                                .ToList();
 
-                            // Build detailed message listing applied updates for chat log
-                            var sb = new System.Text.StringBuilder();
-                            sb.AppendLine($"Applied {count} property updates to your outline:");
-                            sb.AppendLine();
-                            foreach (var kvp in result.UpdatedProperties)
+                            var applySlice = WorkflowResult.Succeeded();
+                            foreach (var u in free)
+                                applySlice.PendingUpdates.Add(u);
+
+                            var count = free.Count == 0
+                                ? 0
+                                : runner.ApplyUpdates(applySlice, gatheredElements);
+
+                            foreach (var u in free)
+                                _sessionTouchedFields.Add(u.SessionTouchKey);
+
+                            // Rebuild remaining pending = Protect only
+                            result.PendingUpdates.Clear();
+                            result.UpdatedProperties.Clear();
+                            foreach (var u in protect)
                             {
-                                var valuePreview = kvp.Value?.ToString() ?? "(empty)";
-                                // Truncate long values for readability
-                                if (valuePreview.Length > 200)
-                                    valuePreview = valuePreview.Substring(0, 200) + "...";
-                                sb.AppendLine($"**{kvp.Key}**: {valuePreview}");
-                                sb.AppendLine();
+                                result.PendingUpdates.Add(u);
+                                result.UpdatedProperties[u.Key] = u.Value ?? string.Empty;
                             }
+
+                            var sb = new System.Text.StringBuilder();
+                            if (count > 0)
+                            {
+                                sb.AppendLine($"Applied {count} update(s) to your outline:");
+                                sb.AppendLine();
+                                foreach (var u in free)
+                                {
+                                    var valuePreview = TruncateForChat(u.Value?.ToString());
+                                    sb.AppendLine($"**{u.Key}**: {valuePreview}");
+                                    sb.AppendLine();
+                                }
+                            }
+                            else
+                            {
+                                sb.AppendLine("No free updates to apply (nothing empty or already written by Collaborator this session).");
+                            }
+
+                            if (protect.Count > 0)
+                            {
+                                sb.AppendLine();
+                                sb.AppendLine(
+                                    $"Left {protect.Count} alone because those fields already have your content. " +
+                                    "Use Review Each to keep or replace them.");
+                                foreach (var u in protect)
+                                {
+                                    sb.AppendLine($"- **{u.Key}** (yours vs proposed)");
+                                    if (!string.IsNullOrWhiteSpace(u.CraftExplanation))
+                                        sb.AppendLine($"  {u.CraftExplanation}");
+                                }
+                            }
+
                             viewModel.ConversationList.Add(ChatMessage.FromCollaborator(sb.ToString().TrimEnd()));
-                            _logger?.LogInformation("AcceptAll: Applied {Count} property updates", count);
+                            _logger?.LogInformation(
+                                "AcceptAll: Applied {Count}, protected {Protected}", count, protect.Count);
                             _auditLogger?.Log(StoryCADLib.Services.Logging.LogLevel.Info,
                                 $"Applied {count} updates from workflow: {workflow.Title}");
 
-                            // Mark updates as applied (keeps panel visible in applied state)
-                            viewModel.MarkUpdatesApplied();
+                            if (protect.Count == 0)
+                            {
+                                viewModel.MarkUpdatesApplied();
+                            }
+                            else
+                            {
+                                PushPendingToViewModel(viewModel, result);
+                            }
 
-                            // Refresh StoryCAD UI to show changes
                             _storyModel?.RefreshCurrentView();
 
-                            // Auto-save to bypass ViewModel flush (Issue #55)
                             _ = Task.Run(async () =>
                             {
                                 var saved = await SaveAsync();
                                 if (saved)
-                                {
                                     _logger?.LogInformation("Auto-save completed after Accept All");
-                                }
                             });
                         }
                         catch (Exception ex)
@@ -588,8 +646,6 @@ public class Collaborator : ICollaborator
                         {
                             viewModel.ClearPendingUpdates();
                             viewModel.ConversationList.Add(ChatMessage.FromCollaborator("Re-running workflow..."));
-
-                            // Re-execute with the same elements
                             await ExecuteWorkflowWithFeedback(viewModel, workflow, gatheredElements);
                         }
                         catch (Exception ex)
@@ -609,50 +665,38 @@ public class Collaborator : ICollaborator
 
                         try
                         {
-                            if (!result.UpdatedProperties.TryGetValue(propertyKey, out var value))
+                            var pending = result.PendingUpdates
+                                .FirstOrDefault(u => string.Equals(u.Key, propertyKey, StringComparison.OrdinalIgnoreCase));
+                            if (pending == null)
                             {
                                 _logger?.LogWarning("Property key not found in pending updates: {Key}", propertyKey);
                                 return;
                             }
 
-                            // Parse key format: "ElementLabel.PropertyName"
-                            var parts = propertyKey.Split('.', 2);
-                            if (parts.Length != 2)
+                            var single = WorkflowResult.Succeeded();
+                            single.PendingUpdates.Add(pending);
+                            var applied = runner.ApplyUpdates(single, gatheredElements);
+
+                            if (applied > 0)
                             {
-                                _logger?.LogWarning("Invalid property key format: {Key}", propertyKey);
-                                return;
-                            }
-
-                            var elementLabel = parts[0];
-                            var propName = parts[1];
-
-                            if (!gatheredElements.TryGetValue(elementLabel, out var element))
-                            {
-                                _logger?.LogWarning("Element not found for property update: {Label}", elementLabel);
-                                return;
-                            }
-
-                            // Apply via API
-                            var updateResult = _storyApi?.UpdateElementProperty(element.Uuid, propName, value);
-
-                            if (updateResult?.IsSuccess == true)
-                            {
+                                _sessionTouchedFields.Add(pending.SessionTouchKey);
                                 viewModel.ConversationList.Add(ChatMessage.FromCollaborator($"Applied {propertyKey}"));
                                 _logger?.LogInformation("AcceptProperty: Applied {Key}", propertyKey);
                                 _auditLogger?.Log(StoryCADLib.Services.Logging.LogLevel.Info,
                                     $"Applied update: {propertyKey}");
 
-                                // Remove from pending updates to prevent duplicate application
+                                result.PendingUpdates.RemoveAll(u =>
+                                    string.Equals(u.Key, propertyKey, StringComparison.OrdinalIgnoreCase));
                                 result.UpdatedProperties.Remove(propertyKey);
-                                viewModel.SetPendingUpdates(result.UpdatedProperties);
+                                PushPendingToViewModel(viewModel, result);
 
-                                // Refresh StoryCAD UI to show changes
                                 _storyModel?.RefreshCurrentView();
                             }
                             else
                             {
-                                viewModel.ConversationList.Add(ChatMessage.Error($"Failed to apply {propertyKey}: {updateResult?.ErrorMessage}"));
-                                _logger?.LogWarning("Failed to apply {Key}: {Error}", propertyKey, updateResult?.ErrorMessage);
+                                viewModel.ConversationList.Add(
+                                    ChatMessage.Error($"Failed to apply {propertyKey}"));
+                                _logger?.LogWarning("Failed to apply {Key}", propertyKey);
                             }
                         }
                         catch (Exception ex)
@@ -672,14 +716,14 @@ public class Collaborator : ICollaborator
 
                         try
                         {
-                            // Remove from pending updates without applying
-                            if (result.UpdatedProperties.Remove(propertyKey))
+                            var removed = result.PendingUpdates.RemoveAll(u =>
+                                string.Equals(u.Key, propertyKey, StringComparison.OrdinalIgnoreCase));
+                            result.UpdatedProperties.Remove(propertyKey);
+                            if (removed > 0)
                             {
                                 viewModel.ConversationList.Add(ChatMessage.FromCollaborator($"Skipped {propertyKey}"));
                                 _logger?.LogInformation("SkipProperty: Skipped {Key}", propertyKey);
-
-                                // Update the pending updates panel
-                                viewModel.SetPendingUpdates(result.UpdatedProperties);
+                                PushPendingToViewModel(viewModel, result);
                             }
                             else
                             {
@@ -693,8 +737,57 @@ public class Collaborator : ICollaborator
                         }
                     };
 
+                    // Accept Remaining: only free rows (Fill/Refresh/Unclassified); leave Protect.
+                    viewModel.OnAcceptRemainingFree = () =>
+                    {
+                        try
+                        {
+                            var free = result.PendingUpdates.Where(WorkflowRunner.AcceptAllMayApply).ToList();
+                            if (free.Count == 0)
+                            {
+                                viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
+                                    "No remaining free updates. Use Accept or Skip on each protected field."));
+                                return;
+                            }
+
+                            var applySlice = WorkflowResult.Succeeded();
+                            foreach (var u in free)
+                                applySlice.PendingUpdates.Add(u);
+                            var count = runner.ApplyUpdates(applySlice, gatheredElements);
+                            foreach (var u in free)
+                                _sessionTouchedFields.Add(u.SessionTouchKey);
+
+                            var freeKeys = free.Select(u => u.Key).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                            result.PendingUpdates.RemoveAll(u => freeKeys.Contains(u.Key));
+                            foreach (var key in freeKeys)
+                                result.UpdatedProperties.Remove(key);
+
+                            viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
+                                $"Applied {count} free update(s). " +
+                                (result.PendingUpdates.Count > 0
+                                    ? $"{result.PendingUpdates.Count} protected field(s) still need Accept or Skip."
+                                    : "All done.")));
+
+                            if (result.PendingUpdates.Count == 0)
+                                viewModel.MarkUpdatesApplied();
+                            else
+                                PushPendingToViewModel(viewModel, result);
+
+                            _storyModel?.RefreshCurrentView();
+                        }
+                        catch (Exception ex)
+                        {
+                            viewModel.ConversationList.Add(ChatMessage.Error($"Error applying remaining: {ex.Message}"));
+                            _logger?.LogError(ex, "Error in AcceptRemainingFree handler");
+                        }
+                    };
+
+                    var fillCount = result.PendingUpdates.Count(u => u.Kind is UpdateKind.Fill or UpdateKind.Refresh or UpdateKind.Unclassified);
+                    var protectCount = result.PendingUpdates.Count(u => u.Kind == UpdateKind.Protect);
                     viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
-                        $"Found {result.UpdatedProperties.Count} property updates. Review them above and choose Accept All, Review Each, or Try Again."));
+                        $"Found {result.PendingUpdates.Count} property update(s) " +
+                        $"({fillCount} ready for Accept All, {protectCount} need your OK because the field already has text). " +
+                        "Choose Accept All, Review Each, or Try Again."));
                 }
                 else
                 {
@@ -721,6 +814,55 @@ public class Collaborator : ICollaborator
             viewModel.ConversationList.Add(ChatMessage.Error($"Error executing workflow: {ex.Message}"));
             _logger?.LogError(ex, "Error executing workflow {Workflow}", workflow.Title);
         }
+    }
+
+    /// <summary>
+    /// Pushes classified pending updates into the workflow panel (issue #116).
+    /// </summary>
+    private static void PushPendingToViewModel(
+        StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
+        WorkflowResult result)
+    {
+        var items = result.PendingUpdates.Select(ToPendingUpdateItem).ToList();
+        viewModel.SetPendingUpdates(items);
+    }
+
+    private static PendingUpdateItem ToPendingUpdateItem(PendingUpdate u)
+    {
+        var proposed = TruncateForChat(u.Value?.ToString() ?? string.Empty, 300);
+        var current = TruncateForChat(u.CurrentDisplay ?? string.Empty, 300);
+        var kindLabel = u.Kind switch
+        {
+            UpdateKind.Fill => "New",
+            UpdateKind.Refresh => "Refresh",
+            UpdateKind.Protect => "Has your text",
+            UpdateKind.Unclassified => "Update",
+            _ => u.Kind.ToString()
+        };
+        var summary = u.Kind == UpdateKind.Protect
+            ? $"{kindLabel} — review before replace"
+            : kindLabel;
+        if (!string.IsNullOrWhiteSpace(u.CraftExplanation) && u.Kind == UpdateKind.Protect)
+            summary += " (craft note)";
+
+        return new PendingUpdateItem
+        {
+            Key = u.Key,
+            ProposedDisplay = string.IsNullOrEmpty(proposed) ? "(empty)" : proposed,
+            CurrentDisplay = current,
+            KindLabel = kindLabel,
+            IsProtected = u.Kind == UpdateKind.Protect,
+            CraftExplanation = u.CraftExplanation,
+            SummaryLine = summary
+        };
+    }
+
+    private static string TruncateForChat(string? text, int max = 200)
+    {
+        var value = text ?? "(empty)";
+        if (value.Length > max)
+            return value.Substring(0, max) + "...";
+        return value;
     }
 
     /// <summary>
