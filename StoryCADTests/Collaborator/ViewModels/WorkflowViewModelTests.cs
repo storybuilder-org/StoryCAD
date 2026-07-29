@@ -402,21 +402,32 @@ public class WorkflowViewModelTests
 
     #endregion
 
-    #region Review Each (issue #115)
+    #region Review Each (issue #115 / #116)
+
+    private static PendingUpdateItem Item(string key, string proposed = "v", bool isProtected = false) =>
+        new()
+        {
+            Key = key,
+            ProposedDisplay = proposed,
+            CurrentDisplay = isProtected ? "existing" : "",
+            KindLabel = isProtected ? "Has your text" : "New",
+            IsProtected = isProtected,
+            SummaryLine = isProtected ? "Has your text" : "New"
+        };
 
     /// <summary>
-    /// Simulates Collaborator: accept/skip removes the key then SetPendingUpdates.
+    /// Simulates Collaborator: accept/skip removes the key then SetPendingUpdates (#116 item list).
     /// </summary>
-    private void WireRemoveOnAcceptOrSkip(Dictionary<string, object> store)
+    private void WireRemoveOnAcceptOrSkip(List<PendingUpdateItem> store)
     {
         _viewModel.OnAcceptProperty = key =>
         {
-            store.Remove(key);
+            store.RemoveAll(i => i.Key == key);
             _viewModel.SetPendingUpdates(store);
         };
         _viewModel.OnSkipProperty = key =>
         {
-            store.Remove(key);
+            store.RemoveAll(i => i.Key == key);
             _viewModel.SetPendingUpdates(store);
         };
     }
@@ -425,11 +436,11 @@ public class WorkflowViewModelTests
     public void ReviewEach_AcceptCurrent_DoesNotSkipMiddleProperty()
     {
         // Arrange — three updates (Ideation: Description, Concept, Premise)
-        var store = new Dictionary<string, object>
+        var store = new List<PendingUpdateItem>
         {
-            ["Overview.Description"] = "idea",
-            ["Overview.Concept"] = "concept",
-            ["Overview.Premise"] = "premise"
+            Item("Overview.Description", "idea"),
+            Item("Overview.Concept", "concept"),
+            Item("Overview.Premise", "premise")
         };
         _viewModel.SetPendingUpdates(store);
         WireRemoveOnAcceptOrSkip(store);
@@ -457,11 +468,11 @@ public class WorkflowViewModelTests
     [TestMethod]
     public void ReviewEach_SkipCurrent_DoesNotDropRemaining()
     {
-        var store = new Dictionary<string, object>
+        var store = new List<PendingUpdateItem>
         {
-            ["Overview.Description"] = "idea",
-            ["Overview.Concept"] = "concept",
-            ["Overview.Premise"] = "premise"
+            Item("Overview.Description", "idea"),
+            Item("Overview.Concept", "concept"),
+            Item("Overview.Premise", "premise")
         };
         _viewModel.SetPendingUpdates(store);
         WireRemoveOnAcceptOrSkip(store);
@@ -484,10 +495,10 @@ public class WorkflowViewModelTests
     public void ReviewEach_AcceptLastOfTwo_DoesNotClearUnreviewed()
     {
         // Secondary bug: accept first of two remaining while index logic treated "done" early
-        var store = new Dictionary<string, object>
+        var store = new List<PendingUpdateItem>
         {
-            ["A"] = 1,
-            ["B"] = 2
+            Item("A", "1"),
+            Item("B", "2")
         };
         _viewModel.SetPendingUpdates(store);
         WireRemoveOnAcceptOrSkip(store);
@@ -496,7 +507,7 @@ public class WorkflowViewModelTests
         _viewModel.AcceptCurrentCommand.Execute(null);
         Assert.AreEqual("B", _viewModel.CurrentReviewKey);
         Assert.AreEqual(1, store.Count);
-        Assert.IsTrue(store.ContainsKey("B"));
+        Assert.IsTrue(store.Exists(i => i.Key == "B"));
 
         _viewModel.AcceptCurrentCommand.Execute(null);
         Assert.AreEqual(0, store.Count);
