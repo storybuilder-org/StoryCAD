@@ -30,16 +30,47 @@ namespace StoryCollaborator.Models
         Type? ListEntryType = null);
 
     /// <summary>
+    /// How a scalar pending update relates to the live outline field (issue #116).
+    /// Non-scalar updates stay <see cref="Unclassified"/> and Accept All may apply them.
+    /// </summary>
+    public enum UpdateKind
+    {
+        /// <summary>Not classified (non-scalar or pre-classify).</summary>
+        Unclassified = 0,
+        /// <summary>Target empty — Accept All may fill.</summary>
+        Fill,
+        /// <summary>Collaborator wrote this field earlier this session — Accept All may refresh.</summary>
+        Refresh,
+        /// <summary>User-owned non-empty differs — Review Each only; Accept All skips.</summary>
+        Protect,
+        /// <summary>Proposed equals current — dropped from pending.</summary>
+        NoOp
+    }
+
+    /// <summary>
     /// Carries one extracted output value between ExtractOutputs and ApplyUpdates.
     /// Value type by WriteVia: Scalar=string, SimpleList=List&lt;string&gt;,
     /// BeatSheet=List&lt;BeatInfo&gt;, CastMembers=List&lt;Guid&gt;,
     /// Relationships=List&lt;RelationshipInfo&gt;, TypedList=null.
+    /// Optional classification fields are set by <c>ClassifyScalarUpdates</c> (#116).
     /// </summary>
     public sealed record PendingUpdate(
         string ElementLabel,
         Guid ElementUuid,
         PropertySpec Spec,
-        object? Value);
+        object? Value,
+        UpdateKind Kind = UpdateKind.Unclassified,
+        string? CurrentDisplay = null,
+        string? CraftExplanation = null)
+    {
+        public string Key => $"{ElementLabel}.{Spec.Property}";
+
+        /// <summary>Stable session key: element UUID + property (survives label renames).</summary>
+        public string SessionTouchKey => $"{ElementUuid:N}.{Spec.Property}";
+
+        public bool AcceptAllMayApply =>
+            Kind is UpdateKind.Fill or UpdateKind.Refresh or UpdateKind.Unclassified;
+    }
 
     /// <summary>
     /// One beat in a BeatSheet output.
