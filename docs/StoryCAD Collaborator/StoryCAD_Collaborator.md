@@ -21,5 +21,6 @@ StoryCAD Collaborator is a paid plug-in for StoryCAD. You can download it from t
 - [Running a Workflow](Running_a_Workflow.html)
 - [Reviewing Suggestions](Reviewing_Suggestions.html)
 - [A Path to Try](A_Path_to_Try.html)
+- [An Example Session](An_Example_Session.html)
 - [Chat](Chat.html)
 - [Tips and Common Questions](Tips_and_Common_Questions.html)
