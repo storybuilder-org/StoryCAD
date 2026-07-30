@@ -79,21 +79,26 @@
                                Text="{x:Bind ViewModel.PendingUpdatesHeader, Mode=OneWay}"
                                FontWeight="SemiBold"
                                Margin="0,0,0,8" />
-                    <!-- Explicit ScrollBar (not overlay): WinUI ListView/ScrollViewer bars fade out. -->
-                    <Grid Grid.Row="1" VerticalAlignment="Stretch">
+                    <!--
+                      Host sizes the ScrollViewer explicitly (infinite-measure breaks scrolling).
+                      Built-in bars overlay/fade; we paint a permanent track + thumb ourselves.
+                    -->
+                    <Grid x:Name="PendingUpdatesScrollHost"
+                          Grid.Row="1"
+                          VerticalAlignment="Stretch"
+                          SizeChanged="PendingUpdatesScrollHost_SizeChanged">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="16" />
                         </Grid.ColumnDefinitions>
+
                         <ScrollViewer x:Name="PendingUpdatesScroll"
                                       Grid.Column="0"
-                                      VerticalAlignment="Stretch"
-                                      VerticalScrollBarVisibility="Hidden"
+                                      VerticalScrollBarVisibility="Disabled"
                                       VerticalScrollMode="Enabled"
                                       HorizontalScrollBarVisibility="Disabled"
                                       HorizontalScrollMode="Disabled"
                                       ViewChanged="PendingUpdatesScroll_ViewChanged"
-                                      SizeChanged="PendingUpdatesScroll_SizeChanged"
                                       AutomationProperties.AutomationId="WorkflowPendingUpdatesList">
                             <ItemsControl x:Name="PendingUpdatesItems"
                                           ItemsSource="{x:Bind ViewModel.PendingUpdateItems, Mode=OneWay}"
@@ -101,7 +106,7 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <!-- Template root: no AutomationId (TemplateSafety forbids it). -->
-                                        <Grid Margin="0,2"
+                                        <Grid Margin="0,4"
                                               AutomationProperties.Name="{Binding Key, Mode=OneWay}">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
@@ -129,15 +134,30 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
-                        <ScrollBar x:Name="PendingUpdatesScrollBar"
-                                   Grid.Column="1"
-                                   Orientation="Vertical"
-                                   IndicatorMode="MouseIndicator"
-                                   Width="14"
-                                   Margin="2,0,0,0"
-                                   Minimum="0"
-                                   ValueChanged="PendingUpdatesScrollBar_ValueChanged"
-                                   AutomationProperties.Name="Property updates scroll" />
+
+                        <!-- Permanent non-overlay scrollbar track (always visible). -->
+                        <Border Grid.Column="1"
+                                Margin="4,0,0,0"
+                                Background="{ThemeResource ControlAltFillColorTertiaryBrush}"
+                                CornerRadius="4"
+                                PointerPressed="PendingUpdatesTrack_PointerPressed">
+                            <Canvas x:Name="PendingUpdatesTrackCanvas"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    SizeChanged="PendingUpdatesTrackCanvas_SizeChanged">
+                                <Border x:Name="PendingUpdatesThumb"
+                                        Width="8"
+                                        Canvas.Left="2"
+                                        Canvas.Top="0"
+                                        Height="24"
+                                        CornerRadius="4"
+                                        Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                        PointerPressed="PendingUpdatesThumb_PointerPressed"
+                                        PointerMoved="PendingUpdatesThumb_PointerMoved"
+                                        PointerReleased="PendingUpdatesThumb_PointerReleased"
+                                        PointerCaptureLost="PendingUpdatesThumb_PointerCaptureLost" />
+                            </Canvas>
+                        </Border>
                     </Grid>
                 </Grid>
             </Border>
