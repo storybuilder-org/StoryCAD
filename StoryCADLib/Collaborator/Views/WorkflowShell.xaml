@@ -30,18 +30,17 @@
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="0,0,0,1"
                 Padding="4,2">
-            <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
-                <!-- Pane toggle (replaces NavigationView hamburger) -->
-                <AppBarButton Label="Workflows"
-                              ToolTipService.ToolTip="Show or hide the workflow list"
+            <!-- Icons only; name on hover (ToolTip). Labels wasted horizontal space. -->
+            <StackPanel Orientation="Horizontal" Spacing="0" VerticalAlignment="Center">
+                <AppBarButton ToolTipService.ToolTip="Workflows"
                               Command="{x:Bind ShellViewModel.TogglePaneCommand, Mode=OneWay}"
-                              AutomationProperties.AutomationId="WorkflowPaneToggleButton">
+                              AutomationProperties.AutomationId="WorkflowPaneToggleButton"
+                              AutomationProperties.Name="Workflows">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE700;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
 
-                <!-- Short workflow name -->
                 <TextBlock Text="{x:Bind ShellViewModel.ActiveWorkflowName, Mode=OneWay}"
                            VerticalAlignment="Center"
                            Margin="4,0,12,0"
@@ -51,38 +50,37 @@
                            MaxWidth="200"
                            AutomationProperties.Name="Current workflow" />
 
-                <!-- Workflow result actions (enabled when pending updates exist) -->
-                <AppBarButton Label="Accept All"
-                              ToolTipService.ToolTip="Apply free property updates"
+                <AppBarButton ToolTipService.ToolTip="Accept All"
                               Command="{x:Bind ShellViewModel.AcceptAllCommand, Mode=OneWay}"
                               IsEnabled="{x:Bind ShellViewModel.HasPendingUpdates, Mode=OneWay}"
-                              AutomationProperties.AutomationId="WorkflowAcceptAllButton">
+                              AutomationProperties.AutomationId="WorkflowAcceptAllButton"
+                              AutomationProperties.Name="Accept All">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE73E;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <AppBarButton Label="Review Each"
-                              ToolTipService.ToolTip="Review each property update"
+                <AppBarButton ToolTipService.ToolTip="Review Each"
                               Command="{x:Bind ShellViewModel.ReviewEachCommand, Mode=OneWay}"
                               IsEnabled="{x:Bind ShellViewModel.HasPendingUpdates, Mode=OneWay}"
-                              AutomationProperties.AutomationId="WorkflowReviewEachButton">
+                              AutomationProperties.AutomationId="WorkflowReviewEachButton"
+                              AutomationProperties.Name="Review Each">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8FD;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <AppBarButton Label="Try Again"
-                              ToolTipService.ToolTip="Run the workflow again"
+                <AppBarButton ToolTipService.ToolTip="Try Again"
                               Command="{x:Bind ShellViewModel.TryAgainCommand, Mode=OneWay}"
                               IsEnabled="{x:Bind ShellViewModel.HasPendingUpdates, Mode=OneWay}"
-                              AutomationProperties.AutomationId="WorkflowTryAgainButton">
+                              AutomationProperties.AutomationId="WorkflowTryAgainButton"
+                              AutomationProperties.Name="Try Again">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE72C;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
 
-                <!-- Prefixed: Shell.xaml already claims HelpButton. -->
-                <AppBarButton Label="Help" ToolTipService.ToolTip="Help" Margin="8,0,0,0"
-                              AutomationProperties.AutomationId="WorkflowHelpButton">
+                <AppBarButton ToolTipService.ToolTip="Help" Margin="8,0,0,0"
+                              AutomationProperties.AutomationId="WorkflowHelpButton"
+                              AutomationProperties.Name="Help">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE897;" />
                     </AppBarButton.Icon>
@@ -108,23 +106,26 @@
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton Label="Settings" ToolTipService.ToolTip="Collaborator Settings"
+                <AppBarButton ToolTipService.ToolTip="Settings"
                               Click="SettingsButton_Click"
-                              AutomationProperties.AutomationId="WorkflowSettingsButton">
+                              AutomationProperties.AutomationId="WorkflowSettingsButton"
+                              AutomationProperties.Name="Settings">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE713;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <AppBarButton Label="Save" ToolTipService.ToolTip="Save outline changes"
+                <AppBarButton ToolTipService.ToolTip="Save"
                               Command="{x:Bind ShellViewModel.SaveCommand, Mode=OneWay}"
-                              AutomationProperties.AutomationId="WorkflowSaveButton">
+                              AutomationProperties.AutomationId="WorkflowSaveButton"
+                              AutomationProperties.Name="Save">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <AppBarButton Label="Exit" ToolTipService.ToolTip="Exit Collaborator"
+                <AppBarButton ToolTipService.ToolTip="Exit"
                               Command="{x:Bind ShellViewModel.ExitCommand, Mode=OneWay}"
-                              AutomationProperties.AutomationId="WorkflowExitButton">
+                              AutomationProperties.AutomationId="WorkflowExitButton"
+                              AutomationProperties.Name="Exit">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8BB;" />
                     </AppBarButton.Icon>
