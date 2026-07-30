@@ -349,10 +349,10 @@ public class Collaborator : ICollaborator
         ArgumentNullException.ThrowIfNull(workflow);
 
         viewModel.Title = workflow.Title;
+        // Brief purpose only; long registry Explanation is not shown (topical strip instead).
         viewModel.Description = workflow.Description;
-        viewModel.Explanation = workflow.Explanation;
 
-        // Build summary of selected elements
+        // Selected elements live in topical Explanation (#129), not a separate card.
         if (gatheredElements != null && gatheredElements.Count > 0)
         {
             var lines = gatheredElements
@@ -360,6 +360,12 @@ public class Collaborator : ICollaborator
                 .ToList();
             viewModel.SelectedElementsSummary = string.Join("\n", lines);
         }
+        else
+        {
+            viewModel.SelectedElementsSummary = string.Empty;
+        }
+
+        viewModel.RefreshTopicalExplanation();
     }
 
     /// <summary>

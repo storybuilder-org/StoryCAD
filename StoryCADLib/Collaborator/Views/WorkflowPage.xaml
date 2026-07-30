@@ -43,40 +43,28 @@
               VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!-- Brief description + explanation (title is on shell bar) -->
+            <!-- Brief purpose + topical Explanation (selected elements + what to do next) -->
             <StackPanel Grid.Row="0" Margin="0,0,0,8">
                 <TextBlock Text="{x:Bind ViewModel.Description, Mode=OneWay}"
                            FontStyle="Italic"
                            TextWrapping="Wrap"
-                           MaxLines="3"
+                           MaxLines="2"
                            TextTrimming="CharacterEllipsis" />
                 <TextBlock Text="{x:Bind ViewModel.Explanation, Mode=OneWay}"
                            TextWrapping="Wrap"
                            Margin="0,6,0,0"
-                           MaxLines="5"
+                           MaxLines="4"
                            TextTrimming="CharacterEllipsis"
                            FontSize="12"
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
 
-            <!-- Selected Elements -->
+            <!-- Property Updates: fills remaining height; always show scrollbar when list scrolls -->
             <Border Grid.Row="1"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,0,0,8">
-                <StackPanel>
-                    <TextBlock Text="Selected Elements:" FontWeight="SemiBold" Margin="0,0,0,5" />
-                    <TextBlock Text="{x:Bind ViewModel.SelectedElementsSummary, Mode=OneWay}" TextWrapping="Wrap" />
-                </StackPanel>
-            </Border>
-
-            <!-- Property Updates: fills all remaining height down to review row / column bottom -->
-            <Border Grid.Row="2"
                     Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="4" Padding="10"
@@ -95,7 +83,8 @@
                               ItemsSource="{x:Bind ViewModel.PendingUpdateItems, Mode=OneWay}"
                               SelectionMode="None"
                               VerticalAlignment="Stretch"
-                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              ScrollViewer.VerticalScrollBarVisibility="Visible"
+                              ScrollViewer.VerticalScrollMode="Enabled"
                               HorizontalContentAlignment="Stretch"
                               AutomationProperties.AutomationId="WorkflowPendingUpdatesList">
                         <ListView.ItemContainerStyle>
@@ -138,7 +127,7 @@
             </Border>
 
             <!-- Review Mode (Accept/Skip); Accept All is on the shell bar -->
-            <StackPanel Grid.Row="3"
+            <StackPanel Grid.Row="2"
                         Visibility="{x:Bind ViewModel.ReviewModeVisibility, Mode=OneWay}"
                         Margin="0,8,0,0">
                 <TextBlock Text="Review Property Update" FontWeight="SemiBold" Margin="0,0,0,8" />

@@ -449,6 +449,22 @@ public class WorkflowViewModelTests
     }
 
     [TestMethod]
+    public void RefreshTopicalExplanation_IncludesSelectedAndPendingCounts()
+    {
+        _viewModel.SelectedElementsSummary = "Overview: Test Story";
+        _viewModel.SetPendingUpdates(new List<PendingUpdateItem>
+        {
+            Item("A", isProtected: false),
+            Item("B", isProtected: true)
+        });
+
+        StringAssert.Contains(_viewModel.Explanation, "Selected: Overview: Test Story");
+        StringAssert.Contains(_viewModel.Explanation, "2 property update(s)");
+        StringAssert.Contains(_viewModel.Explanation, "1 free");
+        StringAssert.Contains(_viewModel.Explanation, "1 need review");
+    }
+
+    [TestMethod]
     public void ReviewEach_AcceptCurrent_DoesNotSkipMiddleProperty()
     {
         // Arrange — three updates (Ideation: Description, Concept, Premise)

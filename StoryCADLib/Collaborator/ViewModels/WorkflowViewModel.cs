@@ -55,9 +55,24 @@ public partial class WorkflowViewModel : ObservableRecipient
 
     public string Title { get; set; }
 
-    public string Description { get; set; }
+    private string _description = string.Empty;
+    /// <summary>Brief workflow purpose (registry description).</summary>
+    public string Description
+    {
+        get => _description;
+        set => SetProperty(ref _description, value ?? string.Empty);
+    }
 
-    public string Explanation { get; set; }
+    private string _explanation = string.Empty;
+    /// <summary>
+    /// Topical work-column context (#129): selected elements and what to do next
+    /// (pending accept/review). Not the long static registry essay.
+    /// </summary>
+    public string Explanation
+    {
+        get => _explanation;
+        set => SetProperty(ref _explanation, value ?? string.Empty);
+    }
 
     public ObservableCollection<ChatMessage> ConversationList { get; set; }
 
@@ -82,14 +97,51 @@ public partial class WorkflowViewModel : ObservableRecipient
         set => SetProperty(ref _promptOutput, value);
     }
 
-    private string _selectedElementsSummary;
+    private string _selectedElementsSummary = string.Empty;
     /// <summary>
-    /// Summary of elements selected for this workflow (e.g., "Problem: Herold wants Greta")
+    /// Gathered elements for this run (e.g. "Overview: Schrodinger's Computer").
+    /// Surfaced via <see cref="Explanation"/>, not a separate card.
     /// </summary>
     public string SelectedElementsSummary
     {
         get => _selectedElementsSummary;
-        set => SetProperty(ref _selectedElementsSummary, value);
+        set => SetProperty(ref _selectedElementsSummary, value ?? string.Empty);
+    }
+
+    /// <summary>
+    /// Rebuilds topical Explanation from selected elements + pending/review state.
+    /// </summary>
+    public void RefreshTopicalExplanation()
+    {
+        var parts = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(SelectedElementsSummary))
+        {
+            var oneLine = SelectedElementsSummary.Replace("\r\n", "; ").Replace("\n", "; ");
+            parts.Add($"Selected: {oneLine}");
+        }
+
+        if (IsInReviewMode && PendingUpdateItems != null && PendingUpdateItems.Count > 0)
+        {
+            parts.Add(
+                $"Reviewing {CurrentReviewIndex + 1} of {PendingUpdateItems.Count}: {CurrentReviewKey}. " +
+                "Accept to apply, Skip to keep yours.");
+        }
+        else if (HasPendingUpdates && PendingUpdateItems != null)
+        {
+            var total = PendingUpdateItems.Count;
+            var needReview = PendingUpdateItems.Count(i => i.IsProtected);
+            var free = total - needReview;
+            parts.Add(
+                $"{total} property update(s) ({free} free, {needReview} need review). " +
+                "Use Accept All, Review Each, or Try Again.");
+        }
+        else if (UpdatesApplied)
+        {
+            parts.Add("Updates applied. Ask in chat or choose another workflow.");
+        }
+
+        Explanation = parts.Count == 0 ? string.Empty : string.Join("\n", parts);
     }
 
     #endregion
@@ -395,6 +447,7 @@ public partial class WorkflowViewModel : ObservableRecipient
         OnPropertyChanged(nameof(CurrentReviewHasCraft));
         OnPropertyChanged(nameof(CurrentReviewCraftVisibility));
         OnPropertyChanged(nameof(ReviewProgress));
+        RefreshTopicalExplanation();
     }
 
     public void ClearPendingUpdates()
@@ -406,6 +459,7 @@ public partial class WorkflowViewModel : ObservableRecipient
         OnPropertyChanged(nameof(HasUpdates));
         OnPropertyChanged(nameof(HasPendingUpdates));
         OnPropertyChanged(nameof(PendingUpdatesHeader));
+        RefreshTopicalExplanation();
     }
 
     /// <summary>
@@ -426,6 +480,7 @@ public partial class WorkflowViewModel : ObservableRecipient
         OnPropertyChanged(nameof(HasPendingUpdates));
         OnPropertyChanged(nameof(PendingUpdatesHeader));
         NotifyReviewProperties();
+        RefreshTopicalExplanation();
     }
 
     /// <summary>Called by Collaborator after all free updates are applied.</summary>
@@ -437,6 +492,7 @@ public partial class WorkflowViewModel : ObservableRecipient
         OnPropertyChanged(nameof(HasUpdates));
         OnPropertyChanged(nameof(HasPendingUpdates));
         OnPropertyChanged(nameof(PendingUpdatesHeader));
+        RefreshTopicalExplanation();
     }
 
     #endregion
