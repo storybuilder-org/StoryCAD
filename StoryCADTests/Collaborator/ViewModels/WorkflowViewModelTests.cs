@@ -433,6 +433,22 @@ public class WorkflowViewModelTests
     }
 
     [TestMethod]
+    public void PendingUpdatesHeader_ReflectsFreeAndProtectedCounts()
+    {
+        _viewModel.SetPendingUpdates(new List<PendingUpdateItem>
+        {
+            Item("A", isProtected: false),
+            Item("B", isProtected: true),
+            Item("C", isProtected: true)
+        });
+
+        Assert.AreEqual("Property Updates (3: 1 free, 2 need review)", _viewModel.PendingUpdatesHeader);
+
+        _viewModel.ClearPendingUpdates();
+        Assert.AreEqual("Property Updates", _viewModel.PendingUpdatesHeader);
+    }
+
+    [TestMethod]
     public void ReviewEach_AcceptCurrent_DoesNotSkipMiddleProperty()
     {
         // Arrange — three updates (Ideation: Description, Concept, Premise)

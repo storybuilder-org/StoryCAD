@@ -42,6 +42,7 @@ public class Collaborator : ICollaborator
     private ElementResolver? _elementResolver;
     private string? _filePath;
     private Window? _hostWindow;
+    private WorkflowShellViewModel? _shellViewModel;
     private bool _disposed;
     private StoryCADLib.Services.Logging.ILogService? _auditLogger;
 
@@ -129,6 +130,7 @@ public class Collaborator : ICollaborator
             var viewModel = shell.DataContext as StoryCADLib.Collaborator.ViewModels.WorkflowShellViewModel;
             if (viewModel != null)
             {
+                _shellViewModel = viewModel;
                 viewModel.MenuItems.Clear();
                 foreach (var workflow in WorkflowRegistry.All)
                 {
@@ -169,6 +171,10 @@ public class Collaborator : ICollaborator
                 {
                     if (viewModel.ContentFrame != null && workflowTag is Workflow workflow)
                     {
+                        // Short name on top bar (Label, not long Title path).
+                        viewModel.ActiveWorkflowName = FormatWorkflowShortName(workflow.Label);
+                        viewModel.HasPendingUpdates = false;
+
                         // Clear shell status; gather cancel has no chat page (#123).
                         viewModel.StatusText = string.Empty;
 
@@ -193,6 +199,7 @@ public class Collaborator : ICollaborator
                         {
                             PopulateWorkflowViewModel(page.ViewModel, workflow, gatherResult.Elements);
                             WireUpChatCallback(page.ViewModel, workflow, gatherResult.Elements);
+                            WireShellWorkflowActions(page.ViewModel);
 
                             // Add status messages from gathering phase
                             foreach (var message in gatherResult.StatusMessages)
@@ -618,6 +625,7 @@ public class Collaborator : ICollaborator
                             if (protect.Count == 0)
                             {
                                 viewModel.MarkUpdatesApplied();
+                                SyncShellPending(viewModel);
                             }
                             else
                             {
@@ -769,7 +777,10 @@ public class Collaborator : ICollaborator
                                     : "All done.")));
 
                             if (result.PendingUpdates.Count == 0)
+                            {
                                 viewModel.MarkUpdatesApplied();
+                                SyncShellPending(viewModel);
+                            }
                             else
                                 PushPendingToViewModel(viewModel, result);
 
@@ -817,14 +828,41 @@ public class Collaborator : ICollaborator
     }
 
     /// <summary>
-    /// Pushes classified pending updates into the workflow panel (issue #116).
+    /// Pushes classified pending updates into the workflow panel (issue #116)
+    /// and enables shell Accept All / Review Each / Try Again.
     /// </summary>
-    private static void PushPendingToViewModel(
+    private void PushPendingToViewModel(
         StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
         WorkflowResult result)
     {
         var items = result.PendingUpdates.Select(ToPendingUpdateItem).ToList();
         viewModel.SetPendingUpdates(items);
+        SyncShellPending(viewModel);
+    }
+
+    /// <summary>
+    /// Routes top-bar Accept All / Review Each / Try Again to the active page VM.
+    /// </summary>
+    private void WireShellWorkflowActions(WorkflowViewModel pageVm)
+    {
+        if (_shellViewModel == null) return;
+
+        _shellViewModel.OnAcceptAll = () => pageVm.AcceptAllCommand.Execute(null);
+        _shellViewModel.OnReviewEach = () => pageVm.ReviewEachCommand.Execute(null);
+        _shellViewModel.OnTryAgain = async () =>
+        {
+            if (pageVm.OnTryAgain != null)
+                await pageVm.OnTryAgain();
+            else
+                pageVm.TryAgainCommand.Execute(null);
+        };
+        SyncShellPending(pageVm);
+    }
+
+    private void SyncShellPending(WorkflowViewModel pageVm)
+    {
+        if (_shellViewModel != null)
+            _shellViewModel.HasPendingUpdates = pageVm.HasPendingUpdates;
     }
 
     private static PendingUpdateItem ToPendingUpdateItem(PendingUpdate u)
@@ -900,6 +938,30 @@ public class Collaborator : ICollaborator
         public Dictionary<string, StoryElement> Elements { get; set; } = new();
         public List<string> StatusMessages { get; set; } = new();
         public bool Cancelled { get; set; }
+    }
+
+    /// <summary>
+    /// Short chrome label from registry Label (e.g. StoryProblem → "Story Problem").
+    /// Not the long Title path used in the nav list.
+    /// </summary>
+    private static string FormatWorkflowShortName(string? label)
+    {
+        if (string.IsNullOrWhiteSpace(label))
+            return string.Empty;
+
+        // Insert spaces before capitals in PascalCase / camelCase identifiers.
+        var sb = new System.Text.StringBuilder(label.Length + 8);
+        for (var i = 0; i < label.Length; i++)
+        {
+            var c = label[i];
+            if (i > 0 && char.IsUpper(c) && !char.IsUpper(label[i - 1]))
+                sb.Append(' ');
+            else if (i > 0 && char.IsUpper(c) && i + 1 < label.Length && char.IsLower(label[i + 1])
+                     && char.IsUpper(label[i - 1]))
+                sb.Append(' ');
+            sb.Append(c);
+        }
+        return sb.ToString();
     }
 
     /// <summary>

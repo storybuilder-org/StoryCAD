@@ -19,6 +19,13 @@ public partial class WorkflowShellViewModel : ObservableRecipient
         MenuItems = new ObservableCollection<NavigationViewItem>();
         SaveCommand = new RelayCommand(SaveOutline);
         ExitCommand = new RelayCommand(ExitCollaborator);
+        AcceptAllCommand = new RelayCommand(() => OnAcceptAll?.Invoke());
+        ReviewEachCommand = new RelayCommand(() => OnReviewEach?.Invoke());
+        TryAgainCommand = new RelayCommand(async () =>
+        {
+            if (OnTryAgain != null)
+                await OnTryAgain();
+        });
     }
 
     #region Properties
@@ -69,7 +76,34 @@ public partial class WorkflowShellViewModel : ObservableRecipient
     public string Title { get; set; } = "Story Collaborator";
 
     /// <summary>
-    /// Shell-level status (CommandBar InfoBar). Visible when the content frame
+    /// Short workflow name on the top bar (left). Uses the registry label
+    /// (e.g. Premise), not the long ideation path title. Empty until a workflow is selected.
+    /// </summary>
+    private string _activeWorkflowName = string.Empty;
+    public string ActiveWorkflowName
+    {
+        get => _activeWorkflowName;
+        set => SetProperty(ref _activeWorkflowName, value ?? string.Empty);
+    }
+
+    /// <summary>
+    /// True when the current workflow page has pending property updates.
+    /// Enables Accept All / Review Each / Try Again on the top bar.
+    /// </summary>
+    private bool _hasPendingUpdates;
+    public bool HasPendingUpdates
+    {
+        get => _hasPendingUpdates;
+        set => SetProperty(ref _hasPendingUpdates, value);
+    }
+
+    /// <summary>Wired by Collaborator to the active WorkflowViewModel actions.</summary>
+    public Action OnAcceptAll { get; set; }
+    public Action OnReviewEach { get; set; }
+    public Func<Task> OnTryAgain { get; set; }
+
+    /// <summary>
+    /// Shell-level status (bottom status bar InfoBar). Visible when the content frame
     /// is empty — e.g. after gather cancel when chat is not available (#123).
     /// </summary>
     private string _statusText = string.Empty;
@@ -114,6 +148,12 @@ public partial class WorkflowShellViewModel : ObservableRecipient
 
     public RelayCommand ExitCommand { get; }
 
+    public RelayCommand AcceptAllCommand { get; }
+
+    public RelayCommand ReviewEachCommand { get; }
+
+    public RelayCommand TryAgainCommand { get; }
+
     private void SaveOutline()
     {
         OnSave?.Invoke();
@@ -127,6 +167,11 @@ public partial class WorkflowShellViewModel : ObservableRecipient
             NavView.SelectionChanged -= NavView_SelectionChanged;
         }
         MenuItems.Clear();
+        HasPendingUpdates = false;
+        ActiveWorkflowName = string.Empty;
+        OnAcceptAll = null;
+        OnReviewEach = null;
+        OnTryAgain = null;
     }
 
     #endregion

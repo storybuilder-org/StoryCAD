@@ -107,6 +107,23 @@ public partial class WorkflowViewModel : ObservableRecipient
     /// <summary>True if updates exist and haven't been fully applied yet.</summary>
     public bool HasPendingUpdates => HasUpdates && !UpdatesApplied;
 
+    /// <summary>
+    /// Panel header with counts (#129): free vs need-review (Protect).
+    /// </summary>
+    public string PendingUpdatesHeader
+    {
+        get
+        {
+            if (PendingUpdateItems == null || PendingUpdateItems.Count == 0)
+                return "Property Updates";
+
+            var total = PendingUpdateItems.Count;
+            var needReview = PendingUpdateItems.Count(i => i.IsProtected);
+            var free = total - needReview;
+            return $"Property Updates ({total}: {free} free, {needReview} need review)";
+        }
+    }
+
     public Microsoft.UI.Xaml.Visibility ReviewModeVisibility =>
         IsInReviewMode ? Microsoft.UI.Xaml.Visibility.Visible : Microsoft.UI.Xaml.Visibility.Collapsed;
 
@@ -388,6 +405,7 @@ public partial class WorkflowViewModel : ObservableRecipient
         CurrentReviewIndex = 0;
         OnPropertyChanged(nameof(HasUpdates));
         OnPropertyChanged(nameof(HasPendingUpdates));
+        OnPropertyChanged(nameof(PendingUpdatesHeader));
     }
 
     /// <summary>
@@ -406,6 +424,7 @@ public partial class WorkflowViewModel : ObservableRecipient
         OnPropertyChanged(nameof(PendingUpdateItems));
         OnPropertyChanged(nameof(HasUpdates));
         OnPropertyChanged(nameof(HasPendingUpdates));
+        OnPropertyChanged(nameof(PendingUpdatesHeader));
         NotifyReviewProperties();
     }
 
@@ -417,6 +436,7 @@ public partial class WorkflowViewModel : ObservableRecipient
         PendingUpdateItems.Clear();
         OnPropertyChanged(nameof(HasUpdates));
         OnPropertyChanged(nameof(HasPendingUpdates));
+        OnPropertyChanged(nameof(PendingUpdatesHeader));
     }
 
     #endregion
