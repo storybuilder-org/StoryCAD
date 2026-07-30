@@ -31,10 +31,20 @@
                 BorderThickness="0,0,0,1"
                 Padding="4,2">
             <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+                <!-- Pane toggle (replaces NavigationView hamburger) -->
+                <AppBarButton Label="Workflows"
+                              ToolTipService.ToolTip="Show or hide the workflow list"
+                              Command="{x:Bind ShellViewModel.TogglePaneCommand, Mode=OneWay}"
+                              AutomationProperties.AutomationId="WorkflowPaneToggleButton">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE700;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
+
                 <!-- Short workflow name -->
                 <TextBlock Text="{x:Bind ShellViewModel.ActiveWorkflowName, Mode=OneWay}"
                            VerticalAlignment="Center"
-                           Margin="8,0,12,0"
+                           Margin="4,0,12,0"
                            FontWeight="SemiBold"
                            FontSize="14"
                            TextTrimming="CharacterEllipsis"
@@ -128,6 +138,8 @@
         <NavigationView x:Name="NavView"
                         Grid.Row="1"
                         IsBackButtonVisible="Collapsed"
+                        IsPaneToggleButtonVisible="False"
+                        IsPaneOpen="{x:Bind ShellViewModel.IsPaneOpen, Mode=TwoWay}"
                         MenuItemsSource="{x:Bind ShellViewModel.MenuItems, Mode=OneWay}"
                         SelectedItem="{x:Bind ShellViewModel.CurrentItem, Mode=TwoWay}"
                         IsSettingsVisible="False"

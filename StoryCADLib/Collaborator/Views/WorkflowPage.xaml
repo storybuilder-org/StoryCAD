@@ -79,50 +79,47 @@
                                Text="{x:Bind ViewModel.PendingUpdatesHeader, Mode=OneWay}"
                                FontWeight="SemiBold"
                                Margin="0,0,0,8" />
-                    <ListView Grid.Row="1"
-                              ItemsSource="{x:Bind ViewModel.PendingUpdateItems, Mode=OneWay}"
-                              SelectionMode="None"
-                              VerticalAlignment="Stretch"
-                              ScrollViewer.VerticalScrollBarVisibility="Visible"
-                              ScrollViewer.VerticalScrollMode="Enabled"
-                              HorizontalContentAlignment="Stretch"
-                              AutomationProperties.AutomationId="WorkflowPendingUpdatesList">
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                <Setter Property="Padding" Value="0,2" />
-                                <Setter Property="MinHeight" Value="0" />
-                            </Style>
-                        </ListView.ItemContainerStyle>
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <!-- Template root: no AutomationId (TemplateSafety forbids it). -->
-                                <Grid AutomationProperties.Name="{Binding Key, Mode=OneWay}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="{Binding Key}"
-                                                   FontWeight="SemiBold"
-                                                   FontSize="12"
-                                                   TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Text="{Binding ProposedDisplay}"
+                    <!-- ScrollViewer (not ListView) so the vertical bar stays visible (#129).
+                         Pending lists are small; virtualization is not needed. -->
+                    <ScrollViewer Grid.Row="1"
+                                  VerticalAlignment="Stretch"
+                                  VerticalScrollBarVisibility="Visible"
+                                  VerticalScrollMode="Enabled"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  HorizontalScrollMode="Disabled"
+                                  AutomationProperties.AutomationId="WorkflowPendingUpdatesList">
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.PendingUpdateItems, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <!-- Template root: no AutomationId (TemplateSafety forbids it). -->
+                                    <Grid Margin="0,2"
+                                          AutomationProperties.Name="{Binding Key, Mode=OneWay}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{Binding Key}"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="12"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding ProposedDisplay}"
+                                                       FontSize="11"
+                                                       Opacity="0.85"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       MaxLines="1" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding SummaryLine}"
                                                    FontSize="11"
-                                                   Opacity="0.85"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   MaxLines="1" />
-                                    </StackPanel>
-                                    <TextBlock Grid.Column="1"
-                                               Text="{Binding SummaryLine}"
-                                               FontSize="11"
-                                               Margin="8,0,0,0"
-                                               VerticalAlignment="Center"
-                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                                                   Margin="8,0,0,0"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </Grid>
             </Border>
 

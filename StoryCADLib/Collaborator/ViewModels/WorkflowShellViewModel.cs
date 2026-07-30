@@ -19,6 +19,7 @@ public partial class WorkflowShellViewModel : ObservableRecipient
         MenuItems = new ObservableCollection<NavigationViewItem>();
         SaveCommand = new RelayCommand(SaveOutline);
         ExitCommand = new RelayCommand(ExitCollaborator);
+        TogglePaneCommand = new RelayCommand(TogglePane);
         AcceptAllCommand = new RelayCommand(() => OnAcceptAll?.Invoke());
         ReviewEachCommand = new RelayCommand(() => OnReviewEach?.Invoke());
         TryAgainCommand = new RelayCommand(async () =>
@@ -97,6 +98,17 @@ public partial class WorkflowShellViewModel : ObservableRecipient
         set => SetProperty(ref _hasPendingUpdates, value);
     }
 
+    /// <summary>
+    /// Workflow list pane open (bound to NavigationView.IsPaneOpen).
+    /// Toggled by the top-bar hamburger; built-in NavView toggle is hidden.
+    /// </summary>
+    private bool _isPaneOpen = true;
+    public bool IsPaneOpen
+    {
+        get => _isPaneOpen;
+        set => SetProperty(ref _isPaneOpen, value);
+    }
+
     /// <summary>Wired by Collaborator to the active WorkflowViewModel actions.</summary>
     public Action OnAcceptAll { get; set; }
     public Action OnReviewEach { get; set; }
@@ -148,11 +160,18 @@ public partial class WorkflowShellViewModel : ObservableRecipient
 
     public RelayCommand ExitCommand { get; }
 
+    public RelayCommand TogglePaneCommand { get; }
+
     public RelayCommand AcceptAllCommand { get; }
 
     public RelayCommand ReviewEachCommand { get; }
 
     public RelayCommand TryAgainCommand { get; }
+
+    private void TogglePane()
+    {
+        IsPaneOpen = !IsPaneOpen;
+    }
 
     private void SaveOutline()
     {
