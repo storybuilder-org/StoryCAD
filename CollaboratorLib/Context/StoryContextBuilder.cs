@@ -36,8 +36,29 @@ public class StoryContextBuilder
         var phase = DetectDevelopmentPhase(model);
         AppendPhaseContext(sb, phase);
 
+        // Issue #107: problem–character spine map (once per context build)
+        ProblemCharacterIndex? index = null;
+        if (spec.IncludeCastProblemMap ||
+            spec.CharacterProblemDetail != CharacterProblemDetail.None)
+        {
+            index = ProblemCharacterIndex.Build(_api, model);
+        }
+
+        if (spec.IncludeCastProblemMap && index != null)
+        {
+            AppendCastProblemMap(sb, index);
+            AppendSpineGaps(sb, index, model);
+        }
+
         if (spec.IncludeStoryConstraints)
             AppendStoryConstraints(sb, model);
+
+        if (spec.CharacterProblemDetail != CharacterProblemDetail.None &&
+            targetElement is CharacterModel character &&
+            index != null)
+        {
+            AppendCharacterProblemSlice(sb, character, index, model, spec.CharacterProblemDetail);
+        }
 
         if (spec.IncludeBeatHierarchy && targetElement is ProblemModel problem)
             AppendBeatHierarchy(sb, problem, model);
@@ -341,6 +362,192 @@ public class StoryContextBuilder
         }
 
         sb.AppendLine();
+    }
+
+    #endregion
+
+    #region Cast–problem map and character slice (issue #107)
+
+    private void AppendCastProblemMap(StringBuilder sb, ProblemCharacterIndex index)
+    {
+        sb.AppendLine("## Cast-problem map");
+
+        if (index.Edges.Count == 0)
+        {
+            sb.AppendLine("No problems with protagonist/antagonist links yet.");
+            sb.AppendLine();
+            return;
+        }
+
+        var majorNames = index.Edges
+            .GroupBy(e => e.CharacterGuid)
+            .Select(g => g.First().CharacterName)
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (majorNames.Count > 0)
+            sb.AppendLine($"Major cast (prot/antag on ≥1 problem): {string.Join(", ", majorNames)}");
+
+        // Group edges by problem for readable lines
+        foreach (var group in index.Edges
+                     .GroupBy(e => e.ProblemGuid)
+                     .OrderByDescending(g => g.Any(e => e.IsStoryProblem))
+                     .ThenBy(g => g.First().ProblemName, StringComparer.OrdinalIgnoreCase))
+        {
+            var first = group.First();
+            var label = first.IsStoryProblem ? "Story Problem" : "Problem";
+            var roles = group
+                .OrderBy(e => e.Role == ProblemCharacterRole.Protagonist ? 0 : 1)
+                .Select(e => $"{e.CharacterName} ({e.Role})")
+                .ToList();
+            sb.AppendLine($"{label} \"{first.ProblemName}\": {string.Join(", ", roles)}");
+        }
+
+        sb.AppendLine();
+    }
+
+    private void AppendSpineGaps(StringBuilder sb, ProblemCharacterIndex index, StoryModel model)
+    {
+        var gaps = new List<string>();
+
+        if (index.StoryProblemGuid != Guid.Empty)
+        {
+            var storyProblem = ResolveElement(index.StoryProblemGuid, model) as ProblemModel;
+            if (storyProblem != null)
+            {
+                var storyEdges = index.EdgesForProblem(storyProblem.Uuid);
+                bool hasProt = storyEdges.Any(e => e.Role == ProblemCharacterRole.Protagonist);
+                bool hasAntag = storyEdges.Any(e => e.Role == ProblemCharacterRole.Antagonist);
+                if (!hasProt && !hasAntag)
+                    gaps.Add($"Story Problem \"{storyProblem.Name}\" has no protagonist/antagonist assigned.");
+                else if (!hasProt)
+                    gaps.Add($"Story Problem \"{storyProblem.Name}\" has no protagonist assigned.");
+                else if (!hasAntag)
+                    gaps.Add($"Story Problem \"{storyProblem.Name}\" has no antagonist assigned.");
+            }
+        }
+
+        var problemsResult = _api.GetElementsByType(StoryItemType.Problem);
+        if (problemsResult.IsSuccess && problemsResult.Payload != null)
+        {
+            foreach (var element in problemsResult.Payload)
+            {
+                if (element is not ProblemModel problem)
+                    continue;
+                if (index.EdgesForProblem(problem.Uuid).Count > 0)
+                    continue;
+                if (!ProblemHasGmcText(problem))
+                    continue;
+                gaps.Add($"Problem \"{problem.Name}\" has goal/conflict text but no cast links.");
+            }
+        }
+
+        if (gaps.Count == 0)
+            return;
+
+        sb.AppendLine("## Spine gaps");
+        foreach (var gap in gaps)
+            sb.AppendLine(gap);
+        sb.AppendLine();
+    }
+
+    private static bool ProblemHasGmcText(ProblemModel problem)
+    {
+        return !string.IsNullOrWhiteSpace(problem.ProtGoal)
+               || !string.IsNullOrWhiteSpace(problem.ProtMotive)
+               || !string.IsNullOrWhiteSpace(problem.ProtConflict)
+               || !string.IsNullOrWhiteSpace(problem.AntagGoal)
+               || !string.IsNullOrWhiteSpace(problem.AntagMotive)
+               || !string.IsNullOrWhiteSpace(problem.AntagConflict);
+    }
+
+    private void AppendCharacterProblemSlice(
+        StringBuilder sb,
+        CharacterModel character,
+        ProblemCharacterIndex index,
+        StoryModel model,
+        CharacterProblemDetail detail)
+    {
+        sb.AppendLine("## This character's problems");
+
+        var edges = index.SelectDetailedEdgesForCharacter(character.Uuid);
+        if (edges.Count == 0)
+        {
+            sb.AppendLine("Not protagonist or antagonist on any problem (off the problem spine).");
+            sb.AppendLine();
+            return;
+        }
+
+        foreach (var problemGroup in edges.GroupBy(e => e.ProblemGuid))
+        {
+            var sample = problemGroup.First();
+            var tag = sample.IsStoryProblem ? "Story Problem" : "Problem";
+            var roles = string.Join(", ", problemGroup
+                .OrderBy(e => e.Role == ProblemCharacterRole.Protagonist ? 0 : 1)
+                .Select(e => e.Role.ToString()));
+            sb.AppendLine($"- [{tag}] \"{sample.ProblemName}\" — {roles}");
+
+            if (detail != CharacterProblemDetail.LinksAndGmc)
+                continue;
+
+            var problem = ResolveElement(sample.ProblemGuid, model) as ProblemModel;
+            if (problem == null)
+                continue;
+
+            // This character's GMC side(s)
+            foreach (var edge in problemGroup.OrderBy(e => e.Role == ProblemCharacterRole.Protagonist ? 0 : 1))
+            {
+                if (edge.Role == ProblemCharacterRole.Protagonist)
+                {
+                    AppendGmcLine(sb, "  ProtGoal", problem.ProtGoal);
+                    AppendGmcLine(sb, "  ProtMotive", problem.ProtMotive);
+                    AppendGmcLine(sb, "  ProtConflict", problem.ProtConflict);
+                }
+                else
+                {
+                    AppendGmcLine(sb, "  AntagGoal", problem.AntagGoal);
+                    AppendGmcLine(sb, "  AntagMotive", problem.AntagMotive);
+                    AppendGmcLine(sb, "  AntagConflict", problem.AntagConflict);
+                }
+            }
+
+            // Opposing force when this character is only one side
+            var isProt = problemGroup.Any(e => e.Role == ProblemCharacterRole.Protagonist);
+            var isAntag = problemGroup.Any(e => e.Role == ProblemCharacterRole.Antagonist);
+            if (isProt && !isAntag && problem.Antagonist != Guid.Empty)
+            {
+                var antag = ResolveElement(problem.Antagonist, model) as CharacterModel;
+                if (antag != null)
+                {
+                    sb.AppendLine($"  Opposing (Antagonist): {antag.Name}");
+                    AppendGmcLine(sb, "  AntagGoal", problem.AntagGoal);
+                    AppendGmcLine(sb, "  AntagMotive", problem.AntagMotive);
+                    AppendGmcLine(sb, "  AntagConflict", problem.AntagConflict);
+                }
+            }
+            else if (isAntag && !isProt && problem.Protagonist != Guid.Empty)
+            {
+                var prot = ResolveElement(problem.Protagonist, model) as CharacterModel;
+                if (prot != null)
+                {
+                    sb.AppendLine($"  Opposing (Protagonist): {prot.Name}");
+                    AppendGmcLine(sb, "  ProtGoal", problem.ProtGoal);
+                    AppendGmcLine(sb, "  ProtMotive", problem.ProtMotive);
+                    AppendGmcLine(sb, "  ProtConflict", problem.ProtConflict);
+                }
+            }
+        }
+
+        sb.AppendLine();
+    }
+
+    private static void AppendGmcLine(StringBuilder sb, string label, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return;
+        sb.AppendLine($"{label}: {value.Trim()}");
     }
 
     #endregion
