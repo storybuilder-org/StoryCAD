@@ -4,7 +4,7 @@ using StoryCADLib.Services.Collaborator.Contracts;
 namespace CollaboratorLib.Context;
 
 /// <summary>
-/// Role of a character on a problem (Problem.Protagonist / Antagonist links).
+/// Role of a character slot on a problem (Problem.Protagonist / Antagonist).
 /// </summary>
 public enum ProblemCharacterRole
 {
@@ -13,7 +13,23 @@ public enum ProblemCharacterRole
 }
 
 /// <summary>
-/// One resolvable Problem → Character cast link.
+/// Resolution of one problem cast slot.
+/// </summary>
+public enum ProblemCharacterLinkStatus
+{
+    /// <summary>GUID set and resolves to a Character.</summary>
+    Linked,
+
+    /// <summary>GUID is Empty; slot not assigned.</summary>
+    Unassigned,
+
+    /// <summary>GUID set but does not resolve to a Character.</summary>
+    Unresolved
+}
+
+/// <summary>
+/// One problem cast slot (always two per problem: protagonist and antagonist).
+/// Unassigned and unresolved slots are first-class; they are not omitted from the index.
 /// </summary>
 public sealed record ProblemCharacterEdge(
     Guid ProblemGuid,
@@ -21,11 +37,13 @@ public sealed record ProblemCharacterEdge(
     ProblemCharacterRole Role,
     Guid CharacterGuid,
     string CharacterName,
-    bool IsStoryProblem);
+    bool IsStoryProblem,
+    ProblemCharacterLinkStatus Status,
+    bool ProblemHasGmcText);
 
 /// <summary>
-/// Reverse index of problem prot/antag links for StoryContext (issue #107 spine map).
-/// Built once per context assembly from existing Problem GUID fields.
+/// Slot-complete index of problem prot/antag links for StoryContext (issue #107 spine map).
+/// Built once per context assembly. Every problem contributes two slots.
 /// </summary>
 public sealed class ProblemCharacterIndex
 {
@@ -37,9 +55,7 @@ public sealed class ProblemCharacterIndex
     private readonly HashSet<Guid> _majorCast;
     private readonly Guid _storyProblemGuid;
 
-    private ProblemCharacterIndex(
-        List<ProblemCharacterEdge> edges,
-        Guid storyProblemGuid)
+    private ProblemCharacterIndex(List<ProblemCharacterEdge> edges, Guid storyProblemGuid)
     {
         _edges = edges;
         _storyProblemGuid = storyProblemGuid;
@@ -49,13 +65,6 @@ public sealed class ProblemCharacterIndex
 
         foreach (var edge in edges)
         {
-            if (!_byCharacter.TryGetValue(edge.CharacterGuid, out var charList))
-            {
-                charList = new List<ProblemCharacterEdge>();
-                _byCharacter[edge.CharacterGuid] = charList;
-            }
-            charList.Add(edge);
-
             if (!_byProblem.TryGetValue(edge.ProblemGuid, out var probList))
             {
                 probList = new List<ProblemCharacterEdge>();
@@ -63,19 +72,36 @@ public sealed class ProblemCharacterIndex
             }
             probList.Add(edge);
 
+            if (edge.Status != ProblemCharacterLinkStatus.Linked)
+                continue;
+            if (edge.CharacterGuid == Guid.Empty)
+                continue;
+
+            if (!_byCharacter.TryGetValue(edge.CharacterGuid, out var charList))
+            {
+                charList = new List<ProblemCharacterEdge>();
+                _byCharacter[edge.CharacterGuid] = charList;
+            }
+            charList.Add(edge);
             _majorCast.Add(edge.CharacterGuid);
         }
     }
 
+    /// <summary>All slots (Linked, Unassigned, Unresolved), two per problem.</summary>
     public IReadOnlyList<ProblemCharacterEdge> Edges => _edges;
+
+    /// <summary>Slots that resolve to a character only.</summary>
+    public IEnumerable<ProblemCharacterEdge> LinkedEdges =>
+        _edges.Where(e => e.Status == ProblemCharacterLinkStatus.Linked);
 
     public Guid StoryProblemGuid => _storyProblemGuid;
 
+    /// <summary>Characters with at least one Linked slot.</summary>
     public IReadOnlyCollection<Guid> MajorCastGuids => _majorCast;
 
     /// <summary>
-    /// Build the index from all problems in the open outline.
-    /// Empty prot/antag GUIDs and unresolvable GUIDs produce no edge.
+    /// Build the index from all problems. Each problem yields two slots
+    /// (protagonist and antagonist), including Unassigned and Unresolved.
     /// </summary>
     public static ProblemCharacterIndex Build(IStoryCADAPI api, StoryModel model)
     {
@@ -102,37 +128,55 @@ public sealed class ProblemCharacterIndex
                 continue;
 
             bool isStoryProblem = storyProblemGuid != Guid.Empty && problem.Uuid == storyProblemGuid;
-            TryAddEdge(api, edges, problem, problem.Protagonist, ProblemCharacterRole.Protagonist, isStoryProblem);
-            TryAddEdge(api, edges, problem, problem.Antagonist, ProblemCharacterRole.Antagonist, isStoryProblem);
+            bool hasGmc = ProblemHasGmcText(problem);
+            edges.Add(CreateSlot(api, problem, problem.Protagonist, ProblemCharacterRole.Protagonist, isStoryProblem, hasGmc));
+            edges.Add(CreateSlot(api, problem, problem.Antagonist, ProblemCharacterRole.Antagonist, isStoryProblem, hasGmc));
         }
 
         return new ProblemCharacterIndex(edges, storyProblemGuid);
     }
 
-    private static void TryAddEdge(
+    private static ProblemCharacterEdge CreateSlot(
         IStoryCADAPI api,
-        List<ProblemCharacterEdge> edges,
         ProblemModel problem,
         Guid characterGuid,
         ProblemCharacterRole role,
-        bool isStoryProblem)
+        bool isStoryProblem,
+        bool hasGmc)
     {
+        var name = problem.Name ?? string.Empty;
+
         if (characterGuid == Guid.Empty)
-            return;
+        {
+            return new ProblemCharacterEdge(
+                problem.Uuid, name, role, Guid.Empty, string.Empty,
+                isStoryProblem, ProblemCharacterLinkStatus.Unassigned, hasGmc);
+        }
 
         var result = api.GetStoryElement(characterGuid);
-        if (!result.IsSuccess || result.Payload is not CharacterModel character)
-            return;
+        if (result.IsSuccess && result.Payload is CharacterModel character)
+        {
+            return new ProblemCharacterEdge(
+                problem.Uuid, name, role, character.Uuid, character.Name ?? string.Empty,
+                isStoryProblem, ProblemCharacterLinkStatus.Linked, hasGmc);
+        }
 
-        edges.Add(new ProblemCharacterEdge(
-            problem.Uuid,
-            problem.Name ?? string.Empty,
-            role,
-            character.Uuid,
-            character.Name ?? string.Empty,
-            isStoryProblem));
+        return new ProblemCharacterEdge(
+            problem.Uuid, name, role, characterGuid, string.Empty,
+            isStoryProblem, ProblemCharacterLinkStatus.Unresolved, hasGmc);
     }
 
+    public static bool ProblemHasGmcText(ProblemModel problem)
+    {
+        return !string.IsNullOrWhiteSpace(problem.ProtGoal)
+               || !string.IsNullOrWhiteSpace(problem.ProtMotive)
+               || !string.IsNullOrWhiteSpace(problem.ProtConflict)
+               || !string.IsNullOrWhiteSpace(problem.AntagGoal)
+               || !string.IsNullOrWhiteSpace(problem.AntagMotive)
+               || !string.IsNullOrWhiteSpace(problem.AntagConflict);
+    }
+
+    /// <summary>Linked slots only for this character.</summary>
     public IReadOnlyList<ProblemCharacterEdge> EdgesForCharacter(Guid characterGuid)
     {
         if (characterGuid == Guid.Empty)
@@ -142,6 +186,7 @@ public sealed class ProblemCharacterIndex
             : Array.Empty<ProblemCharacterEdge>();
     }
 
+    /// <summary>All slots for this problem (typically two).</summary>
     public IReadOnlyList<ProblemCharacterEdge> EdgesForProblem(Guid problemGuid)
     {
         if (problemGuid == Guid.Empty)
@@ -152,7 +197,7 @@ public sealed class ProblemCharacterIndex
     }
 
     /// <summary>
-    /// Prefer Story Problem edges, then Protagonist, then Antagonist; cap count.
+    /// Linked slots for the character, prefer Story Problem, then Protagonist role; cap problems.
     /// </summary>
     public IReadOnlyList<ProblemCharacterEdge> SelectDetailedEdgesForCharacter(
         Guid characterGuid,
@@ -162,7 +207,6 @@ public sealed class ProblemCharacterIndex
         if (edges.Count == 0)
             return edges;
 
-        // Distinct problems in priority order, keep both roles if same problem
         var ordered = edges
             .OrderByDescending(e => e.IsStoryProblem)
             .ThenBy(e => e.Role == ProblemCharacterRole.Protagonist ? 0 : 1)
