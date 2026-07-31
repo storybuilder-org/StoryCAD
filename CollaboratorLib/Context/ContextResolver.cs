@@ -8,40 +8,57 @@ namespace CollaboratorLib.Context;
 /// </summary>
 public class ContextResolver
 {
-    // Workflow labels that need full context
     private static readonly HashSet<string> FullContextWorkflows = new(StringComparer.OrdinalIgnoreCase)
     {
         "GMC",
         "Critique"
     };
 
-    // Workflow labels that only need story constraints
     private static readonly HashSet<string> MinimalContextWorkflows = new(StringComparer.OrdinalIgnoreCase)
     {
         "Premise"
     };
 
     /// <summary>
+    /// High-tier character craft: problem stakes (GMC) in StoryContext.
+    /// </summary>
+    private static readonly HashSet<string> CharacterHighDetailWorkflows = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Flaw",
+        "Backstory",
+        "RoleAndStoryRole"
+    };
+
+    /// <summary>
+    /// Medium-tier character craft: links (and GMC when useful).
+    /// </summary>
+    private static readonly HashSet<string> CharacterMediumDetailWorkflows = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "PsychologicalMakeup",
+        "Relationship"
+    };
+
+    /// <summary>
     /// Get the context specification for a workflow and element type combination.
     /// </summary>
-    /// <param name="workflowLabel">The workflow being executed (e.g., "GMC", "Premise")</param>
-    /// <param name="elementType">The type of element being processed</param>
-    /// <returns>ContextSpec indicating what context to gather</returns>
     public ContextSpec GetContextFor(string workflowLabel, StoryItemType elementType)
     {
-        // GMC workflow on Problem needs full context for temporal awareness
         if (FullContextWorkflows.Contains(workflowLabel) && elementType == StoryItemType.Problem)
         {
             return ContextSpec.Full;
         }
 
-        // Premise workflow only needs story constraints
+        // Premise: constraints only (omit cast map to keep ideation prompts light)
         if (MinimalContextWorkflows.Contains(workflowLabel))
         {
-            return ContextSpec.Default;
+            return new ContextSpec
+            {
+                IncludeStoryConstraints = true,
+                IncludeCastProblemMap = false,
+                CharacterProblemDetail = CharacterProblemDetail.None
+            };
         }
 
-        // Scene workflows need character and setting context
         if (elementType == StoryItemType.Scene)
         {
             return new ContextSpec
@@ -50,23 +67,33 @@ public class ContextResolver
                 IncludeBeatHierarchy = false,
                 IncludeCharacterContext = true,
                 IncludePrecedingEvents = true,
-                MaxPrecedingBeats = 2
+                MaxPrecedingBeats = 2,
+                IncludeCastProblemMap = true,
+                CharacterProblemDetail = CharacterProblemDetail.None
             };
         }
 
-        // Character workflows need relationship context (future enhancement)
         if (elementType == StoryItemType.Character)
         {
+            var detail = CharacterProblemDetail.LinksOnly;
+            if (CharacterHighDetailWorkflows.Contains(workflowLabel))
+                detail = CharacterProblemDetail.LinksAndGmc;
+            else if (CharacterMediumDetailWorkflows.Contains(workflowLabel))
+                detail = CharacterProblemDetail.LinksAndGmc;
+            // PhysicalAppearance, SocialFactors, InnerOuterTraits stay LinksOnly
+
             return new ContextSpec
             {
                 IncludeStoryConstraints = true,
                 IncludeBeatHierarchy = false,
-                IncludeCharacterContext = false, // Don't include self
-                IncludePrecedingEvents = false
+                IncludeCharacterContext = false,
+                IncludePrecedingEvents = false,
+                IncludeCastProblemMap = true,
+                CharacterProblemDetail = detail
             };
         }
 
-        // Default: story constraints only
+        // Default: constraints + spine map (problem/setting and other targets)
         return ContextSpec.Default;
     }
 
@@ -75,7 +102,6 @@ public class ContextResolver
     /// </summary>
     public bool ShouldEnrichContext(string workflowLabel)
     {
-        // All workflows get at least story constraints
         return true;
     }
 }
