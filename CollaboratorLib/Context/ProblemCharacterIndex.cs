@@ -47,8 +47,6 @@ public sealed record ProblemCharacterEdge(
 /// </summary>
 public sealed class ProblemCharacterIndex
 {
-    public const int DefaultMaxDetailedProblems = 2;
-
     private readonly List<ProblemCharacterEdge> _edges;
     private readonly Dictionary<Guid, List<ProblemCharacterEdge>> _byCharacter;
     private readonly Dictionary<Guid, List<ProblemCharacterEdge>> _byProblem;
@@ -197,36 +195,14 @@ public sealed class ProblemCharacterIndex
     }
 
     /// <summary>
-    /// Linked slots for the character, prefer Story Problem, then Protagonist role; cap problems.
+    /// Distinct problem GUIDs where this character is Protagonist and/or Antagonist (linked).
+    /// Same character on both slots yields one GUID. No cap — all related problems.
     /// </summary>
-    public IReadOnlyList<ProblemCharacterEdge> SelectDetailedEdgesForCharacter(
-        Guid characterGuid,
-        int maxProblems = DefaultMaxDetailedProblems)
+    public IReadOnlyList<Guid> RelatedProblemGuids(Guid characterGuid)
     {
-        var edges = EdgesForCharacter(characterGuid);
-        if (edges.Count == 0)
-            return edges;
-
-        var ordered = edges
-            .OrderByDescending(e => e.IsStoryProblem)
-            .ThenBy(e => e.Role == ProblemCharacterRole.Protagonist ? 0 : 1)
-            .ThenBy(e => e.ProblemName, StringComparer.OrdinalIgnoreCase)
+        return EdgesForCharacter(characterGuid)
+            .Select(e => e.ProblemGuid)
+            .Distinct()
             .ToList();
-
-        var selectedProblems = new List<Guid>();
-        var result = new List<ProblemCharacterEdge>();
-        foreach (var edge in ordered)
-        {
-            if (!selectedProblems.Contains(edge.ProblemGuid))
-            {
-                if (selectedProblems.Count >= maxProblems)
-                    continue;
-                selectedProblems.Add(edge.ProblemGuid);
-            }
-            if (selectedProblems.Contains(edge.ProblemGuid))
-                result.Add(edge);
-        }
-
-        return result;
     }
 }

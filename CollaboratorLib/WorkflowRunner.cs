@@ -213,6 +213,7 @@ namespace StoryCollaborator
         /// Builds the #106 request body: full gathered elements (RTF stripped on outbound copy only)
         /// plus pass-through args and declared collection lists. Does not flatten Label_Property keys
         /// and does not invent lists from WriteVia.
+        /// Issue #107: character craft workflows also get RelatedProblems (full Problem models).
         /// </summary>
         internal WorkflowProxyBody BuildWorkflowRequestBody(Dictionary<string, StoryElement> gatheredElements)
         {
@@ -236,7 +237,38 @@ namespace StoryCollaborator
                 body.Args[collection.RequestName] = JsonSerializer.Serialize(projected, serOpts);
             }
 
+            AttachRelatedProblemsCollection(body, gatheredElements, serOpts);
+
             return body;
+        }
+
+        /// <summary>
+        /// Index → all problems where Character is prot and/or antag → full models in args.
+        /// Empty array when no links or no Character. Relationship deferred.
+        /// </summary>
+        private void AttachRelatedProblemsCollection(
+            WorkflowProxyBody body,
+            Dictionary<string, StoryElement> gatheredElements,
+            JsonSerializerOptions serOpts)
+        {
+            _ = serOpts;
+            if (!ContextResolver.RelatedProblemsWorkflows.Contains(workflowModel.Label))
+                return;
+
+            var array = new JsonArray();
+            if (gatheredElements.TryGetValue("Character", out var characterElement) &&
+                characterElement is CharacterModel character)
+            {
+                var index = ProblemCharacterIndex.Build(_storyApi, storyModel);
+                foreach (var problemGuid in index.RelatedProblemGuids(character.Uuid))
+                {
+                    var result = _storyApi.GetStoryElement(problemGuid);
+                    if (result.IsSuccess && result.Payload is ProblemModel problem)
+                        array.Add(SerializeElementOutbound(problem));
+                }
+            }
+
+            body.Args[ContextResolver.RelatedProblemsRequestName] = array.ToJsonString();
         }
 
         /// <summary>
