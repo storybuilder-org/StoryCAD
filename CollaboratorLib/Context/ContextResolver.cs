@@ -20,23 +20,21 @@ public class ContextResolver
     };
 
     /// <summary>
-    /// High-tier character craft: problem stakes (GMC) in StoryContext.
+    /// Character craft workflows that receive the RelatedProblems collection (issue #107).
+    /// Relationship is deferred (not problem-based).
     /// </summary>
-    private static readonly HashSet<string> CharacterHighDetailWorkflows = new(StringComparer.OrdinalIgnoreCase)
+    public static readonly HashSet<string> RelatedProblemsWorkflows = new(StringComparer.OrdinalIgnoreCase)
     {
+        "PhysicalAppearance",
+        "SocialFactors",
+        "PsychologicalMakeup",
+        "InnerOuterTraits",
         "Flaw",
         "Backstory",
         "RoleAndStoryRole"
     };
 
-    /// <summary>
-    /// Medium-tier character craft: links (and GMC when useful).
-    /// </summary>
-    private static readonly HashSet<string> CharacterMediumDetailWorkflows = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "PsychologicalMakeup",
-        "Relationship"
-    };
+    public const string RelatedProblemsRequestName = "RelatedProblems";
 
     /// <summary>
     /// Get the context specification for a workflow and element type combination.
@@ -48,14 +46,13 @@ public class ContextResolver
             return ContextSpec.Full;
         }
 
-        // Premise: constraints only (omit cast map to keep ideation prompts light)
+        // Premise: constraints + gaps (gap pass is outline-wide for every run)
         if (MinimalContextWorkflows.Contains(workflowLabel))
         {
             return new ContextSpec
             {
                 IncludeStoryConstraints = true,
-                IncludeCastProblemMap = false,
-                CharacterProblemDetail = CharacterProblemDetail.None
+                IncludeGaps = true
             };
         }
 
@@ -68,32 +65,22 @@ public class ContextResolver
                 IncludeCharacterContext = true,
                 IncludePrecedingEvents = true,
                 MaxPrecedingBeats = 2,
-                IncludeCastProblemMap = true,
-                CharacterProblemDetail = CharacterProblemDetail.None
+                IncludeGaps = true
             };
         }
 
         if (elementType == StoryItemType.Character)
         {
-            var detail = CharacterProblemDetail.LinksOnly;
-            if (CharacterHighDetailWorkflows.Contains(workflowLabel))
-                detail = CharacterProblemDetail.LinksAndGmc;
-            else if (CharacterMediumDetailWorkflows.Contains(workflowLabel))
-                detail = CharacterProblemDetail.LinksAndGmc;
-            // PhysicalAppearance, SocialFactors, InnerOuterTraits stay LinksOnly
-
             return new ContextSpec
             {
                 IncludeStoryConstraints = true,
                 IncludeBeatHierarchy = false,
                 IncludeCharacterContext = false,
                 IncludePrecedingEvents = false,
-                IncludeCastProblemMap = true,
-                CharacterProblemDetail = detail
+                IncludeGaps = true
             };
         }
 
-        // Default: constraints + spine map (problem/setting and other targets)
         return ContextSpec.Default;
     }
 
