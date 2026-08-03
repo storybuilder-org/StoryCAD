@@ -169,11 +169,11 @@
                       (VerticalScrollMode does not override it). Visible keeps the built-in bar
                       on screen whenever the list overflows: the scroll affordance #129 asks for.
                     -->
+                    <!-- ScrollViewer: no AutomationId (not in convention suffix table). List content is not a ListView. -->
                     <ScrollViewer Grid.Row="2"
                                   VerticalAlignment="Stretch"
                                   VerticalScrollBarVisibility="Visible"
-                                  HorizontalScrollBarVisibility="Disabled"
-                                  AutomationProperties.AutomationId="WorkflowPendingUpdatesList">
+                                  HorizontalScrollBarVisibility="Disabled">
                         <ItemsControl ItemsSource="{x:Bind ViewModel.PendingUpdateItems, Mode=OneWay}">
                             <ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -331,7 +331,7 @@
                             HorizontalAlignment="Stretch"
                             Text="{x:Bind ViewModel.InputText, Mode=TwoWay}"
                             QuerySubmitted="InputTextBox_QuerySubmitted"
-                            AutomationProperties.AutomationId="InputTextBox"
+                            AutomationProperties.AutomationId="InputSearchBox"
                             AutomationProperties.Name="Message">
                 <AutoSuggestBox.QueryIcon>
                     <SymbolIcon Symbol="Send" />

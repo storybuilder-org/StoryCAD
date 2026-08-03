@@ -27,7 +27,8 @@ public partial class ChatMessage : ObservableObject
     /// <summary>
     /// True for a rolled-up run of workflow status lines.
     /// </summary>
-    public bool IsStatusGroup { get; init; }
+    // get/set (not init): WinUI XamlTypeInfo assigns after construction on net10.0-windows
+    public bool IsStatusGroup { get; set; }
 
     /// <summary>
     /// Status lines in this group (status groups only).
