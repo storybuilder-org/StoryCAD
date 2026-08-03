@@ -19,6 +19,12 @@ namespace StoryCollaborator.Workflows
         public string Explanation { get; set; } = string.Empty;
         public string PluginsFolder => Plugins;
 
+        /// <summary>
+        /// The story element type this workflow develops; groups the nav menu (#129).
+        /// The simple constructor sets it; full-WorkflowIO registry entries set it explicitly.
+        /// </summary>
+        public StoryItemType PrimaryElementType { get; set; } = StoryItemType.Unknown;
+
         // Additional properties
         public StoryModel? Model { get; set; }
         public string Plugins { get; set; } = string.Empty;
@@ -57,6 +63,7 @@ namespace StoryCollaborator.Workflows
             Description = description;
             Explanation = explanation ?? string.Empty;
             Plugins = label;
+            PrimaryElementType = primaryElementType;
 
             _workflowIO = CreateSimpleWorkflowIO(primaryElementType, outputProperties, exampleLists);
         }

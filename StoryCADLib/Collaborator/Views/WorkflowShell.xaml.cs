@@ -31,6 +31,8 @@ public sealed partial class WorkflowShell : Page
         {
             shellVm.ContentFrame = StepFrame;
             shellVm.NavView = NavView;
+            // Keep VM pane flag in sync with control default after load.
+            shellVm.IsPaneOpen = NavView.IsPaneOpen;
             // Menu population is handled by Collaborator after navigation
         }
     }

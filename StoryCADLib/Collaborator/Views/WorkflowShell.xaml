@@ -16,43 +16,71 @@
     mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
+            <!-- Top actions (StoryCAD-like): short workflow name + buttons -->
+            <RowDefinition Height="Auto" />
+            <!-- Nav + work + chat -->
             <RowDefinition Height="*" />
+            <!-- Bottom status only -->
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <!-- Main navigation view UI -->
-        <!-- Container id only; MenuItemsSource-bound, so there are no NavigationViewItem
-             elements in this XAML to annotate (Unit 6 NavigationView convention row). -->
-        <NavigationView x:Name="NavView"
-                        Grid.Row="0"
-                        IsBackButtonVisible="Collapsed"
-                        MenuItemsSource="{x:Bind ShellViewModel.MenuItems, Mode=OneWay}"
-                        SelectedItem="{x:Bind ShellViewModel.CurrentItem, Mode=TwoWay}"
-                        IsSettingsVisible="False"
-                        SelectionChanged="NavView_SelectionChanged"
-                        PaneDisplayMode="Left"
-                        AutomationProperties.AutomationId="WorkflowNav">
 
-            <Frame x:Name="StepFrame" Navigated="StepFrame_OnNavigated" Margin="5,0,5,5" />
-        </NavigationView>
+        <!-- Top bar: everything left-aligned (CommandBar PrimaryCommands are right by default). -->
+        <Border Grid.Row="0"
+                Background="{ThemeResource CommandBarBackground}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="4,2">
+            <!-- Icons only; name on hover (ToolTip). Labels wasted horizontal space. -->
+            <StackPanel Orientation="Horizontal" Spacing="0" VerticalAlignment="Center">
+                <AppBarButton ToolTipService.ToolTip="Workflows"
+                              Command="{x:Bind ShellViewModel.TogglePaneCommand, Mode=OneWay}"
+                              AutomationProperties.AutomationId="WorkflowPaneToggleButton"
+                              AutomationProperties.Name="Workflows">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE700;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
 
-        <!-- Shell actions + status (status survives empty content frame / gather cancel) -->
-        <CommandBar Grid.Row="1" HorizontalAlignment="Stretch" OverflowButtonVisibility="Collapsed">
-            <CommandBar.Content>
-                <!-- InfoBar: approved #1420 suffix (Unit 7). Content TextBlocks must not carry AutomationId. -->
-                <InfoBar IsOpen="{x:Bind ShellViewModel.HasStatus, Mode=OneWay}"
-                         Severity="Warning"
-                         IsClosable="False"
-                         Message="{x:Bind ShellViewModel.StatusText, Mode=OneWay}"
-                         MaxWidth="480"
-                         Margin="8,0,8,0"
-                         VerticalAlignment="Center"
-                         AutomationProperties.AutomationId="WorkflowShellStatusInfoBar" />
-            </CommandBar.Content>
-            <CommandBar.PrimaryCommands>
-                <!-- Prefixed: Shell.xaml already claims HelpButton. Label present: name announces
-                     natively, id only (convention Name/LabeledBy rule). -->
-                <AppBarButton Label="Help" ToolTipService.ToolTip="Help" Margin="5"
-                              AutomationProperties.AutomationId="WorkflowHelpButton">
+                <TextBlock Text="{x:Bind ShellViewModel.ActiveWorkflowName, Mode=OneWay}"
+                           VerticalAlignment="Center"
+                           Margin="4,0,12,0"
+                           FontWeight="SemiBold"
+                           FontSize="14"
+                           TextTrimming="CharacterEllipsis"
+                           MaxWidth="200"
+                           AutomationProperties.Name="Current workflow" />
+
+                <AppBarButton ToolTipService.ToolTip="Accept All"
+                              Command="{x:Bind ShellViewModel.AcceptAllCommand, Mode=OneWay}"
+                              IsEnabled="{x:Bind ShellViewModel.HasPendingUpdates, Mode=OneWay}"
+                              AutomationProperties.AutomationId="WorkflowAcceptAllButton"
+                              AutomationProperties.Name="Accept All">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE73E;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton ToolTipService.ToolTip="Review Each"
+                              Command="{x:Bind ShellViewModel.ReviewEachCommand, Mode=OneWay}"
+                              IsEnabled="{x:Bind ShellViewModel.HasPendingUpdates, Mode=OneWay}"
+                              AutomationProperties.AutomationId="WorkflowReviewEachButton"
+                              AutomationProperties.Name="Review Each">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8FD;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton ToolTipService.ToolTip="Try Again"
+                              Command="{x:Bind ShellViewModel.TryAgainCommand, Mode=OneWay}"
+                              IsEnabled="{x:Bind ShellViewModel.HasPendingUpdates, Mode=OneWay}"
+                              AutomationProperties.AutomationId="WorkflowTryAgainButton"
+                              AutomationProperties.Name="Try Again">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE72C;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
+
+                <AppBarButton ToolTipService.ToolTip="Help" Margin="8,0,0,0"
+                              AutomationProperties.AutomationId="WorkflowHelpButton"
+                              AutomationProperties.Name="Help">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE897;" />
                     </AppBarButton.Icon>
@@ -78,31 +106,70 @@
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <!-- Prefixed: "Settings" is a common function name across dialogs, prefix to avoid collision. -->
-                <AppBarButton Label="Settings" ToolTipService.ToolTip="Collaborator Settings" Margin="5"
+                <AppBarButton ToolTipService.ToolTip="Settings"
                               Click="SettingsButton_Click"
-                              AutomationProperties.AutomationId="WorkflowSettingsButton">
+                              AutomationProperties.AutomationId="WorkflowSettingsButton"
+                              AutomationProperties.Name="Settings">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE713;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <!-- Prefixed: Shell.xaml already claims SaveStatusButton/SaveStoryMenuItem for "Save". -->
-                <AppBarButton Label="Save" ToolTipService.ToolTip="Save outline changes" Margin="5"
+                <AppBarButton ToolTipService.ToolTip="Save"
                               Command="{x:Bind ShellViewModel.SaveCommand, Mode=OneWay}"
-                              AutomationProperties.AutomationId="WorkflowSaveButton">
+                              AutomationProperties.AutomationId="WorkflowSaveButton"
+                              AutomationProperties.Name="Save">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <!-- Prefixed: Shell.xaml already claims ExitMenuItem for "Exit". -->
-                <AppBarButton Label="Exit" ToolTipService.ToolTip="Exit Collaborator" Margin="5"
+                <AppBarButton ToolTipService.ToolTip="Exit"
                               Command="{x:Bind ShellViewModel.ExitCommand, Mode=OneWay}"
-                              AutomationProperties.AutomationId="WorkflowExitButton">
+                              AutomationProperties.AutomationId="WorkflowExitButton"
+                              AutomationProperties.Name="Exit">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8BB;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-            </CommandBar.PrimaryCommands>
-        </CommandBar>
+            </StackPanel>
+        </Border>
+
+        <!-- Main navigation view UI -->
+        <!-- Container id only; MenuItemsSource-bound, so there are no NavigationViewItem
+             elements in this XAML to annotate (Unit 6 NavigationView convention row). -->
+        <NavigationView x:Name="NavView"
+                        Grid.Row="1"
+                        IsBackButtonVisible="Collapsed"
+                        IsPaneToggleButtonVisible="False"
+                        IsPaneOpen="{x:Bind ShellViewModel.IsPaneOpen, Mode=TwoWay}"
+                        MenuItemsSource="{x:Bind ShellViewModel.MenuItems, Mode=OneWay}"
+                        SelectedItem="{x:Bind ShellViewModel.CurrentItem, Mode=TwoWay}"
+                        IsSettingsVisible="False"
+                        SelectionChanged="NavView_SelectionChanged"
+                        PaneDisplayMode="Left"
+                        AutomationProperties.AutomationId="WorkflowNav">
+
+            <Frame x:Name="StepFrame"
+                   Navigated="StepFrame_OnNavigated"
+                   Margin="12,8,12,10"
+                   VerticalAlignment="Stretch"
+                   HorizontalAlignment="Stretch" />
+        </NavigationView>
+
+        <!-- Bottom status (survives empty content frame / gather cancel). Not a second title. -->
+        <Border Grid.Row="2"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="0,1,0,0"
+                MinHeight="36"
+                Padding="8,4">
+            <!-- InfoBar: approved #1420 suffix (Unit 7). Content TextBlocks must not carry AutomationId. -->
+            <InfoBar IsOpen="{x:Bind ShellViewModel.HasStatus, Mode=OneWay}"
+                     Severity="Warning"
+                     IsClosable="False"
+                     Message="{x:Bind ShellViewModel.StatusText, Mode=OneWay}"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Center"
+                     AutomationProperties.AutomationId="WorkflowShellStatusInfoBar" />
+        </Border>
     </Grid>
 </Page>

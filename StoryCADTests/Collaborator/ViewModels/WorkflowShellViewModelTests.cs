@@ -83,6 +83,19 @@ public class WorkflowShellViewModelTests
     }
 
     [TestMethod]
+    public void ActiveWorkflowName_Initially_IsEmpty()
+    {
+        Assert.AreEqual(string.Empty, _viewModel.ActiveWorkflowName);
+    }
+
+    [TestMethod]
+    public void ActiveWorkflowName_WhenSet_ReturnsNewValue()
+    {
+        _viewModel.ActiveWorkflowName = "Premise";
+        Assert.AreEqual("Premise", _viewModel.ActiveWorkflowName);
+    }
+
+    [TestMethod]
     public void StatusText_Initially_IsEmpty()
     {
         Assert.AreEqual(string.Empty, _viewModel.StatusText);

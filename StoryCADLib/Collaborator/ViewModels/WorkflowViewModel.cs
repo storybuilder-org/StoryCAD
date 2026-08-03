@@ -21,6 +21,7 @@ public partial class WorkflowViewModel : ObservableRecipient
     public WorkflowViewModel()
     {
         ConversationList = new ObservableCollection<ChatMessage>();
+        ConversationList.CollectionChanged += OnConversationChanged;
         PendingUpdateItems = new ObservableCollection<PendingUpdateItem>();
 
         // Existing commands
@@ -36,6 +37,49 @@ public partial class WorkflowViewModel : ObservableRecipient
         AcceptCurrentCommand = new RelayCommand(ExecuteAcceptCurrent);
         SkipCurrentCommand = new RelayCommand(ExecuteSkipCurrent);
         AcceptRemainingCommand = new RelayCommand(ExecuteAcceptRemaining);
+    }
+
+    /// <summary>
+    /// Shows the sender label once per run of consecutive same-sender bubbles;
+    /// status groups never carry a label (#129 chat cleanup).
+    /// </summary>
+    private void OnConversationChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        if (e.Action != System.Collections.Specialized.NotifyCollectionChangedAction.Add || e.NewItems == null)
+            return;
+
+        foreach (ChatMessage added in e.NewItems)
+        {
+            var index = ConversationList.IndexOf(added);
+            var previous = index > 0 ? ConversationList[index - 1] : null;
+            added.ShowSender = !added.IsStatusGroup
+                && (previous == null || previous.IsUser != added.IsUser);
+        }
+    }
+
+    /// <summary>
+    /// Adds a workflow progress line, rolling consecutive lines into one
+    /// collapsed status group instead of a bubble each (#129 chat cleanup).
+    /// </summary>
+    public void AddStatusMessage(string message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+            return;
+
+        var line = message.Trim().Trim('-').Trim();
+        if (line.Length == 0)
+            return;
+
+        if (ConversationList.Count > 0
+            && ConversationList[^1] is { IsStatusGroup: true } group)
+        {
+            group.AddStep(line);
+            return;
+        }
+
+        var newGroup = ChatMessage.StatusGroup();
+        newGroup.AddStep(line);
+        ConversationList.Add(newGroup);
     }
 
     public async Task InitializeAsync(object workflow)
@@ -55,9 +99,24 @@ public partial class WorkflowViewModel : ObservableRecipient
 
     public string Title { get; set; }
 
-    public string Description { get; set; }
+    private string _description = string.Empty;
+    /// <summary>Brief workflow purpose (registry description).</summary>
+    public string Description
+    {
+        get => _description;
+        set => SetProperty(ref _description, value ?? string.Empty);
+    }
 
-    public string Explanation { get; set; }
+    private string _explanation = string.Empty;
+    /// <summary>
+    /// Topical work-column context (#129): selected elements and what to do next
+    /// (pending accept/review). Not the long static registry essay.
+    /// </summary>
+    public string Explanation
+    {
+        get => _explanation;
+        set => SetProperty(ref _explanation, value ?? string.Empty);
+    }
 
     public ObservableCollection<ChatMessage> ConversationList { get; set; }
 
@@ -82,14 +141,51 @@ public partial class WorkflowViewModel : ObservableRecipient
         set => SetProperty(ref _promptOutput, value);
     }
 
-    private string _selectedElementsSummary;
+    private string _selectedElementsSummary = string.Empty;
     /// <summary>
-    /// Summary of elements selected for this workflow (e.g., "Problem: Herold wants Greta")
+    /// Gathered elements for this run (e.g. "Overview: Schrodinger's Computer").
+    /// Surfaced via <see cref="Explanation"/>, not a separate card.
     /// </summary>
     public string SelectedElementsSummary
     {
         get => _selectedElementsSummary;
-        set => SetProperty(ref _selectedElementsSummary, value);
+        set => SetProperty(ref _selectedElementsSummary, value ?? string.Empty);
+    }
+
+    /// <summary>
+    /// Rebuilds topical Explanation from selected elements + pending/review state.
+    /// </summary>
+    public void RefreshTopicalExplanation()
+    {
+        var parts = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(SelectedElementsSummary))
+        {
+            var oneLine = SelectedElementsSummary.Replace("\r\n", "; ").Replace("\n", "; ");
+            parts.Add($"Selected: {oneLine}");
+        }
+
+        if (IsInReviewMode && PendingUpdateItems != null && PendingUpdateItems.Count > 0)
+        {
+            parts.Add(
+                $"Reviewing {CurrentReviewIndex + 1} of {PendingUpdateItems.Count}: {CurrentReviewDisplayName}. " +
+                "Accept to apply, Skip to keep yours.");
+        }
+        else if (HasPendingUpdates && PendingUpdateItems != null)
+        {
+            var total = PendingUpdateItems.Count;
+            var needReview = PendingUpdateItems.Count(i => i.IsProtected);
+            var free = total - needReview;
+            parts.Add(
+                $"{total} property update(s) ({free} free, {needReview} need review). " +
+                "Use Accept All, Review Each, or Try Again.");
+        }
+        else if (UpdatesApplied)
+        {
+            parts.Add("Updates applied. Ask in chat or choose another workflow.");
+        }
+
+        Explanation = parts.Count == 0 ? string.Empty : string.Join("\n", parts);
     }
 
     #endregion
@@ -106,6 +202,23 @@ public partial class WorkflowViewModel : ObservableRecipient
 
     /// <summary>True if updates exist and haven't been fully applied yet.</summary>
     public bool HasPendingUpdates => HasUpdates && !UpdatesApplied;
+
+    /// <summary>
+    /// Panel header with counts (#129): free vs need-review (Protect).
+    /// </summary>
+    public string PendingUpdatesHeader
+    {
+        get
+        {
+            if (PendingUpdateItems == null || PendingUpdateItems.Count == 0)
+                return "Property Updates";
+
+            var total = PendingUpdateItems.Count;
+            var needReview = PendingUpdateItems.Count(i => i.IsProtected);
+            var free = total - needReview;
+            return $"Property Updates ({total}: {free} free, {needReview} need review)";
+        }
+    }
 
     public Microsoft.UI.Xaml.Visibility ReviewModeVisibility =>
         IsInReviewMode ? Microsoft.UI.Xaml.Visibility.Visible : Microsoft.UI.Xaml.Visibility.Collapsed;
@@ -136,6 +249,26 @@ public partial class WorkflowViewModel : ObservableRecipient
         IsInReviewMode && PendingUpdateItems?.Count > CurrentReviewIndex
             ? PendingUpdateItems[CurrentReviewIndex].Key
             : string.Empty;
+
+    /// <summary>
+    /// Friendly title for the row under review, e.g. "Structure Title (Problem)".
+    /// Falls back to the raw key when display fields are unset (#129).
+    /// </summary>
+    public string CurrentReviewDisplayName
+    {
+        get
+        {
+            if (!IsInReviewMode || PendingUpdateItems == null || PendingUpdateItems.Count <= CurrentReviewIndex)
+                return string.Empty;
+
+            var item = PendingUpdateItems[CurrentReviewIndex];
+            if (string.IsNullOrEmpty(item.PropertyDisplayName))
+                return item.Key;
+            return string.IsNullOrEmpty(item.ElementName)
+                ? item.PropertyDisplayName
+                : $"{item.PropertyDisplayName} ({item.ElementName})";
+        }
+    }
 
     /// <summary>Proposed value for the row under review.</summary>
     public string CurrentReviewValue =>
@@ -299,6 +432,25 @@ public partial class WorkflowViewModel : ObservableRecipient
             await OnTryAgain();
     }
 
+    /// <summary>
+    /// Accepts a single row from its inline tick (#129); works outside review mode.
+    /// Collaborator's handler applies the update, removes the key, and re-syncs the list.
+    /// </summary>
+    public void AcceptItem(string key)
+    {
+        if (string.IsNullOrEmpty(key) || !HasPendingUpdates) return;
+        OnAcceptProperty?.Invoke(key);
+    }
+
+    /// <summary>
+    /// Skips (discards) a single row from its inline dismiss button (#129).
+    /// </summary>
+    public void SkipItem(string key)
+    {
+        if (string.IsNullOrEmpty(key) || !HasPendingUpdates) return;
+        OnSkipProperty?.Invoke(key);
+    }
+
     private void ExecuteAcceptCurrent()
     {
         if (!IsInReviewMode || !HasPendingUpdates) return;
@@ -372,12 +524,14 @@ public partial class WorkflowViewModel : ObservableRecipient
     private void NotifyReviewProperties()
     {
         OnPropertyChanged(nameof(CurrentReviewKey));
+        OnPropertyChanged(nameof(CurrentReviewDisplayName));
         OnPropertyChanged(nameof(CurrentReviewValue));
         OnPropertyChanged(nameof(CurrentReviewExisting));
         OnPropertyChanged(nameof(CurrentReviewCraft));
         OnPropertyChanged(nameof(CurrentReviewHasCraft));
         OnPropertyChanged(nameof(CurrentReviewCraftVisibility));
         OnPropertyChanged(nameof(ReviewProgress));
+        RefreshTopicalExplanation();
     }
 
     public void ClearPendingUpdates()
@@ -388,6 +542,8 @@ public partial class WorkflowViewModel : ObservableRecipient
         CurrentReviewIndex = 0;
         OnPropertyChanged(nameof(HasUpdates));
         OnPropertyChanged(nameof(HasPendingUpdates));
+        OnPropertyChanged(nameof(PendingUpdatesHeader));
+        RefreshTopicalExplanation();
     }
 
     /// <summary>
@@ -403,10 +559,23 @@ public partial class WorkflowViewModel : ObservableRecipient
         }
 
         UpdatesApplied = false;
+
+        // Inline ticks can shrink the list while Review Each is walking it (#129):
+        // exit review when it empties, clamp the index when it points past the end.
+        if (IsInReviewMode)
+        {
+            if (PendingUpdateItems.Count == 0)
+                IsInReviewMode = false;
+            else if (CurrentReviewIndex >= PendingUpdateItems.Count)
+                CurrentReviewIndex = PendingUpdateItems.Count - 1;
+        }
+
         OnPropertyChanged(nameof(PendingUpdateItems));
         OnPropertyChanged(nameof(HasUpdates));
         OnPropertyChanged(nameof(HasPendingUpdates));
+        OnPropertyChanged(nameof(PendingUpdatesHeader));
         NotifyReviewProperties();
+        RefreshTopicalExplanation();
     }
 
     /// <summary>Called by Collaborator after all free updates are applied.</summary>
@@ -417,6 +586,8 @@ public partial class WorkflowViewModel : ObservableRecipient
         PendingUpdateItems.Clear();
         OnPropertyChanged(nameof(HasUpdates));
         OnPropertyChanged(nameof(HasPendingUpdates));
+        OnPropertyChanged(nameof(PendingUpdatesHeader));
+        RefreshTopicalExplanation();
     }
 
     #endregion

@@ -11,8 +11,10 @@ using StoryCADLib.Services.Store;
 using StoryCollaborator.Services;
 using StoryCollaborator.Models;
 using StoryCollaborator.Workflows;
+using CollaboratorLib.Context;
 using StoryCADLib.Collaborator.ViewModels;
 using StoryCADLib.Collaborator.Models;
+using StoryCADLib.Collaborator.Views;
 
 namespace StoryCollaborator;
 
@@ -42,6 +44,7 @@ public class Collaborator : ICollaborator
     private ElementResolver? _elementResolver;
     private string? _filePath;
     private Window? _hostWindow;
+    private WorkflowShellViewModel? _shellViewModel;
     private bool _disposed;
     private StoryCADLib.Services.Logging.ILogService? _auditLogger;
 
@@ -129,16 +132,10 @@ public class Collaborator : ICollaborator
             var viewModel = shell.DataContext as StoryCADLib.Collaborator.ViewModels.WorkflowShellViewModel;
             if (viewModel != null)
             {
-                viewModel.MenuItems.Clear();
-                foreach (var workflow in WorkflowRegistry.All)
-                {
-                    viewModel.MenuItems.Add(new Microsoft.UI.Xaml.Controls.NavigationViewItem
-                    {
-                        Content = workflow.Title,
-                        Tag = workflow
-                    });
-                }
-                _logger.LogInformation("Populated {Count} workflows in menu", viewModel.MenuItems.Count);
+                _shellViewModel = viewModel;
+                // Outline gaps (if any) then #129 groups by element type.
+                RebuildWorkflowMenu(viewModel);
+                _logger.LogInformation("Populated {Count} menu items", viewModel.MenuItems.Count);
 
                 // Set up settings - pass current settings and wire up change callback
                 viewModel.CurrentSettings = _settings;
@@ -167,8 +164,23 @@ public class Collaborator : ICollaborator
                 // Set up navigation callback - when user selects a workflow, navigate to WorkflowPage
                 viewModel.OnWorkflowSelected = async (workflowTag) =>
                 {
-                    if (viewModel.ContentFrame != null && workflowTag is Workflow workflow)
+                    if (viewModel.ContentFrame == null)
+                        return;
+
+                    // Issue #107 phase 6: Outline gaps (navigate only; no LLM)
+                    if (workflowTag is string tag &&
+                        string.Equals(tag, GapWorkflowOwnership.OutlineGapsTag, StringComparison.Ordinal))
                     {
+                        await OpenOutlineGapsPageAsync(viewModel);
+                        return;
+                    }
+
+                    if (workflowTag is Workflow workflow)
+                    {
+                        // Short name on top bar (Label, not long Title path).
+                        viewModel.ActiveWorkflowName = FormatWorkflowShortName(workflow.Label);
+                        viewModel.HasPendingUpdates = false;
+
                         // Clear shell status; gather cancel has no chat page (#123).
                         viewModel.StatusText = string.Empty;
 
@@ -193,15 +205,19 @@ public class Collaborator : ICollaborator
                         {
                             PopulateWorkflowViewModel(page.ViewModel, workflow, gatherResult.Elements);
                             WireUpChatCallback(page.ViewModel, workflow, gatherResult.Elements);
+                            WireShellWorkflowActions(page.ViewModel);
 
-                            // Add status messages from gathering phase
+                            // Add status messages from gathering phase (rolled up, #129)
                             foreach (var message in gatherResult.StatusMessages)
                             {
-                                page.ViewModel.ConversationList.Add(ChatMessage.FromCollaborator(message));
+                                page.ViewModel.AddStatusMessage(message);
                             }
 
                             // Auto-execute the workflow and show progress
                             await ExecuteWorkflowWithFeedback(page.ViewModel, workflow, gatherResult.Elements);
+
+                            // Gaps may have closed after Accept — refresh nav
+                            RebuildWorkflowMenu(viewModel);
                         }
 
                         _logger.LogInformation("Navigated to workflow: {Workflow} with {Count} input elements",
@@ -248,6 +264,131 @@ public class Collaborator : ICollaborator
 
         Dispose();
         return result;
+    }
+
+    /// <summary>
+    /// Rebuild nav: Outline gaps first (when any), then workflows grouped by element type (#129).
+    /// </summary>
+    private void RebuildWorkflowMenu(WorkflowShellViewModel viewModel)
+    {
+        viewModel.MenuItems.Clear();
+
+        if (_storyApi != null && _storyModel != null)
+        {
+            var gapDetails = RequiredFieldGapScanner.FindGapDetails(_storyApi, _storyModel);
+            if (gapDetails.Count > 0)
+            {
+                viewModel.MenuItems.Add(new Microsoft.UI.Xaml.Controls.NavigationViewItem
+                {
+                    Content = $"{GapWorkflowOwnership.OutlineGapsNavTitle} ({gapDetails.Count})",
+                    Tag = GapWorkflowOwnership.OutlineGapsTag
+                });
+            }
+        }
+
+        // Workflows grouped by story element type; group headers expand/collapse only (#129).
+        Microsoft.UI.Xaml.Controls.NavigationViewItem? group = null;
+        StoryItemType? groupType = null;
+        foreach (var workflow in WorkflowRegistry.All)
+        {
+            if (group == null || workflow.PrimaryElementType != groupType)
+            {
+                groupType = workflow.PrimaryElementType;
+                group = new Microsoft.UI.Xaml.Controls.NavigationViewItem
+                {
+                    Content = GroupTitle(groupType.Value),
+                    SelectsOnInvoked = false,
+                    IsExpanded = true
+                };
+                viewModel.MenuItems.Add(group);
+            }
+
+            group.MenuItems.Add(new Microsoft.UI.Xaml.Controls.NavigationViewItem
+            {
+                Content = workflow.Title,
+                Tag = workflow
+            });
+        }
+    }
+
+    /// <summary>
+    /// Opens the Outline gaps page (no gather, no LLM).
+    /// </summary>
+    private Task OpenOutlineGapsPageAsync(WorkflowShellViewModel shellViewModel)
+    {
+        shellViewModel.StatusText = string.Empty;
+        if (_storyApi == null || _storyModel == null || shellViewModel.ContentFrame == null)
+            return Task.CompletedTask;
+
+        var details = RequiredFieldGapScanner.FindGapDetails(_storyApi, _storyModel);
+        var groups = details.Select(d =>
+        {
+            // Option 2: each missing field is a link (workflow if mapped, else host element)
+            var fields = new List<GapFieldLink>();
+            for (var i = 0; i < d.MissingProperties.Count; i++)
+            {
+                var prop = d.MissingProperties[i];
+                var display = i < d.MissingPropertyLabels.Count
+                    ? d.MissingPropertyLabels[i]
+                    : prop;
+                var helpers = GapWorkflowOwnership.WorkflowsFor(d.ElementType, prop);
+                var workflowLabel = helpers.Count > 0 ? helpers[0] : string.Empty;
+                var wf = string.IsNullOrEmpty(workflowLabel)
+                    ? null
+                    : WorkflowRegistry.Get(workflowLabel);
+
+                fields.Add(new GapFieldLink
+                {
+                    DisplayLabel = display,
+                    PropertyName = prop,
+                    ElementGuid = d.ElementGuid,
+                    WorkflowLabel = workflowLabel,
+                    WorkflowTitle = wf?.Title ?? workflowLabel
+                });
+            }
+
+            return new GapElementGroup
+            {
+                ElementGuid = d.ElementGuid,
+                ElementName = d.ElementName,
+                ElementTypeLabel = d.ElementType.ToString(),
+                MissingFields = fields
+            };
+        }).ToList();
+
+        shellViewModel.ContentFrame.Navigate(typeof(GapWorkflowPage));
+        if (shellViewModel.ContentFrame.Content is GapWorkflowPage page && page.ViewModel != null)
+        {
+            page.ViewModel.Load(new GapWorkflowPayload { Groups = groups });
+            page.ViewModel.OnOpenElement = guid =>
+            {
+                var result = _storyApi.SelectStoryElement(guid);
+                if (!result.IsSuccess)
+                    shellViewModel.StatusText = result.ErrorMessage ?? "Could not open element in StoryCAD.";
+                else
+                    shellViewModel.StatusText = string.Empty;
+            };
+            page.ViewModel.OnOpenWorkflow = async label =>
+            {
+                var workflow = WorkflowRegistry.Get(label);
+                if (workflow == null)
+                {
+                    shellViewModel.StatusText = $"Unknown workflow: {label}";
+                    return;
+                }
+
+                // Select matching nav item if present (workflows are nested under type groups, #129)
+                var navItem = FindWorkflowNavItem(shellViewModel, label);
+                if (navItem != null)
+                    shellViewModel.CurrentItem = navItem;
+
+                if (shellViewModel.OnWorkflowSelected != null)
+                    await shellViewModel.OnWorkflowSelected(workflow);
+            };
+        }
+
+        _logger?.LogInformation("Opened Outline gaps page with {Count} gappy elements", groups.Count);
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -342,10 +483,10 @@ public class Collaborator : ICollaborator
         ArgumentNullException.ThrowIfNull(workflow);
 
         viewModel.Title = workflow.Title;
+        // Brief purpose only; long registry Explanation is not shown (topical strip instead).
         viewModel.Description = workflow.Description;
-        viewModel.Explanation = workflow.Explanation;
 
-        // Build summary of selected elements
+        // Selected elements live in topical Explanation (#129), not a separate card.
         if (gatheredElements != null && gatheredElements.Count > 0)
         {
             var lines = gatheredElements
@@ -353,6 +494,12 @@ public class Collaborator : ICollaborator
                 .ToList();
             viewModel.SelectedElementsSummary = string.Join("\n", lines);
         }
+        else
+        {
+            viewModel.SelectedElementsSummary = string.Empty;
+        }
+
+        viewModel.RefreshTopicalExplanation();
     }
 
     /// <summary>
@@ -376,7 +523,12 @@ public class Collaborator : ICollaborator
             $"{workflow.Description}\n\n" +
             $"## Current Story Context\n{elementContext}\n\n" +
             "Provide helpful, constructive feedback to help the writer develop their story. " +
-            "Reference the story elements above when giving advice.");
+            "Reference the story elements above when giving advice.\n\n" +
+            // The chat pane renders replies in a plain TextBlock; any markup arrives verbatim.
+            "Respond in plain text only. Never use Markdown, HTML, RTF, or any other markup: " +
+            "no headings, asterisks for bold or italics, backticks, tables, or links. " +
+            "The display cannot render formatting, so markup characters would appear literally. " +
+            "For lists, use simple lines starting with a hyphen. Separate ideas with blank lines.");
 
         // Wire up the callback
         viewModel.OnSendMessage = async (userMessage) =>
@@ -503,7 +655,7 @@ public class Collaborator : ICollaborator
         try
         {
             // Show progress
-            viewModel.ConversationList.Add(ChatMessage.FromCollaborator($"Running {workflow.Title}..."));
+            viewModel.AddStatusMessage($"Running {workflow.Title}...");
             viewModel.ProgressVisibility = Microsoft.UI.Xaml.Visibility.Visible;
 
             // Execute via WorkflowRunner
@@ -522,16 +674,15 @@ public class Collaborator : ICollaborator
 
             if (result.Success)
             {
-                // Show status messages (omit noisy per-field classify lines from chat)
-                viewModel.ConversationList.Add(ChatMessage.FromCollaborator($"Workflow completed successfully."));
-
+                // Show status messages rolled up (omit noisy per-field classify lines)
                 foreach (var msg in result.StatusMessages)
                 {
                     if (msg.StartsWith("Classified ", StringComparison.Ordinal)
                         || msg.StartsWith("No-op ", StringComparison.Ordinal))
                         continue;
-                    viewModel.ConversationList.Add(ChatMessage.FromCollaborator($"  {msg}"));
+                    viewModel.AddStatusMessage(msg);
                 }
+                viewModel.AddStatusMessage("Workflow completed successfully.");
 
                 // Add AI explanation if available in raw response
                 if (!string.IsNullOrEmpty(result.RawResponse))
@@ -585,7 +736,7 @@ public class Collaborator : ICollaborator
                                 sb.AppendLine();
                                 foreach (var u in free)
                                 {
-                                    var valuePreview = TruncateForChat(u.Value?.ToString());
+                                    var valuePreview = TruncateForChat(FormatValueForDisplay(u.Value));
                                     sb.AppendLine($"**{u.Key}**: {valuePreview}");
                                     sb.AppendLine();
                                 }
@@ -618,6 +769,7 @@ public class Collaborator : ICollaborator
                             if (protect.Count == 0)
                             {
                                 viewModel.MarkUpdatesApplied();
+                                SyncShellPending(viewModel);
                             }
                             else
                             {
@@ -645,7 +797,7 @@ public class Collaborator : ICollaborator
                         try
                         {
                             viewModel.ClearPendingUpdates();
-                            viewModel.ConversationList.Add(ChatMessage.FromCollaborator("Re-running workflow..."));
+                            viewModel.AddStatusMessage("Re-running workflow...");
                             await ExecuteWorkflowWithFeedback(viewModel, workflow, gatheredElements);
                         }
                         catch (Exception ex)
@@ -680,7 +832,7 @@ public class Collaborator : ICollaborator
                             if (applied > 0)
                             {
                                 _sessionTouchedFields.Add(pending.SessionTouchKey);
-                                viewModel.ConversationList.Add(ChatMessage.FromCollaborator($"Applied {propertyKey}"));
+                                viewModel.AddStatusMessage($"Applied {propertyKey}");
                                 _logger?.LogInformation("AcceptProperty: Applied {Key}", propertyKey);
                                 _auditLogger?.Log(StoryCADLib.Services.Logging.LogLevel.Info,
                                     $"Applied update: {propertyKey}");
@@ -721,7 +873,7 @@ public class Collaborator : ICollaborator
                             result.UpdatedProperties.Remove(propertyKey);
                             if (removed > 0)
                             {
-                                viewModel.ConversationList.Add(ChatMessage.FromCollaborator($"Skipped {propertyKey}"));
+                                viewModel.AddStatusMessage($"Skipped {propertyKey}");
                                 _logger?.LogInformation("SkipProperty: Skipped {Key}", propertyKey);
                                 PushPendingToViewModel(viewModel, result);
                             }
@@ -769,7 +921,10 @@ public class Collaborator : ICollaborator
                                     : "All done.")));
 
                             if (result.PendingUpdates.Count == 0)
+                            {
                                 viewModel.MarkUpdatesApplied();
+                                SyncShellPending(viewModel);
+                            }
                             else
                                 PushPendingToViewModel(viewModel, result);
 
@@ -801,7 +956,7 @@ public class Collaborator : ICollaborator
                 viewModel.ConversationList.Add(ChatMessage.Error(result.ErrorMessage ?? "Unknown error"));
                 foreach (var msg in result.StatusMessages)
                 {
-                    viewModel.ConversationList.Add(ChatMessage.FromCollaborator($"  {msg}"));
+                    viewModel.AddStatusMessage(msg);
                 }
             }
 
@@ -817,19 +972,46 @@ public class Collaborator : ICollaborator
     }
 
     /// <summary>
-    /// Pushes classified pending updates into the workflow panel (issue #116).
+    /// Pushes classified pending updates into the workflow panel (issue #116)
+    /// and enables shell Accept All / Review Each / Try Again.
     /// </summary>
-    private static void PushPendingToViewModel(
+    private void PushPendingToViewModel(
         StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
         WorkflowResult result)
     {
         var items = result.PendingUpdates.Select(ToPendingUpdateItem).ToList();
         viewModel.SetPendingUpdates(items);
+        SyncShellPending(viewModel);
     }
 
-    private static PendingUpdateItem ToPendingUpdateItem(PendingUpdate u)
+    /// <summary>
+    /// Routes top-bar Accept All / Review Each / Try Again to the active page VM.
+    /// </summary>
+    private void WireShellWorkflowActions(WorkflowViewModel pageVm)
     {
-        var proposed = TruncateForChat(u.Value?.ToString() ?? string.Empty, 300);
+        if (_shellViewModel == null) return;
+
+        _shellViewModel.OnAcceptAll = () => pageVm.AcceptAllCommand.Execute(null);
+        _shellViewModel.OnReviewEach = () => pageVm.ReviewEachCommand.Execute(null);
+        _shellViewModel.OnTryAgain = async () =>
+        {
+            if (pageVm.OnTryAgain != null)
+                await pageVm.OnTryAgain();
+            else
+                pageVm.TryAgainCommand.Execute(null);
+        };
+        SyncShellPending(pageVm);
+    }
+
+    private void SyncShellPending(WorkflowViewModel pageVm)
+    {
+        if (_shellViewModel != null)
+            _shellViewModel.HasPendingUpdates = pageVm.HasPendingUpdates;
+    }
+
+    private PendingUpdateItem ToPendingUpdateItem(PendingUpdate u)
+    {
+        var proposed = TruncateForChat(FormatValueForDisplay(u.Value), 300);
         var current = TruncateForChat(u.CurrentDisplay ?? string.Empty, 300);
         var kindLabel = u.Kind switch
         {
@@ -848,6 +1030,8 @@ public class Collaborator : ICollaborator
         return new PendingUpdateItem
         {
             Key = u.Key,
+            ElementName = ValueDisplay.SplitPascalCase(u.ElementLabel),
+            PropertyDisplayName = ValueDisplay.SplitPascalCase(u.Spec.Property),
             ProposedDisplay = string.IsNullOrEmpty(proposed) ? "(empty)" : proposed,
             CurrentDisplay = current,
             KindLabel = kindLabel,
@@ -856,6 +1040,17 @@ public class Collaborator : ICollaborator
             SummaryLine = summary
         };
     }
+
+    /// <summary>
+    /// Readable text for a typed pending-update value; lists render per entry and
+    /// element GUIDs resolve to outline names (#129).
+    /// </summary>
+    private string FormatValueForDisplay(object? value) =>
+        ValueDisplay.Format(value, guid =>
+            _storyModel?.StoryElements?.StoryElementGuids != null
+            && _storyModel.StoryElements.StoryElementGuids.TryGetValue(guid, out var element)
+                ? element?.Name
+                : null);
 
     private static string TruncateForChat(string? text, int max = 200)
     {
@@ -901,6 +1096,42 @@ public class Collaborator : ICollaborator
         public List<string> StatusMessages { get; set; } = new();
         public bool Cancelled { get; set; }
     }
+
+    /// <summary>
+    /// Short chrome label from registry Label (e.g. StoryProblem → "Story Problem").
+    /// Not the long Title path used in the nav list.
+    /// </summary>
+    private static Microsoft.UI.Xaml.Controls.NavigationViewItem? FindWorkflowNavItem(
+        WorkflowShellViewModel shellViewModel,
+        string workflowLabel)
+    {
+        foreach (var top in shellViewModel.MenuItems)
+        {
+            if (top.Tag is Workflow w &&
+                string.Equals(w.Label, workflowLabel, StringComparison.OrdinalIgnoreCase))
+                return top;
+
+            foreach (var child in top.MenuItems.OfType<Microsoft.UI.Xaml.Controls.NavigationViewItem>())
+            {
+                if (child.Tag is Workflow cw &&
+                    string.Equals(cw.Label, workflowLabel, StringComparison.OrdinalIgnoreCase))
+                    return child;
+            }
+        }
+
+        return null;
+    }
+
+    private static string FormatWorkflowShortName(string? label) =>
+        ValueDisplay.SplitPascalCase(label);
+
+    /// <summary>Nav group header for a workflow's primary element type (#129).</summary>
+    private static string GroupTitle(StoryItemType type) => type switch
+    {
+        StoryItemType.StoryOverview => "Overview",
+        StoryItemType.Unknown => "Other",
+        _ => ValueDisplay.SplitPascalCase(type.ToString())
+    };
 
     /// <summary>
     /// One-line shell status from gather messages (skip section headers). #123

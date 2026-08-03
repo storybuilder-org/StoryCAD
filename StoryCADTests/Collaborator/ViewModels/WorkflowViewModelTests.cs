@@ -433,6 +433,38 @@ public class WorkflowViewModelTests
     }
 
     [TestMethod]
+    public void PendingUpdatesHeader_ReflectsFreeAndProtectedCounts()
+    {
+        _viewModel.SetPendingUpdates(new List<PendingUpdateItem>
+        {
+            Item("A", isProtected: false),
+            Item("B", isProtected: true),
+            Item("C", isProtected: true)
+        });
+
+        Assert.AreEqual("Property Updates (3: 1 free, 2 need review)", _viewModel.PendingUpdatesHeader);
+
+        _viewModel.ClearPendingUpdates();
+        Assert.AreEqual("Property Updates", _viewModel.PendingUpdatesHeader);
+    }
+
+    [TestMethod]
+    public void RefreshTopicalExplanation_IncludesSelectedAndPendingCounts()
+    {
+        _viewModel.SelectedElementsSummary = "Overview: Test Story";
+        _viewModel.SetPendingUpdates(new List<PendingUpdateItem>
+        {
+            Item("A", isProtected: false),
+            Item("B", isProtected: true)
+        });
+
+        StringAssert.Contains(_viewModel.Explanation, "Selected: Overview: Test Story");
+        StringAssert.Contains(_viewModel.Explanation, "2 property update(s)");
+        StringAssert.Contains(_viewModel.Explanation, "1 free");
+        StringAssert.Contains(_viewModel.Explanation, "1 need review");
+    }
+
+    [TestMethod]
     public void ReviewEach_AcceptCurrent_DoesNotSkipMiddleProperty()
     {
         // Arrange — three updates (Ideation: Description, Concept, Premise)
@@ -511,6 +543,140 @@ public class WorkflowViewModelTests
 
         _viewModel.AcceptCurrentCommand.Execute(null);
         Assert.AreEqual(0, store.Count);
+    }
+
+    [TestMethod]
+    public void CurrentReviewDisplayName_WithDisplayFields_FormatsFriendlyName()
+    {
+        var item = Item("Problem.StructureTitle", "v");
+        item.ElementName = "Problem";
+        item.PropertyDisplayName = "Structure Title";
+        _viewModel.SetPendingUpdates(new List<PendingUpdateItem> { item });
+        _viewModel.ReviewEachCommand.Execute(null);
+
+        Assert.AreEqual("Structure Title (Problem)", _viewModel.CurrentReviewDisplayName);
+        Assert.AreEqual("Problem.StructureTitle", _viewModel.CurrentReviewKey);
+    }
+
+    [TestMethod]
+    public void CurrentReviewDisplayName_WithoutDisplayFields_FallsBackToKey()
+    {
+        _viewModel.SetPendingUpdates(new List<PendingUpdateItem> { Item("Problem.StructureTitle", "v") });
+        _viewModel.ReviewEachCommand.Execute(null);
+
+        Assert.AreEqual("Problem.StructureTitle", _viewModel.CurrentReviewDisplayName);
+    }
+
+    [TestMethod]
+    public void AcceptItem_WithPendingUpdate_InvokesCallbackAndRemovesRow()
+    {
+        var store = new List<PendingUpdateItem> { Item("Overview.Premise", "v"), Item("Overview.Concept", "v") };
+        _viewModel.SetPendingUpdates(store);
+        WireRemoveOnAcceptOrSkip(store);
+
+        _viewModel.AcceptItem("Overview.Concept");
+
+        Assert.AreEqual(1, store.Count);
+        Assert.AreEqual("Overview.Premise", store[0].Key);
+        Assert.AreEqual(1, _viewModel.PendingUpdateItems.Count);
+    }
+
+    [TestMethod]
+    public void SkipItem_DuringReviewMode_ClampsIndexAndExitsWhenEmpty()
+    {
+        var store = new List<PendingUpdateItem> { Item("A", "1"), Item("B", "2") };
+        _viewModel.SetPendingUpdates(store);
+        WireRemoveOnAcceptOrSkip(store);
+        _viewModel.ReviewEachCommand.Execute(null);
+
+        _viewModel.SkipItem("B");
+        Assert.IsTrue(_viewModel.IsInReviewMode);
+        Assert.AreEqual("A", _viewModel.CurrentReviewKey);
+
+        _viewModel.SkipItem("A");
+        Assert.IsFalse(_viewModel.IsInReviewMode, "Review mode must end when inline ticks empty the list.");
+    }
+
+    [TestMethod]
+    public void AcceptItem_WithNoPendingUpdates_DoesNotInvokeCallback()
+    {
+        var invoked = false;
+        _viewModel.OnAcceptProperty = _ => invoked = true;
+
+        _viewModel.AcceptItem("Overview.Premise");
+
+        Assert.IsFalse(invoked);
+    }
+
+    [TestMethod]
+    public void AddStatusMessage_ConsecutiveLines_RollUpIntoOneGroup()
+    {
+        _viewModel.AddStatusMessage("Starting workflow: Problem Structure");
+        _viewModel.AddStatusMessage("Built request body from 1 elements");
+        _viewModel.AddStatusMessage("Received AI response");
+
+        Assert.AreEqual(1, _viewModel.ConversationList.Count);
+        var group = _viewModel.ConversationList[0];
+        Assert.IsTrue(group.IsStatusGroup);
+        Assert.AreEqual(3, group.Steps.Count);
+        StringAssert.Contains(group.StatusHeader, "3 steps");
+        StringAssert.Contains(group.StatusHeader, "Received AI response");
+    }
+
+    [TestMethod]
+    public void AddStatusMessage_AfterBubble_StartsNewGroup()
+    {
+        _viewModel.AddStatusMessage("Running Problem Structure...");
+        _viewModel.ConversationList.Add(ChatMessage.FromCollaborator("Here's my explanation."));
+        _viewModel.AddStatusMessage("Applied Problem.StructureTitle");
+
+        Assert.AreEqual(3, _viewModel.ConversationList.Count);
+        Assert.IsTrue(_viewModel.ConversationList[0].IsStatusGroup);
+        Assert.IsFalse(_viewModel.ConversationList[1].IsStatusGroup);
+        Assert.IsTrue(_viewModel.ConversationList[2].IsStatusGroup);
+    }
+
+    [TestMethod]
+    public void AddStatusMessage_StripsDashHeaders()
+    {
+        _viewModel.AddStatusMessage("--- Gathering input elements ---");
+
+        Assert.AreEqual("Gathering input elements", _viewModel.ConversationList[0].Steps[0]);
+    }
+
+    [TestMethod]
+    public void ConversationList_SenderLabel_ShownOncePerRun()
+    {
+        _viewModel.ConversationList.Add(ChatMessage.FromCollaborator("first"));
+        _viewModel.ConversationList.Add(ChatMessage.FromCollaborator("second"));
+        _viewModel.ConversationList.Add(ChatMessage.FromUser("mine"));
+        _viewModel.ConversationList.Add(ChatMessage.FromCollaborator("reply"));
+
+        Assert.IsTrue(_viewModel.ConversationList[0].ShowSender);
+        Assert.IsFalse(_viewModel.ConversationList[1].ShowSender, "Second Collaborator bubble in a run repeats no label.");
+        Assert.IsTrue(_viewModel.ConversationList[2].ShowSender);
+        Assert.IsTrue(_viewModel.ConversationList[3].ShowSender);
+    }
+
+    [TestMethod]
+    public void ConversationList_StatusGroup_NeverShowsSender()
+    {
+        _viewModel.AddStatusMessage("Running...");
+
+        Assert.IsFalse(_viewModel.ConversationList[0].ShowSender);
+    }
+
+    [TestMethod]
+    public void PendingUpdateItem_DisplayName_FallsBackToKey()
+    {
+        var bare = Item("Overview.Premise", "v");
+        Assert.AreEqual("Overview.Premise", bare.DisplayName);
+        Assert.AreEqual(bare.SummaryLine, bare.ElementAndKind);
+
+        bare.ElementName = "Overview";
+        bare.PropertyDisplayName = "Premise";
+        Assert.AreEqual("Premise", bare.DisplayName);
+        Assert.AreEqual("Overview · New", bare.ElementAndKind);
     }
 
     #endregion

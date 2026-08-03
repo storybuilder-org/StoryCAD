@@ -10,6 +10,17 @@ namespace StoryCADTests.Collaborator;
 public class StoryProblemRegistryTests
 {
     [TestMethod]
+    public void AllWorkflows_HavePrimaryElementType_ForNavGrouping()
+    {
+        // #129: nav menu groups by PrimaryElementType; Unknown would orphan a workflow.
+        foreach (var workflow in WorkflowRegistry.All)
+        {
+            Assert.AreNotEqual(StoryCADLib.Models.StoryItemType.Unknown, workflow.PrimaryElementType,
+                $"Workflow '{workflow.Label}' has no PrimaryElementType.");
+        }
+    }
+
+    [TestMethod]
     public void StoryProblem_OptionalInputs_WriteStructuralLinksOnGather()
     {
         var workflow = WorkflowRegistry.Get("StoryProblem");

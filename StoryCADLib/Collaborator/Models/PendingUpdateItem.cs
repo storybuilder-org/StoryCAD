@@ -6,8 +6,21 @@ namespace StoryCADLib.Collaborator.Models;
 /// </summary>
 public sealed class PendingUpdateItem
 {
-    /// <summary>ElementLabel.PropertyName</summary>
+    /// <summary>ElementLabel.PropertyName (raw key used by accept/skip callbacks).</summary>
     public string Key { get; set; } = string.Empty;
+
+    /// <summary>Element display name with spaces (e.g. "Outer Problem").</summary>
+    public string ElementName { get; set; } = string.Empty;
+
+    /// <summary>Property name with spaces (e.g. "Structure Title").</summary>
+    public string PropertyDisplayName { get; set; } = string.Empty;
+
+    /// <summary>Row title; falls back to the raw key when display fields are unset.</summary>
+    public string DisplayName => string.IsNullOrEmpty(PropertyDisplayName) ? Key : PropertyDisplayName;
+
+    /// <summary>Right-column caption: element plus kind (e.g. "Problem · New").</summary>
+    public string ElementAndKind =>
+        string.IsNullOrEmpty(ElementName) ? SummaryLine : $"{ElementName} · {SummaryLine}";
 
     /// <summary>Proposed value (truncated for display).</summary>
     public string ProposedDisplay { get; set; } = string.Empty;

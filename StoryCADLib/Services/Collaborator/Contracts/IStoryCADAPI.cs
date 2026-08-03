@@ -74,6 +74,12 @@ public interface IStoryCADAPI
     /// <returns>OperationResult containing the story element if found, or error message if not</returns>
     OperationResult<StoryElement> GetStoryElement(Guid guid);
 
+    /// <summary>
+    ///     Selects a story element in the host StoryCAD tree and opens its page
+    ///     (Collaborator gap workflow, issue #107 phase 6).
+    /// </summary>
+    OperationResult<bool> SelectStoryElement(Guid elementGuid);
+
     OperationResult<Guid> AddElement(StoryItemType typeToAdd, string parentGUID, string name, string GUIDOverride = "");
 
     OperationResult<Guid> AddElement(StoryItemType typeToAdd, string parentGUID, string name, Dictionary<string, object> properties, string GUIDOverride = "");
