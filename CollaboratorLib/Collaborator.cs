@@ -11,8 +11,10 @@ using StoryCADLib.Services.Store;
 using StoryCollaborator.Services;
 using StoryCollaborator.Models;
 using StoryCollaborator.Workflows;
+using CollaboratorLib.Context;
 using StoryCADLib.Collaborator.ViewModels;
 using StoryCADLib.Collaborator.Models;
+using StoryCADLib.Collaborator.Views;
 
 namespace StoryCollaborator;
 
@@ -131,31 +133,9 @@ public class Collaborator : ICollaborator
             if (viewModel != null)
             {
                 _shellViewModel = viewModel;
-                // Workflows grouped by story element type; group headers expand/collapse only (#129).
-                viewModel.MenuItems.Clear();
-                Microsoft.UI.Xaml.Controls.NavigationViewItem? group = null;
-                StoryItemType? groupType = null;
-                foreach (var workflow in WorkflowRegistry.All)
-                {
-                    if (group == null || workflow.PrimaryElementType != groupType)
-                    {
-                        groupType = workflow.PrimaryElementType;
-                        group = new Microsoft.UI.Xaml.Controls.NavigationViewItem
-                        {
-                            Content = GroupTitle(groupType.Value),
-                            SelectsOnInvoked = false,
-                            IsExpanded = true
-                        };
-                        viewModel.MenuItems.Add(group);
-                    }
-
-                    group.MenuItems.Add(new Microsoft.UI.Xaml.Controls.NavigationViewItem
-                    {
-                        Content = workflow.Title,
-                        Tag = workflow
-                    });
-                }
-                _logger.LogInformation("Populated {Count} workflow groups in menu", viewModel.MenuItems.Count);
+                // Outline gaps (if any) then #129 groups by element type.
+                RebuildWorkflowMenu(viewModel);
+                _logger.LogInformation("Populated {Count} menu items", viewModel.MenuItems.Count);
 
                 // Set up settings - pass current settings and wire up change callback
                 viewModel.CurrentSettings = _settings;
@@ -184,7 +164,18 @@ public class Collaborator : ICollaborator
                 // Set up navigation callback - when user selects a workflow, navigate to WorkflowPage
                 viewModel.OnWorkflowSelected = async (workflowTag) =>
                 {
-                    if (viewModel.ContentFrame != null && workflowTag is Workflow workflow)
+                    if (viewModel.ContentFrame == null)
+                        return;
+
+                    // Issue #107 phase 6: Outline gaps (navigate only; no LLM)
+                    if (workflowTag is string tag &&
+                        string.Equals(tag, GapWorkflowOwnership.OutlineGapsTag, StringComparison.Ordinal))
+                    {
+                        await OpenOutlineGapsPageAsync(viewModel);
+                        return;
+                    }
+
+                    if (workflowTag is Workflow workflow)
                     {
                         // Short name on top bar (Label, not long Title path).
                         viewModel.ActiveWorkflowName = FormatWorkflowShortName(workflow.Label);
@@ -224,6 +215,9 @@ public class Collaborator : ICollaborator
 
                             // Auto-execute the workflow and show progress
                             await ExecuteWorkflowWithFeedback(page.ViewModel, workflow, gatherResult.Elements);
+
+                            // Gaps may have closed after Accept — refresh nav
+                            RebuildWorkflowMenu(viewModel);
                         }
 
                         _logger.LogInformation("Navigated to workflow: {Workflow} with {Count} input elements",
@@ -270,6 +264,131 @@ public class Collaborator : ICollaborator
 
         Dispose();
         return result;
+    }
+
+    /// <summary>
+    /// Rebuild nav: Outline gaps first (when any), then workflows grouped by element type (#129).
+    /// </summary>
+    private void RebuildWorkflowMenu(WorkflowShellViewModel viewModel)
+    {
+        viewModel.MenuItems.Clear();
+
+        if (_storyApi != null && _storyModel != null)
+        {
+            var gapDetails = RequiredFieldGapScanner.FindGapDetails(_storyApi, _storyModel);
+            if (gapDetails.Count > 0)
+            {
+                viewModel.MenuItems.Add(new Microsoft.UI.Xaml.Controls.NavigationViewItem
+                {
+                    Content = $"{GapWorkflowOwnership.OutlineGapsNavTitle} ({gapDetails.Count})",
+                    Tag = GapWorkflowOwnership.OutlineGapsTag
+                });
+            }
+        }
+
+        // Workflows grouped by story element type; group headers expand/collapse only (#129).
+        Microsoft.UI.Xaml.Controls.NavigationViewItem? group = null;
+        StoryItemType? groupType = null;
+        foreach (var workflow in WorkflowRegistry.All)
+        {
+            if (group == null || workflow.PrimaryElementType != groupType)
+            {
+                groupType = workflow.PrimaryElementType;
+                group = new Microsoft.UI.Xaml.Controls.NavigationViewItem
+                {
+                    Content = GroupTitle(groupType.Value),
+                    SelectsOnInvoked = false,
+                    IsExpanded = true
+                };
+                viewModel.MenuItems.Add(group);
+            }
+
+            group.MenuItems.Add(new Microsoft.UI.Xaml.Controls.NavigationViewItem
+            {
+                Content = workflow.Title,
+                Tag = workflow
+            });
+        }
+    }
+
+    /// <summary>
+    /// Opens the Outline gaps page (no gather, no LLM).
+    /// </summary>
+    private Task OpenOutlineGapsPageAsync(WorkflowShellViewModel shellViewModel)
+    {
+        shellViewModel.StatusText = string.Empty;
+        if (_storyApi == null || _storyModel == null || shellViewModel.ContentFrame == null)
+            return Task.CompletedTask;
+
+        var details = RequiredFieldGapScanner.FindGapDetails(_storyApi, _storyModel);
+        var groups = details.Select(d =>
+        {
+            // Option 2: each missing field is a link (workflow if mapped, else host element)
+            var fields = new List<GapFieldLink>();
+            for (var i = 0; i < d.MissingProperties.Count; i++)
+            {
+                var prop = d.MissingProperties[i];
+                var display = i < d.MissingPropertyLabels.Count
+                    ? d.MissingPropertyLabels[i]
+                    : prop;
+                var helpers = GapWorkflowOwnership.WorkflowsFor(d.ElementType, prop);
+                var workflowLabel = helpers.Count > 0 ? helpers[0] : string.Empty;
+                var wf = string.IsNullOrEmpty(workflowLabel)
+                    ? null
+                    : WorkflowRegistry.Get(workflowLabel);
+
+                fields.Add(new GapFieldLink
+                {
+                    DisplayLabel = display,
+                    PropertyName = prop,
+                    ElementGuid = d.ElementGuid,
+                    WorkflowLabel = workflowLabel,
+                    WorkflowTitle = wf?.Title ?? workflowLabel
+                });
+            }
+
+            return new GapElementGroup
+            {
+                ElementGuid = d.ElementGuid,
+                ElementName = d.ElementName,
+                ElementTypeLabel = d.ElementType.ToString(),
+                MissingFields = fields
+            };
+        }).ToList();
+
+        shellViewModel.ContentFrame.Navigate(typeof(GapWorkflowPage));
+        if (shellViewModel.ContentFrame.Content is GapWorkflowPage page && page.ViewModel != null)
+        {
+            page.ViewModel.Load(new GapWorkflowPayload { Groups = groups });
+            page.ViewModel.OnOpenElement = guid =>
+            {
+                var result = _storyApi.SelectStoryElement(guid);
+                if (!result.IsSuccess)
+                    shellViewModel.StatusText = result.ErrorMessage ?? "Could not open element in StoryCAD.";
+                else
+                    shellViewModel.StatusText = string.Empty;
+            };
+            page.ViewModel.OnOpenWorkflow = async label =>
+            {
+                var workflow = WorkflowRegistry.Get(label);
+                if (workflow == null)
+                {
+                    shellViewModel.StatusText = $"Unknown workflow: {label}";
+                    return;
+                }
+
+                // Select matching nav item if present (workflows are nested under type groups, #129)
+                var navItem = FindWorkflowNavItem(shellViewModel, label);
+                if (navItem != null)
+                    shellViewModel.CurrentItem = navItem;
+
+                if (shellViewModel.OnWorkflowSelected != null)
+                    await shellViewModel.OnWorkflowSelected(workflow);
+            };
+        }
+
+        _logger?.LogInformation("Opened Outline gaps page with {Count} gappy elements", groups.Count);
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -982,6 +1101,27 @@ public class Collaborator : ICollaborator
     /// Short chrome label from registry Label (e.g. StoryProblem → "Story Problem").
     /// Not the long Title path used in the nav list.
     /// </summary>
+    private static Microsoft.UI.Xaml.Controls.NavigationViewItem? FindWorkflowNavItem(
+        WorkflowShellViewModel shellViewModel,
+        string workflowLabel)
+    {
+        foreach (var top in shellViewModel.MenuItems)
+        {
+            if (top.Tag is Workflow w &&
+                string.Equals(w.Label, workflowLabel, StringComparison.OrdinalIgnoreCase))
+                return top;
+
+            foreach (var child in top.MenuItems.OfType<Microsoft.UI.Xaml.Controls.NavigationViewItem>())
+            {
+                if (child.Tag is Workflow cw &&
+                    string.Equals(cw.Label, workflowLabel, StringComparison.OrdinalIgnoreCase))
+                    return child;
+            }
+        }
+
+        return null;
+    }
+
     private static string FormatWorkflowShortName(string? label) =>
         ValueDisplay.SplitPascalCase(label);
 

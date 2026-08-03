@@ -3,10 +3,13 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels;
 using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.Services.API;
@@ -2008,6 +2011,41 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         }
 
         return null;
+    }
+
+    /// <inheritdoc />
+    public OperationResult<bool> SelectStoryElement(Guid elementGuid)
+    {
+        try
+        {
+            if (CurrentModel == null)
+                return OperationResult<bool>.Failure("No current model");
+
+            if (CurrentModel.ExplorerView == null || CurrentModel.ExplorerView.Count == 0)
+                return OperationResult<bool>.Failure("Explorer view is empty");
+
+            StoryNodeItem node = null;
+            foreach (var root in CurrentModel.ExplorerView)
+            {
+                node = FindNodeInTree(root, elementGuid);
+                if (node != null)
+                    break;
+            }
+
+            if (node == null)
+                return OperationResult<bool>.Failure($"No tree node for element {elementGuid}");
+
+            var shell = Ioc.Default.GetService<ShellViewModel>();
+            if (shell == null)
+                return OperationResult<bool>.Failure("ShellViewModel not available");
+
+            shell.TreeViewNodeClicked(node);
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure(ex.Message);
+        }
     }
 
     /// <summary>
