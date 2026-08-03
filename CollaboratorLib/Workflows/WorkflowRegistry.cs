@@ -88,7 +88,7 @@ namespace StoryCollaborator.Workflows
         
                             }
                         }
-                    }),
+                    }) { PrimaryElementType = StoryItemType.StoryOverview },
 
                 // Story Problem workflow - full WorkflowIO
                 new Workflow(
@@ -197,7 +197,7 @@ namespace StoryCollaborator.Workflows
         
                             }
                         }
-                    }),
+                    }) { PrimaryElementType = StoryItemType.StoryOverview },
 
                 // Story Form - simple workflow
                 new Workflow(
@@ -281,7 +281,7 @@ namespace StoryCollaborator.Workflows
                             }
                         },
                         ExampleLists = new List<string> { "ConflictType", "Motive" }
-                    }),
+                    }) { PrimaryElementType = StoryItemType.Problem },
 
                 new Workflow(
                     "ConflictBuilder", "Conflict Builder",
@@ -368,7 +368,7 @@ namespace StoryCollaborator.Workflows
                                 }
                             }
                         }
-                    }),
+                    }) { PrimaryElementType = StoryItemType.Problem },
                 new Workflow(
                     "Structure", "Problem Structure",
                     "Define the structural beats and turning points of a story problem by selecting and applying " +
@@ -529,7 +529,7 @@ namespace StoryCollaborator.Workflows
                                 Projection = ElementProjection.IdAndName
                             }
                         }
-                    }),
+                    }) { PrimaryElementType = StoryItemType.Character },
 
                 // === Setting Workflows (scene-specific) ===
                 new Workflow(
@@ -657,7 +657,7 @@ namespace StoryCollaborator.Workflows
                                 }
                             }
                         }
-                    }),
+                    }) { PrimaryElementType = StoryItemType.Scene },
                 new Workflow(
                     "Sequel", "Sequel (Reaction)",
                     "Develop the character's emotional reaction, reflection, and decision-making after a " +

@@ -184,8 +184,12 @@ internal static partial class StoreKitInterop
         }
     }
 
-    // Prefer the signed copy in Contents/Frameworks; fall back to beside the executable for local
-    // dev runs; last resort let the OS search (rpath/DYLD).
+    // Beside the executable, which covers both shapes the build produces: Contents/MacOS/ in a
+    // published bundle (StoryCAD.csproj's _BuildAndCopyStoreKitShim, placed there so the packaging
+    // pipeline's `find Contents/MacOS -name *.dylib` codesign step signs it) and $(OutDir) in a
+    // plain dev build (_BuildAndCopyStoreKitShimToOutput). Last resort, let the OS search
+    // (rpath/DYLD). There was a Contents/Frameworks probe ahead of these; nothing in the build ever
+    // wrote there, so it only cost a stat on every resolve.
     private static IntPtr Resolve(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
     {
         if (libraryName != Library)
@@ -193,20 +197,13 @@ internal static partial class StoreKitInterop
             return IntPtr.Zero;
         }
 
-        var baseDir = AppContext.BaseDirectory;
-        var frameworks = Path.Combine(baseDir, "..", "Frameworks", DylibFile);
-        if (File.Exists(frameworks) && NativeLibrary.TryLoad(frameworks, out var h1))
+        var beside = Path.Combine(AppContext.BaseDirectory, DylibFile);
+        if (File.Exists(beside) && NativeLibrary.TryLoad(beside, out var handle))
         {
-            return h1;
+            return handle;
         }
 
-        var beside = Path.Combine(baseDir, DylibFile);
-        if (File.Exists(beside) && NativeLibrary.TryLoad(beside, out var h2))
-        {
-            return h2;
-        }
-
-        return NativeLibrary.TryLoad(DylibFile, out var h3) ? h3 : IntPtr.Zero;
+        return NativeLibrary.TryLoad(DylibFile, out var fallback) ? fallback : IntPtr.Zero;
     }
 }
 #endif

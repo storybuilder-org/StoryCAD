@@ -150,7 +150,7 @@
 
             <Frame x:Name="StepFrame"
                    Navigated="StepFrame_OnNavigated"
-                   Margin="5,0,5,5"
+                   Margin="12,8,12,10"
                    VerticalAlignment="Stretch"
                    HorizontalAlignment="Stretch" />
         </NavigationView>

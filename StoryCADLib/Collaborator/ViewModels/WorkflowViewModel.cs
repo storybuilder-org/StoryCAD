@@ -21,6 +21,7 @@ public partial class WorkflowViewModel : ObservableRecipient
     public WorkflowViewModel()
     {
         ConversationList = new ObservableCollection<ChatMessage>();
+        ConversationList.CollectionChanged += OnConversationChanged;
         PendingUpdateItems = new ObservableCollection<PendingUpdateItem>();
 
         // Existing commands
@@ -36,6 +37,49 @@ public partial class WorkflowViewModel : ObservableRecipient
         AcceptCurrentCommand = new RelayCommand(ExecuteAcceptCurrent);
         SkipCurrentCommand = new RelayCommand(ExecuteSkipCurrent);
         AcceptRemainingCommand = new RelayCommand(ExecuteAcceptRemaining);
+    }
+
+    /// <summary>
+    /// Shows the sender label once per run of consecutive same-sender bubbles;
+    /// status groups never carry a label (#129 chat cleanup).
+    /// </summary>
+    private void OnConversationChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        if (e.Action != System.Collections.Specialized.NotifyCollectionChangedAction.Add || e.NewItems == null)
+            return;
+
+        foreach (ChatMessage added in e.NewItems)
+        {
+            var index = ConversationList.IndexOf(added);
+            var previous = index > 0 ? ConversationList[index - 1] : null;
+            added.ShowSender = !added.IsStatusGroup
+                && (previous == null || previous.IsUser != added.IsUser);
+        }
+    }
+
+    /// <summary>
+    /// Adds a workflow progress line, rolling consecutive lines into one
+    /// collapsed status group instead of a bubble each (#129 chat cleanup).
+    /// </summary>
+    public void AddStatusMessage(string message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+            return;
+
+        var line = message.Trim().Trim('-').Trim();
+        if (line.Length == 0)
+            return;
+
+        if (ConversationList.Count > 0
+            && ConversationList[^1] is { IsStatusGroup: true } group)
+        {
+            group.AddStep(line);
+            return;
+        }
+
+        var newGroup = ChatMessage.StatusGroup();
+        newGroup.AddStep(line);
+        ConversationList.Add(newGroup);
     }
 
     public async Task InitializeAsync(object workflow)
@@ -124,7 +168,7 @@ public partial class WorkflowViewModel : ObservableRecipient
         if (IsInReviewMode && PendingUpdateItems != null && PendingUpdateItems.Count > 0)
         {
             parts.Add(
-                $"Reviewing {CurrentReviewIndex + 1} of {PendingUpdateItems.Count}: {CurrentReviewKey}. " +
+                $"Reviewing {CurrentReviewIndex + 1} of {PendingUpdateItems.Count}: {CurrentReviewDisplayName}. " +
                 "Accept to apply, Skip to keep yours.");
         }
         else if (HasPendingUpdates && PendingUpdateItems != null)
@@ -205,6 +249,26 @@ public partial class WorkflowViewModel : ObservableRecipient
         IsInReviewMode && PendingUpdateItems?.Count > CurrentReviewIndex
             ? PendingUpdateItems[CurrentReviewIndex].Key
             : string.Empty;
+
+    /// <summary>
+    /// Friendly title for the row under review, e.g. "Structure Title (Problem)".
+    /// Falls back to the raw key when display fields are unset (#129).
+    /// </summary>
+    public string CurrentReviewDisplayName
+    {
+        get
+        {
+            if (!IsInReviewMode || PendingUpdateItems == null || PendingUpdateItems.Count <= CurrentReviewIndex)
+                return string.Empty;
+
+            var item = PendingUpdateItems[CurrentReviewIndex];
+            if (string.IsNullOrEmpty(item.PropertyDisplayName))
+                return item.Key;
+            return string.IsNullOrEmpty(item.ElementName)
+                ? item.PropertyDisplayName
+                : $"{item.PropertyDisplayName} ({item.ElementName})";
+        }
+    }
 
     /// <summary>Proposed value for the row under review.</summary>
     public string CurrentReviewValue =>
@@ -368,6 +432,25 @@ public partial class WorkflowViewModel : ObservableRecipient
             await OnTryAgain();
     }
 
+    /// <summary>
+    /// Accepts a single row from its inline tick (#129); works outside review mode.
+    /// Collaborator's handler applies the update, removes the key, and re-syncs the list.
+    /// </summary>
+    public void AcceptItem(string key)
+    {
+        if (string.IsNullOrEmpty(key) || !HasPendingUpdates) return;
+        OnAcceptProperty?.Invoke(key);
+    }
+
+    /// <summary>
+    /// Skips (discards) a single row from its inline dismiss button (#129).
+    /// </summary>
+    public void SkipItem(string key)
+    {
+        if (string.IsNullOrEmpty(key) || !HasPendingUpdates) return;
+        OnSkipProperty?.Invoke(key);
+    }
+
     private void ExecuteAcceptCurrent()
     {
         if (!IsInReviewMode || !HasPendingUpdates) return;
@@ -441,6 +524,7 @@ public partial class WorkflowViewModel : ObservableRecipient
     private void NotifyReviewProperties()
     {
         OnPropertyChanged(nameof(CurrentReviewKey));
+        OnPropertyChanged(nameof(CurrentReviewDisplayName));
         OnPropertyChanged(nameof(CurrentReviewValue));
         OnPropertyChanged(nameof(CurrentReviewExisting));
         OnPropertyChanged(nameof(CurrentReviewCraft));
@@ -475,6 +559,17 @@ public partial class WorkflowViewModel : ObservableRecipient
         }
 
         UpdatesApplied = false;
+
+        // Inline ticks can shrink the list while Review Each is walking it (#129):
+        // exit review when it empties, clamp the index when it points past the end.
+        if (IsInReviewMode)
+        {
+            if (PendingUpdateItems.Count == 0)
+                IsInReviewMode = false;
+            else if (CurrentReviewIndex >= PendingUpdateItems.Count)
+                CurrentReviewIndex = PendingUpdateItems.Count - 1;
+        }
+
         OnPropertyChanged(nameof(PendingUpdateItems));
         OnPropertyChanged(nameof(HasUpdates));
         OnPropertyChanged(nameof(HasPendingUpdates));

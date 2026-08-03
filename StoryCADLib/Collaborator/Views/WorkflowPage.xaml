@@ -28,18 +28,79 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="using:StoryCADLib.Collaborator.Views"
     mc:Ignorable="d"
     VerticalAlignment="Stretch"
     HorizontalAlignment="Stretch">
+    <Page.Resources>
+        <!-- Chat bubble: sender label shows once per run of same-sender messages (#129).
+             Bubbles stretch to the full chat column width rather than sitting at a fixed
+             420px cap. The speaker is still cued by the bubble colour and by the sender
+             label, which keeps its left/right alignment. -->
+        <DataTemplate x:Key="ChatBubbleTemplate">
+            <!-- Template root: no AutomationId (TemplateSafety forbids it). -->
+            <StackPanel Margin="0,4,0,4"
+                        HorizontalAlignment="Stretch"
+                        AutomationProperties.Name="{Binding Text, Mode=OneWay}">
+                <TextBlock Text="{Binding Sender}"
+                           FontWeight="SemiBold"
+                           FontSize="11"
+                           Opacity="0.7"
+                           Visibility="{Binding SenderVisibility}"
+                           HorizontalAlignment="{Binding BubbleAlignment}" />
+                <Border CornerRadius="12"
+                        Padding="12,8,12,8"
+                        Margin="0,2,0,0"
+                        Background="{Binding BackgroundBrush}"
+                        HorizontalAlignment="Stretch">
+                    <TextBlock Text="{Binding Text}"
+                               TextWrapping="Wrap"
+                               Foreground="{Binding TextBrush}" />
+                </Border>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Rolled-up workflow status lines: one collapsed expander per run (#129). -->
+        <DataTemplate x:Key="ChatStatusTemplate">
+            <Expander Margin="0,4,0,4"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Stretch"
+                      IsExpanded="False"
+                      AutomationProperties.Name="{Binding StatusHeader, Mode=OneWay}">
+                <Expander.Header>
+                    <TextBlock Text="{Binding StatusHeader}"
+                               FontSize="11"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               TextTrimming="CharacterEllipsis" />
+                </Expander.Header>
+                <ItemsControl ItemsSource="{Binding Steps}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}"
+                                       FontSize="11"
+                                       TextWrapping="Wrap"
+                                       Margin="0,1"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Expander>
+        </DataTemplate>
+
+        <views:ChatMessageTemplateSelector x:Key="ChatTemplateSelector"
+                                           Bubble="{StaticResource ChatBubbleTemplate}"
+                                           Status="{StaticResource ChatStatusTemplate}" />
+    </Page.Resources>
     <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <!-- 3:2 split — the table needs the width more than the chat does. -->
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*" />
-            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="2*" />
         </Grid.ColumnDefinitions>
 
         <!-- ========== Work column (full height; Property Updates takes leftover) ========== -->
         <Grid Grid.Column="0"
-              Margin="0,0,10,0"
+              Margin="0,0,12,0"
               VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -67,11 +128,12 @@
             <Border Grid.Row="1"
                     Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="4" Padding="10"
+                    BorderThickness="1" CornerRadius="8" Padding="14"
                     VerticalAlignment="Stretch"
                     HorizontalAlignment="Stretch">
                 <Grid VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
@@ -79,86 +141,100 @@
                                Text="{x:Bind ViewModel.PendingUpdatesHeader, Mode=OneWay}"
                                FontWeight="SemiBold"
                                Margin="0,0,0,8" />
-                    <!--
-                      Host sizes the ScrollViewer explicitly (infinite-measure breaks scrolling).
-                      Built-in bars overlay/fade; we paint a permanent track + thumb ourselves.
-                    -->
-                    <Grid x:Name="PendingUpdatesScrollHost"
-                          Grid.Row="1"
-                          VerticalAlignment="Stretch"
-                          SizeChanged="PendingUpdatesScrollHost_SizeChanged">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="16" />
-                        </Grid.ColumnDefinitions>
 
-                        <ScrollViewer x:Name="PendingUpdatesScroll"
-                                      Grid.Column="0"
-                                      VerticalScrollBarVisibility="Disabled"
-                                      VerticalScrollMode="Enabled"
-                                      HorizontalScrollBarVisibility="Disabled"
-                                      HorizontalScrollMode="Disabled"
-                                      ViewChanged="PendingUpdatesScroll_ViewChanged"
-                                      AutomationProperties.AutomationId="WorkflowPendingUpdatesList">
-                            <ItemsControl x:Name="PendingUpdatesItems"
-                                          ItemsSource="{x:Bind ViewModel.PendingUpdateItems, Mode=OneWay}"
-                                          SizeChanged="PendingUpdatesItems_SizeChanged">
-                                <ItemsControl.ItemTemplate>
+                    <!-- Table column headers; right margin matches the gutter the built-in
+                         scrollbar reserves (ScrollBarSize, 12px) so headers stay over their
+                         columns (#129). Column widths must stay in sync with the row template. -->
+                    <Grid Grid.Row="1"
+                          Margin="0,0,12,0"
+                          Padding="0,0,0,4"
+                          BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                          BorderThickness="0,0,0,1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="160" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="110" />
+                            <ColumnDefinition Width="64" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Property" FontWeight="SemiBold"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="Proposed" FontWeight="SemiBold"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <!-- Status column has no header; rows still render KindLabel there. -->
+                    </Grid>
+                    <!--
+                      VerticalScrollBarVisibility must be Visible, never Disabled: per WinUI's
+                      ScrollBarVisibility contract, Disabled also turns scrolling off and clamps
+                      content height to the viewport, so rows clip and the wheel does nothing
+                      (VerticalScrollMode does not override it). Visible keeps the built-in bar
+                      on screen whenever the list overflows: the scroll affordance #129 asks for.
+                    -->
+                    <ScrollViewer Grid.Row="2"
+                                  VerticalAlignment="Stretch"
+                                  VerticalScrollBarVisibility="Visible"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  AutomationProperties.AutomationId="WorkflowPendingUpdatesList">
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.PendingUpdateItems, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <!-- Template root: no AutomationId (TemplateSafety forbids it). -->
-                                        <Grid Margin="0,4"
+                                        <!-- Template root: no AutomationId (TemplateSafety forbids it).
+                                             Column widths match the header row above the list. -->
+                                        <Grid Padding="0,8"
+                                              BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                              BorderThickness="0,0,0,1"
                                               AutomationProperties.Name="{Binding Key, Mode=OneWay}">
                                             <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="160" />
                                                 <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="110" />
+                                                <ColumnDefinition Width="64" />
                                             </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0">
-                                                <TextBlock Text="{Binding Key}"
-                                                           FontWeight="SemiBold"
-                                                           FontSize="12"
-                                                           TextTrimming="CharacterEllipsis" />
-                                                <TextBlock Text="{Binding ProposedDisplay}"
-                                                           FontSize="11"
-                                                           Opacity="0.85"
-                                                           TextTrimming="CharacterEllipsis"
-                                                           MaxLines="1" />
-                                            </StackPanel>
+                                            <!-- Tooltip carries the raw key so the element is still discoverable
+                                                 without its own column. -->
+                                            <TextBlock Text="{Binding DisplayName}"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Top"
+                                                       TextWrapping="Wrap"
+                                                       ToolTipService.ToolTip="{Binding Key}" />
                                             <TextBlock Grid.Column="1"
-                                                       Text="{Binding SummaryLine}"
-                                                       FontSize="11"
-                                                       Margin="8,0,0,0"
-                                                       VerticalAlignment="Center"
+                                                       Text="{Binding ProposedDisplay}"
+                                                       Opacity="0.9"
+                                                       VerticalAlignment="Top"
+                                                       TextWrapping="Wrap"
+                                                       Margin="0,0,8,0" />
+                                            <TextBlock Grid.Column="2"
+                                                       Text="{Binding KindLabel}"
+                                                       VerticalAlignment="Top"
+                                                       TextTrimming="CharacterEllipsis"
                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            <StackPanel Grid.Column="3"
+                                                        Orientation="Horizontal"
+                                                        Spacing="4"
+                                                        VerticalAlignment="Top">
+                                                <Button Click="AcceptItemButton_Click"
+                                                        Padding="5"
+                                                        Background="Transparent"
+                                                        BorderThickness="0"
+                                                        ToolTipService.ToolTip="Accept this update"
+                                                        AutomationProperties.Name="Accept update">
+                                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                                              Glyph="&#xE73E;" FontSize="12" />
+                                                </Button>
+                                                <Button Click="SkipItemButton_Click"
+                                                        Padding="5"
+                                                        Background="Transparent"
+                                                        BorderThickness="0"
+                                                        ToolTipService.ToolTip="Skip this update"
+                                                        AutomationProperties.Name="Skip update">
+                                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                                              Glyph="&#xE711;" FontSize="12" />
+                                                </Button>
+                                            </StackPanel>
                                         </Grid>
                                     </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-
-                        <!-- Permanent non-overlay scrollbar track (always visible). -->
-                        <Border Grid.Column="1"
-                                Margin="4,0,0,0"
-                                Background="{ThemeResource ControlAltFillColorTertiaryBrush}"
-                                CornerRadius="4"
-                                PointerPressed="PendingUpdatesTrack_PointerPressed">
-                            <Canvas x:Name="PendingUpdatesTrackCanvas"
-                                    HorizontalAlignment="Stretch"
-                                    VerticalAlignment="Stretch"
-                                    SizeChanged="PendingUpdatesTrackCanvas_SizeChanged">
-                                <Border x:Name="PendingUpdatesThumb"
-                                        Width="8"
-                                        Canvas.Left="2"
-                                        Canvas.Top="0"
-                                        Height="24"
-                                        CornerRadius="4"
-                                        Background="{ThemeResource AccentFillColorDefaultBrush}"
-                                        PointerPressed="PendingUpdatesThumb_PointerPressed"
-                                        PointerMoved="PendingUpdatesThumb_PointerMoved"
-                                        PointerReleased="PendingUpdatesThumb_PointerReleased"
-                                        PointerCaptureLost="PendingUpdatesThumb_PointerCaptureLost" />
-                            </Canvas>
-                        </Border>
-                    </Grid>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </Grid>
             </Border>
 
@@ -170,7 +246,7 @@
                 <Border Background="{ThemeResource SystemAccentColorLight2}"
                         CornerRadius="4" Padding="10" Margin="0,0,0,8">
                     <StackPanel>
-                        <TextBlock Text="{x:Bind ViewModel.CurrentReviewKey, Mode=OneWay}"
+                        <TextBlock Text="{x:Bind ViewModel.CurrentReviewDisplayName, Mode=OneWay}"
                                    FontWeight="Bold" FontSize="13" />
                         <TextBlock Text="Yours"
                                    FontSize="11"
@@ -215,7 +291,7 @@
 
         <!-- ========== Chat column (own height; input does not affect work column) ========== -->
         <Grid Grid.Column="1"
-              Margin="10,0,0,0"
+              Margin="12,0,0,0"
               VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
@@ -227,52 +303,40 @@
                       Margin="0,0,0,10"
                       VerticalAlignment="Stretch"
                       SelectionMode="None"
+                      HorizontalContentAlignment="Stretch"
+                      ItemTemplateSelector="{StaticResource ChatTemplateSelector}"
                       AutomationProperties.AutomationId="WorkflowConversationList">
+                <!-- Containers must stretch, else the bubble template only ever gets its
+                     desired width and stretching inside the template does nothing. The
+                     stock ListViewItem padding/MinHeight would also inset every bubble. -->
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="MinHeight" Value="0" />
+                    </Style>
+                </ListView.ItemContainerStyle>
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <ItemsStackPanel VerticalAlignment="Bottom"
                                          ItemsUpdatingScrollMode="KeepLastItemInView" />
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <!-- Template root: no AutomationId (TemplateSafety forbids it). -->
-                        <StackPanel Margin="0,4,0,4"
-                                    HorizontalAlignment="{Binding BubbleAlignment}"
-                                    AutomationProperties.Name="{Binding Text, Mode=OneWay}">
-                            <TextBlock Text="{Binding Sender}"
-                                       FontWeight="SemiBold"
-                                       FontSize="11"
-                                       Opacity="0.7"
-                                       HorizontalAlignment="{Binding BubbleAlignment}" />
-                            <Border CornerRadius="12"
-                                    Padding="12,8,12,8"
-                                    Margin="0,2,0,0"
-                                    Background="{Binding BackgroundBrush}"
-                                    HorizontalAlignment="{Binding BubbleAlignment}"
-                                    MaxWidth="350">
-                                <TextBlock Text="{Binding Text}"
-                                           TextWrapping="Wrap"
-                                           Foreground="{Binding TextBrush}" />
-                            </Border>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
             </ListView>
 
-            <StackPanel Grid.Row="1" Orientation="Vertical">
-                <!-- No Header/Placeholder: explicit Name (chat message input). -->
-                <TextBox x:Name="InputTextBox"
-                         HorizontalAlignment="Stretch"
-                         KeyDown="InputTextBox_KeyDown" TextWrapping="Wrap"
-                         Text="{x:Bind ViewModel.InputText, Mode=TwoWay}"
-                         MinHeight="60"
-                         AutomationProperties.AutomationId="InputTextBox"
-                         AutomationProperties.Name="Message" />
-                <Button x:Name="SendButton" Content="Send" Click="SendButton_Click"
-                        HorizontalAlignment="Right" Margin="0,5,0,0"
-                        AutomationProperties.AutomationId="SendButton" />
-            </StackPanel>
+            <!-- No suggestion items: used for its Enter-submits behavior and in-box send button.
+                 No Header/Placeholder: explicit Name (chat message input). -->
+            <AutoSuggestBox x:Name="InputTextBox"
+                            Grid.Row="1"
+                            HorizontalAlignment="Stretch"
+                            Text="{x:Bind ViewModel.InputText, Mode=TwoWay}"
+                            QuerySubmitted="InputTextBox_QuerySubmitted"
+                            AutomationProperties.AutomationId="InputTextBox"
+                            AutomationProperties.Name="Message">
+                <AutoSuggestBox.QueryIcon>
+                    <SymbolIcon Symbol="Send" />
+                </AutoSuggestBox.QueryIcon>
+            </AutoSuggestBox>
         </Grid>
 
         <!-- Progress over both columns, bottom edge of page -->

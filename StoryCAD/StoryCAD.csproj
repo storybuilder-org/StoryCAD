@@ -70,6 +70,22 @@
               DestinationFolder="$(PublishDir)/StoryCAD.app/Contents/MacOS/" />
     </Target>
 
+    <!-- Same shim, dev loop: publish is the only thing that builds an .app, so the target above
+         never runs for `dotnet build` / `dotnet run -f net10.0-desktop`. Without the dylib in the
+         output the interop's probe fails, BootStrapper falls back to NullStoreService, and every
+         dev run reports "Collaborator requires the Microsoft Store or Mac App Store edition".
+         $(OutDir) is the resolver's beside-the-executable probe, so a plain build behaves like the
+         bundle. Unsigned and unbundled, so StoreKit itself still has no App Store context; this
+         makes the store path reachable, not transacting. -->
+    <Target Name="_BuildAndCopyStoreKitShimToOutput" AfterTargets="Build"
+            Condition="$([MSBuild]::IsOSPlatform('OSX'))"
+            Inputs="$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/StoreKitShim.swift;$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/build.sh"
+            Outputs="$(OutDir)libStoryCADStoreKit.dylib">
+        <Exec Command="bash &quot;$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/build.sh&quot;" />
+        <Copy SourceFiles="$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/out/libStoryCADStoreKit.dylib"
+              DestinationFolder="$(OutDir)" />
+    </Target>
+
     <PropertyGroup>
         <!-- MSIX Configuration for Windows -->
         <UseWinUI Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</UseWinUI>
