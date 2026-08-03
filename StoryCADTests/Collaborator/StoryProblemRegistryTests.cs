@@ -1,10 +1,17 @@
+using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
+using StoryCADLib.Models.Tools;
+using StoryCADLib.Services.API;
+using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels;
+using StoryCollaborator;
 using StoryCollaborator.Workflows;
 
 namespace StoryCADTests.Collaborator;
 
 /// <summary>
-/// Registry contract for Story Problem gather links (Collaborator #118).
+/// Registry contract for Story Problem gather links (Collaborator #118)
+/// and immediate ProblemCategory write when Overview.StoryProblem is set.
 /// </summary>
 [TestClass]
 public class StoryProblemRegistryTests
@@ -74,5 +81,35 @@ public class StoryProblemRegistryTests
         Assert.IsTrue(props.Contains("Method"), "Method (Resolution tab)");
         Assert.IsTrue(props.Contains("Theme"), "Theme (Resolution tab)");
         Assert.IsTrue(props.Contains("Premise"), "Premise stays on Problem outputs");
+        Assert.IsFalse(props.Contains("ProblemCategory"),
+            "ProblemCategory is link-time structural write, not LLM pending");
+    }
+
+    [TestMethod]
+    public async Task StoryProblemCategory_ListValue_WritesViaApiImmediately()
+    {
+        // Contract: linking StoryProblem sets this exact Lists.json value on the Problem
+        // (Collaborator.ApplyStoryProblemCategory → UpdateElementProperty, not pending).
+        var api = new StoryCADApi(
+            Ioc.Default.GetRequiredService<OutlineService>(),
+            Ioc.Default.GetRequiredService<ListData>(),
+            Ioc.Default.GetRequiredService<ControlData>(),
+            Ioc.Default.GetRequiredService<ToolsData>());
+        var create = await api.CreateEmptyOutline("Category Link", "Author", "0");
+        Assert.IsTrue(create.IsSuccess);
+
+        var model = api.CurrentModel!;
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+        var add = api.AddElement(StoryItemType.Problem, overview.Uuid.ToString(), "Do Not Open the Box");
+        Assert.IsTrue(add.IsSuccess);
+        var problem = (ProblemModel)model.StoryElements.StoryElementGuids[add.Payload];
+        Assert.IsTrue(string.IsNullOrEmpty(problem.ProblemCategory));
+
+        var write = api.UpdateElementProperty(
+            problem.Uuid, "ProblemCategory", StoryCollaborator.Collaborator.StoryProblemCategoryListValue);
+        Assert.IsTrue(write.IsSuccess);
+        Assert.AreEqual("Story problem", problem.ProblemCategory);
+        Assert.AreEqual(
+            StoryCollaborator.Collaborator.StoryProblemCategoryListValue, problem.ProblemCategory);
     }
 }
