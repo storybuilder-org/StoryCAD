@@ -424,11 +424,13 @@ public class WorkflowViewModelTests
         {
             store.RemoveAll(i => i.Key == key);
             _viewModel.SetPendingUpdates(store);
+            return Task.CompletedTask;
         };
         _viewModel.OnSkipProperty = key =>
         {
             store.RemoveAll(i => i.Key == key);
             _viewModel.SetPendingUpdates(store);
+            return Task.CompletedTask;
         };
     }
 
@@ -601,7 +603,11 @@ public class WorkflowViewModelTests
     public void AcceptItem_WithNoPendingUpdates_DoesNotInvokeCallback()
     {
         var invoked = false;
-        _viewModel.OnAcceptProperty = _ => invoked = true;
+        _viewModel.OnAcceptProperty = _ =>
+        {
+            invoked = true;
+            return Task.CompletedTask;
+        };
 
         _viewModel.AcceptItem("Overview.Premise");
 

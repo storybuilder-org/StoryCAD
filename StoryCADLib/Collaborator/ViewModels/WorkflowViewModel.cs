@@ -28,15 +28,15 @@ public partial class WorkflowViewModel : ObservableRecipient
         AcceptCommand = new RelayCommand(SaveOutputs);
         SendCommand = new RelayCommand(async () => await SendButtonClicked());
 
-        // Property update commands
-        AcceptAllCommand = new RelayCommand(ExecuteAcceptAll);
+        // Property update commands (#140: Accept paths may await overwrite confirm)
+        AcceptAllCommand = new RelayCommand(async () => await ExecuteAcceptAllAsync());
         ReviewEachCommand = new RelayCommand(ExecuteReviewEach);
         TryAgainCommand = new RelayCommand(async () => await ExecuteTryAgain());
 
         // Review mode commands
-        AcceptCurrentCommand = new RelayCommand(ExecuteAcceptCurrent);
-        SkipCurrentCommand = new RelayCommand(ExecuteSkipCurrent);
-        AcceptRemainingCommand = new RelayCommand(ExecuteAcceptRemaining);
+        AcceptCurrentCommand = new RelayCommand(async () => await ExecuteAcceptCurrentAsync());
+        SkipCurrentCommand = new RelayCommand(async () => await ExecuteSkipCurrentAsync());
+        AcceptRemainingCommand = new RelayCommand(async () => await ExecuteAcceptRemainingAsync());
     }
 
     /// <summary>
@@ -298,15 +298,15 @@ public partial class WorkflowViewModel : ObservableRecipient
         ? $"{CurrentReviewIndex + 1} of {PendingUpdateItems?.Count ?? 0}"
         : string.Empty;
 
-    public Action OnAcceptAll { get; set; }
+    public Func<Task> OnAcceptAll { get; set; }
     public Func<Task> OnTryAgain { get; set; }
-    public Action<string> OnAcceptProperty { get; set; }
-    public Action<string> OnSkipProperty { get; set; }
+    public Func<string, Task> OnAcceptProperty { get; set; }
+    public Func<string, Task> OnSkipProperty { get; set; }
 
     /// <summary>
-    /// Accept remaining Fill/Refresh only; leave Protect rows (issue #116).
+    /// Accept remaining free now; stage remaining Protect and confirm when the queue is done (#140).
     /// </summary>
-    public Action OnAcceptRemainingFree { get; set; }
+    public Func<Task> OnAcceptRemainingFree { get; set; }
 
     private bool _updatesApplied;
     public bool UpdatesApplied
@@ -406,12 +406,11 @@ public partial class WorkflowViewModel : ObservableRecipient
 
     #region Property Update Command Handlers
 
-    private void ExecuteAcceptAll()
+    private async Task ExecuteAcceptAllAsync()
     {
         if (!HasPendingUpdates) return;
-
-        // Collaborator applies free rows, may leave Protect, and updates this collection.
-        OnAcceptAll?.Invoke();
+        if (OnAcceptAll != null)
+            await OnAcceptAll();
     }
 
     private void ExecuteReviewEach()
@@ -434,57 +433,69 @@ public partial class WorkflowViewModel : ObservableRecipient
 
     /// <summary>
     /// Accepts a single row from its inline tick (#129); works outside review mode.
-    /// Collaborator's handler applies the update, removes the key, and re-syncs the list.
+    /// Protect rows are staged for end-of-queue confirm (#140).
     /// </summary>
-    public void AcceptItem(string key)
+    public async Task AcceptItemAsync(string key)
     {
         if (string.IsNullOrEmpty(key) || !HasPendingUpdates) return;
-        OnAcceptProperty?.Invoke(key);
+        if (OnAcceptProperty != null)
+            await OnAcceptProperty(key);
     }
+
+    /// <summary>Sync wrapper for XAML/command binding that cannot await.</summary>
+    public void AcceptItem(string key) =>
+        _ = AcceptItemAsync(key);
 
     /// <summary>
     /// Skips (discards) a single row from its inline dismiss button (#129).
     /// </summary>
-    public void SkipItem(string key)
+    public async Task SkipItemAsync(string key)
     {
         if (string.IsNullOrEmpty(key) || !HasPendingUpdates) return;
-        OnSkipProperty?.Invoke(key);
+        if (OnSkipProperty != null)
+            await OnSkipProperty(key);
     }
 
-    private void ExecuteAcceptCurrent()
+    public void SkipItem(string key) =>
+        _ = SkipItemAsync(key);
+
+    private async Task ExecuteAcceptCurrentAsync()
     {
         if (!IsInReviewMode || !HasPendingUpdates) return;
 
         var key = CurrentReviewKey;
-        OnAcceptProperty?.Invoke(key);
+        if (OnAcceptProperty != null)
+            await OnAcceptProperty(key);
         AdvanceReview();
     }
 
-    private void ExecuteSkipCurrent()
+    private async Task ExecuteSkipCurrentAsync()
     {
         if (!IsInReviewMode || !HasPendingUpdates) return;
 
         var key = CurrentReviewKey;
-        OnSkipProperty?.Invoke(key);
+        if (OnSkipProperty != null)
+            await OnSkipProperty(key);
         AdvanceReview();
     }
 
-    private void ExecuteAcceptRemaining()
+    private async Task ExecuteAcceptRemainingAsync()
     {
         if (!IsInReviewMode) return;
 
-        // #116: only free updates; Protect stays for Accept/Skip.
+        // #140: free apply now; remaining Protect staged → one confirm when queue done.
         if (OnAcceptRemainingFree != null)
-            OnAcceptRemainingFree.Invoke();
+            await OnAcceptRemainingFree();
         else
         {
-            // Fallback: accept free-looking rows only (no Protect label).
             var keys = PendingUpdateItems
-                .Where(i => !i.IsProtected)
                 .Select(i => i.Key)
                 .ToList();
             foreach (var key in keys)
-                OnAcceptProperty?.Invoke(key);
+            {
+                if (OnAcceptProperty != null)
+                    await OnAcceptProperty(key);
+            }
         }
 
         if (PendingUpdateItems == null || PendingUpdateItems.Count == 0)

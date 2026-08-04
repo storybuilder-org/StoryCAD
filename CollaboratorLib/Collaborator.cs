@@ -44,6 +44,7 @@ public class Collaborator : ICollaborator
     private ElementResolver? _elementResolver;
     private string? _filePath;
     private Window? _hostWindow;
+    private Frame? _hostFrame;
     private WorkflowShellViewModel? _shellViewModel;
     private bool _disposed;
     private StoryCADLib.Services.Logging.ILogService? _auditLogger;
@@ -104,6 +105,7 @@ public class Collaborator : ICollaborator
         _storyModel = model;
         _filePath = filePath;
         _hostWindow = hostWindow;
+        _hostFrame = hostFrame;
         _auditLogger = logger;
 
         // Initialize logging and services
@@ -699,42 +701,124 @@ public class Collaborator : ICollaborator
                 {
                     PushPendingToViewModel(viewModel, result);
 
+                    // #140 / #116 rev: Protect accepts are staged until end-of-queue confirm.
+                    var stageSession = new OverwriteAcceptanceSession();
+
+                    int ApplyPendingList(IReadOnlyList<PendingUpdate> list)
+                    {
+                        if (list.Count == 0) return 0;
+                        var slice = WorkflowResult.Succeeded();
+                        foreach (var u in list)
+                            slice.PendingUpdates.Add(u);
+                        var applied = runner.ApplyUpdates(slice, gatheredElements);
+                        foreach (var u in list)
+                            _sessionTouchedFields.Add(u.SessionTouchKey);
+                        return applied;
+                    }
+
+                    void RemovePendingKeys(IEnumerable<string> keys)
+                    {
+                        var set = keys.ToHashSet(StringComparer.OrdinalIgnoreCase);
+                        result.PendingUpdates.RemoveAll(u => set.Contains(u.Key));
+                        foreach (var key in set)
+                            result.UpdatedProperties.Remove(key);
+                    }
+
+                    void FinishPendingUi()
+                    {
+                        if (result.PendingUpdates.Count == 0 && !stageSession.HasStaged)
+                        {
+                            viewModel.MarkUpdatesApplied();
+                            SyncShellPending(viewModel);
+                        }
+                        else
+                            PushPendingToViewModel(viewModel, result);
+                        _storyModel?.RefreshCurrentView();
+                    }
+
+                    void AutoSaveFireAndForget(string reason)
+                    {
+                        _ = Task.Run(async () =>
+                        {
+                            var saved = await SaveAsync();
+                            if (saved)
+                                _logger?.LogInformation("Auto-save completed after {Reason}", reason);
+                        });
+                    }
+
+                    async Task FlushStagedIfQueueDoneAsync()
+                    {
+                        if (!stageSession.ShouldConfirmStaged(result.PendingUpdates.Count))
+                            return;
+
+                        var staged = stageSession.StagedProtect.ToList();
+                        var ok = await ConfirmOverwriteAsync(staged);
+                        if (ok)
+                        {
+                            var n = ApplyPendingList(staged);
+                            viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
+                                n > 0
+                                    ? $"Applied {n} overwrite(s) after confirmation."
+                                    : "No overwrites were applied."));
+                            _logger?.LogInformation("StagedProtect confirmed: Applied {Count}", n);
+                            _auditLogger?.Log(StoryCADLib.Services.Logging.LogLevel.Info,
+                                $"Applied {n} confirmed overwrites from workflow: {workflow.Title}");
+                            stageSession.ClearStage();
+                            AutoSaveFireAndForget("confirmed overwrites");
+                        }
+                        else
+                        {
+                            viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
+                                $"Cancelled: left {staged.Count} existing field(s) unchanged."));
+                            _logger?.LogInformation("StagedProtect cancelled: {Count}", staged.Count);
+                            stageSession.ClearStage();
+                        }
+
+                        FinishPendingUi();
+                    }
+
                     // Wire up command callbacks using closures (captures local state)
-                    viewModel.OnAcceptAll = () =>
+                    viewModel.OnAcceptAll = async () =>
                     {
                         try
                         {
-                            var free = result.PendingUpdates.Where(WorkflowRunner.AcceptAllMayApply).ToList();
-                            var protect = result.PendingUpdates
-                                .Where(u => u.Kind == UpdateKind.Protect)
-                                .ToList();
+                            var (free, protect) = OverwriteAcceptanceSession.Partition(result.PendingUpdates);
+                            stageSession.ClearStage();
 
-                            var applySlice = WorkflowResult.Succeeded();
-                            foreach (var u in free)
-                                applySlice.PendingUpdates.Add(u);
+                            var applyList = new List<PendingUpdate>(free);
+                            if (protect.Count > 0)
+                            {
+                                if (!await ConfirmOverwriteAsync(protect))
+                                {
+                                    // Cancel overwrites: still apply free rows; leave Protect pending.
+                                    var freeOnly = ApplyPendingList(free);
+                                    RemovePendingKeys(free.Select(u => u.Key));
+                                    viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
+                                        freeOnly > 0
+                                            ? $"Applied {freeOnly} free update(s). Left {protect.Count} field(s) with existing text unchanged."
+                                            : $"Left {protect.Count} field(s) with existing text unchanged."));
+                                    _logger?.LogInformation(
+                                        "AcceptAll cancelled overwrites: free={Free} protect={Protect}",
+                                        freeOnly, protect.Count);
+                                    FinishPendingUi();
+                                    if (freeOnly > 0)
+                                        AutoSaveFireAndForget("Accept All free-only");
+                                    return;
+                                }
 
-                            var count = free.Count == 0
-                                ? 0
-                                : runner.ApplyUpdates(applySlice, gatheredElements);
+                                applyList.AddRange(protect);
+                            }
 
-                            foreach (var u in free)
-                                _sessionTouchedFields.Add(u.SessionTouchKey);
-
-                            // Rebuild remaining pending = Protect only
+                            var count = ApplyPendingList(applyList);
                             result.PendingUpdates.Clear();
                             result.UpdatedProperties.Clear();
-                            foreach (var u in protect)
-                            {
-                                result.PendingUpdates.Add(u);
-                                result.UpdatedProperties[u.Key] = u.Value ?? string.Empty;
-                            }
 
                             var sb = new System.Text.StringBuilder();
                             if (count > 0)
                             {
                                 sb.AppendLine($"Applied {count} update(s) to your outline:");
                                 sb.AppendLine();
-                                foreach (var u in free)
+                                foreach (var u in applyList)
                                 {
                                     var valuePreview = TruncateForChat(FormatValueForDisplay(u.Value));
                                     sb.AppendLine($"**{u.Key}**: {valuePreview}");
@@ -742,48 +826,20 @@ public class Collaborator : ICollaborator
                                 }
                             }
                             else
-                            {
-                                sb.AppendLine("No free updates to apply (nothing empty or already written by Collaborator this session).");
-                            }
-
-                            if (protect.Count > 0)
-                            {
-                                sb.AppendLine();
-                                sb.AppendLine(
-                                    $"Left {protect.Count} alone because those fields already have your content. " +
-                                    "Use Review Each to keep or replace them.");
-                                foreach (var u in protect)
-                                {
-                                    sb.AppendLine($"- **{u.Key}** (yours vs proposed)");
-                                    if (!string.IsNullOrWhiteSpace(u.CraftExplanation))
-                                        sb.AppendLine($"  {u.CraftExplanation}");
-                                }
-                            }
+                                sb.AppendLine("No updates to apply.");
 
                             viewModel.ConversationList.Add(ChatMessage.FromCollaborator(sb.ToString().TrimEnd()));
                             _logger?.LogInformation(
-                                "AcceptAll: Applied {Count}, protected {Protected}", count, protect.Count);
+                                "AcceptAll: Applied {Count} (free={Free} protect={Protect})",
+                                count, free.Count, protect.Count);
                             _auditLogger?.Log(StoryCADLib.Services.Logging.LogLevel.Info,
                                 $"Applied {count} updates from workflow: {workflow.Title}");
 
-                            if (protect.Count == 0)
-                            {
-                                viewModel.MarkUpdatesApplied();
-                                SyncShellPending(viewModel);
-                            }
-                            else
-                            {
-                                PushPendingToViewModel(viewModel, result);
-                            }
-
+                            viewModel.MarkUpdatesApplied();
+                            SyncShellPending(viewModel);
                             _storyModel?.RefreshCurrentView();
-
-                            _ = Task.Run(async () =>
-                            {
-                                var saved = await SaveAsync();
-                                if (saved)
-                                    _logger?.LogInformation("Auto-save completed after Accept All");
-                            });
+                            if (count > 0)
+                                AutoSaveFireAndForget("Accept All");
                         }
                         catch (Exception ex)
                         {
@@ -796,6 +852,7 @@ public class Collaborator : ICollaborator
                     {
                         try
                         {
+                            stageSession.ClearStage();
                             viewModel.ClearPendingUpdates();
                             viewModel.AddStatusMessage("Re-running workflow...");
                             await ExecuteWorkflowWithFeedback(viewModel, workflow, gatheredElements);
@@ -807,7 +864,7 @@ public class Collaborator : ICollaborator
                         }
                     };
 
-                    viewModel.OnAcceptProperty = (propertyKey) =>
+                    viewModel.OnAcceptProperty = async (propertyKey) =>
                     {
                         if (string.IsNullOrEmpty(propertyKey))
                         {
@@ -825,24 +882,35 @@ public class Collaborator : ICollaborator
                                 return;
                             }
 
-                            var single = WorkflowResult.Succeeded();
-                            single.PendingUpdates.Add(pending);
-                            var applied = runner.ApplyUpdates(single, gatheredElements);
+                            if (pending.Kind == UpdateKind.Protect)
+                            {
+                                // Stage overwrite; confirm once when the queue is fully decided (#140).
+                                stageSession.StageProtect(pending);
+                                RemovePendingKeys(new[] { propertyKey });
+                                viewModel.AddStatusMessage($"Queued overwrite: {propertyKey}");
+                                _logger?.LogInformation("AcceptProperty: Staged Protect {Key}", propertyKey);
+                                PushPendingToViewModel(viewModel, result);
+                                await FlushStagedIfQueueDoneAsync();
+                                return;
+                            }
 
+                            var applied = ApplyPendingList(new[] { pending });
                             if (applied > 0)
                             {
-                                _sessionTouchedFields.Add(pending.SessionTouchKey);
                                 viewModel.AddStatusMessage($"Applied {propertyKey}");
                                 _logger?.LogInformation("AcceptProperty: Applied {Key}", propertyKey);
                                 _auditLogger?.Log(StoryCADLib.Services.Logging.LogLevel.Info,
                                     $"Applied update: {propertyKey}");
-
-                                result.PendingUpdates.RemoveAll(u =>
-                                    string.Equals(u.Key, propertyKey, StringComparison.OrdinalIgnoreCase));
-                                result.UpdatedProperties.Remove(propertyKey);
+                                RemovePendingKeys(new[] { propertyKey });
                                 PushPendingToViewModel(viewModel, result);
-
                                 _storyModel?.RefreshCurrentView();
+                                await FlushStagedIfQueueDoneAsync();
+                                if (result.PendingUpdates.Count == 0 && !stageSession.HasStaged)
+                                {
+                                    viewModel.MarkUpdatesApplied();
+                                    SyncShellPending(viewModel);
+                                    AutoSaveFireAndForget("AcceptProperty");
+                                }
                             }
                             else
                             {
@@ -858,7 +926,7 @@ public class Collaborator : ICollaborator
                         }
                     };
 
-                    viewModel.OnSkipProperty = (propertyKey) =>
+                    viewModel.OnSkipProperty = async (propertyKey) =>
                     {
                         if (string.IsNullOrEmpty(propertyKey))
                         {
@@ -876,6 +944,12 @@ public class Collaborator : ICollaborator
                                 viewModel.AddStatusMessage($"Skipped {propertyKey}");
                                 _logger?.LogInformation("SkipProperty: Skipped {Key}", propertyKey);
                                 PushPendingToViewModel(viewModel, result);
+                                await FlushStagedIfQueueDoneAsync();
+                                if (result.PendingUpdates.Count == 0 && !stageSession.HasStaged)
+                                {
+                                    viewModel.MarkUpdatesApplied();
+                                    SyncShellPending(viewModel);
+                                }
                             }
                             else
                             {
@@ -889,46 +963,37 @@ public class Collaborator : ICollaborator
                         }
                     };
 
-                    // Accept Remaining: only free rows (Fill/Refresh/Unclassified); leave Protect.
-                    viewModel.OnAcceptRemainingFree = () =>
+                    // Accept Remaining: free apply now; remaining Protect staged → end confirm if queue empty.
+                    viewModel.OnAcceptRemainingFree = async () =>
                     {
                         try
                         {
-                            var free = result.PendingUpdates.Where(WorkflowRunner.AcceptAllMayApply).ToList();
-                            if (free.Count == 0)
+                            var (free, protect) = OverwriteAcceptanceSession.Partition(result.PendingUpdates);
+                            var freeCount = ApplyPendingList(free);
+                            RemovePendingKeys(free.Select(u => u.Key));
+
+                            foreach (var u in protect)
+                                stageSession.StageProtect(u);
+                            RemovePendingKeys(protect.Select(u => u.Key));
+
+                            if (freeCount > 0)
                             {
                                 viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
-                                    "No remaining free updates. Use Accept or Skip on each protected field."));
-                                return;
+                                    $"Applied {freeCount} free update(s)."));
                             }
 
-                            var applySlice = WorkflowResult.Succeeded();
-                            foreach (var u in free)
-                                applySlice.PendingUpdates.Add(u);
-                            var count = runner.ApplyUpdates(applySlice, gatheredElements);
-                            foreach (var u in free)
-                                _sessionTouchedFields.Add(u.SessionTouchKey);
+                            PushPendingToViewModel(viewModel, result);
+                            _storyModel?.RefreshCurrentView();
+                            await FlushStagedIfQueueDoneAsync();
 
-                            var freeKeys = free.Select(u => u.Key).ToHashSet(StringComparer.OrdinalIgnoreCase);
-                            result.PendingUpdates.RemoveAll(u => freeKeys.Contains(u.Key));
-                            foreach (var key in freeKeys)
-                                result.UpdatedProperties.Remove(key);
-
-                            viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
-                                $"Applied {count} free update(s). " +
-                                (result.PendingUpdates.Count > 0
-                                    ? $"{result.PendingUpdates.Count} protected field(s) still need Accept or Skip."
-                                    : "All done.")));
-
-                            if (result.PendingUpdates.Count == 0)
+                            if (result.PendingUpdates.Count == 0 && !stageSession.HasStaged)
                             {
                                 viewModel.MarkUpdatesApplied();
                                 SyncShellPending(viewModel);
                             }
-                            else
-                                PushPendingToViewModel(viewModel, result);
 
-                            _storyModel?.RefreshCurrentView();
+                            if (freeCount > 0)
+                                AutoSaveFireAndForget("Accept Remaining free");
                         }
                         catch (Exception ex)
                         {
@@ -941,7 +1006,7 @@ public class Collaborator : ICollaborator
                     var protectCount = result.PendingUpdates.Count(u => u.Kind == UpdateKind.Protect);
                     viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
                         $"Found {result.PendingUpdates.Count} property update(s) " +
-                        $"({fillCount} ready for Accept All, {protectCount} need your OK because the field already has text). " +
+                        $"({fillCount} free, {protectCount} replace existing text — confirmation required). " +
                         "Choose Accept All, Review Each, or Try Again."));
                 }
                 else
@@ -969,6 +1034,38 @@ public class Collaborator : ICollaborator
             viewModel.ConversationList.Add(ChatMessage.Error($"Error executing workflow: {ex.Message}"));
             _logger?.LogError(ex, "Error executing workflow {Workflow}", workflow.Title);
         }
+    }
+
+    /// <summary>
+    /// #140: confirm before applying Protect (non-empty field) overwrites.
+    /// Headless / no XamlRoot → false (do not silent-overwrite).
+    /// </summary>
+    internal async Task<bool> ConfirmOverwriteAsync(IReadOnlyList<PendingUpdate> protect)
+    {
+        if (protect == null || protect.Count == 0)
+            return true;
+
+        var xamlRoot = _hostFrame?.XamlRoot;
+        if (xamlRoot == null)
+        {
+            _logger?.LogWarning(
+                "ConfirmOverwriteAsync: no XamlRoot; refusing {Count} Protect overwrite(s)",
+                protect.Count);
+            return false;
+        }
+
+        var dialog = new ContentDialog
+        {
+            Title = "Replace existing content?",
+            Content = OverwriteAcceptanceSession.BuildConfirmMessage(protect),
+            PrimaryButtonText = "Replace",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = xamlRoot
+        };
+
+        var result = await dialog.ShowAsync();
+        return result == ContentDialogResult.Primary;
     }
 
     /// <summary>
