@@ -307,6 +307,58 @@ public class ProblemViewModelTests
     }
 
     [TestMethod]
+    public void SaveModel_NonStoryProblem_DoesNotClearOverviewPremise()
+    {
+        // #1500: _syncPremise must require this Problem == Overview.StoryProblem.
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var overview = (OverviewModel)_storyModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        var storyProblem = new ProblemModel("Main Story Problem", _storyModel, overview.Node);
+        storyProblem.Premise = "Spine premise text";
+        overview.StoryProblem = storyProblem.Uuid;
+        overview.Premise = "Spine premise text";
+
+        var inner = new ProblemModel("Inner Problem", _storyModel, overview.Node);
+        inner.Premise = string.Empty;
+
+        appState.CurrentDocument = new StoryDocument(_storyModel);
+
+        _viewModel.Activate(inner);
+        _viewModel.Premise = string.Empty;
+        _viewModel.Description = "touch field to simulate edit";
+        _viewModel.Deactivate(null);
+
+        Assert.AreEqual("Spine premise text", overview.Premise,
+            "Saving a non–Story Problem must not push empty Premise to Overview");
+        Assert.AreEqual("Spine premise text", storyProblem.Premise,
+            "Story Problem Premise must remain untouched");
+    }
+
+    [TestMethod]
+    public void SaveModel_StoryProblem_StillSyncsPremiseToOverview()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var overview = (OverviewModel)_storyModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        var storyProblem = new ProblemModel("Main Story Problem", _storyModel, overview.Node);
+        storyProblem.Premise = "Old premise";
+        overview.StoryProblem = storyProblem.Uuid;
+        overview.Premise = "Old premise";
+
+        appState.CurrentDocument = new StoryDocument(_storyModel);
+
+        _viewModel.Activate(storyProblem);
+        _viewModel.Premise = "Updated spine premise";
+        _viewModel.Deactivate(null);
+
+        Assert.AreEqual("Updated spine premise", storyProblem.Premise);
+        Assert.AreEqual("Updated spine premise", overview.Premise,
+            "Story Problem SaveModel must still sync Premise to Overview");
+    }
+
+    [TestMethod]
     public void SelectedElementSource_WhenSetToScene_SetsCurrentElementSourceToScenes()
     {
         // Arrange - Setup AppState with CurrentDocument
