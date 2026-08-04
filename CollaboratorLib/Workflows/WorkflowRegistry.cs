@@ -158,6 +158,7 @@ namespace StoryCollaborator.Workflows
                                 PropertiesToUpdate = new List<PropertySpec>
                                 {
                                     new PropertySpec("Name"),
+                                    // ProblemCategory is not LLM: set at gather when Overview.StoryProblem is linked.
                                     new PropertySpec("ProblemType"),
                                     new PropertySpec("ConflictType"),
                                     new PropertySpec("Subject"),

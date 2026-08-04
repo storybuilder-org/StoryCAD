@@ -1336,6 +1336,12 @@ public class Collaborator : ICollaborator
                         $"Found {requirement.ElementLabel}: {currentElement.Name} (from {requirement.ReferencedElementLabel})");
                     _logger?.LogDebug("Resolved {Label} via {Ref} to '{Name}'",
                         requirement.ElementLabel, requirement.ReferencedElementLabel, currentElement.Name);
+                    if (string.Equals(
+                            requirement.ReferencedElementLabel, "Overview.StoryProblem",
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        ApplyStoryProblemCategory(currentElement.Uuid, statusMessages);
+                    }
                     return currentElement;
                 }
 
@@ -1436,11 +1442,47 @@ public class Collaborator : ICollaborator
         {
             statusMessages.Add($"  (Updated {sourceLabel}.{propertyName})");
             _logger?.LogDebug("Updated {Source}.{Property} = {Guid}", sourceLabel, propertyName, pickedElementGuid);
+
+            // Linking Overview.StoryProblem means this Problem is the main story problem —
+            // ProblemCategory is that structural fact (Lists.json), not an Accept/Protect field.
+            if (string.Equals(sourceLabel, "Overview", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(propertyName, "StoryProblem", StringComparison.OrdinalIgnoreCase))
+            {
+                ApplyStoryProblemCategory(pickedElementGuid, statusMessages);
+            }
         }
         else
         {
             _logger?.LogWarning("Failed to update {Source}.{Property}: {Error}",
                 sourceLabel, propertyName, result?.ErrorMessage);
+        }
+    }
+
+    /// <summary>
+    /// Exact Lists.json ProblemCategory value when a Problem is the Overview StoryProblem.
+    /// </summary>
+    internal const string StoryProblemCategoryListValue = "Story problem";
+
+    /// <summary>
+    /// Writes Problem.ProblemCategory = "Story problem" immediately (not pending / not Accept).
+    /// Call whenever Overview.StoryProblem is linked to this Problem.
+    /// </summary>
+    internal void ApplyStoryProblemCategory(Guid problemGuid, List<string>? statusMessages = null)
+    {
+        var catResult = _storyApi?.UpdateElementProperty(
+            problemGuid, "ProblemCategory", StoryProblemCategoryListValue);
+        if (catResult?.IsSuccess == true)
+        {
+            statusMessages?.Add($"  (Set Problem.ProblemCategory = {StoryProblemCategoryListValue})");
+            _logger?.LogDebug(
+                "Set Problem {Guid} ProblemCategory = {Category}",
+                problemGuid, StoryProblemCategoryListValue);
+        }
+        else
+        {
+            _logger?.LogWarning(
+                "Failed to set ProblemCategory on {Guid}: {Error}",
+                problemGuid, catResult?.ErrorMessage);
         }
     }
 
