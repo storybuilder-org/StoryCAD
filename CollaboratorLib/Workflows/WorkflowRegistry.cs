@@ -388,14 +388,21 @@ namespace StoryCollaborator.Workflows
                 // === Character Workflows ===
                 new Workflow(
                     "RoleAndStoryRole", "Role and Story Role",
-                    "Define a character's archetypal role and their function in the story.",
+                    "Define a character's archetypal role, story function, and a short Character Sketch.",
                     StoryItemType.Character,
-                    explanation: "Every character serves a purpose. Role defines their relationship to the protagonist " +
-                                "(ally, mentor, love interest, antagonist). Story Role captures their narrative function " +
-                                "(provides comic relief, delivers exposition, represents theme). Archetype connects them " +
-                                "to universal patterns readers instinctively recognize—the Hero, Trickster, Shadow, or " +
-                                "Shapeshifter. This workflow helps you cast your character deliberately.",
-                    outputProperties: new List<PropertySpec> { new PropertySpec("Role"), new PropertySpec("StoryRole"), new PropertySpec("Archetype") },
+                    explanation: "Every character serves a purpose. Role is occupation/function in the world. " +
+                                "Story Role is narrative function (Protagonist, Antagonist, Supporting). " +
+                                "Archetype is the universal pattern (Hero, Mentor, Shadow). " +
+                                "Character Sketch (Description) is short story-function prose from those choices, " +
+                                "Related Problems, Flaw when present, and story premise—not a physical biography.",
+                    outputProperties: new List<PropertySpec>
+                    {
+                        new PropertySpec("Role"),
+                        new PropertySpec("StoryRole"),
+                        new PropertySpec("Archetype"),
+                        // Character Sketch (gap label); Collaborator #142
+                        new PropertySpec("Description")
+                    },
                     exampleLists: new List<string> { "Role", "StoryRole", "Archetype" }),
                 new Workflow(
                     "PhysicalAppearance", "Physical and Appearance",

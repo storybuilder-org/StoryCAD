@@ -41,7 +41,8 @@ public static class GapWorkflowOwnership
 
             (StoryItemType.Character, "Role") => new[] { "RoleAndStoryRole" },
             (StoryItemType.Character, "StoryRole") => new[] { "RoleAndStoryRole" },
-            (StoryItemType.Character, "Description") => Array.Empty<string>(),
+            // Character Sketch — Role and Story Role (#142)
+            (StoryItemType.Character, "Description") => new[] { "RoleAndStoryRole" },
             (StoryItemType.Character, "Name") => Array.Empty<string>(),
 
             (StoryItemType.Setting, "Description") => new[] { "SettingTimeSpace" },
