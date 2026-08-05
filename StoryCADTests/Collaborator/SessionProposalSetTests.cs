@@ -61,15 +61,19 @@ public class SessionProposalSetTests
     }
 
     [TestMethod]
-    public void BuildSnapshotText_IncludesStatus()
+    public void BuildSnapshotText_IncludesStatus_AndFullLongText()
     {
         var set = new SessionProposalSet();
-        set.ReplaceFromPending(new[] { Make("Problem", "Name", "Prophecy") });
-        set.MarkSkipped("Problem.Name");
+        var longSketch = new string('x', 500) + " END";
+        set.ReplaceFromPending(new[] { Make("Character", "Description", longSketch) });
+        set.MarkSkipped("Character.Description");
 
         var snap = set.BuildSnapshotText();
-        StringAssert.Contains(snap, "Problem.Name");
+        StringAssert.Contains(snap, "Character.Description");
         StringAssert.Contains(snap, "skipped");
+        StringAssert.Contains(snap, " END");
+        Assert.IsFalse(snap.Contains('…') && !snap.Contains(" END"),
+            "Default snapshot should not truncate a 500-char sketch");
     }
 
     [TestMethod]

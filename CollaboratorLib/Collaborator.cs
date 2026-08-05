@@ -635,7 +635,8 @@ public class Collaborator : ICollaborator
     }
 
     /// <summary>
-    /// Push open session proposals into WorkflowResult + Property Updates UI.
+    /// Push session proposals into WorkflowResult (open only for Accept) and
+    /// Property Updates UI (all statuses so Skip does not blank the panel — #145).
     /// </summary>
     private void SyncWorkflowResultFromSession()
     {
@@ -651,14 +652,62 @@ public class Collaborator : ICollaborator
             _activeWorkflowResult.UpdatedProperties[u.Key] = FormatValueForDisplay(u.Value);
         }
 
-        PushPendingToViewModel(_activeWorkflowViewModel, _activeWorkflowResult);
-        if (open.Count == 0)
+        PushSessionSetToViewModel(_activeWorkflowViewModel);
+    }
+
+    /// <summary>
+    /// Show the full session proposal set on the left (open + accepted + skipped).
+    /// Accept handlers still use <see cref="_activeWorkflowResult"/> open rows only.
+    /// </summary>
+    private void PushSessionSetToViewModel(
+        StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel)
+    {
+        if (_sessionProposals == null || _sessionProposals.Count == 0)
         {
-            _activeWorkflowViewModel.MarkUpdatesApplied();
-            SyncShellPending(_activeWorkflowViewModel);
+            viewModel.SetPendingUpdates(Array.Empty<PendingUpdateItem>());
+            SyncShellPending(viewModel);
+            return;
         }
-        else
-            SyncShellPending(_activeWorkflowViewModel);
+
+        var items = _sessionProposals.All
+            .OrderBy(e => e.Update.Key, StringComparer.OrdinalIgnoreCase)
+            .Select(ToSessionPendingUpdateItem)
+            .ToList();
+        viewModel.SetPendingUpdates(items);
+        // Shell Accept All only when something is still open
+        if (_shellViewModel != null)
+            _shellViewModel.HasPendingUpdates = _sessionProposals.OpenCount > 0;
+    }
+
+    private PendingUpdateItem ToSessionPendingUpdateItem(SessionProposalSet.Entry e)
+    {
+        var u = e.Update with { Value = e.ProposedText };
+        var proposed = TruncateForChat(FormatValueForDisplay(u.Value), 500);
+        var current = TruncateForChat(u.CurrentDisplay ?? string.Empty, 300);
+        var kindLabel = e.Status switch
+        {
+            ProposalSessionStatus.Accepted => "Accepted",
+            ProposalSessionStatus.Skipped => "Skipped",
+            _ => u.Kind switch
+            {
+                UpdateKind.Fill => "New",
+                UpdateKind.Refresh => "Refresh",
+                UpdateKind.Protect => "Has your text",
+                _ => "Update"
+            }
+        };
+        return new PendingUpdateItem
+        {
+            Key = u.Key,
+            ElementName = u.ElementLabel,
+            PropertyDisplayName = u.Spec.Property,
+            ProposedDisplay = proposed,
+            CurrentDisplay = current,
+            KindLabel = kindLabel,
+            IsProtected = e.Status == ProposalSessionStatus.Open && u.Kind == UpdateKind.Protect,
+            CraftExplanation = u.CraftExplanation ?? string.Empty,
+            SummaryLine = kindLabel
+        };
     }
 
     /// <summary>
@@ -828,7 +877,10 @@ public class Collaborator : ICollaborator
 
                     void FinishPendingUi()
                     {
-                        if (result.PendingUpdates.Count == 0 && !stageSession.HasStaged)
+                        // Keep full session set visible (skipped/accepted stay on the left).
+                        if (_sessionProposals != null && _sessionProposals.Count > 0)
+                            PushSessionSetToViewModel(viewModel);
+                        else if (result.PendingUpdates.Count == 0 && !stageSession.HasStaged)
                         {
                             viewModel.MarkUpdatesApplied();
                             SyncShellPending(viewModel);
@@ -945,8 +997,7 @@ public class Collaborator : ICollaborator
                             _auditLogger?.Log(StoryCADLib.Services.Logging.LogLevel.Info,
                                 $"Applied {count} updates from workflow: {workflow.Title}");
 
-                            viewModel.MarkUpdatesApplied();
-                            SyncShellPending(viewModel);
+                            PushSessionSetToViewModel(viewModel);
                             RefreshProposalSnapshotInHistory();
                             _storyModel?.RefreshCurrentView();
                             if (count > 0)
@@ -1000,7 +1051,7 @@ public class Collaborator : ICollaborator
                                 RemovePendingKeys(new[] { propertyKey });
                                 viewModel.AddStatusMessage($"Queued overwrite: {propertyKey}");
                                 _logger?.LogInformation("AcceptProperty: Staged Protect {Key}", propertyKey);
-                                PushPendingToViewModel(viewModel, result);
+                                PushSessionSetToViewModel(viewModel);
                                 await FlushStagedIfQueueDoneAsync();
                                 // Staged confirm marks accepted when applied
                                 return;
@@ -1015,16 +1066,12 @@ public class Collaborator : ICollaborator
                                     $"Applied update: {propertyKey}");
                                 _sessionProposals?.MarkAccepted(propertyKey);
                                 RemovePendingKeys(new[] { propertyKey });
-                                PushPendingToViewModel(viewModel, result);
+                                PushSessionSetToViewModel(viewModel);
                                 RefreshProposalSnapshotInHistory();
                                 _storyModel?.RefreshCurrentView();
                                 await FlushStagedIfQueueDoneAsync();
                                 if (result.PendingUpdates.Count == 0 && !stageSession.HasStaged)
-                                {
-                                    viewModel.MarkUpdatesApplied();
-                                    SyncShellPending(viewModel);
                                     AutoSaveFireAndForget("AcceptProperty");
-                                }
                             }
                             else
                             {
@@ -1058,14 +1105,9 @@ public class Collaborator : ICollaborator
                                 _sessionProposals?.MarkSkipped(propertyKey);
                                 viewModel.AddStatusMessage($"Skipped {propertyKey}");
                                 _logger?.LogInformation("SkipProperty: Skipped {Key}", propertyKey);
-                                PushPendingToViewModel(viewModel, result);
+                                PushSessionSetToViewModel(viewModel);
                                 RefreshProposalSnapshotInHistory();
                                 await FlushStagedIfQueueDoneAsync();
-                                if (result.PendingUpdates.Count == 0 && !stageSession.HasStaged)
-                                {
-                                    viewModel.MarkUpdatesApplied();
-                                    SyncShellPending(viewModel);
-                                }
                             }
                             else
                             {
@@ -1120,8 +1162,9 @@ public class Collaborator : ICollaborator
 
                     var fillCount = result.PendingUpdates.Count(u => u.Kind is UpdateKind.Fill or UpdateKind.Refresh or UpdateKind.Unclassified);
                     var protectCount = result.PendingUpdates.Count(u => u.Kind == UpdateKind.Protect);
-                    // #145: clear chat, seed proposal set, unlock Send
+                    // #145: clear chat, seed proposal set, unlock Send; show full set on the left
                     BeginProposalChatSession(viewModel, workflow, result);
+                    PushSessionSetToViewModel(viewModel);
                     viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
                         $"Found {result.PendingUpdates.Count} property update(s) " +
                         $"({fillCount} free, {protectCount} replace existing text — confirmation required). " +

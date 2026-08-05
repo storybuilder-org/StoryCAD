@@ -77,14 +77,17 @@ public sealed class SessionProposalSet
             .Where(e => e.Status == ProposalSessionStatus.Open)
             .Select(e => e.Update with { Value = e.ProposedText });
 
-    /// <summary>Plain-text snapshot for chat history seed / refresh.</summary>
-    public string BuildSnapshotText(int maxValueChars = 280)
+    /// <summary>
+    /// Plain-text snapshot for chat history seed / refresh.
+    /// Full proposal text (high cap) so "show me Description" works after Skip (#145 UX).
+    /// </summary>
+    public string BuildSnapshotText(int maxValueChars = 8000)
     {
         if (_entries.Count == 0)
             return "(No proposals in this session.)";
 
         var sb = new StringBuilder();
-        sb.AppendLine("Property proposals for this workflow run:");
+        sb.AppendLine("Property proposals for this workflow run (full text; status open/accepted/skipped):");
         foreach (var e in _entries.Values.OrderBy(x => x.Update.Key, StringComparer.OrdinalIgnoreCase))
         {
             var status = e.Status switch
@@ -95,13 +98,19 @@ public sealed class SessionProposalSet
                 _ => "?"
             };
             var val = e.ProposedText ?? string.Empty;
-            if (val.Length > maxValueChars)
+            if (maxValueChars > 0 && val.Length > maxValueChars)
                 val = val.Substring(0, maxValueChars) + "…";
-            val = val.Replace("\r\n", " ").Replace("\n", " ");
-            sb.AppendLine($"- {e.Update.Key} [{status}]: {val}");
+            // Keep newlines for long sketches; model needs readable prose
+            sb.AppendLine($"- {e.Update.Key} [{status}]:");
+            sb.AppendLine(val);
+            sb.AppendLine();
         }
         return sb.ToString().TrimEnd();
     }
+
+    /// <summary>Open count (still need Accept/Skip on the left list).</summary>
+    public int OpenCount =>
+        _entries.Values.Count(e => e.Status == ProposalSessionStatus.Open);
 
     public static string BuildSystemInstructions(string workflowTitle) =>
         "You help revise property proposals from the '" + workflowTitle + "' workflow run. " +
