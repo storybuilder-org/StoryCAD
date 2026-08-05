@@ -281,6 +281,9 @@ public class Collaborator : ICollaborator
     /// </summary>
     private void RebuildWorkflowMenu(WorkflowShellViewModel viewModel)
     {
+        // Clearing the menu throws away the selected container, so the pane loses its
+        // highlight on every post-run gap refresh. Re-select the same tag afterwards.
+        var selectedTag = viewModel.CurrentItem?.Tag;
         viewModel.MenuItems.Clear();
 
         if (_storyApi != null && _storyModel != null)
@@ -288,11 +291,9 @@ public class Collaborator : ICollaborator
             var gapDetails = RequiredFieldGapScanner.FindGapDetails(_storyApi, _storyModel);
             if (gapDetails.Count > 0)
             {
-                viewModel.MenuItems.Add(new Microsoft.UI.Xaml.Controls.NavigationViewItem
-                {
-                    Content = $"{GapWorkflowOwnership.OutlineGapsNavTitle} ({gapDetails.Count})",
-                    Tag = GapWorkflowOwnership.OutlineGapsTag
-                });
+                viewModel.MenuItems.Add(WrappingNavItem(
+                    $"{GapWorkflowOwnership.OutlineGapsNavTitle} ({gapDetails.Count})",
+                    GapWorkflowOwnership.OutlineGapsTag));
             }
         }
 
@@ -313,12 +314,32 @@ public class Collaborator : ICollaborator
                 viewModel.MenuItems.Add(group);
             }
 
-            group.MenuItems.Add(new Microsoft.UI.Xaml.Controls.NavigationViewItem
-            {
-                Content = workflow.Title,
-                Tag = workflow
-            });
+            group.MenuItems.Add(WrappingNavItem(workflow.Title, workflow));
         }
+
+        viewModel.RestoreSelection(selectedTag);
+    }
+
+    /// <summary>
+    /// Nav item whose title wraps instead of being trimmed to one line. A string Content is
+    /// rendered by the item template as a single non-wrapping line, so the text has to be a
+    /// TextBlock we control; Height=Auto lets the item grow past the one-line default.
+    /// AutomationProperties.Name keeps the title available to automation and screen readers.
+    /// </summary>
+    private static Microsoft.UI.Xaml.Controls.NavigationViewItem WrappingNavItem(string title, object tag)
+    {
+        var item = new Microsoft.UI.Xaml.Controls.NavigationViewItem
+        {
+            Content = new Microsoft.UI.Xaml.Controls.TextBlock
+            {
+                Text = title,
+                TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap
+            },
+            Tag = tag,
+            Height = double.NaN
+        };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(item, title);
+        return item;
     }
 
     /// <summary>
@@ -1070,8 +1091,9 @@ public class Collaborator : ICollaborator
                                 RefreshProposalSnapshotInHistory();
                                 _storyModel?.RefreshCurrentView();
                                 await FlushStagedIfQueueDoneAsync();
-                                if (result.PendingUpdates.Count == 0 && !stageSession.HasStaged)
-                                    AutoSaveFireAndForget("AcceptProperty");
+                                // Save on each confirmed update, not just the last one in the
+                                // queue: there is no manual Save button to fall back on.
+                                AutoSaveFireAndForget("AcceptProperty");
                             }
                             else
                             {

@@ -106,6 +106,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!-- Brief purpose + topical Explanation (selected elements + what to do next) -->
@@ -142,26 +143,14 @@
                                FontWeight="SemiBold"
                                Margin="0,0,0,8" />
 
-                    <!-- Table column headers; right margin matches the gutter the built-in
-                         scrollbar reserves (ScrollBarSize, 12px) so headers stay over their
-                         columns (#129). Column widths must stay in sync with the row template. -->
-                    <Grid Grid.Row="1"
-                          Margin="0,0,12,0"
-                          Padding="0,0,0,4"
-                          BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                          BorderThickness="0,0,0,1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="160" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="64" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Property" FontWeight="SemiBold"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Grid.Column="1" Text="Proposed" FontWeight="SemiBold"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <!-- Status column has no header; rows still render KindLabel there. -->
-                    </Grid>
+                    <!-- No column headers: the panel title names the table and the rows label
+                         themselves. What is left is the rule that separates title from list.
+                         Right margin matches the gutter the built-in scrollbar reserves
+                         (ScrollBarSize, 12px) so the rule ends level with the rows (#129). -->
+                    <Border Grid.Row="1"
+                            Height="1"
+                            Margin="0,0,12,0"
+                            Background="{ThemeResource CardStrokeColorDefaultBrush}" />
                     <!--
                       VerticalScrollBarVisibility must be Visible, never Disabled: per WinUI's
                       ScrollBarVisibility contract, Disabled also turns scrolling off and clamps
@@ -184,30 +173,32 @@
                                               BorderThickness="0,0,0,1"
                                               AutomationProperties.Name="{Binding Key, Mode=OneWay}">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="160" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="110" />
+                                                <ColumnDefinition Width="1*" />
+                                                <ColumnDefinition Width="3*" />
                                                 <ColumnDefinition Width="64" />
                                             </Grid.ColumnDefinitions>
                                             <!-- Tooltip carries the raw key so the element is still discoverable
-                                                 without its own column. -->
-                                            <TextBlock Text="{Binding DisplayName}"
-                                                       FontWeight="SemiBold"
-                                                       VerticalAlignment="Top"
-                                                       TextWrapping="Wrap"
-                                                       ToolTipService.ToolTip="{Binding Key}" />
+                                                 without its own column. KindLabel sits under the property name
+                                                 rather than in a column of its own. -->
+                                            <StackPanel VerticalAlignment="Top"
+                                                        Margin="0,0,8,0">
+                                                <TextBlock Text="{Binding DisplayName}"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap"
+                                                           ToolTipService.ToolTip="{Binding Key}" />
+                                                <TextBlock Text="{Binding KindCaption}"
+                                                           FontSize="11"
+                                                           Opacity="0.6"
+                                                           TextWrapping="Wrap"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            </StackPanel>
                                             <TextBlock Grid.Column="1"
                                                        Text="{Binding ProposedDisplay}"
                                                        Opacity="0.9"
                                                        VerticalAlignment="Top"
                                                        TextWrapping="Wrap"
                                                        Margin="0,0,8,0" />
-                                            <TextBlock Grid.Column="2"
-                                                       Text="{Binding KindLabel}"
-                                                       VerticalAlignment="Top"
-                                                       TextTrimming="CharacterEllipsis"
-                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                            <StackPanel Grid.Column="3"
+                                            <StackPanel Grid.Column="2"
                                                         Orientation="Horizontal"
                                                         Spacing="4"
                                                         VerticalAlignment="Top">
@@ -238,7 +229,7 @@
                 </Grid>
             </Border>
 
-            <!-- Review Mode (Accept/Skip); Accept All is on the shell bar -->
+            <!-- Review Mode (Accept/Skip); Accept All sits below the table -->
             <StackPanel Grid.Row="2"
                         Visibility="{x:Bind ViewModel.ReviewModeVisibility, Mode=OneWay}"
                         Margin="0,8,0,0">
@@ -287,6 +278,19 @@
                            Margin="0,8,0,0"
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
+
+            <!-- Accept All: primary action for the table, at the foot of the work column.
+                 Accepted updates are written to the outline immediately, so there is no
+                 separate Save button on the shell bar. -->
+            <Button Grid.Row="3"
+                    Content="Accept all changes"
+                    Command="{x:Bind ViewModel.AcceptAllCommand}"
+                    IsEnabled="{x:Bind ViewModel.HasPendingUpdates, Mode=OneWay}"
+                    Style="{ThemeResource AccentButtonStyle}"
+                    HorizontalAlignment="Stretch"
+                    Margin="0,10,0,0"
+                    AutomationProperties.AutomationId="WorkflowAcceptAllButton"
+                    AutomationProperties.Name="Accept all changes" />
         </Grid>
 
         <!-- ========== Chat column (own height; input does not affect work column) ========== -->
@@ -333,6 +337,7 @@
                             PlaceholderText="{x:Bind ViewModel.ChatPlaceholder, Mode=OneWay}"
                             Text="{x:Bind ViewModel.InputText, Mode=TwoWay}"
                             QuerySubmitted="InputTextBox_QuerySubmitted"
+                            Loaded="InputTextBox_Loaded"
                             AutomationProperties.AutomationId="InputSearchBox"
                             AutomationProperties.Name="Message">
                 <AutoSuggestBox.QueryIcon>

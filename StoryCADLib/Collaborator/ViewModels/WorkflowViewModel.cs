@@ -228,12 +228,12 @@ public partial class WorkflowViewModel : ObservableRecipient
         get
         {
             if (PendingUpdateItems == null || PendingUpdateItems.Count == 0)
-                return "Property Updates";
+                return "Proposed property updates";
 
             var total = PendingUpdateItems.Count;
             var needReview = PendingUpdateItems.Count(i => i.IsProtected);
             var free = total - needReview;
-            return $"Property Updates ({total}: {free} free, {needReview} need review)";
+            return $"Proposed property updates ({total}: {free} free, {needReview} need review)";
         }
     }
 
@@ -589,8 +589,19 @@ public partial class WorkflowViewModel : ObservableRecipient
         PendingUpdateItems.Clear();
         if (items != null)
         {
+            // A property name alone ("Structure Title") does not say which element it belongs
+            // to. Name the element on every row once the set covers more than one of them.
+            var multiElement = items
+                .Select(i => i.ElementName)
+                .Where(n => !string.IsNullOrEmpty(n))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Count() > 1;
+
             foreach (var item in items)
+            {
+                item.ShowElementName = multiElement;
                 PendingUpdateItems.Add(item);
+            }
         }
 
         UpdatesApplied = false;

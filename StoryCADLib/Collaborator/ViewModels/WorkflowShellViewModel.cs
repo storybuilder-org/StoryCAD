@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -139,11 +140,66 @@ public partial class WorkflowShellViewModel : ObservableRecipient
     public async void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         CurrentItem = args.SelectedItem as NavigationViewItem;
-        if (CurrentItem?.Tag != null && OnWorkflowSelected != null)
+        var tag = CurrentItem?.Tag;
+        if (tag == null || OnWorkflowSelected == null)
+            return;
+
+        // Re-selecting the tag we are already on is a restore, not a user request:
+        // RestoreSelection re-highlights the same workflow after the menu is rebuilt,
+        // and running it again there would re-execute the workflow on every rebuild.
+        if (IsSameTag(tag, _selectedTag))
+            return;
+
+        _selectedTag = tag;
+        await OnWorkflowSelected(tag);
+    }
+
+    /// <summary>
+    /// Re-selects the menu item carrying <paramref name="tag"/> after the menu has been
+    /// rebuilt. Rebuilding replaces every NavigationViewItem, so the previously selected
+    /// container is gone and the pane would otherwise show nothing highlighted.
+    /// </summary>
+    public void RestoreSelection(object tag)
+    {
+        if (tag == null)
+            return;
+
+        foreach (var item in MenuItems)
         {
-            await OnWorkflowSelected(CurrentItem.Tag);
+            if (IsSameTag(item.Tag, tag))
+            {
+                CurrentItem = item;
+                return;
+            }
+
+            foreach (var child in item.MenuItems.OfType<NavigationViewItem>())
+            {
+                if (IsSameTag(child.Tag, tag))
+                {
+                    // Group must be open or the selected child is hidden.
+                    item.IsExpanded = true;
+                    CurrentItem = child;
+                    return;
+                }
+            }
         }
     }
+
+    /// <summary>
+    /// Workflow tags are the shared <c>WorkflowRegistry</c> instances (reference equality);
+    /// the outline-gaps tag is a string, so compare by value too.
+    /// </summary>
+    private static bool IsSameTag(object a, object b)
+    {
+        if (ReferenceEquals(a, b))
+            return true;
+        if (a is string sa && b is string sb)
+            return string.Equals(sa, sb, StringComparison.Ordinal);
+        return false;
+    }
+
+    /// <summary>Tag of the workflow last navigated to; guards restore against re-running it.</summary>
+    private object _selectedTag;
 
     public Task LoadWorkflowMenuAsync()
     {
@@ -188,6 +244,7 @@ public partial class WorkflowShellViewModel : ObservableRecipient
         MenuItems.Clear();
         HasPendingUpdates = false;
         ActiveWorkflowName = string.Empty;
+        _selectedTag = null;
         OnAcceptAll = null;
         OnReviewEach = null;
         OnTryAgain = null;

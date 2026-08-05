@@ -467,10 +467,55 @@ public class WorkflowViewModelTests
             Item("C", isProtected: true)
         });
 
-        Assert.AreEqual("Property Updates (3: 1 free, 2 need review)", _viewModel.PendingUpdatesHeader);
+        Assert.AreEqual("Proposed property updates (3: 1 free, 2 need review)", _viewModel.PendingUpdatesHeader);
 
         _viewModel.ClearPendingUpdates();
-        Assert.AreEqual("Property Updates", _viewModel.PendingUpdatesHeader);
+        Assert.AreEqual("Proposed property updates", _viewModel.PendingUpdatesHeader);
+    }
+
+    [TestMethod]
+    public void SetPendingUpdates_WithOneElement_DoesNotNameElementOnRows()
+    {
+        var a = Item("A");
+        a.ElementName = "Outer Problem";
+        var b = Item("B");
+        b.ElementName = "Outer Problem";
+
+        _viewModel.SetPendingUpdates(new List<PendingUpdateItem> { a, b });
+
+        Assert.IsFalse(a.ShowElementName);
+        Assert.AreEqual("New", a.KindCaption);
+    }
+
+    [TestMethod]
+    public void SetPendingUpdates_WithMultipleElements_NamesElementOnEveryRow()
+    {
+        var a = Item("A");
+        a.ElementName = "Outer Problem";
+        var b = Item("B", isProtected: true);
+        b.ElementName = "Protagonist";
+
+        _viewModel.SetPendingUpdates(new List<PendingUpdateItem> { a, b });
+
+        Assert.IsTrue(a.ShowElementName);
+        Assert.IsTrue(b.ShowElementName);
+        Assert.AreEqual("Outer Problem · New", a.KindCaption);
+        Assert.AreEqual("Protagonist · Has your text", b.KindCaption);
+    }
+
+    [TestMethod]
+    public void SetPendingUpdates_WithMultipleElementsButNoElementName_FallsBackToKindOnly()
+    {
+        var a = Item("A");
+        a.ElementName = "Outer Problem";
+        var b = Item("B");
+        b.ElementName = "Protagonist";
+        var bare = Item("C");
+
+        _viewModel.SetPendingUpdates(new List<PendingUpdateItem> { a, b, bare });
+
+        Assert.IsTrue(bare.ShowElementName);
+        Assert.AreEqual("New", bare.KindCaption);
     }
 
     [TestMethod]

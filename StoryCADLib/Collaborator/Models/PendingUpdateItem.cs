@@ -22,6 +22,22 @@ public sealed class PendingUpdateItem
     public string ElementAndKind =>
         string.IsNullOrEmpty(ElementName) ? SummaryLine : $"{ElementName} · {SummaryLine}";
 
+    /// <summary>
+    /// True when the pending set spans more than one story element, so the row has to name
+    /// its element to be unambiguous. Set by the ViewModel over the whole set, since a single
+    /// item cannot know. Single-element workflows leave it false and read the same as before.
+    /// </summary>
+    public bool ShowElementName { get; set; }
+
+    /// <summary>
+    /// Faint sub-line under the property name: the kind, prefixed with the element title
+    /// when the set spans several elements (e.g. "Outer Problem · Has your text").
+    /// </summary>
+    public string KindCaption =>
+        ShowElementName && !string.IsNullOrEmpty(ElementName)
+            ? $"{ElementName} · {KindLabel}"
+            : KindLabel;
+
     /// <summary>Proposed value (truncated for display).</summary>
     public string ProposedDisplay { get; set; } = string.Empty;
 
