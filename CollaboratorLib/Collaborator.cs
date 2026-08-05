@@ -38,6 +38,14 @@ public class Collaborator : ICollaborator
     private bool _kernelInitialized;
     private readonly object _kernelLock = new();
 
+    /// <summary>Collaborator #145: last workflow run proposals for proposal-chat.</summary>
+    private SessionProposalSet? _sessionProposals;
+
+    /// <summary>Live result for the open workflow page (pending list + chat patches).</summary>
+    private WorkflowResult? _activeWorkflowResult;
+
+    private StoryCADLib.Collaborator.ViewModels.WorkflowViewModel? _activeWorkflowViewModel;
+
     // State
     private IStoryCADAPI? _storyApi;
     private StoryModel? _storyModel;
@@ -505,48 +513,63 @@ public class Collaborator : ICollaborator
     }
 
     /// <summary>
-    /// Wires up the chat callback for a WorkflowViewModel.
-    /// Creates a new ChatHistory for each workflow and handles message processing.
+    /// Wires chat for a workflow. Send stays disabled until
+    /// <see cref="BeginProposalChatSession"/> after the one-shot produces proposals (#145).
     /// </summary>
     private void WireUpChatCallback(
         StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
         Workflow workflow,
         Dictionary<string, StoryElement> gatheredElements)
     {
-        // Create fresh chat history for this workflow session
+        _sessionProposals = null;
+        _activeWorkflowResult = null;
+        _activeWorkflowViewModel = viewModel;
         _chatHistory = new ChatHistory();
+        viewModel.IsChatEnabled = false;
+        viewModel.ChatPlaceholder = "Waiting for proposals…";
 
-        // Build context from gathered elements
-        var elementContext = BuildElementContext(gatheredElements);
-
-        // Add system message with workflow context and story elements
-        _chatHistory.AddSystemMessage(
-            $"You are a story development assistant helping with the '{workflow.Title}' workflow. " +
-            $"{workflow.Description}\n\n" +
-            $"## Current Story Context\n{elementContext}\n\n" +
-            "Provide helpful, constructive feedback to help the writer develop their story. " +
-            "Reference the story elements above when giving advice.\n\n" +
-            // The chat pane renders replies in a plain TextBlock; any markup arrives verbatim.
-            "Respond in plain text only. Never use Markdown, HTML, RTF, or any other markup: " +
-            "no headings, asterisks for bold or italics, backticks, tables, or links. " +
-            "The display cannot render formatting, so markup characters would appear literally. " +
-            "For lists, use simple lines starting with a hyphen. Separate ideas with blank lines.");
-
-        // Wire up the callback
         viewModel.OnSendMessage = async (userMessage) =>
         {
             try
             {
+                if (_sessionProposals == null || _sessionProposals.Count == 0)
+                {
+                    return "Chat unlocks after the workflow produces property proposals.";
+                }
+
+                EnsureKernelInitialized();
                 _chatHistory?.AddUserMessage(userMessage);
                 _logger?.LogDebug("User message added to chat: {Message}", userMessage);
 
                 var response = await _chatService!.GetChatMessageContentAsync(_chatHistory!);
                 var responseText = response.Content ?? "No response received.";
 
-                _chatHistory?.AddAssistantMessage(responseText);
-                _logger?.LogDebug("Assistant response: {Response}", responseText);
+                ChatPatchParser.TryParse(responseText, out var display, out var patches);
+                _chatHistory?.AddAssistantMessage(display);
 
-                return responseText;
+                if (patches.Count > 0 && _sessionProposals != null)
+                {
+                    var applied = 0;
+                    foreach (var p in patches)
+                    {
+                        if (_sessionProposals.TryApplyPatch(p.Key, p.Value, out _))
+                            applied++;
+                        else
+                            _logger?.LogDebug("Ignored chat patch for unknown key {Key}", p.Key);
+                    }
+
+                    if (applied > 0)
+                    {
+                        SyncWorkflowResultFromSession();
+                        RefreshProposalSnapshotInHistory();
+                        display = string.IsNullOrWhiteSpace(display)
+                            ? $"Updated {applied} proposal(s). Accept to write the outline."
+                            : display + $"\n\n({applied} proposal(s) updated — Accept to write the outline.)";
+                    }
+                }
+
+                _logger?.LogDebug("Assistant response (display): {Response}", display);
+                return display;
             }
             catch (Exception ex)
             {
@@ -555,8 +578,136 @@ public class Collaborator : ICollaborator
             }
         };
 
-        _logger?.LogInformation("Chat callback wired for workflow: {Workflow} with {Count} elements in context",
-            workflow.Title, gatheredElements.Count);
+        _logger?.LogInformation(
+            "Chat callback wired for workflow: {Workflow} (proposal-chat; Send locked until seed)",
+            workflow.Title);
+    }
+
+    /// <summary>
+    /// #145: clear chat, seed system + proposal snapshot, unlock Send.
+    /// Call after the workflow one-shot has classified pending updates.
+    /// </summary>
+    private void BeginProposalChatSession(
+        StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
+        Workflow workflow,
+        WorkflowResult result)
+    {
+        _activeWorkflowResult = result;
+        _activeWorkflowViewModel = viewModel;
+
+        if (result.PendingUpdates.Count == 0)
+        {
+            viewModel.IsChatEnabled = false;
+            viewModel.ChatPlaceholder = "No proposals to edit in chat";
+            _sessionProposals = null;
+            return;
+        }
+
+        EnsureKernelInitialized();
+        _sessionProposals = new SessionProposalSet();
+        _sessionProposals.ReplaceFromPending(result.PendingUpdates);
+
+        _chatHistory = new ChatHistory();
+        _chatHistory.AddSystemMessage(SessionProposalSet.BuildSystemInstructions(workflow.Title));
+        _chatHistory.AddSystemMessage(_sessionProposals.BuildSnapshotText());
+
+        viewModel.ConversationList.Clear();
+        viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
+            "Proposals are ready. Ask about them or request changes (for example, rename a field). " +
+            "Accept still writes the outline. This chat is only for these proposals."));
+
+        viewModel.IsChatEnabled = true;
+        viewModel.ChatPlaceholder = "Ask about or change proposals…";
+        _logger?.LogInformation(
+            "Proposal chat seeded for {Workflow} with {Count} keys",
+            workflow.Title, _sessionProposals.Count);
+    }
+
+    /// <summary>
+    /// Mid-chat: append an updated proposal snapshot (keeps user/assistant turns).
+    /// </summary>
+    private void RefreshProposalSnapshotInHistory()
+    {
+        if (_chatHistory == null || _sessionProposals == null)
+            return;
+        _chatHistory.AddSystemMessage(
+            "Updated property proposals:\n" + _sessionProposals.BuildSnapshotText());
+    }
+
+    /// <summary>
+    /// Push session proposals into WorkflowResult (open only for Accept) and
+    /// Property Updates UI (all statuses so Skip does not blank the panel — #145).
+    /// </summary>
+    private void SyncWorkflowResultFromSession()
+    {
+        if (_sessionProposals == null || _activeWorkflowResult == null || _activeWorkflowViewModel == null)
+            return;
+
+        var open = _sessionProposals.OpenAsPendingUpdates().ToList();
+        _activeWorkflowResult.PendingUpdates.Clear();
+        _activeWorkflowResult.UpdatedProperties.Clear();
+        foreach (var u in open)
+        {
+            _activeWorkflowResult.PendingUpdates.Add(u);
+            _activeWorkflowResult.UpdatedProperties[u.Key] = FormatValueForDisplay(u.Value);
+        }
+
+        PushSessionSetToViewModel(_activeWorkflowViewModel);
+    }
+
+    /// <summary>
+    /// Show the full session proposal set on the left (open + accepted + skipped).
+    /// Accept handlers still use <see cref="_activeWorkflowResult"/> open rows only.
+    /// </summary>
+    private void PushSessionSetToViewModel(
+        StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel)
+    {
+        if (_sessionProposals == null || _sessionProposals.Count == 0)
+        {
+            viewModel.SetPendingUpdates(Array.Empty<PendingUpdateItem>());
+            SyncShellPending(viewModel);
+            return;
+        }
+
+        var items = _sessionProposals.All
+            .OrderBy(e => e.Update.Key, StringComparer.OrdinalIgnoreCase)
+            .Select(ToSessionPendingUpdateItem)
+            .ToList();
+        viewModel.SetPendingUpdates(items);
+        // Shell Accept All only when something is still open
+        if (_shellViewModel != null)
+            _shellViewModel.HasPendingUpdates = _sessionProposals.OpenCount > 0;
+    }
+
+    private PendingUpdateItem ToSessionPendingUpdateItem(SessionProposalSet.Entry e)
+    {
+        var u = e.Update with { Value = e.ProposedText };
+        var proposed = TruncateForChat(FormatValueForDisplay(u.Value), 500);
+        var current = TruncateForChat(u.CurrentDisplay ?? string.Empty, 300);
+        var kindLabel = e.Status switch
+        {
+            ProposalSessionStatus.Accepted => "Accepted",
+            ProposalSessionStatus.Skipped => "Skipped",
+            _ => u.Kind switch
+            {
+                UpdateKind.Fill => "New",
+                UpdateKind.Refresh => "Refresh",
+                UpdateKind.Protect => "Has your text",
+                _ => "Update"
+            }
+        };
+        return new PendingUpdateItem
+        {
+            Key = u.Key,
+            ElementName = u.ElementLabel,
+            PropertyDisplayName = u.Spec.Property,
+            ProposedDisplay = proposed,
+            CurrentDisplay = current,
+            KindLabel = kindLabel,
+            IsProtected = e.Status == ProposalSessionStatus.Open && u.Kind == UpdateKind.Protect,
+            CraftExplanation = u.CraftExplanation ?? string.Empty,
+            SummaryLine = kindLabel
+        };
     }
 
     /// <summary>
@@ -726,7 +877,10 @@ public class Collaborator : ICollaborator
 
                     void FinishPendingUi()
                     {
-                        if (result.PendingUpdates.Count == 0 && !stageSession.HasStaged)
+                        // Keep full session set visible (skipped/accepted stay on the left).
+                        if (_sessionProposals != null && _sessionProposals.Count > 0)
+                            PushSessionSetToViewModel(viewModel);
+                        else if (result.PendingUpdates.Count == 0 && !stageSession.HasStaged)
                         {
                             viewModel.MarkUpdatesApplied();
                             SyncShellPending(viewModel);
@@ -756,6 +910,8 @@ public class Collaborator : ICollaborator
                         if (ok)
                         {
                             var n = ApplyPendingList(staged);
+                            foreach (var u in staged)
+                                _sessionProposals?.MarkAccepted(u.Key);
                             viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
                                 n > 0
                                     ? $"Applied {n} overwrite(s) after confirmation."
@@ -764,6 +920,7 @@ public class Collaborator : ICollaborator
                             _auditLogger?.Log(StoryCADLib.Services.Logging.LogLevel.Info,
                                 $"Applied {n} confirmed overwrites from workflow: {workflow.Title}");
                             stageSession.ClearStage();
+                            RefreshProposalSnapshotInHistory();
                             AutoSaveFireAndForget("confirmed overwrites");
                         }
                         else
@@ -792,6 +949,8 @@ public class Collaborator : ICollaborator
                                 {
                                     // Cancel overwrites: still apply free rows; leave Protect pending.
                                     var freeOnly = ApplyPendingList(free);
+                                    foreach (var u in free)
+                                        _sessionProposals?.MarkAccepted(u.Key);
                                     RemovePendingKeys(free.Select(u => u.Key));
                                     viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
                                         freeOnly > 0
@@ -800,6 +959,7 @@ public class Collaborator : ICollaborator
                                     _logger?.LogInformation(
                                         "AcceptAll cancelled overwrites: free={Free} protect={Protect}",
                                         freeOnly, protect.Count);
+                                    RefreshProposalSnapshotInHistory();
                                     FinishPendingUi();
                                     if (freeOnly > 0)
                                         AutoSaveFireAndForget("Accept All free-only");
@@ -810,6 +970,8 @@ public class Collaborator : ICollaborator
                             }
 
                             var count = ApplyPendingList(applyList);
+                            foreach (var u in applyList)
+                                _sessionProposals?.MarkAccepted(u.Key);
                             result.PendingUpdates.Clear();
                             result.UpdatedProperties.Clear();
 
@@ -835,8 +997,8 @@ public class Collaborator : ICollaborator
                             _auditLogger?.Log(StoryCADLib.Services.Logging.LogLevel.Info,
                                 $"Applied {count} updates from workflow: {workflow.Title}");
 
-                            viewModel.MarkUpdatesApplied();
-                            SyncShellPending(viewModel);
+                            PushSessionSetToViewModel(viewModel);
+                            RefreshProposalSnapshotInHistory();
                             _storyModel?.RefreshCurrentView();
                             if (count > 0)
                                 AutoSaveFireAndForget("Accept All");
@@ -889,8 +1051,9 @@ public class Collaborator : ICollaborator
                                 RemovePendingKeys(new[] { propertyKey });
                                 viewModel.AddStatusMessage($"Queued overwrite: {propertyKey}");
                                 _logger?.LogInformation("AcceptProperty: Staged Protect {Key}", propertyKey);
-                                PushPendingToViewModel(viewModel, result);
+                                PushSessionSetToViewModel(viewModel);
                                 await FlushStagedIfQueueDoneAsync();
+                                // Staged confirm marks accepted when applied
                                 return;
                             }
 
@@ -901,16 +1064,14 @@ public class Collaborator : ICollaborator
                                 _logger?.LogInformation("AcceptProperty: Applied {Key}", propertyKey);
                                 _auditLogger?.Log(StoryCADLib.Services.Logging.LogLevel.Info,
                                     $"Applied update: {propertyKey}");
+                                _sessionProposals?.MarkAccepted(propertyKey);
                                 RemovePendingKeys(new[] { propertyKey });
-                                PushPendingToViewModel(viewModel, result);
+                                PushSessionSetToViewModel(viewModel);
+                                RefreshProposalSnapshotInHistory();
                                 _storyModel?.RefreshCurrentView();
                                 await FlushStagedIfQueueDoneAsync();
                                 if (result.PendingUpdates.Count == 0 && !stageSession.HasStaged)
-                                {
-                                    viewModel.MarkUpdatesApplied();
-                                    SyncShellPending(viewModel);
                                     AutoSaveFireAndForget("AcceptProperty");
-                                }
                             }
                             else
                             {
@@ -941,15 +1102,12 @@ public class Collaborator : ICollaborator
                             result.UpdatedProperties.Remove(propertyKey);
                             if (removed > 0)
                             {
+                                _sessionProposals?.MarkSkipped(propertyKey);
                                 viewModel.AddStatusMessage($"Skipped {propertyKey}");
                                 _logger?.LogInformation("SkipProperty: Skipped {Key}", propertyKey);
-                                PushPendingToViewModel(viewModel, result);
+                                PushSessionSetToViewModel(viewModel);
+                                RefreshProposalSnapshotInHistory();
                                 await FlushStagedIfQueueDoneAsync();
-                                if (result.PendingUpdates.Count == 0 && !stageSession.HasStaged)
-                                {
-                                    viewModel.MarkUpdatesApplied();
-                                    SyncShellPending(viewModel);
-                                }
                             }
                             else
                             {
@@ -1004,17 +1162,20 @@ public class Collaborator : ICollaborator
 
                     var fillCount = result.PendingUpdates.Count(u => u.Kind is UpdateKind.Fill or UpdateKind.Refresh or UpdateKind.Unclassified);
                     var protectCount = result.PendingUpdates.Count(u => u.Kind == UpdateKind.Protect);
+                    // #145: clear chat, seed proposal set, unlock Send; show full set on the left
+                    BeginProposalChatSession(viewModel, workflow, result);
+                    PushSessionSetToViewModel(viewModel);
                     viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
                         $"Found {result.PendingUpdates.Count} property update(s) " +
                         $"({fillCount} free, {protectCount} replace existing text — confirmation required). " +
-                        "Choose Accept All, Review Each, or Try Again."));
+                        "Choose Accept All, Review Each, or Try Again. Chat can revise these proposals."));
                 }
                 else
                 {
+                    viewModel.IsChatEnabled = false;
+                    viewModel.ChatPlaceholder = "No proposals to edit in chat";
                     viewModel.ConversationList.Add(ChatMessage.FromCollaborator("No property updates were extracted from the response."));
                 }
-
-                viewModel.ConversationList.Add(ChatMessage.FromCollaborator("You can ask questions or request changes using the chat below."));
             }
             else
             {
