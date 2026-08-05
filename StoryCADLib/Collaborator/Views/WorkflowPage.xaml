@@ -329,6 +329,8 @@
             <AutoSuggestBox x:Name="InputTextBox"
                             Grid.Row="1"
                             HorizontalAlignment="Stretch"
+                            IsEnabled="{x:Bind ViewModel.IsChatEnabled, Mode=OneWay}"
+                            PlaceholderText="{x:Bind ViewModel.ChatPlaceholder, Mode=OneWay}"
                             Text="{x:Bind ViewModel.InputText, Mode=TwoWay}"
                             QuerySubmitted="InputTextBox_QuerySubmitted"
                             AutomationProperties.AutomationId="InputSearchBox"

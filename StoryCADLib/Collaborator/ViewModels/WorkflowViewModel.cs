@@ -134,6 +134,23 @@ public partial class WorkflowViewModel : ObservableRecipient
         set => SetProperty(ref _inputText, value);
     }
 
+    private bool _isChatEnabled;
+    /// <summary>
+    /// Collaborator #145: Send enabled only after workflow proposals are seeded into chat.
+    /// </summary>
+    public bool IsChatEnabled
+    {
+        get => _isChatEnabled;
+        set => SetProperty(ref _isChatEnabled, value);
+    }
+
+    private string _chatPlaceholder = "Waiting for proposals…";
+    public string ChatPlaceholder
+    {
+        get => _chatPlaceholder;
+        set => SetProperty(ref _chatPlaceholder, value ?? string.Empty);
+    }
+
     private string _promptOutput;
     public string PromptOutput
     {
@@ -368,6 +385,13 @@ public partial class WorkflowViewModel : ObservableRecipient
     public async Task SendButtonClicked()
     {
         if (string.IsNullOrWhiteSpace(InputText)) return;
+        if (!IsChatEnabled)
+        {
+            ConversationList.Add(ChatMessage.FromCollaborator(
+                "Chat unlocks after the workflow produces property proposals."));
+            InputText = string.Empty;
+            return;
+        }
 
         var userMessage = InputText;
         InputText = string.Empty;
