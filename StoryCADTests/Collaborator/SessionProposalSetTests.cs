@@ -7,8 +7,10 @@ namespace StoryCADTests.Collaborator;
 [TestClass]
 public class SessionProposalSetTests
 {
-    private static PendingUpdate Make(string label, string prop, string value, UpdateKind kind = UpdateKind.Fill) =>
-        new(label, Guid.NewGuid(), new PropertySpec(prop), value, kind, "current");
+    private static PendingUpdate Make(
+        string label, string prop, string value,
+        UpdateKind kind = UpdateKind.Fill, string? current = "current") =>
+        new(label, Guid.NewGuid(), new PropertySpec(prop), value, kind, current);
 
     [TestMethod]
     public void LoadFromPending_KeepsAllKeys()
@@ -61,19 +63,25 @@ public class SessionProposalSetTests
     }
 
     [TestMethod]
-    public void BuildSnapshotText_IncludesStatus_AndFullLongText()
+    public void BuildSnapshotText_IncludesProposedAndOutline_FullTextAfterSkip()
     {
         var set = new SessionProposalSet();
-        var longSketch = new string('x', 500) + " END";
-        set.ReplaceFromPending(new[] { Make("Character", "Description", longSketch) });
+        var proposed = "PROPOSED sketch " + new string('p', 400);
+        var outline = "OUTLINE sketch " + new string('o', 400) + " END_OUTLINE";
+        set.ReplaceFromPending(new[]
+        {
+            Make("Character", "Description", proposed, UpdateKind.Protect, outline)
+        });
         set.MarkSkipped("Character.Description");
 
         var snap = set.BuildSnapshotText();
         StringAssert.Contains(snap, "Character.Description");
         StringAssert.Contains(snap, "skipped");
-        StringAssert.Contains(snap, " END");
-        Assert.IsFalse(snap.Contains('…') && !snap.Contains(" END"),
-            "Default snapshot should not truncate a 500-char sketch");
+        StringAssert.Contains(snap, "Proposed (Collaborator):");
+        StringAssert.Contains(snap, "Outline (value on the story element when classified):");
+        StringAssert.Contains(snap, " END_OUTLINE");
+        StringAssert.Contains(snap, proposed.Substring(0, 40));
+        Assert.IsFalse(snap.Contains('…'), "Default snapshot must not truncate outline/proposed");
     }
 
     [TestMethod]

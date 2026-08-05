@@ -35,7 +35,11 @@ public sealed class SessionProposalSet
         _entries.Clear();
         foreach (var u in pending)
         {
-            _entries[u.Key] = new Entry(u, ProposalSessionStatus.Open, FormatValue(u.Value));
+            // Keep full outline value at classify time — needed after Skip when the writer
+            // asks "what is this field now?" (outline text, not a truncated proposal).
+            var outline = u.CurrentDisplay ?? string.Empty;
+            _entries[u.Key] = new Entry(
+                u, ProposalSessionStatus.Open, FormatValue(u.Value), outline);
         }
     }
 
@@ -78,16 +82,20 @@ public sealed class SessionProposalSet
             .Select(e => e.Update with { Value = e.ProposedText });
 
     /// <summary>
-    /// Plain-text snapshot for chat history seed / refresh.
-    /// Full proposal text (high cap) so "show me Description" works after Skip (#145 UX).
+    /// Snapshot for chat history: full proposed text and full outline value at capture time.
+    /// After Skip, "as it is now" is OutlineText (what stayed on the story element).
     /// </summary>
-    public string BuildSnapshotText(int maxValueChars = 8000)
+    public string BuildSnapshotText(int maxValueChars = 0)
     {
         if (_entries.Count == 0)
             return "(No proposals in this session.)";
 
         var sb = new StringBuilder();
-        sb.AppendLine("Property proposals for this workflow run (full text; status open/accepted/skipped):");
+        sb.AppendLine("Property proposals for this workflow run.");
+        sb.AppendLine("For each key: status, Collaborator proposed text, and outline value when the run classified the field.");
+        sb.AppendLine("If status is skipped, the writer kept the outline value (use Outline for \"as it is now\").");
+        sb.AppendLine("If status is accepted, the outline should match what was accepted (use Proposed if Outline empty).");
+        sb.AppendLine();
         foreach (var e in _entries.Values.OrderBy(x => x.Update.Key, StringComparer.OrdinalIgnoreCase))
         {
             var status = e.Status switch
@@ -97,15 +105,24 @@ public sealed class SessionProposalSet
                 ProposalSessionStatus.Skipped => "skipped",
                 _ => "?"
             };
-            var val = e.ProposedText ?? string.Empty;
-            if (maxValueChars > 0 && val.Length > maxValueChars)
-                val = val.Substring(0, maxValueChars) + "…";
-            // Keep newlines for long sketches; model needs readable prose
-            sb.AppendLine($"- {e.Update.Key} [{status}]:");
-            sb.AppendLine(val);
+            sb.AppendLine($"### {e.Update.Key} [{status}]");
+            sb.AppendLine("Proposed (Collaborator):");
+            sb.AppendLine(Cap(e.ProposedText, maxValueChars));
+            sb.AppendLine("Outline (value on the story element when classified):");
+            sb.AppendLine(string.IsNullOrEmpty(e.OutlineText)
+                ? "(empty)"
+                : Cap(e.OutlineText, maxValueChars));
             sb.AppendLine();
         }
         return sb.ToString().TrimEnd();
+    }
+
+    private static string Cap(string? text, int maxValueChars)
+    {
+        var val = text ?? string.Empty;
+        if (maxValueChars > 0 && val.Length > maxValueChars)
+            return val.Substring(0, maxValueChars) + "…";
+        return val;
     }
 
     /// <summary>Open count (still need Accept/Skip on the left list).</summary>
@@ -114,15 +131,19 @@ public sealed class SessionProposalSet
 
     public static string BuildSystemInstructions(string workflowTitle) =>
         "You help revise property proposals from the '" + workflowTitle + "' workflow run. " +
-        "This is not general story chat and you do not have the full outline loaded.\n\n" +
+        "This is not general story chat and you do not have the full outline loaded beyond the snapshot.\n\n" +
         "Rules:\n" +
         "- Answer the writer in plain text only (no Markdown).\n" +
+        "- The snapshot gives, for each key: status, Proposed (Collaborator), and Outline (story element when classified).\n" +
+        "- If the writer asks what a field is \"now\" and status is skipped, quote the full Outline text from the snapshot.\n" +
+        "- If status is open, quote Proposed (and Outline if they ask what is already on the element).\n" +
+        "- If status is accepted, prefer Proposed as what was written.\n" +
         "- You may only change keys listed in the property proposals snapshot.\n" +
         "- If the writer wants a field changed, include a JSON block (optionally fenced) of the form: " +
         "{\"patches\":[{\"key\":\"ElementLabel.Property\",\"value\":\"new text\"}]}\n" +
         "- If the request is not about those proposals, say clearly it is out of scope for this chat. " +
         "Do not invent patches. Suggest Accept, Try Again, another workflow, or editing the outline.\n" +
-        "- Do not invent element IDs or properties outside the proposal list.";
+        "- Do not invent element IDs or properties outside the proposal list. Do not claim text is missing if Outline or Proposed is present in the snapshot.";
 
     private static string FormatValue(object? value) =>
         value switch
@@ -135,5 +156,6 @@ public sealed class SessionProposalSet
     public sealed record Entry(
         PendingUpdate Update,
         ProposalSessionStatus Status,
-        string ProposedText);
+        string ProposedText,
+        string OutlineText);
 }
