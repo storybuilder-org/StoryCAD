@@ -19,6 +19,9 @@ public class WorkflowViewModelTests
     public void Setup()
     {
         _viewModel = new WorkflowViewModel();
+        // #145: production leaves Send locked until proposals seed; unit tests of send
+        // path enable chat explicitly.
+        _viewModel.IsChatEnabled = true;
     }
 
     #region Constructor Tests
@@ -246,6 +249,26 @@ public class WorkflowViewModelTests
     #endregion
 
     #region SendButtonClicked Tests
+
+    [TestMethod]
+    public async Task SendButtonClicked_WhenChatDisabled_DoesNotInvokeCallback()
+    {
+        _viewModel.IsChatEnabled = false;
+        _viewModel.InputText = "Hello";
+        var invoked = false;
+        _viewModel.OnSendMessage = _ =>
+        {
+            invoked = true;
+            return Task.FromResult("x");
+        };
+
+        await _viewModel.SendButtonClicked();
+
+        Assert.IsFalse(invoked);
+        Assert.AreEqual(1, _viewModel.ConversationList.Count);
+        Assert.IsFalse(_viewModel.ConversationList[0].IsUser);
+        StringAssert.Contains(_viewModel.ConversationList[0].Text, "unlocks");
+    }
 
     [TestMethod]
     public async Task SendButtonClicked_WithEmptyInput_DoesNotAddToConversation()
