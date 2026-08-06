@@ -441,8 +441,10 @@ public partial class WorkflowViewModel : ObservableRecipient
     {
         if (!HasPendingUpdates) return;
 
-        CurrentReviewIndex = 0;
         IsInReviewMode = true;
+        CurrentReviewIndex = 0;
+        // One forward pass: land on first open row (or exit if none).
+        AdvancePastSettledRows();
         NotifyReviewProperties();
     }
 
@@ -533,26 +535,43 @@ public partial class WorkflowViewModel : ObservableRecipient
     }
 
     /// <summary>
-    /// After accept/skip, Collaborator removes the current key from the list.
-    /// The next item slides into the same index — do not increment (#115).
+    /// Settled rows (Accepted/Skipped) are done for Review Each. One list, one forward pass:
+    /// foreach item → accept or skip → next. No wrap-around.
     /// </summary>
-    private void AdvanceReview()
+    private static bool IsSettled(PendingUpdateItem? item)
+    {
+        if (item == null) return true;
+        var kind = item.KindLabel ?? string.Empty;
+        return kind.Equals("Skipped", StringComparison.OrdinalIgnoreCase)
+            || kind.Equals("Accepted", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// After accept/skip (or on enter review): sit on an open row walking forward only.
+    /// If the current row was removed, the next open item is already at this index (#115) — stay.
+    /// If the current row is settled (#145), move forward until open or past the end.
+    /// </summary>
+    private void AdvancePastSettledRows()
     {
         if (PendingUpdateItems == null || PendingUpdateItems.Count == 0)
         {
             IsInReviewMode = false;
-            ClearPendingUpdates();
             return;
+        }
+
+        while (CurrentReviewIndex < PendingUpdateItems.Count
+               && IsSettled(PendingUpdateItems[CurrentReviewIndex]))
+        {
+            CurrentReviewIndex++;
         }
 
         if (CurrentReviewIndex >= PendingUpdateItems.Count)
-        {
             IsInReviewMode = false;
-            if (PendingUpdateItems.Count == 0)
-                ClearPendingUpdates();
-            return;
-        }
+    }
 
+    private void AdvanceReview()
+    {
+        AdvancePastSettledRows();
         NotifyReviewProperties();
     }
 
@@ -595,15 +614,9 @@ public partial class WorkflowViewModel : ObservableRecipient
 
         UpdatesApplied = false;
 
-        // Inline ticks can shrink the list while Review Each is walking it (#129):
-        // exit review when it empties, clamp the index when it points past the end.
+        // Review Each: one forward pass; skip settled rows after list rebuild (#145).
         if (IsInReviewMode)
-        {
-            if (PendingUpdateItems.Count == 0)
-                IsInReviewMode = false;
-            else if (CurrentReviewIndex >= PendingUpdateItems.Count)
-                CurrentReviewIndex = PendingUpdateItems.Count - 1;
-        }
+            AdvancePastSettledRows();
 
         OnPropertyChanged(nameof(PendingUpdateItems));
         OnPropertyChanged(nameof(HasUpdates));

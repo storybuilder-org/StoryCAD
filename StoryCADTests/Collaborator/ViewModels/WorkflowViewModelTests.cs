@@ -457,6 +457,33 @@ public class WorkflowViewModelTests
         };
     }
 
+    /// <summary>
+    /// #145: skip/accept keeps the row and marks KindLabel settled (session proposal set).
+    /// </summary>
+    private void WireMarkSettledOnAcceptOrSkip(List<PendingUpdateItem> store)
+    {
+        void Mark(string key, string kind)
+        {
+            var item = store.Find(i => i.Key == key);
+            if (item == null) return;
+            item.KindLabel = kind;
+            item.SummaryLine = kind;
+            item.IsProtected = false;
+            _viewModel.SetPendingUpdates(store);
+        }
+
+        _viewModel.OnAcceptProperty = key =>
+        {
+            Mark(key, "Accepted");
+            return Task.CompletedTask;
+        };
+        _viewModel.OnSkipProperty = key =>
+        {
+            Mark(key, "Skipped");
+            return Task.CompletedTask;
+        };
+    }
+
     [TestMethod]
     public void PendingUpdatesHeader_ReflectsFreeAndProtectedCounts()
     {
@@ -546,6 +573,36 @@ public class WorkflowViewModelTests
         _viewModel.AcceptCurrentCommand.Execute(null);
         Assert.AreEqual(0, store.Count);
         Assert.IsFalse(_viewModel.IsInReviewMode);
+    }
+
+    [TestMethod]
+    public void ReviewEach_SkipWhenRowsStayOnList_AdvancesPastSkipped()
+    {
+        // Regression #145: session set keeps Skipped rows; Review must not stick forever.
+        var store = new List<PendingUpdateItem>
+        {
+            Item("Antagonist.Name", "Ewan"),
+            Item("Problem.Premise", "p"),
+            Item("Problem.Theme", "t")
+        };
+        _viewModel.SetPendingUpdates(store);
+        WireMarkSettledOnAcceptOrSkip(store);
+        _viewModel.ReviewEachCommand.Execute(null);
+
+        Assert.AreEqual("Antagonist.Name", _viewModel.CurrentReviewKey);
+
+        _viewModel.SkipCurrentCommand.Execute(null);
+        Assert.AreEqual("Problem.Premise", _viewModel.CurrentReviewKey,
+            "After skip, review must move to next open row (not stay on Skipped Name).");
+        Assert.AreEqual(3, store.Count, "All rows remain on the session list");
+        Assert.AreEqual("Skipped", store.Find(i => i.Key == "Antagonist.Name")!.KindLabel);
+
+        _viewModel.SkipCurrentCommand.Execute(null);
+        Assert.AreEqual("Problem.Theme", _viewModel.CurrentReviewKey);
+
+        _viewModel.SkipCurrentCommand.Execute(null);
+        Assert.IsFalse(_viewModel.IsInReviewMode, "Review ends when no open rows remain");
+        Assert.AreEqual(3, _viewModel.PendingUpdateItems.Count, "Settled rows stay visible");
     }
 
     [TestMethod]
