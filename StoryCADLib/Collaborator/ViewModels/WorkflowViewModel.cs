@@ -442,16 +442,9 @@ public partial class WorkflowViewModel : ObservableRecipient
         if (!HasPendingUpdates) return;
 
         IsInReviewMode = true;
-        // Start on first open row (skip already Accepted/Skipped session rows — #145).
-        var firstOpen = IndexOfNextOpenForReview(fromIndex: 0);
-        if (firstOpen < 0)
-        {
-            IsInReviewMode = false;
-            NotifyReviewProperties();
-            return;
-        }
-
-        CurrentReviewIndex = firstOpen;
+        CurrentReviewIndex = 0;
+        // One forward pass: land on first open row (or exit if none).
+        AdvancePastSettledRows();
         NotifyReviewProperties();
     }
 
@@ -542,68 +535,43 @@ public partial class WorkflowViewModel : ObservableRecipient
     }
 
     /// <summary>
-    /// True when Review Each should still walk this row (not session-settled).
-    /// #145 keeps Accepted/Skipped on the list for chat; they are not review targets.
+    /// Settled rows (Accepted/Skipped) are done for Review Each. One list, one forward pass:
+    /// foreach item → accept or skip → next. No wrap-around.
     /// </summary>
-    private static bool IsOpenForReview(PendingUpdateItem? item)
+    private static bool IsSettled(PendingUpdateItem? item)
     {
-        if (item == null) return false;
+        if (item == null) return true;
         var kind = item.KindLabel ?? string.Empty;
-        if (kind.Equals("Skipped", StringComparison.OrdinalIgnoreCase)) return false;
-        if (kind.Equals("Accepted", StringComparison.OrdinalIgnoreCase)) return false;
-        return true;
+        return kind.Equals("Skipped", StringComparison.OrdinalIgnoreCase)
+            || kind.Equals("Accepted", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
-    /// Next open review index at or after <paramref name="fromIndex"/>, else earlier open, else -1.
+    /// After accept/skip (or on enter review): sit on an open row walking forward only.
+    /// If the current row was removed, the next open item is already at this index (#115) — stay.
+    /// If the current row is settled (#145), move forward until open or past the end.
     /// </summary>
-    private int IndexOfNextOpenForReview(int fromIndex)
+    private void AdvancePastSettledRows()
     {
         if (PendingUpdateItems == null || PendingUpdateItems.Count == 0)
-            return -1;
-
-        fromIndex = Math.Max(0, fromIndex);
-        for (var i = fromIndex; i < PendingUpdateItems.Count; i++)
         {
-            if (IsOpenForReview(PendingUpdateItems[i]))
-                return i;
+            IsInReviewMode = false;
+            return;
         }
 
-        for (var i = 0; i < fromIndex && i < PendingUpdateItems.Count; i++)
+        while (CurrentReviewIndex < PendingUpdateItems.Count
+               && IsSettled(PendingUpdateItems[CurrentReviewIndex]))
         {
-            if (IsOpenForReview(PendingUpdateItems[i]))
-                return i;
+            CurrentReviewIndex++;
         }
 
-        return -1;
+        if (CurrentReviewIndex >= PendingUpdateItems.Count)
+            IsInReviewMode = false;
     }
 
-    /// <summary>
-    /// After accept/skip: if the row was removed, the next open item is at the same index (#115).
-    /// If the row stayed as Accepted/Skipped (#145), move to the next open row.
-    /// Exit review when no open rows remain (settled rows may still show in the list).
-    /// </summary>
     private void AdvanceReview()
     {
-        if (PendingUpdateItems == null || PendingUpdateItems.Count == 0)
-        {
-            IsInReviewMode = false;
-            // Do not ClearPendingUpdates — empty list only; #145 may rebuild settled rows.
-            NotifyReviewProperties();
-            return;
-        }
-
-        // Prefer current index when the row under review is still open (removal case: next slid in).
-        // If current is settled, search from here for the next open.
-        var next = IndexOfNextOpenForReview(CurrentReviewIndex);
-        if (next < 0)
-        {
-            IsInReviewMode = false;
-            NotifyReviewProperties();
-            return;
-        }
-
-        CurrentReviewIndex = next;
+        AdvancePastSettledRows();
         NotifyReviewProperties();
     }
 
@@ -646,20 +614,9 @@ public partial class WorkflowViewModel : ObservableRecipient
 
         UpdatesApplied = false;
 
-        // Review Each + #145: list may keep Skipped/Accepted rows. Stay on an open row.
+        // Review Each: one forward pass; skip settled rows after list rebuild (#145).
         if (IsInReviewMode)
-        {
-            if (PendingUpdateItems.Count == 0)
-                IsInReviewMode = false;
-            else
-            {
-                var open = IndexOfNextOpenForReview(CurrentReviewIndex);
-                if (open < 0)
-                    IsInReviewMode = false;
-                else
-                    CurrentReviewIndex = open;
-            }
-        }
+            AdvancePastSettledRows();
 
         OnPropertyChanged(nameof(PendingUpdateItems));
         OnPropertyChanged(nameof(HasUpdates));
