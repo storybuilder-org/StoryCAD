@@ -441,8 +441,17 @@ public partial class WorkflowViewModel : ObservableRecipient
     {
         if (!HasPendingUpdates) return;
 
-        CurrentReviewIndex = 0;
         IsInReviewMode = true;
+        // Start on first open row (skip already Accepted/Skipped session rows — #145).
+        var firstOpen = IndexOfNextOpenForReview(fromIndex: 0);
+        if (firstOpen < 0)
+        {
+            IsInReviewMode = false;
+            NotifyReviewProperties();
+            return;
+        }
+
+        CurrentReviewIndex = firstOpen;
         NotifyReviewProperties();
     }
 
@@ -533,26 +542,68 @@ public partial class WorkflowViewModel : ObservableRecipient
     }
 
     /// <summary>
-    /// After accept/skip, Collaborator removes the current key from the list.
-    /// The next item slides into the same index — do not increment (#115).
+    /// True when Review Each should still walk this row (not session-settled).
+    /// #145 keeps Accepted/Skipped on the list for chat; they are not review targets.
+    /// </summary>
+    private static bool IsOpenForReview(PendingUpdateItem? item)
+    {
+        if (item == null) return false;
+        var kind = item.KindLabel ?? string.Empty;
+        if (kind.Equals("Skipped", StringComparison.OrdinalIgnoreCase)) return false;
+        if (kind.Equals("Accepted", StringComparison.OrdinalIgnoreCase)) return false;
+        return true;
+    }
+
+    /// <summary>
+    /// Next open review index at or after <paramref name="fromIndex"/>, else earlier open, else -1.
+    /// </summary>
+    private int IndexOfNextOpenForReview(int fromIndex)
+    {
+        if (PendingUpdateItems == null || PendingUpdateItems.Count == 0)
+            return -1;
+
+        fromIndex = Math.Max(0, fromIndex);
+        for (var i = fromIndex; i < PendingUpdateItems.Count; i++)
+        {
+            if (IsOpenForReview(PendingUpdateItems[i]))
+                return i;
+        }
+
+        for (var i = 0; i < fromIndex && i < PendingUpdateItems.Count; i++)
+        {
+            if (IsOpenForReview(PendingUpdateItems[i]))
+                return i;
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// After accept/skip: if the row was removed, the next open item is at the same index (#115).
+    /// If the row stayed as Accepted/Skipped (#145), move to the next open row.
+    /// Exit review when no open rows remain (settled rows may still show in the list).
     /// </summary>
     private void AdvanceReview()
     {
         if (PendingUpdateItems == null || PendingUpdateItems.Count == 0)
         {
             IsInReviewMode = false;
-            ClearPendingUpdates();
+            // Do not ClearPendingUpdates — empty list only; #145 may rebuild settled rows.
+            NotifyReviewProperties();
             return;
         }
 
-        if (CurrentReviewIndex >= PendingUpdateItems.Count)
+        // Prefer current index when the row under review is still open (removal case: next slid in).
+        // If current is settled, search from here for the next open.
+        var next = IndexOfNextOpenForReview(CurrentReviewIndex);
+        if (next < 0)
         {
             IsInReviewMode = false;
-            if (PendingUpdateItems.Count == 0)
-                ClearPendingUpdates();
+            NotifyReviewProperties();
             return;
         }
 
+        CurrentReviewIndex = next;
         NotifyReviewProperties();
     }
 
@@ -595,14 +646,19 @@ public partial class WorkflowViewModel : ObservableRecipient
 
         UpdatesApplied = false;
 
-        // Inline ticks can shrink the list while Review Each is walking it (#129):
-        // exit review when it empties, clamp the index when it points past the end.
+        // Review Each + #145: list may keep Skipped/Accepted rows. Stay on an open row.
         if (IsInReviewMode)
         {
             if (PendingUpdateItems.Count == 0)
                 IsInReviewMode = false;
-            else if (CurrentReviewIndex >= PendingUpdateItems.Count)
-                CurrentReviewIndex = PendingUpdateItems.Count - 1;
+            else
+            {
+                var open = IndexOfNextOpenForReview(CurrentReviewIndex);
+                if (open < 0)
+                    IsInReviewMode = false;
+                else
+                    CurrentReviewIndex = open;
+            }
         }
 
         OnPropertyChanged(nameof(PendingUpdateItems));
