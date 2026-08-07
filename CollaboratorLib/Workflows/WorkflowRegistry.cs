@@ -370,21 +370,69 @@ namespace StoryCollaborator.Workflows
                             }
                         }
                     }) { PrimaryElementType = StoryItemType.Problem },
+                // Collaborator #167: assign problems/scenes to beats; preserve filled assignments.
                 new Workflow(
-                    "Structure", "Problem Structure",
-                    "Define the structural beats and turning points of a story problem by selecting and applying " +
-                    "a beat sheet template.",
-                    StoryItemType.Problem,
+                    label: "Structure",
+                    title: "Problem Structure",
+                    description: "Choose a beat sheet and match existing problems and scenes to beats " +
+                                "(story problem prefers other problems; other problems prefer scenes).",
                     explanation: "Structure gives your problem shape—a beginning that hooks, a middle that complicates, " +
-                                "and an ending that resolves. This workflow helps you choose a beat sheet (Three Act, " +
-                                "Hero's Journey, Save the Cat, etc.) and maps your problem's key moments to its beats.",
-                    outputProperties: new List<PropertySpec>
+                                "and an ending that resolves. This workflow chooses a beat sheet (full for the story " +
+                                "problem, mini for others) and assigns existing problems and scenes to unfilled beats. " +
+                                "It does not create new elements or wipe filled assignments.",
+                    workflowIO: new WorkflowIO
                     {
-                        new PropertySpec("StructureTitle"),
-                        new PropertySpec("StructureDescription"),
-                        // Beat array: model emits "beats" array; runner clears and rebuilds via the beat API.
-                        new PropertySpec("StructureBeats", WriteVia.BeatSheet, JsonKey: "beats")
-                    }),
+                        RequiredInputs = new List<ElementRequirement>
+                        {
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Problem,
+                                ElementLabel = "Problem",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            }
+                        },
+                        OptionalInputs = new List<ElementRequirement>
+                        {
+                            // Overview helps the Worker detect the outline story problem.
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.StoryOverview,
+                                ElementLabel = "Overview",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            }
+                        },
+                        Outputs = new List<ElementOutput>
+                        {
+                            new ElementOutput
+                            {
+                                ElementType = StoryItemType.Problem,
+                                ElementLabel = "Problem",
+                                PropertiesToUpdate = new List<PropertySpec>
+                                {
+                                    new PropertySpec("StructureTitle"),
+                                    new PropertySpec("StructureDescription"),
+                                    new PropertySpec("StructureBeats", WriteVia.BeatSheet, JsonKey: "beats")
+                                }
+                            }
+                        },
+                        CollectionInputs = new List<CollectionInput>
+                        {
+                            new CollectionInput
+                            {
+                                RequestName = "ProblemChoices",
+                                ElementType = StoryItemType.Problem,
+                                Projection = ElementProjection.BaseStoryElement
+                            },
+                            new CollectionInput
+                            {
+                                RequestName = "SceneChoices",
+                                ElementType = StoryItemType.Scene,
+                                Projection = ElementProjection.BaseStoryElement
+                            }
+                        }
+                    }) { PrimaryElementType = StoryItemType.Problem },
                 // === Character Workflows ===
                 new Workflow(
                     "RoleAndStoryRole", "Role and Story Role",
