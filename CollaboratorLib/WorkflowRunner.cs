@@ -716,37 +716,9 @@ namespace StoryCollaborator
 
                     case WriteVia.BeatSheet:
                     {
+                        // #167: merge proposed beats; never wipe filled assignments.
                         if (update.Value is not List<BeatInfo> beats) break;
-
-                        // Clear existing beats
-                        var structure = _storyApi.GetProblemStructure(uuid);
-                        if (structure.IsSuccess)
-                        {
-                            int beatCount = structure.Payload.Beats.Count();
-                            for (int i = 0; i < beatCount; i++)
-                                _storyApi.DeleteBeat(uuid, 0);
-                        }
-
-                        // Build candidate set for assigned_element validation
-                        var problemGuids = GetCandidateGuids(StoryItemType.Problem);
-                        var sceneGuids = GetCandidateGuids(StoryItemType.Scene);
-                        var validAssignGuids = new System.Collections.Generic.HashSet<Guid>(
-                            problemGuids.Concat(sceneGuids));
-
-                        // Create new beats
-                        for (int i = 0; i < beats.Count; i++)
-                        {
-                            var beat = beats[i];
-                            _storyApi.CreateBeat(uuid, beat.Title, beat.Description);
-                            if (beat.AssignedElement.HasValue)
-                            {
-                                if (validAssignGuids.Contains(beat.AssignedElement.Value))
-                                    _storyApi.AssignElementToBeat(uuid, i, beat.AssignedElement.Value);
-                                else
-                                    result.StatusMessages.Add(
-                                        $"Beat {i} assigned_element {beat.AssignedElement} not in candidate set; left unassigned");
-                            }
-                        }
+                        ApplyBeatSheetMerge(uuid, beats, result);
                         appliedCount++;
                         break;
                     }
@@ -862,6 +834,131 @@ namespace StoryCollaborator
                 beats.Add(new BeatInfo(title, desc, assigned));
             }
             return beats;
+        }
+
+        /// <summary>
+        /// Collaborator #167: install or merge beat proposals without clearing filled assignments.
+        /// Empty sheet: create proposed beats and assign valid candidates.
+        /// Non-empty: fill blank descriptions; assign only empty slots; never reassign.
+        /// </summary>
+        internal void ApplyBeatSheetMerge(Guid problemUuid, List<BeatInfo> proposed, WorkflowResult result)
+        {
+            if (proposed == null || proposed.Count == 0)
+            {
+                result.StatusMessages.Add("BeatSheet: empty proposal; no changes");
+                return;
+            }
+
+            var problemGuids = new HashSet<Guid>(GetCandidateGuids(StoryItemType.Problem));
+            var sceneGuids = new HashSet<Guid>(GetCandidateGuids(StoryItemType.Scene));
+            var validAssignGuids = new HashSet<Guid>(problemGuids.Concat(sceneGuids));
+
+            var existingResult = _storyApi.GetProblemStructure(problemUuid);
+            if (!existingResult.IsSuccess)
+            {
+                result.StatusMessages.Add($"BeatSheet: cannot load structure for {problemUuid}");
+                return;
+            }
+
+            var existingBeats = existingResult.Payload.Beats?.ToList()
+                ?? new List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)>();
+
+            // GUIDs already assigned on this problem (preserve; block multi-problem on same sheet).
+            var usedOnSheet = new HashSet<Guid>(
+                existingBeats
+                    .Where(b => b.LinkedElement.HasValue && b.LinkedElement.Value != Guid.Empty)
+                    .Select(b => b.LinkedElement!.Value));
+
+            if (existingBeats.Count == 0)
+            {
+                for (int i = 0; i < proposed.Count; i++)
+                {
+                    var beat = proposed[i];
+                    var title = string.IsNullOrWhiteSpace(beat.Title) ? $"Beat {i + 1}" : beat.Title.Trim();
+                    var desc = beat.Description?.Trim() ?? string.Empty;
+                    _storyApi.CreateBeat(problemUuid, title, desc);
+                    TryAssignBeat(problemUuid, i, beat.AssignedElement, validAssignGuids, problemGuids, usedOnSheet, result);
+                }
+                return;
+            }
+
+            // Append extra proposed rows when the model grows the sheet (do not delete extras).
+            for (int i = existingBeats.Count; i < proposed.Count; i++)
+            {
+                var beat = proposed[i];
+                var title = string.IsNullOrWhiteSpace(beat.Title) ? $"Beat {i + 1}" : beat.Title.Trim();
+                var desc = beat.Description?.Trim() ?? string.Empty;
+                _storyApi.CreateBeat(problemUuid, title, desc);
+            }
+
+            // Re-read after possible creates.
+            existingResult = _storyApi.GetProblemStructure(problemUuid);
+            existingBeats = existingResult.IsSuccess
+                ? existingResult.Payload.Beats?.ToList()
+                    ?? new List<(string, string, Guid?)>()
+                : existingBeats;
+
+            int pairCount = Math.Min(existingBeats.Count, proposed.Count);
+            for (int i = 0; i < pairCount; i++)
+            {
+                var current = existingBeats[i];
+                var beat = proposed[i];
+
+                var newTitle = string.IsNullOrWhiteSpace(current.BeatTitle) && !string.IsNullOrWhiteSpace(beat.Title)
+                    ? beat.Title.Trim()
+                    : current.BeatTitle;
+                // Prefer keep filled description; fill blank only.
+                var newDesc = string.IsNullOrWhiteSpace(current.BeatDescription) && !string.IsNullOrWhiteSpace(beat.Description)
+                    ? beat.Description.Trim()
+                    : current.BeatDescription;
+
+                if (!string.Equals(newTitle, current.BeatTitle, StringComparison.Ordinal)
+                    || !string.Equals(newDesc, current.BeatDescription, StringComparison.Ordinal))
+                {
+                    _storyApi.UpdateBeat(problemUuid, i, newTitle ?? string.Empty, newDesc ?? string.Empty);
+                }
+
+                var alreadyFilled = current.LinkedElement.HasValue && current.LinkedElement.Value != Guid.Empty;
+                if (alreadyFilled)
+                    continue;
+
+                TryAssignBeat(problemUuid, i, beat.AssignedElement, validAssignGuids, problemGuids, usedOnSheet, result);
+            }
+        }
+
+        private void TryAssignBeat(
+            Guid problemUuid,
+            int beatIndex,
+            Guid? assigned,
+            HashSet<Guid> validAssignGuids,
+            HashSet<Guid> problemGuids,
+            HashSet<Guid> usedOnSheet,
+            WorkflowResult result)
+        {
+            if (!assigned.HasValue || assigned.Value == Guid.Empty)
+                return;
+
+            if (!validAssignGuids.Contains(assigned.Value))
+            {
+                result.StatusMessages.Add(
+                    $"Beat {beatIndex} assigned_element {assigned.Value} not in candidate set; left unassigned");
+                return;
+            }
+
+            // One problem per beat sheet (and prefer one scene): skip if already used on this sheet.
+            if (usedOnSheet.Contains(assigned.Value))
+            {
+                result.StatusMessages.Add(
+                    $"Beat {beatIndex} assigned_element {assigned.Value} already used on this sheet; left unassigned");
+                return;
+            }
+
+            var assignResult = _storyApi.AssignElementToBeat(problemUuid, beatIndex, assigned.Value);
+            if (assignResult.IsSuccess)
+                usedOnSheet.Add(assigned.Value);
+            else
+                result.StatusMessages.Add(
+                    $"Beat {beatIndex} assign failed: {assignResult.ErrorMessage}");
         }
 
         private static List<JsonElement> ExtractTypedEntries(JsonElement elem)
