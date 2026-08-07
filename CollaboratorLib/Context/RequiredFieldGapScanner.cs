@@ -91,7 +91,12 @@ public static class RequiredFieldGapScanner
                 break;
 
             case ProblemModel problem:
+                // Collaborator #160: ConflictType, ProblemType, Subject are spine-required
+                // (multi-workflow problem craft). Flaw/BackStory stay Character input-only.
                 if (IsBlank(problem.ProblemCategory)) missing.Add("ProblemCategory");
+                if (IsBlank(problem.ProblemType)) missing.Add("ProblemType");
+                if (IsBlank(problem.ConflictType)) missing.Add("ConflictType");
+                if (IsBlank(problem.Subject)) missing.Add("Subject");
                 if (IsBlank(problem.Premise)) missing.Add("Premise");
                 if (IsBlank(problem.ProtGoal)) missing.Add("ProtGoal");
                 if (IsBlank(problem.ProtMotive)) missing.Add("ProtMotive");
