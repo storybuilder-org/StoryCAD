@@ -36,6 +36,9 @@ public static class GapWorkflowOwnership
             (StoryItemType.Problem, "Protagonist") => new[] { "StoryProblem", "GMC" },
             (StoryItemType.Problem, "Antagonist") => new[] { "StoryProblem", "GMC" },
             (StoryItemType.Problem, "ProblemCategory") => new[] { "StoryProblem" },
+            (StoryItemType.Problem, "ProblemType") => new[] { "StoryProblem" },
+            (StoryItemType.Problem, "ConflictType") => new[] { "StoryProblem" },
+            (StoryItemType.Problem, "Subject") => new[] { "StoryProblem" },
             (StoryItemType.Problem, "Premise") => new[] { "StoryProblem" },
             (StoryItemType.Problem, "Description") => new[] { "StoryProblem" },
 
@@ -73,6 +76,9 @@ public static class GapWorkflowOwnership
             (StoryItemType.StoryOverview, "StoryProblem") => "Story Problem",
             (StoryItemType.Character, "StoryRole") => "Story Role",
             (StoryItemType.Problem, "ProblemCategory") => "Problem Category",
+            (StoryItemType.Problem, "ProblemType") => "Problem Type",
+            (StoryItemType.Problem, "ConflictType") => "Conflict Type",
+            (StoryItemType.Problem, "Subject") => "Subject",
             (StoryItemType.Scene, "CastMembers") => "Cast",
             _ => propertyName
         };
