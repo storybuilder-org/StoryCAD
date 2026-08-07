@@ -1031,7 +1031,10 @@ namespace StoryCollaborator
             instructions.Add(_settings.ContentPreservation switch
             {
                 ContentPreservationLevel.Strict => "Preserve the user's exact wording. Only fill gaps.",
-                ContentPreservationLevel.Flexible => "Feel free to rewrite and improve the content.",
+                // The coach system message on the Worker forbids revising text that is
+                // already sound, and it outranks this string. Flexible widens what counts
+                // as worth proposing; it does not license the rewrite it used to promise.
+                ContentPreservationLevel.Flexible => "The writer welcomes suggestions on filled fields as well as blank ones.",
                 _ => ""
             });
 

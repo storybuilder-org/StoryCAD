@@ -435,3 +435,5 @@ dev.vars
 
 # StoreKit shim build output (built by src/macos/StoreKitShim/build.sh)
 /src/macos/StoreKitShim/out/
+*.bak
+/.junie
