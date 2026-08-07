@@ -925,6 +925,10 @@ public class Collaborator : ICollaborator
                         }
                         else
                         {
+                            // Writer refused overwrites: session was already MarkAccepted for Review
+                            // Each advance — flip to Skipped so chat/snapshot match the outline.
+                            foreach (var u in staged)
+                                _sessionProposals?.MarkSkipped(u.Key);
                             viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
                                 $"Cancelled: left {staged.Count} existing field(s) unchanged."));
                             _logger?.LogInformation("StagedProtect cancelled: {Count}", staged.Count);
@@ -1047,13 +1051,16 @@ public class Collaborator : ICollaborator
                             if (pending.Kind == UpdateKind.Protect)
                             {
                                 // Stage overwrite; confirm once when the queue is fully decided (#140).
+                                // Mark Accepted in the session set now so Review Each can leave the row
+                                // (IsSettled). Without this, KindLabel stays "Has your text",
+                                // AdvancePastSettledRows never moves, and Accept looks stuck.
                                 stageSession.StageProtect(pending);
                                 RemovePendingKeys(new[] { propertyKey });
+                                _sessionProposals?.MarkAccepted(propertyKey);
                                 viewModel.AddStatusMessage($"Queued overwrite: {propertyKey}");
                                 _logger?.LogInformation("AcceptProperty: Staged Protect {Key}", propertyKey);
                                 PushSessionSetToViewModel(viewModel);
                                 await FlushStagedIfQueueDoneAsync();
-                                // Staged confirm marks accepted when applied
                                 return;
                             }
 
@@ -1131,7 +1138,10 @@ public class Collaborator : ICollaborator
                             RemovePendingKeys(free.Select(u => u.Key));
 
                             foreach (var u in protect)
+                            {
                                 stageSession.StageProtect(u);
+                                _sessionProposals?.MarkAccepted(u.Key);
+                            }
                             RemovePendingKeys(protect.Select(u => u.Key));
 
                             if (freeCount > 0)
@@ -1140,7 +1150,11 @@ public class Collaborator : ICollaborator
                                     $"Applied {freeCount} free update(s)."));
                             }
 
-                            PushPendingToViewModel(viewModel, result);
+                            // Prefer session set so staged Protect show as Accepted for Review Each.
+                            if (_sessionProposals != null && _sessionProposals.Count > 0)
+                                PushSessionSetToViewModel(viewModel);
+                            else
+                                PushPendingToViewModel(viewModel, result);
                             _storyModel?.RefreshCurrentView();
                             await FlushStagedIfQueueDoneAsync();
 
