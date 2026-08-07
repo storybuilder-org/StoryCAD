@@ -97,7 +97,10 @@ public sealed partial class ElementPicker : Page
             return;
         }
 
-        var elementList = elements.Skip(1).ToList();
+        // Skip(1) drops the "(none)" placeholder; the rest are listed alphabetically.
+        var elementList = elements.Skip(1)
+            .OrderBy(e => e.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
         ElementBox.IsEnabled = true;
         ElementBox.ItemsSource = elementList;
 
