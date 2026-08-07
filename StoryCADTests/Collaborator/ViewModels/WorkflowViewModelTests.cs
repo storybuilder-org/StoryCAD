@@ -549,6 +549,56 @@ public class WorkflowViewModelTests
         Assert.AreEqual(0, store.Count, "All three accepts must leave nothing discarded.");
     }
 
+    /// <summary>
+    /// Protect Accept must mark KindLabel Accepted (session set). Leaving
+    /// "Has your text" makes AdvancePastSettledRows stick on the same row.
+    /// </summary>
+    [TestMethod]
+    public void ReviewEach_AcceptProtect_AdvancesWhenMarkedAccepted()
+    {
+        var store = new List<PendingUpdateItem>
+        {
+            Item("Problem.Name", "old name", isProtected: true),
+            Item("Problem.AntagConflict", "old conflict", isProtected: true),
+            Item("Problem.Theme", "old theme", isProtected: true),
+        };
+        _viewModel.SetPendingUpdates(store);
+        WireMarkSettledOnAcceptOrSkip(store);
+        _viewModel.ReviewEachCommand.Execute(null);
+
+        Assert.AreEqual("Problem.Name", _viewModel.CurrentReviewKey);
+
+        _viewModel.SkipCurrentCommand.Execute(null);
+        Assert.AreEqual("Problem.AntagConflict", _viewModel.CurrentReviewKey);
+
+        _viewModel.AcceptCurrentCommand.Execute(null);
+        Assert.AreEqual("Problem.Theme", _viewModel.CurrentReviewKey,
+            "After Accept on Protect AntagConflict, Review Each must advance (not stick).");
+        Assert.IsTrue(_viewModel.IsInReviewMode);
+    }
+
+    /// <summary>
+    /// Documents the stuck-bug shape: Accept that does not settle leaves the index frozen.
+    /// </summary>
+    [TestMethod]
+    public void ReviewEach_AcceptProtect_WithoutMarkingSettled_StaysOnRow()
+    {
+        var store = new List<PendingUpdateItem>
+        {
+            Item("Problem.AntagConflict", "old", isProtected: true),
+            Item("Problem.Theme", "t", isProtected: true),
+        };
+        _viewModel.SetPendingUpdates(store);
+        // Bug shape: stage-only Accept (no KindLabel change)
+        _viewModel.OnAcceptProperty = _ => Task.CompletedTask;
+        _viewModel.ReviewEachCommand.Execute(null);
+
+        Assert.AreEqual("Problem.AntagConflict", _viewModel.CurrentReviewKey);
+        _viewModel.AcceptCurrentCommand.Execute(null);
+        Assert.AreEqual("Problem.AntagConflict", _viewModel.CurrentReviewKey,
+            "Without settling, Review Each must stay (regression detector for production Protect path).");
+    }
+
     [TestMethod]
     public void ReviewEach_SkipCurrent_DoesNotDropRemaining()
     {
