@@ -50,15 +50,7 @@
                            MaxWidth="200"
                            AutomationProperties.Name="Current workflow" />
 
-                <AppBarButton ToolTipService.ToolTip="Accept All"
-                              Command="{x:Bind ShellViewModel.AcceptAllCommand, Mode=OneWay}"
-                              IsEnabled="{x:Bind ShellViewModel.HasPendingUpdates, Mode=OneWay}"
-                              AutomationProperties.AutomationId="WorkflowAcceptAllButton"
-                              AutomationProperties.Name="Accept All">
-                    <AppBarButton.Icon>
-                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE73E;" />
-                    </AppBarButton.Icon>
-                </AppBarButton>
+                <!-- Accept All lives at the foot of the work column on WorkflowPage, not here. -->
                 <AppBarButton ToolTipService.ToolTip="Review Each"
                               Command="{x:Bind ShellViewModel.ReviewEachCommand, Mode=OneWay}"
                               IsEnabled="{x:Bind ShellViewModel.HasPendingUpdates, Mode=OneWay}"
@@ -97,9 +89,9 @@
                                     <TextBlock Text="Story Collaborator Help" FontWeight="Bold" FontSize="16" />
                                     <TextBlock TextWrapping="Wrap" Text="Workflows — The left panel lists available workflows for your story. Each workflow guides you through developing a specific aspect (premise, characters, settings, scenes, etc.). Select one to begin." />
                                     <TextBlock TextWrapping="Wrap" Text="Execute — Runs the selected workflow. Collaborator analyzes your story elements and suggests updates using AI." />
-                                    <TextBlock TextWrapping="Wrap" Text="Review Results — After execution, review each suggested property update. Use Accept to apply individual changes, or Accept All to apply everything at once." />
+                                    <TextBlock TextWrapping="Wrap" Text="Review Results — After execution, review each suggested property update. Use Accept to apply individual changes, or Accept all changes at the foot of the list to apply everything at once." />
                                     <TextBlock TextWrapping="Wrap" Text="Chat — After a workflow runs, use the chat panel to discuss the results, ask for alternatives, or refine suggestions." />
-                                    <TextBlock TextWrapping="Wrap" Text="Save — Saves your outline changes back to StoryCAD." />
+                                    <TextBlock TextWrapping="Wrap" Text="Saving — Updates are written to your outline as soon as you accept them, so there is no Save button." />
                                     <TextBlock TextWrapping="Wrap" Text="Exit — Closes Collaborator and returns to StoryCAD. Any accepted changes are preserved." />
                                 </StackPanel>
                             </ScrollViewer>
@@ -114,14 +106,8 @@
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE713;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <AppBarButton ToolTipService.ToolTip="Save"
-                              Command="{x:Bind ShellViewModel.SaveCommand, Mode=OneWay}"
-                              AutomationProperties.AutomationId="WorkflowSaveButton"
-                              AutomationProperties.Name="Save">
-                    <AppBarButton.Icon>
-                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" />
-                    </AppBarButton.Icon>
-                </AppBarButton>
+                <!-- No Save button: accepted updates are written to the outline as they are
+                     confirmed, so there is nothing to save manually. -->
                 <AppBarButton ToolTipService.ToolTip="Exit"
                               Command="{x:Bind ShellViewModel.ExitCommand, Mode=OneWay}"
                               AutomationProperties.AutomationId="WorkflowExitButton"
@@ -147,6 +133,26 @@
                         SelectionChanged="NavView_SelectionChanged"
                         PaneDisplayMode="Left"
                         AutomationProperties.AutomationId="WorkflowNav">
+
+            <!-- The selected workflow must read at a glance: the stock selected state is a
+                 near-invisible tint on Skia. Items in MenuItemsSource are NavigationViewItem
+                 instances, so they are their own containers and MenuItemContainerStyle never
+                 applies; lightweight styling resources are inherited by them, and do. Accent
+                 tint (not a flat accent fill) keeps the default foreground legible in both
+                 light and dark themes. -->
+            <NavigationView.Resources>
+                <SolidColorBrush x:Key="NavigationViewItemBackgroundSelected"
+                                 Color="{ThemeResource SystemAccentColor}"
+                                 Opacity="0.22" />
+                <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPointerOver"
+                                 Color="{ThemeResource SystemAccentColor}"
+                                 Opacity="0.30" />
+                <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPressed"
+                                 Color="{ThemeResource SystemAccentColor}"
+                                 Opacity="0.36" />
+                <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground"
+                                 Color="{ThemeResource SystemAccentColor}" />
+            </NavigationView.Resources>
 
             <Frame x:Name="StepFrame"
                    Navigated="StepFrame_OnNavigated"
