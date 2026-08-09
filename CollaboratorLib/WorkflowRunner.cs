@@ -108,6 +108,20 @@ namespace StoryCollaborator
                     return WorkflowResult.Failed($"Missing required element: '{requirement.ElementLabel}'");
             }
 
+            // Collaborator #150: abort BeatScenes when ProblemCategory is empty or Story Problem.
+            if (string.Equals(workflowModel.Label, "BeatScenes", StringComparison.Ordinal))
+            {
+                var category = string.Empty;
+                if (gatheredElements.TryGetValue("Problem", out var problemEl)
+                    && problemEl is ProblemModel pm)
+                {
+                    category = pm.ProblemCategory ?? string.Empty;
+                }
+                var gateMessage = ValidateBeatScenesCategory(category);
+                if (gateMessage != null)
+                    return WorkflowResult.Failed(gateMessage);
+            }
+
             // Without a subscriber's (or allowlisted dev/tester's) activation JWT, the workflow
             // degrades to the stub rather than calling out bare (issue #90 step 8 item 5: the
             // OPENAI_API_KEY direct-to-OpenAI path retired, so a held JWT is the only credential).
@@ -130,6 +144,9 @@ namespace StoryCollaborator
 
                 if (workflowIO.ExampleLists.Count > 0)
                     EnrichWithExamples(body.Args);
+
+                if (string.Equals(workflowModel.Label, "BeatScenes", StringComparison.Ordinal))
+                    EnrichWithStockScenes(body.Args);
 
                 // Issue #90 step 8 item 5: the direct-to-OpenAI fallback retired along with
                 // OPENAI_API_KEY on the client. A proxy failure now propagates to the outer
@@ -520,6 +537,8 @@ namespace StoryCollaborator
             {
                 WriteVia.Scalar => update.Value.ToString() ?? string.Empty,
                 WriteVia.SimpleList when update.Value is System.Collections.ICollection c => $"{c.Count} items",
+                WriteVia.BeatSheet when update.Value is List<BeatInfo> beatList =>
+                    FormatBeatSheetDisplay(beatList),
                 WriteVia.BeatSheet when update.Value is System.Collections.ICollection c => $"{c.Count} beats",
                 WriteVia.CastMembers when update.Value is System.Collections.ICollection c => $"{c.Count} cast members",
                 WriteVia.Relationships when update.Value is System.Collections.ICollection c => $"{c.Count} relationships",
@@ -828,18 +847,77 @@ namespace StoryCollaborator
                 Guid? assigned = null;
                 if (beatElem.TryGetProperty("assigned_element", out var ae))
                 {
-                    if (Guid.TryParse(ae.GetString(), out var g))
+                    if (ae.ValueKind == JsonValueKind.String
+                        && Guid.TryParse(ae.GetString(), out var g))
                         assigned = g;
                 }
-                beats.Add(new BeatInfo(title, desc, assigned));
+                string? sceneName = null;
+                if (beatElem.TryGetProperty("scene_name", out var sn)
+                    && sn.ValueKind == JsonValueKind.String)
+                {
+                    sceneName = sn.GetString();
+                }
+                beats.Add(new BeatInfo(title, desc, assigned, sceneName));
             }
             return beats;
+        }
+
+        /// <summary>
+        /// Collaborator #150: abort when ProblemCategory is empty or Story Problem.
+        /// Returns null when the run may continue.
+        /// </summary>
+        internal static string? ValidateBeatScenesCategory(string? problemCategory)
+        {
+            if (string.IsNullOrWhiteSpace(problemCategory))
+                return "Set Problem Category before Scenes from Beats.";
+            if (string.Equals(problemCategory.Trim(), "Story Problem", StringComparison.Ordinal))
+                return "Use Structure on the story problem; run Scenes from Beats on a complication or other category.";
+            return null;
+        }
+
+        private static string FormatBeatSheetDisplay(List<BeatInfo> beats)
+        {
+            var createCount = beats.Count(b => !string.IsNullOrWhiteSpace(b.SceneName));
+            if (createCount > 0)
+                return $"{beats.Count} beats ({createCount} new scenes for empty beats)";
+            return $"{beats.Count} beats";
+        }
+
+        /// <summary>
+        /// Collaborator #150: inject Stock Scenes catalog into args for BeatScenes.
+        /// </summary>
+        internal void EnrichWithStockScenes(Dictionary<string, string> args)
+        {
+            var catsResult = _storyApi.GetStockSceneCategories();
+            if (!catsResult.IsSuccess || catsResult.Payload == null)
+            {
+                _logger?.LogWarning("BeatScenes: no stock scene categories from API");
+                args["StockScenes"] = string.Empty;
+                return;
+            }
+
+            var sb = new System.Text.StringBuilder();
+            foreach (var category in catsResult.Payload)
+            {
+                sb.AppendLine($"### {category}");
+                var scenesResult = _storyApi.GetStockScenes(category);
+                if (scenesResult.IsSuccess && scenesResult.Payload != null)
+                {
+                    foreach (var scene in scenesResult.Payload)
+                        sb.AppendLine($"- {scene}");
+                }
+                sb.AppendLine();
+            }
+            args["StockScenes"] = sb.ToString();
+            _logger?.LogInformation("Injected StockScenes for BeatScenes ({Length} chars)", args["StockScenes"].Length);
         }
 
         /// <summary>
         /// Collaborator #167: install or merge beat proposals without clearing filled assignments.
         /// Empty sheet: create proposed beats and assign valid candidates.
         /// Non-empty: fill blank descriptions; assign only empty slots; never reassign.
+        /// Collaborator #150 (BeatScenes only): empty slots with SceneName create a Scene under
+        /// the problem and assign it; Structure never creates.
         /// </summary>
         internal void ApplyBeatSheetMerge(Guid problemUuid, List<BeatInfo> proposed, WorkflowResult result)
         {
@@ -852,6 +930,7 @@ namespace StoryCollaborator
             var problemGuids = new HashSet<Guid>(GetCandidateGuids(StoryItemType.Problem));
             var sceneGuids = new HashSet<Guid>(GetCandidateGuids(StoryItemType.Scene));
             var validAssignGuids = new HashSet<Guid>(problemGuids.Concat(sceneGuids));
+            bool allowSceneCreate = string.Equals(workflowModel.Label, "BeatScenes", StringComparison.Ordinal);
 
             var existingResult = _storyApi.GetProblemStructure(problemUuid);
             if (!existingResult.IsSuccess)
@@ -877,7 +956,7 @@ namespace StoryCollaborator
                     var title = string.IsNullOrWhiteSpace(beat.Title) ? $"Beat {i + 1}" : beat.Title.Trim();
                     var desc = beat.Description?.Trim() ?? string.Empty;
                     _storyApi.CreateBeat(problemUuid, title, desc);
-                    TryAssignBeat(problemUuid, i, beat.AssignedElement, validAssignGuids, problemGuids, usedOnSheet, result);
+                    TryFillEmptyBeat(problemUuid, i, beat, allowSceneCreate, validAssignGuids, problemGuids, usedOnSheet, result);
                 }
                 return;
             }
@@ -922,8 +1001,42 @@ namespace StoryCollaborator
                 if (alreadyFilled)
                     continue;
 
-                TryAssignBeat(problemUuid, i, beat.AssignedElement, validAssignGuids, problemGuids, usedOnSheet, result);
+                TryFillEmptyBeat(problemUuid, i, beat, allowSceneCreate, validAssignGuids, problemGuids, usedOnSheet, result);
             }
+        }
+
+        /// <summary>
+        /// Empty beat only: BeatScenes may create a Scene from SceneName; otherwise assign GUID.
+        /// </summary>
+        private void TryFillEmptyBeat(
+            Guid problemUuid,
+            int beatIndex,
+            BeatInfo beat,
+            bool allowSceneCreate,
+            HashSet<Guid> validAssignGuids,
+            HashSet<Guid> problemGuids,
+            HashSet<Guid> usedOnSheet,
+            WorkflowResult result)
+        {
+            if (allowSceneCreate && !string.IsNullOrWhiteSpace(beat.SceneName))
+            {
+                var name = beat.SceneName.Trim();
+                var addResult = _storyApi.AddElement(StoryItemType.Scene, problemUuid.ToString(), name);
+                if (!addResult.IsSuccess)
+                {
+                    result.StatusMessages.Add(
+                        $"Beat {beatIndex} scene create failed: {addResult.ErrorMessage}");
+                    return;
+                }
+
+                var newGuid = addResult.Payload;
+                validAssignGuids.Add(newGuid);
+                TryAssignBeat(problemUuid, beatIndex, newGuid, validAssignGuids, problemGuids, usedOnSheet, result);
+                result.StatusMessages.Add($"Beat {beatIndex}: created Scene '{name}' ({newGuid})");
+                return;
+            }
+
+            TryAssignBeat(problemUuid, beatIndex, beat.AssignedElement, validAssignGuids, problemGuids, usedOnSheet, result);
         }
 
         private void TryAssignBeat(
