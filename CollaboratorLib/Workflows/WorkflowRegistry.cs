@@ -433,6 +433,70 @@ namespace StoryCollaborator.Workflows
                             }
                         }
                     }) { PrimaryElementType = StoryItemType.Problem },
+                // Collaborator #150: invent Scene stubs for empty beats on non–Story Problem categories.
+                new Workflow(
+                    label: "BeatScenes",
+                    title: "Scenes from Beats",
+                    description: "Create scene stubs for empty beats on a problem with a beat sheet " +
+                                "(complications and other non–story-problem categories).",
+                    explanation: "When a problem has a beat sheet with empty slots, this workflow invents " +
+                                "one Scene per empty beat: a one-line Name for the central event or conflict, " +
+                                "in causal order. It creates each Scene under the problem and assigns it to " +
+                                "the beat. It requires a Problem Category and does not run when the category " +
+                                "is Story Problem (use Structure instead). Filled beats stay unchanged.",
+                    workflowIO: new WorkflowIO
+                    {
+                        RequiredInputs = new List<ElementRequirement>
+                        {
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Problem,
+                                ElementLabel = "Problem",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            }
+                        },
+                        OptionalInputs = new List<ElementRequirement>
+                        {
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.StoryOverview,
+                                ElementLabel = "Overview",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            },
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Character,
+                                ElementLabel = "Protagonist",
+                                ReferencedElementLabel = "Problem.Protagonist",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            },
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Character,
+                                ElementLabel = "Antagonist",
+                                ReferencedElementLabel = "Problem.Antagonist",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            }
+                        },
+                        Outputs = new List<ElementOutput>
+                        {
+                            new ElementOutput
+                            {
+                                ElementType = StoryItemType.Problem,
+                                ElementLabel = "Problem",
+                                PropertiesToUpdate = new List<PropertySpec>
+                                {
+                                    new PropertySpec("StructureTitle"),
+                                    new PropertySpec("StructureDescription"),
+                                    new PropertySpec("StructureBeats", WriteVia.BeatSheet, JsonKey: "beats")
+                                }
+                            }
+                        }
+                    }) { PrimaryElementType = StoryItemType.Problem },
                 // === Character Workflows ===
                 new Workflow(
                     "RoleAndStoryRole", "Role and Story Role",

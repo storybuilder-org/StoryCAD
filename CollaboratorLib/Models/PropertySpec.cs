@@ -74,11 +74,14 @@ namespace StoryCollaborator.Models
 
     /// <summary>
     /// One beat in a BeatSheet output.
+    /// SceneName (#150 BeatScenes): when set on an empty beat, create a Scene under the
+    /// problem and assign it. Structure and other workflows leave SceneName null.
     /// </summary>
     public sealed record BeatInfo(
         string Title,
         string Description,
-        Guid? AssignedElement = null);
+        Guid? AssignedElement = null,
+        string? SceneName = null);
 
     /// <summary>
     /// One relationship entry in a Relationships output.
