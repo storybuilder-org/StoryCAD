@@ -46,9 +46,21 @@ public partial class WorkflowShellViewModel : ObservableRecipient
     public Func<object, Task> OnWorkflowSelected { get; set; }
 
     /// <summary>
-    /// Current Collaborator settings. Set by Collaborator on open.
+    /// Current Collaborator settings. Set by Collaborator on open, and by the settings
+    /// dialog on Save. Assigning it re-reads <see cref="CollaboratorSettings.ShowCostDetails"/>
+    /// into <see cref="IsCostVisible"/>, so the cost line appears or disappears immediately
+    /// rather than waiting for Collaborator to be reopened.
     /// </summary>
-    public CollaboratorSettings CurrentSettings { get; set; } = CollaboratorSettings.Default;
+    private CollaboratorSettings _currentSettings = CollaboratorSettings.Default;
+    public CollaboratorSettings CurrentSettings
+    {
+        get => _currentSettings;
+        set
+        {
+            _currentSettings = value ?? CollaboratorSettings.Default;
+            IsCostVisible = _currentSettings.ShowCostDetails;
+        }
+    }
 
     /// <summary>
     /// Callback invoked when user changes settings in the dialog.
@@ -132,6 +144,58 @@ public partial class WorkflowShellViewModel : ObservableRecipient
 
     /// <summary>True when <see cref="StatusText"/> should show on the shell InfoBar.</summary>
     public bool HasStatus => !string.IsNullOrEmpty(StatusText);
+
+    /// <summary>
+    /// Per-run cost line for the bottom status bar, formatted by CollaboratorLib's
+    /// WorkflowCostTracker and passed across as a plain string — StoryCADLib cannot see
+    /// ProxyCostInfo (the dependency runs CollaboratorLib -> StoryCADLib, never back).
+    /// Cleared at the start of every run: a stale figure describing the previous run is
+    /// worse than a blank. See devdocs/collaborator_workflow_cost_display_design.md.
+    /// </summary>
+    private string _costSummary = string.Empty;
+    public string CostSummary
+    {
+        get => _costSummary;
+        set
+        {
+            if (SetProperty(ref _costSummary, value ?? string.Empty))
+            {
+                OnPropertyChanged(nameof(HasCost));
+                OnPropertyChanged(nameof(CostVisibility));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Whether the cost line is shown at all, mirroring
+    /// <see cref="CollaboratorSettings.ShowCostDetails"/> (off by default). Not gated on
+    /// developer builds: this is a shipped user-facing option, so any user who wants to
+    /// watch their credit spend can. Set through <see cref="CurrentSettings"/> in
+    /// production; the internal setter exists so tests can pin either state directly.
+    /// </summary>
+    private bool _isCostVisible;
+    internal bool IsCostVisible
+    {
+        get => _isCostVisible;
+        set
+        {
+            if (SetProperty(ref _isCostVisible, value))
+            {
+                OnPropertyChanged(nameof(HasCost));
+                OnPropertyChanged(nameof(CostVisibility));
+            }
+        }
+    }
+
+    /// <summary>True when <see cref="CostSummary"/> should show on the shell status bar.</summary>
+    public bool HasCost => IsCostVisible && !string.IsNullOrEmpty(CostSummary);
+
+    /// <summary>
+    /// <see cref="HasCost"/> as a Visibility for x:Bind, which does not coerce bool and
+    /// would otherwise need a converter added solely for this one line.
+    /// </summary>
+    public Microsoft.UI.Xaml.Visibility CostVisibility =>
+        HasCost ? Microsoft.UI.Xaml.Visibility.Visible : Microsoft.UI.Xaml.Visibility.Collapsed;
 
     #endregion
 

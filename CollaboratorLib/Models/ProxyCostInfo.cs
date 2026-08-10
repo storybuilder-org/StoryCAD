@@ -5,8 +5,13 @@ namespace StoryCollaborator.Models
     /// Null on <see cref="WorkflowResult"/> when the proxy sent no cost event
     /// (old Worker, unpriced model, or the direct-OpenAI fallback path).
     /// </summary>
+    /// <param name="Workflow">
+    /// Workflow label, or null on the chat route — there is no workflow there. The Worker
+    /// sends <c>workflow: null</c> for both chat transports (the streaming collab_cost
+    /// event and the non-streaming X-Collab-Cost header).
+    /// </param>
     public sealed record ProxyCostInfo(
-        string Workflow,
+        string? Workflow,
         string Model,
         int InputTokens,
         int OutputTokens,

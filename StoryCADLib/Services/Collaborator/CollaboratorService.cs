@@ -117,6 +117,13 @@ public class CollaboratorService
             // Create a fresh Collaborator instance for this session (disposed on close).
             _collaboratorInterface = _collaboratorFactory();
 
+            // Seed settings from persisted preferences before opening. ShowCostDetails is the
+            // only member that survives a restart; the rest are session-only and start at
+            // their defaults, which is the behavior that already shipped.
+            var settings = _collaboratorInterface.GetSettings() ?? CollaboratorSettings.Default;
+            settings.ShowCostDetails = _preferenceService.Model.ShowCollaboratorCost;
+            _collaboratorInterface.SetSettings(settings);
+
             var filePath = _appState.CurrentDocument?.FilePath ?? string.Empty;
             await _collaboratorInterface.OpenAsync(_storyCADApi, storyModel, CollaboratorWindow, hostFrame, filePath, _logService);
         }

@@ -32,15 +32,28 @@ internal sealed class ActivationJwtHandler : DelegatingHandler
             request.Content = CreateContent(body, contentType);
         }
 
+        // Last write wins within a scope: a request carrying no cost header records null and
+        // overwrites an earlier capture. Correct for the pipelines that exist today (the
+        // OpenAI client's own retries run failure-then-success, so the priced response is
+        // last), but a chat service issuing several completions per call — SK function
+        // calling, if it is ever enabled here — would report only the final one.
         var response = await SendAttemptAsync(request, cancellationToken).ConfigureAwait(false);
         if (response.StatusCode != HttpStatusCode.Unauthorized)
+        {
+            ChatCostCapture.Record(ProxyCostParser.TryParseHeader(response));
             return response;
+        }
 
         response.Dispose();
         await _reactivate().ConfigureAwait(false);
 
         using var retry = CloneRequest(request, body, contentType);
-        return await SendAttemptAsync(retry, cancellationToken).ConfigureAwait(false);
+        var retried = await SendAttemptAsync(retry, cancellationToken).ConfigureAwait(false);
+
+        // Cost is read from the response that actually carried the answer. The 401 above
+        // never reached the model, so it has no cost to report and must not overwrite one.
+        ChatCostCapture.Record(ProxyCostParser.TryParseHeader(retried));
+        return retried;
     }
 
     private async Task<HttpResponseMessage> SendAttemptAsync(

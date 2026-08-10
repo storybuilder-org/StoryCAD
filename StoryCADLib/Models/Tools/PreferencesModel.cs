@@ -254,6 +254,15 @@ public class PreferencesModel : ObservableObject
     public bool HideRatingPrompt { get; set; }
 
     /// <summary>
+    ///     Shows the per-run cost line on the Collaborator shell's status bar.
+    ///     Off by default: accounting is noise while drafting, and the figure is only
+    ///     meaningful to someone watching their credit spend.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("ShowCollaboratorCost")]
+    public bool ShowCollaboratorCost { get; set; }
+
+    /// <summary>
     ///     Total amount of time StoryCAD has been used/open on the system
     /// </summary>
     [JsonInclude]

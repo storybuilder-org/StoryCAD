@@ -40,6 +40,16 @@ public sealed class CollaboratorSettings
     public LoggingVisibility LoggingLevel { get; set; } = LoggingVisibility.Off;
 
     /// <summary>
+    /// Shows the per-run cost line on the shell's status bar. Off by default: accounting is
+    /// noise while drafting, and the figure only matters to someone watching credit spend.
+    ///
+    /// Unlike the other members, this one persists across sessions — it is seeded from
+    /// <c>PreferencesModel.ShowCollaboratorCost</c> when Collaborator opens and written back
+    /// when the settings dialog changes it. The rest reset to their defaults every open.
+    /// </summary>
+    public bool ShowCostDetails { get; set; }
+
+    /// <summary>
     /// Creates default settings.
     /// </summary>
     public static CollaboratorSettings Default => new();

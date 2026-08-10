@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
 using StoryCADLib.Collaborator.ViewModels;
+using StoryCADLib.Services.Collaborator.Contracts;
 
 #nullable disable
 
@@ -128,6 +129,109 @@ public class WorkflowShellViewModelTests
         _viewModel.StatusText = "Cancelled: Protagonist is required.";
         Assert.IsTrue(_viewModel.HasStatus);
     }
+
+    #region Cost Line Tests
+
+    [TestMethod]
+    public void CostSummary_Initially_IsEmpty()
+    {
+        Assert.AreEqual(string.Empty, _viewModel.CostSummary);
+    }
+
+    [TestMethod]
+    public void CostSummary_WhenSetNull_BecomesEmpty()
+    {
+        _viewModel.CostSummary = "x";
+        _viewModel.CostSummary = null;
+        Assert.AreEqual(string.Empty, _viewModel.CostSummary);
+    }
+
+    [TestMethod]
+    public void IsCostVisible_Initially_IsFalse()
+    {
+        // Default off: accounting stays out of the way until asked for.
+        Assert.IsFalse(_viewModel.IsCostVisible);
+    }
+
+    [TestMethod]
+    public void CurrentSettings_WhenAssigned_AppliesShowCostDetails()
+    {
+        // The settings object is the single source of truth for the gate, so assigning it
+        // flips the line on without reopening Collaborator.
+        _viewModel.CurrentSettings = new CollaboratorSettings { ShowCostDetails = true };
+        Assert.IsTrue(_viewModel.IsCostVisible);
+
+        _viewModel.CurrentSettings = new CollaboratorSettings { ShowCostDetails = false };
+        Assert.IsFalse(_viewModel.IsCostVisible);
+    }
+
+    [TestMethod]
+    public void CurrentSettings_WhenAssignedNull_FallsBackToDefaultsAndHides()
+    {
+        _viewModel.CurrentSettings = new CollaboratorSettings { ShowCostDetails = true };
+
+        _viewModel.CurrentSettings = null;
+
+        Assert.IsNotNull(_viewModel.CurrentSettings);
+        Assert.IsFalse(_viewModel.IsCostVisible);
+    }
+
+    [TestMethod]
+    public void HasCost_WhenNotVisible_IsFalseEvenWithSummary()
+    {
+        // Preference off renders nothing regardless of what CollaboratorLib reported.
+        _viewModel.IsCostVisible = false;
+        _viewModel.CostSummary = "gpt-5.4-nano · 3,141 in / 982 out · $0.0019 this run · $0.0019 session";
+
+        Assert.IsFalse(_viewModel.HasCost);
+    }
+
+    [TestMethod]
+    public void HasCost_WhenVisibleButSummaryEmpty_IsFalse()
+    {
+        _viewModel.IsCostVisible = true;
+        _viewModel.CostSummary = string.Empty;
+
+        Assert.IsFalse(_viewModel.HasCost);
+    }
+
+    [TestMethod]
+    public void HasCost_WhenVisibleAndSummarySet_IsTrue()
+    {
+        _viewModel.IsCostVisible = true;
+        _viewModel.CostSummary = "cost unavailable";
+
+        Assert.IsTrue(_viewModel.HasCost);
+    }
+
+    [TestMethod]
+    public void CostSummary_WhenSet_RaisesPropertyChangedForHasCost()
+    {
+        _viewModel.IsCostVisible = true;
+        var raised = new List<string>();
+        _viewModel.PropertyChanged += (_, args) => raised.Add(args.PropertyName);
+
+        _viewModel.CostSummary = "gpt-5.4-nano · 12 in / 5 out · <$0.0001 this run · <$0.0001 session";
+
+        CollectionAssert.Contains(raised, nameof(WorkflowShellViewModel.CostSummary));
+        CollectionAssert.Contains(raised, nameof(WorkflowShellViewModel.HasCost));
+    }
+
+    [TestMethod]
+    public void IsCostVisible_WhenToggled_RaisesPropertyChangedForHasCost()
+    {
+        _viewModel.IsCostVisible = false;
+        _viewModel.CostSummary = "cost unavailable";
+        var raised = new List<string>();
+        _viewModel.PropertyChanged += (_, args) => raised.Add(args.PropertyName);
+
+        _viewModel.IsCostVisible = true;
+
+        CollectionAssert.Contains(raised, nameof(WorkflowShellViewModel.HasCost));
+        Assert.IsTrue(_viewModel.HasCost);
+    }
+
+    #endregion
 
     [TestMethod]
     public void OnWorkflowSelected_Initially_IsNull()

@@ -1426,21 +1426,12 @@ namespace StoryCollaborator
                     }
                     else if (doc.RootElement.TryGetProperty("collab_cost", out var collabCost))
                     {
-                        try
-                        {
-                            var workflow = collabCost.GetProperty("workflow").GetString();
-                            var model = collabCost.GetProperty("model").GetString();
-                            if (workflow is not null && model is not null)
-                            {
-                                cost = new ProxyCostInfo(
-                                    workflow,
-                                    model,
-                                    collabCost.GetProperty("input_tokens").GetInt32(),
-                                    collabCost.GetProperty("output_tokens").GetInt32(),
-                                    collabCost.GetProperty("cost_microdollars").GetInt64());
-                            }
-                        }
-                        catch (Exception) { /* malformed collab_cost — skip, Cost stays null */ }
+                        // Shared with the X-Collab-Cost header path: the Worker emits an
+                        // identical payload on both. Note the parser requires only `model`,
+                        // not `workflow` — the chat route's streaming branch sends
+                        // workflow: null, and the previous non-null guard here silently
+                        // dropped every one of those events.
+                        cost = ProxyCostParser.TryParse(collabCost);
                     }
                 }
                 catch (JsonException) { /* malformed chunk — skip */ }
