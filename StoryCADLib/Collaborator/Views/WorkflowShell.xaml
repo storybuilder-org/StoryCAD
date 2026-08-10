@@ -168,14 +168,34 @@
                 BorderThickness="0,1,0,0"
                 MinHeight="36"
                 Padding="8,4">
-            <!-- InfoBar: approved #1420 suffix (Unit 7). Content TextBlocks must not carry AutomationId. -->
-            <InfoBar IsOpen="{x:Bind ShellViewModel.HasStatus, Mode=OneWay}"
-                     Severity="Warning"
-                     IsClosable="False"
-                     Message="{x:Bind ShellViewModel.StatusText, Mode=OneWay}"
-                     HorizontalAlignment="Stretch"
-                     VerticalAlignment="Center"
-                     AutomationProperties.AutomationId="WorkflowShellStatusInfoBar" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- InfoBar: approved #1420 suffix (Unit 7). Content TextBlocks must not carry AutomationId. -->
+                <InfoBar Grid.Column="0"
+                         IsOpen="{x:Bind ShellViewModel.HasStatus, Mode=OneWay}"
+                         Severity="Warning"
+                         IsClosable="False"
+                         Message="{x:Bind ShellViewModel.StatusText, Mode=OneWay}"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Center"
+                         AutomationProperties.AutomationId="WorkflowShellStatusInfoBar" />
+
+                <!-- Cost line, shown per CollaboratorSettings.ShowCostDetails. Sits beside the
+                     InfoBar and never replaces it:
+                     status carries errors, and a cost figure must not overwrite one. -->
+                <TextBlock Grid.Column="1"
+                           Text="{x:Bind ShellViewModel.CostSummary, Mode=OneWay}"
+                           Visibility="{x:Bind ShellViewModel.CostVisibility, Mode=OneWay}"
+                           Style="{ThemeResource CaptionTextBlockStyle}"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           IsTextSelectionEnabled="True"
+                           VerticalAlignment="Center"
+                           Margin="12,0,4,0" />
+            </Grid>
         </Border>
     </Grid>
 </Page>

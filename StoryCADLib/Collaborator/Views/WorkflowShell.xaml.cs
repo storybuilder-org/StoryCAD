@@ -2,6 +2,8 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using StoryCADLib.Collaborator.ViewModels;
+using StoryCADLib.DAL;
+using StoryCADLib.Services;
 using StoryCADLib.Services.Collaborator.Contracts;
 
 namespace StoryCADLib.Collaborator.Views;
@@ -109,6 +111,16 @@ public sealed partial class WorkflowShell : Page
             Margin = new Thickness(0, 0, 0, 0)
         };
 
+        // The only setting here that persists across sessions: it is seeded from
+        // PreferencesModel.ShowCollaboratorCost when Collaborator opens and written back
+        // below. The other five reset to their defaults every open.
+        var showCostToggle = new CheckBox
+        {
+            Content = "Show cost per run on the status bar",
+            IsChecked = settings.ShowCostDetails,
+            Margin = new Thickness(0, 12, 0, 0)
+        };
+
         var panel = new StackPanel
         {
             Children =
@@ -118,7 +130,8 @@ public sealed partial class WorkflowShell : Page
                 genreTextBox,
                 likesTextBox,
                 dislikesTextBox,
-                loggingCombo
+                loggingCombo,
+                showCostToggle
             }
         };
 
@@ -143,11 +156,24 @@ public sealed partial class WorkflowShell : Page
                 GenrePreferences = genreTextBox.Text,
                 StoryFormLikes = likesTextBox.Text,
                 StoryFormDislikes = dislikesTextBox.Text,
-                LoggingLevel = (LoggingVisibility)loggingCombo.SelectedIndex
+                LoggingLevel = (LoggingVisibility)loggingCombo.SelectedIndex,
+                ShowCostDetails = showCostToggle.IsChecked == true
             };
 
+            // Assigning CurrentSettings applies ShowCostDetails to the cost line immediately,
+            // so the bar appears or disappears without reopening Collaborator.
             ShellViewModel.CurrentSettings = newSettings;
             ShellViewModel.OnSettingsChanged?.Invoke(newSettings);
+
+            // ShowCostDetails is the one member that outlives the session. Written only when
+            // it actually changed, so saving unrelated settings does not rewrite the file.
+            var preferences = Ioc.Default.GetService<PreferenceService>();
+            if (preferences?.Model != null &&
+                preferences.Model.ShowCollaboratorCost != newSettings.ShowCostDetails)
+            {
+                preferences.Model.ShowCollaboratorCost = newSettings.ShowCostDetails;
+                await new PreferencesIo().WritePreferences(preferences.Model);
+            }
         }
     }
 }

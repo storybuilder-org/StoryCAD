@@ -64,6 +64,13 @@ public class Collaborator : ICollaborator
     private readonly HashSet<string> _sessionTouchedFields =
         new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Per-run cost accumulator for the shell's developer-build cost line. Session-scoped
+    /// like <see cref="_sessionTouchedFields"/>; reset in OpenAsync so a second session in
+    /// one process starts from zero.
+    /// </summary>
+    private readonly WorkflowCostTracker _costTracker = new();
+
     // Settings
     private CollaboratorSettings _settings = CollaboratorSettings.Default;
 
@@ -131,6 +138,7 @@ public class Collaborator : ICollaborator
         EnsureKernelInitialized();
 
         _sessionService.StartSession();
+        _costTracker.Reset();
 
         // Navigate the host-provided frame to the shell
         hostFrame.Navigate(typeof(StoryCADLib.Collaborator.Views.WorkflowShell));
@@ -562,8 +570,30 @@ public class Collaborator : ICollaborator
                 _chatHistory?.AddUserMessage(userMessage);
                 _logger?.LogDebug("User message added to chat: {Message}", userMessage);
 
-                var response = await _chatService!.GetChatMessageContentAsync(_chatHistory!);
+                // Cost line (shown when CollaboratorSettings.ShowCostDetails is on). The proxy's
+                // X-Collab-Cost header is read by
+                // ActivationJwtHandler inside this scope (Semantic Kernel hides the response
+                // from us); Semantic Kernel's own usage metadata is the fallback when the
+                // header is absent, giving tokens without dollars.
+                Microsoft.SemanticKernel.ChatMessageContent response;
+                ProxyCostInfo? chatCost;
+                using (var costScope = ChatCostCapture.Begin())
+                {
+                    response = await _chatService!.GetChatMessageContentAsync(_chatHistory!);
+                    chatCost = costScope.Cost;
+                }
+
                 var responseText = response.Content ?? "No response received.";
+
+                // Nothing to report leaves the previous line alone rather than blanking it:
+                // a chat turn that cannot account for itself should not erase the last
+                // workflow's figure.
+                if (_shellViewModel != null)
+                {
+                    var usageRead = ChatUsageReader.TryRead(response.Metadata, out var chatIn, out var chatOut);
+                    if (chatCost != null || usageRead)
+                        _shellViewModel.CostSummary = _costTracker.RecordChat(chatCost, chatIn, chatOut);
+                }
 
                 ChatPatchParser.TryParse(responseText, out var display, out var patches);
                 _chatHistory?.AddAssistantMessage(display);
@@ -832,12 +862,22 @@ public class Collaborator : ICollaborator
             viewModel.AddStatusMessage($"Running {workflow.Title}...");
             viewModel.ProgressVisibility = Microsoft.UI.Xaml.Visibility.Visible;
 
+            // Cost line describes the run in flight, not the previous one.
+            if (_shellViewModel != null)
+                _shellViewModel.CostSummary = string.Empty;
+
             // Execute via WorkflowRunner
             var runnerLogger = _loggerFactory?.CreateLogger<WorkflowRunner>();
             var runner = new WorkflowRunner(_storyModel!, workflow, _storyApi!, runnerLogger, _settings, _auditLogger);
             _auditLogger?.Log(StoryCADLib.Services.Logging.LogLevel.Info,
                 $"Workflow started: {workflow.Title} with {gatheredElements.Count} elements");
             var result = await runner.RunAsync(gatheredElements);
+
+            // Cost line (devdocs/collaborator_workflow_cost_display_design.md).
+            // Recorded for every run, priced or not: a null Cost still advances the display
+            // to "cost unavailable" rather than leaving the previous run's figure showing.
+            if (_shellViewModel != null)
+                _shellViewModel.CostSummary = _costTracker.Record(result.Cost);
 
             // #116: classify scalars against live outline + session-touch (after extract/enrich).
             if (result.Success)
