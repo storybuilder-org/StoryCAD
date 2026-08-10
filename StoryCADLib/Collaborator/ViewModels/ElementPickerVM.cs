@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using StoryCADLib.Models;
@@ -22,6 +23,17 @@ public class ElementPickerVM
     public Guid? CurrentSelection { get; set; }
 
     /// <summary>
+    /// When non-null and non-empty, the list shows only these element GUIDs (same ForcedType).
+    /// When null, the list shows all elements of the forced/selected type (default).
+    /// </summary>
+    public IReadOnlyCollection<Guid> AllowedGuids { get; set; }
+
+    /// <summary>
+    /// When false, hide Create UI and do not create elements. Default true.
+    /// </summary>
+    public bool AllowCreate { get; set; } = true;
+
+    /// <summary>
     /// API used to create new elements. Set by <see cref="ShowPicker"/>.
     /// </summary>
     public IStoryCADAPI StoryApi { get; set; }
@@ -34,13 +46,17 @@ public class ElementPickerVM
     /// <summary>
     /// Shows the picker. Returns selected element GUID, or null if cancelled / nothing selected.
     /// </summary>
+    /// <param name="allowedGuids">Optional allowlist. Null = no filter. Non-empty = candidates only.</param>
+    /// <param name="allowCreate">When false, Create control is hidden and Create no-ops.</param>
     public async Task<string> ShowPicker(
         StoryModel Model,
         XamlRoot XAMLRoot,
         StoryItemType? Type = null,
         string label = null,
         Guid? currentSelection = null,
-        IStoryCADAPI storyApi = null)
+        IStoryCADAPI storyApi = null,
+        IReadOnlyCollection<Guid> allowedGuids = null,
+        bool allowCreate = true)
     {
         SelectedType = null;
         SelectedElement = null;
@@ -49,7 +65,10 @@ public class ElementPickerVM
         StoryModel = Model;
         PickerLabel = label;
         CurrentSelection = currentSelection;
-        StoryApi = storyApi;
+        AllowedGuids = allowedGuids;
+        AllowCreate = allowCreate;
+        // Strict filter paths pass null API so Create cannot mutate the outline.
+        StoryApi = allowCreate ? storyApi : null;
 
         var ui = new Views.ElementPicker(this);
 
@@ -112,7 +131,7 @@ public class ElementPickerVM
     /// </summary>
     public void CreateNode()
     {
-        if (StoryApi == null || StoryModel == null)
+        if (!AllowCreate || StoryApi == null || StoryModel == null)
             return;
 
         StoryItemType type;

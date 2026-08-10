@@ -79,7 +79,9 @@ public sealed partial class ElementPicker : Page
             return;
         }
 
-        NewButton.IsEnabled = true;
+        // Create only when allowed (filtered multi-owner path sets AllowCreate false).
+        NewButton.IsEnabled = PickerVM.AllowCreate;
+        NewButton.Visibility = PickerVM.AllowCreate ? Visibility.Visible : Visibility.Collapsed;
 
         var elements = type switch
         {
@@ -98,10 +100,17 @@ public sealed partial class ElementPicker : Page
         }
 
         // Skip(1) drops the "(none)" placeholder; the rest are listed alphabetically.
-        var elementList = elements.Skip(1)
+        IEnumerable<StoryElement> query = elements.Skip(1);
+        if (PickerVM.AllowedGuids is { Count: > 0 } allowed)
+        {
+            var set = allowed as HashSet<Guid> ?? allowed.ToHashSet();
+            query = query.Where(e => set.Contains(e.Uuid));
+        }
+
+        var elementList = query
             .OrderBy(e => e.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
-        ElementBox.IsEnabled = true;
+        ElementBox.IsEnabled = elementList.Count > 0;
         ElementBox.ItemsSource = elementList;
 
         if (preserve != null)

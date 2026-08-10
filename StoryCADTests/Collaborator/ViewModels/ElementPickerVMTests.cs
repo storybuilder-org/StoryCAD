@@ -52,6 +52,40 @@ public class ElementPickerVMTests
         Assert.IsNull(vm.ForcedType);
         Assert.IsNull(vm.PickerLabel);
         Assert.IsNull(vm.CurrentSelection);
+        Assert.IsNull(vm.AllowedGuids);
+        Assert.IsTrue(vm.AllowCreate);
+    }
+
+    #endregion
+
+    #region Allowlist / Create filter (#174)
+
+    [TestMethod]
+    public void AllowedGuids_WhenSet_ReturnsSetValue()
+    {
+        var guids = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
+        _viewModel.AllowedGuids = guids;
+        Assert.AreSame(guids, _viewModel.AllowedGuids);
+    }
+
+    [TestMethod]
+    public void AllowCreate_DefaultTrue_CanDisable()
+    {
+        Assert.IsTrue(_viewModel.AllowCreate);
+        _viewModel.AllowCreate = false;
+        Assert.IsFalse(_viewModel.AllowCreate);
+    }
+
+    [TestMethod]
+    public void CreateNode_WhenAllowCreateFalse_DoesNotCreate()
+    {
+        _viewModel.AllowCreate = false;
+        _viewModel.StoryModel = _storyModel;
+        _viewModel.ForcedType = StoryItemType.Problem;
+        _viewModel.NewNodeName = "Should not create";
+        // StoryApi left null and AllowCreate false — CreateNode must no-op
+        _viewModel.CreateNode();
+        Assert.IsNull(_viewModel.SelectedElement);
     }
 
     #endregion

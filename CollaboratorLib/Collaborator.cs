@@ -1528,7 +1528,113 @@ public class Collaborator : ICollaborator
             await GatherElementAsync(requirement, xamlRoot, result.Elements, result.StatusMessages, isRequired: false);
         }
 
+        // #174: Scene Summary injects optional owner Problem + beat-neighbor Scenes
+        // (not OptionalInputs — empty list; derived after Scene is chosen).
+        if (string.Equals(workflow.Label, "SceneSummary", StringComparison.Ordinal)
+            && result.Elements.TryGetValue("Scene", out var sceneElement)
+            && _storyApi != null)
+        {
+            await InjectSceneSummaryNeighborsAsync(sceneElement, xamlRoot, result);
+        }
+
         return result;
+    }
+
+    /// <summary>
+    /// Collaborator #174: resolve and inject Problem / PrecedingScene / NextScene for Scene Summary.
+    /// </summary>
+    private async Task InjectSceneSummaryNeighborsAsync(
+        StoryElement sceneElement,
+        Microsoft.UI.Xaml.XamlRoot xamlRoot,
+        GatherResult result)
+    {
+        var resolver = new Services.SceneStructureNeighborResolver(_storyApi!);
+        var resolved = resolver.ResolveForSceneSummary(sceneElement);
+
+        foreach (var line in resolved.StatusLines)
+            result.StatusMessages.Add(line);
+
+        switch (resolved.OwnerState)
+        {
+            case Services.SceneStructureNeighborResolver.OwnerState.Unique:
+            case Services.SceneStructureNeighborResolver.OwnerState.ExplorerParentOnly:
+                if (resolved.OwnerProblem != null)
+                    result.Elements["Problem"] = resolved.OwnerProblem;
+                if (resolved.PrecedingScene != null)
+                    result.Elements["PrecedingScene"] = resolved.PrecedingScene;
+                if (resolved.NextScene != null)
+                    result.Elements["NextScene"] = resolved.NextScene;
+                break;
+
+            case Services.SceneStructureNeighborResolver.OwnerState.None:
+                // Status already describes omit; no pickers.
+                break;
+
+            case Services.SceneStructureNeighborResolver.OwnerState.Ambiguous:
+                await HandleAmbiguousSceneOwnerAsync(sceneElement, resolver, resolved, xamlRoot, result);
+                break;
+        }
+    }
+
+    private async Task HandleAmbiguousSceneOwnerAsync(
+        StoryElement sceneElement,
+        Services.SceneStructureNeighborResolver resolver,
+        Services.SceneStructureNeighborResolver.ResolveResult resolved,
+        Microsoft.UI.Xaml.XamlRoot xamlRoot,
+        GatherResult result)
+    {
+        var candidates = resolved.OwnerCandidates;
+        if (candidates.Count == 0)
+        {
+            result.StatusMessages.Add("Scene Summary: ambiguous owner list empty; omitting Problem and neighbors.");
+            return;
+        }
+
+        var allowed = candidates.Select(p => p.Uuid).ToList();
+        var preselect = allowed[0];
+        var pickerVM = new ElementPickerVM();
+        // Strict allowlist; Create off (no invent parent).
+        var selectedGuid = await pickerVM.ShowPicker(
+            _storyModel!,
+            xamlRoot,
+            StoryItemType.Problem,
+            "Owner Problem",
+            preselect,
+            storyApi: null,
+            allowedGuids: allowed,
+            allowCreate: false);
+
+        await Task.Delay(100);
+
+        if (string.IsNullOrEmpty(selectedGuid)
+            || !Guid.TryParse(selectedGuid, out var chosen)
+            || !allowed.Contains(chosen))
+        {
+            result.StatusMessages.Add("Scene Summary: owner pick skipped or not a candidate; omitting Problem and neighbors.");
+            return;
+        }
+
+        var problemResult = _storyApi!.GetStoryElement(chosen);
+        if (!problemResult.IsSuccess || problemResult.Payload is not ProblemModel problem)
+        {
+            result.StatusMessages.Add("Scene Summary: chosen owner Problem not found; omitting.");
+            return;
+        }
+
+        result.Elements["Problem"] = problem;
+        var neighbors = resolver.FindNeighbors(problem, sceneElement.Uuid);
+        if (neighbors.PrecedingScene != null)
+            result.Elements["PrecedingScene"] = neighbors.PrecedingScene;
+        if (neighbors.NextScene != null)
+            result.Elements["NextScene"] = neighbors.NextScene;
+
+        result.StatusMessages.Add($"Scene Summary: owner Problem = {problem.Name} (chosen)");
+        result.StatusMessages.Add(neighbors.PrecedingScene != null
+            ? $"Scene Summary: preceding Scene = {neighbors.PrecedingScene.Name}"
+            : "Scene Summary: preceding Scene = (none)");
+        result.StatusMessages.Add(neighbors.NextScene != null
+            ? $"Scene Summary: next Scene = {neighbors.NextScene.Name}"
+            : "Scene Summary: next Scene = (none)");
     }
 
     /// <summary>
