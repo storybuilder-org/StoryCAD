@@ -519,90 +519,78 @@ namespace StoryCollaborator.Workflows
                         }
                     }) { PrimaryElementType = StoryItemType.Problem },
                 // === Character Workflows ===
+                // #182 DefineCharacter: world identity + personality. Occupation Role lives here.
+                // #183 will rename remaining RoleAndStoryRole → StoryFunction (Story Role + Sketch only).
                 new Workflow(
-                    "RoleAndStoryRole", "Role and Story Role",
-                    "Define a character's archetypal role, story function, and a short Character Sketch.",
+                    "DefineCharacter", "Define Character",
+                    "Define who this person is in the world: occupation, body, social background, " +
+                    "psychology, personality facets, and traits—kept coherent with each other and with " +
+                    "problems that link this character.",
                     StoryItemType.Character,
-                    explanation: "Every character serves a purpose. Role is occupation/function in the world. " +
-                                "Story Role is narrative function (Protagonist, Antagonist, Supporting). " +
-                                "Archetype is the universal pattern (Hero, Mentor, Shadow). " +
-                                "Character Sketch (Description) is short story-function prose from those choices, " +
-                                "Related Problems, Flaw when present, and story premise—not a physical biography.",
+                    explanation: "Build a coherent person sheet in one pass. Occupation (Role), appearance, " +
+                                "class and culture, psych profile, and traits must fit together and fit " +
+                                "problems where this character is protagonist or antagonist. " +
+                                "Does not set Story Role, Character Sketch, Flaw, or Backstory.",
                     outputProperties: new List<PropertySpec>
                     {
                         new PropertySpec("Role"),
-                        new PropertySpec("StoryRole"),
-                        new PropertySpec("Archetype"),
-                        // Character Sketch (gap label); Collaborator #142
-                        new PropertySpec("Description")
-                    },
-                    exampleLists: new List<string> { "Role", "StoryRole", "Archetype" }),
-                new Workflow(
-                    "PhysicalAppearance", "Physical and Appearance",
-                    "Develop a character's physical description, distinctive features, and overall appearance " +
-                    "that readers will visualize.",
-                    StoryItemType.Character,
-                    explanation: "Physical details ground your character in reality and can reveal personality, " +
-                                "history, and social position. This workflow helps you define age, build, coloring, " +
-                                "and distinctive features—focusing on details that matter to your story rather than " +
-                                "exhaustive description.",
-                    outputProperties: new List<PropertySpec>
-                    {
                         new PropertySpec("Age"),
                         new PropertySpec("Sex"),
                         new PropertySpec("Eyes"),
                         new PropertySpec("Hair"),
                         new PropertySpec("Build"),
                         new PropertySpec("Complexion"),
-                        new PropertySpec("Appearance")
-                    }),
-                new Workflow(
-                    "SocialFactors", "Social Background",
-                    "Explore a character's social background, economic status, education, ethnicity, and " +
-                    "relationship to society.",
-                    StoryItemType.Character,
-                    explanation: "Characters exist within social contexts that shape their worldview, opportunities, " +
-                                "and conflicts. This workflow helps you define the social forces that formed your " +
-                                "character—class, education, cultural background, and religion—and how these create " +
-                                "story possibilities.",
-                    outputProperties: new List<PropertySpec>
-                    {
+                        new PropertySpec("Appearance"),
                         new PropertySpec("Economic"),
                         new PropertySpec("Education"),
                         new PropertySpec("Ethnic"),
-                        new PropertySpec("Religion")
-                    }),
-                new Workflow(
-                    "PsychologicalMakeup", "Psychological Profile",
-                    "Develop a character's personality, psychology, values, and mental characteristics using " +
-                    "the Enneagram and other frameworks.",
-                    StoryItemType.Character,
-                    explanation: "Understanding your character's psychology helps you write consistent, believable " +
-                                "behavior. This workflow explores personality type (Enneagram), intelligence, core " +
-                                "values, psychological focus, and any abnormalities—the internal landscape that " +
-                                "drives external action.",
-                    outputProperties: new List<PropertySpec>
-                    {
+                        new PropertySpec("Religion"),
                         new PropertySpec("Enneagram"),
                         new PropertySpec("Intelligence"),
                         new PropertySpec("Values"),
                         new PropertySpec("Abnormality"),
-                        new PropertySpec("Focus")
+                        new PropertySpec("Focus"),
+                        new PropertySpec("Adventurousness"),
+                        new PropertySpec("Aggression"),
+                        new PropertySpec("Confidence"),
+                        new PropertySpec("Conscientiousness"),
+                        new PropertySpec("Creativity"),
+                        new PropertySpec("Dominance"),
+                        new PropertySpec("Enthusiasm"),
+                        new PropertySpec("Assurance"),
+                        new PropertySpec("Sensitivity"),
+                        new PropertySpec("Shrewdness"),
+                        new PropertySpec("Sociability"),
+                        new PropertySpec("Stability"),
+                        new PropertySpec("TraitList", WriteVia.SimpleList, ListEntryType: typeof(string))
+                    },
+                    exampleLists: new List<string>
+                    {
+                        "Role", "Build", "Eyes", "Hair", "Complexion", "Race", "Nationality",
+                        "Enneagram", "Intelligence", "Values", "Abnormality", "Focus", "Trait",
+                        "Adventurousness", "Aggression", "Confidence", "Conscientiousness",
+                        "Creativity", "Dominance", "Enthusiasm", "Assurance", "Sensitivity",
+                        "Shrewdness", "Sociability", "Stability"
                     }),
+                // Temporary until #183 StoryFunction: Story Role + Archetype + Character Sketch only.
+                // Occupation Role stripped (#182) so DefineCharacter is the sole Role writer.
                 new Workflow(
-                    "InnerOuterTraits", "Inner and Outer Traits",
-                    "Define the visible behaviors others see (outer traits) and the hidden inner qualities " +
-                    "that drive them (inner traits).",
+                    "RoleAndStoryRole", "Role and Story Role",
+                    "Define a character's story function and a short Character Sketch.",
                     StoryItemType.Character,
-                    explanation: "Outer traits are what characters display to the world—habits, mannerisms, social " +
-                                "behaviors. Inner traits are the deeper qualities—courage, insecurity, compassion—that " +
-                                "explain why they act as they do. The gap between outer and inner creates character " +
-                                "depth and story potential.",
-                    // Bug 2: TraitList is List<string>; must use SimpleList, not Scalar.
+                    explanation: "Story Role is narrative function (Protagonist, Antagonist, Supporting). " +
+                                "Archetype is the universal pattern (Hero, Mentor, Shadow). " +
+                                "Character Sketch (Description) is short story-function prose from those choices, " +
+                                "Related Problems, Flaw when present, and story premise—not a physical biography. " +
+                                "Occupation Role is set by Define Character, not this workflow.",
                     outputProperties: new List<PropertySpec>
                     {
-                        new PropertySpec("TraitList", WriteVia.SimpleList, ListEntryType: typeof(string))
-                    }),
+                        new PropertySpec("StoryRole"),
+                        new PropertySpec("Archetype"),
+                        // Character Sketch (gap label); Collaborator #142
+                        new PropertySpec("Description")
+                    },
+                    exampleLists: new List<string> { "StoryRole", "Archetype" }),
                 new Workflow(
                     "Flaw", "Character Flaw",
                     "Identify and develop a character's central flaw—the weakness or blind spot tied to their " +
