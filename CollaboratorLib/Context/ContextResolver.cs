@@ -25,10 +25,8 @@ public class ContextResolver
     /// </summary>
     public static readonly HashSet<string> RelatedProblemsWorkflows = new(StringComparer.OrdinalIgnoreCase)
     {
-        "PhysicalAppearance",
-        "SocialFactors",
-        "PsychologicalMakeup",
-        "InnerOuterTraits",
+        // #182: DefineCharacter replaces bulk micro-workflows. RoleAndStoryRole stays until #183.
+        "DefineCharacter",
         "Flaw",
         "Backstory",
         "RoleAndStoryRole"
