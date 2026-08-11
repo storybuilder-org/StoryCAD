@@ -18,6 +18,27 @@ namespace StoryCollaborator.Workflows
         public static readonly List<Workflow> All = CreateWorkflows();
 
         /// <summary>
+        /// Workflows starred for a user who has never curated the set. One per stage of the
+        /// outlining arc — idea to premise, premise to problem and cast, problem is well formed,
+        /// problem gets a shape, cast has function, scenes happen and scenes have conflict — so
+        /// the top band reads as a next action rather than a catalog. Seeded once by
+        /// WorkflowStarService; after that the user's choices win.
+        /// Both scene workflows are starred because the user manual's A Path to Try tells writers
+        /// to prefer Scene Summary when running only one; starring Scene Conflict alone would put
+        /// the product at odds with its own craft guidance.
+        /// </summary>
+        public static readonly IReadOnlyList<string> DefaultStarredLabels = new List<string>
+        {
+            "Premise",
+            "StoryProblem",
+            "GMC",
+            "Structure",
+            "RoleAndStoryRole",
+            "SceneSummary",
+            "SceneConflict"
+        };
+
+        /// <summary>
         /// Gets a workflow by its label.
         /// </summary>
         public static Workflow? Get(string label) =>

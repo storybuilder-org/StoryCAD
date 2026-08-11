@@ -176,5 +176,6 @@ public static class BootStrapper
         Services.AddSingleton<TraitsViewModel>();
         Services.AddSingleton<OutlineService>();
         Services.AddSingleton<MacMenuBarService>();
+        Services.AddSingleton<WorkflowStarService>();
     }
 }

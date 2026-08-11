@@ -1,11 +1,13 @@
 using System.Linq;
 using System.Net;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using NLog.Extensions.Logging;
 using StoryCADLib.Models;
+using StoryCADLib.Services.Collaborator;
 using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCADLib.Services.Store;
 using StoryCollaborator.Services;
@@ -73,6 +75,12 @@ public class Collaborator : ICollaborator
 
     // Settings
     private CollaboratorSettings _settings = CollaboratorSettings.Default;
+
+    /// <summary>
+    /// Labels of the workflows shown in the pane's starred band. Loaded from preferences on open
+    /// and kept in step with every star edit, so a menu rebuild does not need a disk read.
+    /// </summary>
+    private List<string> _starredWorkflows = new();
 
     // Debug control - initialized from env var, tests can override directly
     internal static bool CollabDebug =
@@ -151,8 +159,12 @@ public class Collaborator : ICollaborator
             if (viewModel != null)
             {
                 _shellViewModel = viewModel;
-                // Outline gaps (if any) then #129 groups by element type.
+                // Stars decide which workflows sit in the top band, so they must be loaded
+                // before the first menu build.
+                await LoadStarredWorkflowsAsync();
+                // Outline gaps (if any), then starred, then #129 groups by element type.
                 RebuildWorkflowMenu(viewModel);
+                viewModel.OnStarsChanged = labels => ApplyStarredWorkflowsAsync(viewModel, labels);
                 _logger.LogInformation("Populated {Count} menu items", viewModel.MenuItems.Count);
 
                 // Set up settings - pass current settings and wire up change callback
@@ -305,27 +317,257 @@ public class Collaborator : ICollaborator
             }
         }
 
-        // Workflows grouped by story element type; group headers expand/collapse only (#129).
-        Microsoft.UI.Xaml.Controls.NavigationViewItem? group = null;
-        StoryItemType? groupType = null;
-        foreach (var workflow in WorkflowRegistry.All)
+        // Starred band first, then element-type groups holding the rest (#129 grouping kept).
+        // Groups start collapsed so the pane opens on a short list of next actions rather than
+        // the whole catalog.
+        var bands = WorkflowMenuComposer.Compose(WorkflowRegistry.All, _starredWorkflows, GroupTitle);
+        foreach (var band in bands)
         {
-            if (group == null || workflow.PrimaryElementType != groupType)
+            var group = new Microsoft.UI.Xaml.Controls.NavigationViewItem
             {
-                groupType = workflow.PrimaryElementType;
-                group = new Microsoft.UI.Xaml.Controls.NavigationViewItem
-                {
-                    Content = GroupTitle(groupType.Value),
-                    SelectsOnInvoked = false,
-                    IsExpanded = true
-                };
-                viewModel.MenuItems.Add(group);
-            }
+                Content = band.Title,
+                SelectsOnInvoked = false,
+                IsExpanded = band.IsExpanded
+            };
+            viewModel.MenuItems.Add(group);
 
-            group.MenuItems.Add(WrappingNavItem(workflow.Title, workflow));
+            foreach (var item in band.Items)
+            {
+                group.MenuItems.Add(WorkflowNavItem(viewModel, item));
+            }
         }
 
+        RefreshStarEntries(viewModel);
         viewModel.RestoreSelection(selectedTag);
+    }
+
+    /// <summary>
+    /// Republishes the Customize workflows dialog's list so it opens on current star state.
+    /// </summary>
+    private void RefreshStarEntries(WorkflowShellViewModel viewModel)
+    {
+        viewModel.StarEntries.Clear();
+        foreach (var workflow in WorkflowRegistry.All)
+        {
+            viewModel.StarEntries.Add(new WorkflowStarEntry
+            {
+                Label = workflow.Label,
+                Title = workflow.Title,
+                Description = workflow.Description,
+                GroupTitle = GroupTitle(workflow.PrimaryElementType),
+                IsStarred = _starredWorkflows.Contains(workflow.Label)
+            });
+        }
+    }
+
+    /// <summary>
+    /// Loads the user's starred workflows, seeding the registry defaults on first run.
+    /// Falls back to the defaults when preferences are unavailable (Ioc.Default is not configured
+    /// in every host), so the pane is never left without a starred band.
+    /// </summary>
+    private async Task LoadStarredWorkflowsAsync()
+    {
+        try
+        {
+            var starService = Ioc.Default.GetService<WorkflowStarService>();
+            if (starService != null)
+            {
+                _starredWorkflows =
+                    (await starService.GetStarredAsync(WorkflowRegistry.DefaultStarredLabels)).ToList();
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogWarning(ex, "Could not load starred workflows; using defaults");
+        }
+
+        _starredWorkflows = WorkflowRegistry.DefaultStarredLabels.ToList();
+    }
+
+    /// <summary>
+    /// Adopts a new starred set and rebuilds the pane, then persists. Used by the Customize
+    /// workflows dialog; the per-row star button drives the two halves separately so it can drop
+    /// its navigation suppression as soon as the rebuild is done.
+    /// </summary>
+    private async Task ApplyStarredWorkflowsAsync(WorkflowShellViewModel viewModel, IEnumerable<string> labels)
+    {
+        ApplyStarredWorkflows(viewModel, labels);
+        await PersistStarredWorkflowsAsync();
+    }
+
+    /// <summary>
+    /// Adopts a new starred set and rebuilds the pane so the change shows immediately.
+    /// Synchronous on purpose: the pane must answer the click on the click's own turn.
+    /// </summary>
+    private void ApplyStarredWorkflows(WorkflowShellViewModel viewModel, IEnumerable<string> labels)
+    {
+        var next = labels?.ToList() ?? new List<string>();
+
+        // Neither the pane nor the Customize dialog can show a star whose label matches no
+        // registry workflow, so a caller working from either surface cannot include one. Carry
+        // those labels over rather than deleting the star for a workflow that is only withdrawn
+        // for this release — the contract PreferencesModel.StarredCollaboratorWorkflows states.
+        var known = new HashSet<string>(
+            WorkflowRegistry.All.Select(w => w.Label), StringComparer.Ordinal);
+        var carried = new HashSet<string>(next, StringComparer.Ordinal);
+        foreach (var label in _starredWorkflows)
+        {
+            if (!known.Contains(label) && carried.Add(label))
+                next.Add(label);
+        }
+
+        _starredWorkflows = next;
+        RebuildWorkflowMenu(viewModel);
+    }
+
+    /// <summary>
+    /// Saves the current starred set. Separate from the rebuild because the write queues behind
+    /// StoryCAD's serialization lock, which an in-flight autosave can hold for seconds.
+    /// </summary>
+    private async Task PersistStarredWorkflowsAsync()
+    {
+        try
+        {
+            var starService = Ioc.Default.GetService<WorkflowStarService>();
+            if (starService != null)
+                await starService.SetStarredAsync(_starredWorkflows);
+        }
+        catch (Exception ex)
+        {
+            // The session keeps the new set; only the saved copy is lost.
+            _logger?.LogWarning(ex, "Could not persist starred workflows");
+        }
+    }
+
+    /// <summary>
+    /// A workflow row: wrapping title plus a star button that adds or removes the workflow from
+    /// the starred band.
+    /// </summary>
+    private Microsoft.UI.Xaml.Controls.NavigationViewItem WorkflowNavItem(
+        WorkflowShellViewModel viewModel,
+        WorkflowMenuItem item)
+    {
+        var navItem = WrappingNavItem(item.Title, item.Workflow);
+        var star = StarToggleButton(viewModel, item);
+
+        // Replace the plain TextBlock content with title + star in one row.
+        var layout = new Microsoft.UI.Xaml.Controls.Grid();
+        layout.ColumnDefinitions.Add(new Microsoft.UI.Xaml.Controls.ColumnDefinition
+        {
+            Width = new Microsoft.UI.Xaml.GridLength(1, Microsoft.UI.Xaml.GridUnitType.Star)
+        });
+        layout.ColumnDefinitions.Add(new Microsoft.UI.Xaml.Controls.ColumnDefinition
+        {
+            Width = Microsoft.UI.Xaml.GridLength.Auto
+        });
+
+        if (navItem.Content is Microsoft.UI.Xaml.UIElement title)
+        {
+            navItem.Content = null;
+            layout.Children.Add(title);
+        }
+
+        Microsoft.UI.Xaml.Controls.Grid.SetColumn(star, 1);
+        layout.Children.Add(star);
+        navItem.Content = layout;
+
+        // An unstarred star would otherwise clutter every row; it appears on hover and on focus
+        // so it stays reachable from the keyboard.
+        if (!item.IsStarred)
+        {
+            navItem.PointerEntered += (_, _) => star.Opacity = 1;
+            navItem.PointerExited += (_, _) => star.Opacity = 0;
+            navItem.GotFocus += (_, _) => star.Opacity = 1;
+            navItem.LostFocus += (_, _) => star.Opacity = 0;
+        }
+
+        return navItem;
+    }
+
+    /// <summary>
+    /// The star button for one workflow row. Toggling writes preferences and rebuilds the pane.
+    /// </summary>
+    private Microsoft.UI.Xaml.Controls.Button StarToggleButton(
+        WorkflowShellViewModel viewModel,
+        WorkflowMenuItem item)
+    {
+        var starred = item.IsStarred;
+        var label = starred ? "Remove from starred" : "Add to starred";
+        var button = new Microsoft.UI.Xaml.Controls.Button
+        {
+            // FontIcon defaults to SymbolThemeFontFamily, the family the shell's other icons
+            // use; naming a font here would diverge on the desktop head.
+            Content = new Microsoft.UI.Xaml.Controls.FontIcon
+            {
+                // FavoriteStarFill / FavoriteStar
+                Glyph = starred ? "\uE735" : "\uE734",
+                FontSize = 14
+            },
+            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent),
+            BorderThickness = new Microsoft.UI.Xaml.Thickness(0),
+            Padding = new Microsoft.UI.Xaml.Thickness(4, 0, 4, 0),
+            MinWidth = 0,
+            VerticalAlignment = Microsoft.UI.Xaml.VerticalAlignment.Center,
+            Opacity = starred ? 1 : 0
+        };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(button, $"{label}: {item.Title}");
+        Microsoft.UI.Xaml.Controls.ToolTipService.SetToolTip(button, label);
+
+        // Stop the tap reaching the NavigationViewItem. Button.Click carries a plain
+        // RoutedEventArgs with nothing to mark handled, so the pointer event is where bubbling
+        // gets cut; Click still fires for keyboard activation, which never bubbles as a tap.
+        button.Tapped += (_, tapped) => tapped.Handled = true;
+
+        button.Click += (_, _) =>
+        {
+            // Marking the tap handled is not enough on its own — WinUI and Skia disagree on
+            // whether the item still invokes — so the shell also suppresses navigation. It stays
+            // suppressed across the deferred rebuild below.
+            viewModel.SuppressWorkflowNavigation = true;
+
+            // Rebuilding clears MenuItems, which unparents this very button. Doing that inside
+            // its own Click handler tears down the element the handler is still running against,
+            // so the rebuild waits for the handler to unwind. The new set is read inside the
+            // callback, not here: two stars clicked before the queue drains would otherwise both
+            // build on the same stale snapshot and the second would undo the first.
+            var enqueued = button.DispatcherQueue.TryEnqueue(async () =>
+            {
+                try
+                {
+                    var next = new List<string>(_starredWorkflows);
+                    if (starred)
+                        next.RemoveAll(l => string.Equals(l, item.Label, StringComparison.Ordinal));
+                    else if (!next.Contains(item.Label, StringComparer.Ordinal))
+                        next.Add(item.Label);
+
+                    ApplyStarredWorkflows(viewModel, next);
+                }
+                catch (Exception ex)
+                {
+                    // This lambda is async void to the dispatcher; an escaping exception would
+                    // take the process down over a star toggle.
+                    _logger?.LogError(ex, "Could not apply star toggle for {Label}", item.Label);
+                    return;
+                }
+                finally
+                {
+                    // Dropped here rather than after the save below: the flag exists to cover the
+                    // rebuild, and holding it across a write that queues behind an autosave would
+                    // silently swallow real workflow clicks for as long as that save runs.
+                    viewModel.SuppressWorkflowNavigation = false;
+                }
+
+                await PersistStarredWorkflowsAsync();
+            });
+
+            // A refused enqueue (queue shutting down) means the callback never runs, and a stuck
+            // flag would ignore every later workflow click for the rest of the session.
+            if (!enqueued)
+                viewModel.SuppressWorkflowNavigation = false;
+        };
+
+        return button;
     }
 
     /// <summary>
@@ -1449,7 +1691,13 @@ public class Collaborator : ICollaborator
             {
                 if (child.Tag is Workflow cw &&
                     string.Equals(cw.Label, workflowLabel, StringComparison.OrdinalIgnoreCase))
+                {
+                    // Element-type groups start collapsed, so the caller selecting this child
+                    // would highlight something the user cannot see. Same fix-up RestoreSelection
+                    // makes for the rebuild path.
+                    top.IsExpanded = true;
                     return child;
+                }
             }
         }
 

@@ -1,4 +1,5 @@
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using StoryCADLib.Collaborator.ViewModels;
@@ -51,6 +52,84 @@ public sealed partial class WorkflowShell : Page
         {
             shellVm.NavView_SelectionChanged(sender, args);
         }
+    }
+
+    /// <summary>
+    ///     Lets the user pick which workflows sit in the pane's starred band. The pane opens on
+    ///     gaps plus stars; everything else waits in collapsed element-type groups, so this
+    ///     dialog is how a writer shapes that short list without hunting for each row's star.
+    /// </summary>
+    private async void CustomizeWorkflowsButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (ShellViewModel == null || ShellViewModel.StarEntries.Count == 0) return;
+
+        // Checkbox per workflow, sectioned by element type. Entries arrive in registry order,
+        // which is already grouped, so a header goes in wherever the group name changes.
+        var panel = new StackPanel { Spacing = 2 };
+        var checkBoxes = new List<(CheckBox Box, string Label)>();
+        var currentGroup = string.Empty;
+
+        foreach (var entry in ShellViewModel.StarEntries)
+        {
+            if (!string.Equals(entry.GroupTitle, currentGroup, StringComparison.Ordinal))
+            {
+                currentGroup = entry.GroupTitle;
+                panel.Children.Add(new TextBlock
+                {
+                    Text = currentGroup,
+                    FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                    Margin = new Thickness(0, panel.Children.Count == 0 ? 0 : 12, 0, 4)
+                });
+            }
+
+            var box = new CheckBox
+            {
+                IsChecked = entry.IsStarred,
+                MinWidth = 0,
+                Content = new StackPanel
+                {
+                    Children =
+                    {
+                        new TextBlock { Text = entry.Title, TextWrapping = TextWrapping.Wrap },
+                        new TextBlock
+                        {
+                            Text = entry.Description,
+                            TextWrapping = TextWrapping.Wrap,
+                            Opacity = 0.7,
+                            FontSize = 12
+                        }
+                    }
+                }
+            };
+            AutomationProperties.SetName(box, entry.Title);
+
+            checkBoxes.Add((box, entry.Label));
+            panel.Children.Add(box);
+        }
+
+        var dialog = new ContentDialog
+        {
+            Title = "Customize Workflows",
+            Content = new ScrollViewer
+            {
+                Content = panel,
+                MaxHeight = 480,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled
+            },
+            PrimaryButtonText = "Save",
+            CloseButtonText = "Cancel",
+            XamlRoot = this.XamlRoot
+        };
+
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+
+        var starred = checkBoxes
+            .Where(c => c.Box.IsChecked == true)
+            .Select(c => c.Label)
+            .ToList();
+
+        if (ShellViewModel.OnStarsChanged != null)
+            await ShellViewModel.OnStarsChanged(starred);
     }
 
     private async void SettingsButton_Click(object sender, RoutedEventArgs e)

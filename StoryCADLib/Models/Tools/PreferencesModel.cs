@@ -54,6 +54,8 @@ public class PreferencesModel : ObservableObject
         StoreActivationJwt = string.Empty;
         StoreActivationJwtExpiry = DateTime.MinValue;
         StoreUserGuid = string.Empty;
+        StarredCollaboratorWorkflows = new List<string>();
+        CollaboratorStarDefaultsApplied = false;
     }
 
     #endregion
@@ -345,6 +347,29 @@ public class PreferencesModel : ObservableObject
     [JsonInclude]
     [JsonPropertyName("HideShellCommandBarOnMac")]
     public bool HideShellCommandBarOnMac { get; set; }
+
+    /// <summary>
+    ///     Labels of the Collaborator workflows the user has starred. Starred workflows are
+    ///     listed in a short band at the top of the Collaborator navigation pane, ahead of the
+    ///     collapsed element-type groups holding the rest of the registry.
+    ///     Labels, not indexes, so reordering the registry cannot scramble a user's stars.
+    ///     A label that no longer resolves to a workflow is ignored when the menu is built and
+    ///     left in the file, so a workflow withdrawn for one release keeps its star in the next.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("StarredCollaboratorWorkflows")]
+    public List<string> StarredCollaboratorWorkflows { get; set; }
+
+    /// <summary>
+    ///     Whether the default starred set has been seeded into
+    ///     <see cref="StarredCollaboratorWorkflows" />. Gates the seed so it happens exactly once
+    ///     per user, for new installs and for users upgrading from a build without stars alike.
+    ///     Once true the stored list wins even when empty — a user who unstars everything gets an
+    ///     empty band, not the defaults again.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("CollaboratorStarDefaultsApplied")]
+    public bool CollaboratorStarDefaultsApplied { get; set; }
 
     #endregion
 }
