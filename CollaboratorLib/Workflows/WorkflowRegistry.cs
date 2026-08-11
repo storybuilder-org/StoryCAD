@@ -686,14 +686,41 @@ namespace StoryCollaborator.Workflows
                 // SettingCreateImage removed; preserved on branch issue-76-image-workflows (issue #76).
 
                 // === Scene Workflows ===
+                // #174: Scene only on RequiredInputs. Problem / PrecedingScene / NextScene are
+                // inject-only after structure resolve (never OptionalInputs).
                 new Workflow(
-                    "SceneSummary", "Scene Summary",
-                    "Create a concise summary of a scene's purpose, content, and role in the larger story.",
-                    StoryItemType.Scene,
+                    label: "SceneSummary",
+                    title: "Scene Summary",
+                    description: "Create a concise summary of a scene's purpose, content, and role in the larger story.",
                     explanation: "Every scene should earn its place. This workflow helps you articulate what happens " +
                                 "in the scene, why it matters, and what would be lost without it—ensuring each scene " +
                                 "advances plot, reveals character, or both.",
-                    outputProperties: new List<PropertySpec> { new PropertySpec("Description") }),
+                    workflowIO: new WorkflowIO
+                    {
+                        RequiredInputs = new List<ElementRequirement>
+                        {
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Scene,
+                                ElementLabel = "Scene",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            }
+                        },
+                        OptionalInputs = new List<ElementRequirement>(),
+                        Outputs = new List<ElementOutput>
+                        {
+                            new ElementOutput
+                            {
+                                ElementType = StoryItemType.Scene,
+                                ElementLabel = "Scene",
+                                PropertiesToUpdate = new List<PropertySpec>
+                                {
+                                    new PropertySpec("Description")
+                                }
+                            }
+                        }
+                    }) { PrimaryElementType = StoryItemType.Scene },
                 new Workflow(
                     "CastSceneRoles", "Cast and Scene Roles",
                     "Define which characters appear in a scene and what role each plays—protagonist, antagonist, " +
