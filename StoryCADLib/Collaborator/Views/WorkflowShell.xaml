@@ -87,7 +87,8 @@
                             <ScrollViewer MaxHeight="600" HorizontalScrollBarVisibility="Disabled">
                                 <StackPanel Spacing="12" Padding="4" Width="580">
                                     <TextBlock Text="Story Collaborator Help" FontWeight="Bold" FontSize="16" />
-                                    <TextBlock TextWrapping="Wrap" Text="Workflows — The left panel lists available workflows for your story. Each workflow guides you through developing a specific aspect (premise, characters, settings, scenes, etc.). Select one to begin." />
+                                    <TextBlock TextWrapping="Wrap" Text="Workflows — The left panel opens on a short list: any gaps in your outline, then your starred workflows. The rest of the catalog waits below, grouped by story element — expand a group to browse it. Each workflow guides you through developing a specific aspect (premise, characters, settings, scenes, etc.). Select one to begin." />
+                                    <TextBlock TextWrapping="Wrap" Text="Starred — Star the workflows you reach for most and they stay at the top of the panel. Click the star on any workflow to add or remove it, or use Customize Workflows on the toolbar to pick several at once. Your choices are remembered between sessions." />
                                     <TextBlock TextWrapping="Wrap" Text="Execute — Runs the selected workflow. Collaborator analyzes your story elements and suggests updates using AI." />
                                     <TextBlock TextWrapping="Wrap" Text="Review Results — After execution, review each suggested property update. Use Accept to apply individual changes, or Accept all changes at the foot of the list to apply everything at once." />
                                     <TextBlock TextWrapping="Wrap" Text="Chat — After a workflow runs, use the chat panel to discuss the results, ask for alternatives, or refine suggestions." />
@@ -97,6 +98,14 @@
                             </ScrollViewer>
                         </Flyout>
                     </AppBarButton.Flyout>
+                </AppBarButton>
+                <AppBarButton ToolTipService.ToolTip="Customize Workflows"
+                              Click="CustomizeWorkflowsButton_Click"
+                              AutomationProperties.AutomationId="WorkflowCustomizeButton"
+                              AutomationProperties.Name="Customize Workflows">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE735;" />
+                    </AppBarButton.Icon>
                 </AppBarButton>
                 <AppBarButton ToolTipService.ToolTip="Settings"
                               Click="SettingsButton_Click"

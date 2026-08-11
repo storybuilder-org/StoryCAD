@@ -9,9 +9,15 @@ has_toc: false
 
 # A Path to Try
 
-Collaborator lists many workflows. You do not need all of them on day one. The path below matches the craft order in [Writing with StoryCAD](../Writing%20with%20StoryCAD/Writing_with_StoryCAD.html): idea and premise first, then problem and character force, then structure and scenes.
+Collaborator has more than twenty workflows. You do not need all of them on day one. The path below matches the craft order in [Writing with StoryCAD](../Writing%20with%20StoryCAD/Writing_with_StoryCAD.html): idea and premise first, then problem and character force, then structure and scenes.
 
 You can skip steps. This order usually wastes less time.
+
+## The starred band is a head start
+
+Collaborator starts with seven of these workflows starred, so they sit at the top of the workflow list before you touch anything: **Premise**, **Story Problem**, **GMC**, **Problem Structure**, **Role and Story Role**, **Scene Summary**, and **Scene Conflict**. That is the spine below, minus the optional steps.
+
+Treat it as a starting point, not a rule. As you learn which jobs your writing turns on, star those and unstar the rest — see [Opening Collaborator](Opening_Collaborator.html) for how. Everything not starred is still there, filed under its story element.
 
 ## Suggested order
 
@@ -46,7 +52,7 @@ You can skip steps. This order usually wastes less time.
    Prefer **both** Scene Summary and Scene Conflict when you can. If you only run one, start with **Scene Summary** (what happens still carries conflict).  
    Craft: [Defining Scenes](../Writing%20with%20StoryCAD/Defining_Scenes.html), [Plotting in Scenes](../Writing%20with%20StoryCAD/Plotting_in_Scenes.html)
 
-<!-- image: workflow list with the recommended items highlighted in order -->
+<!-- image: workflow list with the starred band showing the recommended items in order -->
 
 ## Teaching tip
 
@@ -54,4 +60,4 @@ For a class or critique group, assign *one* workflow per session and require stu
 
 ## What to leave for later
 
-Image-generation workflows, deep redesigns, and specialty tools can wait until the spine above feels solid. A short list of jobs that actually improve a story beats a long menu of experiments.
+Image-generation workflows, deep redesigns, and specialty tools can wait until the spine above feels solid. A short list of jobs that actually improve a story beats a long menu of experiments. Leaving them unstarred keeps them out of your way without putting them out of reach.

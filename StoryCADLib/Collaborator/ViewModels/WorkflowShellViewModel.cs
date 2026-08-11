@@ -110,6 +110,27 @@ public partial class WorkflowShellViewModel : ObservableRecipient
         set => SetProperty(ref _isPaneOpen, value);
     }
 
+    /// <summary>
+    /// Every registry workflow with its current starred state, for the Customize workflows
+    /// dialog. Collaborator refreshes this whenever it rebuilds the menu.
+    /// </summary>
+    public ObservableCollection<WorkflowStarEntry> StarEntries { get; } = new();
+
+    /// <summary>
+    /// Callback invoked with the complete set of starred labels when the user toggles a star or
+    /// saves the Customize workflows dialog. Collaborator persists the set and rebuilds the menu.
+    /// </summary>
+    public Func<IEnumerable<string>, Task> OnStarsChanged { get; set; }
+
+    /// <summary>
+    /// Set while a star toggle is being handled, to stop the toggle from being treated as a
+    /// workflow choice. Clicking a control inside a NavigationViewItem can still invoke the
+    /// item, and WinUI and Skia do not agree on whether it does; invoking a workflow item runs
+    /// the workflow, which is a billed LLM call the user did not ask for. The flag makes the
+    /// outcome the same on both.
+    /// </summary>
+    public bool SuppressWorkflowNavigation { get; set; }
+
     /// <summary>Wired by Collaborator to the active WorkflowViewModel actions.</summary>
     public Action OnAcceptAll { get; set; }
     public Action OnReviewEach { get; set; }
@@ -139,19 +160,46 @@ public partial class WorkflowShellViewModel : ObservableRecipient
 
     public async void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
+        // A star toggle can still invoke the item underneath it. Leaving CurrentItem alone keeps
+        // the pane highlight — and the tag the following rebuild restores — on the workflow the
+        // user is actually on, instead of moving it to whatever row they starred.
+        if (SuppressWorkflowNavigation)
+            return;
+
         CurrentItem = args.SelectedItem as NavigationViewItem;
         var tag = CurrentItem?.Tag;
-        if (tag == null || OnWorkflowSelected == null)
+        if (!ShouldRunWorkflowForSelection(tag))
             return;
+
+        await OnWorkflowSelected(tag);
+    }
+
+    /// <summary>
+    /// Decides whether a selection change is a genuine request to run a workflow, and records
+    /// the tag when it is. Separated from <see cref="NavView_SelectionChanged" /> because
+    /// NavigationViewSelectionChangedEventArgs cannot be constructed in a test, and the cost of
+    /// getting this wrong is running a billed LLM call the user never asked for.
+    /// </summary>
+    public bool ShouldRunWorkflowForSelection(object tag)
+    {
+        if (tag == null || OnWorkflowSelected == null)
+            return false;
+
+        // A star toggle is in flight; the selection it produced is a side effect of the click,
+        // not a workflow choice.
+        // _selectedTag is deliberately left alone: recording this tag would make the user's next
+        // genuine click on the same workflow look like a restore and silently do nothing.
+        if (SuppressWorkflowNavigation)
+            return false;
 
         // Re-selecting the tag we are already on is a restore, not a user request:
         // RestoreSelection re-highlights the same workflow after the menu is rebuilt,
         // and running it again there would re-execute the workflow on every rebuild.
         if (IsSameTag(tag, _selectedTag))
-            return;
+            return false;
 
         _selectedTag = tag;
-        await OnWorkflowSelected(tag);
+        return true;
     }
 
     /// <summary>
@@ -242,9 +290,12 @@ public partial class WorkflowShellViewModel : ObservableRecipient
             NavView.SelectionChanged -= NavView_SelectionChanged;
         }
         MenuItems.Clear();
+        StarEntries.Clear();
         HasPendingUpdates = false;
         ActiveWorkflowName = string.Empty;
+        SuppressWorkflowNavigation = false;
         _selectedTag = null;
+        OnStarsChanged = null;
         OnAcceptAll = null;
         OnReviewEach = null;
         OnTryAgain = null;
