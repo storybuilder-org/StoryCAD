@@ -974,8 +974,10 @@ public class Collaborator : ICollaborator
 
     private PendingUpdateItem ToSessionPendingUpdateItem(SessionProposalSet.Entry e)
     {
-        var u = e.Update with { Value = e.ProposedText };
-        var proposed = TruncateForChat(FormatValueForDisplay(u.Value), 500);
+        // ProposedText is already ValueDisplay-formatted at capture; do not rebind Value to that string
+        // (List properties must keep typed Values for Accept / SimpleList).
+        var u = e.Update;
+        var proposed = TruncateForChat(e.ProposedText, 500);
         var current = TruncateForChat(u.CurrentDisplay ?? string.Empty, 300);
         var kindLabel = e.Status switch
         {

@@ -97,4 +97,27 @@ public class SessionProposalSetTests
         Assert.AreEqual(1, open.Count);
         Assert.AreEqual("Problem.Premise", open[0].Key);
     }
+
+    [TestMethod]
+    public void SimpleList_ProposedText_NotClrTypeName_AndOpenKeepsList()
+    {
+        // DefineCharacter TraitList: List.ToString() used to leak List`1[System.String] in the UI.
+        var traits = new List<string> { "guarded", "precise", "dry humor" };
+        var spec = new PropertySpec("TraitList", WriteVia.SimpleList, ListEntryType: typeof(string));
+        var update = new PendingUpdate("Character", Guid.NewGuid(), spec, traits, UpdateKind.Fill, null);
+
+        var set = new SessionProposalSet();
+        set.ReplaceFromPending(new[] { update });
+
+        var entry = set.Get("Character.TraitList");
+        Assert.IsNotNull(entry);
+        Assert.IsFalse(entry!.ProposedText.Contains("System.Collections", StringComparison.Ordinal),
+            entry.ProposedText);
+        StringAssert.Contains(entry.ProposedText, "guarded");
+        StringAssert.Contains(entry.ProposedText, "precise");
+
+        var open = set.OpenAsPendingUpdates().Single();
+        Assert.IsInstanceOfType(open.Value, typeof(List<string>));
+        CollectionAssert.AreEqual(traits, (List<string>)open.Value!);
+    }
 }
