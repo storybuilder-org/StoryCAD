@@ -19,7 +19,7 @@ public sealed class GapDetail
 
     /// <summary>
     /// Distinct Collaborator workflow labels that help fill these properties
-    /// (e.g. GMC, RoleAndStoryRole). Empty if only host-element edit applies.
+    /// (e.g. GMC, StoryFunction). Empty if only host-element edit applies.
     /// </summary>
     public required IReadOnlyList<string> HelperWorkflowLabels { get; init; }
 }
