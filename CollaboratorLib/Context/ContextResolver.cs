@@ -25,11 +25,10 @@ public class ContextResolver
     /// </summary>
     public static readonly HashSet<string> RelatedProblemsWorkflows = new(StringComparer.OrdinalIgnoreCase)
     {
-        // #182 DefineCharacter; #183 StoryFunction. Flaw/Backstory until #184.
+        // #182 DefineCharacter; #183 StoryFunction; #184 FlawBackstory.
         "DefineCharacter",
         "StoryFunction",
-        "Flaw",
-        "Backstory"
+        "FlawBackstory"
     };
 
     public const string RelatedProblemsRequestName = "RelatedProblems";
