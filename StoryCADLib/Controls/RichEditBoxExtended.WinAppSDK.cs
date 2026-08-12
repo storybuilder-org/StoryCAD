@@ -72,9 +72,15 @@ public partial class RichEditBoxExtended : RichEditBox
         rtb._lockChangeExecution = true;
         var wasReadOnly = rtb.IsReadOnly;
         rtb.IsReadOnly = false;
+        // Collaborator Accept writes plain text. FormatRtf on non-RTF leaves the box blank
+        // and TextChanged can clear the bound property. Use plain set when not RTF.
+        var text = rtb.RtfText ?? "";
+        var isRtf = text.TrimStart().StartsWith(@"{\rtf", StringComparison.Ordinal);
         rtb.Document.SetText(
-            TextSetOptions.FormatRtf | TextSetOptions.ApplyRtfDocumentDefaults,
-            rtb.RtfText ?? "");
+            isRtf
+                ? TextSetOptions.FormatRtf | TextSetOptions.ApplyRtfDocumentDefaults
+                : TextSetOptions.None,
+            text);
         rtb.IsReadOnly = wasReadOnly;
         rtb._lockChangeExecution = false;
     }
