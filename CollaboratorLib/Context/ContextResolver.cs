@@ -25,11 +25,11 @@ public class ContextResolver
     /// </summary>
     public static readonly HashSet<string> RelatedProblemsWorkflows = new(StringComparer.OrdinalIgnoreCase)
     {
-        // #182: DefineCharacter replaces bulk micro-workflows. RoleAndStoryRole stays until #183.
+        // #182 DefineCharacter; #183 StoryFunction. Flaw/Backstory until #184.
         "DefineCharacter",
+        "StoryFunction",
         "Flaw",
-        "Backstory",
-        "RoleAndStoryRole"
+        "Backstory"
     };
 
     public const string RelatedProblemsRequestName = "RelatedProblems";

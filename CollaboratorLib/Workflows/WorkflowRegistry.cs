@@ -33,7 +33,7 @@ namespace StoryCollaborator.Workflows
             "StoryProblem",
             "GMC",
             "Structure",
-            "RoleAndStoryRole",
+            "StoryFunction",
             "SceneSummary",
             "SceneConflict"
         };
@@ -520,7 +520,6 @@ namespace StoryCollaborator.Workflows
                     }) { PrimaryElementType = StoryItemType.Problem },
                 // === Character Workflows ===
                 // #182 DefineCharacter: world identity + personality. Occupation Role lives here.
-                // #183 will rename remaining RoleAndStoryRole → StoryFunction (Story Role + Sketch only).
                 new Workflow(
                     "DefineCharacter", "Define Character",
                     "Define who this person is in the world: occupation, body, social background, " +
@@ -572,11 +571,10 @@ namespace StoryCollaborator.Workflows
                         "Creativity", "Dominance", "Enthusiasm", "Assurance", "Sensitivity",
                         "Shrewdness", "Sociability", "Stability"
                     }),
-                // Temporary until #183 StoryFunction: Story Role + Archetype + Character Sketch only.
-                // Occupation Role stripped (#182) so DefineCharacter is the sole Role writer.
+                // #183 StoryFunction: plot function only. Occupation Role is DefineCharacter.
                 new Workflow(
-                    "RoleAndStoryRole", "Role and Story Role",
-                    "Define a character's story function and a short Character Sketch.",
+                    "StoryFunction", "Character Story Function",
+                    "Define the character's plot function: Story Role, Archetype, and Character Sketch.",
                     StoryItemType.Character,
                     explanation: "Story Role is narrative function (Protagonist, Antagonist, Supporting). " +
                                 "Archetype is the universal pattern (Hero, Mentor, Shadow). " +
