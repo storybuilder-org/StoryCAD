@@ -7,6 +7,7 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using NLog.Extensions.Logging;
 using StoryCADLib.Models;
+using StoryCADLib.Services;
 using StoryCADLib.Services.Collaborator;
 using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCADLib.Services.Store;
@@ -712,6 +713,32 @@ public class Collaborator : ICollaborator
     }
 
     /// <summary>
+    /// After Collaborator Accept writes the model via API, reload the host page ViewModel
+    /// so the Character (etc.) form and later AutoSave flushes see the new values.
+    /// Close already reloads; Accept did not — empty VM then overwrote applied fields.
+    /// </summary>
+    private void ReloadHostViewModelFromModel()
+    {
+        try
+        {
+            var appState = Ioc.Default.GetService<AppState>();
+            if (appState?.CurrentSaveable is IReloadable reloadable)
+            {
+                reloadable.ReloadFromModel();
+                _logger?.LogInformation("Reloaded host ViewModel from Model after Accept apply");
+            }
+            else
+            {
+                _logger?.LogDebug("No IReloadable CurrentSaveable after Accept apply");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogWarning(ex, "Host ViewModel reload after Accept failed");
+        }
+    }
+
+    /// <summary>
     /// Sets Collaborator settings. Can be called before or after OpenAsync.
     /// </summary>
     public void SetSettings(CollaboratorSettings settings)
@@ -1169,6 +1196,11 @@ public class Collaborator : ICollaborator
                         var applied = runner.ApplyUpdates(slice, gatheredElements);
                         foreach (var u in list)
                             _sessionTouchedFields.Add(u.SessionTouchKey);
+                        // Accept writes the model via API. Host element VMs stay stale until
+                        // reload — AutoSave FlushCurrentEdits then SaveModel's empty VM values
+                        // over the applied text (Character.BackStory wipe after #184 Accept).
+                        if (applied > 0)
+                            ReloadHostViewModelFromModel();
                         return applied;
                     }
 
