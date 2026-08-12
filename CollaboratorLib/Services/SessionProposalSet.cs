@@ -76,10 +76,15 @@ public sealed class SessionProposalSet
         return true;
     }
 
+    /// <summary>
+    /// Open rows for Accept. Keep typed <see cref="PendingUpdate.Value"/> (e.g. List&lt;string&gt; for
+    /// SimpleList). Do not replace with ProposedText — that is display/chat only; List.ToString() is garbage.
+    /// Chat patches already store the new text on <see cref="PendingUpdate.Value"/> via TryApplyPatch.
+    /// </summary>
     public IEnumerable<PendingUpdate> OpenAsPendingUpdates() =>
         _entries.Values
             .Where(e => e.Status == ProposalSessionStatus.Open)
-            .Select(e => e.Update with { Value = e.ProposedText });
+            .Select(e => e.Update);
 
     /// <summary>
     /// Snapshot for chat history: full proposed text and full outline value at capture time.
@@ -145,13 +150,11 @@ public sealed class SessionProposalSet
         "Do not invent patches. Suggest Accept, Try Again, another workflow, or editing the outline.\n" +
         "- Do not invent element IDs or properties outside the proposal list. Do not claim text is missing if Outline or Proposed is present in the snapshot.";
 
-    private static string FormatValue(object? value) =>
-        value switch
-        {
-            null => string.Empty,
-            string s => s,
-            _ => value.ToString() ?? string.Empty
-        };
+    /// <summary>
+    /// Human-readable proposal text. Must not use object.ToString() on lists
+    /// (leaks "System.Collections.Generic.List`1[System.String]").
+    /// </summary>
+    private static string FormatValue(object? value) => ValueDisplay.Format(value);
 
     public sealed record Entry(
         PendingUpdate Update,
