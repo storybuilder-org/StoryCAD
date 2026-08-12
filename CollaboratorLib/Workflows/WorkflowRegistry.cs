@@ -589,25 +589,23 @@ namespace StoryCollaborator.Workflows
                         new PropertySpec("Description")
                     },
                     exampleLists: new List<string> { "StoryRole", "Archetype" }),
+                // #184 FlawBackstory: wound + history together. Retires Flaw and Backstory.
                 new Workflow(
-                    "Flaw", "Character Flaw",
-                    "Identify and develop a character's central flaw—the weakness or blind spot tied to their " +
-                    "inner problem and character arc.",
+                    "FlawBackstory", "Flaw and Backstory",
+                    "Identify the character's central flaw and the formative history that grounds it.",
                     StoryItemType.Character,
-                    explanation: "A flaw is often the source of inner conflict and the key to character transformation. " +
-                                "This workflow helps you identify a flaw that matters to your story—one that creates " +
-                                "problems, blocks goals, and must be overcome (or not) for the character's arc to complete.",
-                    outputProperties: new List<PropertySpec> { new PropertySpec("Flaw") }),
-                new Workflow(
-                    "Backstory", "Backstory",
-                    "Develop the character's formative history—the wound, ghost, or defining events that explain " +
-                    "who they are now.",
-                    StoryItemType.Character,
-                    explanation: "Backstory is cause and explanation. Something happened that created your character's " +
-                                "flaw, shaped their worldview, and drives their current behavior. This workflow helps " +
-                                "you identify that wound or defining moment—what the character may not even consciously " +
-                                "remember but which controls them still.",
-                    outputProperties: new List<PropertySpec> { new PropertySpec("BackStory") }),
+                    explanation: "Flaw is the weakness or blind spot that creates internal cost. BackStory is formative " +
+                                "history. When empty, this run fills focused history that grounds the flaw. When already " +
+                                "filled, this run keeps existing facts and weaves Ghost and wound into them. Related " +
+                                "Problems bound stakes. Prefer rows marked Person vs. Self when present. Problem workflow " +
+                                "Inner and Outer Problems may also write Flaw from the problem side; last Accept wins. " +
+                                "Does not set Story Role, Character Sketch, bulk sheet fields, or Relationship.",
+                    outputProperties: new List<PropertySpec>
+                    {
+                        new PropertySpec("Flaw"),
+                        new PropertySpec("BackStory")
+                    },
+                    exampleLists: new List<string> { "Wound", "WoundCategory" }),
                 new Workflow(
                     label: "Relationship",
                     title: "Character Relationship",

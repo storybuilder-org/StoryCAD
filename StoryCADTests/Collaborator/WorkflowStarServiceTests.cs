@@ -61,11 +61,11 @@ public class WorkflowStarServiceTests
     public async Task GetStarredAsync_AfterUserEdit_ReturnsTheEdit()
     {
         await _service.GetStarredAsync(Defaults);
-        await _service.SetStarredAsync(new[] { "Backstory" });
+        await _service.SetStarredAsync(new[] { "FlawBackstory" });
 
         var starred = await _service.GetStarredAsync(Defaults);
 
-        CollectionAssert.AreEqual(new[] { "Backstory" }, starred.ToArray());
+        CollectionAssert.AreEqual(new[] { "FlawBackstory" }, starred.ToArray());
     }
 
     [TestMethod]
@@ -85,11 +85,11 @@ public class WorkflowStarServiceTests
     public async Task SetStarredAsync_BeforeAnyRead_MarksDefaultsApplied()
     {
         // Otherwise the next read would seed the defaults straight over the user's pick.
-        await _service.SetStarredAsync(new[] { "Backstory" });
+        await _service.SetStarredAsync(new[] { "FlawBackstory" });
 
         var starred = await _service.GetStarredAsync(Defaults);
 
-        CollectionAssert.AreEqual(new[] { "Backstory" }, starred.ToArray());
+        CollectionAssert.AreEqual(new[] { "FlawBackstory" }, starred.ToArray());
     }
 
     [TestMethod]
