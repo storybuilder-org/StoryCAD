@@ -138,7 +138,72 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
+                    <!-- #119: the section picker owns the left panel until the interview
+                         starts, then the Property Updates list takes it back. It sits over
+                         all three rows because there are no proposals to show yet. -->
+                    <Grid Grid.Row="0" Grid.RowSpan="3"
+                          Visibility="{x:Bind ViewModel.InterviewPickerVisibility, Mode=OneWay}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Directions before the list (Terry, 2026-08-11: the picker
+                             needs "some general directions at the start"). The rows below
+                             are phrased as they will be put to the character, so the
+                             framing has to say who is being addressed. -->
+                        <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                            <TextBlock Text="Interview this character"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,4" />
+                            <TextBlock TextWrapping="Wrap"
+                                       Opacity="0.8"
+                                       FontSize="12"
+                                       Text="Tick the parts of their life you want to ask about. They answer in their own voice, one section at a time, and you can break in with a question of your own whenever you like. Nothing reaches your outline until you press Summarize." />
+                        </StackPanel>
+
+                        <ScrollViewer Grid.Row="1"
+                                      VerticalScrollBarVisibility="Visible"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.InterviewSections, Mode=OneWay}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <!-- Template root: no AutomationId (TemplateSafety);
+                                             the accessible name binds instead. -->
+                                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                  Margin="0,4"
+                                                  AutomationProperties.Name="{Binding Title, Mode=OneWay}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title, Mode=OneWay}" />
+                                                <TextBlock Text="{Binding Blurb, Mode=OneWay}"
+                                                           Opacity="0.7"
+                                                           TextWrapping="Wrap"
+                                                           FontSize="12" />
+                                            </StackPanel>
+                                        </CheckBox>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                        <StackPanel Grid.Row="2" Margin="0,8,0,0">
+                            <Button Content="Start interview"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{x:Bind ViewModel.StartInterviewCommand}"
+                                    IsEnabled="{x:Bind ViewModel.HasChosenSections, Mode=OneWay}"
+                                    AutomationProperties.AutomationId="StartInterviewButton" />
+                            <!-- Never gated on a tick: the point is to skip the script. -->
+                            <Button Content="Skip to my own questions"
+                                    Margin="0,6,0,0"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{x:Bind ViewModel.SkipToQuestionsCommand}"
+                                    AutomationProperties.AutomationId="SkipToQuestionsButton" />
+                        </StackPanel>
+                    </Grid>
+
                     <TextBlock Grid.Row="0"
+                               Visibility="{x:Bind ViewModel.PropertyUpdatesVisibility, Mode=OneWay}"
                                Text="{x:Bind ViewModel.PendingUpdatesHeader, Mode=OneWay}"
                                FontWeight="SemiBold"
                                Margin="0,0,0,8" />
@@ -150,6 +215,7 @@
                     <Border Grid.Row="1"
                             Height="1"
                             Margin="0,0,12,0"
+                            Visibility="{x:Bind ViewModel.PropertyUpdatesVisibility, Mode=OneWay}"
                             Background="{ThemeResource CardStrokeColorDefaultBrush}" />
                     <!--
                       VerticalScrollBarVisibility must be Visible, never Disabled: per WinUI's
@@ -161,6 +227,7 @@
                     <!-- ScrollViewer: no AutomationId (not in convention suffix table). List content is not a ListView. -->
                     <ScrollViewer Grid.Row="2"
                                   VerticalAlignment="Stretch"
+                                  Visibility="{x:Bind ViewModel.PropertyUpdatesVisibility, Mode=OneWay}"
                                   VerticalScrollBarVisibility="Visible"
                                   HorizontalScrollBarVisibility="Disabled">
                         <ItemsControl ItemsSource="{x:Bind ViewModel.PendingUpdateItems, Mode=OneWay}">
@@ -282,15 +349,34 @@
             <!-- Accept All: primary action for the table, at the foot of the work column.
                  Accepted updates are written to the outline immediately, so there is no
                  separate Save button on the shell bar. -->
-            <Button Grid.Row="3"
-                    Content="Accept all changes"
-                    Command="{x:Bind ViewModel.AcceptAllCommand}"
-                    IsEnabled="{x:Bind ViewModel.HasPendingUpdates, Mode=OneWay}"
-                    Style="{ThemeResource AccentButtonStyle}"
-                    HorizontalAlignment="Stretch"
-                    Margin="0,10,0,0"
-                    AutomationProperties.AutomationId="WorkflowAcceptAllButton"
-                    AutomationProperties.Name="Accept all changes" />
+            <StackPanel Grid.Row="3">
+                <Button Content="Accept all changes"
+                        Command="{x:Bind ViewModel.AcceptAllCommand}"
+                        IsEnabled="{x:Bind ViewModel.HasPendingUpdates, Mode=OneWay}"
+                        Style="{ThemeResource AccentButtonStyle}"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,10,0,0"
+                        AutomationProperties.AutomationId="WorkflowAcceptAllButton"
+                        AutomationProperties.Name="Accept all changes" />
+
+                <!-- #119: interview controls, collapsed outside an interview. Leaving them
+                     disabled instead would put a dead pair of buttons under Accept all on
+                     every other workflow page, and the taller row would permanently shorten
+                     the Property Updates list above it. -->
+                <StackPanel Orientation="Horizontal"
+                            Margin="0,8,0,0"
+                            Visibility="{x:Bind ViewModel.InterviewControlsVisibility, Mode=OneWay}">
+                    <Button Content="{x:Bind ViewModel.NextSectionLabel, Mode=OneWay}"
+                            Command="{x:Bind ViewModel.NextSectionCommand}"
+                            IsEnabled="{x:Bind ViewModel.CanAskNextSection, Mode=OneWay}"
+                            AutomationProperties.AutomationId="NextInterviewSectionButton" />
+                    <Button Content="Summarize"
+                            Margin="8,0,0,0"
+                            Command="{x:Bind ViewModel.SummarizeCommand}"
+                            IsEnabled="{x:Bind ViewModel.CanSummarize, Mode=OneWay}"
+                            AutomationProperties.AutomationId="SummarizeInterviewButton" />
+                </StackPanel>
+            </StackPanel>
         </Grid>
 
         <!-- ========== Chat column (own height; input does not affect work column) ========== -->

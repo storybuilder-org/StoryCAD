@@ -137,7 +137,9 @@ namespace StoryCollaborator
         /// <summary>
         /// Executes the workflow with pre-gathered elements.
         /// </summary>
-        internal async Task<WorkflowResult> RunAsync(Dictionary<string, StoryElement> gatheredElements)
+        internal async Task<WorkflowResult> RunAsync(
+            Dictionary<string, StoryElement> gatheredElements,
+            Action<Dictionary<string, string>>? extraArgs = null)
         {
             var workflowIO = workflowModel.GetIO();
 
@@ -194,6 +196,10 @@ namespace StoryCollaborator
                 EnrichWithStoryContext(body.Args, gatheredElements, workflowIO);
                 ApplySettings(body.Args);
 
+                // #119: the interview args ride here, after the standard enrichment so
+                // nothing downstream can overwrite them.
+                extraArgs?.Invoke(body.Args);
+
                 if (workflowIO.ExampleLists.Count > 0)
                     EnrichWithExamples(body.Args);
 
@@ -225,6 +231,19 @@ namespace StoryCollaborator
                 }
 
                 result.StatusMessages.Add("Received AI response");
+
+                // #119: conversational workflows answer in prose. Extraction would fail the
+                // turn on the missing JSON object.
+                if (workflowModel.Mode == WorkflowMode.Conversational)
+                {
+                    var conversational = BuildConversationalResult(planResult);
+                    conversational.RemoteTemplateHash = result.RemoteTemplateHash;
+                    conversational.Cost = result.Cost;
+                    conversational.AssembledPrompt = result.AssembledPrompt;
+                    foreach (var msg in result.StatusMessages)
+                        conversational.StatusMessages.Add(msg);
+                    return conversational;
+                }
 
                 var outputResult = ExtractOutputs(planResult, gatheredElements, workflowIO.Outputs);
                 MergeExtractResult(result, outputResult);
@@ -1023,6 +1042,92 @@ namespace StoryCollaborator
                 new PropertySpec(property),
                 value));
             result.UpdatedProperties[key] = value;
+        }
+
+        /// <summary>
+        /// Posts an already-built body and shapes the result (#119). RunAsync's body-building
+        /// and this method are split so an interview turn can set its own args between the two.
+        /// </summary>
+        internal async Task<WorkflowResult> RunPreparedAsync(
+            WorkflowProxyBody body,
+            Dictionary<string, StoryElement> gatheredElements)
+        {
+            // No credential: fail rather than falling back to BuildStubResponse. A stub is a
+            // readable placeholder for an unimplemented one-shot, but a conversational turn
+            // would post "(stub workflow - no AI call made)" as the character's own words and
+            // record it in the transcript Summarize later reads.
+            if (string.IsNullOrWhiteSpace(KernelFactory.ResolveWorkflowCredential()))
+            {
+                return WorkflowResult.Failed(
+                    "This build has no workflow credential, so the character cannot answer. " +
+                    "Activate Collaborator and start the interview again.");
+            }
+
+            // RunAsync's callers get a Failed result rather than an exception; this one's do
+            // too. The interview's callers are async void command handlers, where an escaping
+            // proxy failure (401 with no activation token, out of credits, HTTP error) takes
+            // the app down instead of showing an error bubble.
+            try
+            {
+                var (content, hash, cost, complete) = await PostToProxyAsync(body);
+                if (!complete)
+                    return BuildTruncationFailureResult(content);
+
+                var result = workflowModel.Mode == WorkflowMode.Conversational
+                    ? BuildConversationalResult(content)
+                    : ExtractOutputs(content, gatheredElements, workflowModel.GetIO().Outputs);
+
+                result.RemoteTemplateHash = hash;
+                result.Cost = cost;
+                result.RawResponse = content;
+                return result;
+            }
+            catch (StoryCADLib.Services.Store.OutOfCreditsException ex)
+            {
+                _logger?.LogWarning("Workflow turn refused: out of credits ({Workflow})", workflowModel.Title);
+                return WorkflowResult.Failed(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "WorkflowRunner.RunPreparedAsync error");
+                _auditLogger?.LogException(StoryCADLib.Services.Logging.LogLevel.Error, ex,
+                    $"Workflow turn failed: {workflowModel.Title}");
+                return WorkflowResult.Failed($"Workflow execution failed: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Result for a conversational turn (#119). The reply is prose, so ExtractOutputs must
+        /// not run against it — its JSON failure would fail the whole turn
+        /// ("Could not parse JSON from AI response"). Static and side-effect free so it is
+        /// testable without a live kernel.
+        /// </summary>
+        internal static WorkflowResult BuildConversationalResult(string reply)
+        {
+            if (string.IsNullOrWhiteSpace(reply))
+                return WorkflowResult.Failed("The character did not answer.");
+
+            var result = WorkflowResult.Succeeded();
+            result.RawResponse = reply;
+            return result;
+        }
+
+        /// <summary>
+        /// Writes the four interview args (#119). All four are always written: the Worker merges
+        /// {{$Var}} placeholders and a missing key merges as empty, which changes the prompt
+        /// without saying so.
+        /// </summary>
+        internal static void SetInterviewArgs(
+            Dictionary<string, string> args,
+            string? sectionId,
+            string? freeQuestion,
+            string? transcript,
+            string? chosenSections)
+        {
+            args["InterviewSection"] = sectionId?.Trim() ?? string.Empty;
+            args["InterviewFreeQuestion"] = freeQuestion?.Trim() ?? string.Empty;
+            args["InterviewTranscript"] = transcript ?? string.Empty;
+            args["InterviewChosenSections"] = chosenSections?.Trim() ?? string.Empty;
         }
 
         /// <summary>
