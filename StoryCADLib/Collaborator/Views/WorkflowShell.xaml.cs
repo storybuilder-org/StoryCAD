@@ -132,6 +132,38 @@ public sealed partial class WorkflowShell : Page
             await ShellViewModel.OnStarsChanged(starred);
     }
 
+    /// <summary>
+    ///     Opens the Collaborator section of the user manual in the default browser.
+    ///     The host comes from <see cref="AppState.ManualBaseUrl"/>, which follows the
+    ///     UseBetaDocumentation preference, so a beta tester lands on the beta manual and
+    ///     everyone else on production.
+    ///
+    ///     The trailing slash is load-bearing: the section's landing page is index.html and
+    ///     the bare folder URL is what serves it (StoryCAD #1514). Naming a page here instead
+    ///     would pin the link to one topic and go stale as the section is reorganized.
+    /// </summary>
+    private void ManualLink_Click(object sender, RoutedEventArgs e)
+    {
+        var appState = Ioc.Default.GetService<AppState>();
+        if (appState == null) return;
+
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = new Uri(new Uri(appState.ManualBaseUrl), "docs/StoryCAD%20Collaborator/").ToString(),
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            // A browser that will not launch is not worth interrupting a writing session
+            // over: the flyout the link sits in already answers the common questions.
+            Ioc.Default.GetService<LogService>()?
+                .LogException(LogLevel.Warn, ex, "Could not open the Collaborator manual section");
+        }
+    }
+
     private async void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
         if (ShellViewModel?.CurrentSettings == null) return;

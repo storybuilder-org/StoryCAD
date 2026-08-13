@@ -94,6 +94,16 @@
                                     <TextBlock TextWrapping="Wrap" Text="Chat — After a workflow runs, use the chat panel to discuss the results, ask for alternatives, or refine suggestions." />
                                     <TextBlock TextWrapping="Wrap" Text="Saving — Updates are written to your outline as soon as you accept them, so there is no Save button." />
                                     <TextBlock TextWrapping="Wrap" Text="Exit — Closes Collaborator and returns to StoryCAD. Any accepted changes are preserved." />
+
+                                    <!-- The flyout is a summary; the manual section is the full
+                                         treatment. Click-handled rather than NavigateUri-bound
+                                         because the host (beta or production) is a runtime
+                                         preference read from AppState. -->
+                                    <HyperlinkButton Content="Open the full manual"
+                                                     Click="ManualLink_Click"
+                                                     Padding="0,4,0,0"
+                                                     AutomationProperties.AutomationId="WorkflowHelpManualLink"
+                                                     AutomationProperties.Name="Open the full manual" />
                                 </StackPanel>
                             </ScrollViewer>
                         </Flyout>

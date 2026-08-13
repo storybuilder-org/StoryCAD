@@ -11,7 +11,7 @@ has_toc: false
 
 StoryCAD helps you build a fiction outline from **story elements**: overview, problems, characters, settings, and scenes. You fill tabs and fields until the story is clear enough to draft.
 
-**StoryCAD Collaborator** is a paid plug-in that runs focused craft jobs on that outline. It reads the pieces it needs, suggests wording for named fields (for example Premise, Goal, or Flaw), and waits for you to accept or reject each suggestion. The outline stays yours.
+**StoryCAD Collaborator** is a paid plug-in that runs focused workflows on that outline. It reads the pieces it needs, suggests wording for named fields (for example Premise, Goal, or Flaw), and waits for you to accept or reject each suggestion. The outline stays yours.
 
 ## What it is good for
 
@@ -22,7 +22,7 @@ Collaborator is strongest in the same stages StoryCAD is built for:
 - Deepening **goal, motivation, and conflict**
 - Exploring **inner vs outer** problems
 - Choosing **structure** and shape
-- Filling out **characters** and **scenes** one job at a time
+- Filling out **characters** and **scenes** one workflow at a time
 
 If you teach writing, think of each run as a short exercise: one craft question, applied to *this* student’s outline.
 
@@ -36,6 +36,6 @@ If you teach writing, think of each run as a short exercise: one craft question,
 
 Type yourself when you already know what you want in a field, or when you are brainstorming free-form notes.
 
-Open Collaborator when you are stuck on a craft job, when you want a structured pass over empty fields, or when you want a second take on wording you can still refuse.
+Open Collaborator when you are stuck on a craft problem, when you want a structured pass over empty fields, or when you want a second take on wording you can still refuse.
 
-<!-- image: StoryCAD main window with Collaborator open, outline visible behind or beside -->
+![StoryCAD and the Story Collaborator window side by side, the outline visible in both](../media/Collaborator-With-StoryCAD.png)

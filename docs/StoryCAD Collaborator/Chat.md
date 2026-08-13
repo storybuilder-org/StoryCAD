@@ -33,6 +33,6 @@ If you only chat and never accept Property Updates, the outline fields stay as t
 |------|--------|
 | Fill several named fields on a form | A **workflow** |
 | One-off rephrase or explanation | **Chat** |
-| Re-run the same craft job cleanly | **Try Again** on the workflow |
+| Re-run the same workflow cleanly | **Try Again** on the workflow |
 
 Workflows know which fields belong to which story element. Chat is freer and less structured. Use both, but do not expect chat alone to rebuild your outline.

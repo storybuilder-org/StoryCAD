@@ -9,11 +9,11 @@ has_toc: false
 
 # Running a Workflow
 
-## Pick a job
+## Pick a workflow
 
-In the left list, select a workflow that matches the craft question you care about now. If you are unsure where to start, see [A Path to Try](A_Path_to_Try.html).
+In the left list, select a workflow that matches the craft question you care about now. If you are unsure where to start, see [A Path to Try](Tutorial/A_Path_to_Try.html).
 
-The center of the window shows a short description of the job. That is the purpose of the run, not the full craft essay.
+The center of the window shows a short description of the workflow. That is the purpose of the run, not the full craft essay.
 
 <!-- image: workflow selected, short purpose text visible -->
 
@@ -21,17 +21,15 @@ The center of the window shows a short description of the job. That is the purpo
 
 Some workflows need a specific element: which Problem, which Character, which Scene. Collaborator opens a picker. Select an existing element or create one when the dialog offers that, then continue.
 
-If you cancel the picker, the workflow does not run. A short status message may explain why.
-
-<!-- image: element picker dialog -->
+![The Select Character dialog, listing the outline's characters with an option to create a new element](../media/Collaborator-Element-Picker.png)
 
 ## Wait for the result
 
-Collaborator runs the job and reports progress in the chat column. When it finishes, you typically see:
+Collaborator runs the workflow and reports progress in the chat column. When it finishes, you typically see:
 
-- A short status (for example, how many field updates are ready)
+- A short status, for example how many updates are free and how many need review
 - A **Property Updates** list in the center: each row is one field Collaborator wants to change
-- Buttons (top bar and/or review panel) to Accept All, Review Each, or Try Again
+- **Accept all changes** at the foot of that list, and **Review Each** and **Try Again** on the top bar
 
 Nothing is written into those fields until you accept. See [Reviewing Suggestions](Reviewing_Suggestions.html).
 
