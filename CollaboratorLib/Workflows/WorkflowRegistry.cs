@@ -677,6 +677,16 @@ namespace StoryCollaborator.Workflows
                                 CreateIfMissing = false
                             }
                         },
+                        // The interview is gathered with an optional Problem; the summary
+                        // needs it declared too or its fields never reach the template.
+                        OptionalInputs = new List<ElementRequirement>
+                        {
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Problem,
+                                ElementLabel = "Problem"
+                            }
+                        },
                         Outputs = new List<ElementOutput>
                         {
                             new ElementOutput
@@ -693,6 +703,22 @@ namespace StoryCollaborator.Workflows
                                     new PropertySpec("Education"),
                                     new PropertySpec("Nationality"),
                                     new PropertySpec("Ethnic")
+                                }
+                            },
+                            // Terry, 2026-08-12: the interview must not sit off to the side.
+                            // The presupposition questions take a Problem field as their
+                            // premise, so the answer belongs back on that Problem. Skipped
+                            // silently when no Problem was gathered (ExtractOutputs reports
+                            // "Element not found for output").
+                            new ElementOutput
+                            {
+                                ElementType = StoryItemType.Problem,
+                                ElementLabel = "Problem",
+                                PropertiesToUpdate = new List<PropertySpec>
+                                {
+                                    new PropertySpec("ProtMotive"),
+                                    new PropertySpec("AntagMotive"),
+                                    new PropertySpec("ProtConflict")
                                 }
                             }
                         }
