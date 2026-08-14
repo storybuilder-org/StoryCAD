@@ -17,7 +17,7 @@ This page covers what you need and how to switch Collaborator on. When it is run
 2. An open story outline. Collaborator works on the outline you have open.
 3. A working network connection. Workflows run against a service, so they need one.
 
-StoryCAD Collaborator is a **paid** feature with a **free trial**. There is nothing separate to download or install.
+StoryCAD Collaborator is an **additional paid feature** with a **free trial**. There is nothing separate to download or install.
 
 ## Turn it on
 

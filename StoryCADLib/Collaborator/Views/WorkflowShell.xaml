@@ -140,7 +140,16 @@
 
         <!-- Main navigation view UI -->
         <!-- Container id only; MenuItemsSource-bound, so there are no NavigationViewItem
-             elements in this XAML to annotate (Unit 6 NavigationView convention row). -->
+             elements in this XAML to annotate (Unit 6 NavigationView convention row).
+
+             CompactPaneLength="0" is what makes the top-bar hamburger actually hide the list.
+             PaneDisplayMode="Left" collapses to the compact pane rather than to nothing, and
+             the compact pane is sized to show icons; these items are built from workflow
+             labels with no Icon set, so the default 48px strip rendered clipped text
+             ("Outli ne gaps (25)", "Starr", "Over") instead of hiding. Zero width keeps the
+             open state pushing the work column across, which LeftMinimal would have changed
+             to an overlay. -->
+
         <NavigationView x:Name="NavView"
                         Grid.Row="1"
                         IsBackButtonVisible="Collapsed"
@@ -151,6 +160,7 @@
                         IsSettingsVisible="False"
                         SelectionChanged="NavView_SelectionChanged"
                         PaneDisplayMode="Left"
+                        CompactPaneLength="0"
                         AutomationProperties.AutomationId="WorkflowNav">
 
             <!-- The selected workflow must read at a glance: the stock selected state is a

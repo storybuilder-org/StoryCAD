@@ -13,7 +13,7 @@ This is the most important habit in Collaborator: **read the suggestions, then c
 
 ## Proposed property updates
 
-After a run, the center list is headed **Proposed property updates**. Each row is one field on a story element, for example `Overview.Premise` or `Problem.ProtGoal`.
+After a run, the center list is headed **Proposed property updates**. Each row is one field on a story element, for example **Premise** or **ProtGoal**.
 
 The header counts them. `(3: 1 free, 2 need review)` means three proposals waiting: one that applies on its own, and two that will not move until you say so.
 
@@ -28,8 +28,11 @@ Under each field name is a label saying how Collaborator classified it:
 | **New** | The field is empty | Applies it |
 | **Refresh** | Collaborator wrote this field earlier in the same session | Applies it |
 | **Has your text** | You, or your past edits, already filled the field | **Skips** it. Use Review Each if you want to replace your words |
+| **Update** | A field that holds a list rather than a single value, so there is nothing to compare line for line | Applies it |
 
-**New** and **Refresh** rows are the *free* ones in the header count. **Has your text** rows are the ones that *need review*.
+![A single Property Updates row: the field name Weather, the label New beneath it, and the proposed text alongside](../media/Collaborator-Row-New.png)
+
+**New**, **Refresh**, and **Update** rows are the *free* ones in the header count. **Has your text** rows are the ones that *need review*.
 
 That protects your writing when you re-run a workflow on a half-filled outline.
 
@@ -56,7 +59,7 @@ Then choose:
 | **Skip** | Keep yours; drop this proposal |
 | **Accept Free Remaining** | Apply every remaining **New** and **Refresh** field in one step; still leave **Has your text** fields for Accept or Skip |
 
-<!-- image: Review Each card showing Yours and Proposed -->
+![A Review Property Update card: the field name, Yours reading empty, the proposed text below it, and Accept, Skip, and Accept Free Remaining buttons, marked 1 of 6](../media/Collaborator-Review-Each.png)
 
 **Accept Free Remaining** is *not* “accept every empty field only.” It also applies **Refresh** rows, which are fields Collaborator wrote earlier in this session. It never bulk-overwrites a **Has your text** field.
 

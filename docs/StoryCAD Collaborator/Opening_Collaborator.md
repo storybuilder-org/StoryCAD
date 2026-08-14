@@ -11,13 +11,13 @@ has_toc: false
 
 ## Before you start
 
-Install StoryCAD and Collaborator, and complete first-time setup, as described in [Getting Started](Getting_Started.html). Open a story outline in StoryCAD. Collaborator works on the outline you have open. Save your work in StoryCAD before long sessions if you are the cautious type.
+Open a story outline in StoryCAD. Collaborator works on the outline you have open, and there is nothing separate to install; see [Getting Started](Getting_Started.html) if you have not switched it on yet.
 
 ## Launch Collaborator
 
-With an outline open, start Collaborator from StoryCAD’s Collaborator command (toolbar or menu, depending on your build). A separate **Story Collaborator** window opens.
+With an outline open, click **Collaborator** on the StoryCAD toolbar. A separate **Story Collaborator** window opens.
 
-If Collaborator does not appear, return to [Getting Started](Getting_Started.html) and confirm install and activation.
+If nothing happens, return to [Getting Started](Getting_Started.html) and check the subscription or trial went through.
 
 ![StoryCAD toolbar; the Collaborator button is the highlighted chain icon](../media/Collaborator-Toolbar-Button.png)
 
@@ -67,7 +67,7 @@ Your stars are remembered between sessions, and they are yours alone. They do no
 
 Use the menu (hamburger) control at the left of the top bar to show or hide the workflow list. Hiding the list gives the work area more width. The list is still there when you need another workflow.
 
-<!-- image: same window with list collapsed -->
+![The same window with the workflow list hidden: the workflow purpose, Property Updates, and Accept all changes now run the full width of the window](../media/Collaborator-Pane-Collapsed.png)
 
 ## Settings
 
@@ -87,7 +87,7 @@ Choose **Save** to apply your choices, or **Cancel** to leave them as they were.
 
 ## Cost on the status bar
 
-Off unless you ask for it. Turn on **Show cost per run on the status bar** and the right-hand end of the bottom strip reports the model that ran, the tokens in and out, what that run cost, and what the session has cost so far. Chat turns report the same way, one line per turn.
+Turn on **Show cost per run on the status bar** and the right-hand end of the bottom strip reports the model that ran, the tokens in and out, what that run cost, and what the session has cost so far. Chat turns report the same way, one line per turn.
 
 When a run cannot be priced, the line says so and the session total stays where it was. The figure sits beside status messages rather than replacing them, so a warning is never hidden behind a number.
 

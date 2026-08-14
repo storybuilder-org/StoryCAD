@@ -27,7 +27,7 @@ Accept, then glance at StoryCAD. Two steps, and they catch surprises early. Ther
 
 ## Connection and access
 
-Collaborator needs a working network connection to run workflows. It is a paid feature of StoryCAD with a free trial, and there is nothing separate to install. See [Getting Started](Getting_Started.html) for how to switch it on.
+Collaborator needs a working network connection to run workflows. It is an additional paid feature of StoryCAD with a free trial, and there is nothing separate to install. See [Getting Started](Getting_Started.html) for how to switch it on.
 
 ## Where to learn craft (not just buttons)
 

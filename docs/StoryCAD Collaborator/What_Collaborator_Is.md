@@ -11,7 +11,7 @@ has_toc: false
 
 StoryCAD helps you build a fiction outline from **story elements**: overview, problems, characters, settings, and scenes. You fill tabs and fields until the story is clear enough to draft.
 
-**StoryCAD Collaborator** is a paid plug-in that runs focused workflows on that outline. It reads the pieces it needs, suggests wording for named fields (for example Premise, Goal, or Flaw), and waits for you to accept or reject each suggestion. The outline stays yours.
+**StoryCAD Collaborator** is an additional paid feature that runs focused workflows on that outline. It reads the pieces it needs, suggests wording for named fields (for example Premise, Goal, or Flaw), and waits for you to accept or reject each suggestion. The outline stays yours.
 
 ## What it is good for
 
