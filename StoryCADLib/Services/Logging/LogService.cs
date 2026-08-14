@@ -99,8 +99,8 @@ public class LogService : ILogService
 
             elmahIoTarget.OnMessage += msg =>
             {
-                msg.Version = State.Version;
-
+                // Platform-suffixed so exception reports are filterable by OS (#1428).
+                msg.Version = State.VersionWithPlatform;
 
                 try
                 {
@@ -112,7 +112,6 @@ public class LogService : ILogService
                 }
 
                 var baseException = exceptionHelper?.GetBaseException();
-                msg.Version = State.Version;
 
                 msg.Type = baseException?.GetType().FullName;
                 msg.Data = baseException?.ToDataList() ?? new();

@@ -290,8 +290,11 @@ public class BackendService
             preferences.UserId = id;
             _logService.Log(LogLevel.Info, "User registered, userId: " + id);
 
-            var current = _appState.Version;
-            var previous = preferences.Version ?? "";
+            // Tag both versions with the platform so the versions table can be
+            // broken down per OS (#1428). The previous run was on this same
+            // install, so it carries the same platform code.
+            var current = _appState.VersionWithPlatform;
+            var previous = _appState.WithPlatform(preferences.Version);
             await _sqlIo.AddVersion(id, current, previous);
             _preferenceService.Model.RecordVersionStatus = true;
             PreferencesIo loader = new();

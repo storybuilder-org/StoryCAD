@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using StoryCADLib.Services;
 using StoryCADLib.ViewModels;
 
@@ -150,6 +151,46 @@ public class AppState
             return assembly.Version!.ToString();
         }
     }
+
+    /// <summary>
+    ///     Short code for the operating system this instance is running on,
+    ///     used to break reported versions down per platform (#1428).
+    ///     Detected at runtime rather than with #if, because the desktop head
+    ///     is a single binary that runs on more than one OS.
+    /// </summary>
+    public string Platform
+    {
+        get
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return "Win";
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return "Mac";
+            }
+
+            return "Unknown";
+        }
+    }
+
+    /// <summary>
+    ///     The current version tagged with its platform, e.g. "4.2.0.0-Mac".
+    ///     Reported to the backend versions table and to elmah.io. Version
+    ///     itself stays unsuffixed - it is written to .stbx LastVersion and
+    ///     compared against the stored preferences version.
+    /// </summary>
+    public string VersionWithPlatform => WithPlatform(Version);
+
+    /// <summary>
+    ///     Tags an arbitrary version string with the current platform code.
+    ///     An empty or absent version stays empty, so a first-run install
+    ///     reports no previous version rather than a bare "-Win".
+    /// </summary>
+    public string WithPlatform(string? version) =>
+        string.IsNullOrEmpty(version) ? string.Empty : $"{version}-{Platform}";
 
     public StoryDocument? CurrentDocument
     {

@@ -119,6 +119,87 @@ public class BackendTests
 
     #endregion
 
+    #region PostVersion Platform Suffix Tests (Issue #1428)
+
+    /// <summary>
+    ///     Verifies PostVersion writes the platform-suffixed version to the
+    ///     versions table, so the backend can break usage down per OS (#1428).
+    /// </summary>
+    [TestMethod]
+    public async Task PostVersion_PassesPlatformSuffixedCurrentVersionToSqlIo()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.FirstName = "StoryCAD";
+        preferenceService.Model.LastName = "Tests";
+        preferenceService.Model.Email = "sysadmin@storybuilder.org";
+
+        await backendService.PostVersion();
+
+        Assert.AreEqual(1, testSqlIo.AddVersionCalls.Count);
+        Assert.AreEqual(appState.VersionWithPlatform, testSqlIo.AddVersionCalls[0].current,
+            "PostVersion should send the platform-suffixed version as current_ver");
+    }
+
+    /// <summary>
+    ///     The previous version is suffixed with the same platform code, since a
+    ///     prior run on the same install was necessarily the same OS.
+    /// </summary>
+    [TestMethod]
+    public async Task PostVersion_WhenPreviousVersionStored_SuffixesPreviousVersion()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.FirstName = "StoryCAD";
+        preferenceService.Model.LastName = "Tests";
+        preferenceService.Model.Email = "sysadmin@storybuilder.org";
+        preferenceService.Model.Version = "4.1.0.0";
+
+        await backendService.PostVersion();
+
+        Assert.AreEqual(1, testSqlIo.AddVersionCalls.Count);
+        Assert.AreEqual($"4.1.0.0-{appState.Platform}", testSqlIo.AddVersionCalls[0].previous,
+            "PostVersion should send the platform-suffixed previous version as previous_ver");
+    }
+
+    /// <summary>
+    ///     A first-run install has no stored version; previous_ver must stay empty
+    ///     rather than becoming a bare "-Win".
+    /// </summary>
+    [TestMethod]
+    public async Task PostVersion_WhenNoPreviousVersion_LeavesPreviousEmpty()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.FirstName = "StoryCAD";
+        preferenceService.Model.LastName = "Tests";
+        preferenceService.Model.Email = "sysadmin@storybuilder.org";
+        preferenceService.Model.Version = "";
+
+        await backendService.PostVersion();
+
+        Assert.AreEqual(1, testSqlIo.AddVersionCalls.Count);
+        Assert.AreEqual(string.Empty, testSqlIo.AddVersionCalls[0].previous,
+            "An absent previous version should stay empty, not gain a bare suffix");
+    }
+
+    #endregion
+
     #region DeleteUserData Tests
 
     [TestMethod]
