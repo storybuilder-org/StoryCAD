@@ -77,6 +77,38 @@ public class CharacterInterviewRegistryTests
     }
 
     [TestMethod]
+    public void Summary_WritesBackToTheProblemItAskedAbout()
+    {
+        // Terry, 2026-08-12: the interview must inform the rest of the outline. The
+        // presupposition questions take a Problem field as their premise, so the answer
+        // belongs on that Problem, not only on the Character.
+        var outputs = WorkflowRegistry.All
+            .First(w => w.Label == "CharacterInterviewSummary")
+            .GetIO().Outputs;
+
+        var problem = outputs.FirstOrDefault(o => o.ElementLabel == "Problem");
+        Assert.IsNotNull(problem, "Summary declares no Problem output");
+        Assert.AreEqual(StoryItemType.Problem, problem!.ElementType);
+
+        var props = problem.PropertiesToUpdate.Select(s => s.Property).ToList();
+        CollectionAssert.Contains(props, "ProtMotive");
+        CollectionAssert.Contains(props, "AntagMotive");
+        CollectionAssert.Contains(props, "ProtConflict");
+    }
+
+    [TestMethod]
+    public void Summary_TakesTheProblemAsAnOptionalInput()
+    {
+        // Declared, or the Problem_* placeholders never merge. Optional, because an
+        // interview can run on a character with no linked problem at all.
+        var io = WorkflowRegistry.All
+            .First(w => w.Label == "CharacterInterviewSummary").GetIO();
+
+        Assert.IsTrue(io.OptionalInputs.Any(r => r.ElementLabel == "Problem"));
+        Assert.IsFalse(io.RequiredInputs.Any(r => r.ElementLabel == "Problem"));
+    }
+
+    [TestMethod]
     public void Summary_IsOffTheMenu()
     {
         // Its only meaningful input is a transcript that exists solely inside an interview
