@@ -94,6 +94,16 @@
                                     <TextBlock TextWrapping="Wrap" Text="Chat — After a workflow runs, use the chat panel to discuss the results, ask for alternatives, or refine suggestions." />
                                     <TextBlock TextWrapping="Wrap" Text="Saving — Updates are written to your outline as soon as you accept them, so there is no Save button." />
                                     <TextBlock TextWrapping="Wrap" Text="Exit — Closes Collaborator and returns to StoryCAD. Any accepted changes are preserved." />
+
+                                    <!-- The flyout is a summary; the manual section is the full
+                                         treatment. Click-handled rather than NavigateUri-bound
+                                         because the host (beta or production) is a runtime
+                                         preference read from AppState. -->
+                                    <HyperlinkButton Content="Open the full manual"
+                                                     Click="ManualLink_Click"
+                                                     Padding="0,4,0,0"
+                                                     AutomationProperties.AutomationId="WorkflowHelpManualLinkButton"
+                                                     AutomationProperties.Name="Open the full manual" />
                                 </StackPanel>
                             </ScrollViewer>
                         </Flyout>
@@ -130,7 +140,16 @@
 
         <!-- Main navigation view UI -->
         <!-- Container id only; MenuItemsSource-bound, so there are no NavigationViewItem
-             elements in this XAML to annotate (Unit 6 NavigationView convention row). -->
+             elements in this XAML to annotate (Unit 6 NavigationView convention row).
+
+             CompactPaneLength="0" is what makes the top-bar hamburger actually hide the list.
+             PaneDisplayMode="Left" collapses to the compact pane rather than to nothing, and
+             the compact pane is sized to show icons; these items are built from workflow
+             labels with no Icon set, so the default 48px strip rendered clipped text
+             ("Outli ne gaps (25)", "Starr", "Over") instead of hiding. Zero width keeps the
+             open state pushing the work column across, which LeftMinimal would have changed
+             to an overlay. -->
+
         <NavigationView x:Name="NavView"
                         Grid.Row="1"
                         IsBackButtonVisible="Collapsed"
@@ -141,6 +160,7 @@
                         IsSettingsVisible="False"
                         SelectionChanged="NavView_SelectionChanged"
                         PaneDisplayMode="Left"
+                        CompactPaneLength="0"
                         AutomationProperties.AutomationId="WorkflowNav">
 
             <!-- The selected workflow must read at a glance: the stock selected state is a

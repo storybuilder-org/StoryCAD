@@ -9,33 +9,31 @@ has_toc: false
 
 # Running a Workflow
 
-## Pick a job
+## Pick a workflow
 
-In the left list, select a workflow that matches the craft question you care about now. If you are unsure where to start, see [A Path to Try](A_Path_to_Try.html).
+In the left list, click a workflow that matches the craft question you care about now. If you are unsure where to start, see [A Path to Try](Tutorial/A_Path_to_Try.html).
 
-The center of the window shows a short description of the job. That is the purpose of the run, not the full craft essay.
-
-<!-- image: workflow selected, short purpose text visible -->
+**Clicking a workflow runs it.** There is no separate Run button and no confirmation step, so treat the click as the decision. Its name appears on the top bar, and the center of the window shows a short description of what it is for: the purpose of the run, not the full craft essay.
 
 ## Choose story elements when asked
 
-Some workflows need a specific element: which Problem, which Character, which Scene. Collaborator opens a picker. Select an existing element or create one when the dialog offers that, then continue.
+Some workflows need a specific element first: which Problem, which Character, which Scene. Collaborator opens a picker before it runs anything. Select an existing element, or create one when the dialog offers that.
 
-If you cancel the picker, the workflow does not run. A short status message may explain why.
+![The Select Character dialog, listing the outline's characters with an option to create a new element](../media/Collaborator-Element-Picker.png)
 
-<!-- image: element picker dialog -->
+This is your chance to back out. Cancel the picker and the workflow does not run.
 
 ## Wait for the result
 
-Collaborator runs the job and reports progress in the chat column. When it finishes, you typically see:
+Collaborator runs the workflow and reports progress in the chat column. When it finishes, you typically see:
 
-- A short status (for example, how many field updates are ready)
+- A short status, for example how many updates are free and how many need review
 - A **Property Updates** list in the center: each row is one field Collaborator wants to change
-- Buttons (top bar and/or review panel) to Accept All, Review Each, or Try Again
+- **Accept all changes** at the foot of that list, and **Review Each** and **Try Again** on the top bar
 
 Nothing is written into those fields until you accept. See [Reviewing Suggestions](Reviewing_Suggestions.html).
 
-<!-- image: Property Updates list after a successful run -->
+![A finished run: six proposals headed 6: 6 free, 0 need review, five labeled New and one Update, with Accept all changes at the foot of the list](../media/Collaborator-Updates-After-Run.png)
 
 ## Try Again
 

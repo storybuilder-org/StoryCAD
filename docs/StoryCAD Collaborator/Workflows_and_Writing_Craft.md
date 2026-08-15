@@ -13,11 +13,11 @@ has_toc: false
 
 A **workflow** is a short, focused craft job.
 
-You pick one job from Collaborator’s list (for example, “turn my idea into a premise”). Collaborator looks at the parts of your outline that job needs, then suggests text for specific fields on those story elements. You review the suggestions and accept only what you want.
+You pick one workflow from Collaborator’s list (for example, “turn my idea into a premise”). Collaborator looks at the parts of your outline that workflow needs, then suggests text for specific fields on those story elements. You review the suggestions and accept only what you want.
 
 One workflow, one craft question. That keeps the work small enough to judge.
 
-<!-- image: left-hand list of workflows with a callout “each row is one craft job” -->
+![The workflow list with every element group expanded; each row is one workflow](../media/Collaborator-Workflow-List.png)
 
 ## Craft questions map to workflows
 
@@ -29,16 +29,16 @@ StoryCAD’s manual already teaches the craft spine: idea and premise, problems,
 | What’s the main story problem? | [Defining Problems](../Writing%20with%20StoryCAD/Defining_Problems.html), [Problem and Character Development](../Writing%20with%20StoryCAD/Problem_and_Character_Development.html) | Story Problem; Goal / Motivation / Conflict (GMC) |
 | Outer want vs inner need? | [Defining Problems](../Writing%20with%20StoryCAD/Defining_Problems.html) (outer and inner problems) | Inner and Outer Problems |
 | How is the story shaped? | [Plotting with StoryCAD](../Writing%20with%20StoryCAD/Plotting_with_StoryCAD.html), Overview Structure | Problem Structure |
-| Who is this character? | [Defining Characters](../Writing%20with%20StoryCAD/Defining_Characters.html) | Role and Story Role; Flaw; Backstory; and other character workflows |
+| Who is this character? | [Defining Characters](../Writing%20with%20StoryCAD/Defining_Characters.html) | Character Story Function; Flaw and Backstory; Define Character |
 | What happens in this scene? | [Defining Scenes](../Writing%20with%20StoryCAD/Defining_Scenes.html), [Plotting in Scenes](../Writing%20with%20StoryCAD/Plotting_in_Scenes.html) | Scene Summary; Scene Conflict |
 
-Names on the list may be slightly longer in the app (for example, a full “Ideation…” label). The job is the same: one craft focus per run.
+Names on the list may be slightly longer in the app (for example, a full “Ideation…” label). The work is the same: one craft focus per run.
 
 ## Same spine teachers already use
 
 A useful order for learning fiction structure is roughly:
 
-**idea → premise → story problem → GMC → characters → structure → scenes**
+**Idea → Premise → Story Problem → GMC → Characters → Structure → Scenes**
 
 That is also a sensible order for Collaborator. You do not have to follow it, but jumping straight to scene work with an empty Overview usually produces thin results. Craft first, then tool.
 

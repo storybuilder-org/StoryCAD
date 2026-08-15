@@ -11,15 +11,15 @@ has_toc: false
 
 ## Before you start
 
-Install StoryCAD and Collaborator, and complete first-time setup, as described in [Getting Started](Getting_Started.html). Open a story outline in StoryCAD. Collaborator works on the outline you have open. Save your work in StoryCAD before long sessions if you are the cautious type.
+Open a story outline in StoryCAD. Collaborator works on the outline you have open, and there is nothing separate to install; see [Getting Started](Getting_Started.html) if you have not switched it on yet.
 
 ## Launch Collaborator
 
-With an outline open, start Collaborator from StoryCAD’s Collaborator command (toolbar or menu, depending on your build). A separate **Story Collaborator** window opens.
+With an outline open, click **Collaborator** on the StoryCAD toolbar. A separate **Story Collaborator** window opens.
 
-If Collaborator does not appear, return to [Getting Started](Getting_Started.html) and confirm install and activation.
+If nothing happens, return to [Getting Started](Getting_Started.html) and check the subscription or trial went through.
 
-<!-- image: StoryCAD toolbar or menu highlighting Collaborator -->
+![StoryCAD toolbar; the Collaborator button is the highlighted chain icon](../media/Collaborator-Toolbar-Button.png)
 
 ## The Collaborator window
 
@@ -27,19 +27,21 @@ The window has three main areas:
 
 | Area | What it is for |
 |------|----------------|
-| **Left** | Workflows (craft jobs). Pick one to run. |
-| **Center** | Purpose of the current job, and **Property Updates** (suggested field changes) after a run. |
+| **Left** | Workflows. Pick one to run. |
+| **Center** | Purpose of the current workflow, and **Property Updates** (suggested field changes) after a run. |
 | **Right** | Chat: status messages and optional questions after a run. |
 
-Across the **top** you get actions such as show/hide the workflow list, Accept All, Review Each, Try Again (when results are waiting), Customize Workflows, Help, Settings, Save, and Exit. Hover an icon if the label is not shown.
+Across the **top**, from the left: show or hide the workflow list, the name of the workflow you are on, Review Each, Try Again, Help, Customize Workflows, Settings, and Exit. Review Each and Try Again stay greyed until a run leaves suggestions waiting. The bar is icons only, so hover one to read its name.
 
-A **status** strip at the bottom carries short messages when needed (for example, if you cancel choosing a character).
+**Accept all changes** is not on the top bar. It sits at the foot of the center column, directly under the Property Updates list it applies.
 
-<!-- image: full Collaborator window with left / center / right labeled -->
+A **status** strip at the bottom carries short messages when needed (for example, if you cancel choosing a character). If you have turned on cost details in Settings, the running cost of the session sits at the right-hand end of the same strip.
+
+![The Story Collaborator window: workflow list at left, workflow purpose and Property Updates in the center, chat at right](../media/Collaborator-Window-Overview.png)
 
 ## What the workflow list shows
 
-Collaborator has more than twenty workflows. Showing all of them at once is not much help when you want to get one job done, so the list opens short and grows only when you ask it to. From the top:
+Collaborator ships with about twenty workflows. Showing all of them at once is not much help when you only want to run one, so the list opens short and grows only when you ask it to. From the top:
 
 | Band | What it holds |
 |------|---------------|
@@ -49,7 +51,7 @@ Collaborator has more than twenty workflows. Showing all of them at once is not 
 
 Nothing is hidden. The rest of the catalog is one click away, in the groups.
 
-<!-- image: left pane showing gaps, starred band, and closed element groups -->
+![The workflow pane: outline gaps at the top, then the starred band, then collapsed element groups](../media/Collaborator-Workflow-Pane.png)
 
 ## Star the workflows you use
 
@@ -57,20 +59,40 @@ A star sits at the right of each workflow row. Click it to add that workflow to 
 
 To change several at once, use **Customize Workflows** on the top bar. It lists every workflow with a short description and a checkbox, grouped by story element. Check the ones you want starred and choose **Save**.
 
-Your stars are remembered between sessions, and they are yours alone — they do not change your outline or travel with the story file.
+Your stars are remembered between sessions, and they are yours alone. They do not change your outline or travel with the story file.
 
-Star the handful of jobs your writing actually turns on. A short list you act from beats a long list you scroll.
-
-<!-- image: Customize Workflows dialog with several workflows checked -->
+![The Customize Workflows dialog, listing workflows by story element with a checkbox each](../media/Collaborator-Customize-Workflows.png)
 
 ## Show or hide the workflow list
 
-Use the menu (hamburger) control at the left of the top bar to show or hide the workflow list. Hiding the list gives the work area more width. The list is still there when you need another job.
+Use the menu (hamburger) control at the left of the top bar to show or hide the workflow list. Hiding the list gives the work area more width. The list is still there when you need another workflow.
 
-<!-- image: same window with list collapsed -->
+![The same window with the workflow list hidden: the workflow purpose, Property Updates, and Accept all changes now run the full width of the window](../media/Collaborator-Pane-Collapsed.png)
 
-## Save and exit
+## Settings
 
-**Save** writes outline changes through StoryCAD’s save path so accepted suggestions persist.
+**Settings** opens a short dialog of preferences. The three list fields take several entries separated by commas.
 
-**Exit** closes Collaborator and returns you to StoryCAD. Accepted changes remain on the model; pending suggestions you never accepted do not apply.
+| Setting | What it does |
+|---------|--------------|
+| **Response Terseness** | How much text a suggestion carries: Concise, Balanced, or Detailed. |
+| **Content Preservation** | How hard Collaborator tries to keep your existing wording: Strict, Balanced, or Flexible. |
+| **Genre Preferences** | Genres to steer suggestions toward. |
+| **Story Forms I Like** | Story shapes to lean into. |
+| **Story Forms to Avoid** | Story shapes to keep away from. |
+| **Logging Visibility** | Off, Basic, or Detailed. Detailed can expose prompts, so leave it off unless you are chasing a problem. |
+| **Show cost per run on the status bar** | Turns on the cost line described below. |
+
+Choose **Save** to apply your choices, or **Cancel** to leave them as they were. The cost checkbox is the only one Collaborator remembers; the other six return to their defaults each time you open it.
+
+## Cost on the status bar
+
+Turn on **Show cost per run on the status bar** and the right-hand end of the bottom strip reports the model that ran, the tokens in and out, what that run cost, and what the session has cost so far. Chat turns report the same way, one line per turn.
+
+When a run cannot be priced, the line says so and the session total stays where it was. The figure sits beside status messages rather than replacing them, so a warning is never hidden behind a number.
+
+## Exit
+
+**Exit** closes Collaborator and returns you to StoryCAD.
+
+There is no Save button. Accepting an update writes it to your outline then and there; anything you did not accept is dropped.
