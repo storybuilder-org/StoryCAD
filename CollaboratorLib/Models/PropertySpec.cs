@@ -88,6 +88,9 @@ namespace StoryCollaborator.Models
     /// </summary>
     public sealed record RelationshipInfo(
         Guid RecipientGuid,
-        string Description,
-        bool Mirror = false);
+        string RelationType,
+        bool Mirror = false,
+        string Trait = "",
+        string Attitude = "",
+        string Notes = "");
 }

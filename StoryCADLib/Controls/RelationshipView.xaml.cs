@@ -17,29 +17,32 @@ public sealed partial class RelationshipView : UserControl
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private async void RemoveRelationship(object sender, PointerRoutedEventArgs e)
+    private async void RemoveRelationship(object sender, RoutedEventArgs e)
     {
         try
         {
             Logger.Log(LogLevel.Info, "Starting to remove relationship");
 
-            // Get the RelationshipModel directly from DataContext
-            var characterToDelete = (sender as FrameworkElement)?.DataContext as RelationshipModel;
+            // x:Bind templates do not set DataContext. The row is on Tag ({x:Bind}).
+            var characterToDelete = (sender as FrameworkElement)?.Tag as RelationshipModel;
             if (characterToDelete == null)
             {
-                Logger.Log(LogLevel.Warn, "Could not get RelationshipModel from DataContext");
+                Logger.Log(LogLevel.Warn, "Could not get RelationshipModel from Button.Tag");
                 return;
             }
 
+            var partnerName = characterToDelete.Partner?.Name
+                ?? StoryElement.GetByGuid(characterToDelete.PartnerUuid)?.Name
+                ?? "this partner";
             Logger.Log(LogLevel.Info,
-                $"Character to delete: {characterToDelete.Partner.Name}({characterToDelete.Partner.Uuid})");
+                $"Character to delete: {partnerName}({characterToDelete.PartnerUuid})");
 
             //Show confirmation dialog and gets result.
             ContentDialog cd = new()
             {
                 Title = "Are you sure?",
                 Content =
-                    $"Are you sure you want to delete the relationship between {CharVm.Name} and {characterToDelete.Partner.Name}?",
+                    $"Are you sure you want to delete the relationship between {CharVm.Name} and {partnerName}?",
                 PrimaryButtonText = "Yes",
                 SecondaryButtonText = "No"
             };
@@ -48,7 +51,7 @@ public sealed partial class RelationshipView : UserControl
 
             if (result == ContentDialogResult.Primary) //If positive, then delete.
             {
-                Logger.Log(LogLevel.Info, $"Deleting Relationship to {characterToDelete.Partner.Name}");
+                Logger.Log(LogLevel.Info, $"Deleting Relationship to {partnerName}");
                 Ioc.Default.GetRequiredService<CharacterViewModel>().CharacterRelationships.Remove(characterToDelete);
                 Logger.Log(LogLevel.Info, "Deleted");
                 CharVm.SaveRelationships();

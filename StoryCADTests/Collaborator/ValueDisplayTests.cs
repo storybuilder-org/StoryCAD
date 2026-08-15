@@ -102,11 +102,11 @@ public class ValueDisplayTests
     public void Format_WithRelationshipList_ResolvesNameAndDescription()
     {
         var guid = Guid.NewGuid();
-        var relationships = new List<RelationshipInfo> { new(guid, "rival") };
+        var relationships = new List<RelationshipInfo> { new(guid, "rival", Notes: "keeps score") };
 
         var result = ValueDisplay.Format(relationships, _ => "Herold");
 
-        Assert.AreEqual("• Herold — rival", result);
+        Assert.AreEqual("• Herold (rival) — keeps score", result);
     }
 
     [TestMethod]

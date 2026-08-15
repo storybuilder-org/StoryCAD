@@ -98,7 +98,9 @@ public interface IStoryCADAPI
 
     OperationResult<bool> UpdateImageCaption(Guid element, Guid imageId, string caption);
 
-    OperationResult<bool> AddRelationship(Guid source, Guid recipient, string desc, bool mirror = false);
+    OperationResult<bool> AddRelationship(
+        Guid source, Guid recipient, string desc, bool mirror = false,
+        string trait = "", string attitude = "", string notes = "");
 
     OperationResult<bool> MoveElement(Guid elementGuid, Guid newParentGuid, int? index = null);
 

@@ -120,4 +120,26 @@ public class SessionProposalSetTests
         Assert.IsInstanceOfType(open.Value, typeof(List<string>));
         CollectionAssert.AreEqual(traits, (List<string>)open.Value!);
     }
+
+    [TestMethod]
+    public void ReplaceFromPending_Relationship_ShowsPartnerNameNotGuid()
+    {
+        var partnerGuid = Guid.Parse("6ede4860-411b-43f5-829d-47b3a6b1aa21");
+        var spec = new PropertySpec("RelationshipList", WriteVia.Relationships, JsonKey: "relationship");
+        var update = new PendingUpdate(
+            "Character",
+            Guid.Parse("e2ab5b51-1f5e-4067-b4d4-7e99ba4e642f"),
+            spec,
+            new List<RelationshipInfo> { new(partnerGuid, "Rival", Notes: "A tries to impose order") },
+            UpdateKind.Fill,
+            null);
+
+        var set = new SessionProposalSet();
+        set.ReplaceFromPending(new[] { update }, guid => guid == partnerGuid ? "B" : null);
+
+        var text = set.Get("Character.RelationshipList")!.ProposedText;
+        StringAssert.Contains(text, "B");
+        StringAssert.Contains(text, "A tries to impose order");
+        Assert.IsFalse(text.Contains(partnerGuid.ToString("D"), StringComparison.Ordinal), text);
+    }
 }
