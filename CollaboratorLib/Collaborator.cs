@@ -925,7 +925,7 @@ public class Collaborator : ICollaborator
 
         EnsureKernelInitialized();
         _sessionProposals = new SessionProposalSet();
-        _sessionProposals.ReplaceFromPending(result.PendingUpdates);
+        _sessionProposals.ReplaceFromPending(result.PendingUpdates, ResolveElementName);
 
         _chatHistory = new ChatHistory();
         _chatHistory.AddSystemMessage(SessionProposalSet.BuildSystemInstructions(workflow.Title));
@@ -1655,12 +1655,14 @@ public class Collaborator : ICollaborator
     /// Readable text for a typed pending-update value; lists render per entry and
     /// element GUIDs resolve to outline names (#129).
     /// </summary>
+    private string? ResolveElementName(Guid guid) =>
+        _storyModel?.StoryElements?.StoryElementGuids != null
+        && _storyModel.StoryElements.StoryElementGuids.TryGetValue(guid, out var element)
+            ? element?.Name
+            : null;
+
     private string FormatValueForDisplay(object? value) =>
-        ValueDisplay.Format(value, guid =>
-            _storyModel?.StoryElements?.StoryElementGuids != null
-            && _storyModel.StoryElements.StoryElementGuids.TryGetValue(guid, out var element)
-                ? element?.Name
-                : null);
+        ValueDisplay.Format(value, ResolveElementName);
 
     private static string TruncateForChat(string? text, int max = 200)
     {

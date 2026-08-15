@@ -767,7 +767,9 @@ namespace StoryCollaborator
                         foreach (var rel in relationships)
                         {
                             if (validChars.Contains(rel.RecipientGuid))
-                                _storyApi.AddRelationship(uuid, rel.RecipientGuid, rel.Description, rel.Mirror);
+                                _storyApi.AddRelationship(
+                                    uuid, rel.RecipientGuid, rel.RelationType, rel.Mirror,
+                                    rel.Trait, rel.Attitude, rel.Notes);
                             else
                                 result.StatusMessages.Add(
                                     $"Relationships: recipient GUID {rel.RecipientGuid} not in character candidate set; skipped");
@@ -1127,9 +1129,34 @@ namespace StoryCollaborator
             if (entry.TryGetProperty("recipient_guid", out var rg) || entry.TryGetProperty("GUID", out rg))
                 guidStr = rg.GetString();
             if (!Guid.TryParse(guidStr, out var recipientGuid)) return;
-            var desc = entry.TryGetProperty("description", out var d) ? d.GetString() ?? "" : "";
-            var mirror = entry.TryGetProperty("mirror", out var m) && m.GetBoolean();
-            results.Add(new RelationshipInfo(recipientGuid, desc, mirror));
+            var relationType = ReadJsonString(entry, "RelationType", "relation_type");
+            var notes = ReadJsonString(entry, "Notes", "notes");
+            if (string.IsNullOrWhiteSpace(notes))
+                notes = ReadJsonString(entry, "description");
+            var trait = ReadJsonString(entry, "Trait", "trait");
+            var attitude = ReadJsonString(entry, "Attitude", "attitude");
+            var mirror = true;
+            if (entry.TryGetProperty("mirror", out var m))
+            {
+                mirror = m.ValueKind switch
+                {
+                    JsonValueKind.False => false,
+                    JsonValueKind.True => true,
+                    JsonValueKind.String => !string.Equals(m.GetString(), "false", StringComparison.OrdinalIgnoreCase),
+                    _ => true
+                };
+            }
+            results.Add(new RelationshipInfo(recipientGuid, relationType, mirror, trait, attitude, notes));
+        }
+
+        private static string ReadJsonString(JsonElement entry, params string[] names)
+        {
+            foreach (var name in names)
+            {
+                if (!entry.TryGetProperty(name, out var prop)) continue;
+                return prop.ValueKind == JsonValueKind.String ? prop.GetString() ?? "" : prop.ToString();
+            }
+            return "";
         }
 
         /// <summary>

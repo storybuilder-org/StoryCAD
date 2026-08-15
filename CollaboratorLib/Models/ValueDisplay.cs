@@ -67,7 +67,11 @@ internal static class ValueDisplay
                 return Bullets(relationships.Select(rel =>
                 {
                     var name = ResolveName(rel.RecipientGuid, resolveElementName);
-                    return string.IsNullOrWhiteSpace(rel.Description) ? name : $"{name} — {rel.Description}";
+                    var type = rel.RelationType ?? string.Empty;
+                    var notes = rel.Notes ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(notes))
+                        return string.IsNullOrWhiteSpace(type) ? $"{name} — {notes}" : $"{name} ({type}) — {notes}";
+                    return string.IsNullOrWhiteSpace(type) ? name : $"{name} — {type}";
                 }));
 
             case List<JsonElement> jsonEntries:

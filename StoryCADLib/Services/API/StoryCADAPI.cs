@@ -1035,11 +1035,13 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
     [Description("""
                  Adds a relationship between characters.
                  Both Source and Recipient must be GUIDs of elements that are characters.
-                 Description is the relationship between the two characters.
-                 mirror is a boolean that specifies if the relationship
-                 should be created on both characters.
+                 Description is the short RelationType (the "is a ___ to" slot).
+                 Trait, Attitude, and Notes fill the relationship row.
+                 mirror creates the same row on the partner.
                  """)]
-    public OperationResult<bool> AddRelationship(Guid source, Guid recipient, string desc, bool mirror = false)
+    public OperationResult<bool> AddRelationship(
+        Guid source, Guid recipient, string desc, bool mirror = false,
+        string trait = "", string attitude = "", string notes = "")
     {
         if (CurrentModel == null)
         {
@@ -1058,7 +1060,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
 
         try
         {
-            outlineService.AddRelationship(CurrentModel, source, recipient, desc, mirror);
+            outlineService.AddRelationship(CurrentModel, source, recipient, desc, mirror, trait, attitude, notes);
             return OperationResult<bool>.Success(true);
         }
         catch (Exception ex)

@@ -610,9 +610,9 @@ namespace StoryCollaborator.Workflows
                     label: "Relationship",
                     title: "Character Relationship",
                     description: "Develop the dynamics, history, and tension between two characters.",
-                    explanation: "Relationships create conflict, reveal character, and drive plot. This workflow " +
-                                "explores how two characters relate—their shared history, what they want from each " +
-                                "other, sources of tension, and how the relationship might change through the story.",
+                    explanation: "Name both people. Prefer some sheet fill from Define Character, Character Story Function, or Flaw and Backstory on each side. " +
+                                "The run still proceeds if sheets are thin. The model uses filled traits when they exist. It does not invent missing bulk fields. " +
+                                "Accept writes the short type, Trait, Attitude, and Relationship Notes on both people.",
                     workflowIO: new WorkflowIO
                     {
                         // Primary + Partner full elements for Partner_* placeholders (#106).
@@ -653,7 +653,8 @@ namespace StoryCollaborator.Workflows
                                 ElementType = StoryItemType.Character,
                                 Projection = ElementProjection.IdAndName
                             }
-                        }
+                        },
+                        ExampleLists = new List<string> { "Trait", "Attitude" }
                     }) { PrimaryElementType = StoryItemType.Character },
 
                 // === Setting Workflows (scene-specific) ===

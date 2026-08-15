@@ -30,7 +30,9 @@ public sealed class SessionProposalSet
     public IEnumerable<Entry> All => _entries.Values;
 
     /// <summary>Replace session set from a new workflow extract (open rows).</summary>
-    public void ReplaceFromPending(IEnumerable<PendingUpdate> pending)
+    public void ReplaceFromPending(
+        IEnumerable<PendingUpdate> pending,
+        Func<Guid, string?>? resolveElementName = null)
     {
         _entries.Clear();
         foreach (var u in pending)
@@ -39,7 +41,7 @@ public sealed class SessionProposalSet
             // asks "what is this field now?" (outline text, not a truncated proposal).
             var outline = u.CurrentDisplay ?? string.Empty;
             _entries[u.Key] = new Entry(
-                u, ProposalSessionStatus.Open, FormatValue(u.Value), outline);
+                u, ProposalSessionStatus.Open, FormatValue(u.Value, resolveElementName), outline);
         }
     }
 
@@ -154,7 +156,8 @@ public sealed class SessionProposalSet
     /// Human-readable proposal text. Must not use object.ToString() on lists
     /// (leaks "System.Collections.Generic.List`1[System.String]").
     /// </summary>
-    private static string FormatValue(object? value) => ValueDisplay.Format(value);
+    private static string FormatValue(object? value, Func<Guid, string?>? resolveElementName = null) =>
+        ValueDisplay.Format(value, resolveElementName);
 
     public sealed record Entry(
         PendingUpdate Update,
