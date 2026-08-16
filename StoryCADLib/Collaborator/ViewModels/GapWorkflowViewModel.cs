@@ -32,6 +32,8 @@ public partial class GapWorkflowViewModel : ObservableRecipient
 
     public string EmptyMessage { get; set; } = "No required-field gaps.";
 
+    public string GuessSentence { get; set; } = string.Empty;
+
     /// <summary>Select/focus element in host StoryCAD.</summary>
     public Action<Guid> OnOpenElement { get; set; }
 
@@ -49,7 +51,9 @@ public partial class GapWorkflowViewModel : ObservableRecipient
             foreach (var g in payload.Groups)
                 Groups.Add(g);
         }
+        GuessSentence = payload?.GuessSentence ?? string.Empty;
         OnPropertyChanged(nameof(HasGroups));
+        OnPropertyChanged(nameof(GuessSentence));
     }
 
     private async Task OpenFieldAsync(GapFieldLink field)

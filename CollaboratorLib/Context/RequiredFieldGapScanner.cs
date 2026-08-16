@@ -114,6 +114,10 @@ public static class RequiredFieldGapScanner
             case CharacterModel character:
                 if (IsBlank(character.Role)) missing.Add("Role");
                 if (IsBlank(character.StoryRole)) missing.Add("StoryRole");
+                if (IsBlank(character.Age)) missing.Add("Age");
+                if (IsBlank(character.Sex)) missing.Add("Sex");
+                if (IsBlank(character.Appearance)) missing.Add("Appearance");
+                if (IsBlank(character.BackStory)) missing.Add("BackStory");
                 break;
 
             case SettingModel:

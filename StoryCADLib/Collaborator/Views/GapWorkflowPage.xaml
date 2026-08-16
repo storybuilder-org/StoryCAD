@@ -11,6 +11,8 @@
         <StackPanel Spacing="12">
             <TextBlock Text="{x:Bind ViewModel.Title, Mode=OneWay}"
                        FontWeight="Bold" FontSize="16" TextWrapping="Wrap" />
+            <TextBlock Text="{x:Bind ViewModel.GuessSentence, Mode=OneWay}"
+                       TextWrapping="Wrap" FontWeight="SemiBold" />
             <TextBlock Text="{x:Bind ViewModel.Description, Mode=OneWay}"
                        TextWrapping="Wrap" Opacity="0.9" />
 

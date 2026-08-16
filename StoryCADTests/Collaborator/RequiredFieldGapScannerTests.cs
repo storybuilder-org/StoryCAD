@@ -10,8 +10,8 @@ using StoryCADLib.ViewModels;
 namespace StoryCADTests.Collaborator;
 
 /// <summary>
-/// Collaborator #160: Problem spine essentials include ConflictType, ProblemType, Subject.
-/// Flaw/BackStory remain Character input-only (not gap-required).
+/// Collaborator #160 / #107: Problem spine essentials; Character essentials include BackStory.
+/// Flaw is not gap-required.
 /// </summary>
 [TestClass]
 public class RequiredFieldGapScannerTests
@@ -73,7 +73,29 @@ public class RequiredFieldGapScannerTests
     }
 
     [TestMethod]
-    public void Character_DoesNotRequire_Flaw_Or_BackStory()
+    public void Character_Requires_BackStory_Not_Flaw()
+    {
+        var api = CreateApi();
+        var model = new StoryModel();
+        var character = new CharacterModel("Macbeth", model, null)
+        {
+            Description = "Thane",
+            Role = "General",
+            StoryRole = "Protagonist",
+            Age = "38",
+            Sex = "Male",
+            Appearance = "Weathered"
+            // Flaw / BackStory intentionally empty
+        };
+
+        var missing = RequiredFieldGapScanner.GetMissingProperties(api, character);
+
+        CollectionAssert.Contains(missing.ToList(), "BackStory");
+        CollectionAssert.DoesNotContain(missing.ToList(), "Flaw");
+    }
+
+    [TestMethod]
+    public void Character_ThinSheet_Reports_Age_Sex_Appearance_BackStory()
     {
         var api = CreateApi();
         var model = new StoryModel();
@@ -82,14 +104,59 @@ public class RequiredFieldGapScannerTests
             Description = "Thane",
             Role = "General",
             StoryRole = "Protagonist"
-            // Flaw / BackStory intentionally empty
+        };
+
+        var missing = RequiredFieldGapScanner.GetMissingProperties(api, character);
+
+        CollectionAssert.Contains(missing.ToList(), "Age");
+        CollectionAssert.Contains(missing.ToList(), "Sex");
+        CollectionAssert.Contains(missing.ToList(), "Appearance");
+        CollectionAssert.Contains(missing.ToList(), "BackStory");
+        CollectionAssert.DoesNotContain(missing.ToList(), "Flaw");
+        CollectionAssert.DoesNotContain(missing.ToList(), "Archetype");
+        CollectionAssert.DoesNotContain(missing.ToList(), "Enneagram");
+        CollectionAssert.DoesNotContain(missing.ToList(), "Economic");
+    }
+
+    [TestMethod]
+    public void Character_EssentialEightFilled_DoesNotReportCharacterGaps()
+    {
+        var api = CreateApi();
+        var model = new StoryModel();
+        var character = new CharacterModel("Macbeth", model, null)
+        {
+            Description = "Thane",
+            Role = "General",
+            StoryRole = "Protagonist",
+            Age = "38",
+            Sex = "Male",
+            Appearance = "Weathered",
+            BackStory = "The witches spoke first"
         };
 
         var missing = RequiredFieldGapScanner.GetMissingProperties(api, character);
 
         Assert.AreEqual(0, missing.Count, string.Join(", ", missing));
         CollectionAssert.DoesNotContain(missing.ToList(), "Flaw");
-        CollectionAssert.DoesNotContain(missing.ToList(), "BackStory");
+    }
+
+    [TestMethod]
+    public void GapOwnership_NewCharacterFields_PointToSurfaces()
+    {
+        foreach (var prop in new[] { "Age", "Sex", "Appearance" })
+        {
+            var owners = GapWorkflowOwnership.WorkflowsFor(StoryItemType.Character, prop);
+            Assert.AreEqual(1, owners.Count, prop);
+            Assert.AreEqual("DefineCharacter", owners[0], prop);
+        }
+
+        var backStory = GapWorkflowOwnership.WorkflowsFor(StoryItemType.Character, "BackStory");
+        Assert.AreEqual(1, backStory.Count);
+        Assert.AreEqual("FlawBackstory", backStory[0]);
+        Assert.AreEqual("Backstory",
+            GapWorkflowOwnership.DisplayLabel(StoryItemType.Character, "BackStory"));
+        Assert.AreEqual(0,
+            GapWorkflowOwnership.WorkflowsFor(StoryItemType.Character, "Name").Count);
     }
 
     [TestMethod]

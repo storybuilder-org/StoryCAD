@@ -638,10 +638,20 @@ public class Collaborator : ICollaborator
             };
         }).ToList();
 
+        var guess = new StoryContextBuilder(_storyApi).Classify(_storyModel);
+        _logger?.LogDebug(
+            "Outline gaps guess Earliest={Earliest} OpenSteps={OpenSteps}",
+            guess.Earliest,
+            string.Join(",", guess.OpenSteps));
+
         shellViewModel.ContentFrame.Navigate(typeof(GapWorkflowPage));
         if (shellViewModel.ContentFrame.Content is GapWorkflowPage page && page.ViewModel != null)
         {
-            page.ViewModel.Load(new GapWorkflowPayload { Groups = groups });
+            page.ViewModel.Load(new GapWorkflowPayload
+            {
+                Groups = groups,
+                GuessSentence = guess.GapsSentence
+            });
             page.ViewModel.OnOpenElement = guid =>
             {
                 var result = _storyApi.SelectStoryElement(guid);
