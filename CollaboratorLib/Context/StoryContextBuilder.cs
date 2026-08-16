@@ -32,9 +32,8 @@ public class StoryContextBuilder
 
         var sb = new StringBuilder();
 
-        // Detect development phase
-        var phase = DetectDevelopmentPhase(model);
-        AppendPhaseContext(sb, phase);
+        var guess = Classify(model);
+        AppendPhaseContext(sb, guess.PromptLine);
 
         // Issue #107: required-field gap GUIDs (outline-wide; no problem craft paste)
         if (spec.IncludeGaps)
@@ -62,50 +61,143 @@ public class StoryContextBuilder
     /// </summary>
     public enum DevelopmentPhase
     {
-        Ideation,           // No overview or empty Type/Genre/Premise
-        ProblemDevelopment, // Overview set, but no Story Problem or no beat sheet
-        StructureBuilding,  // Story Problem has beat sheet, hierarchy being built
-        SceneWork           // Scenes assigned to beats
+        Ideation,              // No overview or empty Type/Genre/Premise
+        ProblemDevelopment,    // Premise present; no Story Problem, or seats empty
+        CharacterDevelopment,  // Essential Character fields empty on seated people
+        StructureBuilding,     // After Character Development; no Scene on any beat
+        SceneWork              // Scenes assigned to beats
     }
 
-    /// <summary>
-    /// Detect the current development phase by examining the StoryModel
-    /// </summary>
-    private DevelopmentPhase DetectDevelopmentPhase(StoryModel model)
+    private static readonly string[] EssentialCharacterProperties =
     {
-        var overview = GetOverview(model);
+        "Name", "Description", "Role", "Age", "Sex", "Appearance", "StoryRole", "BackStory"
+    };
 
-        // No overview or missing basic constraints = Ideation
+    /// <summary>
+    /// Classify the outline for StoryContext and Outline gaps (#107).
+    /// </summary>
+    public DevelopmentGuess Classify(StoryModel model)
+    {
+        if (model == null)
+            return MakeGuess(DevelopmentPhase.Ideation, DevelopmentPhase.Ideation);
+
+        var overview = GetOverview(model);
         if (overview == null ||
             string.IsNullOrWhiteSpace(overview.StoryType) ||
             string.IsNullOrWhiteSpace(overview.StoryGenre) ||
             string.IsNullOrWhiteSpace(overview.Premise))
         {
-            return DevelopmentPhase.Ideation;
+            return MakeGuess(DevelopmentPhase.Ideation, DevelopmentPhase.Ideation);
         }
 
-        // No Story Problem assigned = Problem Development
         if (overview.StoryProblem == Guid.Empty)
-        {
-            return DevelopmentPhase.ProblemDevelopment;
-        }
+            return MakeGuess(DevelopmentPhase.ProblemDevelopment, DevelopmentPhase.ProblemDevelopment);
 
         var storyProblem = ResolveElement(overview.StoryProblem, model) as ProblemModel;
         if (storyProblem == null)
+            return MakeGuess(DevelopmentPhase.ProblemDevelopment, DevelopmentPhase.ProblemDevelopment);
+
+        var seats = ProblemCharacterIndex.Build(_api, model).EdgesForProblem(storyProblem.Uuid);
+        var unseated = seats.Count == 0 ||
+                       seats.Any(s => s.Status != ProblemCharacterLinkStatus.Linked);
+        if (unseated)
         {
-            return DevelopmentPhase.ProblemDevelopment;
+            return MakeGuess(
+                DevelopmentPhase.ProblemDevelopment,
+                DevelopmentPhase.ProblemDevelopment,
+                DevelopmentPhase.CharacterDevelopment);
         }
 
-        // Story Problem exists but no beat sheet = Problem Development
-        if (storyProblem.StructureBeats == null || storyProblem.StructureBeats.Count == 0)
+        var seen = new HashSet<Guid>();
+        foreach (var seat in seats)
         {
-            return DevelopmentPhase.ProblemDevelopment;
+            if (!seen.Add(seat.CharacterGuid))
+                continue;
+
+            var person = ResolveElement(seat.CharacterGuid, model);
+            if (person == null || HasEssentialCharacterGap(person))
+            {
+                return MakeGuess(
+                    DevelopmentPhase.CharacterDevelopment,
+                    DevelopmentPhase.CharacterDevelopment);
+            }
         }
 
-        // Check if any beats have scenes assigned (vs just sub-problems)
-        bool hasSceneAssignments = HasSceneAssignments(storyProblem, model);
+        if (HasSceneAssignments(storyProblem, model))
+            return MakeGuess(DevelopmentPhase.SceneWork, DevelopmentPhase.SceneWork);
 
-        return hasSceneAssignments ? DevelopmentPhase.SceneWork : DevelopmentPhase.StructureBuilding;
+        return MakeGuess(DevelopmentPhase.StructureBuilding, DevelopmentPhase.StructureBuilding);
+    }
+
+    /// <summary>
+    /// Detect the current development phase by examining the StoryModel
+    /// </summary>
+    private DevelopmentPhase DetectDevelopmentPhase(StoryModel model) => Classify(model).Earliest;
+
+    private bool HasEssentialCharacterGap(StoryElement person)
+    {
+        var missing = RequiredFieldGapScanner.GetMissingProperties(_api, person);
+        return missing.Any(p => EssentialCharacterProperties.Contains(p, StringComparer.Ordinal));
+    }
+
+    private static DevelopmentGuess MakeGuess(
+        DevelopmentPhase earliest,
+        params DevelopmentPhase[] openSteps)
+    {
+        var steps = (IReadOnlyList<DevelopmentPhase>)openSteps;
+        return new DevelopmentGuess
+        {
+            Earliest = earliest,
+            OpenSteps = steps,
+            PromptLine = PromptLineFor(earliest),
+            GapsSentence = GapsSentenceFor(steps)
+        };
+    }
+
+    internal static string PromptLineFor(DevelopmentPhase phase) => phase switch
+    {
+        DevelopmentPhase.Ideation =>
+            "Early ideation - establishing basic story parameters",
+        DevelopmentPhase.ProblemDevelopment =>
+            "Problem development - building the Story Problem",
+        DevelopmentPhase.CharacterDevelopment =>
+            "Character development - filling essential Character fields",
+        DevelopmentPhase.StructureBuilding =>
+            "Structure building - organizing problems into beat sheet",
+        DevelopmentPhase.SceneWork =>
+            "Scene work - detailed scene-level development",
+        _ => "Unknown phase"
+    };
+
+    internal static string GapsSentenceFor(IReadOnlyList<DevelopmentPhase> openSteps)
+    {
+        bool problem = openSteps.Contains(DevelopmentPhase.ProblemDevelopment);
+        bool character = openSteps.Contains(DevelopmentPhase.CharacterDevelopment);
+        if (problem && character)
+        {
+            return "Guess: Problem Development and Character Development are both open. " +
+                   "The Story Problem needs protagonist and antagonist seats.";
+        }
+
+        if (openSteps.Count == 1)
+        {
+            return openSteps[0] switch
+            {
+                DevelopmentPhase.Ideation =>
+                    "Guess: the outline is in Ideation.",
+                DevelopmentPhase.ProblemDevelopment =>
+                    "Guess: the outline is in Problem Development.",
+                DevelopmentPhase.CharacterDevelopment =>
+                    "Guess: the outline is in Character Development. Essential Character fields are empty on the Story Problem cast.",
+                DevelopmentPhase.StructureBuilding =>
+                    "Guess: the outline is in Structure Building.",
+                DevelopmentPhase.SceneWork =>
+                    "Guess: the outline is in Scene Work.",
+                _ => "Guess: the outline is in an unknown step."
+            };
+        }
+
+        return "Guess: the outline is in " + PromptLineFor(openSteps.FirstOrDefault()) + ".";
     }
 
     /// <summary>
@@ -136,17 +228,10 @@ public class StoryContextBuilder
         return false;
     }
 
-    private void AppendPhaseContext(StringBuilder sb, DevelopmentPhase phase)
+    private void AppendPhaseContext(StringBuilder sb, string promptLine)
     {
         sb.AppendLine("## Development Phase");
-        sb.AppendLine(phase switch
-        {
-            DevelopmentPhase.Ideation => "Early ideation - establishing basic story parameters",
-            DevelopmentPhase.ProblemDevelopment => "Problem/character development - building story elements",
-            DevelopmentPhase.StructureBuilding => "Structure building - organizing problems into beat sheet",
-            DevelopmentPhase.SceneWork => "Scene work - detailed scene-level development",
-            _ => "Unknown phase"
-        });
+        sb.AppendLine(promptLine);
         sb.AppendLine();
     }
 

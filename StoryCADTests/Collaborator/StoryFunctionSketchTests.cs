@@ -68,4 +68,14 @@ public class StoryFunctionSketchTests
         Assert.AreEqual(1, owners.Count);
         Assert.AreEqual("DefineCharacter", owners[0]);
     }
+
+    [TestMethod]
+    public void GapOwnership_HasNo_RoleAndStoryRole()
+    {
+        foreach (var prop in new[] { "Role", "StoryRole", "Description", "Age", "Sex", "Appearance", "BackStory" })
+        {
+            var owners = GapWorkflowOwnership.WorkflowsFor(StoryItemType.Character, prop);
+            CollectionAssert.DoesNotContain(owners.ToList(), "RoleAndStoryRole");
+        }
+    }
 }

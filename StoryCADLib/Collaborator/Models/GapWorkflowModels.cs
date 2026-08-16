@@ -10,6 +10,8 @@ namespace StoryCADLib.Collaborator.Models;
 public sealed class GapWorkflowPayload
 {
     public IReadOnlyList<GapElementGroup> Groups { get; set; } = Array.Empty<GapElementGroup>();
+
+    public string GuessSentence { get; set; } = string.Empty;
 }
 
 public sealed class GapElementGroup

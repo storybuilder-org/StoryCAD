@@ -42,10 +42,14 @@ public static class GapWorkflowOwnership
             (StoryItemType.Problem, "Premise") => new[] { "StoryProblem" },
             (StoryItemType.Problem, "Description") => new[] { "StoryProblem" },
 
-            // #182 occupation Role; #183 Story Function + Character Sketch
+            // #182 occupation Role; #183 Story Function + Character Sketch; #107 essentials
             (StoryItemType.Character, "Role") => new[] { "DefineCharacter" },
+            (StoryItemType.Character, "Age") => new[] { "DefineCharacter" },
+            (StoryItemType.Character, "Sex") => new[] { "DefineCharacter" },
+            (StoryItemType.Character, "Appearance") => new[] { "DefineCharacter" },
             (StoryItemType.Character, "StoryRole") => new[] { "StoryFunction" },
             (StoryItemType.Character, "Description") => new[] { "StoryFunction" },
+            (StoryItemType.Character, "BackStory") => new[] { "FlawBackstory" },
             (StoryItemType.Character, "Name") => Array.Empty<string>(),
 
             (StoryItemType.Setting, "Description") => new[] { "SettingTimeSpace" },
@@ -75,6 +79,7 @@ public static class GapWorkflowOwnership
             (StoryItemType.StoryOverview, "StoryGenre") => "Genre",
             (StoryItemType.StoryOverview, "StoryProblem") => "Story Problem",
             (StoryItemType.Character, "StoryRole") => "Story Role",
+            (StoryItemType.Character, "BackStory") => "Backstory",
             (StoryItemType.Problem, "ProblemCategory") => "Problem Category",
             (StoryItemType.Problem, "ProblemType") => "Problem Type",
             (StoryItemType.Problem, "ConflictType") => "Conflict Type",
