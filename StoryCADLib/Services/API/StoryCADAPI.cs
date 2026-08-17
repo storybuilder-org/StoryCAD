@@ -838,6 +838,12 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         return new ListTarget(element, property, property.PropertyType.GetGenericArguments()[0]);
     }
 
+    private static readonly JsonSerializerOptions CollectionEntryJsonOptions = new()
+    {
+        // LLM TypedList JSON often uses camelCase; CultureEntry uses Pascal [JsonPropertyName].
+        PropertyNameCaseInsensitive = true
+    };
+
     private static object DeserializeEntry(object entry, Type targetType, out string error)
     {
         error = null;
@@ -848,7 +854,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         try
         {
             var json = entry is JsonElement je ? je : JsonSerializer.SerializeToElement(entry);
-            var result = json.Deserialize(targetType);
+            var result = json.Deserialize(targetType, CollectionEntryJsonOptions);
             if (result == null)
             {
                 error = $"Conversion of '{entry.GetType().Name}' to '{targetType.Name}' produced null.";
