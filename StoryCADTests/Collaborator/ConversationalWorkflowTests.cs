@@ -12,11 +12,11 @@ public class ConversationalWorkflowTests
     public void ProseReply_SucceedsWithNoPendingUpdates()
     {
         var result = WorkflowRunner.BuildConversationalResult(
-            "I was born in East Harlem. My mother worked a register downtown.");
+            "FIELD: Flaw | LINE: 1\nYou want something you do not have yet. That's fair to say?");
 
         Assert.IsTrue(result.Success);
         Assert.AreEqual(0, result.PendingUpdates.Count);
-        StringAssert.Contains(result.RawResponse, "East Harlem");
+        StringAssert.Contains(result.RawResponse, "That's fair to say?");
     }
 
     [TestMethod]
@@ -28,45 +28,106 @@ public class ConversationalWorkflowTests
     }
 
     [TestMethod]
-    public void SectionTurn_SetsSectionAndClearsFreeQuestion()
+    public void OpeningTurn_SendsNoCurrentQuestionAndTheFirstLineAsNext()
     {
+        // Nothing has been asked yet, so the Worker resolves an empty current question
+        // and the model simply asks the next one.
         var args = new Dictionary<string, string>();
 
         WorkflowRunner.SetInterviewArgs(
-            args, sectionId: "Origin", freeQuestion: null,
-            transcript: "", chosenSections: "PresentWork,Origin");
+            args, field: "", line: 0, nextField: "Flaw", nextLine: 1,
+            followUpUsed: false, forceFollowUp: false, retryCount: 0, transcript: "", answer: null);
 
-        Assert.AreEqual("Origin", args["InterviewSection"]);
-        Assert.AreEqual(string.Empty, args["InterviewFreeQuestion"]);
-        Assert.AreEqual("PresentWork,Origin", args["InterviewChosenSections"]);
+        Assert.AreEqual(string.Empty, args["InterviewField"]);
+        Assert.AreEqual(string.Empty, args["InterviewLine"]);
+        Assert.AreEqual("Flaw", args["InterviewNextField"]);
+        Assert.AreEqual("1", args["InterviewNextLine"]);
+        Assert.AreEqual(string.Empty, args["InterviewAnswer"]);
     }
 
     [TestMethod]
-    public void FreeQuestionTurn_SetsQuestionAndClearsSection()
+    public void AnsweredTurn_SendsBothPositionsPrecomputed()
     {
+        // The model picks between two resolved lines rather than retrieving one. Asked
+        // to do the arithmetic itself it drifted, reporting one position while asking
+        // another's question.
         var args = new Dictionary<string, string>();
 
         WorkflowRunner.SetInterviewArgs(
-            args, sectionId: null, freeQuestion: "Do you use?",
-            transcript: "[section Origin]\nEast Harlem.", chosenSections: "Origin");
+            args, field: "Flaw", line: 4, nextField: "BackStory", nextLine: 1,
+            followUpUsed: false, forceFollowUp: false, retryCount: 0,
+            transcript: "[Flaw:1] Q: That's fair to say?\nA: Yes.",
+            answer: "After the fire.");
 
-        Assert.AreEqual(string.Empty, args["InterviewSection"]);
-        Assert.AreEqual("Do you use?", args["InterviewFreeQuestion"]);
-        StringAssert.Contains(args["InterviewTranscript"], "East Harlem.");
+        Assert.AreEqual("Flaw", args["InterviewField"]);
+        Assert.AreEqual("4", args["InterviewLine"]);
+        Assert.AreEqual("BackStory", args["InterviewNextField"]);
+        Assert.AreEqual("1", args["InterviewNextLine"]);
+        Assert.AreEqual("After the fire.", args["InterviewAnswer"]);
+        StringAssert.Contains(args["InterviewTranscript"], "[Flaw:1]");
+    }
+
+    [TestMethod]
+    public void LastTurn_SendsNoNextPosition()
+    {
+        // How the Worker is told the interview is over.
+        var args = new Dictionary<string, string>();
+
+        WorkflowRunner.SetInterviewArgs(
+            args, field: "Description", line: 2, nextField: null, nextLine: 0,
+            followUpUsed: false, forceFollowUp: false, retryCount: 0,
+            transcript: "", answer: "That is the spine.");
+
+        Assert.AreEqual(string.Empty, args["InterviewNextField"]);
+        Assert.AreEqual(string.Empty, args["InterviewNextLine"]);
+    }
+
+    [TestMethod]
+    public void FollowUpUsed_IsSentRatherThanCounted()
+    {
+        // One bit the client already knows. Deriving it from the transcript is what
+        // made the model lose its place.
+        var args = new Dictionary<string, string>();
+
+        WorkflowRunner.SetInterviewArgs(
+            args, "Flaw", 3, "Flaw", 4, followUpUsed: true, forceFollowUp: false,
+            retryCount: 0, transcript: "", answer: "x");
+
+        Assert.AreEqual("yes", args["InterviewFollowUpUsed"]);
+    }
+
+    [TestMethod]
+    public void RetryCount_TellsTheWorkerWhenToRewordRatherThanRepeat()
+    {
+        // Terry: repeat the question with the premise still in it. The first re-ask is
+        // that repeat; a second identical one is the wall a writer cannot get past, so
+        // from there the Worker rewords instead, holding the premise.
+        var args = new Dictionary<string, string>();
+
+        WorkflowRunner.SetInterviewArgs(
+            args, "Flaw", 4, "BackStory", 1, followUpUsed: false, forceFollowUp: false,
+            retryCount: 1, transcript: "", answer: "I don't know");
+
+        Assert.AreEqual("1", args["InterviewRetryCount"]);
     }
 
     [TestMethod]
     public void EveryInterviewArgIsAlwaysPresent()
     {
         // The Worker merges {{$Var}} placeholders; a missing key merges as empty and
-        // silently changes the prompt. Always write all four.
+        // silently changes the prompt. Always write all of them.
         var args = new Dictionary<string, string>();
 
-        WorkflowRunner.SetInterviewArgs(args, null, null, null, null);
+        WorkflowRunner.SetInterviewArgs(args, null, 0, null, 0, false, false, 0, null, null);
 
-        CollectionAssert.Contains(args.Keys, "InterviewSection");
-        CollectionAssert.Contains(args.Keys, "InterviewFreeQuestion");
-        CollectionAssert.Contains(args.Keys, "InterviewTranscript");
-        CollectionAssert.Contains(args.Keys, "InterviewChosenSections");
+        foreach (var key in new[]
+                 {
+                     "InterviewField", "InterviewLine", "InterviewNextField",
+                     "InterviewNextLine", "InterviewFollowUpUsed", "InterviewForceFollowUp",
+                     "InterviewRetryCount", "InterviewTranscript", "InterviewAnswer"
+                 })
+        {
+            CollectionAssert.Contains(args.Keys, key);
+        }
     }
 }

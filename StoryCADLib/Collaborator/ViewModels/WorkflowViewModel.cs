@@ -39,11 +39,7 @@ public partial class WorkflowViewModel : ObservableRecipient
         AcceptRemainingCommand = new RelayCommand(async () => await ExecuteAcceptRemainingAsync());
 
         // Character Interview (#119)
-        InterviewSections = new ObservableCollection<InterviewSectionItem>();
-        StartInterviewCommand = new RelayCommand(async () => await StartInterviewAsync());
-        NextSectionCommand = new RelayCommand(async () => await NextSectionAsync());
-        SkipToQuestionsCommand = new RelayCommand(async () => await SkipToQuestionsAsync());
-        SummarizeCommand = new RelayCommand(async () => await SummarizeAsync());
+        SaveInterviewCommand = new RelayCommand(async () => await SaveInterviewAsync());
     }
 
     /// <summary>
@@ -384,38 +380,12 @@ public partial class WorkflowViewModel : ObservableRecipient
 
     #region Character Interview (#119)
 
-    /// <summary>Section picker rows. Empty for every workflow but the interview.</summary>
-    public ObservableCollection<InterviewSectionItem> InterviewSections { get; private set; }
-
-    private bool _isInterviewPickerVisible;
-    /// <summary>
-    /// True between arriving on the page and pressing Start. The picker occupies the
-    /// left panel, which holds no proposals yet.
-    /// </summary>
-    public bool IsInterviewPickerVisible
-    {
-        get => _isInterviewPickerVisible;
-        set
-        {
-            if (SetProperty(ref _isInterviewPickerVisible, value))
-            {
-                OnPropertyChanged(nameof(InterviewPickerVisibility));
-                OnPropertyChanged(nameof(PropertyUpdatesVisibility));
-            }
-        }
-    }
-
-    public Microsoft.UI.Xaml.Visibility InterviewPickerVisibility =>
-        IsInterviewPickerVisible
-            ? Microsoft.UI.Xaml.Visibility.Visible
-            : Microsoft.UI.Xaml.Visibility.Collapsed;
-
     private bool _isInterviewSession;
     /// <summary>
-    /// True for the whole interview, picker and questions alike. The Next/Summarize row
-    /// hangs off this rather than off the two IsEnabled flags: disabled is not absent,
-    /// and every other workflow would otherwise carry a dead pair of buttons under
-    /// Accept all, shortening its Property Updates list to make room.
+    /// True for the whole interview. The Save control hangs off this rather than off its
+    /// IsEnabled flag: disabled is not absent, and every other workflow would otherwise
+    /// carry a dead button under Accept all, shortening its Property Updates list to make
+    /// room.
     /// </summary>
     public bool IsInterviewSession
     {
@@ -432,39 +402,28 @@ public partial class WorkflowViewModel : ObservableRecipient
             ? Microsoft.UI.Xaml.Visibility.Visible
             : Microsoft.UI.Xaml.Visibility.Collapsed;
 
+    private bool _canSaveInterview;
     /// <summary>
-    /// The Property Updates header and list, hidden while the picker holds the panel.
-    /// The picker used to be drawn over them, but every candidate theme background is
-    /// translucent, so both headers rendered on top of each other. One occupant at a
-    /// time instead of a z-order trick.
+    /// Available from the first answered question, not only after the last. It rescues a
+    /// session the writer abandons partway. Collaborator sets it when an answer is
+    /// recorded, never at open: pressing it over an empty transcript can only print a
+    /// refusal.
     /// </summary>
-    public Microsoft.UI.Xaml.Visibility PropertyUpdatesVisibility =>
-        IsInterviewPickerVisible
-            ? Microsoft.UI.Xaml.Visibility.Collapsed
-            : Microsoft.UI.Xaml.Visibility.Visible;
-
-    /// <summary>At least one section ticked.</summary>
-    public bool HasChosenSections =>
-        InterviewSections != null && InterviewSections.Any(s => s.IsSelected);
-
-    private bool _canSummarize;
-    /// <summary>
-    /// Available once the first section has been answered, not only after the last.
-    /// Design: it rescues the session a writer abandons partway. Collaborator sets it
-    /// when a reply lands, never at Start — pressing it over an empty transcript can
-    /// only print a refusal.
-    /// </summary>
-    public bool CanSummarize
+    public bool CanSaveInterview
     {
-        get => _canSummarize;
-        set => SetProperty(ref _canSummarize, value);
+        get => _canSaveInterview;
+        set
+        {
+            if (SetProperty(ref _canSaveInterview, value))
+                OnPropertyChanged(nameof(CanPressSave));
+        }
     }
 
     private bool _isInterviewTurnRunning;
     /// <summary>
-    /// A turn is in flight. The controls are plain RelayCommands over async void handlers,
-    /// so nothing self-disables while one runs: without this, two presses of Next dequeue
-    /// two sections, post two overlapping requests, and record them in completion order.
+    /// A turn is in flight. Save is a plain RelayCommand over an async void handler, so
+    /// nothing self-disables while one runs, and a save landing mid-turn would write a
+    /// transcript missing the answer being recorded.
     /// </summary>
     public bool IsInterviewTurnRunning
     {
@@ -472,127 +431,34 @@ public partial class WorkflowViewModel : ObservableRecipient
         set
         {
             if (SetProperty(ref _isInterviewTurnRunning, value))
-                OnPropertyChanged(nameof(CanAskNextSection));
+                OnPropertyChanged(nameof(CanPressSave));
         }
     }
 
-    private int _remainingSections;
-    private string _nextSectionTitle = string.Empty;
+    /// <summary>What Save actually binds to: something to save, and nothing in flight.</summary>
+    public bool CanPressSave => CanSaveInterview && !IsInterviewTurnRunning;
+
+    public RelayCommand SaveInterviewCommand { get; private set; }
+
+    /// <summary>Collaborator writes the transcript to a Notes element under the character.</summary>
+    public Func<Task> OnSaveInterview { get; set; }
 
     /// <summary>
-    /// Sections still queued. The writer needs an explicit control to advance: every
-    /// typed line is a free question, so there is nothing for a typed "next" to hook.
+    /// Puts the page into interview mode. Called by Collaborator when a Conversational
+    /// workflow opens, before the first question is asked.
     /// </summary>
-    public bool HasMoreSections => _remainingSections > 0;
-
-    /// <summary>What the Next control actually binds to: queued work, and nothing in flight.</summary>
-    public bool CanAskNextSection => HasMoreSections && !IsInterviewTurnRunning;
-
-    /// <summary>
-    /// Names what is coming rather than counting what is left. A bare count told the
-    /// writer how many presses remained but not what they were about to ask.
-    /// </summary>
-    public string NextSectionLabel =>
-        _remainingSections > 0 && !string.IsNullOrWhiteSpace(_nextSectionTitle)
-            ? $"Next question - {_nextSectionTitle}"
-            : "Next question";
-
-    /// <summary>Called after every turn with the head of the queue, if any.</summary>
-    public void SetUpcomingSection(string title, int remaining)
+    public void BeginInterviewSession()
     {
-        _remainingSections = remaining < 0 ? 0 : remaining;
-        _nextSectionTitle = title ?? string.Empty;
-        OnPropertyChanged(nameof(HasMoreSections));
-        OnPropertyChanged(nameof(CanAskNextSection));
-        OnPropertyChanged(nameof(NextSectionLabel));
-    }
-
-    public RelayCommand StartInterviewCommand { get; private set; }
-    public RelayCommand NextSectionCommand { get; private set; }
-    public RelayCommand SkipToQuestionsCommand { get; private set; }
-    public RelayCommand SummarizeCommand { get; private set; }
-
-    /// <summary>Collaborator runs the chosen sections.</summary>
-    public Func<IReadOnlyList<string>, Task> OnStartInterview { get; set; }
-
-    /// <summary>
-    /// Collaborator opens the interview with no queue at all, so the writer asks their
-    /// own questions from the first turn. Always available: skipping the script is not
-    /// gated on having ticked anything.
-    /// </summary>
-    public Func<Task> OnSkipToQuestions { get; set; }
-
-    /// <summary>Collaborator asks the next queued section.</summary>
-    public Func<Task> OnNextSection { get; set; }
-
-    /// <summary>Collaborator runs CharacterInterviewSummary over the transcript.</summary>
-    public Func<Task> OnSummarize { get; set; }
-
-    public void SetInterviewSections(IReadOnlyList<InterviewSectionItem> sections)
-    {
-        InterviewSections.Clear();
-        if (sections != null)
-        {
-            foreach (var section in sections)
-            {
-                section.PropertyChanged += (_, e) =>
-                {
-                    if (e.PropertyName == nameof(InterviewSectionItem.IsSelected))
-                        OnPropertyChanged(nameof(HasChosenSections));
-                };
-                InterviewSections.Add(section);
-            }
-        }
-
-        IsInterviewSession = InterviewSections.Count > 0;
-        IsInterviewPickerVisible = InterviewSections.Count > 0;
-        CanSummarize = false;
+        IsInterviewSession = true;
+        CanSaveInterview = false;
         IsInterviewTurnRunning = false;
-        OnPropertyChanged(nameof(HasChosenSections));
     }
 
-    public async Task StartInterviewAsync()
+    private async Task SaveInterviewAsync()
     {
-        if (!HasChosenSections || IsInterviewTurnRunning) return;
-
-        var chosen = InterviewSections
-            .Where(s => s.IsSelected)
-            .Select(s => s.Id)
-            .ToList();
-
-        if (OnStartInterview != null)
-            await OnStartInterview(chosen);
-    }
-
-    public async Task NextSectionAsync()
-    {
-        if (!CanAskNextSection) return;
-        if (OnNextSection != null)
-            await OnNextSection();
-    }
-
-    /// <summary>Straight to free-form questions, ticked sections or not.</summary>
-    public async Task SkipToQuestionsAsync()
-    {
-        if (OnSkipToQuestions != null)
-            await OnSkipToQuestions();
-    }
-
-    /// <summary>
-    /// Called by Collaborator when the writer leaves the picker, by Start or by Skip.
-    /// Summarize is not unlocked here: <see cref="CanSummarize"/> waits for a reply, so
-    /// the control is never enabled over an empty transcript.
-    /// </summary>
-    public void MarkInterviewStarted()
-    {
-        IsInterviewPickerVisible = false;
-    }
-
-    private async Task SummarizeAsync()
-    {
-        if (!CanSummarize || IsInterviewTurnRunning) return;
-        if (OnSummarize != null)
-            await OnSummarize();
+        if (!CanPressSave) return;
+        if (OnSaveInterview != null)
+            await OnSaveInterview();
     }
 
     #endregion

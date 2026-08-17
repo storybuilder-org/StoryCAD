@@ -7,14 +7,22 @@ using StoryCollaborator.Workflows;
 
 namespace StoryCADTests.Collaborator;
 
-/// <summary>Collaborator #119: Character Interview registry entries.</summary>
+/// <summary>
+/// Collaborator #119: Character Interview registry and transcript.
+///
+/// Terry rejected the first build because Collaborator answered as the character and the
+/// exchange was never saved. These tests hold the two things that changed.
+/// </summary>
 [TestClass]
 public class CharacterInterviewRegistryTests
 {
+    private static Workflow Interview() =>
+        WorkflowRegistry.All.First(w => w.Label == "CharacterInterview");
+
     [TestMethod]
     public void CharacterInterview_IsConversational_AndTargetsCharacter()
     {
-        var workflow = WorkflowRegistry.All.First(w => w.Label == "CharacterInterview");
+        var workflow = Interview();
 
         Assert.AreEqual(WorkflowMode.Conversational, workflow.Mode);
         Assert.AreEqual(StoryItemType.Character, workflow.PrimaryElementType);
@@ -24,100 +32,30 @@ public class CharacterInterviewRegistryTests
     [TestMethod]
     public void CharacterInterview_DeclaresOptionalOverviewAndProblem()
     {
-        var io = WorkflowRegistry.All.First(w => w.Label == "CharacterInterview").GetIO();
-        var labels = io.OptionalInputs.Select(r => r.ElementLabel).ToList();
+        var labels = Interview().GetIO().OptionalInputs.Select(r => r.ElementLabel).ToList();
 
         CollectionAssert.Contains(labels, "Overview");
         CollectionAssert.Contains(labels, "Problem");
     }
 
     [TestMethod]
-    public void CharacterInterview_ProposesNothingItself()
+    public void CharacterInterview_ProposesNothing()
     {
-        // The interview turns return prose. Summarize owns every write.
-        var io = WorkflowRegistry.All.First(w => w.Label == "CharacterInterview").GetIO();
+        // The interview asks; the writer answers; the transcript is saved verbatim. There
+        // is no model pass between what was typed and what the outline keeps, so there is
+        // nothing for the proposal path to extract.
+        var io = Interview().GetIO();
+
         Assert.AreEqual(0, io.Outputs.SelectMany(o => o.PropertiesToUpdate).Count());
     }
 
     [TestMethod]
-    public void Summary_IsOneShot_AndTargetsTheAgreedFields()
+    public void SummaryWorkflow_IsGone()
     {
-        var workflow = WorkflowRegistry.All.First(w => w.Label == "CharacterInterviewSummary");
-        var properties = workflow.GetIO().Outputs
-            .SelectMany(o => o.PropertiesToUpdate)
-            .Select(s => s.Property)
-            .ToList();
-
-        Assert.AreEqual(WorkflowMode.OneShot, workflow.Mode);
-        CollectionAssert.Contains(properties, "Notes");
-        CollectionAssert.Contains(properties, "BackStory");
-        CollectionAssert.Contains(properties, "Flaw");
-        CollectionAssert.Contains(properties, "Values");
-        CollectionAssert.Contains(properties, "PsychNotes");
-        CollectionAssert.Contains(properties, "Education");
-        CollectionAssert.Contains(properties, "Nationality");
-        CollectionAssert.Contains(properties, "Ethnic");
-    }
-
-    [TestMethod]
-    public void Summary_ExcludesFieldsOwnedElsewhereOrPresentTense()
-    {
-        // Economic holds present-tense means; Q9 asks about childhood (design: Outputs).
-        // Description is the Character Sketch, owned by RoleAndStoryRole.
-        var properties = WorkflowRegistry.All
-            .First(w => w.Label == "CharacterInterviewSummary")
-            .GetIO().Outputs
-            .SelectMany(o => o.PropertiesToUpdate)
-            .Select(s => s.Property)
-            .ToList();
-
-        CollectionAssert.DoesNotContain(properties, "Economic");
-        CollectionAssert.DoesNotContain(properties, "Description");
-        CollectionAssert.DoesNotContain(properties, "RelationshipList");
-    }
-
-    [TestMethod]
-    public void Summary_WritesBackToTheProblemItAskedAbout()
-    {
-        // Terry, 2026-08-12: the interview must inform the rest of the outline. The
-        // presupposition questions take a Problem field as their premise, so the answer
-        // belongs on that Problem, not only on the Character.
-        var outputs = WorkflowRegistry.All
-            .First(w => w.Label == "CharacterInterviewSummary")
-            .GetIO().Outputs;
-
-        var problem = outputs.FirstOrDefault(o => o.ElementLabel == "Problem");
-        Assert.IsNotNull(problem, "Summary declares no Problem output");
-        Assert.AreEqual(StoryItemType.Problem, problem!.ElementType);
-
-        var props = problem.PropertiesToUpdate.Select(s => s.Property).ToList();
-        CollectionAssert.Contains(props, "ProtMotive");
-        CollectionAssert.Contains(props, "AntagMotive");
-        CollectionAssert.Contains(props, "ProtConflict");
-    }
-
-    [TestMethod]
-    public void Summary_TakesTheProblemAsAnOptionalInput()
-    {
-        // Declared, or the Problem_* placeholders never merge. Optional, because an
-        // interview can run on a character with no linked problem at all.
-        var io = WorkflowRegistry.All
-            .First(w => w.Label == "CharacterInterviewSummary").GetIO();
-
-        Assert.IsTrue(io.OptionalInputs.Any(r => r.ElementLabel == "Problem"));
-        Assert.IsFalse(io.RequiredInputs.Any(r => r.ElementLabel == "Problem"));
-    }
-
-    [TestMethod]
-    public void Summary_IsOffTheMenu()
-    {
-        // Its only meaningful input is a transcript that exists solely inside an interview
-        // session. Picked from the nav pane it would propose a life story from nothing.
-        var summary = WorkflowRegistry.All.First(w => w.Label == "CharacterInterviewSummary");
-        var interview = WorkflowRegistry.All.First(w => w.Label == "CharacterInterview");
-
-        Assert.IsFalse(summary.ShowInMenu);
-        Assert.IsTrue(interview.ShowInMenu);
+        // Terry: "Do not improve the Summarize prose. Save the questions as asked and the
+        // answers as typed." A workflow that writes a fresh digest from the transcript has
+        // no role left, and registered it would still be reachable.
+        Assert.IsFalse(WorkflowRegistry.All.Any(w => w.Label == "CharacterInterviewSummary"));
     }
 
     [TestMethod]
@@ -139,6 +77,26 @@ public class CharacterInterviewRegistryTests
                 + $"in the registry; {workflow.Label} would draw a duplicate group header.");
             seen.Add(workflow.PrimaryElementType);
             previous = workflow.PrimaryElementType;
+        }
+    }
+
+    [TestMethod]
+    public void EveryFieldTheBankTargets_ExistsOnCharacterModel()
+    {
+        // The bank lives on the Worker (ADR-005), so this side cannot check its wording.
+        // It can check that every field id the Worker will send back names a real property,
+        // which is what makes "every question names a field" mean anything downstream.
+        string[] fields =
+        {
+            "Flaw", "BackStory", "Values", "Enneagram", "Focus", "PsychNotes",
+            "Abnormality", "Intelligence", "TraitList", "Role", "StoryRole",
+            "Archetype", "Description"
+        };
+
+        foreach (var field in fields)
+        {
+            Assert.IsNotNull(typeof(CharacterModel).GetProperty(field),
+                $"The interview bank targets {field}, which is not a property on CharacterModel.");
         }
     }
 }

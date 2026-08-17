@@ -51,10 +51,24 @@ public class Collaborator : ICollaborator
 
     /// <summary>Collaborator #119: the interview in flight, if any.</summary>
     private InterviewTranscript? _interviewTranscript;
-    private Queue<string>? _interviewQueue;
-    private List<string> _interviewChosenSections = new();
     private string _interviewCharacterName = string.Empty;
+    private Guid _interviewCharacterGuid;
     private Dictionary<string, StoryElement>? _interviewElements;
+
+    /// <summary>
+    /// The cursor. The Worker is stateless per turn and owns the question bank, so the
+    /// client carries the position back on every call and never holds question text.
+    /// </summary>
+    private readonly InterviewCursor _interviewCursor = new();
+
+    /// <summary>
+    /// The question on screen with no answer yet. A turn is only recorded once the writer
+    /// replies, so this is what the next answer gets paired with.
+    /// </summary>
+    private string _interviewPendingQuestion = string.Empty;
+
+    /// <summary>True once the transcript has been written to a Notes element.</summary>
+    private bool _interviewSaved;
 
     // State
     private IStoryCADAPI? _storyApi;
@@ -243,6 +257,10 @@ public class Collaborator : ICollaborator
 
                         viewModel.StatusText = string.Empty;
 
+                        // #119: navigating to another workflow abandons an interview just as
+                        // surely as closing the window does. Write it before the page goes.
+                        EndInterviewSession();
+
                         // Navigate to WorkflowPage
                         viewModel.ContentFrame.Navigate(typeof(StoryCADLib.Collaborator.Views.WorkflowPage));
 
@@ -260,8 +278,8 @@ public class Collaborator : ICollaborator
                                 page.ViewModel.AddStatusMessage(message);
                             }
 
-                            // #119: a conversational workflow does not auto-run. The writer
-                            // picks which sections to ask about first.
+                            // #119: a conversational workflow asks rather than proposes, so
+                            // it opens an interview instead of running once and extracting.
                             if (workflow.Mode == WorkflowMode.Conversational)
                                 await StartInterviewSessionAsync(page.ViewModel, workflow, gatherResult.Elements);
                             else
@@ -297,6 +315,10 @@ public class Collaborator : ICollaborator
                 Summary = "No active session"
             };
         }
+
+        // #119: before EndSession, because an unsaved interview is written to the outline
+        // here and RefreshCurrentView below is what puts the new node on screen.
+        EndInterviewSession();
 
         _sessionService.EndSession();
 
@@ -1154,163 +1176,70 @@ public class Collaborator : ICollaborator
     }
 
     /// <summary>
-    /// Executes the workflow and provides feedback to the user via the conversation list.
+    /// Opens an interview (#119). Collaborator asks the first question immediately: there
+    /// is nothing for the writer to choose first, and an empty panel with a Start button
+    /// only delays the thing they came for.
     /// </summary>
-    /// <summary>
-    /// Opens an interview (#119): offer the sections this outline's setting supports and
-    /// wait. Nothing is sent until the writer presses Start.
-    /// </summary>
-    private Task StartInterviewSessionAsync(
+    private async Task StartInterviewSessionAsync(
         StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
         Workflow workflow,
         Dictionary<string, StoryElement> gatheredElements)
     {
         _interviewTranscript = new InterviewTranscript();
-        _interviewQueue = null;
-        _interviewChosenSections = new List<string>();
         _interviewElements = gatheredElements;
-        _interviewCharacterName = gatheredElements.TryGetValue("Character", out var character)
-            ? character?.Name ?? "this character"
-            : "this character";
+        _interviewCursor.Reset();
+        _interviewPendingQuestion = string.Empty;
+        _interviewSaved = false;
 
-        var modern = LooksModernSetting(gatheredElements);
-        var sections = InterviewSectionCatalog.ForSetting(modern)
-            .Select(s => new StoryCADLib.Collaborator.Models.InterviewSectionItem
-            {
-                Id = s.Id,
-                Title = s.Title,
-                Blurb = s.Blurb
-            })
-            .ToList();
+        viewModel.BeginInterviewSession();
+        gatheredElements.TryGetValue("Character", out var character);
+        _interviewCharacterName = character?.Name ?? "this character";
+        _interviewCharacterGuid = character?.Uuid ?? Guid.Empty;
 
-        viewModel.SetInterviewSections(sections);
-        viewModel.IsChatEnabled = false;
-        viewModel.ChatPlaceholder = "Pick sections, then Start";
+        viewModel.ChatPlaceholder = $"Answer as {_interviewCharacterName}…";
+        viewModel.IsChatEnabled = true;
         viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
-            $"Choose what to ask {_interviewCharacterName} about, then press Start interview. " +
-            "You can break in with your own questions between sections, and press Summarize " +
-            "whenever you have enough."));
+            $"Answer as {_interviewCharacterName}, in their voice, in first person. There are "
+            + "no wrong answers and nothing here is written to their form until you save. "
+            + "If a question assumes something you have not decided yet, decide it now."));
 
-        viewModel.OnStartInterview = async chosen =>
-        {
-            // The full chosen set, kept apart from the queue: the queue is consumed as the
-            // interview runs, and InterviewChosenSections has to keep telling the Worker
-            // what the whole plan was, including the section being asked right now.
-            _interviewChosenSections = chosen.ToList();
-            _interviewQueue = new Queue<string>(chosen);
-            viewModel.MarkInterviewStarted();
-            viewModel.IsChatEnabled = true;
-            viewModel.ChatPlaceholder = "Ask them something…";
-            await RunInterviewTurnAsync(viewModel, workflow, sectionId: null);
-            PushUpcomingSection(viewModel);
-        };
+        viewModel.OnSendMessage = answer => RunInterviewTurnAsync(viewModel, workflow, answer);
+        viewModel.OnSaveInterview = () => SaveInterviewAsync(viewModel);
 
-        viewModel.OnNextSection = async () =>
-        {
-            await RunInterviewTurnAsync(viewModel, workflow, sectionId: null);
-            PushUpcomingSection(viewModel);
-        };
+        _logger?.LogInformation("Interview opened for {Character}", _interviewCharacterName);
 
-        // Skip the script entirely: no queue, chat open from the first turn.
-        viewModel.OnSkipToQuestions = () =>
-        {
-            _interviewChosenSections = new List<string>();
-            _interviewQueue = new Queue<string>();
-            viewModel.MarkInterviewStarted();
-            viewModel.IsChatEnabled = true;
-            viewModel.ChatPlaceholder = "Ask them something…";
-            PushUpcomingSection(viewModel);
-            viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
-                $"Ask {_interviewCharacterName} whatever you like. They answer in their " +
-                "own voice, and they will say so rather than invent when your outline " +
-                "does not cover something."));
-            _logger?.LogInformation("Interview skipped to free questions for {Character}",
-                _interviewCharacterName);
-            return Task.CompletedTask;
-        };
-
-        viewModel.OnSummarize = () => RunInterviewSummaryAsync(viewModel, workflow);
-
-        WireInterviewChat(viewModel, workflow);
-
-        _logger?.LogInformation(
-            "Interview opened for {Character}; {Count} sections offered (modern={Modern})",
-            _interviewCharacterName, sections.Count, modern);
-
-        return Task.CompletedTask;
+        await RunInterviewTurnAsync(viewModel, workflow, answer: null);
     }
 
     /// <summary>
-    /// Points chat at the interview rather than the proposal-chat path (#119).
-    /// SendButtonClicked posts whatever the handler returns, so the turn hands the reply
-    /// back rather than posting it itself. Summarize swaps this out again: the interview
-    /// is over by then, and typed messages belong to the proposals it produced.
-    /// </summary>
-    private void WireInterviewChat(
-        StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
-        Workflow workflow)
-    {
-        viewModel.OnSendMessage = userMessage =>
-            RunInterviewTurnAsync(viewModel, workflow, sectionId: null, freeQuestion: userMessage);
-    }
-
-    /// <summary>
-    /// Names the section at the head of the queue on the Next control (#119), so the
-    /// button says what it is about to ask rather than how many presses are left.
-    /// </summary>
-    private void PushUpcomingSection(
-        StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel)
-    {
-        var remaining = _interviewQueue?.Count ?? 0;
-        var title = string.Empty;
-
-        if (remaining > 0)
-        {
-            var nextId = _interviewQueue!.Peek();
-            title = InterviewSectionCatalog.All
-                .FirstOrDefault(s => s.Id == nextId)?.Title ?? nextId;
-        }
-
-        viewModel.SetUpcomingSection(title, remaining);
-    }
-
-    /// <summary>
-    /// One interview turn (#119): either the next chosen section, or the writer's own
-    /// question. Returns the reply text.
+    /// One interview turn (#119): record the answer just given, then ask what the Worker
+    /// says comes next.
     ///
-    /// A section turn posts the reply to chat itself, because nothing else will. A free
-    /// question does not: it arrives through OnSendMessage, and SendButtonClicked posts
-    /// whatever that returns. Posting in both places would double every free answer.
+    /// Returns the question text so SendButtonClicked posts it. The opening turn has no
+    /// answer and nothing to post it, so that one posts itself.
     /// </summary>
     private async Task<string> RunInterviewTurnAsync(
         StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
         Workflow workflow,
-        string? sectionId,
-        string? freeQuestion = null)
+        string? answer)
     {
         if (_interviewTranscript == null || _interviewElements == null)
             return string.Empty;
 
-        // One turn at a time. The commands are async void, so a second press during a slow
-        // call would otherwise open a concurrent turn against the same transcript.
+        // One turn at a time. Send is async void, so a second press during a slow call
+        // would otherwise open a concurrent turn against the same transcript.
         if (viewModel.IsInterviewTurnRunning)
             return string.Empty;
 
-        var queuedSection = false;
-        if (freeQuestion == null)
-        {
-            // Peeked, not dequeued: a section that fails mid-call stays at the head of the
-            // queue so Next asks it again, instead of vanishing from the interview.
-            sectionId ??= _interviewQueue is { Count: > 0 } ? _interviewQueue.Peek() : null;
-            if (sectionId == null)
-            {
-                viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
-                    "That is every section you picked. Ask anything else, or press Summarize."));
-                return string.Empty;
-            }
+        var opening = answer == null;
 
-            queuedSection = _interviewQueue is { Count: > 0 }
-                && string.Equals(_interviewQueue.Peek(), sectionId, StringComparison.Ordinal);
+        // Recorded before the call, not after: if the Worker fails, the writer's answer is
+        // still part of the interview and still gets saved.
+        if (!opening)
+        {
+            _interviewTranscript.Add(
+                _interviewCursor.Field, _interviewCursor.Line, _interviewPendingQuestion, answer!);
+            viewModel.CanSaveInterview = !_interviewTranscript.IsEmpty;
         }
 
         viewModel.IsInterviewTurnRunning = true;
@@ -1320,15 +1249,25 @@ public class Collaborator : ICollaborator
             var runnerLogger = _loggerFactory?.CreateLogger<WorkflowRunner>();
             var runner = new WorkflowRunner(_storyModel!, workflow, _storyApi!, runnerLogger, _settings, _auditLogger);
 
+            // The opening turn has no current question, so the first line rides in as the
+            // next one and the model simply asks it. Every later turn sends the line the
+            // answer came from, plus where that line leads.
+            var next = opening ? InterviewScript.First : _interviewCursor.Next();
+
             var body = runner.BuildWorkflowRequestBody(_interviewElements);
             runner.EnrichWithStoryContext(body.Args, _interviewElements, workflow.GetIO());
             runner.ApplySettings(body.Args);
             WorkflowRunner.SetInterviewArgs(
                 body.Args,
-                sectionId,
-                freeQuestion,
+                opening ? string.Empty : _interviewCursor.Field,
+                opening ? 0 : _interviewCursor.Line,
+                next?.Field,
+                next?.Line ?? 0,
+                _interviewCursor.FollowUpUsed,
+                !opening && _interviewCursor.WantsScriptedFollowUp(answer),
+                _interviewCursor.Retries,
                 _interviewTranscript.ToPromptText(),
-                string.Join(",", _interviewChosenSections));
+                answer);
 
             var result = await runner.RunPreparedAsync(body, _interviewElements);
 
@@ -1337,33 +1276,45 @@ public class Collaborator : ICollaborator
 
             if (!result.Success)
             {
-                viewModel.ConversationList.Add(ChatMessage.Error(result.ErrorMessage ?? "The interview stalled."));
+                viewModel.ConversationList.Add(ChatMessage.Error(
+                    result.ErrorMessage ?? "The interview stalled."));
                 return string.Empty;
             }
 
-            var reply = result.RawResponse ?? string.Empty;
-            if (freeQuestion != null)
+            var reply = InterviewReply.Parse(result.RawResponse ?? string.Empty);
+
+            // Every block answered, or the script ran out while the model still called it
+            // answered. Either way there is nothing left to ask.
+            if (reply.Verdict == InterviewVerdict.Done
+                || (!opening && reply.Verdict == InterviewVerdict.Answered && next == null))
             {
-                _interviewTranscript.AddFreeQuestion(freeQuestion, reply);
-                viewModel.CanSummarize = !_interviewTranscript.IsEmpty;
-                return reply;
+                await FinishInterviewAsync(viewModel, reply.Question);
+                return string.Empty;
             }
 
-            // The section is answered, so it leaves the queue now rather than before the call.
-            if (queuedSection)
-                _interviewQueue!.Dequeue();
-
-            _interviewTranscript.AddSection(sectionId!, reply);
-            viewModel.CanSummarize = !_interviewTranscript.IsEmpty;
-            viewModel.ConversationList.Add(ChatMessage.FromCollaborator(reply));
-
-            if (_interviewQueue is { Count: > 0 })
+            if (string.IsNullOrWhiteSpace(reply.Question))
             {
-                viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
-                    "Ask them anything about that, or press Next question to move on."));
+                viewModel.ConversationList.Add(ChatMessage.Error(
+                    "The interviewer sent nothing back. Say something to try again."));
+                return string.Empty;
             }
 
-            return reply;
+            // The opening turn always lands on the first line, whatever verdict came back:
+            // there was no question to answer, so there is nothing to retry.
+            if (opening)
+                _interviewCursor.Start();
+            else
+                _interviewCursor.Apply(reply.Verdict, next);
+
+            _interviewPendingQuestion = reply.Question;
+
+            if (opening)
+            {
+                viewModel.ConversationList.Add(ChatMessage.FromCollaborator(reply.Question));
+                return string.Empty;
+            }
+
+            return reply.Question;
         }
         finally
         {
@@ -1372,92 +1323,113 @@ public class Collaborator : ICollaborator
         }
     }
 
+
     /// <summary>
-    /// Runs CharacterInterviewSummary over the transcript (#119) and hands the result to
-    /// the normal proposal path, so Accept, Review Each and #116 overwrite rules apply
-    /// unchanged.
+    /// Every block is answered (#119). Saves without asking: the writer has just spent
+    /// thirty questions on this and the one thing they must not lose is the record.
     /// </summary>
-    private async Task RunInterviewSummaryAsync(
+    private async Task FinishInterviewAsync(
         StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
-        Workflow interviewWorkflow)
+        string closingLine)
     {
-        if (_interviewTranscript == null || _interviewTranscript.IsEmpty || _interviewElements == null)
+        _interviewPendingQuestion = string.Empty;
+        viewModel.IsChatEnabled = false;
+        viewModel.ChatPlaceholder = "The interview is finished";
+
+        if (!string.IsNullOrWhiteSpace(closingLine))
+            viewModel.ConversationList.Add(ChatMessage.FromCollaborator(closingLine));
+
+        await SaveInterviewAsync(viewModel);
+    }
+
+    /// <summary>
+    /// Writes the interview into the outline (#119) as a Notes element under the character.
+    ///
+    /// No model call. Terry: "Do not improve the Summarize prose. Save the questions as
+    /// asked and the answers as typed." Running the transcript through a model to produce a
+    /// digest is what the first build did, and it lost both the questions and the answers.
+    /// </summary>
+    private Task SaveInterviewAsync(
+        StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel)
+    {
+        if (_interviewTranscript == null || _interviewTranscript.IsEmpty)
         {
             viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
-                "There is no interview to summarize yet."));
-            return;
+                "There is nothing to save yet. Answer a question first."));
+            return Task.CompletedTask;
         }
 
-        var summary = WorkflowRegistry.Get("CharacterInterviewSummary");
-        if (summary == null)
+        if (_storyApi == null || _interviewCharacterGuid == Guid.Empty)
         {
-            viewModel.ConversationList.Add(ChatMessage.Error("Summary workflow is not registered."));
-            return;
+            viewModel.ConversationList.Add(ChatMessage.Error(
+                "The interview cannot be saved: the character is no longer in the outline."));
+            return Task.CompletedTask;
         }
 
-        var transcript = _interviewTranscript.ToPromptText();
-        var elements = new Dictionary<string, StoryElement>(_interviewElements);
+        var text = _interviewTranscript.ToNotesText(_interviewCharacterName);
+        var result = _storyApi.AddElement(
+            StoryItemType.Notes,
+            _interviewCharacterGuid.ToString(),
+            $"Interview with {_interviewCharacterName}",
+            new Dictionary<string, object> { ["Description"] = text });
 
-        // Hand chat back to the proposal path before the summary runs. Chat was pointed at
-        // the interview at Start; leaving it there would route every message about the
-        // proposals into another interview turn, with no patch parsing and no way to revise
-        // a proposal in chat.
-        WireUpChatCallback(viewModel, summary, elements);
-
-        // preserveConversation: the interview is the record of what was asked. Clearing it
-        // for a proposal snapshot would leave the writer nothing to read back or copy out.
-        await ExecuteWorkflowWithFeedback(viewModel, summary, elements,
-            args => WorkflowRunner.SetInterviewArgs(args, null, null, transcript, null),
-            preserveConversation: true);
-
-        if (_sessionProposals is { Count: > 0 })
+        if (!result.IsSuccess)
         {
-            // Proposals are up: the interview is finished. Close the queue so Next and
-            // Summarize stop offering turns that chat can no longer carry.
-            _interviewQueue = new Queue<string>();
-            PushUpcomingSection(viewModel);
-            viewModel.CanSummarize = false;
-            _logger?.LogInformation("Interview summarized for {Character}; chat handed to proposals",
-                _interviewCharacterName);
-            return;
+            viewModel.ConversationList.Add(ChatMessage.Error(
+                $"The interview could not be saved: {result.ErrorMessage}"));
+            _logger?.LogWarning("Interview save failed for {Character}: {Error}",
+                _interviewCharacterName, result.ErrorMessage);
+            return Task.CompletedTask;
         }
 
-        // Summary produced nothing to accept. Give the interview back rather than leaving
-        // chat wired to proposals that do not exist.
-        WireInterviewChat(viewModel, interviewWorkflow);
-        viewModel.IsChatEnabled = true;
-        viewModel.ChatPlaceholder = "Ask them something…";
-        viewModel.CanSummarize = !_interviewTranscript.IsEmpty;
+        _interviewSaved = true;
+        viewModel.CanSaveInterview = false;
         viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
-            "The summary produced nothing to accept. The interview is still open — " +
-            "ask more, then summarize again."));
+            $"Saved under {_interviewCharacterName} as \"Interview with {_interviewCharacterName}\", "
+            + $"{_interviewTranscript.Turns.Count} questions and answers."));
+
+        _logger?.LogInformation("Interview saved for {Character}: {Turns} turns",
+            _interviewCharacterName, _interviewTranscript.Turns.Count);
+
+        return Task.CompletedTask;
     }
 
     /// <summary>
-    /// Reads the era from the premise and concept (#119). Wrong reads cost the writer a
-    /// section they can simply not tick, so this stays a read rather than a question.
+    /// Called when the workflow page goes away (#119). Writes an unsaved interview rather
+    /// than dropping it: the first build kept the exchange only in the chat pane, so closing
+    /// the panel left the outline with no record that the interview had happened.
     /// </summary>
-    private static bool LooksModernSetting(Dictionary<string, StoryElement> elements)
+    private void EndInterviewSession()
     {
-        if (!elements.TryGetValue("Overview", out var element) || element is not OverviewModel overview)
-            return true;
-
-        var text = $"{overview.Concept} {overview.Premise} {overview.StoryGenre} {overview.Description}"
-            .ToLowerInvariant();
-
-        // Markers have to be specific enough that a modern story cannot trip them. Bare
-        // "fantasy" matched an urban fantasy's genre and "kingdom" matched any figurative
-        // use of the word, and both silently withdrew the schooling section from a
-        // character who plainly went to school.
-        string[] preModern =
+        if (_interviewTranscript is { IsEmpty: false } && !_interviewSaved
+            && _storyApi != null && _interviewCharacterGuid != Guid.Empty)
         {
-            "medieval", "ancient", "roman empire", "viking", "samurai", "feudal",
-            "thane", "sword and sorcery", "high fantasy", "epic fantasy",
-            "mythic", "prehistoric", "bronze age", "iron age"
-        };
+            var result = _storyApi.AddElement(
+                StoryItemType.Notes,
+                _interviewCharacterGuid.ToString(),
+                $"Interview with {_interviewCharacterName}",
+                new Dictionary<string, object>
+                {
+                    ["Description"] = _interviewTranscript.ToNotesText(_interviewCharacterName)
+                });
 
-        return !preModern.Any(marker => text.Contains(marker));
+            _logger?.LogInformation(
+                "Interview auto-saved on close for {Character}: {Turns} turns, success {Success}",
+                _interviewCharacterName, _interviewTranscript.Turns.Count, result.IsSuccess);
+        }
+
+        _interviewTranscript = null;
+        _interviewElements = null;
+        _interviewCursor.Reset();
+        _interviewPendingQuestion = string.Empty;
+        _interviewCharacterGuid = Guid.Empty;
+        _interviewCharacterName = string.Empty;
+        _interviewSaved = false;
     }
+
+    /// <summary>
+    /// Executes the workflow and provides feedback to the user via the conversation list.
+    /// </summary>
 
     /// <param name="preserveConversation">
     /// Keeps the chat pane's contents when proposals arrive. The interview summary sets it:
