@@ -614,16 +614,20 @@ namespace StoryCollaborator.Workflows
                 // Registered inside the Character block, not after it: the nav pane opens a
                 // new group whenever PrimaryElementType changes, so a Character entry after
                 // the Scene entries would render a second "Character" header (#129 grouping).
-
-                // Conversational: one call per section, prose back, no proposals of its own.
+                //
+                // Conversational, and it proposes nothing. Collaborator asks; the writer
+                // answers as the character. The record is the transcript, written to a Notes
+                // element verbatim when the session ends, so there is no model pass between
+                // what the writer typed and what the outline keeps.
                 new Workflow(
                     label: "CharacterInterview",
                     title: "Character Interview",
-                    description: "Interview a character in their own voice, a section of their life at a time.",
-                    explanation: "Other character workflows fill the form. This one lets you hear the " +
-                                 "character: you pick which parts of their life to ask about, they answer " +
-                                 "in first person, and you can break in with your own questions at any " +
-                                 "point. Nothing is written to the outline until you press Summarize.",
+                    description: "Answer as your character, one hard question at a time.",
+                    explanation: "Other character workflows fill the form. This one asks you the " +
+                                 "questions the form cannot: what the flaw once protected, what they " +
+                                 "will not trade away, what they refuse to hear. You answer in their " +
+                                 "voice. The questions and your answers are saved to the outline as a " +
+                                 "note under the character.",
                     workflowIO: new WorkflowIO
                     {
                         RequiredInputs = new List<ElementRequirement>
@@ -653,80 +657,6 @@ namespace StoryCollaborator.Workflows
                 {
                     PrimaryElementType = StoryItemType.Character,
                     Mode = WorkflowMode.Conversational
-                },
-
-                // One-shot: reads the finished transcript, proposes fields through the normal path.
-                // Off the menu (ShowInMenu): its only input that matters is the transcript, which
-                // exists solely inside an interview session. Run directly it would propose a
-                // character's backstory and flaw from nothing.
-                new Workflow(
-                    label: "CharacterInterviewSummary",
-                    title: "Character Interview Summary",
-                    description: "Turn a finished interview into Notes and character fields.",
-                    explanation: "Writes the questions and answers into Notes, and proposes the character " +
-                                 "fields the answers actually grounded. Anything the interview invented is " +
-                                 "marked as invention rather than recall.",
-                    workflowIO: new WorkflowIO
-                    {
-                        RequiredInputs = new List<ElementRequirement>
-                        {
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.Character,
-                                ElementLabel = "Character",
-                                CreateIfMissing = false
-                            }
-                        },
-                        // The interview is gathered with an optional Problem; the summary
-                        // needs it declared too or its fields never reach the template.
-                        OptionalInputs = new List<ElementRequirement>
-                        {
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.Problem,
-                                ElementLabel = "Problem"
-                            }
-                        },
-                        Outputs = new List<ElementOutput>
-                        {
-                            new ElementOutput
-                            {
-                                ElementType = StoryItemType.Character,
-                                ElementLabel = "Character",
-                                PropertiesToUpdate = new List<PropertySpec>
-                                {
-                                    new PropertySpec("Notes"),
-                                    new PropertySpec("BackStory"),
-                                    new PropertySpec("Flaw"),
-                                    new PropertySpec("Values"),
-                                    new PropertySpec("PsychNotes"),
-                                    new PropertySpec("Education"),
-                                    new PropertySpec("Nationality"),
-                                    new PropertySpec("Ethnic")
-                                }
-                            },
-                            // Terry, 2026-08-12: the interview must not sit off to the side.
-                            // The presupposition questions take a Problem field as their
-                            // premise, so the answer belongs back on that Problem. Skipped
-                            // silently when no Problem was gathered (ExtractOutputs reports
-                            // "Element not found for output").
-                            new ElementOutput
-                            {
-                                ElementType = StoryItemType.Problem,
-                                ElementLabel = "Problem",
-                                PropertiesToUpdate = new List<PropertySpec>
-                                {
-                                    new PropertySpec("ProtMotive"),
-                                    new PropertySpec("AntagMotive"),
-                                    new PropertySpec("ProtConflict")
-                                }
-                            }
-                        }
-                    })
-                {
-                    PrimaryElementType = StoryItemType.Character,
-                    Mode = WorkflowMode.OneShot,
-                    ShowInMenu = false
                 },
 
                 // === StoryWorld Workflows ===

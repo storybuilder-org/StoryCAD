@@ -4,16 +4,23 @@ using System.Text;
 namespace StoryCollaborator.Models;
 
 /// <summary>
-/// The interview so far (#119). Rides in args on every turn, because /v1/workflow has
-/// no messages array; and is the source of the Notes text Summarize appends.
+/// The interview so far (#119): what Collaborator asked and what the writer typed back,
+/// play-acting the character.
+///
+/// Rides in args on every turn, because /v1/workflow has no messages array, and is the
+/// text saved into the outline when the session ends.
+///
+/// The question is stored, not just an id. Terry's test is that the saved text is what
+/// appeared on screen, and the first build kept only a section id and the model's reply,
+/// so the questions could not be reconstructed at save time.
 /// </summary>
 public sealed class InterviewTranscript
 {
     /// <summary>
-    /// One exchange. Label is the section id for a scripted turn, or the writer's own
-    /// wording for a free question.
+    /// One exchange. Field and Line are the cursor the Worker tagged the question with,
+    /// so a later pass can tell which form field an answer was aimed at.
     /// </summary>
-    public sealed record Turn(string Label, string Reply, bool IsFreeQuestion);
+    public sealed record Turn(string Field, int Line, string Question, string Answer);
 
     private readonly List<Turn> _turns = new();
 
@@ -21,23 +28,26 @@ public sealed class InterviewTranscript
 
     public bool IsEmpty => _turns.Count == 0;
 
-    public void AddSection(string sectionId, string reply)
+    /// <summary>
+    /// Records an answered question. An unanswered question is not a turn: the writer may
+    /// close the panel on a question they never replied to, and a dangling prompt in the
+    /// saved record reads as something they refused rather than something they never saw.
+    /// </summary>
+    public void Add(string field, int line, string question, string answer)
     {
-        if (string.IsNullOrWhiteSpace(sectionId) || string.IsNullOrWhiteSpace(reply))
+        if (string.IsNullOrWhiteSpace(question) || string.IsNullOrWhiteSpace(answer))
             return;
-        _turns.Add(new Turn(sectionId.Trim(), reply.Trim(), IsFreeQuestion: false));
-    }
 
-    public void AddFreeQuestion(string question, string reply)
-    {
-        if (string.IsNullOrWhiteSpace(question) || string.IsNullOrWhiteSpace(reply))
-            return;
-        _turns.Add(new Turn(question.Trim(), reply.Trim(), IsFreeQuestion: true));
+        _turns.Add(new Turn(
+            string.IsNullOrWhiteSpace(field) ? "Unknown" : field.Trim(),
+            line,
+            question.Trim(),
+            answer.Trim()));
     }
 
     /// <summary>
-    /// What the Worker sees. Section turns are named by id so the template knows which
-    /// ground is already covered and does not ask it again.
+    /// What the Worker sees. Tagged with the cursor so it can tell which lines are already
+    /// asked, and whether it has already spent its one follow-up on a line.
     /// </summary>
     public string ToPromptText()
     {
@@ -47,18 +57,17 @@ public sealed class InterviewTranscript
         var sb = new StringBuilder();
         foreach (var turn in _turns)
         {
-            sb.AppendLine(turn.IsFreeQuestion
-                ? $"[writer asked] {turn.Label}"
-                : $"[section {turn.Label}]");
-            sb.AppendLine(turn.Reply);
+            sb.AppendLine($"[{turn.Field}:{turn.Line}] Q: {turn.Question}");
+            sb.AppendLine($"A: {turn.Answer}");
             sb.AppendLine();
         }
         return sb.ToString().TrimEnd();
     }
 
     /// <summary>
-    /// What lands in Notes. Terry: record the questions along with the answers.
-    /// Plain text only — Notes renders no markup.
+    /// What lands in the outline. The questions as asked and the answers as typed, in
+    /// order, with nothing added and nothing summarized. Plain text only, because a Notes
+    /// element renders no markup.
     /// </summary>
     public string ToNotesText(string characterName)
     {
@@ -68,10 +77,8 @@ public sealed class InterviewTranscript
 
         foreach (var turn in _turns)
         {
-            sb.AppendLine(turn.IsFreeQuestion
-                ? $"Asked: {turn.Label}"
-                : $"Section: {turn.Label}");
-            sb.AppendLine(turn.Reply);
+            sb.AppendLine($"Q: {turn.Question}");
+            sb.AppendLine($"A: {turn.Answer}");
             sb.AppendLine();
         }
         return sb.ToString().TrimEnd();
