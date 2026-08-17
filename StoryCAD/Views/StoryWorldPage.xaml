@@ -83,7 +83,8 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" MinHeight="80" />
+                            <RowDefinition Height="*" MinHeight="80" />
                         </Grid.RowDefinitions>
 
                         <!-- Question prompt -->
@@ -97,8 +98,28 @@
                                   PlaceholderText="Select the type of world..."
                                   AutomationProperties.AutomationId="WorldTypeCombo"/>
 
-                        <!-- Description panel -->
-                        <Border Grid.Row="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        <!-- World tell (StoryElement.Description / ElementDescription) -->
+                        <Expander Grid.Row="2" IsExpanded="True" HorizontalAlignment="Stretch"
+                                  HorizontalContentAlignment="Stretch" Margin="0,16,0,0"
+                                  AutomationProperties.AutomationId="WorldTellExpander">
+                            <Expander.Header>
+                                <TextBlock Text="World tell"
+                                           FontWeight="{x:Bind StoryWorldVm.Description, Converter={StaticResource HasContentToFontWeight}, Mode=OneWay}"/>
+                            </Expander.Header>
+                            <usercontrols:RichEditBoxExtended
+                                RtfText="{x:Bind StoryWorldVm.Description, Mode=TwoWay}"
+                                PlaceholderText="One concrete world fact (the implied-world tell)."
+                                AcceptsReturn="True" IsSpellCheckEnabled="True"
+                                TextWrapping="Wrap"
+                                VerticalAlignment="Stretch"
+                                MinHeight="80"
+                                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                AutomationProperties.AutomationId="WorldTellRichEdit"
+                                AutomationProperties.Name="World tell"/>
+                        </Expander>
+
+                        <!-- World Type help panel -->
+                        <Border Grid.Row="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1" CornerRadius="4" Margin="0,16,0,0" Padding="16">
                             <StackPanel>
