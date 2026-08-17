@@ -13,9 +13,11 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using StoryCADLib.DAL;
 using StoryCADLib.Models;
+using StoryCADLib.Models.StoryWorld;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCADLib.Services.Reports;
+using StoryCADLib.ViewModels;
 using StoryCollaborator.Models;
 using StoryCollaborator.Workflows;
 
@@ -231,6 +233,7 @@ namespace StoryCollaborator
         /// plus pass-through args and declared collection lists. Does not flatten Label_Property keys
         /// and does not invent lists from WriteVia.
         /// Issue #107: character craft workflows also get RelatedProblems (full Problem models).
+        /// Issue #201: DefineStoryWorld gets RelatedSettings and RelatedResearch.
         /// </summary>
         internal WorkflowProxyBody BuildWorkflowRequestBody(Dictionary<string, StoryElement> gatheredElements)
         {
@@ -255,6 +258,8 @@ namespace StoryCollaborator
             }
 
             AttachRelatedProblemsCollection(body, gatheredElements, serOpts);
+            AttachRelatedSettingsCollection(body);
+            AttachRelatedResearchCollection(body, gatheredElements);
 
             return body;
         }
@@ -286,6 +291,63 @@ namespace StoryCollaborator
             }
 
             body.Args[ContextResolver.RelatedProblemsRequestName] = array.ToJsonString();
+        }
+
+        /// <summary>
+        /// All Setting elements as places in the world (#201). Empty array when none.
+        /// </summary>
+        private void AttachRelatedSettingsCollection(WorkflowProxyBody body)
+        {
+            if (!ContextResolver.RelatedSettingsWorkflows.Contains(workflowModel.Label))
+                return;
+
+            var array = new JsonArray();
+            var listResult = _storyApi.GetElementsByType(StoryItemType.Setting);
+            if (listResult.IsSuccess && listResult.Payload != null)
+            {
+                foreach (var setting in listResult.Payload)
+                    array.Add(SerializeElementOutbound(setting));
+            }
+
+            body.Args[ContextResolver.RelatedSettingsRequestName] = array.ToJsonString();
+        }
+
+        /// <summary>
+        /// Notes and Web under the StoryWorld explorer subtree (#201). No live fetch.
+        /// </summary>
+        private void AttachRelatedResearchCollection(
+            WorkflowProxyBody body,
+            Dictionary<string, StoryElement> gatheredElements)
+        {
+            if (!ContextResolver.RelatedResearchWorkflows.Contains(workflowModel.Label))
+                return;
+
+            var array = new JsonArray();
+            if (gatheredElements.TryGetValue("StoryWorld", out var world) && world?.Node != null)
+            {
+                foreach (var research in EnumerateStoryWorldResearch(world.Node))
+                    array.Add(SerializeElementOutbound(research));
+            }
+
+            body.Args[ContextResolver.RelatedResearchRequestName] = array.ToJsonString();
+        }
+
+        private IEnumerable<StoryElement> EnumerateStoryWorldResearch(StoryNodeItem root)
+        {
+            if (root.Children == null || root.Children.Count == 0)
+                yield break;
+
+            foreach (var child in root.Children)
+            {
+                if (storyModel.StoryElements.StoryElementGuids.TryGetValue(child.Uuid, out var element))
+                {
+                    if (element.ElementType is StoryItemType.Notes or StoryItemType.Web)
+                        yield return element;
+                }
+
+                foreach (var nested in EnumerateStoryWorldResearch(child))
+                    yield return nested;
+            }
         }
 
         /// <summary>
@@ -685,6 +747,33 @@ namespace StoryCollaborator
         }
 
         /// <summary>
+        /// Writes the six World Type axis scalars after WorldType Accept (#201).
+        /// </summary>
+        private int ApplyWorldTypeAxes(Guid storyWorldUuid, WorldTypeAxes axes, WorkflowResult result)
+        {
+            int n = 0;
+            void Write(string property, string value)
+            {
+                var r = _storyApi.UpdateElementProperty(storyWorldUuid, property, value);
+                if (r.IsSuccess)
+                {
+                    n++;
+                    result.StatusMessages.Add($"Applied axis {property} from WorldType map");
+                }
+                else
+                    _logger?.LogWarning($"Failed to apply axis {property}: {r.ErrorMessage}");
+            }
+
+            Write("Ontology", axes.Ontology);
+            Write("WorldRelation", axes.WorldRelation);
+            Write("RuleTransparency", axes.RuleTransparency);
+            Write("ScaleOfDifference", axes.ScaleOfDifference);
+            Write("AgencySource", axes.AgencySource);
+            Write("ToneLogic", axes.ToneLogic);
+            return n;
+        }
+
+        /// <summary>
         /// Applies pending updates to story elements via the API.
         /// Dispatches each PendingUpdate by its WriteVia mechanism.
         /// The explicit default: arm throws on any unhandled WriteVia value.
@@ -704,7 +793,17 @@ namespace StoryCollaborator
                     {
                         var applyResult = _storyApi.UpdateElementProperty(uuid, spec.Property, update.Value ?? string.Empty);
                         if (applyResult.IsSuccess)
+                        {
                             appliedCount++;
+                            // #201: WorldType Accept writes six axes from the host map (form auto-fill
+                            // does not run on UpdateElementProperty).
+                            if (string.Equals(spec.Property, "WorldType", StringComparison.Ordinal)
+                                && update.Value is string worldType
+                                && WorldTypeAxisMap.TryGet(worldType, out var axes))
+                            {
+                                appliedCount += ApplyWorldTypeAxes(uuid, axes, result);
+                            }
+                        }
                         else
                             _logger?.LogWarning($"Failed to apply {update.ElementLabel}.{spec.Property}: {applyResult.ErrorMessage}");
                         break;

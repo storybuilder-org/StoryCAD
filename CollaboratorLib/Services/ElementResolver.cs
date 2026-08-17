@@ -140,13 +140,28 @@ namespace StoryCollaborator.Services
                 return null;
             }
 
-            // Only StoryOverview auto-resolves
+            // StoryOverview auto-resolves (always present).
             if (requirement.ElementType == StoryItemType.StoryOverview)
             {
                 var overview = GetMatchingElements(requirement).FirstOrDefault();
                 _logger?.LogDebug("ResolveRequirement: StoryOverview auto-resolve -> {Result}",
                     overview?.Name ?? "(null)");
                 return overview;
+            }
+
+            // StoryWorld singleton: auto-resolve when present (#201). Create path is gather-side.
+            if (requirement.ElementType == StoryItemType.StoryWorld)
+            {
+                var storyWorld = _api.GetStoryWorld();
+                if (storyWorld.IsSuccess && storyWorld.Payload != null)
+                {
+                    _logger?.LogDebug("ResolveRequirement: StoryWorld auto-resolve -> {Result}",
+                        storyWorld.Payload.Name);
+                    return storyWorld.Payload;
+                }
+
+                _logger?.LogDebug("ResolveRequirement: StoryWorld missing (caller may create)");
+                return null;
             }
 
             _logger?.LogDebug("ResolveRequirement: Type {Type} is not singleton - returning null (needs picker)",

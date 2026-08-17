@@ -167,6 +167,7 @@ namespace StoryCollaborator.Workflows
                 StoryItemType.Web => "Web",
                 StoryItemType.Notes => "Notes",
                 StoryItemType.TrashCan => "Trash",
+                StoryItemType.StoryWorld => "StoryWorld",
                 _ => elementType.ToString()
             };
         }
