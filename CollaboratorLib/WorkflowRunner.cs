@@ -191,6 +191,11 @@ namespace StoryCollaborator
                 if (workflowModel.Label == "InnerOuterProblems")
                     EnrichInnerOuterStructuralFields(result, gatheredElements);
 
+                // #201: empty or omitted WorldType becomes NoOp against empty outline and never
+                // reaches Accept. Propose craft default when still blank.
+                if (string.Equals(workflowModel.Label, "DefineStoryWorld", StringComparison.Ordinal))
+                    EnrichDefineStoryWorldWorldType(result, gatheredElements);
+
                 if (!outputResult.Success)
                 {
                     result.Success = false;
@@ -400,6 +405,52 @@ namespace StoryCollaborator
                 ElementDescription = description,
                 Type = element.ElementType.ToString()
             };
+        }
+
+        /// <summary>
+        /// #201: after extract, ensure a non-empty WorldType is proposed when the outline has none.
+        /// Empty proposed + empty current classifies as NoOp and never reaches Accept (smoke Path A).
+        /// Craft default is Consensus Reality (thin-outline / primary-world default).
+        /// </summary>
+        internal void EnrichDefineStoryWorldWorldType(
+            WorkflowResult result,
+            Dictionary<string, StoryElement> gatheredElements)
+        {
+            const string defaultWorldType = "Consensus Reality";
+            const string label = "StoryWorld";
+
+            if (!gatheredElements.TryGetValue(label, out var world) || world == null)
+            {
+                result.StatusMessages.Add("DefineStoryWorld WorldType enrich skipped: StoryWorld not gathered");
+                return;
+            }
+
+            var current = ReadCurrentScalarDisplay(world.Uuid, "WorldType");
+            if (!string.IsNullOrWhiteSpace(current))
+            {
+                result.StatusMessages.Add(
+                    $"DefineStoryWorld WorldType enrich skipped: already set ({TruncateForLog(current)})");
+                return;
+            }
+
+            var pending = result.PendingUpdates.Find(u =>
+                string.Equals(u.ElementLabel, label, StringComparison.Ordinal)
+                && string.Equals(u.Spec.Property, "WorldType", StringComparison.Ordinal)
+                && u.Spec.WriteVia == WriteVia.Scalar);
+
+            var proposed = pending != null ? NormalizeCompareText(FormatDisplayValue(pending)) : string.Empty;
+            if (!string.IsNullOrEmpty(proposed) && WorldTypeAxisMap.TryGet(proposed, out _))
+            {
+                result.StatusMessages.Add(
+                    $"DefineStoryWorld WorldType enrich skipped: model proposed ({TruncateForLog(proposed)})");
+                return;
+            }
+
+            AddOrReplaceScalarUpdate(result, label, world.Uuid, "WorldType", defaultWorldType);
+            var msg =
+                $"DefineStoryWorld WorldType enrich: proposed default {defaultWorldType} (model empty or invalid)";
+            result.StatusMessages.Add(msg);
+            _logger?.LogInformation("{Message}", msg);
         }
 
         /// <summary>
