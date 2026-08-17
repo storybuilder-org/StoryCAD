@@ -522,6 +522,42 @@ namespace StoryCollaborator
 
             foreach (var update in result.PendingUpdates)
             {
+                // TypedList / SimpleList: empty propose + empty live is NoOp (DefineStoryWorld
+                // re-run returned empty Cultures/PhysicalWorlds as two Accept rows).
+                if (update.Spec.WriteVia is WriteVia.TypedList or WriteVia.SimpleList)
+                {
+                    var proposedCount = CountCollectionValue(update.Value);
+                    var currentCount = ReadCurrentCollectionCount(update.ElementUuid, update.Spec.Property);
+                    if (proposedCount == 0 && currentCount == 0)
+                    {
+                        noOpCount++;
+                        result.StatusMessages.Add($"No-op (empty collection): {update.Key}");
+                        _logger?.LogInformation(
+                            "Classify {Key} kind=NoOp (empty {WriteVia})",
+                            update.Key, update.Spec.WriteVia);
+                        continue;
+                    }
+
+                    // Empty propose against filled live would wipe — do not offer that as Accept.
+                    if (proposedCount == 0 && currentCount > 0)
+                    {
+                        noOpCount++;
+                        result.StatusMessages.Add(
+                            $"No-op (empty {update.Spec.WriteVia} would wipe {currentCount} entries): {update.Key}");
+                        _logger?.LogInformation(
+                            "Classify {Key} kind=NoOp (empty propose vs live count={Count})",
+                            update.Key, currentCount);
+                        continue;
+                    }
+
+                    kept.Add(update);
+                    display[update.Key] = FormatDisplayValue(update);
+                    _logger?.LogInformation(
+                        "Classify {Key} kind=Unclassified (non-scalar WriteVia={WriteVia} count={Count})",
+                        update.Key, update.Spec.WriteVia, proposedCount);
+                    continue;
+                }
+
                 if (update.Spec.WriteVia != WriteVia.Scalar)
                 {
                     kept.Add(update);
@@ -632,6 +668,29 @@ namespace StoryCollaborator
                 text = new RichTextStripper().StripRichTextFormat(text) ?? string.Empty;
 
             return text.Trim();
+        }
+
+        private static int CountCollectionValue(object? value)
+        {
+            if (value is null) return 0;
+            if (value is System.Collections.ICollection c) return c.Count;
+            return 0;
+        }
+
+        private int ReadCurrentCollectionCount(Guid elementUuid, string propertyName)
+        {
+            var got = _storyApi.GetStoryElement(elementUuid);
+            if (!got.IsSuccess || got.Payload == null)
+                return 0;
+
+            var property = got.Payload.GetType().GetProperty(propertyName);
+            if (property == null || !property.CanRead)
+                return 0;
+
+            var value = property.GetValue(got.Payload);
+            if (value is System.Collections.ICollection c)
+                return c.Count;
+            return 0;
         }
 
         private static string NormalizeCompareText(string? text)
