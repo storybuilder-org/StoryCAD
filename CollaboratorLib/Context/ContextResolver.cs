@@ -34,6 +34,26 @@ public class ContextResolver
     public const string RelatedProblemsRequestName = "RelatedProblems";
 
     /// <summary>
+    /// StoryWorld workflows that receive all Setting elements as RelatedSettings (#201).
+    /// </summary>
+    public static readonly HashSet<string> RelatedSettingsWorkflows = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "DefineStoryWorld"
+    };
+
+    public const string RelatedSettingsRequestName = "RelatedSettings";
+
+    /// <summary>
+    /// StoryWorld workflows that receive Notes + Web under the StoryWorld node (#201).
+    /// </summary>
+    public static readonly HashSet<string> RelatedResearchWorkflows = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "DefineStoryWorld"
+    };
+
+    public const string RelatedResearchRequestName = "RelatedResearch";
+
+    /// <summary>
     /// Get the context specification for a workflow and element type combination.
     /// </summary>
     public ContextSpec GetContextFor(string workflowLabel, StoryItemType elementType)
@@ -67,6 +87,18 @@ public class ContextResolver
         }
 
         if (elementType == StoryItemType.Character)
+        {
+            return new ContextSpec
+            {
+                IncludeStoryConstraints = true,
+                IncludeBeatHierarchy = false,
+                IncludeCharacterContext = false,
+                IncludePrecedingEvents = false,
+                IncludeGaps = true
+            };
+        }
+
+        if (elementType == StoryItemType.StoryWorld)
         {
             return new ContextSpec
             {

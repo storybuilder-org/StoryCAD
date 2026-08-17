@@ -657,6 +657,70 @@ namespace StoryCollaborator.Workflows
                         ExampleLists = new List<string> { "Trait", "Attitude" }
                     }) { PrimaryElementType = StoryItemType.Character },
 
+                // === StoryWorld Workflows ===
+                // #201 DefineStoryWorld: one worldbuilding surface (classifier + cultures + live areas).
+                new Workflow(
+                    label: "DefineStoryWorld",
+                    title: "Define Story World",
+                    description: "Classify the story world and fill worldbuilding fields this World Type needs.",
+                    explanation: "Sets World Type, a short world tell (Description), cultures, and only the " +
+                                "Physical / History / Magic-Technology areas that World Type makes live. " +
+                                "May create the StoryWorld element when the outline has none. " +
+                                "Does not fill Setting places, Species, Governments, Religions, or Economy. " +
+                                "Axis fields come from the host World Type map on Accept, not from the model.",
+                    workflowIO: new WorkflowIO
+                    {
+                        RequiredInputs = new List<ElementRequirement>
+                        {
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.StoryWorld,
+                                ElementLabel = "StoryWorld",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = true
+                            },
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.StoryOverview,
+                                ElementLabel = "Overview",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            }
+                        },
+                        OptionalInputs = new List<ElementRequirement>(),
+                        Outputs = new List<ElementOutput>
+                        {
+                            new ElementOutput
+                            {
+                                ElementType = StoryItemType.StoryWorld,
+                                ElementLabel = "StoryWorld",
+                                PropertiesToUpdate = new List<PropertySpec>
+                                {
+                                    new PropertySpec("Name"),
+                                    new PropertySpec("WorldType"),
+                                    new PropertySpec("Description"),
+                                    new PropertySpec("FoundingEvents"),
+                                    new PropertySpec("MajorConflicts"),
+                                    new PropertySpec("Eras"),
+                                    new PropertySpec("TechnologicalShifts"),
+                                    new PropertySpec("LostKnowledge"),
+                                    new PropertySpec("SystemType"),
+                                    new PropertySpec("Source"),
+                                    new PropertySpec("Rules"),
+                                    new PropertySpec("Limitations"),
+                                    new PropertySpec("Cost"),
+                                    new PropertySpec("Practitioners"),
+                                    new PropertySpec("SocialImpact"),
+                                    new PropertySpec("Cultures", WriteVia.TypedList,
+                                        ListEntryType: typeof(CultureEntry)),
+                                    new PropertySpec("PhysicalWorlds", WriteVia.TypedList,
+                                        ListEntryType: typeof(PhysicalWorldEntry))
+                                }
+                            }
+                        },
+                        ExampleLists = new List<string> { "WorldType", "SystemType" }
+                    }) { PrimaryElementType = StoryItemType.StoryWorld },
+
                 // === Setting Workflows (scene-specific) ===
                 new Workflow(
                     "SettingTimeSpace", "Setting in Time and Space",

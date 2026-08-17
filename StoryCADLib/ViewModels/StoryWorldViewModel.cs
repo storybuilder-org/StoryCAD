@@ -1115,12 +1115,11 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
 
     /// <summary>
     /// Auto-populates axis values based on the selected World Type.
-    /// Uses the gestalt-to-axis mapping from design documents.
+    /// Uses <see cref="WorldTypeAxisMap"/> (shared with Collaborator Accept).
     /// </summary>
     private void AutoPopulateAxisValues()
     {
-        var axes = GetAxisValuesForWorldType(WorldType);
-        if (axes == null) return;
+        if (!WorldTypeAxisMap.TryGet(WorldType, out var axes)) return;
 
         Ontology = axes.Ontology;
         WorldRelation = axes.WorldRelation;
@@ -1187,102 +1186,6 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
 
             _ => ("Select a World Type to see its description.", "")
         };
-    }
-
-    /// <summary>
-    /// Returns axis values for a World Type based on the gestalt-to-axis mapping.
-    /// </summary>
-    private static AxisValues GetAxisValuesForWorldType(string worldType)
-    {
-        return worldType switch
-        {
-            "Consensus Reality" => new AxisValues
-            {
-                Ontology = "Mundane",
-                WorldRelation = "Primary World",
-                RuleTransparency = "Explicit Rules",
-                ScaleOfDifference = "Cosmetic",
-                AgencySource = "Human-Centric",
-                ToneLogic = "Rational"
-            },
-            "Enchanted Reality" => new AxisValues
-            {
-                Ontology = "Supernatural",
-                WorldRelation = "Primary World",
-                RuleTransparency = "Implicit Rules",
-                ScaleOfDifference = "Cosmetic",
-                AgencySource = "Systemic Forces",
-                ToneLogic = "Symbolic"
-            },
-            "Hidden World" => new AxisValues
-            {
-                Ontology = "Supernatural",
-                WorldRelation = "Layered",
-                RuleTransparency = "Explicit Rules",
-                ScaleOfDifference = "Structural",
-                AgencySource = "Nonhuman Intelligences",
-                ToneLogic = "Rational"
-            },
-            "Divergent World" => new AxisValues
-            {
-                Ontology = "Scientific Speculative",
-                WorldRelation = "Divergent Earth",
-                RuleTransparency = "Explicit Rules",
-                ScaleOfDifference = "Structural",
-                AgencySource = "Human-Centric",
-                ToneLogic = "Rational"
-            },
-            "Constructed World" => new AxisValues
-            {
-                Ontology = "Hybrid",
-                WorldRelation = "Secondary World",
-                RuleTransparency = "Explicit Rules",
-                ScaleOfDifference = "Cosmological",
-                AgencySource = "Human-Centric",  // Variable in spec, default to Human-Centric
-                ToneLogic = "Rational"           // Variable in spec, default to Rational
-            },
-            "Mythic World" => new AxisValues
-            {
-                Ontology = "Symbolic",
-                WorldRelation = "Secondary World",
-                RuleTransparency = "Symbolic Rules",
-                ScaleOfDifference = "Cosmological",
-                AgencySource = "Fate / Providence",
-                ToneLogic = "Mythic"
-            },
-            "Estranged World" => new AxisValues
-            {
-                Ontology = "Scientific Speculative",
-                WorldRelation = "Secondary World",  // Variable in spec
-                RuleTransparency = "Explicit Rules",
-                ScaleOfDifference = "Cosmological",
-                AgencySource = "Systemic Forces",
-                ToneLogic = "Dark / Entropic"
-            },
-            "Broken World" => new AxisValues
-            {
-                Ontology = "Scientific Speculative",
-                WorldRelation = "Divergent Earth",
-                RuleTransparency = "Explicit Rules",
-                ScaleOfDifference = "Structural",
-                AgencySource = "Human-Centric",
-                ToneLogic = "Dark / Entropic"
-            },
-            _ => null
-        };
-    }
-
-    /// <summary>
-    /// Helper class to hold axis values for mapping.
-    /// </summary>
-    private class AxisValues
-    {
-        public string Ontology { get; init; }
-        public string WorldRelation { get; init; }
-        public string RuleTransparency { get; init; }
-        public string ScaleOfDifference { get; init; }
-        public string AgencySource { get; init; }
-        public string ToneLogic { get; init; }
     }
 
     #endregion

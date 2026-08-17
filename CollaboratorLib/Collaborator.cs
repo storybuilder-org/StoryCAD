@@ -1831,7 +1831,104 @@ public class Collaborator : ICollaborator
             await InjectSceneSummaryNeighborsAsync(sceneElement, xamlRoot, result);
         }
 
+        // #201: Story Problem + seats when Overview.StoryProblem resolves (thin gather).
+        if (string.Equals(workflow.Label, "DefineStoryWorld", StringComparison.Ordinal)
+            && _storyApi != null)
+        {
+            InjectStoryProblemSeatsForWorld(result);
+        }
+
         return result;
+    }
+
+    /// <summary>
+    /// Collaborator #201: inject Problem / Protagonist / Antagonist when Overview links them.
+    /// Does not create elements. Does not open pickers.
+    /// </summary>
+    private void InjectStoryProblemSeatsForWorld(GatherResult result)
+    {
+        if (!result.Elements.TryGetValue("Overview", out var overviewElement)
+            || overviewElement is not OverviewModel overview)
+            return;
+
+        if (overview.StoryProblem == Guid.Empty)
+            return;
+
+        var problemResult = _storyApi!.GetStoryElement(overview.StoryProblem);
+        if (!problemResult.IsSuccess || problemResult.Payload is not ProblemModel problem)
+            return;
+
+        result.Elements["Problem"] = problem;
+        result.StatusMessages.Add($"Using Problem: {problem.Name}");
+
+        if (problem.Protagonist != Guid.Empty)
+        {
+            var prot = _storyApi.GetStoryElement(problem.Protagonist);
+            if (prot.IsSuccess && prot.Payload != null)
+            {
+                result.Elements["Protagonist"] = prot.Payload;
+                result.StatusMessages.Add($"Using Protagonist: {prot.Payload.Name}");
+            }
+        }
+
+        if (problem.Antagonist != Guid.Empty)
+        {
+            var antag = _storyApi.GetStoryElement(problem.Antagonist);
+            if (antag.IsSuccess && antag.Payload != null)
+            {
+                result.Elements["Antagonist"] = antag.Payload;
+                result.StatusMessages.Add($"Using Antagonist: {antag.Payload.Name}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Collaborator #201: create the StoryWorld singleton under Overview when missing.
+    /// </summary>
+    private StoryElement? TryCreateStoryWorldSingleton(List<string> statusMessages)
+    {
+        if (_storyApi == null || _storyModel == null)
+            return null;
+
+        var existing = _storyApi.GetStoryWorld();
+        if (existing.IsSuccess && existing.Payload != null)
+            return existing.Payload;
+
+        // Parent: Overview (explorer root).
+        Guid overviewGuid = Guid.Empty;
+        if (_storyModel.ExplorerView.Count > 0)
+            overviewGuid = _storyModel.ExplorerView[0].Uuid;
+        if (overviewGuid == Guid.Empty)
+        {
+            var overviewList = _storyApi.GetElementsByType(StoryItemType.StoryOverview);
+            if (overviewList.IsSuccess && overviewList.Payload is { Count: > 0 })
+                overviewGuid = overviewList.Payload[0].Uuid;
+        }
+
+        if (overviewGuid == Guid.Empty)
+        {
+            statusMessages.Add("Cannot create StoryWorld: Overview not found");
+            return null;
+        }
+
+        var add = _storyApi.AddElement(StoryItemType.StoryWorld, overviewGuid.ToString(), "Story World");
+        if (!add.IsSuccess)
+        {
+            statusMessages.Add($"Cannot create StoryWorld: {add.ErrorMessage}");
+            _logger?.LogWarning("AddElement StoryWorld failed: {Error}", add.ErrorMessage);
+            return null;
+        }
+
+        var created = _storyApi.GetStoryElement(add.Payload);
+        if (!created.IsSuccess || created.Payload == null)
+        {
+            statusMessages.Add("StoryWorld was created but could not be reloaded");
+            return null;
+        }
+
+        statusMessages.Add($"Created StoryWorld: {created.Payload.Name}");
+        _logger?.LogInformation("Created StoryWorld {Guid}", created.Payload.Uuid);
+        return created.Payload;
     }
 
     /// <summary>
@@ -1953,6 +2050,24 @@ public class Collaborator : ICollaborator
             _logger?.LogDebug("Auto-resolved {Label} to '{Name}'",
                 requirement.ElementLabel, autoResolved.Name);
             return autoResolved;
+        }
+
+        // #201: StoryWorld is a singleton. Create when missing; never ElementPicker.
+        if (requirement.ElementType == StoryItemType.StoryWorld)
+        {
+            if (requirement.CreateIfMissing && _storyApi != null)
+            {
+                var created = TryCreateStoryWorldSingleton(statusMessages);
+                if (created != null)
+                {
+                    gatheredElements[requirement.ElementLabel] = created;
+                    return created;
+                }
+            }
+
+            statusMessages.Add($"{requirement.ElementLabel}: StoryWorld missing and could not be created");
+            _logger?.LogWarning("StoryWorld gather failed (create={Create})", requirement.CreateIfMissing);
+            return null;
         }
 
         // Try to get referenced element for pre-selection (e.g., "Problem.Protagonist")
