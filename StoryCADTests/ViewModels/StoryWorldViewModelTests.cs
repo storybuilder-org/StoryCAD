@@ -92,6 +92,7 @@ public class StoryWorldViewModelTests
 
         var model = new StoryWorldModel("Ignored Name", storyModel, null);
         model.WorldType = "Hidden World";
+        model.Description = "The door dilated.";
         model.EconomicSystem = "Barter economy";
 
         // Act
@@ -100,6 +101,7 @@ public class StoryWorldViewModelTests
         // Assert - Name is derived from story name + " Story World", not from model
         Assert.AreEqual("Test Story World", viewModel.Name);
         Assert.AreEqual("Hidden World", viewModel.WorldType);
+        Assert.AreEqual("The door dilated.", viewModel.Description);
         Assert.AreEqual("Barter economy", viewModel.EconomicSystem);
     }
 
@@ -117,11 +119,13 @@ public class StoryWorldViewModelTests
 
         // Act - modify ViewModel properties
         viewModel.WorldType = "Broken World";
+        viewModel.Description = "Ash falls every morning.";
         viewModel.Currency = "Bottle caps";
         viewModel.SaveModel();
 
         // Assert - model should have new values
         Assert.AreEqual("Broken World", model.WorldType);
+        Assert.AreEqual("Ash falls every morning.", model.Description);
         Assert.AreEqual("Bottle caps", model.Currency);
     }
 

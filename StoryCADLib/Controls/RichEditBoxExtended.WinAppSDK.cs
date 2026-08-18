@@ -19,8 +19,31 @@ public partial class RichEditBoxExtended : RichEditBox
         TextAlignment = TextAlignment.Left;
         CornerRadius = new CornerRadius(5);
         PointerEntered += (s, e) => UpdateTheme(null, null);
-        Loaded += UpdateTheme;
+        // Expander content is often created after the bound RtfText was set; re-apply on Loaded
+        // so plain-text Collaborator Values etc. appear when the expander opens.
+        Loaded += OnLoadedApplyRtfText;
         UpdateTheme(null, null);
+    }
+
+    private void OnLoadedApplyRtfText(object sender, RoutedEventArgs e)
+    {
+        UpdateTheme(sender, e);
+        if (_lockChangeExecution)
+            return;
+        var text = RtfText ?? "";
+        if (string.IsNullOrEmpty(text))
+            return;
+        _lockChangeExecution = true;
+        var wasReadOnly = IsReadOnly;
+        IsReadOnly = false;
+        var isRtf = text.TrimStart().StartsWith(@"{\rtf", StringComparison.Ordinal);
+        Document.SetText(
+            isRtf
+                ? TextSetOptions.FormatRtf | TextSetOptions.ApplyRtfDocumentDefaults
+                : TextSetOptions.None,
+            text);
+        IsReadOnly = wasReadOnly;
+        _lockChangeExecution = false;
     }
 
     public string RtfText

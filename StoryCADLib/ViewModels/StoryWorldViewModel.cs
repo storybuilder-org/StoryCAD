@@ -65,6 +65,17 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
         }
     }
 
+    /// <summary>
+    /// World tell / short classifier prose. StoryElement.Description (ElementDescription in .stbx).
+    /// Collaborator DefineStoryWorld writes this; must load/save and bind on the Structure tab.
+    /// </summary>
+    private string _description = string.Empty;
+    public string Description
+    {
+        get => _description;
+        set => SetProperty(ref _description, value);
+    }
+
     private StoryWorldModel _model;
     public StoryWorldModel Model
     {
@@ -951,6 +962,7 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
         try
         {
             // Note: Don't save Name - it's derived for display, node keeps "Story World"
+            Model.Description = Description ?? string.Empty;
 
             // Structure tab
             Model.WorldType = WorldType;
@@ -1020,6 +1032,8 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
         Name = string.IsNullOrEmpty(storyName)
             ? "Story World"
             : storyName + " Story World";
+
+        Description = Model.Description ?? string.Empty;
 
         // Structure tab
         WorldType = Model.WorldType;
@@ -1205,6 +1219,7 @@ public partial class StoryWorldViewModel : ObservableRecipient, INavigable, ISav
 
         // Initialize string properties
         Name = string.Empty;
+        Description = string.Empty;
         WorldType = string.Empty;
 
         // Initialize list tab collections and navigators

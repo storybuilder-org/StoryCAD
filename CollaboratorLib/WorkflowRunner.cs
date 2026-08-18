@@ -191,6 +191,11 @@ namespace StoryCollaborator
                 if (workflowModel.Label == "InnerOuterProblems")
                     EnrichInnerOuterStructuralFields(result, gatheredElements);
 
+                // #201: empty or omitted WorldType becomes NoOp against empty outline and never
+                // reaches Accept. Propose craft default when still blank.
+                if (string.Equals(workflowModel.Label, "DefineStoryWorld", StringComparison.Ordinal))
+                    EnrichDefineStoryWorldWorldType(result, gatheredElements);
+
                 if (!outputResult.Success)
                 {
                     result.Success = false;
@@ -403,6 +408,52 @@ namespace StoryCollaborator
         }
 
         /// <summary>
+        /// #201: after extract, ensure a non-empty WorldType is proposed when the outline has none.
+        /// Empty proposed + empty current classifies as NoOp and never reaches Accept (smoke Path A).
+        /// Craft default is Consensus Reality (thin-outline / primary-world default).
+        /// </summary>
+        internal void EnrichDefineStoryWorldWorldType(
+            WorkflowResult result,
+            Dictionary<string, StoryElement> gatheredElements)
+        {
+            const string defaultWorldType = "Consensus Reality";
+            const string label = "StoryWorld";
+
+            if (!gatheredElements.TryGetValue(label, out var world) || world == null)
+            {
+                result.StatusMessages.Add("DefineStoryWorld WorldType enrich skipped: StoryWorld not gathered");
+                return;
+            }
+
+            var current = ReadCurrentScalarDisplay(world.Uuid, "WorldType");
+            if (!string.IsNullOrWhiteSpace(current))
+            {
+                result.StatusMessages.Add(
+                    $"DefineStoryWorld WorldType enrich skipped: already set ({TruncateForLog(current)})");
+                return;
+            }
+
+            var pending = result.PendingUpdates.Find(u =>
+                string.Equals(u.ElementLabel, label, StringComparison.Ordinal)
+                && string.Equals(u.Spec.Property, "WorldType", StringComparison.Ordinal)
+                && u.Spec.WriteVia == WriteVia.Scalar);
+
+            var proposed = pending != null ? NormalizeCompareText(FormatDisplayValue(pending)) : string.Empty;
+            if (!string.IsNullOrEmpty(proposed) && WorldTypeAxisMap.TryGet(proposed, out _))
+            {
+                result.StatusMessages.Add(
+                    $"DefineStoryWorld WorldType enrich skipped: model proposed ({TruncateForLog(proposed)})");
+                return;
+            }
+
+            AddOrReplaceScalarUpdate(result, label, world.Uuid, "WorldType", defaultWorldType);
+            var msg =
+                $"DefineStoryWorld WorldType enrich: proposed default {defaultWorldType} (model empty or invalid)";
+            result.StatusMessages.Add(msg);
+            _logger?.LogInformation("{Message}", msg);
+        }
+
+        /// <summary>
         /// Issue #120 / #116: after JSON extract, propose Inner Problem structure the model must not invent.
         /// ConflictType is proposed as Person vs. Self (Lists.json craft default). Protagonist and
         /// Antagonist GUIDs both equal the gathered Protagonist (self vs self). These land in pending
@@ -471,6 +522,42 @@ namespace StoryCollaborator
 
             foreach (var update in result.PendingUpdates)
             {
+                // TypedList / SimpleList: empty propose + empty live is NoOp (DefineStoryWorld
+                // re-run returned empty Cultures/PhysicalWorlds as two Accept rows).
+                if (update.Spec.WriteVia is WriteVia.TypedList or WriteVia.SimpleList)
+                {
+                    var proposedCount = CountCollectionValue(update.Value);
+                    var currentCount = ReadCurrentCollectionCount(update.ElementUuid, update.Spec.Property);
+                    if (proposedCount == 0 && currentCount == 0)
+                    {
+                        noOpCount++;
+                        result.StatusMessages.Add($"No-op (empty collection): {update.Key}");
+                        _logger?.LogInformation(
+                            "Classify {Key} kind=NoOp (empty {WriteVia})",
+                            update.Key, update.Spec.WriteVia);
+                        continue;
+                    }
+
+                    // Empty propose against filled live would wipe — do not offer that as Accept.
+                    if (proposedCount == 0 && currentCount > 0)
+                    {
+                        noOpCount++;
+                        result.StatusMessages.Add(
+                            $"No-op (empty {update.Spec.WriteVia} would wipe {currentCount} entries): {update.Key}");
+                        _logger?.LogInformation(
+                            "Classify {Key} kind=NoOp (empty propose vs live count={Count})",
+                            update.Key, currentCount);
+                        continue;
+                    }
+
+                    kept.Add(update);
+                    display[update.Key] = FormatDisplayValue(update);
+                    _logger?.LogInformation(
+                        "Classify {Key} kind=Unclassified (non-scalar WriteVia={WriteVia} count={Count})",
+                        update.Key, update.Spec.WriteVia, proposedCount);
+                    continue;
+                }
+
                 if (update.Spec.WriteVia != WriteVia.Scalar)
                 {
                     kept.Add(update);
@@ -581,6 +668,29 @@ namespace StoryCollaborator
                 text = new RichTextStripper().StripRichTextFormat(text) ?? string.Empty;
 
             return text.Trim();
+        }
+
+        private static int CountCollectionValue(object? value)
+        {
+            if (value is null) return 0;
+            if (value is System.Collections.ICollection c) return c.Count;
+            return 0;
+        }
+
+        private int ReadCurrentCollectionCount(Guid elementUuid, string propertyName)
+        {
+            var got = _storyApi.GetStoryElement(elementUuid);
+            if (!got.IsSuccess || got.Payload == null)
+                return 0;
+
+            var property = got.Payload.GetType().GetProperty(propertyName);
+            if (property == null || !property.CanRead)
+                return 0;
+
+            var value = property.GetValue(got.Payload);
+            if (value is System.Collections.ICollection c)
+                return c.Count;
+            return 0;
         }
 
         private static string NormalizeCompareText(string? text)
@@ -884,9 +994,10 @@ namespace StoryCollaborator
                             _logger?.LogWarning($"{update.ElementLabel}.{spec.Property}: expected List<JsonElement> for TypedList");
                             break;
                         }
-                        // Clear existing entries by repeatedly removing at index 0,
-                        // then add each entry; the API deserializes the JSON object
-                        // into the collection's typed element (e.g. CultureEntry).
+                        // Snapshot prior entries, then clear-and-add. Merge empty proposed
+                        // fields from prior rows with the same Name so Name-only LLM rows
+                        // do not wipe Values (Cultures Accept smoke).
+                        var priorEntries = SnapshotTypedListEntries(uuid, spec.Property);
                         var existing = _storyApi.GetStoryElement(uuid);
                         if (existing.IsSuccess && existing.Payload != null)
                         {
@@ -898,7 +1009,8 @@ namespace StoryCollaborator
                         }
                         foreach (var entry in typedEntries)
                         {
-                            var addResult = _storyApi.AddCollectionEntry(uuid, spec.Property, entry);
+                            var toAdd = MergeTypedListJsonWithPrior(entry, priorEntries, spec.ListEntryType);
+                            var addResult = _storyApi.AddCollectionEntry(uuid, spec.Property, toAdd);
                             if (!addResult.IsSuccess)
                                 result.StatusMessages.Add(
                                     $"{spec.Property}: entry rejected: {addResult.ErrorMessage}");
@@ -1185,6 +1297,112 @@ namespace StoryCollaborator
                     entries.Add(entry.Clone());
             }
             return entries;
+        }
+
+        /// <summary>
+        /// Clone current TypedList rows (e.g. CultureEntry) before clear-and-replace.
+        /// </summary>
+        private List<object> SnapshotTypedListEntries(Guid elementUuid, string propertyName)
+        {
+            var list = new List<object>();
+            var existing = _storyApi.GetStoryElement(elementUuid);
+            if (!existing.IsSuccess || existing.Payload == null)
+                return list;
+
+            var prop = existing.Payload.GetType().GetProperty(propertyName);
+            if (prop?.GetValue(existing.Payload) is not System.Collections.IList current)
+                return list;
+
+            foreach (var item in current)
+            {
+                if (item == null) continue;
+                if (item is CultureEntry ce)
+                    list.Add(ce.Clone());
+                else if (item is PhysicalWorldEntry pe)
+                    list.Add(pe.Clone());
+                else
+                    list.Add(item);
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// When the model returns Name with blank Values (or camelCase keys already handled
+        /// in API deserialize), keep prior non-empty fields on the same Name.
+        /// </summary>
+        private static object MergeTypedListJsonWithPrior(
+            JsonElement proposedJson,
+            List<object> priorEntries,
+            Type? listEntryType)
+        {
+            if (listEntryType == typeof(CultureEntry))
+            {
+                CultureEntry proposed;
+                try
+                {
+                    proposed = JsonSerializer.Deserialize<CultureEntry>(proposedJson.GetRawText(),
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                        ?? new CultureEntry();
+                }
+                catch
+                {
+                    return proposedJson;
+                }
+
+                var prior = priorEntries.OfType<CultureEntry>().FirstOrDefault(p =>
+                    string.Equals(
+                        (p.Name ?? string.Empty).Trim(),
+                        (proposed.Name ?? string.Empty).Trim(),
+                        StringComparison.OrdinalIgnoreCase));
+                if (prior != null)
+                {
+                    if (string.IsNullOrWhiteSpace(proposed.Values)) proposed.Values = prior.Values;
+                    if (string.IsNullOrWhiteSpace(proposed.Customs)) proposed.Customs = prior.Customs;
+                    if (string.IsNullOrWhiteSpace(proposed.Taboos)) proposed.Taboos = prior.Taboos;
+                    if (string.IsNullOrWhiteSpace(proposed.Art)) proposed.Art = prior.Art;
+                    if (string.IsNullOrWhiteSpace(proposed.DailyLife)) proposed.DailyLife = prior.DailyLife;
+                    if (string.IsNullOrWhiteSpace(proposed.Entertainment))
+                        proposed.Entertainment = prior.Entertainment;
+                }
+
+                return proposed;
+            }
+
+            if (listEntryType == typeof(PhysicalWorldEntry))
+            {
+                PhysicalWorldEntry proposed;
+                try
+                {
+                    proposed = JsonSerializer.Deserialize<PhysicalWorldEntry>(proposedJson.GetRawText(),
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                        ?? new PhysicalWorldEntry();
+                }
+                catch
+                {
+                    return proposedJson;
+                }
+
+                var prior = priorEntries.OfType<PhysicalWorldEntry>().FirstOrDefault(p =>
+                    string.Equals(
+                        (p.Name ?? string.Empty).Trim(),
+                        (proposed.Name ?? string.Empty).Trim(),
+                        StringComparison.OrdinalIgnoreCase));
+                if (prior != null)
+                {
+                    if (string.IsNullOrWhiteSpace(proposed.Geography)) proposed.Geography = prior.Geography;
+                    if (string.IsNullOrWhiteSpace(proposed.Climate)) proposed.Climate = prior.Climate;
+                    if (string.IsNullOrWhiteSpace(proposed.NaturalResources))
+                        proposed.NaturalResources = prior.NaturalResources;
+                    if (string.IsNullOrWhiteSpace(proposed.Flora)) proposed.Flora = prior.Flora;
+                    if (string.IsNullOrWhiteSpace(proposed.Fauna)) proposed.Fauna = prior.Fauna;
+                    if (string.IsNullOrWhiteSpace(proposed.Astronomy)) proposed.Astronomy = prior.Astronomy;
+                }
+
+                return proposed;
+            }
+
+            return proposedJson;
         }
 
         private static List<Guid> ExtractGuidList(JsonElement elem)
