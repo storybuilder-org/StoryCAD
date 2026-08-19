@@ -1,4 +1,3 @@
-using System;
 using System.Text.RegularExpressions;
 
 namespace StoryCollaborator.Models;
@@ -6,59 +5,60 @@ namespace StoryCollaborator.Models;
 /// <summary>What the interviewer decided about the answer it was just given (#119).</summary>
 public enum InterviewVerdict
 {
-    /// <summary>The writer answered. Move to the next line the client handed over.</summary>
-    Answered,
+    /// <summary>Still on this field.</summary>
+    KeepAsking,
 
-    /// <summary>A non-answer. Ask the same line again with its premise intact.</summary>
-    Retry,
+    /// <summary>Enough to leave this field.</summary>
+    GotIt,
 
-    /// <summary>The answer offered a concrete detail worth one question. Position holds.</summary>
-    FollowUp,
+    /// <summary>Refused, or there is not one. Leave the field.</summary>
+    NotThis,
 
-    /// <summary>Every block is answered.</summary>
+    /// <summary>Interview complete.</summary>
     Done
 }
 
 /// <summary>
-/// One reply from the interviewer (#119), split into its verdict and the question the
-/// writer actually sees.
-///
-/// The verdict is all the model reports, because it is the only thing the client cannot
-/// work out for itself. Position is arithmetic and lives in <see cref="Workflows.InterviewScript"/>:
-/// an earlier build had the model report a field and line with each question and it drifted
-/// out of step with the question it was actually asking.
+/// One reply from the interviewer (#119). The verdict is all the model reports.
+/// Field is owned by <see cref="Workflows.InterviewScript"/>, not by this parse.
 /// </summary>
 public sealed record InterviewReply(InterviewVerdict Verdict, string Question)
 {
-    // Tolerant of spacing and case. A header that arrives slightly malformed should cost a
-    // verdict, not leave "VERDICT: ANSWERED" on screen in front of the writer.
     private static readonly Regex HeaderPattern = new(
         @"^\s*VERDICT\s*:\s*(?<verdict>[A-Za-z-]+)\s*$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     /// <summary>
-    /// Parses a reply. A missing or unreadable header is read as Answered: the interview
-    /// walks on rather than stalling on the same question, which is the failure a writer
-    /// cannot get out of.
+    /// Parses a reply. Missing header, unknown token, and empty reply are Keep asking.
+    /// Does not use Enum.TryParse as the product map.
     /// </summary>
     public static InterviewReply Parse(string reply)
     {
         if (string.IsNullOrWhiteSpace(reply))
-            return new InterviewReply(InterviewVerdict.Answered, string.Empty);
+            return new InterviewReply(InterviewVerdict.KeepAsking, string.Empty);
 
         var lines = reply.Replace("\r\n", "\n").Split('\n');
         var match = HeaderPattern.Match(lines[0]);
 
         if (!match.Success)
-            return new InterviewReply(InterviewVerdict.Answered, reply.Trim());
+            return new InterviewReply(InterviewVerdict.KeepAsking, reply.Trim());
 
+        var token = match.Groups["verdict"].Value.Replace("-", string.Empty).ToUpperInvariant();
         var body = string.Join("\n", lines, 1, lines.Length - 1).Trim();
-        var verdict = match.Groups["verdict"].Value.Replace("-", string.Empty);
 
-        return new InterviewReply(
-            Enum.TryParse<InterviewVerdict>(verdict, ignoreCase: true, out var parsed)
-                ? parsed
-                : InterviewVerdict.Answered,
-            body);
+        var verdict = token switch
+        {
+            "KEEP" or "RETRY" or "FOLLOWUP" => InterviewVerdict.KeepAsking,
+            "GOTIT" or "ANSWERED" => InterviewVerdict.GotIt,
+            "NOTTHIS" => InterviewVerdict.NotThis,
+            "DONE" => InterviewVerdict.Done,
+            _ => InterviewVerdict.KeepAsking
+        };
+
+        return new InterviewReply(verdict, body);
     }
+
+    /// <summary>Empty body never changes Field, including Got it.</summary>
+    public static bool ShouldApply(bool opening, string question) =>
+        !opening && !string.IsNullOrWhiteSpace(question);
 }

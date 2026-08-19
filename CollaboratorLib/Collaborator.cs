@@ -1238,7 +1238,7 @@ public class Collaborator : ICollaborator
         if (!opening)
         {
             _interviewTranscript.Add(
-                _interviewCursor.Field, _interviewCursor.Line, _interviewPendingQuestion, answer!);
+                _interviewCursor.Field, _interviewPendingQuestion, answer!);
             viewModel.CanSaveInterview = !_interviewTranscript.IsEmpty;
         }
 
@@ -1249,23 +1249,17 @@ public class Collaborator : ICollaborator
             var runnerLogger = _loggerFactory?.CreateLogger<WorkflowRunner>();
             var runner = new WorkflowRunner(_storyModel!, workflow, _storyApi!, runnerLogger, _settings, _auditLogger);
 
-            // The opening turn has no current question, so the first line rides in as the
-            // next one and the model simply asks it. Every later turn sends the line the
-            // answer came from, plus where that line leads.
-            var next = opening ? InterviewScript.First : _interviewCursor.Next();
+            var field = opening ? InterviewScript.First : _interviewCursor.Field;
+            var nextField = InterviewScript.NextField(field);
 
             var body = runner.BuildWorkflowRequestBody(_interviewElements);
             runner.EnrichWithStoryContext(body.Args, _interviewElements, workflow.GetIO());
             runner.ApplySettings(body.Args);
             WorkflowRunner.SetInterviewArgs(
                 body.Args,
-                opening ? string.Empty : _interviewCursor.Field,
-                opening ? 0 : _interviewCursor.Line,
-                next?.Field,
-                next?.Line ?? 0,
-                _interviewCursor.FollowUpUsed,
-                !opening && _interviewCursor.WantsScriptedFollowUp(answer),
-                _interviewCursor.Retries,
+                field,
+                nextField,
+                opening ? 0 : _interviewCursor.TurnsOnField,
                 _interviewTranscript.ToPromptText(),
                 answer);
 
@@ -1283,28 +1277,30 @@ public class Collaborator : ICollaborator
 
             var reply = InterviewReply.Parse(result.RawResponse ?? string.Empty);
 
-            // Every block answered, or the script ran out while the model still called it
-            // answered. Either way there is nothing left to ask.
-            if (reply.Verdict == InterviewVerdict.Done
-                || (!opening && reply.Verdict == InterviewVerdict.Answered && next == null))
-            {
-                await FinishInterviewAsync(viewModel, reply.Question);
-                return string.Empty;
-            }
-
-            if (string.IsNullOrWhiteSpace(reply.Question))
+            if (!InterviewReply.ShouldApply(opening, reply.Question)
+                && string.IsNullOrWhiteSpace(reply.Question))
             {
                 viewModel.ConversationList.Add(ChatMessage.Error(
                     "The interviewer sent nothing back. Say something to try again."));
                 return string.Empty;
             }
 
-            // The opening turn always lands on the first line, whatever verdict came back:
-            // there was no question to answer, so there is nothing to retry.
             if (opening)
+            {
                 _interviewCursor.Start();
+            }
+            else if (reply.Verdict == InterviewVerdict.Done
+                     || ((reply.Verdict == InterviewVerdict.GotIt
+                          || reply.Verdict == InterviewVerdict.NotThis)
+                         && nextField == null))
+            {
+                await FinishInterviewAsync(viewModel, reply.Question);
+                return string.Empty;
+            }
             else
-                _interviewCursor.Apply(reply.Verdict, next);
+            {
+                _interviewCursor.Apply(reply.Verdict);
+            }
 
             _interviewPendingQuestion = reply.Question;
 

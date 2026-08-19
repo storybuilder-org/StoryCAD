@@ -1113,40 +1113,20 @@ namespace StoryCollaborator
         }
 
         /// <summary>
-        /// Writes the four interview args (#119). All four are always written: the Worker merges
-        /// {{$Var}} placeholders and a missing key merges as empty, which changes the prompt
-        /// without saying so.
-        ///
-        /// The cursor is (field, line) and the client is the only thing holding it. The Worker
-        /// is stateless per turn, and the question bank stays on the Worker (ADR-005), so this
-        /// side never sees a line of question text until the Worker sends one back.
-        ///
-        /// Both the current position and the one after it are sent, precomputed. The model
-        /// picks a line to emit rather than working out which line it is on: given the
-        /// arithmetic it drifted, reporting one position while asking another's question.
-        ///
-        /// FollowUpUsed is sent rather than counted on the Worker for the same reason. It is
-        /// one bit the client already knows.
+        /// Writes interview args (#119). Field cursor, not a cue line.
+        /// Do not send InterviewLine. Always write every key the Worker merges.
         /// </summary>
         internal static void SetInterviewArgs(
             Dictionary<string, string> args,
             string? field,
-            int line,
             string? nextField,
-            int nextLine,
-            bool followUpUsed,
-            bool forceFollowUp,
-            int retryCount,
+            int turnsOnField,
             string? transcript,
             string? answer)
         {
             args["InterviewField"] = field?.Trim() ?? string.Empty;
-            args["InterviewLine"] = line > 0 ? line.ToString() : string.Empty;
             args["InterviewNextField"] = nextField?.Trim() ?? string.Empty;
-            args["InterviewNextLine"] = nextLine > 0 ? nextLine.ToString() : string.Empty;
-            args["InterviewFollowUpUsed"] = followUpUsed ? "yes" : "no";
-            args["InterviewForceFollowUp"] = forceFollowUp ? "yes" : "no";
-            args["InterviewRetryCount"] = retryCount.ToString();
+            args["InterviewTurnsOnField"] = turnsOnField.ToString();
             args["InterviewTranscript"] = transcript ?? string.Empty;
             args["InterviewAnswer"] = answer?.Trim() ?? string.Empty;
         }
