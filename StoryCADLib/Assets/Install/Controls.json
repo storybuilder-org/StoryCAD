@@ -14,12 +14,12 @@
         {
           "name": "Romantic",
           "examples": [
-            "Discovering a Spouse's Secret",
-            "An Unwanted Romantic Advance",
-            "A Partner Being Unwilling to Commit",
-            "A Romantic Competitor",
-            "Seeing an Ex with Someone New",
-            "Being Turned Down by a Potential Love Interest",
+            "You discover your spouse has been hiding something important",
+            "Someone keeps making advances you don't want",
+            "Your partner refuses to commit after years together",
+            "A rival is competing for your love interest's affection",
+            "You run into your ex with their new partner",
+            "The person you finally asked out turns you down",
             "Your love interest's ex shows up",
             "Your antagonist seeks to hurt you by taking your love interest"
           ]
@@ -29,7 +29,8 @@
           "examples": [
             "Your antagonist is jealous of your success",
             "You're being challenged for a role you seek",
-            "A business rival wants the same contract or client"
+            "A business rival wants the same contract or client",
+            "You're forced to work alongside someone who despises you"
           ]
         },
         {
@@ -56,7 +57,8 @@
             "Lack of self-confidence holds you back",
             "Your perfectionism prevents you from finishing anything",
             "Guilt over a past decision keeps you from moving forward",
-            "Fear of intimacy causes you to push people away"
+            "Fear of intimacy causes you to push people away",
+            "You're facing a challenge beyond your skills and can't admit it"
           ]
         }
       ]
@@ -84,8 +86,8 @@
         {
           "name": "Information was wrong",
           "examples": [
-            "Being Mistaken for Someone Else",
-            "Antagonist's ego won't let him accept truth",
+            "You're mistaken for someone else, with serious consequences",
+            "Antagonist's ego won't let him accept the truth",
             "Antagonist defends old paradigm"
           ]
         },
@@ -110,25 +112,23 @@
             "An executive in your company trades using insider information",
             "Your antagonist wants to prevent the discovery of a piece of land's true owner",
             "A staff member is part owner of a business your university's doing business with",
-            "Your access to grazing rights are being reduced by someone in Washington"
+            "Your access to grazing rights is being reduced by someone in Washington"
           ]
         },
         {
           "name": "Procedural issues (how to proceed)",
           "examples": [
-            "Misaligned Goals",
+            "You and a partner are working toward incompatible goals",
             "A zoning meeting was rescheduled and you weren't informed",
             "Bickering between two board members is interfering with a major decision",
             "You and your spouse have different child-raising ideas",
-            "You know how, Antagonist believe you"
+            "You know how to proceed, but the antagonist won't believe you"
           ]
         },
         {
           "name": "Psychological need (fairness, respect, trust, etc.)",
           "examples": [
-            "Nepotism at Work",
-            "Having to Work with an Enemy",
-            "A lawyer represents one client while receiving fees from opposing litigents",
+            "A lawyer represents one client while receiving fees from opposing litigants",
             "Antagonist wants to prevent your achievement"
           ]
         }
@@ -140,10 +140,8 @@
         {
           "name": "Limited resources (competition over land, food, etc.)",
           "examples": [
-            "Bad Weather",
-            "Lacking an Important Resource",
-            "Being Unable to Save Everyone",
-            "Physical Exhaustion",
+            "You lack a resource critical to reaching your goal",
+            "There's only time to save some of the people in danger",
             "A deadline is moved up",
             "A resource-hungry factory is consuming the water",
             "A rival tribe is hunting on your territory",
@@ -165,12 +163,11 @@
         {
           "name": "External changes (drought, flood, need to migrate, etc.)",
           "examples": [
-            "Facing a challenge beyond one's knowledge or skill",
-            "Being Unprepared",
             "A new competitor arrives on the scene",
             "A hurricane's bearing down on your town",
             "Refugees are flooding your border",
-            "A powerful land owner blocks access to water during a drought"
+            "A powerful land owner blocks access to water during a drought",
+            "A storm wrecks your carefully laid plans"
           ]
         },
         {
@@ -203,7 +200,7 @@
           "name": "Respect for Others",
           "examples": [
             "A recruit can't seem to earn his drill sergeant's respect",
-            "A co-worker constantly bad-mouths the hispanics she works with",
+            "A co-worker constantly bad-mouths the Hispanics she works with",
             "Disrespect due to ethnic background",
             "Distrust due to religious differences",
             "Disregard due to lack of education",
@@ -214,7 +211,7 @@
           "name": "Courage",
           "examples": [
             "Unwillingness to face opposition due to self-doubt",
-            "Presenting false valour",
+            "Presenting false valor",
             "Unable to ask for forgiveness",
             "Unable to forgive an enemy"
           ]
@@ -240,7 +237,7 @@
         {
           "name": "Fairness/Justice/Openness",
           "examples": [
-            "A whistle-blower is harassed at Work",
+            "A whistle-blower is harassed at work",
             "A supervisor plays favorites because of a long-standing relationship",
             "An attacker isn't charged because he's a police officer",
             "The manager's daughter gets the job although she's not qualified"
@@ -318,13 +315,14 @@
             "Failure to prepare for a bad harvest",
             "Borrowing recklessly",
             "Routinely spending your entire paycheck and never saving",
-            "Failing to defend against a warlike tribe"
+            "Failing to defend against a warlike tribe",
+            "You're called on to perform before you're ready"
           ]
         },
         {
           "name": "Resilience",
           "examples": [
-            "A former a victim of abuse, you're wary of a new relationship",
+            "A former victim of abuse, you're wary of a new relationship",
             "A burned-out coach is given a gifted athlete",
             "A soldier back from combat can't readjust to civilian life",
             "A bankruptcy survivor refuses to risk starting another business",
@@ -383,7 +381,7 @@
           "examples": [
             "A forced (non-collaborative) compromise leaves one or both sides unhappy",
             "The child visitation schedule after a divorce is one-sided",
-            "After a  water rights court decision one party continues to overuse resources",
+            "After a water rights court decision one party continues to overuse resources",
             "One side gives in to avoid direct conflict, but still feels aggrieved"
           ]
         },
@@ -404,7 +402,7 @@
             "Family members feud over the patriarch's will",
             "Barely making ends meet and then finding you're unemployed",
             "Being coddled financially as a youth leaves a young man unprepared for life",
-            "Being expected to be active part in the family business",
+            "Being expected to be an active part in the family business",
             "Acting as a steward is difficult; nobody trusts your intentions",
             "Finding that you've blown through a windfall"
           ]
@@ -424,7 +422,8 @@
             "A boy, shamed by his father, overeats, in a vicious cycle.",
             "An addiction in the family",
             "Work conditions in the mine are unsafe",
-            "A physical handicap causes job issues"
+            "A physical handicap causes job issues",
+            "Exhaustion is eroding your judgment at the worst possible time"
           ]
         },
         {
@@ -440,7 +439,7 @@
         {
           "name": "Humor",
           "examples": [
-            "A coworker constantly pokes fun a workmate",
+            "A coworker constantly pokes fun at a workmate",
             "Using humor to disarm conflict causes resentment",
             "Self-effacing humor results in scorn",
             "Your boss has absolutely no sense of humor"
@@ -551,7 +550,7 @@
           "name": "Crime or injustice",
           "examples": [
             "Antagonist wants to cover up relative's crime",
-            "Antagonist is a physical agressor",
+            "Antagonist is a physical aggressor",
             "Antagonist is assailant",
             "Antagonist has stolen an object",
             "Antagonist is a traitor"
@@ -568,10 +567,10 @@
           ]
         },
         {
-          "name": "Denial or denegration of others' beliefs",
+          "name": "Denial or denigration of others' beliefs",
           "examples": [
-            "Poking fun of door-to-door missionaries",
-            "Calling hispanics papists",
+            "Poking fun at door-to-door missionaries",
+            "Mocking a coworker's religious traditions",
             "Denying that the Holocaust happened"
           ]
         }
@@ -583,7 +582,7 @@
         {
           "name": "Ethnic/racial",
           "examples": [
-            "A young African American man is torn between his love for hip-hop and his parents'' middle-class expectations.",
+            "A young African American man is torn between his love for hip-hop and his parents' middle-class expectations.",
             "A Native American woman tries to balance her indigenous beliefs and a Western lifestyle.",
             "A Hispanic man living near the border is caught between his immigrant community and assimilation.",
             "An Asian American tries to embrace feminism but is pressured to conform by traditional parents.",
@@ -613,7 +612,7 @@
             "A Muslim doctor in an American hospital is torn between the need to wear a hijab and workplace expectations.",
             "A Christian musician/songwriter faces discrimination from liberal friends.",
             "A Hindu woman must choose between family expectations and love for Muslim man.",
-            "A college student who's became an atheist faces pressure from his preacher father."
+            "A college student who's become an atheist faces pressure from his preacher father."
           ]
         },
         {
@@ -621,7 +620,7 @@
           "examples": [
             "A progressive activist who is a single mother and faces opposition from the government, media, and even friends and family when she takes a stand against an oppressive new law.",
             "A businessman who started and owns a successful retail chain faces criticism from employees and the press for his conservative policies.",
-            "A journalism major finds her college newspaper articles due to their content.",
+            "A journalism major finds her college newspaper articles censored due to their content.",
             "A libertarian member of his city council is attacked from both liberal and conservative peers due to his opposition to local taxes."
           ]
         }
@@ -675,7 +674,7 @@
             "An art dealer pairs with a hacker to sell fake NFTs of art works.",
             "A CEO embezzles millions from the company for personal gain.",
             "A celebrity financial advisor defrauds her clients through a Ponzi scheme.",
-            "An accounting firm tax records for their clients to reduce their liability."
+            "An accounting firm falsifies tax records for their clients to reduce their liability."
           ]
         },
         {
@@ -691,7 +690,7 @@
           "examples": [
             "A neo-Nazi group attacks a mosque during Friday prayers.",
             "A group of white supremacists vandalizes a synagogue with anti-Semitic graffiti.",
-            "A man shoots and kills members of a LGBTQ+ community in a nightclub."
+            "A man shoots and kills members of an LGBTQ+ community in a nightclub."
           ]
         },
         {
@@ -739,9 +738,9 @@
             "Because of what she perceives as slow service in a checkout line, Jane flies into a rage and verbally attacks the clerk.",
             "Megan ignores the pleas of a homeless person on the street, seeing them as beneath her and unworthy of her help.",
             "John flatters and sucks up to his boss to get what he wants at every opportunity.",
-            "Paul impulsively keys a sport car on the street, because there are no witnesses.",
+            "Paul impulsively keys a sports car on the street, because there are no witnesses.",
             "A construction worker punches a stranger in a bar for accidentally spilling a drink on the girl he's with.",
-            "Margaret users her position as county commissioner to evade a speeding ticket."
+            "Margaret uses her position as county commissioner to evade a speeding ticket."
           ]
         },
         {
@@ -758,7 +757,7 @@
           "name": "Psychopathy",
           "examples": [
             "Caught copying another student's test answers, she blatantly claims the other person stole hers",
-            "Seeing a jacket she likes, she tries it own and walks out of the store without hesitation",
+            "Seeing a jacket she likes, she tries it on and walks out of the store without hesitation",
             "A youth cusses at his teacher, and seems contrite in counseling, but destroys the classroom after returning",
             "After being fired, a disgruntled employee burns his former employer's business down"
           ]
@@ -787,16 +786,13 @@
     "Ex-wife",
     "Father",
     "Father-in-law",
-    "Former Wife",
     "Former employee",
     "Former employer",
-    "Former husband",
     "Former lover",
     "Former neighbor",
     "Former student",
     "Former teacher",
     "Former teammate",
-    "Former wife",
     "Foster parent",
     "Friend",
     "Husband",
