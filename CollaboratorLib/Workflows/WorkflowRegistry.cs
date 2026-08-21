@@ -30,6 +30,7 @@ namespace StoryCollaborator.Workflows
         {
             "Premise",
             "StoryProblem",
+            "ProblemBuilder",
             "GMC",
             "Structure",
             "StoryFunction",
@@ -517,7 +518,135 @@ namespace StoryCollaborator.Workflows
                                 }
                             }
                         }
-                    }) { PrimaryElementType = StoryItemType.Problem },
+                    })
+                {
+                    PrimaryElementType = StoryItemType.Problem,
+                    CreatesScenesForBeats = true
+                },
+
+                // #77 ProblemBuilder: one Problem surface. Consolidates ConflictBuilder, GMC,
+                // Structure, and BeatScenes. Writes the RequiredFieldGapScanner spine, chooses a
+                // beat sheet, fills empty beats, and creates Scene stubs for #208.
+                // ProblemCategory, Protagonist, and Antagonist are preconditions, not outputs.
+                new Workflow(
+                    label: "ProblemBuilder",
+                    title: "Problem Builder",
+                    description: "Fill a Problem: goal, motive, conflict, outcome, and a beat sheet " +
+                                 "with scenes for its empty beats.",
+                    explanation: "One pass over a Problem you selected. It writes the fields a Problem " +
+                                 "needs to be usable, chooses a beat sheet that fits the Problem Category " +
+                                 "and Conflict Type, binds scenes you already wrote to empty beats, and " +
+                                 "creates scene stubs for the rest. It never changes a beat you filled and " +
+                                 "never adds beats to a sheet you already chose. Set Problem Category, " +
+                                 "Protagonist, and Antagonist before you run it.",
+                    workflowIO: new WorkflowIO
+                    {
+                        RequiredInputs = new List<ElementRequirement>
+                        {
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Problem,
+                                ElementLabel = "Problem",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            },
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.StoryOverview,
+                                ElementLabel = "Overview",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            },
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Character,
+                                ElementLabel = "Protagonist",
+                                ReferencedElementLabel = "Problem.Protagonist",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            },
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Character,
+                                ElementLabel = "Antagonist",
+                                ReferencedElementLabel = "Problem.Antagonist",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            }
+                        },
+                        OptionalInputs = new List<ElementRequirement>(),
+                        Outputs = new List<ElementOutput>
+                        {
+                            new ElementOutput
+                            {
+                                ElementType = StoryItemType.Problem,
+                                ElementLabel = "Problem",
+                                PropertiesToUpdate = new List<PropertySpec>
+                                {
+                                    new PropertySpec("Name"),
+                                    new PropertySpec("Description", JsonKey: "StoryQuestion"),
+                                    new PropertySpec("ProblemType"),
+                                    new PropertySpec("ConflictType"),
+                                    new PropertySpec("Subject"),
+                                    new PropertySpec("ProblemSource"),
+                                    new PropertySpec("Premise"),
+                                    new PropertySpec("ProtGoal"),
+                                    new PropertySpec("ProtMotive"),
+                                    new PropertySpec("ProtConflict"),
+                                    new PropertySpec("AntagGoal"),
+                                    new PropertySpec("AntagMotive"),
+                                    new PropertySpec("AntagConflict"),
+                                    new PropertySpec("Outcome"),
+                                    new PropertySpec("Method"),
+                                    new PropertySpec("Theme"),
+                                    new PropertySpec("Notes", JsonKey: "situation_sheet"),
+                                    new PropertySpec("StructureTitle"),
+                                    new PropertySpec("StructureDescription"),
+                                    new PropertySpec("StructureBeats", WriteVia.BeatSheet, JsonKey: "beats")
+                                }
+                            }
+                        },
+                        // Every list-backed output needs its examples, or the model invents a
+                        // value the StoryCAD dropdown cannot show (a live run returned
+                        // ProblemType "Integrity"; Lists.json allows three values).
+                        ExampleLists = new List<string>
+                        {
+                            "ProblemType", "ProblemSource", "Outcome", "Method", "Theme",
+                            "Motive", "ConflictType", "ProblemCategory",
+                            // #208 handoff: a created stub carries SceneType.
+                            "SceneType"
+                        },
+                        CollectionInputs = new List<CollectionInput>
+                        {
+                            new CollectionInput
+                            {
+                                RequestName = "ProblemChoices",
+                                ElementType = StoryItemType.Problem,
+                                Projection = ElementProjection.BaseStoryElement
+                            },
+                            new CollectionInput
+                            {
+                                RequestName = "SceneChoices",
+                                ElementType = StoryItemType.Scene,
+                                Projection = ElementProjection.BaseStoryElement
+                            },
+                            // #208 handoff: cast on a created stub, resolved from this set.
+                            new CollectionInput
+                            {
+                                RequestName = "CharacterChoices",
+                                ElementType = StoryItemType.Character,
+                                Projection = ElementProjection.IdAndName
+                            }
+                        }
+                    })
+                {
+                    PrimaryElementType = StoryItemType.Problem,
+                    CreatesScenesForBeats = true,
+                    RequiresProblemCategory = true,
+                    InjectsConflictTaxonomy = true,
+                    InjectsBeatSheets = true,
+                    InjectsStockScenes = true
+                },
                 // === Character Workflows ===
                 // #182 DefineCharacter: world identity + personality. Occupation Role lives here.
                 new Workflow(

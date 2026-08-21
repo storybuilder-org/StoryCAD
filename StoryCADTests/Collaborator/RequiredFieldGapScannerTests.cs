@@ -160,13 +160,18 @@ public class RequiredFieldGapScannerTests
     }
 
     [TestMethod]
-    public void GapOwnership_NewProblemFields_PointToStoryProblem()
+    public void GapOwnership_NewProblemFields_OfferProblemBuilderThenStoryProblem()
     {
+        // Collaborator #77: ProblemBuilder fills the Problem spine and is offered first.
+        // A gap means the Problem already exists, and StoryProblem is the premise-to-Problem
+        // creation path, so it is the weaker suggestion here. It stays listed while it is
+        // registered for A:B.
         foreach (var prop in new[] { "ProblemType", "ConflictType", "Subject" })
         {
             var owners = GapWorkflowOwnership.WorkflowsFor(StoryItemType.Problem, prop);
-            Assert.AreEqual(1, owners.Count, prop);
-            Assert.AreEqual("StoryProblem", owners[0], prop);
+            Assert.AreEqual(2, owners.Count, prop);
+            Assert.AreEqual("ProblemBuilder", owners[0], prop);
+            Assert.AreEqual("StoryProblem", owners[1], prop);
         }
 
         Assert.AreEqual("Problem Type",
