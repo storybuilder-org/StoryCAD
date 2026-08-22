@@ -55,9 +55,9 @@ public static class GapWorkflowOwnership
             (StoryItemType.Setting, "Description") => new[] { "SettingTimeSpace" },
             (StoryItemType.Setting, "Name") => Array.Empty<string>(),
 
-            (StoryItemType.Scene, "Description") => new[] { "SceneSummary" },
-            (StoryItemType.Scene, "CastMembers") => new[] { "CastSceneRoles" },
-            (StoryItemType.Scene, "Setting") => new[] { "SceneSummary", "CastSceneRoles" },
+            (StoryItemType.Scene, "Description") => new[] { "SceneBuilder", "SceneSummary" },
+            (StoryItemType.Scene, "CastMembers") => new[] { "SceneBuilder", "CastSceneRoles" },
+            (StoryItemType.Scene, "Setting") => new[] { "SceneBuilder", "SceneSummary", "CastSceneRoles" },
             (StoryItemType.Scene, "Name") => Array.Empty<string>(),
 
             (_, "Name") => Array.Empty<string>(),

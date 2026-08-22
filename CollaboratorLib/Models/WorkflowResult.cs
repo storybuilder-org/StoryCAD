@@ -56,6 +56,17 @@ public class WorkflowResult
     public ProxyCostInfo? Cost { get; set; }
 
     /// <summary>
+    /// Collaborator #208: analysis-only orphan bind GUID from SceneBuilder JSON.
+    /// Not a SceneModel property. Accept uses this when the Scene is an orphan.
+    /// </summary>
+    public Guid? ProposedOwnerGuid { get; set; }
+
+    /// <summary>
+    /// Collaborator #208: display name for the proposed orphan owner (Notes fallback).
+    /// </summary>
+    public string? ProposedOwnerName { get; set; }
+
+    /// <summary>
     /// Creates a successful result.
     /// </summary>
     public static WorkflowResult Succeeded()

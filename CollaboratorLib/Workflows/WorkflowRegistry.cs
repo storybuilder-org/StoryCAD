@@ -23,9 +23,8 @@ namespace StoryCollaborator.Workflows
         /// problem gets a shape, cast has function, scenes happen and scenes have conflict — so
         /// the top band reads as a next action rather than a catalog. Seeded once by
         /// WorkflowStarService; after that the user's choices win.
-        /// Both scene workflows are starred because the user manual's A Path to Try tells writers
-        /// to prefer Scene Summary when running only one; starring Scene Conflict alone would put
-        /// the product at odds with its own craft guidance.
+        /// Scene Summary and Scene Conflict stay starred for A:B. SceneBuilder is also starred
+        /// (#208) after the Worker table entry exists. Cleanup drops the two micro-workflow stars.
         /// </summary>
         public static readonly IReadOnlyList<string> DefaultStarredLabels = new List<string>
         {
@@ -35,7 +34,8 @@ namespace StoryCollaborator.Workflows
             "Structure",
             "StoryFunction",
             "SceneSummary",
-            "SceneConflict"
+            "SceneConflict",
+            "SceneBuilder"
         };
 
         /// <summary>
@@ -756,6 +756,77 @@ namespace StoryCollaborator.Workflows
                 // SettingCreateImage removed; preserved on branch issue-76-image-workflows (issue #76).
 
                 // === Scene Workflows ===
+                // #208: one Scene-primary surface. Five micro-workflows stay registered for A:B.
+                // Required Scene only. Problem / neighbors / contributing Problems are inject-only.
+                new Workflow(
+                    label: "SceneBuilder",
+                    title: "Scene Builder",
+                    description: "Fill an existing Scene: sketch, type, cast, development, conflict, and sequel.",
+                    explanation: "Scene Builder does not create a Scene. Select a Scene first. The run reads contributing Problems and writes Scene fields the model can infer. It does not run on a Story Problem.",
+                    workflowIO: new WorkflowIO
+                    {
+                        RequiredInputs = new List<ElementRequirement>
+                        {
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Scene,
+                                ElementLabel = "Scene",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            }
+                        },
+                        OptionalInputs = new List<ElementRequirement>(),
+                        Outputs = new List<ElementOutput>
+                        {
+                            new ElementOutput
+                            {
+                                ElementType = StoryItemType.Scene,
+                                ElementLabel = "Scene",
+                                PropertiesToUpdate = new List<PropertySpec>
+                                {
+                                    new PropertySpec("Description"),
+                                    new PropertySpec("SceneType"),
+                                    new PropertySpec("CastMembers", WriteVia.CastMembers, JsonKey: "cast"),
+                                    new PropertySpec("Protagonist"),
+                                    new PropertySpec("Antagonist"),
+                                    new PropertySpec("ScenePurpose", WriteVia.SimpleList, ListEntryType: typeof(string)),
+                                    new PropertySpec("ValueExchange"),
+                                    new PropertySpec("Events"),
+                                    new PropertySpec("Consequences"),
+                                    new PropertySpec("Significance"),
+                                    new PropertySpec("Realization"),
+                                    new PropertySpec("ProtagGoal"),
+                                    new PropertySpec("Opposition"),
+                                    new PropertySpec("Outcome"),
+                                    new PropertySpec("AntagGoal"),
+                                    new PropertySpec("ProtagEmotion"),
+                                    new PropertySpec("AntagEmotion"),
+                                    new PropertySpec("Emotion"),
+                                    new PropertySpec("Review"),
+                                    new PropertySpec("NewGoal"),
+                                    new PropertySpec("ViewpointCharacter"),
+                                    new PropertySpec("Setting"),
+                                    new PropertySpec("Date"),
+                                    new PropertySpec("Time"),
+                                    new PropertySpec("Notes")
+                                }
+                            }
+                        },
+                        CollectionInputs = new List<CollectionInput>
+                        {
+                            new CollectionInput
+                            {
+                                RequestName = "CharacterChoices",
+                                ElementType = StoryItemType.Character,
+                                Projection = ElementProjection.IdAndName
+                            }
+                        },
+                        ExampleLists = new List<string>
+                        {
+                            "SceneType", "ScenePurpose", "ValueExchange", "Emotion",
+                            "Goal", "Opposition", "Outcome"
+                        }
+                    }) { PrimaryElementType = StoryItemType.Scene },
                 // #174: Scene only on RequiredInputs. Problem / PrecedingScene / NextScene are
                 // inject-only after structure resolve (never OptionalInputs).
                 new Workflow(
