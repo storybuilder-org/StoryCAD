@@ -19,6 +19,7 @@ using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCADLib.Services.Reports;
 using StoryCADLib.ViewModels;
 using StoryCollaborator.Models;
+using StoryCollaborator.Services;
 using StoryCollaborator.Workflows;
 
 namespace StoryCollaborator
@@ -124,6 +125,15 @@ namespace StoryCollaborator
                     return WorkflowResult.Failed(gateMessage);
             }
 
+            // Collaborator #208: SceneBuilder Story Problem / empty-category bail.
+            // Do not copy BeatScenes: a missing Problem map entry is not empty category.
+            if (string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
+            {
+                var sceneBuilderGate = ValidateSceneBuilderOwner(gatheredElements);
+                if (sceneBuilderGate != null)
+                    return WorkflowResult.Failed(sceneBuilderGate);
+            }
+
             // Without a subscriber's (or allowlisted dev/tester's) activation JWT, the workflow
             // degrades to the stub rather than calling out bare (issue #90 step 8 item 5: the
             // OPENAI_API_KEY direct-to-OpenAI path retired, so a held JWT is the only credential).
@@ -185,6 +195,9 @@ namespace StoryCollaborator
                     result.UpdatedProperties[kvp.Key] = kvp.Value;
                 foreach (var pending in outputResult.PendingUpdates)
                     result.PendingUpdates.Add(pending);
+
+                if (string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
+                    CaptureSceneBuilderProposal(planResult, result);
 
                 // #120: structural fields the model must not invent (list value + GUIDs).
                 // Proposes into pending only; #116 classify decides Fill vs Protect (never silent force).
@@ -265,8 +278,47 @@ namespace StoryCollaborator
             AttachRelatedProblemsCollection(body, gatheredElements, serOpts);
             AttachRelatedSettingsCollection(body);
             AttachRelatedResearchCollection(body, gatheredElements);
+            AttachContributingProblemsCollection(body, gatheredElements);
 
             return body;
+        }
+
+        /// <summary>
+        /// Collaborator #208: all structure owners as full Problem models.
+        /// Orphan (no owners, explorer parent is not a Problem) also attaches ProblemChoices.
+        /// </summary>
+        private void AttachContributingProblemsCollection(
+            WorkflowProxyBody body,
+            Dictionary<string, StoryElement> gatheredElements)
+        {
+            if (!string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
+                return;
+            if (!gatheredElements.TryGetValue("Scene", out var scene) || scene == null)
+                return;
+
+            var resolver = new SceneStructureNeighborResolver(_storyApi);
+            var owners = resolver.FindStructureOwners(scene.Uuid);
+            var array = new JsonArray();
+            foreach (var owner in owners)
+                array.Add(SerializeElementOutbound(owner));
+            body.Args["ContributingProblems"] = array.ToJsonString();
+
+            var explorerParent = resolver.GetExplorerParentProblem(scene);
+            bool orphan = owners.Count == 0 && explorerParent == null;
+            if (!orphan)
+                return;
+
+            var choices = new JsonArray();
+            var problems = _storyApi.GetElementsByType(StoryItemType.Problem);
+            if (problems.IsSuccess && problems.Payload != null)
+            {
+                foreach (var el in problems.Payload)
+                {
+                    if (el is ProblemModel problem)
+                        choices.Add(SerializeElementOutbound(problem));
+                }
+            }
+            body.Args["ProblemChoices"] = choices.ToJsonString();
         }
 
         /// <summary>
@@ -522,6 +574,12 @@ namespace StoryCollaborator
 
             foreach (var update in result.PendingUpdates)
             {
+                if (TryDropInvalidSceneBuilderGuid(update, result))
+                {
+                    noOpCount++;
+                    continue;
+                }
+
                 // TypedList / SimpleList: empty propose + empty live is NoOp (DefineStoryWorld
                 // re-run returned empty Cultures/PhysicalWorlds as two Accept rows).
                 if (update.Spec.WriteVia is WriteVia.TypedList or WriteVia.SimpleList)
@@ -550,6 +608,13 @@ namespace StoryCollaborator
                         continue;
                     }
 
+                    // #208: SceneBuilder ScenePurpose uses Fill/Protect. Other SimpleList stays Unclassified.
+                    if (TryClassifySceneBuilderScenePurpose(update, sessionTouched, workflowId, result, kept, display,
+                            ref fillCount, ref refreshCount, ref protectCount, ref noOpCount))
+                    {
+                        continue;
+                    }
+
                     kept.Add(update);
                     display[update.Key] = FormatDisplayValue(update);
                     _logger?.LogInformation(
@@ -574,6 +639,8 @@ namespace StoryCollaborator
 
                 UpdateKind kind;
                 if (string.Equals(current, proposed, StringComparison.OrdinalIgnoreCase))
+                    kind = UpdateKind.NoOp;
+                else if (string.IsNullOrEmpty(proposed) && !string.IsNullOrEmpty(current))
                     kind = UpdateKind.NoOp;
                 else if (string.IsNullOrEmpty(current))
                     kind = UpdateKind.Fill;
@@ -693,12 +760,34 @@ namespace StoryCollaborator
             return 0;
         }
 
-        private static string NormalizeCompareText(string? text)
+        /// <summary>
+        /// Compare as the writer sees the field: strip RTF, fold quotes/dashes/whitespace.
+        /// A→A (same visible words) is NoOp. Do not treat curly apostrophe vs ASCII as a change.
+        /// </summary>
+        internal static string NormalizeCompareText(string? text)
         {
             if (string.IsNullOrWhiteSpace(text))
                 return string.Empty;
-            return text.Trim();
+
+            var s = text.Trim();
+            if (s.StartsWith(@"{\rtf", StringComparison.Ordinal))
+                s = new RichTextStripper().StripRichTextFormat(s) ?? string.Empty;
+
+            s = s
+                .Replace('\u2018', '\'')
+                .Replace('\u2019', '\'')
+                .Replace('\u201C', '"')
+                .Replace('\u201D', '"')
+                .Replace('\u2013', '-')
+                .Replace('\u2014', '-')
+                .Replace('\u00A0', ' ');
+
+            s = WhitespaceRuns.Replace(s, " ");
+            return s.Trim();
         }
+
+        private static readonly System.Text.RegularExpressions.Regex WhitespaceRuns =
+            new(@"\s+", System.Text.RegularExpressions.RegexOptions.Compiled);
 
         private static string FormatDisplayValue(PendingUpdate update)
         {
@@ -901,6 +990,18 @@ namespace StoryCollaborator
                 {
                     case WriteVia.Scalar:
                     {
+                        if (TryDropInvalidSceneBuilderGuid(update, result))
+                            break;
+                        var live = ReadCurrentScalarDisplay(uuid, spec.Property);
+                        var proposed = FormatDisplayValue(update);
+                        var liveN = NormalizeCompareText(live);
+                        var proposedN = NormalizeCompareText(proposed);
+                        if (string.IsNullOrEmpty(proposedN) ||
+                            string.Equals(liveN, proposedN, StringComparison.OrdinalIgnoreCase))
+                        {
+                            result.StatusMessages.Add($"No-op (unchanged on apply): {update.Key}");
+                            break;
+                        }
                         var applyResult = _storyApi.UpdateElementProperty(uuid, spec.Property, update.Value ?? string.Empty);
                         if (applyResult.IsSuccess)
                         {
@@ -1024,8 +1125,44 @@ namespace StoryCollaborator
                 }
             }
 
+            if (string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal)
+                && gatheredElements.TryGetValue("Scene", out var sceneEl)
+                && sceneEl != null)
+            {
+                appliedCount += EnsureSceneBuilderSeatsOnCast(sceneEl.Uuid, result);
+            }
+
             _logger?.LogInformation($"Applied {appliedCount} pending updates");
             return appliedCount;
+        }
+
+        /// <summary>
+        /// Collaborator #208: Cast includes Protagonist, Antagonist, and ViewpointCharacter at minimum.
+        /// </summary>
+        internal int EnsureSceneBuilderSeatsOnCast(Guid sceneUuid, WorkflowResult result)
+        {
+            var got = _storyApi.GetStoryElement(sceneUuid);
+            if (!got.IsSuccess || got.Payload is not SceneModel scene)
+                return 0;
+
+            var validChars = new HashSet<Guid>(GetCandidateGuids(StoryItemType.Character));
+            int n = 0;
+            foreach (var seat in new[] { scene.Protagonist, scene.Antagonist, scene.ViewpointCharacter })
+            {
+                if (seat == Guid.Empty || !validChars.Contains(seat))
+                    continue;
+                if (scene.CastMembers != null && scene.CastMembers.Contains(seat))
+                    continue;
+                var add = _storyApi.AddCastMember(sceneUuid, seat);
+                if (add.IsSuccess)
+                    n++;
+                else
+                    result.StatusMessages.Add($"Scene Builder: could not add seat {seat} to Cast.");
+            }
+
+            if (n > 0)
+                result.StatusMessages.Add($"Scene Builder: added {n} seat(s) to Cast.");
+            return n;
         }
 
         private IEnumerable<Guid> GetCandidateGuids(StoryItemType type)
@@ -1085,6 +1222,267 @@ namespace StoryCollaborator
                 return "Set Problem Category before Scenes from Beats.";
             if (string.Equals(problemCategory.Trim(), "Story Problem", StringComparison.Ordinal))
                 return "Use Structure on the story problem; run Scenes from Beats on a complication or other category.";
+            return null;
+        }
+
+        /// <summary>
+        /// Collaborator #208: refuse POST when OwnerState is StoryProblemBail or EmptyCategoryBail.
+        /// Missing Problem map entry is not empty category.
+        /// </summary>
+        internal string? ValidateSceneBuilderOwner(Dictionary<string, StoryElement> gatheredElements)
+        {
+            if (!gatheredElements.TryGetValue("Scene", out var scene) || scene == null)
+                return null;
+
+            var resolved = new SceneStructureNeighborResolver(_storyApi).ResolveForSceneBuilder(scene);
+            if (resolved.OwnerState is SceneStructureNeighborResolver.SceneBuilderOwnerState.StoryProblemBail
+                or SceneStructureNeighborResolver.SceneBuilderOwnerState.EmptyCategoryBail)
+                return resolved.BailReason;
+            return null;
+        }
+
+        private static void CaptureSceneBuilderProposal(string planResult, WorkflowResult result)
+        {
+            var json = ExtractJson(planResult);
+            if (string.IsNullOrEmpty(json))
+                return;
+            try
+            {
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+                if (root.TryGetProperty("proposed_owner_guid", out var guidEl)
+                    && guidEl.ValueKind == JsonValueKind.String
+                    && Guid.TryParse(guidEl.GetString(), out var guid)
+                    && guid != Guid.Empty)
+                {
+                    result.ProposedOwnerGuid = guid;
+                }
+                if (root.TryGetProperty("proposed_owner_name", out var nameEl)
+                    && nameEl.ValueKind == JsonValueKind.String)
+                {
+                    result.ProposedOwnerName = nameEl.GetString();
+                }
+            }
+            catch (JsonException)
+            {
+                // analysis-only keys are optional
+            }
+        }
+
+        /// <summary>
+        /// Collaborator #208: on Accept of an orphan, bind the first empty beat when section 5.6 holds.
+        /// Otherwise Fill Notes with a propose line when Notes is empty.
+        /// </summary>
+        internal string? TryApplySceneBuilderOrphanBind(
+            WorkflowResult result,
+            Dictionary<string, StoryElement> gatheredElements)
+        {
+            if (!string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
+                return null;
+            if (!gatheredElements.TryGetValue("Scene", out var scene) || scene == null)
+                return null;
+
+            var resolver = new SceneStructureNeighborResolver(_storyApi);
+            var owners = resolver.FindStructureOwners(scene.Uuid);
+            var explorerParent = resolver.GetExplorerParentProblem(scene);
+            if (owners.Count > 0 || explorerParent != null)
+                return null;
+
+            var proposed = result.ProposedOwnerGuid;
+            var displayName = string.IsNullOrWhiteSpace(result.ProposedOwnerName)
+                ? proposed?.ToString() ?? string.Empty
+                : result.ProposedOwnerName;
+
+            if (proposed is null || proposed == Guid.Empty)
+                return WriteOrphanProposeNotes(scene, result, "empty GUID", displayName);
+
+            var problems = _storyApi.GetElementsByType(StoryItemType.Problem);
+            ProblemModel? match = null;
+            if (problems.IsSuccess && problems.Payload != null)
+                match = problems.Payload.OfType<ProblemModel>().FirstOrDefault(p => p.Uuid == proposed.Value);
+            if (match == null)
+                return WriteOrphanProposeNotes(scene, result, "GUID not in ProblemChoices", displayName);
+
+            var overviewSp = resolver.GetOverviewStoryProblemUuid();
+            if (resolver.IsStoryProblem(match, overviewSp))
+                return WriteOrphanProposeNotes(scene, result, "proposed owner is Story Problem", displayName);
+
+            var structure = _storyApi.GetProblemStructure(match.Uuid);
+            if (!structure.IsSuccess || structure.Payload.Beats == null)
+                return WriteOrphanProposeNotes(scene, result, "could not read beat sheet", displayName);
+
+            int emptyIndex = -1;
+            int i = 0;
+            foreach (var beat in structure.Payload.Beats)
+            {
+                if (beat.LinkedElement is not Guid linked || linked == Guid.Empty)
+                {
+                    emptyIndex = i;
+                    break;
+                }
+                i++;
+            }
+
+            if (emptyIndex < 0)
+                return WriteOrphanProposeNotes(scene, result, "no empty beat", displayName);
+
+            var assign = _storyApi.AssignElementToBeat(match.Uuid, emptyIndex, scene.Uuid);
+            if (!assign.IsSuccess)
+                return WriteOrphanProposeNotes(scene, result,
+                    assign.ErrorMessage ?? "AssignElementToBeat failed", displayName);
+
+            var msg = $"Scene Builder: assigned Scene to beat {emptyIndex} on {match.Name}.";
+            result.StatusMessages.Add(msg);
+            return msg;
+        }
+
+        private string WriteOrphanProposeNotes(
+            StoryElement scene,
+            WorkflowResult result,
+            string reason,
+            string displayName)
+        {
+            var live = ReadCurrentScalarDisplay(scene.Uuid, "Notes");
+            var line = string.IsNullOrWhiteSpace(displayName)
+                ? $"Proposed owner could not be bound ({reason})."
+                : $"Proposed owner: {displayName} ({reason}).";
+            if (string.IsNullOrEmpty(live))
+            {
+                var write = _storyApi.UpdateElementProperty(scene.Uuid, "Notes", line);
+                var msg = write.IsSuccess
+                    ? $"Scene Builder: could not bind ({reason}); wrote propose line to Notes."
+                    : $"Scene Builder: could not bind ({reason}); Notes write failed.";
+                result.StatusMessages.Add(msg);
+                return msg;
+            }
+
+            var protectedMsg = $"Scene Builder: could not bind ({reason}); Notes unchanged.";
+            result.StatusMessages.Add(protectedMsg);
+            return protectedMsg;
+        }
+
+        private static readonly HashSet<string> SceneBuilderCharacterGuidProperties = new(StringComparer.Ordinal)
+        {
+            "Protagonist", "Antagonist", "ViewpointCharacter"
+        };
+
+        /// <summary>
+        /// Drop seat/Setting GUID updates that do not resolve to Character or Setting.
+        /// Empty GUID is not dropped (Fill vs empty live).
+        /// </summary>
+        private bool TryDropInvalidSceneBuilderGuid(PendingUpdate update, WorkflowResult result)
+        {
+            if (!string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
+                return false;
+            if (update.Spec.WriteVia != WriteVia.Scalar)
+                return false;
+
+            var property = update.Spec.Property;
+            bool isCharacterSeat = SceneBuilderCharacterGuidProperties.Contains(property);
+            bool isSetting = string.Equals(property, "Setting", StringComparison.Ordinal);
+            if (!isCharacterSeat && !isSetting)
+                return false;
+
+            var text = update.Value?.ToString();
+            if (string.IsNullOrWhiteSpace(text) || !Guid.TryParse(text, out var guid) || guid == Guid.Empty)
+                return false;
+
+            var got = _storyApi.GetStoryElement(guid);
+            if (!got.IsSuccess || got.Payload == null)
+            {
+                result.StatusMessages.Add($"Scene Builder: {property} GUID {guid} not found; dropped.");
+                return true;
+            }
+
+            if (isCharacterSeat && got.Payload is not CharacterModel)
+            {
+                result.StatusMessages.Add($"Scene Builder: {property} is not a Character; dropped.");
+                return true;
+            }
+
+            if (isSetting && got.Payload is not SettingModel)
+            {
+                result.StatusMessages.Add("Scene Builder: Setting is not a Setting; dropped.");
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool TryClassifySceneBuilderScenePurpose(
+            PendingUpdate update,
+            ISet<string> sessionTouched,
+            string workflowId,
+            WorkflowResult result,
+            List<PendingUpdate> kept,
+            Dictionary<string, object> display,
+            ref int fillCount,
+            ref int refreshCount,
+            ref int protectCount,
+            ref int noOpCount)
+        {
+            if (!string.Equals(workflowId, "SceneBuilder", StringComparison.Ordinal))
+                return false;
+            if (update.Spec.WriteVia != WriteVia.SimpleList)
+                return false;
+            if (!string.Equals(update.Spec.Property, "ScenePurpose", StringComparison.Ordinal))
+                return false;
+            if (update.Value is not List<string> proposed)
+                return false;
+
+            var live = ReadCurrentStringList(update.ElementUuid, update.Spec.Property) ?? new List<string>();
+            UpdateKind kind;
+            if (live.Count == 0 && proposed.Count > 0)
+                kind = UpdateKind.Fill;
+            else if (live.SequenceEqual(proposed, StringComparer.Ordinal))
+                kind = UpdateKind.NoOp;
+            else if (sessionTouched.Contains(update.SessionTouchKey))
+                kind = UpdateKind.Refresh;
+            else
+                kind = UpdateKind.Protect;
+
+            _logger?.LogInformation(
+                "Classify {Key} kind={Kind} (SceneBuilder ScenePurpose ordinal)",
+                update.Key, kind);
+
+            if (kind == UpdateKind.NoOp)
+            {
+                noOpCount++;
+                result.StatusMessages.Add($"No-op (unchanged): {update.Key}");
+                return true;
+            }
+
+            switch (kind)
+            {
+                case UpdateKind.Fill: fillCount++; break;
+                case UpdateKind.Refresh: refreshCount++; break;
+                case UpdateKind.Protect: protectCount++; break;
+            }
+
+            var classified = update with
+            {
+                Kind = kind,
+                CurrentDisplay = live.Count == 0 ? string.Empty : $"{live.Count} items"
+            };
+            kept.Add(classified);
+            display[classified.Key] = FormatDisplayValue(classified);
+            result.StatusMessages.Add($"Classified {classified.Key} as {kind}");
+            return true;
+        }
+
+        private List<string>? ReadCurrentStringList(Guid elementUuid, string propertyName)
+        {
+            var got = _storyApi.GetStoryElement(elementUuid);
+            if (!got.IsSuccess || got.Payload == null)
+                return null;
+            var property = got.Payload.GetType().GetProperty(propertyName);
+            if (property == null || !property.CanRead)
+                return null;
+            var value = property.GetValue(got.Payload);
+            if (value is List<string> list)
+                return list;
+            if (value is IEnumerable<string> enumerable)
+                return enumerable.ToList();
             return null;
         }
 

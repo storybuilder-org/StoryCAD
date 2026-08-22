@@ -30,6 +30,20 @@ public sealed class SceneStructureNeighborResolver
         ExplorerParentOnly
     }
 
+    /// <summary>
+    /// Collaborator #208: owner state for SceneBuilder. Separate from Scene Summary
+    /// <see cref="OwnerState"/> so ResolveForSceneSummary is unchanged.
+    /// </summary>
+    public enum SceneBuilderOwnerState
+    {
+        None,
+        UniqueSubproblem,
+        ExplorerParentSubproblem,
+        AmbiguousSubproblems,
+        StoryProblemBail,
+        EmptyCategoryBail
+    }
+
     public sealed class ResolveResult
     {
         public ProblemModel? OwnerProblem { get; init; }
@@ -44,6 +58,17 @@ public sealed class SceneStructureNeighborResolver
     {
         public SceneModel? PrecedingScene { get; init; }
         public SceneModel? NextScene { get; init; }
+    }
+
+    public sealed class SceneBuilderResolveResult
+    {
+        public IReadOnlyList<ProblemModel> ContributingProblems { get; init; } = Array.Empty<ProblemModel>();
+        public ProblemModel? OwnerProblem { get; init; }
+        public SceneModel? PrecedingScene { get; init; }
+        public SceneModel? NextScene { get; init; }
+        public SceneBuilderOwnerState OwnerState { get; init; }
+        public string? BailReason { get; init; }
+        public IReadOnlyList<string> StatusLines { get; init; } = Array.Empty<string>();
     }
 
     /// <summary>
@@ -62,7 +87,7 @@ public sealed class SceneStructureNeighborResolver
         }
 
         var status = new List<string>();
-        var owners = FindStructureOwners(scene.Uuid, status);
+        var owners = FindStructureOwners(scene.Uuid, status, "Scene Summary");
         var explorerParent = GetExplorerParentProblem(scene);
         var (state, owner, candidates) = ResolveOwner(scene, owners, explorerParent);
 
@@ -124,13 +149,16 @@ public sealed class SceneStructureNeighborResolver
     /// <summary>
     /// Problems whose structure assigns <paramref name="sceneGuid"/> on any beat.
     /// </summary>
-    public IReadOnlyList<ProblemModel> FindStructureOwners(Guid sceneGuid, List<string>? statusLines = null)
+    public IReadOnlyList<ProblemModel> FindStructureOwners(
+        Guid sceneGuid,
+        List<string>? statusLines = null,
+        string scanLabel = "Scene Summary")
     {
         var owners = new List<ProblemModel>();
         var problemsResult = _api.GetElementsByType(StoryItemType.Problem);
         if (!problemsResult.IsSuccess || problemsResult.Payload == null)
         {
-            statusLines?.Add("Scene Summary: could not list Problems for structure scan.");
+            statusLines?.Add($"{scanLabel}: could not list Problems for structure scan.");
             _logger?.LogWarning("FindStructureOwners: GetElementsByType(Problem) failed: {Msg}",
                 problemsResult.ErrorMessage);
             return owners;
@@ -361,5 +389,162 @@ public sealed class SceneStructureNeighborResolver
         }
 
         return null;
+    }
+
+    public const string SceneBuilderStoryProblemBailMessage =
+        "Scene Builder does not run on a Story Problem. Use Problem Builder or Structure for story-problem beats.";
+
+    public const string SceneBuilderEmptyCategoryBailMessage =
+        "Set Problem Category on the owning problem before Scene Builder.";
+
+    /// <summary>
+    /// Collaborator #208: contributing Problems, owning problem, Story Problem / empty-category bail,
+    /// and 1+1 neighbors from OwnerProblem when the Scene GUID is on that sheet.
+    /// </summary>
+    public SceneBuilderResolveResult ResolveForSceneBuilder(StoryElement scene)
+    {
+        if (scene == null || scene.ElementType != StoryItemType.Scene)
+        {
+            return new SceneBuilderResolveResult
+            {
+                OwnerState = SceneBuilderOwnerState.None,
+                StatusLines = new[] { "Scene Builder: no Scene element; owner omitted." }
+            };
+        }
+
+        var status = new List<string>();
+        var owners = FindStructureOwners(scene.Uuid, status, "Scene Builder");
+        var explorerParent = GetExplorerParentProblem(scene);
+        var overviewStoryProblem = GetOverviewStoryProblemUuid();
+        var (state, owner, bail) = ResolveSceneBuilderOwner(owners, explorerParent, overviewStoryProblem);
+
+        if (state is SceneBuilderOwnerState.StoryProblemBail or SceneBuilderOwnerState.EmptyCategoryBail)
+        {
+            if (owner != null)
+                status.Add($"Scene Builder: owner Problem = {owner.Name}");
+            if (!string.IsNullOrEmpty(bail))
+                status.Add(bail);
+            return new SceneBuilderResolveResult
+            {
+                ContributingProblems = owners,
+                OwnerProblem = owner,
+                OwnerState = state,
+                BailReason = bail,
+                StatusLines = status
+            };
+        }
+
+        SceneModel? preceding = null;
+        SceneModel? next = null;
+        if (owner != null)
+        {
+            bool onSheet = owners.Any(o => o.Uuid == owner.Uuid);
+            if (onSheet)
+            {
+                var neighbors = FindNeighbors(owner, scene.Uuid);
+                preceding = neighbors.PrecedingScene;
+                next = neighbors.NextScene;
+            }
+
+            status.Add($"Scene Builder: owner Problem = {owner.Name}");
+            status.Add(preceding != null
+                ? $"Scene Builder: preceding Scene = {preceding.Name}"
+                : "Scene Builder: preceding Scene = (none)");
+            status.Add(next != null
+                ? $"Scene Builder: next Scene = {next.Name}"
+                : "Scene Builder: next Scene = (none)");
+        }
+        else if (state == SceneBuilderOwnerState.AmbiguousSubproblems)
+        {
+            var names = string.Join(", ", owners.Where(o => !IsStoryProblem(o, overviewStoryProblem)).Select(p => p.Name));
+            status.Add($"Scene Builder: ambiguous subproblems ({owners.Count} contributing): {names}. Neighbors omitted.");
+        }
+        else
+        {
+            status.Add("Scene Builder: no owner Problem (orphan); neighbors omitted.");
+        }
+
+        status.Add($"Scene Builder: contributing Problems = {owners.Count}");
+
+        return new SceneBuilderResolveResult
+        {
+            ContributingProblems = owners,
+            OwnerProblem = owner,
+            PrecedingScene = preceding,
+            NextScene = next,
+            OwnerState = state,
+            StatusLines = status
+        };
+    }
+
+    internal Guid GetOverviewStoryProblemUuid()
+    {
+        var result = _api.GetElementsByType(StoryItemType.StoryOverview);
+        if (!result.IsSuccess || result.Payload == null || result.Payload.Count == 0)
+            return Guid.Empty;
+        if (result.Payload[0] is OverviewModel overview)
+            return overview.StoryProblem;
+        return Guid.Empty;
+    }
+
+    internal bool IsStoryProblem(ProblemModel problem, Guid overviewStoryProblem)
+    {
+        if (overviewStoryProblem != Guid.Empty && problem.Uuid == overviewStoryProblem)
+            return true;
+        return string.Equals(
+            (problem.ProblemCategory ?? string.Empty).Trim(),
+            Collaborator.StoryProblemCategoryListValue,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    internal (SceneBuilderOwnerState State, ProblemModel? Owner, string? BailReason)
+        ResolveSceneBuilderOwner(
+            IReadOnlyList<ProblemModel> owners,
+            ProblemModel? explorerParent,
+            Guid overviewStoryProblem)
+    {
+        bool IsSp(ProblemModel p) => IsStoryProblem(p, overviewStoryProblem);
+        bool IsCategorizedSubproblem(ProblemModel p) =>
+            !IsSp(p) && !string.IsNullOrWhiteSpace(p.ProblemCategory);
+
+        var ownerList = owners?.ToList() ?? new List<ProblemModel>();
+
+        // 5.4 step 1
+        if (explorerParent != null && IsSp(explorerParent))
+            return (SceneBuilderOwnerState.StoryProblemBail, explorerParent, SceneBuilderStoryProblemBailMessage);
+
+        // 5.4 step 2
+        if (explorerParent != null && string.IsNullOrWhiteSpace(explorerParent.ProblemCategory))
+        {
+            var categorized = ownerList.Where(IsCategorizedSubproblem).ToList();
+            if (categorized.Count == 1)
+                return (SceneBuilderOwnerState.UniqueSubproblem, categorized[0], null);
+            return (SceneBuilderOwnerState.EmptyCategoryBail, explorerParent, SceneBuilderEmptyCategoryBailMessage);
+        }
+
+        // 5.4 step 3
+        if (explorerParent != null)
+            return (SceneBuilderOwnerState.ExplorerParentSubproblem, explorerParent, null);
+
+        // 5.4 step 4
+        var nonStory = ownerList.Where(o => !IsSp(o)).ToList();
+        if (nonStory.Count == 1)
+        {
+            var only = nonStory[0];
+            if (string.IsNullOrWhiteSpace(only.ProblemCategory))
+                return (SceneBuilderOwnerState.EmptyCategoryBail, only, SceneBuilderEmptyCategoryBailMessage);
+            return (SceneBuilderOwnerState.UniqueSubproblem, only, null);
+        }
+
+        // 5.4 step 5
+        if (ownerList.Count > 0 && ownerList.All(IsSp))
+            return (SceneBuilderOwnerState.StoryProblemBail, ownerList[0], SceneBuilderStoryProblemBailMessage);
+
+        // 5.4 step 6
+        if (nonStory.Count >= 2)
+            return (SceneBuilderOwnerState.AmbiguousSubproblems, null, null);
+
+        // 5.4 step 7
+        return (SceneBuilderOwnerState.None, null, null);
     }
 }

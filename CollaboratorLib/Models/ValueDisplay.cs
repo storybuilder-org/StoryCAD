@@ -48,7 +48,12 @@ internal static class ValueDisplay
             case null:
                 return string.Empty;
 
+            case Guid g:
+                return g == Guid.Empty ? string.Empty : ResolveName(g, resolveElementName);
+
             case string s:
+                if (Guid.TryParse(s, out var parsed) && parsed != Guid.Empty)
+                    return ResolveName(parsed, resolveElementName);
                 return s;
 
             case List<string> entries:

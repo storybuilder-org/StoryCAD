@@ -57,6 +57,26 @@ public class ValueDisplayTests
     }
 
     [TestMethod]
+    public void Format_WithSeatGuidString_ResolvesElementName()
+    {
+        var guid = Guid.Parse("caa640c2-941d-4fa1-b02d-7c1c35e50c22");
+
+        var result = ValueDisplay.Format(guid.ToString("D"), g => g == guid ? "Two ambush gunmen" : null);
+
+        Assert.AreEqual("Two ambush gunmen", result);
+    }
+
+    [TestMethod]
+    public void Format_WithUnresolvedSeatGuidString_FallsBackToGuid()
+    {
+        var guid = Guid.NewGuid();
+
+        var result = ValueDisplay.Format(guid.ToString("D"));
+
+        Assert.AreEqual(guid.ToString("D"), result);
+    }
+
+    [TestMethod]
     public void Format_WithStringList_ReturnsBulletedLines()
     {
         var result = ValueDisplay.Format(new List<string> { "one", "two" });

@@ -225,6 +225,15 @@ public class Collaborator : ICollaborator
                             return;
                         }
 
+                        if (gatherResult.Failed)
+                        {
+                            viewModel.StatusText = string.IsNullOrWhiteSpace(gatherResult.BailReason)
+                                ? FormatGatherStatusForShell(gatherResult.StatusMessages)
+                                : gatherResult.BailReason;
+                            _logger?.LogInformation("SceneBuilder bail: {BailReason}", gatherResult.BailReason);
+                            return;
+                        }
+
                         viewModel.StatusText = string.Empty;
 
                         // Navigate to WorkflowPage
@@ -1197,15 +1206,28 @@ public class Collaborator : ICollaborator
                     // #140 / #116 rev: Protect accepts are staged until end-of-queue confirm.
                     var stageSession = new OverwriteAcceptanceSession();
 
+                    var sceneBuilderOrphanBindDone = false;
+
                     int ApplyPendingList(IReadOnlyList<PendingUpdate> list)
                     {
-                        if (list.Count == 0) return 0;
-                        var slice = WorkflowResult.Succeeded();
-                        foreach (var u in list)
-                            slice.PendingUpdates.Add(u);
-                        var applied = runner.ApplyUpdates(slice, gatheredElements);
-                        foreach (var u in list)
-                            _sessionTouchedFields.Add(u.SessionTouchKey);
+                        int applied = 0;
+                        if (list.Count > 0)
+                        {
+                            var slice = WorkflowResult.Succeeded();
+                            foreach (var u in list)
+                                slice.PendingUpdates.Add(u);
+                            applied = runner.ApplyUpdates(slice, gatheredElements);
+                            foreach (var u in list)
+                                _sessionTouchedFields.Add(u.SessionTouchKey);
+                        }
+                        if (!sceneBuilderOrphanBindDone
+                            && string.Equals(workflow.Label, "SceneBuilder", StringComparison.Ordinal))
+                        {
+                            var bindMsg = runner.TryApplySceneBuilderOrphanBind(result, gatheredElements);
+                            sceneBuilderOrphanBindDone = true;
+                            if (!string.IsNullOrEmpty(bindMsg))
+                                viewModel.AddStatusMessage(bindMsg);
+                        }
                         // Accept writes the model via API. Host element VMs stay stale until
                         // reload — AutoSave FlushCurrentEdits then SaveModel's empty VM values
                         // over the applied text (Character.BackStory wipe after #184 Accept).
@@ -1717,6 +1739,8 @@ public class Collaborator : ICollaborator
         public Dictionary<string, StoryElement> Elements { get; set; } = new();
         public List<string> StatusMessages { get; set; } = new();
         public bool Cancelled { get; set; }
+        public bool Failed { get; set; }
+        public string? BailReason { get; set; }
     }
 
     /// <summary>
@@ -1831,6 +1855,13 @@ public class Collaborator : ICollaborator
             await InjectSceneSummaryNeighborsAsync(sceneElement, xamlRoot, result);
         }
 
+        if (string.Equals(workflow.Label, "SceneBuilder", StringComparison.Ordinal)
+            && result.Elements.TryGetValue("Scene", out var sceneBuilderScene)
+            && _storyApi != null)
+        {
+            InjectSceneBuilder(sceneBuilderScene, result);
+        }
+
         // #201: Story Problem + seats when Overview.StoryProblem resolves (thin gather).
         if (string.Equals(workflow.Label, "DefineStoryWorld", StringComparison.Ordinal)
             && _storyApi != null)
@@ -1929,6 +1960,164 @@ public class Collaborator : ICollaborator
         statusMessages.Add($"Created StoryWorld: {created.Payload.Name}");
         _logger?.LogInformation("Created StoryWorld {Guid}", created.Payload.Uuid);
         return created.Payload;
+    }
+
+    /// <summary>
+    /// Collaborator #208: inject Overview, owner, contributing Problems, neighbors, seats, Setting.
+    /// Sets Failed on Story Problem / empty-category bail. Does not open pickers.
+    /// </summary>
+    private void InjectSceneBuilder(StoryElement sceneElement, GatherResult result)
+    {
+        InjectOverviewIfMissing(result);
+
+        var resolver = new Services.SceneStructureNeighborResolver(_storyApi!);
+        var resolved = resolver.ResolveForSceneBuilder(sceneElement);
+
+        foreach (var line in resolved.StatusLines)
+            result.StatusMessages.Add(line);
+
+        if (resolved.OwnerState is Services.SceneStructureNeighborResolver.SceneBuilderOwnerState.StoryProblemBail
+            or Services.SceneStructureNeighborResolver.SceneBuilderOwnerState.EmptyCategoryBail)
+        {
+            result.Failed = true;
+            result.BailReason = resolved.BailReason;
+            return;
+        }
+
+        if (resolved.OwnerProblem != null)
+            result.Elements["Problem"] = resolved.OwnerProblem;
+        if (resolved.PrecedingScene != null)
+            result.Elements["PrecedingScene"] = resolved.PrecedingScene;
+        if (resolved.NextScene != null)
+            result.Elements["NextScene"] = resolved.NextScene;
+
+        InjectSceneBuilderSeatsAndCast(sceneElement, result);
+        InjectSceneBuilderContributingLabels(sceneElement, resolver, resolved, result);
+        InjectStoryProblemAncestor(result);
+    }
+
+    private void InjectOverviewIfMissing(GatherResult result)
+    {
+        if (result.Elements.ContainsKey("Overview") || _storyApi == null)
+            return;
+
+        var overviews = _storyApi.GetElementsByType(StoryItemType.StoryOverview);
+        if (!overviews.IsSuccess || overviews.Payload == null || overviews.Payload.Count == 0)
+            return;
+
+        result.Elements["Overview"] = overviews.Payload[0];
+        result.StatusMessages.Add($"Using Overview: {overviews.Payload[0].Name}");
+    }
+
+    private void InjectStoryProblemAncestor(GatherResult result)
+    {
+        if (_storyApi == null)
+            return;
+        if (!result.Elements.TryGetValue("Overview", out var overviewEl)
+            || overviewEl is not OverviewModel overview
+            || overview.StoryProblem == Guid.Empty)
+            return;
+        if (result.Elements.TryGetValue("Problem", out var owner)
+            && owner.Uuid == overview.StoryProblem)
+            return;
+
+        var sp = _storyApi.GetStoryElement(overview.StoryProblem);
+        if (!sp.IsSuccess || sp.Payload is not ProblemModel problem)
+            return;
+
+        result.Elements["StoryProblem"] = problem;
+        result.StatusMessages.Add($"Using StoryProblem (ancestor): {problem.Name}");
+    }
+
+    private void InjectSceneBuilderSeatsAndCast(StoryElement sceneElement, GatherResult result)
+    {
+        if (_storyApi == null || sceneElement is not SceneModel scene)
+            return;
+
+        if (scene.Setting != Guid.Empty)
+        {
+            var settingResult = _storyApi.GetStoryElement(scene.Setting);
+            if (settingResult.IsSuccess && settingResult.Payload is SettingModel setting)
+            {
+                result.Elements["Setting"] = setting;
+                result.StatusMessages.Add($"Using Setting: {setting.Name}");
+            }
+        }
+
+        var used = new HashSet<Guid>();
+        TryInjectCharacterSeat(scene.Protagonist, "Protagonist", result, used);
+        TryInjectCharacterSeat(scene.Antagonist, "Antagonist", result, used);
+        TryInjectCharacterSeat(scene.ViewpointCharacter, "ViewpointCharacter", result, used);
+
+        int n = 1;
+        foreach (var guid in scene.CastMembers ?? new List<Guid>())
+        {
+            if (guid == Guid.Empty || used.Contains(guid))
+                continue;
+            var member = _storyApi.GetStoryElement(guid);
+            if (!member.IsSuccess || member.Payload == null)
+                continue;
+            result.Elements[$"CastMember{n}"] = member.Payload;
+            result.StatusMessages.Add($"Using CastMember{n}: {member.Payload.Name}");
+            used.Add(guid);
+            n++;
+        }
+    }
+
+    private void TryInjectCharacterSeat(
+        Guid guid,
+        string label,
+        GatherResult result,
+        HashSet<Guid> used)
+    {
+        if (guid == Guid.Empty || _storyApi == null)
+            return;
+        var got = _storyApi.GetStoryElement(guid);
+        if (!got.IsSuccess || got.Payload is not CharacterModel character)
+            return;
+        result.Elements[label] = character;
+        result.StatusMessages.Add($"Using {label}: {character.Name}");
+        used.Add(guid);
+    }
+
+    private void InjectSceneBuilderContributingLabels(
+        StoryElement sceneElement,
+        Services.SceneStructureNeighborResolver resolver,
+        Services.SceneStructureNeighborResolver.SceneBuilderResolveResult resolved,
+        GatherResult result)
+    {
+        var owners = resolved.ContributingProblems.ToList();
+        if (owners.Count == 0)
+            return;
+
+        var ordered = new List<ProblemModel>();
+        void AddIfOwner(ProblemModel? problem)
+        {
+            if (problem == null)
+                return;
+            var match = owners.FirstOrDefault(o => o.Uuid == problem.Uuid);
+            if (match != null && ordered.All(o => o.Uuid != match.Uuid))
+                ordered.Add(match);
+        }
+
+        AddIfOwner(resolved.OwnerProblem);
+        AddIfOwner(resolver.GetExplorerParentProblem(sceneElement));
+        foreach (var owner in owners)
+            AddIfOwner(owner);
+
+        const int cap = 8;
+        int k = Math.Min(cap, ordered.Count);
+        for (int i = 0; i < k; i++)
+        {
+            result.Elements[$"ContributingProblem{i + 1}"] = ordered[i];
+            result.StatusMessages.Add($"Using ContributingProblem{i + 1}: {ordered[i].Name}");
+        }
+
+        if (ordered.Count > cap)
+        {
+            result.StatusMessages.Add(
+                $"Scene Builder: {ordered.Count} contributing Problems; labeled first {cap}.");
+        }
     }
 
     /// <summary>
