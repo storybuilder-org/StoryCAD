@@ -25,14 +25,15 @@ namespace StoryCollaborator.Workflows
         /// WorkflowStarService; after that the user's choices win.
         /// Scene Summary and Scene Conflict stay starred for A:B. SceneBuilder is also starred
         /// (#208) after the Worker table entry exists. Cleanup drops the two micro-workflow stars.
+        /// GMC and Structure came off the band when ProblemBuilder landed (#77): all three serve
+        /// the same stage, and starring three workflows for one stage is the catalog this list
+        /// exists to prevent. Both stay registered and runnable for A:B.
         /// </summary>
         public static readonly IReadOnlyList<string> DefaultStarredLabels = new List<string>
         {
             "Premise",
             "StoryProblem",
             "ProblemBuilder",
-            "GMC",
-            "Structure",
             "StoryFunction",
             "SceneSummary",
             "SceneConflict",
