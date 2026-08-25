@@ -591,6 +591,26 @@ namespace StoryCollaborator
                 {
                     var proposedCount = CountCollectionValue(update.Value);
                     var currentCount = ReadCurrentCollectionCount(update.ElementUuid, update.Spec.Property);
+
+                    // #216: field_states wins before the empty-collection wipe guard.
+                    if (update.Spec.WriteVia == WriteVia.SimpleList
+                        && TryGetFieldState(result, update, out var listState))
+                    {
+                        var listKind = MapFieldState(
+                            listState,
+                            currentEmpty: currentCount == 0,
+                            proposedEmpty: proposedCount == 0,
+                            sessionTouched: sessionTouched.Contains(update.SessionTouchKey),
+                            update,
+                            result);
+                        ApplyClassifiedKind(
+                            update, listKind, source: "state",
+                            currentRaw: currentCount == 0 ? string.Empty : $"{currentCount} items",
+                            workflowId, result, kept, display,
+                            ref fillCount, ref refreshCount, ref protectCount, ref noOpCount);
+                        continue;
+                    }
+
                     if (proposedCount == 0 && currentCount == 0)
                     {
                         noOpCount++;
@@ -643,53 +663,48 @@ namespace StoryCollaborator
                 var proposed = NormalizeCompareText(FormatDisplayValue(update));
 
                 UpdateKind kind;
-                if (string.Equals(current, proposed, StringComparison.OrdinalIgnoreCase))
+                string source;
+                if (TryGetFieldState(result, update, out var fieldState))
+                {
+                    source = "state";
+                    kind = MapFieldState(
+                        fieldState,
+                        currentEmpty: string.IsNullOrEmpty(current),
+                        proposedEmpty: string.IsNullOrEmpty(proposed),
+                        sessionTouched: sessionTouched.Contains(update.SessionTouchKey),
+                        update,
+                        result);
+                }
+                else if (string.Equals(current, proposed, StringComparison.OrdinalIgnoreCase))
+                {
+                    source = "compare";
                     kind = UpdateKind.NoOp;
+                }
                 else if (string.IsNullOrEmpty(proposed) && !string.IsNullOrEmpty(current))
+                {
+                    source = "compare";
                     kind = UpdateKind.NoOp;
+                }
                 else if (string.IsNullOrEmpty(current))
+                {
+                    source = "compare";
                     kind = UpdateKind.Fill;
+                }
                 else if (sessionTouched.Contains(update.SessionTouchKey))
+                {
+                    source = "compare";
                     kind = UpdateKind.Refresh;
+                }
                 else
+                {
+                    source = "compare";
                     kind = UpdateKind.Protect;
-
-                // Preferences log: kind + values so NoOp/Protect is diagnosable without chat.
-                _logger?.LogInformation(
-                    "Classify {Key} kind={Kind} current=\"{Current}\" proposed=\"{Proposed}\"",
-                    update.Key,
-                    kind,
-                    TruncateForLog(current),
-                    TruncateForLog(proposed));
-
-                if (kind == UpdateKind.NoOp)
-                {
-                    noOpCount++;
-                    result.StatusMessages.Add($"No-op (unchanged): {update.Key}");
-                    continue;
                 }
 
-                switch (kind)
-                {
-                    case UpdateKind.Fill: fillCount++; break;
-                    case UpdateKind.Refresh: refreshCount++; break;
-                    case UpdateKind.Protect: protectCount++; break;
-                }
-
-                string? craft = null;
-                var hint = CraftFieldHints.Find(workflowId, update.ElementLabel, update.Spec.Property);
-                if (hint != null && kind == UpdateKind.Protect)
-                    craft = hint.Explanation;
-
-                var classified = update with
-                {
-                    Kind = kind,
-                    CurrentDisplay = string.IsNullOrEmpty(currentRaw) ? string.Empty : currentRaw,
-                    CraftExplanation = craft
-                };
-                kept.Add(classified);
-                display[classified.Key] = FormatDisplayValue(classified);
-                result.StatusMessages.Add($"Classified {classified.Key} as {kind}");
+                ApplyClassifiedKind(
+                    update, kind, source, currentRaw, workflowId, result, kept, display,
+                    ref fillCount, ref refreshCount, ref protectCount, ref noOpCount,
+                    compareCurrent: current, compareProposed: proposed);
             }
 
             result.PendingUpdates.Clear();
@@ -701,6 +716,115 @@ namespace StoryCollaborator
             _logger?.LogInformation(
                 "ClassifyScalarUpdates done: kept={Kept} fill={Fill} refresh={Refresh} protect={Protect} noop={NoOp}",
                 kept.Count, fillCount, refreshCount, protectCount, noOpCount);
+        }
+
+        /// <summary>
+        /// Collaborator #216: look up model-emitted intent by JSON key.
+        /// </summary>
+        private static bool TryGetFieldState(WorkflowResult result, PendingUpdate update, out OutputFieldState state)
+        {
+            var key = update.Spec.JsonKey ?? update.Spec.Property;
+            return result.FieldStates.TryGetValue(key, out state);
+        }
+
+        /// <summary>
+        /// Map <see cref="OutputFieldState"/> onto the #116 Protect ladder.
+        /// </summary>
+        private static UpdateKind MapFieldState(
+            OutputFieldState state,
+            bool currentEmpty,
+            bool proposedEmpty,
+            bool sessionTouched,
+            PendingUpdate update,
+            WorkflowResult result)
+        {
+            switch (state)
+            {
+                case OutputFieldState.Unchanged:
+                    return UpdateKind.NoOp;
+                case OutputFieldState.Fill:
+                    if (proposedEmpty)
+                    {
+                        result.StatusMessages.Add($"Invalid Fill (empty value): {update.Key}");
+                        return UpdateKind.NoOp;
+                    }
+                    if (!currentEmpty)
+                    {
+                        result.StatusMessages.Add(
+                            $"Field state Fill on non-empty live; treating as Revise: {update.Key}");
+                        return sessionTouched ? UpdateKind.Refresh : UpdateKind.Protect;
+                    }
+                    return UpdateKind.Fill;
+                case OutputFieldState.Revise:
+                    if (currentEmpty)
+                    {
+                        result.StatusMessages.Add(
+                            $"Field state Revise on empty live; treating as Fill: {update.Key}");
+                        if (proposedEmpty)
+                        {
+                            result.StatusMessages.Add($"Invalid Fill (empty value): {update.Key}");
+                            return UpdateKind.NoOp;
+                        }
+                        return UpdateKind.Fill;
+                    }
+                    return sessionTouched ? UpdateKind.Refresh : UpdateKind.Protect;
+                default:
+                    throw new InvalidOperationException($"Unhandled OutputFieldState {state}");
+            }
+        }
+
+        private void ApplyClassifiedKind(
+            PendingUpdate update,
+            UpdateKind kind,
+            string source,
+            string? currentRaw,
+            string? workflowId,
+            WorkflowResult result,
+            List<PendingUpdate> kept,
+            Dictionary<string, object> display,
+            ref int fillCount,
+            ref int refreshCount,
+            ref int protectCount,
+            ref int noOpCount,
+            string? compareCurrent = null,
+            string? compareProposed = null)
+        {
+            _logger?.LogInformation(
+                "Classify {Key} kind={Kind} source={Source} current=\"{Current}\" proposed=\"{Proposed}\"",
+                update.Key,
+                kind,
+                source,
+                TruncateForLog(compareCurrent ?? currentRaw),
+                TruncateForLog(compareProposed ?? FormatDisplayValue(update)));
+
+            if (kind == UpdateKind.NoOp)
+            {
+                noOpCount++;
+                result.StatusMessages.Add($"No-op (unchanged): {update.Key}");
+                return;
+            }
+
+            switch (kind)
+            {
+                case UpdateKind.Fill: fillCount++; break;
+                case UpdateKind.Refresh: refreshCount++; break;
+                case UpdateKind.Protect: protectCount++; break;
+            }
+
+            string? craft = null;
+            var hint = CraftFieldHints.Find(workflowId ?? string.Empty, update.ElementLabel, update.Spec.Property);
+            if (hint != null && kind == UpdateKind.Protect)
+                craft = hint.Explanation;
+
+            var classified = update with
+            {
+                Kind = kind,
+                CurrentDisplay = string.IsNullOrEmpty(currentRaw) ? string.Empty : currentRaw,
+                CraftExplanation = craft
+            };
+            kept.Add(classified);
+            display[classified.Key] = FormatDisplayValue(classified);
+            result.StatusMessages.Add($"Classified {classified.Key} as {kind}");
         }
 
         /// <summary>Shorten long prose for the Preferences log; keep list values intact when short.</summary>
@@ -864,6 +988,7 @@ namespace StoryCollaborator
             {
                 using var doc = JsonDocument.Parse(jsonText);
                 var root = doc.RootElement;
+                ParseFieldStates(root, result);
 
                 foreach (var output in outputs)
                 {
@@ -948,6 +1073,31 @@ namespace StoryCollaborator
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Collaborator #216: read root <c>field_states</c>. Unknown names are skipped.
+        /// </summary>
+        private static void ParseFieldStates(JsonElement root, WorkflowResult result)
+        {
+            if (!root.TryGetProperty("field_states", out var el) || el.ValueKind != JsonValueKind.Object)
+                return;
+
+            foreach (var prop in el.EnumerateObject())
+            {
+                var raw = prop.Value.ValueKind == JsonValueKind.String
+                    ? prop.Value.GetString()
+                    : prop.Value.ToString();
+                if (Enum.TryParse<OutputFieldState>(raw, ignoreCase: true, out var state)
+                    && state is OutputFieldState.Fill or OutputFieldState.Unchanged or OutputFieldState.Revise)
+                {
+                    result.FieldStates[prop.Name] = state;
+                }
+                else
+                {
+                    result.StatusMessages.Add($"Unknown field_states value for {prop.Name}: {raw}");
+                }
+            }
         }
 
         /// <summary>

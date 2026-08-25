@@ -49,6 +49,17 @@ namespace StoryCollaborator.Models
     }
 
     /// <summary>
+    /// Model-emitted intent for one output JSON key (Collaborator #216).
+    /// Distinct from <see cref="UpdateKind"/>: the client maps this to Fill / Refresh / Protect / NoOp.
+    /// </summary>
+    public enum OutputFieldState
+    {
+        Fill,
+        Unchanged,
+        Revise
+    }
+
+    /// <summary>
     /// Carries one extracted output value between ExtractOutputs and ApplyUpdates.
     /// Value type by WriteVia: Scalar=string, SimpleList=List&lt;string&gt;,
     /// BeatSheet=List&lt;BeatInfo&gt;, CastMembers=List&lt;Guid&gt;,

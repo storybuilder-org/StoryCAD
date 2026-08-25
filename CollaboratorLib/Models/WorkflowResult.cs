@@ -34,6 +34,13 @@ public class WorkflowResult
     public List<PendingUpdate> PendingUpdates { get; } = new();
 
     /// <summary>
+    /// Collaborator #216: per-key intent from root JSON <c>field_states</c>.
+    /// Key is the output JSON key (<c>JsonKey ?? Property</c>). Absent key means compare live vs proposed.
+    /// </summary>
+    public Dictionary<string, OutputFieldState> FieldStates { get; } =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
     /// The raw AI response text (for debugging).
     /// </summary>
     public string? RawResponse { get; set; }
