@@ -112,7 +112,10 @@ namespace StoryCollaborator
             }
 
             // Collaborator #150: abort BeatScenes when ProblemCategory is empty or Story Problem.
-            if (string.Equals(workflowModel.Label, "BeatScenes", StringComparison.Ordinal))
+            // Collaborator #77: ProblemBuilder needs the category set too, but runs on any
+            // Problem, so it takes the blank check only.
+            if (string.Equals(workflowModel.Label, "BeatScenes", StringComparison.Ordinal)
+                || workflowModel.RequiresProblemCategory)
             {
                 var category = string.Empty;
                 if (gatheredElements.TryGetValue("Problem", out var problemEl)
@@ -120,7 +123,10 @@ namespace StoryCollaborator
                 {
                     category = pm.ProblemCategory ?? string.Empty;
                 }
-                var gateMessage = ValidateBeatScenesCategory(category);
+
+                var gateMessage = string.Equals(workflowModel.Label, "BeatScenes", StringComparison.Ordinal)
+                    ? ValidateBeatScenesCategory(category)
+                    : ValidateProblemCategory(category);
                 if (gateMessage != null)
                     return WorkflowResult.Failed(gateMessage);
             }
@@ -157,8 +163,7 @@ namespace StoryCollaborator
                 if (workflowIO.ExampleLists.Count > 0)
                     EnrichWithExamples(body.Args);
 
-                if (string.Equals(workflowModel.Label, "BeatScenes", StringComparison.Ordinal))
-                    EnrichWithStockScenes(body.Args);
+                ApplyDeclaredInjections(body.Args);
 
                 // Issue #90 step 8 item 5: the direct-to-OpenAI fallback retired along with
                 // OPENAI_API_KEY on the client. A proxy failure now propagates to the outer
@@ -1186,7 +1191,7 @@ namespace StoryCollaborator
             return new List<string> { elem.GetString() ?? elem.ToString() };
         }
 
-        private static List<BeatInfo> ExtractBeatList(JsonElement elem)
+        internal static List<BeatInfo> ExtractBeatList(JsonElement elem)
         {
             if (elem.ValueKind != JsonValueKind.Array) return new List<BeatInfo>();
             var beats = new List<BeatInfo>();
@@ -1207,7 +1212,33 @@ namespace StoryCollaborator
                 {
                     sceneName = sn.GetString();
                 }
-                beats.Add(new BeatInfo(title, desc, assigned, sceneName));
+
+                // Collaborator #77 / #208 stub contract. Without these the created Scene gets
+                // Name only, whatever the template asks the model for.
+                static string? ReadString(JsonElement beat, string key) =>
+                    beat.TryGetProperty(key, out var v) && v.ValueKind == JsonValueKind.String
+                        ? v.GetString()
+                        : null;
+
+                var sceneDescription = ReadString(beatElem, "scene_description");
+                var sceneNotes = ReadString(beatElem, "scene_notes");
+                var sceneType = ReadString(beatElem, "scene_type");
+
+                List<Guid>? sceneCast = null;
+                if (beatElem.TryGetProperty("scene_cast", out var sc)
+                    && sc.ValueKind == JsonValueKind.Array)
+                {
+                    sceneCast = new List<Guid>();
+                    foreach (var castElem in sc.EnumerateArray())
+                    {
+                        if (castElem.ValueKind == JsonValueKind.String
+                            && Guid.TryParse(castElem.GetString(), out var castGuid))
+                            sceneCast.Add(castGuid);
+                    }
+                }
+
+                beats.Add(new BeatInfo(title, desc, assigned, sceneName,
+                    sceneDescription, sceneNotes, sceneType, sceneCast));
             }
             return beats;
         }
@@ -1216,6 +1247,30 @@ namespace StoryCollaborator
         /// Collaborator #150: abort when ProblemCategory is empty or Story Problem.
         /// Returns null when the run may continue.
         /// </summary>
+        /// <summary>
+        /// Collaborator #77: ProblemCategory must be set before ProblemBuilder runs, because it
+        /// picks the beat sheet class. Unlike <see cref="ValidateBeatScenesCategory"/> this does
+        /// not refuse the story problem; ProblemBuilder runs on any Problem.
+        /// </summary>
+        /// <summary>
+        /// #208 handoff: true when this Problem is the Story Problem. Ignore-case by design.
+        /// </summary>
+        private bool IsStoryProblem(Guid problemUuid)
+        {
+            var result = _storyApi.GetStoryElement(problemUuid);
+            if (result?.IsSuccess != true || result.Payload is not ProblemModel problem)
+                return false;
+            return string.Equals(problem.ProblemCategory?.Trim(), "Story problem",
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        internal static string? ValidateProblemCategory(string? problemCategory)
+        {
+            if (string.IsNullOrWhiteSpace(problemCategory))
+                return "Set Problem Category before Problem Builder.";
+            return null;
+        }
+
         internal static string? ValidateBeatScenesCategory(string? problemCategory)
         {
             if (string.IsNullOrWhiteSpace(problemCategory))
@@ -1497,6 +1552,108 @@ namespace StoryCollaborator
         /// <summary>
         /// Collaborator #150: inject Stock Scenes catalog into args for BeatScenes.
         /// </summary>
+        /// <summary>
+        /// Collaborator #77 / StoryCAD #483: inject the Conflict Builder taxonomy from
+        /// Controls.json. ExampleLists reads Lists.json and cannot reach this data.
+        /// </summary>
+        /// <summary>
+        /// Collaborator #77: run every injection this workflow declares. Injection is a declared
+        /// capability, not a label test. Extracted so the wiring itself is testable: when this
+        /// lived inline in the request path, deleting it left the whole suite green.
+        /// </summary>
+        internal void ApplyDeclaredInjections(Dictionary<string, string> args)
+        {
+            if (string.Equals(workflowModel.Label, "BeatScenes", StringComparison.Ordinal)
+                || workflowModel.InjectsStockScenes)
+                EnrichWithStockScenes(args);
+
+            if (workflowModel.InjectsConflictTaxonomy)
+                EnrichWithConflictTaxonomy(args);
+
+            if (workflowModel.InjectsBeatSheets)
+                EnrichWithBeatSheets(args);
+        }
+
+        internal void EnrichWithConflictTaxonomy(Dictionary<string, string> args)
+        {
+            var categoriesResult = _storyApi.GetConflictCategories();
+            if (!categoriesResult.IsSuccess || categoriesResult.Payload == null)
+            {
+                _logger?.LogWarning("ProblemBuilder: no conflict categories from API");
+                args["ConflictTaxonomy"] = string.Empty;
+                return;
+            }
+
+            var sb = new System.Text.StringBuilder();
+            foreach (var category in categoriesResult.Payload)
+            {
+                sb.AppendLine($"### {category}");
+                var subsResult = _storyApi.GetConflictSubcategories(category);
+                if (!subsResult.IsSuccess || subsResult.Payload == null)
+                    continue;
+
+                foreach (var subcategory in subsResult.Payload)
+                {
+                    sb.AppendLine($"- {subcategory}");
+                    var examplesResult = _storyApi.GetConflictExamples(category, subcategory);
+                    if (!examplesResult.IsSuccess || examplesResult.Payload == null)
+                        continue;
+
+                    foreach (var example in examplesResult.Payload)
+                        sb.AppendLine($"  - {example}");
+                }
+                sb.AppendLine();
+            }
+
+            args["ConflictTaxonomy"] = sb.ToString();
+            _logger?.LogInformation(
+                "Injected ConflictTaxonomy ({Length} chars)", args["ConflictTaxonomy"].Length);
+        }
+
+        /// <summary>
+        /// Collaborator #77: inject the built-in beat sheet catalog from Tools.json so the
+        /// model picks a sheet the app actually has. Excludes the two user actions.
+        /// </summary>
+        internal void EnrichWithBeatSheets(Dictionary<string, string> args)
+        {
+            var namesResult = _storyApi.GetBeatSheetNames();
+            if (!namesResult.IsSuccess || namesResult.Payload == null)
+            {
+                _logger?.LogWarning("ProblemBuilder: no beat sheet names from API");
+                args["BeatSheets"] = string.Empty;
+                return;
+            }
+
+            var sb = new System.Text.StringBuilder();
+            foreach (var name in namesResult.Payload)
+            {
+                // The two user actions are not model choices.
+                if (name.StartsWith("Custom Beat Sheet", StringComparison.OrdinalIgnoreCase)
+                    || name.StartsWith("Load Custom Beat Sheet", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var sheetResult = _storyApi.GetBeatSheet(name);
+                if (!sheetResult.IsSuccess)
+                    continue;
+
+                sb.AppendLine($"### {name}");
+                if (!string.IsNullOrWhiteSpace(sheetResult.Payload.Description))
+                    sb.AppendLine(sheetResult.Payload.Description);
+
+                foreach (var (beatName, beatNotes) in sheetResult.Payload.Beats
+                             ?? Enumerable.Empty<(string, string)>())
+                {
+                    sb.AppendLine(string.IsNullOrWhiteSpace(beatNotes)
+                        ? $"- {beatName}"
+                        : $"- {beatName}: {beatNotes}");
+                }
+                sb.AppendLine();
+            }
+
+            args["BeatSheets"] = sb.ToString();
+            _logger?.LogInformation("Injected BeatSheets ({Length} chars)", args["BeatSheets"].Length);
+        }
+
         internal void EnrichWithStockScenes(Dictionary<string, string> args)
         {
             var catsResult = _storyApi.GetStockSceneCategories();
@@ -1540,8 +1697,17 @@ namespace StoryCollaborator
 
             var problemGuids = new HashSet<Guid>(GetCandidateGuids(StoryItemType.Problem));
             var sceneGuids = new HashSet<Guid>(GetCandidateGuids(StoryItemType.Scene));
-            var validAssignGuids = new HashSet<Guid>(problemGuids.Concat(sceneGuids));
-            bool allowSceneCreate = string.Equals(workflowModel.Label, "BeatScenes", StringComparison.Ordinal);
+
+            // #208 handoff product law: only the Story Problem may hold other Problems on its
+            // beats. A subproblem's beats take Scenes only. Compare ignore-case: the canonical
+            // value is "Story problem" and ValidateBeatScenesCategory's Ordinal compare against
+            // "Story Problem" is a known dead branch that must not be repeated here.
+            var validAssignGuids = IsStoryProblem(problemUuid)
+                ? new HashSet<Guid>(problemGuids.Concat(sceneGuids))
+                : new HashSet<Guid>(sceneGuids);
+            // Collaborator #77: capability, not label. A new workflow that sets SceneName used
+            // to create nothing because this line tested for the literal label "BeatScenes".
+            bool allowSceneCreate = workflowModel.CreatesScenesForBeats;
 
             var existingResult = _storyApi.GetProblemStructure(problemUuid);
             if (!existingResult.IsSuccess)
@@ -1572,27 +1738,21 @@ namespace StoryCollaborator
                 return;
             }
 
-            // Append extra proposed rows when the model grows the sheet (do not delete extras).
-            for (int i = existingBeats.Count; i < proposed.Count; i++)
-            {
-                var beat = proposed[i];
-                var title = string.IsNullOrWhiteSpace(beat.Title) ? $"Beat {i + 1}" : beat.Title.Trim();
-                var desc = beat.Description?.Trim() ?? string.Empty;
-                _storyApi.CreateBeat(problemUuid, title, desc);
-            }
-
-            // Re-read after possible creates.
-            existingResult = _storyApi.GetProblemStructure(problemUuid);
-            existingBeats = existingResult.IsSuccess
-                ? existingResult.Payload.Beats?.ToList()
-                    ?? new List<(string, string, Guid?)>()
-                : existingBeats;
+            // Collaborator #77: a sheet that is already present is the user's. The chosen sheet
+            // sets the beat count, so do not append rows to it. An empty Problem is handled above.
 
             int pairCount = Math.Min(existingBeats.Count, proposed.Count);
             for (int i = 0; i < pairCount; i++)
             {
                 var current = existingBeats[i];
                 var beat = proposed[i];
+
+                // Collaborator #77: a filled beat is the user's. Do not touch its assignment,
+                // its title, or its description. This test used to sit below the text write,
+                // so a filled beat with a blank description took model text under Accept All.
+                var alreadyFilled = current.LinkedElement.HasValue && current.LinkedElement.Value != Guid.Empty;
+                if (alreadyFilled)
+                    continue;
 
                 var newTitle = string.IsNullOrWhiteSpace(current.BeatTitle) && !string.IsNullOrWhiteSpace(beat.Title)
                     ? beat.Title.Trim()
@@ -1607,10 +1767,6 @@ namespace StoryCollaborator
                 {
                     _storyApi.UpdateBeat(problemUuid, i, newTitle ?? string.Empty, newDesc ?? string.Empty);
                 }
-
-                var alreadyFilled = current.LinkedElement.HasValue && current.LinkedElement.Value != Guid.Empty;
-                if (alreadyFilled)
-                    continue;
 
                 TryFillEmptyBeat(problemUuid, i, beat, allowSceneCreate, validAssignGuids, problemGuids, usedOnSheet, result);
             }
@@ -1629,7 +1785,15 @@ namespace StoryCollaborator
             HashSet<Guid> usedOnSheet,
             WorkflowResult result)
         {
-            if (allowSceneCreate && !string.IsNullOrWhiteSpace(beat.SceneName))
+            // Collaborator #77: an empty beat takes an existing free element before a new Scene.
+            // A proposal may carry both; creating then would leave the real Scene orphaned and
+            // put a duplicate on the sheet.
+            bool canBindProposed = beat.AssignedElement.HasValue
+                && beat.AssignedElement.Value != Guid.Empty
+                && validAssignGuids.Contains(beat.AssignedElement.Value)
+                && !usedOnSheet.Contains(beat.AssignedElement.Value);
+
+            if (allowSceneCreate && !canBindProposed && !string.IsNullOrWhiteSpace(beat.SceneName))
             {
                 var name = beat.SceneName.Trim();
                 var addResult = _storyApi.AddElement(StoryItemType.Scene, problemUuid.ToString(), name);
@@ -1641,6 +1805,34 @@ namespace StoryCollaborator
                 }
 
                 var newGuid = addResult.Payload;
+
+                // Collaborator #77 / #208 stub contract: Name, Description, Notes.
+                // Description is the scene summary. Notes carries problem context down to the
+                // scene, including the situation-sheet material that has no Problem property.
+                if (!string.IsNullOrWhiteSpace(beat.SceneDescription))
+                    _storyApi.UpdateElementProperty(newGuid, "Description", beat.SceneDescription.Trim());
+                if (!string.IsNullOrWhiteSpace(beat.SceneNotes))
+                    _storyApi.UpdateElementProperty(newGuid, "Notes", beat.SceneNotes.Trim());
+                if (!string.IsNullOrWhiteSpace(beat.SceneType))
+                    _storyApi.UpdateElementProperty(newGuid, "SceneType", beat.SceneType.Trim());
+
+                // Cast: only names that resolve to a Character. An unresolved name is skipped,
+                // never invented (#208 handoff stub contract).
+                if (beat.SceneCast != null)
+                {
+                    var characterGuids = new HashSet<Guid>(GetCandidateGuids(StoryItemType.Character));
+                    foreach (var castGuid in beat.SceneCast)
+                    {
+                        if (castGuid == Guid.Empty || !characterGuids.Contains(castGuid))
+                        {
+                            result.StatusMessages.Add(
+                                $"Beat {beatIndex} cast member {castGuid} did not resolve; skipped");
+                            continue;
+                        }
+                        _storyApi.AddCastMember(newGuid, castGuid);
+                    }
+                }
+
                 validAssignGuids.Add(newGuid);
                 TryAssignBeat(problemUuid, beatIndex, newGuid, validAssignGuids, problemGuids, usedOnSheet, result);
                 result.StatusMessages.Add($"Beat {beatIndex}: created Scene '{name}' ({newGuid})");
@@ -1902,7 +2094,18 @@ namespace StoryCollaborator
                 var result = _storyApi.GetExamples(propertyName);
                 if (result.IsSuccess && result.Payload != null && result.Payload.Any())
                 {
-                    var formatted = string.Join(", ", result.Payload);
+                    // Collaborator #77: one value per line. A ", " join is ambiguous because
+                    // four Method values, two Theme values and one Outcome value contain a
+                    // comma; a live run returned "Survival (deliveranc", cut mid-word.
+                    //
+                    // Drop the blank first entry. ListData inserts " " at index 0 of every list
+                    // so a non-editable ComboBox can show an empty selection (StoryCAD #1267).
+                    // That is a UI affordance; offering the model a blank option invites a value
+                    // that is not on the list.
+                    var values = result.Payload
+                        .Where(v => !string.IsNullOrWhiteSpace(v))
+                        .ToList();
+                    var formatted = string.Join("\n", values.Select(v => $"- {v}"));
                     args[$"{propertyName}_examples"] = formatted;
                     _logger?.LogInformation($"Injected examples for {propertyName}: {result.Payload.Count()} items");
                 }

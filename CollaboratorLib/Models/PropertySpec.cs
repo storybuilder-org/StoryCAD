@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 
 namespace StoryCollaborator.Models
@@ -81,7 +82,11 @@ namespace StoryCollaborator.Models
         string Title,
         string Description,
         Guid? AssignedElement = null,
-        string? SceneName = null);
+        string? SceneName = null,
+        string? SceneDescription = null,
+        string? SceneNotes = null,
+        string? SceneType = null,
+        IReadOnlyList<Guid>? SceneCast = null);
 
     /// <summary>
     /// One relationship entry in a Relationships output.

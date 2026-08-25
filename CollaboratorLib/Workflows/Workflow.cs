@@ -25,6 +25,36 @@ namespace StoryCollaborator.Workflows
         /// </summary>
         public StoryItemType PrimaryElementType { get; set; } = StoryItemType.Unknown;
 
+        /// <summary>
+        /// Collaborator #77: this workflow may create a Scene for an empty beat from
+        /// <see cref="StoryCollaborator.Models.BeatInfo.SceneName"/>. Replaces the
+        /// <c>Label == "BeatScenes"</c> test that used to gate scene creation.
+        /// </summary>
+        public bool CreatesScenesForBeats { get; set; }
+
+        /// <summary>
+        /// Collaborator #77: this workflow needs Problem.ProblemCategory before it runs.
+        /// The category picks the beat sheet class. Nothing sets it on a ProblemBuilder run.
+        /// </summary>
+        public bool RequiresProblemCategory { get; set; }
+
+        /// <summary>
+        /// Collaborator #77 / StoryCAD #483: inject the Controls.json conflict taxonomy into
+        /// the request args. ExampleLists reads Lists.json and cannot reach that data.
+        /// </summary>
+        public bool InjectsConflictTaxonomy { get; set; }
+
+        /// <summary>
+        /// Collaborator #77: inject the built-in Tools.json beat sheet catalog into the request
+        /// args, so the model chooses a sheet the app actually has.
+        /// </summary>
+        public bool InjectsBeatSheets { get; set; }
+
+        /// <summary>
+        /// Collaborator #150: inject the Stock Scenes catalog. Was gated on the BeatScenes label.
+        /// </summary>
+        public bool InjectsStockScenes { get; set; }
+
         // Additional properties
         public StoryModel? Model { get; set; }
         public string Plugins { get; set; } = string.Empty;
