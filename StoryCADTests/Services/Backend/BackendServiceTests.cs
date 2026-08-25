@@ -287,6 +287,77 @@ public class BackendTests
 
     #endregion
 
+    #region Backend Unreachable Classification Tests (MySQL 1042)
+
+    /// <summary>
+    ///     MySQL 1042 ("Unable to connect to any of the specified MySQL hosts") is raised
+    ///     when the server name fails to resolve - the inner exception is
+    ///     ArgumentException("The host name or IP address is invalid"). That is the same
+    ///     "backend unreachable" condition as 2003/2013, so it must be logged as a Warning
+    ///     and retried on the next startup, never reported to elmah.io as an Error.
+    ///
+    ///     Regression guard: before this fix 1042 fell through to the generic
+    ///     catch (MySqlException) handler, which calls LogException(LogLevel.Error, ...)
+    ///     and therefore produced elmah Error events on every launch for any client
+    ///     pointed at a retired database host.
+    /// </summary>
+    [TestMethod]
+    public async Task PostPreferences_WithMySqlBadHost_LogsAsWarningNotError()
+    {
+        // Arrange
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        testSqlIo.ExceptionToThrow = CreateMySqlException(1042,
+            "Unable to connect to any of the specified MySQL hosts");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        // Act
+        await backendService.PostPreferences(preferenceService.Model);
+
+        // Assert
+        Assert.IsTrue(testLogger.HasWarning("Transient MySQL error during preferences posting"),
+            "1042 should be classified as an unreachable-backend condition, like 2003/2013");
+        Assert.IsTrue(testLogger.HasWarning("Code 1042"),
+            "Should log error code 1042");
+        Assert.AreEqual(0, testLogger.ErrorCount,
+            "1042 must not be logged at Error - Error is what reaches elmah.io");
+    }
+
+    /// <summary>
+    ///     PostVersion mirror of PostPreferences_WithMySqlBadHost_LogsAsWarningNotError.
+    ///     Both posts run back-to-back on startup, so an unresolvable host produced two
+    ///     Error paths per launch before this fix.
+    /// </summary>
+    [TestMethod]
+    public async Task PostVersion_WithMySqlBadHost_LogsAsWarningNotError()
+    {
+        // Arrange
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        testSqlIo.ExceptionToThrow = CreateMySqlException(1042,
+            "Unable to connect to any of the specified MySQL hosts");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        // Act
+        await backendService.PostVersion();
+
+        // Assert
+        Assert.IsTrue(testLogger.HasWarning("Transient MySQL error during version posting"),
+            "1042 should be classified as an unreachable-backend condition, like 2003/2013");
+        Assert.IsTrue(testLogger.HasWarning("Code 1042"),
+            "Should log error code 1042");
+        Assert.AreEqual(0, testLogger.ErrorCount,
+            "1042 must not be logged at Error - Error is what reaches elmah.io");
+    }
+
+    #endregion
+
     #region StartupRecording Exception Handling Tests
 
     /// <summary>
@@ -965,7 +1036,8 @@ public class TestableBackendService : BackendService
         {
             _testLogService.Log(LogLevel.Warn, $"Backend operation cancelled during startup: {ex.Message}");
         }
-        catch (MySqlException ex) when (ex.Number == 2003 || ex.Number == 2013)
+        // Mirrors BackendService.IsBackendUnreachable; keep the two in step.
+        catch (MySqlException ex) when (ex.Number is 1042 or 2003 or 2013)
         {
             _testLogService.Log(LogLevel.Warn, $"Backend server temporarily unavailable (Code {ex.Number}): {ex.Message}");
             _testLogService.Log(LogLevel.Info, "Backend telemetry will retry on next startup");

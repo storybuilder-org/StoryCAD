@@ -62,6 +62,20 @@ public class BackendService
     public IReadOnlyList<UserMessage> UnreadMessages { get; private set; } = Array.Empty<UserMessage>();
 
     /// <summary>
+    ///     True when a MySqlException means "the backend is unreachable" rather than
+    ///     "the backend rejected us": 1042 the server name did not resolve (the driver
+    ///     wraps an ArgumentException, "The host name or IP address is invalid"),
+    ///     2003 the connection was refused, 2013 it was dropped mid-flight.
+    ///
+    ///     These are logged at Warn and retried on the next startup, never at Error.
+    ///     Only Error reaches elmah.io, and an unreachable host recurs on every launch
+    ///     of every affected client — so classifying it as Error turns one dead server
+    ///     into a permanent stream of error reports.
+    /// </summary>
+    private static bool IsBackendUnreachable(MySqlException ex) =>
+        ex.Number is 1042 or 2003 or 2013;
+
+    /// <summary>
     ///     Do any necessary posting to the backend MySQL server on app
     ///     startup. This will include either preferences or versions
     ///     posting that weren't successful during the last run.
@@ -118,7 +132,7 @@ public class BackendService
         {
             _logService.Log(LogLevel.Warn, $"Backend operation cancelled during startup: {ex.Message}");
         }
-        catch (MySqlException ex) when (ex.Number == 2003 || ex.Number == 2013)
+        catch (MySqlException ex) when (IsBackendUnreachable(ex))
         {
             _logService.Log(LogLevel.Warn, $"Backend server temporarily unavailable (Code {ex.Number}): {ex.Message}");
             _logService.Log(LogLevel.Info, "Backend telemetry will retry on next startup");
@@ -245,7 +259,7 @@ public class BackendService
         {
             _logService.Log(LogLevel.Warn, $"Operation cancelled during preferences posting: {ex.Message}");
         }
-        catch (MySqlException ex) when (ex.Number == 2003 || ex.Number == 2013)
+        catch (MySqlException ex) when (IsBackendUnreachable(ex))
         {
             _logService.Log(LogLevel.Warn, $"Transient MySQL error during preferences posting (Code {ex.Number}): {ex.Message}");
         }
@@ -309,7 +323,7 @@ public class BackendService
         {
             _logService.Log(LogLevel.Warn, $"Operation cancelled during version posting: {ex.Message}");
         }
-        catch (MySqlException ex) when (ex.Number == 2003 || ex.Number == 2013)
+        catch (MySqlException ex) when (IsBackendUnreachable(ex))
         {
             _logService.Log(LogLevel.Warn, $"Transient MySQL error during version posting (Code {ex.Number}): {ex.Message}");
         }

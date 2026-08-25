@@ -246,7 +246,10 @@ public partial class App : Application
         MainWindow.UseStudio();
 #endif
 
-        if (!Debugger.IsAttached)
+        // Report field errors, not our own debug sessions. Inverted in 4c0360da
+        // (2025-10-16) while fixing elmah on Mac, which turned off reporting for
+        // every real user and forwarded developer sessions instead. Do not flip it.
+        if (Debugger.IsAttached)
         {
             _log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");
         }
