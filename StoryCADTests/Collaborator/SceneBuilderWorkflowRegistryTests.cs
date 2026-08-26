@@ -51,26 +51,19 @@ public class SceneBuilderWorkflowRegistryTests
     }
 
     [TestMethod]
-    public void FiveSceneMicroWorkflows_RemainRegistered()
+    public void FiveSceneMicroWorkflows_AreGone()
     {
+        // #211: they stayed registered for A:B against SceneBuilder. That comparison is over.
         foreach (var label in new[] { "SceneSummary", "CastSceneRoles", "SceneDevelopment", "SceneConflict", "Sequel" })
-            Assert.IsNotNull(WorkflowRegistry.Get(label), label);
+            Assert.IsNull(WorkflowRegistry.Get(label), label);
     }
 
     [TestMethod]
-    public void SceneSummary_StillDescriptionOnly_EmptyOptionalInputs()
+    public void DefaultStarredLabels_IncludeSceneBuilder_WithoutTheMicroWorkflows()
     {
-        var io = WorkflowRegistry.Get("SceneSummary")!.GetIO();
-        Assert.AreEqual(0, io.OptionalInputs.Count);
-        var props = io.Outputs.Single(o => o.ElementLabel == "Scene").PropertiesToUpdate;
-        Assert.AreEqual("Description", props.Single().Property);
-    }
-
-    [TestMethod]
-    public void DefaultStarredLabels_IncludeSceneBuilder_KeepSceneSummaryAndConflict()
-    {
-        CollectionAssert.Contains(WorkflowRegistry.DefaultStarredLabels.ToList(), "SceneBuilder");
-        CollectionAssert.Contains(WorkflowRegistry.DefaultStarredLabels.ToList(), "SceneSummary");
-        CollectionAssert.Contains(WorkflowRegistry.DefaultStarredLabels.ToList(), "SceneConflict");
+        var starred = WorkflowRegistry.DefaultStarredLabels.ToList();
+        CollectionAssert.Contains(starred, "SceneBuilder");
+        CollectionAssert.DoesNotContain(starred, "SceneSummary");
+        CollectionAssert.DoesNotContain(starred, "SceneConflict");
     }
 }

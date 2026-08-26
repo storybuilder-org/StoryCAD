@@ -8,7 +8,7 @@ namespace StoryCADTests.Collaborator;
 
 /// <summary>
 ///     Collaborator #77 step 12. The gap report tells the user which workflow closes a gap.
-///     ProblemBuilder fills the Problem spine, so it must be named. GMC and StoryProblem stay
+///     ProblemBuilder fills the Problem spine, so it must be named. StoryProblem stays
 ///     listed while they remain registered for A:B.
 /// </summary>
 [TestClass]
@@ -60,10 +60,10 @@ public class GapWorkflowOwnershipProblemBuilderTests
     }
 
     [TestMethod]
-    public void ReplacedWorkflows_StayListedForAbTesting()
+    public void ReplacedWorkflows_AreNotListed()
     {
-        CollectionAssert.Contains(
+        CollectionAssert.DoesNotContain(
             GapWorkflowOwnership.WorkflowsFor(StoryItemType.Problem, "ProtGoal").ToList(), "GMC",
-            "GMC stays registered until the cleanup issue retires it");
+            "#211 deleted GMC; a gap must not offer a workflow that is not registered");
     }
 }

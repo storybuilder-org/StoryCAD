@@ -9,7 +9,7 @@ namespace StoryCADTests.Collaborator;
 
 /// <summary>
 ///     Collaborator #77 step 11. ProblemBuilder consolidates ConflictBuilder, GMC, Structure,
-///     and BeatScenes. The four stay registered for A:B until the cleanup issue.
+///     and BeatScenes. The four stayed registered for A:B; #211 deleted them.
 /// </summary>
 [TestClass]
 public class ProblemBuilderRegistryTests
@@ -146,12 +146,12 @@ public class ProblemBuilderRegistryTests
     }
 
     [TestMethod]
-    public void ReplacedWorkflows_StayRegisteredForAbTesting()
+    public void ReplacedWorkflows_AreGone()
     {
         foreach (var label in new[] { "ConflictBuilder", "GMC", "Structure", "BeatScenes" })
         {
-            Assert.IsTrue(WorkflowRegistry.All.Any(w => w.Label == label),
-                $"'{label}' stays until the cleanup issue retires it");
+            Assert.IsFalse(WorkflowRegistry.All.Any(w => w.Label == label),
+                $"#211 deleted '{label}'; ProblemBuilder is the Problem surface");
         }
     }
 }

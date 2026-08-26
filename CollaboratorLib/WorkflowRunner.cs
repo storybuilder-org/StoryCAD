@@ -111,11 +111,10 @@ namespace StoryCollaborator
                     return WorkflowResult.Failed($"Missing required element: '{requirement.ElementLabel}'");
             }
 
-            // Collaborator #150: abort BeatScenes when ProblemCategory is empty or Story Problem.
-            // Collaborator #77: ProblemBuilder needs the category set too, but runs on any
-            // Problem, so it takes the blank check only.
-            if (string.Equals(workflowModel.Label, "BeatScenes", StringComparison.Ordinal)
-                || workflowModel.RequiresProblemCategory)
+            // Collaborator #77: ProblemBuilder needs ProblemCategory set, but runs on any
+            // Problem, so it takes the blank check only. #211 deleted BeatScenes, which was
+            // the one workflow that also refused the story problem.
+            if (workflowModel.RequiresProblemCategory)
             {
                 var category = string.Empty;
                 if (gatheredElements.TryGetValue("Problem", out var problemEl)
@@ -124,15 +123,13 @@ namespace StoryCollaborator
                     category = pm.ProblemCategory ?? string.Empty;
                 }
 
-                var gateMessage = string.Equals(workflowModel.Label, "BeatScenes", StringComparison.Ordinal)
-                    ? ValidateBeatScenesCategory(category)
-                    : ValidateProblemCategory(category);
+                var gateMessage = ValidateProblemCategory(category);
                 if (gateMessage != null)
                     return WorkflowResult.Failed(gateMessage);
             }
 
-            // Collaborator #208: SceneBuilder Story Problem / empty-category bail.
-            // Do not copy BeatScenes: a missing Problem map entry is not empty category.
+            // Collaborator #208: SceneBuilder Story Problem / empty-category bail. Distinct
+            // from the category gate above: a missing Problem map entry is not empty category.
             if (string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
             {
                 var sceneBuilderGate = ValidateSceneBuilderOwner(gatheredElements);
@@ -1394,15 +1391,6 @@ namespace StoryCollaborator
         }
 
         /// <summary>
-        /// Collaborator #150: abort when ProblemCategory is empty or Story Problem.
-        /// Returns null when the run may continue.
-        /// </summary>
-        /// <summary>
-        /// Collaborator #77: ProblemCategory must be set before ProblemBuilder runs, because it
-        /// picks the beat sheet class. Unlike <see cref="ValidateBeatScenesCategory"/> this does
-        /// not refuse the story problem; ProblemBuilder runs on any Problem.
-        /// </summary>
-        /// <summary>
         /// #208 handoff: true when this Problem is the Story Problem. Ignore-case by design.
         /// </summary>
         private bool IsStoryProblem(Guid problemUuid)
@@ -1414,19 +1402,15 @@ namespace StoryCollaborator
                 StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// Collaborator #77: ProblemCategory must be set before ProblemBuilder runs, because it
+        /// picks the beat sheet class. ProblemBuilder runs on any Problem, the story problem
+        /// included; #211 deleted BeatScenes, whose gate refused it.
+        /// </summary>
         internal static string? ValidateProblemCategory(string? problemCategory)
         {
             if (string.IsNullOrWhiteSpace(problemCategory))
                 return "Set Problem Category before Problem Builder.";
-            return null;
-        }
-
-        internal static string? ValidateBeatScenesCategory(string? problemCategory)
-        {
-            if (string.IsNullOrWhiteSpace(problemCategory))
-                return "Set Problem Category before Scenes from Beats.";
-            if (string.Equals(problemCategory.Trim(), "Story Problem", StringComparison.Ordinal))
-                return "Use Structure on the story problem; run Scenes from Beats on a complication or other category.";
             return null;
         }
 
@@ -1700,7 +1684,8 @@ namespace StoryCollaborator
         }
 
         /// <summary>
-        /// Collaborator #150: inject Stock Scenes catalog into args for BeatScenes.
+        /// Collaborator #150: inject the Stock Scenes catalog for workflows that declare
+        /// InjectsStockScenes. Was gated on the BeatScenes label until #77.
         /// </summary>
         /// <summary>
         /// Collaborator #77 / StoryCAD #483: inject the Conflict Builder taxonomy from
@@ -1713,8 +1698,7 @@ namespace StoryCollaborator
         /// </summary>
         internal void ApplyDeclaredInjections(Dictionary<string, string> args)
         {
-            if (string.Equals(workflowModel.Label, "BeatScenes", StringComparison.Ordinal)
-                || workflowModel.InjectsStockScenes)
+            if (workflowModel.InjectsStockScenes)
                 EnrichWithStockScenes(args);
 
             if (workflowModel.InjectsConflictTaxonomy)
@@ -1809,7 +1793,7 @@ namespace StoryCollaborator
             var catsResult = _storyApi.GetStockSceneCategories();
             if (!catsResult.IsSuccess || catsResult.Payload == null)
             {
-                _logger?.LogWarning("BeatScenes: no stock scene categories from API");
+                _logger?.LogWarning("StockScenes: no stock scene categories from API");
                 args["StockScenes"] = string.Empty;
                 return;
             }
@@ -1827,15 +1811,16 @@ namespace StoryCollaborator
                 sb.AppendLine();
             }
             args["StockScenes"] = sb.ToString();
-            _logger?.LogInformation("Injected StockScenes for BeatScenes ({Length} chars)", args["StockScenes"].Length);
+            _logger?.LogInformation("Injected StockScenes for {Label} ({Length} chars)",
+                workflowModel.Label, args["StockScenes"].Length);
         }
 
         /// <summary>
         /// Collaborator #167: install or merge beat proposals without clearing filled assignments.
         /// Empty sheet: create proposed beats and assign valid candidates.
         /// Non-empty: fill blank descriptions; assign only empty slots; never reassign.
-        /// Collaborator #150 (BeatScenes only): empty slots with SceneName create a Scene under
-        /// the problem and assign it; Structure never creates.
+        /// Collaborator #150: empty slots with SceneName create a Scene under the problem and
+        /// assign it, but only for a workflow that declares CreatesScenesForBeats.
         /// </summary>
         internal void ApplyBeatSheetMerge(Guid problemUuid, List<BeatInfo> proposed, WorkflowResult result)
         {
@@ -1850,8 +1835,8 @@ namespace StoryCollaborator
 
             // #208 handoff product law: only the Story Problem may hold other Problems on its
             // beats. A subproblem's beats take Scenes only. Compare ignore-case: the canonical
-            // value is "Story problem" and ValidateBeatScenesCategory's Ordinal compare against
-            // "Story Problem" is a known dead branch that must not be repeated here.
+            // value is "Story problem", and an Ordinal compare against "Story Problem" silently
+            // never matches. That bug shipped in the BeatScenes gate #211 deleted.
             var validAssignGuids = IsStoryProblem(problemUuid)
                 ? new HashSet<Guid>(problemGuids.Concat(sceneGuids))
                 : new HashSet<Guid>(sceneGuids);
@@ -1923,7 +1908,8 @@ namespace StoryCollaborator
         }
 
         /// <summary>
-        /// Empty beat only: BeatScenes may create a Scene from SceneName; otherwise assign GUID.
+        /// Empty beat only: a workflow declaring CreatesScenesForBeats may create a Scene from
+        /// SceneName; otherwise assign GUID.
         /// </summary>
         private void TryFillEmptyBeat(
             Guid problemUuid,

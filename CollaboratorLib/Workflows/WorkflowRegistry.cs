@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using StoryCADLib.Models;
@@ -20,14 +21,11 @@ namespace StoryCollaborator.Workflows
         /// <summary>
         /// Workflows starred for a user who has never curated the set. One per stage of the
         /// outlining arc — idea to premise, premise to problem and cast, problem is well formed,
-        /// problem gets a shape, cast has function, scenes happen and scenes have conflict — so
-        /// the top band reads as a next action rather than a catalog. Seeded once by
-        /// WorkflowStarService; after that the user's choices win.
-        /// Scene Summary and Scene Conflict stay starred for A:B. SceneBuilder is also starred
-        /// (#208) after the Worker table entry exists. Cleanup drops the two micro-workflow stars.
-        /// GMC and Structure came off the band when ProblemBuilder landed (#77): all three serve
-        /// the same stage, and starring three workflows for one stage is the catalog this list
-        /// exists to prevent. Both stay registered and runnable for A:B.
+        /// cast has function, scene is written — so the top band reads as a next action rather
+        /// than a catalog. Seeded once by WorkflowStarService; after that the user's choices win.
+        /// #77 took GMC and Structure off the band when ProblemBuilder landed, and #211 has now
+        /// deleted them along with the Scene micro-workflows the band held for A:B. One workflow
+        /// per stage is the point: ProblemBuilder carries the problem, SceneBuilder the scene.
         /// </summary>
         public static readonly IReadOnlyList<string> DefaultStarredLabels = new List<string>
         {
@@ -35,10 +33,38 @@ namespace StoryCollaborator.Workflows
             "StoryProblem",
             "ProblemBuilder",
             "StoryFunction",
-            "SceneSummary",
-            "SceneConflict",
             "SceneBuilder"
         };
+
+        /// <summary>
+        /// How far stored stars have been carried forward. Raise this, and add to
+        /// <see cref="RetiredWorkflowReplacements"/>, whenever a consolidation deletes a workflow
+        /// a user could have starred. WorkflowStarService compares it against the number in the
+        /// user's preferences and migrates once.
+        /// </summary>
+        public const int StarMigrationVersion = 1;
+
+        /// <summary>
+        /// Deleted workflow label to the workflow that absorbed its job (#211). A user who
+        /// starred GMC starred the goal-motive-conflict step, and ProblemBuilder is what does
+        /// that step now, so the star moves rather than disappearing. Only used to rewrite
+        /// stored stars; nothing here is registered, and every value must be.
+        /// </summary>
+        public static readonly IReadOnlyDictionary<string, string> RetiredWorkflowReplacements =
+            new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                // #77: ProblemBuilder is the one Problem surface.
+                ["ConflictBuilder"] = "ProblemBuilder",
+                ["GMC"] = "ProblemBuilder",
+                ["Structure"] = "ProblemBuilder",
+                ["BeatScenes"] = "ProblemBuilder",
+                // #208: SceneBuilder is the one Scene surface.
+                ["SceneSummary"] = "SceneBuilder",
+                ["CastSceneRoles"] = "SceneBuilder",
+                ["SceneDevelopment"] = "SceneBuilder",
+                ["SceneConflict"] = "SceneBuilder",
+                ["Sequel"] = "SceneBuilder"
+            };
 
         /// <summary>
         /// Gets a workflow by its label.
@@ -237,86 +263,6 @@ namespace StoryCollaborator.Workflows
 
                 // === Problem Workflows ===
 
-                // GMC workflow - full WorkflowIO
-                new Workflow(
-                    label: "GMC",
-                    title: "Goal / Motivation / Conflict (GMC)",
-                    description: "The goal of this workflow is to ensure that a Problem Story Element " +
-                                "is a well-formed problem capable of contributing to the story's plot.",
-                    explanation: "A story is a narrative that revolves around a character facing " +
-                                "a conflict or problem. A problem arises when a character's " +
-                                "attempt to achieve their goal, motivated by a need or want, is " +
-                                "obstructed by a conflict that prevents its easy achievement.\r\n " +
-                                "StoryCAD's Problem form contains a tab which describes your protagonist's " +
-                                "Goal, Motivation, and Conflict. Another tab does the same for the antagonist, " +
-                                "because the antagonist is often the main source of conflict for the protagonist. " +
-                                "Even a non-human conflict can be thought of as an antagonist through personification, " +
-                                "by giving it a goal. For example, a storm might 'want' to destroy a town.\r\n " +
-                                "Defining your story problems through GMC makes it easier to create the scenes which " +
-                                "describe the protagonist's pursuit of their goal, the motives which drive the quest, " +
-                                "and the obstacles that challenge the protagonist's progress.",
-                    workflowIO: new WorkflowIO
-                    {
-                        // Full characters so Worker can fill Protagonist_Name / Antagonist_Name (issue #106).
-                        RequiredInputs = new List<ElementRequirement>
-                        {
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.Problem,
-                                ElementLabel = "Problem",
-                                RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = false
-                            },
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.Character,
-                                ElementLabel = "Protagonist",
-                                ReferencedElementLabel = "Problem.Protagonist",
-                                RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = false
-                            },
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.Character,
-                                ElementLabel = "Antagonist",
-                                ReferencedElementLabel = "Problem.Antagonist",
-                                RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = false
-                            }
-                        },
-                        Outputs = new List<ElementOutput>
-                        {
-                            new ElementOutput
-                            {
-                                ElementType = StoryItemType.Problem,
-                                ElementLabel = "Problem",
-                                PropertiesToUpdate = new List<PropertySpec>
-                                {
-                                    new PropertySpec("ProtGoal"),
-                                    new PropertySpec("ProtMotive"),
-                                    new PropertySpec("ProtConflict"),
-                                    new PropertySpec("AntagGoal"),
-                                    new PropertySpec("AntagMotive"),
-                                    new PropertySpec("AntagConflict"),
-                                    new PropertySpec("ProblemType"),
-                                    new PropertySpec("Premise")
-                                },
-
-                            }
-                        },
-                        ExampleLists = new List<string> { "ConflictType", "Motive" }
-                    }) { PrimaryElementType = StoryItemType.Problem },
-
-                new Workflow(
-                    "ConflictBuilder", "Conflict Builder",
-                    "Use the Conflict Builder tool to develop and intensify the central conflict of a story problem, " +
-                    "exploring different conflict categories and escalation patterns.",
-                    StoryItemType.Problem,
-                    explanation: "Conflict is what prevents your character from achieving their goal. This workflow " +
-                                "guides you through the Conflict Builder tool to find conflicts that add complexity " +
-                                "and layers of meaning—avoiding both senseless violence and shallow conflicts that " +
-                                "resolve too easily.",
-                    outputProperties: new List<PropertySpec> { new PropertySpec("ProtConflict"), new PropertySpec("AntagConflict") }),
                 new Workflow(
                     label: "InnerOuterProblems",
                     title: "Inner and Outer Problems",
@@ -393,137 +339,6 @@ namespace StoryCollaborator.Workflows
                             }
                         }
                     }) { PrimaryElementType = StoryItemType.Problem },
-                // Collaborator #167: assign problems/scenes to beats; preserve filled assignments.
-                new Workflow(
-                    label: "Structure",
-                    title: "Problem Structure",
-                    description: "Choose a beat sheet and match existing problems and scenes to beats " +
-                                "(story problem prefers other problems; other problems prefer scenes).",
-                    explanation: "Structure gives your problem shape—a beginning that hooks, a middle that complicates, " +
-                                "and an ending that resolves. This workflow chooses a beat sheet (full for the story " +
-                                "problem, mini for others) and assigns existing problems and scenes to unfilled beats. " +
-                                "It does not create new elements or wipe filled assignments.",
-                    workflowIO: new WorkflowIO
-                    {
-                        RequiredInputs = new List<ElementRequirement>
-                        {
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.Problem,
-                                ElementLabel = "Problem",
-                                RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = false
-                            }
-                        },
-                        OptionalInputs = new List<ElementRequirement>
-                        {
-                            // Overview helps the Worker detect the outline story problem.
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.StoryOverview,
-                                ElementLabel = "Overview",
-                                RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = false
-                            }
-                        },
-                        Outputs = new List<ElementOutput>
-                        {
-                            new ElementOutput
-                            {
-                                ElementType = StoryItemType.Problem,
-                                ElementLabel = "Problem",
-                                PropertiesToUpdate = new List<PropertySpec>
-                                {
-                                    new PropertySpec("StructureTitle"),
-                                    new PropertySpec("StructureDescription"),
-                                    new PropertySpec("StructureBeats", WriteVia.BeatSheet, JsonKey: "beats")
-                                }
-                            }
-                        },
-                        CollectionInputs = new List<CollectionInput>
-                        {
-                            new CollectionInput
-                            {
-                                RequestName = "ProblemChoices",
-                                ElementType = StoryItemType.Problem,
-                                Projection = ElementProjection.BaseStoryElement
-                            },
-                            new CollectionInput
-                            {
-                                RequestName = "SceneChoices",
-                                ElementType = StoryItemType.Scene,
-                                Projection = ElementProjection.BaseStoryElement
-                            }
-                        }
-                    }) { PrimaryElementType = StoryItemType.Problem },
-                // Collaborator #150: invent Scene stubs for empty beats on non–Story Problem categories.
-                new Workflow(
-                    label: "BeatScenes",
-                    title: "Scenes from Beats",
-                    description: "Create scene stubs for empty beats on a problem with a beat sheet " +
-                                "(complications and other non–story-problem categories).",
-                    explanation: "When a problem has a beat sheet with empty slots, this workflow invents " +
-                                "one Scene per empty beat: a one-line Name for the central event or conflict, " +
-                                "in causal order. It creates each Scene under the problem and assigns it to " +
-                                "the beat. It requires a Problem Category and does not run when the category " +
-                                "is Story Problem (use Structure instead). Filled beats stay unchanged.",
-                    workflowIO: new WorkflowIO
-                    {
-                        RequiredInputs = new List<ElementRequirement>
-                        {
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.Problem,
-                                ElementLabel = "Problem",
-                                RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = false
-                            }
-                        },
-                        OptionalInputs = new List<ElementRequirement>
-                        {
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.StoryOverview,
-                                ElementLabel = "Overview",
-                                RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = false
-                            },
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.Character,
-                                ElementLabel = "Protagonist",
-                                ReferencedElementLabel = "Problem.Protagonist",
-                                RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = false
-                            },
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.Character,
-                                ElementLabel = "Antagonist",
-                                ReferencedElementLabel = "Problem.Antagonist",
-                                RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = false
-                            }
-                        },
-                        Outputs = new List<ElementOutput>
-                        {
-                            new ElementOutput
-                            {
-                                ElementType = StoryItemType.Problem,
-                                ElementLabel = "Problem",
-                                PropertiesToUpdate = new List<PropertySpec>
-                                {
-                                    new PropertySpec("StructureTitle"),
-                                    new PropertySpec("StructureDescription"),
-                                    new PropertySpec("StructureBeats", WriteVia.BeatSheet, JsonKey: "beats")
-                                }
-                            }
-                        }
-                    })
-                {
-                    PrimaryElementType = StoryItemType.Problem,
-                    CreatesScenesForBeats = true
-                },
 
                 // #77 ProblemBuilder: one Problem surface. Consolidates ConflictBuilder, GMC,
                 // Structure, and BeatScenes. Writes the RequiredFieldGapScanner spine, chooses a
@@ -957,157 +772,13 @@ namespace StoryCollaborator.Workflows
                             "Goal", "Opposition", "Outcome"
                         }
                     }) { PrimaryElementType = StoryItemType.Scene },
-                // #174: Scene only on RequiredInputs. Problem / PrecedingScene / NextScene are
-                // inject-only after structure resolve (never OptionalInputs).
-                new Workflow(
-                    label: "SceneSummary",
-                    title: "Scene Summary",
-                    description: "Create a concise summary of a scene's purpose, content, and role in the larger story.",
-                    explanation: "Every scene should earn its place. This workflow helps you articulate what happens " +
-                                "in the scene, why it matters, and what would be lost without it—ensuring each scene " +
-                                "advances plot, reveals character, or both.",
-                    workflowIO: new WorkflowIO
-                    {
-                        RequiredInputs = new List<ElementRequirement>
-                        {
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.Scene,
-                                ElementLabel = "Scene",
-                                RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = false
-                            }
-                        },
-                        OptionalInputs = new List<ElementRequirement>(),
-                        Outputs = new List<ElementOutput>
-                        {
-                            new ElementOutput
-                            {
-                                ElementType = StoryItemType.Scene,
-                                ElementLabel = "Scene",
-                                PropertiesToUpdate = new List<PropertySpec>
-                                {
-                                    new PropertySpec("Description")
-                                }
-                            }
-                        }
-                    }) { PrimaryElementType = StoryItemType.Scene },
-                new Workflow(
-                    "CastSceneRoles", "Cast and Scene Roles",
-                    "Define which characters appear in a scene and what role each plays—protagonist, antagonist, " +
-                    "ally, or other function.",
-                    StoryItemType.Scene,
-                    explanation: "Scenes need characters with purposes. This workflow helps you cast your scene " +
-                                "deliberately—who must be there, who serves the scene's goals, and what role each " +
-                                "character plays in the scene's conflict.",
-                    // Bug 3: CastMembers is List<Guid>; must use CastMembers mechanism, not Scalar.
-                    // Runner injects CharacterChoices; model returns chosen GUIDs under key "cast".
-                    outputProperties: new List<PropertySpec>
-                    {
-                        new PropertySpec("CastMembers", WriteVia.CastMembers, JsonKey: "cast")
-                    }),
-                new Workflow(
-                    "SceneDevelopment", "Scene Development",
-                    "Develop how a scene advances both the outer plot problem and the protagonist's inner " +
-                    "character arc.",
-                    StoryItemType.Scene,
-                    explanation: "The best scenes work on multiple levels—advancing external plot while developing " +
-                                "internal character. This workflow (based on Lisa Cron's Story Genius method) helps " +
-                                "you identify what happens, what it means to the protagonist, and how it changes them.",
-                    // Bug 4: ScenePurpose is List<string>; must use SimpleList, not Scalar.
-                    outputProperties: new List<PropertySpec>
-                    {
-                        new PropertySpec("ScenePurpose", WriteVia.SimpleList, ListEntryType: typeof(string)),
-                        new PropertySpec("ValueExchange"),
-                        new PropertySpec("Events"),
-                        new PropertySpec("Consequences"),
-                        new PropertySpec("Significance"),
-                        new PropertySpec("Realization")
-                    }),
-                new Workflow(
-                    label: "SceneConflict",
-                    title: "Scene Conflict",
-                    description: "Structure the conflict within a scene—the protagonist's goal, the opposition they face, " +
-                                 "and the outcome.",
-                    explanation: "A scene is a small story with goal, conflict, and outcome. This workflow uses the " +
-                                "Actor's Studio method to define what the scene protagonist wants, what opposes them, " +
-                                "and how the scene ends—usually in a way that makes things worse.",
-                    workflowIO: new WorkflowIO
-                    {
-                        // Scene + full characters for Protagonist_Name / Antagonist_Name (#106).
-                        RequiredInputs = new List<ElementRequirement>
-                        {
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.Scene,
-                                ElementLabel = "Scene",
-                                RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = false
-                            },
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.Character,
-                                ElementLabel = "Protagonist",
-                                ReferencedElementLabel = "Scene.Protagonist",
-                                RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = false
-                            },
-                            new ElementRequirement
-                            {
-                                ElementType = StoryItemType.Character,
-                                ElementLabel = "Antagonist",
-                                ReferencedElementLabel = "Scene.Antagonist",
-                                RequiredProperties = new List<PropertySpec>(),
-                                CreateIfMissing = false
-                            }
-                        },
-                        Outputs = new List<ElementOutput>
-                        {
-                            new ElementOutput
-                            {
-                                ElementType = StoryItemType.Scene,
-                                ElementLabel = "Scene",
-                                PropertiesToUpdate = new List<PropertySpec>
-                                {
-                                    new PropertySpec("ProtagGoal"),
-                                    new PropertySpec("Opposition"),
-                                    new PropertySpec("Outcome")
-                                }
-                            }
-                        }
-                    }) { PrimaryElementType = StoryItemType.Scene },
-                new Workflow(
-                    "Sequel", "Sequel (Reaction)",
-                    "Develop the character's emotional reaction, reflection, and decision-making after a " +
-                    "scene's conflict.",
-                    StoryItemType.Scene,
-                    explanation: "After conflict comes reaction. The sequel (or 'reaction beat') shows the protagonist's " +
-                                "emotional response to what just happened, their dilemma about what to do next, and " +
-                                "their decision that leads to the next scene. This pacing between action and reaction " +
-                                "creates story rhythm.",
-                    outputProperties: new List<PropertySpec>
-                    {
-                        new PropertySpec("Emotion"),
-                        new PropertySpec("Review"),
-                        new PropertySpec("NewGoal")
-                    }),
                 // SceneCreateImage removed; preserved on branch issue-76-image-workflows (issue #76).
             };
 
-            // Issue #106: declared collection inputs (not inferred from WriteVia).
-            var characterChoices = new CollectionInput
-            {
-                RequestName = "CharacterChoices",
-                ElementType = StoryItemType.Character,
-                Projection = ElementProjection.IdAndName
-            };
-            GetFrom(list, "CastSceneRoles")!.GetIO().CollectionInputs.Add(characterChoices);
-            // Relationship CollectionInputs are declared on its WorkflowIO above.
-
+            // Issue #106 attached CharacterChoices to CastSceneRoles here; #211 deleted that
+            // workflow. Every surviving workflow declares its CollectionInputs on its own
+            // WorkflowIO above, so nothing is patched onto the list after it is built.
             return list;
         }
-
-        private static Workflow? GetFrom(List<Workflow> list, string label) =>
-            list.FirstOrDefault(w => w.Label == label);
     }
 }

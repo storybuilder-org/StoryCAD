@@ -78,15 +78,6 @@ public class DeclaredInjectionWiringTests
     }
 
     [TestMethod]
-    public void BeatScenes_KeepsStockScenesByLabel()
-    {
-        // BeatScenes has no flag in the registry; the label path must keep working for A:B.
-        var workflow = new Workflow("BeatScenes", "Scenes from Beats", "t", StoryItemType.Problem);
-
-        CollectionAssert.Contains(Inject(workflow).Keys.ToList(), "StockScenes");
-    }
-
-    [TestMethod]
     public void RegisteredProblemBuilder_InjectsAllThree()
     {
         var registered = WorkflowRegistry.All.Single(w => w.Label == "ProblemBuilder");

@@ -46,36 +46,36 @@ Return to StoryCAD and open the Overview. Anything you accepted is already there
 
 **Craft check:** Does the premise name someone who wants something, and what stands in their way? Danger Calls has both: the detectives need to know when and where Lacas will deal, and his pager network is what stops them. See [Story Idea, Concept, and Premise](../../Writing%20with%20StoryCAD/Story_Idea_Concept_and_Premise.html).
 
-## 3. GMC on a problem
+## 3. Problem Builder on a problem
 
 Danger Calls carries three problems. **How will Leonard and Tony get past Charlie's tech?** is the useful one to work on: Leonard Kraskin against Charlie Lacas, over whether the detectives can read his pager traffic before the next deal.
 
-1. Run **Goal / Motivation / Conflict (GMC)** on that problem.  
+Set **Problem Category**, **Protagonist**, and **Antagonist** on that Problem first. Problem Builder reads all three, and it stops before it starts if the category is blank.
+
+1. Run **Problem Builder** on that problem.  
 2. If Collaborator needs a character it opens a picker. Choose an existing one, or **Create a new element** if the person you want is not there yet. Cancelling the picker stops the run.  
 3. Read the label under each field name.
 
-GMC fills eight fields at once, the goal, motivation, and conflict for both sides of the problem plus its type and premise. On the sample every one of them already has text, so all eight stop and ask. That is the slow path on purpose: eight replacements at once is exactly when you want to read before accepting.
+Problem Builder takes four elements at once, which you can see on the **Selected** line: the Problem, the Overview, and both sides of the cast. It fills the problem's spine and chooses a beat sheet in the same pass, so **StructureBeats** arrives alongside Premise and ProblemType rather than in a second run.
 
-![The GMC run on that problem: eight proposals headed 8: 0 free, 8 need review, covering both the protagonist's and the antagonist's goal, motivation, and conflict](../../media/Collaborator-Session-GMC.png)
+On the sample it proposes nine updates and eight of them already have your text, so those eight stop and ask. That is the slow path on purpose: eight replacements at once is exactly when you want to read before accepting.
+
+![The Problem Builder run: nine proposals headed 9: 1 free, 8 need review, covering Description, Method, Notes, Premise, ProblemType and the StructureBeats beat sheet](../../media/Collaborator-Session-ProblemBuilder.png)
 
 4. Use **Review Each** on at least one row. Read **Yours** against **Proposed**, then Accept or Skip deliberately.  
 5. Use **Accept Free Remaining** for anything left that does not need review.
 
-## 4. Check it landed
-
-Open that Problem in StoryCAD and look at the **Antagonist** tab. Whatever you accepted for Charlie Lacas is already sitting in Goal, Motivation, and Conflict.
-
-![The Problem form in StoryCAD, Antagonist tab, showing Charlie Lacas with the accepted Goal, Motivation, and Conflict text](../../media/Collaborator-Session-Problem.png)
+Return to StoryCAD and open that Problem. Anything you accepted is already sitting in its fields, and the beat sheet is on the **Structure** tab.
 
 **Craft check:** Can you state what the protagonist wants, why, and what opposes them? Same for the antagonist? See [Defining Problems](../../Writing%20with%20StoryCAD/Defining_Problems.html).
 
-## 5. Optional next beat
+## 4. Optional next beat
 
-If you have time, run one more. **Flaw and Backstory** on Charlie Lacas is a good second look: an antagonist is easier to write when you know what made him, and the workflow proposes the wound and the history together. **Scene Conflict** on one of the story's scenes works too, and behaves differently from the Overview workflows.
+If you have time, run one more. **Flaw and Backstory** on Charlie Lacas is a good second look: an antagonist is easier to write when you know what made him, and the workflow proposes the wound and the history together. **Scene Builder** on one of the story's scenes works too, and behaves differently from the Overview workflows.
 
 One more workflow is enough for a first session.
 
-## 6. Close the loop
+## 5. Close the loop
 
 **Exit** Collaborator. Everything you accepted is already in your outline, and anything you skipped never touched it.
 

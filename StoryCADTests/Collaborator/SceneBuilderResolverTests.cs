@@ -235,7 +235,7 @@ public class SceneBuilderResolverTests
     }
 
     [TestMethod]
-    public async Task ValidateSceneBuilderOwner_OrphanDoesNotUseBeatScenesEmptyCategoryMessage()
+    public async Task ValidateSceneBuilderOwner_Orphan_NoBail()
     {
         var api = CreateApi();
         await api.CreateEmptyOutline("Orphan run", "Author", "0");
@@ -249,8 +249,8 @@ public class SceneBuilderResolverTests
         var gathered = new Dictionary<string, StoryElement> { ["Scene"] = scene };
         var gate = runner.ValidateSceneBuilderOwner(gathered);
 
+        // An orphan Scene has no Problem map entry, which is not an empty category.
         Assert.IsNull(gate);
-        Assert.AreNotEqual("Set Problem Category before Scenes from Beats.", gate);
     }
 
     [TestMethod]
@@ -355,12 +355,14 @@ public class SceneBuilderResolverTests
     }
 
     [TestMethod]
-    public async Task SceneDevelopment_ScenePurpose_StaysUnclassified()
+    public async Task NonSceneBuilderWorkflow_ScenePurpose_StaysUnclassified()
     {
         var api = CreateApi();
         var fx = await BuildThreeSceneComplication(api);
         fx.Middle.ScenePurpose.Add("Reveal");
-        var runner = new WorkflowRunner(api.CurrentModel!, WorkflowRegistry.Get("SceneDevelopment")!, api);
+        // #116 Fill/Protect classification is SceneBuilder-only. #211 deleted SceneDevelopment,
+        // which used to stand in for "some other workflow"; StoryProblem serves the same purpose.
+        var runner = new WorkflowRunner(api.CurrentModel!, WorkflowRegistry.Get("StoryProblem")!, api);
         var pending = new PendingUpdate(
             "Scene",
             fx.Middle.Uuid,
@@ -369,7 +371,7 @@ public class SceneBuilderResolverTests
         var result = WorkflowResult.Succeeded();
         result.PendingUpdates.Add(pending);
 
-        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneDevelopment");
+        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "StoryProblem");
 
         Assert.AreEqual(UpdateKind.Unclassified, result.PendingUpdates[0].Kind);
     }
