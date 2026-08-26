@@ -17,7 +17,7 @@ namespace StoryCADTests.Collaborator;
 [TestClass]
 public class WorkflowStarServiceTests
 {
-    private static readonly string[] Defaults = { "Premise", "GMC", "SceneConflict" };
+    private static readonly string[] Defaults = { "Premise", "ProblemBuilder", "SceneBuilder" };
 
     private PreferenceService _preferences;
     private int _writeCount;
@@ -95,11 +95,11 @@ public class WorkflowStarServiceTests
     [TestMethod]
     public async Task SetStarredAsync_WithDuplicatesAndBlanks_StoresCleanOrderedLabels()
     {
-        await _service.SetStarredAsync(new[] { "GMC", "", "Premise", "GMC", null, "   " });
+        await _service.SetStarredAsync(new[] { "ProblemBuilder", "", "Premise", "ProblemBuilder", null, "   " });
 
         var starred = await _service.GetStarredAsync(Defaults);
 
-        CollectionAssert.AreEqual(new[] { "GMC", "Premise" }, starred.ToArray());
+        CollectionAssert.AreEqual(new[] { "ProblemBuilder", "Premise" }, starred.ToArray());
     }
 
     [TestMethod]
@@ -131,5 +131,96 @@ public class WorkflowStarServiceTests
 
         Assert.AreNotSame(first, second);
         Assert.AreNotSame(_preferences.Model.StarredCollaboratorWorkflows, first);
+    }
+
+    // ── #211 retired-star migration ───────────────────────────────────────────────────────────
+
+    private static readonly Dictionary<string, string> Retired = new()
+    {
+        ["GMC"] = "ProblemBuilder",
+        ["Structure"] = "ProblemBuilder",
+        ["SceneSummary"] = "SceneBuilder",
+        ["SceneConflict"] = "SceneBuilder"
+    };
+
+    /// <summary>
+    ///     The case on a real machine: seeded before #77 and #208, so four of seven stars name
+    ///     workflows #211 deletes. They must land on the workflows that absorbed them, collapsed
+    ///     to one star each, rather than vanishing from the band.
+    /// </summary>
+    [TestMethod]
+    public async Task GetStarredAsync_WithPreConsolidationStars_MapsThemToReplacements()
+    {
+        _preferences.Model.CollaboratorStarDefaultsApplied = true;
+        _preferences.Model.CollaboratorStarMigrationVersion = 0;
+        _preferences.Model.StarredCollaboratorWorkflows = new List<string>
+        {
+            "Premise", "StoryProblem", "GMC", "Structure", "StoryFunction", "SceneSummary", "SceneConflict"
+        };
+
+        var starred = await _service.GetStarredAsync(Defaults, Retired, 1);
+
+        CollectionAssert.AreEqual(
+            new[] { "Premise", "StoryProblem", "ProblemBuilder", "StoryFunction", "SceneBuilder" },
+            starred.ToArray());
+        Assert.AreEqual(1, _preferences.Model.CollaboratorStarMigrationVersion);
+    }
+
+    [TestMethod]
+    public async Task GetStarredAsync_AfterMigrating_DoesNotRunAgain()
+    {
+        _preferences.Model.CollaboratorStarDefaultsApplied = true;
+        _preferences.Model.CollaboratorStarMigrationVersion = 0;
+        _preferences.Model.StarredCollaboratorWorkflows = new List<string> { "GMC" };
+
+        await _service.GetStarredAsync(Defaults, Retired, 1);
+        var writesAfterFirst = _writeCount;
+
+        // The user then unstars everything. A second call must not re-migrate or re-seed.
+        await _service.SetStarredAsync(new string[0]);
+        var starred = await _service.GetStarredAsync(Defaults, Retired, 1);
+
+        Assert.AreEqual(0, starred.Count, "an empty set the user chose stays empty");
+        Assert.IsTrue(_writeCount > writesAfterFirst, "SetStarredAsync persists");
+    }
+
+    [TestMethod]
+    public async Task GetStarredAsync_WhenNothingRetired_LeavesTheSetAloneButRecordsTheVersion()
+    {
+        _preferences.Model.CollaboratorStarDefaultsApplied = true;
+        _preferences.Model.CollaboratorStarMigrationVersion = 0;
+        _preferences.Model.StarredCollaboratorWorkflows = new List<string> { "Premise", "SceneBuilder" };
+
+        var starred = await _service.GetStarredAsync(Defaults, Retired, 1);
+
+        CollectionAssert.AreEqual(new[] { "Premise", "SceneBuilder" }, starred.ToArray());
+        Assert.AreEqual(1, _preferences.Model.CollaboratorStarMigrationVersion,
+            "the version must advance even when no label changed, or it migrates on every launch");
+    }
+
+    [TestMethod]
+    public async Task GetStarredAsync_OnFirstRun_SeedsAtTheCurrentMigrationVersion()
+    {
+        var starred = await _service.GetStarredAsync(Defaults, Retired, 1);
+
+        CollectionAssert.AreEqual(Defaults, starred.ToArray());
+        Assert.AreEqual(1, _preferences.Model.CollaboratorStarMigrationVersion,
+            "a set seeded from today's defaults names nothing retired");
+    }
+
+    /// <summary>
+    ///     A retired label with no replacement listed is left where it is. The menu already
+    ///     ignores what it cannot resolve, so a no-op beats inventing a destination.
+    /// </summary>
+    [TestMethod]
+    public async Task GetStarredAsync_WithUnmappedLabel_LeavesItInPlace()
+    {
+        _preferences.Model.CollaboratorStarDefaultsApplied = true;
+        _preferences.Model.CollaboratorStarMigrationVersion = 0;
+        _preferences.Model.StarredCollaboratorWorkflows = new List<string> { "SomeWithdrawnWorkflow", "GMC" };
+
+        var starred = await _service.GetStarredAsync(Defaults, Retired, 1);
+
+        CollectionAssert.AreEqual(new[] { "SomeWithdrawnWorkflow", "ProblemBuilder" }, starred.ToArray());
     }
 }

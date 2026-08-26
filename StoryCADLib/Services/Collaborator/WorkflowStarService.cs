@@ -47,23 +47,89 @@ public class WorkflowStarService
     ///     The default starred set, supplied by the caller because the workflow registry lives in
     ///     CollaboratorLib and StoryCADLib does not reference it.
     /// </param>
-    public async Task<IReadOnlyList<string>> GetStarredAsync(IEnumerable<string> defaultLabels)
+    /// <param name="retiredReplacements">
+    ///     Retired workflow label to the workflow that absorbed it, from the same registry and for
+    ///     the same reason. Omit to skip the migration.
+    /// </param>
+    /// <param name="migrationVersion">
+    ///     The registry's current star-migration version. When the stored version is behind it,
+    ///     retired labels are rewritten once and the stored version catches up.
+    /// </param>
+    public async Task<IReadOnlyList<string>> GetStarredAsync(
+        IEnumerable<string> defaultLabels,
+        IReadOnlyDictionary<string, string> retiredReplacements = null,
+        int migrationVersion = 0)
     {
         var model = _preferenceService.Model;
         model.StarredCollaboratorWorkflows ??= new List<string>();
 
-        if (model.CollaboratorStarDefaultsApplied)
+        if (!model.CollaboratorStarDefaultsApplied)
         {
+            model.StarredCollaboratorWorkflows = Normalize(defaultLabels);
+            model.CollaboratorStarDefaultsApplied = true;
+            // A set seeded from today's defaults names no retired workflow, so it starts current
+            // rather than taking a pointless trip through the migration on the next launch.
+            model.CollaboratorStarMigrationVersion = migrationVersion;
+            await PersistAsync(model);
+            _log?.Log(LogLevel.Info,
+                $"Seeded {model.StarredCollaboratorWorkflows.Count} default starred Collaborator workflows.");
+
             return model.StarredCollaboratorWorkflows.ToList();
         }
 
-        model.StarredCollaboratorWorkflows = Normalize(defaultLabels);
-        model.CollaboratorStarDefaultsApplied = true;
-        await PersistAsync(model);
-        _log?.Log(LogLevel.Info,
-            $"Seeded {model.StarredCollaboratorWorkflows.Count} default starred Collaborator workflows.");
+        if (model.CollaboratorStarMigrationVersion < migrationVersion)
+        {
+            await MigrateRetiredStarsAsync(model, retiredReplacements, migrationVersion);
+        }
 
         return model.StarredCollaboratorWorkflows.ToList();
+    }
+
+    /// <summary>
+    ///     Rewrites stars naming a retired workflow to the one that absorbed it, once. Without
+    ///     this a user seeded before a consolidation keeps labels that no longer resolve; the
+    ///     menu drops them silently, so a merge reads as losing stars. Runs even when it changes
+    ///     nothing, because raising the stored version is what stops it running again.
+    /// </summary>
+    private async Task MigrateRetiredStarsAsync(
+        PreferencesModel model,
+        IReadOnlyDictionary<string, string> retiredReplacements,
+        int migrationVersion)
+    {
+        var before = model.StarredCollaboratorWorkflows;
+        var mapped = new List<string>(before.Count);
+        var rewrote = 0;
+
+        foreach (var label in before)
+        {
+            // A retired label with no replacement listed is left alone: the menu already ignores
+            // what it cannot resolve, and inventing a destination would be worse than a no-op.
+            if (retiredReplacements != null
+                && !string.IsNullOrWhiteSpace(label)
+                && retiredReplacements.TryGetValue(label, out var replacement))
+            {
+                mapped.Add(replacement);
+                rewrote++;
+            }
+            else
+            {
+                mapped.Add(label);
+            }
+        }
+
+        // Normalize collapses the duplicates the mapping creates: four Problem workflows starred
+        // separately become one ProblemBuilder star, keeping first-seen order.
+        model.StarredCollaboratorWorkflows = Normalize(mapped);
+        model.CollaboratorStarMigrationVersion = migrationVersion;
+
+        if (rewrote > 0)
+        {
+            _log?.Log(LogLevel.Info,
+                $"Migrated {rewrote} starred Collaborator workflow label(s) to their replacements; " +
+                $"{model.StarredCollaboratorWorkflows.Count} starred after merge.");
+        }
+
+        await PersistAsync(model);
     }
 
     /// <summary>

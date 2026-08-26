@@ -9,7 +9,8 @@ namespace StoryCADTests.Collaborator;
 /// <summary>
 ///     Collaborator #77 step 6. ProblemBuilder needs ProblemCategory set: it picks the beat
 ///     sheet class. Nothing sets the value on a ProblemBuilder run, so the user sets it first.
-///     Unlike BeatScenes, ProblemBuilder runs on the Story Problem too.
+///     ProblemBuilder runs on the Story Problem too; the BeatScenes gate that refused it
+///     was deleted with that workflow in #211.
 /// </summary>
 [TestClass]
 public class ProblemCategoryGateTests

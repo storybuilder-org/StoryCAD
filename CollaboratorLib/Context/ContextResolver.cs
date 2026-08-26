@@ -8,9 +8,12 @@ namespace CollaboratorLib.Context;
 /// </summary>
 public class ContextResolver
 {
+    // #211 removed GMC, the only registered member. "Critique" has never been registered in
+    // WorkflowRegistry or the Worker table, so ContextSpec.Full is unreachable until some
+    // workflow named here is registered. ProblemBuilder, which absorbed GMC in #77, was not
+    // on this list and keeps the Problem default it shipped with.
     private static readonly HashSet<string> FullContextWorkflows = new(StringComparer.OrdinalIgnoreCase)
     {
-        "GMC",
         "Critique"
     };
 

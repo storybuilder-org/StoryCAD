@@ -62,7 +62,7 @@ public class SceneCreateCapabilityTests
     [TestMethod]
     public void ApplyBeatSheetMerge_WorkflowThatDoesNotCreateScenes_CreatesNothing()
     {
-        var workflow = new Workflow("Structure", "Structure", "test", StoryItemType.Problem);
+        var workflow = new Workflow("NoCreate", "No Create", "test", StoryItemType.Problem);
         var (model, problem, runner) = Arrange(workflow);
 
         runner.ApplyBeatSheetMerge(
@@ -75,13 +75,13 @@ public class SceneCreateCapabilityTests
     }
 
     [TestMethod]
-    public void BeatScenes_StillDeclaresTheCapability()
+    public void RegisteredProblemBuilder_DeclaresTheCapability()
     {
-        var beatScenes = WorkflowRegistry.All
-            .FirstOrDefault(w => w.Label == "BeatScenes");
+        var problemBuilder = WorkflowRegistry.All
+            .FirstOrDefault(w => w.Label == "ProblemBuilder");
 
-        Assert.IsNotNull(beatScenes, "BeatScenes must stay registered for A:B");
-        Assert.IsTrue(beatScenes.CreatesScenesForBeats,
-            "the label gate moved to a flag; BeatScenes must keep creating Scenes");
+        Assert.IsNotNull(problemBuilder, "ProblemBuilder is the surviving Problem surface");
+        Assert.IsTrue(problemBuilder.CreatesScenesForBeats,
+            "#211 deleted BeatScenes; ProblemBuilder carries scene creation on the flag");
     }
 }

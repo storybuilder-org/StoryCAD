@@ -26,9 +26,9 @@ StoryCAD’s manual already teaches the craft spine: idea and premise, problems,
 | Craft question | Learn more in StoryCAD | Typical Collaborator workflow(s) |
 |----------------|------------------------|----------------------------------|
 | What’s my idea, concept, or premise? | [Story Idea, Concept, and Premise](../Writing%20with%20StoryCAD/Story_Idea_Concept_and_Premise.html) | Premise; Story Form (genre and story type) |
-| What’s the main story problem? | [Defining Problems](../Writing%20with%20StoryCAD/Defining_Problems.html), [Problem and Character Development](../Writing%20with%20StoryCAD/Problem_and_Character_Development.html) | Story Problem; Goal / Motivation / Conflict (GMC) |
+| What’s the main story problem? | [Defining Problems](../Writing%20with%20StoryCAD/Defining_Problems.html), [Problem and Character Development](../Writing%20with%20StoryCAD/Problem_and_Character_Development.html) | Story Problem; Problem Builder |
 | Outer want vs inner need? | [Defining Problems](../Writing%20with%20StoryCAD/Defining_Problems.html) (outer and inner problems) | Inner and Outer Problems |
-| How is the story shaped? | [Plotting with StoryCAD](../Writing%20with%20StoryCAD/Plotting_with_StoryCAD.html), Overview Structure | Problem Structure |
+| How is the story shaped? | [Plotting with StoryCAD](../Writing%20with%20StoryCAD/Plotting_with_StoryCAD.html), Overview Structure | Problem Builder (it picks the beat sheet) |
 | Who is this character? | [Defining Characters](../Writing%20with%20StoryCAD/Defining_Characters.html) | Character Story Function; Flaw and Backstory; Define Character |
 | What happens in this scene? | [Defining Scenes](../Writing%20with%20StoryCAD/Defining_Scenes.html), [Plotting in Scenes](../Writing%20with%20StoryCAD/Plotting_in_Scenes.html) | Scene Builder |
 
@@ -40,7 +40,7 @@ A useful order for learning fiction structure is roughly:
 
 **Idea → Premise → Story Problem → GMC → Characters → Structure → Scenes**
 
-That is also a sensible order for Collaborator. You do not have to follow it, but jumping straight to scene work with an empty Overview usually produces thin results. Craft first, then tool.
+Collaborator walks the same order with fewer stops: Problem Builder does the GMC and Structure steps in one run, and Scene Builder does the scene work. You do not have to follow it, but jumping straight to scene work with an empty Overview usually produces thin results. Craft first, then tool.
 
 For broader craft reading beyond this manual, see [StoryBuilder Resources](https://storybuilder.org/resources/) and [Learn](https://storybuilder.org/learn/).
 

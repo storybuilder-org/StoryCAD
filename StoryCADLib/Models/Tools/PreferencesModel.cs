@@ -56,6 +56,7 @@ public class PreferencesModel : ObservableObject
         StoreUserGuid = string.Empty;
         StarredCollaboratorWorkflows = new List<string>();
         CollaboratorStarDefaultsApplied = false;
+        CollaboratorStarMigrationVersion = 0;
     }
 
     #endregion
@@ -370,6 +371,20 @@ public class PreferencesModel : ObservableObject
     [JsonInclude]
     [JsonPropertyName("CollaboratorStarDefaultsApplied")]
     public bool CollaboratorStarDefaultsApplied { get; set; }
+
+    /// <summary>
+    ///     How far the stored stars have been carried forward across workflow consolidations.
+    ///     Seeding happens once (<see cref="CollaboratorStarDefaultsApplied" />) and the stored
+    ///     list wins afterwards, so a user seeded before a consolidation keeps stars naming
+    ///     workflows that were later merged away. Those labels stop resolving and their rows
+    ///     simply vanish from the band, which reads as losing stars rather than as the merge it
+    ///     was. Collaborator #211: when this is below the registry's migration version, each
+    ///     retired label is rewritten to the workflow that absorbed it, once, and this is raised.
+    ///     Zero for every file written before that migration existed.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("CollaboratorStarMigrationVersion")]
+    public int CollaboratorStarMigrationVersion { get; set; }
 
     #endregion
 }
