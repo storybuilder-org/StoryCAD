@@ -555,6 +555,67 @@ public class BackendTests
 
     #endregion
 
+    #region BeginStartupRecording Tests
+
+    /// <summary>
+    ///     Verifies BeginStartupRecording returns while the backend is still unanswered.
+    ///     App.OnLaunched used to await StartupRecording before MainWindow.Activate, so a
+    ///     stalled backend kept the app off screen for the full MySQL timeout.
+    /// </summary>
+    [TestMethod]
+    public async Task BeginStartupRecording_WhenBackendStalls_ReturnsWithoutWaiting()
+    {
+        // Arrange — a configured backend whose message fetch never answers until released.
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("test-connection");
+        var gate = new TaskCompletionSource();
+        testSqlIo.GetUnreadMessagesGate = gate;
+
+        // Steady-state launch: nothing to re-post, so FetchUnreadMessages is the only work.
+        preferenceService.Model.PreferencesInitialized = true;
+        preferenceService.Model.RecordPreferencesStatus = true;
+        preferenceService.Model.RecordVersionStatus = true;
+        preferenceService.Model.Version = appState.Version;
+        preferenceService.Model.UserId = 1;
+
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        // Act
+        backendService.BeginStartupRecording();
+
+        // Assert — control is back here while the backend is still hanging.
+        Assert.IsFalse(backendService.StartupRecordingTask.IsCompleted,
+            "BeginStartupRecording must not wait on the backend");
+
+        gate.SetResult();
+        await backendService.StartupRecordingTask;
+
+        Assert.IsTrue(backendService.StartupRecordingTask.IsCompletedSuccessfully,
+            "StartupRecordingTask should complete once the backend answers");
+        Assert.AreEqual(1, testSqlIo.GetUnreadMessagesCalls.Count,
+            "The deferred work should still have run");
+    }
+
+    /// <summary>
+    ///     Verifies a consumer awaiting StartupRecordingTask outside the App startup
+    ///     path never blocks.
+    /// </summary>
+    [TestMethod]
+    public void StartupRecordingTask_BeforeBegin_IsAlreadyComplete()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var backendService = new BackendService(testLogger, appState, preferenceService, new TestMySqlIo());
+
+        Assert.IsTrue(backendService.StartupRecordingTask.IsCompleted);
+    }
+
+    #endregion
+
     #region StartupRecording Retry Condition Tests
 
     /// <summary>
@@ -957,11 +1018,21 @@ public class TestMySqlIo : IMySqlIo
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    ///     When set, GetUnreadMessages blocks until released, standing in for a stalled backend.
+    /// </summary>
+    public TaskCompletionSource GetUnreadMessagesGate { get; set; }
+
     // Messaging
     public Task<List<UserMessage>> GetUnreadMessages(int userId)
     {
         GetUnreadMessagesCalls.Add(userId);
         if (ExceptionToThrow != null) throw ExceptionToThrow;
+        if (GetUnreadMessagesGate != null)
+        {
+            return GetUnreadMessagesGate.Task.ContinueWith(_ => GetUnreadMessagesReturnValue);
+        }
+
         return Task.FromResult(GetUnreadMessagesReturnValue);
     }
 

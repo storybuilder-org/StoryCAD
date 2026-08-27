@@ -273,7 +273,9 @@ public partial class App : Application
             }
         }
 
-        await Ioc.Default.GetService<BackendService>()!.StartupRecording();
+        // Awaiting this held MainWindow.Activate below until MySQL answered. Shell awaits
+        // StartupRecordingTask before it reads the results.
+        Ioc.Default.GetService<BackendService>()!.BeginStartupRecording();
         Ioc.Default.GetService<IUsageTrackingService>()?.StartSession();
         ConfigureNavigation();
 

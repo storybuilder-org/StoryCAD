@@ -62,6 +62,23 @@ public class BackendService
     public IReadOnlyList<UserMessage> UnreadMessages { get; private set; } = Array.Empty<UserMessage>();
 
     /// <summary>
+    ///     Completes when BeginStartupRecording's work has finished. Consumers of its side
+    ///     effects — UnreadMessages, AppState.LoadedWithVersionChange — await this rather
+    ///     than the window waiting on the network. Already complete until started.
+    /// </summary>
+    public Task StartupRecordingTask { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    ///     Starts StartupRecording off the launch path, publishing it as
+    ///     StartupRecordingTask. StartupRecording handles its own exceptions,
+    ///     so the task does not fault.
+    /// </summary>
+    public void BeginStartupRecording()
+    {
+        StartupRecordingTask = StartupRecording();
+    }
+
+    /// <summary>
     ///     True when a MySqlException means "the backend is unreachable" rather than
     ///     "the backend rejected us": 1042 the server name did not resolve (the driver
     ///     wraps an ArgumentException, "The host name or IP address is invalid"),
@@ -424,6 +441,16 @@ public class BackendService
 
             // Build connection string and pass to DAL
             var connectionString = keys.CONNECTION + sslCa;
+
+            // MySql.Data defaults to 15s per connect and opens one per operation, stalling
+            // both startup and the EndSession flush on shutdown. The secret wins if it sets one.
+            if (!connectionString.Contains("connect timeout", StringComparison.OrdinalIgnoreCase)
+                && !connectionString.Contains("connectiontimeout", StringComparison.OrdinalIgnoreCase)
+                && !connectionString.Contains("connection timeout", StringComparison.OrdinalIgnoreCase))
+            {
+                connectionString += "Connection Timeout=5;";
+            }
+
             _sqlIo.SetConnectionString(connectionString);
 
             _logService.Log(LogLevel.Info, "Backend connection configured successfully");

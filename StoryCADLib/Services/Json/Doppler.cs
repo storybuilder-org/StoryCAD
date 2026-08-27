@@ -13,7 +13,9 @@ public class Doppler
     /// </summary>
     public static bool DopplerConnection;
 
-    private static HttpClient client = new();
+    // Awaited before MainWindow is created, so the 100s default held the app off screen on
+    // a stalled link. Healthy fetches are ~0.3s; on timeout we start as if offline.
+    private static HttpClient client = new() { Timeout = TimeSpan.FromSeconds(5) };
 
     [JsonPropertyName("APIKEY")] public string APIKEY { get; set; }
 
