@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services;
 using StoryCADLib.Services.Collaborator;
+using StoryCollaborator.Workflows;
 
 #nullable disable
 
@@ -222,5 +223,56 @@ public class WorkflowStarServiceTests
         var starred = await _service.GetStarredAsync(Defaults, Retired, 1);
 
         CollectionAssert.AreEqual(new[] { "SomeWithdrawnWorkflow", "ProblemBuilder" }, starred.ToArray());
+    }
+
+    /// <summary>
+    ///     Collaborator #224, against the real registry constants rather than a fixture. A user
+    ///     who curated stars after #211 sits at migration version 1 and can hold both Setting
+    ///     labels. Both must land on SettingBuilder, collapsed to one star, and the stored
+    ///     version must reach the registry's, or the rewrite runs again on every launch.
+    /// </summary>
+    [TestMethod]
+    public async Task GetStarredAsync_WithBothSettingStars_CollapsesThemToSettingBuilder()
+    {
+        _preferences.Model.CollaboratorStarDefaultsApplied = true;
+        _preferences.Model.CollaboratorStarMigrationVersion = 1;
+        _preferences.Model.StarredCollaboratorWorkflows = new List<string>
+        {
+            "Premise", "SettingTimeSpace", "SceneBuilder", "Sensations"
+        };
+
+        var starred = await _service.GetStarredAsync(
+            WorkflowRegistry.DefaultStarredLabels,
+            WorkflowRegistry.RetiredWorkflowReplacements,
+            WorkflowRegistry.StarMigrationVersion);
+
+        CollectionAssert.AreEqual(
+            new[] { "Premise", "SettingBuilder", "SceneBuilder" },
+            starred.ToArray(),
+            string.Join(", ", starred));
+        Assert.AreEqual(WorkflowRegistry.StarMigrationVersion,
+            _preferences.Model.CollaboratorStarMigrationVersion);
+    }
+
+    /// <summary>
+    ///     The same user, one launch later. Nothing may change a second time.
+    /// </summary>
+    [TestMethod]
+    public async Task GetStarredAsync_AfterTheSettingMigration_IsStable()
+    {
+        _preferences.Model.CollaboratorStarDefaultsApplied = true;
+        _preferences.Model.CollaboratorStarMigrationVersion = 1;
+        _preferences.Model.StarredCollaboratorWorkflows = new List<string> { "Sensations" };
+
+        await _service.GetStarredAsync(
+            WorkflowRegistry.DefaultStarredLabels,
+            WorkflowRegistry.RetiredWorkflowReplacements,
+            WorkflowRegistry.StarMigrationVersion);
+        var starred = await _service.GetStarredAsync(
+            WorkflowRegistry.DefaultStarredLabels,
+            WorkflowRegistry.RetiredWorkflowReplacements,
+            WorkflowRegistry.StarMigrationVersion);
+
+        CollectionAssert.AreEqual(new[] { "SettingBuilder" }, starred.ToArray());
     }
 }
