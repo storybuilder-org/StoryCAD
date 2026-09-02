@@ -41,8 +41,9 @@ namespace StoryCollaborator.Workflows
         /// <see cref="RetiredWorkflowReplacements"/>, whenever a consolidation deletes a workflow
         /// a user could have starred. WorkflowStarService compares it against the number in the
         /// user's preferences and migrates once.
+        /// #224 raised this to 2 for the two Setting labels SettingBuilder absorbed.
         /// </summary>
-        public const int StarMigrationVersion = 1;
+        public const int StarMigrationVersion = 2;
 
         /// <summary>
         /// Deleted workflow label to the workflow that absorbed its job (#211). A user who
@@ -63,7 +64,10 @@ namespace StoryCollaborator.Workflows
                 ["CastSceneRoles"] = "SceneBuilder",
                 ["SceneDevelopment"] = "SceneBuilder",
                 ["SceneConflict"] = "SceneBuilder",
-                ["Sequel"] = "SceneBuilder"
+                ["Sequel"] = "SceneBuilder",
+                // #224: SettingBuilder is the one Setting surface.
+                ["SettingTimeSpace"] = "SettingBuilder",
+                ["Sensations"] = "SettingBuilder"
             };
 
         /// <summary>
@@ -666,38 +670,52 @@ namespace StoryCollaborator.Workflows
                         ExampleLists = new List<string> { "WorldType", "SystemType" }
                     }) { PrimaryElementType = StoryItemType.StoryWorld },
 
-                // === Setting Workflows (scene-specific) ===
+                // === Setting Workflows ===
+                // #224: one Setting-primary surface. SettingTimeSpace and Sensations
+                // merged. Sensations read seven properties SettingTimeSpace writes, from
+                // the stored element, so the sensory pass only saw values the writer had
+                // already accepted from an earlier run. One pass makes that order
+                // internal (ADR-008).
+                //
+                // Props and Notes gain a writer here. Nothing wrote Props while
+                // Sensations consumed it, so the objects that make the sounds and the
+                // textures were only ever the writer's own.
+                //
+                // exampleLists carries Locale only. SettingPage.xaml binds Locale and Season
+                // to ComboBox IsEditable="True", so both are suggestion lists rather than
+                // closed lists, and the prompt Writes both. Season is deliberately NOT
+                // declared: three of its seven Lists.json members carry a classifying
+                // parenthetical, and Season is a short field where one member is the whole
+                // answer, so injecting the list made live runs open the property with the
+                // catalog label ("Winter (Bare). The facility leans on closed doors...").
+                // An explicit prohibition cut that but did not close it. Neither merged
+                // workflow declared a list, and both wrote sound Seasons without one.
                 new Workflow(
-                    "SettingTimeSpace", "Setting in Time and Space",
-                    "Define a setting's location, time period, season, weather, and atmospheric conditions.",
+                    "SettingBuilder", "Setting Builder",
+                    "Build a Setting: time, place, conditions, props, and the four senses.",
                     StoryItemType.Setting,
                     explanation: "Setting is more than backdrop—it shapes mood, creates obstacles, and reflects theme. " +
-                                "This workflow helps you establish where and when your scene takes place, from broad " +
-                                "period and locale down to specific weather and lighting that affect your characters.",
+                                "This workflow places your setting in time and space, names the objects a scene can " +
+                                "reach for, and then works through each sense in turn. The senses read the place the " +
+                                "same run just built, so light, weather and props are already on the page when the " +
+                                "sensory detail is written. Smell is particularly powerful—primitive and emotional, " +
+                                "it can pull readers deep into your story world.",
                     outputProperties: new List<PropertySpec>
                     {
+                        new PropertySpec("Period"),
                         new PropertySpec("Locale"),
                         new PropertySpec("Season"),
-                        new PropertySpec("Period"),
-                        new PropertySpec("Lighting"),
                         new PropertySpec("Weather"),
-                        new PropertySpec("Temperature")
-                    }),
-                new Workflow(
-                    "Sensations", "Sensory Details",
-                    "Develop the sensory details—sights, sounds, touch, smell, and taste—that bring a setting to life.",
-                    StoryItemType.Setting,
-                    explanation: "Readers experience your setting through character senses. This workflow prompts you " +
-                                "to explore each sense, finding specific details that immerse readers in the scene. " +
-                                "Smell is particularly powerful—primitive and emotional, it can pull readers deep into " +
-                                "your story world.",
-                    outputProperties: new List<PropertySpec>
-                    {
+                        new PropertySpec("Lighting"),
+                        new PropertySpec("Temperature"),
+                        new PropertySpec("Props"),
                         new PropertySpec("Sights"),
                         new PropertySpec("Sounds"),
                         new PropertySpec("Touch"),
-                        new PropertySpec("SmellTaste")
-                    }),
+                        new PropertySpec("SmellTaste"),
+                        new PropertySpec("Notes")
+                    },
+                    exampleLists: new List<string> { "Locale" }),
                 // SettingCreateImage removed; preserved on branch issue-76-image-workflows (issue #76).
 
                 // === Scene Workflows ===

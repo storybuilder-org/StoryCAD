@@ -52,7 +52,8 @@ public static class GapWorkflowOwnership
             (StoryItemType.Character, "BackStory") => new[] { "FlawBackstory" },
             (StoryItemType.Character, "Name") => Array.Empty<string>(),
 
-            (StoryItemType.Setting, "Description") => new[] { "SettingTimeSpace" },
+            // #224: SettingBuilder absorbed SettingTimeSpace and Sensations.
+            (StoryItemType.Setting, "Description") => new[] { "SettingBuilder" },
             (StoryItemType.Setting, "Name") => Array.Empty<string>(),
 
             (StoryItemType.Scene, "Description") => new[] { "SceneBuilder" },

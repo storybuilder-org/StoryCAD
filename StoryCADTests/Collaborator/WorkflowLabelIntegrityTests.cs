@@ -80,10 +80,16 @@ public class WorkflowLabelIntegrityTests
     {
         // #211. Re-adding one of these means re-adding it to the Worker table too, or the run
         // fails at the proxy rather than in the menu.
+        //
+        // #224 added the two Setting labels. They matter more than the rest: both are keys in
+        // RetiredWorkflowReplacements, so re-registering one without removing that key would
+        // let MigrateRetiredStarsAsync rewrite a user's live star onto SettingBuilder while
+        // the run itself 404s at the proxy.
         foreach (var label in new[]
                  {
                      "ConflictBuilder", "GMC", "Structure", "BeatScenes", "SceneSummary",
-                     "CastSceneRoles", "SceneDevelopment", "SceneConflict", "Sequel"
+                     "CastSceneRoles", "SceneDevelopment", "SceneConflict", "Sequel",
+                     "SettingTimeSpace", "Sensations"
                  })
         {
             Assert.IsNull(WorkflowRegistry.Get(label), label);
