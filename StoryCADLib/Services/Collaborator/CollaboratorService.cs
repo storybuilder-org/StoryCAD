@@ -117,11 +117,12 @@ public class CollaboratorService
             // Create a fresh Collaborator instance for this session (disposed on close).
             _collaboratorInterface = _collaboratorFactory();
 
-            // Seed settings from persisted preferences before opening. ShowCostDetails is the
-            // only member that survives a restart; the rest are session-only and start at
-            // their defaults, which is the behavior that already shipped.
+            // Seed settings from persisted preferences before opening. ShowCostDetails and
+            // Terseness survive a restart (Collaborator #49); the rest are session-only and
+            // start at their defaults.
             var settings = _collaboratorInterface.GetSettings() ?? CollaboratorSettings.Default;
             settings.ShowCostDetails = _preferenceService.Model.ShowCollaboratorCost;
+            settings.Terseness = _preferenceService.Model.CollaboratorTerseness;
             _collaboratorInterface.SetSettings(settings);
 
             var filePath = _appState.CurrentDocument?.FilePath ?? string.Empty;

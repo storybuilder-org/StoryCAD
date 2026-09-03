@@ -766,8 +766,7 @@ public class Collaborator : ICollaborator
     public void SetSettings(CollaboratorSettings settings)
     {
         _settings = settings ?? CollaboratorSettings.Default;
-        _logger?.LogInformation("Settings updated: Terseness={Terseness}, ContentPreservation={Preservation}",
-            _settings.Terseness, _settings.ContentPreservation);
+        _logger?.LogInformation("Settings updated: Terseness={Terseness}", _settings.Terseness);
     }
 
     /// <summary>

@@ -2306,28 +2306,20 @@ namespace StoryCollaborator
         }
 
         /// <summary>
-        /// Applies user settings to the prompt as instructions.
+        /// Applies user settings to the workflow args.
+        ///
+        /// Terseness rides as its own arg (Collaborator #49). The Worker's coach system
+        /// message reads it and states the tier in the CONCISE / BALANCED / DETAILED tokens
+        /// the templates' length tables already key on, so the wire value is the enum name
+        /// and nothing here expands it into prose. Genre and story-form preferences still
+        /// render into the UserSettings string the Worker places in a subordinate block.
+        /// ContentPreservation is gone: the coach system message owns what may be revised.
         /// </summary>
         internal void ApplySettings(Dictionary<string, string> args)
         {
+            args["Terseness"] = _settings.Terseness.ToString();
+
             var instructions = new List<string>();
-
-            instructions.Add(_settings.Terseness switch
-            {
-                TersenessLevel.Concise => "Be concise. Brief responses only.",
-                TersenessLevel.Detailed => "Provide detailed explanations with examples.",
-                _ => ""
-            });
-
-            instructions.Add(_settings.ContentPreservation switch
-            {
-                ContentPreservationLevel.Strict => "Preserve the user's exact wording. Only fill gaps.",
-                // The coach system message on the Worker forbids revising text that is
-                // already sound, and it outranks this string. Flexible widens what counts
-                // as worth proposing; it does not license the rewrite it used to promise.
-                ContentPreservationLevel.Flexible => "The writer welcomes suggestions on filled fields as well as blank ones.",
-                _ => ""
-            });
 
             if (!string.IsNullOrWhiteSpace(_settings.GenrePreferences))
                 instructions.Add($"The user prefers these genres: {_settings.GenrePreferences}");
@@ -2340,8 +2332,8 @@ namespace StoryCollaborator
             var result = string.Join(" ", instructions.Where(s => !string.IsNullOrEmpty(s)));
             args["UserSettings"] = result;
 
-            if (!string.IsNullOrEmpty(result))
-                _logger?.LogInformation("Applied settings: {Settings}", result);
+            _logger?.LogInformation("Applied settings: Terseness={Terseness}{Rest}",
+                args["Terseness"], string.IsNullOrEmpty(result) ? string.Empty : $"; {result}");
         }
 
         /// <summary>
