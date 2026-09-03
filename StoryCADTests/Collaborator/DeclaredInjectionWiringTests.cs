@@ -32,7 +32,7 @@ public class DeclaredInjectionWiringTests
         var api = CreateApi();
         api.CurrentModel = model;
         var args = new Dictionary<string, string>();
-        new WorkflowRunner(model, workflow, api).ApplyDeclaredInjections(args);
+        new WorkflowRunner(model, workflow, api).ApplyDeclaredInjections(args, new Dictionary<string, StoryElement>());
         return args;
     }
 

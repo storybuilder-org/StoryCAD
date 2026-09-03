@@ -55,6 +55,13 @@ namespace StoryCollaborator.Workflows
         /// </summary>
         public bool InjectsStockScenes { get; set; }
 
+        /// <summary>
+        /// Collaborator #217: inject the primary element's current beat sheet as CurrentBeats,
+        /// so the model returns that sheet's rows and leaves filled beats alone. "none" when the
+        /// element has no sheet.
+        /// </summary>
+        public bool InjectsCurrentBeats { get; set; }
+
         // Additional properties
         public StoryModel? Model { get; set; }
         public string Plugins { get; set; } = string.Empty;

@@ -34,7 +34,7 @@ Treat it as a starting point, not a rule. As you learn which workflows your writ
    Craft: [Defining Problems](../../Writing%20with%20StoryCAD/Defining_Problems.html)
 
 4. **Problem Builder**  
-   Goal, motivation, and conflict for both sides of that problem, then a beat sheet that fits it and scene stubs for the empty beats. Set Problem Category, Protagonist, and Antagonist on the Problem first: Problem Builder reads all three, and a blank category stops the run before it starts.  
+   Goal, motivation, and conflict for both sides of that problem, then a beat sheet that fits it. Scenes and problems you have not yet placed on any beat sheet go on its empty beats, and scene stubs fill the rest. Set Problem Category, Protagonist, and Antagonist on the Problem first: Problem Builder reads all three, and a blank category stops the run before it starts.  
    Craft: [Defining Problems](../../Writing%20with%20StoryCAD/Defining_Problems.html) (GMC), [Plotting with StoryCAD](../../Writing%20with%20StoryCAD/Plotting_with_StoryCAD.html)
 
 5. **Inner and Outer Problems**  
