@@ -172,6 +172,18 @@ public class CandidateSetTests
     }
 
     [TestMethod]
+    public void BuildWorkflowRequestBody_FreeElementsForLabelNotGathered_OffersNothing()
+    {
+        var (model, _, runner) = Arrange();
+        new SceneModel("Free", model, null);
+
+        var body = runner.BuildWorkflowRequestBody(new Dictionary<string, StoryElement>());
+
+        Assert.AreEqual(0, OfferedGuids(body, "SceneChoices").Count,
+            "rule 5 without a target is unsatisfiable, so the collection offers nothing rather than everything");
+    }
+
+    [TestMethod]
     public void BuildWorkflowRequestBody_CollectionWithoutFreeElementsFor_OffersEveryElement()
     {
         var model = new StoryModel();

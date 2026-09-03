@@ -78,13 +78,23 @@ public class DeclaredInjectionWiringTests
     }
 
     [TestMethod]
-    public void RegisteredProblemBuilder_InjectsAllThree()
+    public void RegisteredProblemBuilder_InjectsAllFour()
     {
         var registered = WorkflowRegistry.All.Single(w => w.Label == "ProblemBuilder");
-        var keys = Inject(registered).Keys.ToList();
+        var model = new StoryModel();
+        var api = CreateApi();
+        api.CurrentModel = model;
+        var problem = new ProblemModel("Under test", model, null);
+        var args = new Dictionary<string, string>();
+
+        // #217: CurrentBeats needs the gathered Problem; the other three do not.
+        new WorkflowRunner(model, registered, api).ApplyDeclaredInjections(
+            args, new Dictionary<string, StoryElement> { ["Problem"] = problem });
+        var keys = args.Keys.ToList();
 
         CollectionAssert.Contains(keys, "ConflictTaxonomy");
         CollectionAssert.Contains(keys, "BeatSheets");
         CollectionAssert.Contains(keys, "StockScenes");
+        CollectionAssert.Contains(keys, "CurrentBeats");
     }
 }

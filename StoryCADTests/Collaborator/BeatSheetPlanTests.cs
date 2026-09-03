@@ -113,7 +113,7 @@ public class BeatSheetPlanTests
         var text = runner.FormatBeatSheetDisplay(target.Uuid, proposal);
 
         Assert.AreEqual(
-            "6 beats: 1 kept, 1 bound, 1 new scenes, 1 empty, 1 refused, 1 dropped\n" +
+            "6 beats: 1 kept, 1 bound, 1 new scene, 1 empty, 1 refused, 1 dropped\n" +
             "1. Opening Image: keeps Kept\n" +
             "2. Theme Stated: binds Free (Scene)\n" +
             "3. Set-Up: new Scene \"Stub\"\n" +
@@ -167,16 +167,49 @@ public class BeatSheetPlanTests
         var (model, runner) = Arrange();
         var parent = new ProblemModel("Parent", model, null);
         var target = new ProblemModel("Target", model, null);
+        var sibling = new ProblemModel("Free sibling", model, null);
         parent.StructureBeats.Add(new StructureBeat("Act II", "") { Guid = target.Uuid });
         target.BoundStructure = parent.Uuid;
         target.StructureBeats.Add(new StructureBeat("Catalyst", ""));
+        target.StructureBeats.Add(new StructureBeat("Midpoint", ""));
         var result = new WorkflowResult();
 
-        runner.ApplyBeatSheetMerge(target.Uuid, new List<BeatInfo> { new("Catalyst", "", AssignedElement: parent.Uuid) }, result);
+        runner.ApplyBeatSheetMerge(target.Uuid, new List<BeatInfo>
+        {
+            new("Catalyst", "", AssignedElement: parent.Uuid),
+            new("Midpoint", "", AssignedElement: sibling.Uuid)
+        }, result);
 
         Assert.AreEqual(Guid.Empty, target.StructureBeats[0].Guid, "the parent is not bound below itself (rule 4)");
         Assert.AreEqual(Guid.Empty, parent.BoundStructure, "the parent keeps no sheet parent");
+        Assert.AreEqual(sibling.Uuid, target.StructureBeats[1].Guid,
+            "a free Problem outside the chain binds on the same subproblem (rule 3), so the refusal is the ancestor rule, not the old Story-Problem-only branch");
+        Assert.AreEqual(target.Uuid, sibling.BoundStructure);
         Assert.IsTrue(result.StatusMessages.Any(m => m.Contains("not in candidate set")));
+    }
+
+    [TestMethod]
+    public void FormatBeatSheetDisplay_DuplicateCandidate_NamesItAsAlreadyBound()
+    {
+        var (model, runner) = Arrange();
+        var target = new ProblemModel("Target", model, null);
+        var free = new SceneModel("Free", model, null);
+        target.StructureBeats.Add(new StructureBeat("Setup", ""));
+        target.StructureBeats.Add(new StructureBeat("Payoff", ""));
+        var proposal = new List<BeatInfo>
+        {
+            new("Setup", "", AssignedElement: free.Uuid),
+            new("Payoff", "", AssignedElement: free.Uuid)
+        };
+
+        var text = runner.FormatBeatSheetDisplay(target.Uuid, proposal);
+
+        Assert.AreEqual(
+            "2 beats: 0 kept, 1 bound, 0 new scenes, 0 empty, 1 refused\n" +
+            "1. Setup: binds Free (Scene)\n" +
+            "2. Payoff: Free is already bound on this sheet, stays empty",
+            text,
+            "the writer sees the Scene bound by name one line up, so the refusal names it rather than calling it a non-candidate");
     }
 
     [TestMethod]
@@ -199,6 +232,7 @@ public class BeatSheetPlanTests
 
         Assert.AreEqual(BeatRowOutcome.Bind, plan[0].Outcome);
         Assert.AreEqual(BeatRowOutcome.Refuse, plan[1].Outcome, "a sheet is a linear order; one placement per Scene");
+        Assert.AreEqual("Free", plan[1].ElementName, "a refused candidate carries its name; an outside-the-set GUID carries none");
         Assert.AreEqual(free.Uuid, target.StructureBeats[0].Guid);
         Assert.AreEqual(Guid.Empty, target.StructureBeats[1].Guid);
         Assert.IsTrue(result.StatusMessages.Any(m => m.Contains("already used on this sheet")));

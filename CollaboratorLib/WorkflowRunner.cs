@@ -324,8 +324,10 @@ namespace StoryCollaborator
                     }
                     else
                     {
-                        _logger?.LogWarning("{RequestName}: FreeElementsFor '{Label}' was not gathered; offering every element",
+                        // Rule 5 without a target is unsatisfiable; offer nothing rather than everything.
+                        _logger?.LogWarning("{RequestName}: FreeElementsFor '{Label}' was not gathered; offering nothing",
                             collection.RequestName, collection.FreeElementsFor);
+                        elements = new List<StoryElement>();
                     }
                 }
 
@@ -1751,8 +1753,8 @@ namespace StoryCollaborator
             // Drop rows start at the sheet's row count, so that count is the rows before them.
             var sheetRows = plan.Count - dropped;
             var sb = new System.Text.StringBuilder();
-            sb.Append(plan[0].InstallsBeat ? $"{plan.Count} new beats: " : $"{plan.Count} beats: ");
-            sb.Append($"{kept} kept, {bound} bound, {created} new scenes, {empty} empty");
+            sb.Append(plan.Count).Append(plan[0].InstallsBeat ? " new " : " ").Append(Plural(plan.Count, "beat")).Append(": ");
+            sb.Append($"{kept} kept, {bound} bound, {created} new {Plural(created, "scene")}, {empty} empty");
             if (refused > 0) sb.Append($", {refused} refused");
             if (dropped > 0) sb.Append($", {dropped} dropped");
 
@@ -1772,10 +1774,13 @@ namespace StoryCollaborator
                         sb.Append("new Scene \"").Append(row.ElementName).Append('"');
                         break;
                     case BeatRowOutcome.Refuse:
-                        sb.Append(row.ElementGuid).Append(" is not a candidate, stays empty");
+                        if (row.ElementName != null)
+                            sb.Append(row.ElementName).Append(" is already bound on this sheet, stays empty");
+                        else
+                            sb.Append(row.ElementGuid).Append(" is not a candidate, stays empty");
                         break;
                     case BeatRowOutcome.Drop:
-                        sb.Append("not applied, sheet has ").Append(sheetRows).Append(" rows");
+                        sb.Append("not applied, sheet has ").Append(sheetRows).Append(' ').Append(Plural(sheetRows, "row"));
                         break;
                     default:
                         sb.Append("stays empty");
@@ -1785,6 +1790,8 @@ namespace StoryCollaborator
 
             return sb.ToString();
         }
+
+        private static string Plural(int count, string noun) => count == 1 ? noun : noun + "s";
 
         private string ElementTypeNameOf(Guid element)
         {
@@ -1822,34 +1829,35 @@ namespace StoryCollaborator
 
             if (workflowModel.InjectsCurrentBeats)
             {
-                // The target is the gathered element of the workflow's primary type: the Problem
-                // the writer picked for ProblemBuilder. Absent, the Worker merges the placeholder
-                // to an empty string and the template falls back to the catalog sheet.
-                var target = gatheredElements.Values.FirstOrDefault(
-                    e => e != null && e.ElementType == workflowModel.PrimaryElementType);
-                if (target == null)
-                    _logger?.LogWarning("{Workflow}: no gathered {Type}; CurrentBeats not injected",
-                        workflowModel.Label, workflowModel.PrimaryElementType);
-                else
+                // The target is the gathered "Problem", the label the category gate and the
+                // request loop read. Absent, the Worker merges the placeholder to an empty
+                // string and the template falls back to the catalog sheet.
+                if (gatheredElements.TryGetValue("Problem", out var target) && target != null)
                     EnrichWithCurrentBeats(args, target.Uuid);
+                else
+                    _logger?.LogWarning("{Workflow}: no gathered Problem; CurrentBeats not injected",
+                        workflowModel.Label);
             }
         }
 
         /// <summary>
         /// Collaborator #217 section 5.4: the target Problem's sheet as it is now, so the model
         /// returns its rows (a custom sheet included) and leaves filled beats alone. The exact
-        /// text "none" when the Problem has no sheet.
+        /// text "none" when the Problem has no sheet. When the structure cannot be read the arg
+        /// stays unset: "none" would tell the model there is no sheet, while an empty merge
+        /// makes the template fall back to the catalog.
         /// </summary>
         internal void EnrichWithCurrentBeats(Dictionary<string, string> args, Guid targetProblem)
         {
             var structure = _storyApi.GetProblemStructure(targetProblem);
-            var beats = structure.IsSuccess
-                ? structure.Payload.Beats?.ToList()
-                    ?? new List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)>()
-                : new List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)>();
-
             if (!structure.IsSuccess)
-                _logger?.LogWarning("CurrentBeats: cannot load structure for {Problem}", targetProblem);
+            {
+                _logger?.LogWarning("CurrentBeats: cannot load structure for {Problem}; not injected", targetProblem);
+                return;
+            }
+
+            var beats = structure.Payload.Beats?.ToList()
+                ?? new List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)>();
 
             if (beats.Count == 0)
             {
@@ -2054,7 +2062,8 @@ namespace StoryCollaborator
                 // Collaborator #77: an empty beat takes an existing free element before a new Scene.
                 // A proposal may carry both; creating then would leave the real Scene orphaned and
                 // put a duplicate on the sheet.
-                if (assigned.HasValue && candidates.Contains(assigned.Value) && usedOnSheet.Add(assigned.Value))
+                bool isCandidate = assigned.HasValue && candidates.Contains(assigned.Value);
+                if (isCandidate && usedOnSheet.Add(assigned!.Value))
                 {
                     plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Bind,
                         ElementNameOf(assigned.Value), assigned.Value, installs));
@@ -2069,7 +2078,10 @@ namespace StoryCollaborator
 
                 if (assigned.HasValue)
                 {
-                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Refuse, null, assigned.Value, installs));
+                    // A named Refuse is a candidate an earlier row already bound (a sheet is a
+                    // linear order). An unnamed one is outside the set.
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Refuse,
+                        isCandidate ? ElementNameOf(assigned.Value) : null, assigned.Value, installs));
                     continue;
                 }
 
@@ -2105,7 +2117,6 @@ namespace StoryCollaborator
 
             var existingBeats = existingResult.Payload.Beats?.ToList()
                 ?? new List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)>();
-            var candidates = GetCandidates(problemUuid);
             var plan = PlanBeatSheetMerge(problemUuid, proposed);
 
             foreach (var row in plan)
@@ -2158,7 +2169,7 @@ namespace StoryCollaborator
                         CreateSceneStub(problemUuid, row.Index, beat, result);
                         break;
                     case BeatRowOutcome.Refuse:
-                        result.StatusMessages.Add(candidates.Contains(row.ElementGuid!.Value)
+                        result.StatusMessages.Add(row.ElementName != null
                             ? $"Beat {row.Index} assigned_element {row.ElementGuid} already used on this sheet; left unassigned"
                             : $"Beat {row.Index} assigned_element {row.ElementGuid} not in candidate set; left unassigned");
                         break;
@@ -2293,19 +2304,10 @@ namespace StoryCollaborator
 
         /// <summary>
         /// Trash: the node chain ends at the TrashCan root, the same test OutlineService makes
-        /// on its delete path. Walked here rather than through StoryNodeItem.RootNodeType so an
-        /// element with no parent node (a test-built one) logs nothing.
+        /// on its delete path. A deserialized element with no node is not trashed.
         /// </summary>
-        private static bool IsInTrash(StoryElement element)
-        {
-            var node = element.Node;
-            if (node == null)
-                return false;
-            var guard = 0;
-            while (node.Parent != null && ++guard < 1000)
-                node = node.Parent;
-            return node.Type == StoryItemType.TrashCan;
-        }
+        private static bool IsInTrash(StoryElement element) =>
+            element.Node != null && StoryNodeItem.RootNodeType(element.Node) == StoryItemType.TrashCan;
 
         private string ElementNameOf(Guid element)
         {

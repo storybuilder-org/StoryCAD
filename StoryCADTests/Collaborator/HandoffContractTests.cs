@@ -119,19 +119,4 @@ public class HandoffContractTests
         Assert.AreEqual(other.Uuid, problem.StructureBeats[0].Guid,
             "the Story Problem's beats may hold other Problems");
     }
-
-    [TestMethod]
-    public void StoryProblemCategory_ComparesIgnoringCase()
-    {
-        var (model, problem, runner) = Arrange("story problem");
-        var other = new ProblemModel("A complication", model, null);
-        problem.StructureBeats.Add(new StructureBeat("Act I", "setup"));
-
-        runner.ApplyBeatSheetMerge(problem.Uuid,
-            new List<BeatInfo> { new("Act I", "setup", AssignedElement: other.Uuid) },
-            new WorkflowResult());
-
-        Assert.AreEqual(other.Uuid, problem.StructureBeats[0].Guid,
-            "the handoff requires an ignore-case compare; do not repeat the Ordinal bug");
-    }
 }
