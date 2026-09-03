@@ -180,15 +180,6 @@ public sealed partial class WorkflowShell : Page
             Margin = new Thickness(0, 0, 0, 12)
         };
 
-        var preservationCombo = new ComboBox
-        {
-            Header = "Content Preservation",
-            ItemsSource = new[] { "Strict", "Balanced", "Flexible" },
-            SelectedIndex = (int)settings.ContentPreservation,
-            Width = 200,
-            Margin = new Thickness(0, 0, 0, 12)
-        };
-
         var genreTextBox = new TextBox
         {
             Header = "Genre Preferences (comma-separated)",
@@ -222,9 +213,9 @@ public sealed partial class WorkflowShell : Page
             Margin = new Thickness(0, 0, 0, 0)
         };
 
-        // The only setting here that persists across sessions: it is seeded from
-        // PreferencesModel.ShowCollaboratorCost when Collaborator opens and written back
-        // below. The other five reset to their defaults every open.
+        // Persists across sessions with Terseness (Collaborator #49): seeded from
+        // PreferencesModel when Collaborator opens and written back below. The other
+        // three reset to their defaults every open.
         var showCostToggle = new CheckBox
         {
             Content = "Show cost per run on the status bar",
@@ -237,7 +228,6 @@ public sealed partial class WorkflowShell : Page
             Children =
             {
                 tersenessCombo,
-                preservationCombo,
                 genreTextBox,
                 likesTextBox,
                 dislikesTextBox,
@@ -263,7 +253,6 @@ public sealed partial class WorkflowShell : Page
             var newSettings = new CollaboratorSettings
             {
                 Terseness = (TersenessLevel)tersenessCombo.SelectedIndex,
-                ContentPreservation = (ContentPreservationLevel)preservationCombo.SelectedIndex,
                 GenrePreferences = genreTextBox.Text,
                 StoryFormLikes = likesTextBox.Text,
                 StoryFormDislikes = dislikesTextBox.Text,
@@ -276,14 +265,24 @@ public sealed partial class WorkflowShell : Page
             ShellViewModel.CurrentSettings = newSettings;
             ShellViewModel.OnSettingsChanged?.Invoke(newSettings);
 
-            // ShowCostDetails is the one member that outlives the session. Written only when
-            // it actually changed, so saving unrelated settings does not rewrite the file.
+            // ShowCostDetails and Terseness outlive the session. Written only when one of
+            // them actually changed, so saving unrelated settings does not rewrite the file.
             var preferences = Ioc.Default.GetService<PreferenceService>();
-            if (preferences?.Model != null &&
-                preferences.Model.ShowCollaboratorCost != newSettings.ShowCostDetails)
+            if (preferences?.Model != null)
             {
-                preferences.Model.ShowCollaboratorCost = newSettings.ShowCostDetails;
-                await new PreferencesIo().WritePreferences(preferences.Model);
+                var changed = false;
+                if (preferences.Model.ShowCollaboratorCost != newSettings.ShowCostDetails)
+                {
+                    preferences.Model.ShowCollaboratorCost = newSettings.ShowCostDetails;
+                    changed = true;
+                }
+                if (preferences.Model.CollaboratorTerseness != newSettings.Terseness)
+                {
+                    preferences.Model.CollaboratorTerseness = newSettings.Terseness;
+                    changed = true;
+                }
+                if (changed)
+                    await new PreferencesIo().WritePreferences(preferences.Model);
             }
         }
     }

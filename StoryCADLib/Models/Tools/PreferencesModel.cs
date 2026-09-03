@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using StoryCADLib.Services.Collaborator.Contracts;
 
 namespace StoryCADLib.Models.Tools;
 
@@ -57,6 +58,7 @@ public class PreferencesModel : ObservableObject
         StarredCollaboratorWorkflows = new List<string>();
         CollaboratorStarDefaultsApplied = false;
         CollaboratorStarMigrationVersion = 0;
+        CollaboratorTerseness = TersenessLevel.Balanced;
     }
 
     #endregion
@@ -264,6 +266,16 @@ public class PreferencesModel : ObservableObject
     [JsonInclude]
     [JsonPropertyName("ShowCollaboratorCost")]
     public bool ShowCollaboratorCost { get; set; }
+
+    /// <summary>
+    ///     The response length the writer last chose in Collaborator's settings dialog
+    ///     (Collaborator #49). Balanced by default. Seeded into
+    ///     <see cref="CollaboratorSettings.Terseness" /> when Collaborator opens and written
+    ///     back when the dialog changes it, the same way as <see cref="ShowCollaboratorCost" />.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("CollaboratorTerseness")]
+    public TersenessLevel CollaboratorTerseness { get; set; }
 
     /// <summary>
     ///     Total amount of time StoryCAD has been used/open on the system

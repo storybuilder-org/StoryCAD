@@ -4,6 +4,7 @@ using StoryCADLib.DAL;
 using StoryCADLib.Models;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services;
+using StoryCADLib.Services.Collaborator.Contracts;
 
 namespace StoryCADTests.DAL;
 
@@ -43,6 +44,37 @@ public class PreferencesIOTests
         Assert.AreEqual(expectedModel.LastName, actual.LastName);
         Assert.AreEqual(expectedModel.Email, actual.Email);
         Assert.AreEqual(expectedModel.BackupOnOpen, actual.BackupOnOpen);
+    }
+
+    /// <summary>
+    ///     Collaborator #49: the writer's Terseness choice survives a restart.
+    /// </summary>
+    [TestMethod]
+    public async Task WritePreferences_RoundTripsCollaboratorTerseness()
+    {
+        var prefsIo = new PreferencesIo();
+        var expectedModel = new PreferencesModel { CollaboratorTerseness = TersenessLevel.Detailed };
+
+        await prefsIo.WritePreferences(expectedModel);
+
+        var filePath = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "Preferences.json");
+        var actual = JsonSerializer.Deserialize<PreferencesModel>(File.ReadAllText(filePath));
+
+        Assert.IsNotNull(actual);
+        Assert.AreEqual(TersenessLevel.Detailed, actual.CollaboratorTerseness);
+    }
+
+    /// <summary>
+    ///     A Preferences.json written before #49 has no CollaboratorTerseness key. The
+    ///     constructor default must win, not enum zero (Concise).
+    /// </summary>
+    [TestMethod]
+    public void PreferencesModel_WhenJsonLacksTerseness_DefaultsToBalanced()
+    {
+        var actual = JsonSerializer.Deserialize<PreferencesModel>("{}");
+
+        Assert.IsNotNull(actual);
+        Assert.AreEqual(TersenessLevel.Balanced, actual.CollaboratorTerseness);
     }
 
     /// <summary>
