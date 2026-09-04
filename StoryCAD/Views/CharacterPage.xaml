@@ -37,6 +37,7 @@
                     <ComboBox IsEditable="True" Header="Role" Grid.Row="0" MinWidth="200"
                               ItemsSource="{x:Bind CharVm.RoleList}" Text="{x:Bind CharVm.Role, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Role, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.Role, Mode=OneWay}"
                               AutomationProperties.AutomationId="CharacterRoleCombo" />
                     <ComboBox Header="Story Role" Grid.Row="1" IsEditable="False" MinWidth="200"
                               ItemsSource="{x:Bind CharVm.StoryRoleList}"
@@ -108,12 +109,14 @@
                         <ComboBox IsEditable="True" Header="Eye Color" Grid.Column="0" MinWidth="0" Margin="0,0,12,0"
                                   ItemsSource="{x:Bind CharVm.EyesList}"
                                   Text="{x:Bind CharVm.Eyes, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Eyes, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                                  PlaceholderText="{x:Bind CharVm.Eyes, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind CharVm.Eyes, Mode=OneWay}" HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="EyeColorCombo" />
                         <ComboBox IsEditable="True" Header="Hair Color" Grid.Column="2" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.HairList}"
                                   Text="{x:Bind CharVm.Hair, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Hair, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                                  PlaceholderText="{x:Bind CharVm.Hair, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind CharVm.Hair, Mode=OneWay}" HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="HairColorCombo" />
                     </Grid>
                     <Grid Grid.Row="3" HorizontalAlignment="Stretch">
@@ -125,12 +128,14 @@
                         <ComboBox IsEditable="True" Header="Build" Grid.Column="0" MinWidth="0" Margin="0,0,12,0"
                                   ItemsSource="{x:Bind CharVm.BuildList}"
                                   Text="{x:Bind CharVm.Build, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Build, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                                  PlaceholderText="{x:Bind CharVm.Build, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind CharVm.Build, Mode=OneWay}" HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="BuildCombo" />
                         <ComboBox IsEditable="True" Header="Complexion" Grid.Column="2" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.SkinList}"
                                   Text="{x:Bind CharVm.Complexion, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Complexion, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind CharVm.Complexion, Mode=OneWay}"
                                   HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="ComplexionCombo" />
                     </Grid>
@@ -143,12 +148,14 @@
                         <ComboBox IsEditable="True" Header="Race" Grid.Column="0" MinWidth="0" Margin="0,0,12,0"
                                   ItemsSource="{x:Bind CharVm.RaceList}"
                                   Text="{x:Bind CharVm.Race, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Race, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                                  PlaceholderText="{x:Bind CharVm.Race, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind CharVm.Race, Mode=OneWay}" HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="RaceCombo" />
                         <ComboBox IsEditable="True" Header="Nationality" Grid.Column="2" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.NationalityList}"
                                   Text="{x:Bind CharVm.Nationality, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Nationality, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind CharVm.Nationality, Mode=OneWay}"
                                   AutomationProperties.AutomationId="NationalityCombo" />
                     </Grid>
                     <TextBox Header="General Health" Grid.Row="5"
@@ -305,11 +312,13 @@
                                   ItemsSource="{x:Bind CharVm.IntelligenceList}"
                                   Text="{x:Bind CharVm.Intelligence, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Intelligence, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind CharVm.Intelligence, Mode=OneWay}"
                                   AutomationProperties.AutomationId="IntelligenceCombo" />
                         <ComboBox IsEditable="True" Header="Values" Grid.Column="2" Width="200"
                                   ItemsSource="{x:Bind CharVm.ValuesList}"
                                   Text="{x:Bind CharVm.Values, Mode=TwoWay}"
-                                  PlaceholderText="{x:Bind CharVm.Values, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                                  PlaceholderText="{x:Bind CharVm.Values, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind CharVm.Values, Mode=OneWay}" HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="ValuesCombo" />
                     </Grid>
                     <Grid Grid.Row="2" HorizontalAlignment="Stretch">
@@ -322,11 +331,13 @@
                                   ItemsSource="{x:Bind CharVm.FocusList}"
                                   Text="{x:Bind CharVm.Focus, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Focus, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind CharVm.Focus, Mode=OneWay}"
                                   AutomationProperties.AutomationId="FocusCombo" />
                         <ComboBox IsEditable="True" Header="Abnormality" Grid.Column="2" Width="200"
                                   ItemsSource="{x:Bind CharVm.AbnormalityList}"
                                   Text="{x:Bind CharVm.Abnormality, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Abnormality, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind CharVm.Abnormality, Mode=OneWay}"
                                   HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="AbnormalityCombo" />
                     </Grid>
@@ -361,64 +372,76 @@
                               ItemsSource="{x:Bind CharVm.AdventurousnessList}"
                               Text="{x:Bind CharVm.Adventurousness, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Adventurousness, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.Adventurousness, Mode=OneWay}"
                               HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="AdventurousnessCombo" />
                     <ComboBox IsEditable="True" Header="Confidence" Grid.Column="0" Grid.Row="1" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.ConfidenceList}"
                               Text="{x:Bind CharVm.Confidence, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind CharVm.Confidence, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                              PlaceholderText="{x:Bind CharVm.Confidence, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.Confidence, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="ConfidenceCombo" />
                     <ComboBox IsEditable="True" Header="Creativity" Grid.Column="0" Grid.Row="2" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.CreativityList}"
                               Text="{x:Bind CharVm.Creativity, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind CharVm.Creativity, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                              PlaceholderText="{x:Bind CharVm.Creativity, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.Creativity, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="CreativityCombo" />
                     <ComboBox IsEditable="True" Header="Enthusiasm" Grid.Column="0" Grid.Row="3" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.EnthusiasmList}"
                               Text="{x:Bind CharVm.Enthusiasm, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind CharVm.Enthusiasm, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                              PlaceholderText="{x:Bind CharVm.Enthusiasm, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.Enthusiasm, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="EnthusiasmCombo" />
                     <ComboBox IsEditable="True" Header="Sensitivity" Grid.Column="0" Grid.Row="4" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.SensitivityList}"
                               Text="{x:Bind CharVm.Sensitivity, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind CharVm.Sensitivity, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                              PlaceholderText="{x:Bind CharVm.Sensitivity, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.Sensitivity, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="SensitivityCombo" />
                     <ComboBox IsEditable="True" Header="Sociability" Grid.Column="0" Grid.Row="5" MinWidth="0"
                               Margin="0,0,12,0"
                               ItemsSource="{x:Bind CharVm.SociabilityList}"
                               Text="{x:Bind CharVm.Sociability, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind CharVm.Sociability, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                              PlaceholderText="{x:Bind CharVm.Sociability, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.Sociability, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="SociabilityCombo" />
                     <ComboBox IsEditable="True" Header="Aggression" Grid.Column="2" Grid.Row="0" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.AggressionList}"
                               Text="{x:Bind CharVm.Aggression, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind CharVm.Aggression, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                              PlaceholderText="{x:Bind CharVm.Aggression, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.Aggression, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="AggressionCombo" />
                     <ComboBox IsEditable="True" Header="Conscientiousness" Grid.Column="2" Grid.Row="1" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.ConscientiousnessList}"
                               Text="{x:Bind CharVm.Conscientiousness, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Conscientiousness, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.Conscientiousness, Mode=OneWay}"
                               HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="ConscientiousnessCombo" />
                     <ComboBox IsEditable="True" Header="Dominance" Grid.Column="2" Grid.Row="2" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.DominanceList}"
                               Text="{x:Bind CharVm.Dominance, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Dominance, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.Dominance, Mode=OneWay}"
                               AutomationProperties.AutomationId="DominanceCombo" />
                     <ComboBox IsEditable="True" Header="Self Assurance" Grid.Column="2" Grid.Row="3" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.AssuranceList}"
                               Text="{x:Bind CharVm.Assurance, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind CharVm.Assurance, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                              PlaceholderText="{x:Bind CharVm.Assurance, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.Assurance, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="SelfAssuranceCombo" />
                     <ComboBox IsEditable="True" Header="Shrewdness" Grid.Column="2" Grid.Row="4" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.ShrewdnessList}"
                               Text="{x:Bind CharVm.Shrewdness, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind CharVm.Shrewdness, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                              PlaceholderText="{x:Bind CharVm.Shrewdness, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.Shrewdness, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="ShrewdnessCombo" />
                     <ComboBox IsEditable="True" Header="Stability" Grid.Column="2" Grid.Row="5" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.StabilityList}"
                               Text="{x:Bind CharVm.Stability, Mode=TwoWay}"
-                              PlaceholderText="{x:Bind CharVm.Stability, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                              PlaceholderText="{x:Bind CharVm.Stability, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.Stability, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="StabilityCombo" />
                 </Grid>
                 </TabViewItem>

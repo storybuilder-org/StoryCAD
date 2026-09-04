@@ -46,10 +46,12 @@
                         <ComboBox IsEditable="True" Header="Locale" Grid.Column="0" MinWidth="200" Margin="0,0,20,0"
                                   ItemsSource="{x:Bind SettingVm.LocaleList}"
                                   Text="{x:Bind SettingVm.Locale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  SelectedItem="{x:Bind SettingVm.Locale, Mode=OneWay}"
                                   AutomationProperties.AutomationId="LocaleCombo" />
                         <ComboBox IsEditable="True" Header="Season" Grid.Column="2" MinWidth="200"
                                   ItemsSource="{x:Bind SettingVm.SeasonList}"
                                   Text="{x:Bind SettingVm.Season, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind SettingVm.Season, Mode=OneWay}"
                                   AutomationProperties.AutomationId="SeasonCombo" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Left">

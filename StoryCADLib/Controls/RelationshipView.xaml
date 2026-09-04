@@ -74,10 +74,12 @@
                                 <ComboBox Grid.Row="0" Grid.Column="1" IsEditable="True" Header="Trait" MinWidth="150"
                                           ItemsSource="{x:Bind CharVM.RelationshipTraitList}"
                                           Text="{x:Bind Trait, Mode=TwoWay}"
+                                          SelectedItem="{x:Bind Trait, Mode=OneWay}"
                                           PlaceholderText="{x:Bind Trait, Mode=TwoWay}" Margin="0,0,10,0" />
                                 <ComboBox Grid.Row="0" Grid.Column="2" IsEditable="True" Header="Attitude"
                                           MinWidth="150" ItemsSource="{x:Bind CharVM.RelationshipAttitudeList}"
                                           Text="{x:Bind Attitude, Mode=TwoWay}"
+                                          SelectedItem="{x:Bind Attitude, Mode=OneWay}"
                                           PlaceholderText="{x:Bind Attitude, Mode =TwoWay}" />
                                 <usercontrols:RichEditBoxExtended Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"
                                                                   MinHeight="200" HorizontalAlignment="Stretch"
