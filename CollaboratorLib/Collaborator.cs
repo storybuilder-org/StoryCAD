@@ -1043,7 +1043,7 @@ public class Collaborator : ICollaborator
         {
             Key = u.Key,
             ElementName = u.ElementLabel,
-            PropertyDisplayName = u.Spec.Property,
+            PropertyDisplayName = u.DisplayNameOverride ?? u.Spec.Property,
             ProposedDisplay = proposed,
             CurrentDisplay = current,
             KindLabel = kindLabel,
@@ -1675,7 +1675,8 @@ public class Collaborator : ICollaborator
         {
             Key = u.Key,
             ElementName = ValueDisplay.SplitPascalCase(u.ElementLabel),
-            PropertyDisplayName = ValueDisplay.SplitPascalCase(u.Spec.Property),
+            // Collaborator #217 section 5.7: a beat row names itself ("Beat 3: Set-Up").
+            PropertyDisplayName = u.DisplayNameOverride ?? ValueDisplay.SplitPascalCase(u.Spec.Property),
             ProposedDisplay = string.IsNullOrEmpty(proposed) ? "(empty)" : proposed,
             CurrentDisplay = current,
             KindLabel = kindLabel,
