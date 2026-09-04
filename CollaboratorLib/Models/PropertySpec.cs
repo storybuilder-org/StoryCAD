@@ -76,9 +76,11 @@ namespace StoryCollaborator.Models
         string? CraftExplanation = null)
     {
         // Collaborator #217 section 5.7: one beat of a sheet is its own row, so its key carries
-        // the row index. Every Accept path finds a row by Key, so keys must stay unique.
+        // the row index. Every Accept path finds a row by Key, so keys must stay unique. Two
+        // digits, because the pane orders rows by Key with an ordinal compare and [10] must
+        // not sort before [2].
         public string Key => BeatRowIndex.HasValue
-            ? $"{ElementLabel}.{Spec.Property}[{BeatRowIndex.Value}]"
+            ? $"{ElementLabel}.{Spec.Property}[{BeatRowIndex.Value:D2}]"
             : $"{ElementLabel}.{Spec.Property}";
 
         /// <summary>Stable session key: element UUID + property (survives label renames).</summary>

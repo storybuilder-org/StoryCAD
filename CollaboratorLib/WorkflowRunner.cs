@@ -2225,7 +2225,10 @@ namespace StoryCollaborator
         /// </summary>
         internal bool ApplyBeatRow(Guid problemUuid, BeatRowValue row, WorkflowResult result)
         {
-            var sheet = row.Sheet as List<BeatInfo> ?? row.Sheet.ToList();
+            // Copy first: row.Sheet is the shared proposal list. A chat rename patched row.Row
+            // only, so this row's own slot must carry the patched BeatInfo.
+            var sheet = row.Sheet.ToList();
+            sheet[row.Index] = row.Row;
             var existingBeats = ReadBeats(problemUuid, result);
             if (existingBeats == null)
                 return false;
@@ -2252,7 +2255,11 @@ namespace StoryCollaborator
                 result.StatusMessages.Add($"Beat {row.Index}: no plan row; not applied");
                 return false;
             }
-            if (planned.Outcome is not (BeatRowOutcome.Bind or BeatRowOutcome.Create))
+            // The row applies only as what the pane showed it as: a Bind row binds the same
+            // candidate, a Create row creates. Anything else changed under the writer.
+            var expected = row.BindGuid.HasValue ? BeatRowOutcome.Bind : BeatRowOutcome.Create;
+            var sameBinding = !row.BindGuid.HasValue || planned.ElementGuid == row.BindGuid;
+            if (planned.Outcome != expected || !sameBinding)
             {
                 result.StatusMessages.Add($"Beat {row.Index}: now {planned.Outcome}; not applied");
                 return false;
@@ -2339,6 +2346,13 @@ namespace StoryCollaborator
                             result.StatusMessages.Add($"Beat {row.Index}: not applied, sheet has {sheetRows} rows");
                             break;
                     }
+                }
+
+                if (rows.Count == 0 && plan[0].InstallsBeat)
+                {
+                    // A sheetless Problem whose rows all Refuse or stay Empty still gets its
+                    // sheet (titles and descriptions) from the sheet-level Accept.
+                    continue;
                 }
 
                 var at = result.PendingUpdates.IndexOf(sheetUpdate);

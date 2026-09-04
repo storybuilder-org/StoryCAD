@@ -106,8 +106,8 @@ public class PerBeatAcceptTests
         Assert.AreEqual(2, result.PendingUpdates.Count, "Keep, Refuse, Empty and Drop make no row");
         var bind = result.PendingUpdates[0];
         var create = result.PendingUpdates[1];
-        Assert.AreEqual("Problem.StructureBeats[1]", bind.Key);
-        Assert.AreEqual("Problem.StructureBeats[2]", create.Key);
+        Assert.AreEqual("Problem.StructureBeats[01]", bind.Key);
+        Assert.AreEqual("Problem.StructureBeats[02]", create.Key);
         Assert.AreEqual("Beat 2: Theme Stated", bind.DisplayNameOverride);
         Assert.AreEqual("Beat 3: Set-Up", create.DisplayNameOverride);
 
@@ -159,7 +159,7 @@ public class PerBeatAcceptTests
             Assert.AreEqual("empty", row.CurrentDisplay, row.Key);
             Assert.IsTrue(row.AcceptAllMayApply, "Accept All and Accept Free Remaining include the row");
         }
-        Assert.AreEqual("binds Free (Scene)", result.UpdatedProperties["Problem.StructureBeats[1]"]);
+        Assert.AreEqual("binds Free (Scene)", result.UpdatedProperties["Problem.StructureBeats[01]"]);
     }
 
     [TestMethod]
@@ -304,13 +304,90 @@ public class PerBeatAcceptTests
         var set = new SessionProposalSet();
         set.ReplaceFromPending(result.PendingUpdates, null);
 
-        Assert.IsFalse(set.TryApplyPatch("Problem.StructureBeats[1]", "Something else", out _),
+        Assert.IsFalse(set.TryApplyPatch("Problem.StructureBeats[01]", "Something else", out _),
             "a Bind row names an outline element and takes no free text");
-        Assert.IsTrue(set.TryApplyPatch("Problem.StructureBeats[2]", "The letter arrives", out _));
+        Assert.IsTrue(set.TryApplyPatch("Problem.StructureBeats[02]", "The letter arrives", out _));
 
-        var entry = set.Get("Problem.StructureBeats[2]");
+        var entry = set.Get("Problem.StructureBeats[02]");
         var value = (BeatRowValue)entry.Update.Value;
         Assert.AreEqual("The letter arrives", value.Row.SceneName);
         Assert.AreEqual("new Scene \"The letter arrives\"", entry.ProposedText);
+
+        // The patched row is what Accept applies, not the original slot of the shared proposal.
+        var applied = runner.ApplyUpdates(Slice(entry.Update), new Dictionary<string, StoryElement>());
+
+        Assert.AreEqual(1, applied);
+        var created = model.StoryElements.OfType<SceneModel>().Single(s => s.Name == "The letter arrives");
+        Assert.AreEqual(created.Uuid, target.StructureBeats[2].Guid);
+        Assert.IsFalse(model.StoryElements.OfType<SceneModel>().Any(s => s.Name == "Stub"),
+            "the original stub name is not used");
+    }
+
+    [TestMethod]
+    public void ApplyUpdates_BindRowWhoseCandidateWasPlacedMeanwhile_DoesNotBecomeAStub()
+    {
+        var (model, runner) = Arrange();
+        var target = new ProblemModel("Target", model, null);
+        var free = new SceneModel("Free", model, null);
+        var other = new ProblemModel("Other", model, null);
+        target.StructureBeats.Add(new StructureBeat("Catalyst", ""));
+        // The model row carries both a candidate and a stub name; the candidate wins at plan.
+        var proposal = new List<BeatInfo> { new("Catalyst", "", AssignedElement: free.Uuid, SceneName: "Fallback") };
+        var result = SheetResult(target, proposal);
+        runner.ExpandBeatSheetUpdates(result);
+        var bind = result.PendingUpdates.Single();
+        Assert.IsTrue(((BeatRowValue)bind.Value).BindGuid.HasValue, "shown to the writer as a bind");
+
+        // Between Review and Accept the writer places the Scene on another sheet by hand.
+        other.StructureBeats.Add(new StructureBeat("Row", "") { Guid = free.Uuid });
+
+        var slice = Slice(bind);
+        var applied = runner.ApplyUpdates(slice, new Dictionary<string, StoryElement>());
+
+        Assert.AreEqual(0, applied, "a row shown as a bind does not turn into a stub");
+        Assert.AreEqual(Guid.Empty, target.StructureBeats[0].Guid);
+        Assert.IsFalse(model.StoryElements.OfType<SceneModel>().Any(s => s.Name == "Fallback"));
+        Assert.IsTrue(slice.StatusMessages.Any(m => m.Contains("now Create; not applied")),
+            "the status line says why the row did not apply");
+    }
+
+    [TestMethod]
+    public void ExpandBeatSheetUpdates_TwelveRows_KeysSortInIndexOrder()
+    {
+        var (model, runner) = Arrange();
+        var target = new ProblemModel("Target", model, null);
+        var proposal = new List<BeatInfo>();
+        for (var i = 0; i < 12; i++)
+        {
+            target.StructureBeats.Add(new StructureBeat($"Row {i + 1}", ""));
+            proposal.Add(new($"Row {i + 1}", "", SceneName: $"Scene {i + 1}"));
+        }
+        var result = SheetResult(target, proposal);
+
+        runner.ExpandBeatSheetUpdates(result);
+
+        var keys = result.PendingUpdates.Select(u => u.Key).ToList();
+        Assert.AreEqual(12, keys.Count);
+        Assert.AreEqual("Problem.StructureBeats[00]", keys[0]);
+        Assert.AreEqual("Problem.StructureBeats[11]", keys[11]);
+        CollectionAssert.AreEqual(keys, keys.OrderBy(k => k, StringComparer.Ordinal).ToList(),
+            "the pane orders rows by Key with an ordinal compare");
+    }
+
+    [TestMethod]
+    public void ExpandBeatSheetUpdates_SheetlessProblemWithNothingToBind_KeepsTheSheetLevelUpdate()
+    {
+        var (model, runner) = Arrange();
+        var target = new ProblemModel("Target", model, null);
+        var proposal = new List<BeatInfo> { new("Opening Image", "Where we start"), new("Catalyst", "The turn") };
+        var result = SheetResult(target, proposal);
+
+        runner.ExpandBeatSheetUpdates(result);
+
+        var single = result.PendingUpdates.Single();
+        Assert.IsInstanceOfType(single.Value, typeof(List<BeatInfo>), "the sheet-level Accept still installs the titles");
+        runner.ApplyUpdates(Slice(single), new Dictionary<string, StoryElement>());
+        Assert.AreEqual(2, target.StructureBeats.Count);
+        Assert.AreEqual("The turn", target.StructureBeats[1].Description);
     }
 }
