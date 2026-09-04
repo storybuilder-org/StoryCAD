@@ -88,6 +88,7 @@
                                   ItemsSource="{x:Bind SceneVm.SceneTypeList}"
                                   Text="{x:Bind SceneVm.SceneType, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind SceneVm.SceneType, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind SceneVm.SceneType, Mode=OneWay}"
                                   AutomationProperties.AutomationId="SceneTypeCombo" />
                     </Grid>
                     <usercontrols:RichEditBoxExtended Header="Scene Sketch" Grid.Row="3"
@@ -245,17 +246,20 @@
                                   ItemsSource="{x:Bind SceneVm.EmotionList}"
                                   Text="{x:Bind SceneVm.ProtagEmotion, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind SceneVm.ProtagEmotion, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind SceneVm.ProtagEmotion, Mode=OneWay}"
                                   AutomationProperties.AutomationId="ProtagonistFeelingsCombo" />
                     </Grid>
                     <ComboBox IsEditable="True" Header="Protagonist's Goal" Grid.Row="1" MinWidth="300"
                               ItemsSource="{x:Bind SceneVm.GoalList}"
                               Text="{x:Bind SceneVm.ProtagGoal, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.ProtagGoal, Mode=TwoWay}"
+                              SelectedItem="{x:Bind SceneVm.ProtagGoal, Mode=OneWay}"
                               AutomationProperties.AutomationId="ProtagonistGoalCombo" />
                     <ComboBox IsEditable="True" Header="Opposition" Grid.Row="2" Width="400"
                               ItemsSource="{x:Bind SceneVm.OppositionList}"
                               Text="{x:Bind SceneVm.Opposition, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.Opposition, Mode=TwoWay}"
+                              SelectedItem="{x:Bind SceneVm.Opposition, Mode=OneWay}"
                               HorizontalAlignment="Left"
                               AutomationProperties.AutomationId="OppositionCombo" />
                     <Grid Grid.Row="3" HorizontalAlignment="Left">
@@ -274,18 +278,21 @@
                                   ItemsSource="{x:Bind SceneVm.EmotionList}"
                                   Text="{x:Bind SceneVm.AntagEmotion, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind SceneVm.AntagEmotion, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind SceneVm.AntagEmotion, Mode=OneWay}"
                                   AutomationProperties.AutomationId="AntagonistFeelingsCombo" />
                     </Grid>
                     <ComboBox IsEditable="True" Header="Antagonist's Goal" Grid.Row="4" MinWidth="300"
                               ItemsSource="{x:Bind SceneVm.GoalList}"
                               Text="{x:Bind SceneVm.AntagGoal, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.AntagGoal, Mode=TwoWay}"
+                              SelectedItem="{x:Bind SceneVm.AntagGoal, Mode=OneWay}"
                               AutomationProperties.AutomationId="AntagonistGoalCombo" />
                     <TextBlock Grid.Row="5" Text=" " />
                     <ComboBox IsEditable="True" Header="Outcome" Grid.Row="5" Width="400"
                               ItemsSource="{x:Bind SceneVm.OutcomeList}"
                               Text="{x:Bind SceneVm.Outcome, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.Outcome, Mode=TwoWay}"
+                              SelectedItem="{x:Bind SceneVm.Outcome, Mode=OneWay}"
                               HorizontalAlignment="Left"
                               AutomationProperties.AutomationId="OutcomeCombo" />
                 </Grid>
@@ -304,6 +311,7 @@
                               ItemsSource="{x:Bind SceneVm.EmotionList}"
                               Text="{x:Bind SceneVm.Emotion, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.Emotion, Mode=TwoWay}"
+                              SelectedItem="{x:Bind SceneVm.Emotion, Mode=OneWay}"
                               AutomationProperties.AutomationId="EmotionalResponseCombo" />
                     <usercontrols:RichEditBoxExtended Header="Review and Thought" Grid.Row="1"
                                                       RtfText="{x:Bind SceneVm.Review, Mode=TwoWay}"
@@ -316,6 +324,7 @@
                               ItemsSource="{x:Bind SceneVm.GoalList}"
                               Text="{x:Bind SceneVm.NewGoal, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.NewGoal, Mode=TwoWay}"
+                              SelectedItem="{x:Bind SceneVm.NewGoal, Mode=OneWay}"
                               AutomationProperties.AutomationId="NewGoalCombo" />
                 </Grid>
                 </TabViewItem>
