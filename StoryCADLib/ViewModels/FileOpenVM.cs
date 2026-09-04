@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO.Compression;
 using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -317,6 +318,38 @@ public class FileOpenVM : ObservableRecipient
     ///     Used to track which backup to open if needed.
     /// </summary>
     public string[] BackupPaths;
+
+    /// <summary>
+    ///     Reads the timestamp BackupService.BackupProject writes into a backup file name,
+    ///     "{Outline} as of yyyyMMdd_HHmm.zip". Null when the name does not carry one.
+    ///     The File Open menu sorts and labels backups from this instead of stat-ing each
+    ///     file: on a cloud-synced folder holding 5,000 zips, one GetLastWriteTime per file
+    ///     held the menu for about five seconds before it could show (2026-09-04).
+    /// </summary>
+    public static DateTime? ParseBackupTimestamp(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return null;
+
+        const string separator = " as of ";
+        var name = Path.GetFileNameWithoutExtension(path);
+        var index = name.LastIndexOf(separator, StringComparison.Ordinal);
+        if (index < 0)
+            return null;
+
+        var stamp = name[(index + separator.Length)..];
+        return DateTime.TryParseExact(stamp, "yyyyMMdd_HHmm", CultureInfo.InvariantCulture,
+            DateTimeStyles.None, out var when)
+            ? when
+            : null;
+    }
+
+    /// <summary>
+    ///     Newest first by the name stamp. A file whose name carries no stamp falls back to
+    ///     its last-write time, so a hand-renamed backup still sorts instead of vanishing.
+    /// </summary>
+    public static List<string> OrderBackupsNewestFirst(IEnumerable<string> paths) =>
+        paths.OrderByDescending(p => ParseBackupTimestamp(p) ?? File.GetLastWriteTime(p)).ToList();
 
     /// <summary>
     ///     Internal names of samples
