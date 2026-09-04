@@ -68,11 +68,22 @@ public sealed class SessionProposalSet
             return false;
 
         reopened = e.Status is ProposalSessionStatus.Accepted or ProposalSessionStatus.Skipped;
-        var updatedUpdate = e.Update with { Value = newValue };
+        object? patched = newValue;
+        var proposedText = newValue ?? string.Empty;
+        if (e.Update.Value is BeatRowValue row)
+        {
+            // Collaborator #217 section 5.7: a beat row is typed. Chat may rename the stub a
+            // Create row makes; a Bind row names an outline element and takes no free text.
+            if (row.BindGuid.HasValue)
+                return false;
+            patched = row with { Row = row.Row with { SceneName = newValue } };
+            proposedText = FormatValue(patched);
+        }
+        var updatedUpdate = e.Update with { Value = patched };
         _entries[key] = e with
         {
             Update = updatedUpdate,
-            ProposedText = newValue ?? string.Empty,
+            ProposedText = proposedText,
             Status = ProposalSessionStatus.Open
         };
         return true;

@@ -227,13 +227,9 @@ namespace StoryCollaborator
                 result.StatusMessages.Add("Received AI response");
 
                 var outputResult = ExtractOutputs(planResult, gatheredElements, workflowIO.Outputs);
-
-                foreach (var msg in outputResult.StatusMessages)
-                    result.StatusMessages.Add(msg);
-                foreach (var kvp in outputResult.UpdatedProperties)
-                    result.UpdatedProperties[kvp.Key] = kvp.Value;
-                foreach (var pending in outputResult.PendingUpdates)
-                    result.PendingUpdates.Add(pending);
+                MergeExtractResult(result, outputResult);
+                // Collaborator #217 section 5.7: each beat that binds or creates is its own row.
+                ExpandBeatSheetUpdates(result);
 
                 if (string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
                     CaptureSceneBuilderProposal(planResult, result);
@@ -705,6 +701,18 @@ namespace StoryCollaborator
                     continue;
                 }
 
+                // Collaborator #217 section 5.7: a beat row was planned against the live sheet at
+                // extract time and only Bind and Create rows exist, so each one is a Fill.
+                if (update.Value is BeatRowValue)
+                {
+                    var row = update with { Kind = UpdateKind.Fill, CurrentDisplay = "empty" };
+                    kept.Add(row);
+                    display[row.Key] = FormatDisplayValue(row);
+                    fillCount++;
+                    _logger?.LogInformation("Classify {Key} kind=Fill source=plan", row.Key);
+                    continue;
+                }
+
                 if (update.Spec.WriteVia != WriteVia.Scalar)
                 {
                     kept.Add(update);
@@ -985,6 +993,7 @@ namespace StoryCollaborator
             {
                 WriteVia.Scalar => update.Value.ToString() ?? string.Empty,
                 WriteVia.SimpleList when update.Value is System.Collections.ICollection c => $"{c.Count} items",
+                WriteVia.BeatSheet when update.Value is BeatRowValue row => ValueDisplay.Format(row),
                 WriteVia.BeatSheet when update.Value is List<BeatInfo> beatList =>
                     FormatBeatSheetDisplay(update.ElementUuid, beatList),
                 WriteVia.BeatSheet when update.Value is System.Collections.ICollection c => $"{c.Count} beats",
@@ -1258,6 +1267,13 @@ namespace StoryCollaborator
 
                     case WriteVia.BeatSheet:
                     {
+                        // Collaborator #217 section 5.7: one accepted beat row applies on its own.
+                        if (update.Value is BeatRowValue row)
+                        {
+                            if (ApplyBeatRow(uuid, row, result))
+                                appliedCount++;
+                            break;
+                        }
                         // #167: merge proposed beats; never wipe filled assignments.
                         if (update.Value is not List<BeatInfo> beats) break;
                         ApplyBeatSheetMerge(uuid, beats, result);
@@ -1736,27 +1752,9 @@ namespace StoryCollaborator
             if (plan.Count == 0)
                 return $"{beats.Count} beats";
 
-            int kept = 0, bound = 0, created = 0, empty = 0, refused = 0, dropped = 0;
-            foreach (var row in plan)
-            {
-                switch (row.Outcome)
-                {
-                    case BeatRowOutcome.Keep: kept++; break;
-                    case BeatRowOutcome.Bind: bound++; break;
-                    case BeatRowOutcome.Create: created++; break;
-                    case BeatRowOutcome.Empty: empty++; break;
-                    case BeatRowOutcome.Refuse: refused++; break;
-                    case BeatRowOutcome.Drop: dropped++; break;
-                }
-            }
-
             // Drop rows start at the sheet's row count, so that count is the rows before them.
-            var sheetRows = plan.Count - dropped;
-            var sb = new System.Text.StringBuilder();
-            sb.Append(plan.Count).Append(plan[0].InstallsBeat ? " new " : " ").Append(Plural(plan.Count, "beat")).Append(": ");
-            sb.Append($"{kept} kept, {bound} bound, {created} new {Plural(created, "scene")}, {empty} empty");
-            if (refused > 0) sb.Append($", {refused} refused");
-            if (dropped > 0) sb.Append($", {dropped} dropped");
+            var sheetRows = plan.Count - plan.Count(r => r.Outcome == BeatRowOutcome.Drop);
+            var sb = new System.Text.StringBuilder(PlanSummary(plan));
 
             foreach (var row in plan)
             {
@@ -1788,6 +1786,34 @@ namespace StoryCollaborator
                 }
             }
 
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// The one-line summary of a plan: counts per outcome. Heads the sheet-level display and
+        /// is the status line the per-beat expansion (#217 section 5.7) leaves for the run.
+        /// </summary>
+        private static string PlanSummary(List<BeatRowPlan> plan)
+        {
+            int kept = 0, bound = 0, created = 0, empty = 0, refused = 0, dropped = 0;
+            foreach (var row in plan)
+            {
+                switch (row.Outcome)
+                {
+                    case BeatRowOutcome.Keep: kept++; break;
+                    case BeatRowOutcome.Bind: bound++; break;
+                    case BeatRowOutcome.Create: created++; break;
+                    case BeatRowOutcome.Empty: empty++; break;
+                    case BeatRowOutcome.Refuse: refused++; break;
+                    case BeatRowOutcome.Drop: dropped++; break;
+                }
+            }
+
+            var sb = new System.Text.StringBuilder();
+            sb.Append(plan.Count).Append(plan[0].InstallsBeat ? " new " : " ").Append(Plural(plan.Count, "beat")).Append(": ");
+            sb.Append($"{kept} kept, {bound} bound, {created} new {Plural(created, "scene")}, {empty} empty");
+            if (refused > 0) sb.Append($", {refused} refused");
+            if (dropped > 0) sb.Append($", {dropped} dropped");
             return sb.ToString();
         }
 
@@ -2120,60 +2146,221 @@ namespace StoryCollaborator
             var plan = PlanBeatSheetMerge(problemUuid, proposed);
 
             foreach (var row in plan)
+                ExecuteBeatRow(problemUuid, row, proposed[row.Index], existingBeats, result);
+        }
+
+        /// <summary>
+        /// Executes one plan row: creates the beat when the sheet is new, fills blank text on an
+        /// empty beat, then binds or creates. Returns true when the row bound or created. Shared
+        /// by the sheet-level apply and the per-beat apply (#217 section 5.7), so a row does the
+        /// same thing whichever path accepted it.
+        /// </summary>
+        private bool ExecuteBeatRow(
+            Guid problemUuid,
+            BeatRowPlan row,
+            BeatInfo beat,
+            List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)> existingBeats,
+            WorkflowResult result)
+        {
+            if (row.Outcome == BeatRowOutcome.Drop)
             {
-                var beat = proposed[row.Index];
+                // Collaborator #77: a sheet that is already present is the user's. The chosen
+                // sheet sets the beat count, so do not append rows to it.
+                result.StatusMessages.Add(
+                    $"Beat {row.Index}: not applied, sheet has {existingBeats.Count} rows");
+                return false;
+            }
 
-                if (row.Outcome == BeatRowOutcome.Drop)
+            if (row.InstallsBeat)
+            {
+                _storyApi.CreateBeat(problemUuid, row.Title, beat.Description?.Trim() ?? string.Empty);
+            }
+            else
+            {
+                // Collaborator #77: a filled beat is the user's. Do not touch its assignment,
+                // its title, or its description. This test used to sit below the text write,
+                // so a filled beat with a blank description took model text under Accept All.
+                if (row.Outcome == BeatRowOutcome.Keep)
+                    return false;
+
+                var current = existingBeats[row.Index];
+                var newTitle = string.IsNullOrWhiteSpace(current.BeatTitle) && !string.IsNullOrWhiteSpace(beat.Title)
+                    ? beat.Title.Trim()
+                    : current.BeatTitle;
+                // Prefer keep filled description; fill blank only.
+                var newDesc = string.IsNullOrWhiteSpace(current.BeatDescription) && !string.IsNullOrWhiteSpace(beat.Description)
+                    ? beat.Description.Trim()
+                    : current.BeatDescription;
+
+                if (!string.Equals(newTitle, current.BeatTitle, StringComparison.Ordinal)
+                    || !string.Equals(newDesc, current.BeatDescription, StringComparison.Ordinal))
                 {
-                    // Collaborator #77: a sheet that is already present is the user's. The chosen
-                    // sheet sets the beat count, so do not append rows to it.
-                    result.StatusMessages.Add(
-                        $"Beat {row.Index}: not applied, sheet has {existingBeats.Count} rows");
+                    _storyApi.UpdateBeat(problemUuid, row.Index, newTitle ?? string.Empty, newDesc ?? string.Empty);
+                }
+            }
+
+            switch (row.Outcome)
+            {
+                case BeatRowOutcome.Bind:
+                    return AssignBeat(problemUuid, row.Index, row.ElementGuid!.Value, result);
+                case BeatRowOutcome.Create:
+                    return CreateSceneStub(problemUuid, row.Index, beat, result);
+                case BeatRowOutcome.Refuse:
+                    result.StatusMessages.Add(RefuseStatus(row));
+                    return false;
+                default:
+                    return false;
+            }
+        }
+
+        private static string RefuseStatus(BeatRowPlan row) => row.ElementName != null
+            ? $"Beat {row.Index} assigned_element {row.ElementGuid} already used on this sheet; left unassigned"
+            : $"Beat {row.Index} assigned_element {row.ElementGuid} not in candidate set; left unassigned";
+
+        /// <summary>
+        /// Collaborator #217 section 5.7: apply one accepted beat row. Earlier rows of the same
+        /// proposal may have given the Problem a sheet, a binding, or a stub since the plan was
+        /// made, so the row is planned again against the live sheet before it runs. Returns true
+        /// when the row bound or created.
+        /// </summary>
+        internal bool ApplyBeatRow(Guid problemUuid, BeatRowValue row, WorkflowResult result)
+        {
+            // Copy first: row.Sheet is the shared proposal list. A chat rename patched row.Row
+            // only, so this row's own slot must carry the patched BeatInfo.
+            var sheet = row.Sheet.ToList();
+            sheet[row.Index] = row.Row;
+            var existingBeats = ReadBeats(problemUuid, result);
+            if (existingBeats == null)
+                return false;
+
+            if (existingBeats.Count == 0)
+            {
+                // Install if missing: the first accepted row creates every beat of the sheet
+                // (titles and descriptions). Later rows find the sheet present and skip this.
+                for (int i = 0; i < sheet.Count; i++)
+                {
+                    var b = sheet[i];
+                    var title = string.IsNullOrWhiteSpace(b.Title) ? $"Beat {i + 1}" : b.Title.Trim();
+                    _storyApi.CreateBeat(problemUuid, title, b.Description?.Trim() ?? string.Empty);
+                }
+                result.StatusMessages.Add($"BeatSheet: installed {sheet.Count} {Plural(sheet.Count, "beat")}");
+                existingBeats = ReadBeats(problemUuid, result);
+                if (existingBeats == null)
+                    return false;
+            }
+
+            var planned = PlanBeatSheetMerge(problemUuid, sheet).FirstOrDefault(r => r.Index == row.Index);
+            if (planned == null)
+            {
+                result.StatusMessages.Add($"Beat {row.Index}: no plan row; not applied");
+                return false;
+            }
+            // The row applies only as what the pane showed it as: a Bind row binds the same
+            // candidate, a Create row creates. Anything else changed under the writer.
+            var expected = row.BindGuid.HasValue ? BeatRowOutcome.Bind : BeatRowOutcome.Create;
+            var sameBinding = !row.BindGuid.HasValue || planned.ElementGuid == row.BindGuid;
+            if (planned.Outcome != expected || !sameBinding)
+            {
+                result.StatusMessages.Add($"Beat {row.Index}: now {planned.Outcome}; not applied");
+                return false;
+            }
+
+            return ExecuteBeatRow(problemUuid, planned, sheet[row.Index], existingBeats, result);
+        }
+
+        private List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)>? ReadBeats(
+            Guid problemUuid, WorkflowResult result)
+        {
+            var existingResult = _storyApi.GetProblemStructure(problemUuid);
+            if (!existingResult.IsSuccess)
+            {
+                result.StatusMessages.Add($"BeatSheet: cannot load structure for {problemUuid}");
+                return null;
+            }
+            return existingResult.Payload.Beats?.ToList()
+                ?? new List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)>();
+        }
+
+        /// <summary>
+        /// Folds an <see cref="ExtractOutputs"/> result into the run result. FieldStates rides
+        /// along: before #217 the merge left it behind, so classify never saw the model's intent
+        /// and every field fell through to the compare ladder (smoke of 2026-09-04).
+        /// </summary>
+        internal static void MergeExtractResult(WorkflowResult result, WorkflowResult outputResult)
+        {
+            foreach (var msg in outputResult.StatusMessages)
+                result.StatusMessages.Add(msg);
+            foreach (var kvp in outputResult.UpdatedProperties)
+                result.UpdatedProperties[kvp.Key] = kvp.Value;
+            foreach (var pending in outputResult.PendingUpdates)
+                result.PendingUpdates.Add(pending);
+            foreach (var kvp in outputResult.FieldStates)
+                result.FieldStates[kvp.Key] = kvp.Value;
+        }
+
+        /// <summary>
+        /// Collaborator #217 section 5.7: replace each sheet-level BeatSheet update with one update
+        /// per plan row that binds or creates, so Review Each offers Accept or Skip per beat. Keep,
+        /// Empty, Drop and Refuse rows make no row: there is nothing to accept, and Refuse and Drop
+        /// say why in the status list. A proposal whose structure cannot be planned stays whole.
+        /// </summary>
+        internal void ExpandBeatSheetUpdates(WorkflowResult result)
+        {
+            var sheets = result.PendingUpdates
+                .Where(u => u.Spec.WriteVia == WriteVia.BeatSheet && u.Value is List<BeatInfo>)
+                .ToList();
+
+            foreach (var sheetUpdate in sheets)
+            {
+                var beats = (List<BeatInfo>)sheetUpdate.Value!;
+                var plan = PlanBeatSheetMerge(sheetUpdate.ElementUuid, beats);
+                if (plan.Count == 0)
                     continue;
-                }
 
-                if (row.InstallsBeat)
+                result.StatusMessages.Add("BeatSheet: " + PlanSummary(plan));
+                var sheetRows = plan.Count - plan.Count(r => r.Outcome == BeatRowOutcome.Drop);
+                var rows = new List<PendingUpdate>();
+                foreach (var row in plan)
                 {
-                    _storyApi.CreateBeat(problemUuid, row.Title, beat.Description?.Trim() ?? string.Empty);
-                }
-                else
-                {
-                    // Collaborator #77: a filled beat is the user's. Do not touch its assignment,
-                    // its title, or its description. This test used to sit below the text write,
-                    // so a filled beat with a blank description took model text under Accept All.
-                    if (row.Outcome == BeatRowOutcome.Keep)
-                        continue;
-
-                    var current = existingBeats[row.Index];
-                    var newTitle = string.IsNullOrWhiteSpace(current.BeatTitle) && !string.IsNullOrWhiteSpace(beat.Title)
-                        ? beat.Title.Trim()
-                        : current.BeatTitle;
-                    // Prefer keep filled description; fill blank only.
-                    var newDesc = string.IsNullOrWhiteSpace(current.BeatDescription) && !string.IsNullOrWhiteSpace(beat.Description)
-                        ? beat.Description.Trim()
-                        : current.BeatDescription;
-
-                    if (!string.Equals(newTitle, current.BeatTitle, StringComparison.Ordinal)
-                        || !string.Equals(newDesc, current.BeatDescription, StringComparison.Ordinal))
+                    switch (row.Outcome)
                     {
-                        _storyApi.UpdateBeat(problemUuid, row.Index, newTitle ?? string.Empty, newDesc ?? string.Empty);
+                        case BeatRowOutcome.Bind:
+                        case BeatRowOutcome.Create:
+                            var binds = row.Outcome == BeatRowOutcome.Bind;
+                            var value = new BeatRowValue(
+                                row.Index, row.Title, beats[row.Index], beats,
+                                binds ? row.ElementGuid : null,
+                                row.ElementName,
+                                binds ? ElementTypeNameOf(row.ElementGuid!.Value) : null);
+                            rows.Add(new PendingUpdate(
+                                sheetUpdate.ElementLabel, sheetUpdate.ElementUuid, sheetUpdate.Spec, value)
+                            {
+                                BeatRowIndex = row.Index,
+                                DisplayNameOverride = $"Beat {row.Index + 1}: {row.Title}"
+                            });
+                            break;
+                        case BeatRowOutcome.Refuse:
+                            result.StatusMessages.Add(RefuseStatus(row));
+                            break;
+                        case BeatRowOutcome.Drop:
+                            result.StatusMessages.Add($"Beat {row.Index}: not applied, sheet has {sheetRows} rows");
+                            break;
                     }
                 }
 
-                switch (row.Outcome)
+                if (rows.Count == 0 && plan[0].InstallsBeat)
                 {
-                    case BeatRowOutcome.Bind:
-                        AssignBeat(problemUuid, row.Index, row.ElementGuid!.Value, result);
-                        break;
-                    case BeatRowOutcome.Create:
-                        CreateSceneStub(problemUuid, row.Index, beat, result);
-                        break;
-                    case BeatRowOutcome.Refuse:
-                        result.StatusMessages.Add(row.ElementName != null
-                            ? $"Beat {row.Index} assigned_element {row.ElementGuid} already used on this sheet; left unassigned"
-                            : $"Beat {row.Index} assigned_element {row.ElementGuid} not in candidate set; left unassigned");
-                        break;
+                    // A sheetless Problem whose rows all Refuse or stay Empty still gets its
+                    // sheet (titles and descriptions) from the sheet-level Accept.
+                    continue;
                 }
+
+                var at = result.PendingUpdates.IndexOf(sheetUpdate);
+                result.PendingUpdates.RemoveAt(at);
+                result.PendingUpdates.InsertRange(at, rows);
+                result.UpdatedProperties.Remove(sheetUpdate.Key);
+                foreach (var r in rows)
+                    result.UpdatedProperties[r.Key] = FormatDisplayValue(r);
             }
         }
 
@@ -2181,7 +2368,7 @@ namespace StoryCollaborator
         /// Collaborator #150 / #77: create the Scene stub a Create row names, fill the #208
         /// stub contract, and assign it to the beat.
         /// </summary>
-        private void CreateSceneStub(Guid problemUuid, int beatIndex, BeatInfo beat, WorkflowResult result)
+        private bool CreateSceneStub(Guid problemUuid, int beatIndex, BeatInfo beat, WorkflowResult result)
         {
             var name = beat.SceneName!.Trim();
             var addResult = _storyApi.AddElement(StoryItemType.Scene, problemUuid.ToString(), name);
@@ -2189,7 +2376,7 @@ namespace StoryCollaborator
             {
                 result.StatusMessages.Add(
                     $"Beat {beatIndex} scene create failed: {addResult.ErrorMessage}");
-                return;
+                return false;
             }
 
             var newGuid = addResult.Payload;
@@ -2221,16 +2408,19 @@ namespace StoryCollaborator
                 }
             }
 
-            AssignBeat(problemUuid, beatIndex, newGuid, result);
+            var assigned = AssignBeat(problemUuid, beatIndex, newGuid, result);
             result.StatusMessages.Add($"Beat {beatIndex}: created Scene '{name}' ({newGuid})");
+            return assigned;
         }
 
-        private void AssignBeat(Guid problemUuid, int beatIndex, Guid element, WorkflowResult result)
+        private bool AssignBeat(Guid problemUuid, int beatIndex, Guid element, WorkflowResult result)
         {
             var assignResult = _storyApi.AssignElementToBeat(problemUuid, beatIndex, element);
-            if (!assignResult.IsSuccess)
-                result.StatusMessages.Add(
-                    $"Beat {beatIndex} assign failed: {assignResult.ErrorMessage}");
+            if (assignResult.IsSuccess)
+                return true;
+            result.StatusMessages.Add(
+                $"Beat {beatIndex} assign failed: {assignResult.ErrorMessage}");
+            return false;
         }
 
         /// <summary>

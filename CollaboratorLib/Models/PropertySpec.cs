@@ -75,13 +75,31 @@ namespace StoryCollaborator.Models
         string? CurrentDisplay = null,
         string? CraftExplanation = null)
     {
-        public string Key => $"{ElementLabel}.{Spec.Property}";
+        // Collaborator #217 section 5.7: one beat of a sheet is its own row, so its key carries
+        // the row index. Every Accept path finds a row by Key, so keys must stay unique. Two
+        // digits, because the pane orders rows by Key with an ordinal compare and [10] must
+        // not sort before [2].
+        public string Key => BeatRowIndex.HasValue
+            ? $"{ElementLabel}.{Spec.Property}[{BeatRowIndex.Value:D2}]"
+            : $"{ElementLabel}.{Spec.Property}";
 
         /// <summary>Stable session key: element UUID + property (survives label renames).</summary>
         public string SessionTouchKey => $"{ElementUuid:N}.{Spec.Property}";
 
         public bool AcceptAllMayApply =>
             Kind is UpdateKind.Fill or UpdateKind.Refresh or UpdateKind.Unclassified;
+
+        /// <summary>
+        /// Collaborator #217 section 5.7: set when this update is one beat of a BeatSheet
+        /// proposal (Value is a <see cref="BeatRowValue"/>). Null for every other update.
+        /// </summary>
+        public int? BeatRowIndex { get; init; }
+
+        /// <summary>
+        /// Review pane name for this update when the property name is not the right label
+        /// (a beat row reads "Beat 3: Set-Up"). Null means show the property name.
+        /// </summary>
+        public string? DisplayNameOverride { get; init; }
     }
 
     /// <summary>
@@ -98,6 +116,21 @@ namespace StoryCollaborator.Models
         string? SceneNotes = null,
         string? SceneType = null,
         IReadOnlyList<Guid>? SceneCast = null);
+
+    /// <summary>
+    /// Collaborator #217 section 5.7: the value of one per-beat pending update. Row is the
+    /// proposal row; Sheet is the whole proposal, kept so the first accepted row can install
+    /// the sheet when the Problem has none. BindGuid set means the row binds that candidate;
+    /// null means it creates the Scene stub named in Row.SceneName.
+    /// </summary>
+    public sealed record BeatRowValue(
+        int Index,
+        string Title,
+        BeatInfo Row,
+        IReadOnlyList<BeatInfo> Sheet,
+        Guid? BindGuid,
+        string? ElementName,
+        string? ElementType);
 
     /// <summary>
     /// One relationship entry in a Relationships output.

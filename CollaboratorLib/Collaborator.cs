@@ -1043,7 +1043,7 @@ public class Collaborator : ICollaborator
         {
             Key = u.Key,
             ElementName = u.ElementLabel,
-            PropertyDisplayName = u.Spec.Property,
+            PropertyDisplayName = u.DisplayNameOverride ?? u.Spec.Property,
             ProposedDisplay = proposed,
             CurrentDisplay = current,
             KindLabel = kindLabel,
@@ -1209,18 +1209,29 @@ public class Collaborator : ICollaborator
                     var stageSession = new OverwriteAcceptanceSession();
 
                     var sceneBuilderOrphanBindDone = false;
+                    var lastAppliedKeys = new List<string>();
 
                     int ApplyPendingList(IReadOnlyList<PendingUpdate> list)
                     {
                         int applied = 0;
-                        if (list.Count > 0)
+                        lastAppliedKeys.Clear();
+                        foreach (var u in list)
                         {
+                            // One update per slice: the applied keys are then known, and a row
+                            // that returns 0 (#217 5.7: its beat was filled meanwhile) says why
+                            // in the status list instead of a bare "Failed to apply".
                             var slice = WorkflowResult.Succeeded();
-                            foreach (var u in list)
-                                slice.PendingUpdates.Add(u);
-                            applied = runner.ApplyUpdates(slice, gatheredElements);
-                            foreach (var u in list)
-                                _sessionTouchedFields.Add(u.SessionTouchKey);
+                            slice.PendingUpdates.Add(u);
+                            var n = runner.ApplyUpdates(slice, gatheredElements);
+                            foreach (var msg in slice.StatusMessages)
+                            {
+                                if (!msg.StartsWith("No-op ", StringComparison.Ordinal))
+                                    viewModel.AddStatusMessage(msg);
+                            }
+                            if (n > 0)
+                                lastAppliedKeys.Add(u.Key);
+                            applied += n;
+                            _sessionTouchedFields.Add(u.SessionTouchKey);
                         }
                         if (!sceneBuilderOrphanBindDone
                             && string.Equals(workflow.Label, "SceneBuilder", StringComparison.Ordinal))
@@ -1345,17 +1356,19 @@ public class Collaborator : ICollaborator
                             }
 
                             var count = ApplyPendingList(applyList);
+                            var appliedKeys = new HashSet<string>(lastAppliedKeys, StringComparer.OrdinalIgnoreCase);
                             foreach (var u in applyList)
                                 _sessionProposals?.MarkAccepted(u.Key);
                             result.PendingUpdates.Clear();
                             result.UpdatedProperties.Clear();
 
                             var sb = new System.Text.StringBuilder();
-                            if (count > 0)
+                            if (appliedKeys.Count > 0)
                             {
-                                sb.AppendLine($"Applied {count} update(s) to your outline:");
+                                // Only what applied: a beat row can return 0 (#217 5.7).
+                                sb.AppendLine($"Applied {appliedKeys.Count} update(s) to your outline:");
                                 sb.AppendLine();
-                                foreach (var u in applyList)
+                                foreach (var u in applyList.Where(u => appliedKeys.Contains(u.Key)))
                                 {
                                     var valuePreview = TruncateForChat(FormatValueForDisplay(u.Value));
                                     sb.AppendLine($"**{u.Key}**: {valuePreview}");
@@ -1675,7 +1688,8 @@ public class Collaborator : ICollaborator
         {
             Key = u.Key,
             ElementName = ValueDisplay.SplitPascalCase(u.ElementLabel),
-            PropertyDisplayName = ValueDisplay.SplitPascalCase(u.Spec.Property),
+            // Collaborator #217 section 5.7: a beat row names itself ("Beat 3: Set-Up").
+            PropertyDisplayName = u.DisplayNameOverride ?? ValueDisplay.SplitPascalCase(u.Spec.Property),
             ProposedDisplay = string.IsNullOrEmpty(proposed) ? "(empty)" : proposed,
             CurrentDisplay = current,
             KindLabel = kindLabel,

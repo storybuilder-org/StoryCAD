@@ -59,6 +59,12 @@ internal static class ValueDisplay
             case List<string> entries:
                 return Bullets(entries);
 
+            // Collaborator #217 section 5.7: one beat row reads as what Accept will do to it.
+            case BeatRowValue row:
+                return row.BindGuid.HasValue
+                    ? $"binds {row.ElementName ?? ResolveName(row.BindGuid.Value, resolveElementName)} ({row.ElementType ?? "element"})"
+                    : $"new Scene \"{row.Row.SceneName?.Trim()}\"";
+
             case List<BeatInfo> beats:
                 return string.Join("\n", beats.Select((beat, i) =>
                     string.IsNullOrWhiteSpace(beat.Description)
