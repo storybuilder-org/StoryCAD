@@ -16,8 +16,8 @@ namespace StoryCADTests.Collaborator;
 
 /// <summary>
 ///     Collaborator #208 handoff, product law for #77:
-///     stub carries SceneType and CastMembers; a subproblem's beats take Scenes only,
-///     the Story Problem's beats may also take Problems.
+///     stub carries SceneType and CastMembers. Collaborator #217 (StoryCAD #1546 rule 4):
+///     any Problem's beats may hold free Scenes and free Problems together.
 /// </summary>
 [TestClass]
 public class HandoffContractTests
@@ -91,7 +91,7 @@ public class HandoffContractTests
     }
 
     [TestMethod]
-    public void SubproblemBeat_RefusesAProblemBinding()
+    public void SubproblemBeat_BindsAFreeProblem()
     {
         var (model, problem, runner) = Arrange("Complication");
         var other = new ProblemModel("Another problem", model, null);
@@ -101,8 +101,8 @@ public class HandoffContractTests
             new List<BeatInfo> { new("Catalyst", "the turn", AssignedElement: other.Uuid) },
             new WorkflowResult());
 
-        Assert.AreEqual(Guid.Empty, problem.StructureBeats[0].Guid,
-            "a subproblem's beats take Scenes only");
+        Assert.AreEqual(other.Uuid, problem.StructureBeats[0].Guid,
+            "#217: a subproblem's beats take free Problems as well as Scenes (StoryCAD #1546 rule 4)");
     }
 
     [TestMethod]
@@ -118,20 +118,5 @@ public class HandoffContractTests
 
         Assert.AreEqual(other.Uuid, problem.StructureBeats[0].Guid,
             "the Story Problem's beats may hold other Problems");
-    }
-
-    [TestMethod]
-    public void StoryProblemCategory_ComparesIgnoringCase()
-    {
-        var (model, problem, runner) = Arrange("story problem");
-        var other = new ProblemModel("A complication", model, null);
-        problem.StructureBeats.Add(new StructureBeat("Act I", "setup"));
-
-        runner.ApplyBeatSheetMerge(problem.Uuid,
-            new List<BeatInfo> { new("Act I", "setup", AssignedElement: other.Uuid) },
-            new WorkflowResult());
-
-        Assert.AreEqual(other.Uuid, problem.StructureBeats[0].Guid,
-            "the handoff requires an ignore-case compare; do not repeat the Ordinal bug");
     }
 }

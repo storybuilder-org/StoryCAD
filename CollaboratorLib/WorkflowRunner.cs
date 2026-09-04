@@ -35,6 +35,43 @@ namespace StoryCollaborator
         public Dictionary<string, JsonObject> Elements { get; init; } = new();
     }
 
+    /// <summary>
+    /// Collaborator #217 rule 5: the elements ProblemBuilder may offer for one Problem's beats.
+    /// </summary>
+    internal sealed record CandidateSet(HashSet<Guid> Scenes, HashSet<Guid> Problems)
+    {
+        public bool Contains(Guid element) => Scenes.Contains(element) || Problems.Contains(element);
+    }
+
+    internal enum BeatRowOutcome
+    {
+        /// <summary>The existing beat at this index is filled; nothing touches it.</summary>
+        Keep,
+        /// <summary>The proposal's GUID is a candidate and binds to this empty beat.</summary>
+        Bind,
+        /// <summary>No bind applies and the proposal names a Scene stub to create.</summary>
+        Create,
+        /// <summary>The proposal's GUID is not a candidate, or was used earlier; stays empty.</summary>
+        Refuse,
+        /// <summary>Neither a bindable GUID nor a scene name; stays empty.</summary>
+        Empty,
+        /// <summary>Past the last beat of a present sheet; not applied.</summary>
+        Drop
+    }
+
+    /// <summary>
+    /// Collaborator #217 section 5.5: one proposal row's outcome, computed before apply.
+    /// InstallsBeat is true when the Problem had no sheet, so the row first creates the beat.
+    /// ElementName carries the bound element's name (Keep, Bind) or the stub's name (Create).
+    /// </summary>
+    internal sealed record BeatRowPlan(
+        int Index,
+        string Title,
+        BeatRowOutcome Outcome,
+        string? ElementName,
+        Guid? ElementGuid,
+        bool InstallsBeat);
+
     internal class WorkflowRunner
     {
         private static HttpClient _httpClient = new() { Timeout = TimeSpan.FromMinutes(3) };
@@ -160,7 +197,7 @@ namespace StoryCollaborator
                 if (workflowIO.ExampleLists.Count > 0)
                     EnrichWithExamples(body.Args);
 
-                ApplyDeclaredInjections(body.Args);
+                ApplyDeclaredInjections(body.Args, gatheredElements);
 
                 // Issue #90 step 8 item 5: the direct-to-OpenAI fallback retired along with
                 // OPENAI_API_KEY on the client. A proxy failure now propagates to the outer
@@ -271,7 +308,30 @@ namespace StoryCollaborator
                 var listResult = _storyApi.GetElementsByType(collection.ElementType);
                 if (!listResult.IsSuccess) continue;
 
-                var projected = (listResult.Payload ?? Enumerable.Empty<StoryElement>())
+                var elements = (listResult.Payload ?? Enumerable.Empty<StoryElement>()).ToList();
+
+                // Collaborator #217 rule 5: a collection declared FreeElementsFor offers only the
+                // candidates for that gathered element's sheet. The same set gates the apply.
+                if (collection.FreeElementsFor != null)
+                {
+                    if (gatheredElements.TryGetValue(collection.FreeElementsFor, out var target) && target != null)
+                    {
+                        var candidates = GetCandidates(target.Uuid);
+                        var total = elements.Count;
+                        elements = elements.Where(e => candidates.Contains(e.Uuid)).ToList();
+                        _logger?.LogInformation("Candidates for {RequestName}: {Count} of {Total}",
+                            collection.RequestName, elements.Count, total);
+                    }
+                    else
+                    {
+                        // Rule 5 without a target is unsatisfiable; offer nothing rather than everything.
+                        _logger?.LogWarning("{RequestName}: FreeElementsFor '{Label}' was not gathered; offering nothing",
+                            collection.RequestName, collection.FreeElementsFor);
+                        elements = new List<StoryElement>();
+                    }
+                }
+
+                var projected = elements
                     .Select(e => ProjectCollectionElement(e, collection.Projection))
                     .ToList();
                 body.Args[collection.RequestName] = JsonSerializer.Serialize(projected, serOpts);
@@ -915,7 +975,8 @@ namespace StoryCollaborator
         private static readonly System.Text.RegularExpressions.Regex WhitespaceRuns =
             new(@"\s+", System.Text.RegularExpressions.RegexOptions.Compiled);
 
-        private static string FormatDisplayValue(PendingUpdate update)
+        // Instance since #217: the BeatSheet arm plans the merge against the live structure.
+        private string FormatDisplayValue(PendingUpdate update)
         {
             if (update.Value == null)
                 return string.Empty;
@@ -925,7 +986,7 @@ namespace StoryCollaborator
                 WriteVia.Scalar => update.Value.ToString() ?? string.Empty,
                 WriteVia.SimpleList when update.Value is System.Collections.ICollection c => $"{c.Count} items",
                 WriteVia.BeatSheet when update.Value is List<BeatInfo> beatList =>
-                    FormatBeatSheetDisplay(beatList),
+                    FormatBeatSheetDisplay(update.ElementUuid, beatList),
                 WriteVia.BeatSheet when update.Value is System.Collections.ICollection c => $"{c.Count} beats",
                 WriteVia.CastMembers when update.Value is System.Collections.ICollection c => $"{c.Count} cast members",
                 WriteVia.Relationships when update.Value is System.Collections.ICollection c => $"{c.Count} relationships",
@@ -1391,18 +1452,6 @@ namespace StoryCollaborator
         }
 
         /// <summary>
-        /// #208 handoff: true when this Problem is the Story Problem. Ignore-case by design.
-        /// </summary>
-        private bool IsStoryProblem(Guid problemUuid)
-        {
-            var result = _storyApi.GetStoryElement(problemUuid);
-            if (result?.IsSuccess != true || result.Payload is not ProblemModel problem)
-                return false;
-            return string.Equals(problem.ProblemCategory?.Trim(), "Story problem",
-                StringComparison.OrdinalIgnoreCase);
-        }
-
-        /// <summary>
         /// Collaborator #77: ProblemCategory must be set before ProblemBuilder runs, because it
         /// picks the beat sheet class. ProblemBuilder runs on any Problem, the story problem
         /// included; #211 deleted BeatScenes, whose gate refused it.
@@ -1675,12 +1724,81 @@ namespace StoryCollaborator
             return null;
         }
 
-        private static string FormatBeatSheetDisplay(List<BeatInfo> beats)
+        /// <summary>
+        /// Collaborator #217 section 5.5: the Review pane text for a beats proposal. One summary
+        /// line, then one line per row, rendered from the same plan the apply executes. The
+        /// one-line "9 beats (4 new scenes for empty beats)" it replaces hid which Scene went
+        /// to which beat until after Accept.
+        /// </summary>
+        internal string FormatBeatSheetDisplay(Guid problemUuid, List<BeatInfo> beats)
         {
-            var createCount = beats.Count(b => !string.IsNullOrWhiteSpace(b.SceneName));
-            if (createCount > 0)
-                return $"{beats.Count} beats ({createCount} new scenes for empty beats)";
-            return $"{beats.Count} beats";
+            var plan = PlanBeatSheetMerge(problemUuid, beats);
+            if (plan.Count == 0)
+                return $"{beats.Count} beats";
+
+            int kept = 0, bound = 0, created = 0, empty = 0, refused = 0, dropped = 0;
+            foreach (var row in plan)
+            {
+                switch (row.Outcome)
+                {
+                    case BeatRowOutcome.Keep: kept++; break;
+                    case BeatRowOutcome.Bind: bound++; break;
+                    case BeatRowOutcome.Create: created++; break;
+                    case BeatRowOutcome.Empty: empty++; break;
+                    case BeatRowOutcome.Refuse: refused++; break;
+                    case BeatRowOutcome.Drop: dropped++; break;
+                }
+            }
+
+            // Drop rows start at the sheet's row count, so that count is the rows before them.
+            var sheetRows = plan.Count - dropped;
+            var sb = new System.Text.StringBuilder();
+            sb.Append(plan.Count).Append(plan[0].InstallsBeat ? " new " : " ").Append(Plural(plan.Count, "beat")).Append(": ");
+            sb.Append($"{kept} kept, {bound} bound, {created} new {Plural(created, "scene")}, {empty} empty");
+            if (refused > 0) sb.Append($", {refused} refused");
+            if (dropped > 0) sb.Append($", {dropped} dropped");
+
+            foreach (var row in plan)
+            {
+                sb.Append('\n').Append(row.Index + 1).Append(". ").Append(row.Title).Append(": ");
+                switch (row.Outcome)
+                {
+                    case BeatRowOutcome.Keep:
+                        sb.Append("keeps ").Append(row.ElementName);
+                        break;
+                    case BeatRowOutcome.Bind:
+                        sb.Append("binds ").Append(row.ElementName)
+                            .Append(" (").Append(ElementTypeNameOf(row.ElementGuid!.Value)).Append(')');
+                        break;
+                    case BeatRowOutcome.Create:
+                        sb.Append("new Scene \"").Append(row.ElementName).Append('"');
+                        break;
+                    case BeatRowOutcome.Refuse:
+                        if (row.ElementName != null)
+                            sb.Append(row.ElementName).Append(" is already bound on this sheet, stays empty");
+                        else
+                            sb.Append(row.ElementGuid).Append(" is not a candidate, stays empty");
+                        break;
+                    case BeatRowOutcome.Drop:
+                        sb.Append("not applied, sheet has ").Append(sheetRows).Append(' ').Append(Plural(sheetRows, "row"));
+                        break;
+                    default:
+                        sb.Append("stays empty");
+                        break;
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        private static string Plural(int count, string noun) => count == 1 ? noun : noun + "s";
+
+        private string ElementTypeNameOf(Guid element)
+        {
+            var result = _storyApi.GetStoryElement(element);
+            return result?.IsSuccess == true && result.Payload != null
+                ? result.Payload.ElementType.ToString()
+                : "element";
         }
 
         /// <summary>
@@ -1696,7 +1814,9 @@ namespace StoryCollaborator
         /// capability, not a label test. Extracted so the wiring itself is testable: when this
         /// lived inline in the request path, deleting it left the whole suite green.
         /// </summary>
-        internal void ApplyDeclaredInjections(Dictionary<string, string> args)
+        internal void ApplyDeclaredInjections(
+            Dictionary<string, string> args,
+            Dictionary<string, StoryElement> gatheredElements)
         {
             if (workflowModel.InjectsStockScenes)
                 EnrichWithStockScenes(args);
@@ -1706,6 +1826,66 @@ namespace StoryCollaborator
 
             if (workflowModel.InjectsBeatSheets)
                 EnrichWithBeatSheets(args);
+
+            if (workflowModel.InjectsCurrentBeats)
+            {
+                // The target is the gathered "Problem", the label the category gate and the
+                // request loop read. Absent, the Worker merges the placeholder to an empty
+                // string and the template falls back to the catalog sheet.
+                if (gatheredElements.TryGetValue("Problem", out var target) && target != null)
+                    EnrichWithCurrentBeats(args, target.Uuid);
+                else
+                    _logger?.LogWarning("{Workflow}: no gathered Problem; CurrentBeats not injected",
+                        workflowModel.Label);
+            }
+        }
+
+        /// <summary>
+        /// Collaborator #217 section 5.4: the target Problem's sheet as it is now, so the model
+        /// returns its rows (a custom sheet included) and leaves filled beats alone. The exact
+        /// text "none" when the Problem has no sheet. When the structure cannot be read the arg
+        /// stays unset: "none" would tell the model there is no sheet, while an empty merge
+        /// makes the template fall back to the catalog.
+        /// </summary>
+        internal void EnrichWithCurrentBeats(Dictionary<string, string> args, Guid targetProblem)
+        {
+            var structure = _storyApi.GetProblemStructure(targetProblem);
+            if (!structure.IsSuccess)
+            {
+                _logger?.LogWarning("CurrentBeats: cannot load structure for {Problem}; not injected", targetProblem);
+                return;
+            }
+
+            var beats = structure.Payload.Beats?.ToList()
+                ?? new List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)>();
+
+            if (beats.Count == 0)
+            {
+                args["CurrentBeats"] = "none";
+                _logger?.LogInformation("Injected CurrentBeats (none)");
+                return;
+            }
+
+            var sb = new System.Text.StringBuilder();
+            var title = string.IsNullOrWhiteSpace(structure.Payload.Title) ? "(untitled)" : structure.Payload.Title;
+            sb.Append("Sheet: ").Append(title);
+            for (int i = 0; i < beats.Count; i++)
+            {
+                var beat = beats[i];
+                var bound = beat.LinkedElement.HasValue && beat.LinkedElement.Value != Guid.Empty
+                    ? ElementNameOf(beat.LinkedElement.Value)
+                    : "empty";
+                sb.Append('\n').Append(i + 1).Append(". ").Append(beat.BeatTitle).Append(": ").Append(bound);
+
+                var description = beat.BeatDescription ?? string.Empty;
+                if (description.StartsWith(@"{\rtf", StringComparison.Ordinal))
+                    description = new RichTextStripper().StripRichTextFormat(description) ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(description))
+                    sb.Append("\n  ").Append(description.Trim());
+            }
+
+            args["CurrentBeats"] = sb.ToString();
+            _logger?.LogInformation("Injected CurrentBeats ({Length} chars)", args["CurrentBeats"].Length);
         }
 
         internal void EnrichWithConflictTaxonomy(Dictionary<string, string> args)
@@ -1816,11 +1996,109 @@ namespace StoryCollaborator
         }
 
         /// <summary>
+        /// Collaborator #217 section 5.5: one outcome per proposal row, computed before apply.
+        /// <see cref="ApplyBeatSheetMerge"/> executes this plan and <see cref="FormatBeatSheetDisplay"/>
+        /// renders it, so the Review pane cannot show a bind the apply then refuses.
+        /// Empty when the Problem's structure cannot be loaded.
+        /// </summary>
+        internal List<BeatRowPlan> PlanBeatSheetMerge(Guid problemUuid, List<BeatInfo> proposed)
+        {
+            var plan = new List<BeatRowPlan>();
+            if (proposed == null || proposed.Count == 0)
+                return plan;
+
+            var existingResult = _storyApi.GetProblemStructure(problemUuid);
+            if (!existingResult.IsSuccess)
+                return plan;
+
+            var existingBeats = existingResult.Payload.Beats?.ToList()
+                ?? new List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)>();
+
+            // Collaborator #217 rule 5: the same set the request offered. A GUID outside it is
+            // refused here whatever the model wrote.
+            var candidates = GetCandidates(problemUuid);
+            bool installs = existingBeats.Count == 0;
+            // Collaborator #77: capability, not label. A new workflow that sets SceneName used
+            // to create nothing because this line tested for the literal label "BeatScenes".
+            bool allowSceneCreate = workflowModel.CreatesScenesForBeats;
+
+            // GUIDs on this sheet already, plus each Bind this plan makes: one placement per sheet.
+            var usedOnSheet = new HashSet<Guid>(
+                existingBeats
+                    .Where(b => b.LinkedElement.HasValue && b.LinkedElement.Value != Guid.Empty)
+                    .Select(b => b.LinkedElement!.Value));
+
+            for (int i = 0; i < proposed.Count; i++)
+            {
+                var beat = proposed[i];
+                var title = string.IsNullOrWhiteSpace(beat.Title) ? $"Beat {i + 1}" : beat.Title.Trim();
+
+                if (!installs && i >= existingBeats.Count)
+                {
+                    // Collaborator #77: a present sheet sets the row count. The row is not applied.
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Drop, null, null, false));
+                    continue;
+                }
+
+                if (!installs)
+                {
+                    var current = existingBeats[i];
+                    if (!string.IsNullOrWhiteSpace(current.BeatTitle))
+                        title = current.BeatTitle;
+
+                    if (current.LinkedElement.HasValue && current.LinkedElement.Value != Guid.Empty)
+                    {
+                        // Collaborator #77: a filled beat is the writer's. Nothing touches it.
+                        plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Keep,
+                            ElementNameOf(current.LinkedElement.Value), current.LinkedElement.Value, false));
+                        continue;
+                    }
+                }
+
+                Guid? assigned = beat.AssignedElement.HasValue && beat.AssignedElement.Value != Guid.Empty
+                    ? beat.AssignedElement
+                    : null;
+
+                // Collaborator #77: an empty beat takes an existing free element before a new Scene.
+                // A proposal may carry both; creating then would leave the real Scene orphaned and
+                // put a duplicate on the sheet.
+                bool isCandidate = assigned.HasValue && candidates.Contains(assigned.Value);
+                if (isCandidate && usedOnSheet.Add(assigned!.Value))
+                {
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Bind,
+                        ElementNameOf(assigned.Value), assigned.Value, installs));
+                    continue;
+                }
+
+                if (allowSceneCreate && !string.IsNullOrWhiteSpace(beat.SceneName))
+                {
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Create, beat.SceneName.Trim(), null, installs));
+                    continue;
+                }
+
+                if (assigned.HasValue)
+                {
+                    // A named Refuse is a candidate an earlier row already bound (a sheet is a
+                    // linear order). An unnamed one is outside the set.
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Refuse,
+                        isCandidate ? ElementNameOf(assigned.Value) : null, assigned.Value, installs));
+                    continue;
+                }
+
+                plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Empty, null, null, installs));
+            }
+
+            return plan;
+        }
+
+        /// <summary>
         /// Collaborator #167: install or merge beat proposals without clearing filled assignments.
         /// Empty sheet: create proposed beats and assign valid candidates.
         /// Non-empty: fill blank descriptions; assign only empty slots; never reassign.
         /// Collaborator #150: empty slots with SceneName create a Scene under the problem and
         /// assign it, but only for a workflow that declares CreatesScenesForBeats.
+        /// Collaborator #217: executes <see cref="PlanBeatSheetMerge"/> row by row. The Review
+        /// pane rendered that same plan.
         /// </summary>
         internal void ApplyBeatSheetMerge(Guid problemUuid, List<BeatInfo> proposed, WorkflowResult result)
         {
@@ -1829,20 +2107,6 @@ namespace StoryCollaborator
                 result.StatusMessages.Add("BeatSheet: empty proposal; no changes");
                 return;
             }
-
-            var problemGuids = new HashSet<Guid>(GetCandidateGuids(StoryItemType.Problem));
-            var sceneGuids = new HashSet<Guid>(GetCandidateGuids(StoryItemType.Scene));
-
-            // #208 handoff product law: only the Story Problem may hold other Problems on its
-            // beats. A subproblem's beats take Scenes only. Compare ignore-case: the canonical
-            // value is "Story problem", and an Ordinal compare against "Story Problem" silently
-            // never matches. That bug shipped in the BeatScenes gate #211 deleted.
-            var validAssignGuids = IsStoryProblem(problemUuid)
-                ? new HashSet<Guid>(problemGuids.Concat(sceneGuids))
-                : new HashSet<Guid>(sceneGuids);
-            // Collaborator #77: capability, not label. A new workflow that sets SceneName used
-            // to create nothing because this line tested for the literal label "BeatScenes".
-            bool allowSceneCreate = workflowModel.CreatesScenesForBeats;
 
             var existingResult = _storyApi.GetProblemStructure(problemUuid);
             if (!existingResult.IsSuccess)
@@ -1853,164 +2117,204 @@ namespace StoryCollaborator
 
             var existingBeats = existingResult.Payload.Beats?.ToList()
                 ?? new List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)>();
+            var plan = PlanBeatSheetMerge(problemUuid, proposed);
 
-            // GUIDs already assigned on this problem (preserve; block multi-problem on same sheet).
-            var usedOnSheet = new HashSet<Guid>(
-                existingBeats
-                    .Where(b => b.LinkedElement.HasValue && b.LinkedElement.Value != Guid.Empty)
-                    .Select(b => b.LinkedElement!.Value));
-
-            if (existingBeats.Count == 0)
+            foreach (var row in plan)
             {
-                for (int i = 0; i < proposed.Count; i++)
+                var beat = proposed[row.Index];
+
+                if (row.Outcome == BeatRowOutcome.Drop)
                 {
-                    var beat = proposed[i];
-                    var title = string.IsNullOrWhiteSpace(beat.Title) ? $"Beat {i + 1}" : beat.Title.Trim();
-                    var desc = beat.Description?.Trim() ?? string.Empty;
-                    _storyApi.CreateBeat(problemUuid, title, desc);
-                    TryFillEmptyBeat(problemUuid, i, beat, allowSceneCreate, validAssignGuids, problemGuids, usedOnSheet, result);
-                }
-                return;
-            }
-
-            // Collaborator #77: a sheet that is already present is the user's. The chosen sheet
-            // sets the beat count, so do not append rows to it. An empty Problem is handled above.
-
-            int pairCount = Math.Min(existingBeats.Count, proposed.Count);
-            for (int i = 0; i < pairCount; i++)
-            {
-                var current = existingBeats[i];
-                var beat = proposed[i];
-
-                // Collaborator #77: a filled beat is the user's. Do not touch its assignment,
-                // its title, or its description. This test used to sit below the text write,
-                // so a filled beat with a blank description took model text under Accept All.
-                var alreadyFilled = current.LinkedElement.HasValue && current.LinkedElement.Value != Guid.Empty;
-                if (alreadyFilled)
+                    // Collaborator #77: a sheet that is already present is the user's. The chosen
+                    // sheet sets the beat count, so do not append rows to it.
+                    result.StatusMessages.Add(
+                        $"Beat {row.Index}: not applied, sheet has {existingBeats.Count} rows");
                     continue;
-
-                var newTitle = string.IsNullOrWhiteSpace(current.BeatTitle) && !string.IsNullOrWhiteSpace(beat.Title)
-                    ? beat.Title.Trim()
-                    : current.BeatTitle;
-                // Prefer keep filled description; fill blank only.
-                var newDesc = string.IsNullOrWhiteSpace(current.BeatDescription) && !string.IsNullOrWhiteSpace(beat.Description)
-                    ? beat.Description.Trim()
-                    : current.BeatDescription;
-
-                if (!string.Equals(newTitle, current.BeatTitle, StringComparison.Ordinal)
-                    || !string.Equals(newDesc, current.BeatDescription, StringComparison.Ordinal))
-                {
-                    _storyApi.UpdateBeat(problemUuid, i, newTitle ?? string.Empty, newDesc ?? string.Empty);
                 }
 
-                TryFillEmptyBeat(problemUuid, i, beat, allowSceneCreate, validAssignGuids, problemGuids, usedOnSheet, result);
+                if (row.InstallsBeat)
+                {
+                    _storyApi.CreateBeat(problemUuid, row.Title, beat.Description?.Trim() ?? string.Empty);
+                }
+                else
+                {
+                    // Collaborator #77: a filled beat is the user's. Do not touch its assignment,
+                    // its title, or its description. This test used to sit below the text write,
+                    // so a filled beat with a blank description took model text under Accept All.
+                    if (row.Outcome == BeatRowOutcome.Keep)
+                        continue;
+
+                    var current = existingBeats[row.Index];
+                    var newTitle = string.IsNullOrWhiteSpace(current.BeatTitle) && !string.IsNullOrWhiteSpace(beat.Title)
+                        ? beat.Title.Trim()
+                        : current.BeatTitle;
+                    // Prefer keep filled description; fill blank only.
+                    var newDesc = string.IsNullOrWhiteSpace(current.BeatDescription) && !string.IsNullOrWhiteSpace(beat.Description)
+                        ? beat.Description.Trim()
+                        : current.BeatDescription;
+
+                    if (!string.Equals(newTitle, current.BeatTitle, StringComparison.Ordinal)
+                        || !string.Equals(newDesc, current.BeatDescription, StringComparison.Ordinal))
+                    {
+                        _storyApi.UpdateBeat(problemUuid, row.Index, newTitle ?? string.Empty, newDesc ?? string.Empty);
+                    }
+                }
+
+                switch (row.Outcome)
+                {
+                    case BeatRowOutcome.Bind:
+                        AssignBeat(problemUuid, row.Index, row.ElementGuid!.Value, result);
+                        break;
+                    case BeatRowOutcome.Create:
+                        CreateSceneStub(problemUuid, row.Index, beat, result);
+                        break;
+                    case BeatRowOutcome.Refuse:
+                        result.StatusMessages.Add(row.ElementName != null
+                            ? $"Beat {row.Index} assigned_element {row.ElementGuid} already used on this sheet; left unassigned"
+                            : $"Beat {row.Index} assigned_element {row.ElementGuid} not in candidate set; left unassigned");
+                        break;
+                }
             }
         }
 
         /// <summary>
-        /// Empty beat only: a workflow declaring CreatesScenesForBeats may create a Scene from
-        /// SceneName; otherwise assign GUID.
+        /// Collaborator #150 / #77: create the Scene stub a Create row names, fill the #208
+        /// stub contract, and assign it to the beat.
         /// </summary>
-        private void TryFillEmptyBeat(
-            Guid problemUuid,
-            int beatIndex,
-            BeatInfo beat,
-            bool allowSceneCreate,
-            HashSet<Guid> validAssignGuids,
-            HashSet<Guid> problemGuids,
-            HashSet<Guid> usedOnSheet,
-            WorkflowResult result)
+        private void CreateSceneStub(Guid problemUuid, int beatIndex, BeatInfo beat, WorkflowResult result)
         {
-            // Collaborator #77: an empty beat takes an existing free element before a new Scene.
-            // A proposal may carry both; creating then would leave the real Scene orphaned and
-            // put a duplicate on the sheet.
-            bool canBindProposed = beat.AssignedElement.HasValue
-                && beat.AssignedElement.Value != Guid.Empty
-                && validAssignGuids.Contains(beat.AssignedElement.Value)
-                && !usedOnSheet.Contains(beat.AssignedElement.Value);
-
-            if (allowSceneCreate && !canBindProposed && !string.IsNullOrWhiteSpace(beat.SceneName))
+            var name = beat.SceneName!.Trim();
+            var addResult = _storyApi.AddElement(StoryItemType.Scene, problemUuid.ToString(), name);
+            if (!addResult.IsSuccess)
             {
-                var name = beat.SceneName.Trim();
-                var addResult = _storyApi.AddElement(StoryItemType.Scene, problemUuid.ToString(), name);
-                if (!addResult.IsSuccess)
-                {
-                    result.StatusMessages.Add(
-                        $"Beat {beatIndex} scene create failed: {addResult.ErrorMessage}");
-                    return;
-                }
-
-                var newGuid = addResult.Payload;
-
-                // Collaborator #77 / #208 stub contract: Name, Description, Notes.
-                // Description is the scene summary. Notes carries problem context down to the
-                // scene, including the situation-sheet material that has no Problem property.
-                if (!string.IsNullOrWhiteSpace(beat.SceneDescription))
-                    _storyApi.UpdateElementProperty(newGuid, "Description", beat.SceneDescription.Trim());
-                if (!string.IsNullOrWhiteSpace(beat.SceneNotes))
-                    _storyApi.UpdateElementProperty(newGuid, "Notes", beat.SceneNotes.Trim());
-                if (!string.IsNullOrWhiteSpace(beat.SceneType))
-                    _storyApi.UpdateElementProperty(newGuid, "SceneType", beat.SceneType.Trim());
-
-                // Cast: only names that resolve to a Character. An unresolved name is skipped,
-                // never invented (#208 handoff stub contract).
-                if (beat.SceneCast != null)
-                {
-                    var characterGuids = new HashSet<Guid>(GetCandidateGuids(StoryItemType.Character));
-                    foreach (var castGuid in beat.SceneCast)
-                    {
-                        if (castGuid == Guid.Empty || !characterGuids.Contains(castGuid))
-                        {
-                            result.StatusMessages.Add(
-                                $"Beat {beatIndex} cast member {castGuid} did not resolve; skipped");
-                            continue;
-                        }
-                        _storyApi.AddCastMember(newGuid, castGuid);
-                    }
-                }
-
-                validAssignGuids.Add(newGuid);
-                TryAssignBeat(problemUuid, beatIndex, newGuid, validAssignGuids, problemGuids, usedOnSheet, result);
-                result.StatusMessages.Add($"Beat {beatIndex}: created Scene '{name}' ({newGuid})");
+                result.StatusMessages.Add(
+                    $"Beat {beatIndex} scene create failed: {addResult.ErrorMessage}");
                 return;
             }
 
-            TryAssignBeat(problemUuid, beatIndex, beat.AssignedElement, validAssignGuids, problemGuids, usedOnSheet, result);
+            var newGuid = addResult.Payload;
+
+            // Collaborator #77 / #208 stub contract: Name, Description, Notes.
+            // Description is the scene summary. Notes carries problem context down to the
+            // scene, including the situation-sheet material that has no Problem property.
+            if (!string.IsNullOrWhiteSpace(beat.SceneDescription))
+                _storyApi.UpdateElementProperty(newGuid, "Description", beat.SceneDescription.Trim());
+            if (!string.IsNullOrWhiteSpace(beat.SceneNotes))
+                _storyApi.UpdateElementProperty(newGuid, "Notes", beat.SceneNotes.Trim());
+            if (!string.IsNullOrWhiteSpace(beat.SceneType))
+                _storyApi.UpdateElementProperty(newGuid, "SceneType", beat.SceneType.Trim());
+
+            // Cast: only names that resolve to a Character. An unresolved name is skipped,
+            // never invented (#208 handoff stub contract).
+            if (beat.SceneCast != null)
+            {
+                var characterGuids = new HashSet<Guid>(GetCandidateGuids(StoryItemType.Character));
+                foreach (var castGuid in beat.SceneCast)
+                {
+                    if (castGuid == Guid.Empty || !characterGuids.Contains(castGuid))
+                    {
+                        result.StatusMessages.Add(
+                            $"Beat {beatIndex} cast member {castGuid} did not resolve; skipped");
+                        continue;
+                    }
+                    _storyApi.AddCastMember(newGuid, castGuid);
+                }
+            }
+
+            AssignBeat(problemUuid, beatIndex, newGuid, result);
+            result.StatusMessages.Add($"Beat {beatIndex}: created Scene '{name}' ({newGuid})");
         }
 
-        private void TryAssignBeat(
-            Guid problemUuid,
-            int beatIndex,
-            Guid? assigned,
-            HashSet<Guid> validAssignGuids,
-            HashSet<Guid> problemGuids,
-            HashSet<Guid> usedOnSheet,
-            WorkflowResult result)
+        private void AssignBeat(Guid problemUuid, int beatIndex, Guid element, WorkflowResult result)
         {
-            if (!assigned.HasValue || assigned.Value == Guid.Empty)
-                return;
-
-            if (!validAssignGuids.Contains(assigned.Value))
-            {
-                result.StatusMessages.Add(
-                    $"Beat {beatIndex} assigned_element {assigned.Value} not in candidate set; left unassigned");
-                return;
-            }
-
-            // One problem per beat sheet (and prefer one scene): skip if already used on this sheet.
-            if (usedOnSheet.Contains(assigned.Value))
-            {
-                result.StatusMessages.Add(
-                    $"Beat {beatIndex} assigned_element {assigned.Value} already used on this sheet; left unassigned");
-                return;
-            }
-
-            var assignResult = _storyApi.AssignElementToBeat(problemUuid, beatIndex, assigned.Value);
-            if (assignResult.IsSuccess)
-                usedOnSheet.Add(assigned.Value);
-            else
+            var assignResult = _storyApi.AssignElementToBeat(problemUuid, beatIndex, element);
+            if (!assignResult.IsSuccess)
                 result.StatusMessages.Add(
                     $"Beat {beatIndex} assign failed: {assignResult.ErrorMessage}");
+        }
+
+        /// <summary>
+        /// Collaborator #217 rule 5: the elements ProblemBuilder may offer for the target
+        /// Problem's beats. Free means on no sheet and not in the trash. Rule 2 (a Scene may sit
+        /// on many sheets) still holds by hand on the Structure tab; this run never offers the
+        /// second placement.
+        /// </summary>
+        internal CandidateSet GetCandidates(Guid targetProblem)
+        {
+            var scenes = GetLiveElements(StoryItemType.Scene);
+            var problems = GetLiveElements(StoryItemType.Problem);
+
+            // Placed: bound on a filled beat of any Problem that is not in the trash.
+            var placed = new HashSet<Guid>();
+            foreach (var problem in problems.OfType<ProblemModel>())
+            {
+                if (problem.StructureBeats == null)
+                    continue;
+                foreach (var beat in problem.StructureBeats)
+                {
+                    if (beat.Guid != Guid.Empty)
+                        placed.Add(beat.Guid);
+                }
+            }
+
+            var sceneSet = new HashSet<Guid>(scenes.Select(s => s.Uuid).Where(g => !placed.Contains(g)));
+            var problemSet = new HashSet<Guid>(problems.Select(p => p.Uuid).Where(g => !placed.Contains(g)));
+
+            // Self: OutlineService refuses a Problem on its own beat.
+            problemSet.Remove(targetProblem);
+
+            // Rule 3: the Story Problem is never bound to a beat.
+            var overviewResult = _storyApi.GetElementsByType(StoryItemType.StoryOverview);
+            if (overviewResult.IsSuccess
+                && overviewResult.Payload?.FirstOrDefault() is OverviewModel overview
+                && overview.StoryProblem != Guid.Empty)
+            {
+                problemSet.Remove(overview.StoryProblem);
+            }
+
+            // Rule 4: an ancestor on the target's beat would close a cycle. StoryCAD #1546's
+            // guard has not landed, so a visited set keeps a bad file from hanging this walk.
+            var visited = new HashSet<Guid> { targetProblem };
+            var cursor = ReadBoundStructure(targetProblem);
+            while (cursor != Guid.Empty && visited.Add(cursor))
+            {
+                problemSet.Remove(cursor);
+                cursor = ReadBoundStructure(cursor);
+            }
+
+            return new CandidateSet(sceneSet, problemSet);
+        }
+
+        private Guid ReadBoundStructure(Guid problemUuid)
+        {
+            var result = _storyApi.GetStoryElement(problemUuid);
+            return result?.IsSuccess == true && result.Payload is ProblemModel problem
+                ? problem.BoundStructure
+                : Guid.Empty;
+        }
+
+        /// <summary>Elements of one type that are not in the trash.</summary>
+        private List<StoryElement> GetLiveElements(StoryItemType type)
+        {
+            var result = _storyApi.GetElementsByType(type);
+            if (!result.IsSuccess || result.Payload == null)
+                return new List<StoryElement>();
+            return result.Payload.Where(e => !IsInTrash(e)).ToList();
+        }
+
+        /// <summary>
+        /// Trash: the node chain ends at the TrashCan root, the same test OutlineService makes
+        /// on its delete path. A deserialized element with no node is not trashed.
+        /// </summary>
+        private static bool IsInTrash(StoryElement element) =>
+            element.Node != null && StoryNodeItem.RootNodeType(element.Node) == StoryItemType.TrashCan;
+
+        private string ElementNameOf(Guid element)
+        {
+            var result = _storyApi.GetStoryElement(element);
+            return result?.IsSuccess == true && result.Payload != null
+                ? result.Payload.Name
+                : element.ToString();
         }
 
         private static List<JsonElement> ExtractTypedEntries(JsonElement elem)

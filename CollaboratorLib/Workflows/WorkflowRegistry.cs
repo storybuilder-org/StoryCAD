@@ -355,7 +355,7 @@ namespace StoryCollaborator.Workflows
                                  "with scenes for its empty beats.",
                     explanation: "One pass over a Problem you selected. It writes the fields a Problem " +
                                  "needs to be usable, chooses a beat sheet that fits the Problem Category " +
-                                 "and Conflict Type, binds scenes you already wrote to empty beats, and " +
+                                 "and Conflict Type, binds free scenes and problems to empty beats, and " +
                                  "creates scene stubs for the rest. It never changes a beat you filled and " +
                                  "never adds beats to a sheet you already chose. Set Problem Category, " +
                                  "Protagonist, and Antagonist before you run it.",
@@ -438,17 +438,20 @@ namespace StoryCollaborator.Workflows
                         },
                         CollectionInputs = new List<CollectionInput>
                         {
+                            // #217 rule 5: free elements for this Problem's sheet only.
                             new CollectionInput
                             {
                                 RequestName = "ProblemChoices",
                                 ElementType = StoryItemType.Problem,
-                                Projection = ElementProjection.BaseStoryElement
+                                Projection = ElementProjection.BaseStoryElement,
+                                FreeElementsFor = "Problem"
                             },
                             new CollectionInput
                             {
                                 RequestName = "SceneChoices",
                                 ElementType = StoryItemType.Scene,
-                                Projection = ElementProjection.BaseStoryElement
+                                Projection = ElementProjection.BaseStoryElement,
+                                FreeElementsFor = "Problem"
                             },
                             // #208 handoff: cast on a created stub, resolved from this set.
                             new CollectionInput
@@ -465,7 +468,8 @@ namespace StoryCollaborator.Workflows
                     RequiresProblemCategory = true,
                     InjectsConflictTaxonomy = true,
                     InjectsBeatSheets = true,
-                    InjectsStockScenes = true
+                    InjectsStockScenes = true,
+                    InjectsCurrentBeats = true
                 },
                 // === Character Workflows ===
                 // #182 DefineCharacter: world identity + personality. Occupation Role lives here.

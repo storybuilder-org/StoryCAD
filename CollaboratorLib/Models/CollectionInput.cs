@@ -14,4 +14,12 @@ public sealed class CollectionInput
     public StoryItemType ElementType { get; init; }
 
     public ElementProjection Projection { get; init; }
+
+    /// <summary>
+    /// Collaborator #217 rule 5: when set, the label of the gathered element whose sheet these
+    /// candidates are for, and the collection offers only that Problem's free elements (on no
+    /// sheet, not in the trash, not the target, the Story Problem, or an ancestor). Null offers
+    /// every element of the type.
+    /// </summary>
+    public string? FreeElementsFor { get; init; }
 }
