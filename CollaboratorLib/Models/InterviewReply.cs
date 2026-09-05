@@ -24,26 +24,32 @@ public enum InterviewVerdict
 /// </summary>
 public sealed record InterviewReply(InterviewVerdict Verdict, string Question)
 {
+    // The token may carry spaces or hyphens ("GOT IT", "NOT-THIS"); both are stripped
+    // before the table lookup. Anything else on the header line fails the match.
     private static readonly Regex HeaderPattern = new(
-        @"^\s*VERDICT\s*:\s*(?<verdict>[A-Za-z-]+)\s*$",
+        @"^\s*VERDICT\s*:\s*(?<verdict>[A-Za-z][A-Za-z -]*?)\s*$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     /// <summary>
     /// Parses a reply. Missing header, unknown token, and empty reply are Keep asking.
-    /// Does not use Enum.TryParse as the product map.
+    /// Does not use Enum.TryParse as the product map. Leading blank lines are ignored:
+    /// the header must be the first line with text on it, not the first line.
     /// </summary>
     public static InterviewReply Parse(string reply)
     {
         if (string.IsNullOrWhiteSpace(reply))
             return new InterviewReply(InterviewVerdict.KeepAsking, string.Empty);
 
-        var lines = reply.Replace("\r\n", "\n").Split('\n');
+        var lines = reply.TrimStart().Replace("\r\n", "\n").Split('\n');
         var match = HeaderPattern.Match(lines[0]);
 
         if (!match.Success)
             return new InterviewReply(InterviewVerdict.KeepAsking, reply.Trim());
 
-        var token = match.Groups["verdict"].Value.Replace("-", string.Empty).ToUpperInvariant();
+        var token = match.Groups["verdict"].Value
+            .Replace("-", string.Empty)
+            .Replace(" ", string.Empty)
+            .ToUpperInvariant();
         var body = string.Join("\n", lines, 1, lines.Length - 1).Trim();
 
         var verdict = token switch

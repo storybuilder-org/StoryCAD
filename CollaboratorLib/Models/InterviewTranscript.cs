@@ -31,6 +31,22 @@ public sealed class InterviewTranscript
             answer.Trim()));
     }
 
+    /// <summary>
+    /// Extends the last answer. After a failed or empty Worker reply the writer's answer is
+    /// on record with no question after it; their next message continues that answer
+    /// rather than opening a second turn on the same question. False when there is
+    /// nothing to extend or nothing to add.
+    /// </summary>
+    public bool ExtendLastAnswer(string more)
+    {
+        if (_turns.Count == 0 || string.IsNullOrWhiteSpace(more))
+            return false;
+
+        var last = _turns[^1];
+        _turns[^1] = last with { Answer = last.Answer + " " + more.Trim() };
+        return true;
+    }
+
     /// <summary>What the Worker sees. Tags are [Field] only.</summary>
     public string ToPromptText()
     {

@@ -142,6 +142,50 @@ public class InterviewReplyTests
         Assert.AreEqual(InterviewVerdict.KeepAsking, reply.Verdict);
         Assert.AreEqual("What do you not see?", reply.Question);
     }
+
+    [TestMethod]
+    public void Parse_LeadingBlankLine_StillReadsTheHeader()
+    {
+        var reply = InterviewReply.Parse("\n\nVERDICT: GOTIT\nWhen did that first work?");
+
+        Assert.AreEqual(InterviewVerdict.GotIt, reply.Verdict);
+        Assert.AreEqual("When did that first work?", reply.Question);
+    }
+
+    [TestMethod]
+    public void Parse_SpacedTokens_GotItAndNotThis()
+    {
+        Assert.AreEqual(InterviewVerdict.GotIt,
+            InterviewReply.Parse("VERDICT: GOT IT\nq").Verdict);
+        Assert.AreEqual(InterviewVerdict.NotThis,
+            InterviewReply.Parse("Verdict: Not this\nq").Verdict);
+    }
+
+    [TestMethod]
+    public void ExtendLastAnswer_AppendsToTheLastTurn()
+    {
+        var transcript = new InterviewTranscript();
+        transcript.Add("Flaw", "That's fair to say?", "Yes.");
+
+        var extended = transcript.ExtendLastAnswer("I want the Box shut.");
+
+        Assert.IsTrue(extended);
+        Assert.AreEqual(1, transcript.Turns.Count);
+        Assert.AreEqual("Yes. I want the Box shut.", transcript.Turns[0].Answer);
+        Assert.AreEqual("That's fair to say?", transcript.Turns[0].Question);
+    }
+
+    [TestMethod]
+    public void ExtendLastAnswer_WithNothingToExtend_ReturnsFalse()
+    {
+        var transcript = new InterviewTranscript();
+
+        Assert.IsFalse(transcript.ExtendLastAnswer("anything"));
+
+        transcript.Add("Flaw", "q", "a");
+        Assert.IsFalse(transcript.ExtendLastAnswer("   "));
+        Assert.AreEqual("a", transcript.Turns[0].Answer);
+    }
 }
 
 [TestClass]
