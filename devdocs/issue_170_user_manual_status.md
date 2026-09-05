@@ -114,3 +114,48 @@ Collaborator works on a part: one story element, or a small related set, and its
 ## State at the end of the 2026-09-05 session
 
 Branch `issue-170-collaborator-manual`, 12 commits ahead of `dev` (`61186daf`), not pushed. Local preview: `bundle exec jekyll serve --port 4000 --livereload` from the StoryCAD root; the watcher on Windows dies every few edits (Ruby iteration and null-byte errors) and a restart fixes it. Done: items 0, 1 (page), 2, 3 (folder and placeholder form), 4 (pages), 5, 6 (standard), 7. Open: item 3 outline decision and screenshots (14 placeholders now), item 6 voice pass over Opening Collaborator, Running a Workflow, Reviewing Suggestions, Chat, Tips, both tutorial pages, the Tutorial index, and the landing page (which still says "additional paid feature" and "free trial"), Character Interview entry after #119, the Later list.
+
+## Shot list (item 3), written 2026-09-05
+
+Capture on a labeled beta build against the chosen outline, in spine order, so one story runs through every image. Window at a consistent size; the Property Updates list in view. Save to `docs/media/Collaborator/` under the file name given; replace the matching placeholder line with a Markdown image whose alt text describes what the frame shows.
+
+### New images (14 placeholders)
+
+| # | File | Page | Frame | Outline state when taken |
+|---|------|------|-------|--------------------------|
+| 1 | Collaborator-Access-Prompt.png | Getting_Started.md | The Story Collaborator window as it first opens on the fresh outline: workflow list, empty center, chat | New outline, Story Idea only, approved tester |
+| 2 | Collaborator-Outline-Gaps.png | Workflows/Outline_Gaps.md | The Outline gaps page with its Guess sentence and the Overview's missing fields as links | Same as 1 |
+| 3 | Collaborator-Workflow-Premise.png | Workflows/Overview_Workflows.md | Property Updates after Ideation (Story idea => Concept => Premise): Concept and Premise rows marked New, Story Idea marked Has your text | After 2; before accepting |
+| 4 | Collaborator-Workflow-Story-Form.png | Workflows/Overview_Workflows.md | The two rows after Story Form | After accepting 3 |
+| 5 | Collaborator-Workflow-Story-Problem.png | Workflows/Overview_Workflows.md | Property Updates after Story Problem (Premise => Problem + Characters): Problem rows and one Name row per created character | After 4; Problem and two characters created in the pickers |
+| 6 | Collaborator-Workflow-Problem-Builder.png | Workflows/Problem_Workflows.md | Property Updates after Problem Builder: Problem fields above, one row per beat below | After accepting 5; Problem Category set |
+| 7 | Collaborator-Workflow-Inner-Outer.png | Workflows/Problem_Workflows.md | Property Updates after Inner and Outer Problems: inner Problem rows and the protagonist's Flaw row | After 6; inner Problem created in the picker |
+| 8 | Collaborator-Workflow-Story-Function.png | Workflows/Character_Workflows.md | The three rows after Character Story Function on the protagonist | After 7 |
+| 9 | Collaborator-Workflow-Define-Character.png | Workflows/Character_Workflows.md | Property Updates after Define Character, scrolled to show the list's length | After 8, same character |
+| 10 | Collaborator-Workflow-Flaw-Backstory.png | Workflows/Character_Workflows.md | The two rows after Flaw and Backstory on the antagonist, whose Flaw tab is empty | After 9, antagonist |
+| 11 | Collaborator-Workflow-Relationship.png | Workflows/Character_Workflows.md | The relationship row after Character Relationship, with the resulting Relationships tab entry in StoryCAD beside it | After 10, protagonist and antagonist |
+| 12 | Collaborator-Workflow-Story-World.png | Workflows/World_and_Setting_Workflows.md | Property Updates after Define Story World on a StoryWorld created in the picker | Any point after 5 |
+| 13 | Collaborator-Workflow-Setting-Builder.png | Workflows/World_and_Setting_Workflows.md | Property Updates after Setting Builder: Setting tab rows above, the four senses below | A Setting created for the story, any point after 5 |
+| 14 | Collaborator-Workflow-Scene-Builder.png | Workflows/Scene_Workflows.md | Property Updates after Scene Builder on a stub Problem Builder created | After 6 |
+
+Text placeholder, not a screenshot: Getting_Started.md, what the app shows between first launch and approval. Waits on the #97 onboarding decisions.
+
+### Existing images (16 referenced), retake on the chosen outline or keep
+
+| File | Pages | Decision |
+|------|-------|----------|
+| Collaborator-Toolbar-Button.png | Getting Started, Opening | Keep; outline-independent |
+| Collaborator-With-StoryCAD.png | What Collaborator Is | Retake with the chosen outline visible in both windows |
+| Collaborator-Workflow-List.png | Workflows and Writing Craft, Workflow Reference | Retake; must show the current 12 workflows in six groups |
+| Collaborator-Window-Overview.png | Opening | Retake on the chosen outline after a run |
+| Collaborator-Workflow-Pane.png | Opening, A Path to Try | Retake; must show the five current default stars and Story World group |
+| Collaborator-Customize-Workflows.png | Opening | Retake; current workflow set |
+| Collaborator-Pane-Collapsed.png | Opening | Retake on the chosen outline |
+| Collaborator-Element-Picker.png | Running a Workflow | Retake during shot 5 (Select Character with Create a new element) |
+| Collaborator-Updates-After-Run.png | Running a Workflow | Retake; can be the same frame as shot 3 or 4 |
+| Collaborator-Property-Updates.png | Reviewing Suggestions | Retake with a mixed header (some free, some need review), e.g. a second Ideation run |
+| Collaborator-Row-New.png | Reviewing Suggestions | Retake; one row labeled New |
+| Collaborator-Review-Each.png | Reviewing Suggestions | Retake during a Review Each pass on shot 6 |
+| Collaborator-Chat.png | Chat | Retake with a question about a proposal from the chosen outline |
+| Collaborator-Session-Overview.png, -Premise.png, -ProblemBuilder.png | An Example Session | Keep if the tutorial stays on Danger Calls; the session page is the one place the shipped sample appears (item 3 recommendation) |
+| Collaborator-Session-Problem.png | none | Delete; unreferenced |
