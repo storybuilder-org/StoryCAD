@@ -89,6 +89,10 @@ Rules for this topic, taken from the above:
 
 Not adopted from the hand-written pages: empty image alt text, and the occasional typo or unfinished section. Alt text stays descriptive.
 
+### 7. The part and the whole (Terry, 2026-09-05)
+Collaborator works on a part: one story element, or a small related set, and its properties. The whole outline improves as the parts do. That is the analysis and synthesis exchange in outlining, and it ties to craft because the manual's craft chapters are written at the story element level.
+- [x] Written 2026-09-05 as the section "The part and the whole" in `Workflows_and_Writing_Craft.md`, between "What a workflow is" and the craft table. Four paragraphs: the outline as parts; analysis and synthesis; Collaborator on the analysis side, and why a part can be judged; synthesis stays with the writer, with Problem Builder as the one workflow that reaches across parts.
+
 ### Later
 - [ ] Rewrite the issue body to match this list; point its status line at this file.
 - [ ] `Tips_and_Common_Questions.md` "Long lists of updates" still tells the reader to scroll the Property Updates list. Keep only if still true on the labeled build.

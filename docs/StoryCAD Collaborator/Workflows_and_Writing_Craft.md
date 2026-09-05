@@ -17,6 +17,16 @@ Keeping each workflow to one craft question is deliberate. A suggestion for one 
 
 ![The workflow list with every element group expanded; each row is one workflow](../media/Collaborator/Collaborator-Workflow-List.png)
 
+## The part and the whole
+
+An outline in StoryCAD is a whole made of parts. The parts are story elements, the Overview, Problems, Characters, Settings, and Scenes, and each of them is a form with its own properties: a Problem has a goal and a conflict, a Setting has a season and a smell. The [Workflow](../Writing%20with%20StoryCAD/Workflow.html) page calls story elements the building blocks of fiction, and the craft chapters of this manual are organized around them, one chapter for problems, one for characters, one for scenes, one for setting. Almost everything writers have learned to say about craft is said about a part.
+
+Outlining moves back and forth between two kinds of work. One is analysis: taking the story apart so that each element can be looked at on its own, and asking whether this character's motive holds, or whether this scene has an outcome. The other is synthesis: putting the parts back together and asking whether they make one story. Neither works alone. A story cannot be improved in the whole, because the whole is too large to hold in mind at once; it is improved a part at a time, and then the parts are fitted together again.
+
+Collaborator works on the analysis side of that exchange. A workflow takes one element, or a small related set such as a Problem with its protagonist and antagonist, or a Scene with its setting and cast, and proposes values for that part's properties. It reads the rest of the outline for context, your premise, how far the outline has come, what is still empty, but it writes only to the part in front of it. That is why its suggestions can be judged. You can tell whether a proposed goal fits the character you know, or whether the props it suggests would serve the scene you have in mind, in a way you could never judge a rewrite of the whole story at once. And the whole improves as the parts do. When a Problem's goal and conflict are sharp, the scenes that carry it have something to be about, and the premise you condense from it reads truer.
+
+The synthesis stays with you. Deciding what to accept is part of it, and so is the structure that joins the parts: the Story Problem on the Overview, the protagonist and antagonist on a Problem, the beat sheet that puts scenes in order. Problem Builder is the one workflow that reaches across parts, binding scenes to the beats of a Problem, and even it works one Problem at a time. The chapters of Writing with StoryCAD teach the parts; the [Workflow Reference](Workflows/) shows which workflow works on each; and the whole, as it always was, is the writer's.
+
 ## Craft questions and the workflows that answer them
 
 The Writing with StoryCAD section of this manual teaches outlining as a sequence: idea and premise, then the story problem, then the characters who carry it, then structure, then scenes. Collaborator's workflows follow the same sequence, and each one has a page in that section that explains the craft behind it.
