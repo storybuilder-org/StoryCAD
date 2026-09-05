@@ -891,21 +891,30 @@ public class Collaborator : ICollaborator
                 }
 
                 ChatPatchParser.TryParse(responseText, out var display, out var patches);
-                _chatHistory?.AddAssistantMessage(display);
+                var listChanged = false;
 
                 if (patches.Count > 0 && _sessionProposals != null)
                 {
                     // Collaborator #237 item 5: report what was applied, by name, and what was
                     // not. The old text said "Updated" for every parsed patch, so a key the
                     // session did not know produced a success line over an unchanged list.
+                    // The Scorecard chat of 2026-09-05 added a second way: the model re-sent
+                    // the text already in the list and the app said "Changed". Same text is
+                    // now reported as unchanged.
                     var changed = new List<string>();
+                    var unchanged = new List<string>();
                     var unknown = new List<string>();
                     foreach (var p in patches)
                     {
                         var resolved = _sessionProposals.ResolveKey(p.Key);
-                        if (resolved != null && _sessionProposals.TryApplyPatch(resolved, p.Value, out _))
+                        if (resolved != null &&
+                            _sessionProposals.TryApplyPatch(resolved, p.Value, out var reopened, out var textChanged))
                         {
-                            changed.Add(_sessionProposals.Get(resolved)?.DisplayName ?? resolved);
+                            var name = _sessionProposals.Get(resolved)?.DisplayName ?? resolved;
+                            if (textChanged || reopened)
+                                changed.Add(name);
+                            else
+                                unchanged.Add(name);
                         }
                         else
                         {
@@ -918,17 +927,30 @@ public class Collaborator : ICollaborator
                     if (changed.Count > 0)
                     {
                         var synced = SyncWorkflowResultFromSession();
-                        RefreshProposalSnapshotInHistory();
+                        listChanged = synced;
                         notes.Add(synced
                             ? $"Changed {string.Join(", ", changed)}. The list shows the new text. Accept to write the outline."
                             : $"Changed {string.Join(", ", changed)} in chat only. The list could not be refreshed; run the workflow again.");
                     }
+                    if (unchanged.Count > 0)
+                        notes.Add($"{string.Join(", ", unchanged)} already read that way; nothing changed there.");
                     if (unknown.Count > 0)
                         notes.Add($"No proposal in this run is named {string.Join(", ", unknown)}; nothing changed for it.");
 
                     var note = string.Join(" ", notes);
                     display = string.IsNullOrWhiteSpace(display) ? note : display + "\n\n" + note;
                 }
+                else if (ChatPatchParser.HasUnreadPatchBlock(responseText, patches))
+                {
+                    _logger?.LogWarning("Chat reply named patches but none could be read");
+                    display += "\n\nCollaborator wrote a change the app could not read. Ask for it again.";
+                }
+
+                // The history holds what the writer saw, note included, so the model knows the
+                // app applied its patch. The refreshed snapshot follows the assistant turn.
+                _chatHistory?.AddAssistantMessage(display);
+                if (listChanged)
+                    RefreshProposalSnapshotInHistory();
 
                 _logger?.LogDebug("Assistant response (display): {Response}", display);
                 return display;

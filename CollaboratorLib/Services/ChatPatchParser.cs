@@ -56,11 +56,35 @@ public static class ChatPatchParser
         return true;
     }
 
+    /// <summary>
+    /// Collaborator #237: a reply that names patches but yields none was a silent drop. The
+    /// caller tells the writer the change could not be read instead of saying nothing.
+    /// </summary>
+    public static bool HasUnreadPatchBlock(string? raw, IReadOnlyList<Patch> parsed) =>
+        parsed.Count == 0 &&
+        !string.IsNullOrEmpty(raw) &&
+        raw.Contains("\"patches\"", StringComparison.OrdinalIgnoreCase);
+
+    private static readonly JsonDocumentOptions Lenient = new()
+    {
+        AllowTrailingCommas = true,
+        CommentHandling = JsonCommentHandling.Skip
+    };
+
     private static bool TryReadPatchesObject(string json, List<Patch> into)
+    {
+        // Collaborator #237: models put raw line breaks inside JSON strings (the Concept
+        // what-ifs are one per line). That is invalid JSON and used to drop the whole patch
+        // set. Escape control characters inside strings and parse again before giving up.
+        return TryReadPatchesObjectOnce(json, into) ||
+               TryReadPatchesObjectOnce(EscapeControlCharsInsideStrings(json), into);
+    }
+
+    private static bool TryReadPatchesObjectOnce(string json, List<Patch> into)
     {
         try
         {
-            using var doc = JsonDocument.Parse(json);
+            using var doc = JsonDocument.Parse(json, Lenient);
             if (!doc.RootElement.TryGetProperty("patches", out var arr) ||
                 arr.ValueKind != JsonValueKind.Array)
                 return false;
@@ -85,6 +109,52 @@ public static class ChatPatchParser
         {
             return false;
         }
+    }
+
+    private static string EscapeControlCharsInsideStrings(string json)
+    {
+        var sb = new System.Text.StringBuilder(json.Length + 16);
+        var inString = false;
+        var escaped = false;
+        foreach (var c in json)
+        {
+            if (!inString)
+            {
+                if (c == '"') inString = true;
+                sb.Append(c);
+                continue;
+            }
+            if (escaped)
+            {
+                sb.Append(c);
+                escaped = false;
+                continue;
+            }
+            switch (c)
+            {
+                case '\\':
+                    escaped = true;
+                    sb.Append(c);
+                    break;
+                case '"':
+                    inString = false;
+                    sb.Append(c);
+                    break;
+                case '\n':
+                    sb.Append("\\n");
+                    break;
+                case '\r':
+                    sb.Append("\\r");
+                    break;
+                case '\t':
+                    sb.Append("\\t");
+                    break;
+                default:
+                    sb.Append(c);
+                    break;
+            }
+        }
+        return sb.ToString();
     }
 
     private static string CollapseBlankLines(string s)

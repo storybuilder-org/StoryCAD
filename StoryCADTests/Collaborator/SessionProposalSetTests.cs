@@ -245,4 +245,53 @@ public class SessionProposalSetTests
         Assert.IsFalse(text.Contains("in this order"), text);
         StringAssert.Contains(text, "patches");
     }
+
+    // Collaborator #237: the Scorecard chat of 2026-09-05 said "I can't see or control your
+    // patch system's current state" and told the writer to apply the patches. The model was
+    // never told the app applies its JSON to the list.
+    [TestMethod]
+    public void BuildSystemInstructions_SaysTheAppAppliesPatches_AndForbidsHandingWorkBack()
+    {
+        var text = SessionProposalSet.BuildSystemInstructions("Ideation", new[] { "Concept", "Premise" });
+
+        StringAssert.Contains(text, "The app reads the patches JSON out of your reply");
+        StringAssert.Contains(text, "complete new text");
+        StringAssert.Contains(text, "Never tell the writer to apply");
+        StringAssert.Contains(text, "Never say you cannot see or change the list");
+        StringAssert.Contains(text, "If the writer says a change is not there");
+    }
+
+    // Same session: asked to make the mother the protagonist, the model kept the stadium
+    // employee the run's Description proposal had named, because the order rule said later
+    // proposals follow earlier ones. The writer's request outranks the proposals.
+    [TestMethod]
+    public void BuildSystemInstructions_WriterRequestOutranksEarlierProposals()
+    {
+        var text = SessionProposalSet.BuildSystemInstructions(
+            "Ideation (Story idea => Concept => Premise)", new[] { "Description", "Concept", "Premise" });
+
+        StringAssert.Contains(text, "The writer's request outranks every proposal in the snapshot.");
+        StringAssert.Contains(text, "rewrite that earlier proposal too");
+        StringAssert.Contains(text, "Do not keep a role, a name, or an event from an earlier proposal");
+        Assert.IsTrue(
+            text.IndexOf("outranks every proposal", StringComparison.Ordinal) <
+            text.IndexOf("in this order, each from the ones before it", StringComparison.Ordinal),
+            "the request rule comes before the order rule");
+    }
+
+    // Same session: the model re-sent the text already in the list and the app answered
+    // "Changed Concept, Premise." over a list that looked the same.
+    [TestMethod]
+    public void TryApplyPatch_SameText_AppliesButReportsUnchanged()
+    {
+        var set = new SessionProposalSet();
+        set.ReplaceFromPending(new[] { Make("Overview", "Concept", "What if A?\nWhat if B?") });
+
+        Assert.IsTrue(set.TryApplyPatch("Overview.Concept", "What if A?\r\nWhat if B?\n", out _, out var changed));
+        Assert.IsFalse(changed, "line endings and edge whitespace do not make a change");
+
+        Assert.IsTrue(set.TryApplyPatch("Overview.Concept", "What if C?", out _, out changed));
+        Assert.IsTrue(changed);
+        Assert.AreEqual("What if C?", set.Get("Overview.Concept")!.ProposedText);
+    }
 }
