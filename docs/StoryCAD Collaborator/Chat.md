@@ -19,7 +19,7 @@ The right-hand column is **chat**. After a workflow runs, Collaborator posts sta
 
 Use chat to explore. Then, if you want text in a field, run a workflow again or copy wording into StoryCAD yourself and accept formal Property Updates when the workflow offers them.
 
-![The chat column after a run: a typed question about the proposed backstory, and Collaborator's numbered answer explaining what the proposal strengthens](../media/Collaborator-Chat.png)
+![The chat column after a run: a typed question about the proposed backstory, and Collaborator's numbered answer explaining what the proposal strengthens](../media/Collaborator/Collaborator-Chat.png)
 
 ## What chat does not do
 

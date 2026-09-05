@@ -28,11 +28,11 @@ StoryCAD Collaborator is an **additional paid feature** with a **free trial**. T
 
 The dialog shows the trial length and current price for your store. This manual does not discuss pricing.
 
-![StoryCAD toolbar; the Collaborator button is the highlighted chain icon](../media/Collaborator-Toolbar-Button.png)
+![StoryCAD toolbar; the Collaborator button is the highlighted chain icon](../media/Collaborator/Collaborator-Toolbar-Button.png)
 
 The prompt is the same on both platforms; only the store behind it differs, the Microsoft Store on Windows and the App Store on Mac.
 
-<!-- image: subscribe or start trial prompt -->
+*[Screenshot to come: the prompt shown after you click Collaborator. File: Collaborator-Access-Prompt.png]*
 
 ## Preferences that affect the manual
 

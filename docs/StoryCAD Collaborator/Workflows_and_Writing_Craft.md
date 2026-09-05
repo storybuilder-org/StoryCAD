@@ -17,7 +17,7 @@ You pick one workflow from Collaborator’s list (for example, “turn my idea i
 
 One workflow, one craft question. That keeps the work small enough to judge.
 
-![The workflow list with every element group expanded; each row is one workflow](../media/Collaborator-Workflow-List.png)
+![The workflow list with every element group expanded; each row is one workflow](../media/Collaborator/Collaborator-Workflow-List.png)
 
 ## Craft questions map to workflows
 

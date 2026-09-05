@@ -32,8 +32,8 @@ The manual describes subscribing with a free trial. That is the production path.
 
 ### 3. Image folder and placeholder convention
 Today 17 `Collaborator-*.png` files sit loose in `docs/media/` (151 files total; existing subfolders `Elements/`, `Tutorial/`). Pages reference them as `../media/Collaborator-X.png`.
-- [ ] Create `docs/media/Collaborator/`, move the 17 files, fix every image path (`../media/Collaborator/...`; Tutorial pages `../../media/Collaborator/...`).
-- [ ] One placeholder form for an image not yet captured: a visible line in the page, not an HTML comment. Example: `*[Screenshot to come: <what it shows>]*` plus the intended file name.
+- [x] Create `docs/media/Collaborator/`, move the 17 files, fix every image path (`../media/Collaborator/...`; Tutorial pages `../../media/Collaborator/...`). Done 2026-09-05; `Collaborator-Session-Problem.png` moved too, though no page references it: delete or use it at screenshot time.
+- [x] Placeholder form, adopted 2026-09-05: a visible italic line in the page, `*[Screenshot to come: <what it shows>. File: Collaborator-<Name>.png]*`, placed where the image will go. Never an HTML comment. First use: `Getting_Started.md`, `Collaborator-Access-Prompt.png` (its fate is item 1).
 - [ ] Outline plan (open, Terry): one outline or several; start near-empty and follow Collaborator filling it in, or use the shipped sample (Danger Calls already has a Story Idea and Concept). Recommendation on the table: one fresh outline from a single Story Idea sentence printed in the manual, screenshots taken in spine order from that one session; Danger Calls appears once, where "Has your text" is explained.
 - [ ] Then list every screenshot the topic needs, capture on a labeled beta build against that outline, replace placeholders.
 

@@ -20,7 +20,7 @@ It is also the story the manual builds from nothing in [Tutorial Creating a Stor
 
 Danger Calls is partly filled in, which is the interesting case. Collaborator will not overwrite your words without asking, so an outline with text already in it is where you learn what the controls actually do. On an emptier outline, expect more proposals to apply straight away and fewer to stop and ask.
 
-![The Danger Calls outline open in StoryCAD, the Overview showing its Story Idea about teenagers selling drugs with disposable phones](../../media/Collaborator-Session-Overview.png)
+![The Danger Calls outline open in StoryCAD, the Overview showing its Story Idea about teenagers selling drugs with disposable phones](../../media/Collaborator/Collaborator-Session-Overview.png)
 
 ## 1. Start
 
@@ -38,7 +38,7 @@ Collaborator reads what is there. Empty forms produce empty-sounding help.
 
 Danger Calls already has a Story Idea (a news piece about teenagers selling drugs using disposable phones) and a Concept (what if a detective uses a criminal's own phone to stage a rescue). Fields carrying that text come back marked **Has your text**, and **Accept all changes** leaves every one of them alone. That is the point: nothing you wrote disappears because you clicked the big blue button.
 
-![The Premise workflow finished on Danger Calls: three proposals headed 3: 0 free, 3 need review, each labeled Has your text](../../media/Collaborator-Session-Premise.png)
+![The Premise workflow finished on Danger Calls: three proposals headed 3: 0 free, 3 need review, each labeled Has your text](../../media/Collaborator/Collaborator-Session-Premise.png)
 
 4. Use **Review Each** and read one properly. Compare **Yours** against **Proposed**, then Accept or Skip.
 
@@ -60,7 +60,7 @@ Problem Builder takes four elements at once, which you can see on the **Selected
 
 On the sample it proposes nine updates and eight of them already have your text, so those eight stop and ask. That is the slow path on purpose: eight replacements at once is exactly when you want to read before accepting.
 
-![The Problem Builder run: nine proposals headed 9: 1 free, 8 need review, covering Description, Method, Notes, Premise, ProblemType and the StructureBeats beat sheet](../../media/Collaborator-Session-ProblemBuilder.png)
+![The Problem Builder run: nine proposals headed 9: 1 free, 8 need review, covering Description, Method, Notes, Premise, ProblemType and the StructureBeats beat sheet](../../media/Collaborator/Collaborator-Session-ProblemBuilder.png)
 
 4. Use **Review Each** on at least one row. Read **Yours** against **Proposed**, then Accept or Skip deliberately.  
 5. Use **Accept Free Remaining** for anything left that does not need review.

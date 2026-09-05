@@ -49,7 +49,7 @@ Treat it as a starting point, not a rule. As you learn which workflows your writ
    Sketch, type, cast, development, conflict, and sequel for one scene. Select the scene first: Scene Builder fills a scene you already made, and does not run on the story problem itself.  
    Craft: [Defining Scenes](../../Writing%20with%20StoryCAD/Defining_Scenes.html), [Plotting in Scenes](../../Writing%20with%20StoryCAD/Plotting_in_Scenes.html)
 
-![The workflow pane with the starred workflows at the top, in running order](../../media/Collaborator-Workflow-Pane.png)
+![The workflow pane with the starred workflows at the top, in running order](../../media/Collaborator/Collaborator-Workflow-Pane.png)
 
 ## Teaching tip
 

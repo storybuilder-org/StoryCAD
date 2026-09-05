@@ -19,7 +19,7 @@ In the left list, click a workflow that matches the craft question you care abou
 
 Some workflows need a specific element first: which Problem, which Character, which Scene. Collaborator opens a picker before it runs anything. Select an existing element, or create one when the dialog offers that.
 
-![The Select Character dialog, listing the outline's characters with an option to create a new element](../media/Collaborator-Element-Picker.png)
+![The Select Character dialog, listing the outline's characters with an option to create a new element](../media/Collaborator/Collaborator-Element-Picker.png)
 
 This is your chance to back out. Cancel the picker and the workflow does not run.
 
@@ -33,7 +33,7 @@ Collaborator runs the workflow and reports progress in the chat column. When it 
 
 Nothing is written into those fields until you accept. See [Reviewing Suggestions](Reviewing_Suggestions.html).
 
-![A finished run: six proposals headed 6: 6 free, 0 need review, five labeled New and one Update, with Accept all changes at the foot of the list](../media/Collaborator-Updates-After-Run.png)
+![A finished run: six proposals headed 6: 6 free, 0 need review, five labeled New and one Update, with Accept all changes at the foot of the list](../media/Collaborator/Collaborator-Updates-After-Run.png)
 
 ## Try Again
 

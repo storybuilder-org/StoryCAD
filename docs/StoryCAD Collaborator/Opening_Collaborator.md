@@ -19,7 +19,7 @@ With an outline open, click **Collaborator** on the StoryCAD toolbar. A separate
 
 If nothing happens, return to [Getting Started](Getting_Started.html) and check the subscription or trial went through.
 
-![StoryCAD toolbar; the Collaborator button is the highlighted chain icon](../media/Collaborator-Toolbar-Button.png)
+![StoryCAD toolbar; the Collaborator button is the highlighted chain icon](../media/Collaborator/Collaborator-Toolbar-Button.png)
 
 ## The Collaborator window
 
@@ -37,7 +37,7 @@ Across the **top**, from the left: show or hide the workflow list, the name of t
 
 A **status** strip at the bottom carries short messages when needed (for example, if you cancel choosing a character). If you have turned on cost details in Settings, the running cost of the session sits at the right-hand end of the same strip.
 
-![The Story Collaborator window: workflow list at left, workflow purpose and Property Updates in the center, chat at right](../media/Collaborator-Window-Overview.png)
+![The Story Collaborator window: workflow list at left, workflow purpose and Property Updates in the center, chat at right](../media/Collaborator/Collaborator-Window-Overview.png)
 
 ## What the workflow list shows
 
@@ -51,7 +51,7 @@ Collaborator ships with about twenty workflows. Showing all of them at once is n
 
 Nothing is hidden. The rest of the catalog is one click away, in the groups.
 
-![The workflow pane: outline gaps at the top, then the starred band, then collapsed element groups](../media/Collaborator-Workflow-Pane.png)
+![The workflow pane: outline gaps at the top, then the starred band, then collapsed element groups](../media/Collaborator/Collaborator-Workflow-Pane.png)
 
 ## Star the workflows you use
 
@@ -61,13 +61,13 @@ To change several at once, use **Customize Workflows** on the top bar. It lists 
 
 Your stars are remembered between sessions, and they are yours alone. They do not change your outline or travel with the story file.
 
-![The Customize Workflows dialog, listing workflows by story element with a checkbox each](../media/Collaborator-Customize-Workflows.png)
+![The Customize Workflows dialog, listing workflows by story element with a checkbox each](../media/Collaborator/Collaborator-Customize-Workflows.png)
 
 ## Show or hide the workflow list
 
 Use the menu (hamburger) control at the left of the top bar to show or hide the workflow list. Hiding the list gives the work area more width. The list is still there when you need another workflow.
 
-![The same window with the workflow list hidden: the workflow purpose, Property Updates, and Accept all changes now run the full width of the window](../media/Collaborator-Pane-Collapsed.png)
+![The same window with the workflow list hidden: the workflow purpose, Property Updates, and Accept all changes now run the full width of the window](../media/Collaborator/Collaborator-Pane-Collapsed.png)
 
 ## Settings
 

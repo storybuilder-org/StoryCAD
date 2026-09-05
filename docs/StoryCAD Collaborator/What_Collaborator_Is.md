@@ -38,4 +38,4 @@ Type yourself when you already know what you want in a field, or when you are br
 
 Open Collaborator when you are stuck on a craft problem, when you want a structured pass over empty fields, or when you want a second take on wording you can still refuse.
 
-![StoryCAD and the Story Collaborator window side by side, the outline visible in both](../media/Collaborator-With-StoryCAD.png)
+![StoryCAD and the Story Collaborator window side by side, the outline visible in both](../media/Collaborator/Collaborator-With-StoryCAD.png)
