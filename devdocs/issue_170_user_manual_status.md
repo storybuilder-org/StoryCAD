@@ -40,16 +40,16 @@ Today 17 `Collaborator-*.png` files sit loose in `docs/media/` (151 files total;
 ### 4. Describe every workflow
 The manual counts workflows inconsistently (`Opening_Collaborator.md`: "about twenty", seven default stars; `Tutorial/A_Path_to_Try.md`: thirteen, five stars) and describes none individually.
 Registry on `dev` (counted 2026-09-05, `CollaboratorLib/Workflows/WorkflowRegistry.cs`, 12 `new Workflow(`): Premise (Ideation), StoryProblem, StoryForm, InnerOuterProblems, ProblemBuilder, DefineCharacter, StoryFunction (Character Story Function), FlawBackstory, Relationship, DefineStoryWorld, SettingBuilder, SceneBuilder. Collaborator #119 adds CharacterInterview (13). #224 (2026-09-01) folded SettingTimeSpace and Sensations into SettingBuilder, which is why "thirteen" (written 2026-08-23) is now 12. Default stars: Premise, StoryProblem, ProblemBuilder, StoryFunction, SceneBuilder.
-- [ ] Fix the counts everywhere. Prefer wording that does not go stale, or one count in one place.
-- [ ] One entry per registered workflow, sourced from the registry `title`, `description`, `explanation`, and the gather/write specs (what it reads, what it writes, which element it asks you to pick). Placement to decide: expand `Workflows_and_Writing_Craft.md`, or one page per element group.
-- [ ] Add Character Interview when #119 merges to `dev`; placeholder entry until then.
+- [x] Fix the counts everywhere. Prefer wording that does not go stale, or one count in one place. Done 2026-09-05: Opening Collaborator no longer states a count; A Path to Try points at the Workflow Reference instead of "thirteen"; Story World added to the group list.
+- [x] One entry per registered workflow, sourced from the registry `title`, `description`, `explanation`, and the gather/write specs (what it reads, what it writes, which element it asks you to pick). Placement to decide: expand `Workflows_and_Writing_Craft.md`, or one page per element group. Done 2026-09-05 as a `Workflows/` child folder (index plus Outline Gaps, Overview, Problem, Character, World and Setting, Scene pages), nav_order 100.5, after Reviewing Suggestions. Entries sourced from the registry and cross-linked to the Writing with StoryCAD and Story Elements pages.
+- [ ] Add Character Interview when #119 merges to `dev`; placeholder entry until then. Placeholder section is in `Workflows/Character_Workflows.md` (2026-09-05).
 - [ ] Screenshot per workflow follows the item 3 outline plan.
 
 ### 5. Gap analysis and story-development context
 At launch Collaborator generates an Outline gaps workflow and builds a context describing where the outline stands (early ideation, mid-story, ...). The manual has one table row on gaps (`Opening_Collaborator.md` line 48) and nothing on the development guess.
 Code (`CollaboratorLib/Context/`): `RequiredFieldGapScanner`, `GapDetail`, `GapWorkflowOwnership` (the generated gap workflow); `DevelopmentGuess`, `StoryContextBuilder` (phase labels such as "Early ideation - establishing basic story parameters").
-- [ ] Explain the Outline gaps workflow: what counts as a gap (required fields), how the count is built, what running it does, why it appears only when gaps exist. Its own section plus an entry in the item 4 list.
-- [ ] Explain the development context: the phases Collaborator recognizes (read the list from `StoryContextBuilder`), how it decides, how that steers suggestions. No guessing at phase names.
+- [x] Explain the Outline gaps workflow: what counts as a gap (required fields), how the count is built, what running it does, why it appears only when gaps exist. Its own section plus an entry in the item 4 list. Done 2026-09-05: `Workflows/Outline_Gaps.md`, with the required-field table.
+- [x] Explain the development context: the phases Collaborator recognizes (read the list from `StoryContextBuilder`), how it decides, how that steers suggestions. No guessing at phase names. Done 2026-09-05, same page: the five phases in the order the code checks them, and the Guess sentence.
 - [ ] Screenshot the gaps row and count on the item 3 outline, once near-empty and once mid-way.
 
 ### 6. Language review: manual voice, not the Rossmann register
@@ -94,3 +94,8 @@ Not adopted from the hand-written pages: empty image alt text, and the occasiona
 - [ ] `Tips_and_Common_Questions.md` "Long lists of updates" still tells the reader to scroll the Property Updates list. Keep only if still true on the labeled build.
 - [ ] Production merge `dev` to `main`, deliberately, when the topic is ready for manual.storybuilder.org.
 - [ ] Separate from #170: the manual has no written style standard. The writing-standards page covers design specs (ASD-STE100) and human-facing prose (no-ai-slop, Rossmann) and says nothing about end-user documentation. The item 6 description of the hand-written pages is the seed. File as its own issue when the Collaborator topic is done; do not widen #170 to the whole manual.
+
+## Findings for the product, not the manual
+
+- **Outline gaps points Setting Summary at Setting Builder, which never writes it.** `GapWorkflowOwnership` maps `(Setting, Description)` to `SettingBuilder`, but Setting Builder's outputs are Period, Locale, Season, Weather, Lighting, Temperature, Props, the four senses, and Notes. A writer who clicks that link runs a workflow that cannot fill the field. The manual describes the app as it is (2026-09-05); file against Collaborator when convenient.
+- **Opening Collaborator's Settings table listed Content Preservation**, which #49 removed (Collaborator PR #228, StoryCAD PR #1545, 2026-09-03). Row removed 2026-09-05; the "settings that reset" count went from six to five. The six remaining rows match the dialog headers in `WorkflowShell.xaml.cs` (verified 2026-09-05).

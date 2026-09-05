@@ -27,6 +27,7 @@ Collaborator is not a replacement for writing craft. It sits beside StoryCAD’s
 - [Opening Collaborator](Opening_Collaborator.html)
 - [Running a Workflow](Running_a_Workflow.html)
 - [Reviewing Suggestions](Reviewing_Suggestions.html)
+- [Workflow Reference](Workflows/)
 - [A Path to Try](Tutorial/A_Path_to_Try.html)
 - [An Example Session](Tutorial/An_Example_Session.html)
 - [Chat](Chat.html)

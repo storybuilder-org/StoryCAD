@@ -41,15 +41,15 @@ A **status** strip at the bottom carries short messages when needed (for example
 
 ## What the workflow list shows
 
-Collaborator ships with about twenty workflows. Showing all of them at once is not much help when you only want to run one, so the list opens short and grows only when you ask it to. From the top:
+The list on the left opens short and grows only when you ask it to, because seeing every workflow at once is not much help when you want to run one. From the top, it has up to three bands.
 
 | Band | What it holds |
 |------|---------------|
-| **Outline gaps** | Required fields you have not filled in yet, with a count. Appears only when there are gaps. This is usually the most useful thing to do next. |
-| **Starred** | The workflows you have marked as yours. Seven sensible ones are starred to begin with. |
-| **Story element groups** | Everything else, filed under Overview, Problem, Character, Setting, and Scene. These start closed. Click a group to open it and browse. |
+| Outline gaps | Required fields you have not filled in yet, with a count of the elements that have them. The row appears only when there are gaps, and it is usually the most useful thing to do next. |
+| Starred | The workflows you have marked as yours. Five are starred to begin with, one for each stage of outlining. |
+| Story element groups | Everything else, filed under Overview, Problem, Character, Story World, Setting, and Scene. These start closed; click a group to open it. |
 
-Nothing is hidden. The rest of the catalog is one click away, in the groups.
+Nothing is hidden. Every workflow that is not starred is one click away in its group, and the [Workflow Reference](Workflows/) describes each of them.
 
 ![The workflow pane: outline gaps at the top, then the starred band, then collapsed element groups](../media/Collaborator/Collaborator-Workflow-Pane.png)
 
@@ -76,14 +76,13 @@ Use the menu (hamburger) control at the left of the top bar to show or hide the 
 | Setting | What it does |
 |---------|--------------|
 | **Response Terseness** | How much text a suggestion carries: Concise, Balanced, or Detailed. |
-| **Content Preservation** | How hard Collaborator tries to keep your existing wording: Strict, Balanced, or Flexible. |
 | **Genre Preferences** | Genres to steer suggestions toward. |
 | **Story Forms I Like** | Story shapes to lean into. |
 | **Story Forms to Avoid** | Story shapes to keep away from. |
 | **Logging Visibility** | Off, Basic, or Detailed. Detailed can expose prompts, so leave it off unless you are chasing a problem. |
 | **Show cost per run on the status bar** | Turns on the cost line described below. |
 
-Choose **Save** to apply your choices, or **Cancel** to leave them as they were. The cost checkbox is the only one Collaborator remembers; the other six return to their defaults each time you open it.
+Choose **Save** to apply your choices, or **Cancel** to leave them as they were. The cost checkbox is the only one Collaborator remembers; the other five return to their defaults each time you open it.
 
 ## Cost on the status bar
 

@@ -10,7 +10,7 @@ has_toc: false
 
 # A Path to Try
 
-Collaborator has thirteen workflows. You do not need all of them on day one. The path below matches the craft order in [Writing with StoryCAD](../../Writing%20with%20StoryCAD/Writing_with_StoryCAD.html): idea and premise first, then problem and character force, then structure and scenes.
+The [Workflow Reference](../Workflows/) describes every workflow Collaborator offers. You do not need all of them on day one. The path below matches the craft order in [Writing with StoryCAD](../../Writing%20with%20StoryCAD/Writing_with_StoryCAD.html): idea and premise first, then problem and character force, then structure and scenes.
 
 You can skip steps, but this order usually wastes less time.
 
