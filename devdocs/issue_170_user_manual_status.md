@@ -201,11 +201,6 @@ Collaborator writes to the outline on every accept, and the sessions are also a 
 |---|---|---|---|---|---|---|---|
 | S00 | 2026-09-05 | none | Baseline copy, then format conversion | none | `Scorecard-S00-baseline.stbx` (3.2.1 format, 2,907 bytes) | `0211 Scorecard.stbx` in `C:\temp\0211 Scorecard\` (4.1.0.0, 3,363 bytes) | Converted by opening in StoryCAD; Scrivener project empty, nothing to convert |
 
-### Observations from session S01 (2026-09-05, Scorecard, Ideation)
+### Observations from the sessions
 
-- **Proposal chat says "Updated 2 proposals." but the Property Updates list did not change.** `Collaborator.cs` applies each parsed patch with `SessionProposalSet.TryApplyPatch` (which replaces the entry's `ProposedText`) and then `SyncWorkflowResultFromSession` → `PushSessionSetToViewModel` → `WorkflowViewModel.SetPendingUpdates`, which clears and refills the bound list from `ProposedText`. Either the model returned the existing text as its patches, or the rebuilt list did not reach the screen. Screenshot: `manual-sessions\Ideation Suggested Revisions.png`. Unresolved at the time of writing.
-- **The top bar names the workflow by its label** ("Premise") while the list shows the title (Ideation (Story idea => Concept => Premise)). The manual uses the title everywhere; the app is inconsistent with itself.
-- **The status line says "Use Accept All, Review Each, or Try Again"** and the chat says "Choose Accept All"; the button says Accept all changes. The chat line also carries an em dash and "confirmation required" wording.
-- **Ideation proposed no Story Idea row.** The Overview's Story Idea (stored as RTF in `ElementDescription`) was filled; the registry lists Description among the outputs and the manual says the field comes back marked Has your text. The run returned two rows, Concept and Premise, both New.
-- **Ideation's first proposals:** the Concept was five divergent what-if questions rather than one question deepened by follow-ups (the Concept Tab page's own guidance), and the Premise inverted the story idea (parent chasing, an invented kidnapper) and contradicted itself ("chases a lost child" / "find who took him"). Craft quality of the Ideation prompt is a Collaborator matter, not the manual's.
-- **Outline gaps (1)** showed in the list with the Overview as the one element (Concept, Premise, Story Problem empty; Type, Genre, Author filled). Terry reports seeing no gaps on the page; not yet reconciled.
+Collaborator issues found while taking the screenshots are tracked in Collaborator #236 (private repo), one line per finding, each becoming its own issue when confirmed. The S01 screenshots are in `manual-sessions\`.
