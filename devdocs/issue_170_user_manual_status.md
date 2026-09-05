@@ -27,7 +27,7 @@ The manual describes subscribing with a free trial. That is the production path.
 - [ ] Verify on the beta build before writing: what a tester sees when they click Collaborator, and whether the store dialog appears at all.
 
 ### 2. What Collaborator Is: strengthen "What it is not"; cite the AI use policy
-- [ ] `What_Collaborator_Is.md` "## What it is not" (line 29, a short bullet list today). Reinforce it.
+- [x] `What_Collaborator_Is.md` "## What it is not" (line 29, a short bullet list today). Reinforce it. Done 2026-09-05: six short paragraphs, each with its reason (not prose, not a substitute for craft, nothing written until accepted, no library of books, your work not kept or trained on, no guarantee).
 - [ ] Same page: state the Foundation's AI use policy and link https://storybuilder.org/ai-usage-policy/. Read the live page first so the wording matches.
 
 ### 3. Image folder and placeholder convention
