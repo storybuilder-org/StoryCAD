@@ -52,6 +52,12 @@ Code (`CollaboratorLib/Context/`): `RequiredFieldGapScanner`, `GapDetail`, `GapW
 - [ ] Explain the development context: the phases Collaborator recognizes (read the list from `StoryContextBuilder`), how it decides, how that steers suggestions. No guessing at phase names.
 - [ ] Screenshot the gaps row and count on the item 3 outline, once near-empty and once mid-way.
 
+### 6. Language review: manual voice, not the Rossmann register
+The pages read in the Rossmann "punchy" voice: fragments, claim-then-proof paragraphs, aphoristic closers. Example from `Workflows_and_Writing_Craft.md`, "What is a workflow?": "A workflow is a short, focused craft job." ... "One workflow, one craft question. That keeps the work small enough to judge." That register does not fit a user manual. Collaborator #226 (closed) made the same call for the coach's own voice: supportive, keep the mechanics that transfer (concrete detail, plain connectives, varied sentence length), drop the combative register.
+- [ ] Write down the target voice for this topic before editing: plain instructional prose that matches the rest of the StoryCAD manual; complete sentences; explain, then show; no aphorisms, no one-line paragraphs used for effect, no contempt-through-precision. Borrow the transferable rules from #226. Record the standard in this file so the item 4 and item 5 additions are written to it from the start.
+- [ ] Read every page in the topic against that standard and revise: `index.md`, `Getting_Started.md`, `What_Collaborator_Is.md`, `Workflows_and_Writing_Craft.md`, `Opening_Collaborator.md`, `Running_a_Workflow.md`, `Reviewing_Suggestions.md`, `Chat.md`, `Tips_and_Common_Questions.md`, `Tutorial/index.md`, `Tutorial/A_Path_to_Try.md`, `Tutorial/An_Example_Session.md`.
+- [ ] Do this pass after items 1 to 5 change the content, or fold it into each page as that page is rewritten, so no page gets revised twice.
+
 ### Later
 - [ ] Rewrite the issue body to match this list; point its status line at this file.
 - [ ] `Tips_and_Common_Questions.md` "Long lists of updates" still tells the reader to scroll the Property Updates list. Keep only if still true on the labeled build.
