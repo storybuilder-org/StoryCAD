@@ -67,8 +67,21 @@ public class Collaborator : ICollaborator
     /// </summary>
     private string _interviewPendingQuestion = string.Empty;
 
-    /// <summary>True once the transcript has been written to a Notes element.</summary>
-    private bool _interviewSaved;
+    /// <summary>
+    /// The Notes element this session writes to, once it exists. One note per session
+    /// (Terry, 2026-09-05): Save updates it in place, and close writes the turns since.
+    /// </summary>
+    private Guid _interviewNoteGuid;
+
+    /// <summary>Turns recorded since the note was last written.</summary>
+    private bool _interviewHasUnsavedTurns;
+
+    /// <summary>
+    /// The last answer was recorded but the Worker never asked the next question (a failed
+    /// or empty reply). The writer's next message extends that answer instead of opening a
+    /// second turn on the same question.
+    /// </summary>
+    private bool _interviewAnswerAwaitingQuestion;
 
     // State
     private IStoryCADAPI? _storyApi;
@@ -1189,7 +1202,9 @@ public class Collaborator : ICollaborator
         _interviewElements = gatheredElements;
         _interviewCursor.Reset();
         _interviewPendingQuestion = string.Empty;
-        _interviewSaved = false;
+        _interviewNoteGuid = Guid.Empty;
+        _interviewHasUnsavedTurns = false;
+        _interviewAnswerAwaitingQuestion = false;
 
         viewModel.BeginInterviewSession();
         gatheredElements.TryGetValue("Character", out var character);
@@ -1227,20 +1242,38 @@ public class Collaborator : ICollaborator
             return string.Empty;
 
         // One turn at a time. Send is async void, so a second press during a slow call
-        // would otherwise open a concurrent turn against the same transcript.
+        // would otherwise open a concurrent turn against the same transcript. The input is
+        // disabled while a turn runs (WorkflowViewModel.CanSend); if a message gets through
+        // anyway, say so. SendButtonClicked has already posted it to the pane, so a silent
+        // return would look like an answer that was taken.
         if (viewModel.IsInterviewTurnRunning)
+        {
+            viewModel.ConversationList.Add(ChatMessage.Error(
+                "A question is still on its way. That reply was not taken; send it again when the question arrives."));
             return string.Empty;
+        }
 
         var opening = answer == null;
 
         // Recorded before the call, not after: if the Worker fails, the writer's answer is
-        // still part of the interview and still gets saved.
+        // still part of the interview and still gets saved. If the last call failed, this
+        // message continues that answer: the question it belongs to was never asked again,
+        // so a second turn on the same question would put the question in the notes twice.
+        var extended = false;
         if (!opening)
         {
-            _interviewTranscript.Add(
-                _interviewCursor.Field, _interviewPendingQuestion, answer!);
-            viewModel.CanSaveInterview = !_interviewTranscript.IsEmpty;
+            extended = _interviewAnswerAwaitingQuestion && _interviewTranscript.ExtendLastAnswer(answer!);
+            if (!extended)
+                _interviewTranscript.Add(_interviewCursor.Field, _interviewPendingQuestion, answer!);
+            _interviewAnswerAwaitingQuestion = false;
+            _interviewHasUnsavedTurns = !_interviewTranscript.IsEmpty;
+            viewModel.CanSaveInterview = _interviewHasUnsavedTurns;
         }
+
+        // What the Worker responds to: the whole answer, when this message extended one.
+        var latestAnswer = opening
+            ? null
+            : extended ? _interviewTranscript.Turns[^1].Answer : answer;
 
         viewModel.IsInterviewTurnRunning = true;
         viewModel.ProgressVisibility = Microsoft.UI.Xaml.Visibility.Visible;
@@ -1261,7 +1294,7 @@ public class Collaborator : ICollaborator
                 nextField,
                 opening ? 0 : _interviewCursor.TurnsOnField,
                 _interviewTranscript.ToPromptText(),
-                answer);
+                latestAnswer);
 
             var result = await runner.RunPreparedAsync(body, _interviewElements);
 
@@ -1272,6 +1305,7 @@ public class Collaborator : ICollaborator
             {
                 viewModel.ConversationList.Add(ChatMessage.Error(
                     result.ErrorMessage ?? "The interview stalled."));
+                _interviewAnswerAwaitingQuestion = !opening;
                 return string.Empty;
             }
 
@@ -1282,6 +1316,7 @@ public class Collaborator : ICollaborator
             {
                 viewModel.ConversationList.Add(ChatMessage.Error(
                     "The interviewer sent nothing back. Say something to try again."));
+                _interviewAnswerAwaitingQuestion = !opening;
                 return string.Empty;
             }
 
@@ -1362,23 +1397,16 @@ public class Collaborator : ICollaborator
             return Task.CompletedTask;
         }
 
-        var text = _interviewTranscript.ToNotesText(_interviewCharacterName);
-        var result = _storyApi.AddElement(
-            StoryItemType.Notes,
-            _interviewCharacterGuid.ToString(),
-            $"Interview with {_interviewCharacterName}",
-            new Dictionary<string, object> { ["Description"] = text });
-
-        if (!result.IsSuccess)
+        var error = WriteInterviewNote();
+        if (error != null)
         {
             viewModel.ConversationList.Add(ChatMessage.Error(
-                $"The interview could not be saved: {result.ErrorMessage}"));
+                $"The interview could not be saved: {error}"));
             _logger?.LogWarning("Interview save failed for {Character}: {Error}",
-                _interviewCharacterName, result.ErrorMessage);
+                _interviewCharacterName, error);
             return Task.CompletedTask;
         }
 
-        _interviewSaved = true;
         viewModel.CanSaveInterview = false;
         viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
             $"Saved under {_interviewCharacterName} as \"Interview with {_interviewCharacterName}\", "
@@ -1397,21 +1425,12 @@ public class Collaborator : ICollaborator
     /// </summary>
     private void EndInterviewSession()
     {
-        if (_interviewTranscript is { IsEmpty: false } && !_interviewSaved
-            && _storyApi != null && _interviewCharacterGuid != Guid.Empty)
+        if (_interviewTranscript is { IsEmpty: false } && _interviewHasUnsavedTurns)
         {
-            var result = _storyApi.AddElement(
-                StoryItemType.Notes,
-                _interviewCharacterGuid.ToString(),
-                $"Interview with {_interviewCharacterName}",
-                new Dictionary<string, object>
-                {
-                    ["Description"] = _interviewTranscript.ToNotesText(_interviewCharacterName)
-                });
-
+            var error = WriteInterviewNote();
             _logger?.LogInformation(
-                "Interview auto-saved on close for {Character}: {Turns} turns, success {Success}",
-                _interviewCharacterName, _interviewTranscript.Turns.Count, result.IsSuccess);
+                "Interview auto-saved on close for {Character}: {Turns} turns, {Outcome}",
+                _interviewCharacterName, _interviewTranscript.Turns.Count, error ?? "ok");
         }
 
         _interviewTranscript = null;
@@ -1420,7 +1439,43 @@ public class Collaborator : ICollaborator
         _interviewPendingQuestion = string.Empty;
         _interviewCharacterGuid = Guid.Empty;
         _interviewCharacterName = string.Empty;
-        _interviewSaved = false;
+        _interviewNoteGuid = Guid.Empty;
+        _interviewHasUnsavedTurns = false;
+        _interviewAnswerAwaitingQuestion = false;
+    }
+
+    /// <summary>
+    /// Writes the transcript to this session's Notes element: created on the first write,
+    /// updated in place after that, so a writer who saves early and keeps answering ends
+    /// the session with one note holding everything. Returns null on success, else the
+    /// error text.
+    /// </summary>
+    private string? WriteInterviewNote()
+    {
+        if (_interviewTranscript == null || _storyApi == null || _interviewCharacterGuid == Guid.Empty)
+            return "the character is no longer in the outline";
+
+        var text = _interviewTranscript.ToNotesText(_interviewCharacterName);
+        if (_interviewNoteGuid == Guid.Empty)
+        {
+            var added = _storyApi.AddElement(
+                StoryItemType.Notes,
+                _interviewCharacterGuid.ToString(),
+                $"Interview with {_interviewCharacterName}",
+                new Dictionary<string, object> { ["Description"] = text });
+            if (!added.IsSuccess)
+                return added.ErrorMessage;
+            _interviewNoteGuid = added.Payload;
+        }
+        else
+        {
+            var updated = _storyApi.UpdateElementProperty(_interviewNoteGuid, "Description", text);
+            if (!updated.IsSuccess)
+                return updated.ErrorMessage;
+        }
+
+        _interviewHasUnsavedTurns = false;
+        return null;
     }
 
     /// <summary>

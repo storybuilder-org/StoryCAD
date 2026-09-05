@@ -144,8 +144,20 @@ public partial class WorkflowViewModel : ObservableRecipient
     public bool IsChatEnabled
     {
         get => _isChatEnabled;
-        set => SetProperty(ref _isChatEnabled, value);
+        set
+        {
+            if (SetProperty(ref _isChatEnabled, value))
+                OnPropertyChanged(nameof(CanSend));
+        }
     }
+
+    /// <summary>
+    /// What the input box binds to (#119): chat is open and no interview turn is in
+    /// flight. SendButtonClicked posts the text to the pane before Collaborator sees it,
+    /// so a message sent mid-turn would sit there looking taken while the turn loop
+    /// refused it. Disabling the box is the honest state.
+    /// </summary>
+    public bool CanSend => IsChatEnabled && !IsInterviewTurnRunning;
 
     private string _chatPlaceholder = "Waiting for proposals…";
     public string ChatPlaceholder
@@ -431,7 +443,10 @@ public partial class WorkflowViewModel : ObservableRecipient
         set
         {
             if (SetProperty(ref _isInterviewTurnRunning, value))
+            {
                 OnPropertyChanged(nameof(CanPressSave));
+                OnPropertyChanged(nameof(CanSend));
+            }
         }
     }
 

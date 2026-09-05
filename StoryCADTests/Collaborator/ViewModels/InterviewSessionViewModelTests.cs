@@ -49,6 +49,26 @@ public class InterviewSessionViewModelTests
     }
 
     [TestMethod]
+    public void Send_IsBlockedWhileATurnIsInFlight()
+    {
+        // SendButtonClicked posts the text to the pane before Collaborator sees it, so a
+        // message sent mid-turn would sit there looking taken. The box goes dark instead.
+        var viewModel = new WorkflowViewModel();
+        viewModel.BeginInterviewSession();
+        viewModel.IsChatEnabled = true;
+        Assert.IsTrue(viewModel.CanSend);
+
+        viewModel.IsInterviewTurnRunning = true;
+        Assert.IsFalse(viewModel.CanSend);
+
+        viewModel.IsInterviewTurnRunning = false;
+        Assert.IsTrue(viewModel.CanSend);
+
+        viewModel.IsChatEnabled = false;
+        Assert.IsFalse(viewModel.CanSend);
+    }
+
+    [TestMethod]
     public void Save_IsBlockedWhileATurnIsInFlight()
     {
         // A save landing mid-turn writes a transcript missing the answer being recorded.
