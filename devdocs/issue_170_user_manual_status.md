@@ -112,9 +112,17 @@ Collaborator works on a part: one story element, or a small related set, and its
 - **The out-of-credits message tells testers to buy.** `StoreConfig.OutOfCreditsMessage`: "You've used all your credits for this period. Buy more from Collaborator's Buy Credits screen, or wait for your next monthly renewal." The manual tells testers not to buy and to contact the Foundation. A beta build should say that itself.
 - **Ruling (Terry, 2026-09-05):** the onboarding details, including how a tester's build gets the dev-activation setting, get worked out with the first two beta testers rather than designed in advance. If beta feedback requires a StoryCAD change, that means a test deploy or a 4.3 dot release; Getting Started's pending-approval placeholder waits on that.
 
-## State at the end of the 2026-09-05 session
+## State at the end of the 2026-09-05 session (updated 12:00)
 
-Branch `issue-170-collaborator-manual`, 12 commits ahead of `dev` (`61186daf`), not pushed. Local preview: `bundle exec jekyll serve --port 4000 --livereload` from the StoryCAD root; the watcher on Windows dies every few edits (Ruby iteration and null-byte errors) and a restart fixes it. Done: items 0, 1 (page), 2, 3 (folder and placeholder form), 4 (pages), 5, 6 (standard), 7. Open: item 3 outline decision and screenshots (14 placeholders now), item 6 voice pass over Opening Collaborator, Running a Workflow, Reviewing Suggestions, Chat, Tips, both tutorial pages, the Tutorial index, and the landing page (which still says "additional paid feature" and "free trial"), Character Interview entry after #119, the Later list.
+Branch `issue-170-collaborator-manual`, all commits unpushed; base `dev` `61186daf`. Wiki `main` has one unpushed commit (`3759900`, usermanual ADR-001). Collaborator #170 body rewritten today; Collaborator #236 holds the session findings (8 items). Local preview: `bundle exec jekyll serve --port 4000 --livereload` from the StoryCAD root; the watcher dies every few edits, restart it.
+
+Done: items 0, 1, 2, 3 (folder, placeholder form, Scorecard chosen, protocol, S00 baseline), 4, 5, 6 (standard and the full page pass), 7; ADR-001; issue body; shot list.
+
+**Session S01 in progress, not closed.** Before copy `manual-sessions\Scorecard-S01-before.stbx` taken 10:52. Shots 1 and 3 taken and correctly named in `manual-sessions\` (`Collaborator-Access-Prompt.png`, `Collaborator-Workflow-Premise.png`); two diagnostic screenshots also there (`Ideation Suggested Revisions.png`, `Ideation Revisions Display After Followup Question.png`). Shot 2 (Outline gaps page) not taken; Terry saw no gaps on the page while the row said (1). Ideation ran; chat revision reported "Updated 2 proposals" but neither the list nor Accept used it; Accept all changes wrote the ORIGINAL Concept and Premise to the file (`0211 Scorecard.stbx`, 11:33, 4,382 bytes); with Collaborator closed, StoryCAD's Overview page still showed both fields empty (cause not established; my first explanation was wrong). **After copy not taken.** Next: Terry decides how to close S01 (take the after copy as-is, or reopen the file to confirm the Overview shows the accepted text), then fill the S01 row.
+
+Working rules from Terry today: one thing at a time; do not ask for more than one; follow his lead rather than investigating on my own; do not overcomplicate the process.
+
+Open after S01: sessions S02 to S09 per the shot list; the Character Interview entry after #119; the pending-approval text in Getting Started after #97 settles onboarding; the production wording in Getting Started before `dev` merges to `main`; push and PR when Terry calls the topic complete; a Collaborator status-log entry (that repo is checked out on the #119 branch).
 
 ## Tutorial outline (item 3), ruling 2026-09-05
 
