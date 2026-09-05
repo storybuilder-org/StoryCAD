@@ -34,8 +34,9 @@ The manual describes subscribing with a free trial. That is the production path.
 Today 17 `Collaborator-*.png` files sit loose in `docs/media/` (151 files total; existing subfolders `Elements/`, `Tutorial/`). Pages reference them as `../media/Collaborator-X.png`.
 - [x] Create `docs/media/Collaborator/`, move the 17 files, fix every image path (`../media/Collaborator/...`; Tutorial pages `../../media/Collaborator/...`). Done 2026-09-05; `Collaborator-Session-Problem.png` moved too, though no page references it: delete or use it at screenshot time.
 - [x] Placeholder form, adopted 2026-09-05: a visible italic line in the page, `*[Screenshot to come: <what it shows>. File: Collaborator-<Name>.png]*`, placed where the image will go. Never an HTML comment. First use: `Getting_Started.md`, `Collaborator-Access-Prompt.png` (its fate is item 1).
-- [ ] Outline plan (open, Terry): one outline or several; start near-empty and follow Collaborator filling it in, or use the shipped sample (Danger Calls already has a Story Idea and Concept). Recommendation on the table: one fresh outline from a single Story Idea sentence printed in the manual, screenshots taken in spine order from that one session; Danger Calls appears once, where "Has your text" is explained.
-- [ ] Then list every screenshot the topic needs, capture on a labeled beta build against that outline, replace placeholders.
+- [x] Outline plan. Ruling (Terry, 2026-09-05): the screenshots come from a Collaborator tutorial, the same job [Tutorial Creating a Story](../docs/Tutorial%20Creating%20a%20Story/Tutorial_Creating_a_Story.md) does for Danger Calls, except Collaborator runs the workflows in order and the writer accepts or skips. Start from a Story Idea only. End with a complete outline. Danger Calls stays the one place the shipped sample appears, for Has your text. Story not chosen yet; candidate pool is `C:\temp\story-idea-only-outlines.docx` (94 idea-only `.stbx` files under `G:\My Drive\2-Areas\Writing\Projects`, scanned 2026-09-05).
+- [x] Shot list written (below). Capture and placeholder replacement still open.
+- [ ] Capture on a labeled beta build against the tutorial outline, replace placeholders. This run is the closest thing Collaborator has to an acceptance test: every registered workflow, in order, on one outline, with the writer in the loop.
 
 ### 4. Describe every workflow
 The manual counts workflows inconsistently (`Opening_Collaborator.md`: "about twenty", seven default stars; `Tutorial/A_Path_to_Try.md`: thirteen, five stars) and describes none individually.
@@ -50,7 +51,7 @@ At launch Collaborator generates an Outline gaps workflow and builds a context d
 Code (`CollaboratorLib/Context/`): `RequiredFieldGapScanner`, `GapDetail`, `GapWorkflowOwnership` (the generated gap workflow); `DevelopmentGuess`, `StoryContextBuilder` (phase labels such as "Early ideation - establishing basic story parameters").
 - [x] Explain the Outline gaps workflow: what counts as a gap (required fields), how the count is built, what running it does, why it appears only when gaps exist. Its own section plus an entry in the item 4 list. Done 2026-09-05: `Workflows/Outline_Gaps.md`, with the required-field table.
 - [x] Explain the development context: the phases Collaborator recognizes (read the list from `StoryContextBuilder`), how it decides, how that steers suggestions. No guessing at phase names. Done 2026-09-05, same page: the five phases in the order the code checks them, and the Guess sentence.
-- [ ] Screenshot the gaps row and count on the item 3 outline, once near-empty and once mid-way.
+- [ ] Screenshot the gaps row and count on the item 3 outline, once near-empty and once mid-way. Shot 2 and shot 15.
 
 ### 6. Language review: manual voice, not the Rossmann register
 The pages read in the Rossmann "punchy" voice: fragments, claim-then-proof paragraphs, aphoristic closers. Example from `Workflows_and_Writing_Craft.md`, "What is a workflow?": "A workflow is a short, focused craft job." ... "One workflow, one craft question. That keeps the work small enough to judge." That register does not fit a user manual. Collaborator #226 (closed) made the same call for the coach's own voice: supportive, keep the mechanics that transfer (concrete detail, plain connectives, varied sentence length), drop the combative register.
@@ -115,9 +116,26 @@ Collaborator works on a part: one story element, or a small related set, and its
 
 Branch `issue-170-collaborator-manual`, 12 commits ahead of `dev` (`61186daf`), not pushed. Local preview: `bundle exec jekyll serve --port 4000 --livereload` from the StoryCAD root; the watcher on Windows dies every few edits (Ruby iteration and null-byte errors) and a restart fixes it. Done: items 0, 1 (page), 2, 3 (folder and placeholder form), 4 (pages), 5, 6 (standard), 7. Open: item 3 outline decision and screenshots (14 placeholders now), item 6 voice pass over Opening Collaborator, Running a Workflow, Reviewing Suggestions, Chat, Tips, both tutorial pages, the Tutorial index, and the landing page (which still says "additional paid feature" and "free trial"), Character Interview entry after #119, the Later list.
 
+## Tutorial outline (item 3), ruling 2026-09-05
+
+Danger Calls in [Tutorial Creating a Story](../docs/Tutorial%20Creating%20a%20Story/Tutorial_Creating_a_Story.md) is a complete outline built by hand, then shipped as a sample. The Collaborator topic needs the same kind of tutorial: one printed Story Idea, then the workflows in spine order, until the outline is complete. Collaborator proposes; the writer Accepts or Skips. "Help to build" is the product claim, not dump-and-done.
+
+That session is also the acceptance test. Pass means the labeled beta build, against the chosen idea-only outline, can run every registered workflow in the shot-list order and leave a complete outline: Story Idea, Concept, Premise, Story Form, a Story Problem with protagonist and antagonist, Problem Builder beats, an inner problem, Character Story Function, Define Character, Flaw and Backstory, a relationship, Story World, a Setting, and at least one Scene Builder pass on a Problem Builder stub. Fail is a workflow that cannot run, a picker that cannot create what the next step needs, or a write that the writer did not accept.
+
+Two outlines, not one:
+
+| Outline | Role |
+|---------|------|
+| New tutorial outline | Screenshot source for the 14 workflow/gaps frames, the retakes, and the Collaborator tutorial walk. Starts as Story Idea only. |
+| Danger Calls (shipped sample) | [An Example Session](../docs/StoryCAD%20Collaborator/Tutorial/An_Example_Session.md) only. Already has a Story Idea and a Concept, so Ideation comes back Has your text. Do not recapture those three session images against the new outline. |
+
+[A Path to Try](../docs/StoryCAD%20Collaborator/Tutorial/A_Path_to_Try.md) stays the order. The four workflows it leaves for later (Define Character, Character Relationship, Define Story World, Setting Builder) still get shots, because a complete outline and the Workflow Reference both need them. Tutorial pages may need a third walk for the new story; do not collapse it into An Example Session.
+
+Open: pick the Story Idea from the 94-file inventory, or write a new one-sentence idea for the manual. Then run the shot list on a labeled beta build.
+
 ## Shot list (item 3), written 2026-09-05
 
-Capture on a labeled beta build against the chosen outline, in spine order, so one story runs through every image. Window at a consistent size; the Property Updates list in view. Save to `docs/media/Collaborator/` under the file name given; replace the matching placeholder line with a Markdown image whose alt text describes what the frame shows.
+Capture on a labeled beta build against the tutorial outline, in spine order, so one story runs through every image. Window at a consistent size; the Property Updates list in view. Save to `docs/media/Collaborator/` under the file name given; replace the matching placeholder line with a Markdown image whose alt text describes what the frame shows.
 
 ### New images (14 placeholders)
 
@@ -137,6 +155,9 @@ Capture on a labeled beta build against the chosen outline, in spine order, so o
 | 12 | Collaborator-Workflow-Story-World.png | Workflows/World_and_Setting_Workflows.md | Property Updates after Define Story World on a StoryWorld created in the picker | Any point after 5 |
 | 13 | Collaborator-Workflow-Setting-Builder.png | Workflows/World_and_Setting_Workflows.md | Property Updates after Setting Builder: Setting tab rows above, the four senses below | A Setting created for the story, any point after 5 |
 | 14 | Collaborator-Workflow-Scene-Builder.png | Workflows/Scene_Workflows.md | Property Updates after Scene Builder on a stub Problem Builder created | After 6 |
+| 15 | Collaborator-Outline-Gaps-Midway.png | Workflows/Outline_Gaps.md | The Outline gaps row and count after Problem and cast exist, with remaining required fields still listed | After 5, before 12–14 have filled world/setting/scene |
+
+Item 5 asked for gaps twice: shot 2 is near-empty, shot 15 is mid-way. Shot 15 has no placeholder on the page yet; add it when capturing.
 
 Text placeholder, not a screenshot: Getting_Started.md, what the app shows between first launch and approval. Waits on the #97 onboarding decisions.
 
@@ -159,3 +180,9 @@ Text placeholder, not a screenshot: Getting_Started.md, what the app shows betwe
 | Collaborator-Chat.png | Chat | Retake with a question about a proposal from the chosen outline |
 | Collaborator-Session-Overview.png, -Premise.png, -ProblemBuilder.png | An Example Session | Keep if the tutorial stays on Danger Calls; the session page is the one place the shipped sample appears (item 3 recommendation) |
 | Collaborator-Session-Problem.png | none | Delete; unreferenced |
+
+### The Scorecard outline and the session protocol
+
+- Source file: `G:\My Drive\2-Areas\Writing\Projects\0211 Scorecard\0211 Scorecard.stbx`, 2,907 bytes, JSON text (diffable), last saved by StoryCAD 3.2.1.0; StoryCAD 4.x will migrate the file format on first open, so a copy taken before that open is the only pre-migration copy. Contents: Overview with the Story Idea, an empty folder, the trash. Nothing else.
+- Backups and session numbering are recorded and run by Terry's Grok session, not here (2026-09-05). The shot list's "outline state" column maps onto whatever session numbers that protocol assigns; each screenshot file name in the table should appear in that session's record with the before and after backups.
+- Fact for that protocol: StoryCAD stops its timed backup and autosave while Collaborator holds the model (`CollaboratorService.OpenCollaborator`) and restarts them when Collaborator closes, so the backup taken before a session is the only one until the session ends.
