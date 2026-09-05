@@ -102,6 +102,13 @@ namespace StoryCollaborator
         private CollaboratorSettings _settings;
         private readonly StoryCADLib.Services.Logging.ILogService? _auditLogger;
 
+        /// <summary>
+        /// Collaborator #237 item 11: the proposals the writer rejected with Try Again, one
+        /// "Property: value" line each. Null on a first run. When set, RunAsync sends it as
+        /// the RejectedProposals arg and the Worker tells the model to depart from it.
+        /// </summary>
+        internal string? RejectedProposals { get; set; }
+
         // No Kernel field: issue #90 step 8 item 5 retired the direct-OpenAI Semantic Kernel
         // invocation path (InvokeDirectAsync), which was the only reason this class held one.
         // PostToProxyAsync talks to the Worker over plain HttpClient, never through SK.
@@ -193,6 +200,7 @@ namespace StoryCollaborator
 
                 EnrichWithStoryContext(body.Args, gatheredElements, workflowIO);
                 ApplySettings(body.Args);
+                ApplyRejectedProposals(body.Args);
 
                 if (workflowIO.ExampleLists.Count > 0)
                     EnrichWithExamples(body.Args);
@@ -2797,6 +2805,36 @@ namespace StoryCollaborator
                 _logger?.LogWarning($"Failed to enrich story context: {ex.Message}");
                 args["StoryContext"] = string.Empty;
             }
+        }
+
+        /// <summary>
+        /// Collaborator #237 item 11: Try Again means "give me something different". Puts the
+        /// rejected proposals on the wire as RejectedProposals; the Worker appends a TRY AGAIN
+        /// section that tells the model to depart from them. A first run adds nothing.
+        /// </summary>
+        internal void ApplyRejectedProposals(Dictionary<string, string> args)
+        {
+            if (string.IsNullOrWhiteSpace(RejectedProposals)) return;
+            args["RejectedProposals"] = RejectedProposals;
+        }
+
+        /// <summary>
+        /// Renders the pane's proposal rows as the RejectedProposals text: one line per row,
+        /// "DisplayName: proposed value". Rows with no proposed text are skipped. Each value is
+        /// cut at 4,000 characters so a beat sheet cannot double the prompt.
+        /// </summary>
+        internal static string FormatRejectedProposals(IEnumerable<StoryCADLib.Collaborator.Models.PendingUpdateItem> rows)
+        {
+            const int maxValueLength = 4000;
+            var lines = new List<string>();
+            foreach (var row in rows)
+            {
+                var value = (row.ProposedDisplay ?? string.Empty).Trim();
+                if (value.Length == 0) continue;
+                if (value.Length > maxValueLength) value = value[..maxValueLength];
+                lines.Add($"{row.DisplayName}: {value}");
+            }
+            return string.Join("\n", lines);
         }
 
         /// <summary>

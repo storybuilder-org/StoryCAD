@@ -190,11 +190,15 @@ public partial class WorkflowViewModel : ObservableRecipient
         }
         else if (HasPendingUpdates && PendingUpdateItems != null)
         {
+            // Collaborator #237 item 9: one count, stated once; the header on the list
+            // carries the total only.
             var total = PendingUpdateItems.Count;
             var needReview = PendingUpdateItems.Count(i => i.IsProtected);
-            var free = total - needReview;
+            var review = needReview > 0
+                ? $" {needReview} would replace text you wrote; review those before accepting."
+                : string.Empty;
             parts.Add(
-                $"{total} property update(s) ({free} free, {needReview} need review). " +
+                $"{total} property update(s) proposed.{review} " +
                 "Use Accept All, Review Each, or Try Again.");
         }
         else if (UpdatesApplied)
@@ -230,10 +234,7 @@ public partial class WorkflowViewModel : ObservableRecipient
             if (PendingUpdateItems == null || PendingUpdateItems.Count == 0)
                 return "Proposed property updates";
 
-            var total = PendingUpdateItems.Count;
-            var needReview = PendingUpdateItems.Count(i => i.IsProtected);
-            var free = total - needReview;
-            return $"Proposed property updates ({total}: {free} free, {needReview} need review)";
+            return $"Proposed property updates ({PendingUpdateItems.Count})";
         }
     }
 

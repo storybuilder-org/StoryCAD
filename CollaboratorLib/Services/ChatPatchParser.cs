@@ -49,11 +49,10 @@ public static class ChatPatchParser
             TryReadPatchesObject(raw.Trim(), list);
 
         patches = list;
+        // Collaborator #237 item 5: a reply that is only JSON leaves the display empty. The
+        // caller says what changed from what it applied, never from what was parsed; a
+        // parsed patch whose key matched nothing used to be reported as "Updated".
         displayText = CollapseBlankLines(working.Trim());
-        if (string.IsNullOrWhiteSpace(displayText) && list.Count > 0)
-            displayText = list.Count == 1
-                ? $"Updated {list[0].Key}."
-                : $"Updated {list.Count} proposals.";
         return true;
     }
 

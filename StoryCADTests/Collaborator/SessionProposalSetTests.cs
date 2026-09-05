@@ -142,4 +142,107 @@ public class SessionProposalSetTests
         StringAssert.Contains(text, "A tries to impose order");
         Assert.IsFalse(text.Contains(partnerGuid.ToString("D"), StringComparison.Ordinal), text);
     }
+
+    // Collaborator #237 item 5: the Scorecard S01 chat said "Updated 2 proposals." while the
+    // list and the file kept the originals. A patch key the session did not know was one way
+    // to get there. Keys now resolve by exact key, by bare property name, or by the property
+    // part of a Label.Property key, when the match is unique.
+    [TestMethod]
+    public void ResolveKey_ExactKey_ReturnsIt()
+    {
+        var set = new SessionProposalSet();
+        set.ReplaceFromPending(new[] { Make("Overview", "Concept", "A"), Make("Overview", "Premise", "B") });
+
+        Assert.AreEqual("Overview.Concept", set.ResolveKey("overview.concept"));
+    }
+
+    [TestMethod]
+    public void ResolveKey_BarePropertyName_MatchesTheOneEntry()
+    {
+        var set = new SessionProposalSet();
+        set.ReplaceFromPending(new[] { Make("Overview", "Concept", "A"), Make("Overview", "Premise", "B") });
+
+        Assert.AreEqual("Overview.Premise", set.ResolveKey("Premise"));
+        Assert.AreEqual("Overview.Premise", set.ResolveKey("StoryOverview.Premise"));
+    }
+
+    [TestMethod]
+    public void ResolveKey_AmbiguousOrUnknown_IsNull()
+    {
+        var set = new SessionProposalSet();
+        set.ReplaceFromPending(new[] { Make("Problem", "Name", "A"), Make("Character", "Name", "B") });
+
+        Assert.IsNull(set.ResolveKey("Name"), "two entries share the property name");
+        Assert.IsNull(set.ResolveKey("Theme"));
+        Assert.IsNull(set.ResolveKey(""));
+    }
+
+    [TestMethod]
+    public void TryApplyPatch_BarePropertyName_PatchesTheEntry()
+    {
+        var set = new SessionProposalSet();
+        set.ReplaceFromPending(new[] { Make("Overview", "Concept", "Five what-ifs") });
+
+        Assert.IsTrue(set.TryApplyPatch("Concept", "One what-if and two follow-ons", out _));
+        Assert.AreEqual("One what-if and two follow-ons", set.Get("Overview.Concept")!.ProposedText);
+        Assert.AreEqual("One what-if and two follow-ons", set.OpenAsPendingUpdates().Single().Value);
+    }
+
+    // Collaborator #237 item 3: the run's order is the dependency order, so the chat is told
+    // it and told to re-derive everything after a change.
+    [TestMethod]
+    public void All_And_Snapshot_KeepTheRunOrder_NotAlphabetical()
+    {
+        var set = new SessionProposalSet();
+        set.ReplaceFromPending(new[]
+        {
+            Make("Overview", "Description", "idea"),
+            Make("Overview", "Concept", "what if"),
+            Make("Overview", "Premise", "one sentence")
+        });
+
+        CollectionAssert.AreEqual(
+            new[] { "Overview.Description", "Overview.Concept", "Overview.Premise" },
+            set.OrderedKeys.ToList());
+        CollectionAssert.AreEqual(
+            new[] { "Description", "Concept", "Premise" },
+            set.All.Select(e => e.DisplayName).ToList());
+
+        var snap = set.BuildSnapshotText();
+        Assert.IsTrue(snap.IndexOf("### Description", StringComparison.Ordinal) < snap.IndexOf("### Concept", StringComparison.Ordinal));
+        Assert.IsTrue(snap.IndexOf("### Concept", StringComparison.Ordinal) < snap.IndexOf("### Premise", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void BuildSnapshotText_NamesTheProposal_AndCarriesThePatchKeyAside()
+    {
+        // Collaborator #237 item 9: the writer saw "Concept (Overview.Concept)" and "Open" in
+        // chat. The heading leads with the name; the key is labelled as the patch key.
+        var set = new SessionProposalSet();
+        set.ReplaceFromPending(new[] { Make("Overview", "Concept", "what if") });
+
+        var snap = set.BuildSnapshotText();
+        StringAssert.Contains(snap, "### Concept [open] (patch key: Overview.Concept)");
+    }
+
+    [TestMethod]
+    public void BuildSystemInstructions_StatesTheOrder_AndTheDownstreamRule()
+    {
+        var text = SessionProposalSet.BuildSystemInstructions(
+            "Ideation (Story idea => Concept => Premise)", new[] { "Description", "Concept", "Premise" });
+
+        StringAssert.Contains(text, "in this order, each from the ones before it: Description, Concept, Premise.");
+        StringAssert.Contains(text, "also rewrite every proposal after it in that order");
+        StringAssert.Contains(text, "call a proposal by its name");
+        StringAssert.Contains(text, "Do not show the writer a patch key or a status word");
+    }
+
+    [TestMethod]
+    public void BuildSystemInstructions_OneProposal_HasNoOrderRule()
+    {
+        var text = SessionProposalSet.BuildSystemInstructions("Story Form", new[] { "StoryType" });
+
+        Assert.IsFalse(text.Contains("in this order"), text);
+        StringAssert.Contains(text, "patches");
+    }
 }

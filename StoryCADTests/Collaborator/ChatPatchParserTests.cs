@@ -55,4 +55,16 @@ public class ChatPatchParserTests
         Assert.AreEqual("Overview.Concept", patches[0].Key);
         Assert.IsFalse(display.Contains("```"));
     }
+
+    [TestMethod]
+    public void TryParse_JsonOnly_LeavesTheDisplayEmpty()
+    {
+        // Collaborator #237 item 5: the parser used to write "Updated 2 proposals." for a
+        // JSON-only reply before anything was applied. The caller reports from what it applied.
+        var raw = "{\"patches\":[{\"key\":\"Overview.Concept\",\"value\":\"A\"},{\"key\":\"Overview.Premise\",\"value\":\"B\"}]}";
+
+        Assert.IsTrue(ChatPatchParser.TryParse(raw, out var display, out var patches));
+        Assert.AreEqual(2, patches.Count);
+        Assert.AreEqual(string.Empty, display);
+    }
 }

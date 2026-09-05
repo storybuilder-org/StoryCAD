@@ -17,6 +17,13 @@ public static class RequiredFieldGapScanner
     }
 
     /// <summary>
+    /// Collaborator #237 item 10: the number the Outline gaps nav row shows. It is the number
+    /// of missing fields across every element, which is what the Outline gaps page lists.
+    /// </summary>
+    public static int MissingFieldCount(IReadOnlyList<GapDetail> details) =>
+        details?.Sum(d => d.MissingProperties.Count) ?? 0;
+
+    /// <summary>
     /// Full gap report for the Outline gaps workflow (phase 6).
     /// </summary>
     public static IReadOnlyList<GapDetail> FindGapDetails(IStoryCADAPI api, StoryModel model)
