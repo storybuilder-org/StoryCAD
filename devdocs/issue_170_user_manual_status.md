@@ -99,7 +99,7 @@ Collaborator works on a part: one story element, or a small related set, and its
 - [ ] `Tips_and_Common_Questions.md` "Long lists of updates" still tells the reader to scroll the Property Updates list. Keep only if still true on the labeled build.
 - [ ] Production merge `dev` to `main`, deliberately, when the topic is ready for manual.storybuilder.org.
 - [ ] Before that merge, Getting Started has to describe the production path again (Subscribe, free trial, Restore purchases, the Microsoft Store and App Store). The pre-beta wording is in git history at `07741499`.
-- [ ] Separate from #170: the manual has no written style standard. The writing-standards page covers design specs (ASD-STE100) and human-facing prose (no-ai-slop, Rossmann) and says nothing about end-user documentation. The item 6 description of the hand-written pages is the seed. File as its own issue when the Collaborator topic is done; do not widen #170 to the whole manual.
+- [ ] Write an ADR from the voice standard above (Terry, 2026-09-05): the manual-wide rule for end-user documentation, on the model of ADR-008 (which set the language standard for workflow prompts). Home: the wiki, under the usermanual repo pages, plus a new "End-user documentation" row in `wiki/topics/writing-standards.md` pointing at it; walk the wiki ADR checklist first. Scope is the whole manual, not the Collaborator topic. Do it after the item 6 pass, which will refine the rules by applying them. Replaces the earlier note that the manual had no written style standard.
 
 ## Findings for the product, not the manual
 
