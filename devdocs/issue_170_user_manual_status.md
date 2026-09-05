@@ -83,6 +83,7 @@ Rules for this topic, taken from the above:
 - Give the reason for each recommendation in the same paragraph, and say when a choice is optional.
 - Put instructions in prose with a screenshot after a colon sentence. Use a numbered list only for a real sequence of clicks the reader performs in order.
 - Bold a control name only when the reader is told to click it, at most once per paragraph. Elsewhere, capitalize UI names as they appear on screen. No bold for emphasis.
+- Name a workflow exactly as Collaborator's list shows it, every time: Ideation (Story idea => Concept => Premise), Story Problem (Premise => Problem + Characters), Story Form, Inner and Outer Problems, Problem Builder, Define Character, Character Story Function, Flaw and Backstory, Character Relationship, Define Story World, Setting Builder, Scene Builder. No short forms, no "the list shows it as" asides (Terry, 2026-09-05).
 - Tables only for reference material (a field list, the label meanings). Not for argument.
 - Reassure where the product protects the reader (Has your text, nothing written until accepted) in the tone of item 7 above, without slogans.
 - Test a revised page by reading it aloud next to `Creating_a_Story_pt_2.md`. If the Collaborator page sounds clipped or emphatic by comparison, it is not done.

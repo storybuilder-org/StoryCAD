@@ -30,15 +30,15 @@ Danger Calls is partly filled in, which is the interesting case. Collaborator wi
 
 Collaborator reads what is there. Empty forms produce empty-sounding help.
 
-## 2. Premise
+## 2. Ideation (Story idea => Concept => Premise)
 
-1. Click the **Premise** workflow. The list shows it as a longer ideation label. Clicking runs it straight away.  
+1. Click the **Ideation (Story idea => Concept => Premise)** workflow. Clicking runs it straight away.  
 2. Wait for it to finish.  
 3. Read the header above the list. It counts the proposals and splits them into free and need review.
 
 Danger Calls already has a Story Idea (a news piece about teenagers selling drugs using disposable phones) and a Concept (what if a detective uses a criminal's own phone to stage a rescue). Fields carrying that text come back marked **Has your text**, and **Accept all changes** leaves every one of them alone. That is the point: nothing you wrote disappears because you clicked the big blue button.
 
-![The Premise workflow finished on Danger Calls: three proposals headed 3: 0 free, 3 need review, each labeled Has your text](../../media/Collaborator/Collaborator-Session-Premise.png)
+![The Ideation (Story idea => Concept => Premise) workflow finished on Danger Calls: three proposals headed 3: 0 free, 3 need review, each labeled Has your text](../../media/Collaborator/Collaborator-Session-Premise.png)
 
 4. Use **Review Each** and read one properly. Compare **Yours** against **Proposed**, then Accept or Skip.
 

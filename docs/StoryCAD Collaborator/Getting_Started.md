@@ -42,7 +42,7 @@ StoryCAD can open the **production** or **beta** user manual from Help, dependin
 
 1. Open an outline that has at least a short **Story Idea** on the Overview.
 2. Launch Collaborator.
-3. Select a simple workflow such as **Premise** (the list may show a longer ideation label).
+3. Select a simple workflow such as Ideation (Story idea => Concept => Premise).
 4. When suggestions appear, you are set. See [Reviewing Suggestions](Reviewing_Suggestions.html) before you accept anything you care about.
 
 If the window never opens, restart StoryCAD. For StoryCAD help in general, see [Getting Help](../Front%20Matter/Getting_Help.html).

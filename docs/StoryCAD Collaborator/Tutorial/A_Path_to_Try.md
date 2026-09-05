@@ -16,21 +16,19 @@ You can skip steps, but this order usually wastes less time.
 
 ## The starred band is a head start
 
-Collaborator starts with five of these workflows starred, so they sit at the top of the workflow list before you touch anything: **Premise**, **Story Problem**, **Problem Builder**, **Character Story Function**, and **Scene Builder**. That is one per stage of the spine below, so the top of the list reads as a next step rather than a catalog.
+Collaborator starts with five of these workflows starred, so they sit at the top of the workflow list before you touch anything: Ideation (Story idea => Concept => Premise), Story Problem (Premise => Problem + Characters), Problem Builder, Character Story Function, and Scene Builder. That is one per stage of the spine below, so the top of the list reads as a next step rather than a catalog.
 
 Treat it as a starting point, not a rule. As you learn which workflows your writing turns on, star those and unstar the rest. [Opening Collaborator](../Opening_Collaborator.html) shows how. Everything not starred is still there, filed under its story element.
 
 ## Suggested order
 
-1. **Premise**  
-   Nail a workable premise from idea and concept.  
+1. **Ideation (Story idea => Concept => Premise)**     Nail a workable premise from idea and concept.  
    Craft: [Story Idea, Concept, and Premise](../../Writing%20with%20StoryCAD/Story_Idea_Concept_and_Premise.html)
 
 2. **Story Form** (when you care)  
    Genre and story type (novel, screenplay, and so on). Useful once the premise exists.
 
-3. **Story Problem**  
-   Turn the premise into a main problem with protagonist and antagonist shells.  
+3. **Story Problem (Premise => Problem + Characters)**     Turn the premise into a main problem with protagonist and antagonist shells.  
    Craft: [Defining Problems](../../Writing%20with%20StoryCAD/Defining_Problems.html)
 
 4. **Problem Builder**  
