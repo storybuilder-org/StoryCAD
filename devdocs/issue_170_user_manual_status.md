@@ -184,5 +184,18 @@ Text placeholder, not a screenshot: Getting_Started.md, what the app shows betwe
 ### The Scorecard outline and the session protocol
 
 - Source file: `G:\My Drive\2-Areas\Writing\Projects\0211 Scorecard\0211 Scorecard.stbx`, 2,907 bytes, JSON text (diffable), last saved by StoryCAD 3.2.1.0; StoryCAD 4.x will migrate the file format on first open, so a copy taken before that open is the only pre-migration copy. Contents: Overview with the Story Idea, an empty folder, the trash. Nothing else.
-- Backups and session numbering are recorded and run by Terry's Grok session, not here (2026-09-05). The shot list's "outline state" column maps onto whatever session numbers that protocol assigns; each screenshot file name in the table should appear in that session's record with the before and after backups.
 - Fact for that protocol: StoryCAD stops its timed backup and autosave while Collaborator holds the model (`CollaboratorService.OpenCollaborator`) and restarts them when Collaborator closes, so the backup taken before a session is the only one until the session ends.
+
+### Backup and session protocol (Terry, 2026-09-05; recorded here after a check found no other record)
+
+Collaborator writes to the outline on every accept, and the sessions are also a test of Collaborator on a real outline, so each session starts from a copy that can be returned to and ends with a copy that shows what the session did.
+
+- Working folder: `G:\My Drive\2-Areas\Writing\Projects\0211 Scorecard\manual-sessions\`, beside the original. Google Drive syncs it. The original `0211 Scorecard.stbx` is not opened again; the sessions run on `Scorecard.stbx` in the working folder.
+- `Scorecard-S00-baseline.stbx`: byte-identical copy of the original, taken 2026-09-05 before any 4.x open (the 3.2.1 format migrates on first open). Never edited.
+- Session NN, in this order: (1) copy `Scorecard.stbx` to `Scorecard-SNN-before.stbx`; (2) open it in StoryCAD, open Collaborator, run the spine step for that session, take the shots the shot list assigns to it, accept as the manual describes, Exit, save in StoryCAD; (3) copy to `Scorecard-SNN-after.stbx`; (4) fill the row below. A retake of any shot starts from that session's before copy. StoryCAD's own timed backup and autosave are stopped while Collaborator holds the model, so the before copy is the only backup until the session ends.
+- One spine step per session, matching the shot list: S01 open and Outline gaps (shots 1, 2) and Ideation (shot 3); S02 Story Form (4); S03 Story Problem (5, Element Picker retake); S04 Problem Builder (6, Review Each and Property Updates retakes); S05 Inner and Outer Problems (7); S06 the character workflows (8 to 11); S07 Define Story World and Setting Builder (12, 13); S08 Scene Builder (14); S09 the remaining retakes (window, list, pane, Customize Workflows, collapsed pane, Chat, With StoryCAD).
+- Bugs found go to Collaborator issues as they appear, with the session number and the before copy named in the issue, since the before copy reproduces the state.
+
+| Session | Date | Build | Step | Shots taken | Before | After | Notes / issues |
+|---|---|---|---|---|---|---|---|
+| S00 | 2026-09-05 | none | Baseline copy, pre-migration | none | `Scorecard-S00-baseline.stbx` | same | 2,907 bytes, byte-identical to the original |
