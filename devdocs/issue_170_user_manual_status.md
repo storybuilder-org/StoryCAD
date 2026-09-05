@@ -54,9 +54,40 @@ Code (`CollaboratorLib/Context/`): `RequiredFieldGapScanner`, `GapDetail`, `GapW
 
 ### 6. Language review: manual voice, not the Rossmann register
 The pages read in the Rossmann "punchy" voice: fragments, claim-then-proof paragraphs, aphoristic closers. Example from `Workflows_and_Writing_Craft.md`, "What is a workflow?": "A workflow is a short, focused craft job." ... "One workflow, one craft question. That keeps the work small enough to judge." That register does not fit a user manual. Collaborator #226 (closed) made the same call for the coach's own voice: supportive, keep the mechanics that transfer (concrete detail, plain connectives, varied sentence length), drop the combative register.
-- [ ] Write down the target voice for this topic before editing. The rest of the manual was written by hand, mostly by Terry, before the no-ai-slop and Rossmann rules were adopted, so it is the reference. Read three or four of those pages (for example under `Story Elements/` and `Writing with StoryCAD/`), describe their style in a short list (sentence shape, paragraph length, how steps and screenshots are introduced, how much explanation precedes an instruction), and adopt that as the standard for this topic. Borrow the transferable rules from #226 (concrete detail, plain connectives, varied sentence length). Record the standard in this file so the item 4 and item 5 additions are written to it from the start.
+- [x] Write down the target voice for this topic before editing. The rest of the manual was written by hand, mostly by Terry, before the no-ai-slop and Rossmann rules were adopted, so it is the reference. Read three or four of those pages (for example under `Story Elements/` and `Writing with StoryCAD/`), describe their style in a short list (sentence shape, paragraph length, how steps and screenshots are introduced, how much explanation precedes an instruction), and adopt that as the standard for this topic. Borrow the transferable rules from #226 (concrete detail, plain connectives, varied sentence length). Record the standard in this file so the item 4 and item 5 additions are written to it from the start.
 - [ ] Read every page in the topic against that standard and revise: `index.md`, `Getting_Started.md`, `What_Collaborator_Is.md`, `Workflows_and_Writing_Craft.md`, `Opening_Collaborator.md`, `Running_a_Workflow.md`, `Reviewing_Suggestions.md`, `Chat.md`, `Tips_and_Common_Questions.md`, `Tutorial/index.md`, `Tutorial/A_Path_to_Try.md`, `Tutorial/An_Example_Session.md`.
 - [ ] Do this pass after items 1 to 5 change the content, or fold it into each page as that page is rewritten, so no page gets revised twice.
+
+
+#### Voice standard for the StoryCAD Collaborator topic (written 2026-09-05)
+
+Derived from four hand-written pages: `Writing with StoryCAD/Story_Idea_Concept_and_Premise.md` (Terry, 2022 to 2026), `Writing with StoryCAD/Workflow.md`, `Tutorial Creating a Story/Creating_a_Story_pt_2.md`, and the `Story Elements` reference pages `Problem_Form.md` and `Premise_Tab.md`.
+
+What those pages do:
+
+1. **A teacher talking to one writer.** Second person throughout; the tutorial uses "we" and "let's" as it works alongside the reader. Asides sit in parentheses: "(Don't forget to save.)", "(if you want to know what a button is, just mouse over it.)"
+2. **Full sentences, mostly 20 to 35 words, joined with commas, semicolons, and "but" or "and".** Fragments are rare and never used for effect. A paragraph does not end on a one-line verdict.
+3. **Paragraphs of two to five sentences.** A page alternates an explanation paragraph with a one-sentence instruction or a screenshot. There are no one-line paragraphs standing alone for emphasis.
+4. **Explanation comes before the instruction.** A concept is defined, attributed to a named source (Larry Brooks, Eric Bork, IBM, Deborah Chester), and shown with a well-known story (The da Vinci Code, Jaws, Star Wars, Hamlet) before the reader is told to click anything.
+5. **Instructions live inside the prose.** "Click on the Concept tab on your Story Overview and you'll see this:" followed by the screenshot. Numbered step lists are used only where the tutorial has a real sequence to walk. Screenshots follow a sentence that ends in a colon.
+6. **Reasons are given.** The tutorial explains why it adds a third character ("policemen often work in teams... with two detectives, there's somebody to talk to") and admits when a choice is provisional ("if we don't need Tony, a touch of the Delete button can always get rid of him").
+7. **Permission and reassurance.** "You can fill in as much or little of a story element as you like or need." "These lists are intended to be suggestions, not limitations." "At this point all three characters are stick figures, just names and roles. But that's okay, we're making progress."
+8. **Reference pages are short and flat.** One or two paragraphs per tab: what the field is, what it is for, one example drawn from the screenshot ("here, 'Hamlet wants to avenge his father's murder'").
+9. **Light formatting.** Bold is rare. UI names appear capitalized as on screen, sometimes in single quotes ('Open story from disk'). Tables are rare; bullets only list things. Contractions are natural and moderate, not a target rate.
+10. **Reminders close a section**, not a punchline: "Remember to save your work frequently."
+
+Rules for this topic, taken from the above:
+
+- Write in complete sentences of ordinary length. No fragments for effect, no one-sentence paragraphs used as a closer, no "claim, then proof" paragraph shape.
+- Open each section by explaining the idea, then show it, then say what to do. Name the craft source where one exists (Writing with StoryCAD pages, Brooks, Bork) rather than asserting.
+- Give the reason for each recommendation in the same paragraph, and say when a choice is optional.
+- Put instructions in prose with a screenshot after a colon sentence. Use a numbered list only for a real sequence of clicks the reader performs in order.
+- Bold a control name only when the reader is told to click it, at most once per paragraph. Elsewhere, capitalize UI names as they appear on screen. No bold for emphasis.
+- Tables only for reference material (a field list, the label meanings). Not for argument.
+- Reassure where the product protects the reader (Has your text, nothing written until accepted) in the tone of item 7 above, without slogans.
+- Test a revised page by reading it aloud next to `Creating_a_Story_pt_2.md`. If the Collaborator page sounds clipped or emphatic by comparison, it is not done.
+
+Not adopted from the hand-written pages: empty image alt text, and the occasional typo or unfinished section. Alt text stays descriptive.
 
 ### Later
 - [ ] Rewrite the issue body to match this list; point its status line at this file.
