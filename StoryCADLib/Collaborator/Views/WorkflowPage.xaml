@@ -282,15 +282,17 @@
             <!-- Accept All: primary action for the table, at the foot of the work column.
                  Accepted updates are written to the outline immediately, so there is no
                  separate Save button on the shell bar. -->
+            <!-- Collaborator #237 item 9: the button carries the same name the status line
+                 and the chat use for it. -->
             <Button Grid.Row="3"
-                    Content="Accept all changes"
+                    Content="Accept All"
                     Command="{x:Bind ViewModel.AcceptAllCommand}"
                     IsEnabled="{x:Bind ViewModel.HasPendingUpdates, Mode=OneWay}"
                     Style="{ThemeResource AccentButtonStyle}"
                     HorizontalAlignment="Stretch"
                     Margin="0,10,0,0"
                     AutomationProperties.AutomationId="WorkflowAcceptAllButton"
-                    AutomationProperties.Name="Accept all changes" />
+                    AutomationProperties.Name="Accept All" />
         </Grid>
 
         <!-- ========== Chat column (own height; input does not affect work column) ========== -->

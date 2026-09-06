@@ -69,6 +69,18 @@ public partial class RichEditBoxExtended : RichEditBox
             return;
         }
 
+        // Collaborator #237 items 6 and 7. RichEditBox raises TextChanged after a programmatic
+        // SetText returns, so the lock above does not cover it. Without a focus check the
+        // handler then writes the document back over the bound property: as RTF when the box
+        // rendered the plain text Collaborator wrote (the Scorecard S01 file held Concept as RTF
+        // and Premise as plain text, one box realized and one not), and as "" when the box had
+        // not rendered it yet (an empty page over accepted text, and SaveModel then wrote the
+        // empties to the outline). Only the writer changes text, and the writer has focus.
+        if (FocusState == FocusState.Unfocused)
+        {
+            return;
+        }
+
         _lockChangeExecution = true;
         Document.GetText(TextGetOptions.None, out var plain);
         if (string.IsNullOrWhiteSpace(plain))

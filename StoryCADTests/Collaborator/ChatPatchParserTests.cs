@@ -55,4 +55,52 @@ public class ChatPatchParserTests
         Assert.AreEqual("Overview.Concept", patches[0].Key);
         Assert.IsFalse(display.Contains("```"));
     }
+
+    // Collaborator #237: a raw line break inside a JSON string is invalid JSON. The Concept
+    // what-ifs are one per line, so a model that does not escape them dropped every patch.
+    [TestMethod]
+    public void TryParse_RawLineBreaksInsideValue_StillReads()
+    {
+        var raw = "Done.\n{\"patches\":[{\"key\":\"Overview.Concept\",\"value\":\"What if A?\nWhat if B?\"}]}";
+
+        Assert.IsTrue(ChatPatchParser.TryParse(raw, out var display, out var patches));
+        Assert.AreEqual(1, patches.Count);
+        Assert.AreEqual("What if A?\nWhat if B?", patches[0].Value);
+        Assert.AreEqual("Done.", display);
+    }
+
+    [TestMethod]
+    public void TryParse_TrailingComma_StillReads()
+    {
+        var raw = "{\"patches\":[{\"key\":\"Overview.Concept\",\"value\":\"A\"},]}";
+
+        Assert.IsTrue(ChatPatchParser.TryParse(raw, out _, out var patches));
+        Assert.AreEqual(1, patches.Count);
+    }
+
+    [TestMethod]
+    public void HasUnreadPatchBlock_TrueOnlyWhenPatchesNamedButNoneParsed()
+    {
+        var broken = "{\"patches\":[{\"key\":\"Overview.Concept\",\"value\":\"A\"}";
+        ChatPatchParser.TryParse(broken, out _, out var none);
+        Assert.AreEqual(0, none.Count);
+        Assert.IsTrue(ChatPatchParser.HasUnreadPatchBlock(broken, none));
+
+        Assert.IsFalse(ChatPatchParser.HasUnreadPatchBlock("No changes.", none));
+
+        ChatPatchParser.TryParse("{\"patches\":[{\"key\":\"Overview.Concept\",\"value\":\"A\"}]}", out _, out var one);
+        Assert.IsFalse(ChatPatchParser.HasUnreadPatchBlock("irrelevant", one));
+    }
+
+    [TestMethod]
+    public void TryParse_JsonOnly_LeavesTheDisplayEmpty()
+    {
+        // Collaborator #237 item 5: the parser used to write "Updated 2 proposals." for a
+        // JSON-only reply before anything was applied. The caller reports from what it applied.
+        var raw = "{\"patches\":[{\"key\":\"Overview.Concept\",\"value\":\"A\"},{\"key\":\"Overview.Premise\",\"value\":\"B\"}]}";
+
+        Assert.IsTrue(ChatPatchParser.TryParse(raw, out var display, out var patches));
+        Assert.AreEqual(2, patches.Count);
+        Assert.AreEqual(string.Empty, display);
+    }
 }

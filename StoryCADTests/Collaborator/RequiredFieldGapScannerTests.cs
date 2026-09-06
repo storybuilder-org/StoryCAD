@@ -23,6 +23,25 @@ public class RequiredFieldGapScannerTests
         Ioc.Default.GetRequiredService<ToolsData>());
 
     [TestMethod]
+    public void MissingFieldCount_SumsFieldsAcrossElements_NotElements()
+    {
+        // Collaborator #237 item 10: the nav row read "Outline gaps (1)" for an Overview with
+        // five empty fields, because it counted elements. The page lists fields, so the count
+        // is fields.
+        var api = CreateApi();
+        var model = new StoryModel();
+        api.CurrentModel = model;
+        _ = new OverviewModel("Scorecard", model, null); // the base constructor registers it
+
+        var details = RequiredFieldGapScanner.FindGapDetails(api, model);
+
+        Assert.AreEqual(1, details.Count, "one element has gaps");
+        Assert.AreEqual(details[0].MissingProperties.Count, RequiredFieldGapScanner.MissingFieldCount(details));
+        Assert.IsTrue(RequiredFieldGapScanner.MissingFieldCount(details) > 1, "the Overview has more than one empty field");
+        Assert.AreEqual(0, RequiredFieldGapScanner.MissingFieldCount(Array.Empty<GapDetail>()));
+    }
+
+    [TestMethod]
     public void Problem_BlankScalars_Includes_ProblemType_ConflictType_Subject()
     {
         var api = CreateApi();

@@ -209,7 +209,9 @@ public class Collaborator : ICollaborator
                     if (workflowTag is Workflow workflow)
                     {
                         // Short name on top bar (Label, not long Title path).
-                        viewModel.ActiveWorkflowName = FormatWorkflowShortName(workflow.Label);
+                        // Collaborator #237 item 8: one name per workflow everywhere; the
+                        // list shows the title, so the top bar does too.
+                        viewModel.ActiveWorkflowName = workflow.Title;
                         viewModel.HasPendingUpdates = false;
 
                         // Clear shell status; gather cancel has no chat page (#123).
@@ -321,8 +323,11 @@ public class Collaborator : ICollaborator
             var gapDetails = RequiredFieldGapScanner.FindGapDetails(_storyApi, _storyModel);
             if (gapDetails.Count > 0)
             {
+                // Collaborator #237 item 10: the count is the number of missing fields, which is
+                // what the page lists. It used to count elements, so an Overview with five
+                // empty fields read as "(1)".
                 viewModel.MenuItems.Add(WrappingNavItem(
-                    $"{GapWorkflowOwnership.OutlineGapsNavTitle} ({gapDetails.Count})",
+                    $"{GapWorkflowOwnership.OutlineGapsNavTitle} ({RequiredFieldGapScanner.MissingFieldCount(gapDetails)})",
                     GapWorkflowOwnership.OutlineGapsTag));
             }
         }
@@ -886,28 +891,66 @@ public class Collaborator : ICollaborator
                 }
 
                 ChatPatchParser.TryParse(responseText, out var display, out var patches);
-                _chatHistory?.AddAssistantMessage(display);
+                var listChanged = false;
 
                 if (patches.Count > 0 && _sessionProposals != null)
                 {
-                    var applied = 0;
+                    // Collaborator #237 item 5: report what was applied, by name, and what was
+                    // not. The old text said "Updated" for every parsed patch, so a key the
+                    // session did not know produced a success line over an unchanged list.
+                    // The Scorecard chat of 2026-09-05 added a second way: the model re-sent
+                    // the text already in the list and the app said "Changed". Same text is
+                    // now reported as unchanged.
+                    var changed = new List<string>();
+                    var unchanged = new List<string>();
+                    var unknown = new List<string>();
                     foreach (var p in patches)
                     {
-                        if (_sessionProposals.TryApplyPatch(p.Key, p.Value, out _))
-                            applied++;
+                        var resolved = _sessionProposals.ResolveKey(p.Key);
+                        if (resolved != null &&
+                            _sessionProposals.TryApplyPatch(resolved, p.Value, out var reopened, out var textChanged))
+                        {
+                            var name = _sessionProposals.Get(resolved)?.DisplayName ?? resolved;
+                            if (textChanged || reopened)
+                                changed.Add(name);
+                            else
+                                unchanged.Add(name);
+                        }
                         else
-                            _logger?.LogDebug("Ignored chat patch for unknown key {Key}", p.Key);
+                        {
+                            unknown.Add(p.Key);
+                            _logger?.LogWarning("Ignored chat patch for unknown key {Key}", p.Key);
+                        }
                     }
 
-                    if (applied > 0)
+                    var notes = new List<string>();
+                    if (changed.Count > 0)
                     {
-                        SyncWorkflowResultFromSession();
-                        RefreshProposalSnapshotInHistory();
-                        display = string.IsNullOrWhiteSpace(display)
-                            ? $"Updated {applied} proposal(s). Accept to write the outline."
-                            : display + $"\n\n({applied} proposal(s) updated — Accept to write the outline.)";
+                        var synced = SyncWorkflowResultFromSession();
+                        listChanged = synced;
+                        notes.Add(synced
+                            ? $"Changed {string.Join(", ", changed)}. The list shows the new text. Accept to write the outline."
+                            : $"Changed {string.Join(", ", changed)} in chat only. The list could not be refreshed; run the workflow again.");
                     }
+                    if (unchanged.Count > 0)
+                        notes.Add($"{string.Join(", ", unchanged)} already read that way; nothing changed there.");
+                    if (unknown.Count > 0)
+                        notes.Add($"No proposal in this run is named {string.Join(", ", unknown)}; nothing changed for it.");
+
+                    var note = string.Join(" ", notes);
+                    display = string.IsNullOrWhiteSpace(display) ? note : display + "\n\n" + note;
                 }
+                else if (ChatPatchParser.HasUnreadPatchBlock(responseText, patches))
+                {
+                    _logger?.LogWarning("Chat reply named patches but none could be read");
+                    display += "\n\nCollaborator wrote a change the app could not read. Ask for it again.";
+                }
+
+                // The history holds what the writer saw, note included, so the model knows the
+                // app applied its patch. The refreshed snapshot follows the assistant turn.
+                _chatHistory?.AddAssistantMessage(display);
+                if (listChanged)
+                    RefreshProposalSnapshotInHistory();
 
                 _logger?.LogDebug("Assistant response (display): {Response}", display);
                 return display;
@@ -949,7 +992,10 @@ public class Collaborator : ICollaborator
         _sessionProposals.ReplaceFromPending(result.PendingUpdates, ResolveElementName);
 
         _chatHistory = new ChatHistory();
-        _chatHistory.AddSystemMessage(SessionProposalSet.BuildSystemInstructions(workflow.Title));
+        // Collaborator #237 item 3: the chat knows the run's order, so a change to one
+        // proposal re-derives the ones written after it.
+        _chatHistory.AddSystemMessage(SessionProposalSet.BuildSystemInstructions(
+            workflow.Title, _sessionProposals.All.Select(e => e.DisplayName).ToList()));
         _chatHistory.AddSystemMessage(_sessionProposals.BuildSnapshotText());
 
         viewModel.ConversationList.Clear();
@@ -979,10 +1025,18 @@ public class Collaborator : ICollaborator
     /// Push session proposals into WorkflowResult (open only for Accept) and
     /// Property Updates UI (all statuses so Skip does not blank the panel — #145).
     /// </summary>
-    private void SyncWorkflowResultFromSession()
+    private bool SyncWorkflowResultFromSession()
     {
         if (_sessionProposals == null || _activeWorkflowResult == null || _activeWorkflowViewModel == null)
-            return;
+        {
+            // Collaborator #237 item 5: this used to return in silence, and the caller
+            // reported success anyway. It cannot happen while a chat session is open, so
+            // say so where a log reader will see it.
+            _logger?.LogWarning(
+                "Proposal sync skipped: session={Session} result={Result} viewModel={ViewModel}",
+                _sessionProposals != null, _activeWorkflowResult != null, _activeWorkflowViewModel != null);
+            return false;
+        }
 
         var open = _sessionProposals.OpenAsPendingUpdates().ToList();
         _activeWorkflowResult.PendingUpdates.Clear();
@@ -994,6 +1048,7 @@ public class Collaborator : ICollaborator
         }
 
         PushSessionSetToViewModel(_activeWorkflowViewModel);
+        return true;
     }
 
     /// <summary>
@@ -1146,7 +1201,8 @@ public class Collaborator : ICollaborator
     private async Task ExecuteWorkflowWithFeedback(
         StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
         Workflow workflow,
-        Dictionary<string, StoryElement> gatheredElements)
+        Dictionary<string, StoryElement> gatheredElements,
+        string? rejectedProposals = null)
     {
         try
         {
@@ -1160,7 +1216,11 @@ public class Collaborator : ICollaborator
 
             // Execute via WorkflowRunner
             var runnerLogger = _loggerFactory?.CreateLogger<WorkflowRunner>();
-            var runner = new WorkflowRunner(_storyModel!, workflow, _storyApi!, runnerLogger, _settings, _auditLogger);
+            var runner = new WorkflowRunner(_storyModel!, workflow, _storyApi!, runnerLogger, _settings, _auditLogger)
+            {
+                // Collaborator #237 item 11: a Try Again carries what the writer rejected.
+                RejectedProposals = rejectedProposals
+            };
             _auditLogger?.Log(StoryCADLib.Services.Logging.LogLevel.Info,
                 $"Workflow started: {workflow.Title} with {gatheredElements.Count} elements");
             var result = await runner.RunAsync(gatheredElements);
@@ -1402,10 +1462,14 @@ public class Collaborator : ICollaborator
                     {
                         try
                         {
+                            // Collaborator #237 item 11: Try Again means "give me something
+                            // different". Capture the rows the writer saw before they clear, so
+                            // the rerun can tell the model what to depart from.
+                            var rejected = WorkflowRunner.FormatRejectedProposals(viewModel.PendingUpdateItems);
                             stageSession.ClearStage();
                             viewModel.ClearPendingUpdates();
-                            viewModel.AddStatusMessage("Re-running workflow...");
-                            await ExecuteWorkflowWithFeedback(viewModel, workflow, gatheredElements);
+                            viewModel.AddStatusMessage("Re-running workflow for a different result...");
+                            await ExecuteWorkflowWithFeedback(viewModel, workflow, gatheredElements, rejected);
                         }
                         catch (Exception ex)
                         {
@@ -1559,14 +1623,16 @@ public class Collaborator : ICollaborator
                         }
                     };
 
-                    var fillCount = result.PendingUpdates.Count(u => u.Kind is UpdateKind.Fill or UpdateKind.Refresh or UpdateKind.Unclassified);
                     var protectCount = result.PendingUpdates.Count(u => u.Kind == UpdateKind.Protect);
                     // #145: clear chat, seed proposal set, unlock Send; show full set on the left
                     BeginProposalChatSession(viewModel, workflow, result);
                     PushSessionSetToViewModel(viewModel);
+                    // Collaborator #237 item 9: plain words, no em dash, one count.
+                    var replaceNote = protectCount > 0
+                        ? $" {protectCount} of them would replace text you wrote; those ask for confirmation."
+                        : string.Empty;
                     viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
-                        $"Found {result.PendingUpdates.Count} property update(s) " +
-                        $"({fillCount} free, {protectCount} replace existing text — confirmation required). " +
+                        $"Found {result.PendingUpdates.Count} property update(s).{replaceNote} " +
                         "Choose Accept All, Review Each, or Try Again. Chat can revise these proposals."));
                 }
                 else
@@ -1789,9 +1855,6 @@ public class Collaborator : ICollaborator
 
         return null;
     }
-
-    private static string FormatWorkflowShortName(string? label) =>
-        ValueDisplay.SplitPascalCase(label);
 
     /// <summary>Nav group header for a workflow's primary element type (#129).</summary>
     private static string GroupTitle(StoryItemType type) => type switch
