@@ -28,19 +28,36 @@ public class ConversationalWorkflowTests
     }
 
     [TestMethod]
-    public void OpeningTurn_SendsFlawAndEmptyAnswer()
+    public void OpeningTurn_SendsFirstTargetAndThePlan()
     {
         var args = new Dictionary<string, string>();
 
         WorkflowRunner.SetInterviewArgs(
             args, field: "Flaw", nextField: "BackStory", turnsOnField: 0,
-            transcript: "", answer: null);
+            transcript: "", answer: null, targets: "Flaw,BackStory");
 
         Assert.AreEqual("Flaw", args["InterviewField"]);
         Assert.AreEqual("BackStory", args["InterviewNextField"]);
+        Assert.AreEqual("Flaw,BackStory", args["InterviewTargets"]);
         Assert.AreEqual("0", args["InterviewTurnsOnField"]);
         Assert.AreEqual(string.Empty, args["InterviewAnswer"]);
         Assert.IsFalse(args.ContainsKey("InterviewLine"));
+    }
+
+    [TestMethod]
+    public void YouChooseOpening_SendsNoFieldAndNoTargets()
+    {
+        // Design 25.5 step 4: empty targets on the opening asks the Worker to choose.
+        var args = new Dictionary<string, string>();
+
+        WorkflowRunner.SetInterviewArgs(
+            args, field: "", nextField: null, turnsOnField: 0,
+            transcript: "", answer: null, targets: "");
+
+        Assert.AreEqual(string.Empty, args["InterviewField"]);
+        Assert.AreEqual(string.Empty, args["InterviewNextField"]);
+        Assert.AreEqual(string.Empty, args["InterviewTargets"]);
+        Assert.AreEqual(string.Empty, args["InterviewAnswer"]);
     }
 
     [TestMethod]
@@ -82,8 +99,8 @@ public class ConversationalWorkflowTests
 
         foreach (var key in new[]
                  {
-                     "InterviewField", "InterviewNextField", "InterviewTurnsOnField",
-                     "InterviewTranscript", "InterviewAnswer"
+                     "InterviewField", "InterviewNextField", "InterviewTargets",
+                     "InterviewTurnsOnField", "InterviewTranscript", "InterviewAnswer"
                  })
         {
             CollectionAssert.Contains(args.Keys, key);

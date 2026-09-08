@@ -1142,6 +1142,10 @@ namespace StoryCollaborator
         /// <summary>
         /// Writes interview args (#119). Field cursor, not a cue line.
         /// Do not send InterviewLine. Always write every key the Worker merges.
+        ///
+        /// Targets are the session plan's ids in order (design 25.7). Empty on the
+        /// opening means "you choose": the Worker names them on its reply. Empty after
+        /// the opening means nothing; the Worker only reads it on the opening.
         /// </summary>
         internal static void SetInterviewArgs(
             Dictionary<string, string> args,
@@ -1149,10 +1153,12 @@ namespace StoryCollaborator
             string? nextField,
             int turnsOnField,
             string? transcript,
-            string? answer)
+            string? answer,
+            string? targets = null)
         {
             args["InterviewField"] = field?.Trim() ?? string.Empty;
             args["InterviewNextField"] = nextField?.Trim() ?? string.Empty;
+            args["InterviewTargets"] = targets?.Trim() ?? string.Empty;
             args["InterviewTurnsOnField"] = turnsOnField.ToString();
             args["InterviewTranscript"] = transcript ?? string.Empty;
             args["InterviewAnswer"] = answer?.Trim() ?? string.Empty;

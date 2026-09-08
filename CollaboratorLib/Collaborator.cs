@@ -83,6 +83,19 @@ public class Collaborator : ICollaborator
     /// </summary>
     private bool _interviewAnswerAwaitingQuestion;
 
+    /// <summary>
+    /// The fields this session pursues, in order (#119, design section 25). Terry's
+    /// order until the writer names targets in chat or the Worker names them on a
+    /// "you choose" opening; the client holds the list from then on.
+    /// </summary>
+    private InterviewPlan _interviewPlan = InterviewPlan.Default();
+
+    /// <summary>The choice list is on screen and the writer has not answered it yet.</summary>
+    private bool _interviewAwaitingChoice;
+
+    /// <summary>The writer said "you choose": the opening reply carries the targets.</summary>
+    private bool _interviewModelChooses;
+
     // State
     private IStoryCADAPI? _storyApi;
     private StoryModel? _storyModel;
@@ -1244,11 +1257,13 @@ public class Collaborator : ICollaborator
     }
 
     /// <summary>
-    /// Opens an interview (#119). Collaborator asks the first question immediately: there
-    /// is nothing for the writer to choose first, and an empty panel with a Start button
-    /// only delays the thing they came for.
+    /// Opens an interview (#119). First the choice: what to explore, by the form's own
+    /// labels, or "you choose" (design section 25.5). Nothing goes to the Worker until
+    /// the writer answers that. The earlier build asked its first question at once, from
+    /// a stock sentence; Terry read that as the model not knowing how to start. The goal
+    /// is what starts it, and the writer or the Worker names the goal.
     /// </summary>
-    private async Task StartInterviewSessionAsync(
+    private Task StartInterviewSessionAsync(
         StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
         Workflow workflow,
         Dictionary<string, StoryElement> gatheredElements)
@@ -1256,6 +1271,9 @@ public class Collaborator : ICollaborator
         _interviewTranscript = new InterviewTranscript();
         _interviewElements = gatheredElements;
         _interviewCursor.Reset();
+        _interviewPlan = InterviewPlan.Default();
+        _interviewAwaitingChoice = true;
+        _interviewModelChooses = false;
         _interviewPendingQuestion = string.Empty;
         _interviewNoteGuid = Guid.Empty;
         _interviewHasUnsavedTurns = false;
@@ -1266,20 +1284,95 @@ public class Collaborator : ICollaborator
         _interviewCharacterName = character?.Name ?? "this character";
         _interviewCharacterGuid = character?.Uuid ?? Guid.Empty;
 
-        viewModel.ChatPlaceholder = $"Answer as {_interviewCharacterName}…";
+        viewModel.ChatPlaceholder = "Numbers, a field name, or: you choose";
         viewModel.IsChatEnabled = true;
         viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
-            $"Answer as {_interviewCharacterName}, in their voice, in first person. There are "
-            + "no wrong answers and nothing here is written to their form until you save. "
-            + "If a question assumes something you have not decided yet, decide it now."));
+            $"You will answer as {_interviewCharacterName}, in their voice, in first person. "
+            + "There are no wrong answers and nothing here is written to their form until you "
+            + "save. If a question assumes something you have not decided yet, decide it now."));
+        viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
+            InterviewChoice.ListText(_interviewCharacterName, BlankInterviewFields(character))));
 
-        viewModel.OnSendMessage = answer => RunInterviewTurnAsync(viewModel, workflow, answer);
+        viewModel.OnSendMessage = text => HandleInterviewMessageAsync(viewModel, workflow, text);
         viewModel.OnSaveInterview = () => SaveInterviewAsync(viewModel);
 
         _logger?.LogInformation("Interview opened for {Character}", _interviewCharacterName);
-
-        await RunInterviewTurnAsync(viewModel, workflow, answer: null);
+        return Task.CompletedTask;
     }
+
+    /// <summary>
+    /// Routes a chat message during an interview (#119): the answer to the choice list
+    /// while no question has been asked yet; otherwise an answer. A failed opening puts
+    /// the choice back on screen (see <see cref="ChooseInterviewTargetsAsync"/>), so a
+    /// message before the first question is always a choice, never a dropped nudge.
+    /// </summary>
+    private Task<string> HandleInterviewMessageAsync(
+        StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
+        Workflow workflow,
+        string text)
+    {
+        if (_interviewAwaitingChoice || _interviewCursor.NotStarted)
+            return ChooseInterviewTargetsAsync(viewModel, workflow, text);
+
+        return RunInterviewTurnAsync(viewModel, workflow, text);
+    }
+
+    /// <summary>
+    /// The writer's answer to "what do you want to explore?" (design 25.5 steps 3 and 4).
+    /// Sets the plan and runs the opening. Unreadable: the list again, nothing else. An
+    /// opening that fails or returns nothing usable re-arms the choice and says so, rather
+    /// than swallowing the writer's next message as a retry of a plan they may want to
+    /// change (review, 2026-09-07).
+    /// </summary>
+    private async Task<string> ChooseInterviewTargetsAsync(
+        StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
+        Workflow workflow,
+        string text)
+    {
+        var choice = InterviewChoice.Parse(text);
+        if (choice.Kind == InterviewChoiceKind.Unreadable)
+        {
+            return "I did not catch that. "
+                + InterviewChoice.ListText(_interviewCharacterName, BlankInterviewFields(InterviewCharacter()));
+        }
+
+        _interviewAwaitingChoice = false;
+        _interviewModelChooses = choice.Kind == InterviewChoiceKind.ModelChooses;
+        _interviewPlan = _interviewModelChooses
+            ? InterviewPlan.Default()
+            : InterviewPlan.From(choice.Targets);
+
+        viewModel.ChatPlaceholder = $"Answer as {_interviewCharacterName}…";
+        _logger?.LogInformation("Interview targets for {Character}: {Targets}",
+            _interviewCharacterName, _interviewModelChooses ? "(Worker chooses)" : _interviewPlan.ToArg());
+
+        // The opening posts its own question, or its own error.
+        await RunInterviewTurnAsync(viewModel, workflow, answer: null);
+
+        if (_interviewCursor.NotStarted)
+        {
+            _interviewAwaitingChoice = true;
+            _interviewModelChooses = false;
+            viewModel.ChatPlaceholder = "Numbers, a field name, or: you choose";
+            return "The interview did not start. Say what to explore again, or: you choose.";
+        }
+
+        return string.Empty;
+    }
+
+    private StoryElement? InterviewCharacter()
+    {
+        if (_interviewElements != null && _interviewElements.TryGetValue("Character", out var character))
+            return character;
+        return null;
+    }
+
+    /// <summary>
+    /// The form fields with nothing on them, so the choice list can mark them. Blank is
+    /// the case the interview exists for, and the writer should see where the gaps are.
+    /// </summary>
+    private static IReadOnlySet<string> BlankInterviewFields(StoryElement? element) =>
+        InterviewScript.BlankFields(element as CharacterModel);
 
     /// <summary>
     /// One interview turn (#119): record the answer just given, then ask what the Worker
@@ -1337,8 +1430,14 @@ public class Collaborator : ICollaborator
             var runnerLogger = _loggerFactory?.CreateLogger<WorkflowRunner>();
             var runner = new WorkflowRunner(_storyModel!, workflow, _storyApi!, runnerLogger, _settings, _auditLogger);
 
-            var field = opening ? InterviewScript.First : _interviewCursor.Field;
-            var nextField = InterviewScript.NextField(field);
+            // A "you choose" opening has no field yet: the Worker names the targets and
+            // the client takes its plan from the reply (design 25.5 step 4). Every other
+            // turn walks the plan the writer or the Worker already set.
+            var choosing = opening && _interviewModelChooses;
+            var field = opening
+                ? (choosing ? string.Empty : _interviewPlan.First)
+                : _interviewCursor.Field;
+            var nextField = choosing ? null : _interviewPlan.Next(field);
 
             var body = runner.BuildWorkflowRequestBody(_interviewElements);
             runner.EnrichWithStoryContext(body.Args, _interviewElements, workflow.GetIO());
@@ -1349,7 +1448,8 @@ public class Collaborator : ICollaborator
                 nextField,
                 opening ? 0 : _interviewCursor.TurnsOnField,
                 _interviewTranscript.ToPromptText(),
-                latestAnswer);
+                latestAnswer,
+                choosing ? string.Empty : _interviewPlan.ToArg());
 
             var result = await runner.RunPreparedAsync(body, _interviewElements);
 
@@ -1375,9 +1475,54 @@ public class Collaborator : ICollaborator
                 return string.Empty;
             }
 
+            // A closing line where a question was due. On the last field the interviewer
+            // meant to end, whatever its header said: finish. With fields still to go it
+            // left the interview instead of the field (the retest of 2026-09-07 saw it on
+            // a second refusal): treated like an empty reply, the cursor holds, the writer's
+            // next message extends the answer, and nobody is told to save a half-done
+            // interview.
+            if (!opening && reply.Verdict != InterviewVerdict.Done
+                && InterviewReply.LooksLikeAClose(reply.Question))
+            {
+                if (nextField == null)
+                {
+                    await FinishInterviewAsync(viewModel, reply.Question);
+                    return string.Empty;
+                }
+
+                viewModel.ConversationList.Add(ChatMessage.Error(
+                    "The interviewer tried to stop early. Say something to go on."));
+                _interviewAnswerAwaitingQuestion = true;
+                _logger?.LogWarning("Interview close arrived with {Next} still to go for {Character}",
+                    nextField, _interviewCharacterName);
+                return string.Empty;
+            }
+
             if (opening)
             {
-                _interviewCursor.Start();
+                if (_interviewModelChooses)
+                {
+                    // The Worker's targets, up to three, unknown ids dropped. Nothing usable
+                    // is a failed opening, not a silent walk of all thirteen fields under a
+                    // first question aimed elsewhere: the cursor stays unstarted and the
+                    // caller puts the choice back on screen. Told by page header, never id.
+                    var chosen = InterviewPlan.FromKnown(reply.Targets, maxCount: 3);
+                    if (chosen == null)
+                    {
+                        viewModel.ConversationList.Add(ChatMessage.Error(
+                            "The interviewer did not say what it chose."));
+                        _logger?.LogWarning("Interview opening for {Character} named no usable target: {Raw}",
+                            _interviewCharacterName, string.Join(",", reply.Targets));
+                        return string.Empty;
+                    }
+
+                    _interviewPlan = chosen;
+                    _interviewModelChooses = false;
+                    viewModel.ConversationList.Add(ChatMessage.FromCollaborator(_interviewPlan.Describe()));
+                    _logger?.LogInformation("Interview targets chosen by the Worker for {Character}: {Targets}",
+                        _interviewCharacterName, _interviewPlan.ToArg());
+                }
+                _interviewCursor.Start(_interviewPlan);
             }
             else if (reply.Verdict == InterviewVerdict.Done
                      || ((reply.Verdict == InterviewVerdict.GotIt
@@ -1411,8 +1556,8 @@ public class Collaborator : ICollaborator
 
 
     /// <summary>
-    /// Every block is answered (#119). Saves without asking: the writer has just spent
-    /// thirty questions on this and the one thing they must not lose is the record.
+    /// The last target is done (#119). Saves without asking: the writer has just spent
+    /// the session on this and the one thing they must not lose is the record.
     /// </summary>
     private async Task FinishInterviewAsync(
         StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
@@ -1422,8 +1567,19 @@ public class Collaborator : ICollaborator
         viewModel.IsChatEnabled = false;
         viewModel.ChatPlaceholder = "The interview is finished";
 
-        if (!string.IsNullOrWhiteSpace(closingLine))
+        // The closing line is the model's, when it wrote one. When it wrote another
+        // question instead (the sample-outline runs of 2026-09-07 did, twice), the writer
+        // must not be shown a question with the chat already closed; the Saved line that
+        // follows is the close.
+        if (InterviewReply.LooksLikeAQuestion(closingLine))
+        {
+            _logger?.LogWarning("Interview closing line for {Character} was a question; not shown: {Line}",
+                _interviewCharacterName, closingLine);
+        }
+        else if (!string.IsNullOrWhiteSpace(closingLine))
+        {
             viewModel.ConversationList.Add(ChatMessage.FromCollaborator(closingLine));
+        }
 
         await SaveInterviewAsync(viewModel);
     }
@@ -1491,6 +1647,9 @@ public class Collaborator : ICollaborator
         _interviewTranscript = null;
         _interviewElements = null;
         _interviewCursor.Reset();
+        _interviewPlan = InterviewPlan.Default();
+        _interviewAwaitingChoice = false;
+        _interviewModelChooses = false;
         _interviewPendingQuestion = string.Empty;
         _interviewCharacterGuid = Guid.Empty;
         _interviewCharacterName = string.Empty;

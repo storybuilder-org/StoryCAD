@@ -625,9 +625,10 @@ namespace StoryCollaborator.Workflows
                     description: "Answer as your character, one hard question at a time.",
                     explanation: "Other character workflows fill the form. This one asks you the " +
                                  "questions the form cannot: what the flaw once protected, what they " +
-                                 "will not trade away, what they refuse to hear. You answer in their " +
-                                 "voice. The questions and your answers are saved to the outline as a " +
-                                 "note under the character.",
+                                 "will not trade away, what they refuse to hear. Pick what to explore, " +
+                                 "or let Collaborator choose from the form and the character's problems. " +
+                                 "You answer in their voice. The questions and your answers are saved " +
+                                 "to the outline as a note under the character.",
                     workflowIO: new WorkflowIO
                     {
                         RequiredInputs = new List<ElementRequirement>
