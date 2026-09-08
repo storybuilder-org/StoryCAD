@@ -46,9 +46,15 @@ public class WorkflowResult
     public string? RawResponse { get; set; }
 
     /// <summary>
-    /// The assembled prompt sent to the LLM (template with values substituted).
+    /// The assembled prompt sent to the LLM (template with values substituted). On the proxy
+    /// path this is set only when the Worker echoed the prompt (a dev Worker, on request).
     /// </summary>
     public string? AssembledPrompt { get; set; }
+
+    /// <summary>
+    /// The coach system message the Worker sent with the prompt, when echoed. Null otherwise.
+    /// </summary>
+    public string? SystemPrompt { get; set; }
 
     /// <summary>
     /// SHA-256 hex of the proxy template before argument substitution, from the X-Template-Hash response header.

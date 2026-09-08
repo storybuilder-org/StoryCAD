@@ -210,54 +210,72 @@ namespace StoryCollaborator
                 // Issue #90 step 8 item 5: the direct-to-OpenAI fallback retired along with
                 // OPENAI_API_KEY on the client. A proxy failure now propagates to the outer
                 // catch clauses below rather than retrying against OpenAI directly.
-                result.AssembledPrompt = null;
-                var (proxyContent, proxyHash, proxyCost, proxyComplete) = await PostToProxyAsync(body);
-                result.RemoteTemplateHash = proxyHash;
-                result.Cost = proxyCost;
-
-                if (!proxyComplete)
+                // Collaborator #239: send, read and extract are one attempt, so an answer that
+                // mostly breaks the field_states contract can be asked for once more on a fresh
+                // result (ExecuteWithContractRetryAsync). Every attempt starts from the status
+                // messages gathered so far.
+                var preamble = result.StatusMessages.ToList();
+                async Task<WorkflowResult> AttemptAsync()
                 {
-                    // Issue #94 design section 5 item 3 ("surface, never mask"): the one truncation
-                    // retry (PostToProxyAsync -> ExecuteWithTruncationRetryAsync) still came back
-                    // incomplete. The partial text is preserved for diagnostics but must never reach
-                    // ExtractOutputs or a Success result.
-                    return BuildTruncationFailureResult(proxyContent);
+                    var attempt = WorkflowResult.Succeeded();
+                    foreach (var message in preamble)
+                        attempt.StatusMessages.Add(message);
+
+                    attempt.AssembledPrompt = null;
+                    var (proxyContent, proxyHash, proxyCost, proxyComplete) = await PostToProxyAsync(body);
+                    attempt.RemoteTemplateHash = proxyHash;
+                    attempt.Cost = proxyCost;
+                    // Set only when a dev Worker echoed the prompt on request (PromptTestRunner).
+                    attempt.AssembledPrompt = _lastPromptEcho?.User;
+                    attempt.SystemPrompt = _lastPromptEcho?.System;
+
+                    if (!proxyComplete)
+                    {
+                        // Issue #94 design section 5 item 3 ("surface, never mask"): the one truncation
+                        // retry (PostToProxyAsync -> ExecuteWithTruncationRetryAsync) still came back
+                        // incomplete. The partial text is preserved for diagnostics but must never reach
+                        // ExtractOutputs or a Success result.
+                        return BuildTruncationFailureResult(proxyContent);
+                    }
+
+                    string planResult = proxyContent;
+                    attempt.RawResponse = planResult;
+
+                    if (string.IsNullOrEmpty(planResult))
+                    {
+                        return WorkflowResult.Failed("Workflow returned empty response");
+                    }
+
+                    attempt.StatusMessages.Add("Received AI response");
+
+                    var outputResult = ExtractOutputs(planResult, gatheredElements, workflowIO.Outputs);
+                    MergeExtractResult(attempt, outputResult);
+                    // Collaborator #217 section 5.7: each beat that binds or creates is its own row.
+                    ExpandBeatSheetUpdates(attempt);
+
+                    if (string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
+                        CaptureSceneBuilderProposal(planResult, attempt);
+
+                    // #120: structural fields the model must not invent (list value + GUIDs).
+                    // Proposes into pending only; #116 classify decides Fill vs Protect (never silent force).
+                    if (workflowModel.Label == "InnerOuterProblems")
+                        EnrichInnerOuterStructuralFields(attempt, gatheredElements);
+
+                    // #201: empty or omitted WorldType becomes NoOp against empty outline and never
+                    // reaches Accept. Propose craft default when still blank.
+                    if (string.Equals(workflowModel.Label, "DefineStoryWorld", StringComparison.Ordinal))
+                        EnrichDefineStoryWorldWorldType(attempt, gatheredElements);
+
+                    if (!outputResult.Success)
+                    {
+                        attempt.Success = false;
+                        attempt.ErrorMessage = outputResult.ErrorMessage;
+                    }
+
+                    return attempt;
                 }
 
-                string planResult = proxyContent;
-                result.RawResponse = planResult;
-
-                if (string.IsNullOrEmpty(planResult))
-                {
-                    return WorkflowResult.Failed("Workflow returned empty response");
-                }
-
-                result.StatusMessages.Add("Received AI response");
-
-                var outputResult = ExtractOutputs(planResult, gatheredElements, workflowIO.Outputs);
-                MergeExtractResult(result, outputResult);
-                // Collaborator #217 section 5.7: each beat that binds or creates is its own row.
-                ExpandBeatSheetUpdates(result);
-
-                if (string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
-                    CaptureSceneBuilderProposal(planResult, result);
-
-                // #120: structural fields the model must not invent (list value + GUIDs).
-                // Proposes into pending only; #116 classify decides Fill vs Protect (never silent force).
-                if (workflowModel.Label == "InnerOuterProblems")
-                    EnrichInnerOuterStructuralFields(result, gatheredElements);
-
-                // #201: empty or omitted WorldType becomes NoOp against empty outline and never
-                // reaches Accept. Propose craft default when still blank.
-                if (string.Equals(workflowModel.Label, "DefineStoryWorld", StringComparison.Ordinal))
-                    EnrichDefineStoryWorldWorldType(result, gatheredElements);
-
-                if (!outputResult.Success)
-                {
-                    result.Success = false;
-                    result.ErrorMessage = outputResult.ErrorMessage;
-                }
-
+                result = await ExecuteWithContractRetryAsync(AttemptAsync, DescribeContractFault);
                 return result;
             }
             catch (StoryCADLib.Services.Store.OutOfCreditsException ex)
@@ -1094,6 +1112,15 @@ namespace StoryCollaborator
                                 value = jsonProp.ValueKind == JsonValueKind.String
                                     ? jsonProp.GetString()
                                     : jsonProp.ToString();
+                                // Collaborator #239: a field_states word is not text. On some
+                                // runs gpt-5.4-nano put "Unchanged" in a property's text, once
+                                // under Fill, which classify would have written into the outline.
+                                if (IsFieldStateWord(value as string))
+                                {
+                                    result.StatusMessages.Add(
+                                        $"State word as text, treated as empty: {output.ElementLabel}.{spec.Property}");
+                                    value = string.Empty;
+                                }
                                 displayValue = value?.ToString() ?? string.Empty;
                                 break;
 
@@ -2875,17 +2902,44 @@ namespace StoryCollaborator
         /// the cost reported by the proxy's collab_cost event (null when absent), and whether the
         /// returned stream (after the retry, if one occurred) is complete.
         /// </summary>
+        /// <summary>
+        /// PromptTestRunner sets COLLAB_PROMPT_ECHO=1 so every workflow call asks the Worker to
+        /// return the prompt it sent (see <see cref="ProxyPromptEcho"/>). Off by default, so the
+        /// shipped client never asks and an older Worker never sees the key.
+        /// </summary>
+        internal static bool PromptEchoRequested() =>
+            string.Equals(Environment.GetEnvironmentVariable("COLLAB_PROMPT_ECHO"), "1", StringComparison.Ordinal);
+
+        /// <summary>
+        /// The POST /v1/workflow body. The three keys the Worker has always read, plus
+        /// <c>echo_prompt</c> only when asked, so the body an older Worker sees is unchanged.
+        /// </summary>
+        internal static string BuildProxyPayload(string workflowId, WorkflowProxyBody body, bool echoPrompt)
+        {
+            var node = new JsonObject
+            {
+                ["workflowId"] = workflowId,
+                ["args"] = JsonSerializer.SerializeToNode(body.Args),
+                ["elements"] = JsonSerializer.SerializeToNode(body.Elements),
+            };
+            if (echoPrompt)
+                node["echo_prompt"] = true;
+            return node.ToJsonString();
+        }
+
+        /// <summary>
+        /// The prompt the Worker echoed on the last proxy call, when it did. Read by RunAsync
+        /// right after PostToProxyAsync and cleared before every call.
+        /// </summary>
+        private ProxyPromptEcho? _lastPromptEcho;
+
         private async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)> PostToProxyAsync(WorkflowProxyBody body)
         {
             var proxyBaseUrl = Environment.GetEnvironmentVariable("COLLAB_PROXY_URL")
                 ?? KernelFactory.DefaultProxyBaseUrl;
 
-            var payload = JsonSerializer.Serialize(new
-            {
-                workflowId = workflowModel.Label,
-                args = body.Args,
-                elements = body.Elements
-            });
+            var payload = BuildProxyPayload(workflowModel.Label, body, PromptEchoRequested());
+            _lastPromptEcho = null;
 
             return await ExecuteWithTruncationRetryAsync(
                 () => PostToProxyOnceAsync(proxyBaseUrl, payload), ResetHttpClient);
@@ -2920,7 +2974,7 @@ namespace StoryCollaborator
             if (response.Headers.TryGetValues("X-Template-Hash", out var hashValues))
                 templateHash = hashValues.FirstOrDefault();
 
-            var (content, cost, complete) = await ReadSseStreamAsync(response);
+            var (content, cost, complete) = await ReadSseStreamAsync(response, echo => _lastPromptEcho = echo);
             return (content, templateHash, cost, complete);
         }
 
@@ -3005,7 +3059,7 @@ namespace StoryCollaborator
         /// truncation with no false-positive source (issue #94 design section 5 item 1). collab_cost
         /// stays optional (ADR-002 fail-open): [DONE] without a cost event is still Complete=true.
         /// </summary>
-        internal static async Task<(string Content, ProxyCostInfo? Cost, bool Complete)> ReadSseStreamAsync(HttpResponseMessage response)
+        internal static async Task<(string Content, ProxyCostInfo? Cost, bool Complete)> ReadSseStreamAsync(HttpResponseMessage response, Action<ProxyPromptEcho>? onPrompt = null)
         {
             var sb = new System.Text.StringBuilder();
             ProxyCostInfo? cost = null;
@@ -3029,6 +3083,17 @@ namespace StoryCollaborator
                     {
                         sb.Append(content.GetString());
                     }
+                    else if (doc.RootElement.TryGetProperty("collab_prompt", out var collabPrompt)
+                             && collabPrompt.ValueKind == JsonValueKind.Object)
+                    {
+                        // A dev Worker's echo of the two messages it sent, first on the stream
+                        // when the request asked for it. Never model text.
+                        onPrompt?.Invoke(new ProxyPromptEcho(
+                            ReadString(collabPrompt, "system"),
+                            ReadString(collabPrompt, "user"),
+                            NullableString(collabPrompt, "template_hash"),
+                            NullableString(collabPrompt, "system_prompt_hash")));
+                    }
                     else if (doc.RootElement.TryGetProperty("collab_cost", out var collabCost))
                     {
                         // Shared with the X-Collab-Cost header path: the Worker emits an
@@ -3043,6 +3108,12 @@ namespace StoryCollaborator
             }
             return (sb.ToString(), cost, complete);
         }
+
+        private static string ReadString(JsonElement obj, string name) =>
+            obj.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() ?? string.Empty : string.Empty;
+
+        private static string? NullableString(JsonElement obj, string name) =>
+            obj.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
 
         /// <summary>
         /// Truncation-retry-once policy (issue #94 design section 5 items 2-3): a stream that comes
@@ -3065,6 +3136,84 @@ namespace StoryCollaborator
 
             reset();
             return await attempt();
+        }
+
+        /// <summary>
+        /// Collaborator #239: true when the text is one of the field_states words on its own
+        /// (Fill, Unchanged, Revise). Compared by name, never by number, so "1" stays text.
+        /// </summary>
+        internal static bool IsFieldStateWord(string? text)
+        {
+            var t = text?.Trim();
+            if (string.IsNullOrEmpty(t)) return false;
+            return string.Equals(t, nameof(OutputFieldState.Fill), StringComparison.OrdinalIgnoreCase)
+                || string.Equals(t, nameof(OutputFieldState.Unchanged), StringComparison.OrdinalIgnoreCase)
+                || string.Equals(t, nameof(OutputFieldState.Revise), StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Collaborator #239: names an answer that mostly breaks the field_states contract, or
+        /// returns null when the answer is usable. Two shapes count as a fault on a scalar
+        /// output: Fill with no text, and Unchanged on a property that has no text to keep.
+        /// Measured on DefineCharacter with gpt-5.4-nano (2026-09-08, 73 live runs): a sound
+        /// run has at most one or two of these (a gated step), a broken run has most of its
+        /// thirty. The bar is three faults and a quarter of the scalar outputs, so one bad
+        /// property on a small workflow does not buy a second billed call.
+        /// </summary>
+        internal string? DescribeContractFault(WorkflowResult result)
+        {
+            var scalars = 0;
+            var emptyFills = 0;
+            var unchangedOnEmpty = 0;
+            foreach (var update in result.PendingUpdates)
+            {
+                if (update.Spec.WriteVia != WriteVia.Scalar) continue;
+                scalars++;
+                if (!TryGetFieldState(result, update, out var state)) continue;
+
+                var proposedEmpty = string.IsNullOrEmpty(NormalizeCompareText(FormatDisplayValue(update)));
+                var currentEmpty = string.IsNullOrEmpty(
+                    NormalizeCompareText(ReadCurrentScalarDisplay(update.ElementUuid, update.Spec.Property)));
+
+                if (state == OutputFieldState.Fill && proposedEmpty)
+                    emptyFills++;
+                else if (state == OutputFieldState.Unchanged && currentEmpty)
+                    unchangedOnEmpty++;
+            }
+
+            var faults = emptyFills + unchangedOnEmpty;
+            if (faults < 3 || faults * 4 < scalars) return null;
+
+            var parts = new List<string>();
+            if (emptyFills > 0) parts.Add($"{emptyFills} Fill with no text");
+            if (unchangedOnEmpty > 0) parts.Add($"{unchangedOnEmpty} Unchanged on an empty property");
+            return $"{faults} of {scalars} outputs broke the field_states contract ({string.Join(", ", parts)})";
+        }
+
+        /// <summary>
+        /// Collaborator #239: one send-again when the answer mostly breaks the field_states
+        /// contract. Mirrors <see cref="ExecuteWithTruncationRetryAsync"/>: one retry, never a
+        /// third call; the second answer is shown whatever it holds, with the reason on its
+        /// status messages. A failed result is surfaced as-is; the check applies to answers only.
+        /// </summary>
+        internal static async Task<WorkflowResult> ExecuteWithContractRetryAsync(
+            Func<Task<WorkflowResult>> attempt,
+            Func<WorkflowResult, string?> describeFault)
+        {
+            var first = await attempt();
+            if (!first.Success) return first;
+            var reason = describeFault(first);
+            if (reason == null) return first;
+
+            var second = await attempt();
+            second.StatusMessages.Insert(0, $"Contract retry: the first answer had {reason}; asked once more");
+            if (second.Success)
+            {
+                var again = describeFault(second);
+                if (again != null)
+                    second.StatusMessages.Add($"Contract retry: the second answer also had {again}; showing it");
+            }
+            return second;
         }
 
         /// <summary>
