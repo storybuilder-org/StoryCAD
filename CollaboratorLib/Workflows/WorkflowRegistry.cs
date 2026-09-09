@@ -610,6 +610,56 @@ namespace StoryCollaborator.Workflows
                         ExampleLists = new List<string> { "Trait", "Attitude" }
                     }) { PrimaryElementType = StoryItemType.Character },
 
+                // === Character Interview (#119) ===
+                // Registered inside the Character block, not after it: the nav pane opens a
+                // new group whenever PrimaryElementType changes, so a Character entry after
+                // the Scene entries would render a second "Character" header (#129 grouping).
+                //
+                // Conversational, and it proposes nothing. Collaborator asks; the writer
+                // answers as the character. The record is the transcript, written to a Notes
+                // element verbatim when the session ends, so there is no model pass between
+                // what the writer typed and what the outline keeps.
+                new Workflow(
+                    label: "CharacterInterview",
+                    title: "Character Interview",
+                    description: "Answer as your character, one hard question at a time.",
+                    explanation: "Other character workflows fill the form. This one asks you the " +
+                                 "questions the form cannot: what the flaw once protected, what they " +
+                                 "will not trade away, what they refuse to hear. Pick what to explore, " +
+                                 "or let Collaborator choose from the form and the character's problems. " +
+                                 "You answer in their voice. The questions and your answers are saved " +
+                                 "to the outline as a note under the character.",
+                    workflowIO: new WorkflowIO
+                    {
+                        RequiredInputs = new List<ElementRequirement>
+                        {
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Character,
+                                ElementLabel = "Character",
+                                CreateIfMissing = false
+                            }
+                        },
+                        OptionalInputs = new List<ElementRequirement>
+                        {
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.StoryOverview,
+                                ElementLabel = "Overview"
+                            },
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Problem,
+                                ElementLabel = "Problem"
+                            }
+                        },
+                        Outputs = new List<ElementOutput>()
+                    })
+                {
+                    PrimaryElementType = StoryItemType.Character,
+                    Mode = WorkflowMode.Conversational
+                },
+
                 // === StoryWorld Workflows ===
                 // #201 DefineStoryWorld: one worldbuilding surface (classifier + cultures + live areas).
                 new Workflow(

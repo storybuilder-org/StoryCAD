@@ -37,6 +37,9 @@ public partial class WorkflowViewModel : ObservableRecipient
         AcceptCurrentCommand = new RelayCommand(async () => await ExecuteAcceptCurrentAsync());
         SkipCurrentCommand = new RelayCommand(async () => await ExecuteSkipCurrentAsync());
         AcceptRemainingCommand = new RelayCommand(async () => await ExecuteAcceptRemainingAsync());
+
+        // Character Interview (#119)
+        SaveInterviewCommand = new RelayCommand(async () => await SaveInterviewAsync());
     }
 
     /// <summary>
@@ -141,8 +144,20 @@ public partial class WorkflowViewModel : ObservableRecipient
     public bool IsChatEnabled
     {
         get => _isChatEnabled;
-        set => SetProperty(ref _isChatEnabled, value);
+        set
+        {
+            if (SetProperty(ref _isChatEnabled, value))
+                OnPropertyChanged(nameof(CanSend));
+        }
     }
+
+    /// <summary>
+    /// What the input box binds to (#119): chat is open and no interview turn is in
+    /// flight. SendButtonClicked posts the text to the pane before Collaborator sees it,
+    /// so a message sent mid-turn would sit there looking taken while the turn loop
+    /// refused it. Disabling the box is the honest state.
+    /// </summary>
+    public bool CanSend => IsChatEnabled && !IsInterviewTurnRunning;
 
     private string _chatPlaceholder = "Waiting for proposals…";
     public string ChatPlaceholder
@@ -376,6 +391,94 @@ public partial class WorkflowViewModel : ObservableRecipient
 
     #endregion
 
+    #region Character Interview (#119)
+
+    private bool _isInterviewSession;
+    /// <summary>
+    /// True for the whole interview. The Save control hangs off this rather than off its
+    /// IsEnabled flag: disabled is not absent, and every other workflow would otherwise
+    /// carry a dead button under Accept all, shortening its Property Updates list to make
+    /// room.
+    /// </summary>
+    public bool IsInterviewSession
+    {
+        get => _isInterviewSession;
+        set
+        {
+            if (SetProperty(ref _isInterviewSession, value))
+                OnPropertyChanged(nameof(InterviewControlsVisibility));
+        }
+    }
+
+    public Microsoft.UI.Xaml.Visibility InterviewControlsVisibility =>
+        IsInterviewSession
+            ? Microsoft.UI.Xaml.Visibility.Visible
+            : Microsoft.UI.Xaml.Visibility.Collapsed;
+
+    private bool _canSaveInterview;
+    /// <summary>
+    /// Available from the first answered question, not only after the last. It rescues a
+    /// session the writer abandons partway. Collaborator sets it when an answer is
+    /// recorded, never at open: pressing it over an empty transcript can only print a
+    /// refusal.
+    /// </summary>
+    public bool CanSaveInterview
+    {
+        get => _canSaveInterview;
+        set
+        {
+            if (SetProperty(ref _canSaveInterview, value))
+                OnPropertyChanged(nameof(CanPressSave));
+        }
+    }
+
+    private bool _isInterviewTurnRunning;
+    /// <summary>
+    /// A turn is in flight. Save is a plain RelayCommand over an async void handler, so
+    /// nothing self-disables while one runs, and a save landing mid-turn would write a
+    /// transcript missing the answer being recorded.
+    /// </summary>
+    public bool IsInterviewTurnRunning
+    {
+        get => _isInterviewTurnRunning;
+        set
+        {
+            if (SetProperty(ref _isInterviewTurnRunning, value))
+            {
+                OnPropertyChanged(nameof(CanPressSave));
+                OnPropertyChanged(nameof(CanSend));
+            }
+        }
+    }
+
+    /// <summary>What Save actually binds to: something to save, and nothing in flight.</summary>
+    public bool CanPressSave => CanSaveInterview && !IsInterviewTurnRunning;
+
+    public RelayCommand SaveInterviewCommand { get; private set; }
+
+    /// <summary>Collaborator writes the transcript to a Notes element under the character.</summary>
+    public Func<Task> OnSaveInterview { get; set; }
+
+    /// <summary>
+    /// Puts the page into interview mode. Called by Collaborator when a Conversational
+    /// workflow opens, before the first question is asked.
+    /// </summary>
+    public void BeginInterviewSession()
+    {
+        IsInterviewSession = true;
+        CanSaveInterview = false;
+        IsInterviewTurnRunning = false;
+    }
+
+    private async Task SaveInterviewAsync()
+    {
+        if (!CanPressSave) return;
+        if (OnSaveInterview != null)
+            await OnSaveInterview();
+    }
+
+    #endregion
+
     #region Workflow Processing
 
     private async Task ProcessWorkflow()
@@ -405,7 +508,10 @@ public partial class WorkflowViewModel : ObservableRecipient
             if (OnSendMessage != null)
             {
                 var response = await OnSendMessage(userMessage);
-                ConversationList.Add(ChatMessage.FromCollaborator(response));
+                // A failed interview turn posts its own error bubble and hands back nothing.
+                // Adding it anyway leaves a blank collaborator bubble under the error.
+                if (!string.IsNullOrWhiteSpace(response))
+                    ConversationList.Add(ChatMessage.FromCollaborator(response));
             }
             else
             {
