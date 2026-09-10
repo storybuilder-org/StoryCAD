@@ -10,13 +10,13 @@ has_toc: false
 
 # A Path to Try
 
-Collaborator has thirteen workflows. You do not need all of them on day one. The path below matches the craft order in [Writing with StoryCAD](../../Writing%20with%20StoryCAD/Writing_with_StoryCAD.html): idea and premise first, then problem and character force, then structure and scenes.
+Collaborator has twelve workflows. You do not need all of them on day one. The path below matches the craft order in [Writing with StoryCAD](../../Writing%20with%20StoryCAD/Writing_with_StoryCAD.html): idea and premise first, then problem and character force, then structure and scenes.
 
 You can skip steps, but this order usually wastes less time.
 
 ## The starred band is a head start
 
-Collaborator starts with five of these workflows starred, so they sit at the top of the workflow list before you touch anything: **Premise**, **Story Problem**, **Problem Builder**, **Character Story Function**, and **Scene Builder**. That is one per stage of the spine below, so the top of the list reads as a next step rather than a catalog.
+Collaborator starts with five of these workflows starred, so they sit at the top of the workflow list before you touch anything: **Premise**, **Story Problem**, **Problem Builder**, **Character Builder**, and **Scene Builder**. That is one per stage of the spine below, so the top of the list reads as a next step rather than a catalog.
 
 Treat it as a starting point, not a rule. As you learn which workflows your writing turns on, star those and unstar the rest. [Opening Collaborator](../Opening_Collaborator.html) shows how. Everything not starred is still there, filed under its story element.
 
@@ -42,7 +42,7 @@ Treat it as a starting point, not a rule. As you learn which workflows your writ
    Craft: outer and inner problems in the same Defining Problems material
 
 6. **One character path**  
-   For example **Character Story Function**, then **Flaw and Backstory**.  
+   For example **Character Builder**, then **Flaw and Backstory**.  
    Craft: [Defining Characters](../../Writing%20with%20StoryCAD/Defining_Characters.html)
 
 7. **Scene Builder**  

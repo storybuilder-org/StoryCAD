@@ -29,7 +29,7 @@ StoryCAD’s manual already teaches the craft spine: idea and premise, problems,
 | What’s the main story problem? | [Defining Problems](../Writing%20with%20StoryCAD/Defining_Problems.html), [Problem and Character Development](../Writing%20with%20StoryCAD/Problem_and_Character_Development.html) | Story Problem; Problem Builder |
 | Outer want vs inner need? | [Defining Problems](../Writing%20with%20StoryCAD/Defining_Problems.html) (outer and inner problems) | Inner and Outer Problems |
 | How is the story shaped? | [Plotting with StoryCAD](../Writing%20with%20StoryCAD/Plotting_with_StoryCAD.html), Overview Structure | Problem Builder (it picks the beat sheet) |
-| Who is this character? | [Defining Characters](../Writing%20with%20StoryCAD/Defining_Characters.html) | Character Story Function; Flaw and Backstory; Define Character |
+| Who is this character? | [Defining Characters](../Writing%20with%20StoryCAD/Defining_Characters.html) | Character Builder; Flaw and Backstory |
 | What happens in this scene? | [Defining Scenes](../Writing%20with%20StoryCAD/Defining_Scenes.html), [Plotting in Scenes](../Writing%20with%20StoryCAD/Plotting_in_Scenes.html) | Scene Builder |
 
 Names on the list may be slightly longer in the app (for example, a full “Ideation…” label). The work is the same: one craft focus per run.
