@@ -46,7 +46,7 @@ public class SceneBuilderResolverTests
     }
 
     [TestMethod]
-    public async Task ExplorerParentStoryProblem_BailsEvenWhenComplicationAlsoOwns()
+    public async Task ExplorerParentStoryProblem_RunsWithSpineOwner()
     {
         var api = CreateApi();
         var fx = await BuildThreeSceneComplication(api);
@@ -58,13 +58,15 @@ public class SceneBuilderResolverTests
 
         var resolved = new SceneStructureNeighborResolver(api).ResolveForSceneBuilder(underSp);
 
-        Assert.AreEqual(SceneStructureNeighborResolver.SceneBuilderOwnerState.StoryProblemBail, resolved.OwnerState);
+        Assert.AreEqual(
+            SceneStructureNeighborResolver.SceneBuilderOwnerState.ExplorerParentSubproblem,
+            resolved.OwnerState);
         Assert.AreEqual(fx.StoryProblem.Uuid, resolved.OwnerProblem!.Uuid);
-        StringAssert.Contains(resolved.BailReason, "does not run on a Story Problem");
+        Assert.IsNull(resolved.BailReason);
     }
 
     [TestMethod]
-    public async Task OnlyStructureOwnerIsStoryProblem_Bails()
+    public async Task OnlyStructureOwnerIsStoryProblem_Runs()
     {
         var api = CreateApi();
         await api.CreateEmptyOutline("SP only", "Author", "0");
@@ -82,7 +84,11 @@ public class SceneBuilderResolverTests
 
         var resolved = new SceneStructureNeighborResolver(api).ResolveForSceneBuilder(scene);
 
-        Assert.AreEqual(SceneStructureNeighborResolver.SceneBuilderOwnerState.StoryProblemBail, resolved.OwnerState);
+        Assert.AreEqual(
+            SceneStructureNeighborResolver.SceneBuilderOwnerState.UniqueSubproblem,
+            resolved.OwnerState);
+        Assert.AreEqual(sp.Uuid, resolved.OwnerProblem!.Uuid);
+        Assert.IsNull(resolved.BailReason);
         Assert.IsNull(resolved.PrecedingScene);
         Assert.IsNull(resolved.NextScene);
     }
@@ -169,7 +175,7 @@ public class SceneBuilderResolverTests
     }
 
     [TestMethod]
-    public async Task MixedCaseStoryProblemCategory_Bails()
+    public async Task CategoryOnlyStoryProblem_IsNotSpine_Runs()
     {
         var api = CreateApi();
         await api.CreateEmptyOutline("Mixed case", "Author", "0");
@@ -180,9 +186,14 @@ public class SceneBuilderResolverTests
         var scAdd = api.AddElement(StoryItemType.Scene, problem.Uuid.ToString(), "Child");
         var scene = api.GetStoryElement(scAdd.Payload).Payload!;
 
-        var resolved = new SceneStructureNeighborResolver(api).ResolveForSceneBuilder(scene);
+        var resolver = new SceneStructureNeighborResolver(api);
+        var resolved = resolver.ResolveForSceneBuilder(scene);
 
-        Assert.AreEqual(SceneStructureNeighborResolver.SceneBuilderOwnerState.StoryProblemBail, resolved.OwnerState);
+        Assert.IsFalse(resolver.IsStoryProblem(problem, resolver.GetOverviewStoryProblemUuid()));
+        Assert.AreEqual(
+            SceneStructureNeighborResolver.SceneBuilderOwnerState.ExplorerParentSubproblem,
+            resolved.OwnerState);
+        Assert.IsNull(resolved.BailReason);
     }
 
     [TestMethod]
@@ -285,7 +296,7 @@ public class SceneBuilderResolverTests
     }
 
     [TestMethod]
-    public async Task OrphanAccept_StoryProblemGuid_WritesNotesWhenEmpty()
+    public async Task OrphanAccept_StoryProblemGuid_BindsFirstEmptyBeat()
     {
         var api = CreateApi();
         await api.CreateEmptyOutline("SP bind", "Author", "0");
@@ -303,15 +314,37 @@ public class SceneBuilderResolverTests
         var runner = new WorkflowRunner(api.CurrentModel!, WorkflowRegistry.Get("SceneBuilder")!, api);
         var result = WorkflowResult.Succeeded();
         result.ProposedOwnerGuid = sp.Uuid;
+        result.ProposedOwnerName = sp.Name;
         var gathered = new Dictionary<string, StoryElement> { ["Scene"] = scene };
 
         var msg = runner.TryApplySceneBuilderOrphanBind(result, gathered);
 
-        StringAssert.Contains(msg, "could not bind");
+        Assert.IsNotNull(msg);
+        StringAssert.Contains(msg, "assigned Scene");
         var structure = api.GetProblemStructure(sp.Uuid);
-        var linked = structure.Payload.Beats.First().LinkedElement;
-        Assert.IsTrue(linked is not Guid assigned || assigned == Guid.Empty);
-        Assert.IsFalse(string.IsNullOrEmpty(((SceneModel)api.GetStoryElement(scene.Uuid).Payload!).Notes));
+        Assert.AreEqual(scene.Uuid, structure.Payload.Beats.First().LinkedElement);
+        Assert.AreEqual(folder.Uuid, scene.Node!.Parent!.Uuid);
+    }
+
+    [TestMethod]
+    public async Task GuidMatch_IsSpine_CategoryAlone_IsNot()
+    {
+        var api = CreateApi();
+        await api.CreateEmptyOutline("Identity", "Author", "0");
+        var overview = api.CurrentModel!.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+        var linkedAdd = api.AddElement(StoryItemType.Problem, overview.Uuid.ToString(), "Linked");
+        var linked = (ProblemModel)api.GetStoryElement(linkedAdd.Payload).Payload!;
+        api.UpdateElementProperty(linked.Uuid, "ProblemCategory", "Subplot");
+        api.UpdateElementProperty(overview.Uuid, "StoryProblem", linked.Uuid);
+        var catAdd = api.AddElement(StoryItemType.Problem, overview.Uuid.ToString(), "Category only");
+        var catOnly = (ProblemModel)api.GetStoryElement(catAdd.Payload).Payload!;
+        api.UpdateElementProperty(catOnly.Uuid, "ProblemCategory", "Story problem");
+
+        var resolver = new SceneStructureNeighborResolver(api);
+        var spine = resolver.GetOverviewStoryProblemUuid();
+
+        Assert.IsTrue(resolver.IsStoryProblem(linked, spine));
+        Assert.IsFalse(resolver.IsStoryProblem(catOnly, spine));
     }
 
     [TestMethod]

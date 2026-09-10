@@ -77,6 +77,12 @@ public class OverviewModel : StoryElement
         set => _storyProblem = value;
     }
 
+    /// <summary>
+    /// Lists.json ProblemCategory value for the Spine. Collaborator #246: category follows
+    /// Overview.StoryProblem; it is not Spine identity.
+    /// </summary>
+    public const string StoryProblemCategoryListValue = "Story problem";
+
     /// The OverviewModel Premise is the story's premise. If a StoryProblem has been created
     /// and selected (which may not be true in the story's early formulation), this
     /// Premise property and the StoryProblem Premise will be synchronized: when you update

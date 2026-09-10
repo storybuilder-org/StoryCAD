@@ -359,6 +359,123 @@ public class ProblemViewModelTests
     }
 
     [TestMethod]
+    public void SaveModel_SpineCategoryToSubplot_ClearsOverviewStoryProblem()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var overview = (OverviewModel)_storyModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        var storyProblem = new ProblemModel("Main Story Problem", _storyModel, overview.Node);
+        storyProblem.ProblemCategory = OverviewModel.StoryProblemCategoryListValue;
+        overview.StoryProblem = storyProblem.Uuid;
+
+        appState.CurrentDocument = new StoryDocument(_storyModel);
+
+        _viewModel.Activate(storyProblem);
+        _viewModel.ProblemCategory = "Subplot";
+        _viewModel.Deactivate(null);
+
+        Assert.AreEqual("Subplot", storyProblem.ProblemCategory);
+        Assert.AreEqual(Guid.Empty, overview.StoryProblem);
+    }
+
+    [TestMethod]
+    public void SaveModel_EmptyOverview_StoryProblemCategory_SetsSpine()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var overview = (OverviewModel)_storyModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview);
+        overview.StoryProblem = Guid.Empty;
+
+        var problem = new ProblemModel("Candidate", _storyModel, overview.Node);
+        problem.ProblemCategory = string.Empty;
+
+        appState.CurrentDocument = new StoryDocument(_storyModel);
+
+        _viewModel.Activate(problem);
+        _viewModel.ProblemCategory = OverviewModel.StoryProblemCategoryListValue;
+        _viewModel.Deactivate(null);
+
+        Assert.AreEqual(problem.Uuid, overview.StoryProblem);
+        Assert.AreEqual(OverviewModel.StoryProblemCategoryListValue, problem.ProblemCategory);
+    }
+
+    [TestMethod]
+    public void SaveModel_StoryProblemCategory_SetsOverviewToThisProblem()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var overview = (OverviewModel)_storyModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        var spine = new ProblemModel("Spine", _storyModel, overview.Node);
+        spine.ProblemCategory = OverviewModel.StoryProblemCategoryListValue;
+        overview.StoryProblem = spine.Uuid;
+
+        var other = new ProblemModel("Other", _storyModel, overview.Node);
+        other.ProblemCategory = "Subplot";
+
+        appState.CurrentDocument = new StoryDocument(_storyModel);
+
+        _viewModel.Activate(other);
+        _viewModel.ProblemCategory = OverviewModel.StoryProblemCategoryListValue;
+        _viewModel.Deactivate(null);
+
+        Assert.AreEqual(other.Uuid, overview.StoryProblem);
+        Assert.AreEqual(OverviewModel.StoryProblemCategoryListValue, other.ProblemCategory);
+    }
+
+    [TestMethod]
+    public void SaveModel_LeaveStoryProblem_ClearsOverviewPicker()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var overview = (OverviewModel)_storyModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        var storyProblem = new ProblemModel("Main Story Problem", _storyModel, overview.Node);
+        storyProblem.ProblemCategory = OverviewModel.StoryProblemCategoryListValue;
+        overview.StoryProblem = storyProblem.Uuid;
+
+        appState.CurrentDocument = new StoryDocument(_storyModel);
+
+        var overviewVm = Ioc.Default.GetRequiredService<OverviewViewModel>();
+        overviewVm.Activate(overview);
+        Assert.AreEqual(storyProblem.Uuid, overviewVm.SelectedProblem?.Uuid);
+
+        _viewModel.Activate(storyProblem);
+        _viewModel.ProblemCategory = "Subplot";
+        _viewModel.Deactivate(null);
+
+        Assert.AreEqual(Guid.Empty, overview.StoryProblem);
+        Assert.AreEqual("(none)", overviewVm.SelectedProblem?.Name);
+        Assert.AreEqual(Guid.Empty, overviewVm.StoryProblem);
+    }
+
+    [TestMethod]
+    public void SaveModel_SetStoryProblemCategory_UpdatesOverviewPicker()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var overview = (OverviewModel)_storyModel.StoryElements
+            .First(e => e.ElementType == StoryItemType.StoryOverview);
+        overview.StoryProblem = Guid.Empty;
+
+        var problem = new ProblemModel("Candidate", _storyModel, overview.Node);
+        problem.ProblemCategory = string.Empty;
+
+        appState.CurrentDocument = new StoryDocument(_storyModel);
+
+        var overviewVm = Ioc.Default.GetRequiredService<OverviewViewModel>();
+        overviewVm.Activate(overview);
+
+        _viewModel.Activate(problem);
+        _viewModel.ProblemCategory = OverviewModel.StoryProblemCategoryListValue;
+        _viewModel.Deactivate(null);
+
+        Assert.AreEqual(problem.Uuid, overview.StoryProblem);
+        Assert.AreEqual(problem.Uuid, overviewVm.SelectedProblem?.Uuid);
+        Assert.AreEqual(problem.Uuid, overviewVm.StoryProblem);
+    }
+
+    [TestMethod]
     public void SelectedElementSource_WhenSetToScene_SetsCurrentElementSourceToScenes()
     {
         // Arrange - Setup AppState with CurrentDocument

@@ -2540,8 +2540,8 @@ public class Collaborator : ICollaborator
     }
 
     /// <summary>
-    /// Collaborator #208: inject Overview, owner, contributing Problems, neighbors, seats, Setting.
-    /// Sets Failed on Story Problem / empty-category bail. Does not open pickers.
+    /// Collaborator #208 / #246: inject Overview, owner, contributing Problems, neighbors, seats, Setting.
+    /// Sets Failed on empty-category bail. Does not open pickers.
     /// </summary>
     private void InjectSceneBuilder(StoryElement sceneElement, GatherResult result)
     {
@@ -2553,8 +2553,7 @@ public class Collaborator : ICollaborator
         foreach (var line in resolved.StatusLines)
             result.StatusMessages.Add(line);
 
-        if (resolved.OwnerState is Services.SceneStructureNeighborResolver.SceneBuilderOwnerState.StoryProblemBail
-            or Services.SceneStructureNeighborResolver.SceneBuilderOwnerState.EmptyCategoryBail)
+        if (resolved.OwnerState is Services.SceneStructureNeighborResolver.SceneBuilderOwnerState.EmptyCategoryBail)
         {
             result.Failed = true;
             result.BailReason = resolved.BailReason;
