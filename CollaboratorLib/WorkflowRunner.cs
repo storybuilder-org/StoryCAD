@@ -51,6 +51,8 @@ namespace StoryCollaborator
         Bind,
         /// <summary>No bind applies and the proposal names a Scene stub to create.</summary>
         Create,
+        /// <summary>No bind applies and the proposal names a Problem stub to create.</summary>
+        CreateProblem,
         /// <summary>The proposal's GUID is not a candidate, or was used earlier; stays empty.</summary>
         Refuse,
         /// <summary>Neither a bindable GUID nor a scene name; stays empty.</summary>
@@ -1609,8 +1611,13 @@ namespace StoryCollaborator
                     }
                 }
 
+                var problemName = ReadString(beatElem, "problem_name");
+                var problemDescription = ReadString(beatElem, "problem_description");
+                var problemCategory = ReadString(beatElem, "problem_category");
+
                 beats.Add(new BeatInfo(title, desc, assigned, sceneName,
-                    sceneDescription, sceneNotes, sceneType, sceneCast));
+                    sceneDescription, sceneNotes, sceneType, sceneCast,
+                    problemName, problemDescription, problemCategory));
             }
             return beats;
         }
@@ -1914,8 +1921,16 @@ namespace StoryCollaborator
                     case BeatRowOutcome.Create:
                         sb.Append("new Scene \"").Append(row.ElementName).Append('"');
                         break;
+                    case BeatRowOutcome.CreateProblem:
+                        sb.Append("new Problem \"").Append(row.ElementName).Append('"');
+                        var stubCat = beats[row.Index].ProblemCategory?.Trim();
+                        if (!string.IsNullOrEmpty(stubCat))
+                            sb.Append(" (").Append(stubCat).Append(')');
+                        break;
                     case BeatRowOutcome.Refuse:
-                        if (row.ElementName != null)
+                        if (row.ElementGuid is null && row.ElementName != null)
+                            sb.Append(row.ElementName).Append(", stays empty");
+                        else if (row.ElementName != null)
                             sb.Append(row.ElementName).Append(" is already bound on this sheet, stays empty");
                         else
                             sb.Append(row.ElementGuid).Append(" is not a candidate, stays empty");
@@ -1938,7 +1953,7 @@ namespace StoryCollaborator
         /// </summary>
         private static string PlanSummary(List<BeatRowPlan> plan)
         {
-            int kept = 0, bound = 0, created = 0, empty = 0, refused = 0, dropped = 0;
+            int kept = 0, bound = 0, created = 0, createdProblems = 0, empty = 0, refused = 0, dropped = 0;
             foreach (var row in plan)
             {
                 switch (row.Outcome)
@@ -1946,6 +1961,7 @@ namespace StoryCollaborator
                     case BeatRowOutcome.Keep: kept++; break;
                     case BeatRowOutcome.Bind: bound++; break;
                     case BeatRowOutcome.Create: created++; break;
+                    case BeatRowOutcome.CreateProblem: createdProblems++; break;
                     case BeatRowOutcome.Empty: empty++; break;
                     case BeatRowOutcome.Refuse: refused++; break;
                     case BeatRowOutcome.Drop: dropped++; break;
@@ -1954,7 +1970,10 @@ namespace StoryCollaborator
 
             var sb = new System.Text.StringBuilder();
             sb.Append(plan.Count).Append(plan[0].InstallsBeat ? " new " : " ").Append(Plural(plan.Count, "beat")).Append(": ");
-            sb.Append($"{kept} kept, {bound} bound, {created} new {Plural(created, "scene")}, {empty} empty");
+            sb.Append($"{kept} kept, {bound} bound, {created} new {Plural(created, "scene")}");
+            if (createdProblems > 0)
+                sb.Append($", {createdProblems} new {Plural(createdProblems, "problem")}");
+            sb.Append($", {empty} empty");
             if (refused > 0) sb.Append($", {refused} refused");
             if (dropped > 0) sb.Append($", {dropped} dropped");
             return sb.ToString();
@@ -2190,6 +2209,7 @@ namespace StoryCollaborator
             // Collaborator #77: capability, not label. A new workflow that sets SceneName used
             // to create nothing because this line tested for the literal label "BeatScenes".
             bool allowSceneCreate = workflowModel.CreatesScenesForBeats;
+            bool allowProblemCreate = workflowModel.CreatesProblemsForBeats;
 
             // GUIDs on this sheet already, plus each Bind this plan makes: one placement per sheet.
             var usedOnSheet = new HashSet<Guid>(
@@ -2239,9 +2259,36 @@ namespace StoryCollaborator
                     continue;
                 }
 
-                if (allowSceneCreate && !string.IsNullOrWhiteSpace(beat.SceneName))
+                bool hasProblemStub = allowProblemCreate && !string.IsNullOrWhiteSpace(beat.ProblemName);
+                bool hasSceneStub = allowSceneCreate && !string.IsNullOrWhiteSpace(beat.SceneName);
+                if (hasProblemStub && hasSceneStub)
                 {
-                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Create, beat.SceneName.Trim(), null, installs));
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Refuse,
+                        "named a Scene stub and a Problem stub", null, installs));
+                    continue;
+                }
+
+                if (hasProblemStub)
+                {
+                    if (!IsSubproblemCategory(beat.ProblemCategory))
+                    {
+                        var cat = string.IsNullOrWhiteSpace(beat.ProblemCategory)
+                            ? "blank"
+                            : beat.ProblemCategory.Trim();
+                        plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Refuse,
+                            $"Problem stub category '{cat}' is not Complication, Subplot, or Sequence",
+                            null, installs));
+                        continue;
+                    }
+
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.CreateProblem,
+                        beat.ProblemName!.Trim(), null, installs));
+                    continue;
+                }
+
+                if (hasSceneStub)
+                {
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Create, beat.SceneName!.Trim(), null, installs));
                     continue;
                 }
 
@@ -2348,6 +2395,8 @@ namespace StoryCollaborator
                     return AssignBeat(problemUuid, row.Index, row.ElementGuid!.Value, result);
                 case BeatRowOutcome.Create:
                     return CreateSceneStub(problemUuid, row.Index, beat, result);
+                case BeatRowOutcome.CreateProblem:
+                    return CreateProblemStub(problemUuid, row.Index, beat, result);
                 case BeatRowOutcome.Refuse:
                     result.StatusMessages.Add(RefuseStatus(row));
                     return false;
@@ -2356,9 +2405,22 @@ namespace StoryCollaborator
             }
         }
 
-        private static string RefuseStatus(BeatRowPlan row) => row.ElementName != null
-            ? $"Beat {row.Index} assigned_element {row.ElementGuid} already used on this sheet; left unassigned"
-            : $"Beat {row.Index} assigned_element {row.ElementGuid} not in candidate set; left unassigned";
+        private static string RefuseStatus(BeatRowPlan row)
+        {
+            if (row.ElementGuid is null && row.ElementName != null)
+                return $"Beat {row.Index} {row.ElementName}; left unassigned";
+            return row.ElementName != null
+                ? $"Beat {row.Index} assigned_element {row.ElementGuid} already used on this sheet; left unassigned"
+                : $"Beat {row.Index} assigned_element {row.ElementGuid} not in candidate set; left unassigned";
+        }
+
+        internal static bool IsSubproblemCategory(string? category)
+        {
+            var value = (category ?? string.Empty).Trim();
+            return value.Equals("Complication", StringComparison.OrdinalIgnoreCase)
+                || value.Equals("Subplot", StringComparison.OrdinalIgnoreCase)
+                || value.Equals("Sequence", StringComparison.OrdinalIgnoreCase);
+        }
 
         /// <summary>
         /// Collaborator #217 section 5.7: apply one accepted beat row. Earlier rows of the same
@@ -2400,7 +2462,11 @@ namespace StoryCollaborator
             }
             // The row applies only as what the pane showed it as: a Bind row binds the same
             // candidate, a Create row creates. Anything else changed under the writer.
-            var expected = row.BindGuid.HasValue ? BeatRowOutcome.Bind : BeatRowOutcome.Create;
+            var expected = row.BindGuid.HasValue
+                ? BeatRowOutcome.Bind
+                : !string.IsNullOrWhiteSpace(row.Row.ProblemName)
+                    ? BeatRowOutcome.CreateProblem
+                    : BeatRowOutcome.Create;
             var sameBinding = !row.BindGuid.HasValue || planned.ElementGuid == row.BindGuid;
             if (planned.Outcome != expected || !sameBinding)
             {
@@ -2469,6 +2535,7 @@ namespace StoryCollaborator
                     {
                         case BeatRowOutcome.Bind:
                         case BeatRowOutcome.Create:
+                        case BeatRowOutcome.CreateProblem:
                             var binds = row.Outcome == BeatRowOutcome.Bind;
                             var value = new BeatRowValue(
                                 row.Index, row.Title, beats[row.Index], beats,
@@ -2553,6 +2620,50 @@ namespace StoryCollaborator
 
             var assigned = AssignBeat(problemUuid, beatIndex, newGuid, result);
             result.StatusMessages.Add($"Beat {beatIndex}: created Scene '{name}' ({newGuid})");
+            return assigned;
+        }
+
+        /// <summary>
+        /// Collaborator #246: create the Problem stub a CreateProblem row names, set category
+        /// and description, copy seats from the parent Problem, and assign it to the beat.
+        /// </summary>
+        private bool CreateProblemStub(Guid problemUuid, int beatIndex, BeatInfo beat, WorkflowResult result)
+        {
+            if (!IsSubproblemCategory(beat.ProblemCategory))
+            {
+                var cat = string.IsNullOrWhiteSpace(beat.ProblemCategory)
+                    ? "blank"
+                    : beat.ProblemCategory.Trim();
+                result.StatusMessages.Add(
+                    $"Beat {beatIndex} Problem stub category '{cat}' is not Complication, Subplot, or Sequence");
+                return false;
+            }
+
+            var name = beat.ProblemName!.Trim();
+            var addResult = _storyApi.AddElement(StoryItemType.Problem, problemUuid.ToString(), name);
+            if (!addResult.IsSuccess)
+            {
+                result.StatusMessages.Add(
+                    $"Beat {beatIndex} problem create failed: {addResult.ErrorMessage}");
+                return false;
+            }
+
+            var newGuid = addResult.Payload;
+            _storyApi.UpdateElementProperty(newGuid, "ProblemCategory", beat.ProblemCategory!.Trim());
+            if (!string.IsNullOrWhiteSpace(beat.ProblemDescription))
+                _storyApi.UpdateElementProperty(newGuid, "Description", beat.ProblemDescription.Trim());
+
+            var parentResult = _storyApi.GetStoryElement(problemUuid);
+            if (parentResult.IsSuccess && parentResult.Payload is ProblemModel parent)
+            {
+                if (parent.Protagonist != Guid.Empty)
+                    _storyApi.UpdateElementProperty(newGuid, "Protagonist", parent.Protagonist);
+                if (parent.Antagonist != Guid.Empty)
+                    _storyApi.UpdateElementProperty(newGuid, "Antagonist", parent.Antagonist);
+            }
+
+            var assigned = AssignBeat(problemUuid, beatIndex, newGuid, result);
+            result.StatusMessages.Add($"Beat {beatIndex}: created Problem '{name}' ({newGuid})");
             return assigned;
         }
 

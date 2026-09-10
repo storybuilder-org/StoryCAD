@@ -63,5 +63,27 @@ public class BeatListParsingTests
 
         Assert.IsNull(beat.SceneType);
         Assert.IsNull(beat.SceneCast);
+        Assert.IsNull(beat.ProblemName);
+    }
+
+    [TestMethod]
+    public void ExtractBeatList_ReadsProblemStubFields()
+    {
+        using var doc = JsonDocument.Parse("""
+        [
+          {
+            "title": "Midpoint",
+            "description": "the nested fight",
+            "problem_name": "The Yellow Brick Road",
+            "problem_description": "Dorothy must reach the Emerald City.",
+            "problem_category": "Sequence"
+          }
+        ]
+        """);
+        var beat = WorkflowRunner.ExtractBeatList(doc.RootElement).Single();
+
+        Assert.AreEqual("The Yellow Brick Road", beat.ProblemName);
+        Assert.AreEqual("Dorothy must reach the Emerald City.", beat.ProblemDescription);
+        Assert.AreEqual("Sequence", beat.ProblemCategory);
     }
 }

@@ -470,6 +470,7 @@ namespace StoryCollaborator.Workflows
                 {
                     PrimaryElementType = StoryItemType.Problem,
                     CreatesScenesForBeats = true,
+                    CreatesProblemsForBeats = true,
                     RequiresProblemCategory = true,
                     InjectsConflictTaxonomy = true,
                     InjectsBeatSheets = true,
