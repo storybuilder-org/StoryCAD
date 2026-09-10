@@ -45,6 +45,13 @@ namespace StoryCollaborator.Workflows
         public bool CreatesScenesForBeats { get; set; }
 
         /// <summary>
+        /// Collaborator #246: this workflow may create a Problem for an empty beat from
+        /// <see cref="StoryCollaborator.Models.BeatInfo.ProblemName"/>. Category must be
+        /// Complication, Subplot, or Sequence. Never a Spine.
+        /// </summary>
+        public bool CreatesProblemsForBeats { get; set; }
+
+        /// <summary>
         /// Collaborator #77: this workflow needs Problem.ProblemCategory before it runs.
         /// The category picks the beat sheet class. Nothing sets it on a ProblemBuilder run.
         /// </summary>

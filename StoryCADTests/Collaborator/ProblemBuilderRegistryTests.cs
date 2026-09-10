@@ -33,6 +33,7 @@ public class ProblemBuilderRegistryTests
         var workflow = Builder();
 
         Assert.IsTrue(workflow.CreatesScenesForBeats, "it creates Scene stubs for empty beats");
+        Assert.IsTrue(workflow.CreatesProblemsForBeats, "it creates Problem stubs for empty beats");
         Assert.IsTrue(workflow.RequiresProblemCategory, "the category picks the beat sheet class");
         Assert.IsTrue(workflow.InjectsConflictTaxonomy, "the #483 taxonomy feeds the conflict fields");
         Assert.IsTrue(workflow.InjectsBeatSheets, "the model picks from the built-in sheets");
