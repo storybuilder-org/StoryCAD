@@ -770,7 +770,7 @@ namespace StoryCollaborator.Workflows
                     label: "SceneBuilder",
                     title: "Scene Builder",
                     description: "Fill an existing Scene: sketch, type, cast, development, conflict, and sequel.",
-                    explanation: "Scene Builder does not create a Scene. Select a Scene first. The run reads contributing Problems and writes Scene fields the model can infer. It does not run on a Story Problem.",
+                    explanation: "Scene Builder does not create a Scene. Select a Scene first. The run reads contributing Problems and writes Scene fields the model can infer.",
                     workflowIO: new WorkflowIO
                     {
                         RequiredInputs = new List<ElementRequirement>

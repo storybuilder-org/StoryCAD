@@ -32,7 +32,6 @@ public sealed class SceneStructureNeighborResolver
         UniqueSubproblem,
         ExplorerParentSubproblem,
         AmbiguousSubproblems,
-        StoryProblemBail,
         EmptyCategoryBail
     }
 
@@ -269,9 +268,6 @@ public sealed class SceneStructureNeighborResolver
         return null;
     }
 
-    public const string SceneBuilderStoryProblemBailMessage =
-        "Scene Builder does not run on a Story Problem. Use Problem Builder for story-problem beats.";
-
     public const string SceneBuilderEmptyCategoryBailMessage =
         "Set Problem Category on the owning problem before Scene Builder.";
 
@@ -296,7 +292,7 @@ public sealed class SceneStructureNeighborResolver
         var overviewStoryProblem = GetOverviewStoryProblemUuid();
         var (state, owner, bail) = ResolveSceneBuilderOwner(owners, explorerParent, overviewStoryProblem);
 
-        if (state is SceneBuilderOwnerState.StoryProblemBail or SceneBuilderOwnerState.EmptyCategoryBail)
+        if (state is SceneBuilderOwnerState.EmptyCategoryBail)
         {
             if (owner != null)
                 status.Add($"Scene Builder: owner Problem = {owner.Name}");
@@ -365,14 +361,12 @@ public sealed class SceneStructureNeighborResolver
         return Guid.Empty;
     }
 
+    /// <summary>
+    /// Collaborator #246: the Spine is Overview.StoryProblem only. ProblemCategory is not identity.
+    /// </summary>
     internal bool IsStoryProblem(ProblemModel problem, Guid overviewStoryProblem)
     {
-        if (overviewStoryProblem != Guid.Empty && problem.Uuid == overviewStoryProblem)
-            return true;
-        return string.Equals(
-            (problem.ProblemCategory ?? string.Empty).Trim(),
-            Collaborator.StoryProblemCategoryListValue,
-            StringComparison.OrdinalIgnoreCase);
+        return overviewStoryProblem != Guid.Empty && problem.Uuid == overviewStoryProblem;
     }
 
     internal (SceneBuilderOwnerState State, ProblemModel? Owner, string? BailReason)
@@ -382,47 +376,38 @@ public sealed class SceneStructureNeighborResolver
             Guid overviewStoryProblem)
     {
         bool IsSp(ProblemModel p) => IsStoryProblem(p, overviewStoryProblem);
-        bool IsCategorizedSubproblem(ProblemModel p) =>
-            !IsSp(p) && !string.IsNullOrWhiteSpace(p.ProblemCategory);
-
         var ownerList = owners?.ToList() ?? new List<ProblemModel>();
 
-        // 5.4 step 1
-        if (explorerParent != null && IsSp(explorerParent))
-            return (SceneBuilderOwnerState.StoryProblemBail, explorerParent, SceneBuilderStoryProblemBailMessage);
-
-        // 5.4 step 2
+        // Collaborator #246: explorer parent with a blank category still aborts, unless one
+        // categorized structure owner can stand in (same fall-through as #208).
         if (explorerParent != null && string.IsNullOrWhiteSpace(explorerParent.ProblemCategory))
         {
-            var categorized = ownerList.Where(IsCategorizedSubproblem).ToList();
+            var categorized = ownerList
+                .Where(p => !string.IsNullOrWhiteSpace(p.ProblemCategory))
+                .ToList();
             if (categorized.Count == 1)
                 return (SceneBuilderOwnerState.UniqueSubproblem, categorized[0], null);
             return (SceneBuilderOwnerState.EmptyCategoryBail, explorerParent, SceneBuilderEmptyCategoryBailMessage);
         }
 
-        // 5.4 step 3
         if (explorerParent != null)
             return (SceneBuilderOwnerState.ExplorerParentSubproblem, explorerParent, null);
 
-        // 5.4 step 4
-        var nonStory = ownerList.Where(o => !IsSp(o)).ToList();
-        if (nonStory.Count == 1)
-        {
-            var only = nonStory[0];
-            if (string.IsNullOrWhiteSpace(only.ProblemCategory))
-                return (SceneBuilderOwnerState.EmptyCategoryBail, only, SceneBuilderEmptyCategoryBailMessage);
-            return (SceneBuilderOwnerState.UniqueSubproblem, only, null);
-        }
+        if (ownerList.Count == 0)
+            return (SceneBuilderOwnerState.None, null, null);
 
-        // 5.4 step 5
-        if (ownerList.Count > 0 && ownerList.All(IsSp))
-            return (SceneBuilderOwnerState.StoryProblemBail, ownerList[0], SceneBuilderStoryProblemBailMessage);
+        var categorizedOwners = ownerList
+            .Where(p => !string.IsNullOrWhiteSpace(p.ProblemCategory))
+            .ToList();
+        if (categorizedOwners.Count == 0)
+            return (SceneBuilderOwnerState.EmptyCategoryBail, ownerList[0], SceneBuilderEmptyCategoryBailMessage);
 
-        // 5.4 step 6
-        if (nonStory.Count >= 2)
+        var nonSpine = categorizedOwners.Where(o => !IsSp(o)).ToList();
+        if (nonSpine.Count >= 2)
             return (SceneBuilderOwnerState.AmbiguousSubproblems, null, null);
+        if (nonSpine.Count == 1)
+            return (SceneBuilderOwnerState.UniqueSubproblem, nonSpine[0], null);
 
-        // 5.4 step 7
-        return (SceneBuilderOwnerState.None, null, null);
+        return (SceneBuilderOwnerState.UniqueSubproblem, categorizedOwners[0], null);
     }
 }

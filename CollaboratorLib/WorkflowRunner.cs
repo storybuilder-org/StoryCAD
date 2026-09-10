@@ -174,8 +174,8 @@ namespace StoryCollaborator
                     return WorkflowResult.Failed(gateMessage);
             }
 
-            // Collaborator #208: SceneBuilder Story Problem / empty-category bail. Distinct
-            // from the category gate above: a missing Problem map entry is not empty category.
+            // Collaborator #208 / #246: SceneBuilder empty-category bail. Distinct from the
+            // category gate above: a missing Problem map entry is not empty category.
             if (string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
             {
                 var sceneBuilderGate = ValidateSceneBuilderOwner(gatheredElements);
@@ -1628,8 +1628,8 @@ namespace StoryCollaborator
         }
 
         /// <summary>
-        /// Collaborator #208: refuse POST when OwnerState is StoryProblemBail or EmptyCategoryBail.
-        /// Missing Problem map entry is not empty category.
+        /// Collaborator #208 / #246: refuse POST when OwnerState is EmptyCategoryBail.
+        /// Missing Problem map entry is not empty category. Spine owner is not a bail.
         /// </summary>
         internal string? ValidateSceneBuilderOwner(Dictionary<string, StoryElement> gatheredElements)
         {
@@ -1637,8 +1637,7 @@ namespace StoryCollaborator
                 return null;
 
             var resolved = new SceneStructureNeighborResolver(_storyApi).ResolveForSceneBuilder(scene);
-            if (resolved.OwnerState is SceneStructureNeighborResolver.SceneBuilderOwnerState.StoryProblemBail
-                or SceneStructureNeighborResolver.SceneBuilderOwnerState.EmptyCategoryBail)
+            if (resolved.OwnerState is SceneStructureNeighborResolver.SceneBuilderOwnerState.EmptyCategoryBail)
                 return resolved.BailReason;
             return null;
         }
@@ -1704,10 +1703,6 @@ namespace StoryCollaborator
                 match = problems.Payload.OfType<ProblemModel>().FirstOrDefault(p => p.Uuid == proposed.Value);
             if (match == null)
                 return WriteOrphanProposeNotes(scene, result, "GUID not in ProblemChoices", displayName);
-
-            var overviewSp = resolver.GetOverviewStoryProblemUuid();
-            if (resolver.IsStoryProblem(match, overviewSp))
-                return WriteOrphanProposeNotes(scene, result, "proposed owner is Story Problem", displayName);
 
             var structure = _storyApi.GetProblemStructure(match.Uuid);
             if (!structure.IsSuccess || structure.Payload.Beats == null)
