@@ -166,7 +166,7 @@ public class RequiredFieldGapScannerTests
         {
             var owners = GapWorkflowOwnership.WorkflowsFor(StoryItemType.Character, prop);
             Assert.AreEqual(1, owners.Count, prop);
-            Assert.AreEqual("DefineCharacter", owners[0], prop);
+            Assert.AreEqual("CharacterBuilder", owners[0], prop);
         }
 
         var backStory = GapWorkflowOwnership.WorkflowsFor(StoryItemType.Character, "BackStory");

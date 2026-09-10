@@ -42,13 +42,13 @@ public static class GapWorkflowOwnership
             (StoryItemType.Problem, "Premise") => new[] { "ProblemBuilder", "StoryProblem" },
             (StoryItemType.Problem, "Description") => new[] { "ProblemBuilder", "StoryProblem" },
 
-            // #182 occupation Role; #183 Story Function + Character Sketch; #107 essentials
-            (StoryItemType.Character, "Role") => new[] { "DefineCharacter" },
-            (StoryItemType.Character, "Age") => new[] { "DefineCharacter" },
-            (StoryItemType.Character, "Sex") => new[] { "DefineCharacter" },
-            (StoryItemType.Character, "Appearance") => new[] { "DefineCharacter" },
-            (StoryItemType.Character, "StoryRole") => new[] { "StoryFunction" },
-            (StoryItemType.Character, "Description") => new[] { "StoryFunction" },
+            // #244 CharacterBuilder owns the sheet and the sketch.
+            (StoryItemType.Character, "Role") => new[] { "CharacterBuilder" },
+            (StoryItemType.Character, "Age") => new[] { "CharacterBuilder" },
+            (StoryItemType.Character, "Sex") => new[] { "CharacterBuilder" },
+            (StoryItemType.Character, "Appearance") => new[] { "CharacterBuilder" },
+            (StoryItemType.Character, "StoryRole") => new[] { "CharacterBuilder" },
+            (StoryItemType.Character, "Description") => new[] { "CharacterBuilder" },
             (StoryItemType.Character, "BackStory") => new[] { "FlawBackstory" },
             (StoryItemType.Character, "Name") => Array.Empty<string>(),
 

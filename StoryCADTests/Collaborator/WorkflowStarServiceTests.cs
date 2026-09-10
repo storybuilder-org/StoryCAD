@@ -168,6 +168,27 @@ public class WorkflowStarServiceTests
     }
 
     [TestMethod]
+    public async Task GetStarredAsync_WithCharacterFillStars_MapsBothToCharacterBuilder()
+    {
+        _preferences.Model.CollaboratorStarDefaultsApplied = true;
+        _preferences.Model.CollaboratorStarMigrationVersion = 2;
+        _preferences.Model.StarredCollaboratorWorkflows = new List<string>
+        {
+            "Premise", "DefineCharacter", "StoryFunction", "SceneBuilder"
+        };
+
+        var starred = await _service.GetStarredAsync(
+            WorkflowRegistry.DefaultStarredLabels.ToArray(),
+            WorkflowRegistry.RetiredWorkflowReplacements,
+            WorkflowRegistry.StarMigrationVersion);
+
+        CollectionAssert.AreEqual(
+            new[] { "Premise", "CharacterBuilder", "SceneBuilder" },
+            starred.ToArray());
+        Assert.AreEqual(3, _preferences.Model.CollaboratorStarMigrationVersion);
+    }
+
+    [TestMethod]
     public async Task GetStarredAsync_AfterMigrating_DoesNotRunAgain()
     {
         _preferences.Model.CollaboratorStarDefaultsApplied = true;

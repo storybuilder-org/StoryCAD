@@ -41,12 +41,12 @@ A **status** strip at the bottom carries short messages when needed (for example
 
 ## What the workflow list shows
 
-Collaborator ships with about twenty workflows. Showing all of them at once is not much help when you only want to run one, so the list opens short and grows only when you ask it to. From the top:
+Collaborator ships with twelve workflows. Showing all of them at once is not much help when you only want to run one, so the list opens short and grows only when you ask it to. From the top:
 
 | Band | What it holds |
 |------|---------------|
 | **Outline gaps** | Required fields you have not filled in yet, with a count. Appears only when there are gaps. This is usually the most useful thing to do next. |
-| **Starred** | The workflows you have marked as yours. Seven sensible ones are starred to begin with. |
+| **Starred** | The workflows you have marked as yours. Five are starred to begin with. |
 | **Story element groups** | Everything else, filed under Overview, Problem, Character, Setting, and Scene. These start closed. Click a group to open it and browse. |
 
 Nothing is hidden. The rest of the catalog is one click away, in the groups.
