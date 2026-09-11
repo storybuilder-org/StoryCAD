@@ -5,6 +5,18 @@ using StoryCollaborator.Models;
 namespace StoryCollaborator.Workflows
 {
     /// <summary>
+    /// How a workflow talks to the Worker (#119).
+    /// </summary>
+    public enum WorkflowMode
+    {
+        /// <summary>One call, structured JSON out, proposals in. Every workflow before #119.</summary>
+        OneShot = 0,
+
+        /// <summary>One call per turn, prose out. The runner skips JSON extraction.</summary>
+        Conversational = 1
+    }
+
+    /// <summary>
     /// Standard workflow class for all AI-assisted story development workflows.
     /// Provides two constructors:
     /// - Simple: For basic workflows with single input/output element type
@@ -31,6 +43,13 @@ namespace StoryCollaborator.Workflows
         /// <c>Label == "BeatScenes"</c> test that used to gate scene creation.
         /// </summary>
         public bool CreatesScenesForBeats { get; set; }
+
+        /// <summary>
+        /// Collaborator #246: this workflow may create a Problem for an empty beat from
+        /// <see cref="StoryCollaborator.Models.BeatInfo.ProblemName"/>. Category must be
+        /// Complication, Subplot, or Sequence. Never a Spine.
+        /// </summary>
+        public bool CreatesProblemsForBeats { get; set; }
 
         /// <summary>
         /// Collaborator #77: this workflow needs Problem.ProblemCategory before it runs.
@@ -61,6 +80,19 @@ namespace StoryCollaborator.Workflows
         /// element has no sheet.
         /// </summary>
         public bool InjectsCurrentBeats { get; set; }
+
+        /// <summary>
+        /// Conversational workflows return prose rather than a property JSON object, so
+        /// WorkflowRunner must not run ExtractOutputs against the reply (#119).
+        /// </summary>
+        public WorkflowMode Mode { get; set; } = WorkflowMode.OneShot;
+
+        /// <summary>
+        /// False for workflows that only make sense as a step inside another workflow's
+        /// session (#119: the interview summary needs a transcript that exists nowhere
+        /// else). Picking one from the nav pane would run it with its inputs empty.
+        /// </summary>
+        public bool ShowInMenu { get; set; } = true;
 
         // Additional properties
         public StoryModel? Model { get; set; }

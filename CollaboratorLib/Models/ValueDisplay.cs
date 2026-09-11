@@ -61,9 +61,16 @@ internal static class ValueDisplay
 
             // Collaborator #217 section 5.7: one beat row reads as what Accept will do to it.
             case BeatRowValue row:
-                return row.BindGuid.HasValue
-                    ? $"binds {row.ElementName ?? ResolveName(row.BindGuid.Value, resolveElementName)} ({row.ElementType ?? "element"})"
-                    : $"new Scene \"{row.Row.SceneName?.Trim()}\"";
+                if (row.BindGuid.HasValue)
+                    return $"binds {row.ElementName ?? ResolveName(row.BindGuid.Value, resolveElementName)} ({row.ElementType ?? "element"})";
+                if (!string.IsNullOrWhiteSpace(row.Row.ProblemName))
+                {
+                    var cat = row.Row.ProblemCategory?.Trim();
+                    return string.IsNullOrEmpty(cat)
+                        ? $"new Problem \"{row.Row.ProblemName.Trim()}\""
+                        : $"new Problem \"{row.Row.ProblemName.Trim()}\" ({cat})";
+                }
+                return $"new Scene \"{row.Row.SceneName?.Trim()}\"";
 
             case List<BeatInfo> beats:
                 return string.Join("\n", beats.Select((beat, i) =>

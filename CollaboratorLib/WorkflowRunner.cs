@@ -51,6 +51,8 @@ namespace StoryCollaborator
         Bind,
         /// <summary>No bind applies and the proposal names a Scene stub to create.</summary>
         Create,
+        /// <summary>No bind applies and the proposal names a Problem stub to create.</summary>
+        CreateProblem,
         /// <summary>The proposal's GUID is not a candidate, or was used earlier; stays empty.</summary>
         Refuse,
         /// <summary>Neither a bindable GUID nor a scene name; stays empty.</summary>
@@ -102,6 +104,13 @@ namespace StoryCollaborator
         private CollaboratorSettings _settings;
         private readonly StoryCADLib.Services.Logging.ILogService? _auditLogger;
 
+        /// <summary>
+        /// Collaborator #237 item 11: the proposals the writer rejected with Try Again, one
+        /// "Property: value" line each. Null on a first run. When set, RunAsync sends it as
+        /// the RejectedProposals arg and the Worker tells the model to depart from it.
+        /// </summary>
+        internal string? RejectedProposals { get; set; }
+
         // No Kernel field: issue #90 step 8 item 5 retired the direct-OpenAI Semantic Kernel
         // invocation path (InvokeDirectAsync), which was the only reason this class held one.
         // PostToProxyAsync talks to the Worker over plain HttpClient, never through SK.
@@ -137,7 +146,9 @@ namespace StoryCollaborator
         /// <summary>
         /// Executes the workflow with pre-gathered elements.
         /// </summary>
-        internal async Task<WorkflowResult> RunAsync(Dictionary<string, StoryElement> gatheredElements)
+        internal async Task<WorkflowResult> RunAsync(
+            Dictionary<string, StoryElement> gatheredElements,
+            Action<Dictionary<string, string>>? extraArgs = null)
         {
             var workflowIO = workflowModel.GetIO();
 
@@ -165,8 +176,8 @@ namespace StoryCollaborator
                     return WorkflowResult.Failed(gateMessage);
             }
 
-            // Collaborator #208: SceneBuilder Story Problem / empty-category bail. Distinct
-            // from the category gate above: a missing Problem map entry is not empty category.
+            // Collaborator #208 / #246: SceneBuilder empty-category bail. Distinct from the
+            // category gate above: a missing Problem map entry is not empty category.
             if (string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
             {
                 var sceneBuilderGate = ValidateSceneBuilderOwner(gatheredElements);
@@ -193,6 +204,11 @@ namespace StoryCollaborator
 
                 EnrichWithStoryContext(body.Args, gatheredElements, workflowIO);
                 ApplySettings(body.Args);
+                ApplyRejectedProposals(body.Args);
+
+                // #119: the interview args ride here, after the standard enrichment so
+                // nothing downstream can overwrite them.
+                extraArgs?.Invoke(body.Args);
 
                 if (workflowIO.ExampleLists.Count > 0)
                     EnrichWithExamples(body.Args);
@@ -202,54 +218,86 @@ namespace StoryCollaborator
                 // Issue #90 step 8 item 5: the direct-to-OpenAI fallback retired along with
                 // OPENAI_API_KEY on the client. A proxy failure now propagates to the outer
                 // catch clauses below rather than retrying against OpenAI directly.
-                result.AssembledPrompt = null;
-                var (proxyContent, proxyHash, proxyCost, proxyComplete) = await PostToProxyAsync(body);
-                result.RemoteTemplateHash = proxyHash;
-                result.Cost = proxyCost;
-
-                if (!proxyComplete)
+                // Collaborator #239: send, read and extract are one attempt, so an answer that
+                // mostly breaks the field_states contract can be asked for once more on a fresh
+                // result (ExecuteWithContractRetryAsync). Every attempt starts from the status
+                // messages gathered so far.
+                var preamble = result.StatusMessages.ToList();
+                async Task<WorkflowResult> AttemptAsync()
                 {
-                    // Issue #94 design section 5 item 3 ("surface, never mask"): the one truncation
-                    // retry (PostToProxyAsync -> ExecuteWithTruncationRetryAsync) still came back
-                    // incomplete. The partial text is preserved for diagnostics but must never reach
-                    // ExtractOutputs or a Success result.
-                    return BuildTruncationFailureResult(proxyContent);
+                    var attempt = WorkflowResult.Succeeded();
+                    foreach (var message in preamble)
+                        attempt.StatusMessages.Add(message);
+
+                    attempt.AssembledPrompt = null;
+                    var (proxyContent, proxyHash, proxyCost, proxyComplete) = await PostToProxyAsync(body);
+                    attempt.RemoteTemplateHash = proxyHash;
+                    attempt.Cost = proxyCost;
+                    // Set only when a dev Worker echoed the prompt on request (PromptTestRunner).
+                    attempt.AssembledPrompt = _lastPromptEcho?.User;
+                    attempt.SystemPrompt = _lastPromptEcho?.System;
+
+                    if (!proxyComplete)
+                    {
+                        // Issue #94 design section 5 item 3 ("surface, never mask"): the one truncation
+                        // retry (PostToProxyAsync -> ExecuteWithTruncationRetryAsync) still came back
+                        // incomplete. The partial text is preserved for diagnostics but must never reach
+                        // ExtractOutputs or a Success result.
+                        return BuildTruncationFailureResult(proxyContent);
+                    }
+
+                    string planResult = proxyContent;
+                    attempt.RawResponse = planResult;
+
+                    if (string.IsNullOrEmpty(planResult))
+                    {
+                        return WorkflowResult.Failed("Workflow returned empty response");
+                    }
+
+                    attempt.StatusMessages.Add("Received AI response");
+
+                    // #119: conversational workflows answer in prose. Extraction would fail the
+                    // turn on the missing JSON object.
+                    if (workflowModel.Mode == WorkflowMode.Conversational)
+                    {
+                        var conversational = BuildConversationalResult(planResult);
+                        conversational.RemoteTemplateHash = attempt.RemoteTemplateHash;
+                        conversational.Cost = attempt.Cost;
+                        conversational.AssembledPrompt = attempt.AssembledPrompt;
+                        conversational.SystemPrompt = attempt.SystemPrompt;
+                        foreach (var msg in attempt.StatusMessages)
+                            conversational.StatusMessages.Add(msg);
+                        return conversational;
+                    }
+
+                    var outputResult = ExtractOutputs(planResult, gatheredElements, workflowIO.Outputs);
+                    MergeExtractResult(attempt, outputResult);
+                    // Collaborator #217 section 5.7: each beat that binds or creates is its own row.
+                    ExpandBeatSheetUpdates(attempt);
+
+                    if (string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
+                        CaptureSceneBuilderProposal(planResult, attempt);
+
+                    // #120: structural fields the model must not invent (list value + GUIDs).
+                    // Proposes into pending only; #116 classify decides Fill vs Protect (never silent force).
+                    if (workflowModel.Label == "InnerOuterProblems")
+                        EnrichInnerOuterStructuralFields(attempt, gatheredElements);
+
+                    // #201: empty or omitted WorldType becomes NoOp against empty outline and never
+                    // reaches Accept. Propose craft default when still blank.
+                    if (string.Equals(workflowModel.Label, "DefineStoryWorld", StringComparison.Ordinal))
+                        EnrichDefineStoryWorldWorldType(attempt, gatheredElements);
+
+                    if (!outputResult.Success)
+                    {
+                        attempt.Success = false;
+                        attempt.ErrorMessage = outputResult.ErrorMessage;
+                    }
+
+                    return attempt;
                 }
 
-                string planResult = proxyContent;
-                result.RawResponse = planResult;
-
-                if (string.IsNullOrEmpty(planResult))
-                {
-                    return WorkflowResult.Failed("Workflow returned empty response");
-                }
-
-                result.StatusMessages.Add("Received AI response");
-
-                var outputResult = ExtractOutputs(planResult, gatheredElements, workflowIO.Outputs);
-                MergeExtractResult(result, outputResult);
-                // Collaborator #217 section 5.7: each beat that binds or creates is its own row.
-                ExpandBeatSheetUpdates(result);
-
-                if (string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
-                    CaptureSceneBuilderProposal(planResult, result);
-
-                // #120: structural fields the model must not invent (list value + GUIDs).
-                // Proposes into pending only; #116 classify decides Fill vs Protect (never silent force).
-                if (workflowModel.Label == "InnerOuterProblems")
-                    EnrichInnerOuterStructuralFields(result, gatheredElements);
-
-                // #201: empty or omitted WorldType becomes NoOp against empty outline and never
-                // reaches Accept. Propose craft default when still blank.
-                if (string.Equals(workflowModel.Label, "DefineStoryWorld", StringComparison.Ordinal))
-                    EnrichDefineStoryWorldWorldType(result, gatheredElements);
-
-                if (!outputResult.Success)
-                {
-                    result.Success = false;
-                    result.ErrorMessage = outputResult.ErrorMessage;
-                }
-
+                result = await ExecuteWithContractRetryAsync(AttemptAsync, DescribeContractFault);
                 return result;
             }
             catch (StoryCADLib.Services.Store.OutOfCreditsException ex)
@@ -1026,6 +1074,99 @@ namespace StoryCollaborator
         }
 
         /// <summary>
+        /// Posts an already-built body and shapes the result (#119). RunAsync's body-building
+        /// and this method are split so an interview turn can set its own args between the two.
+        /// </summary>
+        internal async Task<WorkflowResult> RunPreparedAsync(
+            WorkflowProxyBody body,
+            Dictionary<string, StoryElement> gatheredElements)
+        {
+            // No credential: fail rather than falling back to BuildStubResponse. A stub is a
+            // readable placeholder for an unimplemented one-shot, but a conversational turn
+            // would post "(stub workflow - no AI call made)" as the character's own words and
+            // record it in the transcript Summarize later reads.
+            if (string.IsNullOrWhiteSpace(KernelFactory.ResolveWorkflowCredential()))
+            {
+                return WorkflowResult.Failed(
+                    "This build has no workflow credential, so the character cannot answer. " +
+                    "Activate Collaborator and start the interview again.");
+            }
+
+            // RunAsync's callers get a Failed result rather than an exception; this one's do
+            // too. The interview's callers are async void command handlers, where an escaping
+            // proxy failure (401 with no activation token, out of credits, HTTP error) takes
+            // the app down instead of showing an error bubble.
+            try
+            {
+                var (content, hash, cost, complete) = await PostToProxyAsync(body);
+                if (!complete)
+                    return BuildTruncationFailureResult(content);
+
+                var result = workflowModel.Mode == WorkflowMode.Conversational
+                    ? BuildConversationalResult(content)
+                    : ExtractOutputs(content, gatheredElements, workflowModel.GetIO().Outputs);
+
+                result.RemoteTemplateHash = hash;
+                result.Cost = cost;
+                result.RawResponse = content;
+                return result;
+            }
+            catch (StoryCADLib.Services.Store.OutOfCreditsException ex)
+            {
+                _logger?.LogWarning("Workflow turn refused: out of credits ({Workflow})", workflowModel.Title);
+                return WorkflowResult.Failed(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "WorkflowRunner.RunPreparedAsync error");
+                _auditLogger?.LogException(StoryCADLib.Services.Logging.LogLevel.Error, ex,
+                    $"Workflow turn failed: {workflowModel.Title}");
+                return WorkflowResult.Failed($"Workflow execution failed: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Result for a conversational turn (#119). The reply is prose, so ExtractOutputs must
+        /// not run against it — its JSON failure would fail the whole turn
+        /// ("Could not parse JSON from AI response"). Static and side-effect free so it is
+        /// testable without a live kernel.
+        /// </summary>
+        internal static WorkflowResult BuildConversationalResult(string reply)
+        {
+            if (string.IsNullOrWhiteSpace(reply))
+                return WorkflowResult.Failed("The interviewer did not ask anything.");
+
+            var result = WorkflowResult.Succeeded();
+            result.RawResponse = reply;
+            return result;
+        }
+
+        /// <summary>
+        /// Writes interview args (#119). Field cursor, not a cue line.
+        /// Do not send InterviewLine. Always write every key the Worker merges.
+        ///
+        /// Targets are the session plan's ids in order (design 25.7). Empty on the
+        /// opening means "you choose": the Worker names them on its reply. Empty after
+        /// the opening means nothing; the Worker only reads it on the opening.
+        /// </summary>
+        internal static void SetInterviewArgs(
+            Dictionary<string, string> args,
+            string? field,
+            string? nextField,
+            int turnsOnField,
+            string? transcript,
+            string? answer,
+            string? targets = null)
+        {
+            args["InterviewField"] = field?.Trim() ?? string.Empty;
+            args["InterviewNextField"] = nextField?.Trim() ?? string.Empty;
+            args["InterviewTargets"] = targets?.Trim() ?? string.Empty;
+            args["InterviewTurnsOnField"] = turnsOnField.ToString();
+            args["InterviewTranscript"] = transcript ?? string.Empty;
+            args["InterviewAnswer"] = answer?.Trim() ?? string.Empty;
+        }
+
+        /// <summary>
         /// Extracts output values from the AI response without applying them.
         /// Builds PendingUpdates from the JSON using each PropertySpec's JsonKey and WriteVia.
         /// UpdatedProperties is populated as a display-only projection.
@@ -1086,6 +1227,15 @@ namespace StoryCollaborator
                                 value = jsonProp.ValueKind == JsonValueKind.String
                                     ? jsonProp.GetString()
                                     : jsonProp.ToString();
+                                // Collaborator #239: a field_states word is not text. On some
+                                // runs gpt-5.4-nano put "Unchanged" in a property's text, once
+                                // under Fill, which classify would have written into the outline.
+                                if (IsFieldStateWord(value as string))
+                                {
+                                    result.StatusMessages.Add(
+                                        $"State word as text, treated as empty: {output.ElementLabel}.{spec.Property}");
+                                    value = string.Empty;
+                                }
                                 displayValue = value?.ToString() ?? string.Empty;
                                 break;
 
@@ -1461,8 +1611,13 @@ namespace StoryCollaborator
                     }
                 }
 
+                var problemName = ReadString(beatElem, "problem_name");
+                var problemDescription = ReadString(beatElem, "problem_description");
+                var problemCategory = ReadString(beatElem, "problem_category");
+
                 beats.Add(new BeatInfo(title, desc, assigned, sceneName,
-                    sceneDescription, sceneNotes, sceneType, sceneCast));
+                    sceneDescription, sceneNotes, sceneType, sceneCast,
+                    problemName, problemDescription, problemCategory));
             }
             return beats;
         }
@@ -1480,8 +1635,8 @@ namespace StoryCollaborator
         }
 
         /// <summary>
-        /// Collaborator #208: refuse POST when OwnerState is StoryProblemBail or EmptyCategoryBail.
-        /// Missing Problem map entry is not empty category.
+        /// Collaborator #208 / #246: refuse POST when OwnerState is EmptyCategoryBail.
+        /// Missing Problem map entry is not empty category. Spine owner is not a bail.
         /// </summary>
         internal string? ValidateSceneBuilderOwner(Dictionary<string, StoryElement> gatheredElements)
         {
@@ -1489,8 +1644,7 @@ namespace StoryCollaborator
                 return null;
 
             var resolved = new SceneStructureNeighborResolver(_storyApi).ResolveForSceneBuilder(scene);
-            if (resolved.OwnerState is SceneStructureNeighborResolver.SceneBuilderOwnerState.StoryProblemBail
-                or SceneStructureNeighborResolver.SceneBuilderOwnerState.EmptyCategoryBail)
+            if (resolved.OwnerState is SceneStructureNeighborResolver.SceneBuilderOwnerState.EmptyCategoryBail)
                 return resolved.BailReason;
             return null;
         }
@@ -1556,10 +1710,6 @@ namespace StoryCollaborator
                 match = problems.Payload.OfType<ProblemModel>().FirstOrDefault(p => p.Uuid == proposed.Value);
             if (match == null)
                 return WriteOrphanProposeNotes(scene, result, "GUID not in ProblemChoices", displayName);
-
-            var overviewSp = resolver.GetOverviewStoryProblemUuid();
-            if (resolver.IsStoryProblem(match, overviewSp))
-                return WriteOrphanProposeNotes(scene, result, "proposed owner is Story Problem", displayName);
 
             var structure = _storyApi.GetProblemStructure(match.Uuid);
             if (!structure.IsSuccess || structure.Payload.Beats == null)
@@ -1771,8 +1921,16 @@ namespace StoryCollaborator
                     case BeatRowOutcome.Create:
                         sb.Append("new Scene \"").Append(row.ElementName).Append('"');
                         break;
+                    case BeatRowOutcome.CreateProblem:
+                        sb.Append("new Problem \"").Append(row.ElementName).Append('"');
+                        var stubCat = beats[row.Index].ProblemCategory?.Trim();
+                        if (!string.IsNullOrEmpty(stubCat))
+                            sb.Append(" (").Append(stubCat).Append(')');
+                        break;
                     case BeatRowOutcome.Refuse:
-                        if (row.ElementName != null)
+                        if (row.ElementGuid is null && row.ElementName != null)
+                            sb.Append(row.ElementName).Append(", stays empty");
+                        else if (row.ElementName != null)
                             sb.Append(row.ElementName).Append(" is already bound on this sheet, stays empty");
                         else
                             sb.Append(row.ElementGuid).Append(" is not a candidate, stays empty");
@@ -1795,7 +1953,7 @@ namespace StoryCollaborator
         /// </summary>
         private static string PlanSummary(List<BeatRowPlan> plan)
         {
-            int kept = 0, bound = 0, created = 0, empty = 0, refused = 0, dropped = 0;
+            int kept = 0, bound = 0, created = 0, createdProblems = 0, empty = 0, refused = 0, dropped = 0;
             foreach (var row in plan)
             {
                 switch (row.Outcome)
@@ -1803,6 +1961,7 @@ namespace StoryCollaborator
                     case BeatRowOutcome.Keep: kept++; break;
                     case BeatRowOutcome.Bind: bound++; break;
                     case BeatRowOutcome.Create: created++; break;
+                    case BeatRowOutcome.CreateProblem: createdProblems++; break;
                     case BeatRowOutcome.Empty: empty++; break;
                     case BeatRowOutcome.Refuse: refused++; break;
                     case BeatRowOutcome.Drop: dropped++; break;
@@ -1811,7 +1970,10 @@ namespace StoryCollaborator
 
             var sb = new System.Text.StringBuilder();
             sb.Append(plan.Count).Append(plan[0].InstallsBeat ? " new " : " ").Append(Plural(plan.Count, "beat")).Append(": ");
-            sb.Append($"{kept} kept, {bound} bound, {created} new {Plural(created, "scene")}, {empty} empty");
+            sb.Append($"{kept} kept, {bound} bound, {created} new {Plural(created, "scene")}");
+            if (createdProblems > 0)
+                sb.Append($", {createdProblems} new {Plural(createdProblems, "problem")}");
+            sb.Append($", {empty} empty");
             if (refused > 0) sb.Append($", {refused} refused");
             if (dropped > 0) sb.Append($", {dropped} dropped");
             return sb.ToString();
@@ -2047,6 +2209,7 @@ namespace StoryCollaborator
             // Collaborator #77: capability, not label. A new workflow that sets SceneName used
             // to create nothing because this line tested for the literal label "BeatScenes".
             bool allowSceneCreate = workflowModel.CreatesScenesForBeats;
+            bool allowProblemCreate = workflowModel.CreatesProblemsForBeats;
 
             // GUIDs on this sheet already, plus each Bind this plan makes: one placement per sheet.
             var usedOnSheet = new HashSet<Guid>(
@@ -2096,9 +2259,36 @@ namespace StoryCollaborator
                     continue;
                 }
 
-                if (allowSceneCreate && !string.IsNullOrWhiteSpace(beat.SceneName))
+                bool hasProblemStub = allowProblemCreate && !string.IsNullOrWhiteSpace(beat.ProblemName);
+                bool hasSceneStub = allowSceneCreate && !string.IsNullOrWhiteSpace(beat.SceneName);
+                if (hasProblemStub && hasSceneStub)
                 {
-                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Create, beat.SceneName.Trim(), null, installs));
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Refuse,
+                        "named a Scene stub and a Problem stub", null, installs));
+                    continue;
+                }
+
+                if (hasProblemStub)
+                {
+                    if (!IsSubproblemCategory(beat.ProblemCategory))
+                    {
+                        var cat = string.IsNullOrWhiteSpace(beat.ProblemCategory)
+                            ? "blank"
+                            : beat.ProblemCategory.Trim();
+                        plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Refuse,
+                            $"Problem stub category '{cat}' is not Complication, Subplot, or Sequence",
+                            null, installs));
+                        continue;
+                    }
+
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.CreateProblem,
+                        beat.ProblemName!.Trim(), null, installs));
+                    continue;
+                }
+
+                if (hasSceneStub)
+                {
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Create, beat.SceneName!.Trim(), null, installs));
                     continue;
                 }
 
@@ -2205,6 +2395,8 @@ namespace StoryCollaborator
                     return AssignBeat(problemUuid, row.Index, row.ElementGuid!.Value, result);
                 case BeatRowOutcome.Create:
                     return CreateSceneStub(problemUuid, row.Index, beat, result);
+                case BeatRowOutcome.CreateProblem:
+                    return CreateProblemStub(problemUuid, row.Index, beat, result);
                 case BeatRowOutcome.Refuse:
                     result.StatusMessages.Add(RefuseStatus(row));
                     return false;
@@ -2213,9 +2405,22 @@ namespace StoryCollaborator
             }
         }
 
-        private static string RefuseStatus(BeatRowPlan row) => row.ElementName != null
-            ? $"Beat {row.Index} assigned_element {row.ElementGuid} already used on this sheet; left unassigned"
-            : $"Beat {row.Index} assigned_element {row.ElementGuid} not in candidate set; left unassigned";
+        private static string RefuseStatus(BeatRowPlan row)
+        {
+            if (row.ElementGuid is null && row.ElementName != null)
+                return $"Beat {row.Index} {row.ElementName}; left unassigned";
+            return row.ElementName != null
+                ? $"Beat {row.Index} assigned_element {row.ElementGuid} already used on this sheet; left unassigned"
+                : $"Beat {row.Index} assigned_element {row.ElementGuid} not in candidate set; left unassigned";
+        }
+
+        internal static bool IsSubproblemCategory(string? category)
+        {
+            var value = (category ?? string.Empty).Trim();
+            return value.Equals("Complication", StringComparison.OrdinalIgnoreCase)
+                || value.Equals("Subplot", StringComparison.OrdinalIgnoreCase)
+                || value.Equals("Sequence", StringComparison.OrdinalIgnoreCase);
+        }
 
         /// <summary>
         /// Collaborator #217 section 5.7: apply one accepted beat row. Earlier rows of the same
@@ -2257,7 +2462,11 @@ namespace StoryCollaborator
             }
             // The row applies only as what the pane showed it as: a Bind row binds the same
             // candidate, a Create row creates. Anything else changed under the writer.
-            var expected = row.BindGuid.HasValue ? BeatRowOutcome.Bind : BeatRowOutcome.Create;
+            var expected = row.BindGuid.HasValue
+                ? BeatRowOutcome.Bind
+                : !string.IsNullOrWhiteSpace(row.Row.ProblemName)
+                    ? BeatRowOutcome.CreateProblem
+                    : BeatRowOutcome.Create;
             var sameBinding = !row.BindGuid.HasValue || planned.ElementGuid == row.BindGuid;
             if (planned.Outcome != expected || !sameBinding)
             {
@@ -2326,6 +2535,7 @@ namespace StoryCollaborator
                     {
                         case BeatRowOutcome.Bind:
                         case BeatRowOutcome.Create:
+                        case BeatRowOutcome.CreateProblem:
                             var binds = row.Outcome == BeatRowOutcome.Bind;
                             var value = new BeatRowValue(
                                 row.Index, row.Title, beats[row.Index], beats,
@@ -2410,6 +2620,50 @@ namespace StoryCollaborator
 
             var assigned = AssignBeat(problemUuid, beatIndex, newGuid, result);
             result.StatusMessages.Add($"Beat {beatIndex}: created Scene '{name}' ({newGuid})");
+            return assigned;
+        }
+
+        /// <summary>
+        /// Collaborator #246: create the Problem stub a CreateProblem row names, set category
+        /// and description, copy seats from the parent Problem, and assign it to the beat.
+        /// </summary>
+        private bool CreateProblemStub(Guid problemUuid, int beatIndex, BeatInfo beat, WorkflowResult result)
+        {
+            if (!IsSubproblemCategory(beat.ProblemCategory))
+            {
+                var cat = string.IsNullOrWhiteSpace(beat.ProblemCategory)
+                    ? "blank"
+                    : beat.ProblemCategory.Trim();
+                result.StatusMessages.Add(
+                    $"Beat {beatIndex} Problem stub category '{cat}' is not Complication, Subplot, or Sequence");
+                return false;
+            }
+
+            var name = beat.ProblemName!.Trim();
+            var addResult = _storyApi.AddElement(StoryItemType.Problem, problemUuid.ToString(), name);
+            if (!addResult.IsSuccess)
+            {
+                result.StatusMessages.Add(
+                    $"Beat {beatIndex} problem create failed: {addResult.ErrorMessage}");
+                return false;
+            }
+
+            var newGuid = addResult.Payload;
+            _storyApi.UpdateElementProperty(newGuid, "ProblemCategory", beat.ProblemCategory!.Trim());
+            if (!string.IsNullOrWhiteSpace(beat.ProblemDescription))
+                _storyApi.UpdateElementProperty(newGuid, "Description", beat.ProblemDescription.Trim());
+
+            var parentResult = _storyApi.GetStoryElement(problemUuid);
+            if (parentResult.IsSuccess && parentResult.Payload is ProblemModel parent)
+            {
+                if (parent.Protagonist != Guid.Empty)
+                    _storyApi.UpdateElementProperty(newGuid, "Protagonist", parent.Protagonist);
+                if (parent.Antagonist != Guid.Empty)
+                    _storyApi.UpdateElementProperty(newGuid, "Antagonist", parent.Antagonist);
+            }
+
+            var assigned = AssignBeat(problemUuid, beatIndex, newGuid, result);
+            result.StatusMessages.Add($"Beat {beatIndex}: created Problem '{name}' ({newGuid})");
             return assigned;
         }
 
@@ -2800,6 +3054,36 @@ namespace StoryCollaborator
         }
 
         /// <summary>
+        /// Collaborator #237 item 11: Try Again means "give me something different". Puts the
+        /// rejected proposals on the wire as RejectedProposals; the Worker appends a TRY AGAIN
+        /// section that tells the model to depart from them. A first run adds nothing.
+        /// </summary>
+        internal void ApplyRejectedProposals(Dictionary<string, string> args)
+        {
+            if (string.IsNullOrWhiteSpace(RejectedProposals)) return;
+            args["RejectedProposals"] = RejectedProposals;
+        }
+
+        /// <summary>
+        /// Renders the pane's proposal rows as the RejectedProposals text: one line per row,
+        /// "DisplayName: proposed value". Rows with no proposed text are skipped. Each value is
+        /// cut at 4,000 characters so a beat sheet cannot double the prompt.
+        /// </summary>
+        internal static string FormatRejectedProposals(IEnumerable<StoryCADLib.Collaborator.Models.PendingUpdateItem> rows)
+        {
+            const int maxValueLength = 4000;
+            var lines = new List<string>();
+            foreach (var row in rows)
+            {
+                var value = (row.ProposedDisplay ?? string.Empty).Trim();
+                if (value.Length == 0) continue;
+                if (value.Length > maxValueLength) value = value[..maxValueLength];
+                lines.Add($"{row.DisplayName}: {value}");
+            }
+            return string.Join("\n", lines);
+        }
+
+        /// <summary>
         /// Applies user settings to the workflow args.
         ///
         /// Terseness rides as its own arg (Collaborator #49). The Worker's coach system
@@ -2837,17 +3121,44 @@ namespace StoryCollaborator
         /// the cost reported by the proxy's collab_cost event (null when absent), and whether the
         /// returned stream (after the retry, if one occurred) is complete.
         /// </summary>
+        /// <summary>
+        /// PromptTestRunner sets COLLAB_PROMPT_ECHO=1 so every workflow call asks the Worker to
+        /// return the prompt it sent (see <see cref="ProxyPromptEcho"/>). Off by default, so the
+        /// shipped client never asks and an older Worker never sees the key.
+        /// </summary>
+        internal static bool PromptEchoRequested() =>
+            string.Equals(Environment.GetEnvironmentVariable("COLLAB_PROMPT_ECHO"), "1", StringComparison.Ordinal);
+
+        /// <summary>
+        /// The POST /v1/workflow body. The three keys the Worker has always read, plus
+        /// <c>echo_prompt</c> only when asked, so the body an older Worker sees is unchanged.
+        /// </summary>
+        internal static string BuildProxyPayload(string workflowId, WorkflowProxyBody body, bool echoPrompt)
+        {
+            var node = new JsonObject
+            {
+                ["workflowId"] = workflowId,
+                ["args"] = JsonSerializer.SerializeToNode(body.Args),
+                ["elements"] = JsonSerializer.SerializeToNode(body.Elements),
+            };
+            if (echoPrompt)
+                node["echo_prompt"] = true;
+            return node.ToJsonString();
+        }
+
+        /// <summary>
+        /// The prompt the Worker echoed on the last proxy call, when it did. Read by RunAsync
+        /// right after PostToProxyAsync and cleared before every call.
+        /// </summary>
+        private ProxyPromptEcho? _lastPromptEcho;
+
         private async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)> PostToProxyAsync(WorkflowProxyBody body)
         {
             var proxyBaseUrl = Environment.GetEnvironmentVariable("COLLAB_PROXY_URL")
                 ?? KernelFactory.DefaultProxyBaseUrl;
 
-            var payload = JsonSerializer.Serialize(new
-            {
-                workflowId = workflowModel.Label,
-                args = body.Args,
-                elements = body.Elements
-            });
+            var payload = BuildProxyPayload(workflowModel.Label, body, PromptEchoRequested());
+            _lastPromptEcho = null;
 
             return await ExecuteWithTruncationRetryAsync(
                 () => PostToProxyOnceAsync(proxyBaseUrl, payload), ResetHttpClient);
@@ -2882,7 +3193,7 @@ namespace StoryCollaborator
             if (response.Headers.TryGetValues("X-Template-Hash", out var hashValues))
                 templateHash = hashValues.FirstOrDefault();
 
-            var (content, cost, complete) = await ReadSseStreamAsync(response);
+            var (content, cost, complete) = await ReadSseStreamAsync(response, echo => _lastPromptEcho = echo);
             return (content, templateHash, cost, complete);
         }
 
@@ -2967,7 +3278,7 @@ namespace StoryCollaborator
         /// truncation with no false-positive source (issue #94 design section 5 item 1). collab_cost
         /// stays optional (ADR-002 fail-open): [DONE] without a cost event is still Complete=true.
         /// </summary>
-        internal static async Task<(string Content, ProxyCostInfo? Cost, bool Complete)> ReadSseStreamAsync(HttpResponseMessage response)
+        internal static async Task<(string Content, ProxyCostInfo? Cost, bool Complete)> ReadSseStreamAsync(HttpResponseMessage response, Action<ProxyPromptEcho>? onPrompt = null)
         {
             var sb = new System.Text.StringBuilder();
             ProxyCostInfo? cost = null;
@@ -2991,6 +3302,17 @@ namespace StoryCollaborator
                     {
                         sb.Append(content.GetString());
                     }
+                    else if (doc.RootElement.TryGetProperty("collab_prompt", out var collabPrompt)
+                             && collabPrompt.ValueKind == JsonValueKind.Object)
+                    {
+                        // A dev Worker's echo of the two messages it sent, first on the stream
+                        // when the request asked for it. Never model text.
+                        onPrompt?.Invoke(new ProxyPromptEcho(
+                            ReadString(collabPrompt, "system"),
+                            ReadString(collabPrompt, "user"),
+                            NullableString(collabPrompt, "template_hash"),
+                            NullableString(collabPrompt, "system_prompt_hash")));
+                    }
                     else if (doc.RootElement.TryGetProperty("collab_cost", out var collabCost))
                     {
                         // Shared with the X-Collab-Cost header path: the Worker emits an
@@ -3005,6 +3327,12 @@ namespace StoryCollaborator
             }
             return (sb.ToString(), cost, complete);
         }
+
+        private static string ReadString(JsonElement obj, string name) =>
+            obj.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() ?? string.Empty : string.Empty;
+
+        private static string? NullableString(JsonElement obj, string name) =>
+            obj.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
 
         /// <summary>
         /// Truncation-retry-once policy (issue #94 design section 5 items 2-3): a stream that comes
@@ -3027,6 +3355,84 @@ namespace StoryCollaborator
 
             reset();
             return await attempt();
+        }
+
+        /// <summary>
+        /// Collaborator #239: true when the text is one of the field_states words on its own
+        /// (Fill, Unchanged, Revise). Compared by name, never by number, so "1" stays text.
+        /// </summary>
+        internal static bool IsFieldStateWord(string? text)
+        {
+            var t = text?.Trim();
+            if (string.IsNullOrEmpty(t)) return false;
+            return string.Equals(t, nameof(OutputFieldState.Fill), StringComparison.OrdinalIgnoreCase)
+                || string.Equals(t, nameof(OutputFieldState.Unchanged), StringComparison.OrdinalIgnoreCase)
+                || string.Equals(t, nameof(OutputFieldState.Revise), StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Collaborator #239: names an answer that mostly breaks the field_states contract, or
+        /// returns null when the answer is usable. Two shapes count as a fault on a scalar
+        /// output: Fill with no text, and Unchanged on a property that has no text to keep.
+        /// Measured on DefineCharacter with gpt-5.4-nano (2026-09-08, 73 live runs): a sound
+        /// run has at most one or two of these (a gated step), a broken run has most of its
+        /// thirty. The bar is three faults and a quarter of the scalar outputs, so one bad
+        /// property on a small workflow does not buy a second billed call.
+        /// </summary>
+        internal string? DescribeContractFault(WorkflowResult result)
+        {
+            var scalars = 0;
+            var emptyFills = 0;
+            var unchangedOnEmpty = 0;
+            foreach (var update in result.PendingUpdates)
+            {
+                if (update.Spec.WriteVia != WriteVia.Scalar) continue;
+                scalars++;
+                if (!TryGetFieldState(result, update, out var state)) continue;
+
+                var proposedEmpty = string.IsNullOrEmpty(NormalizeCompareText(FormatDisplayValue(update)));
+                var currentEmpty = string.IsNullOrEmpty(
+                    NormalizeCompareText(ReadCurrentScalarDisplay(update.ElementUuid, update.Spec.Property)));
+
+                if (state == OutputFieldState.Fill && proposedEmpty)
+                    emptyFills++;
+                else if (state == OutputFieldState.Unchanged && currentEmpty)
+                    unchangedOnEmpty++;
+            }
+
+            var faults = emptyFills + unchangedOnEmpty;
+            if (faults < 3 || faults * 4 < scalars) return null;
+
+            var parts = new List<string>();
+            if (emptyFills > 0) parts.Add($"{emptyFills} Fill with no text");
+            if (unchangedOnEmpty > 0) parts.Add($"{unchangedOnEmpty} Unchanged on an empty property");
+            return $"{faults} of {scalars} outputs broke the field_states contract ({string.Join(", ", parts)})";
+        }
+
+        /// <summary>
+        /// Collaborator #239: one send-again when the answer mostly breaks the field_states
+        /// contract. Mirrors <see cref="ExecuteWithTruncationRetryAsync"/>: one retry, never a
+        /// third call; the second answer is shown whatever it holds, with the reason on its
+        /// status messages. A failed result is surfaced as-is; the check applies to answers only.
+        /// </summary>
+        internal static async Task<WorkflowResult> ExecuteWithContractRetryAsync(
+            Func<Task<WorkflowResult>> attempt,
+            Func<WorkflowResult, string?> describeFault)
+        {
+            var first = await attempt();
+            if (!first.Success) return first;
+            var reason = describeFault(first);
+            if (reason == null) return first;
+
+            var second = await attempt();
+            second.StatusMessages.Insert(0, $"Contract retry: the first answer had {reason}; asked once more");
+            if (second.Success)
+            {
+                var again = describeFault(second);
+                if (again != null)
+                    second.StatusMessages.Add($"Contract retry: the second answer also had {again}; showing it");
+            }
+            return second;
         }
 
         /// <summary>

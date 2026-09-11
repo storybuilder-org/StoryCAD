@@ -494,7 +494,9 @@ public class WorkflowViewModelTests
             Item("C", isProtected: true)
         });
 
-        Assert.AreEqual("Proposed property updates (3: 1 free, 2 need review)", _viewModel.PendingUpdatesHeader);
+        // Collaborator #237 item 9: the header carries the total only; the status line
+        // says how many would replace the writer's text.
+        Assert.AreEqual("Proposed property updates (3)", _viewModel.PendingUpdatesHeader);
 
         _viewModel.ClearPendingUpdates();
         Assert.AreEqual("Proposed property updates", _viewModel.PendingUpdatesHeader);
@@ -556,9 +558,23 @@ public class WorkflowViewModelTests
         });
 
         StringAssert.Contains(_viewModel.Explanation, "Selected: Overview: Test Story");
-        StringAssert.Contains(_viewModel.Explanation, "2 property update(s)");
-        StringAssert.Contains(_viewModel.Explanation, "1 free");
-        StringAssert.Contains(_viewModel.Explanation, "1 need review");
+        StringAssert.Contains(_viewModel.Explanation, "2 property update(s) proposed.");
+        StringAssert.Contains(_viewModel.Explanation, "1 would replace text you wrote");
+        Assert.IsFalse(_viewModel.Explanation.Contains("free"), _viewModel.Explanation);
+    }
+
+    [TestMethod]
+    public void RefreshTopicalExplanation_NoProtectedRows_SaysNothingAboutReplacing()
+    {
+        // Collaborator #237 item 9: "0 need review" was noise on a run with nothing to review.
+        _viewModel.SetPendingUpdates(new List<PendingUpdateItem>
+        {
+            Item("A", isProtected: false),
+            Item("B", isProtected: false)
+        });
+
+        StringAssert.Contains(_viewModel.Explanation, "2 property update(s) proposed. Use Accept All, Review Each, or Try Again.");
+        Assert.IsFalse(_viewModel.Explanation.Contains("replace"), _viewModel.Explanation);
     }
 
     [TestMethod]

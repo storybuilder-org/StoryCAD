@@ -37,7 +37,7 @@ The Writing with StoryCAD section of this manual teaches outlining as a sequence
 | What is the main story problem? | [Defining Problems](../Writing%20with%20StoryCAD/Defining_Problems.html), [Problem and Character Development](../Writing%20with%20StoryCAD/Problem_and_Character_Development.html) | Story Problem (Premise => Problem + Characters); Problem Builder |
 | What does my protagonist want, and what do they need? | [Defining Problems](../Writing%20with%20StoryCAD/Defining_Problems.html) | Inner and Outer Problems |
 | How is the story shaped? | [Plotting with StoryCAD](../Writing%20with%20StoryCAD/Plotting_with_StoryCAD.html), [Structure Tab](../Story%20Elements/Structure_Tab.html) | Problem Builder, which chooses the beat sheet |
-| Who is this character, and what are they for? | [Defining Characters](../Writing%20with%20StoryCAD/Defining_Characters.html) | Character Story Function; Define Character; Flaw and Backstory; Character Relationship |
+| Who is this character, and what are they for? | [Defining Characters](../Writing%20with%20StoryCAD/Defining_Characters.html) | Character Builder; Flaw and Backstory; Character Relationship; Character Interview |
 | Where and when does it happen? | [The Importance of Setting](../Writing%20with%20StoryCAD/The_Importance_of_Setting.html), [Worldbuilding Guide](../Writing%20with%20StoryCAD/Worldbuilding_Guide.html) | Setting Builder; Define Story World |
 | What happens in this scene? | [Defining Scenes](../Writing%20with%20StoryCAD/Defining_Scenes.html), [Plotting in Scenes](../Writing%20with%20StoryCAD/Plotting_in_Scenes.html) | Scene Builder |
 

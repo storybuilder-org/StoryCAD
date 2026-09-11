@@ -161,7 +161,7 @@
                     <!-- ScrollViewer: no AutomationId (not in convention suffix table). List content is not a ListView. -->
                     <ScrollViewer Grid.Row="2"
                                   VerticalAlignment="Stretch"
-                                  VerticalScrollBarVisibility="Visible"
+                                     VerticalScrollBarVisibility="Visible"
                                   HorizontalScrollBarVisibility="Disabled">
                         <ItemsControl ItemsSource="{x:Bind ViewModel.PendingUpdateItems, Mode=OneWay}">
                             <ItemsControl.ItemTemplate>
@@ -282,15 +282,35 @@
             <!-- Accept All: primary action for the table, at the foot of the work column.
                  Accepted updates are written to the outline immediately, so there is no
                  separate Save button on the shell bar. -->
-            <Button Grid.Row="3"
-                    Content="Accept all changes"
-                    Command="{x:Bind ViewModel.AcceptAllCommand}"
-                    IsEnabled="{x:Bind ViewModel.HasPendingUpdates, Mode=OneWay}"
-                    Style="{ThemeResource AccentButtonStyle}"
-                    HorizontalAlignment="Stretch"
-                    Margin="0,10,0,0"
-                    AutomationProperties.AutomationId="WorkflowAcceptAllButton"
-                    AutomationProperties.Name="Accept all changes" />
+            <StackPanel Grid.Row="3">
+                <!-- Collaborator #237 item 9: the button carries the same name the status line
+                     and the chat use for it. -->
+                <Button Content="Accept All"
+                        Command="{x:Bind ViewModel.AcceptAllCommand}"
+                        IsEnabled="{x:Bind ViewModel.HasPendingUpdates, Mode=OneWay}"
+                        Style="{ThemeResource AccentButtonStyle}"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,10,0,0"
+                        AutomationProperties.AutomationId="WorkflowAcceptAllButton"
+                        AutomationProperties.Name="Accept All" />
+
+                <!-- #119: interview controls, collapsed outside an interview. Leaving them
+                     disabled instead would put a dead button under Accept all on every
+                     other workflow page, and the taller row would permanently shorten the
+                     Property Updates list above it.
+
+                     Save writes the transcript verbatim; it runs no workflow, so it sits
+                     apart from Accept all rather than beside it. The session also saves
+                     itself on close, so this is the early exit, not the only one. -->
+                <StackPanel Orientation="Horizontal"
+                            Margin="0,8,0,0"
+                            Visibility="{x:Bind ViewModel.InterviewControlsVisibility, Mode=OneWay}">
+                    <Button Content="Save interview to outline"
+                            Command="{x:Bind ViewModel.SaveInterviewCommand}"
+                            IsEnabled="{x:Bind ViewModel.CanPressSave, Mode=OneWay}"
+                            AutomationProperties.AutomationId="SaveInterviewButton" />
+                </StackPanel>
+            </StackPanel>
         </Grid>
 
         <!-- ========== Chat column (own height; input does not affect work column) ========== -->
@@ -333,7 +353,7 @@
             <AutoSuggestBox x:Name="InputTextBox"
                             Grid.Row="1"
                             HorizontalAlignment="Stretch"
-                            IsEnabled="{x:Bind ViewModel.IsChatEnabled, Mode=OneWay}"
+                            IsEnabled="{x:Bind ViewModel.CanSend, Mode=OneWay}"
                             PlaceholderText="{x:Bind ViewModel.ChatPlaceholder, Mode=OneWay}"
                             Text="{x:Bind ViewModel.InputText, Mode=TwoWay}"
                             QuerySubmitted="InputTextBox_QuerySubmitted"

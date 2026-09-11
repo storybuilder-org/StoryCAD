@@ -14,7 +14,7 @@ The [Workflow Reference](../Workflows/) describes every workflow Collaborator of
 
 ## The starred band is a head start
 
-Collaborator starts with five workflows starred, so they sit at the top of the workflow list before you touch anything: Ideation (Story idea => Concept => Premise), Story Problem (Premise => Problem + Characters), Problem Builder, Character Story Function, and Scene Builder. That is one for each stage of the path below, so the top of the list reads as a next step rather than a catalog.
+Collaborator starts with five workflows starred, so they sit at the top of the workflow list before you touch anything: Ideation (Story idea => Concept => Premise), Story Problem (Premise => Problem + Characters), Problem Builder, Character Builder, and Scene Builder. That is one for each stage of the path below, so the top of the list reads as a next step rather than a catalog.
 
 Treat it as a starting point, not a rule. As you learn which workflows your writing turns on, star those and unstar the rest; [Opening Collaborator](../Opening_Collaborator.html) shows how. Everything that is not starred is still there, filed under its story element.
 
@@ -30,9 +30,9 @@ Treat it as a starting point, not a rule. As you learn which workflows your writ
 
 5. Inner and Outer Problems. The protagonist's outer want against their inner need, as a second Problem built from the first. Craft: the outer and inner problems section of Defining Problems.
 
-6. One character path. Character Story Function first, then Flaw and Backstory, on the protagonist or the antagonist. Craft: [Defining Characters](../../Writing%20with%20StoryCAD/Defining_Characters.html).
+6. One character path. Character Builder first, then Flaw and Backstory, on the protagonist or the antagonist. Craft: [Defining Characters](../../Writing%20with%20StoryCAD/Defining_Characters.html).
 
-7. Scene Builder. Sketch, type, cast, development, conflict, and sequel for one scene. Select the scene first: Scene Builder fills a scene you already have, such as a stub Problem Builder created, and does not run on the story problem itself. Craft: [Defining Scenes](../../Writing%20with%20StoryCAD/Defining_Scenes.html) and [Plotting in Scenes](../../Writing%20with%20StoryCAD/Plotting_in_Scenes.html).
+7. Scene Builder. Sketch, type, cast, development, conflict, and sequel for one scene. Select a scene you already have, such as a stub Problem Builder created, or run it on the story problem (the Spine). Craft: [Defining Scenes](../../Writing%20with%20StoryCAD/Defining_Scenes.html) and [Plotting in Scenes](../../Writing%20with%20StoryCAD/Plotting_in_Scenes.html).
 
 ![The workflow pane with the starred workflows at the top, in running order](../../media/Collaborator/Collaborator-Workflow-Pane.png)
 
@@ -42,4 +42,4 @@ For a class or a critique group, assign one workflow per session and ask student
 
 ## What to leave for later
 
-The workflows not on this path, Define Character, Character Relationship, Define Story World, and Setting Builder, can wait until the path above feels solid. A short list of workflows that improve a story beats a long menu tried once each, and leaving the others unstarred keeps them out of your way without putting them out of reach.
+The workflows not on this path, Character Interview, Character Relationship, Define Story World, and Setting Builder, can wait until the path above feels solid. A short list of workflows that improve a story beats a long menu tried once each, and leaving the others unstarred keeps them out of your way without putting them out of reach.

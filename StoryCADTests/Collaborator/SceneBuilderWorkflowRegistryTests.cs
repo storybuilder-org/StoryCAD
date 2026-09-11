@@ -59,6 +59,16 @@ public class SceneBuilderWorkflowRegistryTests
     }
 
     [TestMethod]
+    public void SceneBuilder_Explanation_DoesNotRefuseSpine()
+    {
+        var workflow = WorkflowRegistry.Get("SceneBuilder");
+        Assert.IsNotNull(workflow);
+        Assert.IsFalse(
+            workflow!.Explanation.Contains("does not run on a Story Problem"),
+            workflow.Explanation);
+    }
+
+    [TestMethod]
     public void DefaultStarredLabels_IncludeSceneBuilder_WithoutTheMicroWorkflows()
     {
         var starred = WorkflowRegistry.DefaultStarredLabels.ToList();

@@ -106,6 +106,8 @@ namespace StoryCollaborator.Models
     /// One beat in a BeatSheet output.
     /// SceneName (#150 BeatScenes): when set on an empty beat, create a Scene under the
     /// problem and assign it. Structure and other workflows leave SceneName null.
+    /// ProblemName (#246): when set on an empty beat, create a Problem under the parent
+    /// and assign it. Category must be Complication, Subplot, or Sequence.
     /// </summary>
     public sealed record BeatInfo(
         string Title,
@@ -115,7 +117,10 @@ namespace StoryCollaborator.Models
         string? SceneDescription = null,
         string? SceneNotes = null,
         string? SceneType = null,
-        IReadOnlyList<Guid>? SceneCast = null);
+        IReadOnlyList<Guid>? SceneCast = null,
+        string? ProblemName = null,
+        string? ProblemDescription = null,
+        string? ProblemCategory = null);
 
     /// <summary>
     /// Collaborator #217 section 5.7: the value of one per-beat pending update. Row is the

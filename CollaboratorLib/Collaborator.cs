@@ -49,6 +49,53 @@ public class Collaborator : ICollaborator
 
     private StoryCADLib.Collaborator.ViewModels.WorkflowViewModel? _activeWorkflowViewModel;
 
+    /// <summary>Collaborator #119: the interview in flight, if any.</summary>
+    private InterviewTranscript? _interviewTranscript;
+    private string _interviewCharacterName = string.Empty;
+    private Guid _interviewCharacterGuid;
+    private Dictionary<string, StoryElement>? _interviewElements;
+
+    /// <summary>
+    /// The cursor. The Worker is stateless per turn and owns the question bank, so the
+    /// client carries the position back on every call and never holds question text.
+    /// </summary>
+    private readonly InterviewCursor _interviewCursor = new();
+
+    /// <summary>
+    /// The question on screen with no answer yet. A turn is only recorded once the writer
+    /// replies, so this is what the next answer gets paired with.
+    /// </summary>
+    private string _interviewPendingQuestion = string.Empty;
+
+    /// <summary>
+    /// The Notes element this session writes to, once it exists. One note per session
+    /// (Terry, 2026-09-05): Save updates it in place, and close writes the turns since.
+    /// </summary>
+    private Guid _interviewNoteGuid;
+
+    /// <summary>Turns recorded since the note was last written.</summary>
+    private bool _interviewHasUnsavedTurns;
+
+    /// <summary>
+    /// The last answer was recorded but the Worker never asked the next question (a failed
+    /// or empty reply). The writer's next message extends that answer instead of opening a
+    /// second turn on the same question.
+    /// </summary>
+    private bool _interviewAnswerAwaitingQuestion;
+
+    /// <summary>
+    /// The fields this session pursues, in order (#119, design section 25). Terry's
+    /// order until the writer names targets in chat or the Worker names them on a
+    /// "you choose" opening; the client holds the list from then on.
+    /// </summary>
+    private InterviewPlan _interviewPlan = InterviewPlan.Default();
+
+    /// <summary>The choice list is on screen and the writer has not answered it yet.</summary>
+    private bool _interviewAwaitingChoice;
+
+    /// <summary>The writer said "you choose": the opening reply carries the targets.</summary>
+    private bool _interviewModelChooses;
+
     // State
     private IStoryCADAPI? _storyApi;
     private StoryModel? _storyModel;
@@ -209,7 +256,9 @@ public class Collaborator : ICollaborator
                     if (workflowTag is Workflow workflow)
                     {
                         // Short name on top bar (Label, not long Title path).
-                        viewModel.ActiveWorkflowName = FormatWorkflowShortName(workflow.Label);
+                        // Collaborator #237 item 8: one name per workflow everywhere; the
+                        // list shows the title, so the top bar does too.
+                        viewModel.ActiveWorkflowName = workflow.Title;
                         viewModel.HasPendingUpdates = false;
 
                         // Clear shell status; gather cancel has no chat page (#123).
@@ -236,6 +285,10 @@ public class Collaborator : ICollaborator
 
                         viewModel.StatusText = string.Empty;
 
+                        // #119: navigating to another workflow abandons an interview just as
+                        // surely as closing the window does. Write it before the page goes.
+                        EndInterviewSession();
+
                         // Navigate to WorkflowPage
                         viewModel.ContentFrame.Navigate(typeof(StoryCADLib.Collaborator.Views.WorkflowPage));
 
@@ -253,8 +306,12 @@ public class Collaborator : ICollaborator
                                 page.ViewModel.AddStatusMessage(message);
                             }
 
-                            // Auto-execute the workflow and show progress
-                            await ExecuteWorkflowWithFeedback(page.ViewModel, workflow, gatherResult.Elements);
+                            // #119: a conversational workflow asks rather than proposes, so
+                            // it opens an interview instead of running once and extracting.
+                            if (workflow.Mode == WorkflowMode.Conversational)
+                                await StartInterviewSessionAsync(page.ViewModel, workflow, gatherResult.Elements);
+                            else
+                                await ExecuteWorkflowWithFeedback(page.ViewModel, workflow, gatherResult.Elements);
 
                             // Gaps may have closed after Accept — refresh nav
                             RebuildWorkflowMenu(viewModel);
@@ -286,6 +343,10 @@ public class Collaborator : ICollaborator
                 Summary = "No active session"
             };
         }
+
+        // #119: before EndSession, because an unsaved interview is written to the outline
+        // here and RefreshCurrentView below is what puts the new node on screen.
+        EndInterviewSession();
 
         _sessionService.EndSession();
 
@@ -321,8 +382,11 @@ public class Collaborator : ICollaborator
             var gapDetails = RequiredFieldGapScanner.FindGapDetails(_storyApi, _storyModel);
             if (gapDetails.Count > 0)
             {
+                // Collaborator #237 item 10: the count is the number of missing fields, which is
+                // what the page lists. It used to count elements, so an Overview with five
+                // empty fields read as "(1)".
                 viewModel.MenuItems.Add(WrappingNavItem(
-                    $"{GapWorkflowOwnership.OutlineGapsNavTitle} ({gapDetails.Count})",
+                    $"{GapWorkflowOwnership.OutlineGapsNavTitle} ({RequiredFieldGapScanner.MissingFieldCount(gapDetails)})",
                     GapWorkflowOwnership.OutlineGapsTag));
             }
         }
@@ -886,28 +950,66 @@ public class Collaborator : ICollaborator
                 }
 
                 ChatPatchParser.TryParse(responseText, out var display, out var patches);
-                _chatHistory?.AddAssistantMessage(display);
+                var listChanged = false;
 
                 if (patches.Count > 0 && _sessionProposals != null)
                 {
-                    var applied = 0;
+                    // Collaborator #237 item 5: report what was applied, by name, and what was
+                    // not. The old text said "Updated" for every parsed patch, so a key the
+                    // session did not know produced a success line over an unchanged list.
+                    // The Scorecard chat of 2026-09-05 added a second way: the model re-sent
+                    // the text already in the list and the app said "Changed". Same text is
+                    // now reported as unchanged.
+                    var changed = new List<string>();
+                    var unchanged = new List<string>();
+                    var unknown = new List<string>();
                     foreach (var p in patches)
                     {
-                        if (_sessionProposals.TryApplyPatch(p.Key, p.Value, out _))
-                            applied++;
+                        var resolved = _sessionProposals.ResolveKey(p.Key);
+                        if (resolved != null &&
+                            _sessionProposals.TryApplyPatch(resolved, p.Value, out var reopened, out var textChanged))
+                        {
+                            var name = _sessionProposals.Get(resolved)?.DisplayName ?? resolved;
+                            if (textChanged || reopened)
+                                changed.Add(name);
+                            else
+                                unchanged.Add(name);
+                        }
                         else
-                            _logger?.LogDebug("Ignored chat patch for unknown key {Key}", p.Key);
+                        {
+                            unknown.Add(p.Key);
+                            _logger?.LogWarning("Ignored chat patch for unknown key {Key}", p.Key);
+                        }
                     }
 
-                    if (applied > 0)
+                    var notes = new List<string>();
+                    if (changed.Count > 0)
                     {
-                        SyncWorkflowResultFromSession();
-                        RefreshProposalSnapshotInHistory();
-                        display = string.IsNullOrWhiteSpace(display)
-                            ? $"Updated {applied} proposal(s). Accept to write the outline."
-                            : display + $"\n\n({applied} proposal(s) updated — Accept to write the outline.)";
+                        var synced = SyncWorkflowResultFromSession();
+                        listChanged = synced;
+                        notes.Add(synced
+                            ? $"Changed {string.Join(", ", changed)}. The list shows the new text. Accept to write the outline."
+                            : $"Changed {string.Join(", ", changed)} in chat only. The list could not be refreshed; run the workflow again.");
                     }
+                    if (unchanged.Count > 0)
+                        notes.Add($"{string.Join(", ", unchanged)} already read that way; nothing changed there.");
+                    if (unknown.Count > 0)
+                        notes.Add($"No proposal in this run is named {string.Join(", ", unknown)}; nothing changed for it.");
+
+                    var note = string.Join(" ", notes);
+                    display = string.IsNullOrWhiteSpace(display) ? note : display + "\n\n" + note;
                 }
+                else if (ChatPatchParser.HasUnreadPatchBlock(responseText, patches))
+                {
+                    _logger?.LogWarning("Chat reply named patches but none could be read");
+                    display += "\n\nCollaborator wrote a change the app could not read. Ask for it again.";
+                }
+
+                // The history holds what the writer saw, note included, so the model knows the
+                // app applied its patch. The refreshed snapshot follows the assistant turn.
+                _chatHistory?.AddAssistantMessage(display);
+                if (listChanged)
+                    RefreshProposalSnapshotInHistory();
 
                 _logger?.LogDebug("Assistant response (display): {Response}", display);
                 return display;
@@ -931,7 +1033,8 @@ public class Collaborator : ICollaborator
     private void BeginProposalChatSession(
         StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
         Workflow workflow,
-        WorkflowResult result)
+        WorkflowResult result,
+        bool preserveConversation = false)
     {
         _activeWorkflowResult = result;
         _activeWorkflowViewModel = viewModel;
@@ -949,10 +1052,14 @@ public class Collaborator : ICollaborator
         _sessionProposals.ReplaceFromPending(result.PendingUpdates, ResolveElementName);
 
         _chatHistory = new ChatHistory();
-        _chatHistory.AddSystemMessage(SessionProposalSet.BuildSystemInstructions(workflow.Title));
+        // Collaborator #237 item 3: the chat knows the run's order, so a change to one
+        // proposal re-derives the ones written after it.
+        _chatHistory.AddSystemMessage(SessionProposalSet.BuildSystemInstructions(
+            workflow.Title, _sessionProposals.All.Select(e => e.DisplayName).ToList()));
         _chatHistory.AddSystemMessage(_sessionProposals.BuildSnapshotText());
 
-        viewModel.ConversationList.Clear();
+        if (!preserveConversation)
+            viewModel.ConversationList.Clear();
         viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
             "Proposals are ready. Ask about them or request changes (for example, rename a field). " +
             "Accept still writes the outline. This chat is only for these proposals."));
@@ -979,10 +1086,18 @@ public class Collaborator : ICollaborator
     /// Push session proposals into WorkflowResult (open only for Accept) and
     /// Property Updates UI (all statuses so Skip does not blank the panel — #145).
     /// </summary>
-    private void SyncWorkflowResultFromSession()
+    private bool SyncWorkflowResultFromSession()
     {
         if (_sessionProposals == null || _activeWorkflowResult == null || _activeWorkflowViewModel == null)
-            return;
+        {
+            // Collaborator #237 item 5: this used to return in silence, and the caller
+            // reported success anyway. It cannot happen while a chat session is open, so
+            // say so where a log reader will see it.
+            _logger?.LogWarning(
+                "Proposal sync skipped: session={Session} result={Result} viewModel={ViewModel}",
+                _sessionProposals != null, _activeWorkflowResult != null, _activeWorkflowViewModel != null);
+            return false;
+        }
 
         var open = _sessionProposals.OpenAsPendingUpdates().ToList();
         _activeWorkflowResult.PendingUpdates.Clear();
@@ -994,6 +1109,7 @@ public class Collaborator : ICollaborator
         }
 
         PushSessionSetToViewModel(_activeWorkflowViewModel);
+        return true;
     }
 
     /// <summary>
@@ -1141,12 +1257,455 @@ public class Collaborator : ICollaborator
     }
 
     /// <summary>
-    /// Executes the workflow and provides feedback to the user via the conversation list.
+    /// Opens an interview (#119). First the choice: what to explore, by the form's own
+    /// labels, or "you choose" (design section 25.5). Nothing goes to the Worker until
+    /// the writer answers that. The earlier build asked its first question at once, from
+    /// a stock sentence; Terry read that as the model not knowing how to start. The goal
+    /// is what starts it, and the writer or the Worker names the goal.
     /// </summary>
-    private async Task ExecuteWorkflowWithFeedback(
+    private Task StartInterviewSessionAsync(
         StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
         Workflow workflow,
         Dictionary<string, StoryElement> gatheredElements)
+    {
+        _interviewTranscript = new InterviewTranscript();
+        _interviewElements = gatheredElements;
+        _interviewCursor.Reset();
+        _interviewPlan = InterviewPlan.Default();
+        _interviewAwaitingChoice = true;
+        _interviewModelChooses = false;
+        _interviewPendingQuestion = string.Empty;
+        _interviewNoteGuid = Guid.Empty;
+        _interviewHasUnsavedTurns = false;
+        _interviewAnswerAwaitingQuestion = false;
+
+        viewModel.BeginInterviewSession();
+        gatheredElements.TryGetValue("Character", out var character);
+        _interviewCharacterName = character?.Name ?? "this character";
+        _interviewCharacterGuid = character?.Uuid ?? Guid.Empty;
+
+        viewModel.ChatPlaceholder = "Numbers, a field name, or: you choose";
+        viewModel.IsChatEnabled = true;
+        viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
+            $"You will answer as {_interviewCharacterName}, in their voice, in first person. "
+            + "There are no wrong answers and nothing here is written to their form until you "
+            + "save. If a question assumes something you have not decided yet, decide it now."));
+        viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
+            InterviewChoice.ListText(_interviewCharacterName, BlankInterviewFields(character))));
+
+        viewModel.OnSendMessage = text => HandleInterviewMessageAsync(viewModel, workflow, text);
+        viewModel.OnSaveInterview = () => SaveInterviewAsync(viewModel);
+
+        _logger?.LogInformation("Interview opened for {Character}", _interviewCharacterName);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Routes a chat message during an interview (#119): the answer to the choice list
+    /// while no question has been asked yet; otherwise an answer. A failed opening puts
+    /// the choice back on screen (see <see cref="ChooseInterviewTargetsAsync"/>), so a
+    /// message before the first question is always a choice, never a dropped nudge.
+    /// </summary>
+    private Task<string> HandleInterviewMessageAsync(
+        StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
+        Workflow workflow,
+        string text)
+    {
+        if (_interviewAwaitingChoice || _interviewCursor.NotStarted)
+            return ChooseInterviewTargetsAsync(viewModel, workflow, text);
+
+        return RunInterviewTurnAsync(viewModel, workflow, text);
+    }
+
+    /// <summary>
+    /// The writer's answer to "what do you want to explore?" (design 25.5 steps 3 and 4).
+    /// Sets the plan and runs the opening. Unreadable: the list again, nothing else. An
+    /// opening that fails or returns nothing usable re-arms the choice and says so, rather
+    /// than swallowing the writer's next message as a retry of a plan they may want to
+    /// change (review, 2026-09-07).
+    /// </summary>
+    private async Task<string> ChooseInterviewTargetsAsync(
+        StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
+        Workflow workflow,
+        string text)
+    {
+        var choice = InterviewChoice.Parse(text);
+        if (choice.Kind == InterviewChoiceKind.Unreadable)
+        {
+            return "I did not catch that. "
+                + InterviewChoice.ListText(_interviewCharacterName, BlankInterviewFields(InterviewCharacter()));
+        }
+
+        _interviewAwaitingChoice = false;
+        _interviewModelChooses = choice.Kind == InterviewChoiceKind.ModelChooses;
+        _interviewPlan = _interviewModelChooses
+            ? InterviewPlan.Default()
+            : InterviewPlan.From(choice.Targets);
+
+        viewModel.ChatPlaceholder = $"Answer as {_interviewCharacterName}…";
+        _logger?.LogInformation("Interview targets for {Character}: {Targets}",
+            _interviewCharacterName, _interviewModelChooses ? "(Worker chooses)" : _interviewPlan.ToArg());
+
+        // The opening posts its own question, or its own error.
+        await RunInterviewTurnAsync(viewModel, workflow, answer: null);
+
+        if (_interviewCursor.NotStarted)
+        {
+            _interviewAwaitingChoice = true;
+            _interviewModelChooses = false;
+            viewModel.ChatPlaceholder = "Numbers, a field name, or: you choose";
+            return "The interview did not start. Say what to explore again, or: you choose.";
+        }
+
+        return string.Empty;
+    }
+
+    private StoryElement? InterviewCharacter()
+    {
+        if (_interviewElements != null && _interviewElements.TryGetValue("Character", out var character))
+            return character;
+        return null;
+    }
+
+    /// <summary>
+    /// The form fields with nothing on them, so the choice list can mark them. Blank is
+    /// the case the interview exists for, and the writer should see where the gaps are.
+    /// </summary>
+    private static IReadOnlySet<string> BlankInterviewFields(StoryElement? element) =>
+        InterviewScript.BlankFields(element as CharacterModel);
+
+    /// <summary>
+    /// One interview turn (#119): record the answer just given, then ask what the Worker
+    /// says comes next.
+    ///
+    /// Returns the question text so SendButtonClicked posts it. The opening turn has no
+    /// answer and nothing to post it, so that one posts itself.
+    /// </summary>
+    private async Task<string> RunInterviewTurnAsync(
+        StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
+        Workflow workflow,
+        string? answer)
+    {
+        if (_interviewTranscript == null || _interviewElements == null)
+            return string.Empty;
+
+        // One turn at a time. Send is async void, so a second press during a slow call
+        // would otherwise open a concurrent turn against the same transcript. The input is
+        // disabled while a turn runs (WorkflowViewModel.CanSend); if a message gets through
+        // anyway, say so. SendButtonClicked has already posted it to the pane, so a silent
+        // return would look like an answer that was taken.
+        if (viewModel.IsInterviewTurnRunning)
+        {
+            viewModel.ConversationList.Add(ChatMessage.Error(
+                "A question is still on its way. That reply was not taken; send it again when the question arrives."));
+            return string.Empty;
+        }
+
+        var opening = answer == null;
+
+        // Recorded before the call, not after: if the Worker fails, the writer's answer is
+        // still part of the interview and still gets saved. If the last call failed, this
+        // message continues that answer: the question it belongs to was never asked again,
+        // so a second turn on the same question would put the question in the notes twice.
+        var extended = false;
+        if (!opening)
+        {
+            extended = _interviewAnswerAwaitingQuestion && _interviewTranscript.ExtendLastAnswer(answer!);
+            if (!extended)
+                _interviewTranscript.Add(_interviewCursor.Field, _interviewPendingQuestion, answer!);
+            _interviewAnswerAwaitingQuestion = false;
+            _interviewHasUnsavedTurns = !_interviewTranscript.IsEmpty;
+            viewModel.CanSaveInterview = _interviewHasUnsavedTurns;
+        }
+
+        // What the Worker responds to: the whole answer, when this message extended one.
+        var latestAnswer = opening
+            ? null
+            : extended ? _interviewTranscript.Turns[^1].Answer : answer;
+
+        viewModel.IsInterviewTurnRunning = true;
+        viewModel.ProgressVisibility = Microsoft.UI.Xaml.Visibility.Visible;
+        try
+        {
+            var runnerLogger = _loggerFactory?.CreateLogger<WorkflowRunner>();
+            var runner = new WorkflowRunner(_storyModel!, workflow, _storyApi!, runnerLogger, _settings, _auditLogger);
+
+            // A "you choose" opening has no field yet: the Worker names the targets and
+            // the client takes its plan from the reply (design 25.5 step 4). Every other
+            // turn walks the plan the writer or the Worker already set.
+            var choosing = opening && _interviewModelChooses;
+            var field = opening
+                ? (choosing ? string.Empty : _interviewPlan.First)
+                : _interviewCursor.Field;
+            var nextField = choosing ? null : _interviewPlan.Next(field);
+
+            var body = runner.BuildWorkflowRequestBody(_interviewElements);
+            runner.EnrichWithStoryContext(body.Args, _interviewElements, workflow.GetIO());
+            runner.ApplySettings(body.Args);
+            WorkflowRunner.SetInterviewArgs(
+                body.Args,
+                field,
+                nextField,
+                opening ? 0 : _interviewCursor.TurnsOnField,
+                _interviewTranscript.ToPromptText(),
+                latestAnswer,
+                choosing ? string.Empty : _interviewPlan.ToArg());
+
+            var result = await runner.RunPreparedAsync(body, _interviewElements);
+
+            if (_shellViewModel != null)
+                _shellViewModel.CostSummary = _costTracker.Record(result.Cost);
+
+            if (!result.Success)
+            {
+                viewModel.ConversationList.Add(ChatMessage.Error(
+                    result.ErrorMessage ?? "The interview stalled."));
+                _interviewAnswerAwaitingQuestion = !opening;
+                return string.Empty;
+            }
+
+            var reply = InterviewReply.Parse(result.RawResponse ?? string.Empty);
+
+            if (!InterviewReply.ShouldApply(opening, reply.Question)
+                && string.IsNullOrWhiteSpace(reply.Question))
+            {
+                viewModel.ConversationList.Add(ChatMessage.Error(
+                    "The interviewer sent nothing back. Say something to try again."));
+                _interviewAnswerAwaitingQuestion = !opening;
+                return string.Empty;
+            }
+
+            // A closing line where a question was due. On the last field the interviewer
+            // meant to end, whatever its header said: finish. With fields still to go it
+            // left the interview instead of the field (the retest of 2026-09-07 saw it on
+            // a second refusal): treated like an empty reply, the cursor holds, the writer's
+            // next message extends the answer, and nobody is told to save a half-done
+            // interview.
+            if (!opening && reply.Verdict != InterviewVerdict.Done
+                && InterviewReply.LooksLikeAClose(reply.Question))
+            {
+                if (nextField == null)
+                {
+                    await FinishInterviewAsync(viewModel, reply.Question);
+                    return string.Empty;
+                }
+
+                viewModel.ConversationList.Add(ChatMessage.Error(
+                    "The interviewer tried to stop early. Say something to go on."));
+                _interviewAnswerAwaitingQuestion = true;
+                _logger?.LogWarning("Interview close arrived with {Next} still to go for {Character}",
+                    nextField, _interviewCharacterName);
+                return string.Empty;
+            }
+
+            if (opening)
+            {
+                if (_interviewModelChooses)
+                {
+                    // The Worker's targets, up to three, unknown ids dropped. Nothing usable
+                    // is a failed opening, not a silent walk of all thirteen fields under a
+                    // first question aimed elsewhere: the cursor stays unstarted and the
+                    // caller puts the choice back on screen. Told by page header, never id.
+                    var chosen = InterviewPlan.FromKnown(reply.Targets, maxCount: 3);
+                    if (chosen == null)
+                    {
+                        viewModel.ConversationList.Add(ChatMessage.Error(
+                            "The interviewer did not say what it chose."));
+                        _logger?.LogWarning("Interview opening for {Character} named no usable target: {Raw}",
+                            _interviewCharacterName, string.Join(",", reply.Targets));
+                        return string.Empty;
+                    }
+
+                    _interviewPlan = chosen;
+                    _interviewModelChooses = false;
+                    viewModel.ConversationList.Add(ChatMessage.FromCollaborator(_interviewPlan.Describe()));
+                    _logger?.LogInformation("Interview targets chosen by the Worker for {Character}: {Targets}",
+                        _interviewCharacterName, _interviewPlan.ToArg());
+                }
+                _interviewCursor.Start(_interviewPlan);
+            }
+            else if (reply.Verdict == InterviewVerdict.Done
+                     || ((reply.Verdict == InterviewVerdict.GotIt
+                          || reply.Verdict == InterviewVerdict.NotThis)
+                         && nextField == null))
+            {
+                await FinishInterviewAsync(viewModel, reply.Question);
+                return string.Empty;
+            }
+            else
+            {
+                _interviewCursor.Apply(reply.Verdict);
+            }
+
+            _interviewPendingQuestion = reply.Question;
+
+            if (opening)
+            {
+                viewModel.ConversationList.Add(ChatMessage.FromCollaborator(reply.Question));
+                return string.Empty;
+            }
+
+            return reply.Question;
+        }
+        finally
+        {
+            viewModel.IsInterviewTurnRunning = false;
+            viewModel.ProgressVisibility = Microsoft.UI.Xaml.Visibility.Collapsed;
+        }
+    }
+
+
+    /// <summary>
+    /// The last target is done (#119). Saves without asking: the writer has just spent
+    /// the session on this and the one thing they must not lose is the record.
+    /// </summary>
+    private async Task FinishInterviewAsync(
+        StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
+        string closingLine)
+    {
+        _interviewPendingQuestion = string.Empty;
+        viewModel.IsChatEnabled = false;
+        viewModel.ChatPlaceholder = "The interview is finished";
+
+        // The closing line is the model's, when it wrote one. When it wrote another
+        // question instead (the sample-outline runs of 2026-09-07 did, twice), the writer
+        // must not be shown a question with the chat already closed; the Saved line that
+        // follows is the close.
+        if (InterviewReply.LooksLikeAQuestion(closingLine))
+        {
+            _logger?.LogWarning("Interview closing line for {Character} was a question; not shown: {Line}",
+                _interviewCharacterName, closingLine);
+        }
+        else if (!string.IsNullOrWhiteSpace(closingLine))
+        {
+            viewModel.ConversationList.Add(ChatMessage.FromCollaborator(closingLine));
+        }
+
+        await SaveInterviewAsync(viewModel);
+    }
+
+    /// <summary>
+    /// Writes the interview into the outline (#119) as a Notes element under the character.
+    ///
+    /// No model call. Terry: "Do not improve the Summarize prose. Save the questions as
+    /// asked and the answers as typed." Running the transcript through a model to produce a
+    /// digest is what the first build did, and it lost both the questions and the answers.
+    /// </summary>
+    private Task SaveInterviewAsync(
+        StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel)
+    {
+        if (_interviewTranscript == null || _interviewTranscript.IsEmpty)
+        {
+            viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
+                "There is nothing to save yet. Answer a question first."));
+            return Task.CompletedTask;
+        }
+
+        if (_storyApi == null || _interviewCharacterGuid == Guid.Empty)
+        {
+            viewModel.ConversationList.Add(ChatMessage.Error(
+                "The interview cannot be saved: the character is no longer in the outline."));
+            return Task.CompletedTask;
+        }
+
+        var error = WriteInterviewNote();
+        if (error != null)
+        {
+            viewModel.ConversationList.Add(ChatMessage.Error(
+                $"The interview could not be saved: {error}"));
+            _logger?.LogWarning("Interview save failed for {Character}: {Error}",
+                _interviewCharacterName, error);
+            return Task.CompletedTask;
+        }
+
+        viewModel.CanSaveInterview = false;
+        viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
+            $"Saved under {_interviewCharacterName} as \"Interview with {_interviewCharacterName}\", "
+            + $"{_interviewTranscript.Turns.Count} questions and answers."));
+
+        _logger?.LogInformation("Interview saved for {Character}: {Turns} turns",
+            _interviewCharacterName, _interviewTranscript.Turns.Count);
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Called when the workflow page goes away (#119). Writes an unsaved interview rather
+    /// than dropping it: the first build kept the exchange only in the chat pane, so closing
+    /// the panel left the outline with no record that the interview had happened.
+    /// </summary>
+    private void EndInterviewSession()
+    {
+        if (_interviewTranscript is { IsEmpty: false } && _interviewHasUnsavedTurns)
+        {
+            var error = WriteInterviewNote();
+            _logger?.LogInformation(
+                "Interview auto-saved on close for {Character}: {Turns} turns, {Outcome}",
+                _interviewCharacterName, _interviewTranscript.Turns.Count, error ?? "ok");
+        }
+
+        _interviewTranscript = null;
+        _interviewElements = null;
+        _interviewCursor.Reset();
+        _interviewPlan = InterviewPlan.Default();
+        _interviewAwaitingChoice = false;
+        _interviewModelChooses = false;
+        _interviewPendingQuestion = string.Empty;
+        _interviewCharacterGuid = Guid.Empty;
+        _interviewCharacterName = string.Empty;
+        _interviewNoteGuid = Guid.Empty;
+        _interviewHasUnsavedTurns = false;
+        _interviewAnswerAwaitingQuestion = false;
+    }
+
+    /// <summary>
+    /// Writes the transcript to this session's Notes element: created on the first write,
+    /// updated in place after that, so a writer who saves early and keeps answering ends
+    /// the session with one note holding everything. Returns null on success, else the
+    /// error text.
+    /// </summary>
+    private string? WriteInterviewNote()
+    {
+        if (_interviewTranscript == null || _storyApi == null || _interviewCharacterGuid == Guid.Empty)
+            return "the character is no longer in the outline";
+
+        var text = _interviewTranscript.ToNotesText(_interviewCharacterName);
+        if (_interviewNoteGuid == Guid.Empty)
+        {
+            var added = _storyApi.AddElement(
+                StoryItemType.Notes,
+                _interviewCharacterGuid.ToString(),
+                $"Interview with {_interviewCharacterName}",
+                new Dictionary<string, object> { ["Description"] = text });
+            if (!added.IsSuccess)
+                return added.ErrorMessage;
+            _interviewNoteGuid = added.Payload;
+        }
+        else
+        {
+            var updated = _storyApi.UpdateElementProperty(_interviewNoteGuid, "Description", text);
+            if (!updated.IsSuccess)
+                return updated.ErrorMessage;
+        }
+
+        _interviewHasUnsavedTurns = false;
+        return null;
+    }
+
+    /// <summary>
+    /// Executes the workflow and provides feedback to the user via the conversation list.
+    /// </summary>
+    /// <param name="preserveConversation">
+    /// Keeps the chat pane's contents when proposals arrive. The interview summary sets it:
+    /// the conversation is the interview, and the writer needs it after Summarize.
+    /// </param>
+    private async Task ExecuteWorkflowWithFeedback(
+        StoryCADLib.Collaborator.ViewModels.WorkflowViewModel viewModel,
+        Workflow workflow,
+        Dictionary<string, StoryElement> gatheredElements,
+        Action<Dictionary<string, string>>? extraArgs = null,
+        bool preserveConversation = false,
+        string? rejectedProposals = null)
     {
         try
         {
@@ -1160,10 +1719,14 @@ public class Collaborator : ICollaborator
 
             // Execute via WorkflowRunner
             var runnerLogger = _loggerFactory?.CreateLogger<WorkflowRunner>();
-            var runner = new WorkflowRunner(_storyModel!, workflow, _storyApi!, runnerLogger, _settings, _auditLogger);
+            var runner = new WorkflowRunner(_storyModel!, workflow, _storyApi!, runnerLogger, _settings, _auditLogger)
+            {
+                // Collaborator #237 item 11: a Try Again carries what the writer rejected.
+                RejectedProposals = rejectedProposals
+            };
             _auditLogger?.Log(StoryCADLib.Services.Logging.LogLevel.Info,
                 $"Workflow started: {workflow.Title} with {gatheredElements.Count} elements");
-            var result = await runner.RunAsync(gatheredElements);
+            var result = await runner.RunAsync(gatheredElements, extraArgs);
 
             // Cost line (devdocs/collaborator_workflow_cost_display_design.md).
             // Recorded for every run, priced or not: a null Cost still advances the display
@@ -1402,10 +1965,18 @@ public class Collaborator : ICollaborator
                     {
                         try
                         {
+                            // Collaborator #237 item 11: Try Again means "give me something
+                            // different". Capture the rows the writer saw before they clear, so
+                            // the rerun can tell the model what to depart from.
+                            var rejected = WorkflowRunner.FormatRejectedProposals(viewModel.PendingUpdateItems);
                             stageSession.ClearStage();
                             viewModel.ClearPendingUpdates();
-                            viewModel.AddStatusMessage("Re-running workflow...");
-                            await ExecuteWorkflowWithFeedback(viewModel, workflow, gatheredElements);
+                            viewModel.AddStatusMessage("Re-running workflow for a different result...");
+                            // extraArgs travels with the re-run: without it the interview
+                            // summary would run again with an empty transcript and propose
+                            // the character's history from nothing.
+                            await ExecuteWorkflowWithFeedback(
+                                viewModel, workflow, gatheredElements, extraArgs, preserveConversation, rejected);
                         }
                         catch (Exception ex)
                         {
@@ -1559,14 +2130,16 @@ public class Collaborator : ICollaborator
                         }
                     };
 
-                    var fillCount = result.PendingUpdates.Count(u => u.Kind is UpdateKind.Fill or UpdateKind.Refresh or UpdateKind.Unclassified);
                     var protectCount = result.PendingUpdates.Count(u => u.Kind == UpdateKind.Protect);
                     // #145: clear chat, seed proposal set, unlock Send; show full set on the left
-                    BeginProposalChatSession(viewModel, workflow, result);
+                    BeginProposalChatSession(viewModel, workflow, result, preserveConversation);
                     PushSessionSetToViewModel(viewModel);
+                    // Collaborator #237 item 9: plain words, no em dash, one count.
+                    var replaceNote = protectCount > 0
+                        ? $" {protectCount} of them would replace text you wrote; those ask for confirmation."
+                        : string.Empty;
                     viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
-                        $"Found {result.PendingUpdates.Count} property update(s) " +
-                        $"({fillCount} free, {protectCount} replace existing text — confirmation required). " +
+                        $"Found {result.PendingUpdates.Count} property update(s).{replaceNote} " +
                         "Choose Accept All, Review Each, or Try Again. Chat can revise these proposals."));
                 }
                 else
@@ -1790,9 +2363,6 @@ public class Collaborator : ICollaborator
         return null;
     }
 
-    private static string FormatWorkflowShortName(string? label) =>
-        ValueDisplay.SplitPascalCase(label);
-
     /// <summary>Nav group header for a workflow's primary element type (#129).</summary>
     private static string GroupTitle(StoryItemType type) => type switch
     {
@@ -1970,8 +2540,8 @@ public class Collaborator : ICollaborator
     }
 
     /// <summary>
-    /// Collaborator #208: inject Overview, owner, contributing Problems, neighbors, seats, Setting.
-    /// Sets Failed on Story Problem / empty-category bail. Does not open pickers.
+    /// Collaborator #208 / #246: inject Overview, owner, contributing Problems, neighbors, seats, Setting.
+    /// Sets Failed on empty-category bail. Does not open pickers.
     /// </summary>
     private void InjectSceneBuilder(StoryElement sceneElement, GatherResult result)
     {
@@ -1983,8 +2553,7 @@ public class Collaborator : ICollaborator
         foreach (var line in resolved.StatusLines)
             result.StatusMessages.Add(line);
 
-        if (resolved.OwnerState is Services.SceneStructureNeighborResolver.SceneBuilderOwnerState.StoryProblemBail
-            or Services.SceneStructureNeighborResolver.SceneBuilderOwnerState.EmptyCategoryBail)
+        if (resolved.OwnerState is Services.SceneStructureNeighborResolver.SceneBuilderOwnerState.EmptyCategoryBail)
         {
             result.Failed = true;
             result.BailReason = resolved.BailReason;

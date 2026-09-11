@@ -25,14 +25,15 @@ namespace StoryCollaborator.Workflows
         /// than a catalog. Seeded once by WorkflowStarService; after that the user's choices win.
         /// #77 took GMC and Structure off the band when ProblemBuilder landed, and #211 has now
         /// deleted them along with the Scene micro-workflows the band held for A:B. One workflow
-        /// per stage is the point: ProblemBuilder carries the problem, SceneBuilder the scene.
+        /// per stage is the point: ProblemBuilder carries the problem, CharacterBuilder the
+        /// cast function, SceneBuilder the scene.
         /// </summary>
         public static readonly IReadOnlyList<string> DefaultStarredLabels = new List<string>
         {
             "Premise",
             "StoryProblem",
             "ProblemBuilder",
-            "StoryFunction",
+            "CharacterBuilder",
             "SceneBuilder"
         };
 
@@ -42,8 +43,9 @@ namespace StoryCollaborator.Workflows
         /// a user could have starred. WorkflowStarService compares it against the number in the
         /// user's preferences and migrates once.
         /// #224 raised this to 2 for the two Setting labels SettingBuilder absorbed.
+        /// #244 raised this to 3 for DefineCharacter and StoryFunction.
         /// </summary>
-        public const int StarMigrationVersion = 2;
+        public const int StarMigrationVersion = 3;
 
         /// <summary>
         /// Deleted workflow label to the workflow that absorbed its job (#211). A user who
@@ -67,7 +69,10 @@ namespace StoryCollaborator.Workflows
                 ["Sequel"] = "SceneBuilder",
                 // #224: SettingBuilder is the one Setting surface.
                 ["SettingTimeSpace"] = "SettingBuilder",
-                ["Sensations"] = "SettingBuilder"
+                ["Sensations"] = "SettingBuilder",
+                // #244: CharacterBuilder is the one Character fill surface.
+                ["DefineCharacter"] = "CharacterBuilder",
+                ["StoryFunction"] = "CharacterBuilder"
             };
 
         /// <summary>
@@ -465,6 +470,7 @@ namespace StoryCollaborator.Workflows
                 {
                     PrimaryElementType = StoryItemType.Problem,
                     CreatesScenesForBeats = true,
+                    CreatesProblemsForBeats = true,
                     RequiresProblemCategory = true,
                     InjectsConflictTaxonomy = true,
                     InjectsBeatSheets = true,
@@ -472,36 +478,36 @@ namespace StoryCollaborator.Workflows
                     InjectsCurrentBeats = true
                 },
                 // === Character Workflows ===
-                // #182 DefineCharacter: world identity + personality. Occupation Role lives here.
+                // #244 CharacterBuilder: sheet then plot function in one pass.
+                // Absorbs #182 DefineCharacter and #183 StoryFunction.
                 new Workflow(
-                    "DefineCharacter", "Define Character",
-                    "Define who this person is in the world: occupation, body, social background, " +
-                    "psychology, personality facets, and traits—kept coherent with each other and with " +
-                    "problems that link this character.",
+                    "CharacterBuilder", "Character Builder",
+                    "Define who this person is in the world and their plot function: occupation, body, " +
+                    "social background, psychology, traits, Story Role, Archetype, and Character Sketch.",
                     StoryItemType.Character,
-                    explanation: "Build a coherent person sheet in one pass. Occupation (Role), appearance, " +
-                                "class and culture, psych profile, and traits must fit together and fit " +
-                                "problems where this character is protagonist or antagonist. " +
-                                "Does not set Story Role, Character Sketch, Flaw, or Backstory.",
+                    explanation: "Build a coherent person sheet and plot function in one pass. Occupation (Role), " +
+                                "appearance, class and culture, psych profile, and traits must fit together and fit " +
+                                "problems where this character is protagonist or antagonist. Then Story Role, " +
+                                "Archetype, and Character Sketch (Description). Does not set Flaw or Backstory.",
                     outputProperties: new List<PropertySpec>
                     {
                         new PropertySpec("Role"),
                         new PropertySpec("Age"),
                         new PropertySpec("Sex"),
+                        new PropertySpec("Economic"),
+                        new PropertySpec("Education"),
+                        new PropertySpec("Ethnic"),
+                        new PropertySpec("Religion"),
                         new PropertySpec("Eyes"),
                         new PropertySpec("Hair"),
                         new PropertySpec("Build"),
                         new PropertySpec("Complexion"),
                         new PropertySpec("Appearance"),
-                        new PropertySpec("Economic"),
-                        new PropertySpec("Education"),
-                        new PropertySpec("Ethnic"),
-                        new PropertySpec("Religion"),
                         new PropertySpec("Enneagram"),
                         new PropertySpec("Intelligence"),
                         new PropertySpec("Values"),
-                        new PropertySpec("Abnormality"),
                         new PropertySpec("Focus"),
+                        new PropertySpec("Abnormality"),
                         new PropertySpec("Adventurousness"),
                         new PropertySpec("Aggression"),
                         new PropertySpec("Confidence"),
@@ -514,7 +520,10 @@ namespace StoryCollaborator.Workflows
                         new PropertySpec("Shrewdness"),
                         new PropertySpec("Sociability"),
                         new PropertySpec("Stability"),
-                        new PropertySpec("TraitList", WriteVia.SimpleList, ListEntryType: typeof(string))
+                        new PropertySpec("TraitList", WriteVia.SimpleList, ListEntryType: typeof(string)),
+                        new PropertySpec("StoryRole"),
+                        new PropertySpec("Archetype"),
+                        new PropertySpec("Description")
                     },
                     exampleLists: new List<string>
                     {
@@ -522,26 +531,9 @@ namespace StoryCollaborator.Workflows
                         "Enneagram", "Intelligence", "Values", "Abnormality", "Focus", "Trait",
                         "Adventurousness", "Aggression", "Confidence", "Conscientiousness",
                         "Creativity", "Dominance", "Enthusiasm", "Assurance", "Sensitivity",
-                        "Shrewdness", "Sociability", "Stability"
+                        "Shrewdness", "Sociability", "Stability",
+                        "StoryRole", "Archetype"
                     }),
-                // #183 StoryFunction: plot function only. Occupation Role is DefineCharacter.
-                new Workflow(
-                    "StoryFunction", "Character Story Function",
-                    "Define the character's plot function: Story Role, Archetype, and Character Sketch.",
-                    StoryItemType.Character,
-                    explanation: "Story Role is narrative function (Protagonist, Antagonist, Supporting). " +
-                                "Archetype is the universal pattern (Hero, Mentor, Shadow). " +
-                                "Character Sketch (Description) is short story-function prose from those choices, " +
-                                "Related Problems, Flaw when present, and story premise—not a physical biography. " +
-                                "Occupation Role is set by Define Character, not this workflow.",
-                    outputProperties: new List<PropertySpec>
-                    {
-                        new PropertySpec("StoryRole"),
-                        new PropertySpec("Archetype"),
-                        // Character Sketch (gap label); Collaborator #142
-                        new PropertySpec("Description")
-                    },
-                    exampleLists: new List<string> { "StoryRole", "Archetype" }),
                 // #184 FlawBackstory: wound + history together. Retires Flaw and Backstory.
                 new Workflow(
                     "FlawBackstory", "Flaw and Backstory",
@@ -563,7 +555,7 @@ namespace StoryCollaborator.Workflows
                     label: "Relationship",
                     title: "Character Relationship",
                     description: "Develop the dynamics, history, and tension between two characters.",
-                    explanation: "Name both people. Prefer some sheet fill from Define Character, Character Story Function, or Flaw and Backstory on each side. " +
+                    explanation: "Name both people. Prefer some sheet fill from Character Builder or Flaw and Backstory on each side. " +
                                 "The run still proceeds if sheets are thin. The model uses filled traits when they exist. It does not invent missing bulk fields. " +
                                 "Accept writes the short type, Trait, Attitude, and Relationship Notes on both people.",
                     workflowIO: new WorkflowIO
@@ -609,6 +601,56 @@ namespace StoryCollaborator.Workflows
                         },
                         ExampleLists = new List<string> { "Trait", "Attitude" }
                     }) { PrimaryElementType = StoryItemType.Character },
+
+                // === Character Interview (#119) ===
+                // Registered inside the Character block, not after it: the nav pane opens a
+                // new group whenever PrimaryElementType changes, so a Character entry after
+                // the Scene entries would render a second "Character" header (#129 grouping).
+                //
+                // Conversational, and it proposes nothing. Collaborator asks; the writer
+                // answers as the character. The record is the transcript, written to a Notes
+                // element verbatim when the session ends, so there is no model pass between
+                // what the writer typed and what the outline keeps.
+                new Workflow(
+                    label: "CharacterInterview",
+                    title: "Character Interview",
+                    description: "Answer as your character, one hard question at a time.",
+                    explanation: "Other character workflows fill the form. This one asks you the " +
+                                 "questions the form cannot: what the flaw once protected, what they " +
+                                 "will not trade away, what they refuse to hear. Pick what to explore, " +
+                                 "or let Collaborator choose from the form and the character's problems. " +
+                                 "You answer in their voice. The questions and your answers are saved " +
+                                 "to the outline as a note under the character.",
+                    workflowIO: new WorkflowIO
+                    {
+                        RequiredInputs = new List<ElementRequirement>
+                        {
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Character,
+                                ElementLabel = "Character",
+                                CreateIfMissing = false
+                            }
+                        },
+                        OptionalInputs = new List<ElementRequirement>
+                        {
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.StoryOverview,
+                                ElementLabel = "Overview"
+                            },
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Problem,
+                                ElementLabel = "Problem"
+                            }
+                        },
+                        Outputs = new List<ElementOutput>()
+                    })
+                {
+                    PrimaryElementType = StoryItemType.Character,
+                    Mode = WorkflowMode.Conversational
+                },
 
                 // === StoryWorld Workflows ===
                 // #201 DefineStoryWorld: one worldbuilding surface (classifier + cultures + live areas).
@@ -729,7 +771,7 @@ namespace StoryCollaborator.Workflows
                     label: "SceneBuilder",
                     title: "Scene Builder",
                     description: "Fill an existing Scene: sketch, type, cast, development, conflict, and sequel.",
-                    explanation: "Scene Builder does not create a Scene. Select a Scene first. The run reads contributing Problems and writes Scene fields the model can infer. It does not run on a Story Problem.",
+                    explanation: "Scene Builder does not create a Scene. Select a Scene first. The run reads contributing Problems and writes Scene fields the model can infer.",
                     workflowIO: new WorkflowIO
                     {
                         RequiredInputs = new List<ElementRequirement>
