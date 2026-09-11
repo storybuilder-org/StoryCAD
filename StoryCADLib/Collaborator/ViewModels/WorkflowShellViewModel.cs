@@ -222,47 +222,55 @@ public partial class WorkflowShellViewModel : ObservableRecipient
 
     #region Navigation Methods
 
-    public async void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    /// <summary>
+    /// Runs the invoked workflow. Bound to ItemInvoked rather than SelectionChanged because
+    /// SelectionChanged does not fire when the user taps the row they are already on, which
+    /// left re-running a workflow on the next element impossible without first detouring
+    /// through a different one (Try Again only repeats the same inputs). ItemInvoked fires on
+    /// every tap, and — unlike SelectionChanged — is not raised by programmatic selection, so
+    /// <see cref="RestoreSelection" /> re-highlighting after a menu rebuild cannot reach here.
+    /// </summary>
+    public async void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
-        // A star toggle can still invoke the item underneath it. Leaving CurrentItem alone keeps
-        // the pane highlight — and the tag the following rebuild restores — on the workflow the
-        // user is actually on, instead of moving it to whatever row they starred.
+        // A star toggle can still invoke the item underneath it.
         if (SuppressWorkflowNavigation)
             return;
 
-        CurrentItem = args.SelectedItem as NavigationViewItem;
-        var tag = CurrentItem?.Tag;
+        var invoked = args.InvokedItemContainer as NavigationViewItem;
+        var tag = invoked?.Tag;
         if (!ShouldRunWorkflowForSelection(tag))
             return;
+
+        // Moved only for a real workflow row. Element-type group headers are invoked to expand
+        // and collapse a band and carry no tag; parking CurrentItem on one would take the pane
+        // highlight off the workflow the user is on, and RebuildWorkflowMenu reads
+        // CurrentItem.Tag to put that highlight back after a run.
+        CurrentItem = invoked;
 
         await OnWorkflowSelected(tag);
     }
 
     /// <summary>
-    /// Decides whether a selection change is a genuine request to run a workflow, and records
-    /// the tag when it is. Separated from <see cref="NavView_SelectionChanged" /> because
-    /// NavigationViewSelectionChangedEventArgs cannot be constructed in a test, and the cost of
-    /// getting this wrong is running a billed LLM call the user never asked for.
+    /// Decides whether an invoke is a genuine request to run a workflow. Separated from
+    /// <see cref="NavView_ItemInvoked" /> because NavigationViewItemInvokedEventArgs cannot be
+    /// constructed in a test, and the cost of getting this wrong is running a billed LLM call
+    /// the user never asked for.
+    ///
+    /// There is deliberately no "same tag as last time" guard. Re-running the workflow you are
+    /// already on is the normal way to walk one workflow down a tree of elements, and the guard
+    /// that used to sit here made that click do nothing. It was only ever needed because
+    /// SelectionChanged also fires for programmatic selection, which ItemInvoked does not.
     /// </summary>
     public bool ShouldRunWorkflowForSelection(object tag)
     {
         if (tag == null || OnWorkflowSelected == null)
             return false;
 
-        // A star toggle is in flight; the selection it produced is a side effect of the click,
+        // A star toggle is in flight; the invoke it produced is a side effect of the click,
         // not a workflow choice.
-        // _selectedTag is deliberately left alone: recording this tag would make the user's next
-        // genuine click on the same workflow look like a restore and silently do nothing.
         if (SuppressWorkflowNavigation)
             return false;
 
-        // Re-selecting the tag we are already on is a restore, not a user request:
-        // RestoreSelection re-highlights the same workflow after the menu is rebuilt,
-        // and running it again there would re-execute the workflow on every rebuild.
-        if (IsSameTag(tag, _selectedTag))
-            return false;
-
-        _selectedTag = tag;
         return true;
     }
 
@@ -310,9 +318,6 @@ public partial class WorkflowShellViewModel : ObservableRecipient
         return false;
     }
 
-    /// <summary>Tag of the workflow last navigated to; guards restore against re-running it.</summary>
-    private object _selectedTag;
-
     public Task LoadWorkflowMenuAsync()
     {
         MenuItems.Clear();
@@ -351,14 +356,13 @@ public partial class WorkflowShellViewModel : ObservableRecipient
         OnExit?.Invoke();
         if (NavView != null)
         {
-            NavView.SelectionChanged -= NavView_SelectionChanged;
+            NavView.ItemInvoked -= NavView_ItemInvoked;
         }
         MenuItems.Clear();
         StarEntries.Clear();
         HasPendingUpdates = false;
         ActiveWorkflowName = string.Empty;
         SuppressWorkflowNavigation = false;
-        _selectedTag = null;
         OnStarsChanged = null;
         OnAcceptAll = null;
         OnReviewEach = null;

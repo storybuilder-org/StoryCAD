@@ -158,7 +158,7 @@
                         MenuItemsSource="{x:Bind ShellViewModel.MenuItems, Mode=OneWay}"
                         SelectedItem="{x:Bind ShellViewModel.CurrentItem, Mode=TwoWay}"
                         IsSettingsVisible="False"
-                        SelectionChanged="NavView_SelectionChanged"
+                        ItemInvoked="NavView_ItemInvoked"
                         PaneDisplayMode="Left"
                         CompactPaneLength="0"
                         AutomationProperties.AutomationId="WorkflowNav">
