@@ -20,7 +20,7 @@ When you click it, the picker asks for the outer Problem, which must already exi
 
 It writes the inner Problem's form: the Story Question and Problem Type on the Problem tab, the Goal, Motivation, and Conflict on both the Protagonist and Antagonist tabs, and on the Resolution tab the Method and Theme, with its reasoning in Notes. The Conflict Type is set to Person vs. Himself, and the protagonist and the antagonist of the inner Problem are the same character, because that is what an inner problem is. It also proposes a Flaw on that character's Flaw tab. Flaw and Backstory can write the same field from the character's side; whichever you accept last is what stays.
 
-*[Screenshot to come: the Property Updates list after Inner and Outer Problems, with the inner Problem's rows and the Flaw row on the protagonist. File: Collaborator-Workflow-Inner-Outer.png]*
+![Property Updates after Inner and Outer Problems: the inner Problem's rows and the Flaw row on Sarah Osborne](../../media/Collaborator/Collaborator-Workflow-Inner-Outer.png)
 
 ## Problem Builder
 
@@ -32,4 +32,4 @@ The run proposes the Problem tab fields (Name, Problem Type, Conflict Type, Subj
 
 Two rules protect your work. Problem Builder never changes a beat you have already filled, and it never adds beats to a sheet you already chose. The Scene stubs it creates are the only new elements; everything else is a proposal on an existing form until you accept it. It is one of the five starred by default.
 
-*[Screenshot to come: the Property Updates list after Problem Builder, with the Problem's fields above and one row per beat below. File: Collaborator-Workflow-Problem-Builder.png]*
+![Property Updates after Problem Builder: the Problem's fields above and one row per beat below](../../media/Collaborator/Collaborator-Workflow-Problem-Builder.png)

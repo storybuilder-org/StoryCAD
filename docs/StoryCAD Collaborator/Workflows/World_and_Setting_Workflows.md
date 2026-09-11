@@ -18,7 +18,7 @@ The [StoryWorld Form](../../Story%20Elements/StoryWorld_Form.html) is optional, 
 
 Define Story World starts from that question. If your outline has no StoryWorld, the picker offers to create one. The run proposes a World Type on the Structure tab, a short description of the world, and a list of Cultures, and then fills only the areas that World Type makes live: the Physical Worlds list, the History tab (Founding Events, Major Conflicts, Eras, Technological Shifts, and Lost Knowledge), and the Magic/Technology tab (System Type, Source, Rules, Limitations, Cost, Practitioners, and Social Impact). A few classification fields on the Structure tab follow from the World Type automatically when you accept. It does not fill Settings, Species, Governments, Religions, or Economy; those tabs are yours.
 
-*[Screenshot to come: the Property Updates list after Define Story World on a newly created StoryWorld. File: Collaborator-Workflow-Story-World.png]*
+![Property Updates after Define Story World on Present-day baseball](../../media/Collaborator/Collaborator-Workflow-Story-World.png)
 
 ## Setting Builder
 
@@ -26,4 +26,4 @@ Define Story World starts from that question. If your outline has no StoryWorld,
 
 Pick the Setting. The run proposes the Setting tab fields, Period, Locale, Season, Weather, Lighting, and Temperature, and the Props: the objects in the place that a character can pick up, fiddle with, break, or stare at. Then it works through the Sensations tab, Sights, Sounds, Touch, and Smell/Taste, with anything left over in Notes. Locale and Season are suggestion lists in StoryCAD rather than fixed choices, and the proposals treat them that way. Smell gets particular attention, for the reason the Sensations Tab page gives: it is the primitive sense, and it pulls a reader in.
 
-*[Screenshot to come: the Property Updates list after Setting Builder, with the Setting tab rows above and the four senses below. File: Collaborator-Workflow-Setting-Builder.png]*
+![Property Updates after Setting Builder on The ballpark: Setting tab rows and the four senses](../../media/Collaborator/Collaborator-Workflow-Setting-Builder.png)

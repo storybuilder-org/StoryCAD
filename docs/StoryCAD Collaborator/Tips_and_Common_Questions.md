@@ -19,7 +19,7 @@ Second passes are normal, and they behave differently from first passes. If you 
 
 ## Long lists of updates
 
-Some workflows, Define Character and Scene Builder among them, propose twenty or more fields at once. The Property Updates list scrolls, and Review Each walks the same rows one at a time with a count of where you are, which is the easier way to be sure you have seen every row before you accept.
+Some workflows, Character Builder and Scene Builder among them, propose twenty or more fields at once. The Property Updates list scrolls, and Review Each walks the same rows one at a time with a count of where you are, which is the easier way to be sure you have seen every row before you accept.
 
 ## Check your work as you go
 

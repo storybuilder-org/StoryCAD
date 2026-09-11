@@ -118,11 +118,11 @@ Branch `issue-170-collaborator-manual`, all commits unpushed; base `dev` `61186d
 
 Done: items 0, 1, 2, 3 (folder, placeholder form, Scorecard chosen, protocol, S00 baseline), 4, 5, 6 (standard and the full page pass), 7; ADR-001; issue body; shot list.
 
-**Session S01 in progress, not closed.** Before copy `manual-sessions\Scorecard-S01-before.stbx` taken 10:52. Shots 1 and 3 taken and correctly named in `manual-sessions\` (`Collaborator-Access-Prompt.png`, `Collaborator-Workflow-Premise.png`); two diagnostic screenshots also there (`Ideation Suggested Revisions.png`, `Ideation Revisions Display After Followup Question.png`). Shot 2 (Outline gaps page) not taken; Terry saw no gaps on the page while the row said (1). Ideation ran; chat revision reported "Updated 2 proposals" but neither the list nor Accept used it; Accept all changes wrote the ORIGINAL Concept and Premise to the file (`0211 Scorecard.stbx`, 11:33, 4,382 bytes); with Collaborator closed, StoryCAD's Overview page still showed both fields empty (cause not established; my first explanation was wrong). **After copy not taken.** Next: Terry decides how to close S01 (take the after copy as-is, or reopen the file to confirm the Overview shows the accepted text), then fill the S01 row.
+**Session state, 2026-09-06 evening.** S01 closed: after copy `Scorecard-S01-after.stbx` taken 2026-09-05 17:29 (4,104 bytes) after the chat-edit verification on the rebuilt Ideation template (#237). S02, S03 and S04 run 2026-09-06; rows below. **Screenshots paused after Story Form (Terry, 2026-09-06):** the Story Problem and Character Story Function outputs are not tutorial-grade, and the manual follows the corrected code (ruling of 2026-09-05). Session order changed on craft grounds: the character workflows (Character Story Function, Define Character, Flaw and Backstory on the antagonist, Character Relationship) run before Problem Builder and Inner and Outer Problems, because Problem Builder would write beats about empty characters and Inner and Outer reads the protagonist's Flaw. Every shot's frame holds in that order; Inner and Outer still writes the protagonist's Flaw row for shot 7 because Flaw and Backstory runs on the antagonist only. Resume from `Scorecard-S03-before.stbx` (Story Form accepted, no Problem yet) when the two templates pass the evaluation planned in Collaborator `devdocs/workflow_set_discussion_2026-09-06.md`.
 
 Working rules from Terry today: one thing at a time; do not ask for more than one; follow his lead rather than investigating on my own; do not overcomplicate the process.
 
-Open after S01: sessions S02 to S09 per the shot list; the Character Interview entry after #119; the pending-approval text in Getting Started after #97 settles onboarding; the production wording in Getting Started before `dev` merges to `main`; push and PR when Terry calls the topic complete; a Collaborator status-log entry (that repo is checked out on the #119 branch).
+Open after S04: retakes of shot 2 (Outline gaps, near-empty), shot 3 under its shot-list name, shot 5 and the Element Picker (from `Scorecard-S03-before.stbx`), and shot 8 before accepting; then Define Character, Flaw and Backstory, Character Relationship, Problem Builder, Inner and Outer Problems, Story World and Setting Builder, Scene Builder, and the S09 retakes; the Character Interview entry after #119; the pending-approval text in Getting Started after #97 settles onboarding; the production wording in Getting Started before `dev` merges to `main`; push and PR when Terry calls the topic complete. Collaborator status-log entry written 2026-09-06.
 
 ## Tutorial outline (item 3), ruling 2026-09-05
 
@@ -137,11 +137,29 @@ Two outlines, not one:
 | New tutorial outline | Screenshot source for the 14 workflow/gaps frames, the retakes, and the Collaborator tutorial walk. Starts as Story Idea only. |
 | Danger Calls (shipped sample) | [An Example Session](../docs/StoryCAD%20Collaborator/Tutorial/An_Example_Session.md) only. Already has a Story Idea and a Concept, so Ideation comes back Has your text. Do not recapture those three session images against the new outline. |
 
-[A Path to Try](../docs/StoryCAD%20Collaborator/Tutorial/A_Path_to_Try.md) stays the order. The four workflows it leaves for later (Define Character, Character Relationship, Define Story World, Setting Builder) still get shots, because a complete outline and the Workflow Reference both need them. Tutorial pages may need a third walk for the new story; do not collapse it into An Example Session.
+[A Path to Try](../docs/StoryCAD%20Collaborator/Tutorial/A_Path_to_Try.md) stays the order. The workflows it leaves for later (Character Interview, Character Relationship, Define Story World, Setting Builder) still get shots, because a complete outline and the Workflow Reference both need them. Tutorial pages may need a third walk for the new story; do not collapse it into An Example Session.
 
 Open: pick the Story Idea from the 94-file inventory, or write a new one-sentence idea for the manual. Then run the shot list on a labeled beta build.
 
-## Shot list (item 3), written 2026-09-05
+## File names
+
+Two patterns only.
+
+Manual shots, same basename in `manual-sessions\` and `docs/media/Collaborator/`:
+
+`Collaborator-<Words-Hyphenated>.png`
+
+Session outlines, `manual-sessions\` only:
+
+`Scorecard-SNN-before.stbx` / `Scorecard-SNN-after.stbx` (`S00-baseline` for the 3.2.1 copy)
+
+Diagnostics and findings, `manual-sessions\` only, never copied into the manual:
+
+`SNN-<kebab>.png`
+
+To take a shot from an old session without writing the before copy, copy that before file to `C:\temp\0211 Scorecard\Scorecard-SNN-before.stbx` and open the copy. Leave `0211 Scorecard.stbx` as the current story.
+
+## Shot list (item 3), written 2026-09-05, names updated 2026-09-11
 
 Capture on a labeled beta build against the tutorial outline, in spine order, so one story runs through every image. Window at a consistent size; the Property Updates list in view. Save to `docs/media/Collaborator/` under the file name given; replace the matching placeholder line with a Markdown image whose alt text describes what the frame shows.
 
@@ -156,10 +174,10 @@ Capture on a labeled beta build against the tutorial outline, in spine order, so
 | 5 | Collaborator-Workflow-Story-Problem.png | Workflows/Overview_Workflows.md | Property Updates after Story Problem (Premise => Problem + Characters): Problem rows and one Name row per created character | After 4; Problem and two characters created in the pickers |
 | 6 | Collaborator-Workflow-Problem-Builder.png | Workflows/Problem_Workflows.md | Property Updates after Problem Builder: Problem fields above, one row per beat below | After accepting 5; Problem Category set |
 | 7 | Collaborator-Workflow-Inner-Outer.png | Workflows/Problem_Workflows.md | Property Updates after Inner and Outer Problems: inner Problem rows and the protagonist's Flaw row | After 6; inner Problem created in the picker |
-| 8 | Collaborator-Workflow-Story-Function.png | Workflows/Character_Workflows.md | The three rows after Character Story Function on the protagonist | After 7 |
-| 9 | Collaborator-Workflow-Define-Character.png | Workflows/Character_Workflows.md | Property Updates after Define Character, scrolled to show the list's length | After 8, same character |
-| 10 | Collaborator-Workflow-Flaw-Backstory.png | Workflows/Character_Workflows.md | The two rows after Flaw and Backstory on the antagonist, whose Flaw tab is empty | After 9, antagonist |
-| 11 | Collaborator-Workflow-Relationship.png | Workflows/Character_Workflows.md | The relationship row after Character Relationship, with the resulting Relationships tab entry in StoryCAD beside it | After 10, protagonist and antagonist |
+| 8 | Collaborator-Workflow-Character-Builder.png | Workflows/Character_Workflows.md | Property Updates after Character Builder on the protagonist, sheet fields and Character Sketch | After 7, same character |
+| 9 | Collaborator-Workflow-Flaw-Backstory.png | Workflows/Character_Workflows.md | The two rows after Flaw and Backstory on the antagonist, whose Flaw tab is empty | After 8, antagonist |
+| 10 | Collaborator-Workflow-Relationship.png | Workflows/Character_Workflows.md | The relationship row after Character Relationship, and the resulting Relationships tab entry in StoryCAD | After 9, protagonist and antagonist |
+| 11 | Collaborator-Workflow-Character-Interview.png | Workflows/Character_Workflows.md | Character Interview after a few turns, Save interview to outline visible | After 8, same character |
 | 12 | Collaborator-Workflow-Story-World.png | Workflows/World_and_Setting_Workflows.md | Property Updates after Define Story World on a StoryWorld created in the picker | Any point after 5 |
 | 13 | Collaborator-Workflow-Setting-Builder.png | Workflows/World_and_Setting_Workflows.md | Property Updates after Setting Builder: Setting tab rows above, the four senses below | A Setting created for the story, any point after 5 |
 | 14 | Collaborator-Workflow-Scene-Builder.png | Workflows/Scene_Workflows.md | Property Updates after Scene Builder on a stub Problem Builder created | After 6 |
@@ -208,7 +226,14 @@ Collaborator writes to the outline on every accept, and the sessions are also a 
 | Session | Date | Build | Step | Shots taken | Before | After | Notes / issues |
 |---|---|---|---|---|---|---|---|
 | S00 | 2026-09-05 | none | Baseline copy, then format conversion | none | `Scorecard-S00-baseline.stbx` (3.2.1 format, 2,907 bytes) | `0211 Scorecard.stbx` in `C:\temp\0211 Scorecard\` (4.1.0.0, 3,363 bytes) | Converted by opening in StoryCAD; Scrivener project empty, nothing to convert |
+| S01 | 2026-09-05 | local Debug builds (`dev` in the morning, `issue-237-ideation-faults` in the afternoon) | Open, Outline gaps, Ideation (Story idea => Concept => Premise) | 1 (`Collaborator-Access-Prompt.png`); 3 (`Collaborator-Workflow-Premise.png`); `S01-chat-01` to `S01-chat-04` diagnostics | `Scorecard-S01-before.stbx` (10:52, 3,363 bytes) | `Scorecard-S01-after.stbx` (17:29, 4,104 bytes) | Shot 2 not taken. Morning run's eleven faults filed as #237; afternoon run on the rebuilt template verified the chat edit; Premise hand-edited ("and stadium security" removed). Morning screenshots in `S01-failed-2026-09-05\`. |
+| S02 | 2026-09-06 | local Debug build | Story Form | 4 (`Collaborator-Workflow-Story-Form.png`) | `Scorecard-S02-before.stbx` (15:08, 4,087 bytes; Type and Genre cleared by hand first so the run had something to propose; StoryCAD stores a cleared dropdown as one space, which the runner and the gap scanner treat as blank) | `Scorecard-S02-after.stbx` (15:17, 4,104 bytes) | Proposed Suspense and Novel. Novel rejected with the row's ✗; Accept All wrote Suspense; Short Story set by hand. The shot shows the proposal, and the caption will say what the writer did with it. #236. |
+| S03 | 2026-09-06 | local Debug build | Story Problem (Premise => Problem + Characters) | none. Shot 5 and the Element Picker retake not taken; `S03-element-picker-after-create.png` is a diagnostic of the picker | `Scorecard-S03-before.stbx` (15:17, 4,104 bytes) | `Scorecard-S03-after.stbx` (15:29, 9,205 bytes) | Problem and two characters created in the pickers with placeholder names (Story Problem, Protagonist, Antagonist) on Claude's instruction. The run wrote 18 fields, renamed the Problem Next Inning, and used the placeholders as names in the prose. Accept All with the overwrite prompt confirmed. Characters renamed by hand at 15:37 to Sarah Osborne (Mother) and Irene Campbell (Kidnapper); the Problem prose still says Protagonist and Antagonist. #236: Create a new element leaves the picker open; placeholder names adopted. |
+| S04 | 2026-09-06 | local Debug build | Character Story Function on Sarah Osborne | finding shot `S04-story-function-no-agency.png` (rows already Accepted; Character Builder replaces this workflow) | `Scorecard-S04-before.stbx` (15:37, 9,205 bytes, names set) | `Scorecard-S04-after.stbx` (15:41, 9,976 bytes) | Archetype Hero; Story Role unchanged; Description is the Problem's phrases reassembled with no cause and effect and an invented term ("choke point"). Accepted as-is. #236: no agency in the sketch (filed #239); Accept All dispatched to the previous workflow first (StoryCAD log 15:41:54). |
 
 ### Observations from the sessions
+
+- The manual's Reviewing Suggestions page says Accept all changes never touches a Has your text row. The code asks for confirmation and, when the writer confirms, applies those rows too (`CollaboratorLib/Collaborator.cs`, the AcceptAll overwrite prompt; seen in S03, where it wrote Next Inning over the typed Problem name). The page needs a sentence about the prompt.
+- Story Form's manual entry says the run "chooses from the same lists you would otherwise choose from". True, but on Scorecard it chose Novel for a one-conflict, small-cast premise; the tutorial page should show the writer rejecting a row, since that is the normal case, not the exception.
 
 Collaborator issues found while taking the screenshots are tracked in Collaborator #236 (private repo), one line per finding, each becoming its own issue when confirmed. The S01 screenshots are in `manual-sessions\`.

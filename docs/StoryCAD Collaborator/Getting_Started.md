@@ -32,7 +32,7 @@ Collaborator does not open for anyone the Foundation has not approved, and appro
 
 *[Text to come: what StoryCAD shows if you click Collaborator between the first launch and approval.]*
 
-*[Screenshot to come: the Story Collaborator window as it first opens. File: Collaborator-Access-Prompt.png]*
+![The Story Collaborator window as it first opens: workflow list, empty center, chat](../media/Collaborator/Collaborator-Access-Prompt.png)
 
 ## If Collaborator does not open
 

@@ -20,7 +20,7 @@ Each missing field is a link, and the small text under it tells you what the lin
 
 A sentence at the top of the page beginning "Guess:" tells you where Collaborator thinks your outline stands. The last section of this page explains it.
 
-*[Screenshot to come: the Outline gaps page on a new outline, with the guess sentence and the Overview's missing fields. File: Collaborator-Outline-Gaps.png]*
+![The Outline gaps page on a new outline, with the Guess sentence and the Overview's missing fields as links](../../media/Collaborator/Collaborator-Outline-Gaps.png)
 
 ## The required fields
 
@@ -28,7 +28,7 @@ A sentence at the top of the page beginning "Guess:" tells you where Collaborato
 |---|---|---|
 | Story Overview | Title, Story Idea, Author, Concept, Premise, Type, Genre, Story Problem | Ideation (Story idea => Concept => Premise) for Story Idea, Concept, and Premise; Story Form for Type and Genre; Story Problem (Premise => Problem + Characters) for the Story Problem. Title and Author you type in StoryCAD. |
 | Problem | Name, Story Question, Problem Category, Problem Type, Conflict Type, Subject, Premise, Protagonist, Antagonist, the Goal, Motivation, and Conflict for each of them, and Outcome | Story Problem (Premise => Problem + Characters) for the category and the two characters, and a first pass at the rest; Problem Builder for the goal, motivation, conflict, and outcome fields. Name you type in StoryCAD. |
-| Character | Name, Character Sketch, Role, Story Role, Age, Sex, Appearance, Backstory | Define Character for Role, Age, Sex, and Appearance; Character Story Function for Story Role and Character Sketch; Flaw and Backstory for Backstory. Name you type in StoryCAD. |
+| Character | Name, Character Sketch, Role, Story Role, Age, Sex, Appearance, Backstory | Character Builder for Role, Age, Sex, Appearance, Story Role, and Character Sketch; Flaw and Backstory for Backstory. Name you type in StoryCAD. |
 | Setting | Name, Setting Summary | The page points Setting Summary at Setting Builder. Name you type in StoryCAD. |
 | Scene | Name, Scene Sketch, Setting, Cast | Scene Builder for all three. Name you type in StoryCAD. |
 
@@ -43,3 +43,7 @@ Every time a workflow runs, Collaborator tells the model which stage of outlinin
 5. Scene Work. At least one scene sits on a beat. The outline has a shape, and the remaining work is inside the scenes.
 
 The same judgment appears to you as the Guess sentence on the Outline gaps page: "Guess: the outline is in Problem Development," for example. When a problem gap and a character gap are both open, the sentence says so and adds that the Story Problem still needs its protagonist and antagonist. It is a guess in the plain sense. It comes from which fields are filled, not from reading your prose, so if it seems wrong, the table above shows which fields it is looking at.
+
+After the spine workflows, the page still lists what is empty. The count is higher. The Guess sentence should have moved past Ideation.
+
+![Outline gaps after the spine workflows: Guess sentence and remaining empty fields](../../media/Collaborator/Collaborator-Outline-Gaps-Midway.png)

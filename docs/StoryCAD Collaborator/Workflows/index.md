@@ -18,7 +18,7 @@ The workflow list occupies the left side of the Story Collaborator window. It op
 
 Outline gaps appears first, and only when your outline has empty required fields. It is not a workflow in the usual sense but a page that lists what is missing and where to go to fill it. [Outline Gaps](Outline_Gaps.html) explains it.
 
-Starred comes next and holds the workflows you have marked with a star. When you first open Collaborator, five are starred for you, one for each stage of outlining: Ideation (Story idea => Concept => Premise), Story Problem (Premise => Problem + Characters), Problem Builder, Character Story Function, and Scene Builder. You can change that set at any time; [Opening Collaborator](../Opening_Collaborator.html) shows how.
+Starred comes next and holds the workflows you have marked with a star. When you first open Collaborator, five are starred for you, one for each stage of outlining: Ideation (Story idea => Concept => Premise), Story Problem (Premise => Problem + Characters), Problem Builder, Character Builder, and Scene Builder. You can change that set at any time; [Opening Collaborator](../Opening_Collaborator.html) shows how.
 
 The remaining workflows are filed under the story element each one works on: Overview, Problem, Character, Story World, Setting, and Scene. These groups start closed. Click a group heading to open it. Nothing is hidden; a workflow that is not starred is one click away in its group.
 
@@ -39,6 +39,6 @@ When you click a workflow, its name appears on the top bar and a short descripti
 - [Outline Gaps](Outline_Gaps.html): the generated list of empty required fields, and how Collaborator judges where your outline stands.
 - [Overview Workflows](Overview_Workflows.html): Ideation (Story idea => Concept => Premise), Story Problem (Premise => Problem + Characters), and Story Form.
 - [Problem Workflows](Problem_Workflows.html): Inner and Outer Problems, and Problem Builder.
-- [Character Workflows](Character_Workflows.html): Define Character, Character Story Function, Flaw and Backstory, and Character Relationship.
+- [Character Workflows](Character_Workflows.html): Character Builder, Flaw and Backstory, Character Relationship, and Character Interview.
 - [World and Setting Workflows](World_and_Setting_Workflows.html): Define Story World, and Setting Builder.
 - [Scene Workflows](Scene_Workflows.html): Scene Builder.
