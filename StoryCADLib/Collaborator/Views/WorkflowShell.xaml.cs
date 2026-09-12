@@ -46,11 +46,11 @@ public sealed partial class WorkflowShell : Page
         // The frame now navigates to WorkflowPage with a specific WorkflowViewModel
     }
 
-    private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
         if (DataContext is WorkflowShellViewModel shellVm)
         {
-            shellVm.NavView_SelectionChanged(sender, args);
+            shellVm.NavView_ItemInvoked(sender, args);
         }
     }
 

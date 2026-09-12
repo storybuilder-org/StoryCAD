@@ -42,8 +42,6 @@ public class WorkflowShellStarSelectionTests
     [TestMethod]
     public void ShouldRunWorkflowForSelection_AfterSuppressionClears_RunsTheSameWorkflow()
     {
-        // The suppressed pass must not record the tag: if it did, the user's next genuine click
-        // on that workflow would look like a menu restore and silently do nothing.
         _viewModel.SuppressWorkflowNavigation = true;
         _viewModel.ShouldRunWorkflowForSelection("Premise");
         _viewModel.SuppressWorkflowNavigation = false;
@@ -52,12 +50,13 @@ public class WorkflowShellStarSelectionTests
     }
 
     [TestMethod]
-    public void ShouldRunWorkflowForSelection_WithTheSameTagTwice_ReturnsFalse()
+    public void ShouldRunWorkflowForSelection_WithTheSameTagTwice_ReturnsTrue()
     {
         _viewModel.ShouldRunWorkflowForSelection("Premise");
 
-        Assert.IsFalse(_viewModel.ShouldRunWorkflowForSelection("Premise"),
-            "A rebuild re-selects the current tag; re-running it would repeat the workflow.");
+        Assert.IsTrue(_viewModel.ShouldRunWorkflowForSelection("Premise"),
+            "Clicking the workflow you are already on is how you run it again on the next "
+            + "element. Try Again re-runs the same inputs, so it is not a substitute.");
     }
 
     [TestMethod]
