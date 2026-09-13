@@ -40,6 +40,21 @@ public interface IStoreActivationService
 
     Task RestoreAsync(CancellationToken ct = default);
 
+    /// <summary>
+    ///     Join: POST <c>platform: "dev"</c> with <c>enroll: true</c>. Returns the Worker
+    ///     response. Caches the JWT only when <see cref="ActivationResponse.Ok" /> and a JWT
+    ///     are present. Transport failure throws <see cref="StoreActivationUnreachableException" />.
+    /// </summary>
+    Task<ActivationResponse> EnrollBetaAsync(CancellationToken ct = default);
+
+    /// <summary>
+    ///     Refresh an approved allowlist row: POST <c>platform: "dev"</c> with enroll false.
+    /// </summary>
+    Task RefreshAllowlistAsync(CancellationToken ct = default);
+
+    /// <summary>True when the held JWT <c>pur</c> claim starts with <c>allowlist:</c>.</summary>
+    bool IsAllowlistActivation { get; }
+
     /// <summary>The current Worker JWT, attached to Collaborator calls; null when not active.</summary>
     string CurrentJwt { get; }
 

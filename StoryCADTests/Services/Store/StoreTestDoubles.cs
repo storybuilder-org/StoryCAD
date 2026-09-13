@@ -96,6 +96,9 @@ internal sealed class FakeActivationClient : IActivationClient
     public string Ticket = "aad-service-ticket";
     public int TicketCallCount;
     public string LastTicketPurpose;
+    public BetaEnrollmentStatus Enrollment = new(true, true, null);
+    public int EnrollmentCallCount;
+    public string LastEnrollmentUserGuid;
 
     public Task<ActivationResponse> ActivateAsync(PurchaseProof proof, CancellationToken ct = default)
     {
@@ -104,6 +107,13 @@ internal sealed class FakeActivationClient : IActivationClient
         return ThrowOnActivate != null
             ? Task.FromException<ActivationResponse>(ThrowOnActivate)
             : Task.FromResult(Response);
+    }
+
+    public Task<BetaEnrollmentStatus> GetBetaEnrollmentAsync(string userGuid, CancellationToken ct = default)
+    {
+        EnrollmentCallCount++;
+        LastEnrollmentUserGuid = userGuid;
+        return Task.FromResult(Enrollment);
     }
 
     public Task<string> GetStoreTicketAsync(string purpose = "purchase", CancellationToken ct = default)

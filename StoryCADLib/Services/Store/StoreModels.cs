@@ -80,4 +80,4 @@ public record ConsumablePurchaseResult(PurchaseStatus Status, PurchaseProof Proo
 ///     is embedded in the signed proof at purchase time so the purchase-to-user link is
 ///     vouched for by the vendor, not asserted by the client.
 /// </summary>
-public record PurchaseProof(string Platform, string Payload, string ProductId, string UserGuid);
+public record PurchaseProof(string Platform, string Payload, string ProductId, string UserGuid, bool Enroll = false);

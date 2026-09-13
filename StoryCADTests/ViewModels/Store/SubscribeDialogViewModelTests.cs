@@ -219,6 +219,7 @@ public class SubscribeDialogViewModelTests
 
         public ActivationState State { get; private set; } = ActivationState.NotPurchased;
         public string CurrentJwt => null;
+        public bool IsAllowlistActivation => false;
         public event EventHandler<ActivationState> StateChanged { add { } remove { } }
 
         public Task InitializeAsync(CancellationToken ct = default) => Task.CompletedTask;
@@ -242,5 +243,10 @@ public class SubscribeDialogViewModelTests
         }
 
         public Task ReactivateAsync(CancellationToken ct = default) => Task.CompletedTask;
+
+        public Task<ActivationResponse> EnrollBetaAsync(CancellationToken ct = default) =>
+            Task.FromResult(new ActivationResponse(false, null, null, "invalid"));
+
+        public Task RefreshAllowlistAsync(CancellationToken ct = default) => Task.CompletedTask;
     }
 }

@@ -73,6 +73,23 @@ public class ProxyActivationClientTests
         StringAssert.Contains(handler.LastRequestBody, "\"platform\":\"apple\"");
     }
 
+    [TestMethod]
+    public async Task GetBetaEnrollmentAsync_200_ParsesBodyWithoutQueryGuid()
+    {
+        var handler = StubHttpMessageHandler.Returning(HttpStatusCode.OK,
+            "{\"open\":true,\"underCap\":true,\"status\":null}");
+        var client = CreateClient(handler);
+
+        var status = await client.GetBetaEnrollmentAsync("guid-1");
+
+        Assert.IsTrue(status.Open);
+        Assert.IsTrue(status.UnderCap);
+        Assert.IsNull(status.Status);
+        StringAssert.EndsWith(handler.LastRequest.RequestUri.AbsolutePath, "/beta-enrollment");
+        Assert.IsTrue(string.IsNullOrEmpty(handler.LastRequest.RequestUri.Query));
+        StringAssert.Contains(handler.LastRequestBody, "\"userGuid\":\"guid-1\"");
+    }
+
     // ── ActivateAsync: authenticated refusal (403) ───────────────────────────
 
     [DataTestMethod]

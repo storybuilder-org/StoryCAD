@@ -3256,7 +3256,14 @@ namespace StoryCollaborator
         internal static void EnsureNotOutOfCredits(HttpResponseMessage response)
         {
             if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-                throw new StoryCADLib.Services.Store.OutOfCreditsException();
+            {
+                var allowlist = CommunityToolkit.Mvvm.DependencyInjection.Ioc.Default
+                    .GetService<StoryCADLib.Services.Store.IStoreActivationService>()?.IsAllowlistActivation == true;
+                throw allowlist
+                    ? new StoryCADLib.Services.Store.OutOfCreditsException(
+                        StoryCADLib.Services.Store.StoreConfig.OutOfCreditsBetaMessage)
+                    : new StoryCADLib.Services.Store.OutOfCreditsException();
+            }
         }
 
         /// <summary>

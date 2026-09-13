@@ -16,7 +16,7 @@ namespace StoryCollaborator.Models
     {
         // The proxy base URL SK receives. SK appends /chat/completions.
         internal const string DefaultProxyBaseUrl =
-            "https://storycad-collaborator-proxy-production.storybuilder-foundation.workers.dev/v1";
+            "https://storycad-collaborator-proxy.storybuilder-foundation.workers.dev/v1";
 
         private const string ModelId = "gpt-5.4-nano";
 

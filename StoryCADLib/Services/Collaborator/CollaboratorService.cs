@@ -3,6 +3,7 @@ using Windows.ApplicationModel.Resources.Core;
 using Windows.Storage;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Markup;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.API;
@@ -85,9 +86,7 @@ public class CollaboratorService
         if (!IsPurchaseVerified())
         {
             _logService.Log(LogLevel.Warn, "Collaborator blocked: no active store activation.");
-            // Offer the subscription. If the user completes it (now Active), fall through and open
-            // Collaborator; otherwise stop here.
-            if (!await ShowSubscribeDialogAsync())
+            if (!await EnsureEntitledToOpenAsync())
             {
                 return;
             }
@@ -160,6 +159,141 @@ public class CollaboratorService
     ///     model owns the dialog). Returns true when the user is Active afterward. Resolved on
     ///     demand to avoid widening the constructor.
     /// </summary>
+    /// <summary>
+    ///     Collaborator #97: Join dialog, allowlist refresh, closed copy, or Subscribe.
+    ///     Does not enroll on the toolbar click.
+    /// </summary>
+    private async Task<bool> EnsureEntitledToOpenAsync()
+    {
+        var activation = Ioc.Default.GetService<IStoreActivationService>();
+        var client = Ioc.Default.GetService<IActivationClient>();
+        var windowing = Ioc.Default.GetService<Windowing>();
+        if (activation is null || client is null)
+        {
+            return false;
+        }
+
+        BetaEnrollmentStatus enrollment;
+        try
+        {
+            var guid = _preferenceService.Model.StoreUserGuid ?? string.Empty;
+            enrollment = await client.GetBetaEnrollmentAsync(guid);
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"Enrollment status unreachable: {ex.Message}");
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                "Collaborator enrollment is unreachable. Check the connection and try again.",
+                LogLevel.Warn, true)));
+            return false;
+        }
+
+        var action = CollaboratorOpenPlanner.Decide(enrollment, hasPlans: false);
+        if (action == CollaboratorOpenAction.ShowClosed)
+        {
+            var store = Ioc.Default.GetService<IStoreService>();
+            var hasPlans = false;
+            if (store is not null)
+            {
+                try
+                {
+                    var products = await store.GetProductsAsync(store.ProductIds);
+                    hasPlans = products is { Count: > 0 };
+                }
+                catch (Exception ex)
+                {
+                    _logService.Log(LogLevel.Warn, $"Store catalog probe failed: {ex.Message}");
+                }
+            }
+
+            action = CollaboratorOpenPlanner.Decide(enrollment, hasPlans);
+        }
+
+        switch (action)
+        {
+            case CollaboratorOpenAction.ShowJoin:
+                return await ShowBetaDialogAsync(windowing);
+            case CollaboratorOpenAction.RefreshAllowlist:
+                try
+                {
+                    await activation.RefreshAllowlistAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logService.Log(LogLevel.Warn, $"Allowlist refresh failed: {ex.Message}");
+                    WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                        "Collaborator enrollment is unreachable. Check the connection and try again.",
+                        LogLevel.Warn, true)));
+                    return false;
+                }
+
+                return activation.State == ActivationState.Active;
+            case CollaboratorOpenAction.ShowSubscribe:
+                return await ShowSubscribeDialogAsync();
+            case CollaboratorOpenAction.ShowRevoked:
+                await ShowNoticeAsync(windowing, "This Collaborator beta access was revoked.");
+                return false;
+            default:
+                var closed = enrollment.Open
+                    ? "The free Collaborator beta is full. Collaborator is not for sale in this release."
+                    : "The free Collaborator beta is closed. Collaborator is not for sale in this release.";
+                await ShowNoticeAsync(windowing, closed);
+                return false;
+        }
+    }
+
+    private async Task<bool> ShowBetaDialogAsync(Windowing windowing)
+    {
+        var vm = Ioc.Default.GetService<BetaEnrollmentDialogViewModel>();
+        if (windowing is null || vm is null)
+        {
+            _logService.Log(LogLevel.Warn, "Beta dialog unavailable; no Windowing or view model registered.");
+            return false;
+        }
+
+        var ok = await vm.ShowAsync(windowing);
+        if (ok)
+        {
+            return true;
+        }
+
+        if (vm.FailureReason == "unreachable")
+        {
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                "Collaborator enrollment is unreachable. Check the connection and try again.",
+                LogLevel.Warn, true)));
+            return false;
+        }
+
+        if (vm.FailureReason is "cap_reached" or "enrollment_closed" or "revoked")
+        {
+            var copy = vm.FailureReason switch
+            {
+                "cap_reached" => "The free Collaborator beta is full. Collaborator is not for sale in this release.",
+                "revoked" => "This Collaborator beta access was revoked.",
+                _ => "The free Collaborator beta is closed. Collaborator is not for sale in this release."
+            };
+            await ShowNoticeAsync(windowing, copy);
+        }
+
+        return false;
+    }
+
+    private static async Task ShowNoticeAsync(Windowing windowing, string body)
+    {
+        if (windowing is null)
+        {
+            return;
+        }
+
+        await windowing.ShowContentDialog(new ContentDialog
+        {
+            Title = "StoryCAD Collaborator",
+            Content = body,
+            CloseButtonText = "OK"
+        });
+    }
+
     private async Task<bool> ShowSubscribeDialogAsync()
     {
         // No platform store (NullStoreService, e.g. any desktop build outside a store bundle) means

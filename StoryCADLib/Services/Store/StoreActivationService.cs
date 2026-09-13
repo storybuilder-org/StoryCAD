@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCADLib.DAL;
@@ -51,6 +53,8 @@ public sealed class StoreActivationService : IStoreActivationService
     public event EventHandler<ActivationState> StateChanged;
 
     public string CurrentJwt => string.IsNullOrEmpty(_jwt) ? null : _jwt;
+
+    public bool IsAllowlistActivation => JwtPurStartsWithAllowlist(CurrentJwt);
 
     // The stable per-user GUID, generated on this machine at startup (issue #90 D8) and embedded
     // in the signed proof at purchase time. Provisioned by
@@ -110,6 +114,35 @@ public sealed class StoreActivationService : IStoreActivationService
         await RefreshActivationAsync(ct);
     }
 
+    public async Task<ActivationResponse> EnrollBetaAsync(CancellationToken ct = default)
+    {
+        var proof = new PurchaseProof("dev", string.Empty, string.Empty, UserGuid, Enroll: true);
+        var response = await _client.ActivateAsync(proof, ct);
+        if (response.Ok && !string.IsNullOrEmpty(response.Jwt))
+        {
+            SetJwt(response.Jwt, response.ExpiresAtUtc ?? DateTime.UtcNow.Add(FallbackJwtLifetime), "allowlist");
+            SetState(ActivationState.Active);
+        }
+
+        return response;
+    }
+
+    public async Task RefreshAllowlistAsync(CancellationToken ct = default)
+    {
+        var proof = new PurchaseProof("dev", string.Empty, string.Empty, UserGuid);
+        var response = await _client.ActivateAsync(proof, ct);
+        if (response.Ok && !string.IsNullOrEmpty(response.Jwt))
+        {
+            SetJwt(response.Jwt, response.ExpiresAtUtc ?? DateTime.UtcNow.Add(FallbackJwtLifetime), "allowlist");
+            SetState(ActivationState.Active);
+            return;
+        }
+
+        SetJwt(string.Empty, DateTime.MinValue, string.Empty);
+        var notPurchased = response.Reason == "invalid" || response.Reason == "expired";
+        SetState(notPurchased ? ActivationState.NotPurchased : ActivationState.Refused);
+    }
+
     // Proof -> Worker -> JWT. Shared by startup, purchase, restore, and entitlement changes.
     private async Task RefreshActivationAsync(CancellationToken ct)
     {
@@ -125,17 +158,15 @@ public sealed class StoreActivationService : IStoreActivationService
                     "StoreUserGuid is empty; purchase proof cannot be bound to a user.");
             }
 
-            // Dev/tester allowlist activation (issue #90 D7/D8): COLLAB_DEV_ACTIVATION routes around
-            // the platform store entirely -- there is no store proof to present, only the GUID a
-            // human approved on the Worker's allowlist. payload/productId are ignored by the
-            // Worker for platform "dev" (design section 6).
-            var proof = IsDevActivationEnabled()
+            // COLLAB_DEV_ACTIVATION and a prior allowlist Join both Refresh (enroll false).
+            // InitializeAsync never sends enroll true (Collaborator #97).
+            var proof = ShouldRefreshAllowlist()
                 ? new PurchaseProof("dev", string.Empty, string.Empty, UserGuid)
                 : await _store.GetPurchaseProofAsync(UserGuid, ct);
             if (proof is null)
             {
                 // Authoritative "no purchase" from the store: drop any cached JWT.
-                SetJwt(string.Empty, DateTime.MinValue);
+                SetJwt(string.Empty, DateTime.MinValue, string.Empty);
                 SetState(ActivationState.NotPurchased);
                 return;
             }
@@ -169,7 +200,8 @@ public sealed class StoreActivationService : IStoreActivationService
             {
                 if (!string.IsNullOrEmpty(response.Jwt))
                 {
-                    SetJwt(response.Jwt, response.ExpiresAtUtc ?? DateTime.UtcNow.Add(FallbackJwtLifetime));
+                    var path = proof.Platform == "dev" ? "allowlist" : "store";
+                    SetJwt(response.Jwt, response.ExpiresAtUtc ?? DateTime.UtcNow.Add(FallbackJwtLifetime), path);
                     SetState(ActivationState.Active);
                     return;
                 }
@@ -180,9 +212,12 @@ public sealed class StoreActivationService : IStoreActivationService
                 return;
             }
 
-            // Refusal. Revoked/invalid -> access denied; expired -> lapsed, offer resubscribe.
-            SetJwt(string.Empty, DateTime.MinValue);
-            SetState(response.Reason == "expired" ? ActivationState.NotPurchased : ActivationState.Refused);
+            // Refusal. Dev invalid means no approved row: NotPurchased so the next click can Join.
+            // Store invalid/revoked stay Refused. Expired stays NotPurchased.
+            SetJwt(string.Empty, DateTime.MinValue, string.Empty);
+            var notPurchased = response.Reason == "expired"
+                || (proof.Platform == "dev" && response.Reason == "invalid");
+            SetState(notPurchased ? ActivationState.NotPurchased : ActivationState.Refused);
         }
         finally
         {
@@ -195,6 +230,45 @@ public sealed class StoreActivationService : IStoreActivationService
     // Worker's allowlist row decides dev entitlement.
     private static bool IsDevActivationEnabled() =>
         Environment.GetEnvironmentVariable("COLLAB_DEV_ACTIVATION") == "1";
+
+    private bool ShouldRefreshAllowlist() =>
+        IsDevActivationEnabled()
+        || string.Equals(_preferenceService.Model.StoreActivationPath, "allowlist", StringComparison.Ordinal);
+
+    internal static bool JwtPurStartsWithAllowlist(string jwt)
+    {
+        if (string.IsNullOrEmpty(jwt))
+        {
+            return false;
+        }
+
+        var parts = jwt.Split('.');
+        if (parts.Length != 3)
+        {
+            return false;
+        }
+
+        try
+        {
+            var payload = parts[1].Replace('-', '+').Replace('_', '/');
+            switch (payload.Length % 4)
+            {
+                case 2: payload += "=="; break;
+                case 3: payload += "="; break;
+            }
+
+            var json = Encoding.UTF8.GetString(Convert.FromBase64String(payload));
+            using var doc = JsonDocument.Parse(json);
+            return doc.RootElement.TryGetProperty("pur", out var pur)
+                && pur.ValueKind == JsonValueKind.String
+                && pur.GetString() is { } value
+                && value.StartsWith("allowlist:", StringComparison.Ordinal);
+        }
+        catch
+        {
+            return false;
+        }
+    }
 
     /// <summary>
     ///     Re-presents proof to the Worker on demand (issue #90 step 8 item 7): used by a workflow
@@ -232,25 +306,38 @@ public sealed class StoreActivationService : IStoreActivationService
             return;
         }
 
-        SetJwt(string.Empty, DateTime.MinValue);
+        SetJwt(string.Empty, DateTime.MinValue, string.Empty);
         SetState(ActivationState.NotPurchased);
     }
 
     // Single writer for the JWT cache. Persists only on change, so a clear that clears
     // nothing (the common startup path for non-purchasers) never touches the disk.
-    private void SetJwt(string jwt, DateTime expiryUtc)
+    private void SetJwt(string jwt, DateTime expiryUtc, string activationPath = null)
     {
         _jwt = jwt ?? string.Empty;
         _expiryUtc = expiryUtc;
+        if (string.IsNullOrEmpty(_jwt))
+        {
+            activationPath = string.Empty;
+        }
 
         var model = _preferenceService.Model;
-        if ((model.StoreActivationJwt ?? string.Empty) == _jwt && model.StoreActivationJwtExpiry == expiryUtc)
+        var pathUnchanged = activationPath is null
+            || (model.StoreActivationPath ?? string.Empty) == activationPath;
+        if ((model.StoreActivationJwt ?? string.Empty) == _jwt
+            && model.StoreActivationJwtExpiry == expiryUtc
+            && pathUnchanged)
         {
             return;
         }
 
         model.StoreActivationJwt = _jwt;
         model.StoreActivationJwtExpiry = expiryUtc;
+        if (activationPath is not null)
+        {
+            model.StoreActivationPath = activationPath;
+        }
+
         PersistPreferences();
     }
 

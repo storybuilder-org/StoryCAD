@@ -1182,10 +1182,18 @@ public class Collaborator : ICollaborator
     /// live kernel call: construct an HttpOperationException directly (its public 4-arg
     /// constructor takes the status code) and assert on the returned exception's type/message.
     /// </summary>
-    internal static Exception TranslateChatException(Exception ex) =>
-        ex is HttpOperationException { StatusCode: HttpStatusCode.TooManyRequests }
-            ? new OutOfCreditsException()
-            : ex;
+    internal static Exception TranslateChatException(Exception ex)
+    {
+        if (ex is not HttpOperationException { StatusCode: HttpStatusCode.TooManyRequests })
+        {
+            return ex;
+        }
+
+        var allowlist = Ioc.Default.GetService<IStoreActivationService>()?.IsAllowlistActivation == true;
+        return allowlist
+            ? new OutOfCreditsException(StoreConfig.OutOfCreditsBetaMessage)
+            : new OutOfCreditsException();
+    }
 
     /// <summary>
     /// Builds a readable text context from gathered story elements for the chat system message.
