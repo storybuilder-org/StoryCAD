@@ -55,6 +55,7 @@ public class PreferencesModel : ObservableObject
         StoreActivationJwt = string.Empty;
         StoreActivationJwtExpiry = DateTime.MinValue;
         StoreUserGuid = string.Empty;
+        StoreActivationPath = string.Empty;
         StarredCollaboratorWorkflows = new List<string>();
         CollaboratorStarDefaultsApplied = false;
         CollaboratorStarMigrationVersion = 0;
@@ -315,6 +316,14 @@ public class PreferencesModel : ObservableObject
     [JsonInclude]
     [JsonPropertyName("StoreUserGuid")]
     public string StoreUserGuid { get; set; }
+
+    /// <summary>
+    ///     How the current JWT was obtained: <c>allowlist</c>, <c>store</c>, or empty.
+    ///     Used at startup to refresh allowlist testers without sending enroll.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("StoreActivationPath")]
+    public string StoreActivationPath { get; set; }
 
     /// <summary>
     ///     Should the startup dialog (HelpPage) be shown

@@ -17,4 +17,8 @@ public sealed class OutOfCreditsException : Exception
     public OutOfCreditsException() : base(StoreConfig.OutOfCreditsMessage)
     {
     }
+
+    public OutOfCreditsException(string message) : base(message)
+    {
+    }
 }

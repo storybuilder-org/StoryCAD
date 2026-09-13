@@ -15,9 +15,24 @@ internal sealed class ActivationRequest
     [JsonPropertyName("payload")] public string Payload { get; set; }
     [JsonPropertyName("productId")] public string ProductId { get; set; }
     [JsonPropertyName("userGuid")] public string UserGuid { get; set; }
+    [JsonPropertyName("enroll")] public bool Enroll { get; set; }
+}
+
+internal sealed class BetaEnrollmentRequest
+{
+    [JsonPropertyName("userGuid")] public string UserGuid { get; set; }
+}
+
+internal sealed class BetaEnrollmentResponse
+{
+    [JsonPropertyName("open")] public bool Open { get; set; }
+    [JsonPropertyName("underCap")] public bool UnderCap { get; set; }
+    [JsonPropertyName("status")] public string Status { get; set; }
 }
 
 [JsonSerializable(typeof(ActivationRequest))]
+[JsonSerializable(typeof(BetaEnrollmentRequest))]
+[JsonSerializable(typeof(BetaEnrollmentResponse))]
 internal partial class ActivationJsonContext : JsonSerializerContext
 {
 }
@@ -44,7 +59,7 @@ public sealed class ProxyActivationClient : IActivationClient
     // Mirrors CollaboratorLib KernelFactory.DefaultProxyBaseUrl. StoryCADLib does not
     // reference CollaboratorLib, so the default is duplicated here; COLLAB_PROXY_URL overrides it.
     private const string DefaultProxyBaseUrl =
-        "https://storycad-collaborator-proxy-production.storybuilder-foundation.workers.dev/v1";
+        "https://storycad-collaborator-proxy.storybuilder-foundation.workers.dev/v1";
 
     // One shared client for the process (socket reuse); the DI singleton reuses it.
     private static readonly HttpClient SharedHttpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
@@ -81,7 +96,8 @@ public sealed class ProxyActivationClient : IActivationClient
             Platform = proof.Platform,
             Payload = proof.Payload,
             ProductId = proof.ProductId,
-            UserGuid = proof.UserGuid
+            UserGuid = proof.UserGuid,
+            Enroll = proof.Enroll
         }, ActivationJsonContext.Default.ActivationRequest);
 
         using var request = BuildRequest(HttpMethod.Post, "/activate");
@@ -116,6 +132,44 @@ public sealed class ProxyActivationClient : IActivationClient
 
         throw new StoreActivationUnreachableException(
             $"Store activation returned unexpected status {(int)response.StatusCode}.");
+    }
+
+    public async Task<BetaEnrollmentStatus> GetBetaEnrollmentAsync(string userGuid, CancellationToken ct = default)
+    {
+        var body = JsonSerializer.Serialize(new BetaEnrollmentRequest { UserGuid = userGuid },
+            ActivationJsonContext.Default.BetaEnrollmentRequest);
+        using var request = BuildRequest(HttpMethod.Post, "/beta-enrollment");
+        request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+
+        HttpResponseMessage response;
+        try
+        {
+            response = await _httpClient.SendAsync(request, ct);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            throw new StoreActivationUnreachableException("Collaborator enrollment is unreachable.", ex);
+        }
+
+        using var _ = response;
+        var content = await response.Content.ReadAsStringAsync(ct);
+        if (response.StatusCode != HttpStatusCode.OK)
+        {
+            throw new StoreActivationUnreachableException(
+                $"Enrollment status returned unexpected status {(int)response.StatusCode}.");
+        }
+
+        var parsed = JsonSerializer.Deserialize(content, ActivationJsonContext.Default.BetaEnrollmentResponse);
+        if (parsed is null)
+        {
+            throw new StoreActivationUnreachableException("Enrollment status body was empty.");
+        }
+
+        return new BetaEnrollmentStatus(parsed.Open, parsed.UnderCap, parsed.Status);
     }
 
     public async Task<string> GetStoreTicketAsync(string purpose = "purchase", CancellationToken ct = default)

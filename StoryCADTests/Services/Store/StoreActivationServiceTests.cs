@@ -30,6 +30,7 @@ public class StoreActivationServiceTests
         prefs.Model.StoreActivationJwt = string.Empty;
         prefs.Model.StoreActivationJwtExpiry = DateTime.MinValue;
         prefs.Model.StoreUserGuid = "11111111-1111-1111-1111-111111111111";
+        prefs.Model.StoreActivationPath = string.Empty;
 
         // Defensive reset: guards against a leaked COLLAB_DEV_ACTIVATION from a prior test or the
         // outer shell environment leaking into tests that don't expect dev-platform routing.
@@ -324,6 +325,7 @@ public class StoreActivationServiceTests
             Assert.IsNotNull(client.LastProof);
             Assert.AreEqual("dev", client.LastProof.Platform);
             Assert.AreEqual("11111111-1111-1111-1111-111111111111", client.LastProof.UserGuid);
+            Assert.IsFalse(client.LastProof.Enroll, "startup must Refresh, not Join");
             Assert.AreEqual(0, store.ProofCallCount,
                 "dev activation must not ask the platform store for proof");
         }
@@ -349,6 +351,76 @@ public class StoreActivationServiceTests
         Assert.IsNotNull(client.LastProof);
         Assert.AreEqual(SampleProof.Platform, client.LastProof.Platform);
         Assert.AreNotEqual("dev", client.LastProof.Platform);
+    }
+
+    [TestMethod]
+    public async Task InitializeAsync_NoDevEnv_DoesNotPostDevActivate()
+    {
+        Environment.SetEnvironmentVariable("COLLAB_DEV_ACTIVATION", null);
+        var store = new FakeStoreService { Proof = null };
+        var client = new FakeActivationClient();
+        var service = CreateService(store, client);
+
+        await service.InitializeAsync();
+
+        Assert.AreEqual(0, client.ActivateCallCount);
+        Assert.AreEqual(ActivationState.NotPurchased, service.State);
+    }
+
+    [TestMethod]
+    public async Task InitializeAsync_DevRefreshInvalid_NotPurchased()
+    {
+        Environment.SetEnvironmentVariable("COLLAB_DEV_ACTIVATION", "1");
+        try
+        {
+            var client = new FakeActivationClient
+            {
+                Response = new ActivationResponse(false, null, null, "invalid")
+            };
+            var service = CreateService(new FakeStoreService(), client);
+
+            await service.InitializeAsync();
+
+            Assert.AreEqual(ActivationState.NotPurchased, service.State);
+            Assert.IsFalse(client.LastProof.Enroll);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("COLLAB_DEV_ACTIVATION", null);
+        }
+    }
+
+    [TestMethod]
+    public async Task EnrollBetaAsync_PostsEnrollTrue_SetsAllowlistPathAndActive()
+    {
+        var client = new FakeActivationClient();
+        var service = CreateService(new FakeStoreService(), client);
+
+        var response = await service.EnrollBetaAsync();
+
+        Assert.IsTrue(response.Ok);
+        Assert.IsTrue(client.LastProof.Enroll);
+        Assert.AreEqual("dev", client.LastProof.Platform);
+        Assert.AreEqual(ActivationState.Active, service.State);
+        Assert.AreEqual("allowlist",
+            Ioc.Default.GetRequiredService<PreferenceService>().Model.StoreActivationPath);
+    }
+
+    [TestMethod]
+    public async Task EnrollBetaAsync_CapReached_ReturnsReasonDoesNotActivate()
+    {
+        var client = new FakeActivationClient
+        {
+            Response = new ActivationResponse(false, null, null, "cap_reached")
+        };
+        var service = CreateService(new FakeStoreService(), client);
+
+        var response = await service.EnrollBetaAsync();
+
+        Assert.AreEqual("cap_reached", response.Reason);
+        Assert.AreNotEqual(ActivationState.Active, service.State);
+        Assert.IsTrue(string.IsNullOrEmpty(
+            Ioc.Default.GetRequiredService<PreferenceService>().Model.StoreActivationPath));
     }
 
     // Fakes shared with the other store test classes live in StoreTestDoubles.cs.

@@ -40,4 +40,8 @@ public static class StoreConfig
     public const string OutOfCreditsMessage =
         "You've used all your credits for this period. Buy more from Collaborator's Buy Credits " +
         "screen, or wait for your next monthly renewal.";
+
+    public const string OutOfCreditsBetaMessage =
+        "You have used all credits for this period. Contact StoryBuilder Foundation. " +
+        "Do not buy credits in the store.";
 }
