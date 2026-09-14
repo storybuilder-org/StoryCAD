@@ -759,6 +759,7 @@ namespace StoryCollaborator.Workflows
                         new PropertySpec("Sounds"),
                         new PropertySpec("Touch"),
                         new PropertySpec("SmellTaste"),
+                        new PropertySpec("Description"),
                         new PropertySpec("Notes")
                     },
                     exampleLists: new List<string> { "Locale" }),
@@ -827,6 +828,12 @@ namespace StoryCollaborator.Workflows
                             {
                                 RequestName = "CharacterChoices",
                                 ElementType = StoryItemType.Character,
+                                Projection = ElementProjection.IdAndName
+                            },
+                            new CollectionInput
+                            {
+                                RequestName = "SettingChoices",
+                                ElementType = StoryItemType.Setting,
                                 Projection = ElementProjection.IdAndName
                             }
                         },
