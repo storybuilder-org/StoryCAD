@@ -61,7 +61,7 @@
 
         <!-- Manual plus legal links (open in the system browser via the view model). -->
         <StackPanel Orientation="Horizontal" Spacing="4">
-            <HyperlinkButton Content="Getting Started" Padding="4,2"
+            <HyperlinkButton Content="Learn more (read before subscribing)" Padding="4,2"
                              Command="{x:Bind Vm.OpenGettingStartedCommand}"
                              AutomationProperties.AutomationId="SubscribeGettingStartedButton" />
             <TextBlock Text="·" VerticalAlignment="Center"
