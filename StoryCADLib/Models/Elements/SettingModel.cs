@@ -10,6 +10,25 @@ public class SettingModel : StoryElement
 
     [JsonIgnore] public static ObservableCollection<string> SettingNames = new();
 
+    /// <summary>
+    /// Keep <see cref="SettingNames"/> in step with a rename. Loaded outlines never
+    /// populate this list (JSON uses the parameterless constructor), so IndexOf can
+    /// be -1. Do not index in that case.
+    /// </summary>
+    internal static void RenameInNameList(string oldName, string newName)
+    {
+        if (oldName is null)
+        {
+            return;
+        }
+
+        var index = SettingNames.IndexOf(oldName);
+        if (index >= 0)
+        {
+            SettingNames[index] = newName ?? string.Empty;
+        }
+    }
+
     #endregion
 
     #region Properties
