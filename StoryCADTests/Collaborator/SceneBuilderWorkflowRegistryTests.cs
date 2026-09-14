@@ -26,6 +26,9 @@ public class SceneBuilderWorkflowRegistryTests
         var choices = io.CollectionInputs.Single(c => c.RequestName == "CharacterChoices");
         Assert.AreEqual(StoryItemType.Character, choices.ElementType);
         Assert.AreEqual(ElementProjection.IdAndName, choices.Projection);
+        var settings = io.CollectionInputs.Single(c => c.RequestName == "SettingChoices");
+        Assert.AreEqual(StoryItemType.Setting, settings.ElementType);
+        Assert.AreEqual(ElementProjection.IdAndName, settings.Projection);
         Assert.IsFalse(io.CollectionInputs.Any(c => c.RequestName == "ProblemChoices"));
     }
 
