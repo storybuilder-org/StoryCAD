@@ -142,6 +142,12 @@
 5. Verify document content matches StoryCAD outline
    **Expected:** Characters, Problems, Scenes, Settings have corresponding Scrivener documents with RTF content
 
+6. Leave the StoryCAD folder in the Binder. Run Scrivener Reports again on the same .scrivx
+   **Expected:** Export completes without errors
+
+7. Open the .scriv project in Scrivener
+   **Expected:** Binder has one StoryCAD folder (the previous folder was replaced). Scrivener does not report duplicate keys.
+
 **Pass/Fail:** ______
 
 ---

@@ -57,6 +57,94 @@ public class ScrivenerIo
         ProjectBookMarks = XmlDocument.SelectSingleNode("ScrivenerProject//ProjectBookmarks");
     }
 
+    /// <summary>
+    ///     Remove every BinderItem titled StoryCAD from the binder, including copies
+    ///     under Trash. Walks the XML tree. Does not use XPath.
+    /// </summary>
+    public void RemoveStoryCADFolders()
+    {
+        var _found = new List<IXmlNode>();
+        CollectStoryCADBinderItems(Binder, _found);
+        foreach (var _node in _found)
+        {
+            _node.ParentNode?.RemoveChild(_node);
+        }
+
+        StoryCAD = null;
+    }
+
+    /// <summary>
+    ///     Insert a StoryCAD BinderItem as a direct child of Binder immediately
+    ///     before the ResearchFolder. If no ResearchFolder exists, append it.
+    /// </summary>
+    /// <returns>true if inserted before ResearchFolder; false if appended</returns>
+    public bool InsertStoryCADFolder(XmlElement folder)
+    {
+        var _research = FindBinderChildByType("ResearchFolder");
+        if (_research != null)
+        {
+            Binder.InsertBefore(folder, _research);
+            return true;
+        }
+
+        Binder.AppendChild(folder);
+        return false;
+    }
+
+    private static void CollectStoryCADBinderItems(IXmlNode node, List<IXmlNode> found)
+    {
+        if (node.NodeType == NodeType.ElementNode && node.NodeName.Equals("BinderItem"))
+        {
+            var _title = node.SelectSingleNode("./Title");
+            if (_title != null && _title.InnerText.Trim() == "StoryCAD")
+            {
+                found.Add(node);
+                return;
+            }
+        }
+
+        foreach (var _child in node.ChildNodes)
+        {
+            CollectStoryCADBinderItems(_child, found);
+        }
+    }
+
+    private IXmlNode FindBinderChildByType(string type)
+    {
+        foreach (var _child in Binder.ChildNodes)
+        {
+            if (_child.NodeType != NodeType.ElementNode || !_child.NodeName.Equals("BinderItem"))
+            {
+                continue;
+            }
+
+            if (_child is XmlElement _element && _element.GetAttribute("Type") == type)
+            {
+                return _child;
+            }
+
+            foreach (var _attr in _child.Attributes)
+            {
+                if (_attr.NodeName.Equals("Type") && _attr.InnerText == type)
+                {
+                    return _child;
+                }
+            }
+
+            // Fallback: Research folder title is Research in the default Scrivener binder
+            if (type == "ResearchFolder")
+            {
+                var _title = _child.SelectSingleNode("./Title");
+                if (_title != null && _title.InnerText.Trim() == "Research")
+                {
+                    return _child;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public async Task SaveScrivenerProject(StorageFile file)
     {
         await XmlDocument.SaveToFileAsync(file);
@@ -232,21 +320,32 @@ public class ScrivenerIo
         _element.SetAttribute("Modified", _now.ToString("yyyy-MM-dd - HH:mm:ss - K"));
         // Add Title child
         var _title = XmlDocument.CreateElement("Title");
-        var _titleText = XmlDocument.CreateTextNode(binderItem.Title);
-        _title.AppendChild(_titleText);
+        _title.InnerText = binderItem.Title;
         _element.AppendChild(_title);
         // Add MetaData child and IncludeInCompile grandchild
         var _meta = XmlDocument.CreateElement("MetaData");
         var _include = XmlDocument.CreateElement("IncludeInCompile");
-        var _includeText = XmlDocument.CreateTextNode("Yes");
-        _include.AppendChild(_includeText);
+        _include.InnerText = "Yes";
         _meta.AppendChild(_include);
+        if (!string.IsNullOrEmpty(binderItem.StbUuid))
+        {
+            var _custom = XmlDocument.CreateElement("CustomMetaData");
+            var _metaItem = XmlDocument.CreateElement("MetaDataItem");
+            var _fieldId = XmlDocument.CreateElement("FieldID");
+            _fieldId.InnerText = "stbuuid";
+            var _value = XmlDocument.CreateElement("Value");
+            _value.InnerText = binderItem.StbUuid;
+            _metaItem.AppendChild(_fieldId);
+            _metaItem.AppendChild(_value);
+            _custom.AppendChild(_metaItem);
+            _meta.AppendChild(_custom);
+        }
+
         _element.AppendChild(_meta);
         // Add TextSettings child and TextSelection grandchild
         var _textSettings = XmlDocument.CreateElement("TextSettings");
         var _textSelection = XmlDocument.CreateElement("TextSelection");
-        var _textSelectionText = XmlDocument.CreateTextNode("0,0");
-        _textSelection.AppendChild(_textSelectionText);
+        _textSelection.InnerText = "0,0";
         _textSettings.AppendChild(_textSelection);
         _element.AppendChild(_textSelection);
         // Note: In Scrivener text nodes can have sub-documents and folders
