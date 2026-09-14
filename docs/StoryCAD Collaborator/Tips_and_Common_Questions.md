@@ -27,7 +27,7 @@ Accept, then look at the element in StoryCAD. Two steps, and they catch surprise
 
 ## Connection and access
 
-Collaborator needs a working network connection to run workflows, because each run goes to a service the Foundation operates. During the beta, access is granted per installation by the Foundation and there is nothing to buy; [Getting Started](Getting_Started.html) explains the steps.
+Collaborator needs a working network connection to run workflows, because each run goes to a service the Foundation operates. During the beta you Join from the Collaborator dialog; after Collaborator is for sale you Subscribe. There is nothing to buy during the beta. [Getting Started](Getting_Started.html) explains both.
 
 ## Where to learn the craft
 

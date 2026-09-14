@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="StoryCADLib.Services.Dialogs.BetaEnrollmentDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <StackPanel Width="440" Spacing="16">
+        <TextBlock TextWrapping="Wrap"
+                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   Text="Collaborator is a free beta. Choose Join to use it. Choose Not now to skip. This click does not enroll you until you choose Join." />
+        <HyperlinkButton Content="Getting Started" Padding="4,2"
+                         Command="{x:Bind Vm.OpenGettingStartedCommand}"
+                         AutomationProperties.AutomationId="BetaEnrollmentGettingStartedButton" />
+    </StackPanel>
+</Page>

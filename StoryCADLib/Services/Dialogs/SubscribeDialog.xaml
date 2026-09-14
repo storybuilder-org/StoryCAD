@@ -59,8 +59,13 @@
                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                    Text="Your subscription renews automatically at the price above until you cancel. Cancel anytime in your account settings. If a free trial is included, cancel before it ends to avoid a charge." />
 
-        <!-- Legal links (open in the system browser via the view model). -->
+        <!-- Manual plus legal links (open in the system browser via the view model). -->
         <StackPanel Orientation="Horizontal" Spacing="4">
+            <HyperlinkButton Content="Getting Started" Padding="4,2"
+                             Command="{x:Bind Vm.OpenGettingStartedCommand}"
+                             AutomationProperties.AutomationId="SubscribeGettingStartedButton" />
+            <TextBlock Text="·" VerticalAlignment="Center"
+                       Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
             <HyperlinkButton Content="Terms of Use" Padding="4,2"
                              Command="{x:Bind Vm.OpenTermsCommand}"
                              AutomationProperties.AutomationId="SubscribeTermsOfUseButton" />

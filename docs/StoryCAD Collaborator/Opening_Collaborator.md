@@ -11,11 +11,11 @@ has_toc: false
 
 ## Before you start
 
-Collaborator works on the outline you have open in StoryCAD, so open one first. There is nothing separate to install; if Collaborator has not been switched on for you yet, [Getting Started](Getting_Started.html) explains how that happens during the beta.
+Collaborator works on the outline you have open in StoryCAD, so open one first. There is nothing separate to install. If Collaborator has not been switched on for you yet, click **Collaborator** and read [Getting Started](Getting_Started.html) from the dialog before you Join or Subscribe.
 
 ## Launch Collaborator
 
-With an outline open, click **Collaborator** on the StoryCAD toolbar. A separate window opens, titled Story Collaborator, and StoryCAD stays where it was behind it. If nothing happens, the usual reason is that your access has not been approved yet, or that StoryCAD has not been restarted since it was; Getting Started covers both.
+With an outline open, click **Collaborator** on the StoryCAD toolbar. During the beta you first see Join and Not now. After you Join, or after a paid subscription is in force, a separate window opens, titled Story Collaborator, and StoryCAD stays where it was behind it. [Getting Started](Getting_Started.html) covers Join, Subscribe, and what to do if the window does not open.
 
 ![StoryCAD toolbar; the Collaborator button is the highlighted chain icon](../media/Collaborator/Collaborator-Toolbar-Button.png)
 

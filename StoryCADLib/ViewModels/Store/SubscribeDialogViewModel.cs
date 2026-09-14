@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
 using System.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
+using StoryCADLib.Models;
 using StoryCADLib.Services.Dialogs;
 using StoryCADLib.Services.Store;
 using Windows.System;
@@ -27,6 +29,7 @@ public sealed class SubscribeDialogViewModel : ObservableObject
         _logService = logService;
         OpenTermsCommand = new RelayCommand(() => Open(StoreConfig.TermsOfUseUrl));
         OpenPrivacyCommand = new RelayCommand(() => Open(StoreConfig.PrivacyPolicyUrl));
+        OpenGettingStartedCommand = new RelayCommand(OpenGettingStarted);
     }
 
     public ObservableCollection<StoreProduct> Plans { get; } = new();
@@ -63,6 +66,7 @@ public sealed class SubscribeDialogViewModel : ObservableObject
 
     public RelayCommand OpenTermsCommand { get; }
     public RelayCommand OpenPrivacyCommand { get; }
+    public RelayCommand OpenGettingStartedCommand { get; }
 
     /// <summary>Price/free-trial line for the selected plan, e.g. "Includes a free trial, then $4.99/month."</summary>
     public string PriceSummary
@@ -255,6 +259,13 @@ public sealed class SubscribeDialogViewModel : ObservableObject
     }
 
     private void ClearStatus() => SetStatus(null);
+
+    private void OpenGettingStarted()
+    {
+        var baseUrl = Ioc.Default.GetService<AppState>()?.ManualBaseUrl
+                      ?? "https://beta.manual.storybuilder.org/";
+        Open(new Uri(new Uri(baseUrl), StoreConfig.GettingStartedManualRelativeUrl).ToString());
+    }
 
     private void Open(string url)
     {

@@ -9,7 +9,9 @@ has_toc: false
 
 # Getting Started
 
-This page covers what you need and how Collaborator is switched on during the beta. Once it is running, [Opening Collaborator](Opening_Collaborator.html) describes the window and [Running a Workflow](Running_a_Workflow.html) walks through your first run.
+This page is how Collaborator is switched on. During the invited beta you Join from a dialog. After Collaborator is for sale, the same toolbar button offers a paid subscription. Once it is running, [Opening Collaborator](Opening_Collaborator.html) describes the window and [Running a Workflow](Running_a_Workflow.html) walks through your first run.
+
+The Join dialog and the Subscribe dialog both link here. Read this page before you choose Join or Subscribe.
 
 ## About the beta
 
@@ -17,30 +19,48 @@ StoryCAD Collaborator is in an invited beta. The people using it are writers, te
 
 ## What you need
 
-You need the beta build of StoryCAD, which is a Windows or macOS build the Foundation distributes to invited testers, on Windows through a Microsoft Store package flight and on the Mac through TestFlight. Your invitation tells you how to get it. Collaborator is part of that build; there is nothing separate to download or install. You also need a story outline to work on, since Collaborator works on the outline you have open, and a working network connection, because every workflow runs against a service.
+You need StoryCAD 4.3 or later. Collaborator is part of that app; there is nothing separate to download. You also need a story outline to work on, since Collaborator works on the outline you have open, and a working network connection, because every workflow runs against a service.
 
-## Turn it on
+## Turn it on during the beta
 
-Collaborator does not open for anyone the Foundation has not approved, and approval happens per installation, so there is a short handshake before your first run.
+Clicking **Collaborator** on the toolbar does not enroll you. StoryCAD shows a dialog titled StoryCAD Collaborator, with **Join**, **Not now**, and a link to this page.
 
-1. Install the beta build from your invitation and launch StoryCAD once. On that first launch your copy of StoryCAD introduces itself to the Foundation's service, which records it as waiting for approval. You do not have to do anything in the app to make this happen.
-2. Tell the Foundation you have installed it, by the route your invitation gives. Nobody needs any code or identifier from you; the person approving matches your message to the waiting entry.
-3. When you hear back that you are approved, restart StoryCAD and open or create an outline.
-4. Click **Collaborator** on the toolbar. Collaborator opens in its own Story Collaborator window.
+1. Open or create an outline.
+2. Click **Collaborator** on the toolbar.
+3. Read this page if you want more than the dialog says.
+4. Choose **Not now** to skip. Collaborator stays closed. Click Collaborator later and the same dialog returns.
+5. Choose **Join** to enroll. Collaborator opens in its own Story Collaborator window. You do not type a code, and you do not wait for an email.
 
 ![StoryCAD toolbar; the Collaborator button is the highlighted chain icon](../media/Collaborator/Collaborator-Toolbar-Button.png)
 
-*[Text to come: what StoryCAD shows if you click Collaborator between the first launch and approval.]*
+![Join dialog: StoryCAD Collaborator, Join and Not now](../media/Collaborator/Collaborator-Join-Dialog.png)
 
 ![The Story Collaborator window as it first opens: workflow list, empty center, chat](../media/Collaborator/Collaborator-Access-Prompt.png)
 
+If the beta is full or closed, Join is not offered. Collaborator is not for sale during the beta, so do not look for a store purchase as a substitute.
+
+## Turn it on after Collaborator is for sale
+
+When Collaborator is sold as a subscription, the toolbar button shows **Subscribe**, **Restore purchases**, and **Not now**, plus a link to this page, Terms of Use, and Privacy Policy. The store sets the price. This manual does not invent one.
+
+1. Open or create an outline.
+2. Click **Collaborator** on the toolbar.
+3. Choose a plan if more than one is listed.
+4. **Subscribe** opens the Microsoft Store or Mac App Store payment sheet. Pay there, not inside StoryCAD.
+5. **Restore purchases** if you already paid on this store account.
+6. **Not now** leaves Collaborator closed.
+
+If you Joined the beta earlier, you can keep using Collaborator without buying until the Foundation says that path has ended.
+
 ## If Collaborator does not open
 
-The usual reason during the beta is that approval has not come through yet, or that StoryCAD has not been restarted since it did; check with the Foundation if you have waited longer than your invitation said to expect. A message about store activation being unreachable means StoryCAD could not reach the Foundation's service at all, which is a network problem at your end or a service problem at ours, and trying again after a few minutes usually settles which. If the Story Collaborator window still never opens, restart StoryCAD. For StoryCAD help in general, see [Getting Help](../Front%20Matter/Getting_Help.html).
+**Not now** is supposed to leave it closed. A message that enrollment is unreachable means StoryCAD could not reach the Foundation's service; wait a few minutes and try again. If the Story Collaborator window still never opens after Join or after a completed purchase, restart StoryCAD. For StoryCAD help in general, see [Getting Help](../Front%20Matter/Getting_Help.html).
 
 ## If you run out of credits
 
-Workflow runs are paid for from a credit allowance the Foundation grants to each tester. If you use it up before it renews, a run will stop with a message saying you have used all your credits for this period and offering to sell you more. Do not buy any. Tell the Foundation instead, and say roughly what you were doing; heavy use is useful information for the beta, and your allowance can be topped up.
+During the beta, workflow runs are paid for from a credit allowance the Foundation grants to each tester. If you use it up before it renews, a run will stop and tell you to contact StoryBuilder Foundation. Do not buy credits in the store. Tell the Foundation instead, and say roughly what you were doing; heavy use is useful information for the beta, and your allowance can be topped up.
+
+After Collaborator is for sale, a subscriber who runs out can buy more from Collaborator's Buy Credits screen, or wait for the next monthly renewal.
 
 ## Preferences that affect the manual
 
