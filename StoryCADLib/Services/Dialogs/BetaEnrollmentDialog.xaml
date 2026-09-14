@@ -8,7 +8,7 @@
         <TextBlock TextWrapping="Wrap"
                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                    Text="Collaborator is a free beta. Choose Join to use it. Choose Not now to skip. This click does not enroll you until you choose Join." />
-        <HyperlinkButton Content="Getting Started" Padding="4,2"
+        <HyperlinkButton Content="Learn more (read before joining)" Padding="4,2"
                          Command="{x:Bind Vm.OpenGettingStartedCommand}"
                          AutomationProperties.AutomationId="BetaEnrollmentGettingStartedButton" />
     </StackPanel>
