@@ -1,6 +1,11 @@
+using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
+using StoryCADLib.Models;
+using StoryCADLib.Services.Dialogs;
 using StoryCADLib.Services.Logging;
 using StoryCADLib.Services.Store;
+using Windows.System;
 
 namespace StoryCADLib.ViewModels.Store;
 
@@ -15,10 +20,13 @@ public sealed class BetaEnrollmentDialogViewModel
 
     public string FailureReason { get; private set; }
 
+    public RelayCommand OpenGettingStartedCommand { get; }
+
     public BetaEnrollmentDialogViewModel(IStoreActivationService activation, ILogService logService)
     {
         _activation = activation;
         _logService = logService;
+        OpenGettingStartedCommand = new RelayCommand(OpenGettingStarted);
     }
 
     public async Task<bool> ShowAsync(Windowing windowing)
@@ -27,8 +35,7 @@ public sealed class BetaEnrollmentDialogViewModel
         var dialog = new ContentDialog
         {
             Title = "StoryCAD Collaborator",
-            Content = "Collaborator is a free beta. Choose Join to use it.\n" +
-                      "Choose Not now to skip. This click does not enroll you until you choose Join.",
+            Content = new BetaEnrollmentDialog(this),
             PrimaryButtonText = "Join",
             CloseButtonText = "Not now",
             DefaultButton = ContentDialogButton.Primary
@@ -69,6 +76,21 @@ public sealed class BetaEnrollmentDialogViewModel
             _logService.Log(LogLevel.Warn, $"Join failed: {ex.Message}");
             FailureReason = "unreachable";
             return false;
+        }
+    }
+
+    private void OpenGettingStarted()
+    {
+        var baseUrl = Ioc.Default.GetService<AppState>()?.ManualBaseUrl
+                      ?? "https://beta.manual.storybuilder.org/";
+        var url = new Uri(new Uri(baseUrl), StoreConfig.GettingStartedManualRelativeUrl).ToString();
+        try
+        {
+            _ = Launcher.LaunchUriAsync(new Uri(url));
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"Failed to open {url}: {ex.Message}");
         }
     }
 }

@@ -24,7 +24,7 @@ The manual describes subscribing with a free trial. That is the production path.
 - [x] `Getting_Started.md` line 20 and `Tips_and_Common_Questions.md` "Connection and access" both say "additional paid feature with a free trial." Reword for beta. Getting Started done 2026-09-05; the Tips sentence is left for the item 6 pass on that page.
 - [x] `Getting_Started.md` leftover placeholder `<!-- image: subscribe or start trial prompt -->`: drop, or replace with what a beta tester sees. Replaced 2026-09-05 with a placeholder for the Story Collaborator window as it first opens.
 - [x] Landing page and `What_Collaborator_Is.md`: check the "paid plug-in, dual store, free trial" framing against beta wording. What Collaborator Is no longer states the business terms (item 2). Landing page fixed in the item 6 pass (f4ca5a58).
-- [ ] Verify on the beta build before writing: what a tester sees when they click Collaborator, and whether the store dialog appears at all. Verified against the code 2026-09-05, not a build; the findings below are what the code does today.
+- [x] Verify on the beta build before writing: what a tester sees when they click Collaborator, and whether the store dialog appears at all. Verified 2026-09-14 on `dev` after #1567: Join / Not now dialog (not Subscribe). Getting Started rewritten for Join plus later Subscribe; both dialogs link that page.
 
 ### 2. What Collaborator Is: strengthen "What it is not"; cite the AI use policy
 - [x] `What_Collaborator_Is.md` "## What it is not" (line 29, a short bullet list today). Reinforce it. Done 2026-09-05: six short paragraphs, each with its reason (not prose, not a substitute for craft, nothing written until accepted, no library of books, your work not kept or trained on, no guarantee).

@@ -38,6 +38,7 @@ public class SubscribeDialogViewModelTests
         Assert.AreEqual(Monthly, vm.SelectedPlan);
         Assert.IsTrue(vm.HasPlans);
         Assert.IsFalse(vm.HasError);
+        Assert.IsNotNull(vm.OpenGettingStartedCommand);
     }
 
     [TestMethod]

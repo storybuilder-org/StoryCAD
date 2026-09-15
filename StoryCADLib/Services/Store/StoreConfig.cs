@@ -24,6 +24,13 @@ public static class StoreConfig
     public const string TermsOfUseUrl = "https://storybuilder.org/terms";
     public const string PrivacyPolicyUrl = "https://storybuilder.org/privacy";
 
+    /// <summary>
+    ///     Relative to <see cref="StoryCADLib.Models.AppState.ManualBaseUrl"/>. Join and Subscribe
+    ///     both open this page in the browser before the user chooses Join or Subscribe.
+    /// </summary>
+    public const string GettingStartedManualRelativeUrl =
+        "docs/StoryCAD%20Collaborator/Getting_Started.html";
+
     // Credit-pack (consumable) product IDs (issue #90 design section 10 "Credit packs", step 10).
     // Placeholders: pack sizes, prices, and the credit exchange rate are gate 3 decisions, not yet
     // made (devdocs/store_submissions.md). Must match the Worker's PRODUCT_MAP entries verbatim
