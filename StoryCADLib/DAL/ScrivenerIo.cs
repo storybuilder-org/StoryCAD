@@ -93,7 +93,14 @@ public class ScrivenerIo
 
     private static void CollectStoryCADBinderItems(IXmlNode node, List<IXmlNode> found)
     {
-        if (node.NodeType == NodeType.ElementNode && node.NodeName.Equals("BinderItem"))
+        // WinRT XmlNodeList: foreach on a text node, or nested foreach on
+        // IIterable<IXmlNode>, throws ExecutionEngineException.
+        if (node == null || node.NodeType != NodeType.ElementNode)
+        {
+            return;
+        }
+
+        if (node.NodeName.Equals("BinderItem"))
         {
             var _title = node.SelectSingleNode("./Title");
             if (_title != null && _title.InnerText.Trim() == "StoryCAD")
@@ -103,10 +110,29 @@ public class ScrivenerIo
             }
         }
 
-        foreach (var _child in node.ChildNodes)
+        foreach (var _child in SnapshotChildElements(node))
         {
             CollectStoryCADBinderItems(_child, found);
         }
+    }
+
+    private static List<IXmlNode> SnapshotChildElements(IXmlNode node)
+    {
+        var _list = new List<IXmlNode>();
+        if (node.ChildNodes == null)
+        {
+            return _list;
+        }
+
+        foreach (var _child in node.ChildNodes)
+        {
+            if (_child.NodeType == NodeType.ElementNode)
+            {
+                _list.Add(_child);
+            }
+        }
+
+        return _list;
     }
 
     private IXmlNode FindBinderChildByType(string type)
