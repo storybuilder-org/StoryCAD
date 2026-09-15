@@ -834,7 +834,7 @@ namespace StoryCollaborator.Workflows
                             {
                                 RequestName = "SettingChoices",
                                 ElementType = StoryItemType.Setting,
-                                Projection = ElementProjection.IdAndName
+                                Projection = ElementProjection.FullModel
                             }
                         },
                         ExampleLists = new List<string>

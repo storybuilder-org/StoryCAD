@@ -554,6 +554,95 @@ public class SceneBuilderResolverTests
         Assert.IsTrue(result.StatusMessages.Any(m => m.Contains("dropped")));
     }
 
+    [TestMethod]
+    public async Task InventedSettingGuid_Dropped()
+    {
+        var api = CreateApi();
+        var fx = await BuildThreeSceneComplication(api);
+        var runner = new WorkflowRunner(api.CurrentModel!, WorkflowRegistry.Get("SceneBuilder")!, api);
+        var result = WorkflowResult.Succeeded();
+        result.PendingUpdates.Add(new PendingUpdate(
+            "Scene",
+            fx.Middle.Uuid,
+            new PropertySpec("Setting"),
+            Guid.NewGuid().ToString()));
+
+        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneBuilder");
+
+        Assert.AreEqual(0, result.PendingUpdates.Count);
+        Assert.IsTrue(result.StatusMessages.Any(m => m.Contains("SettingChoices GUID")));
+    }
+
+    [TestMethod]
+    public async Task SettingPlaceName_Dropped()
+    {
+        var api = CreateApi();
+        var fx = await BuildThreeSceneComplication(api);
+        var runner = new WorkflowRunner(api.CurrentModel!, WorkflowRegistry.Get("SceneBuilder")!, api);
+        var result = WorkflowResult.Succeeded();
+        result.PendingUpdates.Add(new PendingUpdate(
+            "Scene",
+            fx.Middle.Uuid,
+            new PropertySpec("Setting"),
+            "Dodger Stadium"));
+
+        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneBuilder");
+
+        Assert.AreEqual(0, result.PendingUpdates.Count);
+        Assert.IsTrue(result.StatusMessages.Any(m => m.Contains("SettingChoices GUID")));
+    }
+
+    [TestMethod]
+    public async Task SettingChoicesGuid_Kept()
+    {
+        var api = CreateApi();
+        var fx = await BuildThreeSceneComplication(api);
+        var overview = api.CurrentModel!.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+        var settingAdd = api.AddElement(StoryItemType.Setting, overview.Uuid.ToString(), "Dodger Stadium");
+        Assert.IsTrue(settingAdd.IsSuccess);
+        var setting = api.GetStoryElement(settingAdd.Payload).Payload!;
+
+        var runner = new WorkflowRunner(api.CurrentModel!, WorkflowRegistry.Get("SceneBuilder")!, api);
+        var result = WorkflowResult.Succeeded();
+        result.PendingUpdates.Add(new PendingUpdate(
+            "Scene",
+            fx.Middle.Uuid,
+            new PropertySpec("Setting"),
+            setting.Uuid.ToString()));
+
+        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneBuilder");
+
+        Assert.AreEqual(1, result.PendingUpdates.Count);
+        Assert.AreEqual(UpdateKind.Fill, result.PendingUpdates[0].Kind);
+        Assert.AreEqual(setting.Uuid.ToString(), result.PendingUpdates[0].Value);
+    }
+
+    [TestMethod]
+    public async Task SettingUnchangedOnEmptyLive_IsFill()
+    {
+        var api = CreateApi();
+        var fx = await BuildThreeSceneComplication(api);
+        var overview = api.CurrentModel!.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+        var settingAdd = api.AddElement(StoryItemType.Setting, overview.Uuid.ToString(), "Dodger Stadium");
+        Assert.IsTrue(settingAdd.IsSuccess);
+        var setting = api.GetStoryElement(settingAdd.Payload).Payload!;
+
+        var runner = new WorkflowRunner(api.CurrentModel!, WorkflowRegistry.Get("SceneBuilder")!, api);
+        var result = WorkflowResult.Succeeded();
+        result.FieldStates["Setting"] = OutputFieldState.Unchanged;
+        result.PendingUpdates.Add(new PendingUpdate(
+            "Scene",
+            fx.Middle.Uuid,
+            new PropertySpec("Setting"),
+            setting.Uuid.ToString()));
+
+        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneBuilder");
+
+        Assert.AreEqual(1, result.PendingUpdates.Count);
+        Assert.AreEqual(UpdateKind.Fill, result.PendingUpdates[0].Kind);
+        Assert.AreEqual(setting.Uuid.ToString(), result.PendingUpdates[0].Value);
+    }
+
     private static async Task<ThreeSceneFixture> BuildThreeSceneComplication(StoryCADApi api)
     {
         var create = await api.CreateEmptyOutline("Three scenes", "Author", "0");

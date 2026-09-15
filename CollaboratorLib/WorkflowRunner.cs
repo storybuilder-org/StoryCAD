@@ -854,6 +854,12 @@ namespace StoryCollaborator
             switch (state)
             {
                 case OutputFieldState.Unchanged:
+                    if (currentEmpty && !proposedEmpty)
+                    {
+                        result.StatusMessages.Add(
+                            $"Field state Unchanged on empty live; treating as Fill: {update.Key}");
+                        return UpdateKind.Fill;
+                    }
                     return UpdateKind.NoOp;
                 case OutputFieldState.Fill:
                     if (proposedEmpty)
@@ -1788,6 +1794,20 @@ namespace StoryCollaborator
                 return false;
 
             var text = update.Value?.ToString();
+            if (isSetting)
+            {
+                if (string.IsNullOrWhiteSpace(text))
+                    return false;
+                if (!Guid.TryParse(text, out var settingGuid) || settingGuid == Guid.Empty
+                    || !GetCandidateGuids(StoryItemType.Setting).Contains(settingGuid))
+                {
+                    result.StatusMessages.Add(
+                        "Scene Builder: Setting is not a SettingChoices GUID; dropped.");
+                    return true;
+                }
+                return false;
+            }
+
             if (string.IsNullOrWhiteSpace(text) || !Guid.TryParse(text, out var guid) || guid == Guid.Empty)
                 return false;
 
@@ -1801,12 +1821,6 @@ namespace StoryCollaborator
             if (isCharacterSeat && got.Payload is not CharacterModel)
             {
                 result.StatusMessages.Add($"Scene Builder: {property} is not a Character; dropped.");
-                return true;
-            }
-
-            if (isSetting && got.Payload is not SettingModel)
-            {
-                result.StatusMessages.Add("Scene Builder: Setting is not a Setting; dropped.");
                 return true;
             }
 
