@@ -11,6 +11,7 @@ public class ScrivenerReports
 {
     private readonly AppState _appState;
     private readonly ReportFormatter _formatter;
+    private readonly ILogService _logger;
     private readonly StoryModel _model;
     private readonly ScrivenerIo _scrivener;
 
@@ -20,7 +21,6 @@ public class ScrivenerReports
     private BinderItem _explorerNode; //     StoryExplorer subfolder node
     private BinderItem _miscNode; //     Miscellaneous subfolder node
     private BinderItem _narratorNode; //     StoryNarrator subfolder node
-    private XmlElement _newStbRoot;
     private BinderItem _problemListNode; //       List of Problems report
     private BinderItem _sceneListNode; //       List of Scenes report
     private BinderItem _settingListNode; //       List of Settings report
@@ -39,6 +39,7 @@ public class ScrivenerReports
         _appState = appState;
         _model = appState.CurrentDocument!.Model;
         _formatter = new ReportFormatter(appState);
+        _logger = Ioc.Default.GetRequiredService<ILogService>();
         //_root = root;
         //_misc = miscFolder;
     }
@@ -50,8 +51,9 @@ public class ScrivenerReports
     public async Task GenerateReports()
     {
         await _scrivener.LoadScrivenerProject(); // Load the Scrivener project
+        _scrivener.RemoveStoryCADFolders();
         _binderNode = _scrivener.BuildBinderItemTree(); // Build a BinderItem model
-        UpdateStoryCADOutline(); // Replace or add StoryCAD BinderItems to model
+        UpdateStoryCADOutline(); // Build a new StoryCAD BinderItem tree
 
         await RecurseStoryElementReports(_explorerNode);
         await RecurseStoryElementReports(_narratorNode);
@@ -68,23 +70,14 @@ public class ScrivenerReports
 
         SetLabelSettings(); // Add or replace my binder Label settings
 
-        _newStbRoot = _scrivener.CreateFromBinder(_StoryCADNode);
-        await _scrivener.WriteTestFile("newstb.xml", _newStbRoot); // Debugging
-        UpdateStoryCAD();
-        await _scrivener.SaveScrivenerProject(_scrivener.ScrivenerFile);
-    }
+        var newStbRoot = _scrivener.CreateFromBinder(_StoryCADNode);
+        if (!_scrivener.InsertStoryCADFolder(newStbRoot))
+        {
+            _logger.Log(LogLevel.Warn,
+                "Scrivener project has no Research folder; appending StoryCAD folder to Binder");
+        }
 
-    private void UpdateStoryCAD()
-    {
-        if (_scrivener.StoryCAD != null)
-        {
-            var parent = _scrivener.StoryCAD.ParentNode;
-            parent.ReplaceChild(_newStbRoot, _scrivener.StoryCAD);
-        }
-        else
-        {
-            _scrivener.Binder.InsertBefore(_newStbRoot, _scrivener.Research);
-        }
+        await _scrivener.SaveScrivenerProject(_scrivener.ScrivenerFile);
     }
 
     private void MatchDraftFolderToNarrator()
@@ -107,6 +100,11 @@ public class ScrivenerReports
         }
 
         var draftFolderItems = new List<BinderItem>();
+        if (draftFolder == null)
+        {
+            return draftFolderItems;
+        }
+
         foreach (var node in draftFolder)
         {
             draftFolderItems.Add(node);
@@ -128,91 +126,27 @@ public class ScrivenerReports
 
     public void UpdateStoryCADOutline()
     {
-        // Locate StoryCAD BinderItem or insert just before Research folder
-        _StoryCADNode = LocateFolder(_binderNode, "StoryCAD");
-        if (_StoryCADNode == null)
-        {
-            _StoryCADNode = InsertFolderBefore(_binderNode, "Research", "StoryCAD");
-        }
-
-        // Locate or add StoryCAD's three child folders
-        _explorerNode = LocateFolder(_StoryCADNode, "ExplorerView");
-        if (_explorerNode == null)
-        {
-            _explorerNode = AddFolder(_StoryCADNode, "ExplorerView");
-        }
-
-        _explorerNode.Children.Clear();
-        _narratorNode = LocateFolder(_StoryCADNode, "NarratorView");
-        if (_narratorNode == null)
-        {
-            _narratorNode = AddFolder(_StoryCADNode, "NarratorView");
-        }
-
-        _narratorNode.Children.Clear();
-        _miscNode = LocateFolder(_StoryCADNode, "Miscellaneous");
-        if (_miscNode == null)
-        {
-            _miscNode = AddFolder(_StoryCADNode, "Miscellaneous");
-        }
-
-        // Locate or add the Miscellaneous folder's child reports
-        _problemListNode = LocateText(_miscNode, "List of Problems");
-        if (_problemListNode == null)
-        {
-            _problemListNode = AddText(_miscNode, "List of Problems");
-        }
-
-        _characterListNode = LocateText(_miscNode, "List of Characters");
-        if (_characterListNode == null)
-        {
-            _characterListNode = AddText(_miscNode, "List of Characters");
-        }
-
-        _settingListNode = LocateText(_miscNode, "List of Settings");
-        if (_settingListNode == null)
-        {
-            _settingListNode = AddText(_miscNode, "List of Settings");
-        }
-
-        _sceneListNode = LocateText(_miscNode, "List of Scenes");
-        if (_sceneListNode == null)
-        {
-            _sceneListNode = AddText(_miscNode, "List of Scenes");
-        }
-
-        _synopsisNode = LocateText(_miscNode, "Story Synopsis");
-        if (_synopsisNode == null)
-        {
-            _synopsisNode = AddText(_miscNode, "Story Synopsis");
-        }
-
+        _StoryCADNode = new BinderItem(NewUuid(), BinderItemType.Folder, "StoryCAD");
+        _explorerNode = AddFolder(_StoryCADNode, "ExplorerView");
+        _narratorNode = AddFolder(_StoryCADNode, "NarratorView");
+        _miscNode = AddFolder(_StoryCADNode, "Miscellaneous");
+        _problemListNode = AddText(_miscNode, "List of Problems");
+        _characterListNode = AddText(_miscNode, "List of Characters");
+        _settingListNode = AddText(_miscNode, "List of Settings");
+        _sceneListNode = AddText(_miscNode, "List of Scenes");
+        _synopsisNode = AddText(_miscNode, "Story Synopsis");
         AddStoryExplorerNodes();
         AddStoryNarratorNodes();
     }
 
     private void AddStoryExplorerNodes()
     {
-        RecurseStoryModelNode(_model.ExplorerView[0], _explorerNode);
+        RecurseStoryModelNode(_model.ExplorerView[0], _explorerNode, true);
     }
 
     private void AddStoryNarratorNodes()
     {
-        RecurseStoryModelNode(_model.NarratorView[0], _narratorNode);
-    }
-
-    public BinderItem LocateFolder(BinderItem parent, string title)
-    {
-        // See if there if the desired folder exists under parent
-        foreach (var child in parent.Children)
-        {
-            if (child.Title == title)
-            {
-                return child;
-            }
-        }
-
-        return null;
+        RecurseStoryModelNode(_model.NarratorView[0], _narratorNode, false);
     }
 
     public BinderItem AddFolder(BinderItem parent, string title)
@@ -222,40 +156,6 @@ public class ScrivenerReports
         return item;
     }
 
-    public BinderItem InsertFolderBefore(BinderItem parent, string after, string title)
-    {
-        var item = new BinderItem(NewUuid(), BinderItemType.Folder, title);
-        parent.Children.Insert(FolderIndex(_binderNode, after), item);
-        return item;
-    }
-
-    private int FolderIndex(BinderItem parent, string title)
-    {
-        for (var i = 0; i < _binderNode.Children.Count; i++)
-        {
-            if (_binderNode.Children[i].Title.Equals(title))
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    public BinderItem LocateText(BinderItem parent, string title)
-    {
-        // See if there if the desired file exists under parent
-        foreach (var child in parent.Children)
-        {
-            if (child.Title == title)
-            {
-                return child;
-            }
-        }
-
-        return null;
-    }
-
     public BinderItem AddText(BinderItem parent, string title)
     {
         var item = new BinderItem(NewUuid(), BinderItemType.Text, title);
@@ -263,7 +163,7 @@ public class ScrivenerReports
         return item;
     }
 
-    private void RecurseStoryModelNode(StoryNodeItem node, BinderItem parent)
+    private void RecurseStoryModelNode(StoryNodeItem node, BinderItem parent, bool useElementUuid)
     {
         BinderItemType type;
         switch (node.Type)
@@ -279,10 +179,16 @@ public class ScrivenerReports
                 break;
         }
 
-        var binderItem = new BinderItem(node.Uuid.ToString(), type, node.Name, parent);
+        var uuid = useElementUuid ? node.Uuid.ToString() : NewUuid();
+        var binderItem = new BinderItem(uuid, type, node.Name, parent);
+        if (!useElementUuid)
+        {
+            binderItem.StbUuid = node.Uuid.ToString();
+        }
+
         foreach (var child in node.Children)
         {
-            RecurseStoryModelNode(child, binderItem);
+            RecurseStoryModelNode(child, binderItem, useElementUuid);
         }
     }
 
@@ -416,6 +322,23 @@ public class ScrivenerReports
 
     #region Generate StoryCAD reports under StoryCAD model
 
+    private StoryElement FindStoryElement(OutlineService outlineService, string uuidText)
+    {
+        if (!Guid.TryParse(uuidText, out var uuid))
+        {
+            return null;
+        }
+
+        try
+        {
+            return outlineService.GetStoryElementByGuid(_model, uuid);
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
+    }
+
     /// <summary>
     ///     This method builds the reports under the StoryExplorer
     ///     node, which consists of a tree of BinderItem nodes matching
@@ -429,15 +352,11 @@ public class ScrivenerReports
     private async Task RecurseStoryElementReports(BinderItem node)
     {
         StoryElement element = null;
-        var uuid = new Guid(node.Uuid);
         var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
-        try
+        element = FindStoryElement(outlineService, node.Uuid);
+        if (element == null && !string.IsNullOrEmpty(node.StbUuid))
         {
-            element = outlineService.GetStoryElementByGuid(_model, uuid);
-        }
-        catch (InvalidOperationException)
-        {
-            // Element not found, element remains null
+            element = FindStoryElement(outlineService, node.StbUuid);
         }
 
         if (element != null)
