@@ -1657,8 +1657,7 @@ public class ShellViewModel : ObservableRecipient
                 //CharacterModel.CharacterNames[charIndex] = msg.NewName;
                 break;
             case StoryItemType.Setting:
-                var _settingIndex = SettingModel.SettingNames.IndexOf(_msg.OldName);
-                SettingModel.SettingNames[_settingIndex] = _msg.NewName;
+                SettingModel.RenameInNameList(_msg.OldName, _msg.NewName);
                 break;
         }
     }
