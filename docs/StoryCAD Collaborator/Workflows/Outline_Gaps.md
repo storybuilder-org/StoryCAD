@@ -37,9 +37,9 @@ A sentence at the top of the page beginning "Guess:" tells you where Collaborato
 Every time a workflow runs, Collaborator tells the model which stage of outlining your story has reached, so that its suggestions fit an outline at that stage rather than a finished one. It decides the stage from the outline itself, checking in this order and stopping at the first condition that holds:
 
 1. Ideation. The Overview's Type, Genre, or Premise is empty. The story is still an idea.
-2. Problem Development. Those three are filled, but no Story Problem has been chosen on the Overview's Premise tab, or the chosen problem's Protagonist or Antagonist is not linked to a character.
+2. Problem Development. Those three have been filled, but the Overview's Premise tab does not show a chosen Story Problem, or the chosen problem's Protagonist or Antagonist is not linked to a character.
 3. Character Development. The Story Problem and its two characters are in place, but one of those characters is missing an essential field: Name, Character Sketch, Role, Story Role, Age, Sex, Appearance, or Backstory.
-4. Structure Building. The cast is complete, but no scene has been assigned to a beat on the Story Problem's beat sheet or on any of its sub-problems.
+4. Structure Building. The cast is complete, but no scene has been allocated to a beat on the Story Problem's beat sheet or on any of its sub-problems.
 5. Scene Work. At least one scene sits on a beat. The outline has a shape, and the remaining work is inside the scenes.
 
 The same judgment appears to you as the Guess sentence on the Outline gaps page: "Guess: the outline is in Problem Development," for example. When a problem gap and a character gap are both open, the sentence says so and adds that the Story Problem still needs its protagonist and antagonist. It is a guess in the plain sense. It comes from which fields are filled, not from reading your prose, so if it seems wrong, the table above shows which fields it is looking at.

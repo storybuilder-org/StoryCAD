@@ -29,7 +29,7 @@ Along with the elements you picked, Collaborator sends a short account of where 
 
 ## Wait for the result
 
-Collaborator runs the workflow and reports its progress in the chat column on the right. When it finishes, the chat shows a short status line saying how many updates are free and how many need review, and the center of the window fills with the Property Updates list, one row for each field Collaborator would like to change. Accept all changes appears at the foot of that list, and Review Each and Try Again come alive on the top bar. Nothing has been written into your outline yet; that happens only when you accept, and [Reviewing Suggestions](Reviewing_Suggestions.html) explains the choices.
+Collaborator runs the workflow and reports its progress in the chat column on the right. When it finishes, the chat shows a short status line saying how many updates are free and how many need review, and the center of the window fills with the Property Updates list, one row for each field Collaborator would like to change. Accept all changes appears at the foot of that list, and Review Each and Try Again come alive on the top bar. Collaborator doesn't write anything into your outline until you tell it to.
 
 ![A finished run: six proposals headed 6: 6 free, 0 need review, five labeled New and one Update, with Accept all changes at the foot of the list](../media/Collaborator/Collaborator-Updates-After-Run.png)
 
@@ -39,4 +39,4 @@ If the first result misses the mark, click **Try Again** on the top bar. It runs
 
 ## After you accept
 
-Open the same story element in StoryCAD's navigation pane. The fields you accepted hold the text you approved in Collaborator, and you can edit them there like any other text you typed. The outline is still yours.
+Exit this workflow session to return to your outline in StoryCAD. Open the same story element in StoryCAD's navigation pane. The fields you accepted hold the text you approved in Collaborator, and you can edit them there like any other text you typed. The outline is still yours.

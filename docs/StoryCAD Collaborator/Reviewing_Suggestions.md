@@ -38,7 +38,7 @@ The Accept all changes button sits at the foot of the list. It applies every New
 
 ## Review Each
 
-Click **Review Each** on the top bar to walk the list one field at a time. For each field the card shows Yours, the text in your outline now, and Proposed, what Collaborator suggests, with a count such as 1 of 6 so you know where you are. Three buttons follow. Accept writes the proposal into this field only. Skip keeps yours and drops the proposal. Accept Free Remaining applies every remaining New, Refresh, and Update row in one step and leaves the remaining Has your text fields for you to Accept or Skip one by one.
+Click **Review Each** on the top bar to walk the list one field at a time. For each field the card shows Yours, the text in your outline now, and Proposed, what Collaborator suggests, with a count such as 1 of 6 so you know where you are. Three buttons follow. Accept writes the proposal into this field only. Skip keeps yours and drops the proposal. Accept Free Remaining applies to every remaining New, Refresh, and Update row in one step and leaves the remaining Has your text fields for you to Accept or Skip one by one.
 
 Accept Free Remaining is not the same as accepting every empty field. It also applies the Refresh rows, the fields Collaborator wrote earlier in this session, and it never overwrites a Has your text field in bulk.
 
@@ -48,6 +48,6 @@ Accept Free Remaining is not the same as accepting every empty field. It also ap
 
 Try Again on the top bar discards the waiting set and runs the same workflow again; [Running a Workflow](Running_a_Workflow.html) describes it. Use it instead of accepting a weak pass and editing afterward.
 
-## Nothing is permanent until you accept
+## Nothing is permanent until you accept it.
 
-Closing Collaborator without accepting leaves the fields as they were. Accepting writes the text into your outline at once, so there is nothing further to do to keep it, and if you accept a suggestion and dislike it later, edit the field in StoryCAD as you would any other text. You are not locked in.
+Closing Collaborator without accepting leaves the fields as they were. Accepting writes the text into your outline at once, so there is nothing further to do to keep it, and if you accept a suggestion and dislike it later, edit the field in StoryCAD as you would any other text. The system does not lock you in.

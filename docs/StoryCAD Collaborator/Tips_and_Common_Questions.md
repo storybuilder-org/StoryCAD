@@ -19,11 +19,11 @@ Second passes are normal, and they behave differently from first passes. If you 
 
 ## Long lists of updates
 
-Some workflows, Character Builder and Scene Builder among them, propose twenty or more fields at once. The Property Updates list scrolls, and Review Each walks the same rows one at a time with a count of where you are, which is the easier way to be sure you have seen every row before you accept.
+Some workflows, Character Builder and Scene Builder among them, can propose twenty or more fields at once. The Property Updates list scrolls, and Review Each walks the same rows one at a time with a count of where you are, which is the easier way to be sure you have seen every row before you accept.
 
 ## Check your work as you go
 
-Accept, then look at the element in StoryCAD. Two steps, and they catch surprises early. There is no Save step in between: an accepted update is written to your outline as you accept it, and saving the outline in StoryCAD works as it always has.
+Accept, then look at the element in StoryCAD. Two steps, and they catch surprises early. The system writes an accepted update to your outline as you accept it, without a Save step in between, and you save the outline in StoryCAD as usual.
 
 ## Connection and access
 
