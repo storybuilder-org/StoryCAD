@@ -533,9 +533,34 @@ namespace StoryCollaborator.Workflows
                         "Creativity", "Dominance", "Enthusiasm", "Assurance", "Sensitivity",
                         "Shrewdness", "Sociability", "Stability",
                         "StoryRole", "Archetype"
-                    }),
+                    })
+                {
+                    // #260: second workflow to migrate to the "input" JSON object.
+                    JsonInput = new WorkflowJsonInputSpec
+                    {
+                        TargetProperties = new List<string>
+                        {
+                            "GUID", "Name", "Description", "StoryRole", "Archetype", "Flaw", "BackStory",
+                            "Role", "Age", "Sex", "Economic", "Education", "Ethnic", "Religion",
+                            "Eyes", "Hair", "Build", "Complexion", "Appearance",
+                            "Enneagram", "Intelligence", "Values", "Focus", "Abnormality",
+                            "Adventurousness", "Aggression", "Confidence", "Conscientiousness",
+                            "Creativity", "Dominance", "Enthusiasm", "Assurance", "Sensitivity",
+                            "Shrewdness", "Sociability", "Stability", "TraitList"
+                        },
+                        RelatedProblemProperties = new List<string>
+                        {
+                            "GUID", "Name", "Description", "ProblemCategory", "ProblemType", "ConflictType",
+                            "Protagonist", "ProtGoal", "ProtMotive", "ProtConflict",
+                            "Antagonist", "AntagGoal", "AntagMotive", "AntagConflict",
+                            "Premise", "Outcome", "Method", "Theme"
+                        },
+                        ResolvedCharacterProperties = new List<string> { "GUID", "Name" }
+                    }
+                },
                 // #184 FlawBackstory: wound + history together. Retires Flaw and Backstory.
-                // #260: first workflow to migrate to the "input" JSON object (JsonInput below).
+                // #260: first workflow migrated to the "input" JSON object (JsonInput below);
+                // CharacterBuilder above followed the same shape.
                 new Workflow(
                     "FlawBackstory", "Flaw and Backstory",
                     "Identify the character's central flaw and the formative history that grounds it.",

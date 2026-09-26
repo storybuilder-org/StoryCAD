@@ -90,7 +90,7 @@ namespace StoryCollaborator.Workflows
         /// <summary>
         /// Issue #260: the property lists this workflow's "input" request field uses. Null
         /// means the workflow sends no "input" field yet -- Elements and Args stay its only
-        /// carriers until it migrates. Only FlawBackstory sets this today.
+        /// carriers until it migrates. FlawBackstory and CharacterBuilder set this today.
         /// </summary>
         public WorkflowJsonInputSpec? JsonInput { get; set; }
 

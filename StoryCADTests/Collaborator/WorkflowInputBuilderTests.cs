@@ -17,8 +17,9 @@ namespace StoryCADTests.Collaborator;
 
 /// <summary>
 ///     Issue #260 StoryCAD proposal: the "input" request field, one JSON object built for a
-///     migrated workflow. Tonight's scope is FlawBackstory only -- character, relatedProblems,
-///     lists, storyContext (see devdocs/issue_260_json_input_storycad_proposal.md section 2a).
+///     migrated workflow. FlawBackstory and CharacterBuilder share the character,
+///     relatedProblems, lists, storyContext shape (see
+///     devdocs/issue_260_json_input_storycad_proposal.md section 2a).
 /// </summary>
 [TestClass]
 public class WorkflowInputBuilderTests
@@ -208,11 +209,62 @@ public class WorkflowInputBuilderTests
     {
         var api = await NewOutline();
         var character = AddCharacter(api, "Anyone");
+        var partner = AddCharacter(api, "Someone");
+
+        var body = Runner(api, "Relationship").BuildWorkflowRequestBody(
+            new Dictionary<string, StoryElement> { ["Character"] = character, ["Partner"] = partner });
+
+        Assert.IsNull(body.Input, "a workflow without a JsonInput property list gets no input field");
+    }
+
+    [TestMethod]
+    public async Task BuildWorkflowRequestBody_CharacterBuilder_InputHasFourTopLevelKeysAndCharacterKeysMatchSpec()
+    {
+        var api = await NewOutline();
+        var character = AddCharacter(api, "Nell");
 
         var body = Runner(api, "CharacterBuilder").BuildWorkflowRequestBody(
             new Dictionary<string, StoryElement> { ["Character"] = character });
 
-        Assert.IsNull(body.Input, "a workflow without a JsonInput property list gets no input field");
+        Assert.IsNotNull(body.Input, "CharacterBuilder declares a JsonInput property list; input must be built");
+        CollectionAssert.AreEquivalent(
+            new[] { "character", "relatedProblems", "lists", "storyContext" },
+            body.Input.Select(p => p.Key).ToList());
+
+        var characterObj = body.Input["character"].AsObject();
+        CollectionAssert.AreEquivalent(
+            WorkflowRegistry.Get("CharacterBuilder").JsonInput.TargetProperties.ToList(),
+            characterObj.Select(p => p.Key).ToList());
+    }
+
+    [TestMethod]
+    public async Task BuildWorkflowRequestBody_CharacterBuilder_TraitListArrivesAsJsonArray()
+    {
+        var api = await NewOutline();
+        var character = AddCharacter(api, "Traity");
+        character.TraitList = new List<string> { "Brave", "Stubborn" };
+
+        var body = Runner(api, "CharacterBuilder").BuildWorkflowRequestBody(
+            new Dictionary<string, StoryElement> { ["Character"] = character });
+
+        var traitList = body.Input["character"].AsObject()["TraitList"].AsArray();
+        CollectionAssert.AreEqual(
+            new[] { "Brave", "Stubborn" },
+            traitList.Select(v => v.GetValue<string>()).ToList());
+    }
+
+    [TestMethod]
+    public async Task BuildWorkflowRequestBody_CharacterBuilder_AdventurousnessArrivesUnderCorrectSpelling()
+    {
+        var api = await NewOutline();
+        var character = AddCharacter(api, "Daring");
+        character.Adventurousness = "High";
+
+        var body = Runner(api, "CharacterBuilder").BuildWorkflowRequestBody(
+            new Dictionary<string, StoryElement> { ["Character"] = character });
+
+        var characterObj = body.Input["character"].AsObject();
+        Assert.AreEqual("High", characterObj["Adventurousness"].GetValue<string>());
     }
 
     [TestMethod]

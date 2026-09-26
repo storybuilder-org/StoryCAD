@@ -15,7 +15,7 @@ namespace StoryCollaborator;
 /// JsonInput gets a null input; Elements and Args stay the only carriers for it until it
 /// migrates. Adding the next workflow is a registry entry (its own JsonInput property list)
 /// plus a small branch here for its own top-level shape -- <see cref="BuildCharacterCraftInput"/>
-/// is the one shape implemented tonight, for FlawBackstory.
+/// is the one shape implemented so far, shared by FlawBackstory and CharacterBuilder.
 /// </summary>
 internal static class WorkflowInputBuilder
 {
@@ -30,7 +30,7 @@ internal static class WorkflowInputBuilder
 
         JsonObject? result = workflow.Label switch
         {
-            "FlawBackstory" => BuildCharacterCraftInput(workflow, gatheredElements, api, model),
+            "FlawBackstory" or "CharacterBuilder" => BuildCharacterCraftInput(workflow, gatheredElements, api, model),
             _ => null
         };
 
@@ -42,7 +42,8 @@ internal static class WorkflowInputBuilder
 
     /// <summary>
     /// The character / relatedProblems / lists / storyContext shape (StoryCAD proposal #260,
-    /// "The shape for FlawBackstory"). Keyed on a gathered "Character".
+    /// "The shape for FlawBackstory"), shared by FlawBackstory and CharacterBuilder. Keyed on a
+    /// gathered "Character".
     /// </summary>
     private static JsonObject? BuildCharacterCraftInput(
         Workflow workflow,
@@ -170,15 +171,26 @@ internal static class WorkflowInputBuilder
         return type.GetProperty(jsonKey, BindingFlags.Public | BindingFlags.Instance)?.GetValue(element);
     }
 
-    private static JsonValue? ToJsonValue(object? value)
+    private static JsonNode? ToJsonValue(object? value)
     {
         return value switch
         {
             null => JsonValue.Create(string.Empty),
             Guid g => JsonValue.Create(g == Guid.Empty ? string.Empty : g.ToString()),
             string s => JsonValue.Create(s),
+            // TraitList and other string lists (Issue #260, CharacterBuilder): a JSON array of
+            // strings, not "System.Collections.Generic.List`1[...]" from a bare ToString().
+            IEnumerable<string> strings => ToJsonArray(strings),
             _ => JsonValue.Create(value.ToString())
         };
+    }
+
+    private static JsonArray ToJsonArray(IEnumerable<string> values)
+    {
+        var array = new JsonArray();
+        foreach (var value in values)
+            array.Add(JsonValue.Create(value ?? string.Empty));
+        return array;
     }
 
     /// <summary>
