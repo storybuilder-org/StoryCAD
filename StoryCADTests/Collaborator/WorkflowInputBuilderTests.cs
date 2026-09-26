@@ -77,7 +77,7 @@ public class WorkflowInputBuilderTests
     }
 
     [TestMethod]
-    public async Task FlawBackstory_ProtagonistProblem_RelatedProblemsHoldsResolvedProtagonist()
+    public async Task BuildWorkflowRequestBody_CharacterIsProtagonist_ResolvesProtagonistCharacter()
     {
         var api = await NewOutline();
         var character = AddCharacter(api, "Mira");
@@ -127,7 +127,7 @@ public class WorkflowInputBuilderTests
     }
 
     [TestMethod]
-    public async Task FlawBackstory_PersonVsSelf_BothResolvedKeysAreSameCharacter()
+    public async Task BuildWorkflowRequestBody_PersonVsSelfProblem_ResolvesBothSeatsToSameCharacter()
     {
         var api = await NewOutline();
         var character = AddCharacter(api, "Solo");
@@ -150,7 +150,7 @@ public class WorkflowInputBuilderTests
     }
 
     [TestMethod]
-    public async Task FlawBackstory_ProblemWithNoAntagonist_AntagonistCharacterIsJsonNull()
+    public async Task BuildWorkflowRequestBody_NoAntagonist_SetsAntagonistCharacterNull()
     {
         var api = await NewOutline();
         var character = AddCharacter(api, "Lone");
@@ -167,7 +167,7 @@ public class WorkflowInputBuilderTests
     }
 
     [TestMethod]
-    public async Task FlawBackstory_RtfInDescriptionAndProblemField_IsStrippedEverywhere()
+    public async Task BuildWorkflowRequestBody_RtfInNestedStrings_StripsRtf()
     {
         var api = await NewOutline();
         var character = AddCharacter(api, "Ray");
@@ -186,7 +186,7 @@ public class WorkflowInputBuilderTests
     }
 
     [TestMethod]
-    public async Task FlawBackstory_InputObject_ParsesAndHasExactlyFourTopLevelKeys()
+    public async Task BuildWorkflowRequestBody_FlawBackstory_InputHasFourTopLevelKeys()
     {
         var api = await NewOutline();
         var character = AddCharacter(api, "Nell");
@@ -204,7 +204,7 @@ public class WorkflowInputBuilderTests
     }
 
     [TestMethod]
-    public async Task CharacterBuilder_NoJsonInputDeclared_GetsNoInputField()
+    public async Task BuildWorkflowRequestBody_NoJsonInputDeclared_LeavesInputNull()
     {
         var api = await NewOutline();
         var character = AddCharacter(api, "Anyone");
@@ -237,5 +237,44 @@ public class WorkflowInputBuilderTests
         using var doc = JsonDocument.Parse(payload);
         Assert.IsTrue(doc.RootElement.TryGetProperty("input", out var input));
         Assert.AreEqual("x", input.GetProperty("character").GetString());
+    }
+
+    /// <summary>
+    ///     The builder reads each listed name by its JSON key, and a name that matches no property
+    ///     comes back as an empty string. So a misspelled registry entry would send empty data
+    ///     instead of failing. Every name in every JsonInput list must match a real property.
+    /// </summary>
+    [TestMethod]
+    public void JsonInput_EveryPropertyName_MatchesAModelProperty()
+    {
+        var targetTypes = new Dictionary<StoryItemType, Type>
+        {
+            [StoryItemType.Character] = typeof(CharacterModel),
+            [StoryItemType.Problem] = typeof(ProblemModel),
+        };
+
+        var migrated = WorkflowRegistry.All.Where(w => w.JsonInput != null).ToList();
+        Assert.IsTrue(migrated.Count > 0, "at least one workflow declares JsonInput");
+
+        foreach (var workflow in migrated)
+        {
+            Assert.IsTrue(targetTypes.TryGetValue(workflow.PrimaryElementType, out var targetType),
+                $"{workflow.Label}: add {workflow.PrimaryElementType} to this test's type map");
+            AssertAllResolve(workflow.Label, "TargetProperties", targetType, workflow.JsonInput.TargetProperties);
+            AssertAllResolve(workflow.Label, "RelatedProblemProperties", typeof(ProblemModel), workflow.JsonInput.RelatedProblemProperties);
+            AssertAllResolve(workflow.Label, "ResolvedCharacterProperties", typeof(CharacterModel), workflow.JsonInput.ResolvedCharacterProperties);
+        }
+    }
+
+    private static void AssertAllResolve(string label, string list, Type type, IReadOnlyList<string> names)
+    {
+        foreach (var name in names)
+        {
+            var found = type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
+                .Any(p => p.Name == name ||
+                          (p.GetCustomAttributes(typeof(System.Text.Json.Serialization.JsonPropertyNameAttribute), true)
+                              .FirstOrDefault() as System.Text.Json.Serialization.JsonPropertyNameAttribute)?.Name == name);
+            Assert.IsTrue(found, $"{label}.{list}: \"{name}\" matches no property of {type.Name}");
+        }
     }
 }
