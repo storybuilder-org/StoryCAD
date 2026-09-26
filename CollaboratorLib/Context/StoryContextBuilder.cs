@@ -5,6 +5,18 @@ using StoryCADLib.Services.Collaborator.Contracts;
 namespace CollaboratorLib.Context;
 
 /// <summary>
+/// Issue #260: the storyContext object for a migrated workflow's "input" field -- the same
+/// content <see cref="StoryContextBuilder.BuildContext"/> writes as "## " text sections, shaped
+/// as JSON instead. An empty scalar is "", not omitted; no gaps is an empty array, not omitted.
+/// </summary>
+public sealed record StoryContextInput(
+    string Phase,
+    IReadOnlyList<string> Gaps,
+    string StoryType,
+    string StoryGenre,
+    string Premise);
+
+/// <summary>
 /// Builds structured context strings for workflow prompts.
 /// Gathers relevant story information based on ContextSpec requirements.
 /// Detects development phase and provides appropriate context.
@@ -53,6 +65,34 @@ public class StoryContextBuilder
 
         return sb.ToString();
     }
+
+    /// <summary>
+    /// Issue #260: same content as <see cref="BuildContext"/>'s phase line, gap GUIDs, and
+    /// Overview scalars, as a <see cref="StoryContextInput"/> object for a migrated workflow's
+    /// "input" field. This method's text counterpart keeps building the placeholder-era arg
+    /// unchanged.
+    /// </summary>
+    public StoryContextInput BuildContextObject(StoryModel model)
+    {
+        if (model == null)
+            return new StoryContextInput(string.Empty, Array.Empty<string>(), string.Empty, string.Empty, string.Empty);
+
+        var phase = Classify(model).PromptLine;
+        var gaps = RequiredFieldGapScanner.FindGapGuids(_api, model)
+            .Select(g => g.ToString("D"))
+            .ToList();
+
+        var overview = GetOverview(model);
+        return new StoryContextInput(
+            phase,
+            gaps,
+            ScalarOrEmpty(overview?.StoryType),
+            ScalarOrEmpty(overview?.StoryGenre),
+            ScalarOrEmpty(overview?.Premise));
+    }
+
+    private static string ScalarOrEmpty(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? string.Empty : value;
 
     #region Phase Detection
 

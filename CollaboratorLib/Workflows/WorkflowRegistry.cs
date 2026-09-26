@@ -535,6 +535,7 @@ namespace StoryCollaborator.Workflows
                         "StoryRole", "Archetype"
                     }),
                 // #184 FlawBackstory: wound + history together. Retires Flaw and Backstory.
+                // #260: first workflow to migrate to the "input" JSON object (JsonInput below).
                 new Workflow(
                     "FlawBackstory", "Flaw and Backstory",
                     "Identify the character's central flaw and the formative history that grounds it.",
@@ -550,7 +551,24 @@ namespace StoryCollaborator.Workflows
                         new PropertySpec("Flaw"),
                         new PropertySpec("BackStory")
                     },
-                    exampleLists: new List<string> { "Wound", "WoundCategory" }),
+                    exampleLists: new List<string> { "Wound", "WoundCategory" })
+                {
+                    JsonInput = new WorkflowJsonInputSpec
+                    {
+                        TargetProperties = new List<string>
+                        {
+                            "GUID", "Name", "Description", "Role", "StoryRole", "Flaw", "BackStory"
+                        },
+                        RelatedProblemProperties = new List<string>
+                        {
+                            "GUID", "Name", "ProblemCategory", "ProblemType", "ConflictType",
+                            "Protagonist", "ProtGoal", "ProtMotive", "ProtConflict",
+                            "Antagonist", "AntagGoal", "AntagMotive", "AntagConflict",
+                            "Premise", "Outcome", "Theme", "Notes"
+                        },
+                        ResolvedCharacterProperties = new List<string> { "GUID", "Name" }
+                    }
+                },
                 new Workflow(
                     label: "Relationship",
                     title: "Character Relationship",

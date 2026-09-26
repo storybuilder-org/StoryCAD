@@ -33,6 +33,13 @@ namespace StoryCollaborator
     {
         public Dictionary<string, string> Args { get; init; } = new();
         public Dictionary<string, JsonObject> Elements { get; init; } = new();
+
+        /// <summary>
+        /// Issue #260: the single JSON object built for a migrated workflow's request, sent
+        /// under the wire key "input" alongside the unchanged Args and Elements. Null for a
+        /// workflow that has not migrated yet (its registry entry's Workflow.JsonInput is null).
+        /// </summary>
+        public JsonObject? Input { get; set; }
     }
 
     /// <summary>
@@ -385,6 +392,10 @@ namespace StoryCollaborator
             AttachRelatedSettingsCollection(body);
             AttachRelatedResearchCollection(body, gatheredElements);
             AttachContributingProblemsCollection(body, gatheredElements);
+
+            // Issue #260: the migrated-workflow "input" object, built alongside the Elements
+            // and Args above. Null for a workflow whose registry entry has no JsonInput.
+            body.Input = WorkflowInputBuilder.Build(workflowModel, gatheredElements, _storyApi, storyModel);
 
             return body;
         }
@@ -3155,6 +3166,11 @@ namespace StoryCollaborator
                 ["args"] = JsonSerializer.SerializeToNode(body.Args),
                 ["elements"] = JsonSerializer.SerializeToNode(body.Elements),
             };
+            // Issue #260: omitted (never a bare null) for a workflow that has not migrated.
+            // DeepClone: AttemptAsync's contract retry can call this twice with the same body,
+            // and a JsonNode may not be re-parented into a second JsonObject once attached here.
+            if (body.Input != null)
+                node["input"] = body.Input.DeepClone();
             if (echoPrompt)
                 node["echo_prompt"] = true;
             return node.ToJsonString();

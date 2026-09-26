@@ -88,6 +88,13 @@ namespace StoryCollaborator.Workflows
         public WorkflowMode Mode { get; set; } = WorkflowMode.OneShot;
 
         /// <summary>
+        /// Issue #260: the property lists this workflow's "input" request field uses. Null
+        /// means the workflow sends no "input" field yet -- Elements and Args stay its only
+        /// carriers until it migrates. Only FlawBackstory sets this today.
+        /// </summary>
+        public WorkflowJsonInputSpec? JsonInput { get; set; }
+
+        /// <summary>
         /// False for workflows that only make sense as a step inside another workflow's
         /// session (#119: the interview summary needs a transcript that exists nowhere
         /// else). Picking one from the nav pane would run it with its inputs empty.
