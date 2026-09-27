@@ -2708,10 +2708,17 @@ namespace StoryCollaborator
         /// on many sheets) still holds by hand on the Structure tab; this run never offers the
         /// second placement.
         /// </summary>
-        internal CandidateSet GetCandidates(Guid targetProblem)
+        internal CandidateSet GetCandidates(Guid targetProblem) => GetCandidates(_storyApi, targetProblem);
+
+        /// <summary>
+        /// Static core of <see cref="GetCandidates(Guid)"/>, issue #260: takes the API directly
+        /// so <see cref="WorkflowInputBuilder"/> (a static class, no WorkflowRunner instance) can
+        /// build ProblemBuilder's sceneChoices/problemChoices from the same candidate rule.
+        /// </summary>
+        internal static CandidateSet GetCandidates(IStoryCADAPI api, Guid targetProblem)
         {
-            var scenes = GetLiveElements(StoryItemType.Scene);
-            var problems = GetLiveElements(StoryItemType.Problem);
+            var scenes = GetLiveElements(api, StoryItemType.Scene);
+            var problems = GetLiveElements(api, StoryItemType.Problem);
 
             // Placed: bound on a filled beat of any Problem that is not in the trash.
             var placed = new HashSet<Guid>();
@@ -2733,7 +2740,7 @@ namespace StoryCollaborator
             problemSet.Remove(targetProblem);
 
             // Rule 3: the Story Problem is never bound to a beat.
-            var overviewResult = _storyApi.GetElementsByType(StoryItemType.StoryOverview);
+            var overviewResult = api.GetElementsByType(StoryItemType.StoryOverview);
             if (overviewResult.IsSuccess
                 && overviewResult.Payload?.FirstOrDefault() is OverviewModel overview
                 && overview.StoryProblem != Guid.Empty)
@@ -2744,28 +2751,28 @@ namespace StoryCollaborator
             // Rule 4: an ancestor on the target's beat would close a cycle. StoryCAD #1546's
             // guard has not landed, so a visited set keeps a bad file from hanging this walk.
             var visited = new HashSet<Guid> { targetProblem };
-            var cursor = ReadBoundStructure(targetProblem);
+            var cursor = ReadBoundStructure(api, targetProblem);
             while (cursor != Guid.Empty && visited.Add(cursor))
             {
                 problemSet.Remove(cursor);
-                cursor = ReadBoundStructure(cursor);
+                cursor = ReadBoundStructure(api, cursor);
             }
 
             return new CandidateSet(sceneSet, problemSet);
         }
 
-        private Guid ReadBoundStructure(Guid problemUuid)
+        private static Guid ReadBoundStructure(IStoryCADAPI api, Guid problemUuid)
         {
-            var result = _storyApi.GetStoryElement(problemUuid);
+            var result = api.GetStoryElement(problemUuid);
             return result?.IsSuccess == true && result.Payload is ProblemModel problem
                 ? problem.BoundStructure
                 : Guid.Empty;
         }
 
         /// <summary>Elements of one type that are not in the trash.</summary>
-        private List<StoryElement> GetLiveElements(StoryItemType type)
+        private static List<StoryElement> GetLiveElements(IStoryCADAPI api, StoryItemType type)
         {
-            var result = _storyApi.GetElementsByType(type);
+            var result = api.GetElementsByType(type);
             if (!result.IsSuccess || result.Payload == null)
                 return new List<StoryElement>();
             return result.Payload.Where(e => !IsInTrash(e)).ToList();
