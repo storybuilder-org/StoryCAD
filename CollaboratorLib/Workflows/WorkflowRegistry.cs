@@ -146,7 +146,19 @@ namespace StoryCollaborator.Workflows
         
                             }
                         }
-                    }) { PrimaryElementType = StoryItemType.StoryOverview },
+                    })
+                {
+                    PrimaryElementType = StoryItemType.StoryOverview,
+                    // #260: fourth workflow to migrate to the "input" JSON object. Keyed on the
+                    // gathered "Overview" (Workflow.GetDefaultLabel for StoryItemType.StoryOverview).
+                    JsonInput = new WorkflowJsonInputSpec
+                    {
+                        PropertyLists = new Dictionary<string, IReadOnlyList<string>>
+                        {
+                            ["Target"] = new List<string> { "GUID", "Description", "Concept", "Premise" }
+                        }
+                    }
+                },
 
                 // Story Problem workflow - full WorkflowIO
                 new Workflow(
@@ -256,7 +268,29 @@ namespace StoryCollaborator.Workflows
         
                             }
                         }
-                    }) { PrimaryElementType = StoryItemType.StoryOverview },
+                    })
+                {
+                    PrimaryElementType = StoryItemType.StoryOverview,
+                    // #260: fifth workflow to migrate to the "input" JSON object.
+                    JsonInput = new WorkflowJsonInputSpec
+                    {
+                        PropertyLists = new Dictionary<string, IReadOnlyList<string>>
+                        {
+                            ["Target"] = new List<string> { "GUID", "Description", "Concept", "Premise" },
+                            ["Problem"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "ProblemType", "ConflictType", "Subject",
+                                "ProblemSource", "ProtGoal", "ProtMotive", "ProtConflict",
+                                "AntagGoal", "AntagMotive", "AntagConflict", "Premise",
+                                "Outcome", "Method", "Theme", "Protagonist", "Antagonist"
+                            },
+                            ["ResolvedCharacter"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "Role", "StoryRole", "Flaw", "BackStory"
+                            }
+                        }
+                    }
+                },
 
                 // Story Form - simple workflow
                 new Workflow(
@@ -268,7 +302,24 @@ namespace StoryCollaborator.Workflows
                                 "Story type—novel, novella, short story, screenplay—determines scope and pacing. " +
                                 "This workflow helps you make these foundational choices early, when they can guide " +
                                 "rather than constrain your outlining.",
-                    outputProperties: new List<PropertySpec> { new PropertySpec("StoryGenre"), new PropertySpec("StoryType") }),
+                    outputProperties: new List<PropertySpec> { new PropertySpec("StoryGenre"), new PropertySpec("StoryType") },
+                    // Decision 5 (#260): StoryForm declares Genre and StoryType as example
+                    // lists, so the model sees the closed lists it selects StoryGenre and
+                    // StoryType from. The Lists.json key for StoryGenre is "Genre".
+                    exampleLists: new List<string> { "Genre", "StoryType" })
+                {
+                    // #260: sixth workflow to migrate to the "input" JSON object.
+                    JsonInput = new WorkflowJsonInputSpec
+                    {
+                        PropertyLists = new Dictionary<string, IReadOnlyList<string>>
+                        {
+                            ["Target"] = new List<string>
+                            {
+                                "GUID", "StoryGenre", "StoryType", "Description", "Concept", "Premise"
+                            }
+                        }
+                    }
+                },
 
                 // === Problem Workflows ===
 
@@ -347,7 +398,30 @@ namespace StoryCollaborator.Workflows
                                 }
                             }
                         }
-                    }) { PrimaryElementType = StoryItemType.Problem },
+                    })
+                {
+                    PrimaryElementType = StoryItemType.Problem,
+                    // #260: seventh workflow to migrate to the "input" JSON object.
+                    JsonInput = new WorkflowJsonInputSpec
+                    {
+                        PropertyLists = new Dictionary<string, IReadOnlyList<string>>
+                        {
+                            ["OuterProblem"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "ProtGoal", "ProtMotive", "Protagonist"
+                            },
+                            ["InnerProblem"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "ProblemType", "ProtGoal", "ProtMotive", "ProtConflict",
+                                "AntagGoal", "AntagMotive", "AntagConflict", "Method", "Theme", "Notes"
+                            },
+                            ["ResolvedCharacter"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "Role", "StoryRole", "Flaw", "BackStory"
+                            }
+                        }
+                    }
+                },
 
                 // #77 ProblemBuilder: one Problem surface. Consolidates ConflictBuilder, GMC,
                 // Structure, and BeatScenes. Writes the RequiredFieldGapScanner spine, chooses a
@@ -475,7 +549,36 @@ namespace StoryCollaborator.Workflows
                     InjectsConflictTaxonomy = true,
                     InjectsBeatSheets = true,
                     InjectsStockScenes = true,
-                    InjectsCurrentBeats = true
+                    InjectsCurrentBeats = true,
+                    // #260: eighth workflow to migrate to the "input" JSON object. The three
+                    // catalogs (ConflictTaxonomy, BeatSheets, StockScenes) stay fixed text in the
+                    // template (Terry's decision, spec section 8a) and are not part of this
+                    // object; the Inject*/RequiresProblemCategory flags above are unchanged.
+                    JsonInput = new WorkflowJsonInputSpec
+                    {
+                        PropertyLists = new Dictionary<string, IReadOnlyList<string>>
+                        {
+                            // StructureBeats is deliberately absent here: it is built separately
+                            // (BuildStructureBeatsWithBoundElement) so each beat can carry its
+                            // resolved "boundElement" beside BoundGUID.
+                            ["Target"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "ProblemCategory", "ProblemType", "ConflictType",
+                                "Subject", "ProblemSource", "Premise",
+                                "ProtGoal", "ProtMotive", "ProtConflict",
+                                "AntagGoal", "AntagMotive", "AntagConflict",
+                                "Outcome", "Method", "Theme", "Notes",
+                                "StructureTitle", "StructureDescription", "Protagonist", "Antagonist"
+                            },
+                            ["ResolvedCharacter"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "Role", "Flaw", "BackStory", "Values", "Focus"
+                            },
+                            ["SceneChoice"] = new List<string> { "GUID", "Name", "Description" },
+                            ["ProblemChoice"] = new List<string> { "GUID", "Name", "Description" },
+                            ["CharacterChoice"] = new List<string> { "GUID", "Name" }
+                        }
+                    }
                 },
                 // === Character Workflows ===
                 // #244 CharacterBuilder: sheet then plot function in one pass.
@@ -538,24 +641,27 @@ namespace StoryCollaborator.Workflows
                     // #260: second workflow to migrate to the "input" JSON object.
                     JsonInput = new WorkflowJsonInputSpec
                     {
-                        TargetProperties = new List<string>
+                        PropertyLists = new Dictionary<string, IReadOnlyList<string>>
                         {
-                            "GUID", "Name", "Description", "StoryRole", "Archetype", "Flaw", "BackStory",
-                            "Role", "Age", "Sex", "Economic", "Education", "Ethnic", "Religion",
-                            "Eyes", "Hair", "Build", "Complexion", "Appearance",
-                            "Enneagram", "Intelligence", "Values", "Focus", "Abnormality",
-                            "Adventurousness", "Aggression", "Confidence", "Conscientiousness",
-                            "Creativity", "Dominance", "Enthusiasm", "Assurance", "Sensitivity",
-                            "Shrewdness", "Sociability", "Stability", "TraitList"
-                        },
-                        RelatedProblemProperties = new List<string>
-                        {
-                            "GUID", "Name", "Description", "ProblemCategory", "ProblemType", "ConflictType",
-                            "Protagonist", "ProtGoal", "ProtMotive", "ProtConflict",
-                            "Antagonist", "AntagGoal", "AntagMotive", "AntagConflict",
-                            "Premise", "Outcome", "Method", "Theme"
-                        },
-                        ResolvedCharacterProperties = new List<string> { "GUID", "Name" }
+                            ["Target"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "StoryRole", "Archetype", "Flaw", "BackStory",
+                                "Role", "Age", "Sex", "Economic", "Education", "Ethnic", "Religion",
+                                "Eyes", "Hair", "Build", "Complexion", "Appearance",
+                                "Enneagram", "Intelligence", "Values", "Focus", "Abnormality",
+                                "Adventurousness", "Aggression", "Confidence", "Conscientiousness",
+                                "Creativity", "Dominance", "Enthusiasm", "Assurance", "Sensitivity",
+                                "Shrewdness", "Sociability", "Stability", "TraitList"
+                            },
+                            ["RelatedProblem"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "ProblemCategory", "ProblemType", "ConflictType",
+                                "Protagonist", "ProtGoal", "ProtMotive", "ProtConflict",
+                                "Antagonist", "AntagGoal", "AntagMotive", "AntagConflict",
+                                "Premise", "Outcome", "Method", "Theme"
+                            },
+                            ["ResolvedCharacter"] = new List<string> { "GUID", "Name" }
+                        }
                     }
                 },
                 // #184 FlawBackstory: wound + history together. Retires Flaw and Backstory.
@@ -580,18 +686,21 @@ namespace StoryCollaborator.Workflows
                 {
                     JsonInput = new WorkflowJsonInputSpec
                     {
-                        TargetProperties = new List<string>
+                        PropertyLists = new Dictionary<string, IReadOnlyList<string>>
                         {
-                            "GUID", "Name", "Description", "Role", "StoryRole", "Flaw", "BackStory"
-                        },
-                        RelatedProblemProperties = new List<string>
-                        {
-                            "GUID", "Name", "ProblemCategory", "ProblemType", "ConflictType",
-                            "Protagonist", "ProtGoal", "ProtMotive", "ProtConflict",
-                            "Antagonist", "AntagGoal", "AntagMotive", "AntagConflict",
-                            "Premise", "Outcome", "Theme", "Notes"
-                        },
-                        ResolvedCharacterProperties = new List<string> { "GUID", "Name" }
+                            ["Target"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "Role", "StoryRole", "Flaw", "BackStory"
+                            },
+                            ["RelatedProblem"] = new List<string>
+                            {
+                                "GUID", "Name", "ProblemCategory", "ProblemType", "ConflictType",
+                                "Protagonist", "ProtGoal", "ProtMotive", "ProtConflict",
+                                "Antagonist", "AntagGoal", "AntagMotive", "AntagConflict",
+                                "Premise", "Outcome", "Theme", "Notes"
+                            },
+                            ["ResolvedCharacter"] = new List<string> { "GUID", "Name" }
+                        }
                     }
                 },
                 new Workflow(
@@ -643,7 +752,24 @@ namespace StoryCollaborator.Workflows
                             }
                         },
                         ExampleLists = new List<string> { "Trait", "Attitude" }
-                    }) { PrimaryElementType = StoryItemType.Character },
+                    })
+                {
+                    PrimaryElementType = StoryItemType.Character,
+                    // #260: ninth workflow to migrate to the "input" JSON object. Decision 2:
+                    // CharacterChoices is dropped from this object (the partner is a required
+                    // input); the CharacterChoices CollectionInput above is left in place, since
+                    // the current template still reads it as an Arg until it migrates.
+                    JsonInput = new WorkflowJsonInputSpec
+                    {
+                        PropertyLists = new Dictionary<string, IReadOnlyList<string>>
+                        {
+                            ["Target"] = new List<string>
+                            {
+                                "GUID", "Name", "Role", "StoryRole", "Description", "Flaw", "BackStory", "TraitList"
+                            }
+                        }
+                    }
+                },
 
                 // === Character Interview (#119) ===
                 // Registered inside the Character block, not after it: the nav pane opens a
@@ -757,7 +883,28 @@ namespace StoryCollaborator.Workflows
                             }
                         },
                         ExampleLists = new List<string> { "WorldType", "SystemType" }
-                    }) { PrimaryElementType = StoryItemType.StoryWorld },
+                    })
+                {
+                    PrimaryElementType = StoryItemType.StoryWorld,
+                    // #260: tenth workflow to migrate to the "input" JSON object.
+                    JsonInput = new WorkflowJsonInputSpec
+                    {
+                        PropertyLists = new Dictionary<string, IReadOnlyList<string>>
+                        {
+                            ["Target"] = new List<string>
+                            {
+                                "GUID", "Name", "WorldType", "Description",
+                                "FoundingEvents", "MajorConflicts", "Eras", "TechnologicalShifts", "LostKnowledge",
+                                "SystemType", "Source", "Rules", "Limitations", "Cost",
+                                "Practitioners", "SocialImpact", "Cultures", "PhysicalWorlds"
+                            },
+                            ["Problem"] = new List<string> { "GUID", "Name", "Description", "Protagonist", "Antagonist" },
+                            ["ResolvedCharacter"] = new List<string> { "GUID", "Name", "Role", "Ethnic", "Religion", "Values" },
+                            ["Setting"] = new List<string> { "GUID", "Name", "Description", "Locale" },
+                            ["Research"] = new List<string> { "GUID", "Name", "Type", "Description" }
+                        }
+                    }
+                },
 
                 // === Setting Workflows ===
                 // #224: one Setting-primary surface. SettingTimeSpace and Sensations
@@ -811,17 +958,20 @@ namespace StoryCollaborator.Workflows
                     // gathered "Setting" (Workflow.GetDefaultLabel(StoryItemType.Setting)).
                     JsonInput = new WorkflowJsonInputSpec
                     {
-                        TargetProperties = new List<string>
+                        PropertyLists = new Dictionary<string, IReadOnlyList<string>>
                         {
-                            "GUID", "Name", "Description", "Period", "Locale", "Season", "Weather",
-                            "Lighting", "Temperature", "Props", "Sights", "Sounds", "Touch",
-                            "SmellTaste", "Notes"
-                        },
-                        RelatedSceneProperties = new List<string>
-                        {
-                            "GUID", "Name", "Description", "CastMembers"
-                        },
-                        ResolvedCharacterProperties = new List<string> { "GUID", "Name" }
+                            ["Target"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "Period", "Locale", "Season", "Weather",
+                                "Lighting", "Temperature", "Props", "Sights", "Sounds", "Touch",
+                                "SmellTaste", "Notes"
+                            },
+                            ["RelatedScene"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "CastMembers"
+                            },
+                            ["ResolvedCharacter"] = new List<string> { "GUID", "Name" }
+                        }
                     }
                 },
                 // SettingCreateImage removed; preserved on branch issue-76-image-workflows (issue #76).
@@ -903,7 +1053,53 @@ namespace StoryCollaborator.Workflows
                             "SceneType", "ScenePurpose", "ValueExchange", "Emotion",
                             "Goal", "Opposition", "Outcome"
                         }
-                    }) { PrimaryElementType = StoryItemType.Scene },
+                    })
+                {
+                    PrimaryElementType = StoryItemType.Scene,
+                    // #260: eleventh workflow to migrate to the "input" JSON object. Two
+                    // character projections (decision 3 needed the map refactor for this):
+                    // "SceneCharacter" for the Scene's own protagonistCharacter/antagonistCharacter,
+                    // "ResolvedCharacter" for every other reference (cast, viewpointCharacterElement,
+                    // characterChoices, and each Problem's protagonistCharacter/antagonistCharacter).
+                    JsonInput = new WorkflowJsonInputSpec
+                    {
+                        PropertyLists = new Dictionary<string, IReadOnlyList<string>>
+                        {
+                            ["Target"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "SceneType", "CastMembers",
+                                "Protagonist", "Antagonist", "ViewpointCharacter", "Setting",
+                                "ScenePurpose", "ValueExchange", "Events", "Consequences", "Significance",
+                                "Realization", "ProtagGoal", "Opposition", "Outcome", "AntagGoal",
+                                "ProtagEmotion", "AntagEmotion", "Emotion", "Review", "NewGoal",
+                                "Notes", "Date", "Time"
+                            },
+                            // Owning Problem and each contributingProblems entry (decision 3): one
+                            // projection, StructureBeats included (the generic Title/Description/
+                            // BoundGUID shape -- no boundElement; unlike ProblemBuilder, nothing
+                            // here needs the bound element resolved).
+                            ["Problem"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "Premise", "ProblemCategory",
+                                "ProblemType", "ConflictType",
+                                "ProtGoal", "ProtMotive", "ProtConflict",
+                                "AntagGoal", "AntagMotive", "AntagConflict",
+                                "Outcome", "Notes", "StructureTitle", "StructureBeats",
+                                "Protagonist", "Antagonist"
+                            },
+                            ["SceneStoryProblem"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "Premise", "ProblemCategory"
+                            },
+                            ["NeighborScene"] = new List<string> { "GUID", "Name", "Description" },
+                            ["ResolvedCharacter"] = new List<string> { "GUID", "Name" },
+                            ["SceneCharacter"] = new List<string> { "GUID", "Name", "Description" },
+                            ["SettingElement"] = new List<string> { "GUID", "Name", "Description" },
+                            ["SettingChoice"] = new List<string> { "GUID", "Name", "Description", "Locale", "Props" },
+                            ["ProblemChoice"] = new List<string> { "GUID", "Name", "Description", "ProblemCategory" }
+                        }
+                    }
+                },
                 // SceneCreateImage removed; preserved on branch issue-76-image-workflows (issue #76).
             };
 
