@@ -9,13 +9,13 @@ has_toc: false
 
 # Reviewing Suggestions
 
-Reading the suggestions before you accept them is the habit that makes Collaborator safe to use. Collaborator proposes and you decide, and this page explains what the list shows you and what each of your choices does.
+Reading the suggested changes before you accept them is the habit that makes Collaborator safe to use. Collaborator proposes and you decide, and this page explains what the list shows you and what each of your choices does.
 
 ## The Property Updates list
 
-After a run, the center of the window fills with a list headed Proposed property updates. Each row is one field on one story element, for example the Premise on the Overview or the protagonist's Goal on a Problem, with the proposed text beside it. The header counts the rows and sorts them into two kinds. A heading that reads 3: 1 free, 2 need review means three proposals are waiting, of which one will apply on its own when you accept all changes and two will not move until you say so, field by field.
+After a run, the center of the window fills with a list headed Proposed property updates. Each row is one field on one story element, for example, the Premise on the Overview or the protagonist's Goal on a Problem, with the proposed text beside it. The header counts the rows and sorts them into two kinds. A heading that reads 3: 1 free, 2 need review means three proposals are waiting, of which one will apply on its own when you accept all changes and two will not move until you say so, field by field.
 
-![A Property Updates list headed 'Proposed property updates (3: 0 free, 3 need review)', each row showing a field name, its kind, and the proposed text](../media/Collaborator/Collaborator-Property-Updates.png)
+![A Property Updates list headed 'Proposed property updates (3: 0 free, 3 need review)', each row showing a field name, its type, and the proposed text](../media/Collaborator/Collaborator-Property-Updates.png)
 
 ## What the row labels mean
 
@@ -34,7 +34,7 @@ The New, Refresh, and Update rows are the free ones in the header count, and the
 
 ## Accept all changes
 
-The Accept all changes button sits at the foot of the list. It applies every New, Refresh, and Update row and leaves every Has your text field alone. Use it when you started from empty fields and want the first pass written in quickly. Afterwards, open the same element in StoryCAD and skim the form; the text is already there.
+The Accept all changes button sits at the foot of the list. It updates every New, Refresh, and Update row and leaves every Has your text field alone. Use it when you start from empty fields and want the first pass written quickly. Afterwards, open the same element in StoryCAD and skim the form; the text is already there.
 
 ## Review Each
 

@@ -9,7 +9,7 @@ has_toc: false
 
 # Getting Started
 
-This page explains how you activate Collaborator.   StoryCAD Collaborator is available from both the Microsoft Windows and Apple Macintosh versions of StoryCAD.
+This page explains how you activate StoryCAD Collaborator. Collaborator is available from both the Microsoft Windows and Apple Macintosh versions of StoryCAD.
 
 All you need to run Collaborator is StoryCAD Release 4.3 or later. Collaborator is part of StoryCAD; there is nothing separate to download. Collaborator sessions work on the outline you have open, and you will also need a working network connection, because every Collaborator workflow runs against a Cloudflare service which connects to AI models. The beta is free; we'll pay for the AI use.  
 
@@ -17,15 +17,15 @@ The **Join the beta** dialog and the **Subscribe** dialog both bring you to this
 
 Right now, StoryCAD Collaborator is a capped open beta. What we mean by 'open beta' is that you can volunteer to test Collaborator without special invitations or setup procedures.  This page will show you how to do that; it's super easy.  'Capped' means that we're limiting the number of people allowed in the beta. We enroll participants on a first-come, first-served basis.  Once we reach the cap, we will deny new attempts to enroll. The beta ends when beta testers' feedback says the product is ready, not on a specific date.
 
- During the beta you do not buy anything. There is no subscription to start, no trial to keep track of, and no credit card to enter; the Foundation pays for the AI service behind every workflow you run. Beta testers use Collaborator under the same usage limits as any future subscriber, so a heavy week can run into the limit, and the section on running out of credits explains what to do then (during the beta, that won't cost  you, either.) 
+ During the beta you do not buy anything. There is no subscription to start, no trial to keep track of, and no credit card to enter; the Foundation pays for the AI service behind every workflow you run. Beta testers use Collaborator under the same usage limits as any future subscriber, so a heavy week can run into the limit, and the section on running out of credits explains what to do then (during the beta, that won't cost you, either.) 
 
 ## Paid subscriptions
 
 After the beta test period ends, Collaborator becomes a paid subscription. You subscribe from the Microsoft Store on Windows or the Mac App Store on a Mac. StoryCAD does not take a card number. The store from which you downloaded StoryCAD sells the subscription, sets the price, and renews it until you cancel. This manual doesn't discuss pricing for the production service. We think you'll find it's not only inexpensive but a bargain.
 
-On Windows, **Subscribe** opens the Microsoft Store payment sheet for the Microsoft account signed into that PC. You can cancel later, in that account's subscription settings. **Restore purchases** brings the subscription back on another Windows PC that uses the same Microsoft account.
+On Windows, **Subscribe** opens the Microsoft Store payment sheet for the Microsoft account signed into that PC. You can cancel later in that account's subscription settings. **Restore purchases** brings the subscription back on another Windows PC that uses the same Microsoft account.
 
-On a Mac, **Subscribe** opens the Mac App Store payment sheet for the Apple ID signed into that Mac. You can cancel later, in that Apple ID's subscription settings. **Restore purchases** brings the subscription back on another Mac that uses the same Apple ID.
+On a Mac, **Subscribe** opens the Mac App Store payment sheet for the Apple ID signed into that Mac. You can cancel later in that Apple ID's subscription settings. **Restore purchases** brings the subscription back on another Mac that uses the same Apple ID.
 
 A Microsoft Store purchase does not restore on a Mac, and a Mac App Store purchase does not restore on Windows. 
 
@@ -46,21 +46,21 @@ Clicking **Collaborator** on the toolbar does not enroll you. StoryCAD shows a d
    ![Join dialog: StoryCAD Collaborator, Learn more (read before joining), Join and Not now](../media/Collaborator/Collaborator-Join-Dialog.png)
 
 
-   Read the this (StoryCAD Collaborator) section of the user manual to learn more about Collaborator.
+   Read this (StoryCAD Collaborator) section of the user manual to learn more about Collaborator.
 
 4. Choose **Not now** to skip. Collaborator stays closed. Click Collaborator later and the same dialog returns.
 
-5. Choose **Join** to enroll. Collaborator opens in its own Story Collaborator window. You do not type a code, and you do not wait for an email. If the beta hasn't reached its cap limit, you'll be enrolled, and will see the Collaborator window:
+5. Choose **Join** to enroll. Collaborator opens in its own Story Collaborator window. You do not type a code, and you do not wait for an email. If the beta hasn't reached its cap limit, you'll be enrolled and will see the Collaborator window:
 
 ![The Story Collaborator window as it first opens: workflow list, empty center, chat](../media/Collaborator/Collaborator-Access-Prompt.png)
 
 
 
-What appears in the window depends on the outline you opened at launch, and the topics below provide an explanation. If the beta is full or closed. the Join feature is not available.
+What appears in the window depends on the outline you opened at launch, and the topics below provide an explanation. If the beta is full or closed, the Join feature is not available.
 
 ## Activating Collaborator after it's for sale
 
-When Collaborator is available as a paid subscription, the toolbar button shows **Subscribe**, **Restore purchases**, and **Not now**, plus links to this page, Terms of Use, and Privacy Policy. The store links show the price. Analyzing the beta will help us to set that price. This manual does not invent one. 
+When Collaborator is available as a paid subscription, the toolbar button shows **Subscribe**, **Restore purchases**, and **Not now**, plus links to this page, Terms of Use, and Privacy Policy. The store links show the price. Analyzing the beta will help us set that price. This manual does not invent one. 
 
 To subscribe, you:
 
@@ -68,14 +68,14 @@ To subscribe, you:
 2. Click **Collaborator** on the toolbar.
 3. Choose a plan if more than one is listed.
 4. **Subscribe** opens the Microsoft Store or Mac App Store payment sheet. Pay there, not inside StoryCAD.
-5. **Restore purchases** if you already paid on this store account.
+5. **Restore purchases** if you have already paid on this store account.
 6. **Not now** leaves Collaborator closed.
 
-If you Joined the beta earlier, you can keep using Collaborator without buying until the Foundation says that path has ended.
+If you joined the beta earlier, you can keep using Collaborator without buying until the Foundation says that path has ended.
 
 ## If Collaborator does not open
 
-**Not now** will leave it closed. A message that enrollment is unreachable means StoryCAD could not reach the Foundation's service; wait a few minutes and try again. If the Story Collaborator window still never opens after **Join** or after a completed purchase, restart StoryCAD. For StoryCAD help see [Getting Help](../Front%20Matter/Getting_Help.html).
+**Not now** will not launch Collaborator, but won’t block it from trying another time. A message that enrollment is unreachable means StoryCAD could not reach the Foundation's service; wait a few minutes and try again. If the Story Collaborator window still never opens after **Join** or after a completed purchase, restart StoryCAD. For StoryCAD help see [Getting Help](../Front%20Matter/Getting_Help.html).
 
 ## If you run out of credits
 
