@@ -15,4 +15,7 @@ public sealed class WorkflowJsonInputSpec
 
     /// <summary>Properties written onto a resolved protagonistCharacter/antagonistCharacter.</summary>
     public IReadOnlyList<string> ResolvedCharacterProperties { get; init; } = Array.Empty<string>();
+
+    /// <summary>Properties written onto each related Scene, before "cast" is added (SettingBuilder's "relatedScenes").</summary>
+    public IReadOnlyList<string> RelatedSceneProperties { get; init; } = Array.Empty<string>();
 }

@@ -19,7 +19,8 @@ namespace StoryCADTests.Collaborator;
 ///     Issue #260 StoryCAD proposal: the "input" request field, one JSON object built for a
 ///     migrated workflow. FlawBackstory and CharacterBuilder share the character,
 ///     relatedProblems, lists, storyContext shape (see
-///     devdocs/issue_260_json_input_storycad_proposal.md section 2a).
+///     devdocs/issue_260_json_input_storycad_proposal.md section 2a). SettingBuilder has its
+///     own setting, relatedScenes, lists, storyContext shape.
 /// </summary>
 [TestClass]
 public class WorkflowInputBuilderTests
@@ -53,6 +54,20 @@ public class WorkflowInputBuilderTests
         var add = api.AddElement(StoryItemType.Problem, Overview(api).Uuid.ToString(), name);
         Assert.IsTrue(add.IsSuccess, add.ErrorMessage);
         return (ProblemModel)api.GetStoryElement(add.Payload).Payload;
+    }
+
+    private static SettingModel AddSetting(StoryCADApi api, string name)
+    {
+        var add = api.AddElement(StoryItemType.Setting, Overview(api).Uuid.ToString(), name);
+        Assert.IsTrue(add.IsSuccess, add.ErrorMessage);
+        return (SettingModel)api.GetStoryElement(add.Payload).Payload;
+    }
+
+    private static SceneModel AddScene(StoryCADApi api, string name)
+    {
+        var add = api.AddElement(StoryItemType.Scene, Overview(api).Uuid.ToString(), name);
+        Assert.IsTrue(add.IsSuccess, add.ErrorMessage);
+        return (SceneModel)api.GetStoryElement(add.Payload).Payload;
     }
 
     private static WorkflowRunner Runner(StoryCADApi api, string label) =>
@@ -268,6 +283,136 @@ public class WorkflowInputBuilderTests
     }
 
     [TestMethod]
+    public async Task BuildWorkflowRequestBody_SettingUsedByOneScene_ResolvesRelatedSceneAndCast()
+    {
+        var api = await NewOutline();
+        var setting = AddSetting(api, "The Old Mill");
+        setting.Description = "Abandoned and damp";
+        setting.Locale = "Countryside";
+
+        var scene = AddScene(api, "Confrontation");
+        scene.Setting = setting.Uuid;
+        scene.Description = "They meet at last";
+        var alice = AddCharacter(api, "Alice");
+        var bob = AddCharacter(api, "Bob");
+        scene.CastMembers = new List<Guid> { alice.Uuid, bob.Uuid };
+
+        var body = Runner(api, "SettingBuilder").BuildWorkflowRequestBody(
+            new Dictionary<string, StoryElement> { ["Setting"] = setting });
+
+        Assert.IsNotNull(body.Input, "SettingBuilder declares a JsonInput property list; input must be built");
+
+        var related = body.Input["relatedScenes"].AsArray();
+        Assert.AreEqual(1, related.Count);
+        var sceneObj = related[0].AsObject();
+        Assert.AreEqual(scene.Uuid.ToString(), sceneObj["GUID"].GetValue<string>());
+        Assert.AreEqual("Confrontation", sceneObj["Name"].GetValue<string>());
+        Assert.AreEqual("They meet at last", sceneObj["Description"].GetValue<string>());
+
+        var castMembers = sceneObj["CastMembers"].AsArray().Select(v => v.GetValue<string>()).ToList();
+        CollectionAssert.AreEquivalent(new[] { alice.Uuid.ToString(), bob.Uuid.ToString() }, castMembers);
+
+        var cast = sceneObj["cast"].AsArray();
+        Assert.AreEqual(2, cast.Count);
+        var castNames = cast.Select(c => c.AsObject()["Name"].GetValue<string>()).ToList();
+        CollectionAssert.AreEquivalent(new[] { "Alice", "Bob" }, castNames);
+    }
+
+    [TestMethod]
+    public async Task BuildWorkflowRequestBody_SettingUsedByNoScene_RelatedScenesIsEmptyArray()
+    {
+        var api = await NewOutline();
+        var setting = AddSetting(api, "Unused Attic");
+
+        var body = Runner(api, "SettingBuilder").BuildWorkflowRequestBody(
+            new Dictionary<string, StoryElement> { ["Setting"] = setting });
+
+        var related = body.Input["relatedScenes"].AsArray();
+        Assert.AreEqual(0, related.Count);
+    }
+
+    [TestMethod]
+    public async Task BuildWorkflowRequestBody_SceneInTrashUsesSetting_ExcludedFromRelatedScenes()
+    {
+        var api = await NewOutline();
+        var setting = AddSetting(api, "The Vault");
+        var liveScene = AddScene(api, "Live Scene");
+        liveScene.Setting = setting.Uuid;
+        var trashedScene = AddScene(api, "Trashed Scene");
+        trashedScene.Setting = setting.Uuid;
+
+        var delete = await api.DeleteElement(trashedScene.Uuid);
+        Assert.IsTrue(delete.IsSuccess, delete.ErrorMessage);
+
+        var body = Runner(api, "SettingBuilder").BuildWorkflowRequestBody(
+            new Dictionary<string, StoryElement> { ["Setting"] = setting });
+
+        var related = body.Input["relatedScenes"].AsArray();
+        Assert.AreEqual(1, related.Count, "the trashed scene must not appear alongside the live one");
+        Assert.AreEqual(liveScene.Uuid.ToString(), related[0].AsObject()["GUID"].GetValue<string>());
+    }
+
+    [TestMethod]
+    public async Task BuildWorkflowRequestBody_SettingBuilder_InputHasFourTopLevelKeysAndSettingKeysMatchSpec()
+    {
+        var api = await NewOutline();
+        var setting = AddSetting(api, "Harbor Town");
+
+        var body = Runner(api, "SettingBuilder").BuildWorkflowRequestBody(
+            new Dictionary<string, StoryElement> { ["Setting"] = setting });
+
+        Assert.IsNotNull(body.Input, "SettingBuilder declares a JsonInput property list; input must be built");
+        CollectionAssert.AreEquivalent(
+            new[] { "setting", "relatedScenes", "lists", "storyContext" },
+            body.Input.Select(p => p.Key).ToList());
+
+        var settingObj = body.Input["setting"].AsObject();
+        CollectionAssert.AreEquivalent(
+            WorkflowRegistry.Get("SettingBuilder").JsonInput.TargetProperties.ToList(),
+            settingObj.Select(p => p.Key).ToList());
+    }
+
+    [TestMethod]
+    public async Task BuildWorkflowRequestBody_CastMemberGuidDoesNotResolveToCharacter_KeptInCastMembersSkippedFromCast()
+    {
+        var api = await NewOutline();
+        var setting = AddSetting(api, "Ruined Chapel");
+        var scene = AddScene(api, "Standoff");
+        scene.Setting = setting.Uuid;
+        var alice = AddCharacter(api, "Alice");
+        var missingGuid = Guid.NewGuid();
+        scene.CastMembers = new List<Guid> { alice.Uuid, missingGuid };
+
+        var body = Runner(api, "SettingBuilder").BuildWorkflowRequestBody(
+            new Dictionary<string, StoryElement> { ["Setting"] = setting });
+
+        var sceneObj = body.Input["relatedScenes"].AsArray()[0].AsObject();
+        var castMembers = sceneObj["CastMembers"].AsArray().Select(v => v.GetValue<string>()).ToList();
+        CollectionAssert.AreEquivalent(new[] { alice.Uuid.ToString(), missingGuid.ToString() }, castMembers);
+
+        var cast = sceneObj["cast"].AsArray();
+        Assert.AreEqual(1, cast.Count, "an unresolved GUID is skipped from cast, but stays in CastMembers");
+        Assert.AreEqual("Alice", cast[0].AsObject()["Name"].GetValue<string>());
+    }
+
+    [TestMethod]
+    public async Task BuildWorkflowRequestBody_SceneWithEmptyCastMembers_CastIsEmptyArray()
+    {
+        var api = await NewOutline();
+        var setting = AddSetting(api, "Quiet Library");
+        var scene = AddScene(api, "Reading");
+        scene.Setting = setting.Uuid;
+        // CastMembers left at its constructor default: an empty list.
+
+        var body = Runner(api, "SettingBuilder").BuildWorkflowRequestBody(
+            new Dictionary<string, StoryElement> { ["Setting"] = setting });
+
+        var sceneObj = body.Input["relatedScenes"].AsArray()[0].AsObject();
+        Assert.AreEqual(0, sceneObj["cast"].AsArray().Count);
+        Assert.AreEqual(0, sceneObj["CastMembers"].AsArray().Count);
+    }
+
+    [TestMethod]
     public void BuildProxyPayload_BodyInputNull_OmitsInputKey()
     {
         var body = new WorkflowProxyBody();
@@ -303,6 +448,7 @@ public class WorkflowInputBuilderTests
         {
             [StoryItemType.Character] = typeof(CharacterModel),
             [StoryItemType.Problem] = typeof(ProblemModel),
+            [StoryItemType.Setting] = typeof(SettingModel),
         };
 
         var migrated = WorkflowRegistry.All.Where(w => w.JsonInput != null).ToList();
@@ -315,6 +461,7 @@ public class WorkflowInputBuilderTests
             AssertAllResolve(workflow.Label, "TargetProperties", targetType, workflow.JsonInput.TargetProperties);
             AssertAllResolve(workflow.Label, "RelatedProblemProperties", typeof(ProblemModel), workflow.JsonInput.RelatedProblemProperties);
             AssertAllResolve(workflow.Label, "ResolvedCharacterProperties", typeof(CharacterModel), workflow.JsonInput.ResolvedCharacterProperties);
+            AssertAllResolve(workflow.Label, "RelatedSceneProperties", typeof(SceneModel), workflow.JsonInput.RelatedSceneProperties);
         }
     }
 

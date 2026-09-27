@@ -805,7 +805,25 @@ namespace StoryCollaborator.Workflows
                         new PropertySpec("Description"),
                         new PropertySpec("Notes")
                     },
-                    exampleLists: new List<string> { "Locale" }),
+                    exampleLists: new List<string> { "Locale" })
+                {
+                    // #260: third workflow to migrate to the "input" JSON object. Keyed on the
+                    // gathered "Setting" (Workflow.GetDefaultLabel(StoryItemType.Setting)).
+                    JsonInput = new WorkflowJsonInputSpec
+                    {
+                        TargetProperties = new List<string>
+                        {
+                            "GUID", "Name", "Description", "Period", "Locale", "Season", "Weather",
+                            "Lighting", "Temperature", "Props", "Sights", "Sounds", "Touch",
+                            "SmellTaste", "Notes"
+                        },
+                        RelatedSceneProperties = new List<string>
+                        {
+                            "GUID", "Name", "Description", "CastMembers"
+                        },
+                        ResolvedCharacterProperties = new List<string> { "GUID", "Name" }
+                    }
+                },
                 // SettingCreateImage removed; preserved on branch issue-76-image-workflows (issue #76).
 
                 // === Scene Workflows ===
