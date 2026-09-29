@@ -168,7 +168,12 @@ public class RichTextStripper
                             c += 0x10000;
                         }
 
-                        outList.Add(char.ConvertFromUtf32(c));
+                        // RTF writes a character above U+FFFF (an emoji, for example) as two
+                        // \u codes, one per surrogate half. ConvertFromUtf32 rejects a lone
+                        // half, so keep each half as a char; the pair joins in string.Concat.
+                        outList.Add(c is >= 0xD800 and <= 0xDFFF
+                            ? ((char)c).ToString()
+                            : char.ConvertFromUtf32(c));
                         curskip = ucskip;
                     }
                 }
@@ -187,11 +192,16 @@ public class RichTextStripper
             }
             else if (!string.IsNullOrEmpty(tchar))
             {
+                // Skip only the fallback characters that follow a \u code, not the whole run
+                // of text: "舗?s" must keep the "s".
                 if (curskip > 0)
                 {
-                    curskip -= 1;
+                    var skip = Math.Min(curskip, tchar.Length);
+                    tchar = tchar.Substring(skip);
+                    curskip -= skip;
                 }
-                else if (!ignorable)
+
+                if (!ignorable && tchar.Length > 0)
                 {
                     tchar = tchar.Replace("\r\n", "\n").Replace("\r", "\n");
                     outList.Add(tchar);
