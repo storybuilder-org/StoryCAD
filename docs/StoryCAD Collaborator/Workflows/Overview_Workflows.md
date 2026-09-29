@@ -20,7 +20,7 @@ This workflow takes whatever you have on those three tabs and carries it forward
 
 It is one of the five workflows starred when you first open Collaborator. When it finishes, the Property Updates list offers up to three fields on the Overview: Story Idea, Concept, and Premise. Any of them that already holds your text is marked Has your text and left alone by Accept all changes, so running it on a finished Overview is safe. It will simply have less to offer.
 
-![Property Updates after Ideation: Concept and Premise marked New, Story Idea marked Has your text](../../media/Collaborator/Collaborator-Workflow-Premise.png)
+![Property Updates after Ideation: Concept and Premise marked New, Description marked Has your text](../../media/Collaborator/Collaborator-Workflow-Premise.png)
 
 ## Story Problem (Premise => Problem + Characters)
 

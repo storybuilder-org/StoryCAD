@@ -17,7 +17,7 @@ Chat is for exploring a result before you decide about it. You might ask for thr
 
 What chat cannot do is put text into your outline. A chat answer, however good, stays in the column. If you want it in a field, either run the workflow again so that it proposes the new wording as a Property Update, or copy the wording into StoryCAD yourself. This is deliberate: the Property Updates list, with its labels and its Accept and Skip choices, is the one path by which Collaborator writes to your outline, and keeping chat outside that path means a conversation can never change a field you did not mean to change.
 
-![The chat column after a run: a typed question about the proposed backstory, and Collaborator's numbered answer explaining what the proposal strengthens](../media/Collaborator/Collaborator-Chat.png)
+![The chat column after Flaw and Backstory on Nora Helmer: a typed question about which problem her flaw contributes to, and Collaborator's answer](../media/Collaborator/Collaborator-Chat.png)
 
 ## When to use a workflow instead
 

@@ -50,10 +50,7 @@ Clicking **Collaborator** on the toolbar does not enroll you. StoryCAD shows a d
 
 4. Choose **Not now** to skip. Collaborator stays closed. Click Collaborator later and the same dialog returns.
 
-5. Choose **Join** to enroll. Collaborator opens in its own Story Collaborator window. You do not type a code, and you do not wait for an email. If the beta hasn't reached its cap limit, you'll be enrolled and will see the Collaborator window:
-
-![The Story Collaborator window as it first opens: workflow list, empty center, chat](../media/Collaborator/Collaborator-Access-Prompt.png)
-
+5. Choose **Join** to enroll. Collaborator opens in its own Story Collaborator window. You do not type a code, and you do not wait for an email. If the beta hasn't reached its cap limit, you'll be enrolled and will see the Collaborator window.
 
 
 What appears in the window depends on the outline you opened at launch, and the topics below provide an explanation. If the beta is full or closed, the Join feature is not available.
