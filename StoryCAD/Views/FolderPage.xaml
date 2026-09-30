@@ -34,6 +34,10 @@
         <!-- Notes element only: tabbed Notes + Images. -->
         <TabView x:Name="NotesTabView" Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False"
                  IsAddTabButtonVisible="False"
+                 HorizontalAlignment="Stretch"
+                 VerticalAlignment="Stretch"
+                 HorizontalContentAlignment="Stretch"
+                 VerticalContentAlignment="Stretch"
                  x:Load="{x:Bind FolderVm.IsNotes, Mode=OneWay}"
                  AutomationProperties.AutomationId="FolderNotesTabs">
             <TabView.TabItems>
