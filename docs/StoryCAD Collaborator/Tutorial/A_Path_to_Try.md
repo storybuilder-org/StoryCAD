@@ -14,7 +14,7 @@ The [Workflow Reference](../Workflows/) describes every workflow Collaborator of
 
 ## The starred band is a head start
 
-Collaborator starts with five workflows starred, so they sit at the top of the workflow list before you touch anything: Ideation (Story idea => Concept => Premise), Story Problem (Premise => Problem + Characters), Problem Builder, Character Builder, and Scene Builder. That is one for each stage of the path below, so the top of the list reads as a next step rather than a catalog.
+Collaborator starts with six workflows starred, so they sit at the top of the workflow list before you touch anything: Ideation (Story idea => Concept => Premise), Story Problem (Premise => Problem + Characters), Problem Builder, Character Builder, Setting Builder, and Scene Builder. That is one for each stage of the path below, so the top of the list reads as a next step rather than a catalog.
 
 Treat it as a starting point, not a rule. As you learn which workflows your writing turns on, star those and unstar the rest; [Opening Collaborator](../Opening_Collaborator.html) shows how. Everything that is not starred is still there, filed under its story element.
 
@@ -32,7 +32,9 @@ Treat it as a starting point, not a rule. As you learn which workflows your writ
 
 6. One character path. Character Builder first, then Flaw and Backstory, on the protagonist or the antagonist. Craft: [Defining Characters](../../Writing%20with%20StoryCAD/Defining_Characters.html).
 
-7. Scene Builder. Sketch, type, cast, development, conflict, and sequel for one scene. Select a scene you already have, such as a stub Problem Builder created, or create one in the picker. Craft: [Defining Scenes](../../Writing%20with%20StoryCAD/Defining_Scenes.html) and [Plotting in Scenes](../../Writing%20with%20StoryCAD/Plotting_in_Scenes.html).
+7. Setting Builder. Period, Locale, Season, Weather, Lighting, Temperature, Props, the Setting Summary, and the four senses for one place, in one pass. Run it on a Setting before the scenes that use it; Scene Builder picks a scene's Setting from the Settings you already have. Craft: [The Importance of Setting](../../Writing%20with%20StoryCAD/The_Importance_of_Setting.html).
+
+8. Scene Builder. Sketch, type, cast, development, conflict, and sequel for one scene. Select a scene you already have, such as a stub Problem Builder created, or create one in the picker. Craft: [Defining Scenes](../../Writing%20with%20StoryCAD/Defining_Scenes.html) and [Plotting in Scenes](../../Writing%20with%20StoryCAD/Plotting_in_Scenes.html).
 
 ![The workflow pane with the starred workflows at the top, in running order](../../media/Collaborator/Collaborator-Workflow-Pane.png)
 
@@ -42,4 +44,4 @@ For a class or a critique group, assign one workflow per session and ask student
 
 ## What to leave for later
 
-The workflows not on this path, Character Interview, Character Relationship, Define Story World, and Setting Builder, can wait until the path above feels solid. A short list of workflows that improve a story beats a long menu tried once each, and leaving the others unstarred keeps them out of your way without putting them out of reach.
+The workflows not on this path, Character Interview, Character Relationship, and Define Story World, can wait until the path above feels solid. A short list of workflows that improve a story beats a long menu tried once each, and leaving the others unstarred keeps them out of your way without putting them out of reach.

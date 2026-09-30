@@ -180,13 +180,96 @@ public class WorkflowStarServiceTests
         var starred = await _service.GetStarredAsync(
             WorkflowRegistry.DefaultStarredLabels.ToArray(),
             WorkflowRegistry.RetiredWorkflowReplacements,
-            WorkflowRegistry.StarMigrationVersion);
+            WorkflowRegistry.StarMigrationVersion,
+            WorkflowRegistry.StarsAddedByVersion);
+
+        // #269 appends SettingBuilder in the same pass, because this user is behind version 4 too.
+        CollectionAssert.AreEqual(
+            new[] { "Premise", "CharacterBuilder", "SceneBuilder", "SettingBuilder" },
+            starred.ToArray());
+        Assert.AreEqual(WorkflowRegistry.StarMigrationVersion, _preferences.Model.CollaboratorStarMigrationVersion);
+    }
+
+    /// <summary>
+    ///     Collaborator #269. A user seeded with the five defaults before Setting Builder was
+    ///     starred gets it once, at the end of the band, and keeps their order.
+    /// </summary>
+    [TestMethod]
+    public async Task GetStarredAsync_SeededBeforeVersion4_AddsSettingBuilderOnce()
+    {
+        _preferences.Model.CollaboratorStarDefaultsApplied = true;
+        _preferences.Model.CollaboratorStarMigrationVersion = 3;
+        _preferences.Model.StarredCollaboratorWorkflows = new List<string>
+        {
+            "Premise", "StoryProblem", "ProblemBuilder", "CharacterBuilder", "SceneBuilder"
+        };
+
+        var starred = await GetStarredFromRegistryAsync();
 
         CollectionAssert.AreEqual(
-            new[] { "Premise", "CharacterBuilder", "SceneBuilder" },
+            new[] { "Premise", "StoryProblem", "ProblemBuilder", "CharacterBuilder", "SceneBuilder", "SettingBuilder" },
             starred.ToArray());
-        Assert.AreEqual(3, _preferences.Model.CollaboratorStarMigrationVersion);
+        Assert.AreEqual(4, _preferences.Model.CollaboratorStarMigrationVersion);
     }
+
+    [TestMethod]
+    public async Task GetStarredAsync_WhenSettingBuilderIsAlreadyStarred_DoesNotAddItTwice()
+    {
+        _preferences.Model.CollaboratorStarDefaultsApplied = true;
+        _preferences.Model.CollaboratorStarMigrationVersion = 3;
+        _preferences.Model.StarredCollaboratorWorkflows = new List<string> { "SettingBuilder", "Premise" };
+
+        var starred = await GetStarredFromRegistryAsync();
+
+        CollectionAssert.AreEqual(new[] { "SettingBuilder", "Premise" }, starred.ToArray());
+    }
+
+    /// <summary>
+    ///     The add runs once. A user who unstars Setting Builder after it was added keeps it off.
+    /// </summary>
+    [TestMethod]
+    public async Task GetStarredAsync_AfterUserUnstarsTheAddedStar_DoesNotAddItAgain()
+    {
+        _preferences.Model.CollaboratorStarDefaultsApplied = true;
+        _preferences.Model.CollaboratorStarMigrationVersion = 3;
+        _preferences.Model.StarredCollaboratorWorkflows = new List<string> { "Premise" };
+
+        await GetStarredFromRegistryAsync();
+        await _service.SetStarredAsync(new[] { "Premise" });
+        var starred = await GetStarredFromRegistryAsync();
+
+        CollectionAssert.AreEqual(new[] { "Premise" }, starred.ToArray());
+    }
+
+    [TestMethod]
+    public async Task GetStarredAsync_OnFirstRun_SeedsSettingBuilderWithTheDefaults()
+    {
+        var starred = await GetStarredFromRegistryAsync();
+
+        CollectionAssert.AreEqual(WorkflowRegistry.DefaultStarredLabels.ToArray(), starred.ToArray());
+        CollectionAssert.Contains(starred.ToList(), "SettingBuilder");
+    }
+
+    [TestMethod]
+    public void StarsAddedByVersion_NameOnlyDefaultLabelsAtOrBelowTheCurrentVersion()
+    {
+        foreach (var (version, labels) in WorkflowRegistry.StarsAddedByVersion)
+        {
+            Assert.IsTrue(version <= WorkflowRegistry.StarMigrationVersion, $"version {version}");
+            foreach (var label in labels)
+            {
+                CollectionAssert.Contains(WorkflowRegistry.DefaultStarredLabels.ToList(), label,
+                    $"an added star must also be a default, or new users would not get it: {label}");
+            }
+        }
+    }
+
+    private Task<IReadOnlyList<string>> GetStarredFromRegistryAsync() =>
+        _service.GetStarredAsync(
+            WorkflowRegistry.DefaultStarredLabels,
+            WorkflowRegistry.RetiredWorkflowReplacements,
+            WorkflowRegistry.StarMigrationVersion,
+            WorkflowRegistry.StarsAddedByVersion);
 
     [TestMethod]
     public async Task GetStarredAsync_AfterMigrating_DoesNotRunAgain()

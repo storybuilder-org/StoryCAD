@@ -18,9 +18,9 @@ The workflow list occupies the left side of the Story Collaborator window. It op
 
 Outline gaps appears first, and only when your outline has empty required fields. It is not a workflow in the usual sense but a page that lists what is missing and where to go to fill it. [Outline Gaps](Outline_Gaps.html) explains it.
 
-Starred comes next and holds the workflows you have marked with a star. When you first open Collaborator, five are starred for you, one for each stage of outlining: Ideation (Story idea => Concept => Premise), Story Problem (Premise => Problem + Characters), Problem Builder, Character Builder, and Scene Builder. You can change that set at any time; [Opening Collaborator](../Opening_Collaborator.html) shows how.
+Starred comes next and holds the workflows you have marked with a star. When you first open Collaborator, six are starred for you, one for each stage of outlining: Ideation (Story idea => Concept => Premise), Story Problem (Premise => Problem + Characters), Problem Builder, Character Builder, Setting Builder, and Scene Builder. You can change that set at any time; [Opening Collaborator](../Opening_Collaborator.html) shows how.
 
-The remaining workflows are filed under the story element each one works on: Overview, Problem, Character, Story World, Setting, and Scene. A group appears only when it holds a workflow you haven't starred, so with the starting stars there is no Scene group. These groups start closed. Click a group heading to open it. Nothing is hidden; a workflow that is not starred is one click away in its group.
+The remaining workflows are filed under the story element each one works on: Overview, Problem, Character, Story World, Setting, and Scene. A group appears only when it holds a workflow you haven't starred, so with the starting stars there is no Setting or Scene group. These groups start closed. Click a group heading to open it. Nothing is hidden; a workflow that is not starred is one click away in its group.
 
 ![The workflow list with every element group expanded; each row is one workflow](../../media/Collaborator/Collaborator-Workflow-List.png)
 
