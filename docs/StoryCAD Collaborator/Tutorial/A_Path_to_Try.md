@@ -32,7 +32,7 @@ Treat it as a starting point, not a rule. As you learn which workflows your writ
 
 6. One character path. Character Builder first, then Flaw and Backstory, on the protagonist or the antagonist. Craft: [Defining Characters](../../Writing%20with%20StoryCAD/Defining_Characters.html).
 
-7. Scene Builder. Sketch, type, cast, development, conflict, and sequel for one scene. Select a scene you already have, such as a stub Problem Builder created, or run it on the story problem (the Spine). Craft: [Defining Scenes](../../Writing%20with%20StoryCAD/Defining_Scenes.html) and [Plotting in Scenes](../../Writing%20with%20StoryCAD/Plotting_in_Scenes.html).
+7. Scene Builder. Sketch, type, cast, development, conflict, and sequel for one scene. Select a scene you already have, such as a stub Problem Builder created, or create one in the picker. Craft: [Defining Scenes](../../Writing%20with%20StoryCAD/Defining_Scenes.html) and [Plotting in Scenes](../../Writing%20with%20StoryCAD/Plotting_in_Scenes.html).
 
 ![The workflow pane with the starred workflows at the top, in running order](../../media/Collaborator/Collaborator-Workflow-Pane.png)
 

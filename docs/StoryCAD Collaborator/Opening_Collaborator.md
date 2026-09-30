@@ -15,7 +15,7 @@ Collaborator works on the outline you have open in StoryCAD, so open one first. 
 
 ## Launch Collaborator
 
-With an outline open, click **Collaborator** on the StoryCAD toolbar. During the beta you first see Join and Not now. After you Join, or after a paid subscription is in force, a separate window opens, titled Story Collaborator, and StoryCAD stays where it was behind it. [Getting Started](Getting_Started.html) covers Join, Subscribe, and what to do if the window does not open.
+With an outline open, click **Collaborator** on the StoryCAD toolbar. During the beta, you will initially see the options Join and Not now. After you Join, or after a paid subscription is in force, a separate window opens, titled Story Collaborator, and StoryCAD stays where it was behind it. [Getting Started](Getting_Started.html) covers Join, Subscribe, and what to do if the window does not open.
 
 ![StoryCAD toolbar; the Collaborator button is the highlighted chain icon](../media/Collaborator/Collaborator-Toolbar-Button.png)
 
@@ -23,9 +23,9 @@ With an outline open, click **Collaborator** on the StoryCAD toolbar. During the
 
 The window has three areas side by side. The left is the list of workflows, where you pick the one to run. The center shows the purpose of the workflow you picked and, after a run, the Property Updates list of suggested field changes. The right is the chat column, which carries status messages during a run and lets you ask questions afterward.
 
-Across the top runs a bar of icons, from the left: a control that shows or hides the workflow list, the name of the workflow you are on, then Review Each, Try Again, Help, Customize Workflows, Settings, and Exit. Review Each and Try Again stay greyed until a run has left suggestions waiting. The bar is icons only, so hover over one to read its name. Accept all changes is not on that bar; it sits at the foot of the center column, directly under the Property Updates list it applies to.
+Across the top runs a bar of icons, from the left: a control that shows or hides the workflow list, the name of the workflow you are on, then Review Each, Try Again, Help, Customize Workflows, Settings, and Exit. Review Each and Try Again stay greyed until a run has left suggestions waiting. The bar is icons only, so hover over one to read its name. **Accept All** is not on that bar; it sits at the foot of the center column, directly under the Property Updates list it applies to.
 
-A status strip along the bottom carries short messages when there is something to say, for example that you cancelled choosing a character. If you have turned on cost details in Settings, the running cost of the session sits at the right-hand end of the same strip.
+A status strip along the bottom carries short messages when there is something to say, for example, that you cancelled choosing a character. If you have turned on cost details in Settings, the running cost of the session sits at the right-hand end of the same strip.
 
 ![The Story Collaborator window: workflow list at left, workflow purpose and Property Updates in the center, chat at right](../media/Collaborator/Collaborator-Window-Overview.png)
 
@@ -37,7 +37,7 @@ The list on the left opens short and grows only when you ask it to, because seei
 |------|---------------|
 | Outline gaps | Required fields you have not filled in yet, with a count of the elements that have them. The row appears only when there are gaps, and it is usually the most useful thing to do next. |
 | Starred | The workflows you have marked as yours. Five are starred to begin with, one for each stage of outlining: Ideation, Story Problem, Problem Builder, Character Builder, and Scene Builder. |
-| Story element groups | Everything else, filed under Overview, Problem, Character, Story World, Setting, and Scene. These start closed; click a group to open it. |
+| Story element groups | Everything else, filed under Overview, Problem, Character, Story World, Setting, and Scene. A group appears only when it holds a workflow you haven't starred, so with the starting stars there is no Scene group. These start closed; click a group to open it. |
 
 Nothing is hidden. Every workflow that is not starred is one click away in its group, and the [Workflow Reference](Workflows/) describes each of them.
 
@@ -45,7 +45,7 @@ Nothing is hidden. Every workflow that is not starred is one click away in its g
 
 ## Star the workflows you use
 
-A star sits at the right of each workflow row. Click it to add that workflow to the Starred band, or click a filled star to take it out again. Starred workflows move to the top of the list, and the group they came from keeps the rest. Your stars are remembered between sessions and they are yours alone; they do not change your outline and they do not travel with the story file.
+A star sits at the right of each workflow row. Click it to add that workflow to the Starred band, or click a filled star to remove it again. Starred workflows move to the top of the list, and the group they came from keeps the rest. Your stars are remembered between sessions, and they are yours alone; they do not change your outline, and they do not travel with the story file.
 
 To change several at once, click **Customize Workflows** on the top bar. It lists every workflow with its short description and a checkbox, grouped by story element. Check the ones you want starred and choose Save.
 
@@ -53,7 +53,7 @@ To change several at once, click **Customize Workflows** on the top bar. It list
 
 ## Show or hide the workflow list
 
-The menu control at the left of the top bar, the three stacked lines, shows or hides the workflow list. Hiding it gives the work area the full width of the window, which helps when a run has produced a long Property Updates list, and the list is still there when you want another workflow.
+The menu control on the left of the top bar, the three stacked lines, shows or hides the workflow list. Hiding it gives the work area the full width of the window, which helps when a run has produced a long Property Updates list, and the list is still there when you want another workflow.
 
 ![The same window with the workflow list hidden: the workflow purpose, Property Updates, and Accept all changes now run the full width of the window](../media/Collaborator/Collaborator-Pane-Collapsed.png)
 
@@ -74,7 +74,7 @@ Choose Save to apply your choices, or Cancel to leave them as they were. Respons
 
 ## Cost on the status bar
 
-With the cost checkbox on, the right-hand end of the bottom strip reports, after each run, the model that ran, the tokens in and out, what that run cost, and what the session has cost so far. Chat turns report the same way, one line per turn. When a run cannot be priced the line says so and the session total stays where it was. The figure sits beside status messages rather than replacing them, so a warning is never hidden behind a number.
+With the cost checkbox on, the right-hand end of the bottom strip reports, after each run, the model that ran, the tokens in and out, what that run cost, and what the session has cost so far. Chat turns report the same way, one line per turn. When a run cannot be priced, the line says so, and the session total stays where it was. The figure sits beside status messages rather than replacing them, so a warning is never hidden behind a number.
 
 ## Exit
 

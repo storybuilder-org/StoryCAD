@@ -18,9 +18,9 @@ The Story Overview form is where an outline begins, and its Story Idea, Concept,
 
 This workflow takes whatever you have on those three tabs and carries it forward. If you have only a Story Idea, it proposes a Concept and a Premise; if you already have a Concept, it works from that. It reads the Story Overview and nothing else, so the result depends on what you have written there. One honest sentence of Story Idea is enough to start, and a paragraph gives it more to work with.
 
-It is one of the five workflows starred when you first open Collaborator. When it finishes, the Property Updates list offers up to three fields on the Overview: Story Idea, Concept, and Premise. Any of them that already holds your text is marked Has your text and left alone by Accept all changes, so running it on a finished Overview is safe. It will simply have less to offer.
+It is one of the five workflows starred when you first open Collaborator. When it finishes, the Property Updates list offers up to three fields on the Overview: Story Idea, Concept, and Premise. Any of them that already holds your text is marked Has your text, and **Accept All** asks before it replaces that text, so running it on a finished Overview is safe. It will simply have less to offer.
 
-![Property Updates after Ideation: Concept and Premise marked New, Story Idea marked Has your text](../../media/Collaborator/Collaborator-Workflow-Premise.png)
+![Property Updates after Ideation: Concept and Premise marked New, Description marked Has your text](../../media/Collaborator/Collaborator-Workflow-Premise.png)
 
 ## Story Problem (Premise => Problem + Characters)
 

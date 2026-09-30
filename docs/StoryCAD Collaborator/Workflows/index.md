@@ -20,13 +20,13 @@ Outline gaps appears first, and only when your outline has empty required fields
 
 Starred comes next and holds the workflows you have marked with a star. When you first open Collaborator, five are starred for you, one for each stage of outlining: Ideation (Story idea => Concept => Premise), Story Problem (Premise => Problem + Characters), Problem Builder, Character Builder, and Scene Builder. You can change that set at any time; [Opening Collaborator](../Opening_Collaborator.html) shows how.
 
-The remaining workflows are filed under the story element each one works on: Overview, Problem, Character, Story World, Setting, and Scene. These groups start closed. Click a group heading to open it. Nothing is hidden; a workflow that is not starred is one click away in its group.
+The remaining workflows are filed under the story element each one works on: Overview, Problem, Character, Story World, Setting, and Scene. A group appears only when it holds a workflow you haven't starred, so with the starting stars there is no Scene group. These groups start closed. Click a group heading to open it. Nothing is hidden; a workflow that is not starred is one click away in its group.
 
 ![The workflow list with every element group expanded; each row is one workflow](../../media/Collaborator/Collaborator-Workflow-List.png)
 
 ## How a workflow chooses its story element
 
-Most workflows work on one element at a time, and Collaborator has to know which. The Story Overview is chosen for you, because an outline has only one. For every other kind of element, a picker dialog opens before anything runs. If your outline has no element of that kind, the picker offers to create one. If it has exactly one, that one is preselected and you can accept it or create another. If it has several, you choose. When a workflow follows a link in your outline, for instance to the protagonist of the problem you just picked, that character is preselected too.
+Most workflows work on one element at a time, and Collaborator has to know which. The Story Overview and the Story World are chosen for you, because an outline has only one of each. For every other kind of element, a picker dialog opens before anything runs. If your outline has no element of that kind, the picker offers to create one. Otherwise you choose one from the list or create another. When a workflow follows a link in your outline, for instance to the protagonist of the problem you just picked, it uses that character without asking, or preselects it in the picker if the link is optional.
 
 The picker is also your chance to stop. Cancel it and the workflow does not run.
 

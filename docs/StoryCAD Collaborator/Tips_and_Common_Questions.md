@@ -15,15 +15,15 @@ A blank outline gives Collaborator little to work from. One honest sentence unde
 
 ## Running a workflow a second time
 
-Second passes are normal, and they behave differently from first passes. If you accepted a first pass, many rows in the second come back marked Has your text, which means the field now holds words Collaborator will not replace in bulk. Accept all changes touches only the New, Refresh, and Update rows; when you want to replace what is there, use Review Each and decide field by field. [Reviewing Suggestions](Reviewing_Suggestions.html) explains the labels.
+Second passes are normal, and they behave differently from first passes. If you accepted a first pass in an earlier Collaborator session, many rows in the second come back marked Has your text, which means the field now holds words Collaborator will not replace without asking; rows you accepted in this session come back marked Refresh. **Accept All** applies the New, Refresh, and Update rows, then asks before it replaces any Has your text field, and **Cancel** there keeps your text. When you want to decide field by field, use Review Each. [Reviewing Suggestions](Reviewing_Suggestions.html) explains the labels.
 
 ## Long lists of updates
 
-Some workflows, Character Builder and Scene Builder among them, propose twenty or more fields at once. The Property Updates list scrolls, and Review Each walks the same rows one at a time with a count of where you are, which is the easier way to be sure you have seen every row before you accept.
+Some workflows, Character Builder and Scene Builder among them, can propose twenty or more fields at once. The Property Updates list scrolls, and Review Each walks the same rows one at a time with a count of where you are, which is the easier way to be sure you have seen every row before you accept.
 
 ## Check your work as you go
 
-Accept, then look at the element in StoryCAD. Two steps, and they catch surprises early. There is no Save step in between: an accepted update is written to your outline as you accept it, and saving the outline in StoryCAD works as it always has.
+Accept, then look at the element in StoryCAD. Two steps, and they catch surprises early. The system writes an accepted update to your outline as you accept it, without a Save step in between, and Collaborator saves the outline file each time you accept.
 
 ## Connection and access
 
@@ -41,11 +41,11 @@ Collaborator's Help control on the top bar opens a short overview of the window,
 
 ### Will Collaborator change my outline without asking?
 
-No. Suggestions stay in the Property Updates list until you accept them, and a field that already holds your text is never replaced without your going through Review Each.
+No. Suggestions stay in the Property Updates list until you accept them, and a field that already holds your text is never replaced until you choose **Replace** when Collaborator asks.
 
-### Why did Accept all changes leave a field alone?
+### Why did Accept All leave a field alone?
 
-That field already had your text, so it was marked Has your text and set aside for review. Use Review Each, read the proposal against yours, and Accept it if you prefer the new version.
+That field already had your text, so it was marked Has your text, and Accept All asked before replacing it. If you chose **Cancel**, your text stayed. Use Review Each, read the proposal against yours, and Accept it if you prefer the new version.
 
 ### Can I use Collaborator instead of learning structure?
 

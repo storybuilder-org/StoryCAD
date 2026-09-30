@@ -10,7 +10,7 @@ has_toc: false
 
 # An Example Session
 
-This walkthrough is short enough for a class period or a first evening with Collaborator, and you can follow it exactly, because the outline it uses ships with StoryCAD. Danger Calls is a suspense short story about two detectives, Leonard Kraskin and Tony Irwin, trying to catch a drug dealer whose pager network keeps him a step ahead of them. Open it from Sample Stories on the left tab of the open dialog, as described in [Reading and Writing Outlines](../../Quick%20Start/Reading_and_Writing_Outlines.html). It is also the story the manual builds from nothing in [Tutorial Creating a Story](../../Tutorial%20Creating%20a%20Story/Tutorial_Creating_a_Story.html); if you have worked through that, you already know this outline, and if you have not, you do not need to.
+This walkthrough is short enough for a class period or a first evening with Collaborator, and you can follow it exactly, because the outline it uses ships with StoryCAD. Danger Calls is a suspense short story about two detectives, Leonard Kraskin and Tony Irwin, trying to catch a drug dealer whose pager network keeps him a step ahead of them. Open it from **Sample outlines** on the left of the open dialog, as described in [Reading and Writing Outlines](../../Quick%20Start/Reading_and_Writing_Outlines.html). It is also the story the manual builds from nothing in [Tutorial Creating a Story](../../Tutorial%20Creating%20a%20Story/Tutorial_Creating_a_Story.html); if you have worked through that, you already know this outline, and if you have not, you do not need to.
 
 Save a copy before you start. Accepting a suggestion writes it to the outline as you accept it, so work on your own copy rather than the installed sample.
 
@@ -24,9 +24,9 @@ Open your copy of Danger Calls and select Danger Calls at the top of the Story E
 
 ## 2. Ideation (Story idea => Concept => Premise)
 
-Click the **Ideation (Story idea => Concept => Premise)** workflow in the list. Clicking runs it straight away, so wait for it to finish, then read the header above the Property Updates list. It counts the proposals and splits them into free and need review.
+Click the **Ideation (Story idea => Concept => Premise)** workflow in the list. Clicking runs it straight away, so wait for it to finish, then read the header above the Property Updates list. It counts the proposals, and the line above it tells you how many would replace text you wrote.
 
-Danger Calls already has a Story Idea (a news piece about teenagers selling drugs using disposable phones) and a Concept (what if a detective uses a criminal's own phone to stage a rescue). Fields carrying that text come back marked Has your text, and Accept all changes leaves every one of them alone. That is the point of the labels: nothing you wrote disappears because you clicked the button at the foot of the list.
+Danger Calls already has a Story Idea (a news piece about teenagers selling drugs using disposable phones) and a Concept (what if a detective uses a criminal's own phone to stage a rescue). Fields carrying that text come back marked Has your text, and **Accept All** asks before it replaces any of them. That is the point of the labels: nothing you wrote disappears unless you choose **Replace**.
 
 ![The Ideation (Story idea => Concept => Premise) workflow finished on Danger Calls: three proposals headed 3: 0 free, 3 need review, each labeled Has your text](../../media/Collaborator/Collaborator-Session-Premise.png)
 

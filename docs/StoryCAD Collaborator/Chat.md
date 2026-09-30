@@ -15,9 +15,9 @@ The right-hand column of the Story Collaborator window is the chat. While a work
 
 Chat is for exploring a result before you decide about it. You might ask for three tighter versions of a proposed premise, ask why Collaborator chose a particular goal for the antagonist, or ask it to make a conflict more personal and less abstract. The answers come back in the chat column, and they can change your mind about which proposals to accept.
 
-What chat cannot do is put text into your outline. A chat answer, however good, stays in the column. If you want it in a field, either run the workflow again so that it proposes the new wording as a Property Update, or copy the wording into StoryCAD yourself. This is deliberate: the Property Updates list, with its labels and its Accept and Skip choices, is the one path by which Collaborator writes to your outline, and keeping chat outside that path means a conversation can never change a field you did not mean to change.
+What chat cannot do is put text into your outline. A chat answer, however good, does not go into a field by itself. If you want new wording in a field, ask chat to change the proposal, and it rewrites that row in the Property Updates list for you to accept, or copy the wording into StoryCAD yourself. This is deliberate: the Property Updates list, with its labels and its Accept and Skip choices, is the one path by which Collaborator writes a workflow's proposals to your outline, and keeping chat outside that path means a conversation can never change a field you did not mean to change.
 
-![The chat column after a run: a typed question about the proposed backstory, and Collaborator's numbered answer explaining what the proposal strengthens](../media/Collaborator/Collaborator-Chat.png)
+![The chat column after Flaw and Backstory on Nora Helmer: a typed question about which problem her flaw contributes to, and Collaborator's answer](../media/Collaborator/Collaborator-Chat.png)
 
 ## When to use a workflow instead
 

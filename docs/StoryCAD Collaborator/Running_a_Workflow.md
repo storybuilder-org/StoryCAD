@@ -17,11 +17,11 @@ Clicking a workflow runs it. There is no separate Run button and no confirmation
 
 ## Choose the story element when asked
 
-Most workflows work on one story element, and Collaborator has to know which one. The Story Overview is chosen for you, because an outline has only one. For any other kind of element a picker opens before anything runs. If your outline has none of that kind, the picker offers to create one; if it has exactly one, that one is preselected, and you can accept it or create another; if it has several, you choose. When the workflow follows a link in your outline, such as the protagonist of the Problem you just picked, that character is preselected as well. A few workflows ask for more than one element in turn; Story Problem (Premise => Problem + Characters), for example, asks for a Problem and then two characters.
+Most workflows work on one story element, and Collaborator has to know which one. The Story Overview and the Story World are chosen for you, because an outline has only one of each. For any other kind of element a picker opens before anything runs. If your outline has none of that kind, the picker offers to create one; otherwise you choose one from the list or create another. When the workflow follows a link in your outline, such as the protagonist of the Problem you just picked, Collaborator uses that character without asking, or preselects it when the picker is optional. A few workflows ask for more than one element in turn; Story Problem (Premise => Problem + Characters), for example, asks for a Problem and then two characters.
 
-![The Select Character dialog, listing the outline's characters with an option to create a new element](../media/Collaborator/Collaborator-Element-Picker.png)
+![The Select Problem dialog, listing the outline's problems with an option to create a new element](../media/Collaborator/Collaborator-Element-Picker.png)
 
-The picker is your chance to back out. Cancel it and the workflow does not run. Nothing has been written at that point, with one exception worth knowing: where a workflow links elements as you pick them, as Story Problem (Premise => Problem + Characters) does when it makes your choice the Story Problem on the Overview, that link is made at once. The Workflow Reference notes this for the workflows that do it.
+The picker is your chance to back out. Cancel a picker for an element the workflow needs and the workflow does not run; a few pickers are optional, such as the three in Story Problem (Premise => Problem + Characters), and cancelling one of those runs the workflow without that element. Nothing from the run has been written at that point, with two exceptions worth knowing: an element you create in the picker is added to your outline at once, and where a workflow links elements as you pick them, as Story Problem (Premise => Problem + Characters) does when it makes your choice the Story Problem on the Overview, that link is made at once. The Workflow Reference notes this for the workflows that do it.
 
 ## What Collaborator sends with the run
 
@@ -29,9 +29,9 @@ Along with the elements you picked, Collaborator sends a short account of where 
 
 ## Wait for the result
 
-Collaborator runs the workflow and reports its progress in the chat column on the right. When it finishes, the chat shows a short status line saying how many updates are free and how many need review, and the center of the window fills with the Property Updates list, one row for each field Collaborator would like to change. Accept all changes appears at the foot of that list, and Review Each and Try Again come alive on the top bar. Nothing has been written into your outline yet; that happens only when you accept, and [Reviewing Suggestions](Reviewing_Suggestions.html) explains the choices.
+Collaborator runs the workflow and reports its progress in the chat column on the right. When it finishes, the chat shows a short status line saying how many property updates Collaborator found and how many of them would replace text you wrote, and the center of the window fills with the Property Updates list, one row for each field Collaborator would like to change. **Accept All** appears at the foot of that list, and Review Each and Try Again come alive on the top bar. Collaborator doesn't write anything into your outline until you tell it to.
 
-![A finished run: six proposals headed 6: 6 free, 0 need review, five labeled New and one Update, with Accept all changes at the foot of the list](../media/Collaborator/Collaborator-Updates-After-Run.png)
+![A finished Problem Builder run: 23 proposed property updates, each labeled New or Has your text, with Accept All at the foot of the list](../media/Collaborator/Collaborator-Updates-After-Run.png)
 
 ## Try Again
 
@@ -39,4 +39,4 @@ If the first result misses the mark, click **Try Again** on the top bar. It runs
 
 ## After you accept
 
-Open the same story element in StoryCAD's navigation pane. The fields you accepted hold the text you approved in Collaborator, and you can edit them there like any other text you typed. The outline is still yours.
+Exit this workflow session to return to your outline in StoryCAD. Open the same story element in StoryCAD's navigation pane. The fields you accepted hold the text you approved in Collaborator, and you can edit them there like any other text you typed. The outline is still yours.
