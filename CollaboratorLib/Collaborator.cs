@@ -450,7 +450,8 @@ public class Collaborator : ICollaborator
                     (await starService.GetStarredAsync(
                         WorkflowRegistry.DefaultStarredLabels,
                         WorkflowRegistry.RetiredWorkflowReplacements,
-                        WorkflowRegistry.StarMigrationVersion)).ToList();
+                        WorkflowRegistry.StarMigrationVersion,
+                        WorkflowRegistry.StarsAddedByVersion)).ToList();
                 return;
             }
         }

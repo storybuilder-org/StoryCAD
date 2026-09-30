@@ -26,7 +26,8 @@ namespace StoryCollaborator.Workflows
         /// #77 took GMC and Structure off the band when ProblemBuilder landed, and #211 has now
         /// deleted them along with the Scene micro-workflows the band held for A:B. One workflow
         /// per stage is the point: ProblemBuilder carries the problem, CharacterBuilder the
-        /// cast function, SceneBuilder the scene.
+        /// cast function, SceneBuilder the scene. #269 added SettingBuilder, the one Setting
+        /// workflow, so the place a scene uses is on the band before the scene.
         /// </summary>
         public static readonly IReadOnlyList<string> DefaultStarredLabels = new List<string>
         {
@@ -34,18 +35,33 @@ namespace StoryCollaborator.Workflows
             "StoryProblem",
             "ProblemBuilder",
             "CharacterBuilder",
+            "SettingBuilder",
             "SceneBuilder"
         };
 
         /// <summary>
         /// How far stored stars have been carried forward. Raise this, and add to
         /// <see cref="RetiredWorkflowReplacements"/>, whenever a consolidation deletes a workflow
-        /// a user could have starred. WorkflowStarService compares it against the number in the
-        /// user's preferences and migrates once.
+        /// a user could have starred. Raise it too, and add to <see cref="StarsAddedByVersion"/>,
+        /// when a label joins <see cref="DefaultStarredLabels"/>, because the defaults seed only
+        /// once. WorkflowStarService compares it against the number in the user's preferences
+        /// and migrates once.
         /// #224 raised this to 2 for the two Setting labels SettingBuilder absorbed.
         /// #244 raised this to 3 for DefineCharacter and StoryFunction.
+        /// #269 raised this to 4 to star SettingBuilder for users seeded before it was a default.
         /// </summary>
-        public const int StarMigrationVersion = 3;
+        public const int StarMigrationVersion = 4;
+
+        /// <summary>
+        /// Labels added to <see cref="DefaultStarredLabels"/> at a migration version. A user whose
+        /// stored version is below the key gets each label appended once, if it is not already
+        /// starred. After that the user's choice wins: unstarring it keeps it off.
+        /// </summary>
+        public static readonly IReadOnlyDictionary<int, IReadOnlyList<string>> StarsAddedByVersion =
+            new Dictionary<int, IReadOnlyList<string>>
+            {
+                [4] = new[] { "SettingBuilder" }
+            };
 
         /// <summary>
         /// Deleted workflow label to the workflow that absorbed its job (#211). A user who
