@@ -54,4 +54,4 @@ For craft reading beyond this manual, see [StoryBuilder Resources](https://story
 
 StoryCAD stores your outline as forms with tabs and fields, and Collaborator suggests text for those same fields: the Premise on the Overview, a Goal on a Problem's Protagonist tab, the Flaw on a Character. When you accept a suggestion, open the same element in StoryCAD and the text is there, where you can edit it like anything else you typed.
 
-An empty field is easy to try a suggestion on. A field that already holds your words is treated differently: Collaborator marks it Has your text and will not overwrite it without your deliberate review. [Reviewing Suggestions](Reviewing_Suggestions.html) explains the marks, and what Accept all changes does and does not touch.
+An empty field is easy to try a suggestion on. A field that already holds your words is treated differently: Collaborator marks it Has your text and will not overwrite it without asking you first. [Reviewing Suggestions](Reviewing_Suggestions.html) explains the marks, and what **Accept All** does with each one.

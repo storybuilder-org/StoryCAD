@@ -23,7 +23,7 @@ With an outline open, click **Collaborator** on the StoryCAD toolbar. During the
 
 The window has three areas side by side. The left is the list of workflows, where you pick the one to run. The center shows the purpose of the workflow you picked and, after a run, the Property Updates list of suggested field changes. The right is the chat column, which carries status messages during a run and lets you ask questions afterward.
 
-Across the top runs a bar of icons, from the left: a control that shows or hides the workflow list, the name of the workflow you are on, then Review Each, Try Again, Help, Customize Workflows, Settings, and Exit. Review Each and Try Again stay greyed until a run has left suggestions waiting. The bar is icons only, so hover over one to read its name. Accept all changes is not on that bar; it sits at the foot of the center column, directly under the Property Updates list it applies to.
+Across the top runs a bar of icons, from the left: a control that shows or hides the workflow list, the name of the workflow you are on, then Review Each, Try Again, Help, Customize Workflows, Settings, and Exit. Review Each and Try Again stay greyed until a run has left suggestions waiting. The bar is icons only, so hover over one to read its name. **Accept All** is not on that bar; it sits at the foot of the center column, directly under the Property Updates list it applies to.
 
 A status strip along the bottom carries short messages when there is something to say, for example, that you cancelled choosing a character. If you have turned on cost details in Settings, the running cost of the session sits at the right-hand end of the same strip.
 
@@ -37,7 +37,7 @@ The list on the left opens short and grows only when you ask it to, because seei
 |------|---------------|
 | Outline gaps | Required fields you have not filled in yet, with a count of the elements that have them. The row appears only when there are gaps, and it is usually the most useful thing to do next. |
 | Starred | The workflows you have marked as yours. Five are starred to begin with, one for each stage of outlining: Ideation, Story Problem, Problem Builder, Character Builder, and Scene Builder. |
-| Story element groups | Everything else, filed under Overview, Problem, Character, Story World, Setting, and Scene. These start closed; click a group to open it. |
+| Story element groups | Everything else, filed under Overview, Problem, Character, Story World, Setting, and Scene. A group appears only when it holds a workflow you haven't starred, so with the starting stars there is no Scene group. These start closed; click a group to open it. |
 
 Nothing is hidden. Every workflow that is not starred is one click away in its group, and the [Workflow Reference](Workflows/) describes each of them.
 

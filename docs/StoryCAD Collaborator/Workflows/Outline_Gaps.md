@@ -10,13 +10,13 @@ has_toc: false
 
 # Outline Gaps
 
-StoryCAD's forms have many fields, and you are never required to fill them all. Collaborator, though, treats a short list of fields on each kind of story element as required: the ones its workflows read, and the ones a story cannot do without, such as a Story Problem on the Overview or a protagonist on a Problem. When you open Collaborator, it checks every Overview, Problem, Character, Setting, and Scene in your outline against that list. If anything is missing, an Outline gaps row appears at the top of the workflow list with a count of the elements that have gaps. When nothing is missing, the row is not there.
+StoryCAD's forms have many fields, and you are never required to fill them all. Collaborator, though, treats a short list of fields on each kind of story element as required: the ones its workflows read, and the ones a story cannot do without, such as a Story Problem on the Overview or a protagonist on a Problem. When you open Collaborator, it checks every Overview, Problem, Character, Setting, and Scene in your outline against that list. If anything is missing, an Outline gaps row appears at the top of the workflow list with a count of the missing fields. When nothing is missing, the row is not there.
 
 ## What the page shows
 
-Clicking Outline gaps does not run anything. It opens a page in the center of the window headed, in the app's own words, "Required fields that are empty or broken. Click a field to open its helper workflow, or the element name to open it in StoryCAD." Below that, your elements with gaps are listed in outline order, the Overview first, then Problems, Characters, Settings, and Scenes, each with its missing fields under its name.
+Clicking Outline gaps does not run anything. It opens a page in the center of the window headed, in the app's own words, "Required fields that are empty or broken. Click a field to open its helper workflow, or the element name to open it in StoryCAD." Below that, your elements with gaps are listed by type, the Overview first, then Problems, Characters, Settings, and Scenes, alphabetically within each type, each with its missing fields under its name.
 
-Each missing field is a link, and the small text under it tells you what the link does. Where a Collaborator workflow can fill the field, the text reads "via" and the workflow's name, and clicking it starts that workflow; you choose the element in the picker as usual. Where no workflow applies, for example the Author field on the Overview or an element's Name, the text reads "edit in StoryCAD," and clicking the element's name selects it in StoryCAD's navigation pane so you can type the value yourself.
+Each missing field is a link, and the small text beside it tells you what the link does. Where a Collaborator workflow can fill the field, the text reads "via" and the workflow's name, and clicking it starts that workflow; you choose the element in the picker as usual. Where no workflow applies, for example the Author field on the Overview or an element's Name, the text reads "edit in StoryCAD," and clicking the element's name selects it in StoryCAD's navigation pane so you can type the value yourself.
 
 A sentence at the top of the page beginning "Guess:" tells you where Collaborator thinks your outline stands. The last section of this page explains it.
 
@@ -42,7 +42,7 @@ Every time a workflow runs, Collaborator tells the model which stage of outlinin
 4. Structure Building. The cast is complete, but no scene has been allocated to a beat on the Story Problem's beat sheet or on any of its sub-problems.
 5. Scene Work. At least one scene sits on a beat. The outline has a shape, and the remaining work is inside the scenes.
 
-The same judgment appears to you as the Guess sentence on the Outline gaps page: "Guess: the outline is in Problem Development," for example. When a problem gap and a character gap are both open, the sentence says so and adds that the Story Problem still needs its protagonist and antagonist. It is a guess in the plain sense. It comes from which fields are filled, not from reading your prose, so if it seems wrong, the table above shows which fields it is looking at.
+The same judgment appears to you as the Guess sentence on the Outline gaps page: "Guess: the outline is in Problem Development," for example. When the Story Problem is chosen but its protagonist or antagonist isn't linked, the sentence says Problem Development and Character Development are both open, and adds that the Story Problem still needs its protagonist and antagonist. It is a guess in the plain sense. It comes from which fields are filled, not from reading your prose, so if it seems wrong, the table above shows which fields it is looking at.
 
 After the spine workflows, the page still lists what is empty. The count is higher. The Guess sentence should have moved past Ideation.
 

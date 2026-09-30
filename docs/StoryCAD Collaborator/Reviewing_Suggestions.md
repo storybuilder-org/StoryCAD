@@ -13,7 +13,7 @@ Reading the suggested changes before you accept them is the habit that makes Col
 
 ## The Property Updates list
 
-After a run, the center of the window fills with a list headed Proposed property updates. Each row is one field on one story element, for example, the Premise on the Overview or the protagonist's Goal on a Problem, with the proposed text beside it. The header counts the rows and sorts them into two kinds. A heading that reads 3: 1 free, 2 need review means three proposals are waiting, of which one will apply on its own when you accept all changes and two will not move until you say so, field by field.
+After a run, the center of the window fills with a list headed Proposed property updates. Each row is one field on one story element, for example, the Premise on the Overview or the protagonist's Goal on a Problem, with the proposed text beside it. The header counts the rows, and the line above the list tells you how many of them would replace text you wrote. A line that reads 3 property update(s) proposed. 1 would replace text you wrote means three proposals are waiting, of which two will apply on their own when you click **Accept All** and one will not change until you confirm it.
 
 ![A Property Updates list headed 'Proposed property updates (3: 0 free, 3 need review)', each row showing a field name, its type, and the proposed text](../media/Collaborator/Collaborator-Property-Updates.png)
 
@@ -21,20 +21,20 @@ After a run, the center of the window fills with a list headed Proposed property
 
 Under each field name is a label saying how Collaborator classified the field against what your outline already holds.
 
-| Label | What it means | What Accept all changes does |
+| Label | What it means | What Accept All does |
 |-------|---------------|------------------------------|
 | New | The field is empty | Applies it |
 | Refresh | Collaborator wrote this field earlier in the same session | Applies it |
-| Has your text | You, or your past edits, already filled the field | Skips it. Use Review Each if you want to replace your words |
+| Has your text | You, or your past edits, already filled the field | Asks first. **Replace** writes the proposal; **Cancel** keeps your words |
 | Update | A field that holds a list rather than a single value, so there is nothing to compare line for line | Applies it |
 
-The New, Refresh, and Update rows are the free ones in the header count, and the Has your text rows are the ones that need review. This is how your writing is protected when you run a workflow a second time on a half-filled outline: a field you filled yourself, or accepted earlier and then edited, is never replaced in bulk.
+The New, Refresh, and Update rows are the free ones, and the Has your text rows are the ones that would replace text you wrote. This is how your writing is protected when you run a workflow a second time on a half-filled outline: a field you filled yourself, or accepted earlier and then edited, is never replaced without asking you first.
 
 ![A single Property Updates row: the field name Weather, the label New beneath it, and the proposed text alongside](../media/Collaborator/Collaborator-Row-New.png)
 
-## Accept all changes
+## Accept All
 
-The Accept all changes button sits at the foot of the list. It updates every New, Refresh, and Update row and leaves every Has your text field alone. Use it when you start from empty fields and want the first pass written quickly. Afterwards, open the same element in StoryCAD and skim the form; the text is already there.
+The **Accept All** button sits at the foot of the list. It updates every New, Refresh, and Update row. If any Has your text rows are waiting, it first asks whether to replace them: **Replace** writes those too, and **Cancel** leaves your text alone. Use it when you start from empty fields and want the first pass written quickly. Afterwards, open the same element in StoryCAD and skim the form; the text is already there.
 
 ## Review Each
 
