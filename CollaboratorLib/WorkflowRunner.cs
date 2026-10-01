@@ -1505,9 +1505,7 @@ namespace StoryCollaborator
                         foreach (var rel in relationships)
                         {
                             if (validChars.Contains(rel.RecipientGuid))
-                                _storyApi.AddRelationship(
-                                    uuid, rel.RecipientGuid, rel.RelationType, rel.Mirror,
-                                    rel.Trait, rel.Attitude, rel.Notes);
+                                ApplyRelationship(uuid, rel, result);
                             else
                                 result.StatusMessages.Add(
                                     $"Relationships: recipient GUID {rel.RecipientGuid} not in character candidate set; skipped");
@@ -1591,6 +1589,50 @@ namespace StoryCollaborator
             if (n > 0)
                 result.StatusMessages.Add($"Scene Builder: added {n} seat(s) to Cast.");
             return n;
+        }
+
+        /// <summary>
+        ///     Collaborator #251. Writes one full row on the Character, and an inverse row (type only)
+        ///     on the Partner when the Partner has no row for the Character. Never mirrors.
+        /// </summary>
+        private void ApplyRelationship(Guid characterUuid, RelationshipInfo rel, WorkflowResult result)
+        {
+            var character = _storyApi.GetStoryElement(characterUuid).Payload as CharacterModel;
+            var partner = _storyApi.GetStoryElement(rel.RecipientGuid).Payload as CharacterModel;
+            if (character == null || partner == null)
+            {
+                result.StatusMessages.Add(character == null
+                    ? $"Relationships: element {characterUuid} is not a character; skipped"
+                    : $"Relationships: recipient GUID {rel.RecipientGuid} not in character candidate set; skipped");
+                return;
+            }
+
+            if (character.RelationshipList.Any(r => r.PartnerUuid == partner.Uuid))
+            {
+                result.StatusMessages.Add(
+                    $"Relationships: {character.Name} already has a relationship with {partner.Name}; change it on the Relationships tab.");
+                return;
+            }
+
+            var added = _storyApi.AddRelationship(
+                characterUuid, rel.RecipientGuid, rel.RelationType, false,
+                rel.Trait, rel.Attitude, rel.Notes);
+            if (!added.IsSuccess)
+            {
+                result.StatusMessages.Add(
+                    $"Relationships: {character.Name} to {partner.Name} not written: {added.ErrorMessage}");
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(rel.InverseRelationType) &&
+                !partner.RelationshipList.Any(r => r.PartnerUuid == character.Uuid))
+            {
+                var inverse = _storyApi.AddRelationship(
+                    rel.RecipientGuid, characterUuid, rel.InverseRelationType, false);
+                if (!inverse.IsSuccess)
+                    result.StatusMessages.Add(
+                        $"Relationships: inverse type on {partner.Name} not written: {inverse.ErrorMessage}");
+            }
         }
 
         private IEnumerable<Guid> GetCandidateGuids(StoryItemType type)
@@ -2978,7 +3020,7 @@ namespace StoryCollaborator
             return results;
         }
 
-        private static void ParseRelationshipEntry(JsonElement entry, List<RelationshipInfo> results)
+        internal static void ParseRelationshipEntry(JsonElement entry, List<RelationshipInfo> results)
         {
             string? guidStr = null;
             if (entry.TryGetProperty("recipient_guid", out var rg) || entry.TryGetProperty("GUID", out rg))
@@ -2990,18 +3032,8 @@ namespace StoryCollaborator
                 notes = ReadJsonString(entry, "description");
             var trait = ReadJsonString(entry, "Trait", "trait");
             var attitude = ReadJsonString(entry, "Attitude", "attitude");
-            var mirror = true;
-            if (entry.TryGetProperty("mirror", out var m))
-            {
-                mirror = m.ValueKind switch
-                {
-                    JsonValueKind.False => false,
-                    JsonValueKind.True => true,
-                    JsonValueKind.String => !string.Equals(m.GetString(), "false", StringComparison.OrdinalIgnoreCase),
-                    _ => true
-                };
-            }
-            results.Add(new RelationshipInfo(recipientGuid, relationType, mirror, trait, attitude, notes));
+            var inverseRelationType = ReadJsonString(entry, "InverseRelationType", "inverse_relation_type");
+            results.Add(new RelationshipInfo(recipientGuid, relationType, inverseRelationType, trait, attitude, notes));
         }
 
         private static string ReadJsonString(JsonElement entry, params string[] names)
