@@ -110,8 +110,11 @@ public class Collaborator : ICollaborator
     /// <summary>
     /// Issue #116: fields Collaborator successfully wrote this plugin session
     /// (SessionTouchKey = "{uuid:N}.{Property}"). Not persisted across app restarts.
+    /// Collaborator #272: each key maps to the fingerprint of the value Collaborator wrote
+    /// (<see cref="WorkflowRunner.ReadTouchFingerprint"/>), so a later writer edit is not
+    /// mistaken for Collaborator's own text.
     /// </summary>
-    private readonly HashSet<string> _sessionTouchedFields =
+    private readonly Dictionary<string, string> _sessionTouchedFields =
         new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
@@ -1803,7 +1806,14 @@ public class Collaborator : ICollaborator
                             if (n > 0)
                                 lastAppliedKeys.Add(u.Key);
                             applied += n;
-                            _sessionTouchedFields.Add(u.SessionTouchKey);
+                            // Collaborator #272: record the touch only when something was written,
+                            // with the fingerprint of what is now in the outline.
+                            if (n > 0)
+                            {
+                                var fingerprint = runner.ReadTouchFingerprint(u);
+                                if (fingerprint != null)
+                                    _sessionTouchedFields[u.SessionTouchKey] = fingerprint;
+                            }
                         }
                         if (!sceneBuilderOrphanBindDone
                             && string.Equals(workflow.Label, "SceneBuilder", StringComparison.Ordinal))
