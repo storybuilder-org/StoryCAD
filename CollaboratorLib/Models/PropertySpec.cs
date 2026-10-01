@@ -126,7 +126,8 @@ namespace StoryCollaborator.Models
     /// Collaborator #217 section 5.7: the value of one per-beat pending update. Row is the
     /// proposal row; Sheet is the whole proposal, kept so the first accepted row can install
     /// the sheet when the Problem has none. BindGuid set means the row binds that candidate;
-    /// null means it creates the Scene stub named in Row.SceneName.
+    /// null means it creates the stub named in Row.ProblemName (a Problem, #246) or, when that is
+    /// blank, in Row.SceneName (a Scene).
     /// </summary>
     public sealed record BeatRowValue(
         int Index,

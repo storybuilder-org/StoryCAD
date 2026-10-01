@@ -120,7 +120,11 @@ public sealed class SessionProposalSet
             // Create row makes; a Bind row names an outline element and takes no free text.
             if (row.BindGuid.HasValue)
                 return false;
-            patched = row with { Row = row.Row with { SceneName = newValue } };
+            // Collaborator #273: a Problem Create row (#246) carries its name in ProblemName.
+            // Writing SceneName there gave the row both stub kinds, and the plan refused it.
+            patched = string.IsNullOrWhiteSpace(row.Row.ProblemName)
+                ? row with { Row = row.Row with { SceneName = newValue } }
+                : row with { Row = row.Row with { ProblemName = newValue } };
             proposedText = FormatValue(patched);
         }
         changed = !string.Equals(Normalize(proposedText), Normalize(e.ProposedText), StringComparison.Ordinal);

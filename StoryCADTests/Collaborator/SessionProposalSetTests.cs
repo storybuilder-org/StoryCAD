@@ -294,4 +294,33 @@ public class SessionProposalSetTests
         Assert.IsTrue(changed);
         Assert.AreEqual("What if C?", set.Get("Overview.Concept")!.ProposedText);
     }
+
+    /// <summary>
+    ///     Collaborator #273: a Create row that stubs a Problem carries its name in
+    ///     <see cref="BeatInfo.ProblemName"/>. A chat patch renames that Problem; it does not
+    ///     write <see cref="BeatInfo.SceneName"/>, which the row does not use.
+    /// </summary>
+    [TestMethod]
+    public void TryApplyPatch_ProblemCreateRow_SetsProblemName()
+    {
+        var row = new BeatInfo("Midpoint", "the nested fight",
+            ProblemName: "The Yellow Brick Road", ProblemCategory: "Sequence");
+        var update = new PendingUpdate("Problem", Guid.NewGuid(),
+            new PropertySpec("StructureBeats", WriteVia.BeatSheet, JsonKey: "beats"),
+            new BeatRowValue(0, "Midpoint", row, new[] { row }, null, null, null))
+        {
+            BeatRowIndex = 0
+        };
+        var set = new SessionProposalSet();
+        set.ReplaceFromPending(new[] { update });
+
+        Assert.IsTrue(set.TryApplyPatch("Problem.StructureBeats[00]", "The Road to Oz", out _, out var changed));
+
+        Assert.IsTrue(changed, "the displayed proposal changes");
+        var entry = set.Get("Problem.StructureBeats[00]")!;
+        var value = (BeatRowValue)entry.Update.Value!;
+        Assert.AreEqual("The Road to Oz", value.Row.ProblemName);
+        Assert.IsNull(value.Row.SceneName, "a Problem row gets no Scene stub name");
+        Assert.AreEqual("new Problem \"The Road to Oz\" (Sequence)", entry.ProposedText);
+    }
 }
