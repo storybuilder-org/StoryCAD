@@ -144,7 +144,7 @@ namespace StoryCollaborator.Models
     public sealed record RelationshipInfo(
         Guid RecipientGuid,
         string RelationType,
-        bool Mirror = false,
+        string InverseRelationType = "",
         string Trait = "",
         string Attitude = "",
         string Notes = "");

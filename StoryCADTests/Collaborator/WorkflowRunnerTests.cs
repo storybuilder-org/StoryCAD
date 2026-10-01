@@ -81,4 +81,172 @@ public class WorkflowRunnerTests
         Assert.AreEqual(created.Uuid, parent.StructureBeats[0].Guid);
         Assert.AreEqual(0, model.StoryElements.OfType<SceneModel>().Count(), "no Scene stub");
     }
+
+    // ---- Collaborator #251: the Relationship workflow adds an inverse row, not a copy ----
+
+    private static (StoryModel Model, WorkflowRunner Runner, CharacterModel Character, CharacterModel Partner)
+        ArrangeRelationship()
+    {
+        var model = new StoryModel();
+        var api = new StoryCADApi(
+            Ioc.Default.GetRequiredService<OutlineService>(),
+            Ioc.Default.GetRequiredService<ListData>(),
+            Ioc.Default.GetRequiredService<ControlData>(),
+            Ioc.Default.GetRequiredService<ToolsData>());
+        api.CurrentModel = model;
+        var workflow = new Workflow("Relationship", "Relationship", "test", StoryItemType.Character);
+        var runner = new WorkflowRunner(model, workflow, api);
+        var character = new CharacterModel("Sarah Osborne", model, null);
+        var partner = new CharacterModel("Irene Campbell", model, null);
+        return (model, runner, character, partner);
+    }
+
+    private static List<RelationshipInfo> ParseOne(string json)
+    {
+        using var doc = System.Text.Json.JsonDocument.Parse(json);
+        var results = new List<RelationshipInfo>();
+        WorkflowRunner.ParseRelationshipEntry(doc.RootElement, results);
+        return results;
+    }
+
+    private static WorkflowResult RelationshipResult(CharacterModel character, List<RelationshipInfo> rows)
+    {
+        var result = WorkflowResult.Succeeded();
+        result.PendingUpdates.Add(new PendingUpdate("Character", character.Uuid,
+            new PropertySpec("RelationshipList", WriteVia.Relationships, JsonKey: "relationship"), rows));
+        return result;
+    }
+
+    [TestMethod]
+    public void ParseRelationshipEntry_WithInverseRelationType_HoldsTheValue()
+    {
+        var partner = Guid.NewGuid();
+        var rows = ParseOne($$"""
+            {"recipient_guid":"{{partner}}","RelationType":"Captor","InverseRelationType":"Captive","Trait":"t","Attitude":"a","Notes":"n"}
+            """);
+
+        Assert.AreEqual(1, rows.Count);
+        Assert.AreEqual("Captive", rows[0].InverseRelationType);
+        Assert.AreEqual("Captor", rows[0].RelationType);
+    }
+
+    [TestMethod]
+    public void ParseRelationshipEntry_WithMirrorTrue_KeepsNoMirrorValue()
+    {
+        var partner = Guid.NewGuid();
+        var rows = ParseOne($$"""
+            {"recipient_guid":"{{partner}}","RelationType":"Captor","mirror":true,"Notes":"n"}
+            """);
+
+        Assert.AreEqual(1, rows.Count);
+        Assert.AreEqual(partner, rows[0].RecipientGuid);
+        Assert.AreEqual("Captor", rows[0].RelationType);
+        Assert.AreEqual("n", rows[0].Notes);
+        Assert.AreEqual("", rows[0].InverseRelationType);
+        Assert.IsFalse(typeof(RelationshipInfo).GetProperties().Any(p =>
+                p.Name.Contains("mirror", StringComparison.OrdinalIgnoreCase)),
+            "no property holds the mirror value");
+    }
+
+    [TestMethod]
+    public void ApplyUpdates_MirrorTrueAndEmptyInverseRelationType_PartnerHasNoRow()
+    {
+        var (_, runner, character, partner) = ArrangeRelationship();
+        var rows = ParseOne($$"""
+            {"recipient_guid":"{{partner.Uuid}}","RelationType":"Captor","mirror":true,"Trait":"t","Attitude":"a","Notes":"n"}
+            """);
+
+        runner.ApplyUpdates(RelationshipResult(character, rows), new Dictionary<string, StoryElement>());
+
+        Assert.AreEqual(1, character.RelationshipList.Count);
+        Assert.AreEqual(0, partner.RelationshipList.Count);
+    }
+
+    [TestMethod]
+    public void ApplyUpdates_RelationshipWithInverseRelationType_AddsFullRowAndInverseRow()
+    {
+        var (_, runner, character, partner) = ArrangeRelationship();
+        var rows = new List<RelationshipInfo>
+        {
+            new(partner.Uuid, "Captor", InverseRelationType: "Captive",
+                Trait: "wary", Attitude: "cold", Notes: "Sarah holds Irene")
+        };
+
+        runner.ApplyUpdates(RelationshipResult(character, rows), new Dictionary<string, StoryElement>());
+
+        var full = character.RelationshipList.Single();
+        Assert.AreEqual(partner.Uuid, full.PartnerUuid);
+        Assert.AreEqual("Captor", full.RelationType);
+        Assert.AreEqual("wary", full.Trait);
+        Assert.AreEqual("cold", full.Attitude);
+        Assert.AreEqual("Sarah holds Irene", full.Notes);
+        var inverse = partner.RelationshipList.Single();
+        Assert.AreEqual(character.Uuid, inverse.PartnerUuid);
+        Assert.AreEqual("Captive", inverse.RelationType);
+        Assert.AreEqual("", inverse.Trait);
+        Assert.AreEqual("", inverse.Attitude);
+        Assert.AreEqual("", inverse.Notes);
+    }
+
+    [TestMethod]
+    public void ApplyUpdates_PartnerAlreadyHasRowForCharacter_LeavesThatRowUnchanged()
+    {
+        var (_, runner, character, partner) = ArrangeRelationship();
+        partner.RelationshipList.Add(new RelationshipModel(character.Uuid, "Captive")
+        {
+            Trait = "keeps", Attitude = "afraid", Notes = "Irene wrote this"
+        });
+        var rows = ParseOne($$"""
+            {"recipient_guid":"{{partner.Uuid}}","RelationType":"Captor","InverseRelationType":"Prisoner","mirror":true,"Notes":"n"}
+            """);
+
+        runner.ApplyUpdates(RelationshipResult(character, rows), new Dictionary<string, StoryElement>());
+
+        Assert.AreEqual(1, character.RelationshipList.Count);
+        var kept = partner.RelationshipList.Single();
+        Assert.AreEqual("Captive", kept.RelationType);
+        Assert.AreEqual("keeps", kept.Trait);
+        Assert.AreEqual("afraid", kept.Attitude);
+        Assert.AreEqual("Irene wrote this", kept.Notes);
+    }
+
+    [TestMethod]
+    public void ApplyUpdates_CharacterAlreadyHasRowForPartner_AddsNoRowAndSaysSo()
+    {
+        var (_, runner, character, partner) = ArrangeRelationship();
+        character.RelationshipList.Add(new RelationshipModel(partner.Uuid, "Rival") { Notes = "first" });
+        var rows = new List<RelationshipInfo>
+        {
+            new(partner.Uuid, "Captor", InverseRelationType: "Captive", Notes: "second")
+        };
+        var result = RelationshipResult(character, rows);
+
+        runner.ApplyUpdates(result, new Dictionary<string, StoryElement>());
+
+        var only = character.RelationshipList.Single();
+        Assert.AreEqual("Rival", only.RelationType);
+        Assert.AreEqual("first", only.Notes);
+        Assert.AreEqual(0, partner.RelationshipList.Count, "no inverse row when no row was added");
+        CollectionAssert.Contains(result.StatusMessages,
+            "Relationships: Sarah Osborne already has a relationship with Irene Campbell; change it on the Relationships tab.");
+    }
+
+    /// <summary>Collaborator #251: a relationship update on an element that is not a Character writes nothing.</summary>
+    [TestMethod]
+    public void ApplyUpdates_ElementIsNotACharacter_AddsNoRowAndSaysSo()
+    {
+        var (model, runner, _, partner) = ArrangeRelationship();
+        var problem = new ProblemModel("Not a person", model, null);
+        var rows = ParseOne($$"""
+            {"recipient_guid":"{{partner.Uuid}}","RelationType":"Captor","InverseRelationType":"Captive","Notes":"n"}
+            """);
+        var result = WorkflowResult.Succeeded();
+        result.PendingUpdates.Add(new PendingUpdate("Character", problem.Uuid,
+            new PropertySpec("RelationshipList", WriteVia.Relationships, JsonKey: "relationship"), rows));
+
+        runner.ApplyUpdates(result, new Dictionary<string, StoryElement>());
+
+        Assert.AreEqual(0, partner.RelationshipList.Count);
+        StringAssert.Contains(string.Join(" | ", result.StatusMessages), "is not a character");
+    }
 }

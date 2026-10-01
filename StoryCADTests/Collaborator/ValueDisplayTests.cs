@@ -130,6 +130,21 @@ public class ValueDisplayTests
     }
 
     [TestMethod]
+    public void Format_WithRelationshipAndInverseRelationType_ShowsTheInverseType()
+    {
+        var guid = Guid.NewGuid();
+        var relationships = new List<RelationshipInfo>
+        {
+            new(guid, "Captor", InverseRelationType: "Captive", Notes: "holds her")
+        };
+
+        var result = ValueDisplay.Format(relationships, _ => "Irene");
+
+        StringAssert.Contains(result, "inverse: Captive");
+        StringAssert.Contains(result, "Irene (Captor)");
+    }
+
+    [TestMethod]
     public void Format_WithJsonElementList_ReturnsReadablePairs()
     {
         using var doc = JsonDocument.Parse("""{"TraitName":"Brave","TraitNotes":"Under fire"}""");

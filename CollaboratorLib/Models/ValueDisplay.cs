@@ -87,9 +87,14 @@ internal static class ValueDisplay
                     var name = ResolveName(rel.RecipientGuid, resolveElementName);
                     var type = rel.RelationType ?? string.Empty;
                     var notes = rel.Notes ?? string.Empty;
+                    string line;
                     if (!string.IsNullOrWhiteSpace(notes))
-                        return string.IsNullOrWhiteSpace(type) ? $"{name} — {notes}" : $"{name} ({type}) — {notes}";
-                    return string.IsNullOrWhiteSpace(type) ? name : $"{name} — {type}";
+                        line = string.IsNullOrWhiteSpace(type) ? $"{name} — {notes}" : $"{name} ({type}) — {notes}";
+                    else
+                        line = string.IsNullOrWhiteSpace(type) ? name : $"{name} — {type}";
+                    return string.IsNullOrWhiteSpace(rel.InverseRelationType)
+                        ? line
+                        : $"{line} (inverse: {rel.InverseRelationType})";
                 }));
 
             case List<JsonElement> jsonEntries:

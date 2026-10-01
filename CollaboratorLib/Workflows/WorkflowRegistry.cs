@@ -725,7 +725,8 @@ namespace StoryCollaborator.Workflows
                     description: "Develop the dynamics, history, and tension between two characters.",
                     explanation: "Name both people. Prefer some sheet fill from Character Builder or Flaw and Backstory on each side. " +
                                 "The run still proceeds if sheets are thin. The model uses filled traits when they exist. It does not invent missing bulk fields. " +
-                                "Accept writes the short type, Trait, Attitude, and Relationship Notes on both people.",
+                                "Accept writes the type, Trait, Attitude, and Notes on this character. " +
+                                "The other character gets the inverse type only.",
                     workflowIO: new WorkflowIO
                     {
                         // Primary + Partner full elements for Partner_* placeholders (#106).
