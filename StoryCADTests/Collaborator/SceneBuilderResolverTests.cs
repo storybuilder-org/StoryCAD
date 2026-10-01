@@ -362,7 +362,7 @@ public class SceneBuilderResolverTests
         var result = WorkflowResult.Succeeded();
         result.PendingUpdates.Add(pending);
 
-        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneBuilder");
+        runner.ClassifyScalarUpdates(result, new Dictionary<string, string>(), "SceneBuilder");
 
         Assert.AreEqual(1, result.PendingUpdates.Count);
         Assert.AreEqual(UpdateKind.Protect, result.PendingUpdates[0].Kind);
@@ -382,7 +382,7 @@ public class SceneBuilderResolverTests
         var result = WorkflowResult.Succeeded();
         result.PendingUpdates.Add(pending);
 
-        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneBuilder");
+        runner.ClassifyScalarUpdates(result, new Dictionary<string, string>(), "SceneBuilder");
 
         Assert.AreEqual(UpdateKind.Fill, result.PendingUpdates[0].Kind);
     }
@@ -404,7 +404,7 @@ public class SceneBuilderResolverTests
         var result = WorkflowResult.Succeeded();
         result.PendingUpdates.Add(pending);
 
-        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "StoryProblem");
+        runner.ClassifyScalarUpdates(result, new Dictionary<string, string>(), "StoryProblem");
 
         Assert.AreEqual(UpdateKind.Unclassified, result.PendingUpdates[0].Kind);
     }
@@ -437,7 +437,7 @@ public class SceneBuilderResolverTests
             new PropertySpec("Description"),
             "Leonard's badge-out approach."));
 
-        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneBuilder");
+        runner.ClassifyScalarUpdates(result, new Dictionary<string, string>(), "SceneBuilder");
 
         Assert.AreEqual(0, result.PendingUpdates.Count);
     }
@@ -457,7 +457,7 @@ public class SceneBuilderResolverTests
             new PropertySpec("Description"),
             string.Empty));
 
-        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneBuilder");
+        runner.ClassifyScalarUpdates(result, new Dictionary<string, string>(), "SceneBuilder");
 
         Assert.AreEqual(0, result.PendingUpdates.Count);
     }
@@ -480,7 +480,7 @@ public class SceneBuilderResolverTests
             new PropertySpec("Description"),
             echo));
 
-        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneBuilder");
+        runner.ClassifyScalarUpdates(result, new Dictionary<string, string>(), "SceneBuilder");
 
         Assert.AreEqual(0, result.PendingUpdates.Count);
     }
@@ -500,7 +500,7 @@ public class SceneBuilderResolverTests
             new PropertySpec("Description"),
             "Leonard rolls up to the site."));
 
-        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneBuilder");
+        runner.ClassifyScalarUpdates(result, new Dictionary<string, string>(), "SceneBuilder");
 
         Assert.AreEqual(1, result.PendingUpdates.Count);
         Assert.AreEqual(UpdateKind.Protect, result.PendingUpdates[0].Kind);
@@ -548,7 +548,7 @@ public class SceneBuilderResolverTests
         var result = WorkflowResult.Succeeded();
         result.PendingUpdates.Add(pending);
 
-        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneBuilder");
+        runner.ClassifyScalarUpdates(result, new Dictionary<string, string>(), "SceneBuilder");
 
         Assert.AreEqual(0, result.PendingUpdates.Count);
         Assert.IsTrue(result.StatusMessages.Any(m => m.Contains("dropped")));
@@ -567,7 +567,7 @@ public class SceneBuilderResolverTests
             new PropertySpec("Setting"),
             Guid.NewGuid().ToString()));
 
-        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneBuilder");
+        runner.ClassifyScalarUpdates(result, new Dictionary<string, string>(), "SceneBuilder");
 
         Assert.AreEqual(0, result.PendingUpdates.Count);
         Assert.IsTrue(result.StatusMessages.Any(m => m.Contains("SettingChoices GUID")));
@@ -586,7 +586,7 @@ public class SceneBuilderResolverTests
             new PropertySpec("Setting"),
             "Dodger Stadium"));
 
-        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneBuilder");
+        runner.ClassifyScalarUpdates(result, new Dictionary<string, string>(), "SceneBuilder");
 
         Assert.AreEqual(0, result.PendingUpdates.Count);
         Assert.IsTrue(result.StatusMessages.Any(m => m.Contains("SettingChoices GUID")));
@@ -610,7 +610,7 @@ public class SceneBuilderResolverTests
             new PropertySpec("Setting"),
             setting.Uuid.ToString()));
 
-        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneBuilder");
+        runner.ClassifyScalarUpdates(result, new Dictionary<string, string>(), "SceneBuilder");
 
         Assert.AreEqual(1, result.PendingUpdates.Count);
         Assert.AreEqual(UpdateKind.Fill, result.PendingUpdates[0].Kind);
@@ -636,7 +636,7 @@ public class SceneBuilderResolverTests
             new PropertySpec("Setting"),
             setting.Uuid.ToString()));
 
-        runner.ClassifyScalarUpdates(result, new HashSet<string>(), "SceneBuilder");
+        runner.ClassifyScalarUpdates(result, new Dictionary<string, string>(), "SceneBuilder");
 
         Assert.AreEqual(1, result.PendingUpdates.Count);
         Assert.AreEqual(UpdateKind.Fill, result.PendingUpdates[0].Kind);

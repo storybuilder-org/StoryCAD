@@ -669,14 +669,14 @@ namespace StoryCollaborator
         /// Drops NoOps. Attaches craft explanation on Protect when a <see cref="CraftFieldHints"/> entry exists.
         /// Non-scalar updates stay <see cref="UpdateKind.Unclassified"/>.
         /// </summary>
-        /// <param name="sessionTouched">Keys from <see cref="PendingUpdate.SessionTouchKey"/> applied this Collaborator session.</param>
+        /// <param name="sessionTouched">Keys from <see cref="PendingUpdate.SessionTouchKey"/> applied this Collaborator session, each with the fingerprint of the value written (Collaborator #272).</param>
         internal void ClassifyScalarUpdates(
             WorkflowResult result,
-            ISet<string>? sessionTouched,
+            IReadOnlyDictionary<string, string>? sessionTouched,
             string? workflowId = null)
         {
             workflowId ??= workflowModel.Label;
-            sessionTouched ??= new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            sessionTouched ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             var kept = new List<PendingUpdate>();
             var display = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
@@ -712,7 +712,7 @@ namespace StoryCollaborator
                             listState,
                             currentEmpty: currentCount == 0,
                             proposedEmpty: proposedCount == 0,
-                            sessionTouched: sessionTouched.Contains(update.SessionTouchKey),
+                            sessionTouched: IsTouched(update, sessionTouched),
                             update,
                             result);
                         ApplyClassifiedKind(
@@ -795,7 +795,7 @@ namespace StoryCollaborator
                         fieldState,
                         currentEmpty: string.IsNullOrEmpty(current),
                         proposedEmpty: string.IsNullOrEmpty(proposed),
-                        sessionTouched: sessionTouched.Contains(update.SessionTouchKey),
+                        sessionTouched: IsTouched(update, sessionTouched),
                         update,
                         result);
                 }
@@ -814,7 +814,7 @@ namespace StoryCollaborator
                     source = "compare";
                     kind = UpdateKind.Fill;
                 }
-                else if (sessionTouched.Contains(update.SessionTouchKey))
+                else if (IsTouched(update, sessionTouched))
                 {
                     source = "compare";
                     kind = UpdateKind.Refresh;
@@ -970,6 +970,38 @@ namespace StoryCollaborator
         /// True when Accept All may apply this update without an explicit per-field accept.
         /// </summary>
         internal static bool AcceptAllMayApply(PendingUpdate update) => update.AcceptAllMayApply;
+
+        /// <summary>
+        /// Collaborator #272: fingerprint of a property's current value, recorded when Collaborator
+        /// writes it and compared before a later run may classify it Refresh. Scalar: the same
+        /// normalized text Classify compares. SimpleList: the items joined with a newline.
+        /// Other write types return null; Classify does not use the touch map for them.
+        /// </summary>
+        internal string? ReadTouchFingerprint(PendingUpdate update)
+        {
+            switch (update.Spec.WriteVia)
+            {
+                case WriteVia.Scalar:
+                    return NormalizeCompareText(ReadCurrentScalarDisplay(update.ElementUuid, update.Spec.Property));
+                case WriteVia.SimpleList:
+                    var list = ReadCurrentStringList(update.ElementUuid, update.Spec.Property);
+                    return list == null ? string.Empty : string.Join("\n", list);
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Collaborator #272: true only when the key is in the touch map and the current value still
+        /// matches the fingerprint Collaborator stored. Ordinal compare: "A" and "a" differ.
+        /// </summary>
+        internal bool IsTouched(PendingUpdate update, IReadOnlyDictionary<string, string> touchMap)
+        {
+            if (!touchMap.TryGetValue(update.SessionTouchKey, out var written))
+                return false;
+            var current = ReadTouchFingerprint(update);
+            return current != null && string.Equals(current, written, StringComparison.Ordinal);
+        }
 
         private string ReadCurrentScalarDisplay(Guid elementUuid, string propertyName)
         {
@@ -1840,7 +1872,7 @@ namespace StoryCollaborator
 
         private bool TryClassifySceneBuilderScenePurpose(
             PendingUpdate update,
-            ISet<string> sessionTouched,
+            IReadOnlyDictionary<string, string> sessionTouched,
             string workflowId,
             WorkflowResult result,
             List<PendingUpdate> kept,
@@ -1865,7 +1897,7 @@ namespace StoryCollaborator
                 kind = UpdateKind.Fill;
             else if (live.SequenceEqual(proposed, StringComparer.Ordinal))
                 kind = UpdateKind.NoOp;
-            else if (sessionTouched.Contains(update.SessionTouchKey))
+            else if (IsTouched(update, sessionTouched))
                 kind = UpdateKind.Refresh;
             else
                 kind = UpdateKind.Protect;
