@@ -1140,6 +1140,32 @@ public class Collaborator : ICollaborator
             _shellViewModel.HasPendingUpdates = _sessionProposals.OpenCount > 0;
     }
 
+    /// <summary>
+    /// The chat summary after a run. Collaborator #237 item 9: plain words, no em dash, one count.
+    /// Collaborator #272: names the properties the model kept, which the list does not show.
+    /// </summary>
+    internal static string BuildSummaryMessage(int proposalCount, int protectCount, IReadOnlyList<string> keptProperties)
+    {
+        var keptNote = keptProperties.Count switch
+        {
+            0 => string.Empty,
+            1 => $"1 field is kept as it is: {keptProperties[0]}.",
+            _ => $"{keptProperties.Count} fields are kept as they are: {string.Join(", ", keptProperties)}."
+        };
+
+        if (proposalCount == 0)
+            return keptProperties.Count == 0
+                ? "No property updates were extracted from the response."
+                : $"No property updates. {keptNote}";
+
+        var replaceNote = protectCount > 0
+            ? $" {protectCount} of them would replace text you wrote; those ask for confirmation."
+            : string.Empty;
+        var keptSentence = keptNote.Length > 0 ? " " + keptNote : string.Empty;
+        return $"Found {proposalCount} property update(s).{replaceNote}{keptSentence} " +
+               "Choose Accept All, Review Each, or Try Again. Chat can revise these proposals.";
+    }
+
     private PendingUpdateItem ToSessionPendingUpdateItem(SessionProposalSet.Entry e)
     {
         // ProposedText is already ValueDisplay-formatted at capture; do not rebind Value to that string
@@ -2153,19 +2179,15 @@ public class Collaborator : ICollaborator
                     // #145: clear chat, seed proposal set, unlock Send; show full set on the left
                     BeginProposalChatSession(viewModel, workflow, result, preserveConversation);
                     PushSessionSetToViewModel(viewModel);
-                    // Collaborator #237 item 9: plain words, no em dash, one count.
-                    var replaceNote = protectCount > 0
-                        ? $" {protectCount} of them would replace text you wrote; those ask for confirmation."
-                        : string.Empty;
                     viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
-                        $"Found {result.PendingUpdates.Count} property update(s).{replaceNote} " +
-                        "Choose Accept All, Review Each, or Try Again. Chat can revise these proposals."));
+                        BuildSummaryMessage(result.PendingUpdates.Count, protectCount, result.KeptProperties)));
                 }
                 else
                 {
                     viewModel.IsChatEnabled = false;
                     viewModel.ChatPlaceholder = "No proposals to edit in chat";
-                    viewModel.ConversationList.Add(ChatMessage.FromCollaborator("No property updates were extracted from the response."));
+                    viewModel.ConversationList.Add(ChatMessage.FromCollaborator(
+                        BuildSummaryMessage(0, 0, result.KeptProperties)));
                 }
             }
             else

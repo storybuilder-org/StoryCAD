@@ -34,6 +34,13 @@ public class WorkflowResult
     public List<PendingUpdate> PendingUpdates { get; } = new();
 
     /// <summary>
+    /// Collaborator #272: names of the properties the model kept (field state Unchanged, or a
+    /// proposal equal to the filled current value). Classify drops them as NoOp; the summary
+    /// message names them so the writer can see they were examined.
+    /// </summary>
+    public List<string> KeptProperties { get; } = new();
+
+    /// <summary>
     /// Collaborator #216: per-key intent from root JSON <c>field_states</c>.
     /// Key is the output JSON key (<c>JsonKey ?? Property</c>). Absent key means compare live vs proposed.
     /// </summary>

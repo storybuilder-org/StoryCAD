@@ -249,4 +249,67 @@ public class WorkflowRunnerTests
         Assert.AreEqual(0, partner.RelationshipList.Count);
         StringAssert.Contains(string.Join(" | ", result.StatusMessages), "is not a character");
     }
+
+    private static (WorkflowRunner Runner, ProblemModel Problem) ArrangeProblem(string protGoal)
+    {
+        var (model, runner, _, _) = ArrangeRelationship();
+        var problem = new ProblemModel("Dealing with a problem tourist", model, null) { ProtGoal = protGoal };
+        return (runner, problem);
+    }
+
+    private static WorkflowResult GoalResult(ProblemModel problem, string proposed, OutputFieldState? state)
+    {
+        var result = WorkflowResult.Succeeded();
+        result.PendingUpdates.Add(new PendingUpdate("Problem", problem.Uuid, new PropertySpec("ProtGoal"), proposed));
+        if (state.HasValue)
+            result.FieldStates["ProtGoal"] = state.Value;
+        return result;
+    }
+
+    /// <summary>Collaborator #272: the model kept the writer's filled value; the summary names it.</summary>
+    [TestMethod]
+    public void ClassifyScalarUpdates_UnchangedOnFilledProperty_IsKeptNotPending()
+    {
+        var (runner, problem) = ArrangeProblem("Getting Francis happy despite the failed outing");
+        var result = GoalResult(problem, "Getting Francis happy despite the failed outing", OutputFieldState.Unchanged);
+
+        runner.ClassifyScalarUpdates(result, null, "ProblemBuilder");
+
+        Assert.AreEqual(0, result.PendingUpdates.Count);
+        CollectionAssert.AreEqual(new[] { "ProtGoal" }, result.KeptProperties);
+    }
+
+    [TestMethod]
+    public void ClassifyScalarUpdates_ProposalEqualToFilledValue_IsKept()
+    {
+        var (runner, problem) = ArrangeProblem("Getting Francis happy despite the failed outing");
+        var result = GoalResult(problem, "Getting Francis happy despite the failed outing", null);
+
+        runner.ClassifyScalarUpdates(result, null, "ProblemBuilder");
+
+        CollectionAssert.AreEqual(new[] { "ProtGoal" }, result.KeptProperties);
+    }
+
+    [TestMethod]
+    public void ClassifyScalarUpdates_EmptyProposalOnFilledProperty_IsNotKept()
+    {
+        var (runner, problem) = ArrangeProblem("Getting Francis happy despite the failed outing");
+        var result = GoalResult(problem, "", null);
+
+        runner.ClassifyScalarUpdates(result, null, "ProblemBuilder");
+
+        Assert.AreEqual(0, result.PendingUpdates.Count, "the wipe guard still drops the row");
+        Assert.AreEqual(0, result.KeptProperties.Count, "the model did not keep the value");
+    }
+
+    [TestMethod]
+    public void ClassifyScalarUpdates_UnchangedOnEmptyPropertyWithEmptyProposal_IsNotKept()
+    {
+        var (runner, problem) = ArrangeProblem("");
+        var result = GoalResult(problem, "", OutputFieldState.Unchanged);
+
+        runner.ClassifyScalarUpdates(result, null, "ProblemBuilder");
+
+        Assert.AreEqual(0, result.KeptProperties.Count);
+    }
 }
