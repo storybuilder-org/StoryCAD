@@ -931,6 +931,18 @@ namespace StoryCollaborator
             {
                 noOpCount++;
                 result.StatusMessages.Add($"No-op (unchanged): {update.Key}");
+                // Collaborator #272: a filled property the model kept is named in the summary.
+                // Not an empty proposal on filled text (the wipe guard, or Unchanged with no value)
+                // and not an invalid empty Fill.
+                var keptCurrent = compareCurrent ?? currentRaw;
+                var keptProposed = compareProposed ?? NormalizeCompareText(FormatDisplayValue(update));
+                var stateUnchanged = TryGetFieldState(result, update, out var keptState)
+                    && keptState == OutputFieldState.Unchanged;
+                var equalToCurrent = compareProposed != null
+                    && string.Equals(compareCurrent, compareProposed, StringComparison.OrdinalIgnoreCase);
+                if (!string.IsNullOrEmpty(keptCurrent) && !string.IsNullOrEmpty(keptProposed)
+                    && (stateUnchanged || equalToCurrent))
+                    result.KeptProperties.Add(update.DisplayNameOverride ?? update.Spec.Property);
                 return;
             }
 
@@ -1952,6 +1964,9 @@ namespace StoryCollaborator
             {
                 noOpCount++;
                 result.StatusMessages.Add($"No-op (unchanged): {update.Key}");
+                // Collaborator #272: an equal, non-empty list is a kept property.
+                if (live.Count > 0)
+                    result.KeptProperties.Add(update.DisplayNameOverride ?? update.Spec.Property);
                 return true;
             }
 
