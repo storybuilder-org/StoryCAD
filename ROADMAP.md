@@ -14,6 +14,32 @@ Where StoryCAD is going, how the team plans new features, and how you can sugges
 
 ---
 
+## What's planned for 4.4
+
+Release 4.4 makes Collaborator available to everyone. It moves in two stages after the 4.3 beta:
+
+1. **Purchase testing.** The team buys Collaborator through the Microsoft Store and the Mac App Store, on Windows and macOS, and checks that a real purchase turns Collaborator on.
+2. **Public sale.** Collaborator is published for sale in both stores.
+
+StoryCAD work in Release 4.4 (public issues):
+
+| Issue | What it does |
+|---|---|
+| [#1546](https://github.com/storybuilder-org/StoryCAD/issues/1546) | Beat structure as a tree: unplaced elements, an API for it, and a Plot Board window |
+| [#1421](https://github.com/storybuilder-org/StoryCAD/issues/1421) | Automated UI testing: a script runner, with a smoke test as the first script |
+| [#1392](https://github.com/storybuilder-org/StoryCAD/issues/1392) | Build pipeline: separate secrets for each branch |
+
+Collaborator work in Release 4.4 (the Collaborator repository is private, so these have no links):
+
+- Outline gaps cover Settings and the Story World.
+- Story gaps tell you which part of the story is missing and which workflow to run next.
+- Collaborator records which property values it wrote.
+- Accessibility names on the remaining Collaborator window controls.
+- Research on running Collaborator's AI on a different host.
+- Reorganized automated tests for Collaborator's code.
+
+---
+
 ## Where to see what's planned
 
 StoryCAD groups work into **releases**. Each release has a list of issues: bugs, feature requests, and improvements that the team plans to include. The full list of releases is here:
