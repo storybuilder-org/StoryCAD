@@ -312,4 +312,16 @@ public class WorkflowRunnerTests
 
         Assert.AreEqual(0, result.KeptProperties.Count);
     }
+
+    [TestMethod]
+    public void ClassifyScalarUpdates_UnchangedWithEmptyValueOnFilledProperty_IsNotKept()
+    {
+        var (runner, problem) = ArrangeProblem("Getting Francis happy despite the failed outing");
+        var result = GoalResult(problem, "", OutputFieldState.Unchanged);
+
+        runner.ClassifyScalarUpdates(result, null, "ProblemBuilder");
+
+        Assert.AreEqual(0, result.PendingUpdates.Count);
+        Assert.AreEqual(0, result.KeptProperties.Count, "an empty value is a fault in the reply, not a kept value");
+    }
 }
