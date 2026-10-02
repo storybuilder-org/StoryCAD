@@ -7,7 +7,7 @@ Where StoryCAD is going, how the team plans new features, and how you can sugges
 ## The short version
 
 - StoryCAD is currently at version **4.3**. The next public release is **4.4**.
-- **4.3** puts **Collaborator**, StoryCAD's optional AI assistant, inside StoryCAD as a free beta for a limited group of testers.
+- **4.3** put **Collaborator**, StoryCAD's optional AI assistant, inside StoryCAD as a free beta for a limited group of testers.
 - **4.4** is Collaborator's production release, open to all StoryCAD users, together with StoryCAD improvements such as a Plot Board window for the beat structure. You can track it on the GitHub milestone page.
 - All public planning lives on **GitHub**: <https://github.com/storybuilder-org/StoryCAD>.
 - Releases ship when they're ready. There is **no fixed calendar** for any version, by design.
@@ -94,7 +94,7 @@ Three options:
 
 ## A note on Collaborator
 
-StoryCAD has an optional AI assistant called **Collaborator**. It is part of StoryCAD itself, not a separate download. Release 4.3 opens it to a limited group of beta testers; Release 4.4 makes it available to everyone. Collaborator's own planning lives in a private repository, so you won't see its issues directly. The StoryCAD roadmap covers Collaborator features once they reach what you see in the app.
+StoryCAD has an optional AI assistant called **Collaborator**. It is part of StoryCAD itself, not a separate download. Release 4.3 opened it to a limited group of beta testers; Release 4.4 will make it available to everyone. Collaborator's own planning lives in a private repository, so you won't see its issues directly. The StoryCAD roadmap covers Collaborator features once they reach what you see in the app.
 
 ---
 
