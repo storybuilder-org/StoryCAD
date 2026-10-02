@@ -788,6 +788,17 @@ namespace StoryCollaborator
 
                 UpdateKind kind;
                 string source;
+                // Collaborator #253: Ideation never changes a filled Story Idea. It is the first step;
+                // Concept and Premise may fill it when it is empty, never rewrite it.
+                if (string.Equals(workflowId, "Premise", StringComparison.Ordinal)
+                    && string.Equals(update.Spec.Property, "Description", StringComparison.Ordinal)
+                    && !string.IsNullOrEmpty(current))
+                {
+                    result.KeptProperties.Add(update.DisplayNameOverride ?? update.Spec.Property);
+                    noOpCount++;
+                    _logger?.LogInformation("Classify {Key} kind=NoOp source=rule (Ideation keeps a filled Story Idea)", update.Key);
+                    continue;
+                }
                 if (TryGetFieldState(result, update, out var fieldState))
                 {
                     source = "state";
