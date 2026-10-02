@@ -6,8 +6,9 @@ Where StoryCAD is going, how the team plans new features, and how you can sugges
 
 ## The short version
 
-- StoryCAD is currently at version **4.2**. The next public release is **4.3**.
-- Work on **4.3** is already underway. It covers the optional **Collaborator** AI plugin (including macOS support) and **subscription tiers**. You can track progress on the GitHub milestone page; nothing is planned publicly beyond 4.3 yet.
+- StoryCAD is currently at version **4.2**. The next public release is **4.3**, and after it **4.4**.
+- **4.3** puts **Collaborator**, StoryCAD's optional AI assistant, inside StoryCAD as a free beta for a limited group of testers.
+- **4.4** is Collaborator's production release, open to all StoryCAD users, together with StoryCAD improvements such as a Plot Board window for the beat structure. You can track both on the GitHub milestone page.
 - All public planning lives on **GitHub**: <https://github.com/storybuilder-org/StoryCAD>.
 - Releases ship when they're ready. There is **no fixed calendar** for any version, by design.
 
@@ -93,7 +94,7 @@ Three options:
 
 ## A note on Collaborator
 
-StoryCAD has an optional AI plugin called **Collaborator** that, when it's released will ship separately. It has its own roadmap on GitHub (also organized by Release 4.3) but the repository itself is private; you won't see its issues directly. Coverage of Collaborator features will appear on the StoryCAD roadmap when they reach the user-facing surface.
+StoryCAD has an optional AI assistant called **Collaborator**. It is part of StoryCAD itself, not a separate download. Release 4.3 opens it to a limited group of beta testers; Release 4.4 makes it available to everyone. Collaborator's own planning lives in a private repository, so you won't see its issues directly. The StoryCAD roadmap covers Collaborator features once they reach what you see in the app.
 
 ---
 
@@ -103,6 +104,7 @@ StoryCAD has an optional AI plugin called **Collaborator** that, when it's relea
 |---|---|
 | All planned releases | <https://github.com/storybuilder-org/StoryCAD/milestones> |
 | What's in 4.3 specifically | <https://github.com/storybuilder-org/StoryCAD/milestone/6> |
+| What's in 4.4 specifically | <https://github.com/storybuilder-org/StoryCAD/milestone/7> |
 | File a bug or feature request | <https://github.com/storybuilder-org/StoryCAD/issues/new> |
 | Suggest an idea informally | `#feature-requests` on Discord |
 | Vote on quarterly priorities (Pro) | `#feature-voting` on Discord |
