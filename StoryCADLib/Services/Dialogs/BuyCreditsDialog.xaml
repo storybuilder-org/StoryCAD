@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Content body for the "Buy Credits" ContentDialog (issue #90 design section 10 "Credit packs",
+     step 10). The dialog title and the Buy / Not now buttons live on the ContentDialog wrapper
+     (created in code, shown via Windowing.ShowContentDialog). This Page is the same on macOS
+     (Skia) and Windows (WinAppSDK); the platform's own payment sheet appears after Buy.
+     Data-driven from IStoreService via BuyCreditsDialogViewModel (bound as Vm). Mirrors
+     SubscribeDialog.xaml's structure, without the auto-renewal disclosure or restore button:
+     a credit pack is a one-time consumable, not a subscription. -->
+<Page
+    x:Class="StoryCADLib.Services.Dialogs.BuyCreditsDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:store="using:StoryCADLib.Services.Store"
+    mc:Ignorable="d">
+
+    <StackPanel Width="440" Spacing="16">
+
+        <!-- What a credit pack is -->
+        <TextBlock TextWrapping="Wrap"
+                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   Text="Add credit for Collaborator's AI features on top of your monthly allowance. Credits never expire." />
+
+        <!-- Pack selection, data-driven from the store. Collapses to a single row when only one
+             pack size is configured; the whole block is hidden until products load. -->
+        <RadioButtons x:Name="PackChoice"
+                      Header="Choose a pack"
+                      Visibility="{x:Bind Vm.HasPacks, Mode=OneWay}"
+                      ItemsSource="{x:Bind Vm.Packs, Mode=OneWay}"
+                      SelectedItem="{x:Bind Vm.SelectedPack, Mode=TwoWay}"
+                      AutomationProperties.AutomationId="BuyCreditsPackChoiceRadios">
+            <RadioButtons.ItemTemplate>
+                <DataTemplate x:DataType="store:StoreProduct">
+                    <Grid ColumnSpacing="12" MinWidth="360">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{x:Bind DisplayName}" FontWeight="SemiBold" />
+                            <TextBlock Text="{x:Bind Description}" TextWrapping="Wrap"
+                                       FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                   FontWeight="SemiBold"
+                                   Text="{x:Bind DisplayPrice}" />
+                    </Grid>
+                </DataTemplate>
+            </RadioButtons.ItemTemplate>
+        </RadioButtons>
+
+        <!-- Progress while the store round-trips (purchase / activation). -->
+        <StackPanel Orientation="Horizontal" Spacing="8"
+                    Visibility="{x:Bind Vm.IsBusy, Mode=OneWay}">
+            <ProgressRing IsActive="{x:Bind Vm.IsBusy, Mode=OneWay}" Width="16" Height="16" />
+            <TextBlock Text="Contacting the store…" VerticalAlignment="Center"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+
+        <!-- Status feedback: errors ("no charge was made, here's what to do") and informational
+             outcomes (Ask-to-Buy pending). Severity is view-model-driven. -->
+        <InfoBar IsOpen="{x:Bind Vm.HasStatus, Mode=OneWay}"
+                 Severity="{x:Bind Vm.StatusSeverity, Mode=OneWay}" IsClosable="False"
+                 Message="{x:Bind Vm.StatusMessage, Mode=OneWay}"
+                 AutomationProperties.AutomationId="BuyCreditsStatusInfoBar" />
+    </StackPanel>
+</Page>

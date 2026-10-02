@@ -2,23 +2,6 @@
 
 This file provides project-specific guidance for StoryCAD development.
 
-**BEFORE ANY IMPLEMENTATION WORK:**
-
-- You must present a plan.
-- You must ask for explicit approval.
-- You must not proceed until approval is given.
-
-
-
-## **Simplicity First**
-
-**When solving StoryCAD problems, always choose the simplest approach:**
-- Direct method calls over reflection
-- Concrete types over abstractions (until needed)
-- Built-in .NET features over external libraries
-- Straightforward debugging (`Debugger.Launch()`) over complex conditions
-- Clear, obvious code over clever solutions
-
 ## Platform Development (UNO)
 
 ### Multi-Targeting Strategy

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using StoryCADLib.Services.Collaborator.Contracts;
 
 namespace StoryCADLib.Models.Tools;
 
@@ -51,6 +52,14 @@ public class PreferencesModel : ObservableObject
         ShowFilePickerOnStartup = true;
         UseBetaDocumentation = AppState.IsBetaDistribution;
         HideShellCommandBarOnMac = false;
+        StoreActivationJwt = string.Empty;
+        StoreActivationJwtExpiry = DateTime.MinValue;
+        StoreUserGuid = string.Empty;
+        StoreActivationPath = string.Empty;
+        StarredCollaboratorWorkflows = new List<string>();
+        CollaboratorStarDefaultsApplied = false;
+        CollaboratorStarMigrationVersion = 0;
+        CollaboratorTerseness = TersenessLevel.Balanced;
     }
 
     #endregion
@@ -251,6 +260,25 @@ public class PreferencesModel : ObservableObject
     public bool HideRatingPrompt { get; set; }
 
     /// <summary>
+    ///     Shows the per-run cost line on the Collaborator shell's status bar.
+    ///     Off by default: accounting is noise while drafting, and the figure is only
+    ///     meaningful to someone watching their credit spend.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("ShowCollaboratorCost")]
+    public bool ShowCollaboratorCost { get; set; }
+
+    /// <summary>
+    ///     The response length the writer last chose in Collaborator's settings dialog
+    ///     (Collaborator #49). Balanced by default. Seeded into
+    ///     <see cref="CollaboratorSettings.Terseness" /> when Collaborator opens and written
+    ///     back when the dialog changes it, the same way as <see cref="ShowCollaboratorCost" />.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("CollaboratorTerseness")]
+    public TersenessLevel CollaboratorTerseness { get; set; }
+
+    /// <summary>
     ///     Total amount of time StoryCAD has been used/open on the system
     /// </summary>
     [JsonInclude]
@@ -263,6 +291,39 @@ public class PreferencesModel : ObservableObject
     [JsonInclude]
     [JsonPropertyName("LastReview")]
     public DateTime LastReviewDate { get; set; }
+
+    /// <summary>
+    ///     Cached Worker-issued JWT that gates Collaborator (issue #30). Short-lived; treated
+    ///     as a cache, not a secret. Empty when not activated.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("StoreActivationJwt")]
+    public string StoreActivationJwt { get; set; }
+
+    /// <summary>
+    ///     UTC expiry of <see cref="StoreActivationJwt" />. Past/MinValue forces re-activation.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("StoreActivationJwtExpiry")]
+    public DateTime StoreActivationJwtExpiry { get; set; }
+
+    /// <summary>
+    ///     Stable per-user GUID embedded in the store's signed purchase proof (Apple
+    ///     appAccountToken / Microsoft publisherUserId). Generated on this machine at first
+    ///     launch if empty (issue #90 D8); no server mints or stores it, and it never appears in
+    ///     the UI or in a log.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("StoreUserGuid")]
+    public string StoreUserGuid { get; set; }
+
+    /// <summary>
+    ///     How the current JWT was obtained: <c>allowlist</c>, <c>store</c>, or empty.
+    ///     Used at startup to refresh allowlist testers without sending enroll.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("StoreActivationPath")]
+    public string StoreActivationPath { get; set; }
 
     /// <summary>
     ///     Should the startup dialog (HelpPage) be shown
@@ -308,6 +369,43 @@ public class PreferencesModel : ObservableObject
     [JsonInclude]
     [JsonPropertyName("HideShellCommandBarOnMac")]
     public bool HideShellCommandBarOnMac { get; set; }
+
+    /// <summary>
+    ///     Labels of the Collaborator workflows the user has starred. Starred workflows are
+    ///     listed in a short band at the top of the Collaborator navigation pane, ahead of the
+    ///     collapsed element-type groups holding the rest of the registry.
+    ///     Labels, not indexes, so reordering the registry cannot scramble a user's stars.
+    ///     A label that no longer resolves to a workflow is ignored when the menu is built and
+    ///     left in the file, so a workflow withdrawn for one release keeps its star in the next.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("StarredCollaboratorWorkflows")]
+    public List<string> StarredCollaboratorWorkflows { get; set; }
+
+    /// <summary>
+    ///     Whether the default starred set has been seeded into
+    ///     <see cref="StarredCollaboratorWorkflows" />. Gates the seed so it happens exactly once
+    ///     per user, for new installs and for users upgrading from a build without stars alike.
+    ///     Once true the stored list wins even when empty — a user who unstars everything gets an
+    ///     empty band, not the defaults again.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("CollaboratorStarDefaultsApplied")]
+    public bool CollaboratorStarDefaultsApplied { get; set; }
+
+    /// <summary>
+    ///     How far the stored stars have been carried forward across workflow consolidations.
+    ///     Seeding happens once (<see cref="CollaboratorStarDefaultsApplied" />) and the stored
+    ///     list wins afterwards, so a user seeded before a consolidation keeps stars naming
+    ///     workflows that were later merged away. Those labels stop resolving and their rows
+    ///     simply vanish from the band, which reads as losing stars rather than as the merge it
+    ///     was. Collaborator #211: when this is below the registry's migration version, each
+    ///     retired label is rewritten to the workflow that absorbed it, once, and this is raised.
+    ///     Zero for every file written before that migration existed.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("CollaboratorStarMigrationVersion")]
+    public int CollaboratorStarMigrationVersion { get; set; }
 
     #endregion
 }

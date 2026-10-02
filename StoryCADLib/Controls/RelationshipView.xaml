@@ -8,12 +8,20 @@
     <ScrollViewer>
         <StackPanel Orientation="Vertical" Margin="5">
             <Button Content="Create a new relationship" Command="{x:Bind CharVm.AddRelationshipCommand, Mode=OneWay}"
-                    Margin="5" VerticalAlignment="Bottom" HorizontalAlignment="Center" />
+                    Margin="5" VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                    AutomationProperties.AutomationId="AddRelationshipButton" />
+            <!-- ItemsRepeater carries no AutomationId: per Unit 1 finding, ItemsRepeater creates no
+                 automation peer, so a container id here is runtime-inert (also not in the test's
+                 InteractiveElementNames set). -->
             <ItemsRepeater ItemsSource="{x:Bind CharVm.CharacterRelationships}">
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate x:DataType="models:RelationshipModel">
+                        <!-- Template root: no AutomationId (would collide across every realized row).
+                             Name is bound inline to Partner.Name, mirroring Shell's {x:Bind Name}
+                             template-root pattern, so each expander announces which relationship it is. -->
                         <Expander Width="auto" HorizontalAlignment="Stretch" IsExpanded="True"
-                                  LosingFocus="OnLostFocus">
+                                  LosingFocus="OnLostFocus"
+                                  AutomationProperties.Name="{x:Bind Partner.Name, Mode=OneWay}">
                             <Expander.Header>
                                 <Grid Height="auto">
                                     <Grid.ColumnDefinitions>
@@ -21,8 +29,13 @@
                                         <ColumnDefinition Width="15" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <SymbolIcon Symbol="Cancel" HorizontalAlignment="Left" Grid.Column="0"
-                                                PointerPressed="RemoveRelationship" />
+                                    <Button Grid.Column="0" Padding="4" Background="Transparent"
+                                            BorderThickness="0" HorizontalAlignment="Left"
+                                            Click="RemoveRelationship" Tag="{x:Bind}"
+                                            ToolTipService.ToolTip="Delete relationship"
+                                            AutomationProperties.Name="Delete relationship">
+                                        <SymbolIcon Symbol="Cancel" />
+                                    </Button>
                                     <Grid Grid.Row="0" Margin="0,10" HorizontalAlignment="Center" Grid.Column="2">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -35,8 +48,11 @@
                                                    TextWrapping="Wrap" Margin="5,0,0,0"
                                                    IsTextScaleFactorEnabled="True" />
                                         <TextBlock Grid.Column="1" Text=" is a " VerticalAlignment="Center" />
+                                        <!-- No Header (inline sentence layout): explicit literal Name
+                                             states the field's function, same at every row. -->
                                         <TextBox Grid.Column="2" MinWidth="200" Height="20"
-                                                 Text="{x:Bind RelationType, Mode=TwoWay}" Margin="10,0" />
+                                                 Text="{x:Bind RelationType, Mode=TwoWay}" Margin="10,0"
+                                                 AutomationProperties.Name="Relationship type" />
                                         <TextBlock Grid.Column="3" Text=" to " VerticalAlignment="Center"
                                                    Margin="0,0,10,0" />
                                         <TextBlock Grid.Column="4" Text="{x:Bind Partner.Name}"
@@ -58,10 +74,12 @@
                                 <ComboBox Grid.Row="0" Grid.Column="1" IsEditable="True" Header="Trait" MinWidth="150"
                                           ItemsSource="{x:Bind CharVM.RelationshipTraitList}"
                                           Text="{x:Bind Trait, Mode=TwoWay}"
+                                          SelectedItem="{x:Bind Trait, Mode=OneWay}"
                                           PlaceholderText="{x:Bind Trait, Mode=TwoWay}" Margin="0,0,10,0" />
                                 <ComboBox Grid.Row="0" Grid.Column="2" IsEditable="True" Header="Attitude"
                                           MinWidth="150" ItemsSource="{x:Bind CharVM.RelationshipAttitudeList}"
                                           Text="{x:Bind Attitude, Mode=TwoWay}"
+                                          SelectedItem="{x:Bind Attitude, Mode=OneWay}"
                                           PlaceholderText="{x:Bind Attitude, Mode =TwoWay}" />
                                 <usercontrols:RichEditBoxExtended Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"
                                                                   MinHeight="200" HorizontalAlignment="Stretch"

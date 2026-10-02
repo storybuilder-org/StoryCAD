@@ -259,20 +259,40 @@ public class Windowing : ObservableRecipient
     /// Shows a file picker.
     /// </summary>
     /// <returns>A StorageFile object, of the file picked.</returns>
-    public async Task<StorageFile> ShowFilePicker(string buttonText = "Open", string filter = "*")
+    public Task<StorageFile> ShowFilePicker(string buttonText = "Open", string filter = "*")
+        => ShowFileOpenPicker(buttonText, new[] { filter });
+
+    /// <summary>
+    /// Shows a file picker filtered to common image formats. Used to attach
+    /// pictures to story elements.
+    /// </summary>
+    /// <returns>A StorageFile object, of the image picked (or null if cancelled).</returns>
+    public Task<StorageFile> ShowImagePicker(string buttonText = "Add Picture")
+        => ShowFileOpenPicker(buttonText,
+            new[] { ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".tif", ".tiff" });
+
+    /// <summary>
+    /// Shared core for the file-open pickers. Spawns a single-file picker
+    /// restricted to the supplied extension filters and, on macOS, persists a
+    /// security-scoped bookmark so the sandbox grant survives restarts.
+    /// </summary>
+    private async Task<StorageFile> ShowFileOpenPicker(string buttonText, string[] filters)
     {
 	    ILogService logger = _logService;
 
 		try
 		{
-			logger.Log(LogLevel.Info, $"Trying to open a file picker with filter: {filter}");
+			logger.Log(LogLevel.Info, $"Trying to open a file picker with filter: {string.Join(", ", filters)}");
 
 			FileOpenPicker filePicker = new()
 		    {
 			    CommitButtonText = buttonText,
 			    SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
-			    FileTypeFilter = { filter }
 		    };
+			foreach (string filter in filters)
+			{
+				filePicker.FileTypeFilter.Add(filter);
+			}
 
 			//Init and spawn file picker
 		    WinRT.Interop.InitializeWithWindow.Initialize(filePicker, WindowHandle);

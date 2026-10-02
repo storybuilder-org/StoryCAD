@@ -68,6 +68,30 @@ public class IStoryCADAPIInterfaceTests
     }
 
     [TestMethod]
+    public void AddImage_IsOnInterface()
+    {
+        IStoryCADAPI api = _api;
+        var result = api.AddImage(Guid.Empty, new StoryImage());
+        Assert.IsNotNull(result);
+    }
+
+    [TestMethod]
+    public void RemoveImage_IsOnInterface()
+    {
+        IStoryCADAPI api = _api;
+        var result = api.RemoveImage(Guid.Empty, Guid.Empty);
+        Assert.IsNotNull(result);
+    }
+
+    [TestMethod]
+    public void UpdateImageCaption_IsOnInterface()
+    {
+        IStoryCADAPI api = _api;
+        var result = api.UpdateImageCaption(Guid.Empty, Guid.Empty, "cap");
+        Assert.IsNotNull(result);
+    }
+
+    [TestMethod]
     public void AddRelationship_IsOnInterface()
     {
         IStoryCADAPI api = _api;

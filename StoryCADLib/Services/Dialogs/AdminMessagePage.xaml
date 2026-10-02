@@ -10,6 +10,9 @@
 
     <StackPanel Spacing="12">
         <TextBlock x:Name="BodyText" TextWrapping="Wrap" />
-        <HyperlinkButton x:Name="MessageLink" Visibility="Collapsed" />
+        <!-- Content is set from code-behind (AdminMessagePage.xaml.cs, MessageLink.Content = message.LinkText);
+             plain-text Content reaches the UIA Name, so no explicit AutomationProperties.Name is set here. -->
+        <HyperlinkButton x:Name="MessageLink" Visibility="Collapsed"
+                         AutomationProperties.AutomationId="AdminMessageLinkButton" />
     </StackPanel>
 </Page>

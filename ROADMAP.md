@@ -6,10 +6,37 @@ Where StoryCAD is going, how the team plans new features, and how you can sugges
 
 ## The short version
 
-- StoryCAD is currently at version **4.0.2**. The next public release is **4.1**.
-- After 4.1, the team is planning **4.2** and **4.3**; both already have work assigned.
+- StoryCAD is currently at version **4.3**. The next public release is **4.4**.
+- **4.3** put **Collaborator**, StoryCAD's optional AI assistant, inside StoryCAD as a free beta for a limited group of testers.
+- **4.4** is Collaborator's production release, open to all StoryCAD users, together with StoryCAD improvements such as a Plot Board window for the beat structure. You can track it on the GitHub milestone page.
 - All public planning lives on **GitHub**: <https://github.com/storybuilder-org/StoryCAD>.
 - Releases ship when they're ready. There is **no fixed calendar** for any version, by design.
+
+---
+
+## What's planned for 4.4
+
+Release 4.4 makes Collaborator available to everyone. It moves in two stages after the 4.3 beta:
+
+1. **Purchase testing.** The team buys Collaborator through the Microsoft Store and the Mac App Store, on Windows and macOS, and checks that a real purchase turns Collaborator on.
+2. **Public sale.** Collaborator is published for sale in both stores.
+
+StoryCAD work in Release 4.4 (public issues):
+
+| Issue | What it does |
+|---|---|
+| [#1546](https://github.com/storybuilder-org/StoryCAD/issues/1546) | Beat structure as a tree: unplaced elements, an API for it, and a Plot Board window |
+| [#1421](https://github.com/storybuilder-org/StoryCAD/issues/1421) | Automated UI testing: a script runner, with a smoke test as the first script |
+| [#1392](https://github.com/storybuilder-org/StoryCAD/issues/1392) | Build pipeline: separate secrets for each branch |
+
+Collaborator work in Release 4.4 (the Collaborator repository is private, so these have no links):
+
+- Outline gaps cover Settings and the Story World.
+- Story gaps tell you which part of the story is missing and which workflow to run next.
+- Collaborator records which property values it wrote.
+- Accessibility names on the remaining Collaborator window controls.
+- Research on running Collaborator's AI on a different host.
+- Reorganized automated tests for Collaborator's code.
 
 ---
 
@@ -23,9 +50,9 @@ Click any release to see the issues in it. Closed issues are done; open issues a
 
 To see only the issues in a specific release, use a search like:
 
-**<https://github.com/storybuilder-org/StoryCAD/issues?q=is%3Aissue+milestone%3A%22Release+4.1%22>**
+**<https://github.com/storybuilder-org/StoryCAD/issues?q=is%3Aissue+milestone%3A%22Release+4.4%22>**
 
-Replace `Release+4.1` with `Release+4.2` or `Release+4.3` for future releases.
+Replace `Release+4.4` with another release name (for example `Release+4.2` or `Release+4.3`) to see a different release.
 
 You don't need a GitHub account to read any of this; everything in the StoryCAD repository is public.
 
@@ -41,11 +68,11 @@ Best for clearly-defined bug reports or feature requests. Go to <https://github.
 
 Be specific: describe what you want, what problem it solves, and (for bugs) the steps to reproduce. If a maintainer agrees the idea is worth pursuing, they'll assign it to a release milestone. That's when it joins the public roadmap.
 
-### 2. Post in `#feature-suggestions` on Discord (anyone)
+### 2. Post in `#feature-requests` on Discord (anyone)
 
 Best for half-formed ideas, "wouldn't it be cool if...", or just gauging whether anyone else wants the same thing before going through the trouble of writing a proper issue.
 
-The StoryBuilder Discord server is at <https://discord.gg/bpCyAQnWCa>. The `feature-suggestions` channel under StoryCAD Support is open to everyone, free members included. Post your idea and react to others' ideas with emoji to signal what you'd like to see.
+The StoryBuilder Discord server is at <https://discord.gg/bpCyAQnWCa>. The `feature-requests` channel under StoryCAD Support is open to everyone, free members included. Post your idea and react to others' ideas with emoji to signal what you'd like to see.
 
 The team reads this channel and uses it to spot patterns: ideas that get a lot of reactions are candidates for becoming proper GitHub issues and getting on a release.
 
@@ -93,7 +120,7 @@ Three options:
 
 ## A note on Collaborator
 
-StoryCAD has an optional AI plugin called **Collaborator** that, when it's released will ship separately. It has its own roadmap on GitHub (also organized by Release 4.3) but the repository itself is private; you won't see its issues directly. Coverage of Collaborator features will appear on the StoryCAD roadmap when they reach the user-facing surface.
+StoryCAD has an optional AI assistant called **Collaborator**. It is part of StoryCAD itself, not a separate download. Release 4.3 opened it to a limited group of beta testers; Release 4.4 will make it available to everyone. Collaborator's own planning lives in a private repository, so you won't see its issues directly. The StoryCAD roadmap covers Collaborator features once they reach what you see in the app.
 
 ---
 
@@ -102,9 +129,10 @@ StoryCAD has an optional AI plugin called **Collaborator** that, when it's relea
 | What you want | Where to go |
 |---|---|
 | All planned releases | <https://github.com/storybuilder-org/StoryCAD/milestones> |
-| What's in 4.1 specifically | <https://github.com/storybuilder-org/StoryCAD/milestone/4> |
+| What's in 4.3 specifically | <https://github.com/storybuilder-org/StoryCAD/milestone/6> |
+| What's in 4.4 specifically | <https://github.com/storybuilder-org/StoryCAD/milestone/7> |
 | File a bug or feature request | <https://github.com/storybuilder-org/StoryCAD/issues/new> |
-| Suggest an idea informally | `#feature-suggestions` on Discord |
+| Suggest an idea informally | `#feature-requests` on Discord |
 | Vote on quarterly priorities (Pro) | `#feature-voting` on Discord |
 | Read the current user manual | <https://manual.storybuilder.org/> |
 | Discord server | <https://discord.gg/bpCyAQnWCa> |

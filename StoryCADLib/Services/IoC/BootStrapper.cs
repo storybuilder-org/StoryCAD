@@ -5,12 +5,14 @@ using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backend;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator;
+using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCADLib.Services.Dialogs;
 using StoryCADLib.Services.MacMenuBar;
 using StoryCADLib.Services.Navigation;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.Services.Ratings;
 using StoryCADLib.Services.Search;
+using StoryCADLib.Services.Store;
 using StoryCADLib.ViewModels.SubViewModels;
 using StoryCADLib.ViewModels.Tools;
 
@@ -34,7 +36,8 @@ public static class BootStrapper
 
     public static ServiceCollection Services { get; private set; }
 
-    public static void Initialise(bool headless = true, ServiceCollection additionalServices = null)
+    public static void Initialise(bool headless = true, ServiceCollection additionalServices = null,
+        Func<ICollaborator> collaboratorFactory = null)
     {
         //Prevent running this twice.
         if (Initalised)
@@ -46,6 +49,14 @@ public static class BootStrapper
         if (additionalServices != null)
         {
             Services = additionalServices;
+        }
+
+        //Register the Collaborator factory supplied by the head (CollaboratorLib compiled in).
+        //Null when Collaborator is absent (public/free build) - CollaboratorService then reports
+        //HasCollaborator == false and StoryCAD runs Collaborator-free.
+        if (collaboratorFactory != null)
+        {
+            Services.AddSingleton<Func<ICollaborator>>(collaboratorFactory);
         }
 
         //Add StoryCADLib Services
@@ -98,10 +109,36 @@ public static class BootStrapper
         Services.AddSingleton<AppState>();
         Services.AddSingleton<EditFlushService>();
         Services.AddSingleton<Windowing>();
+        Services.AddSingleton<ImageService>();
         Services.AddSingleton<FileOpenService>();
         Services.AddSingleton<FileCreateService>();
         Services.AddSingleton<ToolValidationService>();
         Services.AddSingleton<RatingService>();
+        // Store billing (issue #30). NullStoreService is the default so a binary runs unchanged
+        // outside a store bundle; platform heads override with a real store when one is available.
+#if HAS_UNO
+        // Factory so the dylib probe (a synchronous dlopen) runs lazily at first resolution —
+        // App.xaml.cs's fire-and-forget activation init — instead of during DI setup on the
+        // startup path. A failed macOS dylib load falls back to Null, never crashing startup.
+        Services.AddSingleton<IStoreService>(sp =>
+            OperatingSystem.IsMacOS() && StoreKitInterop.IsAvailable()
+                ? new MacStoreService(sp.GetRequiredService<Windowing>(), sp.GetRequiredService<ILogService>())
+                : new NullStoreService());
+#elif WINDOWS && !HAS_UNO
+        // Real WinAppSDK head only (same guard as WindowsStoreContextAdapter; HAS_UNO_WINUI is also
+        // defined on the desktop head, which is handled above). This TFM only runs on Windows, so
+        // register unconditionally; WindowsStoreService is plain C#, the WinRT calls live in the adapter.
+        Services.AddSingleton<IStoreContextAdapter, WindowsStoreContextAdapter>();
+        Services.AddSingleton<IStoreService, WindowsStoreService>();
+#else
+        Services.AddSingleton<IStoreService, NullStoreService>();
+#endif
+        Services.AddSingleton<IActivationClient, ProxyActivationClient>();
+        Services.AddSingleton<IStoreActivationService, StoreActivationService>();
+        Services.AddSingleton<StoryCADLib.ViewModels.Store.SubscribeDialogViewModel>();
+        Services.AddSingleton<StoryCADLib.ViewModels.Store.BetaEnrollmentDialogViewModel>();
+        // Credit packs (issue #90 design section 10, step 10).
+        Services.AddSingleton<StoryCADLib.ViewModels.Store.BuyCreditsDialogViewModel>();
         Services.AddSingleton<OutlineViewModel>();
         Services.AddSingleton<ShellViewModel>();
         Services.AddSingleton<PreferenceService>();
@@ -140,5 +177,6 @@ public static class BootStrapper
         Services.AddSingleton<TraitsViewModel>();
         Services.AddSingleton<OutlineService>();
         Services.AddSingleton<MacMenuBarService>();
+        Services.AddSingleton<WorkflowStarService>();
     }
 }

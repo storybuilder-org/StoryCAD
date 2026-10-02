@@ -372,6 +372,13 @@ jobs:
           # Clean up cert file
           rm $RUNNER_TEMP/certs.p12
 
+      # Compile the StoreKit shim before tests so a Swift error is caught in CI (PR runs never
+      # reach the publish target that builds it) and the interop smoke test can dlopen the dylib
+      # instead of self-skipping. The macOS runners already ship swiftc + lipo.
+      - name: Build StoreKit shim (macOS)
+        if: matrix.os == 'macos-latest'
+        run: bash src/macos/StoreKitShim/build.sh
+
       - name: Run all tests (macOS)
         if: matrix.os == 'macos-latest'
         run: dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:IsBetaBuild=${{ steps.beta.outputs.is_beta }} -f net10.0-desktop

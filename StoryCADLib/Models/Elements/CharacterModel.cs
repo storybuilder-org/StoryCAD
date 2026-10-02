@@ -184,6 +184,18 @@ public class CharacterModel : StoryElement
         set => _relationshipList = value;
     }
 
+    // Attached pictures (embedded in the outline at full resolution)
+
+    [JsonIgnore] private List<StoryImage> _images;
+
+    [JsonInclude]
+    [JsonPropertyName("Images")]
+    public List<StoryImage> Images
+    {
+        get => _images;
+        set => _images = value;
+    }
+
     // Character social data
 
     [JsonIgnore] private string _economic;
@@ -293,8 +305,8 @@ public class CharacterModel : StoryElement
     [JsonIgnore] private string _adventurousness;
 
     [JsonInclude]
-    [JsonPropertyName("Adventureousness")]
-    public string Adventureousness
+    [JsonPropertyName("Adventureousness")] // wire name kept misspelled: matches the key already persisted in existing .stbx files
+    public string Adventurousness
     {
         get => _adventurousness;
         set => _adventurousness = value;
@@ -483,6 +495,7 @@ public class CharacterModel : StoryElement
         PhysNotes = string.Empty;
         Appearance = string.Empty;
         RelationshipList = new List<RelationshipModel>();
+        Images = new List<StoryImage>();
         Economic = string.Empty;
         Education = string.Empty;
         Ethnic = string.Empty;
@@ -493,7 +506,7 @@ public class CharacterModel : StoryElement
         Abnormality = string.Empty;
         Focus = string.Empty;
         PsychNotes = string.Empty;
-        Adventureousness = string.Empty;
+        Adventurousness = string.Empty;
         Aggression = string.Empty;
         Confidence = string.Empty;
         Conscientiousness = string.Empty;
@@ -532,6 +545,7 @@ public class CharacterModel : StoryElement
         PhysNotes = string.Empty;
         Appearance = string.Empty;
         RelationshipList = new List<RelationshipModel>();
+        Images = new List<StoryImage>();
         Economic = string.Empty;
         Education = string.Empty;
         Ethnic = string.Empty;
@@ -542,7 +556,7 @@ public class CharacterModel : StoryElement
         Abnormality = string.Empty;
         Focus = string.Empty;
         PsychNotes = string.Empty;
-        Adventureousness = string.Empty;
+        Adventurousness = string.Empty;
         Aggression = string.Empty;
         Confidence = string.Empty;
         Conscientiousness = string.Empty;
@@ -563,6 +577,7 @@ public class CharacterModel : StoryElement
 
     public CharacterModel()
     {
+        Images = new List<StoryImage>();
     }
 
     #endregion

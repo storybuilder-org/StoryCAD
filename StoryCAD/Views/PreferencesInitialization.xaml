@@ -30,11 +30,23 @@
                 <StackPanel Grid.Row="1" VerticalAlignment="Stretch">
                     <Border Height="10" />
                     <TextBox PlaceholderText="What's your first name?" Margin="15" VerticalAlignment="Center"
-                             Text="{x:Bind _initVM.Preferences.FirstName, Mode=TwoWay}" />
+                             Text="{x:Bind _initVM.Preferences.FirstName, Mode=TwoWay}"
+                             AutomationProperties.AutomationId="FirstNameTextBox"
+                             AutomationProperties.Name="First name" />
                     <TextBox PlaceholderText="What's your surname?" Margin="15" VerticalAlignment="Center"
-                             Text="{x:Bind _initVM.Preferences.LastName, Mode=TwoWay}" />
+                             Text="{x:Bind _initVM.Preferences.LastName, Mode=TwoWay}"
+                             AutomationProperties.AutomationId="LastNameTextBox"
+                             AutomationProperties.Name="Last name" />
                     <TextBox PlaceholderText="What's your email address?" IsSpellCheckEnabled="False" Margin="15"
-                             VerticalAlignment="Center" Text="{x:Bind _initVM.Preferences.Email, Mode=TwoWay}" />
+                             VerticalAlignment="Center" Text="{x:Bind _initVM.Preferences.Email, Mode=TwoWay}"
+                             AutomationProperties.AutomationId="EmailTextBox"
+                             AutomationProperties.Name="Email address" />
+                    <!-- Two BrowseTextBox instances on one screen, both header-less (PlaceholderText
+                         only): the composite's internal Button/TextBox share the same x:Name-derived
+                         fallback ids across every BrowseTextBox use site app-wide, so Project/Backup
+                         are indistinguishable here without an id+Name set on the outer tag itself
+                         (this is the finding recorded in PR #1445; see BrowseTextBox.xaml for the
+                         internal-control ids, which stay identical across instances by design). -->
                     <controls:BrowseTextBox
                         PlaceholderText="Select a folder to hold your story outlines."
                         Path="{x:Bind _initVM.ProjectDir, Mode=TwoWay}"
@@ -42,7 +54,9 @@
                         BrowseMode="Folder"
                         ButtonVerticalAlignment="Center"
                         ButtonMargin="0,0,0,0"
-                        PathSelected="OnProjectPathSelected" />
+                        PathSelected="OnProjectPathSelected"
+                        AutomationProperties.AutomationId="ProjectDirTextBox"
+                        AutomationProperties.Name="Project directory" />
                     <controls:BrowseTextBox
                         PlaceholderText="Select a folder to hold your outline backups."
                         Path="{x:Bind _initVM.BackupDir, Mode=TwoWay}"
@@ -50,17 +64,23 @@
                         BrowseMode="Folder"
                         ButtonVerticalAlignment="Center"
                         ButtonMargin="0,0,0,0"
-                        PathSelected="OnBackupPathSelected" />
+                        PathSelected="OnBackupPathSelected"
+                        AutomationProperties.AutomationId="BackupDirTextBox"
+                        AutomationProperties.Name="Backup directory" />
                 </StackPanel>
 
                 <StackPanel Grid.Row="2">
                     <CheckBox IsChecked="{x:Bind _initVM.Preferences.ErrorCollectionConsent, Mode=TwoWay}"
-                              Content="Send error logs to Team StoryCAD" VerticalAlignment="Bottom" Margin="5" />
+                              Content="Send error logs to Team StoryCAD" VerticalAlignment="Bottom" Margin="5"
+                              AutomationProperties.AutomationId="ErrorLogsCheck" />
                     <CheckBox IsChecked="{x:Bind _initVM.Preferences.Newsletter, Mode=TwoWay}"
-                              Content="Send me newsletters about StoryCAD" VerticalAlignment="Bottom" Margin="5" />
+                              Content="Send me newsletters about StoryCAD" VerticalAlignment="Bottom" Margin="5"
+                              AutomationProperties.AutomationId="NewsletterCheck" />
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Margin="5">
                         <CheckBox IsChecked="{x:Bind _initVM.Preferences.UsageStatsConsent, Mode=TwoWay}"
-                                  Content="Send anonymous usage statistics" />
+                                  Content="Send anonymous usage statistics"
+                                  AutomationProperties.AutomationId="UsageStatsCheck" />
+                        <!-- Content is "?", not real label text: Name states the function. -->
                         <HyperlinkButton Content="?"
                                          Width="22" Height="22" MinWidth="22" MinHeight="22"
                                          Padding="0" FontSize="12"
@@ -70,15 +90,19 @@
                                          Margin="6,0,0,0"
                                          VerticalAlignment="Center"
                                          NavigateUri="https://manual.storybuilder.org/Preferences/Usage_Statistics.html"
-                                         ToolTipService.ToolTip="Learn what's collected" />
+                                         ToolTipService.ToolTip="Learn what's collected"
+                                         AutomationProperties.AutomationId="UsageStatsInfoButton"
+                                         AutomationProperties.Name="Learn what's collected" />
                     </StackPanel>
                 </StackPanel>
                 <TextBlock Text="{x:Bind _initVM.ErrorMessage, Mode=TwoWay}" Foreground="Red" Grid.Row="3"
                            HorizontalAlignment="Center" />
                 <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button Content="Continue" Margin="25,10" HorizontalAlignment="Center" Click="Check" />
+                    <Button Content="Continue" Margin="25,10" HorizontalAlignment="Center" Click="Check"
+                            AutomationProperties.AutomationId="ContinueButton" />
                     <Button Content="Join our community discord!" Background="#5865F2" Foreground="White" Margin="25"
-                            HorizontalAlignment="Center" Click="Discord" />
+                            HorizontalAlignment="Center" Click="Discord"
+                            AutomationProperties.AutomationId="JoinDiscordButton" />
                 </StackPanel>
             </Grid>
         </ScrollViewer>

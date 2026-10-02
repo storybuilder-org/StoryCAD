@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoryCAD", "StoryCAD\StoryC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoryCADLib", "StoryCADLib\StoryCADLib.csproj", "{DD783D84-9EB6-4B48-A37D-4CE8DF46D467}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollaboratorLib", "CollaboratorLib\CollaboratorLib.csproj", "{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Manual", "Manual", "{890BC15D-B942-465B-8B21-4032D0D60AA3}"
 EndProject
 Global
@@ -88,6 +90,22 @@ Global
 		{DD783D84-9EB6-4B48-A37D-4CE8DF46D467}.Release|x64.Build.0 = Release|Any CPU
 		{DD783D84-9EB6-4B48-A37D-4CE8DF46D467}.Release|x86.ActiveCfg = Release|Any CPU
 		{DD783D84-9EB6-4B48-A37D-4CE8DF46D467}.Release|x86.Build.0 = Release|Any CPU
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Debug|arm64.Build.0 = Debug|Any CPU
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Debug|x64.ActiveCfg = Debug|x64
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Debug|x64.Build.0 = Debug|x64
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Debug|x86.Build.0 = Debug|Any CPU
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Release|arm64.ActiveCfg = Release|Any CPU
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Release|arm64.Build.0 = Release|Any CPU
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Release|x64.ActiveCfg = Release|Any CPU
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Release|x64.Build.0 = Release|Any CPU
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Release|x86.ActiveCfg = Release|Any CPU
+		{DBE89AA3-881F-4EE7-81D5-FC557F8ADD20}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

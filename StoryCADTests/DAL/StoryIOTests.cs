@@ -274,6 +274,53 @@ public partial class StoryIOTests
         Assert.IsFalse(result, "Expected whitespace path to return false.");
     }
 
+    #region Write Retry Tests
+
+    /// <summary>Holds <paramref name="path"/> open with FileShare.None, the same
+    /// condition an external process (scanner, indexer, sync client) creates when
+    /// it briefly locks the outline between saves (issue #1437).</summary>
+    private static FileStream LockFile(string path) =>
+        new(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+
+    [TestMethod]
+    public async Task WriteStory_TargetLockedBriefly_RetriesAndSucceeds()
+    {
+        var filePath = Path.Combine(App.ResultsDir, "WriteRetryTransient.stbx");
+        var model = new StoryModel();
+        var overview = new OverviewModel("Retry Test", model, null);
+        model.ExplorerView.Add(overview.Node);
+
+        var holder = LockFile(filePath);
+        // Release the lock partway through the retry window (attempts run at
+        // roughly 0ms, 100ms, and 300ms).
+        var releaser = Task.Run(async () => { await Task.Delay(150); holder.Dispose(); });
+
+        await _storyIO.WriteStory(filePath, model);
+
+        await releaser;
+        var written = await File.ReadAllTextAsync(filePath);
+        StringAssert.Contains(written, "Retry Test", "Write must succeed once the lock is released.");
+        File.Delete(filePath);
+    }
+
+    [TestMethod]
+    public async Task WriteStory_TargetLockedPersistently_ThrowsIOException()
+    {
+        var filePath = Path.Combine(App.ResultsDir, "WriteRetryPersistent.stbx");
+        var model = new StoryModel();
+        var overview = new OverviewModel("Retry Test", model, null);
+        model.ExplorerView.Add(overview.Node);
+
+        using (LockFile(filePath))
+        {
+            await Assert.ThrowsExactlyAsync<IOException>(() => _storyIO.WriteStory(filePath, model));
+        }
+
+        File.Delete(filePath);
+    }
+
+    #endregion
+
     #region Migration Tests
 
     [TestMethod]

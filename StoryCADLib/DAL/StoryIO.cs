@@ -39,9 +39,6 @@ public class StoryIO
         var parent = Path.GetDirectoryName(output_path);
         Directory.CreateDirectory(parent!);
 
-        var folder = await StorageFolder.GetFolderFromPathAsync(parent);
-        var output =
-            await folder.CreateFileAsync(Path.GetFileName(output_path), CreationCollisionOption.ReplaceExisting);
         _logService.Log(LogLevel.Info, $"Saving Model to disk as {output_path}  " +
                                        $"Elements: {model.StoryElements.StoryElementGuids.Count}");
 
@@ -53,7 +50,38 @@ public class StoryIO
         _logService.Log(LogLevel.Trace, $"Serialised as {json}");
 
         //Save file to disk
-        await FileIO.WriteTextAsync(output, json);
+        await WriteFileWithRetryAsync(output_path, json);
+    }
+
+    /// <summary>
+    ///     Writes <paramref name="json"/> to <paramref name="path"/>, retrying briefly
+    ///     on IOException. Another process (scanner, indexer, sync client) can hold a
+    ///     handle on the outline for a few milliseconds after a preceding write; without
+    ///     the retry that collision fails a user save outright (issue #1437).
+    /// </summary>
+    private async Task WriteFileWithRetryAsync(string path, string json)
+    {
+        const int maxAttempts = 3;
+        for (int attempt = 1; ; attempt++)
+        {
+            try
+            {
+                await File.WriteAllTextAsync(path, json);
+                return;
+            }
+            catch (IOException ex) when (attempt < maxAttempts)
+            {
+                _logService.Log(LogLevel.Warn,
+                    $"Save attempt {attempt} of {maxAttempts} failed (0x{ex.HResult:X8}): {ex.Message}; retrying");
+                await Task.Delay(100 * attempt);
+            }
+            catch (IOException ex)
+            {
+                _logService.Log(LogLevel.Error,
+                    $"Save failed after {maxAttempts} attempts (0x{ex.HResult:X8}): {ex.Message}");
+                throw;
+            }
+        }
     }
 
 

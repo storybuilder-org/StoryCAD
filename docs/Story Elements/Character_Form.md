@@ -9,3 +9,5 @@ has_toc: false
 ## Character Form
 
 Characters are the individuals or entities that drive the story forward. Characters must be well-developed, with realistic traits and motivations that resonate with readers.
+
+Use the **Images** tab to attach reference pictures such as casting photos. See [Images Tab](Images_Tab.html).

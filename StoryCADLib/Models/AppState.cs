@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using StoryCADLib.Services;
 using StoryCADLib.ViewModels;
 
@@ -73,9 +74,43 @@ public class AppState
     ///     - The Build revision is NOT 0.
     ///     - A debugger i.e. VS2022 is attached.
     ///     - .ENV is missing.
+    ///     - The process has no package identity (exe launched unpackaged).
     ///     Usually it's all or none of the above.
     /// </summary>
-    public bool DeveloperBuild => Debugger.IsAttached || !EnvPresent || Package.Current.Id.Version.Revision != 0;
+    public bool DeveloperBuild
+    {
+        get
+        {
+            if (Debugger.IsAttached || !EnvPresent)
+            {
+                return true;
+            }
+
+            try
+            {
+                PackageVersion version = Package.Current.Id.Version;
+
+                // On the Uno desktop head Package.Current is a stub that doesn't
+                // throw; its version stays at the default (all-zero) in any process
+                // that never constructs an Uno Application, e.g. the test host.
+                // No real package identity ever has version 0.0.0.0, so treat it
+                // as unpackaged, same as the throw path below. (#1471)
+                if (version is { Major: 0, Minor: 0, Build: 0, Revision: 0 })
+                {
+                    return true;
+                }
+
+                return version.Revision != 0;
+            }
+            catch
+            {
+                // Package.Current throws when the process has no package identity
+                // (e.g. StoryCAD.exe launched straight from bin\); an unpackaged
+                // run is never a Store release, so treat it as a developer build. (#1448)
+                return true;
+            }
+        }
+    }
 
     /// <summary>
     ///     Compile-time flag indicating this is a beta distribution.
@@ -116,6 +151,46 @@ public class AppState
             return assembly.Version!.ToString();
         }
     }
+
+    /// <summary>
+    ///     Short code for the operating system this instance is running on,
+    ///     used to break reported versions down per platform (#1428).
+    ///     Detected at runtime rather than with #if, because the desktop head
+    ///     is a single binary that runs on more than one OS.
+    /// </summary>
+    public string Platform
+    {
+        get
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return "Win";
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return "Mac";
+            }
+
+            return "Unknown";
+        }
+    }
+
+    /// <summary>
+    ///     The current version tagged with its platform, e.g. "4.2.0.0-Mac".
+    ///     Reported to the backend versions table and to elmah.io. Version
+    ///     itself stays unsuffixed - it is written to .stbx LastVersion and
+    ///     compared against the stored preferences version.
+    /// </summary>
+    public string VersionWithPlatform => WithPlatform(Version);
+
+    /// <summary>
+    ///     Tags an arbitrary version string with the current platform code.
+    ///     An empty or absent version stays empty, so a first-run install
+    ///     reports no previous version rather than a bare "-Win".
+    /// </summary>
+    public string WithPlatform(string? version) =>
+        string.IsNullOrEmpty(version) ? string.Empty : $"{version}-{Platform}";
 
     public StoryDocument? CurrentDocument
     {

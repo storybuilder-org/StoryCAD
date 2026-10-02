@@ -9,7 +9,11 @@
 
     <StackPanel Padding="14,14,14,24">
         <TextBox x:Name="ProjectName" Margin="10" x:FieldModifier="public" Width="400"
-                 HorizontalAlignment="Left" Header="New project Name" Text="{x:Bind SaveAsVm.ProjectName, Mode=TwoWay}" />
+                 HorizontalAlignment="Left" Header="New project Name" Text="{x:Bind SaveAsVm.ProjectName, Mode=TwoWay}"
+                 AutomationProperties.AutomationId="SaveAsProjectNameTextBox" />
+        <!-- Single BrowseTextBox instance on this page with a Header set, so the Header already
+             reaches the inner TextBox's UIA Name; an explicit outer Name is only needed to
+             disambiguate multiple same-type instances on one screen (see PreferencesInitialization). -->
         <controls:BrowseTextBox
             x:Name="ProjectPathBrowse"
             Margin="14"
@@ -19,6 +23,7 @@
             BrowseMode="Folder"
             ButtonVerticalAlignment="Bottom"
             ButtonMargin="0,0,0,0"
-            PathSelected="OnPathSelected" />
+            PathSelected="OnPathSelected"
+            AutomationProperties.AutomationId="SaveAsParentFolderTextBox" />
     </StackPanel>
 </Page>

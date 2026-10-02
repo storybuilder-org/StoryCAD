@@ -144,6 +144,7 @@ public class ShellViewModel : ObservableRecipient
 
         // StoryCAD Collaborator
         CollaboratorCommand = new RelayCommand(LaunchCollaborator, SerializationLock.CanExecuteCommands);
+        BuyCreditsCommand = new RelayCommand(BuyCredits, SerializationLock.CanExecuteCommands);
 
         // Tools commands
         KeyQuestionsCommand = new RelayCommand(async () => await OutlineManager.KeyQuestionsTool(),
@@ -381,6 +382,10 @@ public class ShellViewModel : ObservableRecipient
 
     // Launch Collaborator
     public RelayCommand CollaboratorCommand { get; }
+
+    // Buy Collaborator credits (issue #90 design section 10 "Credit packs"; wiring landed step 8
+    // per Session F's review carry-over). Mirrors CollaboratorCommand's shape exactly.
+    public RelayCommand BuyCreditsCommand { get; }
     public RelayCommand HelpCommand { get; }
 
     // Tools MenuFlyOut Commands
@@ -940,12 +945,16 @@ public class ShellViewModel : ObservableRecipient
         CloseCommand.NotifyCanExecuteChanged();
         ExitCommand.NotifyCanExecuteChanged();
         CollaboratorCommand.NotifyCanExecuteChanged();
+        // Wired with CollaboratorCommand (issue #90 step 8); must refresh on the same cadence
+        // or the toolbar button stays stuck disabled after a serialization-lock cycle.
+        BuyCreditsCommand.NotifyCanExecuteChanged();
         KeyQuestionsCommand.NotifyCanExecuteChanged();
         TopicsCommand.NotifyCanExecuteChanged();
         MasterPlotsCommand.NotifyCanExecuteChanged();
         DramaticSituationsCommand.NotifyCanExecuteChanged();
         StockScenesCommand.NotifyCanExecuteChanged();
         PreferencesCommand.NotifyCanExecuteChanged();
+        ReportFeedbackCommand.NotifyCanExecuteChanged();
         PrintReportsCommand.NotifyCanExecuteChanged();
         ExportReportsToPdfCommand.NotifyCanExecuteChanged();
         ScrivenerReportsCommand.NotifyCanExecuteChanged();
@@ -1031,18 +1040,28 @@ public class ShellViewModel : ObservableRecipient
 
     private async void OpenReportFeedback()
     {
-        var result = await Window.ShowContentDialog(new ContentDialog
+        var feedbackVm = Ioc.Default.GetRequiredService<FeedbackViewModel>();
+        var dialog = new ContentDialog
         {
             Content = new FeedbackDialog(),
             PrimaryButtonText = "Submit Feedback",
             SecondaryButtonText = "Discard",
-            Title = "Submit"
-        });
+            Title = "Submit",
+            IsPrimaryButtonEnabled = feedbackVm.IsValid
+        };
+
+        void OnPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(FeedbackViewModel.IsValid))
+                dialog.IsPrimaryButtonEnabled = feedbackVm.IsValid;
+        }
+
+        feedbackVm.PropertyChanged += OnPropertyChanged;
+        var result = await Window.ShowContentDialog(dialog);
+        feedbackVm.PropertyChanged -= OnPropertyChanged;
 
         if (result == ContentDialogResult.Primary)
-        {
-            Ioc.Default.GetRequiredService<FeedbackViewModel>().CreateFeedback();
-        }
+            feedbackVm.CreateFeedback();
     }
 
     /// <summary>
@@ -1065,6 +1084,24 @@ public class ShellViewModel : ObservableRecipient
             var collaboratorService = Ioc.Default.GetService<CollaboratorService>();
             collaboratorService?.OpenCollaborator();
 
+        }
+    }
+
+    /// <summary>
+    ///     This method is invoked when the user clicks the Buy Credits AppBarButton
+    ///     on the Shell CommandBar. Opens CollaboratorService.ShowBuyCreditsDialogAsync
+    ///     (issue #90 design section 10 "Credit packs"; wiring landed step 8).
+    /// </summary>
+    private async void BuyCredits()
+    {
+        if (SerializationLock.CanExecuteCommands())
+        {
+            Logger.Log(LogLevel.Info, "Opening Buy Credits dialog");
+            var collaboratorService = Ioc.Default.GetService<CollaboratorService>();
+            if (collaboratorService != null)
+            {
+                await collaboratorService.ShowBuyCreditsDialogAsync();
+            }
         }
     }
 
@@ -1620,8 +1657,7 @@ public class ShellViewModel : ObservableRecipient
                 //CharacterModel.CharacterNames[charIndex] = msg.NewName;
                 break;
             case StoryItemType.Setting:
-                var _settingIndex = SettingModel.SettingNames.IndexOf(_msg.OldName);
-                SettingModel.SettingNames[_settingIndex] = _msg.NewName;
+                SettingModel.RenameInNameList(_msg.OldName, _msg.NewName);
                 break;
         }
     }

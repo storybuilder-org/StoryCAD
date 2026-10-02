@@ -1,13 +1,15 @@
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels;
 using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.Services.API;
@@ -667,32 +669,14 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
 
     public OperationResult<StoryElement> UpdateElementProperty(Guid elementUuid, string propertyName, object value)
     {
-        // DIAG-55: Get logger for diagnostic tracing
-        var log = Ioc.Default.GetService<ILogService>();
-
-        // DIAG-55: Log entry point
-        log?.Log(LogLevel.Info, $"DIAG-55: UpdateElementProperty - CurrentModel hash={RuntimeHelpers.GetHashCode(CurrentModel)}, elementUuid={elementUuid}, property={propertyName}");
-
         // Ensure we have a current StoryModel.
         if (CurrentModel == null)
-        {
-            log?.Log(LogLevel.Error, "DIAG-55: CurrentModel is NULL!");
             return OperationResult<StoryElement>.Failure("No StoryModel available. Create a model first.");
-        }
-
-        // DIAG-55: Log StoryElements collection info
-        log?.Log(LogLevel.Info, $"DIAG-55: CurrentModel.StoryElements hash={RuntimeHelpers.GetHashCode(CurrentModel.StoryElements)}, count={CurrentModel.StoryElements.Count}");
 
         // Find the StoryElement in the current model.
         var element = CurrentModel.StoryElements.FirstOrDefault(e => e.Uuid == elementUuid);
         if (element == null)
-        {
-            log?.Log(LogLevel.Error, $"DIAG-55: Element NOT FOUND for UUID {elementUuid}");
             return OperationResult<StoryElement>.Failure("StoryElement not found.");
-        }
-
-        // DIAG-55: Log found element
-        log?.Log(LogLevel.Info, $"DIAG-55: Found element hash={RuntimeHelpers.GetHashCode(element)}, type={element.GetType().Name}, name={element.Name}");
 
         try
         {
@@ -738,23 +722,9 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
                 }
             }
 
-            // DIAG-55: Log before/after
-            var oldValue = property.GetValue(element);
-            var oldStr = oldValue?.ToString() ?? "";
-            log?.Log(LogLevel.Info, $"DIAG-55: Before SetValue - {propertyName} oldValue='{oldStr.Substring(0, Math.Min(50, oldStr.Length))}'");
-
             // Update the property value.
             property.SetValue(element, value);
-
-            // DIAG-55: Verify the set worked
-            var verifyValue = property.GetValue(element);
-            var newStr = verifyValue?.ToString() ?? "";
-            log?.Log(LogLevel.Info, $"DIAG-55: After SetValue - {propertyName} newValue='{newStr.Substring(0, Math.Min(50, newStr.Length))}'");
-
-            // DIAG-55: Log Changed flag status
-            log?.Log(LogLevel.Info, $"DIAG-55: Before setting Changed - CurrentModel.Changed={CurrentModel.Changed}");
             CurrentModel.Changed = true;
-            log?.Log(LogLevel.Info, $"DIAG-55: After setting Changed - CurrentModel.Changed={CurrentModel.Changed}");
 
             return OperationResult<StoryElement>.Success(element);
         }
@@ -868,6 +838,12 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         return new ListTarget(element, property, property.PropertyType.GetGenericArguments()[0]);
     }
 
+    private static readonly JsonSerializerOptions CollectionEntryJsonOptions = new()
+    {
+        // LLM TypedList JSON often uses camelCase; CultureEntry uses Pascal [JsonPropertyName].
+        PropertyNameCaseInsensitive = true
+    };
+
     private static object DeserializeEntry(object entry, Type targetType, out string error)
     {
         error = null;
@@ -878,7 +854,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         try
         {
             var json = entry is JsonElement je ? je : JsonSerializer.SerializeToElement(entry);
-            var result = json.Deserialize(targetType);
+            var result = json.Deserialize(targetType, CollectionEntryJsonOptions);
             if (result == null)
             {
                 error = $"Conversion of '{entry.GetType().Name}' to '{targetType.Name}' produced null.";
@@ -974,16 +950,104 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         }
     }
 
+    [KernelFunction]
+    [Description("""
+                 Attaches an image to a story element.
+                 element MUST be the GUID of a Character, Setting, Scene, or Notes element.
+                 image is a StoryImage whose ImageData is the Base64 of the picture bytes;
+                 it must have a non-empty Id used to remove or re-caption it later.
+                 """)]
+    public OperationResult<bool> AddImage(Guid element, StoryImage image)
+    {
+        try
+        {
+            if (CurrentModel == null)
+            {
+                return OperationResult<bool>.Failure("No outline is opened");
+            }
+
+            var storyElement = outlineService.GetStoryElementByGuid(CurrentModel, element);
+            outlineService.AddImage(CurrentModel, storyElement, image);
+
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error in AddImage: {ex.Message}");
+        }
+    }
+
+    [KernelFunction]
+    [Description("""
+                 Removes an attached image from a story element.
+                 element MUST be the GUID of a Character, Setting, Scene, or Notes element.
+                 imageId MUST be the Id of an image currently attached to that element.
+                 """)]
+    public OperationResult<bool> RemoveImage(Guid element, Guid imageId)
+    {
+        try
+        {
+            if (CurrentModel == null)
+            {
+                return OperationResult<bool>.Failure("No outline is opened");
+            }
+
+            var storyElement = outlineService.GetStoryElementByGuid(CurrentModel, element);
+            if (!outlineService.RemoveImage(CurrentModel, storyElement, imageId))
+            {
+                return OperationResult<bool>.Failure($"No image with Id {imageId} is attached to that element.");
+            }
+
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error in RemoveImage: {ex.Message}");
+        }
+    }
+
+    [KernelFunction]
+    [Description("""
+                 Updates the caption of an image attached to a story element.
+                 element MUST be the GUID of a Character, Setting, Scene, or Notes element.
+                 imageId MUST be the Id of an image currently attached to that element.
+                 caption is the new caption text.
+                 """)]
+    public OperationResult<bool> UpdateImageCaption(Guid element, Guid imageId, string caption)
+    {
+        try
+        {
+            if (CurrentModel == null)
+            {
+                return OperationResult<bool>.Failure("No outline is opened");
+            }
+
+            var storyElement = outlineService.GetStoryElementByGuid(CurrentModel, element);
+            if (!outlineService.UpdateImageCaption(CurrentModel, storyElement, imageId, caption))
+            {
+                return OperationResult<bool>.Failure($"No image with Id {imageId} is attached to that element.");
+            }
+
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure($"Error in UpdateImageCaption: {ex.Message}");
+        }
+    }
+
 
     [KernelFunction]
     [Description("""
                  Adds a relationship between characters.
                  Both Source and Recipient must be GUIDs of elements that are characters.
-                 Description is the relationship between the two characters.
-                 mirror is a boolean that specifies if the relationship
-                 should be created on both characters.
+                 Description is the short RelationType (the "is a ___ to" slot).
+                 Trait, Attitude, and Notes fill the relationship row.
+                 mirror creates the same row on the partner.
                  """)]
-    public OperationResult<bool> AddRelationship(Guid source, Guid recipient, string desc, bool mirror = false)
+    public OperationResult<bool> AddRelationship(
+        Guid source, Guid recipient, string desc, bool mirror = false,
+        string trait = "", string attitude = "", string notes = "")
     {
         if (CurrentModel == null)
         {
@@ -1002,7 +1066,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
 
         try
         {
-            outlineService.AddRelationship(CurrentModel, source, recipient, desc, mirror);
+            outlineService.AddRelationship(CurrentModel, source, recipient, desc, mirror, trait, attitude, notes);
             return OperationResult<bool>.Success(true);
         }
         catch (Exception ex)
@@ -1955,6 +2019,41 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         }
 
         return null;
+    }
+
+    /// <inheritdoc />
+    public OperationResult<bool> SelectStoryElement(Guid elementGuid)
+    {
+        try
+        {
+            if (CurrentModel == null)
+                return OperationResult<bool>.Failure("No current model");
+
+            if (CurrentModel.ExplorerView == null || CurrentModel.ExplorerView.Count == 0)
+                return OperationResult<bool>.Failure("Explorer view is empty");
+
+            StoryNodeItem node = null;
+            foreach (var root in CurrentModel.ExplorerView)
+            {
+                node = FindNodeInTree(root, elementGuid);
+                if (node != null)
+                    break;
+            }
+
+            if (node == null)
+                return OperationResult<bool>.Failure($"No tree node for element {elementGuid}");
+
+            var shell = Ioc.Default.GetService<ShellViewModel>();
+            if (shell == null)
+                return OperationResult<bool>.Failure("ShellViewModel not available");
+
+            shell.TreeViewNodeClicked(node);
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure(ex.Message);
+        }
     }
 
     /// <summary>

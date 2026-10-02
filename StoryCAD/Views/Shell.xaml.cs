@@ -114,9 +114,10 @@ public sealed partial class Shell : Page
         Windowing.XamlRoot = XamlRoot;
         Ioc.Default.GetService<AppState>()!.StartUpTimer.Stop();
 
-        if (await Ioc.Default.GetService<CollaboratorService>()!.CollaboratorEnabled())
+        // Collaborator is compiled in (and a factory registered) → show its entry point.
+        // Absent (public/free build) → hidden. Instance is created per-session in OpenCollaborator.
+        if (Ioc.Default.GetService<CollaboratorService>()!.HasCollaborator)
         {
-            Ioc.Default.GetService<CollaboratorService>()!.ConnectCollaborator();
             ShellVm.CollaboratorVisibility = Visibility.Visible;
         }
         else
@@ -152,6 +153,15 @@ public sealed partial class Shell : Page
             {
                 await Ioc.Default.GetRequiredService<WebViewModel>().ShowWebViewDialog();
             }
+        }
+
+        // The version-change check below and ShowAdminMessagesAsync both consume
+        // StartupRecording's results, so wait for it here, behind a window that is
+        // already up. Normally already complete.
+        var backendService = Ioc.Default.GetService<BackendService>();
+        if (backendService is not null)
+        {
+            await backendService.StartupRecordingTask;
         }
 
         //Shows changelog if the app has been updated since the last launch.

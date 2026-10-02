@@ -10,6 +10,25 @@ public class SettingModel : StoryElement
 
     [JsonIgnore] public static ObservableCollection<string> SettingNames = new();
 
+    /// <summary>
+    /// Keep <see cref="SettingNames"/> in step with a rename. Loaded outlines never
+    /// populate this list (JSON uses the parameterless constructor), so IndexOf can
+    /// be -1. Do not index in that case.
+    /// </summary>
+    internal static void RenameInNameList(string oldName, string newName)
+    {
+        if (oldName is null)
+        {
+            return;
+        }
+
+        var index = SettingNames.IndexOf(oldName);
+        if (index >= 0)
+        {
+            SettingNames[index] = newName ?? string.Empty;
+        }
+    }
+
     #endregion
 
     #region Properties
@@ -136,6 +155,18 @@ public class SettingModel : StoryElement
         set => _notes = value;
     }
 
+    // Attached pictures (embedded in the outline at full resolution)
+
+    [JsonIgnore] private List<StoryImage> _images;
+
+    [JsonInclude]
+    [JsonPropertyName("Images")]
+    public List<StoryImage> Images
+    {
+        get => _images;
+        set => _images = value;
+    }
+
     #endregion
 
     #region Constructors
@@ -155,6 +186,7 @@ public class SettingModel : StoryElement
         Touch = string.Empty;
         SmellTaste = string.Empty;
         Notes = string.Empty;
+        Images = new List<StoryImage>();
         SettingNames.Add(Name);
     }
 
@@ -174,12 +206,14 @@ public class SettingModel : StoryElement
         Touch = string.Empty;
         SmellTaste = string.Empty;
         Notes = string.Empty;
+        Images = new List<StoryImage>();
         SettingNames.Add(Name);
     }
 
 
     public SettingModel()
     {
+        Images = new List<StoryImage>();
     }
 
     #endregion

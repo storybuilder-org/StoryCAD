@@ -1,0 +1,3643 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
+using CollaboratorLib.Context;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using StoryCADLib.DAL;
+using StoryCADLib.Models;
+using StoryCADLib.Models.StoryWorld;
+using StoryCADLib.Services.API;
+using StoryCADLib.Services.Collaborator.Contracts;
+using StoryCADLib.Services.Reports;
+using StoryCADLib.ViewModels;
+using StoryCollaborator.Models;
+using StoryCollaborator.Services;
+using StoryCollaborator.Workflows;
+
+namespace StoryCollaborator
+{
+    public sealed record WorkflowRunOutcome(WorkflowResult Result, int AppliedCount);
+
+    /// <summary>
+    /// Client request body for POST /v1/workflow after issue #106.
+    /// </summary>
+    internal sealed class WorkflowProxyBody
+    {
+        public Dictionary<string, string> Args { get; init; } = new();
+        public Dictionary<string, JsonObject> Elements { get; init; } = new();
+
+        /// <summary>
+        /// Issue #260: the single JSON object built for a migrated workflow's request, sent
+        /// under the wire key "input" alongside the unchanged Args and Elements. Null for a
+        /// workflow that has not migrated yet (its registry entry's Workflow.JsonInput is null).
+        /// </summary>
+        public JsonObject? Input { get; set; }
+    }
+
+    /// <summary>
+    /// Collaborator #217 rule 5: the elements ProblemBuilder may offer for one Problem's beats.
+    /// </summary>
+    internal sealed record CandidateSet(HashSet<Guid> Scenes, HashSet<Guid> Problems)
+    {
+        public bool Contains(Guid element) => Scenes.Contains(element) || Problems.Contains(element);
+    }
+
+    internal enum BeatRowOutcome
+    {
+        /// <summary>The existing beat at this index is filled; nothing touches it.</summary>
+        Keep,
+        /// <summary>The proposal's GUID is a candidate and binds to this empty beat.</summary>
+        Bind,
+        /// <summary>No bind applies and the proposal names a Scene stub to create.</summary>
+        Create,
+        /// <summary>No bind applies and the proposal names a Problem stub to create.</summary>
+        CreateProblem,
+        /// <summary>The proposal's GUID is not a candidate, or was used earlier; stays empty.</summary>
+        Refuse,
+        /// <summary>Neither a bindable GUID nor a scene name; stays empty.</summary>
+        Empty,
+        /// <summary>Past the last beat of a present sheet; not applied.</summary>
+        Drop
+    }
+
+    /// <summary>
+    /// Collaborator #217 section 5.5: one proposal row's outcome, computed before apply.
+    /// InstallsBeat is true when the Problem had no sheet, so the row first creates the beat.
+    /// ElementName carries the bound element's name (Keep, Bind) or the stub's name (Create).
+    /// </summary>
+    internal sealed record BeatRowPlan(
+        int Index,
+        string Title,
+        BeatRowOutcome Outcome,
+        string? ElementName,
+        Guid? ElementGuid,
+        bool InstallsBeat);
+
+    internal class WorkflowRunner
+    {
+        private static HttpClient _httpClient = new() { Timeout = TimeSpan.FromMinutes(3) };
+
+        // Test-only accessor (issue #94 design section 5 item 2): lets
+        // WorkflowRunnerTruncationTests.cs observe ResetHttpClient's swap without any network activity.
+        internal static HttpClient CurrentHttpClient => _httpClient;
+
+        /// <summary>
+        /// Swaps in a fresh HttpClient, disposing the old one (issue #94 design section 5 item 2):
+        /// the truncation retry calls this to abandon the pooled connection, which server evidence
+        /// pins to a flagged Cloudflare isolate after a mid-stream kill (design doc section 2, phase
+        /// C). Safe because workflow calls are sequential -- the UI runs one workflow at a time,
+        /// PromptTestRunner and the tests included -- and the chat sidebar uses Semantic Kernel's own
+        /// HttpClient, untouched here.
+        /// </summary>
+        internal static void ResetHttpClient()
+        {
+            var fresh = new HttpClient { Timeout = TimeSpan.FromMinutes(3) };
+            var old = Interlocked.Exchange(ref _httpClient, fresh);
+            old.Dispose();
+        }
+
+        private IStoryCADAPI _storyApi;
+        private StoryModel storyModel;
+        private Workflow workflowModel;
+        private readonly ILogger<WorkflowRunner>? _logger;
+        private CollaboratorSettings _settings;
+        private readonly StoryCADLib.Services.Logging.ILogService? _auditLogger;
+
+        /// <summary>
+        /// Collaborator #237 item 11: the proposals the writer rejected with Try Again, one
+        /// "Property: value" line each. Null on a first run. When set, RunAsync sends it as
+        /// the RejectedProposals arg and the Worker tells the model to depart from it.
+        /// </summary>
+        internal string? RejectedProposals { get; set; }
+
+        // No Kernel field: issue #90 step 8 item 5 retired the direct-OpenAI Semantic Kernel
+        // invocation path (InvokeDirectAsync), which was the only reason this class held one.
+        // PostToProxyAsync talks to the Worker over plain HttpClient, never through SK.
+        internal WorkflowRunner(StoryModel model, Workflow workflow, IStoryCADAPI api, ILogger<WorkflowRunner>? logger = null, CollaboratorSettings? settings = null, StoryCADLib.Services.Logging.ILogService? auditLogger = null)
+        {
+            storyModel = model;
+            workflowModel = workflow;
+            _logger = logger;
+            _settings = settings ?? CollaboratorSettings.Default;
+            _storyApi = api;
+            _auditLogger = auditLogger;
+        }
+
+        /// <summary>
+        /// Executes the workflow and applies outputs if autoApply is true.
+        /// Shared entry point for the gated integration test and for PromptTestRunner.
+        /// </summary>
+        internal static async Task<WorkflowRunOutcome> RunAndApplyAsync(
+            StoryModel model,
+            Workflow workflow,
+            IStoryCADAPI api,
+            Dictionary<string, StoryElement> gatheredElements,
+            CollaboratorSettings settings,
+            bool autoApply,
+            ILogger<WorkflowRunner>? logger = null)
+        {
+            var runner = new WorkflowRunner(model, workflow, api, logger, settings);
+            var result = await runner.RunAsync(gatheredElements);
+            var applied = autoApply && result.Success ? runner.ApplyUpdates(result, gatheredElements) : 0;
+            return new WorkflowRunOutcome(result, applied);
+        }
+
+        /// <summary>
+        /// Executes the workflow with pre-gathered elements.
+        /// </summary>
+        internal async Task<WorkflowResult> RunAsync(
+            Dictionary<string, StoryElement> gatheredElements,
+            Action<Dictionary<string, string>>? extraArgs = null)
+        {
+            var workflowIO = workflowModel.GetIO();
+
+            // Validate required inputs before any template or proxy check.
+            foreach (var requirement in workflowIO.RequiredInputs)
+            {
+                if (!gatheredElements.ContainsKey(requirement.ElementLabel))
+                    return WorkflowResult.Failed($"Missing required element: '{requirement.ElementLabel}'");
+            }
+
+            // Collaborator #77: ProblemBuilder needs ProblemCategory set, but runs on any
+            // Problem, so it takes the blank check only. #211 deleted BeatScenes, which was
+            // the one workflow that also refused the story problem.
+            if (workflowModel.RequiresProblemCategory)
+            {
+                var category = string.Empty;
+                if (gatheredElements.TryGetValue("Problem", out var problemEl)
+                    && problemEl is ProblemModel pm)
+                {
+                    category = pm.ProblemCategory ?? string.Empty;
+                }
+
+                var gateMessage = ValidateProblemCategory(category);
+                if (gateMessage != null)
+                    return WorkflowResult.Failed(gateMessage);
+            }
+
+            // Collaborator #208 / #246: SceneBuilder empty-category bail. Distinct from the
+            // category gate above: a missing Problem map entry is not empty category.
+            if (string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
+            {
+                var sceneBuilderGate = ValidateSceneBuilderOwner(gatheredElements);
+                if (sceneBuilderGate != null)
+                    return WorkflowResult.Failed(sceneBuilderGate);
+            }
+
+            // Without a subscriber's (or allowlisted dev/tester's) activation JWT, the workflow
+            // degrades to the stub rather than calling out bare (issue #90 step 8 item 5: the
+            // OPENAI_API_KEY direct-to-OpenAI path retired, so a held JWT is the only credential).
+            if (string.IsNullOrWhiteSpace(KernelFactory.ResolveWorkflowCredential()))
+            {
+                return BuildStubResponse();
+            }
+
+            var result = WorkflowResult.Succeeded();
+
+            try
+            {
+                result.StatusMessages.Add($"Starting workflow: {workflowModel.Title}");
+
+                var body = BuildWorkflowRequestBody(gatheredElements);
+                result.StatusMessages.Add($"Built request body from {gatheredElements.Count} elements");
+
+                EnrichWithStoryContext(body.Args, gatheredElements, workflowIO);
+                ApplySettings(body.Args);
+                ApplyRejectedProposals(body.Args);
+
+                // #119: the interview args ride here, after the standard enrichment so
+                // nothing downstream can overwrite them.
+                extraArgs?.Invoke(body.Args);
+
+                if (workflowIO.ExampleLists.Count > 0)
+                    EnrichWithExamples(body.Args);
+
+                ApplyDeclaredInjections(body.Args, gatheredElements);
+
+                // Issue #90 step 8 item 5: the direct-to-OpenAI fallback retired along with
+                // OPENAI_API_KEY on the client. A proxy failure now propagates to the outer
+                // catch clauses below rather than retrying against OpenAI directly.
+                // Collaborator #239: send, read and extract are one attempt, so an answer that
+                // mostly breaks the field_states contract can be asked for once more on a fresh
+                // result (ExecuteWithContractRetryAsync). Every attempt starts from the status
+                // messages gathered so far.
+                var preamble = result.StatusMessages.ToList();
+                async Task<WorkflowResult> AttemptAsync()
+                {
+                    var attempt = WorkflowResult.Succeeded();
+                    foreach (var message in preamble)
+                        attempt.StatusMessages.Add(message);
+
+                    attempt.AssembledPrompt = null;
+                    var (proxyContent, proxyHash, proxyCost, proxyComplete) = await PostToProxyAsync(body);
+                    attempt.RemoteTemplateHash = proxyHash;
+                    attempt.Cost = proxyCost;
+                    // Set only when a dev Worker echoed the prompt on request (PromptTestRunner).
+                    attempt.AssembledPrompt = _lastPromptEcho?.User;
+                    attempt.SystemPrompt = _lastPromptEcho?.System;
+
+                    if (!proxyComplete)
+                    {
+                        // Issue #94 design section 5 item 3 ("surface, never mask"): the one truncation
+                        // retry (PostToProxyAsync -> ExecuteWithTruncationRetryAsync) still came back
+                        // incomplete. The partial text is preserved for diagnostics but must never reach
+                        // ExtractOutputs or a Success result.
+                        return BuildTruncationFailureResult(proxyContent);
+                    }
+
+                    string planResult = proxyContent;
+                    attempt.RawResponse = planResult;
+
+                    if (string.IsNullOrEmpty(planResult))
+                    {
+                        return WorkflowResult.Failed("Workflow returned empty response");
+                    }
+
+                    attempt.StatusMessages.Add("Received AI response");
+
+                    // #119: conversational workflows answer in prose. Extraction would fail the
+                    // turn on the missing JSON object.
+                    if (workflowModel.Mode == WorkflowMode.Conversational)
+                    {
+                        var conversational = BuildConversationalResult(planResult);
+                        conversational.RemoteTemplateHash = attempt.RemoteTemplateHash;
+                        conversational.Cost = attempt.Cost;
+                        conversational.AssembledPrompt = attempt.AssembledPrompt;
+                        conversational.SystemPrompt = attempt.SystemPrompt;
+                        foreach (var msg in attempt.StatusMessages)
+                            conversational.StatusMessages.Add(msg);
+                        return conversational;
+                    }
+
+                    var outputResult = ExtractOutputs(planResult, gatheredElements, workflowIO.Outputs);
+                    MergeExtractResult(attempt, outputResult);
+                    // Collaborator #217 section 5.7: each beat that binds or creates is its own row.
+                    ExpandBeatSheetUpdates(attempt);
+
+                    if (string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
+                        CaptureSceneBuilderProposal(planResult, attempt);
+
+                    // #120: structural fields the model must not invent (list value + GUIDs).
+                    // Proposes into pending only; #116 classify decides Fill vs Protect (never silent force).
+                    if (workflowModel.Label == "InnerOuterProblems")
+                        EnrichInnerOuterStructuralFields(attempt, gatheredElements);
+
+                    // #201: empty or omitted WorldType becomes NoOp against empty outline and never
+                    // reaches Accept. Propose craft default when still blank.
+                    if (string.Equals(workflowModel.Label, "DefineStoryWorld", StringComparison.Ordinal))
+                        EnrichDefineStoryWorldWorldType(attempt, gatheredElements);
+
+                    if (!outputResult.Success)
+                    {
+                        attempt.Success = false;
+                        attempt.ErrorMessage = outputResult.ErrorMessage;
+                    }
+
+                    return attempt;
+                }
+
+                result = await ExecuteWithContractRetryAsync(AttemptAsync, DescribeContractFault);
+                return result;
+            }
+            catch (StoryCADLib.Services.Store.OutOfCreditsException ex)
+            {
+                // Issue #90 design section 10 (step 10): shown as-is, not wrapped in
+                // "Workflow execution failed: ..." -- this is a recognized, actionable state
+                // (buy more credits or wait for renewal), not an unexpected failure.
+                _logger?.LogWarning("Workflow call refused: out of credits ({Workflow})", workflowModel.Title);
+                return WorkflowResult.Failed(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "WorkflowRunner.RunAsync error");
+                _auditLogger?.LogException(StoryCADLib.Services.Logging.LogLevel.Error, ex,
+                    $"Workflow failed: {workflowModel.Title}");
+                return WorkflowResult.Failed($"Workflow execution failed: {ex.Message}");
+            }
+        }
+
+        private static readonly JsonSerializerOptions ElementSerializeOptions = new()
+        {
+            WriteIndented = false,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            Converters =
+            {
+                new EmptyGuidConverter(),
+                new StoryElementConverter(),
+                new JsonStringEnumConverter()
+            }
+        };
+
+        /// <summary>
+        /// Builds the #106 request body: full gathered elements (RTF stripped on outbound copy only)
+        /// plus pass-through args and declared collection lists. Does not flatten Label_Property keys
+        /// and does not invent lists from WriteVia.
+        /// Issue #107: character craft workflows also get RelatedProblems (full Problem models).
+        /// Issue #201: DefineStoryWorld gets RelatedSettings and RelatedResearch.
+        /// </summary>
+        internal WorkflowProxyBody BuildWorkflowRequestBody(Dictionary<string, StoryElement> gatheredElements)
+        {
+            var body = new WorkflowProxyBody();
+
+            foreach (var (label, element) in gatheredElements)
+            {
+                if (element == null) continue;
+                body.Elements[label] = SerializeElementOutbound(element);
+            }
+
+            var serOpts = new JsonSerializerOptions { WriteIndented = false };
+            foreach (var collection in workflowModel.GetIO().CollectionInputs)
+            {
+                var listResult = _storyApi.GetElementsByType(collection.ElementType);
+                if (!listResult.IsSuccess) continue;
+
+                var elements = (listResult.Payload ?? Enumerable.Empty<StoryElement>()).ToList();
+
+                // Collaborator #217 rule 5: a collection declared FreeElementsFor offers only the
+                // candidates for that gathered element's sheet. The same set gates the apply.
+                if (collection.FreeElementsFor != null)
+                {
+                    if (gatheredElements.TryGetValue(collection.FreeElementsFor, out var target) && target != null)
+                    {
+                        var candidates = GetCandidates(target.Uuid);
+                        var total = elements.Count;
+                        elements = elements.Where(e => candidates.Contains(e.Uuid)).ToList();
+                        _logger?.LogInformation("Candidates for {RequestName}: {Count} of {Total}",
+                            collection.RequestName, elements.Count, total);
+                    }
+                    else
+                    {
+                        // Rule 5 without a target is unsatisfiable; offer nothing rather than everything.
+                        _logger?.LogWarning("{RequestName}: FreeElementsFor '{Label}' was not gathered; offering nothing",
+                            collection.RequestName, collection.FreeElementsFor);
+                        elements = new List<StoryElement>();
+                    }
+                }
+
+                var projected = elements
+                    .Select(e => ProjectCollectionElement(e, collection.Projection))
+                    .ToList();
+                body.Args[collection.RequestName] = JsonSerializer.Serialize(projected, serOpts);
+            }
+
+            AttachRelatedProblemsCollection(body, gatheredElements, serOpts);
+            AttachRelatedSettingsCollection(body);
+            AttachRelatedResearchCollection(body, gatheredElements);
+            AttachContributingProblemsCollection(body, gatheredElements);
+
+            // Issue #260: the migrated-workflow "input" object, built alongside the Elements
+            // and Args above. Null for a workflow whose registry entry has no JsonInput.
+            body.Input = WorkflowInputBuilder.Build(workflowModel, gatheredElements, _storyApi, storyModel);
+
+            return body;
+        }
+
+        /// <summary>
+        /// Collaborator #208: all structure owners as full Problem models.
+        /// Orphan (no owners, explorer parent is not a Problem) also attaches ProblemChoices.
+        /// </summary>
+        private void AttachContributingProblemsCollection(
+            WorkflowProxyBody body,
+            Dictionary<string, StoryElement> gatheredElements)
+        {
+            if (!string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
+                return;
+            if (!gatheredElements.TryGetValue("Scene", out var scene) || scene == null)
+                return;
+
+            var resolver = new SceneStructureNeighborResolver(_storyApi);
+            var owners = resolver.FindStructureOwners(scene.Uuid);
+            var array = new JsonArray();
+            foreach (var owner in owners)
+                array.Add(SerializeElementOutbound(owner));
+            body.Args["ContributingProblems"] = array.ToJsonString();
+
+            var explorerParent = resolver.GetExplorerParentProblem(scene);
+            bool orphan = owners.Count == 0 && explorerParent == null;
+            if (!orphan)
+                return;
+
+            var choices = new JsonArray();
+            var problems = _storyApi.GetElementsByType(StoryItemType.Problem);
+            if (problems.IsSuccess && problems.Payload != null)
+            {
+                foreach (var el in problems.Payload)
+                {
+                    if (el is ProblemModel problem)
+                        choices.Add(SerializeElementOutbound(problem));
+                }
+            }
+            body.Args["ProblemChoices"] = choices.ToJsonString();
+        }
+
+        /// <summary>
+        /// Index → all problems where Character is prot and/or antag → full models in args.
+        /// Empty array when no links or no Character. Relationship deferred.
+        /// </summary>
+        private void AttachRelatedProblemsCollection(
+            WorkflowProxyBody body,
+            Dictionary<string, StoryElement> gatheredElements,
+            JsonSerializerOptions serOpts)
+        {
+            _ = serOpts;
+            if (!ContextResolver.RelatedProblemsWorkflows.Contains(workflowModel.Label))
+                return;
+
+            var array = new JsonArray();
+            if (gatheredElements.TryGetValue("Character", out var characterElement) &&
+                characterElement is CharacterModel character)
+            {
+                var index = ProblemCharacterIndex.Build(_storyApi, storyModel);
+                foreach (var problemGuid in index.RelatedProblemGuids(character.Uuid))
+                {
+                    var result = _storyApi.GetStoryElement(problemGuid);
+                    if (result.IsSuccess && result.Payload is ProblemModel problem)
+                        array.Add(SerializeElementOutbound(problem));
+                }
+            }
+
+            body.Args[ContextResolver.RelatedProblemsRequestName] = array.ToJsonString();
+        }
+
+        /// <summary>
+        /// All Setting elements as places in the world (#201). Empty array when none.
+        /// </summary>
+        private void AttachRelatedSettingsCollection(WorkflowProxyBody body)
+        {
+            if (!ContextResolver.RelatedSettingsWorkflows.Contains(workflowModel.Label))
+                return;
+
+            var array = new JsonArray();
+            var listResult = _storyApi.GetElementsByType(StoryItemType.Setting);
+            if (listResult.IsSuccess && listResult.Payload != null)
+            {
+                foreach (var setting in listResult.Payload)
+                    array.Add(SerializeElementOutbound(setting));
+            }
+
+            body.Args[ContextResolver.RelatedSettingsRequestName] = array.ToJsonString();
+        }
+
+        /// <summary>
+        /// Notes and Web under the StoryWorld explorer subtree (#201). No live fetch.
+        /// </summary>
+        private void AttachRelatedResearchCollection(
+            WorkflowProxyBody body,
+            Dictionary<string, StoryElement> gatheredElements)
+        {
+            if (!ContextResolver.RelatedResearchWorkflows.Contains(workflowModel.Label))
+                return;
+
+            var array = new JsonArray();
+            if (gatheredElements.TryGetValue("StoryWorld", out var world) && world?.Node != null)
+            {
+                foreach (var research in EnumerateStoryWorldResearch(world.Node))
+                    array.Add(SerializeElementOutbound(research));
+            }
+
+            body.Args[ContextResolver.RelatedResearchRequestName] = array.ToJsonString();
+        }
+
+        private IEnumerable<StoryElement> EnumerateStoryWorldResearch(StoryNodeItem root)
+        {
+            if (root.Children == null || root.Children.Count == 0)
+                yield break;
+
+            foreach (var child in root.Children)
+            {
+                if (storyModel.StoryElements.StoryElementGuids.TryGetValue(child.Uuid, out var element))
+                {
+                    if (element.ElementType is StoryItemType.Notes or StoryItemType.Web)
+                        yield return element;
+                }
+
+                foreach (var nested in EnumerateStoryWorldResearch(child))
+                    yield return nested;
+            }
+        }
+
+        /// <summary>
+        /// Serialize runtime type to a JSON object, then strip RTF on that copy only.
+        /// Never mutates the live outline element.
+        /// </summary>
+        internal JsonObject SerializeElementOutbound(StoryElement element)
+        {
+            // StoryElementConverter writes Type discriminator using runtime type.
+            var json = JsonSerializer.Serialize<StoryElement>(element, ElementSerializeOptions);
+            var node = JsonNode.Parse(json)!.AsObject();
+            StripRtfOnTopLevelStrings(node);
+            return node;
+        }
+
+        private static void StripRtfOnTopLevelStrings(JsonObject obj)
+        {
+            var stripper = new RichTextStripper();
+            foreach (var key in obj.Select(p => p.Key).ToList())
+            {
+                if (obj[key] is JsonValue jv && jv.TryGetValue<string>(out var s)
+                    && s != null && s.StartsWith(@"{\rtf", StringComparison.Ordinal))
+                {
+                    obj[key] = stripper.StripRichTextFormat(s);
+                }
+            }
+        }
+
+        private object ProjectCollectionElement(StoryElement element, ElementProjection projection)
+        {
+            return projection switch
+            {
+                ElementProjection.IdAndName => new { GUID = element.Uuid, Name = element.Name },
+                ElementProjection.BaseStoryElement => BuildBaseProjection(element),
+                ElementProjection.FullModel => SerializeElementOutbound(element),
+                _ => new { GUID = element.Uuid, Name = element.Name }
+            };
+        }
+
+        private object BuildBaseProjection(StoryElement element)
+        {
+            var description = element.Description ?? string.Empty;
+            if (description.StartsWith(@"{\rtf", StringComparison.Ordinal))
+                description = new RichTextStripper().StripRichTextFormat(description);
+
+            return new
+            {
+                GUID = element.Uuid,
+                Name = element.Name,
+                ElementDescription = description,
+                Type = element.ElementType.ToString()
+            };
+        }
+
+        /// <summary>
+        /// #201: after extract, ensure a non-empty WorldType is proposed when the outline has none.
+        /// Empty proposed + empty current classifies as NoOp and never reaches Accept (smoke Path A).
+        /// Craft default is Consensus Reality (thin-outline / primary-world default).
+        /// </summary>
+        internal void EnrichDefineStoryWorldWorldType(
+            WorkflowResult result,
+            Dictionary<string, StoryElement> gatheredElements)
+        {
+            const string defaultWorldType = "Consensus Reality";
+            const string label = "StoryWorld";
+
+            if (!gatheredElements.TryGetValue(label, out var world) || world == null)
+            {
+                result.StatusMessages.Add("DefineStoryWorld WorldType enrich skipped: StoryWorld not gathered");
+                return;
+            }
+
+            var current = ReadCurrentScalarDisplay(world.Uuid, "WorldType");
+            if (!string.IsNullOrWhiteSpace(current))
+            {
+                result.StatusMessages.Add(
+                    $"DefineStoryWorld WorldType enrich skipped: already set ({TruncateForLog(current)})");
+                return;
+            }
+
+            var pending = result.PendingUpdates.Find(u =>
+                string.Equals(u.ElementLabel, label, StringComparison.Ordinal)
+                && string.Equals(u.Spec.Property, "WorldType", StringComparison.Ordinal)
+                && u.Spec.WriteVia == WriteVia.Scalar);
+
+            var proposed = pending != null ? NormalizeCompareText(FormatDisplayValue(pending)) : string.Empty;
+            if (!string.IsNullOrEmpty(proposed) && WorldTypeAxisMap.TryGet(proposed, out _))
+            {
+                result.StatusMessages.Add(
+                    $"DefineStoryWorld WorldType enrich skipped: model proposed ({TruncateForLog(proposed)})");
+                return;
+            }
+
+            AddOrReplaceScalarUpdate(result, label, world.Uuid, "WorldType", defaultWorldType);
+            var msg =
+                $"DefineStoryWorld WorldType enrich: proposed default {defaultWorldType} (model empty or invalid)";
+            result.StatusMessages.Add(msg);
+            _logger?.LogInformation("{Message}", msg);
+        }
+
+        /// <summary>
+        /// Issue #120 / #116: after JSON extract, propose Inner Problem structure the model must not invent.
+        /// ConflictType is proposed as Person vs. Self (Lists.json craft default). Protagonist and
+        /// Antagonist GUIDs both equal the gathered Protagonist (self vs self). These land in pending
+        /// only; <see cref="ClassifyScalarUpdates"/> decides Fill vs Protect — Accept never silent-forces
+        /// a user-owned different value. ProblemType Decision|Discover comes from the model.
+        /// </summary>
+        internal void EnrichInnerOuterStructuralFields(
+            WorkflowResult result,
+            Dictionary<string, StoryElement> gatheredElements)
+        {
+            if (!gatheredElements.TryGetValue("InnerProblem", out var inner))
+            {
+                const string skip = "InnerOuter structural enrich skipped: InnerProblem not gathered";
+                result.StatusMessages.Add(skip);
+                _logger?.LogInformation("{Message}", skip);
+                return;
+            }
+
+            // Craft default list value — do not trust free model text for ConflictType.
+            const string personVsSelf = "Person vs. Self";
+            AddOrReplaceScalarUpdate(result, "InnerProblem", inner.Uuid, "ConflictType", personVsSelf);
+
+            if (!gatheredElements.TryGetValue("Protagonist", out var protagonist))
+            {
+                var partial =
+                    $"InnerOuter structural enrich: ConflictType proposed={personVsSelf}; Protagonist not gathered; links not set";
+                result.StatusMessages.Add(partial);
+                _logger?.LogInformation("{Message}", partial);
+                return;
+            }
+
+            var protGuid = protagonist.Uuid.ToString();
+            AddOrReplaceScalarUpdate(result, "InnerProblem", inner.Uuid, "Protagonist", protGuid);
+            AddOrReplaceScalarUpdate(result, "InnerProblem", inner.Uuid, "Antagonist", protGuid);
+            var enrichMsg =
+                $"InnerOuter structural enrich: ConflictType proposed={personVsSelf}; Protagonist=Antagonist={protGuid}";
+            result.StatusMessages.Add(enrichMsg);
+            // Preferences log (not chat): durable record for #116 craft/overwrite diagnosis.
+            _logger?.LogInformation("{Message}", enrichMsg);
+        }
+
+        /// <summary>
+        /// Issue #116: classify scalar pending updates against live outline values and session-touch set.
+        /// Drops NoOps. Attaches craft explanation on Protect when a <see cref="CraftFieldHints"/> entry exists.
+        /// Non-scalar updates stay <see cref="UpdateKind.Unclassified"/>.
+        /// </summary>
+        /// <param name="sessionTouched">Keys from <see cref="PendingUpdate.SessionTouchKey"/> applied this Collaborator session, each with the fingerprint of the value written (Collaborator #272).</param>
+        internal void ClassifyScalarUpdates(
+            WorkflowResult result,
+            IReadOnlyDictionary<string, string>? sessionTouched,
+            string? workflowId = null)
+        {
+            workflowId ??= workflowModel.Label;
+            sessionTouched ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            var kept = new List<PendingUpdate>();
+            var display = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            var noOpCount = 0;
+            var protectCount = 0;
+            var fillCount = 0;
+            var refreshCount = 0;
+
+            _logger?.LogInformation(
+                "ClassifyScalarUpdates start: workflow={Workflow} pending={Count} sessionTouched={Touched}",
+                workflowId, result.PendingUpdates.Count, sessionTouched.Count);
+
+            foreach (var update in result.PendingUpdates)
+            {
+                if (TryDropInvalidSceneBuilderGuid(update, result))
+                {
+                    noOpCount++;
+                    continue;
+                }
+
+                // TypedList / SimpleList: empty propose + empty live is NoOp (DefineStoryWorld
+                // re-run returned empty Cultures/PhysicalWorlds as two Accept rows).
+                if (update.Spec.WriteVia is WriteVia.TypedList or WriteVia.SimpleList)
+                {
+                    var proposedCount = CountCollectionValue(update.Value);
+                    var currentCount = ReadCurrentCollectionCount(update.ElementUuid, update.Spec.Property);
+
+                    // #216: field_states wins before the empty-collection wipe guard.
+                    if (update.Spec.WriteVia == WriteVia.SimpleList
+                        && TryGetFieldState(result, update, out var listState))
+                    {
+                        var listKind = MapFieldState(
+                            listState,
+                            currentEmpty: currentCount == 0,
+                            proposedEmpty: proposedCount == 0,
+                            sessionTouched: IsTouched(update, sessionTouched),
+                            update,
+                            result);
+                        ApplyClassifiedKind(
+                            update, listKind, source: "state",
+                            currentRaw: currentCount == 0 ? string.Empty : $"{currentCount} items",
+                            workflowId, result, kept, display,
+                            ref fillCount, ref refreshCount, ref protectCount, ref noOpCount);
+                        continue;
+                    }
+
+                    if (proposedCount == 0 && currentCount == 0)
+                    {
+                        noOpCount++;
+                        result.StatusMessages.Add($"No-op (empty collection): {update.Key}");
+                        _logger?.LogInformation(
+                            "Classify {Key} kind=NoOp (empty {WriteVia})",
+                            update.Key, update.Spec.WriteVia);
+                        continue;
+                    }
+
+                    // Empty propose against filled live would wipe — do not offer that as Accept.
+                    if (proposedCount == 0 && currentCount > 0)
+                    {
+                        noOpCount++;
+                        result.StatusMessages.Add(
+                            $"No-op (empty {update.Spec.WriteVia} would wipe {currentCount} entries): {update.Key}");
+                        _logger?.LogInformation(
+                            "Classify {Key} kind=NoOp (empty propose vs live count={Count})",
+                            update.Key, currentCount);
+                        continue;
+                    }
+
+                    // #208: SceneBuilder ScenePurpose uses Fill/Protect. Other SimpleList stays Unclassified.
+                    if (TryClassifySceneBuilderScenePurpose(update, sessionTouched, workflowId, result, kept, display,
+                            ref fillCount, ref refreshCount, ref protectCount, ref noOpCount))
+                    {
+                        continue;
+                    }
+
+                    kept.Add(update);
+                    display[update.Key] = FormatDisplayValue(update);
+                    _logger?.LogInformation(
+                        "Classify {Key} kind=Unclassified (non-scalar WriteVia={WriteVia} count={Count})",
+                        update.Key, update.Spec.WriteVia, proposedCount);
+                    continue;
+                }
+
+                // Collaborator #217 section 5.7: a beat row was planned against the live sheet at
+                // extract time and only Bind and Create rows exist, so each one is a Fill.
+                if (update.Value is BeatRowValue)
+                {
+                    var row = update with { Kind = UpdateKind.Fill, CurrentDisplay = "empty" };
+                    kept.Add(row);
+                    display[row.Key] = FormatDisplayValue(row);
+                    fillCount++;
+                    _logger?.LogInformation("Classify {Key} kind=Fill source=plan", row.Key);
+                    continue;
+                }
+
+                if (update.Spec.WriteVia != WriteVia.Scalar)
+                {
+                    kept.Add(update);
+                    display[update.Key] = FormatDisplayValue(update);
+                    _logger?.LogInformation(
+                        "Classify {Key} kind=Unclassified (non-scalar WriteVia={WriteVia})",
+                        update.Key, update.Spec.WriteVia);
+                    continue;
+                }
+
+                var currentRaw = ReadCurrentScalarDisplay(update.ElementUuid, update.Spec.Property);
+                var current = NormalizeCompareText(currentRaw);
+                var proposed = NormalizeCompareText(FormatDisplayValue(update));
+
+                UpdateKind kind;
+                string source;
+                // Collaborator #253: Ideation never changes a filled Story Idea. It is the first step;
+                // Concept and Premise may fill it when it is empty, never rewrite it.
+                if (string.Equals(workflowId, "Premise", StringComparison.Ordinal)
+                    && string.Equals(update.Spec.Property, "Description", StringComparison.Ordinal)
+                    && !string.IsNullOrEmpty(current))
+                {
+                    result.KeptProperties.Add(update.DisplayNameOverride ?? update.Spec.Property);
+                    noOpCount++;
+                    _logger?.LogInformation("Classify {Key} kind=NoOp source=rule (Ideation keeps a filled Story Idea)", update.Key);
+                    continue;
+                }
+                if (TryGetFieldState(result, update, out var fieldState))
+                {
+                    source = "state";
+                    kind = MapFieldState(
+                        fieldState,
+                        currentEmpty: string.IsNullOrEmpty(current),
+                        proposedEmpty: string.IsNullOrEmpty(proposed),
+                        sessionTouched: IsTouched(update, sessionTouched),
+                        update,
+                        result);
+                }
+                else if (string.Equals(current, proposed, StringComparison.OrdinalIgnoreCase))
+                {
+                    source = "compare";
+                    kind = UpdateKind.NoOp;
+                }
+                else if (string.IsNullOrEmpty(proposed) && !string.IsNullOrEmpty(current))
+                {
+                    source = "compare";
+                    kind = UpdateKind.NoOp;
+                }
+                else if (string.IsNullOrEmpty(current))
+                {
+                    source = "compare";
+                    kind = UpdateKind.Fill;
+                }
+                else if (IsTouched(update, sessionTouched))
+                {
+                    source = "compare";
+                    kind = UpdateKind.Refresh;
+                }
+                else
+                {
+                    source = "compare";
+                    kind = UpdateKind.Protect;
+                }
+
+                ApplyClassifiedKind(
+                    update, kind, source, currentRaw, workflowId, result, kept, display,
+                    ref fillCount, ref refreshCount, ref protectCount, ref noOpCount,
+                    compareCurrent: current, compareProposed: proposed);
+            }
+
+            result.PendingUpdates.Clear();
+            result.PendingUpdates.AddRange(kept);
+            result.UpdatedProperties.Clear();
+            foreach (var kvp in display)
+                result.UpdatedProperties[kvp.Key] = kvp.Value;
+
+            _logger?.LogInformation(
+                "ClassifyScalarUpdates done: kept={Kept} fill={Fill} refresh={Refresh} protect={Protect} noop={NoOp}",
+                kept.Count, fillCount, refreshCount, protectCount, noOpCount);
+        }
+
+        /// <summary>
+        /// Collaborator #216: look up model-emitted intent by JSON key.
+        /// </summary>
+        private static bool TryGetFieldState(WorkflowResult result, PendingUpdate update, out OutputFieldState state)
+        {
+            var key = update.Spec.JsonKey ?? update.Spec.Property;
+            return result.FieldStates.TryGetValue(key, out state);
+        }
+
+        /// <summary>
+        /// Map <see cref="OutputFieldState"/> onto the #116 Protect ladder.
+        /// </summary>
+        private static UpdateKind MapFieldState(
+            OutputFieldState state,
+            bool currentEmpty,
+            bool proposedEmpty,
+            bool sessionTouched,
+            PendingUpdate update,
+            WorkflowResult result)
+        {
+            switch (state)
+            {
+                case OutputFieldState.Unchanged:
+                    if (currentEmpty && !proposedEmpty)
+                    {
+                        result.StatusMessages.Add(
+                            $"Field state Unchanged on empty live; treating as Fill: {update.Key}");
+                        return UpdateKind.Fill;
+                    }
+                    return UpdateKind.NoOp;
+                case OutputFieldState.Fill:
+                    if (proposedEmpty)
+                    {
+                        result.StatusMessages.Add($"Invalid Fill (empty value): {update.Key}");
+                        return UpdateKind.NoOp;
+                    }
+                    if (!currentEmpty)
+                    {
+                        result.StatusMessages.Add(
+                            $"Field state Fill on non-empty live; treating as Revise: {update.Key}");
+                        return sessionTouched ? UpdateKind.Refresh : UpdateKind.Protect;
+                    }
+                    return UpdateKind.Fill;
+                case OutputFieldState.Revise:
+                    if (currentEmpty)
+                    {
+                        result.StatusMessages.Add(
+                            $"Field state Revise on empty live; treating as Fill: {update.Key}");
+                        if (proposedEmpty)
+                        {
+                            result.StatusMessages.Add($"Invalid Fill (empty value): {update.Key}");
+                            return UpdateKind.NoOp;
+                        }
+                        return UpdateKind.Fill;
+                    }
+                    return sessionTouched ? UpdateKind.Refresh : UpdateKind.Protect;
+                default:
+                    throw new InvalidOperationException($"Unhandled OutputFieldState {state}");
+            }
+        }
+
+        private void ApplyClassifiedKind(
+            PendingUpdate update,
+            UpdateKind kind,
+            string source,
+            string? currentRaw,
+            string? workflowId,
+            WorkflowResult result,
+            List<PendingUpdate> kept,
+            Dictionary<string, object> display,
+            ref int fillCount,
+            ref int refreshCount,
+            ref int protectCount,
+            ref int noOpCount,
+            string? compareCurrent = null,
+            string? compareProposed = null)
+        {
+            _logger?.LogInformation(
+                "Classify {Key} kind={Kind} source={Source} current=\"{Current}\" proposed=\"{Proposed}\"",
+                update.Key,
+                kind,
+                source,
+                TruncateForLog(compareCurrent ?? currentRaw),
+                TruncateForLog(compareProposed ?? FormatDisplayValue(update)));
+
+            if (kind == UpdateKind.NoOp)
+            {
+                noOpCount++;
+                result.StatusMessages.Add($"No-op (unchanged): {update.Key}");
+                // Collaborator #272: a filled property the model kept is named in the summary.
+                // Not an empty proposal on filled text (the wipe guard, or Unchanged with no value)
+                // and not an invalid empty Fill.
+                var keptCurrent = compareCurrent ?? currentRaw;
+                var keptProposed = compareProposed ?? NormalizeCompareText(FormatDisplayValue(update));
+                var stateUnchanged = TryGetFieldState(result, update, out var keptState)
+                    && keptState == OutputFieldState.Unchanged;
+                var equalToCurrent = compareProposed != null
+                    && string.Equals(compareCurrent, compareProposed, StringComparison.OrdinalIgnoreCase);
+                if (!string.IsNullOrEmpty(keptCurrent) && !string.IsNullOrEmpty(keptProposed)
+                    && (stateUnchanged || equalToCurrent))
+                    result.KeptProperties.Add(update.DisplayNameOverride ?? update.Spec.Property);
+                return;
+            }
+
+            switch (kind)
+            {
+                case UpdateKind.Fill: fillCount++; break;
+                case UpdateKind.Refresh: refreshCount++; break;
+                case UpdateKind.Protect: protectCount++; break;
+            }
+
+            string? craft = null;
+            var hint = CraftFieldHints.Find(workflowId ?? string.Empty, update.ElementLabel, update.Spec.Property);
+            if (hint != null && kind == UpdateKind.Protect)
+                craft = hint.Explanation;
+
+            var classified = update with
+            {
+                Kind = kind,
+                CurrentDisplay = string.IsNullOrEmpty(currentRaw) ? string.Empty : currentRaw,
+                CraftExplanation = craft
+            };
+            kept.Add(classified);
+            display[classified.Key] = FormatDisplayValue(classified);
+            result.StatusMessages.Add($"Classified {classified.Key} as {kind}");
+        }
+
+        /// <summary>Shorten long prose for the Preferences log; keep list values intact when short.</summary>
+        private static string TruncateForLog(string? text, int max = 120)
+        {
+            if (string.IsNullOrEmpty(text))
+                return "";
+            var t = text.Replace('\r', ' ').Replace('\n', ' ');
+            return t.Length <= max ? t : t.Substring(0, max) + "...";
+        }
+
+        /// <summary>
+        /// True when Accept All may apply this update without an explicit per-field accept.
+        /// </summary>
+        internal static bool AcceptAllMayApply(PendingUpdate update) => update.AcceptAllMayApply;
+
+        /// <summary>
+        /// Collaborator #272: fingerprint of a property's current value, recorded when Collaborator
+        /// writes it and compared before a later run may classify it Refresh. Scalar: the same
+        /// normalized text Classify compares. SimpleList: the items joined with a newline.
+        /// Other write types return null; Classify does not use the touch map for them.
+        /// </summary>
+        internal string? ReadTouchFingerprint(PendingUpdate update)
+        {
+            switch (update.Spec.WriteVia)
+            {
+                case WriteVia.Scalar:
+                    return NormalizeCompareText(ReadCurrentScalarDisplay(update.ElementUuid, update.Spec.Property));
+                case WriteVia.SimpleList:
+                    var list = ReadCurrentStringList(update.ElementUuid, update.Spec.Property);
+                    return list == null ? string.Empty : string.Join("\n", list);
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Collaborator #272: true only when the key is in the touch map and the current value still
+        /// matches the fingerprint Collaborator stored. Ordinal compare: "A" and "a" differ.
+        /// </summary>
+        internal bool IsTouched(PendingUpdate update, IReadOnlyDictionary<string, string> touchMap)
+        {
+            if (!touchMap.TryGetValue(update.SessionTouchKey, out var written))
+                return false;
+            var current = ReadTouchFingerprint(update);
+            return current != null && string.Equals(current, written, StringComparison.Ordinal);
+        }
+
+        private string ReadCurrentScalarDisplay(Guid elementUuid, string propertyName)
+        {
+            var got = _storyApi.GetStoryElement(elementUuid);
+            if (!got.IsSuccess || got.Payload == null)
+                return string.Empty;
+
+            var element = got.Payload;
+            var property = element.GetType().GetProperty(propertyName);
+            if (property == null || !property.CanRead)
+                return string.Empty;
+
+            var value = property.GetValue(element);
+            if (value == null)
+                return string.Empty;
+
+            if (value is Guid g)
+                return g == Guid.Empty ? string.Empty : g.ToString();
+
+            var text = value.ToString() ?? string.Empty;
+            if (text.StartsWith(@"{\rtf", StringComparison.Ordinal))
+                text = new RichTextStripper().StripRichTextFormat(text) ?? string.Empty;
+
+            return text.Trim();
+        }
+
+        private static int CountCollectionValue(object? value)
+        {
+            if (value is null) return 0;
+            if (value is System.Collections.ICollection c) return c.Count;
+            return 0;
+        }
+
+        private int ReadCurrentCollectionCount(Guid elementUuid, string propertyName)
+        {
+            var got = _storyApi.GetStoryElement(elementUuid);
+            if (!got.IsSuccess || got.Payload == null)
+                return 0;
+
+            var property = got.Payload.GetType().GetProperty(propertyName);
+            if (property == null || !property.CanRead)
+                return 0;
+
+            var value = property.GetValue(got.Payload);
+            if (value is System.Collections.ICollection c)
+                return c.Count;
+            return 0;
+        }
+
+        /// <summary>
+        /// Compare as the writer sees the field: strip RTF, fold quotes/dashes/whitespace.
+        /// A→A (same visible words) is NoOp. Do not treat curly apostrophe vs ASCII as a change.
+        /// </summary>
+        internal static string NormalizeCompareText(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return string.Empty;
+
+            var s = text.Trim();
+            if (s.StartsWith(@"{\rtf", StringComparison.Ordinal))
+                s = new RichTextStripper().StripRichTextFormat(s) ?? string.Empty;
+
+            s = s
+                .Replace('\u2018', '\'')
+                .Replace('\u2019', '\'')
+                .Replace('\u201C', '"')
+                .Replace('\u201D', '"')
+                .Replace('\u2013', '-')
+                .Replace('\u2014', '-')
+                .Replace('\u00A0', ' ');
+
+            s = WhitespaceRuns.Replace(s, " ");
+            return s.Trim();
+        }
+
+        private static readonly System.Text.RegularExpressions.Regex WhitespaceRuns =
+            new(@"\s+", System.Text.RegularExpressions.RegexOptions.Compiled);
+
+        // Instance since #217: the BeatSheet arm plans the merge against the live structure.
+        private string FormatDisplayValue(PendingUpdate update)
+        {
+            if (update.Value == null)
+                return string.Empty;
+
+            return update.Spec.WriteVia switch
+            {
+                WriteVia.Scalar => update.Value.ToString() ?? string.Empty,
+                WriteVia.SimpleList when update.Value is System.Collections.ICollection c => $"{c.Count} items",
+                WriteVia.BeatSheet when update.Value is BeatRowValue row => ValueDisplay.Format(row),
+                WriteVia.BeatSheet when update.Value is List<BeatInfo> beatList =>
+                    FormatBeatSheetDisplay(update.ElementUuid, beatList),
+                WriteVia.BeatSheet when update.Value is System.Collections.ICollection c => $"{c.Count} beats",
+                WriteVia.CastMembers when update.Value is System.Collections.ICollection c => $"{c.Count} cast members",
+                WriteVia.Relationships when update.Value is System.Collections.ICollection c => $"{c.Count} relationships",
+                WriteVia.TypedList when update.Value is System.Collections.ICollection c => $"{c.Count} entries",
+                _ => update.Value.ToString() ?? string.Empty
+            };
+        }
+
+        /// <summary>
+        /// Injects or replaces a scalar PendingUpdate and its UpdatedProperties display entry.
+        /// </summary>
+        private static void AddOrReplaceScalarUpdate(
+            WorkflowResult result,
+            string elementLabel,
+            Guid elementUuid,
+            string property,
+            string value)
+        {
+            var key = $"{elementLabel}.{property}";
+            result.PendingUpdates.RemoveAll(u =>
+                u.ElementLabel == elementLabel && u.Spec.Property == property);
+            result.PendingUpdates.Add(new PendingUpdate(
+                elementLabel,
+                elementUuid,
+                new PropertySpec(property),
+                value));
+            result.UpdatedProperties[key] = value;
+        }
+
+        /// <summary>
+        /// Posts an already-built body and shapes the result (#119). RunAsync's body-building
+        /// and this method are split so an interview turn can set its own args between the two.
+        /// </summary>
+        internal async Task<WorkflowResult> RunPreparedAsync(
+            WorkflowProxyBody body,
+            Dictionary<string, StoryElement> gatheredElements)
+        {
+            // No credential: fail rather than falling back to BuildStubResponse. A stub is a
+            // readable placeholder for an unimplemented one-shot, but a conversational turn
+            // would post "(stub workflow - no AI call made)" as the character's own words and
+            // record it in the transcript Summarize later reads.
+            if (string.IsNullOrWhiteSpace(KernelFactory.ResolveWorkflowCredential()))
+            {
+                return WorkflowResult.Failed(
+                    "This build has no workflow credential, so the character cannot answer. " +
+                    "Activate Collaborator and start the interview again.");
+            }
+
+            // RunAsync's callers get a Failed result rather than an exception; this one's do
+            // too. The interview's callers are async void command handlers, where an escaping
+            // proxy failure (401 with no activation token, out of credits, HTTP error) takes
+            // the app down instead of showing an error bubble.
+            try
+            {
+                var (content, hash, cost, complete) = await PostToProxyAsync(body);
+                if (!complete)
+                    return BuildTruncationFailureResult(content);
+
+                var result = workflowModel.Mode == WorkflowMode.Conversational
+                    ? BuildConversationalResult(content)
+                    : ExtractOutputs(content, gatheredElements, workflowModel.GetIO().Outputs);
+
+                result.RemoteTemplateHash = hash;
+                result.Cost = cost;
+                result.RawResponse = content;
+                return result;
+            }
+            catch (StoryCADLib.Services.Store.OutOfCreditsException ex)
+            {
+                _logger?.LogWarning("Workflow turn refused: out of credits ({Workflow})", workflowModel.Title);
+                return WorkflowResult.Failed(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "WorkflowRunner.RunPreparedAsync error");
+                _auditLogger?.LogException(StoryCADLib.Services.Logging.LogLevel.Error, ex,
+                    $"Workflow turn failed: {workflowModel.Title}");
+                return WorkflowResult.Failed($"Workflow execution failed: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Result for a conversational turn (#119). The reply is prose, so ExtractOutputs must
+        /// not run against it — its JSON failure would fail the whole turn
+        /// ("Could not parse JSON from AI response"). Static and side-effect free so it is
+        /// testable without a live kernel.
+        /// </summary>
+        internal static WorkflowResult BuildConversationalResult(string reply)
+        {
+            if (string.IsNullOrWhiteSpace(reply))
+                return WorkflowResult.Failed("The interviewer did not ask anything.");
+
+            var result = WorkflowResult.Succeeded();
+            result.RawResponse = reply;
+            return result;
+        }
+
+        /// <summary>
+        /// Writes interview args (#119). Field cursor, not a cue line.
+        /// Do not send InterviewLine. Always write every key the Worker merges.
+        ///
+        /// Targets are the session plan's ids in order (design 25.7). Empty on the
+        /// opening means "you choose": the Worker names them on its reply. Empty after
+        /// the opening means nothing; the Worker only reads it on the opening.
+        /// </summary>
+        internal static void SetInterviewArgs(
+            Dictionary<string, string> args,
+            string? field,
+            string? nextField,
+            int turnsOnField,
+            string? transcript,
+            string? answer,
+            string? targets = null)
+        {
+            args["InterviewField"] = field?.Trim() ?? string.Empty;
+            args["InterviewNextField"] = nextField?.Trim() ?? string.Empty;
+            args["InterviewTargets"] = targets?.Trim() ?? string.Empty;
+            args["InterviewTurnsOnField"] = turnsOnField.ToString();
+            args["InterviewTranscript"] = transcript ?? string.Empty;
+            args["InterviewAnswer"] = answer?.Trim() ?? string.Empty;
+        }
+
+        /// <summary>
+        /// Extracts output values from the AI response without applying them.
+        /// Builds PendingUpdates from the JSON using each PropertySpec's JsonKey and WriteVia.
+        /// UpdatedProperties is populated as a display-only projection.
+        /// </summary>
+        internal WorkflowResult ExtractOutputs(
+            string aiResponse,
+            Dictionary<string, StoryElement> elements,
+            List<ElementOutput> outputs)
+        {
+            var result = WorkflowResult.Succeeded();
+
+            var jsonText = ExtractJson(aiResponse);
+
+            _logger?.LogInformation("=== EXTRACTED JSON ===");
+            _logger?.LogInformation(jsonText ?? "(null - extraction failed)");
+            _logger?.LogInformation("=== END EXTRACTED JSON ===");
+
+            if (string.IsNullOrEmpty(jsonText))
+            {
+                result.Success = false;
+                result.ErrorMessage = "Could not parse JSON from AI response";
+                result.StatusMessages.Add("Failed to extract JSON from response");
+                return result;
+            }
+
+            try
+            {
+                using var doc = JsonDocument.Parse(jsonText);
+                var root = doc.RootElement;
+                ParseFieldStates(root, result);
+
+                foreach (var output in outputs)
+                {
+                    if (!elements.TryGetValue(output.ElementLabel, out var element))
+                    {
+                        result.StatusMessages.Add($"Element not found for output: {output.ElementLabel}");
+                        continue;
+                    }
+
+                    foreach (var spec in output.PropertiesToUpdate)
+                    {
+                        var jsonKey = spec.JsonKey ?? spec.Property;
+
+                        if (!root.TryGetProperty(jsonKey, out var jsonProp))
+                        {
+                            result.StatusMessages.Add($"JSON property not found: {jsonKey}");
+                            continue;
+                        }
+
+                        _logger?.LogInformation($"=== EXTRACTED PROPERTY: {output.ElementLabel}.{spec.Property} (key: {jsonKey}) ===");
+
+                        object? value;
+                        string displayValue;
+
+                        switch (spec.WriteVia)
+                        {
+                            case WriteVia.Scalar:
+                                value = jsonProp.ValueKind == JsonValueKind.String
+                                    ? jsonProp.GetString()
+                                    : jsonProp.ToString();
+                                // Collaborator #239: a field_states word is not text. On some
+                                // runs gpt-5.4-nano put "Unchanged" in a property's text, once
+                                // under Fill, which classify would have written into the outline.
+                                if (IsFieldStateWord(value as string))
+                                {
+                                    result.StatusMessages.Add(
+                                        $"State word as text, treated as empty: {output.ElementLabel}.{spec.Property}");
+                                    value = string.Empty;
+                                }
+                                displayValue = value?.ToString() ?? string.Empty;
+                                break;
+
+                            case WriteVia.SimpleList:
+                                var strList = ExtractStringList(jsonProp, result.StatusMessages, $"{output.ElementLabel}.{spec.Property}");
+                                value = strList;
+                                displayValue = $"{strList.Count} items";
+                                break;
+
+                            case WriteVia.BeatSheet:
+                                var beats = ExtractBeatList(jsonProp);
+                                value = beats;
+                                displayValue = $"{beats.Count} beats";
+                                break;
+
+                            case WriteVia.CastMembers:
+                                var castGuids = ExtractGuidList(jsonProp);
+                                value = castGuids;
+                                displayValue = $"{castGuids.Count} cast members";
+                                break;
+
+                            case WriteVia.Relationships:
+                                var rels = ExtractRelationshipList(jsonProp);
+                                value = rels;
+                                displayValue = $"{rels.Count} relationships";
+                                break;
+
+                            case WriteVia.TypedList:
+                                // Extract a JSON array of objects; each object is deserialized
+                                // into the collection's typed entry by the API at apply time.
+                                // Clone() detaches each element so it survives doc disposal.
+                                var typedEntries = ExtractTypedEntries(jsonProp);
+                                value = typedEntries;
+                                displayValue = $"{typedEntries.Count} entries";
+                                break;
+
+                            default:
+                                throw new InvalidOperationException($"Unhandled WriteVia value: {spec.WriteVia}");
+                        }
+
+                        result.UpdatedProperties[$"{output.ElementLabel}.{spec.Property}"] = displayValue;
+                        result.PendingUpdates.Add(new PendingUpdate(output.ElementLabel, element.Uuid, spec, value));
+                        result.StatusMessages.Add($"Extracted {output.ElementLabel}.{spec.Property}");
+                    }
+                }
+            }
+            catch (JsonException ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"JSON parse error: {ex.Message}";
+                result.StatusMessages.Add($"JSON parsing failed: {ex.Message}");
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Collaborator #216: read root <c>field_states</c>. Unknown names are skipped.
+        /// </summary>
+        private static void ParseFieldStates(JsonElement root, WorkflowResult result)
+        {
+            if (!root.TryGetProperty("field_states", out var el) || el.ValueKind != JsonValueKind.Object)
+                return;
+
+            foreach (var prop in el.EnumerateObject())
+            {
+                var raw = prop.Value.ValueKind == JsonValueKind.String
+                    ? prop.Value.GetString()
+                    : prop.Value.ToString();
+                if (Enum.TryParse<OutputFieldState>(raw, ignoreCase: true, out var state)
+                    && state is OutputFieldState.Fill or OutputFieldState.Unchanged or OutputFieldState.Revise)
+                {
+                    result.FieldStates[prop.Name] = state;
+                }
+                else
+                {
+                    result.StatusMessages.Add($"Unknown field_states value for {prop.Name}: {raw}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Writes the six World Type axis scalars after WorldType Accept (#201).
+        /// </summary>
+        private int ApplyWorldTypeAxes(Guid storyWorldUuid, WorldTypeAxes axes, WorkflowResult result)
+        {
+            int n = 0;
+            void Write(string property, string value)
+            {
+                var r = _storyApi.UpdateElementProperty(storyWorldUuid, property, value);
+                if (r.IsSuccess)
+                {
+                    n++;
+                    result.StatusMessages.Add($"Applied axis {property} from WorldType map");
+                }
+                else
+                    _logger?.LogWarning($"Failed to apply axis {property}: {r.ErrorMessage}");
+            }
+
+            Write("Ontology", axes.Ontology);
+            Write("WorldRelation", axes.WorldRelation);
+            Write("RuleTransparency", axes.RuleTransparency);
+            Write("ScaleOfDifference", axes.ScaleOfDifference);
+            Write("AgencySource", axes.AgencySource);
+            Write("ToneLogic", axes.ToneLogic);
+            return n;
+        }
+
+        /// <summary>
+        /// Applies pending updates to story elements via the API.
+        /// Dispatches each PendingUpdate by its WriteVia mechanism.
+        /// The explicit default: arm throws on any unhandled WriteVia value.
+        /// </summary>
+        internal int ApplyUpdates(WorkflowResult result, Dictionary<string, StoryElement> gatheredElements)
+        {
+            int appliedCount = 0;
+
+            foreach (var update in result.PendingUpdates)
+            {
+                var spec = update.Spec;
+                var uuid = update.ElementUuid;
+
+                switch (spec.WriteVia)
+                {
+                    case WriteVia.Scalar:
+                    {
+                        if (TryDropInvalidSceneBuilderGuid(update, result))
+                            break;
+                        var live = ReadCurrentScalarDisplay(uuid, spec.Property);
+                        var proposed = FormatDisplayValue(update);
+                        var liveN = NormalizeCompareText(live);
+                        var proposedN = NormalizeCompareText(proposed);
+                        if (string.IsNullOrEmpty(proposedN) ||
+                            string.Equals(liveN, proposedN, StringComparison.OrdinalIgnoreCase))
+                        {
+                            result.StatusMessages.Add($"No-op (unchanged on apply): {update.Key}");
+                            break;
+                        }
+                        var applyResult = _storyApi.UpdateElementProperty(uuid, spec.Property, update.Value ?? string.Empty);
+                        if (applyResult.IsSuccess)
+                        {
+                            appliedCount++;
+                            // #201: WorldType Accept writes six axes from the host map (form auto-fill
+                            // does not run on UpdateElementProperty).
+                            if (string.Equals(spec.Property, "WorldType", StringComparison.Ordinal)
+                                && update.Value is string worldType
+                                && WorldTypeAxisMap.TryGet(worldType, out var axes))
+                            {
+                                appliedCount += ApplyWorldTypeAxes(uuid, axes, result);
+                            }
+                        }
+                        else
+                            _logger?.LogWarning($"Failed to apply {update.ElementLabel}.{spec.Property}: {applyResult.ErrorMessage}");
+                        break;
+                    }
+
+                    case WriteVia.SimpleList:
+                    {
+                        if (update.Value is not List<string> entries)
+                        {
+                            _logger?.LogWarning($"{update.ElementLabel}.{spec.Property}: expected List<string> for SimpleList");
+                            break;
+                        }
+                        // Clear existing entries by repeatedly removing at index 0
+                        var existing = _storyApi.GetStoryElement(uuid);
+                        if (existing.IsSuccess && existing.Payload != null)
+                        {
+                            var prop = existing.Payload.GetType().GetProperty(spec.Property);
+                            var currentList = prop?.GetValue(existing.Payload) as System.Collections.IList;
+                            int count = currentList?.Count ?? 0;
+                            for (int i = 0; i < count; i++)
+                                _storyApi.RemoveCollectionEntry(uuid, spec.Property, 0);
+                        }
+                        foreach (var entry in entries)
+                            _storyApi.AddCollectionEntry(uuid, spec.Property, entry);
+                        appliedCount++;
+                        break;
+                    }
+
+                    case WriteVia.BeatSheet:
+                    {
+                        // Collaborator #217 section 5.7: one accepted beat row applies on its own.
+                        if (update.Value is BeatRowValue row)
+                        {
+                            if (ApplyBeatRow(uuid, row, result))
+                                appliedCount++;
+                            break;
+                        }
+                        // #167: merge proposed beats; never wipe filled assignments.
+                        if (update.Value is not List<BeatInfo> beats) break;
+                        ApplyBeatSheetMerge(uuid, beats, result);
+                        appliedCount++;
+                        break;
+                    }
+
+                    case WriteVia.CastMembers:
+                    {
+                        if (update.Value is not List<Guid> charGuids) break;
+                        var validChars = new System.Collections.Generic.HashSet<Guid>(
+                            GetCandidateGuids(StoryItemType.Character));
+                        foreach (var charGuid in charGuids)
+                        {
+                            if (validChars.Contains(charGuid))
+                                _storyApi.AddCastMember(uuid, charGuid);
+                            else
+                                result.StatusMessages.Add(
+                                    $"CastMembers: GUID {charGuid} not in character candidate set; skipped");
+                        }
+                        appliedCount++;
+                        break;
+                    }
+
+                    case WriteVia.Relationships:
+                    {
+                        if (update.Value is not List<RelationshipInfo> relationships) break;
+                        var validChars = new System.Collections.Generic.HashSet<Guid>(
+                            GetCandidateGuids(StoryItemType.Character));
+                        foreach (var rel in relationships)
+                        {
+                            if (validChars.Contains(rel.RecipientGuid))
+                                ApplyRelationship(uuid, rel, result);
+                            else
+                                result.StatusMessages.Add(
+                                    $"Relationships: recipient GUID {rel.RecipientGuid} not in character candidate set; skipped");
+                        }
+                        appliedCount++;
+                        break;
+                    }
+
+                    case WriteVia.TypedList:
+                    {
+                        if (update.Value is not List<JsonElement> typedEntries)
+                        {
+                            _logger?.LogWarning($"{update.ElementLabel}.{spec.Property}: expected List<JsonElement> for TypedList");
+                            break;
+                        }
+                        // Snapshot prior entries, then clear-and-add. Merge empty proposed
+                        // fields from prior rows with the same Name so Name-only LLM rows
+                        // do not wipe Values (Cultures Accept smoke).
+                        var priorEntries = SnapshotTypedListEntries(uuid, spec.Property);
+                        var existing = _storyApi.GetStoryElement(uuid);
+                        if (existing.IsSuccess && existing.Payload != null)
+                        {
+                            var prop = existing.Payload.GetType().GetProperty(spec.Property);
+                            var currentList = prop?.GetValue(existing.Payload) as System.Collections.IList;
+                            int count = currentList?.Count ?? 0;
+                            for (int i = 0; i < count; i++)
+                                _storyApi.RemoveCollectionEntry(uuid, spec.Property, 0);
+                        }
+                        foreach (var entry in typedEntries)
+                        {
+                            var toAdd = MergeTypedListJsonWithPrior(entry, priorEntries, spec.ListEntryType);
+                            var addResult = _storyApi.AddCollectionEntry(uuid, spec.Property, toAdd);
+                            if (!addResult.IsSuccess)
+                                result.StatusMessages.Add(
+                                    $"{spec.Property}: entry rejected: {addResult.ErrorMessage}");
+                        }
+                        appliedCount++;
+                        break;
+                    }
+
+                    default:
+                        throw new InvalidOperationException($"Unhandled WriteVia value: {spec.WriteVia}");
+                }
+            }
+
+            if (string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal)
+                && gatheredElements.TryGetValue("Scene", out var sceneEl)
+                && sceneEl != null)
+            {
+                appliedCount += EnsureSceneBuilderSeatsOnCast(sceneEl.Uuid, result);
+            }
+
+            _logger?.LogInformation($"Applied {appliedCount} pending updates");
+            return appliedCount;
+        }
+
+        /// <summary>
+        /// Collaborator #208: Cast includes Protagonist, Antagonist, and ViewpointCharacter at minimum.
+        /// </summary>
+        internal int EnsureSceneBuilderSeatsOnCast(Guid sceneUuid, WorkflowResult result)
+        {
+            var got = _storyApi.GetStoryElement(sceneUuid);
+            if (!got.IsSuccess || got.Payload is not SceneModel scene)
+                return 0;
+
+            var validChars = new HashSet<Guid>(GetCandidateGuids(StoryItemType.Character));
+            int n = 0;
+            foreach (var seat in new[] { scene.Protagonist, scene.Antagonist, scene.ViewpointCharacter })
+            {
+                if (seat == Guid.Empty || !validChars.Contains(seat))
+                    continue;
+                if (scene.CastMembers != null && scene.CastMembers.Contains(seat))
+                    continue;
+                var add = _storyApi.AddCastMember(sceneUuid, seat);
+                if (add.IsSuccess)
+                    n++;
+                else
+                    result.StatusMessages.Add($"Scene Builder: could not add seat {seat} to Cast.");
+            }
+
+            if (n > 0)
+                result.StatusMessages.Add($"Scene Builder: added {n} seat(s) to Cast.");
+            return n;
+        }
+
+        /// <summary>
+        ///     Collaborator #251. Writes one full row on the Character, and an inverse row (type only)
+        ///     on the Partner when the Partner has no row for the Character. Never mirrors.
+        /// </summary>
+        private void ApplyRelationship(Guid characterUuid, RelationshipInfo rel, WorkflowResult result)
+        {
+            var character = _storyApi.GetStoryElement(characterUuid).Payload as CharacterModel;
+            var partner = _storyApi.GetStoryElement(rel.RecipientGuid).Payload as CharacterModel;
+            if (character == null || partner == null)
+            {
+                result.StatusMessages.Add(character == null
+                    ? $"Relationships: element {characterUuid} is not a character; skipped"
+                    : $"Relationships: recipient GUID {rel.RecipientGuid} not in character candidate set; skipped");
+                return;
+            }
+
+            if (character.RelationshipList.Any(r => r.PartnerUuid == partner.Uuid))
+            {
+                result.StatusMessages.Add(
+                    $"Relationships: {character.Name} already has a relationship with {partner.Name}; change it on the Relationships tab.");
+                return;
+            }
+
+            var added = _storyApi.AddRelationship(
+                characterUuid, rel.RecipientGuid, rel.RelationType, false,
+                rel.Trait, rel.Attitude, rel.Notes);
+            if (!added.IsSuccess)
+            {
+                result.StatusMessages.Add(
+                    $"Relationships: {character.Name} to {partner.Name} not written: {added.ErrorMessage}");
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(rel.InverseRelationType) &&
+                !partner.RelationshipList.Any(r => r.PartnerUuid == character.Uuid))
+            {
+                var inverse = _storyApi.AddRelationship(
+                    rel.RecipientGuid, characterUuid, rel.InverseRelationType, false);
+                if (!inverse.IsSuccess)
+                    result.StatusMessages.Add(
+                        $"Relationships: inverse type on {partner.Name} not written: {inverse.ErrorMessage}");
+            }
+        }
+
+        private IEnumerable<Guid> GetCandidateGuids(StoryItemType type)
+        {
+            var result = _storyApi.GetElementsByType(type);
+            return result.IsSuccess && result.Payload != null
+                ? result.Payload.Select(e => e.Uuid)
+                : Enumerable.Empty<Guid>();
+        }
+
+        private static List<string> ExtractStringList(JsonElement elem, List<string> statusMessages, string context)
+        {
+            if (elem.ValueKind == JsonValueKind.Array)
+            {
+                return elem.EnumerateArray()
+                    .Select(e => e.GetString() ?? e.ToString())
+                    .ToList();
+            }
+            // Model returned a bare string; treat as single entry, add a drift note.
+            statusMessages.Add($"{context}: expected JSON array for SimpleList, got {elem.ValueKind}; treating as single entry");
+            return new List<string> { elem.GetString() ?? elem.ToString() };
+        }
+
+        internal static List<BeatInfo> ExtractBeatList(JsonElement elem)
+        {
+            if (elem.ValueKind != JsonValueKind.Array) return new List<BeatInfo>();
+            var beats = new List<BeatInfo>();
+            foreach (var beatElem in elem.EnumerateArray())
+            {
+                var title = beatElem.TryGetProperty("title", out var t) ? t.GetString() ?? "" : "";
+                var desc = beatElem.TryGetProperty("description", out var d) ? d.GetString() ?? "" : "";
+                Guid? assigned = null;
+                if (beatElem.TryGetProperty("assigned_element", out var ae))
+                {
+                    if (ae.ValueKind == JsonValueKind.String
+                        && Guid.TryParse(ae.GetString(), out var g))
+                        assigned = g;
+                }
+                string? sceneName = null;
+                if (beatElem.TryGetProperty("scene_name", out var sn)
+                    && sn.ValueKind == JsonValueKind.String)
+                {
+                    sceneName = sn.GetString();
+                }
+
+                // Collaborator #77 / #208 stub contract. Without these the created Scene gets
+                // Name only, whatever the template asks the model for.
+                static string? ReadString(JsonElement beat, string key) =>
+                    beat.TryGetProperty(key, out var v) && v.ValueKind == JsonValueKind.String
+                        ? v.GetString()
+                        : null;
+
+                var sceneDescription = ReadString(beatElem, "scene_description");
+                var sceneNotes = ReadString(beatElem, "scene_notes");
+                var sceneType = ReadString(beatElem, "scene_type");
+
+                List<Guid>? sceneCast = null;
+                if (beatElem.TryGetProperty("scene_cast", out var sc)
+                    && sc.ValueKind == JsonValueKind.Array)
+                {
+                    sceneCast = new List<Guid>();
+                    foreach (var castElem in sc.EnumerateArray())
+                    {
+                        if (castElem.ValueKind == JsonValueKind.String
+                            && Guid.TryParse(castElem.GetString(), out var castGuid))
+                            sceneCast.Add(castGuid);
+                    }
+                }
+
+                var problemName = ReadString(beatElem, "problem_name");
+                var problemDescription = ReadString(beatElem, "problem_description");
+                var problemCategory = ReadString(beatElem, "problem_category");
+
+                beats.Add(new BeatInfo(title, desc, assigned, sceneName,
+                    sceneDescription, sceneNotes, sceneType, sceneCast,
+                    problemName, problemDescription, problemCategory));
+            }
+            return beats;
+        }
+
+        /// <summary>
+        /// Collaborator #77: ProblemCategory must be set before ProblemBuilder runs, because it
+        /// picks the beat sheet class. ProblemBuilder runs on any Problem, the story problem
+        /// included; #211 deleted BeatScenes, whose gate refused it.
+        /// </summary>
+        internal static string? ValidateProblemCategory(string? problemCategory)
+        {
+            if (string.IsNullOrWhiteSpace(problemCategory))
+                return "Set Problem Category before Problem Builder.";
+            return null;
+        }
+
+        /// <summary>
+        /// Collaborator #208 / #246: refuse POST when OwnerState is EmptyCategoryBail.
+        /// Missing Problem map entry is not empty category. Spine owner is not a bail.
+        /// </summary>
+        internal string? ValidateSceneBuilderOwner(Dictionary<string, StoryElement> gatheredElements)
+        {
+            if (!gatheredElements.TryGetValue("Scene", out var scene) || scene == null)
+                return null;
+
+            var resolved = new SceneStructureNeighborResolver(_storyApi).ResolveForSceneBuilder(scene);
+            if (resolved.OwnerState is SceneStructureNeighborResolver.SceneBuilderOwnerState.EmptyCategoryBail)
+                return resolved.BailReason;
+            return null;
+        }
+
+        private static void CaptureSceneBuilderProposal(string planResult, WorkflowResult result)
+        {
+            var json = ExtractJson(planResult);
+            if (string.IsNullOrEmpty(json))
+                return;
+            try
+            {
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+                if (root.TryGetProperty("proposed_owner_guid", out var guidEl)
+                    && guidEl.ValueKind == JsonValueKind.String
+                    && Guid.TryParse(guidEl.GetString(), out var guid)
+                    && guid != Guid.Empty)
+                {
+                    result.ProposedOwnerGuid = guid;
+                }
+                if (root.TryGetProperty("proposed_owner_name", out var nameEl)
+                    && nameEl.ValueKind == JsonValueKind.String)
+                {
+                    result.ProposedOwnerName = nameEl.GetString();
+                }
+            }
+            catch (JsonException)
+            {
+                // analysis-only keys are optional
+            }
+        }
+
+        /// <summary>
+        /// Collaborator #208: on Accept of an orphan, bind the first empty beat when section 5.6 holds.
+        /// Otherwise Fill Notes with a propose line when Notes is empty.
+        /// </summary>
+        internal string? TryApplySceneBuilderOrphanBind(
+            WorkflowResult result,
+            Dictionary<string, StoryElement> gatheredElements)
+        {
+            if (!string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
+                return null;
+            if (!gatheredElements.TryGetValue("Scene", out var scene) || scene == null)
+                return null;
+
+            var resolver = new SceneStructureNeighborResolver(_storyApi);
+            var owners = resolver.FindStructureOwners(scene.Uuid);
+            var explorerParent = resolver.GetExplorerParentProblem(scene);
+            if (owners.Count > 0 || explorerParent != null)
+                return null;
+
+            var proposed = result.ProposedOwnerGuid;
+            var displayName = string.IsNullOrWhiteSpace(result.ProposedOwnerName)
+                ? proposed?.ToString() ?? string.Empty
+                : result.ProposedOwnerName;
+
+            if (proposed is null || proposed == Guid.Empty)
+                return WriteOrphanProposeNotes(scene, result, "empty GUID", displayName);
+
+            var problems = _storyApi.GetElementsByType(StoryItemType.Problem);
+            ProblemModel? match = null;
+            if (problems.IsSuccess && problems.Payload != null)
+                match = problems.Payload.OfType<ProblemModel>().FirstOrDefault(p => p.Uuid == proposed.Value);
+            if (match == null)
+                return WriteOrphanProposeNotes(scene, result, "GUID not in ProblemChoices", displayName);
+
+            var structure = _storyApi.GetProblemStructure(match.Uuid);
+            if (!structure.IsSuccess || structure.Payload.Beats == null)
+                return WriteOrphanProposeNotes(scene, result, "could not read beat sheet", displayName);
+
+            int emptyIndex = -1;
+            int i = 0;
+            foreach (var beat in structure.Payload.Beats)
+            {
+                if (beat.LinkedElement is not Guid linked || linked == Guid.Empty)
+                {
+                    emptyIndex = i;
+                    break;
+                }
+                i++;
+            }
+
+            if (emptyIndex < 0)
+                return WriteOrphanProposeNotes(scene, result, "no empty beat", displayName);
+
+            var assign = _storyApi.AssignElementToBeat(match.Uuid, emptyIndex, scene.Uuid);
+            if (!assign.IsSuccess)
+                return WriteOrphanProposeNotes(scene, result,
+                    assign.ErrorMessage ?? "AssignElementToBeat failed", displayName);
+
+            var msg = $"Scene Builder: assigned Scene to beat {emptyIndex} on {match.Name}.";
+            result.StatusMessages.Add(msg);
+            return msg;
+        }
+
+        private string WriteOrphanProposeNotes(
+            StoryElement scene,
+            WorkflowResult result,
+            string reason,
+            string displayName)
+        {
+            var live = ReadCurrentScalarDisplay(scene.Uuid, "Notes");
+            var line = string.IsNullOrWhiteSpace(displayName)
+                ? $"Proposed owner could not be bound ({reason})."
+                : $"Proposed owner: {displayName} ({reason}).";
+            if (string.IsNullOrEmpty(live))
+            {
+                var write = _storyApi.UpdateElementProperty(scene.Uuid, "Notes", line);
+                var msg = write.IsSuccess
+                    ? $"Scene Builder: could not bind ({reason}); wrote propose line to Notes."
+                    : $"Scene Builder: could not bind ({reason}); Notes write failed.";
+                result.StatusMessages.Add(msg);
+                return msg;
+            }
+
+            var protectedMsg = $"Scene Builder: could not bind ({reason}); Notes unchanged.";
+            result.StatusMessages.Add(protectedMsg);
+            return protectedMsg;
+        }
+
+        private static readonly HashSet<string> SceneBuilderCharacterGuidProperties = new(StringComparer.Ordinal)
+        {
+            "Protagonist", "Antagonist", "ViewpointCharacter"
+        };
+
+        /// <summary>
+        /// Drop seat/Setting GUID updates that do not resolve to Character or Setting.
+        /// Empty GUID is not dropped (Fill vs empty live).
+        /// </summary>
+        private bool TryDropInvalidSceneBuilderGuid(PendingUpdate update, WorkflowResult result)
+        {
+            if (!string.Equals(workflowModel.Label, "SceneBuilder", StringComparison.Ordinal))
+                return false;
+            if (update.Spec.WriteVia != WriteVia.Scalar)
+                return false;
+
+            var property = update.Spec.Property;
+            bool isCharacterSeat = SceneBuilderCharacterGuidProperties.Contains(property);
+            bool isSetting = string.Equals(property, "Setting", StringComparison.Ordinal);
+            if (!isCharacterSeat && !isSetting)
+                return false;
+
+            var text = update.Value?.ToString();
+            if (isSetting)
+            {
+                if (string.IsNullOrWhiteSpace(text))
+                    return false;
+                if (!Guid.TryParse(text, out var settingGuid) || settingGuid == Guid.Empty
+                    || !GetCandidateGuids(StoryItemType.Setting).Contains(settingGuid))
+                {
+                    result.StatusMessages.Add(
+                        "Scene Builder: Setting is not a SettingChoices GUID; dropped.");
+                    return true;
+                }
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(text) || !Guid.TryParse(text, out var guid) || guid == Guid.Empty)
+                return false;
+
+            var got = _storyApi.GetStoryElement(guid);
+            if (!got.IsSuccess || got.Payload == null)
+            {
+                result.StatusMessages.Add($"Scene Builder: {property} GUID {guid} not found; dropped.");
+                return true;
+            }
+
+            if (isCharacterSeat && got.Payload is not CharacterModel)
+            {
+                result.StatusMessages.Add($"Scene Builder: {property} is not a Character; dropped.");
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool TryClassifySceneBuilderScenePurpose(
+            PendingUpdate update,
+            IReadOnlyDictionary<string, string> sessionTouched,
+            string workflowId,
+            WorkflowResult result,
+            List<PendingUpdate> kept,
+            Dictionary<string, object> display,
+            ref int fillCount,
+            ref int refreshCount,
+            ref int protectCount,
+            ref int noOpCount)
+        {
+            if (!string.Equals(workflowId, "SceneBuilder", StringComparison.Ordinal))
+                return false;
+            if (update.Spec.WriteVia != WriteVia.SimpleList)
+                return false;
+            if (!string.Equals(update.Spec.Property, "ScenePurpose", StringComparison.Ordinal))
+                return false;
+            if (update.Value is not List<string> proposed)
+                return false;
+
+            var live = ReadCurrentStringList(update.ElementUuid, update.Spec.Property) ?? new List<string>();
+            UpdateKind kind;
+            if (live.Count == 0 && proposed.Count > 0)
+                kind = UpdateKind.Fill;
+            else if (live.SequenceEqual(proposed, StringComparer.Ordinal))
+                kind = UpdateKind.NoOp;
+            else if (IsTouched(update, sessionTouched))
+                kind = UpdateKind.Refresh;
+            else
+                kind = UpdateKind.Protect;
+
+            _logger?.LogInformation(
+                "Classify {Key} kind={Kind} (SceneBuilder ScenePurpose ordinal)",
+                update.Key, kind);
+
+            if (kind == UpdateKind.NoOp)
+            {
+                noOpCount++;
+                result.StatusMessages.Add($"No-op (unchanged): {update.Key}");
+                // Collaborator #272: an equal, non-empty list is a kept property.
+                if (live.Count > 0)
+                    result.KeptProperties.Add(update.DisplayNameOverride ?? update.Spec.Property);
+                return true;
+            }
+
+            switch (kind)
+            {
+                case UpdateKind.Fill: fillCount++; break;
+                case UpdateKind.Refresh: refreshCount++; break;
+                case UpdateKind.Protect: protectCount++; break;
+            }
+
+            var classified = update with
+            {
+                Kind = kind,
+                CurrentDisplay = live.Count == 0 ? string.Empty : $"{live.Count} items"
+            };
+            kept.Add(classified);
+            display[classified.Key] = FormatDisplayValue(classified);
+            result.StatusMessages.Add($"Classified {classified.Key} as {kind}");
+            return true;
+        }
+
+        private List<string>? ReadCurrentStringList(Guid elementUuid, string propertyName)
+        {
+            var got = _storyApi.GetStoryElement(elementUuid);
+            if (!got.IsSuccess || got.Payload == null)
+                return null;
+            var property = got.Payload.GetType().GetProperty(propertyName);
+            if (property == null || !property.CanRead)
+                return null;
+            var value = property.GetValue(got.Payload);
+            if (value is List<string> list)
+                return list;
+            if (value is IEnumerable<string> enumerable)
+                return enumerable.ToList();
+            return null;
+        }
+
+        /// <summary>
+        /// Collaborator #217 section 5.5: the Review pane text for a beats proposal. One summary
+        /// line, then one line per row, rendered from the same plan the apply executes. The
+        /// one-line "9 beats (4 new scenes for empty beats)" it replaces hid which Scene went
+        /// to which beat until after Accept.
+        /// </summary>
+        internal string FormatBeatSheetDisplay(Guid problemUuid, List<BeatInfo> beats)
+        {
+            var plan = PlanBeatSheetMerge(problemUuid, beats);
+            if (plan.Count == 0)
+                return $"{beats.Count} beats";
+
+            // Drop rows start at the sheet's row count, so that count is the rows before them.
+            var sheetRows = plan.Count - plan.Count(r => r.Outcome == BeatRowOutcome.Drop);
+            var sb = new System.Text.StringBuilder(PlanSummary(plan));
+
+            foreach (var row in plan)
+            {
+                sb.Append('\n').Append(row.Index + 1).Append(". ").Append(row.Title).Append(": ");
+                switch (row.Outcome)
+                {
+                    case BeatRowOutcome.Keep:
+                        sb.Append("keeps ").Append(row.ElementName);
+                        break;
+                    case BeatRowOutcome.Bind:
+                        sb.Append("binds ").Append(row.ElementName)
+                            .Append(" (").Append(ElementTypeNameOf(row.ElementGuid!.Value)).Append(')');
+                        break;
+                    case BeatRowOutcome.Create:
+                        sb.Append("new Scene \"").Append(row.ElementName).Append('"');
+                        break;
+                    case BeatRowOutcome.CreateProblem:
+                        sb.Append("new Problem \"").Append(row.ElementName).Append('"');
+                        var stubCat = beats[row.Index].ProblemCategory?.Trim();
+                        if (!string.IsNullOrEmpty(stubCat))
+                            sb.Append(" (").Append(stubCat).Append(')');
+                        break;
+                    case BeatRowOutcome.Refuse:
+                        if (row.ElementGuid is null && row.ElementName != null)
+                            sb.Append(row.ElementName).Append(", stays empty");
+                        else if (row.ElementName != null)
+                            sb.Append(row.ElementName).Append(" is already bound on this sheet, stays empty");
+                        else
+                            sb.Append(row.ElementGuid).Append(" is not a candidate, stays empty");
+                        break;
+                    case BeatRowOutcome.Drop:
+                        sb.Append("not applied, sheet has ").Append(sheetRows).Append(' ').Append(Plural(sheetRows, "row"));
+                        break;
+                    default:
+                        sb.Append("stays empty");
+                        break;
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// The one-line summary of a plan: counts per outcome. Heads the sheet-level display and
+        /// is the status line the per-beat expansion (#217 section 5.7) leaves for the run.
+        /// </summary>
+        private static string PlanSummary(List<BeatRowPlan> plan)
+        {
+            int kept = 0, bound = 0, created = 0, createdProblems = 0, empty = 0, refused = 0, dropped = 0;
+            foreach (var row in plan)
+            {
+                switch (row.Outcome)
+                {
+                    case BeatRowOutcome.Keep: kept++; break;
+                    case BeatRowOutcome.Bind: bound++; break;
+                    case BeatRowOutcome.Create: created++; break;
+                    case BeatRowOutcome.CreateProblem: createdProblems++; break;
+                    case BeatRowOutcome.Empty: empty++; break;
+                    case BeatRowOutcome.Refuse: refused++; break;
+                    case BeatRowOutcome.Drop: dropped++; break;
+                }
+            }
+
+            var sb = new System.Text.StringBuilder();
+            sb.Append(plan.Count).Append(plan[0].InstallsBeat ? " new " : " ").Append(Plural(plan.Count, "beat")).Append(": ");
+            sb.Append($"{kept} kept, {bound} bound, {created} new {Plural(created, "scene")}");
+            if (createdProblems > 0)
+                sb.Append($", {createdProblems} new {Plural(createdProblems, "problem")}");
+            sb.Append($", {empty} empty");
+            if (refused > 0) sb.Append($", {refused} refused");
+            if (dropped > 0) sb.Append($", {dropped} dropped");
+            return sb.ToString();
+        }
+
+        private static string Plural(int count, string noun) => count == 1 ? noun : noun + "s";
+
+        private string ElementTypeNameOf(Guid element)
+        {
+            var result = _storyApi.GetStoryElement(element);
+            return result?.IsSuccess == true && result.Payload != null
+                ? result.Payload.ElementType.ToString()
+                : "element";
+        }
+
+        /// <summary>
+        /// Collaborator #150: inject the Stock Scenes catalog for workflows that declare
+        /// InjectsStockScenes. Was gated on the BeatScenes label until #77.
+        /// </summary>
+        /// <summary>
+        /// Collaborator #77 / StoryCAD #483: inject the Conflict Builder taxonomy from
+        /// Controls.json. ExampleLists reads Lists.json and cannot reach this data.
+        /// </summary>
+        /// <summary>
+        /// Collaborator #77: run every injection this workflow declares. Injection is a declared
+        /// capability, not a label test. Extracted so the wiring itself is testable: when this
+        /// lived inline in the request path, deleting it left the whole suite green.
+        /// </summary>
+        internal void ApplyDeclaredInjections(
+            Dictionary<string, string> args,
+            Dictionary<string, StoryElement> gatheredElements)
+        {
+            if (workflowModel.InjectsStockScenes)
+                EnrichWithStockScenes(args);
+
+            if (workflowModel.InjectsConflictTaxonomy)
+                EnrichWithConflictTaxonomy(args);
+
+            if (workflowModel.InjectsBeatSheets)
+                EnrichWithBeatSheets(args);
+
+            if (workflowModel.InjectsCurrentBeats)
+            {
+                // The target is the gathered "Problem", the label the category gate and the
+                // request loop read. Absent, the Worker merges the placeholder to an empty
+                // string and the template falls back to the catalog sheet.
+                if (gatheredElements.TryGetValue("Problem", out var target) && target != null)
+                    EnrichWithCurrentBeats(args, target.Uuid);
+                else
+                    _logger?.LogWarning("{Workflow}: no gathered Problem; CurrentBeats not injected",
+                        workflowModel.Label);
+            }
+        }
+
+        /// <summary>
+        /// Collaborator #217 section 5.4: the target Problem's sheet as it is now, so the model
+        /// returns its rows (a custom sheet included) and leaves filled beats alone. The exact
+        /// text "none" when the Problem has no sheet. When the structure cannot be read the arg
+        /// stays unset: "none" would tell the model there is no sheet, while an empty merge
+        /// makes the template fall back to the catalog.
+        /// </summary>
+        internal void EnrichWithCurrentBeats(Dictionary<string, string> args, Guid targetProblem)
+        {
+            var structure = _storyApi.GetProblemStructure(targetProblem);
+            if (!structure.IsSuccess)
+            {
+                _logger?.LogWarning("CurrentBeats: cannot load structure for {Problem}; not injected", targetProblem);
+                return;
+            }
+
+            var beats = structure.Payload.Beats?.ToList()
+                ?? new List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)>();
+
+            if (beats.Count == 0)
+            {
+                args["CurrentBeats"] = "none";
+                _logger?.LogInformation("Injected CurrentBeats (none)");
+                return;
+            }
+
+            var sb = new System.Text.StringBuilder();
+            var title = string.IsNullOrWhiteSpace(structure.Payload.Title) ? "(untitled)" : structure.Payload.Title;
+            sb.Append("Sheet: ").Append(title);
+            for (int i = 0; i < beats.Count; i++)
+            {
+                var beat = beats[i];
+                var bound = beat.LinkedElement.HasValue && beat.LinkedElement.Value != Guid.Empty
+                    ? ElementNameOf(beat.LinkedElement.Value)
+                    : "empty";
+                sb.Append('\n').Append(i + 1).Append(". ").Append(beat.BeatTitle).Append(": ").Append(bound);
+
+                var description = beat.BeatDescription ?? string.Empty;
+                if (description.StartsWith(@"{\rtf", StringComparison.Ordinal))
+                    description = new RichTextStripper().StripRichTextFormat(description) ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(description))
+                    sb.Append("\n  ").Append(description.Trim());
+            }
+
+            args["CurrentBeats"] = sb.ToString();
+            _logger?.LogInformation("Injected CurrentBeats ({Length} chars)", args["CurrentBeats"].Length);
+        }
+
+        internal void EnrichWithConflictTaxonomy(Dictionary<string, string> args)
+        {
+            var categoriesResult = _storyApi.GetConflictCategories();
+            if (!categoriesResult.IsSuccess || categoriesResult.Payload == null)
+            {
+                _logger?.LogWarning("ProblemBuilder: no conflict categories from API");
+                args["ConflictTaxonomy"] = string.Empty;
+                return;
+            }
+
+            var sb = new System.Text.StringBuilder();
+            foreach (var category in categoriesResult.Payload)
+            {
+                sb.AppendLine($"### {category}");
+                var subsResult = _storyApi.GetConflictSubcategories(category);
+                if (!subsResult.IsSuccess || subsResult.Payload == null)
+                    continue;
+
+                foreach (var subcategory in subsResult.Payload)
+                {
+                    sb.AppendLine($"- {subcategory}");
+                    var examplesResult = _storyApi.GetConflictExamples(category, subcategory);
+                    if (!examplesResult.IsSuccess || examplesResult.Payload == null)
+                        continue;
+
+                    foreach (var example in examplesResult.Payload)
+                        sb.AppendLine($"  - {example}");
+                }
+                sb.AppendLine();
+            }
+
+            args["ConflictTaxonomy"] = sb.ToString();
+            _logger?.LogInformation(
+                "Injected ConflictTaxonomy ({Length} chars)", args["ConflictTaxonomy"].Length);
+        }
+
+        /// <summary>
+        /// Collaborator #77: inject the built-in beat sheet catalog from Tools.json so the
+        /// model picks a sheet the app actually has. Excludes the two user actions.
+        /// </summary>
+        internal void EnrichWithBeatSheets(Dictionary<string, string> args)
+        {
+            var namesResult = _storyApi.GetBeatSheetNames();
+            if (!namesResult.IsSuccess || namesResult.Payload == null)
+            {
+                _logger?.LogWarning("ProblemBuilder: no beat sheet names from API");
+                args["BeatSheets"] = string.Empty;
+                return;
+            }
+
+            var sb = new System.Text.StringBuilder();
+            foreach (var name in namesResult.Payload)
+            {
+                // The two user actions are not model choices.
+                if (name.StartsWith("Custom Beat Sheet", StringComparison.OrdinalIgnoreCase)
+                    || name.StartsWith("Load Custom Beat Sheet", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var sheetResult = _storyApi.GetBeatSheet(name);
+                if (!sheetResult.IsSuccess)
+                    continue;
+
+                sb.AppendLine($"### {name}");
+                if (!string.IsNullOrWhiteSpace(sheetResult.Payload.Description))
+                    sb.AppendLine(sheetResult.Payload.Description);
+
+                foreach (var (beatName, beatNotes) in sheetResult.Payload.Beats
+                             ?? Enumerable.Empty<(string, string)>())
+                {
+                    sb.AppendLine(string.IsNullOrWhiteSpace(beatNotes)
+                        ? $"- {beatName}"
+                        : $"- {beatName}: {beatNotes}");
+                }
+                sb.AppendLine();
+            }
+
+            args["BeatSheets"] = sb.ToString();
+            _logger?.LogInformation("Injected BeatSheets ({Length} chars)", args["BeatSheets"].Length);
+        }
+
+        internal void EnrichWithStockScenes(Dictionary<string, string> args)
+        {
+            var catsResult = _storyApi.GetStockSceneCategories();
+            if (!catsResult.IsSuccess || catsResult.Payload == null)
+            {
+                _logger?.LogWarning("StockScenes: no stock scene categories from API");
+                args["StockScenes"] = string.Empty;
+                return;
+            }
+
+            var sb = new System.Text.StringBuilder();
+            foreach (var category in catsResult.Payload)
+            {
+                sb.AppendLine($"### {category}");
+                var scenesResult = _storyApi.GetStockScenes(category);
+                if (scenesResult.IsSuccess && scenesResult.Payload != null)
+                {
+                    foreach (var scene in scenesResult.Payload)
+                        sb.AppendLine($"- {scene}");
+                }
+                sb.AppendLine();
+            }
+            args["StockScenes"] = sb.ToString();
+            _logger?.LogInformation("Injected StockScenes for {Label} ({Length} chars)",
+                workflowModel.Label, args["StockScenes"].Length);
+        }
+
+        /// <summary>
+        /// Collaborator #217 section 5.5: one outcome per proposal row, computed before apply.
+        /// <see cref="ApplyBeatSheetMerge"/> executes this plan and <see cref="FormatBeatSheetDisplay"/>
+        /// renders it, so the Review pane cannot show a bind the apply then refuses.
+        /// Empty when the Problem's structure cannot be loaded.
+        /// </summary>
+        internal List<BeatRowPlan> PlanBeatSheetMerge(Guid problemUuid, List<BeatInfo> proposed)
+        {
+            var plan = new List<BeatRowPlan>();
+            if (proposed == null || proposed.Count == 0)
+                return plan;
+
+            var existingResult = _storyApi.GetProblemStructure(problemUuid);
+            if (!existingResult.IsSuccess)
+                return plan;
+
+            var existingBeats = existingResult.Payload.Beats?.ToList()
+                ?? new List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)>();
+
+            // Collaborator #217 rule 5: the same set the request offered. A GUID outside it is
+            // refused here whatever the model wrote.
+            var candidates = GetCandidates(problemUuid);
+            bool installs = existingBeats.Count == 0;
+            // Collaborator #77: capability, not label. A new workflow that sets SceneName used
+            // to create nothing because this line tested for the literal label "BeatScenes".
+            bool allowSceneCreate = workflowModel.CreatesScenesForBeats;
+            bool allowProblemCreate = workflowModel.CreatesProblemsForBeats;
+
+            // GUIDs on this sheet already, plus each Bind this plan makes: one placement per sheet.
+            var usedOnSheet = new HashSet<Guid>(
+                existingBeats
+                    .Where(b => b.LinkedElement.HasValue && b.LinkedElement.Value != Guid.Empty)
+                    .Select(b => b.LinkedElement!.Value));
+
+            for (int i = 0; i < proposed.Count; i++)
+            {
+                var beat = proposed[i];
+                var title = string.IsNullOrWhiteSpace(beat.Title) ? $"Beat {i + 1}" : beat.Title.Trim();
+
+                if (!installs && i >= existingBeats.Count)
+                {
+                    // Collaborator #77: a present sheet sets the row count. The row is not applied.
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Drop, null, null, false));
+                    continue;
+                }
+
+                if (!installs)
+                {
+                    var current = existingBeats[i];
+                    if (!string.IsNullOrWhiteSpace(current.BeatTitle))
+                        title = current.BeatTitle;
+
+                    if (current.LinkedElement.HasValue && current.LinkedElement.Value != Guid.Empty)
+                    {
+                        // Collaborator #77: a filled beat is the writer's. Nothing touches it.
+                        plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Keep,
+                            ElementNameOf(current.LinkedElement.Value), current.LinkedElement.Value, false));
+                        continue;
+                    }
+                }
+
+                Guid? assigned = beat.AssignedElement.HasValue && beat.AssignedElement.Value != Guid.Empty
+                    ? beat.AssignedElement
+                    : null;
+
+                // Collaborator #77: an empty beat takes an existing free element before a new Scene.
+                // A proposal may carry both; creating then would leave the real Scene orphaned and
+                // put a duplicate on the sheet.
+                bool isCandidate = assigned.HasValue && candidates.Contains(assigned.Value);
+                if (isCandidate && usedOnSheet.Add(assigned!.Value))
+                {
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Bind,
+                        ElementNameOf(assigned.Value), assigned.Value, installs));
+                    continue;
+                }
+
+                bool hasProblemStub = allowProblemCreate && !string.IsNullOrWhiteSpace(beat.ProblemName);
+                bool hasSceneStub = allowSceneCreate && !string.IsNullOrWhiteSpace(beat.SceneName);
+                if (hasProblemStub && hasSceneStub)
+                {
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Refuse,
+                        "named a Scene stub and a Problem stub", null, installs));
+                    continue;
+                }
+
+                if (hasProblemStub)
+                {
+                    if (!IsSubproblemCategory(beat.ProblemCategory))
+                    {
+                        var cat = string.IsNullOrWhiteSpace(beat.ProblemCategory)
+                            ? "blank"
+                            : beat.ProblemCategory.Trim();
+                        plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Refuse,
+                            $"Problem stub category '{cat}' is not Complication, Subplot, or Sequence",
+                            null, installs));
+                        continue;
+                    }
+
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.CreateProblem,
+                        beat.ProblemName!.Trim(), null, installs));
+                    continue;
+                }
+
+                if (hasSceneStub)
+                {
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Create, beat.SceneName!.Trim(), null, installs));
+                    continue;
+                }
+
+                if (assigned.HasValue)
+                {
+                    // A named Refuse is a candidate an earlier row already bound (a sheet is a
+                    // linear order). An unnamed one is outside the set.
+                    plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Refuse,
+                        isCandidate ? ElementNameOf(assigned.Value) : null, assigned.Value, installs));
+                    continue;
+                }
+
+                plan.Add(new BeatRowPlan(i, title, BeatRowOutcome.Empty, null, null, installs));
+            }
+
+            return plan;
+        }
+
+        /// <summary>
+        /// Collaborator #167: install or merge beat proposals without clearing filled assignments.
+        /// Empty sheet: create proposed beats and assign valid candidates.
+        /// Non-empty: fill blank descriptions; assign only empty slots; never reassign.
+        /// Collaborator #150: empty slots with SceneName create a Scene under the problem and
+        /// assign it, but only for a workflow that declares CreatesScenesForBeats.
+        /// Collaborator #217: executes <see cref="PlanBeatSheetMerge"/> row by row. The Review
+        /// pane rendered that same plan.
+        /// </summary>
+        internal void ApplyBeatSheetMerge(Guid problemUuid, List<BeatInfo> proposed, WorkflowResult result)
+        {
+            if (proposed == null || proposed.Count == 0)
+            {
+                result.StatusMessages.Add("BeatSheet: empty proposal; no changes");
+                return;
+            }
+
+            var existingResult = _storyApi.GetProblemStructure(problemUuid);
+            if (!existingResult.IsSuccess)
+            {
+                result.StatusMessages.Add($"BeatSheet: cannot load structure for {problemUuid}");
+                return;
+            }
+
+            var existingBeats = existingResult.Payload.Beats?.ToList()
+                ?? new List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)>();
+            var plan = PlanBeatSheetMerge(problemUuid, proposed);
+
+            foreach (var row in plan)
+                ExecuteBeatRow(problemUuid, row, proposed[row.Index], existingBeats, result);
+        }
+
+        /// <summary>
+        /// Executes one plan row: creates the beat when the sheet is new, fills blank text on an
+        /// empty beat, then binds or creates. Returns true when the row bound or created. Shared
+        /// by the sheet-level apply and the per-beat apply (#217 section 5.7), so a row does the
+        /// same thing whichever path accepted it.
+        /// </summary>
+        private bool ExecuteBeatRow(
+            Guid problemUuid,
+            BeatRowPlan row,
+            BeatInfo beat,
+            List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)> existingBeats,
+            WorkflowResult result)
+        {
+            if (row.Outcome == BeatRowOutcome.Drop)
+            {
+                // Collaborator #77: a sheet that is already present is the user's. The chosen
+                // sheet sets the beat count, so do not append rows to it.
+                result.StatusMessages.Add(
+                    $"Beat {row.Index}: not applied, sheet has {existingBeats.Count} rows");
+                return false;
+            }
+
+            if (row.InstallsBeat)
+            {
+                _storyApi.CreateBeat(problemUuid, row.Title, beat.Description?.Trim() ?? string.Empty);
+            }
+            else
+            {
+                // Collaborator #77: a filled beat is the user's. Do not touch its assignment,
+                // its title, or its description. This test used to sit below the text write,
+                // so a filled beat with a blank description took model text under Accept All.
+                if (row.Outcome == BeatRowOutcome.Keep)
+                    return false;
+
+                var current = existingBeats[row.Index];
+                var newTitle = string.IsNullOrWhiteSpace(current.BeatTitle) && !string.IsNullOrWhiteSpace(beat.Title)
+                    ? beat.Title.Trim()
+                    : current.BeatTitle;
+                // Prefer keep filled description; fill blank only.
+                var newDesc = string.IsNullOrWhiteSpace(current.BeatDescription) && !string.IsNullOrWhiteSpace(beat.Description)
+                    ? beat.Description.Trim()
+                    : current.BeatDescription;
+
+                if (!string.Equals(newTitle, current.BeatTitle, StringComparison.Ordinal)
+                    || !string.Equals(newDesc, current.BeatDescription, StringComparison.Ordinal))
+                {
+                    _storyApi.UpdateBeat(problemUuid, row.Index, newTitle ?? string.Empty, newDesc ?? string.Empty);
+                }
+            }
+
+            switch (row.Outcome)
+            {
+                case BeatRowOutcome.Bind:
+                    return AssignBeat(problemUuid, row.Index, row.ElementGuid!.Value, result);
+                case BeatRowOutcome.Create:
+                    return CreateSceneStub(problemUuid, row.Index, beat, result);
+                case BeatRowOutcome.CreateProblem:
+                    return CreateProblemStub(problemUuid, row.Index, beat, result);
+                case BeatRowOutcome.Refuse:
+                    result.StatusMessages.Add(RefuseStatus(row));
+                    return false;
+                default:
+                    return false;
+            }
+        }
+
+        private static string RefuseStatus(BeatRowPlan row)
+        {
+            if (row.ElementGuid is null && row.ElementName != null)
+                return $"Beat {row.Index} {row.ElementName}; left unassigned";
+            return row.ElementName != null
+                ? $"Beat {row.Index} assigned_element {row.ElementGuid} already used on this sheet; left unassigned"
+                : $"Beat {row.Index} assigned_element {row.ElementGuid} not in candidate set; left unassigned";
+        }
+
+        internal static bool IsSubproblemCategory(string? category)
+        {
+            var value = (category ?? string.Empty).Trim();
+            return value.Equals("Complication", StringComparison.OrdinalIgnoreCase)
+                || value.Equals("Subplot", StringComparison.OrdinalIgnoreCase)
+                || value.Equals("Sequence", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Collaborator #217 section 5.7: apply one accepted beat row. Earlier rows of the same
+        /// proposal may have given the Problem a sheet, a binding, or a stub since the plan was
+        /// made, so the row is planned again against the live sheet before it runs. Returns true
+        /// when the row bound or created.
+        /// </summary>
+        internal bool ApplyBeatRow(Guid problemUuid, BeatRowValue row, WorkflowResult result)
+        {
+            // Copy first: row.Sheet is the shared proposal list. A chat rename patched row.Row
+            // only, so this row's own slot must carry the patched BeatInfo.
+            var sheet = row.Sheet.ToList();
+            sheet[row.Index] = row.Row;
+            var existingBeats = ReadBeats(problemUuid, result);
+            if (existingBeats == null)
+                return false;
+
+            if (existingBeats.Count == 0)
+            {
+                // Install if missing: the first accepted row creates every beat of the sheet
+                // (titles and descriptions). Later rows find the sheet present and skip this.
+                for (int i = 0; i < sheet.Count; i++)
+                {
+                    var b = sheet[i];
+                    var title = string.IsNullOrWhiteSpace(b.Title) ? $"Beat {i + 1}" : b.Title.Trim();
+                    _storyApi.CreateBeat(problemUuid, title, b.Description?.Trim() ?? string.Empty);
+                }
+                result.StatusMessages.Add($"BeatSheet: installed {sheet.Count} {Plural(sheet.Count, "beat")}");
+                existingBeats = ReadBeats(problemUuid, result);
+                if (existingBeats == null)
+                    return false;
+            }
+
+            var planned = PlanBeatSheetMerge(problemUuid, sheet).FirstOrDefault(r => r.Index == row.Index);
+            if (planned == null)
+            {
+                result.StatusMessages.Add($"Beat {row.Index}: no plan row; not applied");
+                return false;
+            }
+            // The row applies only as what the pane showed it as: a Bind row binds the same
+            // candidate, a Create row creates. Anything else changed under the writer.
+            var expected = row.BindGuid.HasValue
+                ? BeatRowOutcome.Bind
+                : !string.IsNullOrWhiteSpace(row.Row.ProblemName)
+                    ? BeatRowOutcome.CreateProblem
+                    : BeatRowOutcome.Create;
+            var sameBinding = !row.BindGuid.HasValue || planned.ElementGuid == row.BindGuid;
+            if (planned.Outcome != expected || !sameBinding)
+            {
+                result.StatusMessages.Add($"Beat {row.Index}: now {planned.Outcome}; not applied");
+                return false;
+            }
+
+            return ExecuteBeatRow(problemUuid, planned, sheet[row.Index], existingBeats, result);
+        }
+
+        private List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)>? ReadBeats(
+            Guid problemUuid, WorkflowResult result)
+        {
+            var existingResult = _storyApi.GetProblemStructure(problemUuid);
+            if (!existingResult.IsSuccess)
+            {
+                result.StatusMessages.Add($"BeatSheet: cannot load structure for {problemUuid}");
+                return null;
+            }
+            return existingResult.Payload.Beats?.ToList()
+                ?? new List<(string BeatTitle, string BeatDescription, Guid? LinkedElement)>();
+        }
+
+        /// <summary>
+        /// Folds an <see cref="ExtractOutputs"/> result into the run result. FieldStates rides
+        /// along: before #217 the merge left it behind, so classify never saw the model's intent
+        /// and every field fell through to the compare ladder (smoke of 2026-09-04).
+        /// </summary>
+        internal static void MergeExtractResult(WorkflowResult result, WorkflowResult outputResult)
+        {
+            foreach (var msg in outputResult.StatusMessages)
+                result.StatusMessages.Add(msg);
+            foreach (var kvp in outputResult.UpdatedProperties)
+                result.UpdatedProperties[kvp.Key] = kvp.Value;
+            foreach (var pending in outputResult.PendingUpdates)
+                result.PendingUpdates.Add(pending);
+            foreach (var kvp in outputResult.FieldStates)
+                result.FieldStates[kvp.Key] = kvp.Value;
+        }
+
+        /// <summary>
+        /// Collaborator #217 section 5.7: replace each sheet-level BeatSheet update with one update
+        /// per plan row that binds or creates, so Review Each offers Accept or Skip per beat. Keep,
+        /// Empty, Drop and Refuse rows make no row: there is nothing to accept, and Refuse and Drop
+        /// say why in the status list. A proposal whose structure cannot be planned stays whole.
+        /// </summary>
+        internal void ExpandBeatSheetUpdates(WorkflowResult result)
+        {
+            var sheets = result.PendingUpdates
+                .Where(u => u.Spec.WriteVia == WriteVia.BeatSheet && u.Value is List<BeatInfo>)
+                .ToList();
+
+            foreach (var sheetUpdate in sheets)
+            {
+                var beats = (List<BeatInfo>)sheetUpdate.Value!;
+                var plan = PlanBeatSheetMerge(sheetUpdate.ElementUuid, beats);
+                if (plan.Count == 0)
+                    continue;
+
+                result.StatusMessages.Add("BeatSheet: " + PlanSummary(plan));
+                var sheetRows = plan.Count - plan.Count(r => r.Outcome == BeatRowOutcome.Drop);
+                var rows = new List<PendingUpdate>();
+                foreach (var row in plan)
+                {
+                    switch (row.Outcome)
+                    {
+                        case BeatRowOutcome.Bind:
+                        case BeatRowOutcome.Create:
+                        case BeatRowOutcome.CreateProblem:
+                            var binds = row.Outcome == BeatRowOutcome.Bind;
+                            var value = new BeatRowValue(
+                                row.Index, row.Title, beats[row.Index], beats,
+                                binds ? row.ElementGuid : null,
+                                row.ElementName,
+                                binds ? ElementTypeNameOf(row.ElementGuid!.Value) : null);
+                            rows.Add(new PendingUpdate(
+                                sheetUpdate.ElementLabel, sheetUpdate.ElementUuid, sheetUpdate.Spec, value)
+                            {
+                                BeatRowIndex = row.Index,
+                                DisplayNameOverride = $"Beat {row.Index + 1}: {row.Title}"
+                            });
+                            break;
+                        case BeatRowOutcome.Refuse:
+                            result.StatusMessages.Add(RefuseStatus(row));
+                            break;
+                        case BeatRowOutcome.Drop:
+                            result.StatusMessages.Add($"Beat {row.Index}: not applied, sheet has {sheetRows} rows");
+                            break;
+                    }
+                }
+
+                if (rows.Count == 0 && plan[0].InstallsBeat)
+                {
+                    // A sheetless Problem whose rows all Refuse or stay Empty still gets its
+                    // sheet (titles and descriptions) from the sheet-level Accept.
+                    continue;
+                }
+
+                var at = result.PendingUpdates.IndexOf(sheetUpdate);
+                result.PendingUpdates.RemoveAt(at);
+                result.PendingUpdates.InsertRange(at, rows);
+                result.UpdatedProperties.Remove(sheetUpdate.Key);
+                foreach (var r in rows)
+                    result.UpdatedProperties[r.Key] = FormatDisplayValue(r);
+            }
+        }
+
+        /// <summary>
+        /// Collaborator #150 / #77: create the Scene stub a Create row names, fill the #208
+        /// stub contract, and assign it to the beat.
+        /// </summary>
+        private bool CreateSceneStub(Guid problemUuid, int beatIndex, BeatInfo beat, WorkflowResult result)
+        {
+            var name = beat.SceneName!.Trim();
+            var addResult = _storyApi.AddElement(StoryItemType.Scene, problemUuid.ToString(), name);
+            if (!addResult.IsSuccess)
+            {
+                result.StatusMessages.Add(
+                    $"Beat {beatIndex} scene create failed: {addResult.ErrorMessage}");
+                return false;
+            }
+
+            var newGuid = addResult.Payload;
+
+            // Collaborator #77 / #208 stub contract: Name, Description, Notes.
+            // Description is the scene summary. Notes carries problem context down to the
+            // scene, including the situation-sheet material that has no Problem property.
+            if (!string.IsNullOrWhiteSpace(beat.SceneDescription))
+                _storyApi.UpdateElementProperty(newGuid, "Description", beat.SceneDescription.Trim());
+            if (!string.IsNullOrWhiteSpace(beat.SceneNotes))
+                _storyApi.UpdateElementProperty(newGuid, "Notes", beat.SceneNotes.Trim());
+            if (!string.IsNullOrWhiteSpace(beat.SceneType))
+                _storyApi.UpdateElementProperty(newGuid, "SceneType", beat.SceneType.Trim());
+
+            // Cast: only names that resolve to a Character. An unresolved name is skipped,
+            // never invented (#208 handoff stub contract).
+            if (beat.SceneCast != null)
+            {
+                var characterGuids = new HashSet<Guid>(GetCandidateGuids(StoryItemType.Character));
+                foreach (var castGuid in beat.SceneCast)
+                {
+                    if (castGuid == Guid.Empty || !characterGuids.Contains(castGuid))
+                    {
+                        result.StatusMessages.Add(
+                            $"Beat {beatIndex} cast member {castGuid} did not resolve; skipped");
+                        continue;
+                    }
+                    _storyApi.AddCastMember(newGuid, castGuid);
+                }
+            }
+
+            var assigned = AssignBeat(problemUuid, beatIndex, newGuid, result);
+            result.StatusMessages.Add($"Beat {beatIndex}: created Scene '{name}' ({newGuid})");
+            return assigned;
+        }
+
+        /// <summary>
+        /// Collaborator #246: create the Problem stub a CreateProblem row names, set category
+        /// and description, copy seats from the parent Problem, and assign it to the beat.
+        /// </summary>
+        private bool CreateProblemStub(Guid problemUuid, int beatIndex, BeatInfo beat, WorkflowResult result)
+        {
+            if (!IsSubproblemCategory(beat.ProblemCategory))
+            {
+                var cat = string.IsNullOrWhiteSpace(beat.ProblemCategory)
+                    ? "blank"
+                    : beat.ProblemCategory.Trim();
+                result.StatusMessages.Add(
+                    $"Beat {beatIndex} Problem stub category '{cat}' is not Complication, Subplot, or Sequence");
+                return false;
+            }
+
+            var name = beat.ProblemName!.Trim();
+            var addResult = _storyApi.AddElement(StoryItemType.Problem, problemUuid.ToString(), name);
+            if (!addResult.IsSuccess)
+            {
+                result.StatusMessages.Add(
+                    $"Beat {beatIndex} problem create failed: {addResult.ErrorMessage}");
+                return false;
+            }
+
+            var newGuid = addResult.Payload;
+            _storyApi.UpdateElementProperty(newGuid, "ProblemCategory", beat.ProblemCategory!.Trim());
+            if (!string.IsNullOrWhiteSpace(beat.ProblemDescription))
+                _storyApi.UpdateElementProperty(newGuid, "Description", beat.ProblemDescription.Trim());
+
+            var parentResult = _storyApi.GetStoryElement(problemUuid);
+            if (parentResult.IsSuccess && parentResult.Payload is ProblemModel parent)
+            {
+                if (parent.Protagonist != Guid.Empty)
+                    _storyApi.UpdateElementProperty(newGuid, "Protagonist", parent.Protagonist);
+                if (parent.Antagonist != Guid.Empty)
+                    _storyApi.UpdateElementProperty(newGuid, "Antagonist", parent.Antagonist);
+            }
+
+            var assigned = AssignBeat(problemUuid, beatIndex, newGuid, result);
+            result.StatusMessages.Add($"Beat {beatIndex}: created Problem '{name}' ({newGuid})");
+            return assigned;
+        }
+
+        private bool AssignBeat(Guid problemUuid, int beatIndex, Guid element, WorkflowResult result)
+        {
+            var assignResult = _storyApi.AssignElementToBeat(problemUuid, beatIndex, element);
+            if (assignResult.IsSuccess)
+                return true;
+            result.StatusMessages.Add(
+                $"Beat {beatIndex} assign failed: {assignResult.ErrorMessage}");
+            return false;
+        }
+
+        /// <summary>
+        /// Collaborator #217 rule 5: the elements ProblemBuilder may offer for the target
+        /// Problem's beats. Free means on no sheet and not in the trash. Rule 2 (a Scene may sit
+        /// on many sheets) still holds by hand on the Structure tab; this run never offers the
+        /// second placement.
+        /// </summary>
+        internal CandidateSet GetCandidates(Guid targetProblem) => GetCandidates(_storyApi, targetProblem);
+
+        /// <summary>
+        /// Static core of <see cref="GetCandidates(Guid)"/>, issue #260: takes the API directly
+        /// so <see cref="WorkflowInputBuilder"/> (a static class, no WorkflowRunner instance) can
+        /// build ProblemBuilder's sceneChoices/problemChoices from the same candidate rule.
+        /// </summary>
+        internal static CandidateSet GetCandidates(IStoryCADAPI api, Guid targetProblem)
+        {
+            var scenes = GetLiveElements(api, StoryItemType.Scene);
+            var problems = GetLiveElements(api, StoryItemType.Problem);
+
+            // Placed: bound on a filled beat of any Problem that is not in the trash.
+            var placed = new HashSet<Guid>();
+            foreach (var problem in problems.OfType<ProblemModel>())
+            {
+                if (problem.StructureBeats == null)
+                    continue;
+                foreach (var beat in problem.StructureBeats)
+                {
+                    if (beat.Guid != Guid.Empty)
+                        placed.Add(beat.Guid);
+                }
+            }
+
+            var sceneSet = new HashSet<Guid>(scenes.Select(s => s.Uuid).Where(g => !placed.Contains(g)));
+            var problemSet = new HashSet<Guid>(problems.Select(p => p.Uuid).Where(g => !placed.Contains(g)));
+
+            // Self: OutlineService refuses a Problem on its own beat.
+            problemSet.Remove(targetProblem);
+
+            // Rule 3: the Story Problem is never bound to a beat.
+            var overviewResult = api.GetElementsByType(StoryItemType.StoryOverview);
+            if (overviewResult.IsSuccess
+                && overviewResult.Payload?.FirstOrDefault() is OverviewModel overview
+                && overview.StoryProblem != Guid.Empty)
+            {
+                problemSet.Remove(overview.StoryProblem);
+            }
+
+            // Rule 4: an ancestor on the target's beat would close a cycle. StoryCAD #1546's
+            // guard has not landed, so a visited set keeps a bad file from hanging this walk.
+            var visited = new HashSet<Guid> { targetProblem };
+            var cursor = ReadBoundStructure(api, targetProblem);
+            while (cursor != Guid.Empty && visited.Add(cursor))
+            {
+                problemSet.Remove(cursor);
+                cursor = ReadBoundStructure(api, cursor);
+            }
+
+            return new CandidateSet(sceneSet, problemSet);
+        }
+
+        private static Guid ReadBoundStructure(IStoryCADAPI api, Guid problemUuid)
+        {
+            var result = api.GetStoryElement(problemUuid);
+            return result?.IsSuccess == true && result.Payload is ProblemModel problem
+                ? problem.BoundStructure
+                : Guid.Empty;
+        }
+
+        /// <summary>Elements of one type that are not in the trash.</summary>
+        private static List<StoryElement> GetLiveElements(IStoryCADAPI api, StoryItemType type)
+        {
+            var result = api.GetElementsByType(type);
+            if (!result.IsSuccess || result.Payload == null)
+                return new List<StoryElement>();
+            return result.Payload.Where(e => !IsInTrash(e)).ToList();
+        }
+
+        /// <summary>
+        /// Trash: the node chain ends at the TrashCan root, the same test OutlineService makes
+        /// on its delete path. A deserialized element with no node is not trashed.
+        /// </summary>
+        private static bool IsInTrash(StoryElement element) =>
+            element.Node != null && StoryNodeItem.RootNodeType(element.Node) == StoryItemType.TrashCan;
+
+        private string ElementNameOf(Guid element)
+        {
+            var result = _storyApi.GetStoryElement(element);
+            return result?.IsSuccess == true && result.Payload != null
+                ? result.Payload.Name
+                : element.ToString();
+        }
+
+        private static List<JsonElement> ExtractTypedEntries(JsonElement elem)
+        {
+            var entries = new List<JsonElement>();
+            if (elem.ValueKind != JsonValueKind.Array) return entries;
+            foreach (var entry in elem.EnumerateArray())
+            {
+                if (entry.ValueKind == JsonValueKind.Object)
+                    entries.Add(entry.Clone());
+            }
+            return entries;
+        }
+
+        /// <summary>
+        /// Clone current TypedList rows (e.g. CultureEntry) before clear-and-replace.
+        /// </summary>
+        private List<object> SnapshotTypedListEntries(Guid elementUuid, string propertyName)
+        {
+            var list = new List<object>();
+            var existing = _storyApi.GetStoryElement(elementUuid);
+            if (!existing.IsSuccess || existing.Payload == null)
+                return list;
+
+            var prop = existing.Payload.GetType().GetProperty(propertyName);
+            if (prop?.GetValue(existing.Payload) is not System.Collections.IList current)
+                return list;
+
+            foreach (var item in current)
+            {
+                if (item == null) continue;
+                if (item is CultureEntry ce)
+                    list.Add(ce.Clone());
+                else if (item is PhysicalWorldEntry pe)
+                    list.Add(pe.Clone());
+                else
+                    list.Add(item);
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// When the model returns Name with blank Values (or camelCase keys already handled
+        /// in API deserialize), keep prior non-empty fields on the same Name.
+        /// </summary>
+        private static object MergeTypedListJsonWithPrior(
+            JsonElement proposedJson,
+            List<object> priorEntries,
+            Type? listEntryType)
+        {
+            if (listEntryType == typeof(CultureEntry))
+            {
+                CultureEntry proposed;
+                try
+                {
+                    proposed = JsonSerializer.Deserialize<CultureEntry>(proposedJson.GetRawText(),
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                        ?? new CultureEntry();
+                }
+                catch
+                {
+                    return proposedJson;
+                }
+
+                var prior = priorEntries.OfType<CultureEntry>().FirstOrDefault(p =>
+                    string.Equals(
+                        (p.Name ?? string.Empty).Trim(),
+                        (proposed.Name ?? string.Empty).Trim(),
+                        StringComparison.OrdinalIgnoreCase));
+                if (prior != null)
+                {
+                    if (string.IsNullOrWhiteSpace(proposed.Values)) proposed.Values = prior.Values;
+                    if (string.IsNullOrWhiteSpace(proposed.Customs)) proposed.Customs = prior.Customs;
+                    if (string.IsNullOrWhiteSpace(proposed.Taboos)) proposed.Taboos = prior.Taboos;
+                    if (string.IsNullOrWhiteSpace(proposed.Art)) proposed.Art = prior.Art;
+                    if (string.IsNullOrWhiteSpace(proposed.DailyLife)) proposed.DailyLife = prior.DailyLife;
+                    if (string.IsNullOrWhiteSpace(proposed.Entertainment))
+                        proposed.Entertainment = prior.Entertainment;
+                }
+
+                return proposed;
+            }
+
+            if (listEntryType == typeof(PhysicalWorldEntry))
+            {
+                PhysicalWorldEntry proposed;
+                try
+                {
+                    proposed = JsonSerializer.Deserialize<PhysicalWorldEntry>(proposedJson.GetRawText(),
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                        ?? new PhysicalWorldEntry();
+                }
+                catch
+                {
+                    return proposedJson;
+                }
+
+                var prior = priorEntries.OfType<PhysicalWorldEntry>().FirstOrDefault(p =>
+                    string.Equals(
+                        (p.Name ?? string.Empty).Trim(),
+                        (proposed.Name ?? string.Empty).Trim(),
+                        StringComparison.OrdinalIgnoreCase));
+                if (prior != null)
+                {
+                    if (string.IsNullOrWhiteSpace(proposed.Geography)) proposed.Geography = prior.Geography;
+                    if (string.IsNullOrWhiteSpace(proposed.Climate)) proposed.Climate = prior.Climate;
+                    if (string.IsNullOrWhiteSpace(proposed.NaturalResources))
+                        proposed.NaturalResources = prior.NaturalResources;
+                    if (string.IsNullOrWhiteSpace(proposed.Flora)) proposed.Flora = prior.Flora;
+                    if (string.IsNullOrWhiteSpace(proposed.Fauna)) proposed.Fauna = prior.Fauna;
+                    if (string.IsNullOrWhiteSpace(proposed.Astronomy)) proposed.Astronomy = prior.Astronomy;
+                }
+
+                return proposed;
+            }
+
+            return proposedJson;
+        }
+
+        private static List<Guid> ExtractGuidList(JsonElement elem)
+        {
+            if (elem.ValueKind != JsonValueKind.Array) return new List<Guid>();
+            var guids = new List<Guid>();
+            foreach (var entry in elem.EnumerateArray())
+            {
+                string? guidStr = null;
+                if (entry.ValueKind == JsonValueKind.String)
+                    guidStr = entry.GetString();
+                else if (entry.ValueKind == JsonValueKind.Object)
+                {
+                    if (entry.TryGetProperty("guid", out var g) || entry.TryGetProperty("GUID", out g))
+                        guidStr = g.GetString();
+                }
+                if (Guid.TryParse(guidStr, out var parsed))
+                    guids.Add(parsed);
+            }
+            return guids;
+        }
+
+        private static List<RelationshipInfo> ExtractRelationshipList(JsonElement elem)
+        {
+            var results = new List<RelationshipInfo>();
+            if (elem.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var entry in elem.EnumerateArray())
+                    ParseRelationshipEntry(entry, results);
+            }
+            else if (elem.ValueKind == JsonValueKind.Object)
+            {
+                ParseRelationshipEntry(elem, results);
+            }
+            return results;
+        }
+
+        internal static void ParseRelationshipEntry(JsonElement entry, List<RelationshipInfo> results)
+        {
+            string? guidStr = null;
+            if (entry.TryGetProperty("recipient_guid", out var rg) || entry.TryGetProperty("GUID", out rg))
+                guidStr = rg.GetString();
+            if (!Guid.TryParse(guidStr, out var recipientGuid)) return;
+            var relationType = ReadJsonString(entry, "RelationType", "relation_type");
+            var notes = ReadJsonString(entry, "Notes", "notes");
+            if (string.IsNullOrWhiteSpace(notes))
+                notes = ReadJsonString(entry, "description");
+            var trait = ReadJsonString(entry, "Trait", "trait");
+            var attitude = ReadJsonString(entry, "Attitude", "attitude");
+            var inverseRelationType = ReadJsonString(entry, "InverseRelationType", "inverse_relation_type");
+            results.Add(new RelationshipInfo(recipientGuid, relationType, inverseRelationType, trait, attitude, notes));
+        }
+
+        private static string ReadJsonString(JsonElement entry, params string[] names)
+        {
+            foreach (var name in names)
+            {
+                if (!entry.TryGetProperty(name, out var prop)) continue;
+                return prop.ValueKind == JsonValueKind.String ? prop.GetString() ?? "" : prop.ToString();
+            }
+            return "";
+        }
+
+        /// <summary>
+        /// Extracts JSON object from a string that may contain surrounding text.
+        /// </summary>
+        internal static string? ExtractJson(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return null;
+
+            var jsonStart = text.IndexOf("{");
+            var jsonEnd = text.LastIndexOf("}");
+
+            if (jsonStart >= 0 && jsonEnd > jsonStart)
+            {
+                return text.Substring(jsonStart, jsonEnd - jsonStart + 1);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Fetches examples for each name declared in the workflow's ExampleLists and adds them to args.
+        /// </summary>
+        internal void EnrichWithExamples(Dictionary<string, string> args)
+        {
+            foreach (var propertyName in workflowModel.GetIO().ExampleLists)
+            {
+                var result = _storyApi.GetExamples(propertyName);
+                if (result.IsSuccess && result.Payload != null && result.Payload.Any())
+                {
+                    // Collaborator #77: one value per line. A ", " join is ambiguous because
+                    // four Method values, two Theme values and one Outcome value contain a
+                    // comma; a live run returned "Survival (deliveranc", cut mid-word.
+                    //
+                    // Drop the blank first entry. ListData inserts " " at index 0 of every list
+                    // so a non-editable ComboBox can show an empty selection (StoryCAD #1267).
+                    // That is a UI affordance; offering the model a blank option invites a value
+                    // that is not on the list.
+                    var values = result.Payload
+                        .Where(v => !string.IsNullOrWhiteSpace(v))
+                        .ToList();
+                    var formatted = string.Join("\n", values.Select(v => $"- {v}"));
+                    args[$"{propertyName}_examples"] = formatted;
+                    _logger?.LogInformation($"Injected examples for {propertyName}: {result.Payload.Count()} items");
+                }
+                else
+                {
+                    _logger?.LogWarning($"No examples found for property: {propertyName}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Enriches args with story context (still client-built for #106).
+        /// </summary>
+        internal void EnrichWithStoryContext(Dictionary<string, string> args, Dictionary<string, StoryElement> gatheredElements, WorkflowIO workflowIO)
+        {
+            try
+            {
+                StoryElement? targetElement = null;
+                StoryItemType targetType = StoryItemType.StoryOverview;
+
+                foreach (var output in workflowIO.Outputs)
+                {
+                    if (gatheredElements.TryGetValue(output.ElementLabel, out var element))
+                    {
+                        targetElement = element;
+                        targetType = output.ElementType;
+                        break;
+                    }
+                }
+
+                if (targetElement == null)
+                {
+                    foreach (var input in workflowIO.RequiredInputs)
+                    {
+                        if (gatheredElements.TryGetValue(input.ElementLabel, out var element))
+                        {
+                            targetElement = element;
+                            targetType = input.ElementType;
+                            break;
+                        }
+                    }
+                }
+
+                var resolver = new ContextResolver();
+                var spec = resolver.GetContextFor(workflowModel.Label, targetType);
+
+                var builder = new StoryContextBuilder(_storyApi);
+                var context = builder.BuildContext(targetElement, spec, storyModel);
+
+                args["StoryContext"] = !string.IsNullOrWhiteSpace(context) ? context : string.Empty;
+
+                if (!string.IsNullOrWhiteSpace(context))
+                    _logger?.LogInformation($"Enriched with story context ({context.Length} chars) for {workflowModel.Label} workflow");
+                else
+                    _logger?.LogInformation($"No story context generated for {workflowModel.Label} workflow");
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning($"Failed to enrich story context: {ex.Message}");
+                args["StoryContext"] = string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Collaborator #237 item 11: Try Again means "give me something different". Puts the
+        /// rejected proposals on the wire as RejectedProposals; the Worker appends a TRY AGAIN
+        /// section that tells the model to depart from them. A first run adds nothing.
+        /// </summary>
+        internal void ApplyRejectedProposals(Dictionary<string, string> args)
+        {
+            if (string.IsNullOrWhiteSpace(RejectedProposals)) return;
+            args["RejectedProposals"] = RejectedProposals;
+        }
+
+        /// <summary>
+        /// Renders the pane's proposal rows as the RejectedProposals text: one line per row,
+        /// "DisplayName: proposed value". Rows with no proposed text are skipped. Each value is
+        /// cut at 4,000 characters so a beat sheet cannot double the prompt.
+        /// </summary>
+        internal static string FormatRejectedProposals(IEnumerable<StoryCADLib.Collaborator.Models.PendingUpdateItem> rows)
+        {
+            const int maxValueLength = 4000;
+            var lines = new List<string>();
+            foreach (var row in rows)
+            {
+                var value = (row.ProposedDisplay ?? string.Empty).Trim();
+                if (value.Length == 0) continue;
+                if (value.Length > maxValueLength) value = value[..maxValueLength];
+                lines.Add($"{row.DisplayName}: {value}");
+            }
+            return string.Join("\n", lines);
+        }
+
+        /// <summary>
+        /// Applies user settings to the workflow args.
+        ///
+        /// Terseness rides as its own arg (Collaborator #49). The Worker's coach system
+        /// message reads it and states the tier in the CONCISE / BALANCED / DETAILED tokens
+        /// the templates' length tables already key on, so the wire value is the enum name
+        /// and nothing here expands it into prose. Genre and story-form preferences still
+        /// render into the UserSettings string the Worker places in a subordinate block.
+        /// ContentPreservation is gone: the coach system message owns what may be revised.
+        /// </summary>
+        internal void ApplySettings(Dictionary<string, string> args)
+        {
+            args["Terseness"] = _settings.Terseness.ToString();
+
+            var instructions = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(_settings.GenrePreferences))
+                instructions.Add($"The user prefers these genres: {_settings.GenrePreferences}");
+
+            if (!string.IsNullOrWhiteSpace(_settings.StoryFormLikes))
+                instructions.Add($"The user likes these story forms: {_settings.StoryFormLikes}");
+            if (!string.IsNullOrWhiteSpace(_settings.StoryFormDislikes))
+                instructions.Add($"Avoid suggesting these story forms: {_settings.StoryFormDislikes}");
+
+            var result = string.Join(" ", instructions.Where(s => !string.IsNullOrEmpty(s)));
+            args["UserSettings"] = result;
+
+            _logger?.LogInformation("Applied settings: Terseness={Terseness}{Rest}",
+                args["Terseness"], string.IsNullOrEmpty(result) ? string.Empty : $"; {result}");
+        }
+
+        /// <summary>
+        /// Posts the workflow request to the proxy's /v1/workflow endpoint, retrying once on a
+        /// fresh connection if the stream comes back truncated (issue #94 design section 5 item 2).
+        /// Returns the SSE response text, the X-Template-Hash header value (null on fallback path),
+        /// the cost reported by the proxy's collab_cost event (null when absent), and whether the
+        /// returned stream (after the retry, if one occurred) is complete.
+        /// </summary>
+        /// <summary>
+        /// PromptTestRunner sets COLLAB_PROMPT_ECHO=1 so every workflow call asks the Worker to
+        /// return the prompt it sent (see <see cref="ProxyPromptEcho"/>). Off by default, so the
+        /// shipped client never asks and an older Worker never sees the key.
+        /// </summary>
+        internal static bool PromptEchoRequested() =>
+            string.Equals(Environment.GetEnvironmentVariable("COLLAB_PROMPT_ECHO"), "1", StringComparison.Ordinal);
+
+        /// <summary>
+        /// The POST /v1/workflow body. The three keys the Worker has always read, plus
+        /// <c>echo_prompt</c> only when asked, so the body an older Worker sees is unchanged.
+        /// </summary>
+        internal static string BuildProxyPayload(string workflowId, WorkflowProxyBody body, bool echoPrompt)
+        {
+            var node = new JsonObject
+            {
+                ["workflowId"] = workflowId,
+                ["args"] = JsonSerializer.SerializeToNode(body.Args),
+                ["elements"] = JsonSerializer.SerializeToNode(body.Elements),
+            };
+            // Issue #260: omitted (never a bare null) for a workflow that has not migrated.
+            // DeepClone: AttemptAsync's contract retry can call this twice with the same body,
+            // and a JsonNode may not be re-parented into a second JsonObject once attached here.
+            if (body.Input != null)
+                node["input"] = body.Input.DeepClone();
+            if (echoPrompt)
+                node["echo_prompt"] = true;
+            return node.ToJsonString();
+        }
+
+        /// <summary>
+        /// The prompt the Worker echoed on the last proxy call, when it did. Read by RunAsync
+        /// right after PostToProxyAsync and cleared before every call.
+        /// </summary>
+        private ProxyPromptEcho? _lastPromptEcho;
+
+        private async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)> PostToProxyAsync(WorkflowProxyBody body)
+        {
+            var proxyBaseUrl = Environment.GetEnvironmentVariable("COLLAB_PROXY_URL")
+                ?? KernelFactory.DefaultProxyBaseUrl;
+
+            var payload = BuildProxyPayload(workflowModel.Label, body, PromptEchoRequested());
+            _lastPromptEcho = null;
+
+            return await ExecuteWithTruncationRetryAsync(
+                () => PostToProxyOnceAsync(proxyBaseUrl, payload), ResetHttpClient);
+        }
+
+        /// <summary>
+        /// One attempt of the full send-plus-read sequence PostToProxyAsync's truncation retry
+        /// wraps: credential resolution via SendWithReactivationRetryAsync, the 401 guard,
+        /// EnsureNotOutOfCredits, EnsureSuccessStatusCode, the X-Template-Hash header read, then
+        /// ReadSseStreamAsync (issue #94 design section 5 item 2).
+        /// </summary>
+        private async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)> PostToProxyOnceAsync(string proxyBaseUrl, string payload)
+        {
+            var response = await SendWithReactivationRetryAsync(
+                () => SendWorkflowRequestAsync(proxyBaseUrl, payload), KernelFactory.ReactivateAsync);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                response.Dispose();
+                // No activation token held (never activated, or one reactivation attempt above
+                // still didn't produce one): refuse client-side rather than let
+                // EnsureSuccessStatusCode()'s generic "does not indicate success: 401" surface.
+                throw new InvalidOperationException(
+                    "No activation token held; refusing to call the proxy workflow endpoint without " +
+                    "a credential. Subscribe to Collaborator, or (for dev builds) enroll on the allowlist.");
+            }
+
+            EnsureNotOutOfCredits(response);
+            response.EnsureSuccessStatusCode();
+
+            string? templateHash = null;
+            if (response.Headers.TryGetValues("X-Template-Hash", out var hashValues))
+                templateHash = hashValues.FirstOrDefault();
+
+            var (content, cost, complete) = await ReadSseStreamAsync(response, echo => _lastPromptEcho = echo);
+            return (content, templateHash, cost, complete);
+        }
+
+        /// <summary>
+        /// Sends one attempt of the workflow POST. Resolved per call: a subscriber's (or
+        /// allowlisted dev/tester's) activation JWT is the sole credential (issue #90 step 8 item
+        /// 6 retires the COLLAB_PROXY_TOKEN shared-secret fallback), and the JWT rotates
+        /// ~12-hourly so it must never be cached across calls. No credential available returns a
+        /// synthetic 401 rather than throwing, so <see cref="SendWithReactivationRetryAsync" />
+        /// handles a missing credential the same way it handles the Worker's own 401 (design
+        /// section 11's failure-mode row groups "JWT missing, invalid, or expired" together).
+        /// </summary>
+        private async Task<HttpResponseMessage> SendWorkflowRequestAsync(string proxyBaseUrl, string payload)
+        {
+            var credential = KernelFactory.ResolveWorkflowCredential();
+            if (string.IsNullOrWhiteSpace(credential))
+                return new HttpResponseMessage(System.Net.HttpStatusCode.Unauthorized);
+
+            using var request = CreateWorkflowRequest(proxyBaseUrl, credential, payload);
+            return await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        }
+
+        /// <summary>
+        /// 401-refresh-once-and-retry (issue #90 step 8 item 7 / design section 11's expired-token
+        /// row): a workflow call that comes back 401 refreshes the activation once through
+        /// re-activation and retries with the refreshed credential before failing. Exactly one
+        /// retry -- a second 401 is returned as-is so the caller's handling surfaces it rather than
+        /// looping. Reactivation is <see cref="KernelFactory.ReactivateAsync"/> (shared with chat,
+        /// Collaborator #95). internal static and testable without a live HTTP transport: sendRequest
+        /// and reactivate are injected, matching CreateWorkflowRequest/
+        /// EnsureNotOutOfCredits's existing testable-without-network pattern in this class.
+        /// </summary>
+        internal static async Task<HttpResponseMessage> SendWithReactivationRetryAsync(
+            Func<Task<HttpResponseMessage>> sendRequest, Func<Task> reactivate)
+        {
+            var response = await sendRequest();
+            if (response.StatusCode != System.Net.HttpStatusCode.Unauthorized)
+                return response;
+
+            response.Dispose();
+            await reactivate();
+            return await sendRequest();
+        }
+
+        /// <summary>
+        /// Issue #90 design section 10 "The cutoff" (ruling of 2026-07-15, step 10): the Worker
+        /// refuses a workflow call with 429 before any upstream dispatch when the caller's balance
+        /// is at or below zero. Checked before EnsureSuccessStatusCode() so the thrown exception is
+        /// StoryCADLib.Services.Store.OutOfCreditsException, not the generic HttpRequestException
+        /// EnsureSuccessStatusCode() would otherwise produce (message: "Response status code does
+        /// not indicate success: 429"). Deliberately not an HttpRequestException itself, so it can
+        /// never be mistaken for a transport failure and swallowed by ordinary HTTP error handling:
+        /// an out-of-credits refusal must always reach the caller as its own recognizable state
+        /// (step 8 item 5 retired the direct-to-OpenAI fallback that used to make this distinction
+        /// load-bearing for a different reason -- routing a capped user's personal API key around
+        /// the balance cutoff -- but the exception stays distinct regardless). internal static and
+        /// side-effect-free on success, matching CreateWorkflowRequest/ReadSseStreamAsync's existing
+        /// testable-without-HTTP-transport pattern in this class.
+        /// </summary>
+        internal static void EnsureNotOutOfCredits(HttpResponseMessage response)
+        {
+            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+            {
+                var allowlist = CommunityToolkit.Mvvm.DependencyInjection.Ioc.Default
+                    .GetService<StoryCADLib.Services.Store.IStoreActivationService>()?.IsAllowlistActivation == true;
+                throw allowlist
+                    ? new StoryCADLib.Services.Store.OutOfCreditsException(
+                        StoryCADLib.Services.Store.StoreConfig.OutOfCreditsBetaMessage)
+                    : new StoryCADLib.Services.Store.OutOfCreditsException();
+            }
+        }
+
+        /// <summary>
+        /// Builds the /workflow POST with the resolved Bearer credential attached. The
+        /// activation contract requires the credential on every Collaborator call.
+        /// </summary>
+        internal static HttpRequestMessage CreateWorkflowRequest(string proxyBaseUrl, string credential, string payload)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{proxyBaseUrl}/workflow");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", credential);
+            request.Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
+            return request;
+        }
+
+        /// <summary>
+        /// Reads the /workflow endpoint's SSE stream to completion. Complete is true iff a
+        /// <c>data: [DONE]</c> line was actually read -- the Worker appends it on every complete
+        /// stream, including the cost-missing and unpriced-model paths, so its absence is a
+        /// truncation with no false-positive source (issue #94 design section 5 item 1). collab_cost
+        /// stays optional (ADR-002 fail-open): [DONE] without a cost event is still Complete=true.
+        /// </summary>
+        internal static async Task<(string Content, ProxyCostInfo? Cost, bool Complete)> ReadSseStreamAsync(HttpResponseMessage response, Action<ProxyPromptEcho>? onPrompt = null)
+        {
+            var sb = new System.Text.StringBuilder();
+            ProxyCostInfo? cost = null;
+            bool complete = false;
+            using var stream = await response.Content.ReadAsStreamAsync();
+            using var reader = new StreamReader(stream);
+            string? line;
+            while ((line = await reader.ReadLineAsync()) != null)
+            {
+                if (!line.StartsWith("data: ")) continue;
+                var data = line.Substring(6).Trim();
+                if (data == "[DONE]") { complete = true; break; }
+                try
+                {
+                    using var doc = JsonDocument.Parse(data);
+                    if (doc.RootElement.TryGetProperty("choices", out var choices) &&
+                        choices.GetArrayLength() > 0 &&
+                        choices[0].TryGetProperty("delta", out var delta) &&
+                        delta.TryGetProperty("content", out var content) &&
+                        content.ValueKind == JsonValueKind.String)
+                    {
+                        sb.Append(content.GetString());
+                    }
+                    else if (doc.RootElement.TryGetProperty("collab_prompt", out var collabPrompt)
+                             && collabPrompt.ValueKind == JsonValueKind.Object)
+                    {
+                        // A dev Worker's echo of the two messages it sent, first on the stream
+                        // when the request asked for it. Never model text.
+                        onPrompt?.Invoke(new ProxyPromptEcho(
+                            ReadString(collabPrompt, "system"),
+                            ReadString(collabPrompt, "user"),
+                            NullableString(collabPrompt, "template_hash"),
+                            NullableString(collabPrompt, "system_prompt_hash")));
+                    }
+                    else if (doc.RootElement.TryGetProperty("collab_cost", out var collabCost))
+                    {
+                        // Shared with the X-Collab-Cost header path: the Worker emits an
+                        // identical payload on both. Note the parser requires only `model`,
+                        // not `workflow` — the chat route's streaming branch sends
+                        // workflow: null, and the previous non-null guard here silently
+                        // dropped every one of those events.
+                        cost = ProxyCostParser.TryParse(collabCost);
+                    }
+                }
+                catch (JsonException) { /* malformed chunk — skip */ }
+            }
+            return (sb.ToString(), cost, complete);
+        }
+
+        private static string ReadString(JsonElement obj, string name) =>
+            obj.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() ?? string.Empty : string.Empty;
+
+        private static string? NullableString(JsonElement obj, string name) =>
+            obj.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
+
+        /// <summary>
+        /// Truncation-retry-once policy (issue #94 design section 5 items 2-3): a stream that comes
+        /// back incomplete (no <c>data: [DONE]</c> read -- <see cref="ReadSseStreamAsync"/>) resets
+        /// the shared HttpClient (abandoning the pooled connection -- server evidence pins it to a
+        /// flagged Cloudflare isolate after a kill, so a same-connection retry would die again) and
+        /// re-sends once end-to-end through the same credential path before returning the (possibly
+        /// still incomplete) result to the caller. Exactly one retry, mirroring
+        /// <see cref="SendWithReactivationRetryAsync"/>'s refresh-once-and-retry shape. internal
+        /// static and testable without a live HTTP transport: attempt and reset are injected,
+        /// matching this class's existing testable-without-network pattern.
+        /// </summary>
+        internal static async Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)> ExecuteWithTruncationRetryAsync(
+            Func<Task<(string Content, string? TemplateHash, ProxyCostInfo? Cost, bool Complete)>> attempt,
+            Action reset)
+        {
+            var result = await attempt();
+            if (result.Complete)
+                return result;
+
+            reset();
+            return await attempt();
+        }
+
+        /// <summary>
+        /// Collaborator #239: true when the text is one of the field_states words on its own
+        /// (Fill, Unchanged, Revise). Compared by name, never by number, so "1" stays text.
+        /// </summary>
+        internal static bool IsFieldStateWord(string? text)
+        {
+            var t = text?.Trim();
+            if (string.IsNullOrEmpty(t)) return false;
+            return string.Equals(t, nameof(OutputFieldState.Fill), StringComparison.OrdinalIgnoreCase)
+                || string.Equals(t, nameof(OutputFieldState.Unchanged), StringComparison.OrdinalIgnoreCase)
+                || string.Equals(t, nameof(OutputFieldState.Revise), StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Collaborator #239: names an answer that mostly breaks the field_states contract, or
+        /// returns null when the answer is usable. Two shapes count as a fault on a scalar
+        /// output: Fill with no text, and Unchanged on a property that has no text to keep.
+        /// Measured on DefineCharacter with gpt-5.4-nano (2026-09-08, 73 live runs): a sound
+        /// run has at most one or two of these (a gated step), a broken run has most of its
+        /// thirty. The bar is three faults and a quarter of the scalar outputs, so one bad
+        /// property on a small workflow does not buy a second billed call.
+        /// </summary>
+        internal string? DescribeContractFault(WorkflowResult result)
+        {
+            var scalars = 0;
+            var emptyFills = 0;
+            var unchangedOnEmpty = 0;
+            foreach (var update in result.PendingUpdates)
+            {
+                if (update.Spec.WriteVia != WriteVia.Scalar) continue;
+                scalars++;
+                if (!TryGetFieldState(result, update, out var state)) continue;
+
+                var proposedEmpty = string.IsNullOrEmpty(NormalizeCompareText(FormatDisplayValue(update)));
+                var currentEmpty = string.IsNullOrEmpty(
+                    NormalizeCompareText(ReadCurrentScalarDisplay(update.ElementUuid, update.Spec.Property)));
+
+                if (state == OutputFieldState.Fill && proposedEmpty)
+                    emptyFills++;
+                else if (state == OutputFieldState.Unchanged && currentEmpty)
+                    unchangedOnEmpty++;
+            }
+
+            var faults = emptyFills + unchangedOnEmpty;
+            if (faults < 3 || faults * 4 < scalars) return null;
+
+            var parts = new List<string>();
+            if (emptyFills > 0) parts.Add($"{emptyFills} Fill with no text");
+            if (unchangedOnEmpty > 0) parts.Add($"{unchangedOnEmpty} Unchanged on an empty property");
+            return $"{faults} of {scalars} outputs broke the field_states contract ({string.Join(", ", parts)})";
+        }
+
+        /// <summary>
+        /// Collaborator #239: one send-again when the answer mostly breaks the field_states
+        /// contract. Mirrors <see cref="ExecuteWithTruncationRetryAsync"/>: one retry, never a
+        /// third call; the second answer is shown whatever it holds, with the reason on its
+        /// status messages. A failed result is surfaced as-is; the check applies to answers only.
+        /// </summary>
+        internal static async Task<WorkflowResult> ExecuteWithContractRetryAsync(
+            Func<Task<WorkflowResult>> attempt,
+            Func<WorkflowResult, string?> describeFault)
+        {
+            var first = await attempt();
+            if (!first.Success) return first;
+            var reason = describeFault(first);
+            if (reason == null) return first;
+
+            var second = await attempt();
+            second.StatusMessages.Insert(0, $"Contract retry: the first answer had {reason}; asked once more");
+            if (second.Success)
+            {
+                var again = describeFault(second);
+                if (again != null)
+                    second.StatusMessages.Add($"Contract retry: the second answer also had {again}; showing it");
+            }
+            return second;
+        }
+
+        /// <summary>
+        /// Issue #94 design section 5 item 3 ("surface, never mask"): builds the failed result for a
+        /// stream that came back incomplete even after PostToProxyAsync's one truncation retry. The
+        /// partial text is preserved in RawResponse for diagnostics; it never reaches ExtractOutputs
+        /// or a Success result. internal static and pinned directly by its own test (driving RunAsync
+        /// end-to-end here would require faking HTTP), per the NO MOCKS rule in
+        /// Collaborator/CLAUDE.md.
+        /// </summary>
+        internal static WorkflowResult BuildTruncationFailureResult(string partialContent)
+        {
+            return new WorkflowResult
+            {
+                Success = false,
+                ErrorMessage = "The AI response stream ended before completion; the answer may be incomplete. Please try again.",
+                RawResponse = partialContent
+            };
+        }
+
+
+        /// <summary>
+        /// Builds a response for stub workflows (those without prompts yet).
+        /// </summary>
+        internal WorkflowResult BuildStubResponse()
+        {
+            var result = WorkflowResult.Succeeded();
+            var workflowIO = workflowModel.GetIO();
+
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"Workflow: {workflowModel.Title}");
+            sb.AppendLine();
+            sb.AppendLine("This workflow is planned but not yet implemented.");
+            sb.AppendLine();
+            sb.AppendLine($"Description: {workflowModel.Description}");
+
+            if (!string.IsNullOrEmpty(workflowModel.Explanation))
+            {
+                sb.AppendLine();
+                sb.AppendLine($"Details: {workflowModel.Explanation}");
+            }
+
+            if (workflowIO.RequiredInputs.Count > 0 || workflowIO.OptionalInputs.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("Inputs:");
+                foreach (var input in workflowIO.RequiredInputs)
+                    sb.AppendLine($"  • {input.ElementLabel} ({input.ElementType}) - required");
+                foreach (var input in workflowIO.OptionalInputs)
+                    sb.AppendLine($"  • {input.ElementLabel} ({input.ElementType}) - optional");
+            }
+
+            if (workflowIO.Outputs.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("Outputs:");
+                foreach (var output in workflowIO.Outputs)
+                {
+                    var props = string.Join(", ", output.PropertiesToUpdate.Select(p => p.Property));
+                    var action = "updates";
+                    sb.AppendLine($"  • {action} {output.ElementLabel}: {props}");
+                }
+            }
+
+            sb.AppendLine();
+            sb.AppendLine("Check back soon - this workflow is in development!");
+
+            result.AssembledPrompt = sb.ToString();
+            result.RawResponse = "(stub workflow - no AI call made)";
+
+            return result;
+        }
+    }
+}

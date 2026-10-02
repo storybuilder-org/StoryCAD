@@ -165,5 +165,25 @@ public class IReloadableTests
         Assert.AreEqual("External Edit", viewModel.Description);
     }
 
+    [TestMethod]
+    public void OverviewViewModel_SaveModel_SetsSpineProblemCategory()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var storyModel = new StoryModel();
+        var overview = new OverviewModel("Test Story", storyModel, null);
+        storyModel.ExplorerView.Add(overview.Node);
+        var problem = new ProblemModel("Candidate", storyModel, overview.Node);
+        problem.ProblemCategory = "Subplot";
+        appState.CurrentDocument = new StoryDocument(storyModel);
+
+        var viewModel = Ioc.Default.GetRequiredService<OverviewViewModel>();
+        viewModel.Activate(overview);
+        viewModel.SelectedProblem = problem;
+        viewModel.SaveModel();
+
+        Assert.AreEqual(problem.Uuid, overview.StoryProblem);
+        Assert.AreEqual(OverviewModel.StoryProblemCategoryListValue, problem.ProblemCategory);
+    }
+
     #endregion
 }

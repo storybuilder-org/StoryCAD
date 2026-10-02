@@ -94,10 +94,8 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
 
     // Premise sync fields
 
-
-    // True if _overviewModel.StoryProblem has been set, in which
-    // case any ProblemViewModel Premise changes must also be made
-    // to the _overviewModel.Premise property.
+    // True only when this Problem is Overview.StoryProblem (#1500).
+    // Then Premise edits save both Problem and Overview.
     private bool _syncPremise;
 
     #endregion
@@ -440,14 +438,11 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
         var root = _storyModel.ExplorerView[0].Uuid;
         var outlineService = Ioc.Default.GetService<OutlineService>();
         _overviewModel = (OverviewModel)outlineService!.GetStoryElementByGuid(_storyModel, root);
-        if (_overviewModel.StoryProblem != Guid.Empty)
-        {
-            _syncPremise = true;
-        }
-        else
-        {
-            _syncPremise = false;
-        }
+        // Only the designated Story Problem may push Premise to Overview (#1500).
+        // A non-empty Overview.StoryProblem GUID alone must not enable sync for every Problem.
+        _syncPremise = Model != null
+            && _overviewModel.StoryProblem != Guid.Empty
+            && _overviewModel.StoryProblem == Model.Uuid;
 
         // Delegate beat-related loading to BeatSheetsViewModel
         BeatSheetsVm.LoadBeats(Model, _storyModel);
@@ -471,7 +466,9 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
             Model.Name = Name;
             Model.ProblemType = ProblemType;
             Model.ConflictType = ConflictType;
+            var previousCategory = Model.ProblemCategory;
             Model.ProblemCategory = ProblemCategory;
+            SyncSpineWithCategory(previousCategory);
             Model.Subject = Subject;
             Model.ProblemSource = ProblemSource;
             Model.Protagonist = Protagonist;
@@ -502,6 +499,54 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
             _logger.LogException(LogLevel.Error,
                 ex, $"Failed to save problem model - {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Collaborator #246: Overview.StoryProblem follows ProblemCategory.
+    /// Category Story problem writes this Problem as the Spine (the Overview picker
+    /// target). Leaving Story problem for a Subplot, Complication, Sequence, or blank
+    /// clears the Overview link when it pointed here. A no-op save of a GUID spine
+    /// that still has a blank category does not clear.
+    /// </summary>
+    private void SyncSpineWithCategory(string previousCategory)
+    {
+        if (_overviewModel == null || Model == null)
+            return;
+
+        var incoming = (ProblemCategory ?? string.Empty).Trim();
+        bool isStoryProblemCategory = string.Equals(
+            incoming,
+            OverviewModel.StoryProblemCategoryListValue,
+            StringComparison.OrdinalIgnoreCase);
+        bool isSubproblemCategory =
+            incoming.Equals("Complication", StringComparison.OrdinalIgnoreCase)
+            || incoming.Equals("Subplot", StringComparison.OrdinalIgnoreCase)
+            || incoming.Equals("Sequence", StringComparison.OrdinalIgnoreCase);
+        bool wasStoryProblemCategory = string.Equals(
+            (previousCategory ?? string.Empty).Trim(),
+            OverviewModel.StoryProblemCategoryListValue,
+            StringComparison.OrdinalIgnoreCase);
+
+        if (isStoryProblemCategory)
+        {
+            _overviewModel.StoryProblem = Model.Uuid;
+            _syncPremise = true;
+            PushSpineToOverviewPicker();
+            return;
+        }
+
+        if (_overviewModel.StoryProblem == Model.Uuid
+            && (isSubproblemCategory || wasStoryProblemCategory))
+        {
+            _overviewModel.StoryProblem = Guid.Empty;
+            _syncPremise = false;
+            PushSpineToOverviewPicker();
+        }
+    }
+
+    private void PushSpineToOverviewPicker()
+    {
+        Ioc.Default.GetService<OverviewViewModel>()?.SyncPickerFromModel();
     }
 
     public void ReloadFromModel()

@@ -16,31 +16,68 @@
     mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
+            <!-- Top actions (StoryCAD-like): short workflow name + buttons -->
+            <RowDefinition Height="Auto" />
+            <!-- Nav + work + chat -->
             <RowDefinition Height="*" />
+            <!-- Bottom status only -->
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <!-- Main navigation view UI -->
-        <NavigationView x:Name="NavView"
-                        Grid.Row="0"
-                        IsBackButtonVisible="Collapsed"
-                        MenuItemsSource="{x:Bind ShellViewModel.MenuItems, Mode=OneWay}"
-                        SelectedItem="{x:Bind ShellViewModel.CurrentItem, Mode=TwoWay}"
-                        IsSettingsVisible="False"
-                        SelectionChanged="NavView_SelectionChanged"
-                        PaneDisplayMode="Left">
 
-            <Frame x:Name="StepFrame" Navigated="StepFrame_OnNavigated" Margin="5,0,5,5" />
-        </NavigationView>
+        <!-- Top bar: everything left-aligned (CommandBar PrimaryCommands are right by default). -->
+        <Border Grid.Row="0"
+                Background="{ThemeResource CommandBarBackground}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="4,2">
+            <!-- Icons only; name on hover (ToolTip). Labels wasted horizontal space. -->
+            <StackPanel Orientation="Horizontal" Spacing="0" VerticalAlignment="Center">
+                <AppBarButton ToolTipService.ToolTip="Workflows"
+                              Command="{x:Bind ShellViewModel.TogglePaneCommand, Mode=OneWay}"
+                              AutomationProperties.AutomationId="WorkflowPaneToggleButton"
+                              AutomationProperties.Name="Workflows">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE700;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
 
-        <!-- LLM prompting buttons -->
-        <CommandBar Grid.Row="1" HorizontalAlignment="Left" OverflowButtonVisibility="Collapsed">
-            <CommandBar.PrimaryCommands>
-                <AppBarButton Label="Help" ToolTipService.ToolTip="Help" Margin="5">
+                <TextBlock Text="{x:Bind ShellViewModel.ActiveWorkflowName, Mode=OneWay}"
+                           VerticalAlignment="Center"
+                           Margin="4,0,12,0"
+                           FontWeight="SemiBold"
+                           FontSize="14"
+                           TextTrimming="CharacterEllipsis"
+                           MaxWidth="200"
+                           AutomationProperties.Name="Current workflow" />
+
+                <!-- Accept All lives at the foot of the work column on WorkflowPage, not here. -->
+                <AppBarButton ToolTipService.ToolTip="Review Each"
+                              Command="{x:Bind ShellViewModel.ReviewEachCommand, Mode=OneWay}"
+                              IsEnabled="{x:Bind ShellViewModel.HasPendingUpdates, Mode=OneWay}"
+                              AutomationProperties.AutomationId="WorkflowReviewEachButton"
+                              AutomationProperties.Name="Review Each">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8FD;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton ToolTipService.ToolTip="Try Again"
+                              Command="{x:Bind ShellViewModel.TryAgainCommand, Mode=OneWay}"
+                              IsEnabled="{x:Bind ShellViewModel.HasPendingUpdates, Mode=OneWay}"
+                              AutomationProperties.AutomationId="WorkflowTryAgainButton"
+                              AutomationProperties.Name="Try Again">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE72C;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
+
+                <AppBarButton ToolTipService.ToolTip="Help" Margin="8,0,0,0"
+                              AutomationProperties.AutomationId="WorkflowHelpButton"
+                              AutomationProperties.Name="Help">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE897;" />
                     </AppBarButton.Icon>
                     <AppBarButton.Flyout>
-                        <Flyout>
+                        <Flyout AutomationProperties.AutomationId="WorkflowHelpFlyout">
                             <Flyout.FlyoutPresenterStyle>
                                 <Style TargetType="FlyoutPresenter">
                                     <Setter Property="MaxWidth" Value="620" />
@@ -50,36 +87,144 @@
                             <ScrollViewer MaxHeight="600" HorizontalScrollBarVisibility="Disabled">
                                 <StackPanel Spacing="12" Padding="4" Width="580">
                                     <TextBlock Text="Story Collaborator Help" FontWeight="Bold" FontSize="16" />
-                                    <TextBlock TextWrapping="Wrap" Text="Workflows — The left panel lists available workflows for your story. Each workflow guides you through developing a specific aspect (premise, characters, settings, scenes, etc.). Select one to begin." />
+                                    <TextBlock TextWrapping="Wrap" Text="Workflows — The left panel opens on a short list: any gaps in your outline, then your starred workflows. The rest of the catalog waits below, grouped by story element — expand a group to browse it. Each workflow guides you through developing a specific aspect (premise, characters, settings, scenes, etc.). Select one to begin." />
+                                    <TextBlock TextWrapping="Wrap" Text="Starred — Star the workflows you reach for most and they stay at the top of the panel. Click the star on any workflow to add or remove it, or use Customize Workflows on the toolbar to pick several at once. Your choices are remembered between sessions." />
                                     <TextBlock TextWrapping="Wrap" Text="Execute — Runs the selected workflow. Collaborator analyzes your story elements and suggests updates using AI." />
-                                    <TextBlock TextWrapping="Wrap" Text="Review Results — After execution, review each suggested property update. Use Accept to apply individual changes, or Accept All to apply everything at once." />
+                                    <TextBlock TextWrapping="Wrap" Text="Review Results — After execution, review each suggested property update. Use Accept to apply individual changes, or Accept all changes at the foot of the list to apply everything at once." />
                                     <TextBlock TextWrapping="Wrap" Text="Chat — After a workflow runs, use the chat panel to discuss the results, ask for alternatives, or refine suggestions." />
-                                    <TextBlock TextWrapping="Wrap" Text="Save — Saves your outline changes back to StoryCAD." />
+                                    <TextBlock TextWrapping="Wrap" Text="Saving — Updates are written to your outline as soon as you accept them, so there is no Save button." />
                                     <TextBlock TextWrapping="Wrap" Text="Exit — Closes Collaborator and returns to StoryCAD. Any accepted changes are preserved." />
+
+                                    <!-- The flyout is a summary; the manual section is the full
+                                         treatment. Click-handled rather than NavigateUri-bound
+                                         because the host (beta or production) is a runtime
+                                         preference read from AppState. -->
+                                    <HyperlinkButton Content="Open the full manual"
+                                                     Click="ManualLink_Click"
+                                                     Padding="0,4,0,0"
+                                                     AutomationProperties.AutomationId="WorkflowHelpManualLinkButton"
+                                                     AutomationProperties.Name="Open the full manual" />
                                 </StackPanel>
                             </ScrollViewer>
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton Label="Settings" ToolTipService.ToolTip="Collaborator Settings" Margin="5"
-                              Click="SettingsButton_Click">
+                <AppBarButton ToolTipService.ToolTip="Customize Workflows"
+                              Click="CustomizeWorkflowsButton_Click"
+                              AutomationProperties.AutomationId="WorkflowCustomizeButton"
+                              AutomationProperties.Name="Customize Workflows">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE735;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton ToolTipService.ToolTip="Settings"
+                              Click="SettingsButton_Click"
+                              AutomationProperties.AutomationId="WorkflowSettingsButton"
+                              AutomationProperties.Name="Settings">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE713;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <AppBarButton Label="Save" ToolTipService.ToolTip="Save outline changes" Margin="5"
-                              Command="{x:Bind ShellViewModel.SaveCommand, Mode=OneWay}">
-                    <AppBarButton.Icon>
-                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE74E;" />
-                    </AppBarButton.Icon>
-                </AppBarButton>
-                <AppBarButton Label="Exit" ToolTipService.ToolTip="Exit Collaborator" Margin="5"
-                              Command="{x:Bind ShellViewModel.ExitCommand, Mode=OneWay}">
+                <!-- No Save button: accepted updates are written to the outline as they are
+                     confirmed, so there is nothing to save manually. -->
+                <AppBarButton ToolTipService.ToolTip="Exit"
+                              Command="{x:Bind ShellViewModel.ExitCommand, Mode=OneWay}"
+                              AutomationProperties.AutomationId="WorkflowExitButton"
+                              AutomationProperties.Name="Exit">
                     <AppBarButton.Icon>
                         <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8BB;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-            </CommandBar.PrimaryCommands>
-        </CommandBar>
+            </StackPanel>
+        </Border>
+
+        <!-- Main navigation view UI -->
+        <!-- Container id only; MenuItemsSource-bound, so there are no NavigationViewItem
+             elements in this XAML to annotate (Unit 6 NavigationView convention row).
+
+             CompactPaneLength="0" is what makes the top-bar hamburger actually hide the list.
+             PaneDisplayMode="Left" collapses to the compact pane rather than to nothing, and
+             the compact pane is sized to show icons; these items are built from workflow
+             labels with no Icon set, so the default 48px strip rendered clipped text
+             ("Outli ne gaps (25)", "Starr", "Over") instead of hiding. Zero width keeps the
+             open state pushing the work column across, which LeftMinimal would have changed
+             to an overlay. -->
+
+        <NavigationView x:Name="NavView"
+                        Grid.Row="1"
+                        IsBackButtonVisible="Collapsed"
+                        IsPaneToggleButtonVisible="False"
+                        IsPaneOpen="{x:Bind ShellViewModel.IsPaneOpen, Mode=TwoWay}"
+                        MenuItemsSource="{x:Bind ShellViewModel.MenuItems, Mode=OneWay}"
+                        SelectedItem="{x:Bind ShellViewModel.CurrentItem, Mode=TwoWay}"
+                        IsSettingsVisible="False"
+                        ItemInvoked="NavView_ItemInvoked"
+                        PaneDisplayMode="Left"
+                        CompactPaneLength="0"
+                        AutomationProperties.AutomationId="WorkflowNav">
+
+            <!-- The selected workflow must read at a glance: the stock selected state is a
+                 near-invisible tint on Skia. Items in MenuItemsSource are NavigationViewItem
+                 instances, so they are their own containers and MenuItemContainerStyle never
+                 applies; lightweight styling resources are inherited by them, and do. Accent
+                 tint (not a flat accent fill) keeps the default foreground legible in both
+                 light and dark themes. -->
+            <NavigationView.Resources>
+                <SolidColorBrush x:Key="NavigationViewItemBackgroundSelected"
+                                 Color="{ThemeResource SystemAccentColor}"
+                                 Opacity="0.22" />
+                <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPointerOver"
+                                 Color="{ThemeResource SystemAccentColor}"
+                                 Opacity="0.30" />
+                <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPressed"
+                                 Color="{ThemeResource SystemAccentColor}"
+                                 Opacity="0.36" />
+                <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground"
+                                 Color="{ThemeResource SystemAccentColor}" />
+            </NavigationView.Resources>
+
+            <Frame x:Name="StepFrame"
+                   Navigated="StepFrame_OnNavigated"
+                   Margin="12,8,12,10"
+                   VerticalAlignment="Stretch"
+                   HorizontalAlignment="Stretch" />
+        </NavigationView>
+
+        <!-- Bottom status (survives empty content frame / gather cancel). Not a second title. -->
+        <Border Grid.Row="2"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="0,1,0,0"
+                MinHeight="36"
+                Padding="8,4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- InfoBar: approved #1420 suffix (Unit 7). Content TextBlocks must not carry AutomationId. -->
+                <InfoBar Grid.Column="0"
+                         IsOpen="{x:Bind ShellViewModel.HasStatus, Mode=OneWay}"
+                         Severity="Warning"
+                         IsClosable="False"
+                         Message="{x:Bind ShellViewModel.StatusText, Mode=OneWay}"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Center"
+                         AutomationProperties.AutomationId="WorkflowShellStatusInfoBar" />
+
+                <!-- Cost line, shown per CollaboratorSettings.ShowCostDetails. Sits beside the
+                     InfoBar and never replaces it:
+                     status carries errors, and a cost figure must not overwrite one. -->
+                <TextBlock Grid.Column="1"
+                           Text="{x:Bind ShellViewModel.CostSummary, Mode=OneWay}"
+                           Visibility="{x:Bind ShellViewModel.CostVisibility, Mode=OneWay}"
+                           Style="{ThemeResource CaptionTextBlockStyle}"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           IsTextSelectionEnabled="True"
+                           VerticalAlignment="Center"
+                           Margin="12,0,4,0" />
+            </Grid>
+        </Border>
     </Grid>
 </Page>

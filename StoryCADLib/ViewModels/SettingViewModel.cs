@@ -9,7 +9,7 @@ using StoryCADLib.Services.Navigation;
 namespace StoryCADLib.ViewModels;
 
 [Microsoft.UI.Xaml.Data.Bindable]
-public class SettingViewModel : ObservableRecipient, INavigable, ISaveable, IReloadable
+public class SettingViewModel : ElementViewModelBase, INavigable, ISaveable, IReloadable
 {
     #region Fields
 
@@ -243,6 +243,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable, IRel
         Touch = Model.Touch;
         SmellTaste = Model.SmellTaste;
         Notes = Model.Notes;
+        ImageGallery.Load(Model.Images);
 
         _changeable = true;
     }
@@ -269,6 +270,7 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable, IRel
             Model.Touch = Touch;
             Model.SmellTaste = SmellTaste;
             Model.Notes = Notes;
+            Model.Images = ImageGallery.ToModelList();
         }
         catch (Exception ex)
         {
@@ -296,7 +298,8 @@ public class SettingViewModel : ObservableRecipient, INavigable, ISaveable, IRel
 
     #region Constructor
 
-    public SettingViewModel(ILogService logger, ListData listData, Windowing windowing)
+    public SettingViewModel(ILogService logger, ListData listData, Windowing windowing, ImageService imageService)
+        : base(imageService, logger)
     {
         _logger = logger;
         _listData = listData;

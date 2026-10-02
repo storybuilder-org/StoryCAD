@@ -9,3 +9,5 @@ has_toc: false
 ## Scene Form
 
 Each scene represents a specific event or moment in the narrative, contributing to the overall plot progression. Every scene has a setting and a cast of one or more characters.
+
+Use the **Images** tab to attach reference or mood art for the scene. See [Images Tab](Images_Tab.html).

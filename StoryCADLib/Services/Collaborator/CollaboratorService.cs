@@ -1,55 +1,57 @@
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.Loader;
 using Windows.ApplicationModel.AppExtensions;
 using Windows.ApplicationModel.Resources.Core;
 using Windows.Storage;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Markup;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator.Contracts;
-using StoryCADLib.Services.Outline;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Store;
+using StoryCADLib.ViewModels.Store;
 
 namespace StoryCADLib.Services.Collaborator;
 
 public class CollaboratorService
 {
-    private const string PluginFileName = "CollaboratorLib.dll";
-    private const string EnvPluginDirVar = "STORYCAD_PLUGIN_DIR";
     private readonly AppState _appState;
     private readonly AutoSaveService _autoSaveService;
     private readonly BackupService _backupService;
     private readonly ILogService _logService;
     private readonly PreferenceService _preferenceService;
-    private ICollaborator _collaboratorInterface; // Interface-based reference
-    private Assembly CollabAssembly;
-    private AssemblyLoadContext _pluginLoadContext; // Custom load context for plugin dependencies
+    private readonly StoryCADApi _storyCADApi;
+
+    // Factory supplied by the composition root (StoryCAD head) when CollaboratorLib
+    // is compiled in. Null when Collaborator is absent (public/free build), which is
+    // how StoryCAD runs Collaborator-free. A factory (not a single instance) lets us
+    // create a fresh Collaborator per session and dispose it on close.
+    private readonly Func<ICollaborator> _collaboratorFactory;
+    private ICollaborator _collaboratorInterface; // Current session instance (null between sessions)
     public Window CollaboratorWindow; // The secondary window for Collaborator
-#pragma warning disable CS0169, CS0414 // CS0169: unused on macOS, CS0414: assigned but unused on Windows - tracked for Issue #1126
-    private bool dllExists;     // Used in Windows-only FindDll() method
-#pragma warning restore CS0169, CS0414
-#pragma warning disable CS0649 // Field will be assigned in future macOS implementation (Issue #1126)
-    private string dllPath;     // Used in ConnectCollaborator() - will be needed for macOS (Issue #1126)
-#pragma warning restore CS0649
 
     public CollaboratorService(AppState appState, ILogService logService, PreferenceService preferenceService,
-        AutoSaveService autoSaveService, BackupService backupService)
+        AutoSaveService autoSaveService, BackupService backupService, StoryCADApi storyCADApi,
+        Func<ICollaborator> collaboratorFactory = null)
     {
         _appState = appState;
         _logService = logService;
         _preferenceService = preferenceService;
         _autoSaveService = autoSaveService;
         _backupService = backupService;
+        _storyCADApi = storyCADApi;
+        _collaboratorFactory = collaboratorFactory;
     }
 
     #region Collaborator calls
 
     /// <summary>
-    ///     Gets whether a collaborator is available
+    ///     Gets whether a collaborator is available (i.e. CollaboratorLib was compiled in
+    ///     and a factory was registered at the composition root).
     /// </summary>
-    public bool HasCollaborator => _collaboratorInterface != null;
+    public bool HasCollaborator => _collaboratorFactory != null;
 
 
     /// <summary>
@@ -58,214 +60,297 @@ public class CollaboratorService
     /// </summary>
     public async void OpenCollaborator()
     {
-        if (_collaboratorInterface == null)
+        if (_collaboratorFactory == null)
         {
-            _logService.Log(LogLevel.Warn, "Collaborator plugin not available - plugin DLL not found or failed to load");
+            _logService.Log(LogLevel.Warn, "Collaborator not available - no Collaborator implementation registered");
             return;
         }
 
-        // Get the current StoryModel from AppState
+        // Get the current StoryModel from AppState. Close/Reset leaves a non-null document
+        // with an empty model (FilePath null, CurrentView empty) — same gate as Print Reports.
         var storyModel = _appState.CurrentDocument?.Model;
-        // DIAG-55: Log StoryModel identity from AppState
-        _logService.Log(LogLevel.Info, $"DIAG-55: AppState.CurrentDocument.Model hash={RuntimeHelpers.GetHashCode(storyModel)}");
-        if (storyModel == null)
+        if (storyModel == null || storyModel.CurrentView.Count == 0)
         {
-            _logService.Log(LogLevel.Error, "No StoryModel available - no document is open");
+            _logService.Log(LogLevel.Warn, "No story is open; Collaborator not started.");
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(
+                new StatusMessage("No story is open. Open an outline before using Collaborator.",
+                    LogLevel.Warn)));
             return;
         }
 
-        // Create the API instance for Collaborator to use
-        var outlineService = Ioc.Default.GetService<OutlineService>();
-        var listData = Ioc.Default.GetService<ListData>();
-        var controlData = Ioc.Default.GetService<ControlData>();
-        var toolsData = Ioc.Default.GetService<ToolsData>();
-        if (outlineService != null && listData != null && controlData != null && toolsData != null)
+        // Issue #90 ruling of 2026-07-15: the old COLLAB_DEV_ENABLED purchase-check bypass retired.
+        // Entitlement is holding a valid activation, however obtained -- including via the
+        // dev/tester allowlist, which COLLAB_DEV_ACTIVATION (renamed from COLLAB_DEV_ENABLED,
+        // 2026-07-17) only routes StoreActivationService toward (item 3), rather than skipping
+        // this check.
+        if (!IsPurchaseVerified())
         {
-            var api = new StoryCADApi(outlineService, listData, controlData, toolsData);
-            api.SetCurrentModel(storyModel);
-            // DIAG-55: Log API.CurrentModel after SetCurrentModel
-            _logService.Log(LogLevel.Info, $"DIAG-55: After SetCurrentModel - api.CurrentModel hash={RuntimeHelpers.GetHashCode(api.CurrentModel)}");
-
-            try
+            _logService.Log(LogLevel.Warn, "Collaborator blocked: no active store activation.");
+            if (!await EnsureEntitledToOpenAsync())
             {
-                // Host supplies the root frame for navigation
-                var hostRoot = new StoryCADLib.Collaborator.Views.CollaboratorHostRoot();
-                var hostFrame = hostRoot.RootFrameControl;
-                if (hostFrame == null)
-                {
-                    _logService.Log(LogLevel.Error, "Collaborator host frame not found");
-                    return;
-                }
-
-                // Create the window on the host side
-                CollaboratorWindow = new Window { Content = hostRoot, Title = "Story Collaborator" };
-                CollaboratorWindow.Activate();
-
-                // Let the plugin drive the provided frame
-                // DIAG-55: Log before OpenAsync - verify both references match
-                _logService.Log(LogLevel.Info, $"DIAG-55: Before OpenAsync - storyModel hash={RuntimeHelpers.GetHashCode(storyModel)}, api.CurrentModel hash={RuntimeHelpers.GetHashCode(api.CurrentModel)}");
-                var filePath = _appState.CurrentDocument?.FilePath ?? string.Empty;
-                await _collaboratorInterface.OpenAsync(api, storyModel, CollaboratorWindow, hostFrame, filePath, _logService);
+                return;
             }
-            catch (Exception ex)
+        }
+
+        _storyCADApi.SetCurrentModel(storyModel);
+
+        // Pause background services while Collaborator holds the model
+        _backupService.StopTimedBackup();
+        _autoSaveService.StopAutoSave();
+
+        try
+        {
+            // Host supplies the root frame for navigation
+            var hostRoot = new StoryCADLib.Collaborator.Views.CollaboratorHostRoot();
+            var hostFrame = hostRoot.RootFrameControl;
+            if (hostFrame == null)
             {
-                _logService.Log(LogLevel.Error, $"Failed to open Collaborator: {ex.Message}");
+                _logService.Log(LogLevel.Error, "Collaborator host frame not found");
                 return;
             }
 
-            if (CollaboratorWindow != null)
-            {
-                CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
-                // Window is already activated in WindowManager.CreateWindowAsync
-                _logService.Log(LogLevel.Info, "Collaborator window opened");
-            }
-            else
-            {
-                _logService.Log(LogLevel.Error, "Failed to create Collaborator window");
-            }
+            // Create the window on the host side
+            CollaboratorWindow = new Window { Content = hostRoot, Title = "Story Collaborator" };
+            CollaboratorWindow.Activate();
+
+            // Create a fresh Collaborator instance for this session (disposed on close).
+            _collaboratorInterface = _collaboratorFactory();
+
+            // Seed settings from persisted preferences before opening. ShowCostDetails and
+            // Terseness survive a restart (Collaborator #49); the rest are session-only and
+            // start at their defaults.
+            var settings = _collaboratorInterface.GetSettings() ?? CollaboratorSettings.Default;
+            settings.ShowCostDetails = _preferenceService.Model.ShowCollaboratorCost;
+            settings.Terseness = _preferenceService.Model.CollaboratorTerseness;
+            _collaboratorInterface.SetSettings(settings);
+
+            var filePath = _appState.CurrentDocument?.FilePath ?? string.Empty;
+            await _collaboratorInterface.OpenAsync(_storyCADApi, storyModel, CollaboratorWindow, hostFrame, filePath, _logService);
         }
-    }
-
-    #endregion
-
-    #region Collaboratorlib connection
-
-    /// <summary>
-    ///     If the plugin is active, connect to CollaboratorLib and create an instance
-    ///     of Collaborator.
-    /// </summary>
-    public void ConnectCollaborator()
-    {
-        // Use custom load context to resolve plugin dependencies when an explicit path is provided
-        _pluginLoadContext = new PluginLoadContext(dllPath);
-        CollabAssembly = _pluginLoadContext.LoadFromAssemblyPath(dllPath);
-        _logService.Log(LogLevel.Info, "Loaded CollaboratorLib.dll with custom load context");
-
-        // Get the type of the Collaborator class
-        var collaboratorType = CollabAssembly.GetType("StoryCollaborator.Collaborator");
-        if (collaboratorType == null)
-        {   
-            _logService.Log(LogLevel.Error, "Could not find Collaborator type in assembly");
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Error, $"Failed to open Collaborator: {ex.Message}");
             return;
         }
 
-        // Create an instance of the Collaborator class using parameterless constructor
-        _logService.Log(LogLevel.Info, "Creating Collaborator instance.");
-
-        var constructor = collaboratorType.GetConstructor(Type.EmptyTypes);
-        if (constructor == null)
+        if (CollaboratorWindow != null)
         {
-            _logService.Log(LogLevel.Error, "Could not find parameterless constructor for Collaborator");
-            throw new InvalidOperationException("Collaborator must have a parameterless constructor");
+            CollaboratorWindow.Closed += (sender, args) => CollaboratorClosed();
+            // Window is already activated in WindowManager.CreateWindowAsync
+            _logService.Log(LogLevel.Info, "Collaborator window opened");
         }
-
-        var collaborator = constructor.Invoke(null);
-        _logService.Log(LogLevel.Info, "Collaborator instance created.");
-
-        // Cast to interface
-        _collaboratorInterface = collaborator as ICollaborator;
-        if (_collaboratorInterface == null)
+        else
         {
-            _logService.Log(LogLevel.Error, "Collaborator does not implement ICollaborator interface");
-            throw new InvalidOperationException("CollaboratorLib must implement ICollaborator interface");
+            _logService.Log(LogLevel.Error, "Failed to create Collaborator window");
         }
-
-        _logService.Log(LogLevel.Info, "Collaborator successfully loaded with ICollaborator interface.");
     }
 
-    public async Task<bool> CollaboratorEnabled()
-    {
-        if (!OperatingSystem.IsWindows())
-        {
-            _logService.Log(LogLevel.Warn, "Collaborator interface not supported on this platform");
-            return false;
-        }
-        
-        // COLLAB_DEBUG environment variable provides runtime control over Collaborator loading
-        // - "0" = disable loading (useful for testing StoryCAD without Collaborator overhead)
-        // - "1" or unset = enable loading (normal operation)
-        //
-        // Why environment variable instead of #if DEBUG?
-        // - Runtime flexibility: can disable/enable without rebuilding
-        // - Test scenarios: can test Store deployment behavior in debug builds
-        // - CI/CD: can run tests with/without Collaborator via environment config
-        var collabDebug = Environment.GetEnvironmentVariable("COLLAB_DEBUG");
-        if (collabDebug == "0")
-        {
-            _logService.Log(LogLevel.Info, "Collaborator disabled by COLLAB_DEBUG=0");
-            return false;
-        }
-
-        // Allow loading if:
-        // 1. Developer build (bundled CollaboratorLib) or
-        // 2. STORYCAD_PLUGIN_DIR is set (for JIT debugging without F5)
-        var hasPluginDir = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(EnvPluginDirVar));
-
-        return hasPluginDir && await FindDll();
-    }
+    // Gate (issue #30): Collaborator opens only when the store-activation service holds a valid
+    // Worker JWT. This is a client-side, open-time check; attaching CurrentJwt to each Collaborator
+    // Worker call (the per-call enforcement in the activation contract, "JWT"; see
+    // StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md) is the
+    // remaining #30 wiring in the CollaboratorLib/Worker track. Resolved on demand to avoid
+    // widening the constructor.
+    private static bool IsPurchaseVerified() =>
+        Ioc.Default.GetService<IStoreActivationService>()?.State == ActivationState.Active;
 
     /// <summary>
-    ///     Locates CollaboratorLib.dll using STORYCAD_PLUGIN_DIR environment variable.
-    ///
-    ///     For development/debugging:
-    ///     - Set STORYCAD_PLUGIN_DIR to CollaboratorLib build output directory
-    ///     - Example: D:\dev\src\Collaborator\CollaboratorLib\bin\x64\Debug\net10.0-windows10.0.22621
-    ///
-    ///     For production deployment:
-    ///     - Plugin will be bundled in MSIX package at AppContext.BaseDirectory
-    ///     - See issue #30 for production deployment strategy
+    ///     Offers the subscription via <see cref="SubscribeDialogViewModel.ShowAsync" /> (the view
+    ///     model owns the dialog). Returns true when the user is Active afterward. Resolved on
+    ///     demand to avoid widening the constructor.
     /// </summary>
-    /// <returns>True if CollaboratorLib.dll was found and is accessible, false otherwise.</returns>
-    private async Task<bool> FindDll()
+    /// <summary>
+    ///     Collaborator #97: Join dialog, allowlist refresh, closed copy, or Subscribe.
+    ///     Does not enroll on the toolbar click.
+    /// </summary>
+    private async Task<bool> EnsureEntitledToOpenAsync()
     {
-#if !HAS_UNO
-        await Task.CompletedTask; // Async signature required for cross-platform compatibility
-        _logService.Log(LogLevel.Info, "Locating CollaboratorLib...");
-
-        if (TryResolveFromEnv(out var envPath))
+        var activation = Ioc.Default.GetService<IStoreActivationService>();
+        var client = Ioc.Default.GetService<IActivationClient>();
+        var windowing = Ioc.Default.GetService<Windowing>();
+        if (activation is null || client is null)
         {
-            dllPath = envPath;
-            dllExists = true;
-            _logService.Log(LogLevel.Info, $"Found via {EnvPluginDirVar}: {dllPath}");
+            return false;
+        }
+
+        BetaEnrollmentStatus enrollment;
+        try
+        {
+            var guid = _preferenceService.Model.StoreUserGuid ?? string.Empty;
+            enrollment = await client.GetBetaEnrollmentAsync(guid);
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"Enrollment status unreachable: {ex.Message}");
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                "Collaborator enrollment is unreachable. Check the connection and try again.",
+                LogLevel.Warn, true)));
+            return false;
+        }
+
+        var action = CollaboratorOpenPlanner.Decide(enrollment, hasPlans: false);
+        if (action == CollaboratorOpenAction.ShowClosed)
+        {
+            var store = Ioc.Default.GetService<IStoreService>();
+            var hasPlans = false;
+            if (store is not null)
+            {
+                try
+                {
+                    var products = await store.GetProductsAsync(store.ProductIds);
+                    hasPlans = products is { Count: > 0 };
+                }
+                catch (Exception ex)
+                {
+                    _logService.Log(LogLevel.Warn, $"Store catalog probe failed: {ex.Message}");
+                }
+            }
+
+            action = CollaboratorOpenPlanner.Decide(enrollment, hasPlans);
+        }
+
+        switch (action)
+        {
+            case CollaboratorOpenAction.ShowJoin:
+                return await ShowBetaDialogAsync(windowing);
+            case CollaboratorOpenAction.RefreshAllowlist:
+                try
+                {
+                    await activation.RefreshAllowlistAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logService.Log(LogLevel.Warn, $"Allowlist refresh failed: {ex.Message}");
+                    WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                        "Collaborator enrollment is unreachable. Check the connection and try again.",
+                        LogLevel.Warn, true)));
+                    return false;
+                }
+
+                return activation.State == ActivationState.Active;
+            case CollaboratorOpenAction.ShowSubscribe:
+                return await ShowSubscribeDialogAsync();
+            case CollaboratorOpenAction.ShowRevoked:
+                await ShowNoticeAsync(windowing, "This Collaborator beta access was revoked.");
+                return false;
+            default:
+                var closed = enrollment.Open
+                    ? "The free Collaborator beta is full. Collaborator is not for sale in this release."
+                    : "The free Collaborator beta is closed. Collaborator is not for sale in this release.";
+                await ShowNoticeAsync(windowing, closed);
+                return false;
+        }
+    }
+
+    private async Task<bool> ShowBetaDialogAsync(Windowing windowing)
+    {
+        var vm = Ioc.Default.GetService<BetaEnrollmentDialogViewModel>();
+        if (windowing is null || vm is null)
+        {
+            _logService.Log(LogLevel.Warn, "Beta dialog unavailable; no Windowing or view model registered.");
+            return false;
+        }
+
+        var ok = await vm.ShowAsync(windowing);
+        if (ok)
+        {
             return true;
         }
 
-        _logService.Log(LogLevel.Info, "CollaboratorLib.dll not found. Set STORYCAD_PLUGIN_DIR environment variable.");
-        dllPath = null;
-        dllExists = false;
+        if (vm.FailureReason == "unreachable")
+        {
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                "Collaborator enrollment is unreachable. Check the connection and try again.",
+                LogLevel.Warn, true)));
+            return false;
+        }
+
+        if (vm.FailureReason is "cap_reached" or "enrollment_closed" or "revoked")
+        {
+            var copy = vm.FailureReason switch
+            {
+                "cap_reached" => "The free Collaborator beta is full. Collaborator is not for sale in this release.",
+                "revoked" => "This Collaborator beta access was revoked.",
+                _ => "The free Collaborator beta is closed. Collaborator is not for sale in this release."
+            };
+            await ShowNoticeAsync(windowing, copy);
+        }
+
         return false;
-#else
-        // macOS plugin loading tracked in Issue #1126 and #1135
-        await Task.CompletedTask;  // Placeholder until macOS implementation
-        _logService.Log(LogLevel.Error, "Collaborator is not supported on this platform.");
-        return false;
-#endif
     }
 
-    private bool TryResolveFromEnv(out string path)
+    private static async Task ShowNoticeAsync(Windowing windowing, string body)
     {
-        path = null;
-        var dir = Environment.GetEnvironmentVariable(EnvPluginDirVar);
-        if (string.IsNullOrWhiteSpace(dir))
+        if (windowing is null)
         {
+            return;
+        }
+
+        await windowing.ShowContentDialog(new ContentDialog
+        {
+            Title = "StoryCAD Collaborator",
+            Content = body,
+            CloseButtonText = "OK"
+        });
+    }
+
+    private async Task<bool> ShowSubscribeDialogAsync()
+    {
+        // No platform store (NullStoreService, e.g. any desktop build outside a store bundle) means
+        // no plans to list and a Subscribe button that can never succeed. Don't show the dialog;
+        // tell the user Collaborator needs the store edition. Resolved on demand to match above.
+        var store = Ioc.Default.GetService<IStoreService>();
+        if (store is null || !store.IsSupported)
+        {
+            // Called on the UI thread from OpenCollaboratorAsync, so send the status directly.
+            _logService.Log(LogLevel.Warn, "Subscribe dialog suppressed; no platform store is available in this build.");
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                "Collaborator requires the Microsoft Store or Mac App Store edition of StoryCAD.",
+                LogLevel.Warn, true)));
             return false;
         }
 
-        var candidate = Path.Combine(dir, PluginFileName);
-        if (!File.Exists(candidate))
+        var windowing = Ioc.Default.GetService<Windowing>();
+        var vm = Ioc.Default.GetService<SubscribeDialogViewModel>();
+        if (windowing is null || vm is null)
         {
-            _logService.Log(LogLevel.Warn, $"{EnvPluginDirVar} set but file missing: {candidate}");
+            _logService.Log(LogLevel.Warn, "Subscribe dialog unavailable; no Windowing or view model registered.");
             return false;
         }
 
-        var pdb = Path.ChangeExtension(candidate, ".pdb");
-        if (!File.Exists(pdb))
+        return await vm.ShowAsync(windowing);
+    }
+
+    /// <summary>
+    ///     Offers a credit-pack purchase via <see cref="BuyCreditsDialogViewModel.ShowAsync" />
+    ///     (issue #90 design section 10 "Credit packs", step 10). Returns true when a pack was
+    ///     purchased and credited. Public (unlike <see cref="ShowSubscribeDialogAsync" />, which
+    ///     has no caller outside <see cref="OpenCollaborator" />'s own gate): the out-of-credits
+    ///     message the workflow and chat callers show (StoryCADLib.Services.Store.
+    ///     OutOfCreditsException) names this screen, so a menu item or in-panel button can call it
+    ///     directly once one is wired up -- no further plumbing needed on this side.
+    /// </summary>
+    public async Task<bool> ShowBuyCreditsDialogAsync()
+    {
+        var store = Ioc.Default.GetService<IStoreService>();
+        if (store is null || !store.IsSupported)
         {
-            _logService.Log(LogLevel.Warn, $"PDB missing next to DLL: {pdb}");
+            _logService.Log(LogLevel.Warn, "Buy Credits dialog suppressed; no platform store is available in this build.");
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                "Buying credits requires the Microsoft Store or Mac App Store edition of StoryCAD.",
+                LogLevel.Warn, true)));
+            return false;
         }
 
-        path = candidate;
-        return true;
+        var windowing = Ioc.Default.GetService<Windowing>();
+        var vm = Ioc.Default.GetService<BuyCreditsDialogViewModel>();
+        if (windowing is null || vm is null)
+        {
+            _logService.Log(LogLevel.Warn, "Buy Credits dialog unavailable; no Windowing or view model registered.");
+            return false;
+        }
+
+        return await vm.ShowAsync(windowing);
     }
 
     #endregion
@@ -325,15 +410,8 @@ public class CollaboratorService
             _logService.Log(LogLevel.Info, "Closed collaborator window");
         }
 
-        // Null objects to deallocate them
         _collaboratorInterface = null;
-        CollabAssembly = null;
         _logService.Log(LogLevel.Info, "Nulled collaborator objects");
-
-        // Run garbage collection to clean up any remnants
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        _logService.Log(LogLevel.Info, "Garbage collection finished.");
     }
 
     public void CollaboratorClosed()
@@ -359,6 +437,7 @@ public class CollaboratorService
             _logService.Log(LogLevel.Error, $"Collaborator Close failed: {ex.Message}");
         }
 
+        _collaboratorInterface = null;
         CollaboratorWindow = null;
 
         // Reload current ViewModel from Model to pick up Collaborator's changes
@@ -392,45 +471,4 @@ public class CollaboratorService
     }
 
     #endregion
-
-    /// <summary>
-    /// Custom AssemblyLoadContext that resolves plugin dependencies from the plugin directory.
-    /// Uses AssemblyDependencyResolver to find dependencies next to the plugin DLL.
-    /// </summary>
-    private class PluginLoadContext : AssemblyLoadContext
-    {
-        private readonly AssemblyDependencyResolver _resolver;
-
-        public PluginLoadContext(string pluginPath)
-        {
-            _resolver = new AssemblyDependencyResolver(pluginPath);
-        }
-
-        protected override Assembly Load(AssemblyName assemblyName)
-        {
-            // Simple strategy: prefer what's already loaded, otherwise load from plugin
-            // This ensures StoryCADLib and other shared assemblies use the same instance
-            // while allowing plugin-specific dependencies to load from plugin directory
-
-            var existingAssembly = Default.Assemblies
-                .FirstOrDefault(a => AssemblyName.ReferenceMatchesDefinition(
-                    a.GetName(), assemblyName));
-
-            if (existingAssembly != null)
-            {
-                // Assembly already loaded in default context - use that instance
-                return null;
-            }
-
-            // Not in default context - try to load from plugin directory
-            string assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
-            if (assemblyPath != null)
-            {
-                return LoadFromAssemblyPath(assemblyPath);
-            }
-
-            // Not found anywhere - let runtime handle it
-            return null;
-        }
-    }
 }

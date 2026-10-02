@@ -1,7 +1,11 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
+using StoryCADLib.Services;
+using StoryCADLib.Services.API;
+using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator;
 using StoryCADLib.Services.Collaborator.Contracts;
+using StoryCADLib.Services.Logging;
 
 #nullable disable
 
@@ -10,6 +14,16 @@ namespace StoryCADTests.Services.Collaborator;
 [TestClass]
 public class CollaboratorServiceTests
 {
+    private static CollaboratorService CreateService(Func<ICollaborator> factory = null) =>
+        new(
+            Ioc.Default.GetRequiredService<AppState>(),
+            Ioc.Default.GetRequiredService<ILogService>(),
+            Ioc.Default.GetRequiredService<PreferenceService>(),
+            Ioc.Default.GetRequiredService<AutoSaveService>(),
+            Ioc.Default.GetRequiredService<BackupService>(),
+            Ioc.Default.GetRequiredService<StoryCADApi>(),
+            factory);
+
     /// <summary>
     ///     Test that CollaboratorService can be created
     /// </summary>
@@ -24,70 +38,28 @@ public class CollaboratorServiceTests
     }
 
     /// <summary>
-    ///     Test that COLLAB_DEBUG=0 bypasses collaborator loading
+    ///     With no factory registered (public/free build, CollaboratorLib not compiled in),
+    ///     HasCollaborator is false and the Collaborator entry point stays hidden.
     /// </summary>
     [TestMethod]
-    public async Task CollaboratorService_CollabDebugZero_DisablesCollaborator()
+    public void HasCollaborator_NoFactory_ReturnsFalse()
     {
-        // Arrange
-        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
-        var originalValue = Environment.GetEnvironmentVariable("COLLAB_DEBUG");
+        var service = CreateService(factory: null);
 
-        try
-        {
-            // Act - Set COLLAB_DEBUG to 0
-            Environment.SetEnvironmentVariable("COLLAB_DEBUG", "0");
-            var result = await service.CollaboratorEnabled();
-
-            // Assert
-            Assert.IsFalse(result, "CollaboratorEnabled should return false when COLLAB_DEBUG=0");
-        }
-        finally
-        {
-            // Cleanup - Restore original value
-            Environment.SetEnvironmentVariable("COLLAB_DEBUG", originalValue);
-        }
+        Assert.IsFalse(service.HasCollaborator,
+            "HasCollaborator should be false when no Collaborator factory is registered");
     }
 
     /// <summary>
-    ///     Test that COLLAB_DEBUG values other than "0" allow normal collaborator checks.
-    ///     (Only COLLAB_DEBUG=0 disables loading; any other value including "1" allows normal operation)
+    ///     When a factory is registered at the composition root (CollaboratorLib compiled in),
+    ///     HasCollaborator is true. The factory itself is the seam #30's license gate will wrap.
     /// </summary>
     [TestMethod]
-    public async Task CollaboratorService_CollabDebugOne_AllowsNormalChecks()
+    public void HasCollaborator_WithFactory_ReturnsTrue()
     {
-        // Arrange
-        var service = Ioc.Default.GetRequiredService<CollaboratorService>();
-        var originalValue = Environment.GetEnvironmentVariable("COLLAB_DEBUG");
-        var originalPluginDir = Environment.GetEnvironmentVariable("STORYCAD_PLUGIN_DIR");
+        var service = CreateService(factory: () => null);
 
-        try
-        {
-            // Act - Set COLLAB_DEBUG to 1 (should continue with normal checks, no longer triggers debugging)
-            Environment.SetEnvironmentVariable("COLLAB_DEBUG", "1");
-            // Clear STORYCAD_PLUGIN_DIR to ensure we're testing the COLLAB_DEBUG=1 path
-            Environment.SetEnvironmentVariable("STORYCAD_PLUGIN_DIR", null);
-
-            var result = await service.CollaboratorEnabled();
-
-            // Assert - Result depends on whether we're in developer build and if DLL exists
-            // We're just testing that it doesn't return false immediately
-            // The actual result will depend on the test environment
-            var appState = Ioc.Default.GetRequiredService<AppState>();
-            if (!appState.DeveloperBuild)
-            {
-                Assert.IsFalse(result, "Should be false when not in developer build and no plugin dir");
-            }
-            // If in developer build, result depends on whether DLL is found
-        }
-        finally
-        {
-            // Cleanup - Restore original values
-            Environment.SetEnvironmentVariable("COLLAB_DEBUG", originalValue);
-            Environment.SetEnvironmentVariable("STORYCAD_PLUGIN_DIR", originalPluginDir);
-        }
+        Assert.IsTrue(service.HasCollaborator,
+            "HasCollaborator should be true when a Collaborator factory is registered");
     }
-
-    // Note: Tests for removed interface methods have been deleted.
-    // The ICollaborator interface now has OpenAsync, Close, and Dispose methods.
 }

@@ -8,7 +8,7 @@ has_toc: false
 ---
 ## Scrivener Reports
 
-If you use Scrivener, clicking Scrivener Reports will open a file picker to allow you to select a Scrivener .scrivx file from a Scrivener project. The Scrivener project you select is the one you’ll be writing your draft in, and it must have been created before you generate the reports.
+If you use Scrivener, clicking Scrivener Reports will open a file picker to allow you to select a Scrivener .scrivx file from a Scrivener project. The Scrivener project you select is the one you’ll be writing your draft in, and it must have been created before you generate the reports. If that project already has a StoryCAD folder from an earlier export, StoryCAD replaces that folder. You do not need to delete it first.
 
 ![](../media/Scrivener-Reports-File-Picker.png)
 

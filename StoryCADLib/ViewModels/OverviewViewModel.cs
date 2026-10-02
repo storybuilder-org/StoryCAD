@@ -388,6 +388,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable, IRe
                 Model.Style = Style ?? "";
                 Model.Tone = Tone ?? "";
                 Model.StoryProblem = StoryProblem;
+                ApplySpineCategory();
                 Model.Description = Description ?? "";
                 Model.Concept = Concept ?? "";
                 Model.Premise = Premise ?? "";
@@ -419,6 +420,43 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable, IRe
             _logger.LogException(LogLevel.Error,
                 ex, $"Failed to save overview model - {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Collaborator #246: selecting a Spine on Overview writes ProblemCategory Story problem
+    /// on that Problem. Clearing the picker does not change the old Problem's category.
+    /// </summary>
+    private void ApplySpineCategory()
+    {
+        if (StoryProblem == Guid.Empty || _storyModel == null)
+            return;
+
+        if (StoryElement.GetByGuid(StoryProblem, _storyModel) is not ProblemModel spine)
+            return;
+
+        if (!string.Equals(
+                (spine.ProblemCategory ?? string.Empty).Trim(),
+                OverviewModel.StoryProblemCategoryListValue,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            spine.ProblemCategory = OverviewModel.StoryProblemCategoryListValue;
+        }
+    }
+
+    /// <summary>
+    /// Collaborator #246: ProblemViewModel writes Overview.StoryProblem on category change.
+    /// Copy that GUID onto the picker so the ComboBox does not keep the previous Problem.
+    /// </summary>
+    public void SyncPickerFromModel()
+    {
+        if (Model == null || Problems == null)
+            return;
+
+        var was = _changeable;
+        _changeable = false;
+        StoryProblem = Model.StoryProblem;
+        SelectedProblem = Problems.FirstOrDefault(p => p.Uuid == StoryProblem);
+        _changeable = was;
     }
 
     public void ReloadFromModel()
