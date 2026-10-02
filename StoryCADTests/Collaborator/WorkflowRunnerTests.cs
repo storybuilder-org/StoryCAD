@@ -324,4 +324,61 @@ public class WorkflowRunnerTests
         Assert.AreEqual(0, result.PendingUpdates.Count);
         Assert.AreEqual(0, result.KeptProperties.Count, "an empty value is a fault in the reply, not a kept value");
     }
+
+    private static (WorkflowRunner Runner, OverviewModel Overview) ArrangeOverview(string storyIdea)
+    {
+        var (model, runner, _, _) = ArrangeRelationship();
+        var overview = new OverviewModel("Scorecard", model, null) { Description = storyIdea };
+        return (runner, overview);
+    }
+
+    private static WorkflowResult StoryIdeaResult(OverviewModel overview, string proposed, OutputFieldState state)
+    {
+        var result = WorkflowResult.Succeeded();
+        result.PendingUpdates.Add(new PendingUpdate("Overview", overview.Uuid, new PropertySpec("Description"), proposed));
+        result.FieldStates["Description"] = state;
+        return result;
+    }
+
+    /// <summary>
+    ///     Collaborator #253: Ideation (Premise) never changes a filled Story Idea. The model
+    ///     rewrote it and dropped facts; the Story Idea has no earlier step to give a MaterialChange.
+    /// </summary>
+    [TestMethod]
+    public void ClassifyScalarUpdates_IdeationReviseOnFilledStoryIdea_IsNotProposedAndIsKept()
+    {
+        const string idea = "A child is lost and being pursued in a major league ball park during the game.";
+        var (runner, overview) = ArrangeOverview(idea);
+        var result = StoryIdeaResult(overview,
+            "A mother searches for her lost child in a major league ball park during the game.",
+            OutputFieldState.Revise);
+
+        runner.ClassifyScalarUpdates(result, null, "Premise");
+
+        Assert.AreEqual(0, result.PendingUpdates.Count, "no proposal to change the Story Idea");
+        CollectionAssert.Contains(result.KeptProperties, "Description");
+        Assert.AreEqual(idea, overview.Description);
+    }
+
+    [TestMethod]
+    public void ClassifyScalarUpdates_IdeationFillOnEmptyStoryIdea_IsFill()
+    {
+        var (runner, overview) = ArrangeOverview("");
+        var result = StoryIdeaResult(overview, "A child is lost in a ball park.", OutputFieldState.Fill);
+
+        runner.ClassifyScalarUpdates(result, null, "Premise");
+
+        Assert.AreEqual(UpdateKind.Fill, result.PendingUpdates.Single().Kind);
+    }
+
+    [TestMethod]
+    public void ClassifyScalarUpdates_OtherWorkflowReviseOnFilledDescription_IsStillProposed()
+    {
+        var (runner, overview) = ArrangeOverview("A child is lost in a ball park.");
+        var result = StoryIdeaResult(overview, "A child is lost and pursued in a ball park.", OutputFieldState.Revise);
+
+        runner.ClassifyScalarUpdates(result, null, "StoryProblem");
+
+        Assert.AreEqual(UpdateKind.Protect, result.PendingUpdates.Single().Kind);
+    }
 }
