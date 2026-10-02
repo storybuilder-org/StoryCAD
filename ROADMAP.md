@@ -6,9 +6,9 @@ Where StoryCAD is going, how the team plans new features, and how you can sugges
 
 ## The short version
 
-- StoryCAD is currently at version **4.2**. The next public release is **4.3**, and after it **4.4**.
+- StoryCAD is currently at version **4.3**. The next public release is **4.4**.
 - **4.3** puts **Collaborator**, StoryCAD's optional AI assistant, inside StoryCAD as a free beta for a limited group of testers.
-- **4.4** is Collaborator's production release, open to all StoryCAD users, together with StoryCAD improvements such as a Plot Board window for the beat structure. You can track both on the GitHub milestone page.
+- **4.4** is Collaborator's production release, open to all StoryCAD users, together with StoryCAD improvements such as a Plot Board window for the beat structure. You can track it on the GitHub milestone page.
 - All public planning lives on **GitHub**: <https://github.com/storybuilder-org/StoryCAD>.
 - Releases ship when they're ready. There is **no fixed calendar** for any version, by design.
 
@@ -24,9 +24,9 @@ Click any release to see the issues in it. Closed issues are done; open issues a
 
 To see only the issues in a specific release, use a search like:
 
-**<https://github.com/storybuilder-org/StoryCAD/issues?q=is%3Aissue+milestone%3A%22Release+4.3%22>**
+**<https://github.com/storybuilder-org/StoryCAD/issues?q=is%3Aissue+milestone%3A%22Release+4.4%22>**
 
-Replace `Release+4.3` with another release name (for example `Release+4.1` or `Release+4.2`) to see a different release.
+Replace `Release+4.4` with another release name (for example `Release+4.2` or `Release+4.3`) to see a different release.
 
 You don't need a GitHub account to read any of this; everything in the StoryCAD repository is public.
 
