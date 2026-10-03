@@ -1,6 +1,6 @@
 # StoryCAD Roadmap
 
-Where StoryCAD is going, how the team plans new features, and how you can suggest or vote on what gets built next. Plain English; no GitHub experience required.
+Where StoryCAD is going, how the team plans new features, and how you can suggest what gets built next. Plain English; no GitHub experience required.
 
 ---
 
@@ -60,7 +60,7 @@ You don't need a GitHub account to read any of this; everything in the StoryCAD 
 
 ## How features get on the roadmap
 
-The team picks what goes into a release based on three sources of input, in roughly this order of formality.
+The team picks what goes into a release based on two sources of input, in roughly this order of formality.
 
 ### 1. File a GitHub issue (anyone)
 
@@ -76,19 +76,9 @@ The StoryBuilder Discord server is at <https://discord.gg/bpCyAQnWCa>. The `feat
 
 The team reads this channel and uses it to spot patterns: ideas that get a lot of reactions are candidates for becoming proper GitHub issues and getting on a release.
 
-### 3. Vote in `#feature-voting` (StoryCAD Pro members, quarterly)
-
-Once per quarter, the team picks 4–6 candidate features from the GitHub backlog and posts a poll in the `feature-voting` channel. **The winning feature gets added to the roadmap**, with a comment posted on the corresponding GitHub issue noting the community vote.
-
-This channel is part of the **StoryCAD Pro** subscription tier ($2.99/month via Discord Server Subscriptions). Pro members get a direct, binding vote in what the team prioritizes next. Free members can still influence the roadmap through paths 1 and 2, but a Pro vote is the only mechanism that the team is committed to honoring on a fixed cadence.
-
-This is one of the seven perks that come with Pro; see the Discord server for the full list and how to subscribe.
-
 The 'how' of a production release is an internal decision for the development team and StoryBuilder Foundation's board. We fix bugs, we have things we need to update to remain current, and we even have improvements of our own we'd like to see.
 
-But we believe the 'what' of a release, the features that it contains, should be user-driven as much as possible, and particularly for the features that enhance StoryCAD for you its users. Feature voting is our attempt at putting control of the product (as much as is practical) in your hands.
-
-In case you might ask, the reason we restrict feature voting to StoryCAD Pro users is to make sure you have some skin in the game.  We don't think this is onerous: a StoryCAD Pro subscription costs less than a cup of coffee.
+But we believe the 'what' of a release, the features that it contains, should be user-driven as much as possible, and particularly for the features that enhance StoryCAD for you its users. GitHub issues and the `#feature-requests` channel are how we put control of the product (as much as is practical) in your hands.
 
 ---
 
@@ -133,7 +123,6 @@ StoryCAD has an optional AI assistant called **Collaborator**. It is part of Sto
 | What's in 4.4 specifically | <https://github.com/storybuilder-org/StoryCAD/milestone/7> |
 | File a bug or feature request | <https://github.com/storybuilder-org/StoryCAD/issues/new> |
 | Suggest an idea informally | `#feature-requests` on Discord |
-| Vote on quarterly priorities (Pro) | `#feature-voting` on Discord |
 | Read the current user manual | <https://manual.storybuilder.org/> |
 | Discord server | <https://discord.gg/bpCyAQnWCa> |
 | Foundation's main site | <https://storybuilder.org/> |
