@@ -44,23 +44,27 @@
                                   ItemsSource="{x:Bind ProblemVm.ProblemTypeList}"
                                   Text="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind ProblemVm.ProblemType, Mode=OneWay}"
                                   AutomationProperties.AutomationId="ProblemTypeCombo" />
                             <ComboBox Grid.Column="2" IsEditable="True" Header="Conflict Type" Grid.Row="0" MinWidth="200"
                                   Margin="20,0,0,0"
                                   ItemsSource="{x:Bind ProblemVm.ConflictTypeList}"
                                   Text="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}"
+                                  SelectedItem="{x:Bind ProblemVm.ConflictType, Mode=OneWay}"
                                   AutomationProperties.AutomationId="ConflictTypeCombo" />
                         </Grid>
                         <ComboBox IsEditable="True" Header="Problem Category" Grid.Row="1" MinWidth="300"
                               ItemsSource="{x:Bind ProblemVm.ProblemCategoryList}"
                               Text="{x:Bind ProblemVm.ProblemCategory, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.ProblemCategory, Mode=TwoWay}"
+                              SelectedItem="{x:Bind ProblemVm.ProblemCategory, Mode=OneWay}"
                               AutomationProperties.AutomationId="ProblemCategoryCombo" />
                         <ComboBox IsEditable="True" Header="Subject" Grid.Row="2" MinWidth="300"
                               ItemsSource="{x:Bind ProblemVm.SubjectList}"
                               Text="{x:Bind ProblemVm.Subject, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.Subject, Mode=TwoWay}"
+                              SelectedItem="{x:Bind ProblemVm.Subject, Mode=OneWay}"
                               AutomationProperties.AutomationId="SubjectCombo" />
                         <usercontrols:RichEditBoxExtended Header="Story Question" Grid.Row="3"
                                                       RtfText="{x:Bind ProblemVm.Description, Mode=TwoWay}"
@@ -73,6 +77,7 @@
                               ItemsSource="{x:Bind ProblemVm.ProblemSourceList}"
                               Text="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}"
+                              SelectedItem="{x:Bind ProblemVm.ProblemSource, Mode=OneWay}"
                               AutomationProperties.AutomationId="ProblemSourceCombo" />
                     </Grid>
                 </TabViewItem>
@@ -97,11 +102,13 @@
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               Text="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}"
+                              SelectedItem="{x:Bind ProblemVm.ProtGoal, Mode=OneWay}"
                               AutomationProperties.AutomationId="ProblemProtagonistGoalCombo" />
                         <ComboBox IsEditable="True" Header="Motivation" Grid.Row="2"
                               MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
                               Text="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}"
+                              SelectedItem="{x:Bind ProblemVm.ProtMotive, Mode=OneWay}"
                               AutomationProperties.AutomationId="ProtagonistMotivationCombo" />
                         <Button Content="Conflict Builder" Grid.Row="3" HorizontalAlignment="Left" Margin="0,10,10,10"
                             Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}"
@@ -137,11 +144,13 @@
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               Text="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}"
+                              SelectedItem="{x:Bind ProblemVm.AntagGoal, Mode=OneWay}"
                               AutomationProperties.AutomationId="ProblemAntagonistGoalCombo" />
                         <ComboBox IsEditable="True" Header="Motivation" Grid.Row="2"
                               MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
                               Text="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}"
+                              SelectedItem="{x:Bind ProblemVm.AntagMotive, Mode=OneWay}"
                               AutomationProperties.AutomationId="AntagonistMotivationCombo" />
                         <Button Content="Conflict Builder" Grid.Row="3" HorizontalAlignment="Left" Margin="0,10,10,10"
                             Command="{x:Bind ProblemVm.ConflictCommand, Mode=OneWay}"
@@ -170,16 +179,19 @@
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.OutcomeList}"
                               Text="{x:Bind ProblemVm.Outcome, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.Outcome, Mode=TwoWay}"
+                              SelectedItem="{x:Bind ProblemVm.Outcome, Mode=OneWay}"
                               AutomationProperties.AutomationId="ProblemOutcomeCombo" />
                         <ComboBox IsEditable="True" Header="Method" Grid.Row="1"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.MethodList}"
                               Text="{x:Bind ProblemVm.Method, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.Method, Mode=TwoWay}"
+                              SelectedItem="{x:Bind ProblemVm.Method, Mode=OneWay}"
                               AutomationProperties.AutomationId="MethodCombo" />
                         <ComboBox IsEditable="True" Header="Theme" Grid.Row="2"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.ThemeList}"
                               Text="{x:Bind ProblemVm.Theme, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.Theme, Mode=TwoWay}"
+                              SelectedItem="{x:Bind ProblemVm.Theme, Mode=OneWay}"
                               AutomationProperties.AutomationId="ThemeCombo" />
                         <usercontrols:RichEditBoxExtended Header="Premise" Grid.Row="3"
                                                       RtfText="{x:Bind ProblemVm.Premise, Mode=TwoWay}"

@@ -119,6 +119,87 @@ public class BackendTests
 
     #endregion
 
+    #region PostVersion Platform Suffix Tests (Issue #1428)
+
+    /// <summary>
+    ///     Verifies PostVersion writes the platform-suffixed version to the
+    ///     versions table, so the backend can break usage down per OS (#1428).
+    /// </summary>
+    [TestMethod]
+    public async Task PostVersion_PassesPlatformSuffixedCurrentVersionToSqlIo()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.FirstName = "StoryCAD";
+        preferenceService.Model.LastName = "Tests";
+        preferenceService.Model.Email = "sysadmin@storybuilder.org";
+
+        await backendService.PostVersion();
+
+        Assert.AreEqual(1, testSqlIo.AddVersionCalls.Count);
+        Assert.AreEqual(appState.VersionWithPlatform, testSqlIo.AddVersionCalls[0].current,
+            "PostVersion should send the platform-suffixed version as current_ver");
+    }
+
+    /// <summary>
+    ///     The previous version is suffixed with the same platform code, since a
+    ///     prior run on the same install was necessarily the same OS.
+    /// </summary>
+    [TestMethod]
+    public async Task PostVersion_WhenPreviousVersionStored_SuffixesPreviousVersion()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.FirstName = "StoryCAD";
+        preferenceService.Model.LastName = "Tests";
+        preferenceService.Model.Email = "sysadmin@storybuilder.org";
+        preferenceService.Model.Version = "4.1.0.0";
+
+        await backendService.PostVersion();
+
+        Assert.AreEqual(1, testSqlIo.AddVersionCalls.Count);
+        Assert.AreEqual($"4.1.0.0-{appState.Platform}", testSqlIo.AddVersionCalls[0].previous,
+            "PostVersion should send the platform-suffixed previous version as previous_ver");
+    }
+
+    /// <summary>
+    ///     A first-run install has no stored version; previous_ver must stay empty
+    ///     rather than becoming a bare "-Win".
+    /// </summary>
+    [TestMethod]
+    public async Task PostVersion_WhenNoPreviousVersion_LeavesPreviousEmpty()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        preferenceService.Model.FirstName = "StoryCAD";
+        preferenceService.Model.LastName = "Tests";
+        preferenceService.Model.Email = "sysadmin@storybuilder.org";
+        preferenceService.Model.Version = "";
+
+        await backendService.PostVersion();
+
+        Assert.AreEqual(1, testSqlIo.AddVersionCalls.Count);
+        Assert.AreEqual(string.Empty, testSqlIo.AddVersionCalls[0].previous,
+            "An absent previous version should stay empty, not gain a bare suffix");
+    }
+
+    #endregion
+
     #region DeleteUserData Tests
 
     [TestMethod]
@@ -202,6 +283,77 @@ public class BackendTests
         // Assert
         Assert.IsFalse(result);
         Assert.IsTrue(testLogger.HasError("Failed to delete user data"));
+    }
+
+    #endregion
+
+    #region Backend Unreachable Classification Tests (MySQL 1042)
+
+    /// <summary>
+    ///     MySQL 1042 ("Unable to connect to any of the specified MySQL hosts") is raised
+    ///     when the server name fails to resolve - the inner exception is
+    ///     ArgumentException("The host name or IP address is invalid"). That is the same
+    ///     "backend unreachable" condition as 2003/2013, so it must be logged as a Warning
+    ///     and retried on the next startup, never reported to elmah.io as an Error.
+    ///
+    ///     Regression guard: before this fix 1042 fell through to the generic
+    ///     catch (MySqlException) handler, which calls LogException(LogLevel.Error, ...)
+    ///     and therefore produced elmah Error events on every launch for any client
+    ///     pointed at a retired database host.
+    /// </summary>
+    [TestMethod]
+    public async Task PostPreferences_WithMySqlBadHost_LogsAsWarningNotError()
+    {
+        // Arrange
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        testSqlIo.ExceptionToThrow = CreateMySqlException(1042,
+            "Unable to connect to any of the specified MySQL hosts");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        // Act
+        await backendService.PostPreferences(preferenceService.Model);
+
+        // Assert
+        Assert.IsTrue(testLogger.HasWarning("Transient MySQL error during preferences posting"),
+            "1042 should be classified as an unreachable-backend condition, like 2003/2013");
+        Assert.IsTrue(testLogger.HasWarning("Code 1042"),
+            "Should log error code 1042");
+        Assert.AreEqual(0, testLogger.ErrorCount,
+            "1042 must not be logged at Error - Error is what reaches elmah.io");
+    }
+
+    /// <summary>
+    ///     PostVersion mirror of PostPreferences_WithMySqlBadHost_LogsAsWarningNotError.
+    ///     Both posts run back-to-back on startup, so an unresolvable host produced two
+    ///     Error paths per launch before this fix.
+    /// </summary>
+    [TestMethod]
+    public async Task PostVersion_WithMySqlBadHost_LogsAsWarningNotError()
+    {
+        // Arrange
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        testSqlIo.ExceptionToThrow = CreateMySqlException(1042,
+            "Unable to connect to any of the specified MySQL hosts");
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        // Act
+        await backendService.PostVersion();
+
+        // Assert
+        Assert.IsTrue(testLogger.HasWarning("Transient MySQL error during version posting"),
+            "1042 should be classified as an unreachable-backend condition, like 2003/2013");
+        Assert.IsTrue(testLogger.HasWarning("Code 1042"),
+            "Should log error code 1042");
+        Assert.AreEqual(0, testLogger.ErrorCount,
+            "1042 must not be logged at Error - Error is what reaches elmah.io");
     }
 
     #endregion
@@ -399,6 +551,67 @@ public class BackendTests
         // Assert
         Assert.IsTrue(testLogger.HasError("Unexpected error in StartupRecording method"),
             "Should log unexpected exception as Error");
+    }
+
+    #endregion
+
+    #region BeginStartupRecording Tests
+
+    /// <summary>
+    ///     Verifies BeginStartupRecording returns while the backend is still unanswered.
+    ///     App.OnLaunched used to await StartupRecording before MainWindow.Activate, so a
+    ///     stalled backend kept the app off screen for the full MySQL timeout.
+    /// </summary>
+    [TestMethod]
+    public async Task BeginStartupRecording_WhenBackendStalls_ReturnsWithoutWaiting()
+    {
+        // Arrange — a configured backend whose message fetch never answers until released.
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("test-connection");
+        var gate = new TaskCompletionSource();
+        testSqlIo.GetUnreadMessagesGate = gate;
+
+        // Steady-state launch: nothing to re-post, so FetchUnreadMessages is the only work.
+        preferenceService.Model.PreferencesInitialized = true;
+        preferenceService.Model.RecordPreferencesStatus = true;
+        preferenceService.Model.RecordVersionStatus = true;
+        preferenceService.Model.Version = appState.Version;
+        preferenceService.Model.UserId = 1;
+
+        var backendService = new BackendService(testLogger, appState, preferenceService, testSqlIo);
+
+        // Act
+        backendService.BeginStartupRecording();
+
+        // Assert — control is back here while the backend is still hanging.
+        Assert.IsFalse(backendService.StartupRecordingTask.IsCompleted,
+            "BeginStartupRecording must not wait on the backend");
+
+        gate.SetResult();
+        await backendService.StartupRecordingTask;
+
+        Assert.IsTrue(backendService.StartupRecordingTask.IsCompletedSuccessfully,
+            "StartupRecordingTask should complete once the backend answers");
+        Assert.AreEqual(1, testSqlIo.GetUnreadMessagesCalls.Count,
+            "The deferred work should still have run");
+    }
+
+    /// <summary>
+    ///     Verifies a consumer awaiting StartupRecordingTask outside the App startup
+    ///     path never blocks.
+    /// </summary>
+    [TestMethod]
+    public void StartupRecordingTask_BeforeBegin_IsAlreadyComplete()
+    {
+        var testLogger = new TestLogService();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var backendService = new BackendService(testLogger, appState, preferenceService, new TestMySqlIo());
+
+        Assert.IsTrue(backendService.StartupRecordingTask.IsCompleted);
     }
 
     #endregion
@@ -805,11 +1018,21 @@ public class TestMySqlIo : IMySqlIo
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    ///     When set, GetUnreadMessages blocks until released, standing in for a stalled backend.
+    /// </summary>
+    public TaskCompletionSource GetUnreadMessagesGate { get; set; }
+
     // Messaging
     public Task<List<UserMessage>> GetUnreadMessages(int userId)
     {
         GetUnreadMessagesCalls.Add(userId);
         if (ExceptionToThrow != null) throw ExceptionToThrow;
+        if (GetUnreadMessagesGate != null)
+        {
+            return GetUnreadMessagesGate.Task.ContinueWith(_ => GetUnreadMessagesReturnValue);
+        }
+
         return Task.FromResult(GetUnreadMessagesReturnValue);
     }
 
@@ -884,7 +1107,8 @@ public class TestableBackendService : BackendService
         {
             _testLogService.Log(LogLevel.Warn, $"Backend operation cancelled during startup: {ex.Message}");
         }
-        catch (MySqlException ex) when (ex.Number == 2003 || ex.Number == 2013)
+        // Mirrors BackendService.IsBackendUnreachable; keep the two in step.
+        catch (MySqlException ex) when (ex.Number is 1042 or 2003 or 2013)
         {
             _testLogService.Log(LogLevel.Warn, $"Backend server temporarily unavailable (Code {ex.Number}): {ex.Message}");
             _testLogService.Log(LogLevel.Info, "Backend telemetry will retry on next startup");

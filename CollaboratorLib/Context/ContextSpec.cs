@@ -17,7 +17,7 @@ public record ContextSpec
     public bool IncludeBeatHierarchy { get; init; }
 
     /// <summary>
-    /// Include character details for Protagonist/Antagonist references.
+    /// Include character details for Protagonist/Antagonist references (problem-target runs).
     /// </summary>
     public bool IncludeCharacterContext { get; init; }
 
@@ -32,7 +32,13 @@ public record ContextSpec
     public int MaxPrecedingBeats { get; init; } = 3;
 
     /// <summary>
-    /// Default spec with minimal context (story constraints only).
+    /// Include outline-wide required-field gap GUIDs (issue #107).
+    /// Default on for all runs; turn off only for explicit minimal prompts.
+    /// </summary>
+    public bool IncludeGaps { get; init; } = true;
+
+    /// <summary>
+    /// Default: story constraints + gap GUID list.
     /// </summary>
     public static ContextSpec Default => new();
 
@@ -45,6 +51,7 @@ public record ContextSpec
         IncludeBeatHierarchy = true,
         IncludeCharacterContext = true,
         IncludePrecedingEvents = true,
-        MaxPrecedingBeats = 3
+        MaxPrecedingBeats = 3,
+        IncludeGaps = true
     };
 }

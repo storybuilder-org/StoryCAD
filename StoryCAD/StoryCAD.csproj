@@ -55,6 +55,37 @@
               Condition="Exists('$(PublishDir)/StoryCAD.app')" />
     </Target>
 
+    <!-- StoreKit shim (issue #30): build the Swift dylib and drop it in Contents/MacOS/ so the
+         packaging pipeline's existing `find Contents/MacOS -name *.dylib` codesign step signs it
+         with the MAS cert before the outer bundle. Placed beside the executable, which the interop's
+         DllImport resolver finds; runs on macOS publish only, so Windows/Linux outputs are unaffected. -->
+    <!-- Inputs/Outputs (keyed on the final copied dylib) let MSBuild skip the two swiftc slices +
+         lipo when the shim source is unchanged and the bundle already holds the dylib. -->
+    <Target Name="_BuildAndCopyStoreKitShim" AfterTargets="_UnoPublishAppBundle"
+            Condition="$([MSBuild]::IsOSPlatform('OSX')) And Exists('$(PublishDir)/StoryCAD.app')"
+            Inputs="$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/StoreKitShim.swift;$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/build.sh"
+            Outputs="$(PublishDir)/StoryCAD.app/Contents/MacOS/libStoryCADStoreKit.dylib">
+        <Exec Command="bash &quot;$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/build.sh&quot;" />
+        <Copy SourceFiles="$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/out/libStoryCADStoreKit.dylib"
+              DestinationFolder="$(PublishDir)/StoryCAD.app/Contents/MacOS/" />
+    </Target>
+
+    <!-- Same shim, dev loop: publish is the only thing that builds an .app, so the target above
+         never runs for `dotnet build` / `dotnet run -f net10.0-desktop`. Without the dylib in the
+         output the interop's probe fails, BootStrapper falls back to NullStoreService, and every
+         dev run reports "Collaborator requires the Microsoft Store or Mac App Store edition".
+         $(OutDir) is the resolver's beside-the-executable probe, so a plain build behaves like the
+         bundle. Unsigned and unbundled, so StoreKit itself still has no App Store context; this
+         makes the store path reachable, not transacting. -->
+    <Target Name="_BuildAndCopyStoreKitShimToOutput" AfterTargets="Build"
+            Condition="$([MSBuild]::IsOSPlatform('OSX'))"
+            Inputs="$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/StoreKitShim.swift;$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/build.sh"
+            Outputs="$(OutDir)libStoryCADStoreKit.dylib">
+        <Exec Command="bash &quot;$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/build.sh&quot;" />
+        <Copy SourceFiles="$(MSBuildProjectDirectory)/../src/macos/StoreKitShim/out/libStoryCADStoreKit.dylib"
+              DestinationFolder="$(OutDir)" />
+    </Target>
+
     <PropertyGroup>
         <!-- MSIX Configuration for Windows -->
         <UseWinUI Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</UseWinUI>
@@ -86,9 +117,6 @@
 
     <ItemGroup>
         <PackageReference Include="Uno.Fonts.Fluent" />
-        <!-- Transitive CVE override (GHSA-xrw6-gwf8-vvr9). Version pinned in Directory.Packages.props.
-             Remove when Uno.Sdk in global.json bumps to 6.6+. Tracked by issue #1383. -->
-        <PackageReference Include="Tmds.DBus.Protocol" />
     </ItemGroup>
 
     <ItemGroup>

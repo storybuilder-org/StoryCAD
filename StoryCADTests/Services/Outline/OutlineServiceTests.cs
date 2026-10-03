@@ -1858,6 +1858,33 @@ public class OutlineServiceTests
         Assert.IsFalse(model.Changed, "A no-op duplicate add must not mark the model changed.");
     }
 
+    [TestMethod]
+    public async Task AddRelationship_WritesTraitAttitudeNotesAndMirrors()
+    {
+        var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+        var character1 = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+        var character2 = _outlineService.AddStoryElement(model, StoryItemType.Character, overview.Node);
+
+        var result = _outlineService.AddRelationship(
+            model, character1.Uuid, character2.Uuid, "Rival",
+            mirror: true, trait: "Protective", attitude: "Wary", notes: "They keep score");
+
+        Assert.IsTrue(result);
+        var source = (CharacterModel)character1;
+        var partner = (CharacterModel)character2;
+        Assert.AreEqual(1, source.RelationshipList.Count);
+        Assert.AreEqual(1, partner.RelationshipList.Count);
+        Assert.AreEqual("Rival", source.RelationshipList[0].RelationType);
+        Assert.AreEqual("Protective", source.RelationshipList[0].Trait);
+        Assert.AreEqual("Wary", source.RelationshipList[0].Attitude);
+        Assert.AreEqual("They keep score", source.RelationshipList[0].Notes);
+        Assert.AreEqual(character2.Uuid, source.RelationshipList[0].PartnerUuid);
+        Assert.AreEqual(character2.Name, source.RelationshipList[0].Partner.Name);
+        Assert.AreEqual(character1.Uuid, partner.RelationshipList[0].PartnerUuid);
+        Assert.AreEqual("They keep score", partner.RelationshipList[0].Notes);
+    }
+
     #endregion
 
     #region AddCastMember Tests

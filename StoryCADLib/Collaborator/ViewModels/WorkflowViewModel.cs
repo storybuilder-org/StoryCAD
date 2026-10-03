@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StoryCADLib.Collaborator.Models;
@@ -19,21 +21,68 @@ public partial class WorkflowViewModel : ObservableRecipient
     public WorkflowViewModel()
     {
         ConversationList = new ObservableCollection<ChatMessage>();
-        PendingUpdates = new Dictionary<string, object>();
+        ConversationList.CollectionChanged += OnConversationChanged;
+        PendingUpdateItems = new ObservableCollection<PendingUpdateItem>();
 
         // Existing commands
         AcceptCommand = new RelayCommand(SaveOutputs);
         SendCommand = new RelayCommand(async () => await SendButtonClicked());
 
-        // Property update commands
-        AcceptAllCommand = new RelayCommand(ExecuteAcceptAll);
+        // Property update commands (#140: Accept paths may await overwrite confirm)
+        AcceptAllCommand = new RelayCommand(async () => await ExecuteAcceptAllAsync());
         ReviewEachCommand = new RelayCommand(ExecuteReviewEach);
         TryAgainCommand = new RelayCommand(async () => await ExecuteTryAgain());
 
         // Review mode commands
-        AcceptCurrentCommand = new RelayCommand(ExecuteAcceptCurrent);
-        SkipCurrentCommand = new RelayCommand(ExecuteSkipCurrent);
-        AcceptRemainingCommand = new RelayCommand(ExecuteAcceptRemaining);
+        AcceptCurrentCommand = new RelayCommand(async () => await ExecuteAcceptCurrentAsync());
+        SkipCurrentCommand = new RelayCommand(async () => await ExecuteSkipCurrentAsync());
+        AcceptRemainingCommand = new RelayCommand(async () => await ExecuteAcceptRemainingAsync());
+
+        // Character Interview (#119)
+        SaveInterviewCommand = new RelayCommand(async () => await SaveInterviewAsync());
+    }
+
+    /// <summary>
+    /// Shows the sender label once per run of consecutive same-sender bubbles;
+    /// status groups never carry a label (#129 chat cleanup).
+    /// </summary>
+    private void OnConversationChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        if (e.Action != System.Collections.Specialized.NotifyCollectionChangedAction.Add || e.NewItems == null)
+            return;
+
+        foreach (ChatMessage added in e.NewItems)
+        {
+            var index = ConversationList.IndexOf(added);
+            var previous = index > 0 ? ConversationList[index - 1] : null;
+            added.ShowSender = !added.IsStatusGroup
+                && (previous == null || previous.IsUser != added.IsUser);
+        }
+    }
+
+    /// <summary>
+    /// Adds a workflow progress line, rolling consecutive lines into one
+    /// collapsed status group instead of a bubble each (#129 chat cleanup).
+    /// </summary>
+    public void AddStatusMessage(string message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+            return;
+
+        var line = message.Trim().Trim('-').Trim();
+        if (line.Length == 0)
+            return;
+
+        if (ConversationList.Count > 0
+            && ConversationList[^1] is { IsStatusGroup: true } group)
+        {
+            group.AddStep(line);
+            return;
+        }
+
+        var newGroup = ChatMessage.StatusGroup();
+        newGroup.AddStep(line);
+        ConversationList.Add(newGroup);
     }
 
     public async Task InitializeAsync(object workflow)
@@ -53,9 +102,24 @@ public partial class WorkflowViewModel : ObservableRecipient
 
     public string Title { get; set; }
 
-    public string Description { get; set; }
+    private string _description = string.Empty;
+    /// <summary>Brief workflow purpose (registry description).</summary>
+    public string Description
+    {
+        get => _description;
+        set => SetProperty(ref _description, value ?? string.Empty);
+    }
 
-    public string Explanation { get; set; }
+    private string _explanation = string.Empty;
+    /// <summary>
+    /// Topical work-column context (#129): selected elements and what to do next
+    /// (pending accept/review). Not the long static registry essay.
+    /// </summary>
+    public string Explanation
+    {
+        get => _explanation;
+        set => SetProperty(ref _explanation, value ?? string.Empty);
+    }
 
     public ObservableCollection<ChatMessage> ConversationList { get; set; }
 
@@ -73,6 +137,35 @@ public partial class WorkflowViewModel : ObservableRecipient
         set => SetProperty(ref _inputText, value);
     }
 
+    private bool _isChatEnabled;
+    /// <summary>
+    /// Collaborator #145: Send enabled only after workflow proposals are seeded into chat.
+    /// </summary>
+    public bool IsChatEnabled
+    {
+        get => _isChatEnabled;
+        set
+        {
+            if (SetProperty(ref _isChatEnabled, value))
+                OnPropertyChanged(nameof(CanSend));
+        }
+    }
+
+    /// <summary>
+    /// What the input box binds to (#119): chat is open and no interview turn is in
+    /// flight. SendButtonClicked posts the text to the pane before Collaborator sees it,
+    /// so a message sent mid-turn would sit there looking taken while the turn loop
+    /// refused it. Disabling the box is the honest state.
+    /// </summary>
+    public bool CanSend => IsChatEnabled && !IsInterviewTurnRunning;
+
+    private string _chatPlaceholder = "Waiting for proposals…";
+    public string ChatPlaceholder
+    {
+        get => _chatPlaceholder;
+        set => SetProperty(ref _chatPlaceholder, value ?? string.Empty);
+    }
+
     private string _promptOutput;
     public string PromptOutput
     {
@@ -80,14 +173,55 @@ public partial class WorkflowViewModel : ObservableRecipient
         set => SetProperty(ref _promptOutput, value);
     }
 
-    private string _selectedElementsSummary;
+    private string _selectedElementsSummary = string.Empty;
     /// <summary>
-    /// Summary of elements selected for this workflow (e.g., "Problem: Herold wants Greta")
+    /// Gathered elements for this run (e.g. "Overview: Schrodinger's Computer").
+    /// Surfaced via <see cref="Explanation"/>, not a separate card.
     /// </summary>
     public string SelectedElementsSummary
     {
         get => _selectedElementsSummary;
-        set => SetProperty(ref _selectedElementsSummary, value);
+        set => SetProperty(ref _selectedElementsSummary, value ?? string.Empty);
+    }
+
+    /// <summary>
+    /// Rebuilds topical Explanation from selected elements + pending/review state.
+    /// </summary>
+    public void RefreshTopicalExplanation()
+    {
+        var parts = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(SelectedElementsSummary))
+        {
+            var oneLine = SelectedElementsSummary.Replace("\r\n", "; ").Replace("\n", "; ");
+            parts.Add($"Selected: {oneLine}");
+        }
+
+        if (IsInReviewMode && PendingUpdateItems != null && PendingUpdateItems.Count > 0)
+        {
+            parts.Add(
+                $"Reviewing {CurrentReviewIndex + 1} of {PendingUpdateItems.Count}: {CurrentReviewDisplayName}. " +
+                "Accept to apply, Skip to keep yours.");
+        }
+        else if (HasPendingUpdates && PendingUpdateItems != null)
+        {
+            // Collaborator #237 item 9: one count, stated once; the header on the list
+            // carries the total only.
+            var total = PendingUpdateItems.Count;
+            var needReview = PendingUpdateItems.Count(i => i.IsProtected);
+            var review = needReview > 0
+                ? $" {needReview} would replace text you wrote; review those before accepting."
+                : string.Empty;
+            parts.Add(
+                $"{total} property update(s) proposed.{review} " +
+                "Use Accept All, Review Each, or Try Again.");
+        }
+        else if (UpdatesApplied)
+        {
+            parts.Add("Updates applied. Ask in chat or choose another workflow.");
+        }
+
+        Explanation = parts.Count == 0 ? string.Empty : string.Join("\n", parts);
     }
 
     #endregion
@@ -95,28 +229,35 @@ public partial class WorkflowViewModel : ObservableRecipient
     #region Pending Updates Properties
 
     /// <summary>
-    /// Property updates extracted from workflow but not yet applied.
-    /// Key format: "ElementLabel.PropertyName", Value: new value
+    /// Classified property updates for the panel (issue #116).
     /// </summary>
-    public Dictionary<string, object> PendingUpdates { get; set; }
+    public ObservableCollection<PendingUpdateItem> PendingUpdateItems { get; set; }
 
-    /// <summary>
-    /// True if there are updates to display (pending or applied).
-    /// </summary>
-    public bool HasUpdates => PendingUpdates?.Count > 0;
+    /// <summary>True if there are updates to display (pending or applied).</summary>
+    public bool HasUpdates => PendingUpdateItems?.Count > 0;
 
-    /// <summary>
-    /// True if updates exist and haven't been applied yet.
-    /// </summary>
+    /// <summary>True if updates exist and haven't been fully applied yet.</summary>
     public bool HasPendingUpdates => HasUpdates && !UpdatesApplied;
+
+    /// <summary>
+    /// Panel header with counts (#129): free vs need-review (Protect).
+    /// </summary>
+    public string PendingUpdatesHeader
+    {
+        get
+        {
+            if (PendingUpdateItems == null || PendingUpdateItems.Count == 0)
+                return "Proposed property updates";
+
+            return $"Proposed property updates ({PendingUpdateItems.Count})";
+        }
+    }
 
     public Microsoft.UI.Xaml.Visibility ReviewModeVisibility =>
         IsInReviewMode ? Microsoft.UI.Xaml.Visibility.Visible : Microsoft.UI.Xaml.Visibility.Collapsed;
 
     private bool _isInReviewMode;
-    /// <summary>
-    /// True when user is reviewing updates one at a time.
-    /// </summary>
+    /// <summary>True when user is reviewing updates one at a time.</summary>
     public bool IsInReviewMode
     {
         get => _isInReviewMode;
@@ -130,64 +271,77 @@ public partial class WorkflowViewModel : ObservableRecipient
     }
 
     private int _currentReviewIndex;
-    /// <summary>
-    /// Index of the property currently being reviewed (0-based).
-    /// </summary>
+    /// <summary>Index of the property currently being reviewed (0-based).</summary>
     public int CurrentReviewIndex
     {
         get => _currentReviewIndex;
         set => SetProperty(ref _currentReviewIndex, value);
     }
 
-    /// <summary>
-    /// Display key of the property currently being reviewed.
-    /// </summary>
-    public string CurrentReviewKey => IsInReviewMode && PendingUpdates?.Count > CurrentReviewIndex
-        ? PendingUpdates.Keys.ElementAt(CurrentReviewIndex)
-        : string.Empty;
+    public string CurrentReviewKey =>
+        IsInReviewMode && PendingUpdateItems?.Count > CurrentReviewIndex
+            ? PendingUpdateItems[CurrentReviewIndex].Key
+            : string.Empty;
 
     /// <summary>
-    /// Value of the property currently being reviewed.
+    /// Friendly title for the row under review, e.g. "Structure Title (Problem)".
+    /// Falls back to the raw key when display fields are unset (#129).
     /// </summary>
-    public string CurrentReviewValue => IsInReviewMode && PendingUpdates?.Count > CurrentReviewIndex
-        ? PendingUpdates.Values.ElementAt(CurrentReviewIndex)?.ToString() ?? "(empty)"
-        : string.Empty;
+    public string CurrentReviewDisplayName
+    {
+        get
+        {
+            if (!IsInReviewMode || PendingUpdateItems == null || PendingUpdateItems.Count <= CurrentReviewIndex)
+                return string.Empty;
 
-    /// <summary>
-    /// Progress text for review mode (e.g., "2 of 5").
-    /// </summary>
+            var item = PendingUpdateItems[CurrentReviewIndex];
+            if (string.IsNullOrEmpty(item.PropertyDisplayName))
+                return item.Key;
+            return string.IsNullOrEmpty(item.ElementName)
+                ? item.PropertyDisplayName
+                : $"{item.PropertyDisplayName} ({item.ElementName})";
+        }
+    }
+
+    /// <summary>Proposed value for the row under review.</summary>
+    public string CurrentReviewValue =>
+        IsInReviewMode && PendingUpdateItems?.Count > CurrentReviewIndex
+            ? PendingUpdateItems[CurrentReviewIndex].ProposedDisplay
+            : string.Empty;
+
+    /// <summary>Current outline value for the row under review.</summary>
+    public string CurrentReviewExisting =>
+        IsInReviewMode && PendingUpdateItems?.Count > CurrentReviewIndex
+            ? (string.IsNullOrEmpty(PendingUpdateItems[CurrentReviewIndex].CurrentDisplay)
+                ? "(empty)"
+                : PendingUpdateItems[CurrentReviewIndex].CurrentDisplay)
+            : string.Empty;
+
+    public string CurrentReviewCraft =>
+        IsInReviewMode && PendingUpdateItems?.Count > CurrentReviewIndex
+            ? PendingUpdateItems[CurrentReviewIndex].CraftExplanation ?? string.Empty
+            : string.Empty;
+
+    public bool CurrentReviewHasCraft => !string.IsNullOrWhiteSpace(CurrentReviewCraft);
+
+    public Microsoft.UI.Xaml.Visibility CurrentReviewCraftVisibility =>
+        CurrentReviewHasCraft ? Microsoft.UI.Xaml.Visibility.Visible : Microsoft.UI.Xaml.Visibility.Collapsed;
+
     public string ReviewProgress => IsInReviewMode
-        ? $"{CurrentReviewIndex + 1} of {PendingUpdates?.Count ?? 0}"
+        ? $"{CurrentReviewIndex + 1} of {PendingUpdateItems?.Count ?? 0}"
         : string.Empty;
 
-    /// <summary>
-    /// Callback invoked when user clicks Accept All.
-    /// Collaborator sets this to apply all pending updates.
-    /// </summary>
-    public Action OnAcceptAll { get; set; }
-
-    /// <summary>
-    /// Callback invoked when user clicks Try Again.
-    /// Collaborator sets this to re-execute the workflow.
-    /// </summary>
+    public Func<Task> OnAcceptAll { get; set; }
     public Func<Task> OnTryAgain { get; set; }
+    public Func<string, Task> OnAcceptProperty { get; set; }
+    public Func<string, Task> OnSkipProperty { get; set; }
 
     /// <summary>
-    /// Callback invoked when user accepts a single property in review mode.
-    /// Parameter is the property key (e.g., "Overview.Premise").
+    /// Accept remaining free now; stage remaining Protect and confirm when the queue is done (#140).
     /// </summary>
-    public Action<string> OnAcceptProperty { get; set; }
-
-    /// <summary>
-    /// Callback invoked when user skips a single property in review mode.
-    /// Parameter is the property key (e.g., "Overview.Premise").
-    /// </summary>
-    public Action<string> OnSkipProperty { get; set; }
+    public Func<Task> OnAcceptRemainingFree { get; set; }
 
     private bool _updatesApplied;
-    /// <summary>
-    /// True when updates have been applied (disables action buttons via CanExecute).
-    /// </summary>
     public bool UpdatesApplied
     {
         get => _updatesApplied;
@@ -237,6 +391,94 @@ public partial class WorkflowViewModel : ObservableRecipient
 
     #endregion
 
+    #region Character Interview (#119)
+
+    private bool _isInterviewSession;
+    /// <summary>
+    /// True for the whole interview. The Save control hangs off this rather than off its
+    /// IsEnabled flag: disabled is not absent, and every other workflow would otherwise
+    /// carry a dead button under Accept all, shortening its Property Updates list to make
+    /// room.
+    /// </summary>
+    public bool IsInterviewSession
+    {
+        get => _isInterviewSession;
+        set
+        {
+            if (SetProperty(ref _isInterviewSession, value))
+                OnPropertyChanged(nameof(InterviewControlsVisibility));
+        }
+    }
+
+    public Microsoft.UI.Xaml.Visibility InterviewControlsVisibility =>
+        IsInterviewSession
+            ? Microsoft.UI.Xaml.Visibility.Visible
+            : Microsoft.UI.Xaml.Visibility.Collapsed;
+
+    private bool _canSaveInterview;
+    /// <summary>
+    /// Available from the first answered question, not only after the last. It rescues a
+    /// session the writer abandons partway. Collaborator sets it when an answer is
+    /// recorded, never at open: pressing it over an empty transcript can only print a
+    /// refusal.
+    /// </summary>
+    public bool CanSaveInterview
+    {
+        get => _canSaveInterview;
+        set
+        {
+            if (SetProperty(ref _canSaveInterview, value))
+                OnPropertyChanged(nameof(CanPressSave));
+        }
+    }
+
+    private bool _isInterviewTurnRunning;
+    /// <summary>
+    /// A turn is in flight. Save is a plain RelayCommand over an async void handler, so
+    /// nothing self-disables while one runs, and a save landing mid-turn would write a
+    /// transcript missing the answer being recorded.
+    /// </summary>
+    public bool IsInterviewTurnRunning
+    {
+        get => _isInterviewTurnRunning;
+        set
+        {
+            if (SetProperty(ref _isInterviewTurnRunning, value))
+            {
+                OnPropertyChanged(nameof(CanPressSave));
+                OnPropertyChanged(nameof(CanSend));
+            }
+        }
+    }
+
+    /// <summary>What Save actually binds to: something to save, and nothing in flight.</summary>
+    public bool CanPressSave => CanSaveInterview && !IsInterviewTurnRunning;
+
+    public RelayCommand SaveInterviewCommand { get; private set; }
+
+    /// <summary>Collaborator writes the transcript to a Notes element under the character.</summary>
+    public Func<Task> OnSaveInterview { get; set; }
+
+    /// <summary>
+    /// Puts the page into interview mode. Called by Collaborator when a Conversational
+    /// workflow opens, before the first question is asked.
+    /// </summary>
+    public void BeginInterviewSession()
+    {
+        IsInterviewSession = true;
+        CanSaveInterview = false;
+        IsInterviewTurnRunning = false;
+    }
+
+    private async Task SaveInterviewAsync()
+    {
+        if (!CanPressSave) return;
+        if (OnSaveInterview != null)
+            await OnSaveInterview();
+    }
+
+    #endregion
+
     #region Workflow Processing
 
     private async Task ProcessWorkflow()
@@ -247,6 +489,13 @@ public partial class WorkflowViewModel : ObservableRecipient
     public async Task SendButtonClicked()
     {
         if (string.IsNullOrWhiteSpace(InputText)) return;
+        if (!IsChatEnabled)
+        {
+            ConversationList.Add(ChatMessage.FromCollaborator(
+                "Chat unlocks after the workflow produces property proposals."));
+            InputText = string.Empty;
+            return;
+        }
 
         var userMessage = InputText;
         InputText = string.Empty;
@@ -259,7 +508,10 @@ public partial class WorkflowViewModel : ObservableRecipient
             if (OnSendMessage != null)
             {
                 var response = await OnSendMessage(userMessage);
-                ConversationList.Add(ChatMessage.FromCollaborator(response));
+                // A failed interview turn posts its own error bubble and hands back nothing.
+                // Adding it anyway leaves a blank collaborator bubble under the error.
+                if (!string.IsNullOrWhiteSpace(response))
+                    ConversationList.Add(ChatMessage.FromCollaborator(response));
             }
             else
             {
@@ -285,23 +537,22 @@ public partial class WorkflowViewModel : ObservableRecipient
 
     #region Property Update Command Handlers
 
-    private void ExecuteAcceptAll()
+    private async Task ExecuteAcceptAllAsync()
     {
         if (!HasPendingUpdates) return;
-
-        OnAcceptAll?.Invoke();
-        ClearPendingUpdates();
+        if (OnAcceptAll != null)
+            await OnAcceptAll();
     }
 
     private void ExecuteReviewEach()
     {
         if (!HasPendingUpdates) return;
 
-        CurrentReviewIndex = 0;
         IsInReviewMode = true;
-        OnPropertyChanged(nameof(CurrentReviewKey));
-        OnPropertyChanged(nameof(CurrentReviewValue));
-        OnPropertyChanged(nameof(ReviewProgress));
+        CurrentReviewIndex = 0;
+        // One forward pass: land on first open row (or exit if none).
+        AdvancePastSettledRows();
+        NotifyReviewProperties();
     }
 
     private async Task ExecuteTryAgain()
@@ -310,90 +561,199 @@ public partial class WorkflowViewModel : ObservableRecipient
 
         ClearPendingUpdates();
         if (OnTryAgain != null)
-        {
             await OnTryAgain();
-        }
     }
 
-    private void ExecuteAcceptCurrent()
+    /// <summary>
+    /// Accepts a single row from its inline tick (#129); works outside review mode.
+    /// Protect rows are staged for end-of-queue confirm (#140).
+    /// </summary>
+    public async Task AcceptItemAsync(string key)
+    {
+        if (string.IsNullOrEmpty(key) || !HasPendingUpdates) return;
+        if (OnAcceptProperty != null)
+            await OnAcceptProperty(key);
+    }
+
+    /// <summary>Sync wrapper for XAML/command binding that cannot await.</summary>
+    public void AcceptItem(string key) =>
+        _ = AcceptItemAsync(key);
+
+    /// <summary>
+    /// Skips (discards) a single row from its inline dismiss button (#129).
+    /// </summary>
+    public async Task SkipItemAsync(string key)
+    {
+        if (string.IsNullOrEmpty(key) || !HasPendingUpdates) return;
+        if (OnSkipProperty != null)
+            await OnSkipProperty(key);
+    }
+
+    public void SkipItem(string key) =>
+        _ = SkipItemAsync(key);
+
+    private async Task ExecuteAcceptCurrentAsync()
     {
         if (!IsInReviewMode || !HasPendingUpdates) return;
 
         var key = CurrentReviewKey;
-        OnAcceptProperty?.Invoke(key);
+        if (OnAcceptProperty != null)
+            await OnAcceptProperty(key);
         AdvanceReview();
     }
 
-    private void ExecuteSkipCurrent()
+    private async Task ExecuteSkipCurrentAsync()
     {
         if (!IsInReviewMode || !HasPendingUpdates) return;
 
         var key = CurrentReviewKey;
-        // Notify Collaborator to remove from its pending updates
-        OnSkipProperty?.Invoke(key);
-        // Note: Collaborator calls SetPendingUpdates which updates our PendingUpdates
+        if (OnSkipProperty != null)
+            await OnSkipProperty(key);
         AdvanceReview();
     }
 
-    private void ExecuteAcceptRemaining()
+    private async Task ExecuteAcceptRemainingAsync()
     {
         if (!IsInReviewMode) return;
 
-        // Accept all remaining updates
-        var remainingKeys = PendingUpdates.Keys.Skip(CurrentReviewIndex).ToList();
-        foreach (var key in remainingKeys)
+        // #140: free apply now; remaining Protect staged → one confirm when queue done.
+        if (OnAcceptRemainingFree != null)
+            await OnAcceptRemainingFree();
+        else
         {
-            OnAcceptProperty?.Invoke(key);
+            var keys = PendingUpdateItems
+                .Select(i => i.Key)
+                .ToList();
+            foreach (var key in keys)
+            {
+                if (OnAcceptProperty != null)
+                    await OnAcceptProperty(key);
+            }
         }
 
-        ClearPendingUpdates();
+        if (PendingUpdateItems == null || PendingUpdateItems.Count == 0)
+        {
+            ClearPendingUpdates();
+            return;
+        }
+
+        CurrentReviewIndex = 0;
+        NotifyReviewProperties();
+    }
+
+    /// <summary>
+    /// Settled rows (Accepted/Skipped) are done for Review Each. One list, one forward pass:
+    /// foreach item → accept or skip → next. No wrap-around.
+    /// </summary>
+    private static bool IsSettled(PendingUpdateItem? item)
+    {
+        if (item == null) return true;
+        var kind = item.KindLabel ?? string.Empty;
+        return kind.Equals("Skipped", StringComparison.OrdinalIgnoreCase)
+            || kind.Equals("Accepted", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// After accept/skip (or on enter review): sit on an open row walking forward only.
+    /// If the current row was removed, the next open item is already at this index (#115) — stay.
+    /// If the current row is settled (#145), move forward until open or past the end.
+    /// </summary>
+    private void AdvancePastSettledRows()
+    {
+        if (PendingUpdateItems == null || PendingUpdateItems.Count == 0)
+        {
+            IsInReviewMode = false;
+            return;
+        }
+
+        while (CurrentReviewIndex < PendingUpdateItems.Count
+               && IsSettled(PendingUpdateItems[CurrentReviewIndex]))
+        {
+            CurrentReviewIndex++;
+        }
+
+        if (CurrentReviewIndex >= PendingUpdateItems.Count)
+            IsInReviewMode = false;
     }
 
     private void AdvanceReview()
     {
-        if (CurrentReviewIndex >= PendingUpdates.Count - 1 || PendingUpdates.Count == 0)
-        {
-            // Done reviewing
-            IsInReviewMode = false;
-            ClearPendingUpdates();
-        }
-        else
-        {
-            // Move to next
-            CurrentReviewIndex++;
-            OnPropertyChanged(nameof(CurrentReviewKey));
-            OnPropertyChanged(nameof(CurrentReviewValue));
-            OnPropertyChanged(nameof(ReviewProgress));
-        }
+        AdvancePastSettledRows();
+        NotifyReviewProperties();
+    }
+
+    private void NotifyReviewProperties()
+    {
+        OnPropertyChanged(nameof(CurrentReviewKey));
+        OnPropertyChanged(nameof(CurrentReviewDisplayName));
+        OnPropertyChanged(nameof(CurrentReviewValue));
+        OnPropertyChanged(nameof(CurrentReviewExisting));
+        OnPropertyChanged(nameof(CurrentReviewCraft));
+        OnPropertyChanged(nameof(CurrentReviewHasCraft));
+        OnPropertyChanged(nameof(CurrentReviewCraftVisibility));
+        OnPropertyChanged(nameof(ReviewProgress));
+        RefreshTopicalExplanation();
     }
 
     public void ClearPendingUpdates()
     {
-        PendingUpdates.Clear();
+        PendingUpdateItems.Clear();
         IsInReviewMode = false;
         UpdatesApplied = false;
         CurrentReviewIndex = 0;
-    }
-
-    /// <summary>
-    /// Receives pending updates from Collaborator after workflow execution.
-    /// </summary>
-    public void SetPendingUpdates(Dictionary<string, object> updates)
-    {
-        PendingUpdates = updates;
-        UpdatesApplied = false;
-        OnPropertyChanged(nameof(PendingUpdates));
         OnPropertyChanged(nameof(HasUpdates));
         OnPropertyChanged(nameof(HasPendingUpdates));
+        OnPropertyChanged(nameof(PendingUpdatesHeader));
+        RefreshTopicalExplanation();
     }
 
     /// <summary>
-    /// Called by Collaborator after updates are applied (disables action buttons).
+    /// Receives classified pending updates from Collaborator after workflow execution (#116).
     /// </summary>
+    public void SetPendingUpdates(IReadOnlyList<PendingUpdateItem> items)
+    {
+        PendingUpdateItems.Clear();
+        if (items != null)
+        {
+            // A property name alone ("Structure Title") does not say which element it belongs
+            // to. Name the element on every row once the set covers more than one of them.
+            var multiElement = items
+                .Select(i => i.ElementName)
+                .Where(n => !string.IsNullOrEmpty(n))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Count() > 1;
+
+            foreach (var item in items)
+            {
+                item.ShowElementName = multiElement;
+                PendingUpdateItems.Add(item);
+            }
+        }
+
+        UpdatesApplied = false;
+
+        // Review Each: one forward pass; skip settled rows after list rebuild (#145).
+        if (IsInReviewMode)
+            AdvancePastSettledRows();
+
+        OnPropertyChanged(nameof(PendingUpdateItems));
+        OnPropertyChanged(nameof(HasUpdates));
+        OnPropertyChanged(nameof(HasPendingUpdates));
+        OnPropertyChanged(nameof(PendingUpdatesHeader));
+        NotifyReviewProperties();
+        RefreshTopicalExplanation();
+    }
+
+    /// <summary>Called by Collaborator after all free updates are applied.</summary>
     public void MarkUpdatesApplied()
     {
         UpdatesApplied = true;
         IsInReviewMode = false;
+        PendingUpdateItems.Clear();
+        OnPropertyChanged(nameof(HasUpdates));
+        OnPropertyChanged(nameof(HasPendingUpdates));
+        OnPropertyChanged(nameof(PendingUpdatesHeader));
+        RefreshTopicalExplanation();
     }
 
     #endregion

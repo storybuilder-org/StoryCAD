@@ -8,40 +8,73 @@ namespace CollaboratorLib.Context;
 /// </summary>
 public class ContextResolver
 {
-    // Workflow labels that need full context
+    // #211 removed GMC, the only registered member. "Critique" has never been registered in
+    // WorkflowRegistry or the Worker table, so ContextSpec.Full is unreachable until some
+    // workflow named here is registered. ProblemBuilder, which absorbed GMC in #77, was not
+    // on this list and keeps the Problem default it shipped with.
     private static readonly HashSet<string> FullContextWorkflows = new(StringComparer.OrdinalIgnoreCase)
     {
-        "GMC",
         "Critique"
     };
 
-    // Workflow labels that only need story constraints
     private static readonly HashSet<string> MinimalContextWorkflows = new(StringComparer.OrdinalIgnoreCase)
     {
         "Premise"
     };
 
     /// <summary>
+    /// Character craft workflows that receive the RelatedProblems collection (issue #107).
+    /// Relationship is deferred (not problem-based).
+    /// </summary>
+    public static readonly HashSet<string> RelatedProblemsWorkflows = new(StringComparer.OrdinalIgnoreCase)
+    {
+        // #244 CharacterBuilder; #184 FlawBackstory.
+        "CharacterBuilder",
+        "FlawBackstory"
+    };
+
+    public const string RelatedProblemsRequestName = "RelatedProblems";
+
+    /// <summary>
+    /// StoryWorld workflows that receive all Setting elements as RelatedSettings (#201).
+    /// </summary>
+    public static readonly HashSet<string> RelatedSettingsWorkflows = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "DefineStoryWorld"
+    };
+
+    public const string RelatedSettingsRequestName = "RelatedSettings";
+
+    /// <summary>
+    /// StoryWorld workflows that receive Notes + Web under the StoryWorld node (#201).
+    /// </summary>
+    public static readonly HashSet<string> RelatedResearchWorkflows = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "DefineStoryWorld"
+    };
+
+    public const string RelatedResearchRequestName = "RelatedResearch";
+
+    /// <summary>
     /// Get the context specification for a workflow and element type combination.
     /// </summary>
-    /// <param name="workflowLabel">The workflow being executed (e.g., "GMC", "Premise")</param>
-    /// <param name="elementType">The type of element being processed</param>
-    /// <returns>ContextSpec indicating what context to gather</returns>
     public ContextSpec GetContextFor(string workflowLabel, StoryItemType elementType)
     {
-        // GMC workflow on Problem needs full context for temporal awareness
         if (FullContextWorkflows.Contains(workflowLabel) && elementType == StoryItemType.Problem)
         {
             return ContextSpec.Full;
         }
 
-        // Premise workflow only needs story constraints
+        // Premise: constraints + gaps (gap pass is outline-wide for every run)
         if (MinimalContextWorkflows.Contains(workflowLabel))
         {
-            return ContextSpec.Default;
+            return new ContextSpec
+            {
+                IncludeStoryConstraints = true,
+                IncludeGaps = true
+            };
         }
 
-        // Scene workflows need character and setting context
         if (elementType == StoryItemType.Scene)
         {
             return new ContextSpec
@@ -50,23 +83,35 @@ public class ContextResolver
                 IncludeBeatHierarchy = false,
                 IncludeCharacterContext = true,
                 IncludePrecedingEvents = true,
-                MaxPrecedingBeats = 2
+                MaxPrecedingBeats = 2,
+                IncludeGaps = true
             };
         }
 
-        // Character workflows need relationship context (future enhancement)
         if (elementType == StoryItemType.Character)
         {
             return new ContextSpec
             {
                 IncludeStoryConstraints = true,
                 IncludeBeatHierarchy = false,
-                IncludeCharacterContext = false, // Don't include self
-                IncludePrecedingEvents = false
+                IncludeCharacterContext = false,
+                IncludePrecedingEvents = false,
+                IncludeGaps = true
             };
         }
 
-        // Default: story constraints only
+        if (elementType == StoryItemType.StoryWorld)
+        {
+            return new ContextSpec
+            {
+                IncludeStoryConstraints = true,
+                IncludeBeatHierarchy = false,
+                IncludeCharacterContext = false,
+                IncludePrecedingEvents = false,
+                IncludeGaps = true
+            };
+        }
+
         return ContextSpec.Default;
     }
 
@@ -75,7 +120,6 @@ public class ContextResolver
     /// </summary>
     public bool ShouldEnrichContext(string workflowLabel)
     {
-        // All workflows get at least story constraints
         return true;
     }
 }

@@ -5,6 +5,18 @@ using StoryCADLib.Services.Collaborator.Contracts;
 namespace CollaboratorLib.Context;
 
 /// <summary>
+/// Issue #260: the storyContext object for a migrated workflow's "input" field -- the same
+/// content <see cref="StoryContextBuilder.BuildContext"/> writes as "## " text sections, shaped
+/// as JSON instead. An empty scalar is "", not omitted; no gaps is an empty array, not omitted.
+/// </summary>
+public sealed record StoryContextInput(
+    string Phase,
+    IReadOnlyList<string> Gaps,
+    string StoryType,
+    string StoryGenre,
+    string Premise);
+
+/// <summary>
 /// Builds structured context strings for workflow prompts.
 /// Gathers relevant story information based on ContextSpec requirements.
 /// Detects development phase and provides appropriate context.
@@ -32,9 +44,12 @@ public class StoryContextBuilder
 
         var sb = new StringBuilder();
 
-        // Detect development phase
-        var phase = DetectDevelopmentPhase(model);
-        AppendPhaseContext(sb, phase);
+        var guess = Classify(model);
+        AppendPhaseContext(sb, guess.PromptLine);
+
+        // Issue #107: required-field gap GUIDs (outline-wide; no problem craft paste)
+        if (spec.IncludeGaps)
+            AppendGaps(sb, model);
 
         if (spec.IncludeStoryConstraints)
             AppendStoryConstraints(sb, model);
@@ -51,6 +66,34 @@ public class StoryContextBuilder
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Issue #260: same content as <see cref="BuildContext"/>'s phase line, gap GUIDs, and
+    /// Overview scalars, as a <see cref="StoryContextInput"/> object for a migrated workflow's
+    /// "input" field. This method's text counterpart keeps building the placeholder-era arg
+    /// unchanged.
+    /// </summary>
+    public StoryContextInput BuildContextObject(StoryModel model)
+    {
+        if (model == null)
+            return new StoryContextInput(string.Empty, Array.Empty<string>(), string.Empty, string.Empty, string.Empty);
+
+        var phase = Classify(model).PromptLine;
+        var gaps = RequiredFieldGapScanner.FindGapGuids(_api, model)
+            .Select(g => g.ToString("D"))
+            .ToList();
+
+        var overview = GetOverview(model);
+        return new StoryContextInput(
+            phase,
+            gaps,
+            ScalarOrEmpty(overview?.StoryType),
+            ScalarOrEmpty(overview?.StoryGenre),
+            ScalarOrEmpty(overview?.Premise));
+    }
+
+    private static string ScalarOrEmpty(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? string.Empty : value;
+
     #region Phase Detection
 
     /// <summary>
@@ -58,50 +101,143 @@ public class StoryContextBuilder
     /// </summary>
     public enum DevelopmentPhase
     {
-        Ideation,           // No overview or empty Type/Genre/Premise
-        ProblemDevelopment, // Overview set, but no Story Problem or no beat sheet
-        StructureBuilding,  // Story Problem has beat sheet, hierarchy being built
-        SceneWork           // Scenes assigned to beats
+        Ideation,              // No overview or empty Type/Genre/Premise
+        ProblemDevelopment,    // Premise present; no Story Problem, or seats empty
+        CharacterDevelopment,  // Essential Character fields empty on seated people
+        StructureBuilding,     // After Character Development; no Scene on any beat
+        SceneWork              // Scenes assigned to beats
     }
 
-    /// <summary>
-    /// Detect the current development phase by examining the StoryModel
-    /// </summary>
-    private DevelopmentPhase DetectDevelopmentPhase(StoryModel model)
+    private static readonly string[] EssentialCharacterProperties =
     {
-        var overview = GetOverview(model);
+        "Name", "Description", "Role", "Age", "Sex", "Appearance", "StoryRole", "BackStory"
+    };
 
-        // No overview or missing basic constraints = Ideation
+    /// <summary>
+    /// Classify the outline for StoryContext and Outline gaps (#107).
+    /// </summary>
+    public DevelopmentGuess Classify(StoryModel model)
+    {
+        if (model == null)
+            return MakeGuess(DevelopmentPhase.Ideation, DevelopmentPhase.Ideation);
+
+        var overview = GetOverview(model);
         if (overview == null ||
             string.IsNullOrWhiteSpace(overview.StoryType) ||
             string.IsNullOrWhiteSpace(overview.StoryGenre) ||
             string.IsNullOrWhiteSpace(overview.Premise))
         {
-            return DevelopmentPhase.Ideation;
+            return MakeGuess(DevelopmentPhase.Ideation, DevelopmentPhase.Ideation);
         }
 
-        // No Story Problem assigned = Problem Development
         if (overview.StoryProblem == Guid.Empty)
-        {
-            return DevelopmentPhase.ProblemDevelopment;
-        }
+            return MakeGuess(DevelopmentPhase.ProblemDevelopment, DevelopmentPhase.ProblemDevelopment);
 
         var storyProblem = ResolveElement(overview.StoryProblem, model) as ProblemModel;
         if (storyProblem == null)
+            return MakeGuess(DevelopmentPhase.ProblemDevelopment, DevelopmentPhase.ProblemDevelopment);
+
+        var seats = ProblemCharacterIndex.Build(_api, model).EdgesForProblem(storyProblem.Uuid);
+        var unseated = seats.Count == 0 ||
+                       seats.Any(s => s.Status != ProblemCharacterLinkStatus.Linked);
+        if (unseated)
         {
-            return DevelopmentPhase.ProblemDevelopment;
+            return MakeGuess(
+                DevelopmentPhase.ProblemDevelopment,
+                DevelopmentPhase.ProblemDevelopment,
+                DevelopmentPhase.CharacterDevelopment);
         }
 
-        // Story Problem exists but no beat sheet = Problem Development
-        if (storyProblem.StructureBeats == null || storyProblem.StructureBeats.Count == 0)
+        var seen = new HashSet<Guid>();
+        foreach (var seat in seats)
         {
-            return DevelopmentPhase.ProblemDevelopment;
+            if (!seen.Add(seat.CharacterGuid))
+                continue;
+
+            var person = ResolveElement(seat.CharacterGuid, model);
+            if (person == null || HasEssentialCharacterGap(person))
+            {
+                return MakeGuess(
+                    DevelopmentPhase.CharacterDevelopment,
+                    DevelopmentPhase.CharacterDevelopment);
+            }
         }
 
-        // Check if any beats have scenes assigned (vs just sub-problems)
-        bool hasSceneAssignments = HasSceneAssignments(storyProblem, model);
+        if (HasSceneAssignments(storyProblem, model))
+            return MakeGuess(DevelopmentPhase.SceneWork, DevelopmentPhase.SceneWork);
 
-        return hasSceneAssignments ? DevelopmentPhase.SceneWork : DevelopmentPhase.StructureBuilding;
+        return MakeGuess(DevelopmentPhase.StructureBuilding, DevelopmentPhase.StructureBuilding);
+    }
+
+    /// <summary>
+    /// Detect the current development phase by examining the StoryModel
+    /// </summary>
+    private DevelopmentPhase DetectDevelopmentPhase(StoryModel model) => Classify(model).Earliest;
+
+    private bool HasEssentialCharacterGap(StoryElement person)
+    {
+        var missing = RequiredFieldGapScanner.GetMissingProperties(_api, person);
+        return missing.Any(p => EssentialCharacterProperties.Contains(p, StringComparer.Ordinal));
+    }
+
+    private static DevelopmentGuess MakeGuess(
+        DevelopmentPhase earliest,
+        params DevelopmentPhase[] openSteps)
+    {
+        var steps = (IReadOnlyList<DevelopmentPhase>)openSteps;
+        return new DevelopmentGuess
+        {
+            Earliest = earliest,
+            OpenSteps = steps,
+            PromptLine = PromptLineFor(earliest),
+            GapsSentence = GapsSentenceFor(steps)
+        };
+    }
+
+    internal static string PromptLineFor(DevelopmentPhase phase) => phase switch
+    {
+        DevelopmentPhase.Ideation =>
+            "Early ideation - establishing basic story parameters",
+        DevelopmentPhase.ProblemDevelopment =>
+            "Problem development - building the Story Problem",
+        DevelopmentPhase.CharacterDevelopment =>
+            "Character development - filling essential Character fields",
+        DevelopmentPhase.StructureBuilding =>
+            "Structure building - organizing problems into beat sheet",
+        DevelopmentPhase.SceneWork =>
+            "Scene work - detailed scene-level development",
+        _ => "Unknown phase"
+    };
+
+    internal static string GapsSentenceFor(IReadOnlyList<DevelopmentPhase> openSteps)
+    {
+        bool problem = openSteps.Contains(DevelopmentPhase.ProblemDevelopment);
+        bool character = openSteps.Contains(DevelopmentPhase.CharacterDevelopment);
+        if (problem && character)
+        {
+            return "Guess: Problem Development and Character Development are both open. " +
+                   "The Story Problem needs protagonist and antagonist seats.";
+        }
+
+        if (openSteps.Count == 1)
+        {
+            return openSteps[0] switch
+            {
+                DevelopmentPhase.Ideation =>
+                    "Guess: the outline is in Ideation.",
+                DevelopmentPhase.ProblemDevelopment =>
+                    "Guess: the outline is in Problem Development.",
+                DevelopmentPhase.CharacterDevelopment =>
+                    "Guess: the outline is in Character Development. Essential Character fields are empty on the Story Problem cast.",
+                DevelopmentPhase.StructureBuilding =>
+                    "Guess: the outline is in Structure Building.",
+                DevelopmentPhase.SceneWork =>
+                    "Guess: the outline is in Scene Work.",
+                _ => "Guess: the outline is in an unknown step."
+            };
+        }
+
+        return "Guess: the outline is in " + PromptLineFor(openSteps.FirstOrDefault()) + ".";
     }
 
     /// <summary>
@@ -132,17 +268,10 @@ public class StoryContextBuilder
         return false;
     }
 
-    private void AppendPhaseContext(StringBuilder sb, DevelopmentPhase phase)
+    private void AppendPhaseContext(StringBuilder sb, string promptLine)
     {
         sb.AppendLine("## Development Phase");
-        sb.AppendLine(phase switch
-        {
-            DevelopmentPhase.Ideation => "Early ideation - establishing basic story parameters",
-            DevelopmentPhase.ProblemDevelopment => "Problem/character development - building story elements",
-            DevelopmentPhase.StructureBuilding => "Structure building - organizing problems into beat sheet",
-            DevelopmentPhase.SceneWork => "Scene work - detailed scene-level development",
-            _ => "Unknown phase"
-        });
+        sb.AppendLine(promptLine);
         sb.AppendLine();
     }
 
@@ -340,6 +469,25 @@ public class StoryContextBuilder
             }
         }
 
+        sb.AppendLine();
+    }
+
+    #endregion
+
+    #region Required-field gaps (issue #107)
+
+    /// <summary>
+    /// Outline-wide gaps: one GUID per element missing any required property.
+    /// </summary>
+    private void AppendGaps(StringBuilder sb, StoryModel model)
+    {
+        var gapGuids = RequiredFieldGapScanner.FindGapGuids(_api, model);
+        if (gapGuids.Count == 0)
+            return;
+
+        sb.AppendLine("## Gaps");
+        foreach (var guid in gapGuids)
+            sb.AppendLine(guid.ToString("D"));
         sb.AppendLine();
     }
 

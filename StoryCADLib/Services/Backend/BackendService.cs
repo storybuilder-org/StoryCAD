@@ -62,6 +62,37 @@ public class BackendService
     public IReadOnlyList<UserMessage> UnreadMessages { get; private set; } = Array.Empty<UserMessage>();
 
     /// <summary>
+    ///     Completes when BeginStartupRecording's work has finished. Consumers of its side
+    ///     effects — UnreadMessages, AppState.LoadedWithVersionChange — await this rather
+    ///     than the window waiting on the network. Already complete until started.
+    /// </summary>
+    public Task StartupRecordingTask { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    ///     Starts StartupRecording off the launch path, publishing it as
+    ///     StartupRecordingTask. StartupRecording handles its own exceptions,
+    ///     so the task does not fault.
+    /// </summary>
+    public void BeginStartupRecording()
+    {
+        StartupRecordingTask = StartupRecording();
+    }
+
+    /// <summary>
+    ///     True when a MySqlException means "the backend is unreachable" rather than
+    ///     "the backend rejected us": 1042 the server name did not resolve (the driver
+    ///     wraps an ArgumentException, "The host name or IP address is invalid"),
+    ///     2003 the connection was refused, 2013 it was dropped mid-flight.
+    ///
+    ///     These are logged at Warn and retried on the next startup, never at Error.
+    ///     Only Error reaches elmah.io, and an unreachable host recurs on every launch
+    ///     of every affected client — so classifying it as Error turns one dead server
+    ///     into a permanent stream of error reports.
+    /// </summary>
+    private static bool IsBackendUnreachable(MySqlException ex) =>
+        ex.Number is 1042 or 2003 or 2013;
+
+    /// <summary>
     ///     Do any necessary posting to the backend MySQL server on app
     ///     startup. This will include either preferences or versions
     ///     posting that weren't successful during the last run.
@@ -118,7 +149,7 @@ public class BackendService
         {
             _logService.Log(LogLevel.Warn, $"Backend operation cancelled during startup: {ex.Message}");
         }
-        catch (MySqlException ex) when (ex.Number == 2003 || ex.Number == 2013)
+        catch (MySqlException ex) when (IsBackendUnreachable(ex))
         {
             _logService.Log(LogLevel.Warn, $"Backend server temporarily unavailable (Code {ex.Number}): {ex.Message}");
             _logService.Log(LogLevel.Info, "Backend telemetry will retry on next startup");
@@ -245,7 +276,7 @@ public class BackendService
         {
             _logService.Log(LogLevel.Warn, $"Operation cancelled during preferences posting: {ex.Message}");
         }
-        catch (MySqlException ex) when (ex.Number == 2003 || ex.Number == 2013)
+        catch (MySqlException ex) when (IsBackendUnreachable(ex))
         {
             _logService.Log(LogLevel.Warn, $"Transient MySQL error during preferences posting (Code {ex.Number}): {ex.Message}");
         }
@@ -290,8 +321,11 @@ public class BackendService
             preferences.UserId = id;
             _logService.Log(LogLevel.Info, "User registered, userId: " + id);
 
-            var current = _appState.Version;
-            var previous = preferences.Version ?? "";
+            // Tag both versions with the platform so the versions table can be
+            // broken down per OS (#1428). The previous run was on this same
+            // install, so it carries the same platform code.
+            var current = _appState.VersionWithPlatform;
+            var previous = _appState.WithPlatform(preferences.Version);
             await _sqlIo.AddVersion(id, current, previous);
             _preferenceService.Model.RecordVersionStatus = true;
             PreferencesIo loader = new();
@@ -306,7 +340,7 @@ public class BackendService
         {
             _logService.Log(LogLevel.Warn, $"Operation cancelled during version posting: {ex.Message}");
         }
-        catch (MySqlException ex) when (ex.Number == 2003 || ex.Number == 2013)
+        catch (MySqlException ex) when (IsBackendUnreachable(ex))
         {
             _logService.Log(LogLevel.Warn, $"Transient MySQL error during version posting (Code {ex.Number}): {ex.Message}");
         }
@@ -407,6 +441,16 @@ public class BackendService
 
             // Build connection string and pass to DAL
             var connectionString = keys.CONNECTION + sslCa;
+
+            // MySql.Data defaults to 15s per connect and opens one per operation, stalling
+            // both startup and the EndSession flush on shutdown. The secret wins if it sets one.
+            if (!connectionString.Contains("connect timeout", StringComparison.OrdinalIgnoreCase)
+                && !connectionString.Contains("connectiontimeout", StringComparison.OrdinalIgnoreCase)
+                && !connectionString.Contains("connection timeout", StringComparison.OrdinalIgnoreCase))
+            {
+                connectionString += "Connection Timeout=5;";
+            }
+
             _sqlIo.SetConnectionString(connectionString);
 
             _logService.Log(LogLevel.Info, "Backend connection configured successfully");

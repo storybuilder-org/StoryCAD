@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
 using StoryCADLib.ViewModels;
@@ -208,6 +209,95 @@ public class AppStateTests
         bool result = appState.DeveloperBuild;
 
         Assert.IsTrue(result);
+    }
+
+    #endregion
+
+    #region Platform / VersionWithPlatform Tests (Issue #1428)
+
+    [TestMethod]
+    public void Platform_ReturnsCodeFromKnownSet()
+    {
+        // Arrange
+        var appState = new AppState();
+
+        // Act & Assert - only Win, Mac and the Unknown fallback are shipped codes.
+        CollectionAssert.Contains(new[] { "Win", "Mac", "Unknown" }, appState.Platform,
+            $"Platform returned an unexpected code: '{appState.Platform}'");
+    }
+
+    [TestMethod]
+    public void Platform_OnMacOS_ReturnsMac()
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            Assert.Inconclusive("macOS-only assertion; this run is on another OS.");
+        }
+
+        Assert.AreEqual("Mac", new AppState().Platform);
+    }
+
+    [TestMethod]
+    public void Platform_OnWindows_ReturnsWin()
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            Assert.Inconclusive("Windows-only assertion; this run is on another OS.");
+        }
+
+        Assert.AreEqual("Win", new AppState().Platform);
+    }
+
+    [TestMethod]
+    public void VersionWithPlatform_AppendsPlatformCodeToVersion()
+    {
+        // Arrange
+        var appState = new AppState();
+
+        // Act & Assert
+        Assert.AreEqual($"{appState.Version}-{appState.Platform}", appState.VersionWithPlatform);
+    }
+
+    [TestMethod]
+    public void Version_StaysUnsuffixed()
+    {
+        // The suffix must not leak into Version itself - that value is written to
+        // .stbx LastVersion and compared against the stored preferences version,
+        // so a suffix there would fire a spurious version change on every upgrade.
+        var appState = new AppState();
+
+        Assert.IsFalse(appState.Version.Contains('-'),
+            $"Version should carry no platform suffix but was '{appState.Version}'");
+    }
+
+    [TestMethod]
+    public void WithPlatform_WhenVersionSupplied_AppendsPlatformCode()
+    {
+        // Arrange
+        var appState = new AppState();
+
+        // Act & Assert
+        Assert.AreEqual($"4.1.0.0-{appState.Platform}", appState.WithPlatform("4.1.0.0"));
+    }
+
+    [TestMethod]
+    public void WithPlatform_WhenVersionEmpty_ReturnsEmpty()
+    {
+        // A first-run install has no previous version; it must stay empty rather
+        // than becoming a bare "-Mac".
+        var appState = new AppState();
+
+        Assert.AreEqual(string.Empty, appState.WithPlatform(""));
+    }
+
+    [TestMethod]
+    public void WithPlatform_WhenVersionNull_ReturnsEmpty()
+    {
+        // Arrange
+        var appState = new AppState();
+
+        // Act & Assert
+        Assert.AreEqual(string.Empty, appState.WithPlatform(null));
     }
 
     #endregion

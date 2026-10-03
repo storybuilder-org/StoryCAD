@@ -19,6 +19,7 @@
 	<ItemGroup>
 		<InternalsVisibleTo Include="CollaboratorTests" />
 		<InternalsVisibleTo Include="PromptTestRunner" />
+		<InternalsVisibleTo Include="StoryCADTests" />
 	</ItemGroup>
 
 	<!-- on Windows, build both desktop + WinUI (desktop first for UNOB0012) -->

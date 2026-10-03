@@ -5,6 +5,18 @@ using StoryCollaborator.Models;
 namespace StoryCollaborator.Workflows
 {
     /// <summary>
+    /// How a workflow talks to the Worker (#119).
+    /// </summary>
+    public enum WorkflowMode
+    {
+        /// <summary>One call, structured JSON out, proposals in. Every workflow before #119.</summary>
+        OneShot = 0,
+
+        /// <summary>One call per turn, prose out. The runner skips JSON extraction.</summary>
+        Conversational = 1
+    }
+
+    /// <summary>
     /// Standard workflow class for all AI-assisted story development workflows.
     /// Provides two constructors:
     /// - Simple: For basic workflows with single input/output element type
@@ -18,6 +30,77 @@ namespace StoryCollaborator.Workflows
         public string Description { get; set; } = string.Empty;
         public string Explanation { get; set; } = string.Empty;
         public string PluginsFolder => Plugins;
+
+        /// <summary>
+        /// The story element type this workflow develops; groups the nav menu (#129).
+        /// The simple constructor sets it; full-WorkflowIO registry entries set it explicitly.
+        /// </summary>
+        public StoryItemType PrimaryElementType { get; set; } = StoryItemType.Unknown;
+
+        /// <summary>
+        /// Collaborator #77: this workflow may create a Scene for an empty beat from
+        /// <see cref="StoryCollaborator.Models.BeatInfo.SceneName"/>. Replaces the
+        /// <c>Label == "BeatScenes"</c> test that used to gate scene creation.
+        /// </summary>
+        public bool CreatesScenesForBeats { get; set; }
+
+        /// <summary>
+        /// Collaborator #246: this workflow may create a Problem for an empty beat from
+        /// <see cref="StoryCollaborator.Models.BeatInfo.ProblemName"/>. Category must be
+        /// Complication, Subplot, or Sequence. Never a Spine.
+        /// </summary>
+        public bool CreatesProblemsForBeats { get; set; }
+
+        /// <summary>
+        /// Collaborator #77: this workflow needs Problem.ProblemCategory before it runs.
+        /// The category picks the beat sheet class. Nothing sets it on a ProblemBuilder run.
+        /// </summary>
+        public bool RequiresProblemCategory { get; set; }
+
+        /// <summary>
+        /// Collaborator #77 / StoryCAD #483: inject the Controls.json conflict taxonomy into
+        /// the request args. ExampleLists reads Lists.json and cannot reach that data.
+        /// </summary>
+        public bool InjectsConflictTaxonomy { get; set; }
+
+        /// <summary>
+        /// Collaborator #77: inject the built-in Tools.json beat sheet catalog into the request
+        /// args, so the model chooses a sheet the app actually has.
+        /// </summary>
+        public bool InjectsBeatSheets { get; set; }
+
+        /// <summary>
+        /// Collaborator #150: inject the Stock Scenes catalog. Was gated on the BeatScenes label.
+        /// </summary>
+        public bool InjectsStockScenes { get; set; }
+
+        /// <summary>
+        /// Collaborator #217: inject the primary element's current beat sheet as CurrentBeats,
+        /// so the model returns that sheet's rows and leaves filled beats alone. "none" when the
+        /// element has no sheet.
+        /// </summary>
+        public bool InjectsCurrentBeats { get; set; }
+
+        /// <summary>
+        /// Conversational workflows return prose rather than a property JSON object, so
+        /// WorkflowRunner must not run ExtractOutputs against the reply (#119).
+        /// </summary>
+        public WorkflowMode Mode { get; set; } = WorkflowMode.OneShot;
+
+        /// <summary>
+        /// Issue #260: the property lists this workflow's "input" request field uses. Null
+        /// means the workflow sends no "input" field yet -- Elements and Args stay its only
+        /// carriers until it migrates. FlawBackstory, CharacterBuilder, and SettingBuilder set
+        /// this today.
+        /// </summary>
+        public WorkflowJsonInputSpec? JsonInput { get; set; }
+
+        /// <summary>
+        /// False for workflows that only make sense as a step inside another workflow's
+        /// session (#119: the interview summary needs a transcript that exists nowhere
+        /// else). Picking one from the nav pane would run it with its inputs empty.
+        /// </summary>
+        public bool ShowInMenu { get; set; } = true;
 
         // Additional properties
         public StoryModel? Model { get; set; }
@@ -57,6 +140,7 @@ namespace StoryCollaborator.Workflows
             Description = description;
             Explanation = explanation ?? string.Empty;
             Plugins = label;
+            PrimaryElementType = primaryElementType;
 
             _workflowIO = CreateSimpleWorkflowIO(primaryElementType, outputProperties, exampleLists);
         }
@@ -160,6 +244,7 @@ namespace StoryCollaborator.Workflows
                 StoryItemType.Web => "Web",
                 StoryItemType.Notes => "Notes",
                 StoryItemType.TrashCan => "Trash",
+                StoryItemType.StoryWorld => "StoryWorld",
                 _ => elementType.ToString()
             };
         }

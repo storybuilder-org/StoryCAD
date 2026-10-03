@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.UI;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services;
@@ -12,6 +13,15 @@ namespace StoryCADLib.DAL;
 /// </summary>
 public class PreferencesIo
 {
+    // Masks StoreUserGuid's value in the two debug lines below that log the whole preferences
+    // JSON (issue #90 D8): the GUID must never appear in a log at any level, and these lines are
+    // the only place the full-JSON dump exposes it.
+    private static readonly Regex UserGuidLogPattern = new(
+        "(\"StoreUserGuid\"\\s*:\\s*\")[^\"]*(\")", RegexOptions.Compiled);
+
+    private static string MaskUserGuidForLog(string preferencesJson) =>
+        UserGuidLogPattern.Replace(preferencesJson, "$1***$2");
+
     private readonly AppState _appState;
     private readonly ILogService _log;
     private readonly PreferenceService _preferenceService;
@@ -49,7 +59,7 @@ public class PreferencesIo
                     _log.Log(LogLevel.Info, "Preferences.json found, reading it.");
                     StorageFile _preferencesFile = await StorageFile.GetFileFromPathAsync(PreferencesFilePath);
                     var _preferencesJson = await FileIO.ReadTextAsync(_preferencesFile);
-                    _log.Log(LogLevel.Debug, $"Preferences Contents: {_preferencesJson}");
+                    _log.Log(LogLevel.Debug, $"Preferences Contents: {MaskUserGuidForLog(_preferencesJson)}");
 
                     //Update _model, with new values.
                     _model = JsonSerializer.Deserialize<PreferencesModel>(_preferencesJson);
@@ -138,7 +148,7 @@ public class PreferencesIo
                     CreationCollisionOption.OpenIfExists);
 
                 //Log and write.
-                _log.Log(LogLevel.Debug, $"Serialised preferences as {_newPreferences}");
+                _log.Log(LogLevel.Debug, $"Serialised preferences as {MaskUserGuidForLog(_newPreferences)}");
                 await FileIO.WriteTextAsync(_preferencesFile, _newPreferences); //Writes file to disk
                 _log.Log(LogLevel.Info, "Preferences write complete.");
             }, CancellationToken.None, _log);

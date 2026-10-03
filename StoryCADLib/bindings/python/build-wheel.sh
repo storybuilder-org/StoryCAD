@@ -100,5 +100,26 @@ echo "==> $PYTHON_BIN -m build --wheel"
 cd "$HERE"
 "$PYTHON_BIN" -m build --wheel
 
+# ─── Linux: manylinux platform tag (StoryCAD #1424) ───────────────────────
+# PyPI refuses raw linux_* tags. The wheel holds only managed .NET DLLs and
+# Python, no ELF libraries, so a manylinux tag claims nothing about glibc.
+# If native libraries ever appear in the runtime, stop: those need
+# `auditwheel repair`, not a rename.
+if [[ "$uname_s" == "Linux" ]]; then
+  if find "$RUNTIME_DIR" -type f -name '*.so*' | grep -q .; then
+    echo "ERROR: native .so files in $RUNTIME_DIR; use auditwheel repair instead of retagging" >&2
+    exit 1
+  fi
+  case "$uname_m" in
+    x86_64)        PLAT="manylinux_2_17_x86_64" ;;
+    aarch64|arm64) PLAT="manylinux_2_17_aarch64" ;;
+  esac
+  echo "==> Retagging Linux wheel as $PLAT"
+  "$PYTHON_BIN" -m pip install --quiet wheel
+  for whl in "$HERE"/dist/*-linux_*.whl; do
+    "$PYTHON_BIN" -m wheel tags --remove --platform-tag "$PLAT" "$whl"
+  done
+fi
+
 echo "==> Done. Artifacts:"
 ls -lh "$HERE/dist" | tail -n +2

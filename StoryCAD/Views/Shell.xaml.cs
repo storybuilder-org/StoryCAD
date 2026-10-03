@@ -155,6 +155,15 @@ public sealed partial class Shell : Page
             }
         }
 
+        // The version-change check below and ShowAdminMessagesAsync both consume
+        // StartupRecording's results, so wait for it here, behind a window that is
+        // already up. Normally already complete.
+        var backendService = Ioc.Default.GetService<BackendService>();
+        if (backendService is not null)
+        {
+            await backendService.StartupRecordingTask;
+        }
+
         //Shows changelog if the app has been updated since the last launch.
         if (Ioc.Default.GetRequiredService<AppState>().LoadedWithVersionChange)
         {

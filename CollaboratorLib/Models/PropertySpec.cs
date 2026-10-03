@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 
 namespace StoryCollaborator.Models
@@ -30,30 +31,121 @@ namespace StoryCollaborator.Models
         Type? ListEntryType = null);
 
     /// <summary>
+    /// How a scalar pending update relates to the live outline field (issue #116).
+    /// Non-scalar updates stay <see cref="Unclassified"/> and Accept All may apply them.
+    /// </summary>
+    public enum UpdateKind
+    {
+        /// <summary>Not classified (non-scalar or pre-classify).</summary>
+        Unclassified = 0,
+        /// <summary>Target empty — Accept All may fill.</summary>
+        Fill,
+        /// <summary>Collaborator wrote this field earlier this session — Accept All may refresh.</summary>
+        Refresh,
+        /// <summary>User-owned non-empty differs — Review Each only; Accept All skips.</summary>
+        Protect,
+        /// <summary>Proposed equals current — dropped from pending.</summary>
+        NoOp
+    }
+
+    /// <summary>
+    /// Model-emitted intent for one output JSON key (Collaborator #216).
+    /// Distinct from <see cref="UpdateKind"/>: the client maps this to Fill / Refresh / Protect / NoOp.
+    /// </summary>
+    public enum OutputFieldState
+    {
+        Fill,
+        Unchanged,
+        Revise
+    }
+
+    /// <summary>
     /// Carries one extracted output value between ExtractOutputs and ApplyUpdates.
     /// Value type by WriteVia: Scalar=string, SimpleList=List&lt;string&gt;,
     /// BeatSheet=List&lt;BeatInfo&gt;, CastMembers=List&lt;Guid&gt;,
     /// Relationships=List&lt;RelationshipInfo&gt;, TypedList=null.
+    /// Optional classification fields are set by <c>ClassifyScalarUpdates</c> (#116).
     /// </summary>
     public sealed record PendingUpdate(
         string ElementLabel,
         Guid ElementUuid,
         PropertySpec Spec,
-        object? Value);
+        object? Value,
+        UpdateKind Kind = UpdateKind.Unclassified,
+        string? CurrentDisplay = null,
+        string? CraftExplanation = null)
+    {
+        // Collaborator #217 section 5.7: one beat of a sheet is its own row, so its key carries
+        // the row index. Every Accept path finds a row by Key, so keys must stay unique. Two
+        // digits, because the pane orders rows by Key with an ordinal compare and [10] must
+        // not sort before [2].
+        public string Key => BeatRowIndex.HasValue
+            ? $"{ElementLabel}.{Spec.Property}[{BeatRowIndex.Value:D2}]"
+            : $"{ElementLabel}.{Spec.Property}";
+
+        /// <summary>Stable session key: element UUID + property (survives label renames).</summary>
+        public string SessionTouchKey => $"{ElementUuid:N}.{Spec.Property}";
+
+        public bool AcceptAllMayApply =>
+            Kind is UpdateKind.Fill or UpdateKind.Refresh or UpdateKind.Unclassified;
+
+        /// <summary>
+        /// Collaborator #217 section 5.7: set when this update is one beat of a BeatSheet
+        /// proposal (Value is a <see cref="BeatRowValue"/>). Null for every other update.
+        /// </summary>
+        public int? BeatRowIndex { get; init; }
+
+        /// <summary>
+        /// Review pane name for this update when the property name is not the right label
+        /// (a beat row reads "Beat 3: Set-Up"). Null means show the property name.
+        /// </summary>
+        public string? DisplayNameOverride { get; init; }
+    }
 
     /// <summary>
     /// One beat in a BeatSheet output.
+    /// SceneName (#150 BeatScenes): when set on an empty beat, create a Scene under the
+    /// problem and assign it. Structure and other workflows leave SceneName null.
+    /// ProblemName (#246): when set on an empty beat, create a Problem under the parent
+    /// and assign it. Category must be Complication, Subplot, or Sequence.
     /// </summary>
     public sealed record BeatInfo(
         string Title,
         string Description,
-        Guid? AssignedElement = null);
+        Guid? AssignedElement = null,
+        string? SceneName = null,
+        string? SceneDescription = null,
+        string? SceneNotes = null,
+        string? SceneType = null,
+        IReadOnlyList<Guid>? SceneCast = null,
+        string? ProblemName = null,
+        string? ProblemDescription = null,
+        string? ProblemCategory = null);
+
+    /// <summary>
+    /// Collaborator #217 section 5.7: the value of one per-beat pending update. Row is the
+    /// proposal row; Sheet is the whole proposal, kept so the first accepted row can install
+    /// the sheet when the Problem has none. BindGuid set means the row binds that candidate;
+    /// null means it creates the stub named in Row.ProblemName (a Problem, #246) or, when that is
+    /// blank, in Row.SceneName (a Scene).
+    /// </summary>
+    public sealed record BeatRowValue(
+        int Index,
+        string Title,
+        BeatInfo Row,
+        IReadOnlyList<BeatInfo> Sheet,
+        Guid? BindGuid,
+        string? ElementName,
+        string? ElementType);
 
     /// <summary>
     /// One relationship entry in a Relationships output.
     /// </summary>
     public sealed record RelationshipInfo(
         Guid RecipientGuid,
-        string Description,
-        bool Mirror = false);
+        string RelationType,
+        string InverseRelationType = "",
+        string Trait = "",
+        string Attitude = "",
+        string Notes = "");
 }

@@ -1,12 +1,17 @@
 using Windows.ApplicationModel.AppExtensions;
 using Windows.ApplicationModel.Resources.Core;
 using Windows.Storage;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Markup;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator.Contracts;
+using StoryCADLib.Services.Messages;
+using StoryCADLib.Services.Store;
+using StoryCADLib.ViewModels.Store;
 
 namespace StoryCADLib.Services.Collaborator;
 
@@ -61,20 +66,30 @@ public class CollaboratorService
             return;
         }
 
-        // Get the current StoryModel from AppState
+        // Get the current StoryModel from AppState. Close/Reset leaves a non-null document
+        // with an empty model (FilePath null, CurrentView empty) — same gate as Print Reports.
         var storyModel = _appState.CurrentDocument?.Model;
-        if (storyModel == null)
+        if (storyModel == null || storyModel.CurrentView.Count == 0)
         {
-            _logService.Log(LogLevel.Error, "No StoryModel available - no document is open");
+            _logService.Log(LogLevel.Warn, "No story is open; Collaborator not started.");
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(
+                new StatusMessage("No story is open. Open an outline before using Collaborator.",
+                    LogLevel.Warn)));
             return;
         }
 
-        bool devEnabled = Environment.GetEnvironmentVariable("COLLAB_DEV_ENABLED") == "1";
-        if (!devEnabled && !IsPurchaseVerified())
+        // Issue #90 ruling of 2026-07-15: the old COLLAB_DEV_ENABLED purchase-check bypass retired.
+        // Entitlement is holding a valid activation, however obtained -- including via the
+        // dev/tester allowlist, which COLLAB_DEV_ACTIVATION (renamed from COLLAB_DEV_ENABLED,
+        // 2026-07-17) only routes StoreActivationService toward (item 3), rather than skipping
+        // this check.
+        if (!IsPurchaseVerified())
         {
-            _logService.Log(LogLevel.Warn, "Collaborator blocked: purchase not verified and COLLAB_DEV_ENABLED != 1");
-            // TODO #30: show purchase prompt
-            return;
+            _logService.Log(LogLevel.Warn, "Collaborator blocked: no active store activation.");
+            if (!await EnsureEntitledToOpenAsync())
+            {
+                return;
+            }
         }
 
         _storyCADApi.SetCurrentModel(storyModel);
@@ -101,6 +116,14 @@ public class CollaboratorService
             // Create a fresh Collaborator instance for this session (disposed on close).
             _collaboratorInterface = _collaboratorFactory();
 
+            // Seed settings from persisted preferences before opening. ShowCostDetails and
+            // Terseness survive a restart (Collaborator #49); the rest are session-only and
+            // start at their defaults.
+            var settings = _collaboratorInterface.GetSettings() ?? CollaboratorSettings.Default;
+            settings.ShowCostDetails = _preferenceService.Model.ShowCollaboratorCost;
+            settings.Terseness = _preferenceService.Model.CollaboratorTerseness;
+            _collaboratorInterface.SetSettings(settings);
+
             var filePath = _appState.CurrentDocument?.FilePath ?? string.Empty;
             await _collaboratorInterface.OpenAsync(_storyCADApi, storyModel, CollaboratorWindow, hostFrame, filePath, _logService);
         }
@@ -122,7 +145,213 @@ public class CollaboratorService
         }
     }
 
-    private static bool IsPurchaseVerified() => false; // TODO #30: wire real JWT/Store verification
+    // Gate (issue #30): Collaborator opens only when the store-activation service holds a valid
+    // Worker JWT. This is a client-side, open-time check; attaching CurrentJwt to each Collaborator
+    // Worker call (the per-call enforcement in the activation contract, "JWT"; see
+    // StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md) is the
+    // remaining #30 wiring in the CollaboratorLib/Worker track. Resolved on demand to avoid
+    // widening the constructor.
+    private static bool IsPurchaseVerified() =>
+        Ioc.Default.GetService<IStoreActivationService>()?.State == ActivationState.Active;
+
+    /// <summary>
+    ///     Offers the subscription via <see cref="SubscribeDialogViewModel.ShowAsync" /> (the view
+    ///     model owns the dialog). Returns true when the user is Active afterward. Resolved on
+    ///     demand to avoid widening the constructor.
+    /// </summary>
+    /// <summary>
+    ///     Collaborator #97: Join dialog, allowlist refresh, closed copy, or Subscribe.
+    ///     Does not enroll on the toolbar click.
+    /// </summary>
+    private async Task<bool> EnsureEntitledToOpenAsync()
+    {
+        var activation = Ioc.Default.GetService<IStoreActivationService>();
+        var client = Ioc.Default.GetService<IActivationClient>();
+        var windowing = Ioc.Default.GetService<Windowing>();
+        if (activation is null || client is null)
+        {
+            return false;
+        }
+
+        BetaEnrollmentStatus enrollment;
+        try
+        {
+            var guid = _preferenceService.Model.StoreUserGuid ?? string.Empty;
+            enrollment = await client.GetBetaEnrollmentAsync(guid);
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"Enrollment status unreachable: {ex.Message}");
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                "Collaborator enrollment is unreachable. Check the connection and try again.",
+                LogLevel.Warn, true)));
+            return false;
+        }
+
+        var action = CollaboratorOpenPlanner.Decide(enrollment, hasPlans: false);
+        if (action == CollaboratorOpenAction.ShowClosed)
+        {
+            var store = Ioc.Default.GetService<IStoreService>();
+            var hasPlans = false;
+            if (store is not null)
+            {
+                try
+                {
+                    var products = await store.GetProductsAsync(store.ProductIds);
+                    hasPlans = products is { Count: > 0 };
+                }
+                catch (Exception ex)
+                {
+                    _logService.Log(LogLevel.Warn, $"Store catalog probe failed: {ex.Message}");
+                }
+            }
+
+            action = CollaboratorOpenPlanner.Decide(enrollment, hasPlans);
+        }
+
+        switch (action)
+        {
+            case CollaboratorOpenAction.ShowJoin:
+                return await ShowBetaDialogAsync(windowing);
+            case CollaboratorOpenAction.RefreshAllowlist:
+                try
+                {
+                    await activation.RefreshAllowlistAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logService.Log(LogLevel.Warn, $"Allowlist refresh failed: {ex.Message}");
+                    WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                        "Collaborator enrollment is unreachable. Check the connection and try again.",
+                        LogLevel.Warn, true)));
+                    return false;
+                }
+
+                return activation.State == ActivationState.Active;
+            case CollaboratorOpenAction.ShowSubscribe:
+                return await ShowSubscribeDialogAsync();
+            case CollaboratorOpenAction.ShowRevoked:
+                await ShowNoticeAsync(windowing, "This Collaborator beta access was revoked.");
+                return false;
+            default:
+                var closed = enrollment.Open
+                    ? "The free Collaborator beta is full. Collaborator is not for sale in this release."
+                    : "The free Collaborator beta is closed. Collaborator is not for sale in this release.";
+                await ShowNoticeAsync(windowing, closed);
+                return false;
+        }
+    }
+
+    private async Task<bool> ShowBetaDialogAsync(Windowing windowing)
+    {
+        var vm = Ioc.Default.GetService<BetaEnrollmentDialogViewModel>();
+        if (windowing is null || vm is null)
+        {
+            _logService.Log(LogLevel.Warn, "Beta dialog unavailable; no Windowing or view model registered.");
+            return false;
+        }
+
+        var ok = await vm.ShowAsync(windowing);
+        if (ok)
+        {
+            return true;
+        }
+
+        if (vm.FailureReason == "unreachable")
+        {
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                "Collaborator enrollment is unreachable. Check the connection and try again.",
+                LogLevel.Warn, true)));
+            return false;
+        }
+
+        if (vm.FailureReason is "cap_reached" or "enrollment_closed" or "revoked")
+        {
+            var copy = vm.FailureReason switch
+            {
+                "cap_reached" => "The free Collaborator beta is full. Collaborator is not for sale in this release.",
+                "revoked" => "This Collaborator beta access was revoked.",
+                _ => "The free Collaborator beta is closed. Collaborator is not for sale in this release."
+            };
+            await ShowNoticeAsync(windowing, copy);
+        }
+
+        return false;
+    }
+
+    private static async Task ShowNoticeAsync(Windowing windowing, string body)
+    {
+        if (windowing is null)
+        {
+            return;
+        }
+
+        await windowing.ShowContentDialog(new ContentDialog
+        {
+            Title = "StoryCAD Collaborator",
+            Content = body,
+            CloseButtonText = "OK"
+        });
+    }
+
+    private async Task<bool> ShowSubscribeDialogAsync()
+    {
+        // No platform store (NullStoreService, e.g. any desktop build outside a store bundle) means
+        // no plans to list and a Subscribe button that can never succeed. Don't show the dialog;
+        // tell the user Collaborator needs the store edition. Resolved on demand to match above.
+        var store = Ioc.Default.GetService<IStoreService>();
+        if (store is null || !store.IsSupported)
+        {
+            // Called on the UI thread from OpenCollaboratorAsync, so send the status directly.
+            _logService.Log(LogLevel.Warn, "Subscribe dialog suppressed; no platform store is available in this build.");
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                "Collaborator requires the Microsoft Store or Mac App Store edition of StoryCAD.",
+                LogLevel.Warn, true)));
+            return false;
+        }
+
+        var windowing = Ioc.Default.GetService<Windowing>();
+        var vm = Ioc.Default.GetService<SubscribeDialogViewModel>();
+        if (windowing is null || vm is null)
+        {
+            _logService.Log(LogLevel.Warn, "Subscribe dialog unavailable; no Windowing or view model registered.");
+            return false;
+        }
+
+        return await vm.ShowAsync(windowing);
+    }
+
+    /// <summary>
+    ///     Offers a credit-pack purchase via <see cref="BuyCreditsDialogViewModel.ShowAsync" />
+    ///     (issue #90 design section 10 "Credit packs", step 10). Returns true when a pack was
+    ///     purchased and credited. Public (unlike <see cref="ShowSubscribeDialogAsync" />, which
+    ///     has no caller outside <see cref="OpenCollaborator" />'s own gate): the out-of-credits
+    ///     message the workflow and chat callers show (StoryCADLib.Services.Store.
+    ///     OutOfCreditsException) names this screen, so a menu item or in-panel button can call it
+    ///     directly once one is wired up -- no further plumbing needed on this side.
+    /// </summary>
+    public async Task<bool> ShowBuyCreditsDialogAsync()
+    {
+        var store = Ioc.Default.GetService<IStoreService>();
+        if (store is null || !store.IsSupported)
+        {
+            _logService.Log(LogLevel.Warn, "Buy Credits dialog suppressed; no platform store is available in this build.");
+            WeakReferenceMessenger.Default.Send(new StatusChangedMessage(new StatusMessage(
+                "Buying credits requires the Microsoft Store or Mac App Store edition of StoryCAD.",
+                LogLevel.Warn, true)));
+            return false;
+        }
+
+        var windowing = Ioc.Default.GetService<Windowing>();
+        var vm = Ioc.Default.GetService<BuyCreditsDialogViewModel>();
+        if (windowing is null || vm is null)
+        {
+            _logService.Log(LogLevel.Warn, "Buy Credits dialog unavailable; no Windowing or view model registered.");
+            return false;
+        }
+
+        return await vm.ShowAsync(windowing);
+    }
 
     #endregion
 

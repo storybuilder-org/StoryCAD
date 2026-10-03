@@ -864,12 +864,10 @@ public class ReportFormatter
     }
 
     /// <summary>
-    ///     Produces a whole-story map of every character's relationships.
-    ///     For each character it lists each relationship and the inverse
-    ///     relationship (the counterpart's view back at this character).
-    ///     Because inverse relationships are created opt-in, the inverse
-    ///     side is often absent; in that case this report states so
-    ///     explicitly rather than implying symmetry.
+    ///     Produces a whole-story map of character relationships.
+    ///     Each real pairing is printed once, under the earlier character.
+    ///     If the counterpart has a reverse entry, it is nested as Reciprocal.
+    ///     Missing inverses and characters with nothing to print are omitted.
     /// </summary>
     public string FormatCharacterRelationshipsMapReport()
     {
@@ -893,20 +891,24 @@ public class ReportFormatter
             return output.ToString();
         }
 
+        var printed = new HashSet<(Guid From, Guid To)>();
+
         foreach (var character in characters)
         {
-            output.AppendLine(character.Name);
-
             var relationships = character.RelationshipList;
             if (relationships == null || relationships.Count == 0)
-            {
-                output.AppendLine("    (no relationships)");
-                output.AppendLine();
                 continue;
-            }
+
+            var body = new StringBuilder();
 
             foreach (var rel in relationships)
             {
+                if (printed.Contains((character.Uuid, rel.PartnerUuid)))
+                    continue;
+
+                if (body.Length > 0)
+                    body.AppendLine();
+
                 // Look the partner up directly rather than via StoryElement.GetByGuid:
                 // a dangling relationship in a report is expected data hygiene, so a
                 // missing partner should log a Warn, not an Error. Errors alert via
@@ -926,38 +928,42 @@ public class ReportFormatter
                 }
 
                 var relType = string.IsNullOrEmpty(rel.RelationType) ? "(unspecified)" : rel.RelationType;
-                output.AppendLine($"    -> {partnerName}  ({relType})");
+                body.AppendLine($"    -> {partnerName}  ({relType})");
 
                 if (!string.IsNullOrEmpty(rel.Trait) || !string.IsNullOrEmpty(rel.Attitude))
-                    output.AppendLine($"       Trait: {rel.Trait}   Attitude: {rel.Attitude}");
+                    body.AppendLine($"       Trait: {rel.Trait}   Attitude: {rel.Attitude}");
 
                 var notes = GetText(rel.Notes);
                 if (!string.IsNullOrEmpty(notes))
-                    output.AppendLine($"       Notes: {notes}");
+                    body.AppendLine($"       Notes: {notes}");
 
-                // Inverse view: look up the counterpart's relationship back to this character.
+                printed.Add((character.Uuid, rel.PartnerUuid));
+
                 var reciprocal = (partner as CharacterModel)?.RelationshipList?
                     .FirstOrDefault(r => r.PartnerUuid == character.Uuid);
                 if (reciprocal == null)
-                {
-                    output.AppendLine("       Reciprocal: (no reciprocal relationship defined)");
-                }
-                else
-                {
-                    var reciprocalType = string.IsNullOrEmpty(reciprocal.RelationType)
-                        ? "(unspecified)"
-                        : reciprocal.RelationType;
-                    output.AppendLine($"       Reciprocal: {partnerName} -> {character.Name}  ({reciprocalType})");
+                    continue;
 
-                    if (!string.IsNullOrEmpty(reciprocal.Trait) || !string.IsNullOrEmpty(reciprocal.Attitude))
-                        output.AppendLine($"          Trait: {reciprocal.Trait}   Attitude: {reciprocal.Attitude}");
+                var reciprocalType = string.IsNullOrEmpty(reciprocal.RelationType)
+                    ? "(unspecified)"
+                    : reciprocal.RelationType;
+                body.AppendLine($"       Reciprocal: {partnerName} -> {character.Name}  ({reciprocalType})");
 
-                    var reciprocalNotes = GetText(reciprocal.Notes);
-                    if (!string.IsNullOrEmpty(reciprocalNotes))
-                        output.AppendLine($"          Notes: {reciprocalNotes}");
-                }
+                if (!string.IsNullOrEmpty(reciprocal.Trait) || !string.IsNullOrEmpty(reciprocal.Attitude))
+                    body.AppendLine($"          Trait: {reciprocal.Trait}   Attitude: {reciprocal.Attitude}");
+
+                var reciprocalNotes = GetText(reciprocal.Notes);
+                if (!string.IsNullOrEmpty(reciprocalNotes))
+                    body.AppendLine($"          Notes: {reciprocalNotes}");
+
+                printed.Add((rel.PartnerUuid, character.Uuid));
             }
 
+            if (body.Length == 0)
+                continue;
+
+            output.AppendLine(character.Name);
+            output.Append(body);
             output.AppendLine();
         }
 

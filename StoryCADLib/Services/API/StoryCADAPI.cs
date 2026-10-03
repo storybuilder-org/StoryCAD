@@ -3,10 +3,13 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels;
 using StoryCADLib.ViewModels.Tools;
 
 namespace StoryCADLib.Services.API;
@@ -835,6 +838,12 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         return new ListTarget(element, property, property.PropertyType.GetGenericArguments()[0]);
     }
 
+    private static readonly JsonSerializerOptions CollectionEntryJsonOptions = new()
+    {
+        // LLM TypedList JSON often uses camelCase; CultureEntry uses Pascal [JsonPropertyName].
+        PropertyNameCaseInsensitive = true
+    };
+
     private static object DeserializeEntry(object entry, Type targetType, out string error)
     {
         error = null;
@@ -845,7 +854,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         try
         {
             var json = entry is JsonElement je ? je : JsonSerializer.SerializeToElement(entry);
-            var result = json.Deserialize(targetType);
+            var result = json.Deserialize(targetType, CollectionEntryJsonOptions);
             if (result == null)
             {
                 error = $"Conversion of '{entry.GetType().Name}' to '{targetType.Name}' produced null.";
@@ -1032,11 +1041,13 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
     [Description("""
                  Adds a relationship between characters.
                  Both Source and Recipient must be GUIDs of elements that are characters.
-                 Description is the relationship between the two characters.
-                 mirror is a boolean that specifies if the relationship
-                 should be created on both characters.
+                 Description is the short RelationType (the "is a ___ to" slot).
+                 Trait, Attitude, and Notes fill the relationship row.
+                 mirror creates the same row on the partner.
                  """)]
-    public OperationResult<bool> AddRelationship(Guid source, Guid recipient, string desc, bool mirror = false)
+    public OperationResult<bool> AddRelationship(
+        Guid source, Guid recipient, string desc, bool mirror = false,
+        string trait = "", string attitude = "", string notes = "")
     {
         if (CurrentModel == null)
         {
@@ -1055,7 +1066,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
 
         try
         {
-            outlineService.AddRelationship(CurrentModel, source, recipient, desc, mirror);
+            outlineService.AddRelationship(CurrentModel, source, recipient, desc, mirror, trait, attitude, notes);
             return OperationResult<bool>.Success(true);
         }
         catch (Exception ex)
@@ -2008,6 +2019,41 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         }
 
         return null;
+    }
+
+    /// <inheritdoc />
+    public OperationResult<bool> SelectStoryElement(Guid elementGuid)
+    {
+        try
+        {
+            if (CurrentModel == null)
+                return OperationResult<bool>.Failure("No current model");
+
+            if (CurrentModel.ExplorerView == null || CurrentModel.ExplorerView.Count == 0)
+                return OperationResult<bool>.Failure("Explorer view is empty");
+
+            StoryNodeItem node = null;
+            foreach (var root in CurrentModel.ExplorerView)
+            {
+                node = FindNodeInTree(root, elementGuid);
+                if (node != null)
+                    break;
+            }
+
+            if (node == null)
+                return OperationResult<bool>.Failure($"No tree node for element {elementGuid}");
+
+            var shell = Ioc.Default.GetService<ShellViewModel>();
+            if (shell == null)
+                return OperationResult<bool>.Failure("ShellViewModel not available");
+
+            shell.TreeViewNodeClicked(node);
+            return OperationResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<bool>.Failure(ex.Message);
+        }
     }
 
     /// <summary>

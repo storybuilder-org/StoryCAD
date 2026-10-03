@@ -417,10 +417,15 @@ public class OutlineService
     /// <param name="Model">StoryModel</param>
     /// <param name="source">Character you want to add relationship to.</param>
     /// <param name="recipient">Relationship character is with</param>
-    /// <param name="desc">Relationship description</param>
+    /// <param name="desc">Short RelationType (the "is a ___ to" slot)</param>
     /// <param name="mirror">Create same relationship on recipient</param>
+    /// <param name="trait">Dyad Trait</param>
+    /// <param name="attitude">Dyad Attitude</param>
+    /// <param name="notes">Relationship Notes (plain text)</param>
     /// <returns></returns>
-    internal bool AddRelationship(StoryModel Model, Guid source, Guid recipient, string desc, bool mirror = false)
+    internal bool AddRelationship(
+        StoryModel Model, Guid source, Guid recipient, string desc, bool mirror = false,
+        string trait = "", string attitude = "", string notes = "")
     {
         _log.Log(LogLevel.Info, $"AddRelationship called from {source} to {recipient}.");
         if (source == Guid.Empty)
@@ -460,7 +465,7 @@ public class OutlineService
             }
         }
 
-        RelationshipModel relationship = new(recipient, desc);
+        RelationshipModel relationship = BuildRelationship(recipient, recipientElement, desc, trait, attitude, notes);
         sourceCharacter.RelationshipList.Add(relationship);
         Model.Changed = true;
 
@@ -483,7 +488,8 @@ public class OutlineService
 
             if (!mirrorExists)
             {
-                RelationshipModel mirrorRelationship = new(source, desc);
+                RelationshipModel mirrorRelationship = BuildRelationship(
+                    source, sourceElement, desc, trait, attitude, notes);
                 recipientCharacter.RelationshipList.Add(mirrorRelationship);
             }
         }
@@ -491,6 +497,17 @@ public class OutlineService
         _log.Log(LogLevel.Info, $"AddRelationship completed from {source} to {recipient}.");
         return true;
     }
+
+    private static RelationshipModel BuildRelationship(
+        Guid partnerUuid, StoryElement partner, string relationType,
+        string trait, string attitude, string notes) =>
+        new(partnerUuid, relationType ?? string.Empty)
+        {
+            Partner = partner,
+            Trait = trait ?? string.Empty,
+            Attitude = attitude ?? string.Empty,
+            Notes = notes ?? string.Empty
+        };
 
     /// <summary>
     ///     Adds a new cast member to a scene.

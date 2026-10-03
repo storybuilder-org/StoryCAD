@@ -222,6 +222,11 @@ public partial class App : Application
         //Load user preferences or initialise them.
         await new PreferencesIo().ReadPreferences();
 
+        // Explicit startup step (issue #90 D8 as amended): generate and persist the client-side
+        // user GUID on first launch, before store activation ever runs. Must run after
+        // ReadPreferences and before the activation kickoff below.
+        await Preferences.EnsureUserGuidProvisionedAsync();
+
         // Restore macOS security-scoped bookmarks so previously selected folders remain accessible
         if (OperatingSystem.IsMacOS())
         {
@@ -229,12 +234,22 @@ public partial class App : Application
             MacSecurityBookmarks.RestoreAllBookmarks(prefs.Model.SecurityBookmarks, _log);
         }
 
+        // Store activation (issue #30): rehydrate any cached JWT and re-verify purchase proof so a
+        // subscriber is Active before they first open Collaborator; constructing the service also
+        // starts the platform store's entitlement/license listener. Must run after ReadPreferences;
+        // fire-and-forget off the UI thread (InitializeAsync itself never throws).
+        _ = Task.Run(() => Ioc.Default.GetRequiredService<StoryCADLib.Services.Store.IStoreActivationService>()
+            .InitializeAsync());
+
         MainWindow = new Window();
 #if DEBUG
         MainWindow.UseStudio();
 #endif
 
-        if (!Debugger.IsAttached)
+        // Report field errors, not our own debug sessions. Inverted in 4c0360da
+        // (2025-10-16) while fixing elmah on Mac, which turned off reporting for
+        // every real user and forwarded developer sessions instead. Do not flip it.
+        if (Debugger.IsAttached)
         {
             _log.Log(LogLevel.Info, "Bypassing elmah.io as debugger is attached.");
         }
@@ -258,7 +273,9 @@ public partial class App : Application
             }
         }
 
-        await Ioc.Default.GetService<BackendService>()!.StartupRecording();
+        // Awaiting this held MainWindow.Activate below until MySQL answered. Shell awaits
+        // StartupRecordingTask before it reads the results.
+        Ioc.Default.GetService<BackendService>()!.BeginStartupRecording();
         Ioc.Default.GetService<IUsageTrackingService>()?.StartSession();
         ConfigureNavigation();
 
