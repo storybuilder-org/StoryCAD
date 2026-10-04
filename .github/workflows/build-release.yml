@@ -582,7 +582,9 @@ jobs:
         run: |
           $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio/Installer/vswhere.exe"
           $vstest = & $vswhere -latest -products * -find "**/vstest.console.exe" | Select-Object -First 1
-          & $vstest "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll"
+          # DopplerTests read secrets from .env, which this secret-free job never writes; the
+          # build job runs them with secrets. First run (#1601) failed only these two.
+          & $vstest "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll" "/TestCaseFilter:FullyQualifiedName!~DopplerTests"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Script lint
