@@ -14,3 +14,5 @@ menu PdfReportsMenuItem
 toggle PrintReportsOverviewCheck on
 click PrimaryButton                       # "Export"
 save-file-dialog "{scratch}/outlines/SaveProbe.pdf"
+expect-no name:"PDF export failed"      # the success message carries the scratch path, which
+expect-no name:"Unable to create a PDF document for export."   # exact-text expect cannot match
