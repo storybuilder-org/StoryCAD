@@ -647,12 +647,33 @@ jobs:
           New-ItemProperty -Path $key -Name DumpCount -PropertyType DWord -Value 3 -Force | Out-Null
           New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting" -Name DontShowUI -PropertyType DWord -Value 1 -Force | Out-Null
           Get-ItemProperty -Path $key | Select-Object DumpFolder, DumpType, DumpCount | Format-List
+          "WerSvc: $((Get-Service WerSvc -ErrorAction SilentlyContinue).Status)"
+          "WER Disabled value: $((Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ErrorAction SilentlyContinue).Disabled)"
+          "cdb present: $(Test-Path "${env:ProgramFiles(x86)}\Windows Kits\10\Debuggers\x64\cdb.exe")"
 
+      - name: Download ProcDump
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://download.sysinternals.com/files/Procdump.zip -OutFile "$env:RUNNER_TEMP\procdump.zip"
+          Expand-Archive "$env:RUNNER_TEMP\procdump.zip" -DestinationPath "$env:RUNNER_TEMP\procdump" -Force
+
+      # WER wrote no dump on this runner (run 37227198444), so ProcDump, started in this same step,
+      # waits for StoryCAD.exe and writes a full dump on an unhandled exception, independent of WER.
       - name: Smoke script (advisory)
         id: smoke
         continue-on-error: true
         shell: pwsh
-        run: ./StoryCADAutomation/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADAutomation.exe run StoryCADTests/ManualTests/Smoke_Test.scs --ci
+        run: |
+          New-Item -ItemType Directory -Force crash-dumps | Out-Null
+          $procdump = Start-Process -FilePath "$env:RUNNER_TEMP\procdump\procdump64.exe" -PassThru -NoNewWindow `
+            -ArgumentList "-accepteula -ma -e -w StoryCAD.exe `"$env:GITHUB_WORKSPACE\crash-dumps`"" `
+            -RedirectStandardOutput "$env:GITHUB_WORKSPACE\crash-dumps\procdump.log"
+          Start-Sleep -Seconds 2
+          ./StoryCADAutomation/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADAutomation.exe run StoryCADTests/ManualTests/Smoke_Test.scs --ci
+          $smokeExit = $LASTEXITCODE
+          Start-Sleep -Seconds 10   # let ProcDump finish writing a dump
+          if (-not $procdump.HasExited) { Stop-Process -Id $procdump.Id -Force }
+          exit $smokeExit
 
       # After a smoke failure: the app's crash records and its own logs (--ci keeps the scratch folder).
       - name: Smoke failure diagnostics
@@ -670,6 +691,7 @@ jobs:
         if: steps.smoke.outcome == 'failure'
         shell: pwsh
         run: |
+          if (Test-Path crash-dumps/procdump.log) { "---- procdump.log"; Get-Content crash-dumps/procdump.log | Select-Object -Last 30 }
           $dumps = Get-ChildItem crash-dumps -Filter *.dmp -ErrorAction SilentlyContinue
           if (-not $dumps) { "No crash dump was written."; exit 0 }
           $dumps | ForEach-Object { "dump: $($_.Name) $($_.Length) bytes" }
