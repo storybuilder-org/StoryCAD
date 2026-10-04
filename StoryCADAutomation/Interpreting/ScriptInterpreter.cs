@@ -25,6 +25,9 @@ public sealed class ScriptInterpreter
     /// </summary>
     private const string ScratchToken = "{scratch}";
 
+    /// <summary>How long `expect ... text` waits for the expected value (the design's 5 s implicit wait).</summary>
+    private static readonly TimeSpan ExpectTextTimeout = TimeSpan.FromSeconds(5);
+
     private readonly Func<IUiDriver> _launchDriver;
     private readonly InterpreterOptions _options;
 
@@ -278,14 +281,31 @@ public sealed class ScriptInterpreter
                 return currentStep;
             case ScriptVerb.ExpectText:
             {
-                var state = RequireDriver().WaitUntilFound(s.Target!);
-                if (!string.Equals(state.Text, s.Text, StringComparison.Ordinal))
+                // Polls, because text often changes after the action that caused it: the status
+                // bar shows the previous message for a moment after a save. Reads the Value or
+                // Text pattern, else the UIA Name, which is how a TextBlock exposes its text
+                // (#1421 review M5).
+                var d = RequireDriver();
+                var expected = NormalizeText(s.Text);
+                var polling = Stopwatch.StartNew();
+                while (true)
                 {
-                    throw new AutomationStepException(
-                        $"{s.Target} text is \"{state.Text}\", expected \"{s.Text}\".");
-                }
+                    var state = d.WaitUntilFound(s.Target!);
+                    var actual = string.IsNullOrEmpty(state.Text) ? state.Name : state.Text;
+                    if (string.Equals(NormalizeText(actual), expected, StringComparison.Ordinal))
+                    {
+                        return currentStep;
+                    }
 
-                return currentStep;
+                    if (polling.Elapsed >= ExpectTextTimeout)
+                    {
+                        throw new AutomationStepException(
+                            $"{s.Target} text is \"{actual}\", expected \"{s.Text}\" " +
+                            $"(polled for {ExpectTextTimeout.TotalSeconds:0}s).");
+                    }
+
+                    Thread.Sleep(200);
+                }
             }
 
             case ScriptVerb.ExpectEnabled:
@@ -387,6 +407,10 @@ public sealed class ScriptInterpreter
 
         return resolved;
     }
+
+    /// <summary>Line endings unified and trailing whitespace dropped before text comparison.</summary>
+    private static string NormalizeText(string? value)
+        => (value ?? string.Empty).Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n').TrimEnd();
 
     private IUiDriver RequireDriver()
         => Driver ?? throw new AutomationStepException("no app is running; the launch statement must come first.");
