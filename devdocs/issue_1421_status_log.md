@@ -13,3 +13,9 @@ Session recovery for #1421 (UI automation DSL and runner). The issue body is the
 - Next: milestone 2 (CI on PRs; one manual screenshot from a script).
 
 How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-windows10.0.22621/win-x64/.env` aside, run `StoryCADAutomation\bin\x64\Debug\net10.0-windows10.0.22621\StoryCADAutomation.exe run StoryCADTests\ManualTests\Smoke_Test.scs`, then restore `.env`.
+
+## 2026-10-04 (later)
+
+- Review follow-ups committed (`900ff0e9`, `cc82dad0`). Smoke script passes at `cc82dad0` (28.2 s, exit 0). WinAppSDK 1757 passed, 15 skipped; desktop 1746 passed, 12 skipped.
+- Added `StoryCADTests/AutomationScripts/SaveDialog.scs`: PDF export through the native Save dialog. Passes (21.8 s).
+- Manual check after any change to driver teardown: run a script that fails while the Open dialog is up (launch, `click OpenFromFileNavItem`, then any failing `expect`). Pass when the output shows `teardown: Cancelled a file dialog left open.` and no `PickerHost` process remains.

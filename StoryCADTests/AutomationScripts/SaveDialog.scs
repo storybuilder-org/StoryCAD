@@ -1,0 +1,16 @@
+# Regression script for the runner's native Save dialog handling (#1421).
+# PDF export is one of two app paths that open the Win32 Save dialog (file-name box id 1001).
+# Run after any change to the driver's file-dialog code:
+#   StoryCADAutomation run StoryCADTests/AutomationScripts/SaveDialog.scs
+script "Save Dialog"
+
+step "Export a PDF through the native Save dialog"
+launch
+click CreateNewOutlineNavItem
+set FileOpenProjectNameTextBox "SaveProbe"
+press "Tab"                               # the name binding updates only when focus leaves the box
+click PrimaryButton                       # "Create outline"
+menu PdfReportsMenuItem
+toggle PrintReportsOverviewCheck on
+click PrimaryButton                       # "Export"
+save-file-dialog "{scratch}/outlines/SaveProbe.pdf"
