@@ -2,6 +2,8 @@
 
 Issue #1421. Decision context: issue body "Architecture decision (2026-07-12)" section. Status: draft for design review.
 
+**Build status (2026-10-04, milestone 1).** Built and run live: driver, parser, lint, interpreter in the test profile, and `run <script>` with console output and exit codes 0-3. The app's data root comes from the `STORYCAD_ROOT_DIR` environment variable, not a copy of the build (#1421 decision of 2026-10-04). `StoryCADTests/ManualTests/Smoke_Test.scs` passes. Deferred until a script needs it: the presentation profile, report files, `--keep-going`, launch retry, folder runs, `check` as its own command, and the display-scale check (CI milestone). Sections below that describe deferred parts are not built.
+
 ## Components
 
 One new console project, `StoryCADAutomation`, target `net10.0-windows10.0.22621` (FlaUI wraps UIA3 and is Windows-only; the DSL itself is backend-neutral, see "macOS seam" below). Three layers inside it:
