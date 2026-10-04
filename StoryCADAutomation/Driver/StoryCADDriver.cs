@@ -322,6 +322,44 @@ public sealed class StoryCADDriver : IUiDriver
     }
 
     /// <inheritdoc />
+    public void InvokeInWindow(string windowTitle, ElementAddress target, TimeSpan? timeout = null)
+    {
+        // Scoped to the dialog the script named: a process-wide name lookup could press an
+        // OK or Cancel somewhere else in the app (#1421 review M4).
+        var t = Timeout(timeout);
+        var window = _locator.WaitForWindow(windowTitle, t);
+        var element = WaitFor(t, $"{target} inside the \"{windowTitle}\" window", () => target.Kind switch
+        {
+            ElementAddressKind.AutomationId => window.FindFirstDescendant(cf => cf.ByAutomationId(target.Value)),
+            ElementAddressKind.Name => window.FindFirstDescendant(cf => cf.ByName(target.Value)),
+            _ => throw new AutomationStepException($"dialog targets are ids or name:\"...\", not {target}."),
+        });
+        if (!element.Patterns.Invoke.IsSupported)
+        {
+            throw new AutomationStepException($"{target} inside the \"{windowTitle}\" window cannot be invoked.");
+        }
+
+        element.Patterns.Invoke.Pattern.Invoke();
+        Wait.UntilInputIsProcessed();
+    }
+
+    /// <inheritdoc />
+    public int? ExitCode
+    {
+        get
+        {
+            try
+            {
+                return _process.HasExited ? _process.ExitCode : null;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+    }
+
+    /// <inheritdoc />
     public void WaitForWindowTitle(string title, TimeSpan? timeout = null)
         => _locator.WaitForWindow(title, Timeout(timeout));
 
@@ -616,15 +654,18 @@ public sealed class StoryCADDriver : IUiDriver
     /// </summary>
     private void CompleteFileDialog(string fileNameId, string path, TimeSpan? timeout)
     {
+        // One deadline for the whole statement, so the worst case is one timeout, not one per wait.
         var t = Timeout(timeout);
-        var dialog = WaitFor(t, "a file dialog to open", FindFileDialog);
-        var fileName = WaitFor(t, $"the file-name box (Edit {fileNameId}) in the file dialog",
+        var deadline = Stopwatch.StartNew();
+        TimeSpan Remaining() => t - deadline.Elapsed > TimeSpan.Zero ? t - deadline.Elapsed : TimeSpan.Zero;
+        var dialog = WaitFor(Remaining(), "a file dialog to open", FindFileDialog);
+        var fileName = WaitFor(Remaining(), $"the file-name box (Edit {fileNameId}) in the file dialog",
             () => dialog.FindFirstDescendant(cf =>
                 cf.ByControlType(ControlType.Edit).And(cf.ByAutomationId(fileNameId))));
         fileName.Patterns.Value.Pattern.SetValue(path);
         Wait.UntilInputIsProcessed();
 
-        var confirm = WaitFor(t, "the OK button (id 1) in the file dialog",
+        var confirm = WaitFor(Remaining(), "the OK button (id 1) in the file dialog",
             () => dialog.FindFirstChild(cf => cf.ByAutomationId("1")));
         if (confirm.Patterns.Invoke.IsSupported)
         {
@@ -636,10 +677,9 @@ public sealed class StoryCADDriver : IUiDriver
         }
 
         Wait.UntilInputIsProcessed();
-        var closing = Stopwatch.StartNew();
         while (FindFileDialog() is not null)
         {
-            if (closing.Elapsed > t)
+            if (deadline.Elapsed > t)
             {
                 throw new AutomationStepException(
                     $"the file dialog was still open {t.TotalSeconds:0}s after confirming '{path}'.");
@@ -653,10 +693,14 @@ public sealed class StoryCADDriver : IUiDriver
     {
         foreach (var window in _automation.GetDesktop().FindAllChildren(cf => cf.ByProcessId(_process.Id)))
         {
-            var dialog = window.FindFirstDescendant(cf => cf.ByClassName("#32770"));
-            if (dialog is not null)
+            // Only a dialog with a file-name box counts, so a Win32 message box (also #32770)
+            // never matches.
+            foreach (var dialog in window.FindAllDescendants(cf => cf.ByClassName("#32770")))
             {
-                return dialog;
+                if (dialog.FindFirstDescendant(cf => cf.ByAutomationId("1148").Or(cf.ByAutomationId("1001"))) is not null)
+                {
+                    return dialog;
+                }
             }
         }
 
@@ -696,17 +740,33 @@ public sealed class StoryCADDriver : IUiDriver
 
         // A file dialog belongs to PickerHost.exe, not to the app, so killing the app's job leaves
         // it on the desktop, pointing at a scratch folder that is about to be deleted (seen on
-        // Brigid, 2026-10-04). Stop its process first; the dialog must be found while the app
-        // window that parents it still exists.
+        // Brigid, 2026-10-04). Press its Cancel first, which touches only this dialog; stop
+        // PickerHost only if the dialog stays open, in case one PickerHost serves other apps.
+        // The dialog must be found while the app window that parents it still exists.
         try
         {
             if (!_process.HasExited && FindFileDialog() is { } dialog)
             {
-                using var picker = Process.GetProcessById(dialog.Properties.ProcessId.Value);
-                if (string.Equals(picker.ProcessName, "PickerHost", StringComparison.OrdinalIgnoreCase))
+                var pickerId = dialog.Properties.ProcessId.Value;
+                dialog.FindFirstChild(cf => cf.ByAutomationId("2"))?.Patterns.LegacyIAccessible.Pattern.DoDefaultAction();
+                var closing = Stopwatch.StartNew();
+                while (FindFileDialog() is not null && closing.Elapsed < TimeSpan.FromSeconds(3))
                 {
-                    picker.Kill();
-                    notes.Add($"Closed a file dialog left open (PickerHost, process {picker.Id}).");
+                    Thread.Sleep(100);
+                }
+
+                if (FindFileDialog() is null)
+                {
+                    notes.Add("Cancelled a file dialog left open.");
+                }
+                else
+                {
+                    using var picker = Process.GetProcessById(pickerId);
+                    if (string.Equals(picker.ProcessName, "PickerHost", StringComparison.OrdinalIgnoreCase))
+                    {
+                        picker.Kill();
+                        notes.Add($"Closed a file dialog left open by stopping PickerHost (process {picker.Id}).");
+                    }
                 }
             }
         }

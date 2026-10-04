@@ -22,6 +22,13 @@ public sealed class ScriptLinter
     private static readonly string[] RuntimeInertIds = { "NavigationTree", "TrashTree" };
 
     /// <summary>
+    ///     ContentDialog template-part ids. They come from the WinUI ContentDialog template, not
+    ///     StoryCAD XAML, so the scan never sees them; checked live on Brigid 2026-10-04. WinUI
+    ///     shows one ContentDialog at a time, so each id is unambiguous (#1421 review M4).
+    /// </summary>
+    private static readonly string[] ContentDialogButtonIds = { "PrimaryButton", "SecondaryButton", "CloseButton" };
+
+    /// <summary>
     ///     Modifier tokens that hardcode one platform. "Primary" is the logical form (Ctrl
     ///     here, Cmd on a future macOS backend); token names mirror
     ///     <see cref="KeyChord" />'s modifier table.
@@ -82,7 +89,8 @@ public sealed class ScriptLinter
                         $"'{address.Value}' never surfaces an automation peer at runtime (ItemsRepeater creates none); " +
                         "address tree rows with tree \"path\" instead."));
                 }
-                else if (statement.Verb != ScriptVerb.Dialog && !_facts.AutomationIds.Contains(address.Value))
+                else if (statement.Verb != ScriptVerb.Dialog && !_facts.AutomationIds.Contains(address.Value)
+                         && !ContentDialogButtonIds.Contains(address.Value))
                 {
                     // Dialog-verb targets are exempt: native dialogs live outside the XAML,
                     // and their element names are a stated lint limit.

@@ -42,6 +42,18 @@ public class ScriptLinterTests
     }
 
     [TestMethod]
+    public void Lint_WithContentDialogButtonId_ReportsNoError()
+    {
+        Assert.AreEqual(0, LintDialogLine("click PrimaryButton").Count);
+    }
+
+    [TestMethod]
+    public void Lint_WithUnknownBareId_ReportsError()
+    {
+        Assert.AreEqual(1, LintDialogLine("click NoSuchButton").Count);
+    }
+
+    [TestMethod]
     public void Lint_WithRepeatedScratchToken_ReportsError()
     {
         Assert.AreEqual(1, LintDialogLine("save-file-dialog \"{scratch}/{scratch}/Smoke.stbx\"").Count);

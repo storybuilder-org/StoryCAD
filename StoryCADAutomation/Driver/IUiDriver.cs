@@ -36,6 +36,15 @@ public interface IUiDriver : IDisposable
     bool WaitForExit(TimeSpan timeout);
 
     /// <summary>
+    ///     Waits for the window titled <paramref name="windowTitle" />, then invokes
+    ///     <paramref name="target" /> found inside that window only (the dialog verb).
+    /// </summary>
+    void InvokeInWindow(string windowTitle, ElementAddress target, TimeSpan? timeout = null);
+
+    /// <summary>The app's exit code once it has exited; null while it runs or when unreadable.</summary>
+    int? ExitCode { get; }
+
+    /// <summary>
     ///     Waits until a window with the exact title exists: a top-level window of the app
     ///     process, or an in-window dialog surfacing as a Window-typed element (ContentDialog).
     ///     Serves the wait-window, expect window, and dialog verbs.

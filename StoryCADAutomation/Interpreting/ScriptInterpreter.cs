@@ -153,27 +153,32 @@ public sealed class ScriptInterpreter
                 Driver = _launchDriver();
                 return currentStep;
             case ScriptVerb.Close:
-            {
-                var d = RequireDriver();
-                d.InvokeMenuItem(ElementAddress.FromAutomationId(ExitMenuItemId));
-                if (!d.WaitForExit(_options.ExitTimeout))
                 {
-                    throw new AutomationStepException(
-                        $"the app did not exit within {_options.ExitTimeout.TotalSeconds:0}s of File > Exit; " +
-                        "close expects no unsaved changes (design, Session verbs).");
-                }
+                    var d = RequireDriver();
+                    d.InvokeMenuItem(ElementAddress.FromAutomationId(ExitMenuItemId));
+                    if (!d.WaitForExit(_options.ExitTimeout))
+                    {
+                        throw new AutomationStepException(
+                            $"the app did not exit within {_options.ExitTimeout.TotalSeconds:0}s of File > Exit; " +
+                            "close expects no unsaved changes (design, Session verbs).");
+                    }
 
-                return currentStep;
-            }
+                    RequireCleanExitCode(d);
+                    return currentStep;
+                }
 
             case ScriptVerb.ExpectExit:
-                if (!RequireDriver().WaitForExit(_options.ExitTimeout))
                 {
-                    throw new AutomationStepException(
-                        $"the app process was still running after {_options.ExitTimeout.TotalSeconds:0}s.");
-                }
+                    var d = RequireDriver();
+                    if (!d.WaitForExit(_options.ExitTimeout))
+                    {
+                        throw new AutomationStepException(
+                            $"the app process was still running after {_options.ExitTimeout.TotalSeconds:0}s.");
+                    }
 
-                return currentStep;
+                    RequireCleanExitCode(d);
+                    return currentStep;
+                }
 
             case ScriptVerb.Click:
                 _options.Profile.Click(RequireDriver(), s.Target!);
@@ -220,14 +225,14 @@ public sealed class ScriptInterpreter
                 ExecuteMenu(s);
                 return currentStep;
             case ScriptVerb.ContextMenu:
-            {
-                // Right-click is always real pointer (context menus need it), then the flyout
-                // path walks by item name: sub-items expand, the leaf invokes.
-                var d = RequireDriver();
-                d.RightClickPointer(s.Target!);
-                WalkFlyoutPath(d, s.Text!.Split('/'));
-                return currentStep;
-            }
+                {
+                    // Right-click is always real pointer (context menus need it), then the flyout
+                    // path walks by item name: sub-items expand, the leaf invokes.
+                    var d = RequireDriver();
+                    d.RightClickPointer(s.Target!);
+                    WalkFlyoutPath(d, s.Text!.Split('/'));
+                    return currentStep;
+                }
 
             case ScriptVerb.Tab:
                 // TabViewItem realizes selection via SelectionItem; id preferred, header text fallback.
@@ -235,26 +240,25 @@ public sealed class ScriptInterpreter
                 return currentStep;
 
             case ScriptVerb.SaveFileDialog:
-            {
-                var d = RequireDriver();
-                d.CompleteSaveFileDialog(ResolveScratchPath(s.Text!, d.ScratchDirectory));
-                return currentStep;
-            }
+                {
+                    var d = RequireDriver();
+                    d.CompleteSaveFileDialog(ResolveScratchPath(s.Text!, d.ScratchDirectory));
+                    return currentStep;
+                }
 
             case ScriptVerb.OpenFileDialog:
-            {
-                var d = RequireDriver();
-                d.CompleteOpenFileDialog(ResolveScratchPath(s.Text!, d.ScratchDirectory));
-                return currentStep;
-            }
+                {
+                    var d = RequireDriver();
+                    d.CompleteOpenFileDialog(ResolveScratchPath(s.Text!, d.ScratchDirectory));
+                    return currentStep;
+                }
 
             case ScriptVerb.Dialog:
-            {
-                var d = RequireDriver();
-                d.WaitForWindowTitle(s.Text!);
-                _options.Profile.Click(d, s.Target!);
-                return currentStep;
-            }
+                {
+                    // Invoke, not the profile's click: the profile has no window scope yet (M7 deferred).
+                    RequireDriver().InvokeInWindow(s.Text!, s.Target!);
+                    return currentStep;
+                }
 
             case ScriptVerb.Wait:
                 // Explicit wait beyond the implicit one; same readiness bar, no pattern demand.
@@ -264,15 +268,15 @@ public sealed class ScriptInterpreter
                 RequireDriver().WaitForWindowTitle(s.Text!);
                 return currentStep;
             case ScriptVerb.Pause:
-            {
-                var scaled = _options.Profile.ScalePause(s.Seconds!.Value);
-                if (scaled > TimeSpan.Zero)
                 {
-                    Thread.Sleep(scaled);
-                }
+                    var scaled = _options.Profile.ScalePause(s.Seconds!.Value);
+                    if (scaled > TimeSpan.Zero)
+                    {
+                        Thread.Sleep(scaled);
+                    }
 
-                return currentStep;
-            }
+                    return currentStep;
+                }
 
             case ScriptVerb.ExpectExists:
                 // Assertions use the found-only wait: they check state, never usability
@@ -280,55 +284,55 @@ public sealed class ScriptInterpreter
                 RequireDriver().WaitUntilFound(s.Target!);
                 return currentStep;
             case ScriptVerb.ExpectText:
-            {
-                // Polls, because text often changes after the action that caused it: the status
-                // bar shows the previous message for a moment after a save. Reads the Value or
-                // Text pattern, else the UIA Name, which is how a TextBlock exposes its text
-                // (#1421 review M5).
-                var d = RequireDriver();
-                var expected = NormalizeText(s.Text);
-                var polling = Stopwatch.StartNew();
-                while (true)
                 {
-                    var state = d.WaitUntilFound(s.Target!);
-                    var actual = string.IsNullOrEmpty(state.Text) ? state.Name : state.Text;
-                    if (string.Equals(NormalizeText(actual), expected, StringComparison.Ordinal))
+                    // Polls, because text often changes after the action that caused it: the status
+                    // bar shows the previous message for a moment after a save. Reads the Value or
+                    // Text pattern, else the UIA Name, which is how a TextBlock exposes its text
+                    // (#1421 review M5).
+                    var d = RequireDriver();
+                    var expected = NormalizeText(s.Text);
+                    var polling = Stopwatch.StartNew();
+                    while (true)
                     {
-                        return currentStep;
-                    }
+                        var state = d.WaitUntilFound(s.Target!);
+                        var actual = string.IsNullOrEmpty(state.Text) ? state.Name : state.Text;
+                        if (string.Equals(NormalizeText(actual), expected, StringComparison.Ordinal))
+                        {
+                            return currentStep;
+                        }
 
-                    if (polling.Elapsed >= ExpectTextTimeout)
-                    {
-                        throw new AutomationStepException(
-                            $"{s.Target} text is \"{actual}\", expected \"{s.Text}\" " +
-                            $"(polled for {ExpectTextTimeout.TotalSeconds:0}s).");
-                    }
+                        if (polling.Elapsed >= ExpectTextTimeout)
+                        {
+                            throw new AutomationStepException(
+                                $"{s.Target} text is \"{actual}\", expected \"{s.Text}\" " +
+                                $"(polled for {ExpectTextTimeout.TotalSeconds:0}s).");
+                        }
 
-                    Thread.Sleep(200);
+                        Thread.Sleep(200);
+                    }
                 }
-            }
 
             case ScriptVerb.ExpectEnabled:
-            {
-                var state = RequireDriver().WaitUntilFound(s.Target!);
-                if (!state.IsEnabled)
                 {
-                    throw new AutomationStepException($"{s.Target} is disabled, expected enabled.");
-                }
+                    var state = RequireDriver().WaitUntilFound(s.Target!);
+                    if (!state.IsEnabled)
+                    {
+                        throw new AutomationStepException($"{s.Target} is disabled, expected enabled.");
+                    }
 
-                return currentStep;
-            }
+                    return currentStep;
+                }
 
             case ScriptVerb.ExpectDisabled:
-            {
-                var state = RequireDriver().WaitUntilFound(s.Target!);
-                if (state.IsEnabled)
                 {
-                    throw new AutomationStepException($"{s.Target} is enabled, expected disabled.");
-                }
+                    var state = RequireDriver().WaitUntilFound(s.Target!);
+                    if (state.IsEnabled)
+                    {
+                        throw new AutomationStepException($"{s.Target} is enabled, expected disabled.");
+                    }
 
-                return currentStep;
-            }
+                    return currentStep;
+                }
 
             case ScriptVerb.ExpectTreeContains:
                 RequireDriver().WaitUntilFound(ElementAddress.FromTreePath(s.Text!));
@@ -406,6 +410,19 @@ public sealed class ScriptInterpreter
         }
 
         return resolved;
+    }
+
+    /// <summary>
+    ///     An exit counts as clean only with exit code 0, so a crash during File > Exit fails the
+    ///     step instead of passing as "the app went away" (#1421 milestone 1 review).
+    /// </summary>
+    private static void RequireCleanExitCode(IUiDriver driver)
+    {
+        if (driver.ExitCode is not 0)
+        {
+            throw new AutomationStepException(
+                $"the app exited with code {driver.ExitCode?.ToString() ?? "unknown"}, expected 0.");
+        }
     }
 
     /// <summary>Line endings unified and trailing whitespace dropped before text comparison.</summary>
