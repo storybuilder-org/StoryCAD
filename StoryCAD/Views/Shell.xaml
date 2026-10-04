@@ -674,7 +674,8 @@
             <TextBlock Grid.Column="1" Text="{x:Bind ShellVm.StatusMessage, Mode=OneWay}"
                        Foreground="{x:Bind ShellVm.StatusColor, Mode=OneWay}"
                        TextTrimming="CharacterEllipsis"
-                       FontSize="14" Margin="10" FontFamily="Segoe UI" Padding="0,5" />
+                       FontSize="14" Margin="10" FontFamily="Segoe UI" Padding="0,5"
+                       AutomationProperties.AutomationId="StatusMessageText" />
 
             <Button Grid.Column="2" Background="Transparent" Command="{x:Bind ShellVm.SaveFileCommand}"
                     AutomationProperties.AutomationId="SaveStatusButton"
