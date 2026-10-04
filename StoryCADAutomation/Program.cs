@@ -6,9 +6,9 @@ using StoryCADAutomation.Scripting;
 namespace StoryCADAutomation;
 
 /// <summary>
-///     Minimal runner for #1421 milestone 1: `run &lt;script.scs&gt; [--app &lt;exe&gt;]`, test profile,
-///     results on the console. Report files, --keep-going, launch retry, folder runs and a
-///     separate `check` command are deferred until a script needs them.
+///     Runner for #1421: `run &lt;script.scs&gt;` in the test profile with results on the console,
+///     and `check` to lint scripts without launching the app. Report files, --keep-going,
+///     launch retry and folder runs for `run` are deferred until a script needs them.
 /// </summary>
 internal static class Program
 {
@@ -23,6 +23,11 @@ internal static class Program
 
     private static int Main(string[] args)
     {
+        if (args.Length == 2 && args[0] == "check")
+        {
+            return Check(args[1]);
+        }
+
         if (args.Length < 2 || args[0] != "run")
         {
             return Usage();
@@ -30,11 +35,21 @@ internal static class Program
 
         var scriptPath = args[1];
         string? appPath = null;
+        var outputDirectory = "automation-output";
+        var ci = false;
         for (var i = 2; i < args.Length; i++)
         {
             if (args[i] == "--app" && i + 1 < args.Length)
             {
                 appPath = args[++i];
+            }
+            else if (args[i] == "--out" && i + 1 < args.Length)
+            {
+                outputDirectory = args[++i];
+            }
+            else if (args[i] == "--ci")
+            {
+                ci = true;
             }
             else
             {
@@ -52,25 +67,19 @@ internal static class Program
         // Lint gates every run, so no script reaches the app with an unknown id or a dialog
         // path outside {scratch}. The interpreter also checks dialog paths at run time (B1).
         var parsed = ScriptParser.ParseFile(scriptPath);
-        var diagnostics = parsed.Errors
-            .Concat(new ScriptLinter(XamlUiFacts.LoadFromXamlScan()).Lint(parsed.Statements))
-            .ToList();
-        foreach (var diagnostic in diagnostics)
-        {
-            Console.Error.WriteLine(diagnostic);
-        }
-
-        if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
+        if (PrintDiagnostics(parsed, new ScriptLinter(XamlUiFacts.LoadFromXamlScan())))
         {
             return ScriptError;
         }
 
-        // No display-scale requirement for local runs (Brigid is 3840x2160 at 150%). The design's
-        // 100% check exists for CI and video capture; the CI milestone sets it again.
-        var driverOptions = new DriverOptions { AppPath = appPath ?? DefaultAppPath(), RequiredDpiScalePercent = null };
+        // The design's display check (1920x1080 or larger at 100% scale) runs only with --ci.
+        // Local machines differ: Brigid is 3840x2160 at 150%.
+        var driverOptions = ci
+            ? new DriverOptions { AppPath = appPath ?? DefaultAppPath() }
+            : new DriverOptions { AppPath = appPath ?? DefaultAppPath(), RequiredDpiScalePercent = null, MinDesktopWidth = 0, MinDesktopHeight = 0 };
         var interpreter = new ScriptInterpreter(
             () => StoryCADDriver.Launch(driverOptions),
-            new InterpreterOptions { OnStatement = PrintOutcome });
+            new InterpreterOptions { OnStatement = PrintOutcome, OutputDirectory = outputDirectory });
 
         var stopwatch = Stopwatch.StartNew();
         ScriptRunResult result;
@@ -97,6 +106,55 @@ internal static class Program
 
         Console.WriteLine($"FAILED: {result.ScriptName}, {failures.Count} failure(s) in {seconds:0.0}s");
         return failures.Any(o => o.Failure is AutomationLaunchException) ? LaunchFailure : StepFailure;
+    }
+
+    /// <summary>
+    ///     `check`: lints one script, or every .scs under a folder, without launching the app.
+    ///     Exit 0 when no script has an error, 2 otherwise. CI runs it as a required check.
+    /// </summary>
+    private static int Check(string target)
+    {
+        string[] scripts;
+        if (Directory.Exists(target))
+        {
+            scripts = Directory.GetFiles(target, "*.scs", SearchOption.AllDirectories);
+            Array.Sort(scripts, StringComparer.Ordinal);
+        }
+        else if (File.Exists(target))
+        {
+            scripts = new[] { target };
+        }
+        else
+        {
+            Console.Error.WriteLine($"no script or folder at {target}");
+            return UsageError;
+        }
+
+        var linter = new ScriptLinter(XamlUiFacts.LoadFromXamlScan());
+        var failed = 0;
+        foreach (var script in scripts)
+        {
+            Console.WriteLine($"check {script}");
+            if (PrintDiagnostics(ScriptParser.ParseFile(script), linter))
+            {
+                failed++;
+            }
+        }
+
+        Console.WriteLine($"{scripts.Length} script(s) checked, {failed} with errors.");
+        return failed == 0 ? Passed : ScriptError;
+    }
+
+    /// <summary>Prints parse errors and lint findings; returns true when any is an error.</summary>
+    private static bool PrintDiagnostics(ScriptParseResult parsed, ScriptLinter linter)
+    {
+        var diagnostics = parsed.Errors.Concat(linter.Lint(parsed.Statements)).ToList();
+        foreach (var diagnostic in diagnostics)
+        {
+            Console.Error.WriteLine(diagnostic);
+        }
+
+        return diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error);
     }
 
     private static void PrintOutcome(StatementOutcome outcome)
@@ -135,7 +193,8 @@ internal static class Program
         Console.Error.WriteLine("StoryCAD automation runner (issue #1421)");
         Console.Error.WriteLine();
         Console.Error.WriteLine("Usage:");
-        Console.Error.WriteLine("  StoryCADAutomation run <script.scs> [--app <path to StoryCAD.exe>]");
+        Console.Error.WriteLine("  StoryCADAutomation run <script.scs> [--app <path to StoryCAD.exe>] [--out <dir>] [--ci]");
+        Console.Error.WriteLine("  StoryCADAutomation check <script.scs | folder>");
         Console.Error.WriteLine();
         Console.Error.WriteLine("Exit codes: 0 all steps passed, 1 step failure(s), 2 script parse/lint error,");
         Console.Error.WriteLine("            3 environment or launch failure.");

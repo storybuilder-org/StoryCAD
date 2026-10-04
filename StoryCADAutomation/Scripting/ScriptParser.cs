@@ -222,6 +222,7 @@ public static partial class ScriptParser
             "expect" => BuildExpect(reader),
             "expect-no" => New(ScriptVerb.ExpectNo) with { Target = TakeTarget(reader) },
             "narrate" => New(ScriptVerb.Narrate) with { Text = TakeString(reader, "narration text") },
+            "screenshot" => New(ScriptVerb.Screenshot) with { Text = TakeString(reader, "png file name") },
             _ => throw new SyntaxException($"unknown verb '{verbWord}'; the verb set is fixed in devdocs/issue_1421_dsl_design.md."),
         };
 

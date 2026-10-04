@@ -348,6 +348,21 @@ public sealed class ScriptInterpreter
                 _options.Profile.Narrate(s.Text!, _options.Log);
                 return currentStep;
 
+            case ScriptVerb.Screenshot:
+                {
+                    // Checked here as well as in the lint, like dialog paths: a bare file name only.
+                    if (Path.GetFileName(s.Text!) != s.Text || !s.Text!.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new AutomationStepException($"screenshot name '{s.Text}' must be a plain .png file name.");
+                    }
+
+                    var path = Path.Combine(Path.GetFullPath(_options.OutputDirectory), s.Text);
+                    Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                    RequireDriver().CaptureMainWindow(path);
+                    _options.Log($"screenshot: {path}");
+                    return currentStep;
+                }
+
             default:
                 throw new AutomationStepException($"no handler for verb {s.Verb} (line {s.Line}).");
         }

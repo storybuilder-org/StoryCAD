@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Reflection;
 using FlaUI.Core.AutomationElements;
+using FlaUI.Core.Capturing;
 using FlaUI.Core.Definitions;
 using FlaUI.Core.Input;
 using FlaUI.UIA3;
@@ -341,6 +342,25 @@ public sealed class StoryCADDriver : IUiDriver
 
         element.Patterns.Invoke.Pattern.Invoke();
         Wait.UntilInputIsProcessed();
+    }
+
+    /// <inheritdoc />
+    public void CaptureMainWindow(string pngPath)
+    {
+        var hwnd = _process.MainWindowHandle;
+        var window = hwnd == IntPtr.Zero ? null : _automation.FromHandle(hwnd);
+        if (window is null)
+        {
+            throw new AutomationStepException("the app has no main window to capture.");
+        }
+
+        Wait.UntilInputIsProcessed();
+        // The visible frame only: the UIA bounds include the invisible resize border, which
+        // captured a strip of whatever was behind the window (seen on Brigid, 2026-10-04).
+        using var image = NativeMethods.VisibleWindowBounds(hwnd) is { } frame
+            ? Capture.Rectangle(frame)
+            : Capture.Element(window);
+        image.ToFile(pngPath);
     }
 
     /// <inheritdoc />

@@ -60,4 +60,7 @@ public enum ScriptVerb
 
     // presentation
     Narrate,
+
+    // capture (#1421 Milestone 2)
+    Screenshot,
 }

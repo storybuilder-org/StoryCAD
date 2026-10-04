@@ -55,6 +55,20 @@ internal static class NativeMethods
     /// <summary>System DPI (96 = 100% scale).</summary>
     internal static int SystemDpi() => (int)GetDpiForSystem();
 
+    /// <summary>
+    ///     The window's visible frame in screen pixels, without the invisible resize border that
+    ///     GetWindowRect and the UIA bounds include; null when DWM cannot report it.
+    /// </summary>
+    internal static System.Drawing.Rectangle? VisibleWindowBounds(IntPtr hwnd)
+    {
+        if (DwmGetWindowAttribute(hwnd, DwmwaExtendedFrameBounds, out var r, Marshal.SizeOf<RECT>()) != 0)
+        {
+            return null;
+        }
+
+        return System.Drawing.Rectangle.FromLTRB(r.Left, r.Top, r.Right, r.Bottom);
+    }
+
     /// <summary>Process id owning the current foreground window, or 0 when there is none.</summary>
     internal static uint ForegroundWindowProcessId()
     {
@@ -154,4 +168,18 @@ internal static class NativeMethods
 
     [DllImport("user32.dll")]
     private static extern bool SetProcessDpiAwarenessContext(IntPtr value);
+
+    private const int DwmwaExtendedFrameBounds = 9;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmGetWindowAttribute(IntPtr hwnd, int attribute, out RECT value, int size);
 }

@@ -22,6 +22,9 @@ public sealed class InterpreterOptions
     /// </summary>
     public TimeSpan ExitTimeout { get; init; } = TimeSpan.FromSeconds(15);
 
+    /// <summary>Folder the screenshot verb writes into (runner --out).</summary>
+    public string OutputDirectory { get; init; } = "automation-output";
+
     /// <summary>Log sink for step lines, narrate output, and failures; the runner redirects it.</summary>
     public Action<string> Log { get; init; } = static line => Console.Out.WriteLine(line);
 

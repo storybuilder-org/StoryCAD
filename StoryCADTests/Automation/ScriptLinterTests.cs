@@ -58,5 +58,46 @@ public class ScriptLinterTests
     {
         Assert.AreEqual(1, LintDialogLine("save-file-dialog \"{scratch}/{scratch}/Smoke.stbx\"").Count);
     }
+
+    [TestMethod]
+    public void Lint_WithPlainScreenshotName_ReportsNoError()
+    {
+        Assert.AreEqual(0, LintDialogLine("screenshot \"Overview-Page.png\"").Count);
+    }
+
+    [TestMethod]
+    public void Lint_WithScreenshotPathOrWrongType_ReportsError()
+    {
+        Assert.AreEqual(1, LintDialogLine("screenshot \"../Overview.png\"").Count);
+        Assert.AreEqual(1, LintDialogLine("screenshot \"media/Overview.png\"").Count);
+        Assert.AreEqual(1, LintDialogLine("screenshot \"Overview.jpg\"").Count);
+    }
+
+    /// <summary>
+    ///     Every committed script lints clean against the live XAML, the same rule as the
+    ///     required CI `check`, so a XAML change that breaks a script fails here first.
+    /// </summary>
+    [TestMethod]
+    public void Lint_AllCommittedScripts_ReportNoErrors()
+    {
+        var root = new DirectoryInfo(AppContext.BaseDirectory);
+        while (root != null && !File.Exists(Path.Combine(root.FullName, "StoryCAD.sln")))
+        {
+            root = root.Parent;
+        }
+
+        Assert.IsNotNull(root, "StoryCAD.sln not found above the test output folder.");
+        var scripts = Directory.GetFiles(Path.Combine(root.FullName, "StoryCADTests"), "*.scs", SearchOption.AllDirectories);
+        Assert.IsTrue(scripts.Length > 0, "no committed .scs scripts found");
+
+        var linter = new ScriptLinter(XamlUiFacts.LoadFromXamlScan());
+        foreach (var script in scripts)
+        {
+            var parsed = ScriptParser.ParseFile(script);
+            var errors = parsed.Errors.Concat(linter.Lint(parsed.Statements))
+                .Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
+            Assert.AreEqual(0, errors.Count, $"{script}: {string.Join("; ", errors)}");
+        }
+    }
 }
 #endif

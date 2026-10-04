@@ -11,7 +11,7 @@ namespace StoryCADAutomation.Scripting;
 ///     data), native-dialog element names, and whether a statically valid id surfaces an
 ///     automation peer at runtime outside the deny-list.
 /// </summary>
-public sealed class ScriptLinter
+public sealed partial class ScriptLinter
 {
     /// <summary>
     ///     Runtime-inert deny-list: these ids exist in Shell.xaml but never surface an
@@ -66,6 +66,9 @@ public sealed class ScriptLinter
                     break;
                 case ScriptVerb.Press:
                     LintChord(statement, findings);
+                    break;
+                case ScriptVerb.Screenshot:
+                    LintScreenshotName(statement, findings);
                     break;
             }
         }
@@ -164,6 +167,24 @@ public sealed class ScriptLinter
                 "either can point the path outside the scratch folder."));
         }
     }
+
+    /// <summary>
+    ///     A screenshot name is a plain .png file name, so a script can only write into the
+    ///     run's output folder (design, Capture).
+    /// </summary>
+    private static void LintScreenshotName(ScriptStatement statement, List<ScriptDiagnostic> findings)
+    {
+        var name = statement.Text!;
+        if (!ScreenshotNamePattern().IsMatch(name) || name.Contains("..", StringComparison.Ordinal))
+        {
+            findings.Add(Error(statement,
+                $"screenshot name '{name}' must be a plain .png file name (letters, digits, '-', '_', '.'), " +
+                "with no folder, so the image lands in the run's output folder."));
+        }
+    }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"^[A-Za-z0-9_.-]+\.png$")]
+    private static partial System.Text.RegularExpressions.Regex ScreenshotNamePattern();
 
     private static void LintChord(ScriptStatement statement, List<ScriptDiagnostic> findings)
     {
