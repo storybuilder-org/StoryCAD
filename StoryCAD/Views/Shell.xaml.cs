@@ -411,6 +411,41 @@ public sealed partial class Shell : Page
         ShellVm.TreeViewNodeClicked((s as FrameworkElement).DataContext);
 
     /// <summary>
+    ///     Removes the expand/collapse area from a root row. A root row is a TreeViewItem outside
+    ///     any TreeView (see the drag-and-drop overview above), and WinUI's handler for a press on
+    ///     that area reads the item's TreeViewNode without a null check. Outside a TreeView the node
+    ///     is null, so a click there crashed the app with 0xC0000005 (#1602). Root rows never expand
+    ///     or collapse; their children always show in the nested TreeView.
+    /// </summary>
+    private void RootItem_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is TreeViewItem item && FindDescendant(item, "ExpandCollapseChevron") is UIElement chevron)
+        {
+            chevron.IsHitTestVisible = false;
+            chevron.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private static DependencyObject FindDescendant(DependencyObject parent, string name)
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is FrameworkElement { Name: var childName } && childName == name)
+            {
+                return child;
+            }
+
+            if (FindDescendant(child, name) is { } found)
+            {
+                return found;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
     ///     This updates the parent of a node in a drag and drop to correctly update backing store (story model)
     ///     when the parent of the item being moved is supposed to be the root of the tree view.
     /// </summary>
