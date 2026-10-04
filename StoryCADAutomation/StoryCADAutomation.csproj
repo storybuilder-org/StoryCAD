@@ -21,6 +21,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="StoryCADTests" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\StoryCADXamlScan\StoryCADXamlScan.csproj" />
     </ItemGroup>
 </Project>

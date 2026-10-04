@@ -147,6 +147,14 @@ public sealed class ScriptLinter
             findings.Add(Error(statement,
                 $"dialog path '{path}' contains '..', which would escape the scratch root."));
         }
+
+        var rest = path["{scratch}/".Length..];
+        if (rest.Contains("{scratch}", StringComparison.Ordinal) || rest.Contains(':'))
+        {
+            findings.Add(Error(statement,
+                $"dialog path '{path}' may not repeat {{scratch}} or contain ':' after the root; " +
+                "either can point the path outside the scratch folder."));
+        }
     }
 
     private static void LintChord(ScriptStatement statement, List<ScriptDiagnostic> findings)

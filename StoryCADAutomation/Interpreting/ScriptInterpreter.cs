@@ -58,7 +58,7 @@ public sealed class ScriptInterpreter
         if (!script.Success)
         {
             throw new ArgumentException(
-                "Refusing to execute a script with parse errors; parse and lint gate execution (exit 2 before any launch).",
+                "Refusing to execute a script with parse errors (exit 2 before any launch).",
                 nameof(script));
         }
 
@@ -234,14 +234,14 @@ public sealed class ScriptInterpreter
             case ScriptVerb.SaveFileDialog:
             {
                 var d = RequireDriver();
-                d.CompleteSaveFileDialog(ResolveScratchPath(s.Text!, d));
+                d.CompleteSaveFileDialog(ResolveScratchPath(s.Text!, d.ScratchDirectory));
                 return currentStep;
             }
 
             case ScriptVerb.OpenFileDialog:
             {
                 var d = RequireDriver();
-                d.CompleteOpenFileDialog(ResolveScratchPath(s.Text!, d));
+                d.CompleteOpenFileDialog(ResolveScratchPath(s.Text!, d.ScratchDirectory));
                 return currentStep;
             }
 
@@ -365,13 +365,28 @@ public sealed class ScriptInterpreter
 
     /// <summary>
     ///     Substitutes {scratch} and normalizes to a full backend path. Scripts write
-    ///     forward slashes (design, Dialogs); the lint guarantees the {scratch} root, this
-    ///     only realizes it.
+    ///     forward slashes (design, Dialogs).
     /// </summary>
-    private static string ResolveScratchPath(string scriptPath, IUiDriver driver)
-        => Path.GetFullPath(scriptPath
-            .Replace(ScratchToken, driver.ScratchDirectory, StringComparison.Ordinal)
+    internal static string ResolveScratchPath(string scriptPath, string scratchDirectory)
+    {
+        var resolved = Path.GetFullPath(scriptPath
+            .Replace(ScratchToken, scratchDirectory, StringComparison.Ordinal)
             .Replace('/', Path.DirectorySeparatorChar));
+
+        // Checked here as well as in the lint: this is the last stop before the runner types a
+        // path into a real file dialog, so a script that skipped `check` still cannot reach a
+        // user folder (#1421 review B1). The trailing separator stops "run1" matching "run10".
+        var root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(scratchDirectory))
+                   + Path.DirectorySeparatorChar;
+        if (!resolved.StartsWith(root, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new AutomationStepException(
+                $"dialog path '{scriptPath}' resolves to '{resolved}', outside the scratch folder '{root}'; " +
+                "file dialogs may only use paths under {scratch}.");
+        }
+
+        return resolved;
+    }
 
     private IUiDriver RequireDriver()
         => Driver ?? throw new AutomationStepException("no app is running; the launch statement must come first.");
