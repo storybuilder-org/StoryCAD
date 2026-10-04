@@ -1,11 +1,14 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
 using StoryCADLib.Services.Collaborator.Contracts;
+using StoryCADLib.Services.Logging;
 
 namespace StoryCADLib.Collaborator.ViewModels;
 
@@ -343,7 +346,19 @@ public partial class WorkflowShellViewModel : ObservableRecipient
 
     private void TogglePane()
     {
-        IsPaneOpen = !IsPaneOpen;
+        try
+        {
+            IsPaneOpen = !IsPaneOpen;
+        }
+        catch (COMException ex)
+        {
+            // WinUI can refuse the x:Bind push to NavigationView.IsPaneOpen with E_FAIL; seen right
+            // after an element picker was cancelled (issue #1595). Unhandled, it ends the app.
+            // Resync the field only; raising PropertyChanged would push to the control again.
+            _isPaneOpen = NavView?.IsPaneOpen ?? !_isPaneOpen;
+            Ioc.Default.GetService<ILogService>()?.Log(LogLevel.Warn,
+                $"Workflow pane toggle failed (HRESULT 0x{ex.HResult:X8}): {ex.Message}");
+        }
     }
 
     private void SaveOutline()

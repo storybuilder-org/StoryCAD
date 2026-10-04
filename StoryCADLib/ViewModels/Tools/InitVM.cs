@@ -96,6 +96,10 @@ public class InitVM : ObservableRecipient
         // Preserve any security bookmarks saved during folder picker usage
         Preferences.SecurityBookmarks = preference.Model.SecurityBookmarks;
 
+        // Startup provisioned this GUID before the setup page; losing it makes beta Join send an
+        // empty userGuid, which the Worker rejects with 400 (issue #1596).
+        Preferences.StoreUserGuid = preference.Model.StoreUserGuid;
+
         //Make sure prefs init page isn't shown again
         Preferences.PreferencesInitialized = true;
 

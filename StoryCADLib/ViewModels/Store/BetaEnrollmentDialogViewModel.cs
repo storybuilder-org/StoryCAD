@@ -43,10 +43,12 @@ public sealed class BetaEnrollmentDialogViewModel
 
         dialog.PrimaryButtonClick += async (_, args) =>
         {
+            // The deferral holds the dialog open until Join finishes. It closes on failure too, so
+            // the caller shows FailureReason at once instead of after Not now (issue #1596).
             var deferral = args.GetDeferral();
             try
             {
-                args.Cancel = !await JoinAsync();
+                await JoinAsync();
             }
             finally
             {

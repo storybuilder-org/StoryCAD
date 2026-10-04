@@ -493,4 +493,32 @@ public class WorkflowShellViewModelTests
     }
 
     #endregion
+
+    #region TogglePane Tests
+
+    /// <summary>
+    ///     Issue #1595: the x:Bind push to NavigationView.IsPaneOpen threw COMException from inside
+    ///     PropertyChanged and ended the app. The toggle must absorb it and keep the old state.
+    /// </summary>
+    [TestMethod]
+    public void TogglePaneCommand_WhenBindingThrowsComException_DoesNotThrowAndKeepsState()
+    {
+        // Arrange
+        var before = _viewModel.IsPaneOpen;
+        _viewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(WorkflowShellViewModel.IsPaneOpen))
+            {
+                throw new System.Runtime.InteropServices.COMException("Unspecified error", unchecked((int)0x80004005));
+            }
+        };
+
+        // Act
+        _viewModel.TogglePaneCommand.Execute(null);
+
+        // Assert
+        Assert.AreEqual(before, _viewModel.IsPaneOpen);
+    }
+
+    #endregion
 }
