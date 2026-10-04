@@ -1,0 +1,16 @@
+# Produces docs/media/File-Open-Dialog.png for the user manual (#1421, D-SCREENSHOT, Terry 2026-10-04).
+# The manual shows the file menu on its recent-files tab with the Rocky sample listed.
+# Run, then copy the image over docs/media/File-Open-Dialog.png:
+#   StoryCADAutomation run StoryCADTests/AutomationScripts/File-Open-Dialog.scs --out automation-output
+script "File Open Dialog"
+
+step "Open the Rocky sample so it lands in the recent files list"
+launch
+click SampleOutlinesNavItem
+select FileOpenSamplesList "Rocky"
+click PrimaryButton                       # "Open sample"
+
+step "Reopen the file menu on the recent files tab and capture it"
+menu OpenCreateFileMenuItem
+click RecentlyOpenedNavItem
+screenshot dialog "File-Open-Dialog.png"
