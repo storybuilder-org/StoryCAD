@@ -46,9 +46,10 @@ public class AppState
     public readonly Stopwatch StartUpTimer = Stopwatch.StartNew();
 
     /// <summary>
-    ///     Environment variable that, when set, replaces <see cref="RootDirectory" />. The UI
-    ///     automation runner (StoryCADAutomation) sets it to a per-run scratch folder so a test
-    ///     run reads its own Preferences.json and writes its logs there, never the user's (#1421).
+    ///     Environment variable that, in Debug builds only, replaces <see cref="RootDirectory" />.
+    ///     The UI automation runner (StoryCADAutomation) sets it to a per-run scratch folder so a
+    ///     test run reads its own Preferences.json and writes its logs there, never the user's
+    ///     (#1421). Release builds ignore it.
     /// </summary>
     public const string RootDirectoryOverrideVariable = "STORYCAD_ROOT_DIR";
 
@@ -59,11 +60,15 @@ public class AppState
     {
         get
         {
+#if DEBUG
+            // Debug builds only (Terry, 2026-10-04): a shipped Release build must not be
+            // redirectable by an environment variable. The automation runner uses Debug builds.
             var overrideDirectory = Environment.GetEnvironmentVariable(RootDirectoryOverrideVariable);
             if (!string.IsNullOrWhiteSpace(overrideDirectory))
             {
                 return overrideDirectory;
             }
+#endif
 
             try
             {
