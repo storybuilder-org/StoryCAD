@@ -589,6 +589,49 @@ jobs:
         shell: pwsh
         run: ./StoryCADAutomation/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADAutomation.exe check StoryCADTests
 
+      # Hosted runners start at 1024x768; the smoke script's --ci check needs 1920x1080 at 100%.
+      # Advisory like the smoke step: if the runner has no desktop session at all (the reason
+      # 3e1205af kept CI on the desktop test target), this and the smoke step fail first.
+      - name: Set display to 1920x1080 (advisory)
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          Add-Type -TypeDefinition @'
+          using System;
+          using System.Runtime.InteropServices;
+          public static class Display
+          {
+              [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+              public struct DEVMODE
+              {
+                  [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)] public string dmDeviceName;
+                  public short dmSpecVersion, dmDriverVersion, dmSize, dmDriverExtra;
+                  public int dmFields, dmPositionX, dmPositionY, dmDisplayOrientation, dmDisplayFixedOutput;
+                  public short dmColor, dmDuplex, dmYResolution, dmTTOption, dmCollate;
+                  [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)] public string dmFormName;
+                  public short dmLogPixels;
+                  public int dmBitsPerPel, dmPelsWidth, dmPelsHeight, dmDisplayFlags, dmDisplayFrequency;
+                  public int dmICMMethod, dmICMIntent, dmMediaType, dmDitherType, dmReserved1, dmReserved2;
+                  public int dmPanningWidth, dmPanningHeight;
+              }
+              [DllImport("user32.dll", CharSet = CharSet.Ansi)] static extern int EnumDisplaySettings(string device, int mode, ref DEVMODE dm);
+              [DllImport("user32.dll", CharSet = CharSet.Ansi)] static extern int ChangeDisplaySettings(ref DEVMODE dm, int flags);
+              public static int Set(int width, int height)
+              {
+                  var dm = new DEVMODE();
+                  dm.dmSize = (short)Marshal.SizeOf(dm);
+                  EnumDisplaySettings(null, -1, ref dm);
+                  dm.dmPelsWidth = width;
+                  dm.dmPelsHeight = height;
+                  dm.dmFields = 0x80000 | 0x100000;
+                  return ChangeDisplaySettings(ref dm, 0);
+              }
+          }
+          '@
+          $result = [Display]::Set(1920, 1080)
+          "ChangeDisplaySettings returned $result (0 means changed)"
+          if ($result -ne 0) { exit 1 }
+
       - name: Smoke script (advisory)
         continue-on-error: true
         shell: pwsh
