@@ -176,7 +176,7 @@ public sealed class StoryCADDriver : IUiDriver
             // match AppState.RootDirectoryOverrideVariable (StoryCADLib/Models/AppState.cs).
             startInfo.Environment[RootDirectoryOverrideVariable] = scratch.AppDataDirectory;
 
-            var job = new KillOnCloseJob();
+            var job = new KillOnCloseJob(options.AllowCrashReporting);
             Process? process = null;
             UIA3Automation? automation = null;
             try

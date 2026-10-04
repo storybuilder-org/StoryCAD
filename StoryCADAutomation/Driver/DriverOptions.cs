@@ -63,4 +63,10 @@ public sealed class DriverOptions
     ///     The runner turns this off only while it copies the app's NLog files into the report.
     /// </summary>
     public bool SweepScratchOnTeardown { get; init; } = true;
+
+    /// <summary>
+    ///     Let Windows Error Reporting handle an app crash, so it writes a dump (runner --ci,
+    ///     #1421 D-CI-CRASH). Off by default: locally a WER dialog could outlive the run.
+    /// </summary>
+    public bool AllowCrashReporting { get; init; }
 }

@@ -77,7 +77,7 @@ internal static class Program
         // CI keeps the scratch folder (the app's logs) so the workflow can upload it after a
         // failure; the CI machine is thrown away after the job.
         var driverOptions = ci
-            ? new DriverOptions { AppPath = appPath ?? DefaultAppPath(), SweepScratchOnTeardown = false }
+            ? new DriverOptions { AppPath = appPath ?? DefaultAppPath(), SweepScratchOnTeardown = false, AllowCrashReporting = true }
             : new DriverOptions { AppPath = appPath ?? DefaultAppPath(), RequiredDpiScalePercent = null, MinDesktopWidth = 0, MinDesktopHeight = 0 };
         var interpreter = new ScriptInterpreter(
             () => StoryCADDriver.Launch(driverOptions),

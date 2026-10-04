@@ -101,14 +101,20 @@ internal static class NativeMethods
     [DllImport("kernel32.dll", SetLastError = true)]
     internal static extern bool CloseHandle(IntPtr hObject);
 
-    /// <summary>Applies the kill-on-close and die-on-unhandled-exception limits to a job.</summary>
-    internal static bool SetKillOnCloseLimits(IntPtr jobHandle)
+    /// <summary>
+    ///     Applies kill-on-close to a job, plus die-on-unhandled-exception unless
+    ///     <paramref name="allowCrashReporting" /> is set. Die-on-unhandled-exception skips Windows
+    ///     Error Reporting, so a crash then leaves no dump and no event-log entry.
+    /// </summary>
+    internal static bool SetKillOnCloseLimits(IntPtr jobHandle, bool allowCrashReporting)
     {
         var info = new JOBOBJECT_EXTENDED_LIMIT_INFORMATION
         {
             BasicLimitInformation = new JOBOBJECT_BASIC_LIMIT_INFORMATION
             {
-                LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE | JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION,
+                LimitFlags = allowCrashReporting
+                    ? JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+                    : JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE | JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION,
             },
         };
         return SetInformationJobObject(

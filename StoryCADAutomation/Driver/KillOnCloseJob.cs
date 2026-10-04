@@ -14,7 +14,11 @@ internal sealed class KillOnCloseJob : IDisposable
 {
     private IntPtr _handle;
 
-    public KillOnCloseJob()
+    /// <param name="allowCrashReporting">
+    ///     Leave Windows Error Reporting on, so a crash writes a dump (CI, where WER's dialog is
+    ///     turned off). Local runs keep it off so no crash dialog outlives the run.
+    /// </param>
+    public KillOnCloseJob(bool allowCrashReporting = false)
     {
         _handle = NativeMethods.CreateJobObjectW(IntPtr.Zero, null);
         if (_handle == IntPtr.Zero)
@@ -22,7 +26,7 @@ internal sealed class KillOnCloseJob : IDisposable
             throw new Win32Exception();
         }
 
-        if (!NativeMethods.SetKillOnCloseLimits(_handle))
+        if (!NativeMethods.SetKillOnCloseLimits(_handle, allowCrashReporting))
         {
             var error = new Win32Exception();
             NativeMethods.CloseHandle(_handle);
