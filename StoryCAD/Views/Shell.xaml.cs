@@ -411,7 +411,7 @@ public sealed partial class Shell : Page
         ShellVm.TreeViewNodeClicked((s as FrameworkElement).DataContext);
 
     /// <summary>
-    ///     Removes the expand/collapse area from a root row. A root row is a TreeViewItem outside
+    ///     Makes a root row ignore presses on its expand/collapse area. A root row is a TreeViewItem outside
     ///     any TreeView (see the drag-and-drop overview above), and WinUI's handler for a press on
     ///     that area reads the item's TreeViewNode without a null check. Outside a TreeView the node
     ///     is null, so a click there crashed the app with 0xC0000005 (#1602). Root rows never expand
@@ -419,10 +419,11 @@ public sealed partial class Shell : Page
     /// </summary>
     private void RootItem_Loaded(object sender, RoutedEventArgs e)
     {
+        // Hit testing only: collapsing the area changed the row's layout and the root's
+        // right-click menu stopped opening.
         if (sender is TreeViewItem item && FindDescendant(item, "ExpandCollapseChevron") is UIElement chevron)
         {
             chevron.IsHitTestVisible = false;
-            chevron.Visibility = Visibility.Collapsed;
         }
     }
 
