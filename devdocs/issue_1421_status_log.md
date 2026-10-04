@@ -19,3 +19,9 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - Review follow-ups committed (`900ff0e9`, `cc82dad0`). Smoke script passes at `cc82dad0` (28.2 s, exit 0). WinAppSDK 1757 passed, 15 skipped; desktop 1746 passed, 12 skipped.
 - Added `StoryCADTests/AutomationScripts/SaveDialog.scs`: PDF export through the native Save dialog. Passes (21.8 s).
 - Manual check after any change to driver teardown: run a script that fails while the Open dialog is up (launch, `click OpenFromFileNavItem`, then any failing `expect`). Pass when the output shows `teardown: Cancelled a file dialog left open.` and no `PickerHost` process remains.
+
+## 2026-10-04 (Milestone 2 started)
+
+- Added `check`, `--ci`, `--out` and the `screenshot` verb; CI job `ui-smoke` for PRs (not run yet; first run comes with the PR).
+- WinAppSDK tests 1763 passed, 15 skipped. `check StoryCADTests`: 2 scripts, 0 errors. `Smoke_Test.scs` and `SaveDialog.scs` pass.
+- Next: the manual screenshot script once D-SCREENSHOT is answered on StoryCADWiki #7.
