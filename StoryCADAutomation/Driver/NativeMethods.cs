@@ -7,8 +7,7 @@ namespace StoryCADAutomation.Driver;
 ///     (a crashed child and its WER dialog must not outlive the run), foreground-window
 ///     identity (real input lands on whatever owns the pixels, so every real-pointer or
 ///     keyboard action verifies StoryCAD is foreground first), primary-display metrics
-///     (the CI hosting section's resolution/DPI assertion at launch), and hard links
-///     (scratch app mirroring without copying ~800 MB of build output per run).
+///     (the CI hosting section's resolution/DPI assertion at launch).
 /// </summary>
 internal static class NativeMethods
 {
@@ -67,12 +66,6 @@ internal static class NativeMethods
 
         GetWindowThreadProcessId(hwnd, out var pid);
         return pid;
-    }
-
-    /// <summary>Creates a hard link; returns false on failure (caller falls back to a copy).</summary>
-    internal static bool TryCreateHardLink(string linkPath, string existingFilePath)
-    {
-        return CreateHardLinkW(linkPath, existingFilePath, IntPtr.Zero);
     }
 
     // --- job object ------------------------------------------------------------------
@@ -161,9 +154,4 @@ internal static class NativeMethods
 
     [DllImport("user32.dll")]
     private static extern bool SetProcessDpiAwarenessContext(IntPtr value);
-
-    // --- file system ---------------------------------------------------------------------
-
-    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-    private static extern bool CreateHardLinkW(string lpFileName, string lpExistingFileName, IntPtr lpSecurityAttributes);
 }

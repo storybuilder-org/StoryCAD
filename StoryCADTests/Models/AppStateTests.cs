@@ -78,6 +78,41 @@ public class AppStateTests
         }
     }
 
+    #region RootDirectory override Tests (Issue #1421)
+
+    [TestMethod]
+    public void RootDirectory_WithOverrideVariableSet_ReturnsOverride()
+    {
+        // Arrange
+        var scratch = Path.Combine(Path.GetTempPath(), "StoryCADAutomation", "run-test");
+        Environment.SetEnvironmentVariable(AppState.RootDirectoryOverrideVariable, scratch);
+        try
+        {
+            // Act & Assert
+            Assert.AreEqual(scratch, new AppState().RootDirectory);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(AppState.RootDirectoryOverrideVariable, null);
+        }
+    }
+
+    [TestMethod]
+    public void RootDirectory_WithOverrideVariableUnset_DoesNotUseOverride()
+    {
+        // Arrange
+        Environment.SetEnvironmentVariable(AppState.RootDirectoryOverrideVariable, null);
+
+        // Act
+        var root = new AppState().RootDirectory;
+
+        // Assert
+        Assert.IsFalse(string.IsNullOrWhiteSpace(root));
+        Assert.IsFalse(root.Contains("StoryCADAutomation", StringComparison.OrdinalIgnoreCase));
+    }
+
+    #endregion
+
     #region CurrentViewType Tests (Issue #1146)
 
     [TestMethod]

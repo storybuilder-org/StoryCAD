@@ -10,7 +10,7 @@ namespace StoryCADAutomation.Driver;
 
 /// <summary>
 ///     FlaUI/UIA3 realization of <see cref="IUiDriver" /> for the StoryCAD WinAppSDK head:
-///     contained launch (per-run scratch mirror with seeded preferences, scrubbed child
+///     contained launch (per-run scratch app-data folder with seeded preferences, scrubbed child
 ///     environment, refusals, kill-on-close job object), process-rooted element location with
 ///     per-verb readiness waits, and pointer/keyboard primitives gated on a foreground check.
 ///     Implements issue #1421 Code task 3; the interpreter and runner tasks build on top.
@@ -37,6 +37,8 @@ public sealed class StoryCADDriver : IUiDriver
         "STORYCAD_TEST_CONNECTION",
         "UNO_DISPLAY_SCALE_OVERRIDE",
     };
+
+    private const string RootDirectoryOverrideVariable = "STORYCAD_ROOT_DIR";
 
     private readonly DriverOptions _options;
     private readonly Process _process;
@@ -140,11 +142,9 @@ public sealed class StoryCADDriver : IUiDriver
         var scratch = ScratchArea.Create(options.ScratchRoot);
         try
         {
-            scratch.MirrorApp(sourceDir);
-
             // Version must match StoryCADLib's assembly version (AppState.Version) or the
             // changelog dialog opens and blocks the file-open menu.
-            var libPath = Path.Combine(scratch.AppDirectory, "StoryCADLib.dll");
+            var libPath = Path.Combine(sourceDir, "StoryCADLib.dll");
             if (!File.Exists(libPath))
             {
                 throw new AutomationLaunchException(
@@ -157,14 +157,19 @@ public sealed class StoryCADDriver : IUiDriver
 
             var startInfo = new ProcessStartInfo
             {
-                FileName = Path.Combine(scratch.AppDirectory, Path.GetFileName(appPath)),
-                WorkingDirectory = scratch.AppDirectory,
+                FileName = appPath,
+                WorkingDirectory = sourceDir,
                 UseShellExecute = false,
             };
             foreach (var name in ScrubbedEnvironmentVariables)
             {
                 startInfo.Environment.Remove(name);
             }
+
+            // The app reads Preferences.json and writes logs under this folder instead of its
+            // exe folder, so the developer's own bin preferences are never touched. Name must
+            // match AppState.RootDirectoryOverrideVariable (StoryCADLib/Models/AppState.cs).
+            startInfo.Environment[RootDirectoryOverrideVariable] = scratch.AppDataDirectory;
 
             var job = new KillOnCloseJob();
             Process? process = null;

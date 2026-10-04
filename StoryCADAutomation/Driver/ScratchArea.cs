@@ -3,39 +3,20 @@ using System.Text.Json;
 namespace StoryCADAutomation.Driver;
 
 /// <summary>
-///     Per-run scratch directory: a mirrored app install with a seeded Preferences.json, plus
-///     the outline and backup directories the seeded preferences point at.
-///     <para>
-///         Why a mirror: when StoryCAD runs unpackaged, AppState.RootDirectory falls back to
-///         AppDomain.CurrentDomain.BaseDirectory (StoryCADLib/Models/AppState.cs), so
-///         PreferencesIo reads Preferences.json from the exe directory and there is no path or
-///         environment override. Seeding in place would overwrite the developer's own dev-run
-///         preferences in bin; mirroring the install into scratch and launching the mirror keeps
-///         the run fully contained. Hard links make the mirror cheap on the same volume;
-///         cross-volume falls back to copying (~800 MB of Debug output). Hard links share
-///         inodes with the bin output, so rebuilding while a run is live mutates the mirror's
-///         loose data files (loaded PE images stay locked).
-///     </para>
+///     Per-run scratch directory: the app-data folder the launched app uses as its root (seeded
+///     Preferences.json, logs), plus the outline and backup directories the seeded preferences
+///     point at. The driver hands the app-data folder to StoryCAD through the STORYCAD_ROOT_DIR
+///     environment variable (StoryCADLib/Models/AppState.cs, RootDirectoryOverrideVariable), so
+///     the build output is launched in place and never copied (#1421).
 /// </summary>
 internal sealed class ScratchArea
 {
-    /// <summary>Root-relative entries never mirrored from the source install.</summary>
-    private static readonly string[] ExcludedRootFiles =
-    {
-        "Preferences.json", // developer's dev-run preferences stay put; the run gets its own seed
-        ".env",             // backend isolation; launch refuses on .env before mirroring anyway
-        "evergreenbootstrapper.exe", // runtime File.Create under RootDirectory (StoryCADLib/ViewModels/WebViewModel.cs:343);
-                                     // a hard-linked stale copy would be truncated through the shared inode
-    };
-
-    private const string ExcludedRootDirectory = "logs"; // fresh NLog output in the mirror belongs to this run
-
     private ScratchArea(string root)
     {
         Root = root;
         OutlineDirectory = Path.Combine(root, "outlines");
         BackupDirectory = Path.Combine(root, "backups");
-        AppDirectory = Path.Combine(root, "app");
+        AppDataDirectory = Path.Combine(root, "appdata");
     }
 
     /// <summary>Run root; the future {scratch} substitution in scripts resolves here.</summary>
@@ -47,11 +28,8 @@ internal sealed class ScratchArea
     /// <summary>Seeded as BackupDirectory so BackupService writes here and nowhere else.</summary>
     public string BackupDirectory { get; }
 
-    /// <summary>The mirrored install; the exe the driver actually launches lives here.</summary>
-    public string AppDirectory { get; }
-
-    /// <summary>"hardlink" or "copy"; recorded for diagnostics.</summary>
-    public string MirrorMode { get; private set; } = "none";
+    /// <summary>The app's root for this run (STORYCAD_ROOT_DIR): Preferences.json and logs live here.</summary>
+    public string AppDataDirectory { get; }
 
     /// <summary>Creates the per-run directory tree under <paramref name="scratchRoot" /> (default %TEMP%\StoryCADAutomation).</summary>
     public static ScratchArea Create(string? scratchRoot)
@@ -61,51 +39,12 @@ internal sealed class ScratchArea
         var area = new ScratchArea(root);
         Directory.CreateDirectory(area.OutlineDirectory);
         Directory.CreateDirectory(area.BackupDirectory);
-        Directory.CreateDirectory(area.AppDirectory);
+        Directory.CreateDirectory(area.AppDataDirectory);
         return area;
     }
 
     /// <summary>
-    ///     Mirrors the app install into <see cref="AppDirectory" />. Hard links when source and
-    ///     scratch share a volume, per-file copy otherwise (or when a link fails).
-    /// </summary>
-    public void MirrorApp(string sourceDir)
-    {
-        var sameVolume = string.Equals(
-            Path.GetPathRoot(Path.GetFullPath(sourceDir)),
-            Path.GetPathRoot(Path.GetFullPath(Root)),
-            StringComparison.OrdinalIgnoreCase);
-        MirrorMode = sameVolume ? "hardlink" : "copy";
-
-        foreach (var dir in Directory.EnumerateDirectories(sourceDir, "*", SearchOption.AllDirectories))
-        {
-            var rel = Path.GetRelativePath(sourceDir, dir);
-            if (IsExcluded(rel))
-            {
-                continue;
-            }
-
-            Directory.CreateDirectory(Path.Combine(AppDirectory, rel));
-        }
-
-        foreach (var file in Directory.EnumerateFiles(sourceDir, "*", SearchOption.AllDirectories))
-        {
-            var rel = Path.GetRelativePath(sourceDir, file);
-            if (IsExcluded(rel))
-            {
-                continue;
-            }
-
-            var dest = Path.Combine(AppDirectory, rel);
-            if (!sameVolume || !NativeMethods.TryCreateHardLink(dest, file))
-            {
-                File.Copy(file, dest, overwrite: true);
-            }
-        }
-    }
-
-    /// <summary>
-    ///     Writes the seeded Preferences.json into the mirrored install. The contents are part
+    ///     Writes the seeded Preferences.json into the app-data folder. The contents are part
     ///     of the design, not an implementation detail (devdocs/issue_1421_dsl_design.md
     ///     "Runner", Environment prep; key names are the JsonPropertyName values in
     ///     StoryCADLib/Models/Tools/PreferencesModel.cs). Keys omitted here keep the
@@ -113,7 +52,7 @@ internal sealed class ScratchArea
     ///     default-constructed model.
     /// </summary>
     /// <param name="storyCADLibVersion">
-    ///     Assembly version of the mirrored StoryCADLib.dll. Must match what AppState.Version
+    ///     Assembly version of the launched StoryCADLib.dll. Must match what AppState.Version
     ///     reports at runtime or the app treats the launch as a version change and shows the
     ///     changelog dialog (probe precondition, devdocs/tools/uia_header_probe.ps1).
     /// </param>
@@ -155,7 +94,7 @@ internal sealed class ScratchArea
         };
 
         File.WriteAllText(
-            Path.Combine(AppDirectory, "Preferences.json"),
+            Path.Combine(AppDataDirectory, "Preferences.json"),
             JsonSerializer.Serialize(preferences, new JsonSerializerOptions { WriteIndented = true }));
     }
 
@@ -192,19 +131,5 @@ internal sealed class ScratchArea
         }
 
         return notes;
-    }
-
-    private static bool IsExcluded(string relativePath)
-    {
-        foreach (var file in ExcludedRootFiles)
-        {
-            if (string.Equals(relativePath, file, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-        }
-
-        return string.Equals(relativePath, ExcludedRootDirectory, StringComparison.OrdinalIgnoreCase)
-               || relativePath.StartsWith(ExcludedRootDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
     }
 }

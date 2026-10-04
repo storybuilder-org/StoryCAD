@@ -15,9 +15,7 @@ public sealed class DriverOptions
 
     /// <summary>
     ///     Root under which per-run scratch directories are created. Default:
-    ///     %TEMP%\StoryCADAutomation. The app install is mirrored into scratch (hard links on
-    ///     the same volume, file copies otherwise), so pointing this at the app's volume makes
-    ///     launch near-instant; a cross-volume default pays an ~800 MB copy per run.
+    ///     %TEMP%\StoryCADAutomation.
     /// </summary>
     public string? ScratchRoot { get; init; }
 
