@@ -693,6 +693,28 @@ public sealed class StoryCADDriver : IUiDriver
         }
 
         var notes = new List<string>();
+
+        // A file dialog belongs to PickerHost.exe, not to the app, so killing the app's job leaves
+        // it on the desktop, pointing at a scratch folder that is about to be deleted (seen on
+        // Brigid, 2026-10-04). Stop its process first; the dialog must be found while the app
+        // window that parents it still exists.
+        try
+        {
+            if (!_process.HasExited && FindFileDialog() is { } dialog)
+            {
+                using var picker = Process.GetProcessById(dialog.Properties.ProcessId.Value);
+                if (string.Equals(picker.ProcessName, "PickerHost", StringComparison.OrdinalIgnoreCase))
+                {
+                    picker.Kill();
+                    notes.Add($"Closed a file dialog left open (PickerHost, process {picker.Id}).");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            notes.Add($"Closing a leftover file dialog failed: {ex.Message}");
+        }
+
         try
         {
             if (!_process.HasExited)
