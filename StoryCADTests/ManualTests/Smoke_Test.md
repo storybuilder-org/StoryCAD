@@ -42,17 +42,14 @@
 **Time:** ~1 minute
 
 **Steps:**
-1. Click File > New Story  
-   **Expected:** New outline with "Untitled" appears
+1. In the file menu (it opens at startup, or File > Open/Create file), click **Create new outline**, type `SmokeTest` as the project name, and click **Create outline**  
+   **Expected:** The new outline opens with `SmokeTest` at the top of the tree
    
-2. Type "Smoke Test" in Story Name  
-   **Expected:** Name updates in tree
+2. Type `Smoke Test` in **Title**  
+   **Expected:** The top of the tree changes to `Smoke Test`
 
 3. Press Ctrl+S  
-   **Expected:** Save dialog appears
-
-4. Save as "SmokeTest.stbx" in Documents  
-   **Expected:** File saves, no errors
+   **Expected:** No dialog; the status bar says the save completed
 
 **Pass/Fail:** ______
 
@@ -66,13 +63,13 @@
 1. Right-click Story Overview  
    **Expected:** Context menu appears
 
-2. Select Add > Character  
+2. Select **Add Elements > Add Character**  
    **Expected:** New Character node appears
 
-3. Type "Test Character" in Name field  
+3. **Click the new Character node**, then type `Test Character` in Name  
    **Expected:** Tree updates with name
 
-4. Right-click and Add > Scene  
+4. Right-click the top node and select **Add Elements > Add Scene**  
    **Expected:** New Scene appears
 
 **Pass/Fail:** ______
@@ -84,7 +81,7 @@
 **Time:** ~1 minute
 
 **Steps:**
-1. Click File > Open Story  
+1. Click **File > Open/Create file**, then **Open from file**  
    **Expected:** Open dialog appears
 
 2. Select SmokeTest.stbx  
@@ -108,7 +105,7 @@
 2. Click File > Exit  
    **Expected:** Save changes dialog appears
 
-3. Click "Don't Save"  
+3. Click **No**  
    **Expected:** Application closes cleanly
 
 **Pass/Fail:** ______
