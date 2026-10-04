@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Reflection;
+using FlaUI.Core.AutomationElements;
+using FlaUI.Core.Definitions;
 using FlaUI.Core.Input;
 using FlaUI.UIA3;
 using Mouse = FlaUI.Core.Input.Mouse;
@@ -39,6 +41,8 @@ public sealed class StoryCADDriver : IUiDriver
     };
 
     private const string RootDirectoryOverrideVariable = "STORYCAD_ROOT_DIR";
+    private const string SaveDialogFileNameId = "1001";
+    private const string OpenDialogFileNameId = "1148";
 
     private readonly DriverOptions _options;
     private readonly Process _process;
@@ -595,34 +599,87 @@ public sealed class StoryCADDriver : IUiDriver
 
     /// <inheritdoc />
     public void CompleteSaveFileDialog(string path, TimeSpan? timeout = null)
-        => CompleteFileDialog(path, timeout);
+        => CompleteFileDialog(SaveDialogFileNameId, path, timeout);
 
     /// <inheritdoc />
     public void CompleteOpenFileDialog(string path, TimeSpan? timeout = null)
-        => CompleteFileDialog(path, timeout);
+        => CompleteFileDialog(OpenDialogFileNameId, path, timeout);
 
     /// <summary>
-    ///     Drives the Win32 common item dialog: filename field is dialog control id "1001"
-    ///     (FileNameControlHost), the confirm button is IDOK, id "1". Save and Open pickers
-    ///     share both ids, so one choreography serves either verb. The dialog runs in-process,
-    ///     so the process-rooted search reaches it, and before it opens neither numeric id
-    ///     exists in StoryCAD's PascalCase id namespace — a miss times out with a readiness
-    ///     diagnosis instead of matching app UI. No overwrite-confirm handling in v1: dialog
-    ///     paths are {scratch}-rooted and scratch is fresh per run, so the target file cannot
-    ///     pre-exist. Live confirmation of the ids lands with the smoke script (#1421 task 8).
+    ///     Drives the Win32 common item dialog. Checked live on Brigid, 2026-10-04 (#1421 review
+    ///     M1): the dialog is a "#32770" window owned by PickerHost.exe and nested under
+    ///     StoryCAD's main window in the UIA tree. Its file-name box is an Edit with id "1001"
+    ///     (Save) or "1148" (Open), and its OK button is id "1", which UIA reports as a Pane, so
+    ///     it is pressed through its default action. Every search is scoped to the dialog: a
+    ///     process-wide search for "1" matched other UI. No overwrite-confirm handling: dialog
+    ///     paths are {scratch}-rooted and scratch is fresh per run.
     /// </summary>
-    private void CompleteFileDialog(string path, TimeSpan? timeout)
+    private void CompleteFileDialog(string fileNameId, string path, TimeSpan? timeout)
     {
         var t = Timeout(timeout);
-        var fileName = _locator.WaitUntilReady(
-            ElementAddress.FromAutomationId("1001"), ReadinessRequirement.SetValue, t);
+        var dialog = WaitFor(t, "a file dialog to open", FindFileDialog);
+        var fileName = WaitFor(t, $"the file-name box (Edit {fileNameId}) in the file dialog",
+            () => dialog.FindFirstDescendant(cf =>
+                cf.ByControlType(ControlType.Edit).And(cf.ByAutomationId(fileNameId))));
         fileName.Patterns.Value.Pattern.SetValue(path);
         Wait.UntilInputIsProcessed();
 
-        var confirm = _locator.WaitUntilReady(
-            ElementAddress.FromAutomationId("1"), ReadinessRequirement.Invoke, t);
-        confirm.Patterns.Invoke.Pattern.Invoke();
+        var confirm = WaitFor(t, "the OK button (id 1) in the file dialog",
+            () => dialog.FindFirstChild(cf => cf.ByAutomationId("1")));
+        if (confirm.Patterns.Invoke.IsSupported)
+        {
+            confirm.Patterns.Invoke.Pattern.Invoke();
+        }
+        else
+        {
+            confirm.Patterns.LegacyIAccessible.Pattern.DoDefaultAction();
+        }
+
         Wait.UntilInputIsProcessed();
+        var closing = Stopwatch.StartNew();
+        while (FindFileDialog() is not null)
+        {
+            if (closing.Elapsed > t)
+            {
+                throw new AutomationStepException(
+                    $"the file dialog was still open {t.TotalSeconds:0}s after confirming '{path}'.");
+            }
+
+            Thread.Sleep(200);
+        }
+    }
+
+    private AutomationElement? FindFileDialog()
+    {
+        foreach (var window in _automation.GetDesktop().FindAllChildren(cf => cf.ByProcessId(_process.Id)))
+        {
+            var dialog = window.FindFirstDescendant(cf => cf.ByClassName("#32770"));
+            if (dialog is not null)
+            {
+                return dialog;
+            }
+        }
+
+        return null;
+    }
+
+    private static AutomationElement WaitFor(TimeSpan timeout, string what, Func<AutomationElement?> find)
+    {
+        var waiting = Stopwatch.StartNew();
+        while (true)
+        {
+            if (find() is { } found)
+            {
+                return found;
+            }
+
+            if (waiting.Elapsed > timeout)
+            {
+                throw new AutomationStepException($"timed out after {timeout.TotalSeconds:0}s waiting for {what}.");
+            }
+
+            Thread.Sleep(200);
+        }
     }
 
     // --- session --------------------------------------------------------------------------

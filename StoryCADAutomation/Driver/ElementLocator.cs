@@ -469,6 +469,29 @@ internal sealed class ElementLocator
                 cf.ByAutomationId(TreeHostAutomationId).And(cf.ByControlType(ControlType.Tree)));
             foreach (var host in hosts)
             {
+                // The outline root is not inside its host: Shell.xaml draws it as a standalone
+                // TreeItem just before the host that holds its children. The trash tree keeps its
+                // root inside its host. Live UIA shape checked on Brigid, 2026-10-04 (#1421).
+                var root = StandaloneRootBefore(host);
+                if (root is not null && segments[0].Index == 1 && NameOf(root) == segments[0].Name)
+                {
+                    if (segments.Count == 1)
+                    {
+                        diagnosis = string.Empty;
+                        return root;
+                    }
+
+                    var child = TryResolveUnderHost(host, segments.Skip(1).ToList(), out var childDiagnosis);
+                    if (child is not null)
+                    {
+                        diagnosis = string.Empty;
+                        return child;
+                    }
+
+                    diagnosis = childDiagnosis.Replace("'the tree root'", $"'{segments[0].Name}'", StringComparison.Ordinal);
+                    continue;
+                }
+
                 var element = TryResolveUnderHost(host, segments, out var hostDiagnosis);
                 if (element is not null)
                 {
@@ -481,6 +504,21 @@ internal sealed class ElementLocator
         }
 
         return null;
+    }
+
+    /// <summary>The TreeItem sibling directly before <paramref name="host" />, if there is one.</summary>
+    private AutomationElement? StandaloneRootBefore(AutomationElement host)
+    {
+        try
+        {
+            var walker = _automation.TreeWalkerFactory.GetControlViewWalker();
+            var previous = walker.GetPreviousSibling(host);
+            return previous?.ControlType == ControlType.TreeItem ? previous : null;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 
     private AutomationElement? TryResolveUnderHost(
