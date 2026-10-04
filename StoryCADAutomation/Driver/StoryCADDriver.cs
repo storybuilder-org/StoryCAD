@@ -889,7 +889,9 @@ public sealed class StoryCADDriver : IUiDriver
 
         if (HasExited)
         {
-            throw new AutomationStepException("StoryCAD exited mid-run.", appExited: true);
+            // The exit code tells a crash from a close: e.g. 0xC000027B is a WinUI fail-fast.
+            var code = ExitCode is { } c ? $"0x{c:X8}" : "unknown";
+            throw new AutomationStepException($"StoryCAD exited mid-run (exit code {code}).", appExited: true);
         }
     }
 
