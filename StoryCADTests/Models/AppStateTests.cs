@@ -80,6 +80,9 @@ public class AppStateTests
 
     #region RootDirectory override Tests (Issue #1421)
 
+    // The override exists in Debug builds only (Terry, 2026-10-04). CI runs Debug tests in the
+    // ui-smoke job and Release tests in the build job, so each test below runs somewhere in CI.
+#if DEBUG
     [TestMethod]
     public void RootDirectory_WithOverrideVariableSet_ReturnsOverride()
     {
@@ -96,6 +99,24 @@ public class AppStateTests
             Environment.SetEnvironmentVariable(AppState.RootDirectoryOverrideVariable, null);
         }
     }
+#else
+    [TestMethod]
+    public void RootDirectory_InReleaseBuild_IgnoresOverrideVariable()
+    {
+        // Arrange
+        var scratch = Path.Combine(Path.GetTempPath(), "StoryCADAutomation", "run-test");
+        Environment.SetEnvironmentVariable(AppState.RootDirectoryOverrideVariable, scratch);
+        try
+        {
+            // Act & Assert: the shipped build cannot be redirected by the variable
+            Assert.AreNotEqual(scratch, new AppState().RootDirectory);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(AppState.RootDirectoryOverrideVariable, null);
+        }
+    }
+#endif
 
     [TestMethod]
     public void RootDirectory_WithOverrideVariableUnset_DoesNotUseOverride()
