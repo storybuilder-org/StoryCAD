@@ -542,6 +542,58 @@ jobs:
           security delete-keychain $RUNNER_TEMP/app-signing.keychain-db 2>/dev/null || true
           rm -f $RUNNER_TEMP/storycad.provisionprofile
 
+  # UI automation for #1421: unit tests on the WinAppSDK target, script lint, and the smoke script.
+  # No secrets, so it runs on forks too; no .env is written, which the automation runner requires.
+  #
+  # Required from day one (D-CI-CHECK, Terry 2026-10-04): "WinAppSDK unit tests" and "Script lint".
+  # Advisory for now: "Smoke script" (continue-on-error). Promotion rule: make it required after
+  # 20 consecutive green PR runs or 2 weeks with no failures not caused by the app, whichever
+  # comes later. Tracked as a Milestone 2 box on #1421.
+  ui-smoke:
+    if: github.event_name == 'pull_request'
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: "./global.json"
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            **/packages.lock.json
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build (Debug x64, both heads)
+        run: msbuild StoryCAD.sln -t:Restore,Build -p:Configuration=Debug -p:Platform=x64 -m -v:minimal
+
+      - name: WinAppSDK unit tests
+        shell: pwsh
+        run: |
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio/Installer/vswhere.exe"
+          $vstest = & $vswhere -latest -products * -find "**/vstest.console.exe" | Select-Object -First 1
+          & $vstest "StoryCADTests/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADTests.dll"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Script lint
+        shell: pwsh
+        run: ./StoryCADAutomation/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADAutomation.exe check StoryCADTests
+
+      - name: Smoke script (advisory)
+        continue-on-error: true
+        shell: pwsh
+        run: ./StoryCADAutomation/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADAutomation.exe run StoryCADTests/ManualTests/Smoke_Test.scs --ci
+
   # Python wheels: build, run pytest, upload. Runs on every push/PR/dispatch
   # (matrix scoped per trigger — see below) so a broken binding or csproj
   # change surfaces immediately, not weeks later at release time. The
