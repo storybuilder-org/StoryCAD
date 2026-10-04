@@ -1,0 +1,47 @@
+# Smoke_Test.md as an automation script (#1421). Run with:
+#   StoryCADAutomation run StoryCADTests/ManualTests/Smoke_Test.scs
+# The runner seeds preferences that open the file menu at startup and put the outline
+# folder at {scratch}/outlines, so nothing touches real user files.
+script "Smoke Test"
+
+step "ST-001: Application Launch"
+launch
+expect FileMenuButton exists
+expect ViewSelectorCombo exists
+expect FileOpenNav exists                 # startup file menu, no error dialog in its place
+
+step "ST-002: Create and Save New Story"
+click CreateNewOutlineNavItem
+set FileOpenProjectNameTextBox "SmokeTest"
+press "Tab"                               # the name binding updates only when focus leaves the box
+click PrimaryButton                       # "Create outline"; one ContentDialog at a time
+set TitleTextBox "Smoke Test"
+expect tree contains "Smoke Test"
+press "Primary+S"
+expect StatusMessageText text "SaveFile command completed"
+
+step "ST-003: Add Basic Elements"
+context-menu tree "Smoke Test" "Add Elements/Add Character"
+open-node tree "Smoke Test/New Character"   # adding does not open the new element's page
+set CharacterNameTextBox "Test Character"
+expect tree contains "Smoke Test/Test Character"
+context-menu tree "Smoke Test" "Add Elements/Add Scene"
+expect tree contains "Smoke Test/New Scene"
+menu SaveStoryMenuItem                    # not a manual step; ST-004 reopens this file
+expect StatusMessageText text "SaveFile command completed"
+
+step "ST-004: Open Existing File"
+menu CloseStoryMenuItem                   # not a manual step; the checks below must see a reopened file
+expect-no tree "Smoke Test/Test Character"
+menu OpenCreateFileMenuItem
+click OpenFromFileNavItem
+open-file-dialog "{scratch}/outlines/SmokeTest.stbx"
+expect tree contains "Smoke Test/Test Character"
+expect tree contains "Smoke Test/New Scene"
+
+step "ST-005: Clean Exit"
+open-node tree "Smoke Test/Test Character"
+set CharacterNameTextBox "Test Character changed"
+menu ExitMenuItem
+dialog "Save changes?" click name:"No"
+expect-exit

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <!-- Plain net10.0, no Uno.Sdk: the scan parses XAML files as XML off disk and never
+             touches UI framework types. Platform-neutral on purpose so script linting stays
+             available to a future macOS backend (devdocs/issue_1421_dsl_design.md "macOS seam"). -->
+        <TargetFramework>net10.0</TargetFramework>
+        <RootNamespace>StoryCADXamlScan</RootNamespace>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+</Project>

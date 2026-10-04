@@ -557,7 +557,7 @@
 
                                         <!-- Shows the root node out of tree, prevents creating new roots. -->
                                         <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). -->
-                                        <TreeViewItem Tapped="RootClick" RightTapped="TreeViewItem_RightTapped"
+                                        <TreeViewItem Tapped="RootClick" RightTapped="TreeViewItem_RightTapped" Loaded="RootItem_Loaded"
                                                       HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
                                                       Background="Transparent" BorderBrush="Transparent"
                                                       AutomationProperties.Name="{x:Bind Name, Mode=OneWay}">
@@ -674,7 +674,8 @@
             <TextBlock Grid.Column="1" Text="{x:Bind ShellVm.StatusMessage, Mode=OneWay}"
                        Foreground="{x:Bind ShellVm.StatusColor, Mode=OneWay}"
                        TextTrimming="CharacterEllipsis"
-                       FontSize="14" Margin="10" FontFamily="Segoe UI" Padding="0,5" />
+                       FontSize="14" Margin="10" FontFamily="Segoe UI" Padding="0,5"
+                       AutomationProperties.AutomationId="StatusMessageText" />
 
             <Button Grid.Column="2" Background="Transparent" Command="{x:Bind ShellVm.SaveFileCommand}"
                     AutomationProperties.AutomationId="SaveStatusButton"

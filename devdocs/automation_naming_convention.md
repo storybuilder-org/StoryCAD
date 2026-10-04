@@ -76,4 +76,4 @@ Every interactive control gets `AutomationProperties.AutomationId`.
 - Decorative icons inside an already-labeled parent (SymbolIcon, FontIcon inside a Button or MenuFlyoutItem).
 - Separators and spacers: AppBarSeparator, Border rules, filler grid columns.
 - Layout containers (Grid, StackPanel, ScrollViewer) unless one is a LabeledBy target or an items host.
-- TextBlocks that are content rather than labels.
+- TextBlocks that are content rather than labels. One exception: the Shell status-bar message carries `StatusMessageText`, because the smoke script checks save results through it (#1421, Terry's decision of 2026-09-30). The proposed suffix for a TextBlock is `Text`.

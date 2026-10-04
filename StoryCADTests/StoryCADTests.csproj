@@ -82,6 +82,11 @@
         </None>
     </ItemGroup>
 
+    <!-- The automation runner is Windows-only (FlaUI/UIA3); its unit tests compile only on this target. -->
+    <ItemGroup Condition="'$(TargetFramework)'=='net10.0-windows10.0.22621'">
+        <ProjectReference Include="..\StoryCADAutomation\StoryCADAutomation.csproj" />
+    </ItemGroup>
+
     <!-- Windows-specific content -->
     <ItemGroup Condition="'$(TargetFramework)'=='net10.0-windows10.0.22621'">
         <AppxManifest Include="Package.appxmanifest">
@@ -118,6 +123,7 @@
     <ItemGroup>
         <ProjectReference Include="..\StoryCADLib\StoryCADLib.csproj" />
         <ProjectReference Include="..\CollaboratorLib\CollaboratorLib.csproj" />
+        <ProjectReference Include="..\StoryCADXamlScan\StoryCADXamlScan.csproj" />
     </ItemGroup>
 
 </Project>

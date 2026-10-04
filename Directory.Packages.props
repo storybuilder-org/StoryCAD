@@ -24,6 +24,12 @@
     <PackageVersion Include="Octokit" Version="14.0.0" />
     <PackageVersion Include="SkiaSharp" Version="3.119.2" />
     <PackageVersion Include="Uno.Fonts.Fluent" Version="2.7.1" />
+    <!-- UI-automation driver for the StoryCADAutomation runner (issue #1421). Dev/CI-only:
+         referenced solely by StoryCADAutomation, never shipped to users. MIT-licensed; upstream
+         moves slowly (4.0.0 published 2022-09-24, 5.0.0 2025-02-25 per nuget.org), so bump
+         deliberately alongside a smoke-script re-run, not in bulk package updates. Pinned 2026-07-13. -->
+    <PackageVersion Include="FlaUI.Core" Version="5.0.0" />
+    <PackageVersion Include="FlaUI.UIA3" Version="5.0.0" />
     <PackageVersion Include="MSTest.TestAdapter" Version="4.1.0" />
     <PackageVersion Include="MSTest.TestFramework" Version="4.1.0" />
     <PackageVersion Include="Microsoft.TestPlatform.TestHost" Version="18.3.0" />

@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <!-- Plain Windows console app, no Uno.Sdk: FlaUI drives UIA3, which is Windows-only.
+             The DSL stays backend-neutral; see devdocs/issue_1421_dsl_design.md "macOS seam". -->
+        <TargetFramework>net10.0-windows10.0.22621</TargetFramework>
+        <!-- The macOS release leg runs `dotnet restore StoryCAD.sln` (build-release.yml "Restore");
+             a net*-windows TFM fails that restore with NETSDK1004/NETSDK1100 on non-Windows hosts
+             unless Windows targeting is enabled. The project itself is never built on non-Windows
+             (sibling projects OS-guard their TFMs instead; this one has no non-Windows fallback). -->
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <RootNamespace>StoryCADAutomation</RootNamespace>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <Platforms>x86;x64;arm64</Platforms>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FlaUI.Core" />
+        <PackageReference Include="FlaUI.UIA3" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="StoryCADTests" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\StoryCADXamlScan\StoryCADXamlScan.csproj" />
+    </ItemGroup>
+</Project>
