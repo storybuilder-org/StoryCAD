@@ -134,6 +134,9 @@ narrate "Adding our first character."   # caption overlay in presentation; log l
 screenshot "Overview-Page.png"   # captures the StoryCAD main window to the run's output
                                  # folder (--out). Lint error: anything but a plain .png file
                                  # name (no folder, no ".."), so scripts cannot write elsewhere.
+screenshot dialog "File-Open-Dialog.png"   # captures only the open ContentDialog, for manual
+                                           # images of a dialog; same name rule (Terry approved
+                                           # this second Milestone 2 design change, 2026-10-04)
 ```
 
 Verbs missing during #1422 translation go into this table by PR against `StoryCADAutomation`, never as per-script workarounds (per #1422 scope).

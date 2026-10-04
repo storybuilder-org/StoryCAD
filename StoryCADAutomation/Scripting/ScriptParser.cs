@@ -222,7 +222,7 @@ public static partial class ScriptParser
             "expect" => BuildExpect(reader),
             "expect-no" => New(ScriptVerb.ExpectNo) with { Target = TakeTarget(reader) },
             "narrate" => New(ScriptVerb.Narrate) with { Text = TakeString(reader, "narration text") },
-            "screenshot" => New(ScriptVerb.Screenshot) with { Text = TakeString(reader, "png file name") },
+            "screenshot" => BuildScreenshot(reader),
             _ => throw new SyntaxException($"unknown verb '{verbWord}'; the verb set is fixed in devdocs/issue_1421_dsl_design.md."),
         };
 
@@ -300,6 +300,18 @@ public static partial class ScriptParser
             var title = TakeString(r, "dialog title");
             TakeKeyword(r, "click");
             return New(ScriptVerb.Dialog) with { Text = title, Target = TakeTarget(r) };
+        }
+
+        ScriptStatement BuildScreenshot(ArgReader r)
+        {
+            // screenshot "name.png" captures the main window; screenshot dialog "name.png" the open ContentDialog.
+            if (r.Peek is { Kind: TokenKind.Word, Value: "dialog" })
+            {
+                r.Next();
+                return New(ScriptVerb.ScreenshotDialog) with { Text = TakeString(r, "png file name") };
+            }
+
+            return New(ScriptVerb.Screenshot) with { Text = TakeString(r, "png file name") };
         }
 
         ScriptStatement BuildPause(ArgReader r)

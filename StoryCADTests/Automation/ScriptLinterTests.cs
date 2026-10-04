@@ -85,6 +85,22 @@ public class ScriptLinterTests
     }
 
     [TestMethod]
+    public void Parse_WithScreenshotDialog_ProducesDialogCaptureStatement()
+    {
+        var parsed = ScriptParser.Parse("script \"Lint test\"\nscreenshot dialog \"File-Open-Dialog.png\"\n");
+
+        Assert.IsTrue(parsed.Success, string.Join("; ", parsed.Errors));
+        Assert.AreEqual(ScriptVerb.ScreenshotDialog, parsed.Statements[1].Verb);
+        Assert.AreEqual("File-Open-Dialog.png", parsed.Statements[1].Text);
+    }
+
+    [TestMethod]
+    public void Lint_WithScreenshotDialogPath_ReportsError()
+    {
+        Assert.AreEqual(1, LintDialogLine("screenshot dialog \"media/File-Open-Dialog.png\"").Count);
+    }
+
+    [TestMethod]
     public void Lint_WithScreenshotPathOrWrongType_ReportsError()
     {
         Assert.AreEqual(1, LintDialogLine("screenshot \"../Overview.png\"").Count);

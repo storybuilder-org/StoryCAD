@@ -44,6 +44,9 @@ public interface IUiDriver : IDisposable
     /// <summary>Saves an image of the app's main window as a PNG at <paramref name="pngPath" />.</summary>
     void CaptureMainWindow(string pngPath);
 
+    /// <summary>Saves an image of the open ContentDialog only as a PNG at <paramref name="pngPath" />.</summary>
+    void CaptureOpenDialog(string pngPath);
+
     /// <summary>The app's exit code once it has exited; null while it runs or when unreadable.</summary>
     int? ExitCode { get; }
 

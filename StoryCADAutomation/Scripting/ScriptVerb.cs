@@ -63,4 +63,5 @@ public enum ScriptVerb
 
     // capture (#1421 Milestone 2)
     Screenshot,
+    ScreenshotDialog,
 }

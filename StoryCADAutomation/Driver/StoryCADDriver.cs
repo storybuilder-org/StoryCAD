@@ -364,6 +364,31 @@ public sealed class StoryCADDriver : IUiDriver
     }
 
     /// <inheritdoc />
+    public void CaptureOpenDialog(string pngPath)
+    {
+        // A ContentDialog has no UIA element of its own: its content and buttons sit directly
+        // under a Popup window that spans the whole app (checked live, 2026-10-04). The union of
+        // the Popup's children already meets the dialog's left, top and right edges; only the
+        // button bar's 24-epx bottom padding lies outside it, scaled to the display.
+        var button = WaitFor(Timeout(null), "an open ContentDialog (PrimaryButton or CloseButton)", () =>
+            _automation.GetDesktop().FindFirstDescendant(cf =>
+                cf.ByProcessId(_process.Id).And(cf.ByAutomationId("PrimaryButton").Or(cf.ByAutomationId("CloseButton")))));
+        var popup = _automation.TreeWalkerFactory.GetControlViewWalker().GetParent(button)
+                    ?? throw new AutomationStepException("the ContentDialog has no parent window to measure.");
+        var bounds = Rectangle.Empty;
+        foreach (var child in popup.FindAllChildren())
+        {
+            var r = child.BoundingRectangle;
+            bounds = bounds.IsEmpty ? r : Rectangle.Union(bounds, r);
+        }
+
+        bounds.Height += (int)Math.Round(24 * NativeMethods.SystemDpi() / 96.0);
+        Wait.UntilInputIsProcessed();
+        using var image = Capture.Rectangle(bounds);
+        image.ToFile(pngPath);
+    }
+
+    /// <inheritdoc />
     public int? ExitCode
     {
         get

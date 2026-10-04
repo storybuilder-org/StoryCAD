@@ -68,6 +68,7 @@ public sealed partial class ScriptLinter
                     LintChord(statement, findings);
                     break;
                 case ScriptVerb.Screenshot:
+                case ScriptVerb.ScreenshotDialog:
                     LintScreenshotName(statement, findings);
                     break;
             }
