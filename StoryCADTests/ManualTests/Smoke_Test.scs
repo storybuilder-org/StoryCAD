@@ -14,7 +14,7 @@ step "ST-002: Create and Save New Story"
 click CreateNewOutlineNavItem
 set FileOpenProjectNameTextBox "SmokeTest"
 press "Tab"                               # the name binding updates only when focus leaves the box
-click name:"Create outline"               # file menu dialog has no title to scope by
+click PrimaryButton                       # "Create outline"; one ContentDialog at a time
 set TitleTextBox "Smoke Test"
 expect tree contains "Smoke Test"
 press "Primary+S"
