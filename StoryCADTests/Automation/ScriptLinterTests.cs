@@ -48,6 +48,25 @@ public class ScriptLinterTests
     }
 
     [TestMethod]
+    public void Lint_WithContentDialogButtonIdOutsideClickOrDialog_ReportsError()
+    {
+        Assert.AreEqual(1, LintDialogLine("expect PrimaryButton exists").Count);
+    }
+
+    [TestMethod]
+    public void Lint_WithMadeUpIdInDialog_ReportsError()
+    {
+        Assert.AreEqual(1, LintDialogLine("dialog \"Save changes?\" click NoSuchButton").Count);
+    }
+
+    [TestMethod]
+    public void Lint_WithNativeOrContentDialogIdInDialog_ReportsNoError()
+    {
+        Assert.AreEqual(0, LintDialogLine("dialog \"Open\" click 1").Count);
+        Assert.AreEqual(0, LintDialogLine("dialog \"Save changes?\" click SecondaryButton").Count);
+    }
+
+    [TestMethod]
     public void Lint_WithUnknownBareId_ReportsError()
     {
         Assert.AreEqual(1, LintDialogLine("click NoSuchButton").Count);

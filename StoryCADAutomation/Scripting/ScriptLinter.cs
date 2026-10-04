@@ -92,11 +92,28 @@ public sealed partial class ScriptLinter
                         $"'{address.Value}' never surfaces an automation peer at runtime (ItemsRepeater creates none); " +
                         "address tree rows with tree \"path\" instead."));
                 }
-                else if (statement.Verb != ScriptVerb.Dialog && !_facts.AutomationIds.Contains(address.Value)
-                         && !ContentDialogButtonIds.Contains(address.Value))
+                else if (_facts.AutomationIds.Contains(address.Value))
                 {
-                    // Dialog-verb targets are exempt: native dialogs live outside the XAML,
-                    // and their element names are a stated lint limit.
+                    // A StoryCAD XAML id: always valid.
+                }
+                else if (ContentDialogButtonIds.Contains(address.Value))
+                {
+                    // ContentDialog buttons are for click and dialog only. Untitled ContentDialogs
+                    // (the file menu) cannot be scoped by the dialog verb, so click accepts them;
+                    // WinUI shows one ContentDialog at a time, which keeps the id unambiguous.
+                    if (statement.Verb is not (ScriptVerb.Click or ScriptVerb.Dialog))
+                    {
+                        findings.Add(Error(statement,
+                            $"'{address.Value}' is a ContentDialog button; use it only with click or dialog."));
+                    }
+                }
+                else if (statement.Verb == ScriptVerb.Dialog && NativeControlIdPattern().IsMatch(address.Value))
+                {
+                    // A native dialog control id (all digits, e.g. "1" for OK): outside the XAML,
+                    // so its existence can only be checked live.
+                }
+                else
+                {
                     findings.Add(Error(statement,
                         $"AutomationId '{address.Value}' does not exist in the convention-scope XAML " +
                         "(devdocs/automation_naming_convention.md is the namespace)."));
@@ -182,6 +199,9 @@ public sealed partial class ScriptLinter
                 "with no folder, so the image lands in the run's output folder."));
         }
     }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"^[0-9]+$")]
+    private static partial System.Text.RegularExpressions.Regex NativeControlIdPattern();
 
     [System.Text.RegularExpressions.GeneratedRegex(@"^[A-Za-z0-9_.-]+\.png$")]
     private static partial System.Text.RegularExpressions.Regex ScreenshotNamePattern();
