@@ -634,46 +634,11 @@ jobs:
           "ChangeDisplaySettings returned $result (0 means changed)"
           if ($result -ne 0) { exit 1 }
 
-      # D-CI-CRASH (Terry, 2026-10-04): StoryCAD exits 0xC0000005 on this runner at Smoke_Test.scs
-      # line 28. Windows Error Reporting writes a minidump of StoryCAD.exe so the faulting module
-      # can be found. Remove with the crash fix.
-      - name: Enable crash dumps for StoryCAD.exe
-        shell: pwsh
-        run: |
-          $key = "HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\StoryCAD.exe"
-          New-Item -Path $key -Force | Out-Null
-          New-ItemProperty -Path $key -Name DumpFolder -PropertyType ExpandString -Value (Join-Path $env:GITHUB_WORKSPACE "crash-dumps") -Force | Out-Null
-          New-ItemProperty -Path $key -Name DumpType -PropertyType DWord -Value 1 -Force | Out-Null
-          New-ItemProperty -Path $key -Name DumpCount -PropertyType DWord -Value 3 -Force | Out-Null
-          New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting" -Name DontShowUI -PropertyType DWord -Value 1 -Force | Out-Null
-          Get-ItemProperty -Path $key | Select-Object DumpFolder, DumpType, DumpCount | Format-List
-          "WerSvc: $((Get-Service WerSvc -ErrorAction SilentlyContinue).Status)"
-          "WER Disabled value: $((Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ErrorAction SilentlyContinue).Disabled)"
-          "cdb present: $(Test-Path "${env:ProgramFiles(x86)}\Windows Kits\10\Debuggers\x64\cdb.exe")"
-
-      - name: Download ProcDump
-        shell: pwsh
-        run: |
-          Invoke-WebRequest https://download.sysinternals.com/files/Procdump.zip -OutFile "$env:RUNNER_TEMP\procdump.zip"
-          Expand-Archive "$env:RUNNER_TEMP\procdump.zip" -DestinationPath "$env:RUNNER_TEMP\procdump" -Force
-
-      # WER wrote no dump on this runner (run 37227198444), so ProcDump, started in this same step,
-      # waits for StoryCAD.exe and writes a full dump on an unhandled exception, independent of WER.
       - name: Smoke script (advisory)
         id: smoke
         continue-on-error: true
         shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force crash-dumps | Out-Null
-          $procdump = Start-Process -FilePath "$env:RUNNER_TEMP\procdump\procdump64.exe" -PassThru -NoNewWindow `
-            -ArgumentList "-accepteula -ma -e -w StoryCAD.exe `"$env:GITHUB_WORKSPACE\crash-dumps`"" `
-            -RedirectStandardOutput "$env:GITHUB_WORKSPACE\crash-dumps\procdump.log"
-          Start-Sleep -Seconds 2
-          ./StoryCADAutomation/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADAutomation.exe run StoryCADTests/ManualTests/Smoke_Test.scs --ci
-          $smokeExit = $LASTEXITCODE
-          Start-Sleep -Seconds 10   # let ProcDump finish writing a dump
-          if (-not $procdump.HasExited) { Stop-Process -Id $procdump.Id -Force }
-          exit $smokeExit
+        run: ./StoryCADAutomation/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADAutomation.exe run StoryCADTests/ManualTests/Smoke_Test.scs --ci
 
       # After a smoke failure: the app's crash records and its own logs (--ci keeps the scratch folder).
       - name: Smoke failure diagnostics
@@ -686,27 +651,6 @@ jobs:
             ForEach-Object { "---- $($_.TimeCreated) $($_.ProviderName) id=$($_.Id)"; $_.Message }
           # The runner's scratch folders live under %TEMP%; copy them where upload-artifact can see them.
           Copy-Item -Path (Join-Path $env:TEMP "StoryCADAutomation") -Destination smoke-scratch -Recurse -ErrorAction SilentlyContinue
-
-      - name: Analyze crash dump
-        if: steps.smoke.outcome == 'failure'
-        shell: pwsh
-        run: |
-          if (Test-Path crash-dumps/procdump.log) { "---- procdump.log"; Get-Content crash-dumps/procdump.log | Select-Object -Last 30 }
-          $dumps = Get-ChildItem crash-dumps -Filter *.dmp -ErrorAction SilentlyContinue
-          if (-not $dumps) { "No crash dump was written."; exit 0 }
-          $dumps | ForEach-Object { "dump: $($_.Name) $($_.Length) bytes" }
-          $cdb = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\Debuggers\x64\cdb.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-          if (-not $cdb) { "cdb.exe not found on this runner; analyze the uploaded dump locally."; exit 0 }
-          $symbols = "srv*$env:RUNNER_TEMP\symbols*https://msdl.microsoft.com/download/symbols;$env:GITHUB_WORKSPACE\StoryCAD\bin\x64\Debug\net10.0-windows10.0.22621\win-x64"
-          & $cdb.FullName -z $dumps[0].FullName -y $symbols -c ".ecxr; kb 40; lmv m StoryCAD*; !analyze -v; q" | Select-Object -Last 200
-
-      - name: Upload crash dumps
-        if: steps.smoke.outcome == 'failure'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ui-smoke-crash-dumps
-          path: crash-dumps/*.dmp
-          if-no-files-found: warn
 
       - name: Upload smoke logs
         if: steps.smoke.outcome == 'failure'
