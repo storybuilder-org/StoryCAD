@@ -74,8 +74,10 @@ internal static class Program
 
         // The design's display check (1920x1080 or larger at 100% scale) runs only with --ci.
         // Local machines differ: Brigid is 3840x2160 at 150%.
+        // CI keeps the scratch folder (the app's logs) so the workflow can upload it after a
+        // failure; the CI machine is thrown away after the job.
         var driverOptions = ci
-            ? new DriverOptions { AppPath = appPath ?? DefaultAppPath() }
+            ? new DriverOptions { AppPath = appPath ?? DefaultAppPath(), SweepScratchOnTeardown = false }
             : new DriverOptions { AppPath = appPath ?? DefaultAppPath(), RequiredDpiScalePercent = null, MinDesktopWidth = 0, MinDesktopHeight = 0 };
         var interpreter = new ScriptInterpreter(
             () => StoryCADDriver.Launch(driverOptions),

@@ -635,9 +635,30 @@ jobs:
           if ($result -ne 0) { exit 1 }
 
       - name: Smoke script (advisory)
+        id: smoke
         continue-on-error: true
         shell: pwsh
         run: ./StoryCADAutomation/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADAutomation.exe run StoryCADTests/ManualTests/Smoke_Test.scs --ci
+
+      # After a smoke failure: the app's crash records and its own logs (--ci keeps the scratch folder).
+      - name: Smoke failure diagnostics
+        if: steps.smoke.outcome == 'failure'
+        shell: pwsh
+        run: |
+          Get-WinEvent -FilterHashtable @{ LogName = 'Application'; StartTime = (Get-Date).AddHours(-1) } -ErrorAction SilentlyContinue |
+            Where-Object { $_.Message -match 'StoryCAD' } |
+            Select-Object -First 10 |
+            ForEach-Object { "---- $($_.TimeCreated) $($_.ProviderName) id=$($_.Id)"; $_.Message }
+          # The runner's scratch folders live under %TEMP%; copy them where upload-artifact can see them.
+          Copy-Item -Path (Join-Path $env:TEMP "StoryCADAutomation") -Destination smoke-scratch -Recurse -ErrorAction SilentlyContinue
+
+      - name: Upload smoke logs
+        if: steps.smoke.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-smoke-logs
+          path: smoke-scratch/**/logs/**
+          if-no-files-found: warn
 
   # Python wheels: build, run pytest, upload. Runs on every push/PR/dispatch
   # (matrix scoped per trigger — see below) so a broken binding or csproj
