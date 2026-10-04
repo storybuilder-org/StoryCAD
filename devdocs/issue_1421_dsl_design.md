@@ -2,7 +2,7 @@
 
 Issue #1421. Decision context: issue body "Architecture decision (2026-07-12)" section. Status: draft for design review.
 
-**Build status (2026-10-04, milestone 1).** Built and run live: driver, parser, lint, interpreter in the test profile, and `run <script>` with console output and exit codes 0-3. The app's data root comes from the `STORYCAD_ROOT_DIR` environment variable, not a copy of the build (#1421 decision of 2026-10-04). `StoryCADTests/ManualTests/Smoke_Test.scs` passes. Deferred until a script needs it: the presentation profile, report files, `--keep-going`, launch retry, folder runs, `check` as its own command, and the display-scale check (CI milestone). Sections below that describe deferred parts are not built.
+**Build status (2026-10-04).** Milestone 1 built and ran live: the driver, the parser, lint, the interpreter in the test profile, and `run <script>` with console output and exit codes 0-3. The app's data root comes from the `STORYCAD_ROOT_DIR` environment variable, not a copy of the build. `StoryCADTests/ManualTests/Smoke_Test.scs` passes. Milestone 2 (in progress) adds `check`, `--ci`, `--out`, the `screenshot` verb and a CI job. Still deferred: the presentation profile, report files, `--keep-going`, launch retry and folder runs for `run`. Sections below that describe deferred parts are not built.
 
 ## Components
 
@@ -128,6 +128,14 @@ expect-no <target>           # asserts absence, e.g. error dialogs. Settle-then-
 narrate "Adding our first character."   # caption overlay in presentation; log line in test
 ```
 
+**Capture** (added 2026-10-04, #1421 Milestone 2)
+
+```
+screenshot "Overview-Page.png"   # captures the StoryCAD main window to the run's output
+                                 # folder (--out). Lint error: anything but a plain .png file
+                                 # name (no folder, no ".."), so scripts cannot write elsewhere.
+```
+
 Verbs missing during #1422 translation go into this table by PR against `StoryCADAutomation`, never as per-script workarounds (per #1422 scope).
 
 ## Execution profiles
@@ -156,6 +164,9 @@ StoryCADAutomation run <script.scs | directory> [options]
   --pacing <factor>               presentation pacing multiplier
   --timeout <seconds>             implicit-wait default override
   --window <WxH>                  presentation window size
+  --out <dir>                     screenshot output folder; default ./automation-output
+  --ci                            assert the CI display (1920x1080 or larger, 100% scale)
+                                  at launch; local runs skip it
 
 StoryCADAutomation check <script.scs | directory>   # lint only, no launch
 ```
@@ -185,6 +196,7 @@ The child process launches with a scrubbed environment: `COLLAB_DEBUG` and `COLL
 - **Menu/tab text-path segments** match XAML `Text`/`Header` values where the text form is used.
 - **Dialog-verb paths** are `{scratch}`-rooted (error).
 - **`name:` targets** outside `dialog` scopes and **literal platform chords** (`Ctrl+...`) are warnings.
+- **`screenshot` names** are plain `.png` file names (error).
 
 CI runs `check` over all scripts on every PR, so a renamed id or menu label fails at lint time instead of in a UI run. What `check` cannot verify, stated plainly: tree node names (runtime outline data), native-dialog element names, and whether a statically valid id actually surfaces a peer at runtime outside the deny-list. Those fail only live.
 
@@ -198,7 +210,7 @@ Verbs name intent (`click`, `open-node`), never UIA mechanics. A future macOS ba
 
 ## Out of scope for v1
 
-Control flow, variables, includes; a recording tool that emits `.scs`; screen capture; step-level retry; macOS backend; translating any plan beyond `Smoke_Test.md` (#1422 owns the portfolio).
+Control flow, variables, includes; a recording tool that emits `.scs`; video capture (stills arrive with `screenshot`, Milestone 2); step-level retry; macOS backend; translating any plan beyond `Smoke_Test.md` (#1422 owns the portfolio).
 
 ## First script
 
