@@ -473,7 +473,7 @@ internal sealed class ElementLocator
                 // TreeItem just before the host that holds its children. The trash tree keeps its
                 // root inside its host. Live UIA shape checked on Brigid, 2026-10-04 (#1421).
                 var root = StandaloneRootBefore(host);
-                if (root is not null && segments[0].Index == 1 && NameOf(root) == segments[0].Name)
+                if (root is not null && segments[0].Index == 1 && RowName(root) == segments[0].Name)
                 {
                     if (segments.Count == 1)
                     {
@@ -535,7 +535,7 @@ internal sealed class ElementLocator
                 return null;
             }
 
-            var matches = candidates.Where(c => NameOf(c) == segment.Name).ToList();
+            var matches = candidates.Where(c => RowName(c) == segment.Name).ToList();
             if (matches.Count < segment.Index)
             {
                 diagnosis = $"segment '{segment}' matched {matches.Count} row(s) under " +
@@ -659,6 +659,10 @@ internal sealed class ElementLocator
 
         return null;
     }
+
+    // Tree rows match without trailing spaces: the shipped samples end most element names in
+    // spaces ("Santiago "), which a script author cannot see (#1421, Intro-Video.scs).
+    private static string RowName(AutomationElement element) => NameOf(element).TrimEnd();
 
     private static string NameOf(AutomationElement element)
     {

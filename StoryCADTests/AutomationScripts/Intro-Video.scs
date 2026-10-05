@@ -1,0 +1,94 @@
+# "A 5 Minute introduction to StoryCAD" (YouTube qFpTI15-q7A, 2023) as a script (#1421 Milestone 4).
+# Test profile: a regression check of the steps the video shows.
+# Presentation profile: drives the app for an OBS recording; narrate lines become the .srt captions.
+#   StoryCADAutomation run StoryCADTests/AutomationScripts/Intro-Video.scs
+# Left out of the video's steps: the user manual (opens a browser), the Windows print preview,
+# and the Scrivener export (needs Scrivener). The narration mentions them over the app.
+script "Intro Video"
+
+step "The main window"
+launch
+expect FileOpenNav exists
+narrate "StoryCAD is a free and open source computer-aided design tool for fiction writers."
+click SampleOutlinesNavItem
+select FileOpenSamplesList "The Old Man and the Sea"
+click PrimaryButton                       # "Open"
+expect tree contains "The Old Man and the Sea"
+narrate "On the left is the navigation pane. It shows every element of your outline as a tree."
+open-node tree "The Old Man and the Sea/Characters/Santiago"
+narrate "The right side is the content pane. It shows the element you select in the tree."
+pause 2
+narrate "The menu bar at the top opens files, adds story elements, runs tools and prints reports."
+click PreferencesButton
+narrate "Preferences hold your name, your folders and how StoryCAD saves your work."
+pause 2
+dialog "Preferences" click name:"Cancel"
+
+step "A new outline"
+menu OpenCreateFileMenuItem
+click CreateNewOutlineNavItem
+narrate "StoryCAD creates new outlines from templates. This one starts from the blank template."
+set FileOpenProjectNameTextBox "Fish Story"
+press "Tab"                               # the name binding updates only when focus leaves the box
+click PrimaryButton                       # "Create outline"
+expect tree contains "Fish Story"
+narrate "A blank outline has two nodes: the story overview and the trash can."
+pause 2
+
+step "The story overview"
+narrate "The overview is the root of the tree and the place to start."
+tab StoryIdeaTab
+focus StoryIdeaRichEdit                  # RichEdit boxes have no Value pattern, so focus and type
+type "Codify a local urban legend as a morality tale."
+narrate "Each element has tabs. Each tab covers one part of that element."
+tab ConceptTab
+focus ConceptRichEdit
+type "What if a morally upstanding man failed utterly and repeatedly?"
+pause 2
+
+step "Story elements"
+narrate "You build your outline by adding story elements: problems, characters, settings and scenes."
+context-menu tree "Fish Story" "Add Elements/Add Problem"
+open-node tree "Fish Story/New Problem"
+set ProblemNameTextBox "An old man hasn't caught a fish in 84 days"
+expect tree contains "Fish Story/An old man hasn't caught a fish in 84 days"
+click tree "Fish Story"                   # the root row has no Invoke; click falls back to a real pointer
+menu AddCharacterMenuItem
+open-node tree "Fish Story/New Character"
+set CharacterNameTextBox "Santiago"
+click tree "Fish Story"                   # the root row has no Invoke; click falls back to a real pointer
+menu AddCharacterMenuItem
+open-node tree "Fish Story/New Character"
+set CharacterNameTextBox "Manolin"
+expect tree contains "Fish Story/Santiago"
+expect tree contains "Fish Story/Manolin"
+narrate "Add elements in any order, as inspiration strikes or from start to finish."
+pause 2
+
+step "Plotting aids"
+narrate "StoryCAD has tools for plotting. Master Plots adds a ready-made story structure."
+click tree "Fish Story"                   # the root row has no Invoke; click falls back to a real pointer
+menu MasterPlotsMenuItem
+select MasterPlotsCombo "Ascent/Descent"   # the 2023 video used Seven Point Story Structure, now a beat sheet
+pause 2
+click PrimaryButton                       # "Copy"
+expect StatusMessageText text "MasterPlot Ascent/Descent inserted"
+expect tree contains "Fish Story/Rise and Fall"   # one of the three scenes it inserts
+pause 2
+
+step "Reports"
+narrate "When it is time to write, print reports from your outline."
+menu PrintReportsMenuItem
+toggle PrintReportsOverviewCheck on
+tab PrintReportsCharactersTab
+toggle PrintReportsCharacterListCheck on
+pause 2
+dialog "Generate Reports" click name:"Cancel"
+narrate "You can also export your outline to a Scrivener project and draft from it there."
+pause 2
+
+step "Close"
+narrate "StoryCAD is free from the Microsoft Store and the Mac App Store. Thanks for watching."
+menu ExitMenuItem
+dialog "Save changes?" click name:"No"
+expect-exit
