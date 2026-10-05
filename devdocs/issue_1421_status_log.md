@@ -25,3 +25,10 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - Added `check`, `--ci`, `--out` and the `screenshot` verb; CI job `ui-smoke` for PRs (not run yet; first run comes with the PR).
 - WinAppSDK tests 1763 passed, 15 skipped. `check StoryCADTests`: 2 scripts, 0 errors. `Smoke_Test.scs` and `SaveDialog.scs` pass.
 - Next: the manual screenshot script once D-SCREENSHOT is answered on StoryCADWiki #7.
+
+## 2026-10-05 (Milestone 4)
+
+- PR #1604 merged (`982cd909`): `Intro-Video.scs`, tree rows match without trailing spaces.
+- Draft PR #1605: presentation profile (`--profile presentation`, `--pacing`, `--window`, `.srt` output) and two driver fixes (root-row click point, `menu` real click).
+- Test profile: `Smoke_Test.scs` (35.0 s), `Intro-Video.scs` (69.6 s), `SaveDialog.scs` (22.1 s), `File-Open-Dialog.scs` (8.3 s) pass. Presentation: `Intro-Video.scs` passed four runs, 227.4 s to 232.6 s. Automation unit tests 26 passed. Full suite not run locally; CI runs it.
+- Open: OBS recording check against the `.srt`; Milestone 3 manual text and close-out.
