@@ -6,7 +6,7 @@ namespace StoryCADAutomation.Interpreting;
 /// </summary>
 public sealed class InterpreterOptions
 {
-    /// <summary>Profile realization; test by default, presentation arrives with #1421 task 7.</summary>
+    /// <summary>Profile realization; test by default, presentation with the runner's --profile flag.</summary>
     public IExecutionProfile Profile { get; init; } = new TestProfile();
 
     /// <summary>

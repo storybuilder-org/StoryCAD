@@ -127,6 +127,14 @@ public sealed class ScriptInterpreter
         return IsAssertion(statement.Verb) && _options.Profile.ContinueOnAssertionFailure;
     }
 
+    /// <summary>Runs the profile's approach (a cursor glide in presentation) and returns the driver.</summary>
+    private IUiDriver Approach(ElementAddress target)
+    {
+        var d = RequireDriver();
+        _options.Profile.Approach(d, target);
+        return d;
+    }
+
     private static bool IsAssertion(ScriptVerb verb) => verb is
         ScriptVerb.ExpectExists or ScriptVerb.ExpectText or ScriptVerb.ExpectEnabled or
         ScriptVerb.ExpectDisabled or ScriptVerb.ExpectTreeContains or ScriptVerb.ExpectWindow or
@@ -196,30 +204,30 @@ public sealed class ScriptInterpreter
                 RequireDriver().PressChord(s.Text!);
                 return currentStep;
             case ScriptVerb.Type:
-                RequireDriver().TypeText(s.Text!);
+                _options.Profile.Type(RequireDriver(), s.Text!);
                 return currentStep;
             case ScriptVerb.Focus:
-                RequireDriver().Focus(s.Target!);
+                Approach(s.Target!).Focus(s.Target!);
                 return currentStep;
 
             case ScriptVerb.Set:
-                RequireDriver().SetText(s.Target!, s.Text!);
+                _options.Profile.Set(RequireDriver(), s.Target!, s.Text!);
                 return currentStep;
             case ScriptVerb.Select:
-                RequireDriver().SelectItem(s.Target!, s.Text!);
+                Approach(s.Target!).SelectItem(s.Target!, s.Text!);
                 return currentStep;
             case ScriptVerb.Toggle:
-                RequireDriver().Toggle(s.Target!, s.On!.Value);
+                Approach(s.Target!).Toggle(s.Target!, s.On!.Value);
                 return currentStep;
 
             case ScriptVerb.OpenNode:
-                RequireDriver().ActivateTreeRow(s.Target!.Value);
+                Approach(s.Target!).ActivateTreeRow(s.Target!.Value);
                 return currentStep;
             case ScriptVerb.Expand:
-                RequireDriver().Expand(s.Target!);
+                Approach(s.Target!).Expand(s.Target!);
                 return currentStep;
             case ScriptVerb.Collapse:
-                RequireDriver().Collapse(s.Target!);
+                Approach(s.Target!).Collapse(s.Target!);
                 return currentStep;
             case ScriptVerb.Menu:
                 ExecuteMenu(s);
@@ -236,8 +244,11 @@ public sealed class ScriptInterpreter
 
             case ScriptVerb.Tab:
                 // TabViewItem realizes selection via SelectionItem; id preferred, header text fallback.
-                RequireDriver().Select(s.Target ?? ElementAddress.FromName(s.Text!));
-                return currentStep;
+                {
+                    var tab = s.Target ?? ElementAddress.FromName(s.Text!);
+                    Approach(tab).Select(tab);
+                    return currentStep;
+                }
 
             case ScriptVerb.SaveFileDialog:
                 {
@@ -255,8 +266,10 @@ public sealed class ScriptInterpreter
 
             case ScriptVerb.Dialog:
                 {
-                    // Invoke, not the profile's click: the profile has no window scope yet (M7 deferred).
-                    RequireDriver().InvokeInWindow(s.Text!, s.Target!);
+                    // Invoke inside the named dialog only (review M4); the profile only moves the cursor.
+                    var d = RequireDriver();
+                    _options.Profile.ApproachInWindow(d, s.Text!, s.Target!);
+                    d.InvokeInWindow(s.Text!, s.Target!);
                     return currentStep;
                 }
 
