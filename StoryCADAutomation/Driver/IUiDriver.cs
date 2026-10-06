@@ -138,7 +138,11 @@ public interface IUiDriver : IDisposable
     ///     menus"). The text-path menu form is interpreter-side composition of Expand/Invoke
     ///     and does not need this.
     /// </summary>
-    void InvokeMenuItem(ElementAddress leaf, TimeSpan? timeout = null);
+    /// <param name="openers">
+    ///     Ids to click first, owning button outermost (from the XAML). When given, the driver
+    ///     opens exactly those menus; when null, it falls back to trying each menu in turn.
+    /// </param>
+    void InvokeMenuItem(ElementAddress leaf, IReadOnlyList<string>? openers = null, TimeSpan? timeout = null);
 
     /// <summary>
     ///     Drives an already-opening native save picker to completion (the save-file-dialog

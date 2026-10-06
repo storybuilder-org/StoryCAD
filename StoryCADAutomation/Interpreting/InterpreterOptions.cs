@@ -22,6 +22,13 @@ public sealed class InterpreterOptions
     /// </summary>
     public TimeSpan ExitTimeout { get; init; } = TimeSpan.FromSeconds(15);
 
+    /// <summary>
+    ///     Menu item id to the ids clicked to reach it, from the XAML (runner wires
+    ///     <c>XamlUiFacts.MenuOpeners</c>). An id missing here falls back to the menu search.
+    /// </summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> MenuOpeners { get; init; } =
+        new Dictionary<string, IReadOnlyList<string>>();
+
     /// <summary>Folder the screenshot verb writes into (runner --out).</summary>
     public string OutputDirectory { get; init; } = "automation-output";
 

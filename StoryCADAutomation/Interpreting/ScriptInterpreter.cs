@@ -163,7 +163,7 @@ public sealed class ScriptInterpreter
             case ScriptVerb.Close:
                 {
                     var d = RequireDriver();
-                    d.InvokeMenuItem(ElementAddress.FromAutomationId(ExitMenuItemId));
+                    d.InvokeMenuItem(ElementAddress.FromAutomationId(ExitMenuItemId), Openers(ExitMenuItemId));
                     if (!d.WaitForExit(_options.ExitTimeout))
                     {
                         throw new AutomationStepException(
@@ -395,8 +395,8 @@ public sealed class ScriptInterpreter
         var d = RequireDriver();
         if (s.Target is not null)
         {
-            // Leaf-id form: the driver opens parent menus (design, Navigation verbs).
-            d.InvokeMenuItem(s.Target);
+            // Leaf-id form: open the menus the XAML puts the item under, then click it.
+            d.InvokeMenuItem(s.Target, Openers(s.Target.Value));
             return;
         }
 
@@ -412,6 +412,9 @@ public sealed class ScriptInterpreter
         d.Expand(ElementAddress.FromName(segments[0]));
         WalkFlyoutPath(d, segments[1..]);
     }
+
+    private IReadOnlyList<string>? Openers(string menuItemId)
+        => _options.MenuOpeners.TryGetValue(menuItemId, out var openers) ? openers : null;
 
     /// <summary>Walks flyout segments by name: sub-menu items expand, the leaf invokes.</summary>
     private static void WalkFlyoutPath(IUiDriver driver, string[] segments)

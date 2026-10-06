@@ -707,9 +707,11 @@ public sealed class StoryCADDriver : IUiDriver
     }
 
     /// <inheritdoc />
-    public void InvokeMenuItem(ElementAddress leaf, TimeSpan? timeout = null)
+    public void InvokeMenuItem(ElementAddress leaf, IReadOnlyList<string>? openers = null, TimeSpan? timeout = null)
     {
-        var element = _locator.WaitMenuItemReady(leaf, ReadinessRequirement.Invoke, Timeout(timeout));
+        var element = openers is { Count: > 0 }
+            ? OpenMenusThenFind(leaf, openers, Timeout(timeout))
+            : _locator.WaitMenuItemReady(leaf, ReadinessRequirement.Invoke, Timeout(timeout));
 
         // A real click, not the Invoke pattern: after a UIA Invoke the flyout kept the keyboard,
         // and later type and press steps were lost (#1421 Milestone 4, Intro-Video.scs line 58).
@@ -734,6 +736,35 @@ public sealed class StoryCADDriver : IUiDriver
         }
 
         Wait.UntilInputIsProcessed();
+    }
+
+    /// <summary>
+    ///     Clicks the owning button and any sub-menus the XAML names, as a user would, then waits
+    ///     for the item. This replaced trying every menu in turn, which a recording showed as
+    ///     menus opening for no reason (#1421 Milestone 4).
+    /// </summary>
+    private AutomationElement OpenMenusThenFind(ElementAddress leaf, IReadOnlyList<string> openers, TimeSpan timeout)
+    {
+        foreach (var opener in openers)
+        {
+            ClickPointer(ElementAddress.FromAutomationId(opener), timeout);
+        }
+
+        try
+        {
+            return _locator.WaitUntilReady(leaf, ReadinessRequirement.Invoke, TimeSpan.FromMilliseconds(1500));
+        }
+        catch (AutomationStepException)
+        {
+            // A click that lands while another flyout is still closing only dismisses it
+            // (Smoke_Test.scs, File menu right after a context menu). Open the menus once more.
+            foreach (var opener in openers)
+            {
+                ClickPointer(ElementAddress.FromAutomationId(opener), timeout);
+            }
+
+            return _locator.WaitUntilReady(leaf, ReadinessRequirement.Invoke, timeout);
+        }
     }
 
     // A flyout's close animation can run long on a slow machine; invoking an item whose click

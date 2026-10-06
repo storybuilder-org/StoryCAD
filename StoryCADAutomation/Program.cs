@@ -86,7 +86,8 @@ internal static class Program
         // Lint gates every run, so no script reaches the app with an unknown id or a dialog
         // path outside {scratch}. The interpreter also checks dialog paths at run time (B1).
         var parsed = ScriptParser.ParseFile(scriptPath);
-        if (PrintDiagnostics(parsed, new ScriptLinter(XamlUiFacts.LoadFromXamlScan())))
+        var facts = XamlUiFacts.LoadFromXamlScan();
+        if (PrintDiagnostics(parsed, new ScriptLinter(facts)))
         {
             return ScriptError;
         }
@@ -124,6 +125,7 @@ internal static class Program
             {
                 OnStatement = PrintOutcome,
                 OutputDirectory = outputDirectory,
+                MenuOpeners = facts.MenuOpeners,
                 Profile = (IExecutionProfile?)presentationProfile ?? new TestProfile(),
             });
 

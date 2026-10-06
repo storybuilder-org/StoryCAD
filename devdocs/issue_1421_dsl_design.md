@@ -157,7 +157,7 @@ Same script, two realizations. Profile is a runner flag, never a script statemen
 
 Screen recording stays outside the runner: start OBS, then the runner. After a presentation run the runner writes `<out>/<script name>.srt`. Cue times count from the start of the run, so a recording started just before the runner lines up; shift the subtitle track in the editor by the gap. The `.srt` replaces the planned `timeline.json` and caption overlay (Terry, 2026-10-05).
 
-Not glided in presentation: `press`, the flyout steps inside `context-menu`, and the text-path form of `menu`. `menu` by id clicks the found item with a real pointer and falls back to the Invoke pattern if the item is still showing 1.5 s later; it needs StoryCAD in the foreground in both profiles. A UIA Invoke left the flyout holding the keyboard, so later `type` and `press` steps were lost (found in Milestone 4).
+Not glided in presentation: `press`, the flyout steps inside `context-menu`, and the text-path form of `menu`. `menu` by id clicks, as a user would, the toolbar button and any sub-menu that the XAML puts the item under (`XamlUiFacts.MenuOpeners`), then the item. It no longer tries every menu in turn; that search remains only for an item with no owning button in the XAML. If the item has not appeared 1.5 s after the menus are opened, the menus are clicked once more (a click that lands while another flyout closes only dismisses it). If the item is still showing 1.5 s after its click, the Invoke pattern runs. `menu` needs StoryCAD in the foreground in both profiles. A UIA Invoke left the flyout holding the keyboard, so later `type` and `press` steps were lost (found in Milestone 4).
 
 ## Runner
 
