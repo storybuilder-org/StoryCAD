@@ -1007,7 +1007,17 @@ public sealed class StoryCADDriver : IUiDriver
     /// </summary>
     private void EnsureAppForeground(string action)
     {
+        // Waits up to 1 s without taking the foreground: when a dialog closes, Windows can
+        // report no foreground window (process 0) for a moment (#1421 Milestone 4, File > Exit
+        // after Generate Reports).
         var foregroundPid = NativeMethods.ForegroundWindowProcessId();
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        while (foregroundPid != (uint)_process.Id && watch.Elapsed < TimeSpan.FromSeconds(1))
+        {
+            Thread.Sleep(100);
+            foregroundPid = NativeMethods.ForegroundWindowProcessId();
+        }
+
         if (foregroundPid != (uint)_process.Id)
         {
             throw new AutomationStepException(
