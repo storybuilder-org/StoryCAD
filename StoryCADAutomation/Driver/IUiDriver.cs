@@ -94,6 +94,18 @@ public interface IUiDriver : IDisposable
     /// <summary>Real-pointer drag: press on source, eased move, release on target.</summary>
     void Drag(ElementAddress from, ElementAddress to, TimeSpan? timeout = null);
 
+    /// <summary>
+    ///     Eased pointer move to the target, no click. The presentation profile calls it before
+    ///     a verb acts, so a recording shows the cursor reach each control (#1421 Milestone 4).
+    /// </summary>
+    void GlideTo(ElementAddress target, TimeSpan? timeout = null);
+
+    /// <summary><see cref="GlideTo" /> for a target inside the named dialog window.</summary>
+    void GlideToInWindow(string windowTitle, ElementAddress target, TimeSpan? timeout = null);
+
+    /// <summary>Restores the main window and sets its outer size in physical pixels (runner --window).</summary>
+    void ResizeMainWindow(int width, int height);
+
     // --- keyboard and focus ----------------------------------------------------------------
 
     /// <summary>Types text into whatever has keyboard focus. Requires the app to be foreground.</summary>
@@ -126,7 +138,11 @@ public interface IUiDriver : IDisposable
     ///     menus"). The text-path menu form is interpreter-side composition of Expand/Invoke
     ///     and does not need this.
     /// </summary>
-    void InvokeMenuItem(ElementAddress leaf, TimeSpan? timeout = null);
+    /// <param name="openers">
+    ///     Ids to click first, owning button outermost (from the XAML). When given, the driver
+    ///     opens exactly those menus; when null, it falls back to trying each menu in turn.
+    /// </param>
+    void InvokeMenuItem(ElementAddress leaf, IReadOnlyList<string>? openers = null, TimeSpan? timeout = null);
 
     /// <summary>
     ///     Drives an already-opening native save picker to completion (the save-file-dialog

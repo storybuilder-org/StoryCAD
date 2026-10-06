@@ -35,6 +35,13 @@ public sealed partial class XamlUiFacts
     public required IReadOnlySet<string> TabLabels { get; init; }
 
     /// <summary>
+    ///     Menu item id to the ids clicked to reach it (owning button first). The runner uses it
+    ///     so `menu` opens the right menu directly; empty when facts are built from literals.
+    /// </summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> MenuOpeners { get; init; } =
+        new Dictionary<string, IReadOnlyList<string>>();
+
+    /// <summary>
     ///     Loads the facts through the shared scan library (one scan for convention tests and
     ///     lint; a second copy would drift — design, Script lint). The scan locates the repo by
     ///     walking up from the executing assembly's directory to StoryCAD.sln, so `check` only
@@ -64,7 +71,16 @@ public sealed partial class XamlUiFacts
             }
         }
 
-        return new XamlUiFacts { AutomationIds = ids, MenuLabels = menuLabels, TabLabels = tabLabels };
+        var menuOpeners = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
+        foreach (var path in AutomationXamlScan.MenuItemPaths())
+        {
+            menuOpeners.TryAdd(path.Id, path.Openers);
+        }
+
+        return new XamlUiFacts
+        {
+            AutomationIds = ids, MenuLabels = menuLabels, TabLabels = tabLabels, MenuOpeners = menuOpeners,
+        };
     }
 
     /// <summary>Trims and drops everything from the first 2+-space run (the shortcut column).</summary>

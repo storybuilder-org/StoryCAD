@@ -175,6 +175,26 @@ internal static class NativeMethods
     [DllImport("user32.dll")]
     private static extern bool SetProcessDpiAwarenessContext(IntPtr value);
 
+    // --- window placement (runner --window) ----------------------------------------------
+
+    private const int SW_RESTORE = 9;
+
+    /// <summary>Restores a maximized or minimized window, then moves and sizes it (physical pixels).</summary>
+    internal static void PlaceWindow(IntPtr hwnd, int x, int y, int width, int height)
+    {
+        ShowWindow(hwnd, SW_RESTORE);
+        if (!MoveWindow(hwnd, x, y, width, height, true))
+        {
+            throw new InvalidOperationException($"MoveWindow failed (Win32 error {Marshal.GetLastWin32Error()}).");
+        }
+    }
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool MoveWindow(IntPtr hWnd, int x, int y, int nWidth, int nHeight, bool bRepaint);
+
     private const int DwmwaExtendedFrameBounds = 9;
 
     [StructLayout(LayoutKind.Sequential)]

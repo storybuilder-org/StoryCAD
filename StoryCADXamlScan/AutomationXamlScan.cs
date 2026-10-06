@@ -231,4 +231,60 @@ public static class AutomationXamlScan
             }
         }
     }
+
+    /// <summary>
+    ///     For each menu item with an AutomationId, the ids a user clicks to reach it: the
+    ///     toolbar button that owns its flyout, then any MenuFlyoutSubItem in between, outermost
+    ///     first. The automation runner opens these directly instead of trying every menu
+    ///     (#1421 Milestone 4). Items with no owning button in the XAML (context flyouts) are
+    ///     left out.
+    /// </summary>
+    public static IEnumerable<MenuItemPath> MenuItemPaths()
+    {
+        foreach (var relPath in ScopeFiles())
+        {
+            var doc = LoadXaml(relPath);
+            foreach (var element in doc.Descendants())
+            {
+                if (element.Name.LocalName is not ("MenuFlyoutItem" or "MenuFlyoutSubItem"))
+                {
+                    continue;
+                }
+
+                var id = GetAttributeValue(element, AutomationIdAttribute);
+                if (string.IsNullOrEmpty(id))
+                {
+                    continue;
+                }
+
+                var openers = new List<string>();
+                var ownedByButton = false;
+                foreach (var ancestor in element.Ancestors())
+                {
+                    var ancestorId = GetAttributeValue(ancestor, AutomationIdAttribute);
+                    if (string.IsNullOrEmpty(ancestorId))
+                    {
+                        continue;
+                    }
+
+                    if (ancestor.Name.LocalName == "MenuFlyoutSubItem")
+                    {
+                        openers.Add(ancestorId);
+                    }
+                    else if (ancestor.Name.LocalName is "AppBarButton" or "Button")
+                    {
+                        openers.Add(ancestorId);
+                        ownedByButton = true;
+                        break;
+                    }
+                }
+
+                if (ownedByButton)
+                {
+                    openers.Reverse();
+                    yield return new MenuItemPath(relPath, id, openers);
+                }
+            }
+        }
+    }
 }

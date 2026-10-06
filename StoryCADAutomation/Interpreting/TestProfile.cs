@@ -36,6 +36,23 @@ public sealed class TestProfile : IExecutionProfile
     }
 
     /// <inheritdoc />
+    public void Approach(IUiDriver driver, ElementAddress target)
+    {
+        // No cursor travel in test mode: it only costs time.
+    }
+
+    /// <inheritdoc />
+    public void ApproachInWindow(IUiDriver driver, string windowTitle, ElementAddress target)
+    {
+    }
+
+    /// <inheritdoc />
+    public void Type(IUiDriver driver, string text) => driver.TypeText(text);
+
+    /// <inheritdoc />
+    public void Set(IUiDriver driver, ElementAddress target, string value) => driver.SetText(target, value);
+
+    /// <inheritdoc />
     public TimeSpan ScalePause(double seconds) => TimeSpan.Zero; // pause factor 0 in test mode
 
     /// <inheritdoc />

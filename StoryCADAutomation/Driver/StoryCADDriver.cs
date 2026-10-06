@@ -327,20 +327,54 @@ public sealed class StoryCADDriver : IUiDriver
     {
         // Scoped to the dialog the script named: a process-wide name lookup could press an
         // OK or Cancel somewhere else in the app (#1421 review M4).
-        var t = Timeout(timeout);
-        var window = _locator.WaitForWindow(windowTitle, t);
-        var element = WaitFor(t, $"{target} inside the \"{windowTitle}\" window", () => target.Kind switch
-        {
-            ElementAddressKind.AutomationId => window.FindFirstDescendant(cf => cf.ByAutomationId(target.Value)),
-            ElementAddressKind.Name => window.FindFirstDescendant(cf => cf.ByName(target.Value)),
-            _ => throw new AutomationStepException($"dialog targets are ids or name:\"...\", not {target}."),
-        });
+        var element = FindInWindow(windowTitle, target, Timeout(timeout));
         if (!element.Patterns.Invoke.IsSupported)
         {
             throw new AutomationStepException($"{target} inside the \"{windowTitle}\" window cannot be invoked.");
         }
 
         element.Patterns.Invoke.Pattern.Invoke();
+        Wait.UntilInputIsProcessed();
+    }
+
+    private AutomationElement FindInWindow(string windowTitle, ElementAddress target, TimeSpan timeout)
+    {
+        var window = _locator.WaitForWindow(windowTitle, timeout);
+        return WaitFor(timeout, $"{target} inside the \"{windowTitle}\" window", () => target.Kind switch
+        {
+            ElementAddressKind.AutomationId => window.FindFirstDescendant(cf => cf.ByAutomationId(target.Value)),
+            ElementAddressKind.Name => window.FindFirstDescendant(cf => cf.ByName(target.Value)),
+            _ => throw new AutomationStepException($"dialog targets are ids or name:\"...\", not {target}."),
+        });
+    }
+
+    /// <inheritdoc />
+    public void GlideTo(ElementAddress target, TimeSpan? timeout = null)
+    {
+        var point = ReadyClickPoint(target, timeout);
+        EnsureAppForeground($"glide to {target}");
+        EasedMoveTo(point);
+    }
+
+    /// <inheritdoc />
+    public void GlideToInWindow(string windowTitle, ElementAddress target, TimeSpan? timeout = null)
+    {
+        var element = FindInWindow(windowTitle, target, Timeout(timeout));
+        if (!element.TryGetClickablePoint(out var point))
+        {
+            var rect = element.BoundingRectangle;
+            point = new Point(rect.Left + rect.Width / 2, rect.Top + rect.Height / 2);
+        }
+
+        EnsureAppForeground($"glide to {target}");
+        EasedMoveTo(point);
+    }
+
+    /// <inheritdoc />
+    public void ResizeMainWindow(int width, int height)
+    {
+        // Top-left of the primary display, so an OBS capture region stays the same run to run.
+        NativeMethods.PlaceWindow(_process.MainWindowHandle, 0, 0, width, height);
         Wait.UntilInputIsProcessed();
     }
 
@@ -673,11 +707,113 @@ public sealed class StoryCADDriver : IUiDriver
     }
 
     /// <inheritdoc />
-    public void InvokeMenuItem(ElementAddress leaf, TimeSpan? timeout = null)
+    public void InvokeMenuItem(ElementAddress leaf, IReadOnlyList<string>? openers = null, TimeSpan? timeout = null)
     {
-        var element = _locator.WaitMenuItemReady(leaf, ReadinessRequirement.Invoke, Timeout(timeout));
-        element.Patterns.Invoke.Pattern.Invoke();
+        var element = openers is { Count: > 0 }
+            ? OpenMenusThenFind(leaf, openers, Timeout(timeout))
+            : _locator.WaitMenuItemReady(leaf, ReadinessRequirement.Invoke, Timeout(timeout));
+
+        // A real click, not the Invoke pattern: after a UIA Invoke the flyout kept the keyboard,
+        // and later type and press steps were lost (#1421 Milestone 4, Intro-Video.scs line 58).
+        var rect = SettledRectangle(element);
+        if (!rect.IsEmpty)
+        {
+            EnsureAppForeground($"menu {leaf}");
+            EasedMoveTo(new Point(rect.Left + rect.Width / 2, rect.Top + rect.Height / 2));
+            Mouse.Click(MouseButton.Left);
+            Wait.UntilInputIsProcessed();
+
+            // Some clicks on a flyout opened through UIA do not register (Smoke_Test.scs
+            // Close Story). If the item is still showing, invoke it as before.
+            if (StillShowing(element))
+            {
+                element.Patterns.Invoke.Pattern.Invoke();
+            }
+        }
+        else
+        {
+            element.Patterns.Invoke.Pattern.Invoke();
+        }
+
         Wait.UntilInputIsProcessed();
+    }
+
+    /// <summary>
+    ///     Clicks the owning button and any sub-menus the XAML names, as a user would, then waits
+    ///     for the item. This replaced trying every menu in turn, which a recording showed as
+    ///     menus opening for no reason (#1421 Milestone 4).
+    /// </summary>
+    private AutomationElement OpenMenusThenFind(ElementAddress leaf, IReadOnlyList<string> openers, TimeSpan timeout)
+    {
+        foreach (var opener in openers)
+        {
+            ClickPointer(ElementAddress.FromAutomationId(opener), timeout);
+        }
+
+        try
+        {
+            return _locator.WaitUntilReady(leaf, ReadinessRequirement.Invoke, TimeSpan.FromMilliseconds(1500));
+        }
+        catch (AutomationStepException)
+        {
+            // A click that lands while another flyout is still closing only dismisses it
+            // (Smoke_Test.scs, File menu right after a context menu). Open the menus once more.
+            foreach (var opener in openers)
+            {
+                ClickPointer(ElementAddress.FromAutomationId(opener), timeout);
+            }
+
+            return _locator.WaitUntilReady(leaf, ReadinessRequirement.Invoke, timeout);
+        }
+    }
+
+    // A flyout's close animation can run long on a slow machine; invoking an item whose click
+    // did register would run its command twice (a second Save, a second dialog).
+    private static readonly TimeSpan MenuCloseWait = TimeSpan.FromMilliseconds(1500);
+
+    private static bool StillShowing(AutomationElement element)
+    {
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        while (watch.Elapsed < MenuCloseWait)
+        {
+            Thread.Sleep(100);
+            try
+            {
+                if (element.IsOffscreen || element.BoundingRectangle.IsEmpty)
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                return false; // the flyout closed and the item left the UIA tree
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    ///     The element's rectangle once two reads 60 ms apart agree, up to 1 s. A flyout slides
+    ///     in when it opens, so an early read points where the item no longer is.
+    /// </summary>
+    private static System.Drawing.Rectangle SettledRectangle(AutomationElement element)
+    {
+        var previous = element.BoundingRectangle;
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        while (watch.Elapsed < TimeSpan.FromSeconds(1))
+        {
+            Thread.Sleep(60);
+            var current = element.BoundingRectangle;
+            if (current == previous)
+            {
+                return current;
+            }
+
+            previous = current;
+        }
+
+        return previous;
     }
 
     /// <inheritdoc />
@@ -902,7 +1038,17 @@ public sealed class StoryCADDriver : IUiDriver
     /// </summary>
     private void EnsureAppForeground(string action)
     {
+        // Waits up to 1 s without taking the foreground: when a dialog closes, Windows can
+        // report no foreground window (process 0) for a moment (#1421 Milestone 4, File > Exit
+        // after Generate Reports).
         var foregroundPid = NativeMethods.ForegroundWindowProcessId();
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        while (foregroundPid != (uint)_process.Id && watch.Elapsed < TimeSpan.FromSeconds(1))
+        {
+            Thread.Sleep(100);
+            foregroundPid = NativeMethods.ForegroundWindowProcessId();
+        }
+
         if (foregroundPid != (uint)_process.Id)
         {
             throw new AutomationStepException(
@@ -916,12 +1062,15 @@ public sealed class StoryCADDriver : IUiDriver
         var element = _locator.WaitUntilReady(target, ReadinessRequirement.ClickablePoint, Timeout(timeout));
         try
         {
-            if (element.TryGetClickablePoint(out var point))
+            // A clickable point outside the element's own rectangle is not on the element. The
+            // outline root row reports one at the window's top-left corner, so a real click
+            // there opened the system menu and later keystrokes went into it (#1421 Milestone 4).
+            var rect = element.BoundingRectangle;
+            if (element.TryGetClickablePoint(out var point) && (rect.IsEmpty || rect.Contains(point)))
             {
                 return point;
             }
 
-            var rect = element.BoundingRectangle;
             if (!rect.IsEmpty)
             {
                 return new Point(rect.Left + rect.Width / 2, rect.Top + rect.Height / 2);

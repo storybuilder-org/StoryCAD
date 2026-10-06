@@ -2,7 +2,7 @@
 
 Issue #1421. Decision context: issue body "Architecture decision (2026-07-12)" section. Status: draft for design review.
 
-**Build status (2026-10-04).** Milestone 1 built and ran live: the driver, the parser, lint, the interpreter in the test profile, and `run <script>` with console output and exit codes 0-3. The app's data root comes from the `STORYCAD_ROOT_DIR` environment variable, not a copy of the build. `StoryCADTests/ManualTests/Smoke_Test.scs` passes. Milestone 2 (in progress) adds `check`, `--ci`, `--out`, the `screenshot` verb and a CI job. Still deferred: the presentation profile, report files, `--keep-going`, launch retry and folder runs for `run`. Sections below that describe deferred parts are not built.
+**Build status (2026-10-05).** Milestones 1 and 2 are built: the driver, the parser, lint, the interpreter, `run` with console output and exit codes 0-3, `check`, `--ci`, `--out`, the `screenshot` verb and the CI job. The app's data root comes from the `STORYCAD_ROOT_DIR` environment variable. Milestone 4 adds the presentation profile in a minimum form (see Execution profiles) with `--profile`, `--pacing` and `--window`. Dropped on 2026-10-05: JUnit XML, NLog collection, `--keep-going`, launch retry and `timeline.json`. Folder runs for `run` moved to #1422. Sections below that describe dropped parts are kept for history and are not built.
 
 ## Components
 
@@ -147,27 +147,27 @@ Same script, two realizations. Profile is a runner flag, never a script statemen
 
 | Concern | `test` | `presentation` |
 |---|---|---|
-| `click` realization | UIA pattern (Invoke/SelectionItem) where sufficient; real pointer where patterns are known-insufficient (driver keeps that per-control strategy; the 2026-06-12 navigation case is the founding example) | Real pointer, eased cursor movement, always |
-| `pause` factor | 0 | 1.0 (scalable via `--pacing`) |
-| Assertions | Hard fail; script aborts (unless `--keep-going`) | Log and continue, except session-fatal errors |
-| Window | Whatever launch yields | Fixed size and position for capture (`--window 1920x1080`) |
-| `narrate` | Log line | On-screen caption overlay |
-| Screenshots | On failure only | Off (external capture owns the pixels) |
+| Targeted verbs | Act directly | The cursor glides to the target first (one hook for every targeted verb and for `dialog`; settles review M7) |
+| `click` realization | UIA pattern (Invoke/SelectionItem) where sufficient; real pointer where patterns are known-insufficient | Glide, then the same realization as test |
+| `type`, `set` | `type` all at once; `set` through the Value pattern | One character at a time, with a 65 ms pause times `--pacing` after each one on top of input processing; `set` clears the field through the Value pattern (which opens a collapsed Expander), then types |
+| `pause` factor | 0 | 1.0 times `--pacing` |
+| `narrate` | Log line | Log line, plus a subtitle cue; the run holds for reading time (0.4 s a word, 2 s minimum, times `--pacing`) |
+| Assertions | Hard fail; script aborts | Same as test: a failed demo is recorded again |
+| Window | Whatever launch yields | `--window WxH` restores the main window and sets its outer size at the top-left of the primary display. The outer size includes Windows' invisible resize border, so use an OBS Window Capture source, not a fixed screen region |
 
-Screen recording stays outside the runner: OBS or ffmpeg wraps the process. The runner writes a timestamped step timeline (`timeline.json`) so captions and cuts can be synced to a recording afterward. Building capture into v1 adds an encoder dependency for something the OS already does.
+Screen recording stays outside the runner: start OBS, then the runner. After a presentation run the runner writes `<out>/<script name>.srt`. Cue times count from the start of the run, so a recording started just before the runner lines up; shift the subtitle track in the editor by the gap. The `.srt` replaces the planned `timeline.json` and caption overlay (Terry, 2026-10-05).
+
+Not glided in presentation: `press`, the flyout steps inside `context-menu`, and the text-path form of `menu`. `menu` by id clicks, as a user would, the toolbar button and any sub-menu that the XAML puts the item under (`XamlUiFacts.MenuOpeners`), then the item. It no longer tries every menu in turn; that search remains only for an item with no owning button in the XAML. If the item has not appeared 1.5 s after the menus are opened, the menus are clicked once more (a click that lands while another flyout closes only dismisses it). If the item is still showing 1.5 s after its click, the Invoke pattern runs. `menu` needs StoryCAD in the foreground in both profiles. A UIA Invoke left the flyout holding the keyboard, so later `type` and `press` steps were lost (found in Milestone 4).
 
 ## Runner
 
 ```
-StoryCADAutomation run <script.scs | directory> [options]
+StoryCADAutomation run <script.scs> [options]
   --profile test|presentation     default test
   --app <path>                    StoryCAD exe; default: sibling Debug build output
-  --report <dir>                  default ./automation-reports/<timestamp>
-  --keep-going                    report failures but run remaining steps
-  --pacing <factor>               presentation pacing multiplier
-  --timeout <seconds>             implicit-wait default override
-  --window <WxH>                  presentation window size
-  --out <dir>                     screenshot output folder; default ./automation-output
+  --pacing <factor>               presentation pauses, typing and reading time multiplier; default 1.0
+  --window <WxH>                  restore and size the main window, e.g. 1920x1080
+  --out <dir>                     screenshot and .srt output folder; default ./automation-output
   --ci                            assert the CI display (1920x1080 or larger, 100% scale)
                                   at launch; local runs skip it
 

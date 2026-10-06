@@ -6,7 +6,7 @@ namespace StoryCADAutomation.Interpreting;
 /// </summary>
 public sealed class InterpreterOptions
 {
-    /// <summary>Profile realization; test by default, presentation arrives with #1421 task 7.</summary>
+    /// <summary>Profile realization; test by default, presentation with the runner's --profile flag.</summary>
     public IExecutionProfile Profile { get; init; } = new TestProfile();
 
     /// <summary>
@@ -21,6 +21,13 @@ public sealed class InterpreterOptions
     ///     job-object teardown is the backstop, not this wait.
     /// </summary>
     public TimeSpan ExitTimeout { get; init; } = TimeSpan.FromSeconds(15);
+
+    /// <summary>
+    ///     Menu item id to the ids clicked to reach it, from the XAML (runner wires
+    ///     <c>XamlUiFacts.MenuOpeners</c>). An id missing here falls back to the menu search.
+    /// </summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> MenuOpeners { get; init; } =
+        new Dictionary<string, IReadOnlyList<string>>();
 
     /// <summary>Folder the screenshot verb writes into (runner --out).</summary>
     public string OutputDirectory { get; init; } = "automation-output";
