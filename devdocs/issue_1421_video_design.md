@@ -206,6 +206,7 @@ Before the narrator voice is available, items 1 to 7 use a stock ElevenLabs voic
 | Narrator samples and consent in ElevenLabs | The narrator, with Terry |
 | Whether the narrator gives a name in the first line | The narrator |
 | Logo file and intro music file in the assets folder | Terry or Shipping Sentinel |
+| When a video uses the intro music, put this credit line in its YouTube description: "Music: 'Dance of the Clouds' by Origen, used with permission." | The person who uploads the video |
 
 ---
 
