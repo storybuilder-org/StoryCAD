@@ -1038,16 +1038,9 @@ public sealed class StoryCADDriver : IUiDriver
     /// </summary>
     private void EnsureAppForeground(string action)
     {
-        // Waits up to 1 s without taking the foreground: when a dialog closes, Windows can
-        // report no foreground window (process 0) for a moment (#1421 Milestone 4, File > Exit
-        // after Generate Reports).
-        var foregroundPid = NativeMethods.ForegroundWindowProcessId();
-        var watch = System.Diagnostics.Stopwatch.StartNew();
-        while (foregroundPid != (uint)_process.Id && watch.Elapsed < TimeSpan.FromSeconds(1))
-        {
-            Thread.Sleep(100);
-            foregroundPid = NativeMethods.ForegroundWindowProcessId();
-        }
+        // Waits up to 1 s (10 reads, 100 ms apart) without taking the foreground.
+        var foregroundPid = WaitForForegroundProcess(
+            NativeMethods.ForegroundWindowProcessId, (uint)_process.Id, 10, () => Thread.Sleep(100));
 
         if (foregroundPid != (uint)_process.Id)
         {
@@ -1065,15 +1058,10 @@ public sealed class StoryCADDriver : IUiDriver
             // A clickable point outside the element's own rectangle is not on the element. The
             // outline root row reports one at the window's top-left corner, so a real click
             // there opened the system menu and later keystrokes went into it (#1421 Milestone 4).
-            var rect = element.BoundingRectangle;
-            if (element.TryGetClickablePoint(out var point) && (rect.IsEmpty || rect.Contains(point)))
+            Point? reported = element.TryGetClickablePoint(out var point) ? point : null;
+            if (ChooseClickPoint(reported, element.BoundingRectangle) is { } chosen)
             {
-                return point;
-            }
-
-            if (!rect.IsEmpty)
-            {
-                return new Point(rect.Left + rect.Width / 2, rect.Top + rect.Height / 2);
+                return chosen;
             }
         }
         catch (Exception)
@@ -1082,6 +1070,39 @@ public sealed class StoryCADDriver : IUiDriver
         }
 
         throw new AutomationStepException($"{target} is ready but has no clickable point.");
+    }
+
+    /// <summary>
+    ///     The point a real click uses: the element's reported clickable point if it lies inside
+    ///     the element's rectangle, else the rectangle's center, else none. The outline root row
+    ///     reports a point at the window's top-left corner (#1421 Milestone 4).
+    /// </summary>
+    internal static Point? ChooseClickPoint(Point? reported, Rectangle rect)
+    {
+        if (reported is { } point && (rect.IsEmpty || rect.Contains(point)))
+        {
+            return point;
+        }
+
+        return rect.IsEmpty ? null : new Point(rect.Left + rect.Width / 2, rect.Top + rect.Height / 2);
+    }
+
+    /// <summary>
+    ///     Reads the foreground process up to <paramref name="polls" /> more times, with
+    ///     <paramref name="pause" /> between reads, until it is <paramref name="expected" />.
+    ///     Returns the last value read. When a dialog closes, Windows can report no foreground
+    ///     window (process 0) for a moment (#1421 Milestone 4, File > Exit after Generate Reports).
+    /// </summary>
+    internal static uint WaitForForegroundProcess(Func<uint> read, uint expected, int polls, Action pause)
+    {
+        var pid = read();
+        for (var i = 0; i < polls && pid != expected; i++)
+        {
+            pause();
+            pid = read();
+        }
+
+        return pid;
     }
 
     /// <summary>
