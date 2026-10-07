@@ -9,17 +9,22 @@ script "Intro Video"
 step "The main window"
 launch
 expect FileOpenNav exists
+step "The main window (2)"
 narrate "StoryCAD is a free and open source computer-aided design tool for fiction writers."
 click SampleOutlinesNavItem
 select FileOpenSamplesList "The Old Man and the Sea"
 click PrimaryButton                       # "Open"
 expect tree contains "The Old Man and the Sea"
+step "The main window (3)"
 narrate "On the left is the navigation pane. It shows every element of your outline as a tree."
 open-node tree "The Old Man and the Sea/Characters/Santiago"
+step "The main window (4)"
 narrate "The right side is the content pane. It shows the element you select in the tree."
 pause 2
+step "The main window (5)"
 narrate "The menu bar at the top opens files, adds story elements, runs tools and prints reports."
 click PreferencesButton
+step "The main window (6)"
 narrate "Preferences hold your name, your folders and how StoryCAD saves your work."
 pause 2
 dialog "Preferences" click name:"Cancel"
@@ -27,11 +32,13 @@ dialog "Preferences" click name:"Cancel"
 step "A new outline"
 menu OpenCreateFileMenuItem
 click CreateNewOutlineNavItem
+step "A new outline (2)"
 narrate "StoryCAD creates new outlines from templates. This one starts from the blank template."
 set FileOpenProjectNameTextBox "Fish Story"
 press "Tab"                               # the name binding updates only when focus leaves the box
 click PrimaryButton                       # "Create outline"
 expect tree contains "Fish Story"
+step "A new outline (3)"
 narrate "A blank outline has two nodes: the story overview and the trash can."
 pause 2
 
@@ -40,6 +47,7 @@ narrate "The overview is the root of the tree and the place to start."
 tab StoryIdeaTab
 focus StoryIdeaRichEdit                  # RichEdit boxes have no Value pattern, so focus and type
 type "Codify a local urban legend as a morality tale."
+step "The story overview (2)"
 narrate "Each element has tabs. Each tab covers one part of that element."
 tab ConceptTab
 focus ConceptRichEdit
@@ -62,6 +70,7 @@ open-node tree "Fish Story/New Character"
 set CharacterNameTextBox "Manolin"
 expect tree contains "Fish Story/Santiago"
 expect tree contains "Fish Story/Manolin"
+step "Story elements (2)"
 narrate "Add elements in any order, as inspiration strikes or from start to finish."
 pause 2
 
@@ -84,6 +93,7 @@ tab PrintReportsCharactersTab
 toggle PrintReportsCharacterListCheck on
 pause 2
 dialog "Generate Reports" click name:"Cancel"
+step "Reports (2)"
 narrate "You can also export your outline to a Scrivener project and draft from it there."
 pause 2
 

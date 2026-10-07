@@ -85,8 +85,103 @@ public static partial class ScriptParser
                 "the first statement must be script \"name\" (design, Script language)."));
         }
 
+        CheckVideoStructure(statements, errors);
         return new ScriptParseResult { ScriptName = scriptName, Statements = statements, Errors = errors };
     }
+
+    /// <summary>Upper bound for step "name" hold N, in seconds (video design, section 6.2 rule 6).</summary>
+    public const double MaxHoldSeconds = 30;
+
+    /// <summary>
+    ///     The placement rules for the video statements (devdocs/issue_1421_video_design.md,
+    ///     section 6.2): title first after script, closing last, narrate lines at the head of
+    ///     their step, and a show step that holds only narrate lines and one show.
+    /// </summary>
+    private static void CheckVideoStructure(List<ScriptStatement> statements, List<ScriptDiagnostic> errors)
+    {
+        for (var i = 0; i < statements.Count; i++)
+        {
+            var s = statements[i];
+            if (s.Verb == ScriptVerb.Title && i != 1)
+            {
+                errors.Add(Error(s, "title must be the first statement after script \"name\"."));
+            }
+
+            if (s.Verb == ScriptVerb.Closing && i != statements.Count - 1)
+            {
+                errors.Add(Error(s, "closing must be the last statement."));
+            }
+        }
+
+        // Walk each step: the statements after a step line, up to the next step or closing.
+        var stepIndex = -1;
+        var headDone = false;
+        var shows = 0;
+        var actions = new List<ScriptStatement>();
+        for (var i = 0; i <= statements.Count; i++)
+        {
+            var s = i < statements.Count ? statements[i] : null;
+            if (s is null || s.Verb is ScriptVerb.Step or ScriptVerb.Closing)
+            {
+                if (stepIndex >= 0 && shows > 0)
+                {
+                    if (shows > 1)
+                    {
+                        errors.Add(Error(statements[stepIndex], "a step may hold only one show."));
+                    }
+
+                    foreach (var action in actions)
+                    {
+                        errors.Add(Error(action, "a step with show holds only narrate lines and the show."));
+                    }
+                }
+
+                if (s is null)
+                {
+                    break;
+                }
+
+                stepIndex = s.Verb == ScriptVerb.Step ? i : -1;
+                headDone = false;
+                shows = 0;
+                actions.Clear();
+                continue;
+            }
+
+            switch (s.Verb)
+            {
+                case ScriptVerb.Narrate:
+                    if (stepIndex >= 0 && headDone)
+                    {
+                        errors.Add(Error(s, "narrate lines come immediately after the step line."));
+                    }
+
+                    break;
+                case ScriptVerb.ShowImage or ScriptVerb.ShowText:
+                    if (stepIndex < 0)
+                    {
+                        errors.Add(Error(s, "show must be inside a step."));
+                    }
+
+                    headDone = true;
+                    shows++;
+                    break;
+                case ScriptVerb.Script or ScriptVerb.Title:
+                    break;
+                default:
+                    headDone = true;
+                    if (stepIndex >= 0)
+                    {
+                        actions.Add(s);
+                    }
+
+                    break;
+            }
+        }
+    }
+
+    private static ScriptDiagnostic Error(ScriptStatement statement, string message)
+        => new(DiagnosticSeverity.Error, statement.Line, message);
 
     // --- tokenizer -------------------------------------------------------------------------
 
@@ -193,7 +288,10 @@ public static partial class ScriptParser
         ScriptStatement statement = verbWord switch
         {
             "script" => New(ScriptVerb.Script) with { Text = TakeString(reader, "run name") },
-            "step" => New(ScriptVerb.Step) with { Text = TakeString(reader, "step name") },
+            "step" => BuildStep(reader),
+            "title" => New(ScriptVerb.Title) with { Text = TakeString(reader, "title text") },
+            "closing" => New(ScriptVerb.Closing) with { Text = TakeString(reader, "closing text") },
+            "show" => BuildShow(reader),
             "launch" => New(ScriptVerb.Launch),
             "close" => New(ScriptVerb.Close),
             "expect-exit" => New(ScriptVerb.ExpectExit),
@@ -234,6 +332,37 @@ public static partial class ScriptParser
         return statement;
 
         ScriptStatement New(ScriptVerb verb) => new() { Verb = verb, Line = line, Source = source };
+
+        ScriptStatement BuildStep(ArgReader r)
+        {
+            var name = TakeString(r, "step name");
+            if (r.AtEnd)
+            {
+                return New(ScriptVerb.Step) with { Text = name };
+            }
+
+            // step "name" hold N: extra seconds at the end of the step (video design, section 6).
+            TakeKeyword(r, "hold");
+            var word = TakeWord(r, "hold seconds");
+            if (!double.TryParse(word, NumberStyles.Float, CultureInfo.InvariantCulture, out var seconds)
+                || !double.IsFinite(seconds) || seconds < 0 || seconds > MaxHoldSeconds)
+            {
+                throw new SyntaxException($"hold takes a number of seconds from 0 to {MaxHoldSeconds}, not '{word}'.");
+            }
+
+            return New(ScriptVerb.Step) with { Text = name, Seconds = seconds };
+        }
+
+        ScriptStatement BuildShow(ArgReader r)
+        {
+            var kind = TakeWord(r, "'image' or 'text'");
+            return kind switch
+            {
+                "image" => New(ScriptVerb.ShowImage) with { Text = TakeString(r, "image file name") },
+                "text" => New(ScriptVerb.ShowText) with { Text = TakeString(r, "card text") },
+                _ => throw new SyntaxException($"show takes 'image' or 'text', not '{kind}'."),
+            };
+        }
 
         ScriptStatement BuildDrag(ArgReader r)
         {

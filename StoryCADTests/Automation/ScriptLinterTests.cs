@@ -101,6 +101,17 @@ public class ScriptLinterTests
     }
 
     [TestMethod]
+    [DataRow("apple-pie.png", 0)]
+    [DataRow("Apple Pie.JPG", 0)]
+    [DataRow("media/apple-pie.png", 1)]
+    [DataRow("../apple-pie.png", 1)]
+    [DataRow("apple-pie.gif", 1)]
+    public void Lint_WithShowImageName_ReportsErrorOnlyForBadNames(string name, int errors)
+    {
+        Assert.AreEqual(errors, LintDialogLine($"step \"Recipe\"\nshow image \"{name}\"").Count);
+    }
+
+    [TestMethod]
     public void Lint_WithScreenshotPathOrWrongType_ReportsError()
     {
         Assert.AreEqual(1, LintDialogLine("screenshot \"../Overview.png\"").Count);

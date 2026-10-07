@@ -31,7 +31,10 @@ public sealed record ScriptStatement
     /// </summary>
     public string? Text { get; init; }
 
-    /// <summary>Pause duration in seconds, before profile pacing is applied.</summary>
+    /// <summary>
+    ///     Pause duration in seconds, before profile pacing is applied; on a step line, the
+    ///     optional hold seconds added at the end of the step (video design, section 6).
+    /// </summary>
     public double? Seconds { get; init; }
 
     /// <summary>Toggle direction: true = on.</summary>
