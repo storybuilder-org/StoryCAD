@@ -9,10 +9,6 @@ on:
       - "**/*.{png,jpg,jpeg,svg,gif}"
   pull_request:
     branches: [main, dev]
-    paths-ignore:
-      - "**/*.md"
-      - "docs/**"
-      - "**/*.{png,jpg,jpeg,svg,gif}"
   workflow_dispatch:
     inputs:
       version:
