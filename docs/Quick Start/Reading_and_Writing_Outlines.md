@@ -23,7 +23,16 @@ File Open displays the following open dialog:
 
 ![](../media/File-Open-Dialog.png)
 
-This dialog will by default display recently opened outlines. Clicking on Open story from disk will open a file browser to allow you to pick a particular outline to pen.  Clicking on the Create new story tab on the left will display a dialog for a new story outline. The Project path defaults to the file folder specified in Preferences.
+The dialog opens on Recently opened, which lists the outlines you worked on last and when each was last edited. Click an outline, then click Open Outline. The other choices on the left are:
+
+- **Create new outline** starts a new outline. The Project path defaults to the folder specified in Preferences.
+- **Sample outlines** lists the sample outlines that come with StoryCAD. Changes to a sample are lost unless you save it somewhere else.
+- **Backups** lists your backup copies, newest first. Click one, then click Open backup.
+- **Open from file** opens a file browser so you can pick any outline on your computer.
+
+Clear **Show on startup** if you don't want this dialog to appear when StoryCAD starts. Click Close to leave the dialog without opening anything.
+
+Create new outline displays this page:
 
 ![](../media/Create-New-Outline-Dialog.png)
  
