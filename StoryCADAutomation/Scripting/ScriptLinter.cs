@@ -71,6 +71,9 @@ public sealed partial class ScriptLinter
                 case ScriptVerb.ScreenshotDialog:
                     LintScreenshotName(statement, findings);
                     break;
+                case ScriptVerb.ShowImage:
+                    LintImageName(statement, findings);
+                    break;
             }
         }
 
@@ -200,6 +203,25 @@ public sealed partial class ScriptLinter
                 "with no folder, so the image lands in the run's output folder."));
         }
     }
+
+    /// <summary>
+    ///     A show image names a .png or .jpg file in the assets folder, with no folder part
+    ///     (video design, section 6.2 rule 5). Whether the file exists is checked by the video
+    ///     command, which knows the assets folder.
+    /// </summary>
+    private static void LintImageName(ScriptStatement statement, List<ScriptDiagnostic> findings)
+    {
+        var name = statement.Text!;
+        if (!ImageNamePattern().IsMatch(name) || name.Contains("..", StringComparison.Ordinal))
+        {
+            findings.Add(Error(statement,
+                $"show image '{name}' must be a plain .png or .jpg file name (letters, digits, '-', '_', '.', ' '), " +
+                "with no folder; the file lives in the assets folder."));
+        }
+    }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"^[A-Za-z0-9_. -]+\.(png|jpg)$", System.Text.RegularExpressions.RegexOptions.IgnoreCase)]
+    private static partial System.Text.RegularExpressions.Regex ImageNamePattern();
 
     [System.Text.RegularExpressions.GeneratedRegex(@"^[0-9]+$")]
     private static partial System.Text.RegularExpressions.Regex NativeControlIdPattern();

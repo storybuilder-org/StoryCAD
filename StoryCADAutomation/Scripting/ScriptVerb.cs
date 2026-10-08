@@ -64,4 +64,10 @@ public enum ScriptVerb
     // capture (#1421 Milestone 2)
     Screenshot,
     ScreenshotDialog,
+
+    // video (#1421 Milestone 5, devdocs/issue_1421_video_design.md)
+    Title,
+    Closing,
+    ShowImage,
+    ShowText,
 }

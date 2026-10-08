@@ -361,6 +361,21 @@ public sealed class ScriptInterpreter
                 _options.Profile.Narrate(s.Text!, _options.Log);
                 return currentStep;
 
+            // Cards are drawn by assembly from the run's log, not by the app; the run only
+            // records them (video design, sections 6.3 and 9).
+            case ScriptVerb.Title:
+                _options.Log($"title: {s.Text}");
+                return currentStep;
+            case ScriptVerb.Closing:
+                _options.Log($"closing: {s.Text}");
+                return currentStep;
+            case ScriptVerb.ShowImage:
+                _options.Log($"show image: {s.Text}");
+                return currentStep;
+            case ScriptVerb.ShowText:
+                _options.Log($"show text: {s.Text}");
+                return currentStep;
+
             case ScriptVerb.Screenshot:
             case ScriptVerb.ScreenshotDialog:
                 {

@@ -662,7 +662,9 @@ internal sealed class ElementLocator
 
     // Tree rows match without trailing spaces: the shipped samples end most element names in
     // spaces ("Santiago "), which a script author cannot see (#1421, Intro-Video.scs).
-    private static string RowName(AutomationElement element) => NameOf(element).TrimEnd();
+    private static string RowName(AutomationElement element) => RowName(NameOf(element));
+
+    internal static string RowName(string uiaName) => uiaName.TrimEnd();
 
     private static string NameOf(AutomationElement element)
     {

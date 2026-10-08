@@ -41,7 +41,12 @@ expect tree contains "Smoke Test/New Scene"
 
 step "ST-005: Clean Exit"
 open-node tree "Smoke Test/Test Character"
-set CharacterNameTextBox "Test Character changed"
+menu SaveStoryMenuItem                    # keyboard right after a menu: with a UIA Invoke the flyout kept the keyboard and typing was lost (#1421 Milestone 4)
+focus CharacterNameTextBox
+press "End"
+type " changed"
+press "Tab"                               # the name binding updates only when focus leaves the box
+expect CharacterNameTextBox text "Test Character changed"
 menu ExitMenuItem
 dialog "Save changes?" click name:"No"
 expect-exit
