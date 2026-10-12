@@ -45,6 +45,7 @@ the init scripts out of `/docker-entrypoint-initdb.d`:
 - `STORYBUILDER_CURRENT_SCHEMA.sql` — tables, stored procedures, purge event
 - `seed_test_data.sql` — Alice, Bob, Carol with preferences
 - `V003__messaging_tables.sql` — admin message tables and procedures (#1377)
+- `V004__admin_sends.sql` — user groups and send records for the message sender (#1396)
 
 Those scripts only run against an empty volume, so after the first boot the
 data sticks. See **Reset** below when you need to reload the schema.
