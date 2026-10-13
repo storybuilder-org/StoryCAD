@@ -57,4 +57,15 @@ public sealed class TestProfile : IExecutionProfile
 
     /// <inheritdoc />
     public void Narrate(string text, Action<string> log) => log($"narrate: {text}");
+
+    /// <inheritdoc />
+    public void BeginStep(double holdSeconds)
+    {
+        // The test profile does not wait for narration or hold (video design, section 6.3).
+    }
+
+    /// <inheritdoc />
+    public void EndStep()
+    {
+    }
 }

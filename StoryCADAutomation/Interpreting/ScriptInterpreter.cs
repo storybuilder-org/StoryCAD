@@ -101,6 +101,12 @@ public sealed class ScriptInterpreter
             }
         }
 
+        // The last step ends with the script: its narration and hold still play out.
+        if (!aborted && !cancellation.IsCancellationRequested)
+        {
+            _options.Profile.EndStep();
+        }
+
         return new ScriptRunResult { ScriptName = script.ScriptName, Outcomes = outcomes };
     }
 
@@ -149,6 +155,8 @@ public sealed class ScriptInterpreter
                 _options.Log($"script: {s.Text}");
                 return currentStep;
             case ScriptVerb.Step:
+                // The wait for the step before this one runs here, so the report charges it to this line.
+                _options.Profile.BeginStep(s.Seconds ?? 0);
                 _options.Log($"step: {s.Text}");
                 return s.Text;
 
@@ -367,6 +375,7 @@ public sealed class ScriptInterpreter
                 _options.Log($"title: {s.Text}");
                 return currentStep;
             case ScriptVerb.Closing:
+                _options.Profile.EndStep();
                 _options.Log($"closing: {s.Text}");
                 return currentStep;
             case ScriptVerb.ShowImage:
