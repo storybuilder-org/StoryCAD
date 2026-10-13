@@ -105,9 +105,12 @@ internal static class VideoCommand
                 {
                     // StoryCAD lays itself out in 1920x1080 at any display scale; the recording area
                     // is that size in screen pixels, and assembly scales it back to 1920x1080.
-                    var area = CaptureSize(driver.MainWindowDpi);
-                    var frame = driver.PlaceVisibleFrame(area.Width, area.Height);
-                    recorder = ScreenRecorder.Start(ffmpeg, frame, recordingPath, clock);
+                    var dpi = driver.MainWindowDpi;
+                    var area = CaptureSize(dpi);
+                    var inset = BorderInset(dpi);
+                    var frame = driver.PlaceVisibleFrame(area.Width + 2 * inset, area.Height + 2 * inset);
+                    var inside = new Rectangle(frame.X + inset, frame.Y + inset, area.Width, area.Height);
+                    recorder = ScreenRecorder.Start(ffmpeg, inside, recordingPath, clock);
                 }
                 catch (Exception ex)
                 {
@@ -198,6 +201,13 @@ internal static class VideoCommand
         static int Even(double pixels) => (int)Math.Round(pixels / 2) * 2;
         return new Size(Even(VideoAssembler.Width * dpi / 96.0), Even(VideoAssembler.Height * dpi / 96.0));
     }
+
+    /// <summary>
+    ///     The width of the window border in screen pixels. The border lets the wallpaper show
+    ///     through (2 px on every side at 150%, seen on Brigid, 2026-10-13), so the recording
+    ///     starts inside it.
+    /// </summary>
+    internal static int BorderInset(int dpi) => (int)Math.Ceiling(dpi / 96.0);
 
     /// <summary>
     ///     The plan for assembly: each show card covers its step, each clip starts at its cue,

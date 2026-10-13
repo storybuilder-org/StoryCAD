@@ -43,6 +43,15 @@ public class VideoTests
     }
 
     [TestMethod]
+    [DataRow(96, 1)]
+    [DataRow(144, 2)]
+    [DataRow(192, 2)]
+    public void BorderInset_AtDisplayDpi_CoversTheWindowBorder(int dpi, int inset)
+    {
+        Assert.AreEqual(inset, VideoCommand.BorderInset(dpi));
+    }
+
+    [TestMethod]
     public void ParseOutTime_WithProgressLine_ReturnsTime()
     {
         Assert.AreEqual(TimeSpan.FromMilliseconds(1500), ScreenRecorder.ParseOutTime("out_time_us=1500000"));
