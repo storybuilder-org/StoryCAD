@@ -55,6 +55,48 @@ internal static class NativeMethods
     /// <summary>System DPI (96 = 100% scale).</summary>
     internal static int SystemDpi() => (int)GetDpiForSystem();
 
+    /// <summary>The DPI a window lays itself out at; it follows a scale change that the system DPI misses.</summary>
+    internal static int WindowDpi(IntPtr hwnd) => (int)GetDpiForWindow(hwnd);
+
+    /// <summary>The primary display's work area: the screen without the taskbar.</summary>
+    internal static System.Drawing.Rectangle PrimaryWorkArea()
+    {
+        if (!SystemParametersInfo(SpiGetWorkArea, 0, out var r, 0))
+        {
+            throw new InvalidOperationException($"SystemParametersInfo failed (Win32 error {Marshal.GetLastWin32Error()}).");
+        }
+
+        return System.Drawing.Rectangle.FromLTRB(r.Left, r.Top, r.Right, r.Bottom);
+    }
+
+    private const uint SpiGetWorkArea = 0x0030;
+
+    /// <summary>
+    ///     Brings a window to the front. Windows refuses SetForegroundWindow to a background
+    ///     process unless it has just had input, so an Alt press and release comes first.
+    /// </summary>
+    internal static bool ForceForeground(IntPtr hwnd)
+    {
+        keybd_event(VkMenu, 0, 0, UIntPtr.Zero);
+        keybd_event(VkMenu, 0, KeyEventKeyUp, UIntPtr.Zero);
+        return SetForegroundWindow(hwnd);
+    }
+
+    private const byte VkMenu = 0x12;
+    private const uint KeyEventKeyUp = 0x0002;
+
+    [DllImport("user32.dll")]
+    private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetDpiForWindow(IntPtr hwnd);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, out RECT pvParam, uint fWinIni);
+
     /// <summary>
     ///     The window's visible frame in screen pixels, without the invisible resize border that
     ///     GetWindowRect and the UIA bounds include; null when DWM cannot report it.

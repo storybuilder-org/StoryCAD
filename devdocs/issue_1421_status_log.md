@@ -40,3 +40,11 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - Automation unit tests: 74 passed (12 new timing tests; independent review found no defect against section 7). Not run live on Brigid in this item.
 - Item 3, the `voice` command (section 8.1): one 24 kHz WAV clip per narrate text in `<out>/voice/`, named from the voice and the text; `run` in the presentation profile reads clip lengths from there when `STORYCAD_VOICE_ID` is set. Automation unit tests: 87 passed (fake ElevenLabs). No live ElevenLabs call yet: `ELEVENLABS_API_KEY` and `STORYCAD_VOICE_ID` are not set on Brigid.
 - Next: item 4, the `video` command and assembly. ffmpeg and ffprobe are not on the PATH on Brigid.
+
+## 2026-10-13 (Milestone 5, item 4)
+
+- PR #1616 (items 2 and 3) merged into `dev` as `01cf76a3`. Item 4 is on branch `issue-1421-video-m5-video`, cut from `dev` at `04c46971`.
+- Item 4, `video <script> --out <dir> --assets <dir>`: the window is sized so StoryCAD has a 1920x1080 layout at the display scale (2880x1620 at 150%), ffmpeg records it, and assembly scales it to 1920x1080 with the title card, show cards, clips and closing card. ffmpeg comes from `STORYCAD_FFMPEG` (design section 10 changed; Terry approved the scale method 2026-10-13).
+- Live run on Brigid at 150%: a four-step test script passed, `.mp4` 31.8 s, 1920x1080. Text in the app frames is sharp. Live finding fixed: moving the window gave the foreground to Explorer; the driver brings StoryCAD back to the front.
+- Automation unit tests: 98 passed, including one that assembles a real `.mp4` when `STORYCAD_FFMPEG` is set.
+- Next: item 5, remove the `.srt` output and the OBS text.
