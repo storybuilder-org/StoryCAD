@@ -36,7 +36,7 @@ public sealed class PresentationProfile : IExecutionProfile
     private TimeSpan? _narrationEnd;
     private TimeSpan _hold;
 
-    /// <param name="pacing">Multiplier for pauses, hold and typing delay; 1.0 is the script's own timing.</param>
+    /// <param name="pacing">Multiplier for pauses and typing delay; 1.0 is the script's own timing.</param>
     /// <param name="clock">
     ///     Clip times count from this clock. The runner starts it when the run starts, so the
     ///     times line up with a recording started just before the runner.
@@ -141,8 +141,8 @@ public sealed class PresentationProfile : IExecutionProfile
     {
         EndStep();
         _narrationEnd = _elapsed();
-        // Hold follows pacing as pause does; at the default pacing 1.0 it is the script's seconds.
-        _hold = ScalePause(holdSeconds);
+        // Hold is always the seconds written; pacing does not change it (Terry, 2026-10-13).
+        _hold = TimeSpan.FromSeconds(holdSeconds);
     }
 
     /// <inheritdoc />

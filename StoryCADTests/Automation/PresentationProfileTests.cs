@@ -237,7 +237,7 @@ public class PresentationProfileTests
     }
 
     [TestMethod]
-    public void EndStep_WithPacing_ScalesHoldOnly()
+    public void EndStep_WithPacing_KeepsHoldAndReadingTime()
     {
         var profile = TimedProfile(Clips, pacing: 2.0);
         profile.BeginStep(1);
@@ -245,7 +245,7 @@ public class PresentationProfileTests
 
         profile.EndStep();
 
-        Assert.AreEqual(TimeSpan.FromSeconds(6), _now, "4 s reading time unscaled, plus 1 s hold times 2");
+        Assert.AreEqual(TimeSpan.FromSeconds(5), _now, "4 s reading time plus 1 s hold, neither scaled");
     }
 
     [TestMethod]
