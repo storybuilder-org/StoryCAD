@@ -32,3 +32,10 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - Draft PR #1605: presentation profile (`--profile presentation`, `--pacing`, `--window`, `.srt` output) and two driver fixes (root-row click point, `menu` real click).
 - Test profile: `Smoke_Test.scs` (35.0 s), `Intro-Video.scs` (69.6 s), `SaveDialog.scs` (22.1 s), `File-Open-Dialog.scs` (8.3 s) pass. Presentation: `Intro-Video.scs` passed four runs, 227.4 s to 232.6 s. Automation unit tests 26 passed. Full suite not run locally; CI runs it.
 - Open: OBS recording check against the `.srt`; Milestone 3 manual text and close-out.
+
+## 2026-10-13 (Milestone 5, item 2)
+
+- PR #1608 merged into `dev` 2026-10-08 (`36b9608e`): the design and item 1. Item 2 is on branch `issue-1421-video-m5-step-timing`, cut from `dev` at `02afce24`.
+- Item 2, step timing (design section 7): narrate no longer stops the run inside a step; clips start one after the other at the step start; the step waits for its narration, then its hold. A missing clip uses the reading time. The clip-length source returns nothing until item 3 (`voice`).
+- Automation unit tests: 74 passed (12 new timing tests; independent review found no defect against section 7). Not run live on Brigid in this item.
+- Next: item 3, the `voice` command (ElevenLabs stock voice for testing).

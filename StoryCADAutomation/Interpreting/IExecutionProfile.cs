@@ -42,6 +42,15 @@ public interface IExecutionProfile
     /// <summary>Applies the profile pacing factor to a pause duration.</summary>
     TimeSpan ScalePause(double seconds);
 
-    /// <summary>Renders a narrate statement (log line in test, a subtitle cue in presentation).</summary>
+    /// <summary>Renders a narrate statement (log line in test, a timed clip in presentation).</summary>
     void Narrate(string text, Action<string> log);
+
+    /// <summary>
+    ///     Starts a step: ends the step before it, then starts the step's narration and actions
+    ///     together (video design, section 7). <paramref name="holdSeconds" /> is the step's hold.
+    /// </summary>
+    void BeginStep(double holdSeconds);
+
+    /// <summary>Ends the open step, if any: waits for its narration, then for its hold.</summary>
+    void EndStep();
 }
