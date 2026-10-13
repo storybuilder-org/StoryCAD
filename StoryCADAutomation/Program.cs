@@ -3,13 +3,15 @@ using System.Globalization;
 using StoryCADAutomation.Driver;
 using StoryCADAutomation.Interpreting;
 using StoryCADAutomation.Scripting;
+using StoryCADAutomation.Voice;
 
 namespace StoryCADAutomation;
 
 /// <summary>
 ///     Runner for #1421: `run &lt;script.scs&gt;` with results on the console, in the test profile or
 ///     the presentation profile (writes a .srt of the narrate lines), and `check` to lint
-///     scripts without launching the app. Folder runs for `run` belong to #1422.
+///     scripts without launching the app, and `voice` to make the narrator clips (#1421
+///     Milestone 5). Folder runs for `run` belong to #1422.
 /// </summary>
 internal static class Program
 {
@@ -27,6 +29,11 @@ internal static class Program
         if (args.Length == 2 && args[0] == "check")
         {
             return Check(args[1]);
+        }
+
+        if (args.Length == 4 && args[0] == "voice" && args[2] == "--out")
+        {
+            return Voice(args[1], args[3]);
         }
 
         if (args.Length < 2 || args[0] != "run")
@@ -100,7 +107,7 @@ internal static class Program
             ? new DriverOptions { AppPath = appPath ?? DefaultAppPath(), SweepScratchOnTeardown = false, AllowCrashReporting = true }
             : new DriverOptions { AppPath = appPath ?? DefaultAppPath(), RequiredDpiScalePercent = null, MinDesktopWidth = 0, MinDesktopHeight = 0 };
         var stopwatch = Stopwatch.StartNew();
-        var presentationProfile = presentation ? new PresentationProfile(pacing, stopwatch) : null;
+        var presentationProfile = presentation ? new PresentationProfile(pacing, stopwatch, ClipLengths(outputDirectory)) : null;
         var interpreter = new ScriptInterpreter(
             () =>
             {
@@ -202,6 +209,61 @@ internal static class Program
         return failed == 0 ? Passed : ScriptError;
     }
 
+    /// <summary>
+    ///     `voice`: makes the missing narrator clips for a script in &lt;out&gt;/voice/ (video design,
+    ///     section 8.1). Exit 3 when the API key or the voice id is not set, or ElevenLabs fails.
+    /// </summary>
+    internal static int Voice(string scriptPath, string outputDirectory)
+    {
+        if (!File.Exists(scriptPath))
+        {
+            Console.Error.WriteLine($"script not found: {scriptPath}");
+            return UsageError;
+        }
+
+        // The variables come first: without them the command stops with exit 3 (section 8.1 rule 4).
+        var apiKey = Environment.GetEnvironmentVariable(VoiceClips.ApiKeyVariable);
+        var voiceId = Environment.GetEnvironmentVariable(VoiceClips.VoiceIdVariable);
+        if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(voiceId))
+        {
+            Console.Error.WriteLine($"voice needs {VoiceClips.ApiKeyVariable} and {VoiceClips.VoiceIdVariable} set.");
+            return LaunchFailure;
+        }
+
+        var parsed = ScriptParser.ParseFile(scriptPath);
+        if (PrintDiagnostics(parsed, new ScriptLinter(XamlUiFacts.LoadFromXamlScan())))
+        {
+            return ScriptError;
+        }
+
+        var texts = parsed.Statements.Where(s => s.Verb == ScriptVerb.Narrate).Select(s => s.Text!);
+        var folder = VoiceClips.Folder(outputDirectory);
+        try
+        {
+            using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(2) };
+            var (made, kept) = VoiceClips.MakeAsync(texts, folder, voiceId, apiKey, http, Console.WriteLine)
+                .GetAwaiter().GetResult();
+            Console.WriteLine($"voice: {made} clip(s) made, {kept} kept, in {folder}");
+            return Passed;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException
+                                       or UnauthorizedAccessException)
+        {
+            Console.Error.WriteLine($"voice failed: {ex.Message}");
+            return LaunchFailure;
+        }
+    }
+
+    /// <summary>
+    ///     Clip lengths from &lt;out&gt;/voice/ for the voice in STORYCAD_VOICE_ID; null without it,
+    ///     so every narrate line uses the reading time.
+    /// </summary>
+    private static Func<string, TimeSpan?>? ClipLengths(string outputDirectory)
+    {
+        var voiceId = Environment.GetEnvironmentVariable(VoiceClips.VoiceIdVariable);
+        return string.IsNullOrWhiteSpace(voiceId) ? null : VoiceClips.Lengths(VoiceClips.Folder(outputDirectory), voiceId);
+    }
+
     /// <summary>Prints parse errors and lint findings; returns true when any is an error.</summary>
     private static bool PrintDiagnostics(ScriptParseResult parsed, ScriptLinter linter)
     {
@@ -270,6 +332,7 @@ internal static class Program
         Console.Error.WriteLine("  StoryCADAutomation run <script.scs> [--app <path to StoryCAD.exe>] [--out <dir>] [--ci]");
         Console.Error.WriteLine("                        [--profile test|presentation] [--pacing <factor>] [--window <WxH>]");
         Console.Error.WriteLine("  StoryCADAutomation check <script.scs | folder>");
+        Console.Error.WriteLine("  StoryCADAutomation voice <script.scs> --out <dir>");
         Console.Error.WriteLine();
         Console.Error.WriteLine("Exit codes: 0 all steps passed, 1 step failure(s), 2 script parse/lint error,");
         Console.Error.WriteLine("            3 environment or launch failure.");

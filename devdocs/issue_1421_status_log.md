@@ -38,4 +38,5 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - PR #1608 merged into `dev` 2026-10-08 (`36b9608e`): the design and item 1. Item 2 is on branch `issue-1421-video-m5-step-timing`, cut from `dev` at `02afce24`.
 - Item 2, step timing (design section 7): narrate no longer stops the run inside a step; clips start one after the other at the step start; the step waits for its narration, then its hold. A missing clip uses the reading time. The clip-length source returns nothing until item 3 (`voice`).
 - Automation unit tests: 74 passed (12 new timing tests; independent review found no defect against section 7). Not run live on Brigid in this item.
-- Next: item 3, the `voice` command (ElevenLabs stock voice for testing).
+- Item 3, the `voice` command (section 8.1): one 24 kHz WAV clip per narrate text in `<out>/voice/`, named from the voice and the text; `run` in the presentation profile reads clip lengths from there when `STORYCAD_VOICE_ID` is set. Automation unit tests: 87 passed (fake ElevenLabs). No live ElevenLabs call yet: `ELEVENLABS_API_KEY` and `STORYCAD_VOICE_ID` are not set on Brigid.
+- Next: item 4, the `video` command and assembly. ffmpeg and ffprobe are not on the PATH on Brigid.
