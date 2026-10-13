@@ -1,26 +1,32 @@
 version: 2
 updates:
   - package-ecosystem: "nuget"
-    directory: "/StoryCAD/StoryCAD.csproj"
-    schedule:
-      interval: "daily"
+    directory: "/"                 # Directory.Packages.props covers every project
+    schedule: { interval: "weekly" }
     open-pull-requests-limit: 5
+    groups:
+      nuget-minor-patch:
+        update-types: ["minor", "patch"]
 
-    commit-message:
-      prefix: "StoryCAD"
+  - package-ecosystem: "dotnet-sdk"   # global.json
+    directory: "/"
+    schedule: { interval: "weekly" }
 
-  - package-ecosystem: "nuget"
-    directory: "/StoryCADLib/StoryCADLib.csproj"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: "StoryCADLib"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule: { interval: "weekly" }
+    groups:
+      actions:
+        patterns: ["*"]
 
-  - package-ecosystem: "nuget"
-    directory: "/StoryCADTests/StoryCADTests.csproj"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: "StoryCADTests"
+  - package-ecosystem: "bundler"      # manual site (Jekyll)
+    directory: "/"
+    schedule: { interval: "monthly" }
+
+  - package-ecosystem: "pip"          # Python bindings
+    directory: "/StoryCADLib/bindings/python"
+    schedule: { interval: "monthly" }
+
+  - package-ecosystem: "docker"       # test database image
+    directory: "/StoryCADTests/TestDb"
+    schedule: { interval: "monthly" }
