@@ -75,7 +75,7 @@ public static class VideoAssembler
         }, workDirectory);
     }
 
-    /// <summary>The title card: the logo above the title, the intro music under it.</summary>
+    /// <summary>The title card: the title above the logo, the intro music under it.</summary>
     internal static IReadOnlyList<string> TitleArguments(VideoPlan plan, string output)
     {
         var length = plan.MusicPath is not null && plan.MusicLength is { } music ? music : TitleWithoutMusic;
@@ -88,12 +88,12 @@ public static class VideoAssembler
         {
             args.AddRange(new[] { "-i", plan.LogoPath });
             filter.Add($"[{next}:v]scale=w=1000:h=400:force_original_aspect_ratio=decrease[logo]");
-            filter.Add($"{video}[logo]overlay=x=(W-w)/2:y=(H-h)/2-140[bg]");
+            filter.Add($"{video}[logo]overlay=x=(W-w)/2:y=(H-h)/2+140[bg]");
             video = "[bg]";
             next++;
         }
 
-        var textY = plan.LogoPath is null ? "(h-text_h)/2" : "(h-text_h)/2+260";
+        var textY = plan.LogoPath is null ? "(h-text_h)/2" : "(h-text_h)/2-260";
         filter.Add($"{video}{DrawText("title.txt", textY)}[v]");
         if (plan.MusicPath is not null)
         {
