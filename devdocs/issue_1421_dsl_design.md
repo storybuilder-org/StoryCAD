@@ -151,11 +151,11 @@ Same script, two realizations. Profile is a runner flag, never a script statemen
 | `click` realization | UIA pattern (Invoke/SelectionItem) where sufficient; real pointer where patterns are known-insufficient | Glide, then the same realization as test |
 | `type`, `set` | `type` all at once; `set` through the Value pattern | One character at a time, with a 65 ms pause times `--pacing` after each one on top of input processing; `set` clears the field through the Value pattern (which opens a collapsed Expander), then types |
 | `pause` factor | 0 | 1.0 times `--pacing` |
-| `narrate` | Log line | Log line, plus a subtitle cue; the run holds for reading time (0.4 s a word, 2 s minimum, times `--pacing`) |
+| `narrate` | Log line | Log line; in a step, the clip plays while the step's actions run, and the step waits for it (video design, section 7) |
 | Assertions | Hard fail; script aborts | Same as test: a failed demo is recorded again |
-| Window | Whatever launch yields | `--window WxH` restores the main window and sets its outer size at the top-left of the primary display. The outer size includes Windows' invisible resize border, so use an OBS Window Capture source, not a fixed screen region |
+| Window | Whatever launch yields | `--window WxH` restores the main window and sets its outer size at the top-left of the primary display. The outer size includes Windows' invisible resize border. The `video` command sizes the window itself |
 
-Screen recording stays outside the runner: start OBS, then the runner. After a presentation run the runner writes `<out>/<script name>.srt`. Cue times count from the start of the run, so a recording started just before the runner lines up; shift the subtitle track in the editor by the gap. The `.srt` replaces the planned `timeline.json` and caption overlay (Terry, 2026-10-05).
+Recording is the `video` command (`devdocs/issue_1421_video_design.md`, Milestone 5). It replaced the OBS recording and the `.srt` subtitle file of Milestone 4; YouTube makes captions from the voice track (Terry, 2026-10-07).
 
 Not glided in presentation: `press`, the flyout steps inside `context-menu`, and the text-path form of `menu`. `menu` by id clicks, as a user would, the toolbar button and any sub-menu that the XAML puts the item under (`XamlUiFacts.MenuOpeners`), then the item. It no longer tries every menu in turn; that search remains only for an item with no owning button in the XAML. If the item has not appeared 1.5 s after the menus are opened, the menus are clicked once more (a click that lands while another flyout closes only dismisses it). If the item is still showing 1.5 s after its click, the Invoke pattern runs. `menu` needs StoryCAD in the foreground in both profiles. A UIA Invoke left the flyout holding the keyboard, so later `type` and `press` steps were lost (found in Milestone 4).
 
@@ -165,13 +165,15 @@ Not glided in presentation: `press`, the flyout steps inside `context-menu`, and
 StoryCADAutomation run <script.scs> [options]
   --profile test|presentation     default test
   --app <path>                    StoryCAD exe; default: sibling Debug build output
-  --pacing <factor>               presentation pauses, typing and reading time multiplier; default 1.0
+  --pacing <factor>               presentation pause and typing multiplier; default 1.0
   --window <WxH>                  restore and size the main window, e.g. 1920x1080
-  --out <dir>                     screenshot and .srt output folder; default ./automation-output
+  --out <dir>                     output folder (screenshots, voice clips); default ./automation-output
   --ci                            assert the CI display (1920x1080 or larger, 100% scale)
                                   at launch; local runs skip it
 
 StoryCADAutomation check <script.scs | directory>   # lint only, no launch
+StoryCADAutomation voice <script.scs> --out <dir>   # voice clips (video design, 8.1)
+StoryCADAutomation video <script.scs> --out <dir> --assets <dir>   # the .mp4 (video design, 8.2)
 ```
 
 **Exit codes:** 0 all steps passed; 1 one or more step failures; 2 script parse/lint error; 3 environment or launch failure.

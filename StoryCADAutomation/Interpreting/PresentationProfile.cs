@@ -1,6 +1,4 @@
 using System.Diagnostics;
-using System.Globalization;
-using System.Text;
 using StoryCADAutomation.Driver;
 
 namespace StoryCADAutomation.Interpreting;
@@ -29,7 +27,7 @@ public sealed class PresentationProfile : IExecutionProfile
     private readonly Func<TimeSpan> _elapsed;
     private readonly Action<TimeSpan> _sleep;
     private readonly Func<string, TimeSpan?> _clipLength;
-    private readonly List<SubtitleCue> _cues = new();
+    private readonly List<NarrationCue> _cues = new();
     private readonly List<StepSpan> _steps = new();
     private readonly double _pacing;
 
@@ -74,7 +72,7 @@ public sealed class PresentationProfile : IExecutionProfile
     public bool ContinueOnAssertionFailure => false;
 
     /// <summary>Narrate lines in run order, with their start times.</summary>
-    public IReadOnlyList<SubtitleCue> Cues => _cues;
+    public IReadOnlyList<NarrationCue> Cues => _cues;
 
     /// <summary>Each step's start and end in run order, the end after its hold; a card covers its step.</summary>
     public IReadOnlyList<StepSpan> Steps => _steps;
@@ -131,13 +129,13 @@ public sealed class PresentationProfile : IExecutionProfile
         {
             // In a step the clip follows the step's earlier clips, and the actions do not wait.
             var start = end > now ? end : now;
-            _cues.Add(new SubtitleCue(start, start + length, text));
+            _cues.Add(new NarrationCue(start, start + length, text));
             _narrationEnd = start + length;
             return;
         }
 
         // Outside a step there is no step end to wait at, so the run waits for the clip here.
-        _cues.Add(new SubtitleCue(now, now + length, text));
+        _cues.Add(new NarrationCue(now, now + length, text));
         _sleep(length);
     }
 
@@ -182,35 +180,10 @@ public sealed class PresentationProfile : IExecutionProfile
         var time = TimeSpan.FromTicks(PerWord.Ticks * words);
         return time > MinimumCue ? time : MinimumCue;
     }
-
-    /// <summary>The cues as a SubRip (.srt) file. A cue ends early if the next one starts first.</summary>
-    public static string ToSrt(IReadOnlyList<SubtitleCue> cues)
-    {
-        var srt = new StringBuilder();
-        for (var i = 0; i < cues.Count; i++)
-        {
-            var start = cues[i].Start;
-            var end = cues[i].End;
-            if (i + 1 < cues.Count && cues[i + 1].Start < end)
-            {
-                end = cues[i + 1].Start;
-            }
-
-            srt.Append(i + 1).Append("\r\n");
-            srt.Append(SrtTime(start)).Append(" --> ").Append(SrtTime(end)).Append("\r\n");
-            srt.Append(cues[i].Text).Append("\r\n\r\n");
-        }
-
-        return srt.ToString();
-    }
-
-    private static string SrtTime(TimeSpan t)
-        => string.Format(CultureInfo.InvariantCulture, "{0:00}:{1:00}:{2:00},{3:000}",
-            (int)t.TotalHours, t.Minutes, t.Seconds, t.Milliseconds);
 }
 
 /// <summary>When one step ran, counted from the start of the run.</summary>
 public sealed record StepSpan(TimeSpan Start, TimeSpan End);
 
-/// <summary>One narrate line and when it shows, counted from the start of the run.</summary>
-public sealed record SubtitleCue(TimeSpan Start, TimeSpan End, string Text);
+/// <summary>One narrate line and when its clip plays, counted from the start of the run.</summary>
+public sealed record NarrationCue(TimeSpan Start, TimeSpan End, string Text);

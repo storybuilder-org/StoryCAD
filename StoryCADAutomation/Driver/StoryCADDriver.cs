@@ -373,7 +373,7 @@ public sealed class StoryCADDriver : IUiDriver
     /// <inheritdoc />
     public void ResizeMainWindow(int width, int height)
     {
-        // Top-left of the primary display, so an OBS capture region stays the same run to run.
+        // Top-left of the primary display, so the window is in the same place run to run.
         NativeMethods.PlaceWindow(_process.MainWindowHandle, 0, 0, width, height);
         Wait.UntilInputIsProcessed();
     }
