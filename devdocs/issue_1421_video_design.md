@@ -153,7 +153,7 @@ The command replaces the OBS recording of Milestone 4. The `.srt` output of Mile
 
 The `.mp4` file has these parts, in this sequence:
 
-1. **Title card.** The logo above the title text. The intro music plays under the card. The card lasts as long as the music. Without a music file, the card lasts 5 s.
+1. **Title card.** The title text above the logo. The intro music plays under the card. The card lasts as long as the music. Without a music file, the card lasts 5 s.
 2. **Recording.** Assembly puts each clip at its start time. For each `show` step, the card covers the recording for the full step.
 3. **Closing card.** The `closing` text. The card lasts 10 s.
 
