@@ -541,10 +541,8 @@ jobs:
   # UI automation for #1421: unit tests on the WinAppSDK target, script lint, and the smoke script.
   # No secrets, so it runs on forks too; no .env is written, which the automation runner requires.
   #
-  # Required from day one (D-CI-CHECK, Terry 2026-10-04): "WinAppSDK unit tests" and "Script lint".
-  # Advisory for now: "Smoke script" (continue-on-error). Promotion rule: make it required after
-  # 20 consecutive green PR runs or 2 weeks with no failures not caused by the app, whichever
-  # comes later. Tracked as a Milestone 2 box on #1421.
+  # All three steps are required: "WinAppSDK unit tests" and "Script lint" from 2026-10-04, and
+  # "Smoke script" from 2026-10-14 (Terry), after it passed the required number of PR runs.
   ui-smoke:
     if: github.event_name == 'pull_request'
     runs-on: windows-latest
@@ -630,15 +628,14 @@ jobs:
           "ChangeDisplaySettings returned $result (0 means changed)"
           if ($result -ne 0) { exit 1 }
 
-      - name: Smoke script (advisory)
+      - name: Smoke script
         id: smoke
-        continue-on-error: true
         shell: pwsh
         run: ./StoryCADAutomation/bin/x64/Debug/net10.0-windows10.0.22621/StoryCADAutomation.exe run StoryCADTests/ManualTests/Smoke_Test.scs --ci
 
       # After a smoke failure: the app's crash records and its own logs (--ci keeps the scratch folder).
       - name: Smoke failure diagnostics
-        if: steps.smoke.outcome == 'failure'
+        if: failure() && steps.smoke.outcome == 'failure'
         shell: pwsh
         run: |
           Get-WinEvent -FilterHashtable @{ LogName = 'Application'; StartTime = (Get-Date).AddHours(-1) } -ErrorAction SilentlyContinue |
@@ -649,7 +646,7 @@ jobs:
           Copy-Item -Path (Join-Path $env:TEMP "StoryCADAutomation") -Destination smoke-scratch -Recurse -ErrorAction SilentlyContinue
 
       - name: Upload smoke logs
-        if: steps.smoke.outcome == 'failure'
+        if: failure() && steps.smoke.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: ui-smoke-logs
