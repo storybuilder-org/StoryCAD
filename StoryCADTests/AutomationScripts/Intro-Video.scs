@@ -1,6 +1,6 @@
 # "A 5 Minute introduction to StoryCAD" (YouTube qFpTI15-q7A, 2023) as a script (#1421 Milestone 4).
 # Test profile: a regression check of the steps the video shows.
-# Presentation profile: drives the app for an OBS recording; narrate lines become the .srt captions.
+# Presentation profile: the `video` command records it (devdocs/issue_1421_video_design.md).
 #   StoryCADAutomation run StoryCADTests/AutomationScripts/Intro-Video.scs
 # Left out of the video's steps: the user manual (opens a browser), the Windows print preview,
 # and the Scrivener export (needs Scrivener). The narration mentions them over the app.

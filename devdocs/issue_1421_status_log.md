@@ -48,3 +48,10 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - Live run on Brigid at 150%: a four-step test script passed, `.mp4` 31.8 s, 1920x1080. Text in the app frames is sharp. Live finding fixed: moving the window gave the foreground to Explorer; the driver brings StoryCAD back to the front.
 - Automation unit tests: 98 passed, including one that assembles a real `.mp4` when `STORYCAD_FFMPEG` is set.
 - Next: item 5, remove the `.srt` output and the OBS text.
+
+## 2026-10-14 (Milestone 5, item 5)
+
+- PR #1622 (item 4) merged into `dev` as `87c3dc08`; live `video` runs with real ElevenLabs clips passed on Brigid.
+- Item 5 on branch `issue-1421-video-m5-remove-srt`: the presentation `run` no longer writes a `.srt`; `ToSrt` and its two tests removed; `SubtitleCue` renamed `NarrationCue`. The OBS and `.srt` text in `issue_1421_dsl_design.md`, `Intro-Video.scs` and two code comments now points to the `video` command.
+- Automation unit tests: 99 passed. `check StoryCADTests`: 4 scripts, 0 errors.
+- Next: item 6, the brief for the intro video (Terry reads and approves it).

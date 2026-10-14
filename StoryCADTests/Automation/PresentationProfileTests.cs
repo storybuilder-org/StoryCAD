@@ -5,44 +5,13 @@ using StoryCADAutomation.Interpreting;
 namespace StoryCADTests.Automation;
 
 /// <summary>
-///     Presentation profile pieces that need no app: subtitle output, reading time, pause
+///     Presentation profile pieces that need no app: reading time, pause
 ///     scaling, and the runner's --window parser (#1421 Milestone 4); step timing (#1421
 ///     Milestone 5, video design section 7).
 /// </summary>
 [TestClass]
 public class PresentationProfileTests
 {
-    [TestMethod]
-    public void ToSrt_WithTwoCues_WritesNumberedSubRipBlocks()
-    {
-        var cues = new[]
-        {
-            new SubtitleCue(TimeSpan.FromMilliseconds(1500), TimeSpan.FromMilliseconds(4000), "First line."),
-            new SubtitleCue(TimeSpan.FromSeconds(3725), TimeSpan.FromSeconds(3727), "Second line."),
-        };
-
-        var srt = PresentationProfile.ToSrt(cues);
-
-        Assert.AreEqual(
-            "1\r\n00:00:01,500 --> 00:00:04,000\r\nFirst line.\r\n\r\n" +
-            "2\r\n01:02:05,000 --> 01:02:07,000\r\nSecond line.\r\n\r\n",
-            srt);
-    }
-
-    [TestMethod]
-    public void ToSrt_WhenNextCueStartsEarly_EndsAtNextStart()
-    {
-        var cues = new[]
-        {
-            new SubtitleCue(TimeSpan.Zero, TimeSpan.FromSeconds(5), "Long."),
-            new SubtitleCue(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(4), "Next."),
-        };
-
-        var srt = PresentationProfile.ToSrt(cues);
-
-        StringAssert.Contains(srt, "00:00:00,000 --> 00:00:02,000");
-    }
-
     [TestMethod]
     public void ReadingTime_WithShortText_ReturnsTwoSecondMinimum()
     {

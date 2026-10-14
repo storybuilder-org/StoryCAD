@@ -10,9 +10,9 @@ namespace StoryCADAutomation;
 
 /// <summary>
 ///     Runner for #1421: `run &lt;script.scs&gt;` with results on the console, in the test profile or
-///     the presentation profile (writes a .srt of the narrate lines), and `check` to lint
-///     scripts without launching the app, and `voice` to make the narrator clips (#1421
-///     Milestone 5), and `video` to make a finished .mp4 (same milestone). Folder runs for `run` belong to #1422.
+///     the presentation profile; `check` to lint scripts without launching the app; `voice` to
+///     make the narrator clips and `video` to make a finished .mp4 (#1421 Milestone 5). Folder
+///     runs for `run` belong to #1422.
 /// </summary>
 internal static class Program
 {
@@ -154,16 +154,6 @@ internal static class Program
             {
                 Console.Error.WriteLine($"teardown: {note}");
             }
-        }
-
-        if (presentationProfile is not null)
-        {
-            // Written even after a failure, so a partial recording still has its captions.
-            var srtPath = Path.Combine(Path.GetFullPath(outputDirectory),
-                Path.GetFileNameWithoutExtension(scriptPath) + ".srt");
-            Directory.CreateDirectory(Path.GetDirectoryName(srtPath)!);
-            File.WriteAllText(srtPath, PresentationProfile.ToSrt(presentationProfile.Cues));
-            Console.WriteLine($"subtitles: {srtPath}");
         }
 
         var failures = result.Outcomes.Where(o => o.Status == StatementStatus.Failed).ToList();
