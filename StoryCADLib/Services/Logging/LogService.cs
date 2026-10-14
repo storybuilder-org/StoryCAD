@@ -229,14 +229,14 @@ public class LogService : ILogService
         switch (level)
         {
             case LogLevel.Error:
+                // One event only: each Error/Fatal event is a separate elmah.io report, and the
+                // file layout already writes the stack trace (#1615).
                 exceptionHelper = exception;
                 Logger.Error(exception, message);
-                Logger.Error($"{message}\nStack Trace:\n{exception.StackTrace}");
                 break;
             case LogLevel.Fatal:
                 exceptionHelper = exception;
                 Logger.Fatal(exception, message);
-                Logger.Error($"{message}\nStack Trace:\n{exception.StackTrace}");
                 break;
         }
     }

@@ -141,6 +141,34 @@ public class FileCreateServiceTests
     }
 
     [TestMethod]
+    public async Task CreateFile_WithForwardSlashFolder_CreatesFile()
+    {
+        // Arrange - the dialog's folder box is free text; .NET accepts '/' separators (#1615)
+        var folder = _testFolder.Replace('\\', '/');
+
+        // Act
+        var result = await _fileCreateService.CreateFile(folder, "TestStory.stbx", 0);
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.IsTrue(File.Exists(result));
+    }
+
+    [TestMethod]
+    public async Task CreateFile_WhenFileExists_GeneratesUniqueName()
+    {
+        // Arrange
+        File.WriteAllText(Path.Combine(_testFolder, "TestStory.stbx"), "existing");
+
+        // Act
+        var result = await _fileCreateService.CreateFile(_testFolder, "TestStory.stbx", 0);
+
+        // Assert
+        Assert.AreEqual(Path.Combine(_testFolder, "TestStory (2).stbx"), result);
+        Assert.AreEqual("existing", File.ReadAllText(Path.Combine(_testFolder, "TestStory.stbx")));
+    }
+
+    [TestMethod]
     public async Task CreateFile_SendsStatusMessages()
     {
         // Arrange
