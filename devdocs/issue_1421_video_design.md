@@ -137,12 +137,13 @@ StoryCADAutomation voice <script.scs> --out <dir>
 StoryCADAutomation video <script.scs> --out <dir> --assets <dir>
 ```
 
-1. The command sets the StoryCAD window so that its visible area is 1920x1080 at the top left of the primary display.
+1. The command sets the StoryCAD window so that StoryCAD has a layout of 1920x1080 at the display scale. At 100% scale, the visible area is 1920x1080 pixels. At a larger scale, the area is larger by the same factor. For example, the area is 2880x1620 pixels at 150% scale. The window is at the top left of the primary display.
 2. The command starts ffmpeg. ffmpeg records only that area of the screen.
 3. The command runs the script in the presentation profile.
 4. The command stops ffmpeg.
-5. If a step fails, the command deletes the recording and stops with exit code 1.
-6. If all steps pass, assembly makes `<dir>/<script name>.mp4`.
+5. If a step fails, the command deletes the recording and stops with exit code 1. If the launch fails, the exit code is 3.
+6. The recording starts at `launch`. Put `narrate` and `show` statements after `launch`. If they are before `launch`, `video` stops with exit code 2.
+7. If all steps pass, assembly makes `<dir>/<script name>.mp4`.
 
 The command replaces the OBS recording of Milestone 4. The `.srt` output of Milestone 4 is removed. YouTube makes captions from the audio.
 
@@ -164,6 +165,16 @@ All cards use one style:
 | Text | White, Segoe UI, 64 px, centered on both axes |
 | Image | Centered, scaled to fit the frame |
 
+Assembly scales the recording to 1920x1080.
+
+The assets folder holds these files:
+
+| File | Use |
+|------|-----|
+| `logo.png` | The logo on the title card |
+| `intro-music` with an audio file extension, for example `intro-music.mp3` | The intro music |
+| The files that `show image` names | The image cards |
+
 The output is 1920x1080, H.264 video, AAC audio.
 
 If the logo or the music file is not in the assets folder, assembly makes the title card without it. The video command does not fail.
@@ -172,11 +183,11 @@ If the logo or the music file is not in the assets folder, assembly makes the ti
 
 ## 10. Dependencies and security
 
-1. ffmpeg and ffprobe must be on the PATH of the presentation machine. CI does not use them.
+1. ffmpeg must be on the presentation machine. The environment variable `STORYCAD_FFMPEG` gives the full path of the ffmpeg program. If the variable is missing, the `video` command stops with exit code 3. The command does not use ffprobe. CI does not use ffmpeg.
 2. ElevenLabs is a paid vendor. Terry has the account.
 3. The API key stays in an environment variable. Do not put it in a file in a repository.
 4. The assets folder stays outside the repository. Do not commit music or images with unknown rights.
-5. The `video` command needs a primary display of 1920x1080 or larger at 100% scale. If the display is smaller, the command stops with exit code 3.
+5. The `video` command needs a primary display that can hold the window of section 8.2, step 1, out of the taskbar. If the display is smaller, the command stops with exit code 3. The display scale can have any value. (Terry, 2026-10-13: try this method. If the text in the video is not sharp, use 100% scale.)
 
 ---
 

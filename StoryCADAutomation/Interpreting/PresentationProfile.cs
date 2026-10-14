@@ -30,11 +30,13 @@ public sealed class PresentationProfile : IExecutionProfile
     private readonly Action<TimeSpan> _sleep;
     private readonly Func<string, TimeSpan?> _clipLength;
     private readonly List<SubtitleCue> _cues = new();
+    private readonly List<StepSpan> _steps = new();
     private readonly double _pacing;
 
     // The open step: when its last clip stops, and its hold. Null when no step is open.
     private TimeSpan? _narrationEnd;
     private TimeSpan _hold;
+    private TimeSpan _stepStart;
 
     /// <param name="pacing">Multiplier for pauses and typing delay; 1.0 is the script's own timing.</param>
     /// <param name="clock">
@@ -73,6 +75,9 @@ public sealed class PresentationProfile : IExecutionProfile
 
     /// <summary>Narrate lines in run order, with their start times.</summary>
     public IReadOnlyList<SubtitleCue> Cues => _cues;
+
+    /// <summary>Each step's start and end in run order, the end after its hold; a card covers its step.</summary>
+    public IReadOnlyList<StepSpan> Steps => _steps;
 
     /// <inheritdoc />
     public void Click(IUiDriver driver, ElementAddress target)
@@ -141,6 +146,7 @@ public sealed class PresentationProfile : IExecutionProfile
     {
         EndStep();
         _narrationEnd = _elapsed();
+        _stepStart = _narrationEnd.Value;
         // Hold is always the seconds written; pacing does not change it (Terry, 2026-10-13).
         _hold = TimeSpan.FromSeconds(holdSeconds);
     }
@@ -159,6 +165,8 @@ public sealed class PresentationProfile : IExecutionProfile
         {
             _sleep(wait);
         }
+
+        _steps.Add(new StepSpan(_stepStart, _elapsed()));
     }
 
     /// <summary>
@@ -200,6 +208,9 @@ public sealed class PresentationProfile : IExecutionProfile
         => string.Format(CultureInfo.InvariantCulture, "{0:00}:{1:00}:{2:00},{3:000}",
             (int)t.TotalHours, t.Minutes, t.Seconds, t.Milliseconds);
 }
+
+/// <summary>When one step ran, counted from the start of the run.</summary>
+public sealed record StepSpan(TimeSpan Start, TimeSpan End);
 
 /// <summary>One narrate line and when it shows, counted from the start of the run.</summary>
 public sealed record SubtitleCue(TimeSpan Start, TimeSpan End, string Text);

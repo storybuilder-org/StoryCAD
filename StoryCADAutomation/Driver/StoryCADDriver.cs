@@ -378,6 +378,52 @@ public sealed class StoryCADDriver : IUiDriver
         Wait.UntilInputIsProcessed();
     }
 
+    /// <summary>The DPI the main window lays itself out at (100% scale is 96).</summary>
+    public int MainWindowDpi => NativeMethods.WindowDpi(_process.MainWindowHandle);
+
+    /// <summary>
+    ///     Places the main window so that its visible frame is exactly width x height screen
+    ///     pixels at the top-left of the primary display, and returns that frame. The video
+    ///     command records this area (#1421 Milestone 5, video design section 8.2).
+    /// </summary>
+    public Rectangle PlaceVisibleFrame(int width, int height)
+    {
+        var hwnd = _process.MainWindowHandle;
+        var workArea = NativeMethods.PrimaryWorkArea();
+        if (!workArea.Contains(new Rectangle(0, 0, width, height)))
+        {
+            throw new AutomationLaunchException(
+                $"a {width}x{height} window at the top-left does not fit in the display's work area {workArea}; " +
+                "the taskbar or the screen edge would show in the recording.");
+        }
+
+        NativeMethods.PlaceWindow(hwnd, 0, 0, width, height);
+        Wait.UntilInputIsProcessed();
+
+        // The window rectangle includes an invisible resize border; widen the window by that
+        // border so the visible part has the size asked for, and start it at the screen corner.
+        var frame = NativeMethods.VisibleWindowBounds(hwnd)
+                    ?? throw new AutomationLaunchException("Windows did not report the visible window frame.");
+        NativeMethods.PlaceWindow(hwnd, -frame.X, -frame.Y,
+            width + (width - frame.Width), height + (height - frame.Height));
+        Wait.UntilInputIsProcessed();
+
+        frame = NativeMethods.VisibleWindowBounds(hwnd)
+                ?? throw new AutomationLaunchException("Windows did not report the visible window frame.");
+        if (frame != new Rectangle(0, 0, width, height))
+        {
+            throw new AutomationLaunchException(
+                $"the visible window frame is {frame}, not {width}x{height} at the top-left of the primary display.");
+        }
+
+        // Moving the window can hand the foreground to Explorer (seen on Brigid, 2026-10-13),
+        // and real input refuses a background app; give it back to StoryCAD.
+        NativeMethods.ForceForeground(hwnd);
+        Wait.UntilInputIsProcessed();
+        EnsureAppForeground("place the window for recording");
+        return frame;
+    }
+
     /// <inheritdoc />
     public void CaptureMainWindow(string pngPath)
     {

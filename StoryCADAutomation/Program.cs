@@ -3,6 +3,7 @@ using System.Globalization;
 using StoryCADAutomation.Driver;
 using StoryCADAutomation.Interpreting;
 using StoryCADAutomation.Scripting;
+using StoryCADAutomation.Video;
 using StoryCADAutomation.Voice;
 
 namespace StoryCADAutomation;
@@ -11,7 +12,7 @@ namespace StoryCADAutomation;
 ///     Runner for #1421: `run &lt;script.scs&gt;` with results on the console, in the test profile or
 ///     the presentation profile (writes a .srt of the narrate lines), and `check` to lint
 ///     scripts without launching the app, and `voice` to make the narrator clips (#1421
-///     Milestone 5). Folder runs for `run` belong to #1422.
+///     Milestone 5), and `video` to make a finished .mp4 (same milestone). Folder runs for `run` belong to #1422.
 /// </summary>
 internal static class Program
 {
@@ -29,6 +30,11 @@ internal static class Program
         if (args.Length == 2 && args[0] == "check")
         {
             return Check(args[1]);
+        }
+
+        if (args.Length == 6 && args[0] == "video" && args[2] == "--out" && args[4] == "--assets")
+        {
+            return File.Exists(args[1]) ? VideoCommand.Run(args[1], args[3], args[5]) : MissingScript(args[1]);
         }
 
         if (args.Length == 4 && args[0] == "voice" && args[2] == "--out")
@@ -265,7 +271,7 @@ internal static class Program
     }
 
     /// <summary>Prints parse errors and lint findings; returns true when any is an error.</summary>
-    private static bool PrintDiagnostics(ScriptParseResult parsed, ScriptLinter linter)
+    internal static bool PrintDiagnostics(ScriptParseResult parsed, ScriptLinter linter)
     {
         var diagnostics = parsed.Errors.Concat(linter.Lint(parsed.Statements)).ToList();
         foreach (var diagnostic in diagnostics)
@@ -276,7 +282,7 @@ internal static class Program
         return diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error);
     }
 
-    private static void PrintOutcome(StatementOutcome outcome)
+    internal static void PrintOutcome(StatementOutcome outcome)
     {
         // Failures are already logged by the interpreter with their message.
         if (outcome.Status == StatementStatus.Failed)
@@ -289,7 +295,7 @@ internal static class Program
     }
 
     /// <summary>The WinAppSDK Debug x64 build output in the checkout this runner was built from.</summary>
-    private static string DefaultAppPath()
+    internal static string DefaultAppPath()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir != null && !File.Exists(Path.Combine(dir.FullName, "StoryCAD.sln")))
@@ -324,6 +330,12 @@ internal static class Program
         return false;
     }
 
+    private static int MissingScript(string scriptPath)
+    {
+        Console.Error.WriteLine($"script not found: {scriptPath}");
+        return UsageError;
+    }
+
     private static int Usage()
     {
         Console.Error.WriteLine("StoryCAD automation runner (issue #1421)");
@@ -333,6 +345,7 @@ internal static class Program
         Console.Error.WriteLine("                        [--profile test|presentation] [--pacing <factor>] [--window <WxH>]");
         Console.Error.WriteLine("  StoryCADAutomation check <script.scs | folder>");
         Console.Error.WriteLine("  StoryCADAutomation voice <script.scs> --out <dir>");
+        Console.Error.WriteLine("  StoryCADAutomation video <script.scs> --out <dir> --assets <dir>");
         Console.Error.WriteLine();
         Console.Error.WriteLine("Exit codes: 0 all steps passed, 1 step failure(s), 2 script parse/lint error,");
         Console.Error.WriteLine("            3 environment or launch failure.");
