@@ -55,3 +55,11 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - Item 5 on branch `issue-1421-video-m5-remove-srt`: the presentation `run` no longer writes a `.srt`; `ToSrt` and its two tests removed; `SubtitleCue` renamed `NarrationCue`. The OBS and `.srt` text in `issue_1421_dsl_design.md`, `Intro-Video.scs` and two code comments now points to the `video` command.
 - Automation unit tests: 99 passed. `check StoryCADTests`: 4 scripts, 0 errors.
 - Next: item 6, the brief for the intro video (Terry reads and approves it).
+
+## 2026-10-14 (Milestone 5, items 6 to 8)
+
+- PR #1623 (item 5) merged into `dev` as `faf08596`.
+- Item 6: brief `StoryCADTests/AutomationScripts/Intro-Video-brief.md`, revised after a writing review, approved by Terry 2026-10-14.
+- Item 7: `Intro-Video.scs` rewritten from the brief: 18 steps, title, two text cards, closing.
+- Item 8: one `video` run on Brigid at 150% passed with ElevenLabs clips (stock voice); `.mp4` 4:08. Terry approved it 2026-10-14. Done gate changed from three runs to one (Terry, 2026-10-14).
+- `check StoryCADTests`: 0 errors.
