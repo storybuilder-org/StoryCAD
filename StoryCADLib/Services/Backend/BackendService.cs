@@ -37,6 +37,9 @@ public class BackendService
     private readonly ILogService _logService;
     private readonly PreferenceService _preferenceService;
     private readonly IMySqlIo _sqlIo;
+
+    /// <summary>The user_groups group that holds Collaborator beta testers (#1628).</summary>
+    public const string BetaGroupName = "collab_beta";
     private string _sslCaPath = string.Empty;
 
     public BackendService(ILogService logService, AppState appState,
@@ -139,6 +142,12 @@ public class BackendService
             {
                 await PostVersion();
             }
+
+            // Beta testers who joined before #1628 are added here; a repeat add does nothing.
+            if (_preferenceService.Model.StoreActivationPath == "allowlist")
+            {
+                await AddToBetaGroup();
+            }
         }
         catch (TaskCanceledException ex)
         {
@@ -230,6 +239,37 @@ public class BackendService
         catch (Exception ex)
         {
             _logService.Log(LogLevel.Warn, $"Failed to mark message {messageId} as read: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    ///     Adds this user to the collab_beta group, so the admin message tool can reach
+    ///     Collaborator beta testers (#1628). Called after Join and at startup for beta testers.
+    ///     Failures log Warn only: the next startup tries again.
+    /// </summary>
+    public async Task AddToBetaGroup()
+    {
+        if (!IsConnectionConfigured)
+        {
+            _logService.Log(LogLevel.Warn, "Skipping beta group - backend connection not configured");
+            return;
+        }
+
+        var userId = _preferenceService.Model.UserId;
+        if (userId <= 0)
+        {
+            _logService.Log(LogLevel.Warn, "Skipping beta group - no UserId stored");
+            return;
+        }
+
+        try
+        {
+            await _sqlIo.AddUserToGroup(userId, BetaGroupName);
+            _logService.Log(LogLevel.Info, "Added user to the beta group");
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(LogLevel.Warn, $"Failed to add user to the beta group: {ex.Message}");
         }
     }
 
