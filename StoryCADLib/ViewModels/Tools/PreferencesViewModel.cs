@@ -283,7 +283,7 @@ public class PreferencesViewModel : ObservableValidator
 
     public Uri UsageStatsHelpUrl => new Uri(
         (UseBetaDocumentation ? "https://beta.manual.storybuilder.org/" : "https://manual.storybuilder.org/")
-        + "Preferences/Usage_Statistics.html");
+        + "docs/Preferences/Usage_Statistics.html");
 
     /// <summary>
     /// Tracks if theme preference changed during this save (requires restart)

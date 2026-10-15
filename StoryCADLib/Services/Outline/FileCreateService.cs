@@ -97,11 +97,10 @@ public class FileCreateService
 
             using (var serializationLock = new SerializationLock(_logger))
             {
-                // Create the new outline's file
-                var folder = await StorageFolder.GetFolderFromPathAsync(outlineFolder);
-                var storyModelFile =
-                    (await folder.CreateFileAsync(outlineName, CreationCollisionOption.GenerateUniqueName))
-                    .Path;
+                // Create the new outline's file. System.IO, not StorageFolder: the folder box is free
+                // text, and StorageFolder rejects paths .NET accepts, such as '/' separators (#1615).
+                var storyModelFile = UniqueFilePath(Path.GetFullPath(outlineFolder), outlineName);
+                await using (new FileStream(storyModelFile, FileMode.CreateNew)) { }
 
                 // Create the StoryModel
                 var name = Path.GetFileNameWithoutExtension(storyModelFile);
@@ -159,5 +158,22 @@ public class FileCreateService
             Default.Send(new StatusChangedMessage(new StatusMessage("New project command failed", LogLevel.Error)));
             return null;
         }
+    }
+
+    /// <summary>
+    ///     Returns a path in folder for fileName that no file uses yet, adding " (2)", " (3)" and so on
+    ///     the same way CreationCollisionOption.GenerateUniqueName did.
+    /// </summary>
+    private static string UniqueFilePath(string folder, string fileName)
+    {
+        var path = Path.Combine(folder, fileName);
+        var stem = Path.GetFileNameWithoutExtension(fileName);
+        var extension = Path.GetExtension(fileName);
+        for (var n = 2; File.Exists(path); n++)
+        {
+            path = Path.Combine(folder, $"{stem} ({n}){extension}");
+        }
+
+        return path;
     }
 }

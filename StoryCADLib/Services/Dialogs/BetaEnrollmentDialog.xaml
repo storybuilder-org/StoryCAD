@@ -7,7 +7,7 @@
     <StackPanel Width="440" Spacing="16">
         <TextBlock TextWrapping="Wrap"
                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                   Text="Collaborator is a free beta. Choose Join to use it. Choose Not now to skip. This click does not enroll you until you choose Join." />
+                   Text="Collaborator is a free beta. Choose 'Join' to use it. Choose 'Not now' to skip. This click does not enroll you until you choose 'Join'. Joining marks your StoryCAD account as a beta tester, so we can contact you about the beta." />
         <HyperlinkButton Content="Learn more (read before joining)" Padding="4,2"
                          Command="{x:Bind Vm.OpenGettingStartedCommand}"
                          AutomationProperties.AutomationId="BetaEnrollmentGettingStartedButton" />

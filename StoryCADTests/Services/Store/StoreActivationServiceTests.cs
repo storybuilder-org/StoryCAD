@@ -4,7 +4,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
 using StoryCADLib.Services.Logging;
+using StoryCADLib.Services.Backend;
 using StoryCADLib.Services.Store;
+using StoryCADTests.Services.Backend;
 
 #nullable disable
 
@@ -37,11 +39,14 @@ public class StoreActivationServiceTests
         Environment.SetEnvironmentVariable("COLLAB_DEV_ACTIVATION", null);
     }
 
-    private static StoreActivationService CreateService(FakeStoreService store, FakeActivationClient client) =>
+    private static StoreActivationService CreateService(FakeStoreService store, FakeActivationClient client,
+        TestMySqlIo sqlIo = null) =>
         new(store, client,
             Ioc.Default.GetRequiredService<PreferenceService>(),
             Ioc.Default.GetRequiredService<Windowing>(),
-            Ioc.Default.GetRequiredService<ILogService>());
+            Ioc.Default.GetRequiredService<ILogService>(),
+            new BackendService(new TestLogService(), Ioc.Default.GetRequiredService<AppState>(),
+                Ioc.Default.GetRequiredService<PreferenceService>(), sqlIo ?? new TestMySqlIo()));
 
     private static void SetCachedJwt(string jwt, DateTime expiryUtc)
     {
@@ -404,6 +409,34 @@ public class StoreActivationServiceTests
         Assert.AreEqual(ActivationState.Active, service.State);
         Assert.AreEqual("allowlist",
             Ioc.Default.GetRequiredService<PreferenceService>().Model.StoreActivationPath);
+    }
+
+    [TestMethod]
+    public async Task EnrollBetaAsync_Accepted_AddsUserToBetaGroup()
+    {
+        // #1628: Join puts the user's backend record in the collab_beta group
+        var sqlIo = new TestMySqlIo();
+        sqlIo.SetConnectionString("fake");
+        Ioc.Default.GetRequiredService<PreferenceService>().Model.UserId = 42;
+        var service = CreateService(new FakeStoreService(), new FakeActivationClient(), sqlIo);
+
+        await service.EnrollBetaAsync();
+
+        CollectionAssert.AreEqual(new[] { (42, BackendService.BetaGroupName) }, sqlIo.AddUserToGroupCalls);
+    }
+
+    [TestMethod]
+    public async Task EnrollBetaAsync_Refused_DoesNotAddUserToBetaGroup()
+    {
+        var sqlIo = new TestMySqlIo();
+        sqlIo.SetConnectionString("fake");
+        Ioc.Default.GetRequiredService<PreferenceService>().Model.UserId = 42;
+        var client = new FakeActivationClient { Response = new ActivationResponse(false, null, null, "cap_reached") };
+        var service = CreateService(new FakeStoreService(), client, sqlIo);
+
+        await service.EnrollBetaAsync();
+
+        Assert.AreEqual(0, sqlIo.AddUserToGroupCalls.Count);
     }
 
     [TestMethod]

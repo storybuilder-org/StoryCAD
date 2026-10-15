@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using StoryCADLib.DAL;
+using StoryCADLib.Services.Backend;
 using StoryCADLib.Services.Locking;
 using StoryCADLib.Services.Messages;
 
@@ -28,6 +29,7 @@ public sealed class StoreActivationService : IStoreActivationService
     private readonly PreferenceService _preferenceService;
     private readonly Windowing _windowing;
     private readonly ILogService _logService;
+    private readonly BackendService _backendService;
 
     // Serialises activation so a startup Initialize and an out-of-band EntitlementChanged
     // can't interleave and clobber state.
@@ -38,8 +40,10 @@ public sealed class StoreActivationService : IStoreActivationService
     private DateTime _expiryUtc = DateTime.MinValue;
 
     public StoreActivationService(IStoreService store, IActivationClient client,
-        PreferenceService preferenceService, Windowing windowing, ILogService logService)
+        PreferenceService preferenceService, Windowing windowing, ILogService logService,
+        BackendService backendService)
     {
+        _backendService = backendService;
         _store = store;
         _client = client;
         _preferenceService = preferenceService;
@@ -122,6 +126,8 @@ public sealed class StoreActivationService : IStoreActivationService
         {
             SetJwt(response.Jwt, response.ExpiresAtUtc ?? DateTime.UtcNow.Add(FallbackJwtLifetime), "allowlist");
             SetState(ActivationState.Active);
+            // Lets the admin message tool reach beta testers (#1628). Never throws.
+            await _backendService.AddToBetaGroup();
         }
 
         return response;

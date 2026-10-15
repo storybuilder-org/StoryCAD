@@ -331,6 +331,34 @@ public class PreferencesViewModelTests
             Assert.AreEqual("Review StoryCAD on the Microsoft Store", text);
     }
 
+    [TestMethod]
+    public void UsageStatsHelpUrl_WithProductionManual_PointsToDocsPage()
+    {
+        // Arrange
+        var vm = Ioc.Default.GetRequiredService<PreferencesViewModel>();
+
+        // Act
+        vm.UseBetaDocumentation = false;
+
+        // Assert
+        Assert.AreEqual("https://manual.storybuilder.org/docs/Preferences/Usage_Statistics.html",
+            vm.UsageStatsHelpUrl.ToString());
+    }
+
+    [TestMethod]
+    public void UsageStatsHelpUrl_WithBetaManual_PointsToDocsPage()
+    {
+        // Arrange
+        var vm = Ioc.Default.GetRequiredService<PreferencesViewModel>();
+
+        // Act
+        vm.UseBetaDocumentation = true;
+
+        // Assert
+        Assert.AreEqual("https://beta.manual.storybuilder.org/docs/Preferences/Usage_Statistics.html",
+            vm.UsageStatsHelpUrl.ToString());
+    }
+
     #endregion
 
     #region A5: PropertyChanged Notification Tests
