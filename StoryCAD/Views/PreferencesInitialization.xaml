@@ -89,7 +89,7 @@
                                          CornerRadius="11"
                                          Margin="6,0,0,0"
                                          VerticalAlignment="Center"
-                                         NavigateUri="https://manual.storybuilder.org/Preferences/Usage_Statistics.html"
+                                         NavigateUri="https://manual.storybuilder.org/docs/Preferences/Usage_Statistics.html"
                                          ToolTipService.ToolTip="Learn what's collected"
                                          AutomationProperties.AutomationId="UsageStatsInfoButton"
                                          AutomationProperties.Name="Learn what's collected" />
