@@ -897,6 +897,109 @@ public class BackendTests
     }
 
     #endregion
+
+    #region AddToBetaGroup (#1628)
+
+    private static BackendService BetaBackend(TestLogService log, TestMySqlIo sqlIo) =>
+        new(log, Ioc.Default.GetRequiredService<AppState>(), Ioc.Default.GetRequiredService<PreferenceService>(), sqlIo);
+
+    [TestMethod]
+    public async Task AddToBetaGroup_WhenConfigured_AddsUserToCollabBeta()
+    {
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        Ioc.Default.GetRequiredService<PreferenceService>().Model.UserId = 42;
+
+        await BetaBackend(new TestLogService(), testSqlIo).AddToBetaGroup();
+
+        Assert.AreEqual(1, testSqlIo.AddUserToGroupCalls.Count);
+        Assert.AreEqual((42, "collab_beta"), testSqlIo.AddUserToGroupCalls[0]);
+    }
+
+    [TestMethod]
+    public async Task AddToBetaGroup_NoUserId_LogsWarningAndSkips()
+    {
+        var testLogger = new TestLogService();
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        Ioc.Default.GetRequiredService<PreferenceService>().Model.UserId = 0;
+
+        await BetaBackend(testLogger, testSqlIo).AddToBetaGroup();
+
+        Assert.AreEqual(0, testSqlIo.AddUserToGroupCalls.Count);
+        Assert.IsTrue(testLogger.HasWarning("beta group"));
+    }
+
+    [TestMethod]
+    public async Task AddToBetaGroup_NotConfigured_LogsWarningAndSkips()
+    {
+        var testLogger = new TestLogService();
+        var testSqlIo = new TestMySqlIo(); // not configured
+        Ioc.Default.GetRequiredService<PreferenceService>().Model.UserId = 42;
+
+        await BetaBackend(testLogger, testSqlIo).AddToBetaGroup();
+
+        Assert.AreEqual(0, testSqlIo.AddUserToGroupCalls.Count);
+        Assert.IsTrue(testLogger.HasWarning("beta group"));
+    }
+
+    [TestMethod]
+    public async Task AddToBetaGroup_WhenSqlFails_LogsWarningAndDoesNotThrow()
+    {
+        var testLogger = new TestLogService();
+        var testSqlIo = new TestMySqlIo { ExceptionToThrow = new InvalidOperationException("down") };
+        testSqlIo.SetConnectionString("fake");
+        Ioc.Default.GetRequiredService<PreferenceService>().Model.UserId = 42;
+
+        await BetaBackend(testLogger, testSqlIo).AddToBetaGroup();
+
+        Assert.IsTrue(testLogger.HasWarning("beta group"));
+        Assert.AreEqual(0, testLogger.ExceptionCalls.Count);
+    }
+
+    [TestMethod]
+    public async Task StartupRecording_BetaTester_AddsUserToCollabBeta()
+    {
+        var testSqlIo = await RunStartupRecording(activationPath: "allowlist");
+
+        Assert.AreEqual(1, testSqlIo.AddUserToGroupCalls.Count);
+        Assert.AreEqual((42, "collab_beta"), testSqlIo.AddUserToGroupCalls[0]);
+    }
+
+    [TestMethod]
+    public async Task StartupRecording_NotBetaTester_DoesNotAddToGroup()
+    {
+        var testSqlIo = await RunStartupRecording(activationPath: "store");
+
+        Assert.AreEqual(0, testSqlIo.AddUserToGroupCalls.Count);
+    }
+
+    /// <summary>
+    ///     Runs StartupRecording with nothing else to post, then puts the shared preferences back.
+    /// </summary>
+    private static async Task<TestMySqlIo> RunStartupRecording(string activationPath)
+    {
+        var model = Ioc.Default.GetRequiredService<PreferenceService>().Model;
+        var saved = (model.UserId, model.StoreActivationPath, model.RecordPreferencesStatus,
+            model.PreferencesInitialized);
+        var testSqlIo = new TestMySqlIo();
+        testSqlIo.SetConnectionString("fake");
+        try
+        {
+            (model.UserId, model.StoreActivationPath, model.RecordPreferencesStatus, model.PreferencesInitialized) =
+                (42, activationPath, true, false);
+            await BetaBackend(new TestLogService(), testSqlIo).StartupRecording();
+        }
+        finally
+        {
+            (model.UserId, model.StoreActivationPath, model.RecordPreferencesStatus, model.PreferencesInitialized) =
+                saved;
+        }
+
+        return testSqlIo;
+    }
+
+    #endregion
 }
 
 #region Test Infrastructure
@@ -1039,6 +1142,15 @@ public class TestMySqlIo : IMySqlIo
     public Task MarkMessageRead(int userId, int messageId)
     {
         MarkMessageReadCalls.Add((userId, messageId));
+        if (ExceptionToThrow != null) throw ExceptionToThrow;
+        return Task.CompletedTask;
+    }
+
+    public List<(int userId, string groupName)> AddUserToGroupCalls { get; } = new();
+
+    public Task AddUserToGroup(int userId, string groupName)
+    {
+        AddUserToGroupCalls.Add((userId, groupName));
         if (ExceptionToThrow != null) throw ExceptionToThrow;
         return Task.CompletedTask;
     }

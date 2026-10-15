@@ -18,6 +18,7 @@ We may collect your data for several reasons:
 
 * To send you articles, tips, and updates information in the form of a newsletter.
 * To collect reports of error anomalies in StoryCAD. 
+* To contact Collaborator beta testers about the beta. Joining the beta marks your account as a beta tester.
 
 SAFEGUARDING AND SECURING THE DATA
 
