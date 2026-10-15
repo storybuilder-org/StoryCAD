@@ -169,4 +169,17 @@ public class MySqlIo : IMySqlIo
         cmd.Parameters.AddWithValue("in_message_id", messageId);
         await cmd.ExecuteNonQueryAsync();
     }
+
+    /// <inheritdoc />
+    public async Task AddUserToGroup(int userId, string groupName)
+    {
+        await using var conn = new MySqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await using MySqlCommand cmd = new("spAddUserToGroup", conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.AddWithValue("in_user_id", userId);
+        cmd.Parameters.AddWithValue("in_group_name", groupName);
+        await cmd.ExecuteNonQueryAsync();
+    }
 }

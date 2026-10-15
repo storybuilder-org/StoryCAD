@@ -1042,6 +1042,15 @@ public class TestMySqlIo : IMySqlIo
         if (ExceptionToThrow != null) throw ExceptionToThrow;
         return Task.CompletedTask;
     }
+
+    public List<(int userId, string groupName)> AddUserToGroupCalls { get; } = new();
+
+    public Task AddUserToGroup(int userId, string groupName)
+    {
+        AddUserToGroupCalls.Add((userId, groupName));
+        if (ExceptionToThrow != null) throw ExceptionToThrow;
+        return Task.CompletedTask;
+    }
 }
 
 /// <summary>
