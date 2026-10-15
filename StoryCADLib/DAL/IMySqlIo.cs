@@ -72,4 +72,10 @@ public interface IMySqlIo
     ///     Marks a message as read/dismissed for a user (via spMarkMessageRead).
     /// </summary>
     Task MarkMessageRead(int userId, int messageId);
+
+    /// <summary>
+    ///     Adds a user to a named group (via spAddUserToGroup). Does nothing when the user
+    ///     is in the group already.
+    /// </summary>
+    Task AddUserToGroup(int userId, string groupName);
 }
