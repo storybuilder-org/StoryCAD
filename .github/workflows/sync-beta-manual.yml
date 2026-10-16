@@ -17,12 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout StoryCAD dev
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: dev
 
       - name: Checkout BetaManual
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: storybuilder-org/BetaManual
           token: ${{ secrets.BETA_MANUAL_PAT }}
