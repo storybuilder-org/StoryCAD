@@ -97,3 +97,4 @@ Approved on issue #1422 (Design D2 and D3). The rule applies to the user manual 
 
 - A script's `screenshot` statement uses the exact name of the manual image it replaces. `check` warns when a `screenshot` name does not follow the pattern.
 - Rename an image only in the PR that first scripts it. Change every link to the image in the same PR. Images that no script makes keep their current names (`DevTab.png`, `Danger-Calls-after-Scene-Move.png`).
+- Capture a window image with `--window 1036x744`: a visible frame of 1036 x 744 pixels at 100% scale (Terry, 2026-10-17). The title bar shows the title users see; the runner removes "(DEV BUILD)" through `STORYCAD_PLAIN_TITLE`.
