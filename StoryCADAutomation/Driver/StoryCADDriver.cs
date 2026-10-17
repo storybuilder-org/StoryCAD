@@ -176,6 +176,10 @@ public sealed class StoryCADDriver : IUiDriver
             // match AppState.RootDirectoryOverrideVariable (StoryCADLib/Models/AppState.cs).
             startInfo.Environment[RootDirectoryOverrideVariable] = scratch.AppDataDirectory;
 
+            // Manual screenshots show the title users see. Name must match
+            // AppState.PlainTitleVariable (StoryCADLib/Models/AppState.cs).
+            startInfo.Environment["STORYCAD_PLAIN_TITLE"] = "1";
+
             var job = new KillOnCloseJob(options.AllowCrashReporting);
             Process? process = null;
             UIA3Automation? automation = null;
