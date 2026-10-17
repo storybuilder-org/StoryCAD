@@ -20,6 +20,7 @@ Session recovery for #1422 (manual test plans as automation scripts, with their 
   - Rearranging_Content.md: narrator root is "Narrative View"; Old Man and the Sea example is wrong (it uses folders); template drop-down is under File > Open/Create file > Create new outline; a dropped node becomes the last child; "parent node", not "parent folder"; Hamlet's acts are Folders, not Sections.
   - Move_Story_Elements.md: Narrative View cannot move either.
   - Clean: Navigating_in_StoryCAD.md, Story_Explorer_and_Story_Narrator_Views.md.
-- Next: apply the manual page comparison (Status_Bar.md Filter Status entry, Search.md, Rearranging_Content.md drop position and narrator root name), full test run, commit, PR.
+- Manual fixes applied to the six pages; `labels` reports no misses on them.
+- Next: open the PR for Core_Navigation.
 
 How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-windows10.0.22621/win-x64/.env` aside, run `StoryCADAutomation\bin\x64\Debug\net10.0-windows10.0.22621\StoryCADAutomation.exe run StoryCADTests\AutomationScripts\Core-Navigation.scs --window 1554x1116 --out <folder>`, then restore `.env`. Keep hands off the mouse and keyboard during the run.
