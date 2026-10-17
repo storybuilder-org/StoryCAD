@@ -114,6 +114,9 @@ pause 1.5                    # seconds × profile pacing factor; ×0 in test mod
 expect <target> exists
 expect <target> text "value"
 expect <target> enabled | disabled
+expect <target> expanded | collapsed   # the ExpandCollapse state of the target itself (#1422);
+                                       # a child-row check cannot work, because resolving a tree
+                                       # path expands every parent on the way
 expect tree contains "path"
 expect window "title"
 expect-no <target>           # asserts absence, e.g. error dialogs. Settle-then-check:

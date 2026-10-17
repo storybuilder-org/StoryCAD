@@ -359,16 +359,7 @@ public sealed partial class Shell : Page
 
     private void ClearNodes(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
-        var storyModel = Ioc.Default.GetService<AppState>()!.CurrentDocument.Model;
-        if (storyModel?.CurrentView == null || storyModel.CurrentView.Count == 0)
-        {
-            return;
-        }
-
-        foreach (var node in storyModel.CurrentView[0])
-        {
-            node.Background = null;
-        }
+        ShellVm.ClearSearch();
     }
 
     private void TreeViewItem_Tapped(object sender, TappedRoutedEventArgs e)

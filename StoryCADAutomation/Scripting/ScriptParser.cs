@@ -493,14 +493,16 @@ public static partial class ScriptParser
 
             ScriptStatement WithCondition(ElementAddress target)
             {
-                var condition = TakeWord(r, "condition (exists, text \"value\", enabled, disabled)");
+                var condition = TakeWord(r, "condition (exists, text \"value\", enabled, disabled, expanded, collapsed)");
                 return condition switch
                 {
                     "exists" => New(ScriptVerb.ExpectExists) with { Target = target },
                     "text" => New(ScriptVerb.ExpectText) with { Target = target, Text = TakeString(r, "expected text", allowEmpty: true) },
                     "enabled" => New(ScriptVerb.ExpectEnabled) with { Target = target },
                     "disabled" => New(ScriptVerb.ExpectDisabled) with { Target = target },
-                    _ => throw new SyntaxException($"unknown expect condition '{condition}'; use exists, text \"value\", enabled, or disabled."),
+                    "expanded" => New(ScriptVerb.ExpectExpanded) with { Target = target },
+                    "collapsed" => New(ScriptVerb.ExpectCollapsed) with { Target = target },
+                    _ => throw new SyntaxException($"unknown expect condition '{condition}'; use exists, text \"value\", enabled, disabled, expanded, or collapsed."),
                 };
             }
         }

@@ -297,6 +297,7 @@ internal sealed class ElementLocator
         string? name = null;
         string? text = null;
         var controlType = "Unknown";
+        bool? isExpanded = null;
         try
         {
             isEnabled = element.Properties.IsEnabled.ValueOrDefault;
@@ -312,13 +313,28 @@ internal sealed class ElementLocator
             {
                 text = element.Patterns.Text.Pattern.DocumentRange.GetText(-1);
             }
+            else if (element.Patterns.Selection.IsSupported)
+            {
+                // A non-editable ComboBox shows its selected item; its Name is only the label.
+                var selected = element.Patterns.Selection.Pattern.Selection.ValueOrDefault;
+                if (selected is { Length: > 0 })
+                {
+                    text = string.Join(", ", selected.Select(e => e.Properties.Name.ValueOrDefault));
+                }
+            }
+
+            if (element.Patterns.ExpandCollapse.IsSupported)
+            {
+                var state = element.Patterns.ExpandCollapse.Pattern.ExpandCollapseState.ValueOrDefault;
+                isExpanded = state is ExpandCollapseState.Expanded or ExpandCollapseState.PartiallyExpanded;
+            }
         }
         catch (Exception)
         {
             // Partial snapshots are acceptable; the element may have vanished mid-read.
         }
 
-        return new ElementState(isEnabled, isOffscreen, isFocusable, name, text, controlType);
+        return new ElementState(isEnabled, isOffscreen, isFocusable, name, text, controlType, isExpanded);
     }
 
     /// <summary>

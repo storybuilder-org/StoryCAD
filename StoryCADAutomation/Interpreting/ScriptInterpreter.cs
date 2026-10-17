@@ -143,7 +143,7 @@ public sealed class ScriptInterpreter
 
     private static bool IsAssertion(ScriptVerb verb) => verb is
         ScriptVerb.ExpectExists or ScriptVerb.ExpectText or ScriptVerb.ExpectEnabled or
-        ScriptVerb.ExpectDisabled or ScriptVerb.ExpectTreeContains or ScriptVerb.ExpectWindow or
+        ScriptVerb.ExpectDisabled or ScriptVerb.ExpectExpanded or ScriptVerb.ExpectCollapsed or ScriptVerb.ExpectTreeContains or ScriptVerb.ExpectWindow or
         ScriptVerb.ExpectNo or ScriptVerb.ExpectExit;
 
     /// <summary>Dispatches one statement; returns the (possibly updated) current step name.</summary>
@@ -254,6 +254,9 @@ public sealed class ScriptInterpreter
                 // TabViewItem realizes selection via SelectionItem; id preferred, header text fallback.
                 {
                     var tab = s.Target ?? ElementAddress.FromName(s.Text!);
+                    // A tab past the edge of a narrow tab strip is off-screen until the strip
+                    // scrolls (Core_Navigation CN-003, #1422).
+                    RequireDriver().ScrollIntoView(tab);
                     Approach(tab).Select(tab);
                     return currentStep;
                 }
@@ -355,6 +358,36 @@ public sealed class ScriptInterpreter
                     return currentStep;
                 }
 
+            case ScriptVerb.ExpectExpanded:
+            case ScriptVerb.ExpectCollapsed:
+                {
+                    // Reads the row's own ExpandCollapse state. Checking for a child row cannot
+                    // work: resolving a tree path expands every parent on the way (#1422).
+                    var want = s.Verb == ScriptVerb.ExpectExpanded;
+                    var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(2);
+                    while (true)
+                    {
+                        var state = RequireDriver().WaitUntilFound(s.Target!);
+                        if (state.IsExpanded == want)
+                        {
+                            return currentStep;
+                        }
+
+                        if (state.IsExpanded is null)
+                        {
+                            throw new AutomationStepException($"{s.Target} cannot expand or collapse.");
+                        }
+
+                        if (DateTime.UtcNow >= deadline)
+                        {
+                            throw new AutomationStepException(
+                                $"{s.Target} is {(want ? "collapsed" : "expanded")}, expected {(want ? "expanded" : "collapsed")}.");
+                        }
+
+                        Thread.Sleep(200);
+                    }
+                }
+
             case ScriptVerb.ExpectTreeContains:
                 RequireDriver().WaitUntilFound(ElementAddress.FromTreePath(s.Text!));
                 return currentStep;
@@ -396,6 +429,10 @@ public sealed class ScriptInterpreter
 
                     var path = Path.Combine(Path.GetFullPath(_options.OutputDirectory), s.Text);
                     Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+
+                    // Page slide-ins and dropdowns animate after the step that started them; a
+                    // capture without this caught a half-drawn page and a closed list (#1422).
+                    Thread.Sleep(500);
                     if (s.Verb == ScriptVerb.ScreenshotDialog)
                     {
                         RequireDriver().CaptureOpenDialog(path);

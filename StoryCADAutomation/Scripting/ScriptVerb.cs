@@ -54,6 +54,8 @@ public enum ScriptVerb
     ExpectText,
     ExpectEnabled,
     ExpectDisabled,
+    ExpectExpanded,
+    ExpectCollapsed,
     ExpectTreeContains,
     ExpectWindow,
     ExpectNo,

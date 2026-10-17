@@ -68,6 +68,12 @@ public interface IUiDriver : IDisposable
     /// <summary>Selects via the UIA SelectionItem pattern.</summary>
     void Select(ElementAddress target, TimeSpan? timeout = null);
 
+    /// <summary>
+    ///     Scrolls the target into view through the UIA ScrollItem pattern, as a user scrolls a
+    ///     tab carousel; does nothing when the element has no such pattern.
+    /// </summary>
+    void ScrollIntoView(ElementAddress target, TimeSpan? timeout = null);
+
     /// <summary>Selects an item by name inside a container (ComboBox/ListView selection verb).</summary>
     void SelectItem(ElementAddress container, string itemName, TimeSpan? timeout = null);
 

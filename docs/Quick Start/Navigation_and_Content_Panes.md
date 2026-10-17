@@ -30,7 +30,7 @@ Two more assist in researching your story:
 There’s also a Trashcan node which is the parent for other nodes you wish to discard.
 
 Clicking (or touching) a Story Element node on the Navigation Pane will display that Story Element’s  content in the Content Panel. Each Story Element type has its own form; the major ones are tabbed.
-![](../media/ContentPane.png)
+![](../media/Content-Pane.png)
 
 
 
