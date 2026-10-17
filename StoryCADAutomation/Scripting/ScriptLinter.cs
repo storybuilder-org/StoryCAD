@@ -5,9 +5,9 @@ namespace StoryCADAutomation.Scripting;
 /// <summary>
 ///     The `check` lint, rule for rule the design's "Script lint as a fitness function"
 ///     section (devdocs/issue_1421_dsl_design.md). Errors: bare ids missing from the XAML,
-///     runtime-inert ids, unmatched menu/tab text-path segments, non-{scratch}-rooted
+///     runtime-inert ids, menu text paths not in the XAML, unmatched tab text, non-{scratch}-rooted
 ///     dialog paths, malformed chords. Warnings: name: outside dialog scopes, literal
-///     platform chords. Stated limits, checkable only live: tree node names (runtime outline
+///     platform chords, screenshot names outside the manual image standard. Stated limits, checkable only live: tree node names (runtime outline
 ///     data), native-dialog element names, and whether a statically valid id surfaces an
 ///     automation peer at runtime outside the deny-list.
 /// </summary>
@@ -132,19 +132,37 @@ public sealed partial class ScriptLinter
         }
     }
 
+    /// <summary>
+    ///     The whole path must be one the runtime can walk on Windows: the owning button's label,
+    ///     then sub-menu labels, then the leaf, each the UIA Name (#1421 review M3). Checking
+    ///     segments one by one passed "File/Exit", whose Windows Name is "Quit".
+    /// </summary>
     private void LintMenuPath(ScriptStatement statement, List<ScriptDiagnostic> findings)
     {
-        foreach (var segment in statement.Text!.Split('/'))
+        var segments = statement.Text!.Split('/');
+        if (_facts.MenuPaths.Contains(XamlUiFacts.MenuPathKey(segments)))
         {
-            if (_facts.MenuLabels.Contains(XamlUiFacts.Normalize(segment)))
-            {
-                continue;
-            }
-
-            findings.Add(Error(statement,
-                $"menu path segment '{segment.Trim()}' matches no Text/Header/Label value on a menu element in the XAML; " +
-                "if the item's label itself contains '/', address it by its leaf AutomationId instead."));
+            return;
         }
+
+        // Name the labels that can follow the longest valid start of the path, so the author
+        // sees "Quit" next to "Exit".
+        var labels = _facts.MenuPaths.Select(XamlUiFacts.MenuPathLabels).ToList();
+        var known = segments.Select(XamlUiFacts.Normalize).ToArray();
+        var depth = 0;
+        while (depth < known.Length - 1
+               && labels.Any(path => path.Length > depth + 1 && path.Take(depth + 1).SequenceEqual(known.Take(depth + 1))))
+        {
+            depth++;
+        }
+
+        var next = labels.Where(path => path.Length > depth && path.Take(depth).SequenceEqual(known.Take(depth)))
+            .Select(path => path[depth]).Distinct().Order(StringComparer.Ordinal);
+        var where = depth == 0 ? "at the top level" : $"after '{string.Join("/", known.Take(depth))}'";
+        findings.Add(Error(statement,
+            $"menu path '{statement.Text}' is not a menu path in the XAML (Windows UIA names); " +
+            $"{where} the menus have: {string.Join(", ", next)}. " +
+            "If a label itself contains '/', address the item by its leaf AutomationId instead."));
     }
 
     private void LintTabLabel(ScriptStatement statement, List<ScriptDiagnostic> findings)
@@ -202,7 +220,16 @@ public sealed partial class ScriptLinter
                 $"screenshot name '{name}' must be a plain .png file name (letters, digits, '-', '_', '.'), " +
                 "with no folder, so the image lands in the run's output folder."));
         }
+        else if (!ManualImageNamePattern().IsMatch(name))
+        {
+            findings.Add(Warning(statement,
+                $"screenshot name '{name}' does not follow <Area>-<Screen>[-<State>][-Mac].png, hyphenated " +
+                "capitalized words (devdocs/automation_naming_convention.md, Manual image names)."));
+        }
     }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"^[A-Z0-9][A-Za-z0-9]*(-[A-Z0-9][A-Za-z0-9]*)+\.png$")]
+    private static partial System.Text.RegularExpressions.Regex ManualImageNamePattern();
 
     /// <summary>
     ///     A show image names a .png or .jpg file in the assets folder, with no folder part

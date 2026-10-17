@@ -198,10 +198,10 @@ The child process launches with a scrubbed environment: `COLLAB_DEBUG` and `COLL
 
 - **Bare-id targets** exist as `AutomationProperties.AutomationId` in the XAML. The scan logic is extracted from `AutomationConventionTests` into a shared library referenced by both StoryCADTests and StoryCADAutomation; a second copy would drift.
 - **Runtime-inert ids** are rejected via a deny-list (ItemsRepeater container ids like `NavigationTree`/`TrashTree` exist statically but never surface a peer; a pure existence scan would pass them).
-- **Menu/tab text-path segments** match XAML `Text`/`Header` values where the text form is used.
+- **Menu text paths** match a whole menu path in the XAML: the owning button label, then the sub-menu labels, then the leaf, each as the Windows UIA Name (explicit `AutomationProperties.Name`, else the Windows `Text`/`Label`/`Header`). Changed for #1422 (review M3): a check of each segment alone passed `menu "File/Exit"`, but the Windows Name is `Quit`. **Tab text** matches a TabViewItem `Header`.
 - **Dialog-verb paths** are `{scratch}`-rooted (error).
 - **`name:` targets** outside `dialog` scopes and **literal platform chords** (`Ctrl+...`) are warnings.
-- **`screenshot` names** are plain `.png` file names (error).
+- **`screenshot` names** are plain `.png` file names (error). A name outside the manual image standard (`devdocs/automation_naming_convention.md`, Manual image names) is a warning.
 
 CI runs `check` over all scripts on every PR, so a renamed id or menu label fails at lint time instead of in a UI run. What `check` cannot verify, stated plainly: tree node names (runtime outline data), native-dialog element names, and whether a statically valid id actually surfaces a peer at runtime outside the deny-list. Those fail only live.
 

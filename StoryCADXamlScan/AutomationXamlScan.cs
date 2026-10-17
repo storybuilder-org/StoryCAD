@@ -189,19 +189,20 @@ public static class AutomationXamlScan
     ///     Attribute local names that carry a user-visible label. Label covers AppBarButton
     ///     (top-level menu buttons carry Label, not Text); AutomationProperties.Name is included
     ///     because it overrides the UIA Name that runtime text-path addressing matches against
-    ///     (Shell's padded menu texts pair with clean explicit Names).
+    ///     (Shell's padded menu texts pair with clean explicit Names). Content covers buttons and
+    ///     check boxes, whose labels the manual names in bold (#1422 label check).
     /// </summary>
     private static readonly string[] LabelAttributeNames =
     {
-        "Text", "Header", "Label", "AutomationProperties.Name",
+        "Text", "Header", "Label", "Content", "AutomationProperties.Name",
     };
 
     /// <summary>
     ///     Every user-visible label attribute across all scope files, for the script linter's
-    ///     menu/tab text-path checks (devdocs/issue_1421_dsl_design.md "Script lint as a fitness
-    ///     function"). Unlike <see cref="GetAttributeValue" />, conditional variants (win:Text,
-    ///     skia:Text) ARE included: they are the per-platform runtime labels, and a text-path
-    ///     segment that matches either platform's label is valid. Values that are bindings or
+    ///     tab text check (devdocs/issue_1421_dsl_design.md "Script lint as a fitness function")
+    ///     and the manual label check (#1422). Unlike <see cref="GetAttributeValue" />, conditional
+    ///     variants (win:Text, skia:Text) ARE included: they are the per-platform runtime labels,
+    ///     and a label that matches either platform's label is valid. Values that are bindings or
     ///     markup extensions ({x:Bind ...}) are skipped as not statically checkable; so are
     ///     labels set via nested property elements rather than attributes.
     /// </summary>
@@ -286,5 +287,82 @@ public static class AutomationXamlScan
                 }
             }
         }
+    }
+
+    /// <summary>
+    ///     Every menu path as the text-path form of `menu` walks it on Windows: the label of the
+    ///     button that owns the flyout, then each MenuFlyoutSubItem label, then the item's own.
+    ///     Every AppBarButton is also a one-label path (`menu "Show"` invokes the button). Labels
+    ///     are raw <see cref="WindowsLabel" /> values; items with a bound or missing label are
+    ///     left out (#1421 review M3: lint and runtime must agree on whole paths).
+    /// </summary>
+    public static IEnumerable<MenuLabelPath> MenuLabelPaths()
+    {
+        foreach (var relPath in ScopeFiles())
+        {
+            var doc = LoadXaml(relPath);
+            foreach (var element in doc.Descendants())
+            {
+                if (element.Name.LocalName == "AppBarButton" && WindowsLabel(element) is { } buttonLabel)
+                {
+                    yield return new MenuLabelPath(relPath, LineOf(element), new[] { buttonLabel });
+                }
+
+                if (element.Name.LocalName is not ("MenuFlyoutItem" or "MenuFlyoutSubItem"))
+                {
+                    continue;
+                }
+
+                var labels = new List<string?> { WindowsLabel(element) };
+                var ownedByButton = false;
+                foreach (var ancestor in element.Ancestors())
+                {
+                    if (ancestor.Name.LocalName == "MenuFlyoutSubItem")
+                    {
+                        labels.Add(WindowsLabel(ancestor));
+                    }
+                    else if (ancestor.Name.LocalName is "AppBarButton" or "Button")
+                    {
+                        labels.Add(WindowsLabel(ancestor));
+                        ownedByButton = true;
+                        break;
+                    }
+                }
+
+                if (ownedByButton && labels.All(label => label is not null))
+                {
+                    labels.Reverse();
+                    yield return new MenuLabelPath(relPath, LineOf(element), labels.Select(label => label!).ToList());
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    ///     The label UIA reports as Name on Windows: an explicit AutomationProperties.Name, else
+    ///     the first unconditional or win: Text, Label, Header, or Content. skia: and the other
+    ///     platform variants are not the Windows label. Null when the label is bound or absent.
+    /// </summary>
+    public static string? WindowsLabel(XElement element)
+    {
+        var name = GetAttributeValue(element, "AutomationProperties.Name");
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            return name.StartsWith('{') ? null : name;
+        }
+
+        // Shell.xaml maps win: to the default presentation namespace, so resolve the prefix.
+        var win = element.GetNamespaceOfPrefix("win");
+        foreach (var attributeName in new[] { "Text", "Label", "Header", "Content" })
+        {
+            var attribute = element.Attributes().FirstOrDefault(a => a.Name.LocalName == attributeName
+                && (a.Name.Namespace == XNamespace.None || (win is not null && a.Name.Namespace == win)));
+            if (attribute is not null && !string.IsNullOrWhiteSpace(attribute.Value))
+            {
+                return attribute.Value.StartsWith('{') ? null : attribute.Value;
+            }
+        }
+
+        return null;
     }
 }

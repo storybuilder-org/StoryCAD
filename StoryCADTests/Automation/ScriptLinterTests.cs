@@ -12,7 +12,7 @@ public class ScriptLinterTests
     private static readonly ScriptLinter Linter = new(new XamlUiFacts
     {
         AutomationIds = new HashSet<string>(),
-        MenuLabels = new HashSet<string>(),
+        MenuPaths = new HashSet<string>(),
         TabLabels = new HashSet<string>(),
     });
 
@@ -85,6 +85,21 @@ public class ScriptLinterTests
     }
 
     [TestMethod]
+    [DataRow("Character-Role-Tab.png", 0)]
+    [DataRow("Preferences-Backup-Tab-Mac.png", 0)]
+    [DataRow("File-Open-Dialog.png", 0)]
+    [DataRow("DevTab.png", 1)]
+    [DataRow("Danger-Calls-after-Scene-Move.png", 1)]
+    [DataRow("file_open.png", 1)]
+    public void Lint_WithScreenshotName_WarnsWhenNotManualImageStandard(string name, int warnings)
+    {
+        var parsed = ScriptParser.Parse($"script \"Lint test\"\nscreenshot \"{name}\"\n");
+        var found = Linter.Lint(parsed.Statements).Where(d => d.Severity == DiagnosticSeverity.Warning).ToList();
+
+        Assert.AreEqual(warnings, found.Count);
+    }
+
+    [TestMethod]
     public void Parse_WithScreenshotDialog_ProducesDialogCaptureStatement()
     {
         var parsed = ScriptParser.Parse("script \"Lint test\"\nscreenshot dialog \"File-Open-Dialog.png\"\n");
@@ -117,6 +132,67 @@ public class ScriptLinterTests
         Assert.AreEqual(1, LintDialogLine("screenshot \"../Overview.png\"").Count);
         Assert.AreEqual(1, LintDialogLine("screenshot \"media/Overview.png\"").Count);
         Assert.AreEqual(1, LintDialogLine("screenshot \"Overview.jpg\"").Count);
+    }
+
+    // #1421 review M3: a menu text path is linted as a whole path of Windows UIA names.
+    private static readonly ScriptLinter MenuLinter = new(new XamlUiFacts
+    {
+        AutomationIds = new HashSet<string>(),
+        MenuPaths = new HashSet<string>
+        {
+            XamlUiFacts.MenuPathKey(new[] { "File" }),
+            XamlUiFacts.MenuPathKey(new[] { "File", "Save Story" }),
+            XamlUiFacts.MenuPathKey(new[] { "File", "Quit" }),
+            XamlUiFacts.MenuPathKey(new[] { "Tools" }),
+            XamlUiFacts.MenuPathKey(new[] { "Tools", "Plotting Aids" }),
+            XamlUiFacts.MenuPathKey(new[] { "Tools", "Plotting Aids", "Master Plots                Ctrl+M" }),
+        },
+        TabLabels = new HashSet<string>(),
+    });
+
+    private static IReadOnlyList<ScriptDiagnostic> LintMenuLine(ScriptLinter linter, string path)
+    {
+        var parsed = ScriptParser.Parse($"script \"Lint test\"\nmenu \"{path}\"\n");
+        Assert.IsTrue(parsed.Success, string.Join("; ", parsed.Errors));
+        return linter.Lint(parsed.Statements).Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
+    }
+
+    [TestMethod]
+    [DataRow("File/Quit")]
+    [DataRow("File/Save Story")]
+    [DataRow("Tools/Plotting Aids/Master Plots")]
+    [DataRow("File")]
+    public void LintMenuPath_WithWindowsPath_ReportsNoError(string path)
+    {
+        Assert.AreEqual(0, LintMenuLine(MenuLinter, path).Count);
+    }
+
+    [TestMethod]
+    public void LintMenuPath_WithExitInsteadOfQuit_ReportsErrorNamingQuit()
+    {
+        var errors = LintMenuLine(MenuLinter, "File/Exit");
+
+        Assert.AreEqual(1, errors.Count);
+        StringAssert.Contains(errors[0].Message, "Quit");
+    }
+
+    [TestMethod]
+    [DataRow("Tools/Save Story")]
+    [DataRow("Master Plots")]
+    [DataRow("Tools/Master Plots")]
+    public void LintMenuPath_WithLabelUnderWrongParent_ReportsError(string path)
+    {
+        Assert.AreEqual(1, LintMenuLine(MenuLinter, path).Count);
+    }
+
+    [TestMethod]
+    public void LintMenuPath_AgainstLiveXaml_RejectsExitAndAcceptsQuit()
+    {
+        var linter = new ScriptLinter(XamlUiFacts.LoadFromXamlScan());
+
+        Assert.AreEqual(1, LintMenuLine(linter, "File/Exit").Count);
+        Assert.AreEqual(0, LintMenuLine(linter, "File/Quit").Count);
+        Assert.AreEqual(0, LintMenuLine(linter, "Tools/Plotting Aids/Master Plots").Count);
     }
 
     /// <summary>
