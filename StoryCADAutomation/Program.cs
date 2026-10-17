@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using StoryCADAutomation.Driver;
 using StoryCADAutomation.Interpreting;
+using StoryCADAutomation.Manual;
 using StoryCADAutomation.Scripting;
 using StoryCADAutomation.Video;
 using StoryCADAutomation.Voice;
@@ -11,8 +12,9 @@ namespace StoryCADAutomation;
 /// <summary>
 ///     Runner for #1421: `run &lt;script.scs&gt;` with results on the console, in the test profile or
 ///     the presentation profile; `check` to lint scripts without launching the app; `voice` to
-///     make the narrator clips and `video` to make a finished .mp4 (#1421 Milestone 5). Folder
-///     runs for `run` belong to #1422.
+///     make the narrator clips and `video` to make a finished .mp4 (#1421 Milestone 5); `labels`
+///     to compare bold text in manual pages with the XAML labels (#1422). Folder runs for `run`
+///     belong to #1422.
 /// </summary>
 internal static class Program
 {
@@ -30,6 +32,11 @@ internal static class Program
         if (args.Length == 2 && args[0] == "check")
         {
             return Check(args[1]);
+        }
+
+        if (args.Length >= 2 && args[0] == "labels")
+        {
+            return Labels(args[1..]);
         }
 
         if (args.Length == 6 && args[0] == "video" && args[2] == "--out" && args[4] == "--assets")
@@ -206,6 +213,48 @@ internal static class Program
     }
 
     /// <summary>
+    ///     `labels`: lists bold text in manual pages (files, or every .md under a folder) that
+    ///     matches no XAML label (#1422 D4). Advisory, because the manual also uses bold for
+    ///     emphasis: exit 0 when every phrase matches, 1 when any does not.
+    /// </summary>
+    private static int Labels(string[] targets)
+    {
+        var pages = new List<string>();
+        foreach (var target in targets)
+        {
+            if (Directory.Exists(target))
+            {
+                var found = Directory.GetFiles(target, "*.md", SearchOption.AllDirectories);
+                Array.Sort(found, StringComparer.Ordinal);
+                pages.AddRange(found);
+            }
+            else if (File.Exists(target))
+            {
+                pages.Add(target);
+            }
+            else
+            {
+                Console.Error.WriteLine($"no manual page or folder at {target}");
+                return UsageError;
+            }
+        }
+
+        var check = new LabelCheck(XamlUiFacts.LoadFromXamlScan());
+        var misses = 0;
+        foreach (var page in pages)
+        {
+            foreach (var miss in check.Misses(File.ReadAllText(page)))
+            {
+                Console.WriteLine($"{page}:{miss.Line}: **{miss.Text}** matches no XAML label");
+                misses++;
+            }
+        }
+
+        Console.WriteLine($"{pages.Count} page(s) checked, {misses} bold phrase(s) match no XAML label.");
+        return misses == 0 ? Passed : StepFailure;
+    }
+
+    /// <summary>
     ///     `voice`: makes the missing narrator clips for a script in &lt;out&gt;/voice/ (video design,
     ///     section 8.1). Exit 3 when the API key or the voice id is not set, or ElevenLabs fails.
     /// </summary>
@@ -334,6 +383,7 @@ internal static class Program
         Console.Error.WriteLine("  StoryCADAutomation run <script.scs> [--app <path to StoryCAD.exe>] [--out <dir>] [--ci]");
         Console.Error.WriteLine("                        [--profile test|presentation] [--pacing <factor>] [--window <WxH>]");
         Console.Error.WriteLine("  StoryCADAutomation check <script.scs | folder>");
+        Console.Error.WriteLine("  StoryCADAutomation labels <page.md | folder> [...]   (exit 1 lists bold text matching no XAML label)");
         Console.Error.WriteLine("  StoryCADAutomation voice <script.scs> --out <dir>");
         Console.Error.WriteLine("  StoryCADAutomation video <script.scs> --out <dir> --assets <dir>");
         Console.Error.WriteLine();
