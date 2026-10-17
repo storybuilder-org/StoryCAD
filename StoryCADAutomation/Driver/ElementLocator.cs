@@ -699,7 +699,7 @@ internal sealed class ElementLocator
         // Fast path: the flyout is already open (a context-menu step, or a retry).
         if (TryFind(leaf, out _) is not null)
         {
-            return WaitUntilReady(leaf, need, Remaining(deadline));
+            return WaitUntilReady(leaf, need, LeafReadinessBudget(deadline, DateTime.UtcNow));
         }
 
         while (true)
@@ -710,7 +710,7 @@ internal sealed class ElementLocator
                 TryExpand(opener);
                 if (ProbeLeafRealized(leaf, FlyoutRealizeBudget))
                 {
-                    return WaitUntilReady(leaf, need, Remaining(deadline));
+                    return WaitUntilReady(leaf, need, LeafReadinessBudget(deadline, DateTime.UtcNow));
                 }
 
                 foreach (var subMenu in CollapsedSubMenuItems())
@@ -718,11 +718,15 @@ internal sealed class ElementLocator
                     TryExpand(subMenu);
                     if (ProbeLeafRealized(leaf, FlyoutRealizeBudget))
                     {
-                        return WaitUntilReady(leaf, need, Remaining(deadline));
+                        return WaitUntilReady(leaf, need, LeafReadinessBudget(deadline, DateTime.UtcNow));
                     }
                 }
 
                 TryCollapse(opener); // don't leak an open flyout into the next probe or step
+                if (DateTime.UtcNow >= deadline)
+                {
+                    break; // one pass is 7 owners x 500 ms; stop at the deadline, not after the pass
+                }
             }
 
             if (DateTime.UtcNow >= deadline)
@@ -736,10 +740,15 @@ internal sealed class ElementLocator
         }
     }
 
-    private static TimeSpan Remaining(DateTime deadline)
+    /// <summary>
+    ///     Readiness time for a leaf the probe has found. A probe pass can run past the
+    ///     deadline, so the time left can be zero; the floor gives a found leaf the same time a
+    ///     flyout gets to realize, so it is not failed on timing alone (#1421 review M2).
+    /// </summary>
+    internal static TimeSpan LeafReadinessBudget(DateTime deadline, DateTime now)
     {
-        var remaining = deadline - DateTime.UtcNow;
-        return remaining > TimeSpan.Zero ? remaining : TimeSpan.FromMilliseconds(1);
+        var remaining = deadline - now;
+        return remaining > FlyoutRealizeBudget ? remaining : FlyoutRealizeBudget;
     }
 
     private bool ProbeLeafRealized(ElementAddress leaf, TimeSpan budget)
