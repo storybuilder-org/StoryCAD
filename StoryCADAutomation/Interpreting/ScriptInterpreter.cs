@@ -68,9 +68,17 @@ public sealed class ScriptInterpreter
         var outcomes = new List<StatementOutcome>(script.Statements.Count);
         string? currentStep = null;
         var aborted = false;
+        var skipToNextStep = false;
         foreach (var statement in script.Statements)
         {
-            if (aborted || cancellation.IsCancellationRequested)
+            // --keep-going resumes at the next step, not the next statement: the rest of a failed
+            // step would act on the wrong screen (#1421 review M6, design Failure policy).
+            if (skipToNextStep && statement.Verb == ScriptVerb.Step)
+            {
+                skipToNextStep = false;
+            }
+
+            if (aborted || skipToNextStep || cancellation.IsCancellationRequested)
             {
                 Emit(outcomes, new StatementOutcome(
                     statement, StatementStatus.Skipped, currentStep, DateTimeOffset.UtcNow, TimeSpan.Zero, null));
@@ -98,6 +106,7 @@ public sealed class ScriptInterpreter
             {
                 _options.Log($"FAIL line {statement.Line}: {statement.Source} :: {failure.Message}");
                 aborted = !ShouldContinueAfter(statement, failure);
+                skipToNextStep = !aborted && _options.KeepGoing;
             }
         }
 

@@ -59,6 +59,7 @@ internal static class Program
         var outputDirectory = "automation-output";
         var ci = false;
         var presentation = false;
+        var keepGoing = false;
         var pacing = 1.0;
         (int Width, int Height)? window = null;
         for (var i = 2; i < args.Length; i++)
@@ -74,6 +75,10 @@ internal static class Program
             else if (args[i] == "--ci")
             {
                 ci = true;
+            }
+            else if (args[i] == "--keep-going")
+            {
+                keepGoing = true;
             }
             else if (args[i] == "--profile" && i + 1 < args.Length && args[i + 1] is "test" or "presentation")
             {
@@ -129,7 +134,11 @@ internal static class Program
                 {
                     try
                     {
-                        driver.ResizeMainWindow(w.Width, w.Height);
+                        // --window is in 100%-scale pixels, so a script gives the same layout and
+                        // the same screenshots on any display scaling (#1422 evaluation). The size is
+                        // the visible frame, which is exactly what a screenshot captures.
+                        var scale = driver.MainWindowDpi / 96.0;
+                        driver.PlaceVisibleFrame((int)Math.Round(w.Width * scale), (int)Math.Round(w.Height * scale));
                     }
                     catch (Exception ex)
                     {
@@ -144,6 +153,7 @@ internal static class Program
             new InterpreterOptions
             {
                 OnStatement = PrintOutcome,
+                KeepGoing = keepGoing,
                 OutputDirectory = outputDirectory,
                 MenuOpeners = facts.MenuOpeners,
                 Profile = (IExecutionProfile?)presentationProfile ?? new TestProfile(),
@@ -382,6 +392,7 @@ internal static class Program
         Console.Error.WriteLine("Usage:");
         Console.Error.WriteLine("  StoryCADAutomation run <script.scs> [--app <path to StoryCAD.exe>] [--out <dir>] [--ci]");
         Console.Error.WriteLine("                        [--profile test|presentation] [--pacing <factor>] [--window <WxH>]");
+        Console.Error.WriteLine("                        [--keep-going]   (--window: visible frame in 100%-scale pixels; --keep-going: after a failure, run the next step)");
         Console.Error.WriteLine("  StoryCADAutomation check <script.scs | folder>");
         Console.Error.WriteLine("  StoryCADAutomation labels <page.md | folder> [...]   (exit 1 lists bold text matching no XAML label)");
         Console.Error.WriteLine("  StoryCADAutomation voice <script.scs> --out <dir>");
