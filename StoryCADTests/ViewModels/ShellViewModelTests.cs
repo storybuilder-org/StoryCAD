@@ -1814,4 +1814,32 @@ public class ShellViewModelTests
     }
 
     #endregion
+
+    // #1422 Core_Navigation CN-005: clearing a search clears its result message.
+    [TestMethod]
+    public void ClearSearch_WhileResultMessageShows_ClearsMessage()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        Ioc.Default.GetRequiredService<AppState>().CurrentDocument = null;
+        shell.LastSearchStatus = "Found 19 matches";
+        shell.StatusMessage = "Found 19 matches";
+
+        shell.ClearSearch();
+
+        Assert.AreEqual(string.Empty, shell.StatusMessage);
+        Assert.IsNull(shell.LastSearchStatus);
+    }
+
+    [TestMethod]
+    public void ClearSearch_AfterLaterMessage_KeepsLaterMessage()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        Ioc.Default.GetRequiredService<AppState>().CurrentDocument = null;
+        shell.LastSearchStatus = "Found 19 matches";
+        shell.StatusMessage = "SaveFile command completed";
+
+        shell.ClearSearch();
+
+        Assert.AreEqual("SaveFile command completed", shell.StatusMessage);
+    }
 }

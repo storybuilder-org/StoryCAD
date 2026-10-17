@@ -19,17 +19,19 @@ public sealed partial class XamlUiFacts
     private static partial Regex ShortcutColumnGap();
 
     /// <summary>
-    ///     Elements whose labels menu text-path segments resolve against: top-level menu
-    ///     buttons (AppBarButton carries Label) and flyout items (Text, plus the explicit
-    ///     AutomationProperties.Name that runtime Name addressing actually matches).
+    ///     Joins a menu path's labels into one <see cref="MenuPaths" /> key. A label can contain
+    ///     '/' ("Open/Create file"), so '/' cannot be the separator.
     /// </summary>
-    private static readonly string[] MenuElementNames = { "AppBarButton", "MenuFlyoutItem", "MenuFlyoutSubItem" };
+    private const char MenuPathSeparator = '\n';
 
     /// <summary>Every AutomationProperties.AutomationId value in the convention-scope XAML.</summary>
     public required IReadOnlySet<string> AutomationIds { get; init; }
 
-    /// <summary>Labels a menu text-path segment may name, normalized (trimmed, shortcut column stripped).</summary>
-    public required IReadOnlySet<string> MenuLabels { get; init; }
+    /// <summary>
+    ///     Whole menu paths the text-path form of `menu` can walk on Windows, as
+    ///     <see cref="MenuPathKey" /> keys of normalized labels (#1421 review M3).
+    /// </summary>
+    public required IReadOnlySet<string> MenuPaths { get; init; }
 
     /// <summary>TabViewItem header labels the tab text form may name.</summary>
     public required IReadOnlySet<string> TabLabels { get; init; }
@@ -40,6 +42,12 @@ public sealed partial class XamlUiFacts
     /// </summary>
     public IReadOnlyDictionary<string, IReadOnlyList<string>> MenuOpeners { get; init; } =
         new Dictionary<string, IReadOnlyList<string>>();
+
+    /// <summary>
+    ///     Every static label in the XAML (Text, Header, Label, Content, AutomationProperties.Name,
+    ///     all platform variants), normalized. The manual label check matches bold text against it.
+    /// </summary>
+    public IReadOnlySet<string> AllLabels { get; init; } = new HashSet<string>();
 
     /// <summary>
     ///     Loads the facts through the shared scan library (one scan for convention tests and
@@ -57,15 +65,18 @@ public sealed partial class XamlUiFacts
             ids.Add(occurrence.Id);
         }
 
-        var menuLabels = new HashSet<string>(StringComparer.Ordinal);
+        var menuPaths = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var path in AutomationXamlScan.MenuLabelPaths())
+        {
+            menuPaths.Add(MenuPathKey(path.Labels));
+        }
+
         var tabLabels = new HashSet<string>(StringComparer.Ordinal);
+        var allLabels = new HashSet<string>(StringComparer.Ordinal);
         foreach (var label in AutomationXamlScan.LabelOccurrences())
         {
-            if (MenuElementNames.Contains(label.ElementName))
-            {
-                menuLabels.Add(Normalize(label.Value));
-            }
-            else if (label.ElementName == "TabViewItem")
+            allLabels.Add(Normalize(label.Value));
+            if (label.ElementName == "TabViewItem")
             {
                 tabLabels.Add(Normalize(label.Value));
             }
@@ -79,9 +90,17 @@ public sealed partial class XamlUiFacts
 
         return new XamlUiFacts
         {
-            AutomationIds = ids, MenuLabels = menuLabels, TabLabels = tabLabels, MenuOpeners = menuOpeners,
+            AutomationIds = ids, MenuPaths = menuPaths, TabLabels = tabLabels, MenuOpeners = menuOpeners,
+            AllLabels = allLabels,
         };
     }
+
+    /// <summary>The <see cref="MenuPaths" /> key for a path's labels, each normalized.</summary>
+    public static string MenuPathKey(IEnumerable<string> labels)
+        => string.Join(MenuPathSeparator, labels.Select(Normalize));
+
+    /// <summary>The labels of a <see cref="MenuPaths" /> key.</summary>
+    internal static string[] MenuPathLabels(string key) => key.Split(MenuPathSeparator);
 
     /// <summary>Trims and drops everything from the first 2+-space run (the shortcut column).</summary>
     internal static string Normalize(string label)

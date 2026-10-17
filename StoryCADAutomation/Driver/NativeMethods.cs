@@ -91,6 +91,60 @@ internal static class NativeMethods
     [DllImport("user32.dll")]
     private static extern bool SetForegroundWindow(IntPtr hWnd);
 
+    /// <summary>
+    ///     Moves the pointer by sending a real mouse-move input event. FlaUI's Mouse.Position and
+    ///     Mouse.MoveTo place the cursor with SetCursorPos, which sends no input, so a WinUI drag
+    ///     never sees the pointer move and the release reads as a click (#1422, CN-006).
+    /// </summary>
+    internal static void SendMouseMove(int x, int y)
+    {
+        var left = GetSystemMetrics(SM_XVIRTUALSCREEN);
+        var top = GetSystemMetrics(SM_YVIRTUALSCREEN);
+        var width = Math.Max(GetSystemMetrics(SM_CXVIRTUALSCREEN) - 1, 1);
+        var height = Math.Max(GetSystemMetrics(SM_CYVIRTUALSCREEN) - 1, 1);
+        var input = new INPUT
+        {
+            type = InputMouse,
+            mi = new MOUSEINPUT
+            {
+                dx = (int)Math.Round((x - left) * 65535.0 / width),
+                dy = (int)Math.Round((y - top) * 65535.0 / height),
+                dwFlags = MouseEventFMove | MouseEventFAbsolute | MouseEventFVirtualDesk,
+            },
+        };
+        SendInput(1, [input], Marshal.SizeOf<INPUT>());
+    }
+
+    private const int SM_XVIRTUALSCREEN = 76;
+    private const int SM_YVIRTUALSCREEN = 77;
+    private const int SM_CXVIRTUALSCREEN = 78;
+    private const int SM_CYVIRTUALSCREEN = 79;
+    private const uint InputMouse = 0;
+    private const uint MouseEventFMove = 0x0001;
+    private const uint MouseEventFVirtualDesk = 0x4000;
+    private const uint MouseEventFAbsolute = 0x8000;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MOUSEINPUT
+    {
+        public int dx;
+        public int dy;
+        public uint mouseData;
+        public uint dwFlags;
+        public uint time;
+        public IntPtr dwExtraInfo;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct INPUT
+    {
+        public uint type;
+        public MOUSEINPUT mi; // MOUSEINPUT is the largest member of the Win32 union on x64
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
+
     [DllImport("user32.dll")]
     private static extern uint GetDpiForWindow(IntPtr hwnd);
 

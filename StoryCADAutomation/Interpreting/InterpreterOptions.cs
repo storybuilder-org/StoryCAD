@@ -24,7 +24,7 @@ public sealed class InterpreterOptions
 
     /// <summary>
     ///     Menu item id to the ids clicked to reach it, from the XAML (runner wires
-    ///     <c>XamlUiFacts.MenuOpeners</c>). An id missing here falls back to the menu search.
+    ///     <c>XamlUiFacts.MenuOpeners</c>). An id missing here must already be showing in an open flyout.
     /// </summary>
     public IReadOnlyDictionary<string, IReadOnlyList<string>> MenuOpeners { get; init; } =
         new Dictionary<string, IReadOnlyList<string>>();
