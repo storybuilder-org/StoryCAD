@@ -77,3 +77,23 @@ Every interactive control gets `AutomationProperties.AutomationId`.
 - Separators and spacers: AppBarSeparator, Border rules, filler grid columns.
 - Layout containers (Grid, StackPanel, ScrollViewer) unless one is a LabeledBy target or an items host.
 - TextBlocks that are content rather than labels. One exception: the Shell status-bar message carries `StatusMessageText`, because the smoke script checks save results through it (#1421, Terry's decision of 2026-09-30). The proposed suffix for a TextBlock is `Text`.
+
+## Manual image names
+
+Approved on issue #1422 (Design D2 and D3). The rule applies to the user manual images under `docs/` and to the `screenshot` statements that make them.
+
+- Name a manual image `<Area>-<Screen>[-<State>][-Mac].png`.
+- Separate the words with hyphens. Start each word with a capital letter. Do not use abbreviations.
+- **Area** is the manual section or the story element: `Character`, `Preferences`, `Collaborator`, or a tutorial name such as `Danger-Calls`.
+- **Screen** is the tab, dialog, or menu that the image shows.
+- **State** is optional. It tells what the image shows happening.
+- `-Mac` marks a macOS capture. A name without `-Mac` is a Windows capture.
+
+| Image | Area | Screen | State | Platform |
+|---|---|---|---|---|
+| `Character-Role-Tab.png` | Character | Role tab | | Windows |
+| `Preferences-Backup-Tab-Mac.png` | Preferences | Backup tab | | macOS |
+| `Danger-Calls-Master-Plots-Dialog-Scene-Added.png` | Danger-Calls | Master Plots dialog | Scene added | Windows |
+
+- A script's `screenshot` statement uses the exact name of the manual image it replaces. `check` warns when a `screenshot` name does not follow the pattern.
+- Rename an image only in the PR that first scripts it. Change every link to the image in the same PR. Images that no script makes keep their current names (`DevTab.png`, `Danger-Calls-after-Scene-Move.png`).
