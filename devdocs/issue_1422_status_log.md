@@ -10,6 +10,8 @@ Session recovery for #1422 (manual test plans as automation scripts, with their 
 - `StoryCADTests/AutomationScripts/Core-Navigation.scs`: all six plan steps pass on Brigid (54.1 s, `--window 1554x1116`). `Core_Navigation.md` step CN-001.3 corrected.
 - Images replaced and renamed: `Content-Pane.png`, `Character-Tabs.png`, `Search-Results.png`. `Explorer-and-Navigator-Views.png` stays hand-maintained.
 - Tests: Automation 135+ passed; ShellViewModel, OutlineViewModel and Automation together 283 passed, 0 failed.
+- Full WinAppSDK suite at `c9c14093`: 1910 tests, 1893 passed, 17 skipped, 0 failed.
+- Parked 2026-10-17 for Collaborator work. A read-only agent was comparing the seven manual pages with the code; rerun that comparison on resume if its result is gone.
 - Next: apply the manual page comparison (Status_Bar.md Filter Status entry, Search.md, Rearranging_Content.md drop position and narrator root name), full test run, commit, PR.
 
 How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-windows10.0.22621/win-x64/.env` aside, run `StoryCADAutomation\bin\x64\Debug\net10.0-windows10.0.22621\StoryCADAutomation.exe run StoryCADTests\AutomationScripts\Core-Navigation.scs --window 1554x1116 --out <folder>`, then restore `.env`. Keep hands off the mouse and keyboard during the run.
