@@ -1,6 +1,7 @@
 #if WINDOWS10_0_22621_0_OR_GREATER
 using StoryCADAutomation.Driver;
 using StoryCADAutomation.Interpreting;
+using StoryCADAutomation.Scripting;
 
 namespace StoryCADTests.Automation;
 
@@ -42,6 +43,45 @@ public class ScriptInterpreterTests
 
         Assert.ThrowsExactly<AutomationStepException>(
             () => ScriptInterpreter.ResolveScratchPath(userPath, Scratch));
+    }
+
+    // #1422 evaluation: --keep-going skips the rest of a failed step and runs the next step.
+    // No launch statement, so every expect fails with "no app is running".
+    private static IReadOnlyList<StatementStatus> RunWithoutApp(bool keepGoing)
+    {
+        var parsed = ScriptParser.Parse(
+            "script \"Keep going\"\nstep \"A\"\nexpect FileMenuButton exists\nexpect ViewSelectorCombo exists\n" +
+            "step \"B\"\nexpect StatusMessageText exists\n");
+        Assert.IsTrue(parsed.Success, string.Join("; ", parsed.Errors));
+        var interpreter = new ScriptInterpreter(
+            () => throw new InvalidOperationException("no launch in this test"),
+            new InterpreterOptions { KeepGoing = keepGoing, Log = static _ => { } });
+
+        return interpreter.Execute(parsed).Outcomes.Select(o => o.Status).ToList();
+    }
+
+    [TestMethod]
+    public void Execute_WithKeepGoing_SkipsRestOfFailedStepAndRunsNextStep()
+    {
+        var statuses = RunWithoutApp(keepGoing: true);
+
+        CollectionAssert.AreEqual(new[]
+        {
+            StatementStatus.Passed, StatementStatus.Passed, StatementStatus.Failed, StatementStatus.Skipped,
+            StatementStatus.Passed, StatementStatus.Failed,
+        }, statuses.ToArray());
+    }
+
+    [TestMethod]
+    public void Execute_WithoutKeepGoing_SkipsEverythingAfterFirstFailure()
+    {
+        var statuses = RunWithoutApp(keepGoing: false);
+
+        CollectionAssert.AreEqual(new[]
+        {
+            StatementStatus.Passed, StatementStatus.Passed, StatementStatus.Failed, StatementStatus.Skipped,
+            StatementStatus.Skipped, StatementStatus.Skipped,
+        }, statuses.ToArray());
     }
 }
 #endif

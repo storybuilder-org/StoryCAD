@@ -23,4 +23,9 @@ Session recovery for #1422 (manual test plans as automation scripts, with their 
 - Manual fixes applied to the six pages; `labels` reports no misses on them.
 - Next: open the PR for Core_Navigation.
 
-How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-windows10.0.22621/win-x64/.env` aside, run `StoryCADAutomation\bin\x64\Debug\net10.0-windows10.0.22621\StoryCADAutomation.exe run StoryCADTests\AutomationScripts\Core-Navigation.scs --window 1554x1116 --out <folder>`, then restore `.env`. Keep hands off the mouse and keyboard during the run.
+## 2026-10-17 (PR 2 branch started)
+
+- PR #1635 (Core_Navigation) open, CI green, ready for review.
+- Branch `issue-1422-core-file-operations` from PR 1's branch. Added from the PR 1 evaluation: `--keep-going` (a failure skips the rest of its step) and `--window` as the visible frame in 100%-scale pixels. Automation tests 139 passed. Not yet run live: the next live run checks `--window 1036x744`.
+
+How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-windows10.0.22621/win-x64/.env` aside, run `StoryCADAutomation\bin\x64\Debug\net10.0-windows10.0.22621\StoryCADAutomation.exe run StoryCADTests\AutomationScripts\Core-Navigation.scs --window 1036x744 --out <folder>`, then restore `.env`. Keep hands off the mouse and keyboard during the run.

@@ -10,8 +10,8 @@ public sealed class InterpreterOptions
     public IExecutionProfile Profile { get; init; } = new TestProfile();
 
     /// <summary>
-    ///     Report failures but run remaining steps (the --keep-going flag). Session-fatal
-    ///     failures (app death, launch failure) abort regardless.
+    ///     Report failures but run the remaining steps (the --keep-going flag): a failure skips
+    ///     the rest of its step. Session-fatal failures (app death, launch failure) abort regardless.
     /// </summary>
     public bool KeepGoing { get; init; }
 
