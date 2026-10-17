@@ -195,6 +195,23 @@ public class ScriptLinterTests
         Assert.AreEqual(0, LintMenuLine(linter, "Tools/Plotting Aids/Master Plots").Count);
     }
 
+    // #1422: the runner opens a menu item through its XAML owners and never searches menus.
+    [TestMethod]
+    [DataRow("SaveStoryMenuItem", 0)]
+    [DataRow("MasterPlotsMenuItem", 0)]
+    [DataRow("ContextAddCharacterMenuItem", 1)]
+    [DataRow("FileMenuButton", 1)]
+    public void LintMenuLeaf_AgainstLiveXaml_AcceptsOnlyToolbarMenuItems(string id, int expectedErrors)
+    {
+        var linter = new ScriptLinter(XamlUiFacts.LoadFromXamlScan());
+        var parsed = ScriptParser.Parse($"script \"Lint test\"\nmenu {id}\n");
+        Assert.IsTrue(parsed.Success, string.Join("; ", parsed.Errors));
+
+        var errors = linter.Lint(parsed.Statements).Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
+
+        Assert.AreEqual(expectedErrors, errors.Count, string.Join("; ", errors));
+    }
+
     /// <summary>
     ///     Every committed script lints clean against the live XAML, the same rule as the
     ///     required CI `check`, so a XAML change that breaks a script fails here first.

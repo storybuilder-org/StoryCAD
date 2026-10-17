@@ -57,6 +57,9 @@ public sealed partial class ScriptLinter
                 case ScriptVerb.Menu when statement.Text is not null:
                     LintMenuPath(statement, findings);
                     break;
+                case ScriptVerb.Menu when statement.Target is { Kind: ElementAddressKind.AutomationId } leaf:
+                    LintMenuLeaf(statement, leaf.Value, findings);
+                    break;
                 case ScriptVerb.Tab when statement.Text is not null:
                     LintTabLabel(statement, findings);
                     break;
@@ -163,6 +166,21 @@ public sealed partial class ScriptLinter
             $"menu path '{statement.Text}' is not a menu path in the XAML (Windows UIA names); " +
             $"{where} the menus have: {string.Join(", ", next)}. " +
             "If a label itself contains '/', address the item by its leaf AutomationId instead."));
+    }
+
+    /// <summary>
+    ///     The runner opens a menu item by clicking the toolbar button and sub-menus the XAML
+    ///     puts it under; it never searches the menus (#1422). An id with no such owner (a
+    ///     context-menu item, or a control that is not a menu item) cannot be reached by menu.
+    /// </summary>
+    private void LintMenuLeaf(ScriptStatement statement, string id, List<ScriptDiagnostic> findings)
+    {
+        if (!_facts.MenuOpeners.ContainsKey(id))
+        {
+            findings.Add(Error(statement,
+                $"'{id}' is not an item on a toolbar menu in the XAML, so menu cannot open it; " +
+                "use context-menu for a tree right-click menu, or click for other controls."));
+        }
     }
 
     private void LintTabLabel(ScriptStatement statement, List<ScriptDiagnostic> findings)

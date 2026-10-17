@@ -237,7 +237,7 @@ public static class AutomationXamlScan
     ///     For each menu item with an AutomationId, the ids a user clicks to reach it: the
     ///     toolbar button that owns its flyout, then any MenuFlyoutSubItem in between, outermost
     ///     first. The automation runner opens these directly instead of trying every menu
-    ///     (#1421 Milestone 4). Items with no owning button in the XAML (context flyouts) are
+    ///     (#1421 Milestone 4). Items with no owning toolbar button (context flyouts) are
     ///     left out.
     /// </summary>
     public static IEnumerable<MenuItemPath> MenuItemPaths()
@@ -275,7 +275,9 @@ public static class AutomationXamlScan
                     else if (ancestor.Name.LocalName is "AppBarButton" or "Button")
                     {
                         openers.Add(ancestorId);
-                        ownedByButton = true;
+                        // A button inside a flyout (Shell's AddElementsButton in the tree's
+                        // right-click menu) is not on screen until a context-menu step opens it.
+                        ownedByButton = !ancestor.Ancestors().Any(a => a.Name.LocalName.EndsWith("Flyout", StringComparison.Ordinal));
                         break;
                     }
                 }

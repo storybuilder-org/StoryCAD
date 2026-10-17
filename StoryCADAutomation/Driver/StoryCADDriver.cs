@@ -755,9 +755,11 @@ public sealed class StoryCADDriver : IUiDriver
     /// <inheritdoc />
     public void InvokeMenuItem(ElementAddress leaf, IReadOnlyList<string>? openers = null, TimeSpan? timeout = null)
     {
+        // No openers means the item is not on a toolbar menu; its flyout must already be open
+        // (a context-menu step). The runner never searches menus for an item (#1422).
         var element = openers is { Count: > 0 }
             ? OpenMenusThenFind(leaf, openers, Timeout(timeout))
-            : _locator.WaitMenuItemReady(leaf, ReadinessRequirement.Invoke, Timeout(timeout));
+            : _locator.WaitUntilReady(leaf, ReadinessRequirement.Invoke, Timeout(timeout));
 
         // A real click, not the Invoke pattern: after a UIA Invoke the flyout kept the keyboard,
         // and later type and press steps were lost (#1421 Milestone 4, Intro-Video.scs line 58).

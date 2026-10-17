@@ -140,7 +140,8 @@ public interface IUiDriver : IDisposable
     /// </summary>
     /// <param name="openers">
     ///     Ids to click first, owning button outermost (from the XAML). When given, the driver
-    ///     opens exactly those menus; when null, it falls back to trying each menu in turn.
+    ///     opens exactly those menus; when null, the item's flyout must already be open (a
+    ///     context-menu step). The driver never searches the menus for an item (#1422).
     /// </param>
     void InvokeMenuItem(ElementAddress leaf, IReadOnlyList<string>? openers = null, TimeSpan? timeout = null);
 
