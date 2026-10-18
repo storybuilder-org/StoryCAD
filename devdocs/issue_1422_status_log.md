@@ -34,6 +34,9 @@ Session recovery for #1422 (manual test plans as automation scripts, with their 
 
 - Hyper-V VM `StoryCAD-Automation` on Brigid, stored in `D:\VMs`: Generation 2, 16 GB fixed memory, 4 processors, 128 GB disk, Default Switch, TPM on. Windows 11 Pro build 26300, not activated.
 - Installed unattended from `D:\VMs\ISO\answer\autounattend.xml` (packed as `answer.iso`); local admin `storycad` signs in automatically. Host reaches it with PowerShell Direct (`Invoke-Command -VMName StoryCAD-Automation`).
-- Next: rebuild `StoryCAD`, copy the build into the VM, run `Core-Navigation.scs` there with `--window 1036x744`.
+- VM display fixed at 1920x1080, 100% scale (`Set-VMVideo -ResolutionType Single`); boots from its disk.
+- `Core-Navigation.scs` passed in the VM in 26.4 s (54.1 s on Brigid), with `--window 1036x744 --keep-going`. The three screenshots are 1036 x 744 with no "(DEV BUILD)" in the title; they replace the 1536 x 1107 images from PR 1. No step failed, so `--keep-going` has not yet resumed after a failure live.
+- VM layout: `C:\Automation\storycad` (the self-contained `win-x64` build, without `.env`), `C:\Automation\repo` (the repo's `.xaml` files and `StoryCAD.sln`, which the runner's XAML scan needs) with the runner, published self-contained, in `repo\runner`. The run goes through a scheduled task in the signed-in session, because PowerShell Direct has no desktop.
+- Next: translate Core_File_Operations.md.
 
 How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-windows10.0.22621/win-x64/.env` aside, run `StoryCADAutomation\bin\x64\Debug\net10.0-windows10.0.22621\StoryCADAutomation.exe run StoryCADTests\AutomationScripts\Core-Navigation.scs --window 1036x744 --out <folder>`, then restore `.env`. Keep hands off the mouse and keyboard during the run.
