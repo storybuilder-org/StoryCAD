@@ -20,6 +20,7 @@ public class CollaboratorService
     private readonly AppState _appState;
     private readonly AutoSaveService _autoSaveService;
     private readonly BackupService _backupService;
+    private readonly EditFlushService _editFlushService;
     private readonly ILogService _logService;
     private readonly PreferenceService _preferenceService;
     private readonly StoryCADApi _storyCADApi;
@@ -34,7 +35,7 @@ public class CollaboratorService
 
     public CollaboratorService(AppState appState, ILogService logService, PreferenceService preferenceService,
         AutoSaveService autoSaveService, BackupService backupService, StoryCADApi storyCADApi,
-        Func<ICollaborator> collaboratorFactory = null)
+        EditFlushService editFlushService, Func<ICollaborator> collaboratorFactory = null)
     {
         _appState = appState;
         _logService = logService;
@@ -42,6 +43,7 @@ public class CollaboratorService
         _autoSaveService = autoSaveService;
         _backupService = backupService;
         _storyCADApi = storyCADApi;
+        _editFlushService = editFlushService;
         _collaboratorFactory = collaboratorFactory;
     }
 
@@ -60,6 +62,11 @@ public class CollaboratorService
     /// </summary>
     public async void OpenCollaborator()
     {
+        // Issue #1639: copy edits still held by the open page's view model into the model, so
+        // Collaborator reads what the writer sees. In memory only; the file is not written.
+        // The Collaborator window never deactivates the page, so nothing else flushes here.
+        _editFlushService.FlushCurrentEdits();
+
         if (_collaboratorFactory == null)
         {
             _logService.Log(LogLevel.Warn, "Collaborator not available - no Collaborator implementation registered");

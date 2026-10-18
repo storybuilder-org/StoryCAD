@@ -6,6 +6,8 @@ using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Collaborator;
 using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCADLib.Services.Logging;
+using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels;
 
 #nullable disable
 
@@ -22,6 +24,7 @@ public class CollaboratorServiceTests
             Ioc.Default.GetRequiredService<AutoSaveService>(),
             Ioc.Default.GetRequiredService<BackupService>(),
             Ioc.Default.GetRequiredService<StoryCADApi>(),
+            Ioc.Default.GetRequiredService<EditFlushService>(),
             factory);
 
     /// <summary>
@@ -61,5 +64,40 @@ public class CollaboratorServiceTests
 
         Assert.IsTrue(service.HasCollaborator,
             "HasCollaborator should be true when a Collaborator factory is registered");
+    }
+
+    /// <summary>
+    ///     Issue #1639: edits typed on the open page live in its view model until SaveModel runs.
+    ///     OpenCollaborator must flush them to the model before it hands the model to Collaborator.
+    /// </summary>
+    [TestMethod]
+    public async Task OpenCollaborator_FlushesPendingPageEditsToModel()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        var model = await outlineService.CreateModel("Flush Test", "Test Author", 0);
+        appState.CurrentDocument = new StoryDocument(model, "test.stbx");
+        var overview = model.StoryElements.OfType<OverviewModel>().First();
+        overview.StoryGenre = "Mystery";
+
+        // Real page view model, as the Story Overview page uses it, with an unsaved edit
+        var vm = new OverviewViewModel();
+        vm.Activate(overview);
+        vm.StoryGenre = "";
+        appState.CurrentSaveable = vm;
+        Assert.AreEqual("Mystery", overview.StoryGenre, "Precondition: model still holds the old value");
+
+        // No factory: OpenCollaborator returns right after the flush, so no dialog or window is created.
+        var service = CreateService();
+        try
+        {
+            service.OpenCollaborator();
+
+            Assert.AreEqual("", overview.StoryGenre, "Pending page edit should reach the model before Collaborator opens");
+        }
+        finally
+        {
+            appState.CurrentSaveable = null;
+        }
     }
 }
