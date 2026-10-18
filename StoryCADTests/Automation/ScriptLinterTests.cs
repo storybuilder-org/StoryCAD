@@ -152,6 +152,73 @@ public class ScriptLinterTests
     }
 
     [TestMethod]
+    public void Parse_WithScreenshotOfOneTarget_ProducesTargetAndZeroMargin()
+    {
+        var parsed = ScriptParser.Parse("script \"Lint test\"\nscreenshot \"Status-Bar.png\" of BackupStatusButton\n");
+
+        Assert.IsTrue(parsed.Success, string.Join("; ", parsed.Errors));
+        var s = parsed.Statements[1];
+        Assert.AreEqual(ScriptVerb.Screenshot, s.Verb);
+        Assert.IsNull(s.Crop);
+        Assert.AreEqual(1, s.CaptureTargets!.Count);
+        Assert.AreEqual("BackupStatusButton", s.CaptureTargets[0].Value);
+        Assert.AreEqual(0, s.CaptureMargin);
+    }
+
+    [TestMethod]
+    public void Parse_WithScreenshotOfSeveralTargetsAndMargin_ProducesAllTargetsAndMargin()
+    {
+        var parsed = ScriptParser.Parse(
+            "script \"Lint test\"\nscreenshot \"File-Menu.png\" of FileMenuButton tree \"Story\" name:\"Exit\" margin 12\n");
+
+        Assert.IsTrue(parsed.Success, string.Join("; ", parsed.Errors));
+        var targets = parsed.Statements[1].CaptureTargets!;
+        Assert.AreEqual(3, targets.Count);
+        Assert.AreEqual(StoryCADAutomation.Driver.ElementAddressKind.AutomationId, targets[0].Kind);
+        Assert.AreEqual(StoryCADAutomation.Driver.ElementAddressKind.TreePath, targets[1].Kind);
+        Assert.AreEqual(StoryCADAutomation.Driver.ElementAddressKind.Name, targets[2].Kind);
+        Assert.AreEqual(12, parsed.Statements[1].CaptureMargin);
+    }
+
+    [TestMethod]
+    [DataRow("of")]
+    [DataRow("of margin 8")]
+    [DataRow("of FileMenuButton margin")]
+    [DataRow("of FileMenuButton margin -1")]
+    [DataRow("of FileMenuButton margin 2.5")]
+    [DataRow("of FileMenuButton margin 8 ExitMenuItem")]
+    [DataRow("of \"FileMenuButton\"")]
+    [DataRow("crop 0,40,467,311 of FileMenuButton")]
+    [DataRow("of FileMenuButton crop 0,40,467,311")]
+    public void Parse_WithBadScreenshotOf_ReportsError(string tail)
+    {
+        var parsed = ScriptParser.Parse($"script \"Lint test\"\nscreenshot \"File-Menu.png\" {tail}\n");
+
+        Assert.IsFalse(parsed.Success);
+    }
+
+    [TestMethod]
+    public void Lint_WithUnknownScreenshotOfTarget_ReportsError()
+    {
+        Assert.AreEqual(1, LintDialogLine("screenshot \"File-Menu.png\" of NoSuchButton").Count);
+    }
+
+    [TestMethod]
+    public void Lint_WithKnownScreenshotOfTargets_ReportsNoError()
+    {
+        var linter = new ScriptLinter(new XamlUiFacts
+        {
+            AutomationIds = new HashSet<string> { "FileMenuButton", "ExitMenuItem" },
+            MenuPaths = new HashSet<string>(),
+            TabLabels = new HashSet<string>(),
+        });
+        var parsed = ScriptParser.Parse(
+            "script \"Lint test\"\nscreenshot \"File-Menu.png\" of FileMenuButton ExitMenuItem margin 12\n");
+
+        Assert.AreEqual(0, linter.Lint(parsed.Statements).Count(d => d.Severity == DiagnosticSeverity.Error));
+    }
+
+    [TestMethod]
     public void Lint_WithScreenshotDialogPath_ReportsError()
     {
         Assert.AreEqual(1, LintDialogLine("screenshot dialog \"media/File-Open-Dialog.png\"").Count);

@@ -24,7 +24,7 @@ press "Tab"
 expect StoryIdeaRichEdit text "A detective hunts a thief."
 # The unsaved-changes indicator is the status bar pencil turning red; scripts cannot read a color.
 focus TitleTextBox                        # moves the keyboard focus ring off the status bar
-screenshot "Status-Bar.png" crop 0,691,1036,53
+screenshot "Status-Bar.png" of ViewSelectorCombo BackupStatusButton margin 8
 
 step "CF-002: Save New Story"
 press "Primary+S"                         # no Save dialog: the file got its name and folder at creation
@@ -35,7 +35,7 @@ step "CF-003: Open Existing Story"
 menu CloseStoryMenuItem                   # not a plan step; the checks below must see a reopened file
 expect-no tree "Core Test Story"
 click FileMenuButton                      # not a plan step: the manual's File menu image, over the empty home page
-screenshot "File-Menu.png" crop 380,30,340,276
+screenshot "File-Menu.png" of FileMenuButton OpenCreateFileMenuItem ExitMenuItem margin 12
 press "Escape"
 press "Primary+O"
 click OpenFromFileNavItem

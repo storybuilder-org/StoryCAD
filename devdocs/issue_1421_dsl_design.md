@@ -145,6 +145,12 @@ screenshot "File-Menu.png" crop 380,30,340,276   # captures this part of the mai
                                                  # window's top-left corner (the units of --window).
                                                  # For close-up manual images (Terry, 2026-10-18,
                                                  # #1422). A crop outside the window fails the step.
+screenshot "File-Menu.png" of FileMenuButton ExitMenuItem margin 12   # captures the union of the
+                                                 # targets' on-screen rectangles (one or more targets,
+                                                 # same grammar as other verbs), grown by margin N
+                                                 # 100%-scale pixels and clipped to the window. Follows
+                                                 # layout changes; prefer it to crop. crop and of are
+                                                 # exclusive. A target with no area in the window fails.
 ```
 
 Verbs missing during #1422 translation go into this table by PR against `StoryCADAutomation`, never as per-script workarounds (per #1422 scope).

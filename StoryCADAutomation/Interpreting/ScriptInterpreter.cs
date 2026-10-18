@@ -446,6 +446,10 @@ public sealed class ScriptInterpreter
                     {
                         RequireDriver().CaptureOpenDialog(path);
                     }
+                    else if (s.CaptureTargets is { } targets)
+                    {
+                        RequireDriver().CaptureElements(path, targets, s.CaptureMargin ?? 0);
+                    }
                     else
                     {
                         RequireDriver().CaptureMainWindow(path, s.Crop);

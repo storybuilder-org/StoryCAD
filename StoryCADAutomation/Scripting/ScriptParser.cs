@@ -446,7 +446,18 @@ public static partial class ScriptParser
                 return New(ScriptVerb.Screenshot) with { Text = name };
             }
 
+            if (r.Peek is { Kind: TokenKind.Word, Value: "of" })
+            {
+                r.Next();
+                return BuildScreenshotOf(r, name);
+            }
+
             // screenshot "name.png" crop x,y,w,h: a detail of the window for a close-up manual image.
+            if (r.Peek is not { Kind: TokenKind.Word, Value: "crop" })
+            {
+                throw new SyntaxException("after the png file name, expected 'crop x,y,w,h' or 'of target ...'.");
+            }
+
             TakeKeyword(r, "crop");
             var word = TakeWord(r, "crop rectangle x,y,w,h");
             var parts = word.Split(',');
@@ -459,11 +470,50 @@ public static partial class ScriptParser
                     $"crop takes x,y,width,height as whole 100%-scale pixels with width and height above 0, not '{word}'.");
             }
 
+            if (r.Peek is { Kind: TokenKind.Word, Value: "of" })
+            {
+                throw new SyntaxException("a screenshot takes crop or of, not both.");
+            }
+
             return New(ScriptVerb.Screenshot) with
             {
                 Text = name,
                 Crop = new System.Drawing.Rectangle(values[0], values[1], values[2], values[3]),
             };
+        }
+
+        // screenshot "name.png" of target [target ...] [margin N]: the union of the targets'
+        // on-screen rectangles, so the close-up follows the layout instead of fixed pixels.
+        ScriptStatement BuildScreenshotOf(ArgReader r, string name)
+        {
+            var targets = new List<ElementAddress>();
+            while (!r.AtEnd && r.Peek is not { Kind: TokenKind.Word, Value: "margin" or "crop" })
+            {
+                targets.Add(TakeTarget(r));
+            }
+
+            if (targets.Count == 0)
+            {
+                throw new SyntaxException("screenshot ... of takes at least one target.");
+            }
+
+            if (r.Peek is { Kind: TokenKind.Word, Value: "crop" })
+            {
+                throw new SyntaxException("a screenshot takes crop or of, not both.");
+            }
+
+            var margin = 0;
+            if (!r.AtEnd)
+            {
+                TakeKeyword(r, "margin");
+                var word = TakeWord(r, "margin in 100%-scale pixels");
+                if (!int.TryParse(word, NumberStyles.None, CultureInfo.InvariantCulture, out margin))
+                {
+                    throw new SyntaxException($"margin takes a whole number of 100%-scale pixels, 0 or more, not '{word}'.");
+                }
+            }
+
+            return New(ScriptVerb.Screenshot) with { Text = name, CaptureTargets = targets, CaptureMargin = margin };
         }
 
         ScriptStatement BuildPause(ArgReader r)
