@@ -559,6 +559,32 @@ public class ShellViewModel : ObservableRecipient
     }
 
 
+    /// <summary>The status text the last search posted, so clearing the search can clear it.</summary>
+    internal string LastSearchStatus { get; set; }
+
+    /// <summary>
+    ///     Clears the search highlights, and the search's "Found N matches" message if it is
+    ///     still showing (a later message is left alone). Runs on every search-box text change.
+    /// </summary>
+    public void ClearSearch()
+    {
+        var model = appState.CurrentDocument?.Model;
+        if (model?.CurrentView != null && model.CurrentView.Count > 0)
+        {
+            foreach (var node in model.CurrentView[0])
+            {
+                node.Background = null;
+            }
+        }
+
+        if (LastSearchStatus != null && StatusMessage == LastSearchStatus)
+        {
+            StatusMessage = string.Empty;
+        }
+
+        LastSearchStatus = null;
+    }
+
     private string _filterText;
 
     public string FilterText

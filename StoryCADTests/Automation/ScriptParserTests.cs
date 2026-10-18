@@ -36,6 +36,19 @@ public class ScriptParserTests
         CollectionAssert.Contains(verbs, ScriptVerb.Closing);
     }
 
+    // #1422: a tree row's expand state is asserted on the row itself.
+    [TestMethod]
+    [DataRow("expanded", ScriptVerb.ExpectExpanded)]
+    [DataRow("collapsed", ScriptVerb.ExpectCollapsed)]
+    public void Parse_ExpectExpandState_ProducesExpandVerb(string condition, ScriptVerb expected)
+    {
+        var result = Parse($"expect tree \"Danger Calls/Settings\" {condition}");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual(expected, result.Statements[1].Verb);
+        Assert.AreEqual("Danger Calls/Settings", result.Statements[1].Target!.Value);
+    }
+
     [TestMethod]
     public void Parse_StepWithHold_StoresHoldSeconds()
     {

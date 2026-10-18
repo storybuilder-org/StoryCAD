@@ -751,20 +751,14 @@ public class OutlineViewModel : ObservableRecipient
                 }
             }
 
-            switch (searchTotal)
+            var result = searchTotal switch
             {
-                case 0:
-                    Messenger.Send(
-                        new StatusChangedMessage(new StatusMessage("Found no matches", LogLevel.Info, true)));
-                    break;
-                case 1:
-                    Messenger.Send(new StatusChangedMessage(new StatusMessage("Found 1 match", LogLevel.Info, true)));
-                    break;
-                default:
-                    Messenger.Send(new StatusChangedMessage(new StatusMessage($"Found {searchTotal} matches",
-                        LogLevel.Info, true)));
-                    break;
-            }
+                0 => "Found no matches",
+                1 => "Found 1 match",
+                _ => $"Found {searchTotal} matches",
+            };
+            shellVm.LastSearchStatus = result; // clearing the search clears this message too
+            Messenger.Send(new StatusChangedMessage(new StatusMessage(result, LogLevel.Info, true)));
         }
     }
 

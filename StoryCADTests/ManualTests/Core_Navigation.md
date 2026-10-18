@@ -31,8 +31,8 @@
 2. Click on a Character node  
    **Expected:** Content pane updates to Character form
 
-3. Double-click parent node with children  
-   **Expected:** Node expands/collapses
+3. Click a collapsed parent node with children (a double-click counts as one click)  
+   **Expected:** Node expands; clicking it again leaves it expanded
 
 4. Click expand/collapse arrow  
    **Expected:** Children show/hide

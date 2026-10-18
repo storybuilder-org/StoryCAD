@@ -1,0 +1,96 @@
+# Core_Navigation.md as an automation script (#1422). Run with:
+#   StoryCADAutomation run StoryCADTests/AutomationScripts/Core-Navigation.scs --window 1554x1116 --out automation-output
+# The window size is in physical pixels and suits a 150% display; below about 1030 logical
+# pixels wide the app hides the tree. Hands off the mouse and keyboard while it runs.
+# Manual pages (docs/Quick Start/): Navigation_and_Content_Panes.md, Tabs.md, Status_Bar.md,
+#   Story_Explorer_and_Story_Narrator_Views.md, Search.md, Rearranging_Content.md, Move_Story_Elements.md
+# Each screenshot replaces the docs/media image of the same name.
+script "Core Navigation"
+
+step "Setup: open the Danger Calls sample"
+launch
+click SampleOutlinesNavItem
+select FileOpenSamplesList "Danger Calls"
+click PrimaryButton                       # "Open sample"
+expect tree contains "Danger Calls/Characters/Leonard Kraskin"
+
+step "CN-001: Tree Navigation with Mouse"
+click tree "Danger Calls"                 # the root row exposes only ExpandCollapse, so this is a pointer click
+expect TitleTextBox text "Danger Calls"
+open-node tree "Danger Calls/Characters/Leonard Kraskin"
+expect CharacterNameTextBox text "Leonard Kraskin"
+expect tree "Danger Calls/Settings" collapsed   # the sample opens with its folders collapsed
+click tree "Danger Calls/Settings"        # plan step 3: the app reads a double-click as one click (Terry, 2026-10-17)
+expect tree "Danger Calls/Settings" expanded
+click tree "Danger Calls/Settings"        # a click never collapses; only the arrow does
+expect tree "Danger Calls/Settings" expanded
+collapse tree "Danger Calls/Settings"     # the expand/collapse arrow
+expect tree "Danger Calls/Settings" collapsed
+expand tree "Danger Calls/Settings"
+expect tree "Danger Calls/Settings" expanded
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him/Shootout"
+screenshot "Content-Pane.png"
+
+step "CN-002: Tree Navigation with Keyboard"
+open-node tree "Danger Calls/Characters/Leonard Kraskin"
+focus tree "Danger Calls/Characters/Leonard Kraskin"
+press "Down"
+press "Enter"
+expect CharacterNameTextBox text "Charlie Lacas"
+focus tree "Danger Calls/Characters/Charlie Lacas"
+press "Up"
+press "Enter"
+expect CharacterNameTextBox text "Leonard Kraskin"
+focus tree "Danger Calls/Characters"
+press "Left"
+expect tree "Danger Calls/Characters" collapsed
+press "Right"
+expect tree "Danger Calls/Characters" expanded
+
+step "CN-003: Tab Navigation"
+open-node tree "Danger Calls/Characters/Leonard Kraskin"
+expect RoleTab exists
+screenshot "Character-Tabs.png"
+tab PhysicalTab
+expect AgeTextBox exists
+tab AppearanceTab
+expect AppearanceRichEdit exists
+tab SocialTab
+expect EconomicRichEdit exists
+tab PhysicalTab
+set AgeTextBox "41"
+press "Tab"                               # the binding updates only when focus leaves the box
+tab RoleTab
+tab PhysicalTab
+expect AgeTextBox text "41"
+# Plan step 4 (narrow window shows carousel arrows) is not scripted: no verb resizes the window mid-run.
+
+step "CN-004: View Switching"
+expect ViewSelectorCombo text "Story Explorer View"
+# Explorer-and-Navigator-Views.png stays hand-maintained: it is a close crop of the open list, which a window capture cannot reproduce.
+select ViewSelectorCombo "Story Narrator View"
+expect tree contains "Narrative View/Shootout"
+select ViewSelectorCombo "Story Explorer View"
+expect tree contains "Danger Calls/Characters/Leonard Kraskin"
+
+step "CN-005: Search Navigation"
+click ShellSearchBox
+type "Lacas"
+press "Enter"
+expect StatusMessageText text "Found 19 matches"
+screenshot "Search-Results.png"
+open-node tree "Danger Calls/Characters/Charlie Lacas"
+expect CharacterNameTextBox text "Charlie Lacas"
+set ShellSearchBox ""                     # changing the search text clears the highlights
+
+step "CN-006: Drag and Drop Movement"
+drag tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him/Shootout" to tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"
+expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/Shootout"
+expect-no tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him/Shootout"
+drag tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/Shootout" to tree "Danger Calls"
+expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/Shootout"
+
+step "Teardown: exit without saving the sample"
+menu ExitMenuItem
+dialog "Save changes?" click name:"No"
+expect-exit

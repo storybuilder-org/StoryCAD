@@ -114,6 +114,9 @@ pause 1.5                    # seconds × profile pacing factor; ×0 in test mod
 expect <target> exists
 expect <target> text "value"
 expect <target> enabled | disabled
+expect <target> expanded | collapsed   # the ExpandCollapse state of the target itself (#1422);
+                                       # a child-row check cannot work, because resolving a tree
+                                       # path expands every parent on the way
 expect tree contains "path"
 expect window "title"
 expect-no <target>           # asserts absence, e.g. error dialogs. Settle-then-check:
@@ -157,7 +160,7 @@ Same script, two realizations. Profile is a runner flag, never a script statemen
 
 Recording is the `video` command (`devdocs/issue_1421_video_design.md`, Milestone 5). It replaced the OBS recording and the `.srt` subtitle file of Milestone 4; YouTube makes captions from the voice track (Terry, 2026-10-07).
 
-Not glided in presentation: `press`, the flyout steps inside `context-menu`, and the text-path form of `menu`. `menu` by id clicks, as a user would, the toolbar button and any sub-menu that the XAML puts the item under (`XamlUiFacts.MenuOpeners`), then the item. It no longer tries every menu in turn; that search remains only for an item with no owning button in the XAML. If the item has not appeared 1.5 s after the menus are opened, the menus are clicked once more (a click that lands while another flyout closes only dismisses it). If the item is still showing 1.5 s after its click, the Invoke pattern runs. `menu` needs StoryCAD in the foreground in both profiles. A UIA Invoke left the flyout holding the keyboard, so later `type` and `press` steps were lost (found in Milestone 4).
+Not glided in presentation: `press`, the flyout steps inside `context-menu`, and the text-path form of `menu`. `menu` by id clicks, as a user would, the toolbar button and any sub-menu that the XAML puts the item under (`XamlUiFacts.MenuOpeners`), then the item. It never searches the menus: the lint rejects `menu` for an id that no toolbar button owns, and a context-menu item is reached with `context-menu` (#1422). If the item has not appeared 1.5 s after the menus are opened, the menus are clicked once more (a click that lands while another flyout closes only dismisses it). If the item is still showing 1.5 s after its click, the Invoke pattern runs. `menu` needs StoryCAD in the foreground in both profiles. A UIA Invoke left the flyout holding the keyboard, so later `type` and `press` steps were lost (found in Milestone 4).
 
 ## Runner
 
@@ -198,10 +201,10 @@ The child process launches with a scrubbed environment: `COLLAB_DEBUG` and `COLL
 
 - **Bare-id targets** exist as `AutomationProperties.AutomationId` in the XAML. The scan logic is extracted from `AutomationConventionTests` into a shared library referenced by both StoryCADTests and StoryCADAutomation; a second copy would drift.
 - **Runtime-inert ids** are rejected via a deny-list (ItemsRepeater container ids like `NavigationTree`/`TrashTree` exist statically but never surface a peer; a pure existence scan would pass them).
-- **Menu/tab text-path segments** match XAML `Text`/`Header` values where the text form is used.
+- **Menu text paths** match a whole menu path in the XAML: the owning button label, then the sub-menu labels, then the leaf, each as the Windows UIA Name (explicit `AutomationProperties.Name`, else the Windows `Text`/`Label`/`Header`). Changed for #1422 (review M3): a check of each segment alone passed `menu "File/Exit"`, but the Windows Name is `Quit`. **Tab text** matches a TabViewItem `Header`.
 - **Dialog-verb paths** are `{scratch}`-rooted (error).
 - **`name:` targets** outside `dialog` scopes and **literal platform chords** (`Ctrl+...`) are warnings.
-- **`screenshot` names** are plain `.png` file names (error).
+- **`screenshot` names** are plain `.png` file names (error). A name outside the manual image standard (`devdocs/automation_naming_convention.md`, Manual image names) is a warning.
 
 CI runs `check` over all scripts on every PR, so a renamed id or menu label fails at lint time instead of in a UI run. What `check` cannot verify, stated plainly: tree node names (runtime outline data), native-dialog element names, and whether a statically valid id actually surfaces a peer at runtime outside the deny-list. Those fail only live.
 

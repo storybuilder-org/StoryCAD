@@ -504,6 +504,17 @@ public sealed class StoryCADDriver : IUiDriver
     }
 
     /// <inheritdoc />
+    public void ScrollIntoView(ElementAddress target, TimeSpan? timeout = null)
+    {
+        var element = _locator.WaitUntilReady(target, ReadinessRequirement.Exists, Timeout(timeout));
+        if (element.Patterns.ScrollItem.IsSupported)
+        {
+            element.Patterns.ScrollItem.Pattern.ScrollIntoView();
+            Wait.UntilInputIsProcessed();
+        }
+    }
+
+    /// <inheritdoc />
     public void Select(ElementAddress target, TimeSpan? timeout = null)
     {
         var element = _locator.WaitUntilReady(target, ReadinessRequirement.SelectionItem, Timeout(timeout));
@@ -650,6 +661,9 @@ public sealed class StoryCADDriver : IUiDriver
     /// <inheritdoc />
     public void Drag(ElementAddress from, ElementAddress to, TimeSpan? timeout = null)
     {
+        // A long tree can put the source row below the visible area; a user scrolls first.
+        ScrollIntoView(from, timeout);
+
         // Resolve both ends before pressing so a missing drop target never leaves the mouse
         // button held down.
         var source = ReadyClickPoint(from, timeout);
@@ -660,8 +674,11 @@ public sealed class StoryCADDriver : IUiDriver
         try
         {
             Thread.Sleep(150); // let the press register before movement starts
-            EasedMoveTo(destination);
+            // Every move while the button is down must be a real input event; the glide used
+            // elsewhere places the cursor without one, and the release then reads as a click.
+            InputMoveTo(source, destination);
             Thread.Sleep(150); // hover so drop-target logic sees the position
+            InputMoveTo(destination, destination with { Y = destination.Y + 2 });
         }
         finally
         {
@@ -681,6 +698,11 @@ public sealed class StoryCADDriver : IUiDriver
         EnsureAppForeground("type");
         Keyboard.Type(text);
         Wait.UntilInputIsProcessed();
+
+        // WinUI raises some text-changed events after the keystrokes are processed. Shell's
+        // search box clears its highlights on text change, so an Enter sent at once had its
+        // highlights wiped by the late event (#1634).
+        Thread.Sleep(500);
     }
 
     /// <inheritdoc />
@@ -728,7 +750,14 @@ public sealed class StoryCADDriver : IUiDriver
     {
         // WaitReadyRevealing expands the enclosing collapsed Expander first: collapsed
         // Expanders keep RichEdit content out of the UIA tree (#1420 expand-before-type).
-        var element = _locator.WaitReadyRevealing(target, ReadinessRequirement.SetValue, Timeout(timeout));
+        // An AutoSuggestBox holds no value itself; its text lives in an inner text box that
+        // carries no StoryCAD AutomationId (Shell's ShellSearchBox, #1422).
+        var outer = _locator.TryFind(target, out _);
+        var element = outer is not null && !outer.Patterns.Value.IsSupported
+                      && outer.FindFirstDescendant(cf => cf.ByControlType(ControlType.Edit)) is { } inner
+                      && inner.Patterns.Value.IsSupported
+            ? inner
+            : _locator.WaitReadyRevealing(target, ReadinessRequirement.SetValue, Timeout(timeout));
         try
         {
             element.Focus(); // mimic a user edit so focus-driven bindings fire on later focus moves
@@ -755,9 +784,11 @@ public sealed class StoryCADDriver : IUiDriver
     /// <inheritdoc />
     public void InvokeMenuItem(ElementAddress leaf, IReadOnlyList<string>? openers = null, TimeSpan? timeout = null)
     {
+        // No openers means the item is not on a toolbar menu; its flyout must already be open
+        // (a context-menu step). The runner never searches menus for an item (#1422).
         var element = openers is { Count: > 0 }
             ? OpenMenusThenFind(leaf, openers, Timeout(timeout))
-            : _locator.WaitMenuItemReady(leaf, ReadinessRequirement.Invoke, Timeout(timeout));
+            : _locator.WaitUntilReady(leaf, ReadinessRequirement.Invoke, Timeout(timeout));
 
         // A real click, not the Invoke pattern: after a UIA Invoke the flyout kept the keyboard,
         // and later type and press steps were lost (#1421 Milestone 4, Intro-Video.scs line 58).
@@ -1156,6 +1187,20 @@ public sealed class StoryCADDriver : IUiDriver
     ///     drag logic in the app see a plausible pointer, and presentation recordings read as
     ///     human motion. Duration scales with distance, bounded to keep test mode fast.
     /// </summary>
+    /// <summary>Moves in small real-input steps (see NativeMethods.SendMouseMove).</summary>
+    private static void InputMoveTo(Point from, Point to)
+    {
+        const int steps = 30;
+        for (var i = 1; i <= steps; i++)
+        {
+            var t = (double)i / steps;
+            NativeMethods.SendMouseMove(
+                (int)Math.Round(from.X + (to.X - from.X) * t),
+                (int)Math.Round(from.Y + (to.Y - from.Y) * t));
+            Thread.Sleep(10);
+        }
+    }
+
     private static void EasedMoveTo(Point target)
     {
         var start = Mouse.Position;

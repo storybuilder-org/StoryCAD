@@ -27,20 +27,22 @@ Two more assist in researching your story:
 	•	Web
 	•	Notes
 
-There’s also a Trashcan node which is the parent for other nodes you wish to discard.
+A StoryWorld element holds the rules, history, and cultures of your story’s world.
 
-Clicking (or touching) a Story Element node on the Navigation Pane will display that Story Element’s  content in the Content Panel. Each Story Element type has its own form; the major ones are tabbed.
-![](../media/ContentPane.png)
+Below the outline, under a gray line, is a Deleted Story Elements node, which holds the story elements you delete.
+
+Clicking (or touching) a Story Element node on the Navigation Pane will display that Story Element’s  content in the Content Pane. Each Story Element type has its own form; the major ones are tabbed.
+![](../media/Content-Pane.png)
 
 
 
-On some screen sizes and orientations the Navigation and Content panes may be stacked with the Navigation pane above the Content pane. In those cases the Show/Hide Navigation button (the hamburger menu button) acts differently; it toggles from the Navigation Pane to the Content Pane and back.
+When the StoryCAD window is narrow, there is room for only one pane, and the Content Pane fills the window. The Show/Hide Navigation button (the hamburger menu button) then switches between the Navigation Pane and the Content Pane.
 
 ![](../media/Navigation-and-Content-Pane.png)
 
 
 Your outline has only one Story Overview; it’s created automatically when you open or create a new outline. The Story Overview is the root of the Navigation Pane tree, and all other Story Elements are below it. 
 
-Every major form also has a full-page tab (labeled Notes) which holds your general notes and thoughts regarding the story element. We won’t talk about these again; just be aware that they’re there.
+Most forms also have a full-page tab (labeled Notes) which holds your general notes and thoughts regarding the story element. We won’t talk about these again; just be aware that they’re there.
 
 

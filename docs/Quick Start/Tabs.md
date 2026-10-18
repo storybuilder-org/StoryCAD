@@ -8,10 +8,10 @@ has_toc: false
 ---
 ### Tabs
 
-For most Story Element types, that Form contains multiple tabs. Clicking or touching a Tab name (the larger font) will switch to that tab’s content. 
+For most Story Element types, that Form contains multiple tabs. Clicking or touching a tab name will switch to that tab’s content. 
 
 Tabs allow you to easily switch between different sections of a form, rather than having to navigate through multiple separate pages or windows. A tab organizes and groups related information.
 
-In some cases (and particularly if you resize the StoryCAD window smaller) not all tabs will show. In that case  the tabs will form a carousel you can scroll left or right by using the left or right arrows that appear at the edges of the tab area.
+Some forms, such as the Character form, have more tabs than fit across the window, and a smaller window shows fewer. The tabs then form a carousel you can scroll left or right by using the left or right arrows at the edges of the tab area.
 
-![](../media/Tabs.png)
+![](../media/Character-Tabs.png)

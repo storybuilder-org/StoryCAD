@@ -11,10 +11,12 @@ namespace StoryCADAutomation.Driver;
 /// <param name="Name">UIA Name, or null when unreadable.</param>
 /// <param name="Text">Value-pattern or Text-pattern content, or null when the element has neither.</param>
 /// <param name="ControlType">UIA control type name, for diagnostics only.</param>
+/// <param name="IsExpanded">ExpandCollapse state (true expanded, false collapsed), or null when the element has no such pattern.</param>
 public sealed record ElementState(
     bool IsEnabled,
     bool IsOffscreen,
     bool IsKeyboardFocusable,
     string? Name,
     string? Text,
-    string ControlType);
+    string ControlType,
+    bool? IsExpanded = null);
