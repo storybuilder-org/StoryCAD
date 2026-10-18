@@ -27,7 +27,7 @@ public sealed partial class WebPage : Page
     /// <summary>
     ///     This code updates the timestamp and query so that the URL box can be updated.
     /// </summary>
-    private void Web_OnNavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
+    private void Web_OnNavigationCompleted(Microsoft.UI.Xaml.Controls.WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
     {
         WebVM.Query = WebVM.Url.ToString();
         WebVM.Timestamp = DateTime.Now;
