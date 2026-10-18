@@ -24,7 +24,7 @@ Some options in the menu have key binds to speed up your story planning. Below i
 
 ### Add Story Element Commands
 
-These shortcuts are available when the story explorer is visible.
+These shortcuts are available when the Story Explorer view is visible, except Alt+A, which works in the Story Narrator view.
 
 | Windows | macOS | Action |
 |---------|-------|--------|
@@ -54,10 +54,10 @@ These shortcuts are available when the story explorer is visible.
 | Windows | macOS | Action |
 |---------|-------|--------|
 | Ctrl+P | &#8984;P | Print Reports (Windows) / PDF Reports (macOS) |
-| Ctrl+Shift+P | &#8679;&#8984;P | PDF Reports |
+| Ctrl+Shift+P | &#8679;&#8984;P | PDF Reports (Windows) / Print Reports (macOS) |
 | Ctrl+R | &#8984;R | Scrivener Reports |
 
-*Note: Print Reports is only available on Windows. On macOS, Ctrl+P opens PDF Reports instead.*
+*Note: the two platforms swap these keys. On macOS, &#8984;P opens PDF Reports and &#8679;&#8984;P opens Print Reports.*
 
 ### Other
 

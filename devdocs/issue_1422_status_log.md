@@ -39,4 +39,11 @@ Session recovery for #1422 (manual test plans as automation scripts, with their 
 - VM layout: `C:\Automation\storycad` (the self-contained `win-x64` build, without `.env`), `C:\Automation\repo` (the repo's `.xaml` files and `StoryCAD.sln`, which the runner's XAML scan needs) with the runner, published self-contained, in `repo\runner`. The run goes through a scheduled task in the signed-in session, because PowerShell Direct has no desktop.
 - Next: translate Core_File_Operations.md.
 
+## 2026-10-18 (PR 2, Core_File_Operations)
+
+- `StoryCADTests/AutomationScripts/Core-File-Operations.scs`: all six plan steps pass in the VM (35.8 s, `--window 1036x744`). Two runs; the first failure (an off-screen tree row) let `--keep-going` resume at the next step live. No new verbs.
+- `Core_File_Operations.md` corrected: no New Story command (Ctrl+N opens the Narrative Editor); a new outline is written when created, so Save shows no dialog; the changed indicator is the red pencil, not "Changed" text; "Save changes?" has Yes and No only; menu paths updated.
+- Manual: `Create-New-Outline-Dialog.png` replaced (old image showed the 3.x dialog). Page comparison (agent) found five mismatches, all fixed: Reading_and_Writing_Outlines.md (menu item names, Save As dialog, open saves silently, duplicate samples paragraph), Starting_and_Stopping_StoryCAD.md (single instance is Windows only), Key_Binds.md (Alt+A needs the Narrator view; macOS swaps the two report keys). Label check: no app-label misses.
+- Waiting on Terry: no Cancel on "Save changes?" (intended or a defect); `File-Menu.png` and `Status-Bar.png` are stale close crops (crop option or full-window images).
+
 How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-windows10.0.22621/win-x64/.env` aside, run `StoryCADAutomation\bin\x64\Debug\net10.0-windows10.0.22621\StoryCADAutomation.exe run StoryCADTests\AutomationScripts\Core-Navigation.scs --window 1036x744 --out <folder>`, then restore `.env`. Keep hands off the mouse and keyboard during the run.

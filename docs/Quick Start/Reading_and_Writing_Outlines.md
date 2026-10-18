@@ -17,7 +17,7 @@ A StoryCAD outline is a single file with a file extension of .stbx: for instance
 
 StoryCAD .stbx files are fully compatible across Windows and macOS. See [Platform Differences](../Front%20Matter/Platform_Differences.html) for details on text formatting differences between platforms.
 
-The Open command identifies which outline you wish to work on. The Save command will save the file with the same name it with which it was opened or previously saved. The Save As command will save an outline under a new name or at a new location. 
+**Open/Create file** opens the dialog below, where you open an outline or start a new one. **Save Story** saves the outline under the name and folder it already has; a new outline gets those when you create it, so Save Story never asks for a file name. **Save Story As** opens a Save as dialog with a **New project Name** and a **Parent Folder Path**, to save a copy under a new name or in a new folder; StoryCAD then works on the copy. **Create Backup** makes a backup copy now. **Close Story** closes the outline and asks whether to save changes if there are any.
 
 File Open displays the following open dialog:
 
@@ -36,7 +36,5 @@ Create new outline displays this page:
 
 ![](../media/Create-New-Outline-Dialog.png)
  
-Clicking on Sample Stories on the left tab displays a list of sample outlines installed with StoryCAD for you to play with. If you intend to change a sample, we recommend saving it to a different location before doing so.
-
-Only one story outline can be open at a time.  If you open a new file you'll be prompted to save the current file first if it’s been modified.
+Only one story outline can be open at a time.  If you open another outline while the current one has unsaved changes, StoryCAD saves the current outline first, without asking.
 
