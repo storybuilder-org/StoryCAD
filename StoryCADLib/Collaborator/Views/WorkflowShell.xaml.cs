@@ -102,6 +102,7 @@ public sealed partial class WorkflowShell : Page
                 }
             };
             AutomationProperties.SetName(box, entry.Title);
+            AutomationProperties.SetAutomationId(box, CollaboratorAutomationIds.WorkflowCheck(entry.Label));
 
             checkBoxes.Add((box, entry.Label));
             panel.Children.Add(box);
@@ -222,6 +223,13 @@ public sealed partial class WorkflowShell : Page
             IsChecked = settings.ShowCostDetails,
             Margin = new Thickness(0, 12, 0, 0)
         };
+
+        AutomationProperties.SetAutomationId(tersenessCombo, CollaboratorAutomationIds.SettingsTersenessCombo);
+        AutomationProperties.SetAutomationId(genreTextBox, CollaboratorAutomationIds.SettingsGenreTextBox);
+        AutomationProperties.SetAutomationId(likesTextBox, CollaboratorAutomationIds.SettingsLikesTextBox);
+        AutomationProperties.SetAutomationId(dislikesTextBox, CollaboratorAutomationIds.SettingsDislikesTextBox);
+        AutomationProperties.SetAutomationId(loggingCombo, CollaboratorAutomationIds.SettingsLoggingCombo);
+        AutomationProperties.SetAutomationId(showCostToggle, CollaboratorAutomationIds.SettingsShowCostCheck);
 
         var panel = new StackPanel
         {

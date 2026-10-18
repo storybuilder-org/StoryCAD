@@ -71,6 +71,21 @@ Every interactive control gets `AutomationProperties.AutomationId`.
 - Static TabViewItems are not templated; each gets a `Tab`-suffixed AutomationId.
 - A composite user control (`Traits`, `RelationshipView`, `Conflict`, `Flaw`, `BrowseTextBox`, `ImageGalleryControl`) carries AutomationIds on its internal controls. If a composite is ever instantiated inside a repeater, treat it like a DataTemplate: internal ids stay, tests scope by the repeating parent's id plus a bound Name.
 
+## Controls built in C#
+
+The XAML scan cannot see controls that code creates. Collaborator builds its pane, star buttons, Customize Workflows dialog, and Settings dialog in C# (Collaborator #197). `StoryCADLib/Collaborator/CollaboratorAutomationIds.cs` holds the rules, and the code that makes each control calls it. `{Label}` is the workflow's `Label` in `WorkflowRegistry`; a group title loses its spaces.
+
+| Control | AutomationId |
+|---|---|
+| Workflow row | `Workflow{Label}NavItem`, for example `WorkflowPremiseNavItem` |
+| Star on a workflow row | `Workflow{Label}StarButton` |
+| Outline gaps row | `WorkflowOutlineGapsNavItem` |
+| Group row | `WorkflowGroup{Title}NavItem`, for example `WorkflowGroupStarredNavItem`, `WorkflowGroupStoryWorldNavItem` |
+| Customize Workflows check box | `Workflow{Label}Check` |
+| Settings fields | `WorkflowSettingsTersenessCombo`, `WorkflowSettingsGenreTextBox`, `WorkflowSettingsLikesTextBox`, `WorkflowSettingsDislikesTextBox`, `WorkflowSettingsLoggingCombo`, `WorkflowSettingsShowCostCheck` |
+
+A starred workflow sits in the Starred group and keeps its row id. The other groups start closed, so a script expands the group before it clicks a row. `CollaboratorAutomationIdCoverageTests` in `StoryCADTests` fails when C# code in `CollaboratorLib` or `StoryCADLib/Collaborator` creates an interactive control without a `SetAutomationId` call for it.
+
 ## Do not annotate
 
 - Decorative icons inside an already-labeled parent (SymbolIcon, FontIcon inside a Button or MenuFlyoutItem).
