@@ -295,7 +295,9 @@ public class BeatSheetsViewModel : ObservableObject
         _storyModel = storyModel;
         _problemModel = model;
 
-        _structureModelTitle = model.StructureTitle;
+        // #1641: raise PropertyChanged so the Beat Sheet ComboBox follows a reload after
+        // Collaborator Accept. _isLoading keeps the setter logic and the dirty flag out.
+        SetProperty(ref _structureModelTitle, model.StructureTitle, nameof(StructureModelTitle));
         StructureDescription = model.StructureDescription;
         StructureBeats = model.StructureBeats;
         BoundStructure = model.BoundStructure;

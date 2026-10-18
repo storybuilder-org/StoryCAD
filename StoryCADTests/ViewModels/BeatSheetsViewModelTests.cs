@@ -314,6 +314,31 @@ public class BeatSheetsViewModelTests
         Assert.AreEqual("Save The Cat", _beatEditor.StructureModelTitle);
     }
 
+    /// <summary>
+    ///     Issue #1641: Collaborator Accept reloads the open Problem page through LoadBeats. The
+    ///     Beat Sheet ComboBox only updates on PropertyChanged, so a reload that changes the title
+    ///     must raise it, without marking the outline dirty or applying the sheet again.
+    /// </summary>
+    [TestMethod]
+    public void LoadBeats_Reload_RaisesStructureModelTitleChangedWithoutDirty()
+    {
+        _problemModel.StructureTitle = "";
+        _problemModel.StructureBeats = new ObservableCollection<StructureBeat>();
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _dirtyNotified = false;
+
+        var raised = new List<string>();
+        _beatEditor.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+        _problemModel.StructureTitle = "Three Act Play";
+
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+
+        Assert.AreEqual("Three Act Play", _beatEditor.StructureModelTitle);
+        CollectionAssert.Contains(raised, nameof(BeatSheetsViewModel.StructureModelTitle));
+        Assert.IsFalse(_dirtyNotified, "A reload must not mark the outline dirty");
+        Assert.AreEqual(0, _beatEditor.StructureBeats.Count, "A reload must not apply the beat sheet");
+    }
+
     [TestMethod]
     public void SaveBeats_ShouldWriteBackToProblemModel()
     {
