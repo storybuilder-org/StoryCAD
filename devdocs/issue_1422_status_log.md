@@ -56,3 +56,10 @@ Session recovery for #1422 (manual test plans as automation scripts, with their 
 - VM runs: stage the build to `D:\VMs\stage` (StoryCAD `win-x64` without `.env`; runner published self-contained into the VM's `C:\Automation\repo\runner`), set the script name in `C:\Automation\run.cmd`, start it as a scheduled task in the signed-in session, copy `C:\Automation\out` back.
 
 How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-windows10.0.22621/win-x64/.env` aside, run `StoryCADAutomation\bin\x64\Debug\net10.0-windows10.0.22621\StoryCADAutomation.exe run StoryCADTests\AutomationScripts\Core-Navigation.scs --window 1036x744 --out <folder>`, then restore `.env`. Keep hands off the mouse and keyboard during the run.
+
+## 2026-10-18 (PR 3 branch started, Core_Story_Elements)
+
+- Branch `issue-1422-core-story-elements` from `dev` at `8abc5c54` (after PR #1637 merged).
+- New `screenshot "Name.png" of <target> [<target> ...] [margin N]`: the image covers the named elements plus a margin in 100%-scale pixels, clipped to the window (Terry, 2026-10-18: close-ups by element name instead of pixel numbers). `Core-File-Operations.scs` uses it for `Status-Bar.png` and `File-Menu.png`. Automation tests 158 passed; lint clean.
+- VM runs are one command: `D:\VMs\Run-InVM.ps1 -Repo <worktree> -Script <name>.scs` (elevated PowerShell) stages the Debug build, runner and XAML, runs in the VM, and copies results to `D:\VMs\out\<script>`. The script lives on Brigid, not in the repo. First run: Core_File_Operations passed, 42.1 s in the VM, 97 s end to end.
+- Open: the new `Status-Bar.png` takes a thin strip of the page above the status bar (margin 8 reaches past its top edge). Fix the margin, retake both images into `docs/media`, then start the Core_Story_Elements script.
