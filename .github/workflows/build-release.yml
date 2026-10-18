@@ -247,6 +247,31 @@ jobs:
           echo
           echo "-------------------"
 
+      # Dependabot and fork PRs run without the repository's Actions secrets. Those runs build and
+      # test without signing, skip the tests that need .env, and upload no packages. A release
+      # dispatch must have them, so it fails here instead of shipping unsigned.
+      - name: Check for secrets
+        id: secrets
+        shell: bash
+        env:
+          PFX_B64: ${{ secrets.BASE64_ENCODED_PFX }}
+          APPLE_CERTS: ${{ secrets.APPLE_CERTIFICATES_BASE64 }}
+          APP_ENV: ${{ secrets.ENV }}
+        run: |
+          if [ "${{ matrix.os }}" = "macos-latest" ]; then cert="$APPLE_CERTS"; else cert="$PFX_B64"; fi
+          signing=false; has_env=false
+          [ -n "$cert" ] && signing=true
+          [ -n "$APP_ENV" ] && has_env=true
+          echo "signing=$signing" >> "$GITHUB_OUTPUT"
+          echo "has_env=$has_env" >> "$GITHUB_OUTPUT"
+          if [ "$signing" = false ]; then
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              echo "::error::Signing secrets are missing. A dispatch build must be signed."
+              exit 1
+            fi
+            echo "::notice::No signing secrets (Dependabot or fork PR): building and testing without signing or packages."
+          fi
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -255,6 +280,8 @@ jobs:
           cache-dependency-path: |
             **/*.csproj
             **/packages.lock.json
+            Directory.Packages.props
+            global.json
 
       - name: Install Uno macOS workload
         if: matrix.os == 'macos-latest'
@@ -305,7 +332,7 @@ jobs:
           echo "Updated CFBundleVersion to ${{ github.run_number }}"
 
       - name: Decode real PFX and write .env (Windows)
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-latest' && steps.secrets.outputs.signing == 'true'
         shell: pwsh
         env:
           PFX_B64: ${{ secrets.BASE64_ENCODED_PFX }}
@@ -324,7 +351,7 @@ jobs:
 
       - name: Run tests (Windows x64)
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
-        run: dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:Platform=${{ matrix.platform }} -p:IsBetaBuild=${{ steps.beta.outputs.is_beta }} -f net10.0-desktop
+        run: dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:Platform=${{ matrix.platform }} -p:IsBetaBuild=${{ steps.beta.outputs.is_beta }} -f net10.0-desktop ${{ steps.secrets.outputs.has_env != 'true' && '--filter "FullyQualifiedName!~DopplerTests"' || '' }}
 
       - name: Write .env (macOS)
         if: matrix.os == 'macos-latest'
@@ -337,7 +364,7 @@ jobs:
           fi
 
       - name: Setup macOS signing
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-latest' && steps.secrets.outputs.signing == 'true'
         env:
           APPLE_CERTIFICATES_BASE64: ${{ secrets.APPLE_CERTIFICATES_BASE64 }}
           APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
@@ -377,7 +404,7 @@ jobs:
 
       - name: Run all tests (macOS)
         if: matrix.os == 'macos-latest'
-        run: dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:IsBetaBuild=${{ steps.beta.outputs.is_beta }} -f net10.0-desktop
+        run: dotnet test --project StoryCADTests/StoryCADTests.csproj --configuration Release --no-restore -p:IsBetaBuild=${{ steps.beta.outputs.is_beta }} -f net10.0-desktop ${{ steps.secrets.outputs.has_env != 'true' && '--filter "FullyQualifiedName!~DopplerTests"' || '' }}
 
       # 10 ─ Setup MSBuild (Windows only)
       - name: Setup MSBuild
@@ -392,7 +419,8 @@ jobs:
           PFX_PASSWORD: ${{ secrets.PFX_PASSWORD }}
         run: |
           $pfx = "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx"
-          if (-not (Test-Path $pfx)) { throw "PFX missing. Cannot sign MSIX." }
+          $signing = "${{ steps.secrets.outputs.signing }}" -eq "true"
+          if ($signing -and -not (Test-Path $pfx)) { throw "PFX missing. Cannot sign MSIX." }
           $msbuildArgs = @(
             'StoryCAD.sln',
             '/m',
@@ -400,14 +428,18 @@ jobs:
             '/p:Platform=${{ matrix.platform }}',
             '/p:UapAppxPackageBuildMode=SideloadOnly',
             '/p:AppxBundle=Never',
-            "/p:PackageCertificateKeyFile=$pfx",
             "/p:AppxPackageDir=${{ github.workspace }}\StoryCAD\Packages\",
             '/p:GenerateAppxPackageOnBuild=true',
             '/p:PublishReadyToRun=false',
             '/p:IsBetaBuild=${{ steps.beta.outputs.is_beta }}'
           )
-          if (-not [string]::IsNullOrEmpty($env:PFX_PASSWORD)) {
-            $msbuildArgs += "/p:PackageCertificatePassword=$env:PFX_PASSWORD"
+          if ($signing) {
+            $msbuildArgs += "/p:PackageCertificateKeyFile=$pfx"
+            if (-not [string]::IsNullOrEmpty($env:PFX_PASSWORD)) {
+              $msbuildArgs += "/p:PackageCertificatePassword=$env:PFX_PASSWORD"
+            }
+          } else {
+            $msbuildArgs += '/p:AppxPackageSigningEnabled=false'
           }
           & msbuild @msbuildArgs
 
@@ -419,8 +451,12 @@ jobs:
           Remove-Item "${{ github.workspace }}\StoryCAD\GitHubActionsWorkflow.pfx" -Force -ErrorAction SilentlyContinue
           Remove-Item "${{ github.workspace }}\StoryCAD\.env","${{ github.workspace }}\StoryCADTests\.env" -Force -ErrorAction SilentlyContinue
 
+      - name: Build macOS app (unsigned)
+        if: matrix.os == 'macos-latest' && steps.secrets.outputs.signing != 'true'
+        run: dotnet build StoryCAD/StoryCAD.csproj -c Release -f ${{ matrix.fw }} --no-restore -p:IsBetaBuild=${{ steps.beta.outputs.is_beta }}
+
       - name: Publish macOS package
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-latest' && steps.secrets.outputs.signing == 'true'
         run: |
           ENTITLEMENTS="StoryCAD/Platforms/Desktop/Entitlements.plist"
           CERT="Apple Distribution: StoryBuilder Foundation (3T4DPS2D5Y)"
@@ -468,14 +504,14 @@ jobs:
           rm -f "${{ github.workspace }}/StoryCADTests/.env"
 
       - name: Zip MSIX artifacts (Windows)
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-latest' && steps.secrets.outputs.signing == 'true'
         shell: pwsh
         run: |
           $zipName = "storycad-msix-${{ matrix.art }}.zip"
           Compress-Archive -Path "${{ github.workspace }}\StoryCAD\Packages\*" -DestinationPath $zipName -Force
 
       - name: Upload MSIX (Windows)
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-latest' && steps.secrets.outputs.signing == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: storycad-msix-${{ matrix.art }}
@@ -524,7 +560,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload PKG (macOS)
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-latest' && steps.secrets.outputs.signing == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: storycad-${{ matrix.art }}
@@ -564,6 +600,8 @@ jobs:
           cache-dependency-path: |
             **/*.csproj
             **/packages.lock.json
+            Directory.Packages.props
+            global.json
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
@@ -686,6 +724,8 @@ jobs:
           cache-dependency-path: |
             **/*.csproj
             **/packages.lock.json
+            Directory.Packages.props
+            global.json
 
       - name: Setup Python
         uses: actions/setup-python@v5
