@@ -317,8 +317,10 @@ jobs:
           "tag_version=$v"   >> $env:GITHUB_OUTPUT
           Write-Host "Generated version: $v"
 
+      # Restore as Release: every later step builds Release with --no-restore. A Debug restore pulls in
+      # Uno.WinUI.DevServer, which Uno.Sdk 6.7+ rejects in optimized builds (UNOB0019).
       - name: Restore
-        run: dotnet restore StoryCAD.sln
+        run: dotnet restore StoryCAD.sln -p:Configuration=Release
 
       - name: Set version in manifest and csproj
         shell: pwsh
