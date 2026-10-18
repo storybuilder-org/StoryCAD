@@ -116,4 +116,29 @@ public class CollaboratorAutomationIdsTests
 
         Assert.AreEqual(0, duplicates.Count, $"Duplicate ids: {string.Join(", ", duplicates)}");
     }
+
+#if WINDOWS10_0_22621_0_OR_GREATER // the runner, and its lint, exist on this target only
+    /// <summary>
+    ///     The automation runner cannot reference StoryCADLib, so its lint repeats the id shapes.
+    ///     Every id built here must pass that lint, or scripts cannot use it.
+    /// </summary>
+    [TestMethod]
+    public void AllIds_InAutomationScript_PassLint()
+    {
+        var linter = new StoryCADAutomation.Scripting.ScriptLinter(new StoryCADAutomation.Scripting.XamlUiFacts
+        {
+            AutomationIds = new HashSet<string>(),
+            MenuPaths = new HashSet<string>(),
+            TabLabels = new HashSet<string>(),
+        });
+        var script = "script \"Ids\"\n" + string.Concat(AllIds().Select(id => $"expect {id} exists\n"));
+        var parsed = StoryCADAutomation.Scripting.ScriptParser.Parse(script);
+        Assert.IsTrue(parsed.Success, string.Join("; ", parsed.Errors));
+
+        var errors = linter.Lint(parsed.Statements)
+            .Where(d => d.Severity == StoryCADAutomation.Scripting.DiagnosticSeverity.Error)
+            .ToList();
+        Assert.AreEqual(0, errors.Count, string.Join("; ", errors));
+    }
+#endif
 }

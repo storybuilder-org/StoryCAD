@@ -54,6 +54,26 @@ public class ScriptLinterTests
     }
 
     [TestMethod]
+    [DataRow("click WorkflowPremiseNavItem")]
+    [DataRow("click WorkflowPremiseStarButton")]
+    [DataRow("expect WorkflowPremiseCheck exists")]
+    [DataRow("expand WorkflowGroupOverviewNavItem")]
+    [DataRow("expect WorkflowOutlineGapsNavItem exists")]
+    [DataRow("expect WorkflowSettingsTersenessCombo exists")]
+    public void Lint_WithCollaboratorIdBuiltInCSharp_ReportsNoError(string line)
+    {
+        Assert.AreEqual(0, LintDialogLine(line).Count);
+    }
+
+    [TestMethod]
+    [DataRow("click WorkflowPremiseRow")]
+    [DataRow("expect WorkflowSettingsTersenessDropDown exists")]
+    public void Lint_WithCollaboratorLikeIdOfWrongShape_ReportsError(string line)
+    {
+        Assert.AreEqual(1, LintDialogLine(line).Count);
+    }
+
+    [TestMethod]
     public void Lint_WithMadeUpIdInDialog_ReportsError()
     {
         Assert.AreEqual(1, LintDialogLine("dialog \"Save changes?\" click NoSuchButton").Count);

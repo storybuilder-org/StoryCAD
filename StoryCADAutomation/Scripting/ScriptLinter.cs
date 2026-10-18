@@ -114,6 +114,11 @@ public sealed partial class ScriptLinter
                             $"'{address.Value}' is a ContentDialog button; use it only with click or dialog."));
                     }
                 }
+                else if (CollaboratorBuiltIdPattern().IsMatch(address.Value))
+                {
+                    // A Collaborator control built in C# (Collaborator #197): no XAML holds it, and
+                    // the workflow labels live in CollaboratorLib, so its existence is checked live.
+                }
                 else if (statement.Verb == ScriptVerb.Dialog && NativeControlIdPattern().IsMatch(address.Value))
                 {
                     // A native dialog control id (all digits, e.g. "1" for OK): outside the XAML,
@@ -270,6 +275,11 @@ public sealed partial class ScriptLinter
 
     [System.Text.RegularExpressions.GeneratedRegex(@"^[0-9]+$")]
     private static partial System.Text.RegularExpressions.Regex NativeControlIdPattern();
+
+    // The shapes StoryCADLib's CollaboratorAutomationIds builds. The runner cannot reference
+    // StoryCADLib, so the shapes are repeated here.
+    [System.Text.RegularExpressions.GeneratedRegex(@"^Workflow(Group|Settings)?[A-Z][A-Za-z0-9]*(NavItem|StarButton|Check|Combo|TextBox)$")]
+    private static partial System.Text.RegularExpressions.Regex CollaboratorBuiltIdPattern();
 
     [System.Text.RegularExpressions.GeneratedRegex(@"^[A-Za-z0-9_.-]+\.png$")]
     private static partial System.Text.RegularExpressions.Regex ScreenshotNamePattern();
