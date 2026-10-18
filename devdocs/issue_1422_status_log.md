@@ -46,5 +46,13 @@ Session recovery for #1422 (manual test plans as automation scripts, with their 
 - Manual: `Create-New-Outline-Dialog.png` replaced (old image showed the 3.x dialog). Page comparison (agent) found five mismatches, all fixed: Reading_and_Writing_Outlines.md (menu item names, Save As dialog, open saves silently, duplicate samples paragraph), Starting_and_Stopping_StoryCAD.md (single instance is Windows only), Key_Binds.md (Alt+A needs the Narrator view; macOS swaps the two report keys). Label check: no app-label misses.
 - "Save changes?" with no Cancel, and opening another outline saving without asking: Terry ruled these defects; filed as #1636 (fix based on `dev`), which lists the #1422 script, plan, page and image updates to make after the fix.
 - New `screenshot "Name.png" crop x,y,w,h` (Terry, 2026-10-18: keep close-up images): 100%-scale pixels from the window's top-left corner. Parser and `CropArea` unit tests (8 cases). `File-Menu.png` (was missing Create Backup) and `Status-Bar.png` (was missing the AutoSave and Backup icons) now come from the script. Final run: passed in 37.7 s.
+- PR #1637 opened against `dev` (branch rebased onto `dev` after PR 1's merge); CI green; ready for Terry's review.
+
+### Session recovery (2026-10-18, paused for Terry's demo)
+
+- Waiting on Terry: review of PR #1637.
+- After #1637 merges: merge-cleanup (tick C2 on #1422, `log.md` merge entry, wiki page for the crop option), then C3, Core_Story_Elements, on a new branch from `dev`.
+- Separate: #1636 (Save changes dialog), fix based on `dev`; its body lists the #1422 follow-ups.
+- VM runs: stage the build to `D:\VMs\stage` (StoryCAD `win-x64` without `.env`; runner published self-contained into the VM's `C:\Automation\repo\runner`), set the script name in `C:\Automation\run.cmd`, start it as a scheduled task in the signed-in session, copy `C:\Automation\out` back.
 
 How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-windows10.0.22621/win-x64/.env` aside, run `StoryCADAutomation\bin\x64\Debug\net10.0-windows10.0.22621\StoryCADAutomation.exe run StoryCADTests\AutomationScripts\Core-Navigation.scs --window 1036x744 --out <folder>`, then restore `.env`. Keep hands off the mouse and keyboard during the run.
