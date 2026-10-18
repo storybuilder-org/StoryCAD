@@ -1,32 +1,39 @@
 version: 2
+
+# Every ecosystem lands in one weekly PR. Security updates still open on their own, straight away.
+multi-ecosystem-groups:
+  all-dependencies:
+    schedule:
+      interval: "weekly"
+
 updates:
+  # Package versions live in Directory.Packages.props at the root, so one entry covers every project.
   - package-ecosystem: "nuget"
-    directory: "/"                 # Directory.Packages.props covers every project
-    schedule: { interval: "weekly" }
-    open-pull-requests-limit: 5
-    groups:
-      nuget-minor-patch:
-        update-types: ["minor", "patch"]
+    directory: "/"
+    patterns: ["*"]
+    multi-ecosystem-group: "all-dependencies"
 
   - package-ecosystem: "dotnet-sdk"   # global.json
     directory: "/"
-    schedule: { interval: "weekly" }
+    patterns: ["*"]
+    multi-ecosystem-group: "all-dependencies"
 
   - package-ecosystem: "github-actions"
     directory: "/"
-    schedule: { interval: "weekly" }
-    groups:
-      actions:
-        patterns: ["*"]
+    patterns: ["*"]
+    multi-ecosystem-group: "all-dependencies"
 
   - package-ecosystem: "bundler"      # manual site (Jekyll)
     directory: "/"
-    schedule: { interval: "monthly" }
+    patterns: ["*"]
+    multi-ecosystem-group: "all-dependencies"
 
   - package-ecosystem: "pip"          # Python bindings
     directory: "/StoryCADLib/bindings/python"
-    schedule: { interval: "monthly" }
+    patterns: ["*"]
+    multi-ecosystem-group: "all-dependencies"
 
   - package-ecosystem: "docker"       # test database image
     directory: "/StoryCADTests/TestDb"
-    schedule: { interval: "monthly" }
+    patterns: ["*"]
+    multi-ecosystem-group: "all-dependencies"
