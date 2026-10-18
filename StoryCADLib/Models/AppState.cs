@@ -54,6 +54,13 @@ public class AppState
     public const string RootDirectoryOverrideVariable = "STORYCAD_ROOT_DIR";
 
     /// <summary>
+    ///     Environment variable the UI automation runner sets to "1" so the title bar leaves out
+    ///     "(DEV BUILD)": automated runs are always developer builds (no .env, no package identity),
+    ///     and the user manual's screenshots must show the title users see (#1422).
+    /// </summary>
+    public const string PlainTitleVariable = "STORYCAD_PLAIN_TITLE";
+
+    /// <summary>
     ///     This is the path where all app files are stored
     /// </summary>
     public string RootDirectory

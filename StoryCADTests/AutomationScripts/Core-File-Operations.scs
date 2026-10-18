@@ -1,0 +1,100 @@
+# Core_File_Operations.md as an automation script (#1422). Run with:
+#   StoryCADAutomation run StoryCADTests/AutomationScripts/Core-File-Operations.scs --window 1036x744 --out automation-output
+# --window is the visible frame at 100% scale (the runner scales it for the display).
+# Hands off the mouse and keyboard while it runs.
+# Manual pages (docs/Quick Start/): Reading_and_Writing_Outlines.md, Starting_and_Stopping_StoryCAD.md,
+#   Status_Bar.md, Key_Binds.md
+# Each screenshot replaces the docs/media image of the same name.
+# Outlines go to {scratch}/outlines, the folder the runner's seeded preferences name.
+script "Core File Operations"
+
+step "CF-001: New Story Creation"
+launch
+click CreateNewOutlineNavItem             # 4.x has no New Story command; Ctrl+N opens the Narrative Editor
+set FileOpenProjectNameTextBox "CF002_TestSave"
+press "Tab"                               # the name binding updates only when focus leaves the box
+click PrimaryButton                       # "Create outline" writes the file at once
+expect window "StoryCAD - Currently editing CF002_TestSave"
+set TitleTextBox "Core Test Story"
+press "Tab"
+expect tree contains "Core Test Story"
+focus StoryIdeaRichEdit
+type "A detective hunts a thief."
+press "Tab"
+expect StoryIdeaRichEdit text "A detective hunts a thief."
+# The unsaved-changes indicator is the status bar pencil turning red; scripts cannot read a color.
+focus TitleTextBox                        # moves the keyboard focus ring off the status bar
+screenshot "Status-Bar.png" crop 0,691,1036,53
+
+step "CF-002: Save New Story"
+press "Primary+S"                         # no Save dialog: the file got its name and folder at creation
+expect StatusMessageText text "SaveFile command completed"
+expect window "StoryCAD - Currently editing CF002_TestSave"
+
+step "CF-003: Open Existing Story"
+menu CloseStoryMenuItem                   # not a plan step; the checks below must see a reopened file
+expect-no tree "Core Test Story"
+click FileMenuButton                      # not a plan step: the manual's File menu image, over the empty home page
+screenshot "File-Menu.png" crop 380,30,340,276
+press "Escape"
+press "Primary+O"
+click OpenFromFileNavItem
+open-file-dialog "{scratch}/outlines/CF002_TestSave.stbx"
+expect tree contains "Core Test Story"
+expect TitleTextBox text "Core Test Story"
+expect StoryIdeaRichEdit text "A detective hunts a thief."
+
+step "CF-004: Save As Function"
+press "Primary+Shift+S"
+set SaveAsProjectNameTextBox "CF004_SaveAs.stbx"   # the name box keeps the extension
+press "Tab"
+click PrimaryButton                       # "Save"
+expect StatusMessageText text "Save File As command completed"
+expect window "StoryCAD - Currently editing CF004_SaveAs"
+menu OpenCreateFileMenuItem               # the original is still there: open it
+click OpenFromFileNavItem
+open-file-dialog "{scratch}/outlines/CF002_TestSave.stbx"
+expect window "StoryCAD - Currently editing CF002_TestSave"
+
+step "CF-005: Open Sample Outline"
+menu OpenCreateFileMenuItem
+click SampleOutlinesNavItem
+select FileOpenSamplesList "Hamlet"
+click PrimaryButton                       # "Open sample"; the app opens a copy in the temp folder
+expect tree contains "Hamlet/Characters/Claudius"
+open-node tree "Hamlet/Characters/Claudius"
+expect CharacterNameTextBox exists
+open-node tree "Hamlet/Problems"            # above Characters, so still on screen
+menu CloseStoryMenuItem                   # unchanged, so no "Save changes?" dialog
+expect StatusMessageText text "Close story command completed"
+expect-no tree "Hamlet/Characters/Claudius"
+
+step "Manual image: the Create new outline page"
+menu OpenCreateFileMenuItem               # not a plan step; after the file work, because the path set
+click CreateNewOutlineNavItem             # here stays for the rest of the run
+set FileOpenProjectPathTextBox "C:\Users\Writer\Documents\StoryCAD\Projects"
+set FileOpenProjectNameTextBox "A New Dawn"
+press "Tab"
+screenshot dialog "Create-New-Outline-Dialog.png"
+click CloseButton                         # "Close": nothing is created
+
+step "CF-006: Unsaved Changes Dialog"
+menu OpenCreateFileMenuItem
+click OpenFromFileNavItem
+open-file-dialog "{scratch}/outlines/CF002_TestSave.stbx"
+set TitleTextBox "Core Test Story changed"
+press "Tab"
+expect tree contains "Core Test Story changed"
+menu CloseStoryMenuItem                   # Close asks the same question as Exit; Exit would end the run
+dialog "Save changes?" click name:"No"    # the dialog has Yes and No, no Cancel
+expect StatusMessageText text "Close story command completed"
+menu OpenCreateFileMenuItem
+click OpenFromFileNavItem
+open-file-dialog "{scratch}/outlines/CF002_TestSave.stbx"
+expect tree contains "Core Test Story"
+expect-no tree "Core Test Story changed"
+set TitleTextBox "Core Test Story changed again"
+press "Tab"
+menu ExitMenuItem
+dialog "Save changes?" click name:"No"
+expect-exit

@@ -40,7 +40,7 @@ If you have unsaved changes, StoryCAD will prompt you to save before exiting.
 
 StoryCAD follows regular platform conventions. The app can be resized, maximized, or minimized.
 
-**Single Instance**: You can only have one instance of StoryCAD open at once. If you try to open another instance while the first one is open, it will instead bring the original instance forward.
+**Single Instance**: On Windows, you can only have one instance of StoryCAD open at once. If you try to open another instance while the first one is open, it will instead bring the original instance forward.
 
 ### Platform Differences
 

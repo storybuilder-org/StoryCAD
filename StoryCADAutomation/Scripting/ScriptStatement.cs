@@ -39,4 +39,10 @@ public sealed record ScriptStatement
 
     /// <summary>Toggle direction: true = on.</summary>
     public bool? On { get; init; }
+
+    /// <summary>
+    ///     Screenshot crop ("screenshot ... crop x,y,w,h"): a rectangle in 100%-scale pixels from
+    ///     the visible window's top-left corner, the same units as --window.
+    /// </summary>
+    public System.Drawing.Rectangle? Crop { get; init; }
 }

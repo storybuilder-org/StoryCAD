@@ -14,6 +14,24 @@ public class StoryCADDriverTests
     private static readonly Rectangle Row = new(100, 200, 300, 40);
 
     [TestMethod]
+    public void CropArea_At150Percent_ScalesFromWindowCorner()
+    {
+        var frame = new Rectangle(100, 50, 1554, 1116);
+
+        Assert.AreEqual(new Rectangle(115, 80, 300, 150),
+            StoryCADDriver.CropArea(frame, new Rectangle(10, 20, 200, 100), 144));
+    }
+
+    [TestMethod]
+    public void CropArea_ReachingOutsideWindow_ThrowsStepException()
+    {
+        var frame = new Rectangle(0, 0, 1036, 744);
+
+        Assert.ThrowsExactly<AutomationStepException>(() =>
+            StoryCADDriver.CropArea(frame, new Rectangle(900, 0, 200, 100), 96));
+    }
+
+    [TestMethod]
     public void ChooseClickPoint_WithPointInsideRectangle_ReturnsThatPoint()
     {
         Assert.AreEqual(new Point(150, 210), StoryCADDriver.ChooseClickPoint(new Point(150, 210), Row));

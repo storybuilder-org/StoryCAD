@@ -2,7 +2,7 @@
 
 Issue #1421. Decision context: issue body "Architecture decision (2026-07-12)" section. Status: draft for design review.
 
-**Build status (2026-10-05).** Milestones 1 and 2 are built: the driver, the parser, lint, the interpreter, `run` with console output and exit codes 0-3, `check`, `--ci`, `--out`, the `screenshot` verb and the CI job. The app's data root comes from the `STORYCAD_ROOT_DIR` environment variable. Milestone 4 adds the presentation profile in a minimum form (see Execution profiles) with `--profile`, `--pacing` and `--window`. Dropped on 2026-10-05: JUnit XML, NLog collection, `--keep-going`, launch retry and `timeline.json`. Folder runs for `run` moved to #1422. Sections below that describe dropped parts are kept for history and are not built.
+**Build status (2026-10-05).** Milestones 1 and 2 are built: the driver, the parser, lint, the interpreter, `run` with console output and exit codes 0-3, `check`, `--ci`, `--out`, the `screenshot` verb and the CI job. The app's data root comes from the `STORYCAD_ROOT_DIR` environment variable. Milestone 4 adds the presentation profile in a minimum form (see Execution profiles) with `--profile`, `--pacing` and `--window`. Dropped on 2026-10-05: JUnit XML, NLog collection, `--keep-going`, launch retry and `timeline.json`. `--keep-going` returned on 2026-10-17 (#1422 evaluation): a failure skips the rest of its step and the run goes on with the next step. Folder runs for `run` moved to #1422. Sections below that describe dropped parts are kept for history and are not built.
 
 ## Components
 
@@ -140,6 +140,11 @@ screenshot "Overview-Page.png"   # captures the StoryCAD main window to the run'
 screenshot dialog "File-Open-Dialog.png"   # captures only the open ContentDialog, for manual
                                            # images of a dialog; same name rule (Terry approved
                                            # this second Milestone 2 design change, 2026-10-04)
+screenshot "File-Menu.png" crop 380,30,340,276   # captures this part of the main window only:
+                                                 # x,y,width,height in 100%-scale pixels from the
+                                                 # window's top-left corner (the units of --window).
+                                                 # For close-up manual images (Terry, 2026-10-18,
+                                                 # #1422). A crop outside the window fails the step.
 ```
 
 Verbs missing during #1422 translation go into this table by PR against `StoryCADAutomation`, never as per-script workarounds (per #1422 scope).
@@ -156,7 +161,7 @@ Same script, two realizations. Profile is a runner flag, never a script statemen
 | `pause` factor | 0 | 1.0 times `--pacing` |
 | `narrate` | Log line | Log line; in a step, the clip plays while the step's actions run, and the step waits for it (video design, section 7) |
 | Assertions | Hard fail; script aborts | Same as test: a failed demo is recorded again |
-| Window | Whatever launch yields | `--window WxH` restores the main window and sets its outer size at the top-left of the primary display. The outer size includes Windows' invisible resize border. The `video` command sizes the window itself |
+| Window | Whatever launch yields | `--window WxH` places the main window at the top-left of the primary display with a visible frame of W x H pixels at 100% scale; the runner multiplies by the window's display scale, so a script gives the same layout on any display (#1422). The `video` command sizes the window itself |
 
 Recording is the `video` command (`devdocs/issue_1421_video_design.md`, Milestone 5). It replaced the OBS recording and the `.srt` subtitle file of Milestone 4; YouTube makes captions from the voice track (Terry, 2026-10-07).
 
@@ -169,7 +174,8 @@ StoryCADAutomation run <script.scs> [options]
   --profile test|presentation     default test
   --app <path>                    StoryCAD exe; default: sibling Debug build output
   --pacing <factor>               presentation pause and typing multiplier; default 1.0
-  --window <WxH>                  restore and size the main window, e.g. 1920x1080
+  --window <WxH>                  visible frame size in 100%-scale pixels, e.g. 1036x744
+  --keep-going                    after a failure, skip the rest of that step and run the next step
   --out <dir>                     output folder (screenshots, voice clips); default ./automation-output
   --ci                            assert the CI display (1920x1080 or larger, 100% scale)
                                   at launch; local runs skip it

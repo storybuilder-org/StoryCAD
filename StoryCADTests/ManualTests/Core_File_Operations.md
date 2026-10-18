@@ -7,9 +7,8 @@
 | Action | Windows | macOS |
 |--------|---------|-------|
 | Save | Ctrl+S | Cmd+S |
-| Open | Ctrl+O | Cmd+O |
+| Open/Create file | Ctrl+O | Cmd+O |
 | Save As | Ctrl+Shift+S | Cmd+Shift+S |
-| New | Ctrl+N | Cmd+N |
 | File dialogs | Windows native | macOS native |
 | Test folder location | Documents\TestInputs | ~/Documents/TestInputs |
 
@@ -17,7 +16,7 @@
 
 ## Setup
 1. Launch StoryCAD
-2. Note: Sample outlines in File > Open Sample Outline
+2. Note: Sample outlines are in File > Open/Create file > Sample outlines
 3. Create test folder: TestInputs/CoreTests (in Documents or a convenient location)
 
 ---
@@ -27,17 +26,20 @@
 **Time:** ~2 minutes
 
 **Steps:**
-1. Click File > New Story
-   **Expected:** New Story dialog opens; enter story name and click Create
+1. Click File > Open/Create file > Create new outline  
+   **Expected:** The New outline page opens; Project path is the folder from Preferences
 
-2. Enter "Core Test Story" in Story Name field  
+2. Set Project path to TestInputs/CoreTests, enter "CF002_TestSave" as Project Name, and click Create outline  
+   **Expected:** The outline file is created at once; title bar shows "Currently editing CF002_TestSave"
+
+3. Enter "Core Test Story" in the Name field  
    **Expected:** Tree updates to show name
 
-3. Add Story Idea text  
+4. Add Story Idea text  
    **Expected:** Text saves in field
 
-4. Verify Changed indicator  
-   **Expected:** Status bar shows "Changed"
+5. Verify the changed indicator  
+   **Expected:** The pencil icon in the status bar is red
 
 **Pass/Fail:** ______
 
@@ -45,23 +47,17 @@
 
 ### CF-002: Save New Story
 **Priority:** Critical  
-**Time:** ~2 minutes
+**Time:** ~1 minute
 
 **Steps:**
-1. With new story from CF-001, press Ctrl+S (Cmd+S on macOS)
-   **Expected:** File saves silently (no dialog for previously saved files)
+1. With new story from CF-001, press Ctrl+S (Cmd+S on macOS)  
+   **Expected:** File saves silently; the outline got its name and folder when it was created, so no Save dialog appears
 
-2. Navigate to TestInputs/CoreTests  
-   **Expected:** Folder is accessible
+2. Verify the changed indicator cleared  
+   **Expected:** The pencil icon is green
 
-3. Enter "CF002_TestSave.stbx" and click Save  
-   **Expected:** File saves successfully
-
-4. Verify Changed indicator cleared  
-   **Expected:** "Changed" no longer shown
-
-5. Check title bar  
-   **Expected:** Shows "CF002_TestSave.stbx"
+3. Check title bar  
+   **Expected:** Shows "Currently editing CF002_TestSave"
 
 **Pass/Fail:** ______
 
@@ -72,13 +68,13 @@
 **Time:** ~2 minutes
 
 **Steps:**
-1. Click File > Open Story (or Ctrl+O / Cmd+O)
+1. Click File > Close Story, then File > Open/Create file (or Ctrl+O / Cmd+O) > Open from file  
    **Expected:** Open dialog appears
 
-2. Select CF002_TestSave.stbx from the CoreTests folder
+2. Select CF002_TestSave.stbx from the CoreTests folder  
    **Expected:** File opens
 
-3. Verify content preserved
+3. Verify content preserved  
    **Expected:** "Core Test Story" and idea text present
 
 **Pass/Fail:** ______
@@ -91,16 +87,16 @@
 
 **Steps:**
 1. With file open, press Ctrl+Shift+S  
-   **Expected:** Save As dialog appears
+   **Expected:** Save as dialog appears
 
-2. Change name to "CF004_SaveAs.stbx"  
+2. Change New project Name to "CF004_SaveAs.stbx" and click Save  
    **Expected:** File saves with new name
 
 3. Verify title bar updated  
-   **Expected:** Shows new filename
+   **Expected:** Shows "Currently editing CF004_SaveAs"
 
 4. Verify original file still exists  
-   **Expected:** Both files in folder
+   **Expected:** Both files in folder; File > Open/Create file > Open from file opens CF002_TestSave
 
 **Pass/Fail:** ______
 
@@ -111,17 +107,17 @@
 **Time:** ~1 minute
 
 **Steps:**
-1. Click File > Open Sample Outline  
-   **Expected:** Submenu with samples
+1. Click File > Open/Create file > Sample outlines  
+   **Expected:** List of samples
 
-2. Select "Hamlet"  
+2. Select "Hamlet" and click Open sample  
    **Expected:** Sample opens
 
-3. Browse the outline content
+3. Browse the outline content  
    **Expected:** Can navigate and view all elements
 
-4. Close the sample
-   **Expected:** No save prompt; temp copy is silently discarded
+4. Click File > Close Story without changing anything  
+   **Expected:** No save prompt
 
 **Pass/Fail:** ______
 
@@ -133,18 +129,15 @@
 
 **Steps:**
 1. Open any story and make a change  
-   **Expected:** "Changed" appears
+   **Expected:** The pencil icon turns red
 
 2. Click File > Exit  
-   **Expected:** "Save changes?" dialog
+   **Expected:** "Save changes?" dialog with Yes and No
 
-3. Click Cancel  
-   **Expected:** Returns to app
-
-4. Try again, click Don't Save  
+3. Click No  
    **Expected:** Exits without saving
 
-5. Reopen file  
+4. Start StoryCAD and reopen the file  
    **Expected:** Changes not present
 
 **Pass/Fail:** ______

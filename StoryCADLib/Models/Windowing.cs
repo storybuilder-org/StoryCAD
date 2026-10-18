@@ -131,7 +131,8 @@ public class Windowing : ObservableRecipient
         string BaseTitle = "StoryCAD ";
 
         //Developer Build title warning
-        if (_appState.DeveloperBuild)
+        if (_appState.DeveloperBuild
+            && Environment.GetEnvironmentVariable(AppState.PlainTitleVariable) != "1")
         {
             BaseTitle += "(DEV BUILD) ";
         }
