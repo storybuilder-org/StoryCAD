@@ -23,6 +23,8 @@ type "A detective hunts a thief."
 press "Tab"
 expect StoryIdeaRichEdit text "A detective hunts a thief."
 # The unsaved-changes indicator is the status bar pencil turning red; scripts cannot read a color.
+focus TitleTextBox                        # moves the keyboard focus ring off the status bar
+screenshot "Status-Bar.png" crop 0,691,1036,53
 
 step "CF-002: Save New Story"
 press "Primary+S"                         # no Save dialog: the file got its name and folder at creation
@@ -32,6 +34,9 @@ expect window "StoryCAD - Currently editing CF002_TestSave"
 step "CF-003: Open Existing Story"
 menu CloseStoryMenuItem                   # not a plan step; the checks below must see a reopened file
 expect-no tree "Core Test Story"
+click FileMenuButton                      # not a plan step: the manual's File menu image, over the empty home page
+screenshot "File-Menu.png" crop 380,30,340,276
+press "Escape"
 press "Primary+O"
 click OpenFromFileNavItem
 open-file-dialog "{scratch}/outlines/CF002_TestSave.stbx"

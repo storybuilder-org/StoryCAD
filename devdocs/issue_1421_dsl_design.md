@@ -140,6 +140,11 @@ screenshot "Overview-Page.png"   # captures the StoryCAD main window to the run'
 screenshot dialog "File-Open-Dialog.png"   # captures only the open ContentDialog, for manual
                                            # images of a dialog; same name rule (Terry approved
                                            # this second Milestone 2 design change, 2026-10-04)
+screenshot "File-Menu.png" crop 380,30,340,276   # captures this part of the main window only:
+                                                 # x,y,width,height in 100%-scale pixels from the
+                                                 # window's top-left corner (the units of --window).
+                                                 # For close-up manual images (Terry, 2026-10-18,
+                                                 # #1422). A crop outside the window fails the step.
 ```
 
 Verbs missing during #1422 translation go into this table by PR against `StoryCADAutomation`, never as per-script workarounds (per #1422 scope).

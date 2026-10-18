@@ -440,7 +440,30 @@ public static partial class ScriptParser
                 return New(ScriptVerb.ScreenshotDialog) with { Text = TakeString(r, "png file name") };
             }
 
-            return New(ScriptVerb.Screenshot) with { Text = TakeString(r, "png file name") };
+            var name = TakeString(r, "png file name");
+            if (r.AtEnd)
+            {
+                return New(ScriptVerb.Screenshot) with { Text = name };
+            }
+
+            // screenshot "name.png" crop x,y,w,h: a detail of the window for a close-up manual image.
+            TakeKeyword(r, "crop");
+            var word = TakeWord(r, "crop rectangle x,y,w,h");
+            var parts = word.Split(',');
+            var values = new int[parts.Length];
+            if (parts.Length != 4
+                || parts.Where((p, i) => !int.TryParse(p, NumberStyles.None, CultureInfo.InvariantCulture, out values[i])).Any()
+                || values[2] == 0 || values[3] == 0)
+            {
+                throw new SyntaxException(
+                    $"crop takes x,y,width,height as whole 100%-scale pixels with width and height above 0, not '{word}'.");
+            }
+
+            return New(ScriptVerb.Screenshot) with
+            {
+                Text = name,
+                Crop = new System.Drawing.Rectangle(values[0], values[1], values[2], values[3]),
+            };
         }
 
         ScriptStatement BuildPause(ArgReader r)

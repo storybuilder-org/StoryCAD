@@ -448,7 +448,7 @@ public sealed class ScriptInterpreter
                     }
                     else
                     {
-                        RequireDriver().CaptureMainWindow(path);
+                        RequireDriver().CaptureMainWindow(path, s.Crop);
                     }
 
                     _options.Log($"screenshot: {path}");

@@ -41,8 +41,12 @@ public interface IUiDriver : IDisposable
     /// </summary>
     void InvokeInWindow(string windowTitle, ElementAddress target, TimeSpan? timeout = null);
 
-    /// <summary>Saves an image of the app's main window as a PNG at <paramref name="pngPath" />.</summary>
-    void CaptureMainWindow(string pngPath);
+    /// <summary>
+    ///     Saves an image of the app's main window as a PNG at <paramref name="pngPath" />; with
+    ///     <paramref name="crop" />, only that rectangle (100%-scale pixels from the window's
+    ///     top-left corner).
+    /// </summary>
+    void CaptureMainWindow(string pngPath, System.Drawing.Rectangle? crop = null);
 
     /// <summary>Saves an image of the open ContentDialog only as a PNG at <paramref name="pngPath" />.</summary>
     void CaptureOpenDialog(string pngPath);

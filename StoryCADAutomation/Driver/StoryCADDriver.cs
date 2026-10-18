@@ -429,7 +429,7 @@ public sealed class StoryCADDriver : IUiDriver
     }
 
     /// <inheritdoc />
-    public void CaptureMainWindow(string pngPath)
+    public void CaptureMainWindow(string pngPath, Rectangle? crop = null)
     {
         var hwnd = _process.MainWindowHandle;
         var window = hwnd == IntPtr.Zero ? null : _automation.FromHandle(hwnd);
@@ -441,10 +441,31 @@ public sealed class StoryCADDriver : IUiDriver
         Wait.UntilInputIsProcessed();
         // The visible frame only: the UIA bounds include the invisible resize border, which
         // captured a strip of whatever was behind the window (seen on Brigid, 2026-10-04).
-        using var image = NativeMethods.VisibleWindowBounds(hwnd) is { } frame
-            ? Capture.Rectangle(frame)
-            : Capture.Element(window);
+        var frame = NativeMethods.VisibleWindowBounds(hwnd) ?? window.BoundingRectangle;
+        using var image = Capture.Rectangle(crop is { } c ? CropArea(frame, c, NativeMethods.SystemDpi()) : frame);
         image.ToFile(pngPath);
+    }
+
+    /// <summary>
+    ///     Maps a crop given in 100%-scale pixels from the window's top-left corner (the units of
+    ///     --window) to screen pixels, so one script crops the same detail at any display scaling.
+    /// </summary>
+    internal static Rectangle CropArea(Rectangle frame, Rectangle crop, int dpi)
+    {
+        var scale = dpi / 96.0;
+        var area = new Rectangle(
+            frame.X + (int)Math.Round(crop.X * scale),
+            frame.Y + (int)Math.Round(crop.Y * scale),
+            (int)Math.Round(crop.Width * scale),
+            (int)Math.Round(crop.Height * scale));
+        if (!frame.Contains(area))
+        {
+            throw new AutomationStepException(
+                $"crop {crop.X},{crop.Y},{crop.Width},{crop.Height} reaches outside the "
+                + $"{Math.Round(frame.Width / scale)}x{Math.Round(frame.Height / scale)} window.");
+        }
+
+        return area;
     }
 
     /// <inheritdoc />

@@ -110,6 +110,28 @@ public class ScriptLinterTests
     }
 
     [TestMethod]
+    public void Parse_WithScreenshotCrop_ProducesCropRectangle()
+    {
+        var parsed = ScriptParser.Parse("script \"Lint test\"\nscreenshot \"File-Menu.png\" crop 0,40,467,311\n");
+
+        Assert.IsTrue(parsed.Success, string.Join("; ", parsed.Errors));
+        Assert.AreEqual(new System.Drawing.Rectangle(0, 40, 467, 311), parsed.Statements[1].Crop);
+    }
+
+    [TestMethod]
+    [DataRow("crop 0,0,467")]
+    [DataRow("crop 0,0,0,311")]
+    [DataRow("crop -1,0,467,311")]
+    [DataRow("crop 0,0,467,311.5")]
+    [DataRow("trim 0,0,467,311")]
+    public void Parse_WithBadScreenshotCrop_ReportsError(string tail)
+    {
+        var parsed = ScriptParser.Parse($"script \"Lint test\"\nscreenshot \"File-Menu.png\" {tail}\n");
+
+        Assert.IsFalse(parsed.Success);
+    }
+
+    [TestMethod]
     public void Lint_WithScreenshotDialogPath_ReportsError()
     {
         Assert.AreEqual(1, LintDialogLine("screenshot dialog \"media/File-Open-Dialog.png\"").Count);
