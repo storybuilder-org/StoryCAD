@@ -26,4 +26,5 @@
 
     <ItemGroup>
         <ProjectReference Include="..\StoryCADXamlScan\StoryCADXamlScan.csproj" />
-    </ItemGroup></Project>
+    </ItemGroup>
+</Project>
