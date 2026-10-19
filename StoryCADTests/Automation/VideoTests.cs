@@ -86,6 +86,99 @@ public class VideoTests
     }
 
     [TestMethod]
+    public void BodyArguments_WithCard_FadesTheCardInAndOut()
+    {
+        var plan = new VideoPlan
+        {
+            RecordingPath = "rec.mkv",
+            RecordingLength = TimeSpan.FromSeconds(20),
+            Cards = new[] { new VideoCard(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(9.5), null, "pie.png") },
+        };
+
+        var filter = Filter(VideoAssembler.BodyArguments(plan, "body.mp4"));
+
+        StringAssert.Contains(filter, "fps=30,format=yuva420p,fade=t=in:st=4:d=0.3:alpha=1,fade=t=out:st=9.2:d=0.3:alpha=1[c0]");
+    }
+
+    [TestMethod]
+    public void CardFades_WithCardShorterThanTwoFades_UsesHalfItsLengthForEach()
+    {
+        var fades = VideoAssembler.CardFades(new VideoCard(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1.4), "Short", null));
+
+        Assert.AreEqual(",format=yuva420p,fade=t=in:st=1:d=0.2:alpha=1,fade=t=out:st=1.2:d=0.2:alpha=1", fades);
+    }
+
+    [TestMethod]
+    public void CardFades_WithCardAtZero_DoesNotFadeIn()
+    {
+        var fades = VideoAssembler.CardFades(new VideoCard(TimeSpan.Zero, TimeSpan.FromSeconds(3), "First", null));
+
+        Assert.AreEqual(",format=yuva420p,fade=t=out:st=2.7:d=0.3:alpha=1", fades);
+    }
+
+    [TestMethod]
+    public void CardFades_WithEmptyCard_ReturnsNoFades()
+    {
+        Assert.AreEqual(string.Empty,
+            VideoAssembler.CardFades(new VideoCard(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2), "None", null)));
+    }
+
+    [TestMethod]
+    public void JoinArguments_WithTitleBodyAndClosing_CrossfadesAtCumulativeOffsets()
+    {
+        var parts = new[]
+        {
+            ("title.mp4", TimeSpan.FromSeconds(3)), ("body.mp4", TimeSpan.FromSeconds(6)), ("closing.mp4", TimeSpan.FromSeconds(10)),
+        };
+
+        var args = VideoAssembler.JoinArguments(parts, "out.mp4").ToList();
+
+        // The second offset is 3 + 6 - 0.5 - 0.5: the first crossfade made the joined video shorter.
+        Assert.AreEqual(
+            "[0:v][1:v]xfade=transition=fade:duration=0.5:offset=2.5[v1];[0:a][1:a]acrossfade=d=0.5[a1];" +
+            "[v1][2:v]xfade=transition=fade:duration=0.5:offset=8[v2];[a1][2:a]acrossfade=d=0.5[a2]",
+            Filter(args));
+        CollectionAssert.AreEqual(new[] { "-map", "[v2]", "-map", "[a2]" }, args.GetRange(args.IndexOf("-map"), 4));
+        Assert.AreEqual("18", args[args.IndexOf("-t") + 1]);
+        Assert.AreEqual("+faststart", args[args.IndexOf("-movflags") + 1]);
+        Assert.AreEqual("libx264", args[args.IndexOf("-c:v") + 1]);
+        Assert.AreEqual("out.mp4", args[^1]);
+        CollectionAssert.DoesNotContain(args, "concat");
+    }
+
+    [TestMethod]
+    public void JoinArguments_WithoutClosing_CrossfadesOnce()
+    {
+        var parts = new[] { ("title.mp4", TimeSpan.FromSeconds(3)), ("body.mp4", TimeSpan.FromSeconds(6)) };
+
+        var args = VideoAssembler.JoinArguments(parts, "out.mp4").ToList();
+
+        Assert.AreEqual(
+            "[0:v][1:v]xfade=transition=fade:duration=0.5:offset=2.5[v1];[0:a][1:a]acrossfade=d=0.5[a1]", Filter(args));
+        Assert.AreEqual("8.5", args[args.IndexOf("-t") + 1]);
+    }
+
+    [TestMethod]
+    public void JoinArguments_WithoutTitle_CrossfadesBodyIntoClosing()
+    {
+        var parts = new[] { ("body.mp4", TimeSpan.FromSeconds(6)), ("closing.mp4", TimeSpan.FromSeconds(10)) };
+
+        var args = VideoAssembler.JoinArguments(parts, "out.mp4").ToList();
+
+        StringAssert.Contains(Filter(args), "offset=5.5[v1]");
+        Assert.AreEqual("15.5", args[args.IndexOf("-t") + 1]);
+    }
+
+    [TestMethod]
+    public void JoinArguments_WithBodyOnly_CopiesIt()
+    {
+        var args = VideoAssembler.JoinArguments(new[] { ("body.mp4", TimeSpan.FromSeconds(6)) }, "out.mp4").ToList();
+
+        CollectionAssert.AreEqual(new[] { "-i", "body.mp4", "-c", "copy", "-movflags", "+faststart", "out.mp4" },
+            args.Skip(4).ToList());
+    }
+
+    [TestMethod]
     public void BodyArguments_WithoutClips_UsesSilence()
     {
         var plan = new VideoPlan { RecordingPath = "rec.mkv", RecordingLength = TimeSpan.FromSeconds(3) };
@@ -110,10 +203,31 @@ public class VideoTests
             _folder, null, null, _folder);
 
         Assert.AreEqual(2, plan.Cards.Count);
-        Assert.AreEqual((TimeSpan.FromSeconds(-1), TimeSpan.FromSeconds(2), "First"),
+        // The first card started before the recording, so it starts at 0 (#1626).
+        Assert.AreEqual((TimeSpan.Zero, TimeSpan.FromSeconds(2), "First"),
             (plan.Cards[0].Start, plan.Cards[0].End, plan.Cards[0].Text));
         Assert.AreEqual((TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(7)), (plan.Cards[1].Start, plan.Cards[1].End));
         Assert.AreEqual(Path.Combine(_folder, "pie.png"), plan.Cards[1].ImagePath);
+    }
+
+    [TestMethod]
+    [DataRow(9.43, 0.0)]
+    [DataRow(9.0, 1.0)]
+    public void Plan_WithCardStartUnderOneSecond_StartsCardAtZero(double offsetSeconds, double expectedStart)
+    {
+        // The step starts 10 s after the runner's clock starts; the offset puts it at 0.57 s or 1 s into the recording.
+        var now = TimeSpan.FromSeconds(10);
+        var profile = new PresentationProfile(1.0, () => now, t => now += t, _ => TimeSpan.FromSeconds(3));
+        var parsed = ScriptParser.Parse("script \"Cards\"\nstep \"A\"\nnarrate \"one\"\nshow text \"First\"\n");
+        new ScriptInterpreter(() => throw new InvalidOperationException(),
+            new InterpreterOptions { Profile = profile, Log = _ => { } }).Execute(parsed);
+        var offset = TimeSpan.FromSeconds(offsetSeconds);
+
+        var plan = VideoCommand.Plan(parsed, profile, offset, "rec.mkv", TimeSpan.FromSeconds(9),
+            _folder, null, null, _folder);
+
+        Assert.AreEqual(TimeSpan.FromSeconds(expectedStart), plan.Cards[0].Start);
+        Assert.AreEqual(profile.Steps[0].End - offset, plan.Cards[0].End);
     }
 
     [TestMethod]
@@ -151,10 +265,10 @@ public class VideoTests
 
         VideoAssembler.Assemble(ffmpeg, plan, Path.Combine(_folder, "work"), mp4);
 
-        // 3 s title + 6 s recording + 10 s closing.
+        // 3 s title + 6 s recording + 10 s closing, less two 0.5 s crossfades.
         var length = ffmpeg.Duration(mp4);
         Assert.IsNotNull(length);
-        Assert.AreEqual(19, length.Value.TotalSeconds, 0.2);
+        Assert.AreEqual(18, length.Value.TotalSeconds, 0.2);
     }
 
     [TestMethod]

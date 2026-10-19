@@ -25,6 +25,13 @@ internal static class VideoCommand
 
     internal const string MusicFilePattern = "intro-music.*";
 
+    /// <summary>
+    ///     A card that starts sooner than this into the recording starts at 0 instead, so the
+    ///     viewer never sees StoryCAD start up (Terry, 2026-10-19, #1626: the intro video showed
+    ///     the Open dialog and the DEV BUILD title for 0.57 s before its first card).
+    /// </summary>
+    internal static readonly TimeSpan CardStartCover = TimeSpan.FromSeconds(1);
+
     private const string SegoeUi = @"C:\Windows\Fonts\segoeui.ttf";
 
     public static int Run(string scriptPath, string outputDirectory, string assetsDirectory)
@@ -211,7 +218,8 @@ internal static class VideoCommand
 
     /// <summary>
     ///     The plan for assembly: each show card covers its step, each clip starts at its cue,
-    ///     all moved from the runner's clock to the recording's time.
+    ///     all moved from the runner's clock to the recording's time. A card that starts under
+    ///     <see cref="CardStartCover" /> into the recording starts at 0; nothing else moves.
     /// </summary>
     internal static VideoPlan Plan(ScriptParseResult parsed, PresentationProfile profile, TimeSpan offset,
         string recordingPath, TimeSpan recordingLength, string assetsDirectory, Ffmpeg? ffmpeg,
@@ -228,7 +236,8 @@ internal static class VideoCommand
             else if (s.Verb is ScriptVerb.ShowText or ScriptVerb.ShowImage && step < profile.Steps.Count)
             {
                 var span = profile.Steps[step];
-                cards.Add(new VideoCard(span.Start - offset, span.End - offset,
+                var start = span.Start - offset;
+                cards.Add(new VideoCard(start < CardStartCover ? TimeSpan.Zero : start, span.End - offset,
                     s.Verb == ScriptVerb.ShowText ? s.Text : null,
                     s.Verb == ScriptVerb.ShowImage ? Path.GetFullPath(Path.Combine(assetsDirectory, s.Text!)) : null));
             }
