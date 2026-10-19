@@ -256,6 +256,7 @@ public sealed class ScriptInterpreter
                     var d = RequireDriver();
                     d.RightClickPointer(s.Target!);
                     WalkFlyoutPath(d, s.Text!.Split('/'));
+                    d.CloseContextFlyout();
                     return currentStep;
                 }
 

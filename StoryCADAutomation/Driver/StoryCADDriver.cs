@@ -716,6 +716,23 @@ public sealed class StoryCADDriver : IUiDriver
     }
 
     /// <inheritdoc />
+    public void CloseContextFlyout()
+    {
+        // Shell's CommandBarFlyout stays open, collapsed to an empty box, after an item runs by
+        // UIA Invoke (a real click outside would light-dismiss it); its entries leave the UIA
+        // tree, so the box cannot be detected. Escape closes it. A dialog the item opened (Delete
+        // asks first when other elements refer to the node) must not get that Escape (#1422).
+        Thread.Sleep(ContextFlyoutSettle);
+        Wait.UntilInputIsProcessed();
+        var dialogOpen = _automation.GetDesktop().FindFirstDescendant(cf =>
+            cf.ByProcessId(_process.Id).And(cf.ByAutomationId("PrimaryButton").Or(cf.ByAutomationId("CloseButton")))) is not null;
+        if (!dialogOpen)
+        {
+            PressChord("Escape");
+        }
+    }
+
+    /// <inheritdoc />
     public void RightClickPointer(ElementAddress target, TimeSpan? timeout = null)
     {
         // Right-click is always real pointer: context menus need it (design, Pointer verbs).
@@ -915,6 +932,9 @@ public sealed class StoryCADDriver : IUiDriver
     // A flyout's close animation can run long on a slow machine; invoking an item whose click
     // did register would run its command twice (a second Save, a second dialog).
     private static readonly TimeSpan MenuCloseWait = TimeSpan.FromMilliseconds(1500);
+
+    // Time for a context-menu item's dialog to appear before CloseContextFlyout looks for it.
+    private static readonly TimeSpan ContextFlyoutSettle = TimeSpan.FromMilliseconds(500);
 
     private static bool StillShowing(AutomationElement element)
     {

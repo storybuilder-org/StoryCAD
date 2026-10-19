@@ -108,6 +108,12 @@ public interface IUiDriver : IDisposable
     /// <summary>Real-pointer right click (context menus need real input; there is no pattern realization).</summary>
     void RightClickPointer(ElementAddress target, TimeSpan? timeout = null);
 
+    /// <summary>
+    ///     After a context-menu item runs: presses Escape unless the item opened a dialog, so a
+    ///     right-click flyout left open does not catch the next pointer input.
+    /// </summary>
+    void CloseContextFlyout();
+
     /// <summary>Real-pointer drag: press on source, eased move, release on target.</summary>
     void Drag(ElementAddress from, ElementAddress to, TimeSpan? timeout = null);
 
