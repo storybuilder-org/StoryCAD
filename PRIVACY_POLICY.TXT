@@ -10,7 +10,7 @@ We may collect the following data:
 
 * Your IP address.
 * Your email address (if you give us permission to obtain it.)
-* Error logs (if you give us[TC1] permission to obtain them.)
+* Error logs (if you give us permission to obtain them.)
 
 WHY WE COLLECT YOUR DATA
 
@@ -41,14 +41,22 @@ policy documentation of the website(s) you go to.
 
 RESTRICTING THE COLLECTION OF YOUR PERSONAL DATA
 
-StoryCAD�s Preferences page gives you control over the use and collection of your 
+StoryCAD's Preferences page gives you control over the use and collection of your 
 personal data. If you wish to restrict the use and collection of your data, you can 
-leaving either or both of the following two boxes unchecked:
+leave either or both of the following two boxes unchecked:
 
 * Send error logs to Team StoryCAD
 * Send me newsletters about StoryCAD
 
 If you do authorize either of these two options, please enter your email address as well.
 
+STORYCAD YOUTUBE UPLOADER
 
-
+The StoryBuilder Foundation uses a small internal tool, "StoryCAD YouTube", to publish 
+videos to its own YouTube channel, @StoryCAD, through the YouTube Data API. The tool is 
+used only by Foundation staff, signed in to the Foundation's own channel. It uploads 
+videos and sets their titles, descriptions, captions, thumbnails and playlists. It does 
+not read, collect or store data about any other YouTube user. Its sign-in token is kept 
+on the staff member's computer and is not shared. Use of information received from 
+Google APIs follows the Google API Services User Data Policy, including its Limited Use 
+requirements.
