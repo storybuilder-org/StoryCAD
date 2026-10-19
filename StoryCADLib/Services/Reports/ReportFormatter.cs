@@ -1246,7 +1246,7 @@ public class ReportFormatter
         // STUB: Reimpliment this code at a later date, because
         /*
         //Create new Webview, then initalise corewebview and configure URL.
-        var _webview = new WebView2();
+        var _webview = new Microsoft.UI.Xaml.Controls.WebView2();
         _webview.Source = ((WebModel)element).URL;
         _webview.Height = 1080;
         _webview.Width = 1920;
