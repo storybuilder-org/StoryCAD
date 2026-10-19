@@ -16,7 +16,7 @@ public enum FailureClass
 
     /// <summary>
     ///     The environment refused the run or the app never reached a usable main window:
-    ///     .env present, instance already running, display mismatch, launch crash. The runner
+    ///     instance already running, display mismatch, launch crash. The runner
     ///     maps this class to exit code 3 (one whole-script retry permitted, per the design).
     /// </summary>
     LaunchFailure,

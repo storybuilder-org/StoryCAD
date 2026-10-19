@@ -15,6 +15,7 @@ using StoryCollaborator.Services;
 using StoryCollaborator.Models;
 using StoryCollaborator.Workflows;
 using CollaboratorLib.Context;
+using StoryCADLib.Collaborator;
 using StoryCADLib.Collaborator.ViewModels;
 using StoryCADLib.Collaborator.Models;
 using StoryCADLib.Collaborator.Views;
@@ -390,7 +391,8 @@ public class Collaborator : ICollaborator
                 // empty fields read as "(1)".
                 viewModel.MenuItems.Add(WrappingNavItem(
                     $"{GapWorkflowOwnership.OutlineGapsNavTitle} ({RequiredFieldGapScanner.MissingFieldCount(gapDetails)})",
-                    GapWorkflowOwnership.OutlineGapsTag));
+                    GapWorkflowOwnership.OutlineGapsTag,
+                    CollaboratorAutomationIds.OutlineGapsNavItem));
             }
         }
 
@@ -406,6 +408,8 @@ public class Collaborator : ICollaborator
                 SelectsOnInvoked = false,
                 IsExpanded = band.IsExpanded
             };
+            Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(
+                group, CollaboratorAutomationIds.GroupNavItem(band.Title));
             viewModel.MenuItems.Add(group);
 
             foreach (var item in band.Items)
@@ -529,7 +533,8 @@ public class Collaborator : ICollaborator
         WorkflowShellViewModel viewModel,
         WorkflowMenuItem item)
     {
-        var navItem = WrappingNavItem(item.Title, item.Workflow);
+        var navItem = WrappingNavItem(
+            item.Title, item.Workflow, CollaboratorAutomationIds.WorkflowNavItem(item.Label));
         var star = StarToggleButton(viewModel, item);
 
         // Replace the plain TextBlock content with title + star in one row.
@@ -593,6 +598,8 @@ public class Collaborator : ICollaborator
             Opacity = starred ? 1 : 0
         };
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(button, $"{label}: {item.Title}");
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(
+            button, CollaboratorAutomationIds.WorkflowStarButton(item.Label));
         Microsoft.UI.Xaml.Controls.ToolTipService.SetToolTip(button, label);
 
         // Stop the tap reaching the NavigationViewItem. Button.Click carries a plain
@@ -657,7 +664,8 @@ public class Collaborator : ICollaborator
     /// TextBlock we control; Height=Auto lets the item grow past the one-line default.
     /// AutomationProperties.Name keeps the title available to automation and screen readers.
     /// </summary>
-    private static Microsoft.UI.Xaml.Controls.NavigationViewItem WrappingNavItem(string title, object tag)
+    private static Microsoft.UI.Xaml.Controls.NavigationViewItem WrappingNavItem(
+        string title, object tag, string automationId)
     {
         var item = new Microsoft.UI.Xaml.Controls.NavigationViewItem
         {
@@ -670,6 +678,7 @@ public class Collaborator : ICollaborator
             Height = double.NaN
         };
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(item, title);
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(item, automationId);
         return item;
     }
 
@@ -2405,7 +2414,7 @@ public class Collaborator : ICollaborator
     }
 
     /// <summary>Nav group header for a workflow's primary element type (#129).</summary>
-    private static string GroupTitle(StoryItemType type) => type switch
+    internal static string GroupTitle(StoryItemType type) => type switch
     {
         StoryItemType.StoryOverview => "Overview",
         StoryItemType.Unknown => "Other",

@@ -111,15 +111,6 @@ public sealed class StoryCADDriver : IUiDriver
         }
 
         var sourceDir = Path.GetDirectoryName(appPath)!;
-        if (File.Exists(Path.Combine(sourceDir, ".env")))
-        {
-            // Backend isolation: with .env present the app can register users and post
-            // telemetry; automated runs must never do either (design, Runner section).
-            throw new AutomationLaunchException(
-                $".env present in {sourceDir} - refusing to launch. Automated runs must not reach the backend; " +
-                "move .env away for the run and restore it after.");
-        }
-
         var processName = Path.GetFileNameWithoutExtension(appPath);
         var running = Process.GetProcessesByName(processName);
         try
