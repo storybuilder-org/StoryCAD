@@ -176,7 +176,12 @@ public class Collaborator : ICollaborator
                 {
                     _ = Task.Run(async () =>
                     {
-                        var saved = await _service!.SaveAsync(_session, _filePath);
+                        // A save that an accept started finishes first, so two writes never overlap.
+                        if (_session?.PendingSave != null)
+                        {
+                            try { await _session.PendingSave; } catch { /* logged by the save */ }
+                        }
+                        var saved = await _service!.SaveAsync(_filePath);
                         _logger?.LogInformation("Manual save {Result}", saved ? "succeeded" : "failed");
                     });
                 };
@@ -308,6 +313,17 @@ public class Collaborator : ICollaborator
         EndInterviewSession();
 
         _sessionService.EndSession();
+
+        // The accepts of this session save in the background. Let the last one finish before
+        // the host closes the outline, so the file holds every accepted proposal.
+        try
+        {
+            _session?.PendingSave?.Wait(TimeSpan.FromSeconds(10));
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogWarning(ex, "A background save failed before close");
+        }
 
         var result = new CollaboratorResult
         {
@@ -728,12 +744,6 @@ public class Collaborator : ICollaborator
     }
 
     /// <summary>
-    /// Exact Lists.json ProblemCategory value when a Problem is the Overview StoryProblem.
-    /// <see cref="WorkflowSessionService"/> writes it when the input gather links the Problem.
-    /// </summary>
-    internal const string StoryProblemCategoryListValue = "Story problem";
-
-    /// <summary>
     /// Called when the workflow page goes away (#119). The service writes an unsaved
     /// interview rather than dropping it.
     /// </summary>
@@ -814,127 +824,6 @@ public class Collaborator : ICollaborator
         }
 
         viewModel.RefreshTopicalExplanation();
-    }
-
-    /// <summary>
-    /// The chat summary after a run. Collaborator #237 item 9: plain words, no em dash, one count.
-    /// Collaborator #272: names the properties the model kept, which the list does not show.
-    /// </summary>
-    internal static string BuildSummaryMessage(int proposalCount, int protectCount, IReadOnlyList<string> keptProperties)
-    {
-        var keptNote = keptProperties.Count switch
-        {
-            0 => string.Empty,
-            1 => $"1 field is kept as it is: {keptProperties[0]}.",
-            _ => $"{keptProperties.Count} fields are kept as they are: {string.Join(", ", keptProperties)}."
-        };
-
-        if (proposalCount == 0)
-            return keptProperties.Count == 0
-                ? "No property updates were extracted from the response."
-                : $"No property updates. {keptNote}";
-
-        var replaceNote = protectCount > 0
-            ? $" {protectCount} of them would replace text you wrote; those ask for confirmation."
-            : string.Empty;
-        var keptSentence = keptNote.Length > 0 ? " " + keptNote : string.Empty;
-        return $"Found {proposalCount} property update(s).{replaceNote}{keptSentence} " +
-               "Choose Accept All, Review Each, or Try Again. Chat can revise these proposals.";
-    }
-
-    /// <summary>
-    /// Issue #90 design section 10 "The cutoff" (ruling of 2026-07-15, step 10): the shipped chat
-    /// sidebar sends through Semantic Kernel to the Worker's /v1/chat/completions, which refuses
-    /// with 429 (before any upstream dispatch) when the caller's balance is at or below zero.
-    /// Semantic Kernel wraps a non-success HTTP response in <see cref="HttpOperationException"/>
-    /// (its <see cref="HttpOperationException.StatusCode"/> carries the code); this recognizes the
-    /// 429 shape and translates it to <see cref="OutOfCreditsException"/> so
-    /// WorkflowViewModel.SendButtonClicked's <c>ChatMessage.Error(ex.Message)</c> shows a message
-    /// naming the credits screen instead of the raw HTTP exception text. Every other exception
-    /// passes through unchanged. internal static and side-effect-free, so it is testable without a
-    /// live kernel call: construct an HttpOperationException directly (its public 4-arg
-    /// constructor takes the status code) and assert on the returned exception's type/message.
-    /// </summary>
-    internal static Exception TranslateChatException(Exception ex)
-    {
-        if (ex is not HttpOperationException { StatusCode: HttpStatusCode.TooManyRequests })
-        {
-            return ex;
-        }
-
-        var allowlist = Ioc.Default.GetService<IStoreActivationService>()?.IsAllowlistActivation == true;
-        return allowlist
-            ? new OutOfCreditsException(StoreConfig.OutOfCreditsBetaMessage)
-            : new OutOfCreditsException();
-    }
-
-    /// <summary>
-    /// Builds a readable text context from gathered story elements for the chat system message.
-    /// </summary>
-    private string BuildElementContext(Dictionary<string, StoryElement> elements)
-    {
-        if (elements == null || elements.Count == 0)
-            return "No story elements available yet.";
-
-        var sb = new System.Text.StringBuilder();
-
-        foreach (var (label, element) in elements)
-        {
-            if (element == null) continue;
-
-            sb.AppendLine($"### {label}: {element.Name}");
-
-            // Add key properties based on element type
-            switch (element)
-            {
-                case OverviewModel overview:
-                    if (!string.IsNullOrWhiteSpace(overview.Description))
-                        sb.AppendLine($"- Story Idea: {overview.Description}");
-                    if (!string.IsNullOrWhiteSpace(overview.Concept))
-                        sb.AppendLine($"- Concept: {overview.Concept}");
-                    if (!string.IsNullOrWhiteSpace(overview.Premise))
-                        sb.AppendLine($"- Premise: {overview.Premise}");
-                    if (!string.IsNullOrWhiteSpace(overview.StoryGenre))
-                        sb.AppendLine($"- Genre: {overview.StoryGenre}");
-                    break;
-
-                case ProblemModel problem:
-                    if (!string.IsNullOrWhiteSpace(problem.ProblemType))
-                        sb.AppendLine($"- Problem Type: {problem.ProblemType}");
-                    if (!string.IsNullOrWhiteSpace(problem.Description))
-                        sb.AppendLine($"- Description: {problem.Description}");
-                    if (!string.IsNullOrWhiteSpace(problem.ProtGoal))
-                        sb.AppendLine($"- Protagonist Goal: {problem.ProtGoal}");
-                    if (!string.IsNullOrWhiteSpace(problem.ProtMotive))
-                        sb.AppendLine($"- Protagonist Motive: {problem.ProtMotive}");
-                    if (!string.IsNullOrWhiteSpace(problem.ProtConflict))
-                        sb.AppendLine($"- Protagonist Conflict: {problem.ProtConflict}");
-                    if (!string.IsNullOrWhiteSpace(problem.AntagGoal))
-                        sb.AppendLine($"- Antagonist Goal: {problem.AntagGoal}");
-                    if (!string.IsNullOrWhiteSpace(problem.Premise))
-                        sb.AppendLine($"- Premise: {problem.Premise}");
-                    break;
-
-                case CharacterModel character:
-                    if (!string.IsNullOrWhiteSpace(character.Role))
-                        sb.AppendLine($"- Role: {character.Role}");
-                    if (!string.IsNullOrWhiteSpace(character.Archetype))
-                        sb.AppendLine($"- Archetype: {character.Archetype}");
-                    if (!string.IsNullOrWhiteSpace(character.Description))
-                        sb.AppendLine($"- Description: {character.Description}");
-                    break;
-
-                default:
-                    // For other element types, just include description if available
-                    if (!string.IsNullOrWhiteSpace(element.Description))
-                        sb.AppendLine($"- Description: {element.Description}");
-                    break;
-            }
-
-            sb.AppendLine();
-        }
-
-        return sb.ToString().TrimEnd();
     }
 
     /// <summary>

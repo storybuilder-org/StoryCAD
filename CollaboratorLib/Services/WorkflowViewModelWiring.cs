@@ -158,7 +158,7 @@ public static class WorkflowViewModelWiring
     /// <summary>
     /// Runs the workflow of the session and shows the outcome on the page.
     /// </summary>
-    public static async Task RunAsync(
+    internal static async Task RunAsync(
         WorkflowViewModel viewModel,
         WorkflowShellViewModel? shell,
         WorkflowSessionService service,
@@ -172,7 +172,7 @@ public static class WorkflowViewModelWiring
     /// Puts the page into interview mode and opens the interview (#119). Call it for a
     /// Conversational workflow, in place of <see cref="RunAsync"/>.
     /// </summary>
-    public static void BeginInterview(
+    internal static void BeginInterview(
         WorkflowViewModel viewModel,
         WorkflowShellViewModel? shell,
         WorkflowSessionService service,
@@ -187,7 +187,7 @@ public static class WorkflowViewModelWiring
     /// Copies the session to the page: the lines for the conversation, the state of the chat and the
     /// interview, the cost line, and, when a run left proposals, the proposal list.
     /// </summary>
-    public static void Show(WorkflowViewModel viewModel, WorkflowShellViewModel? shell, WorkflowSession session)
+    internal static void Show(WorkflowViewModel viewModel, WorkflowShellViewModel? shell, WorkflowSession session)
     {
         Sync(viewModel, shell, session);
         if (session.Result is { Success: true } result
@@ -331,7 +331,7 @@ public static class WorkflowViewModelWiring
     /// <summary>
     /// Show the full session proposal set on the left (open + accepted + skipped).
     /// </summary>
-    public static void PushSessionSet(WorkflowViewModel viewModel, WorkflowShellViewModel? shell, WorkflowSession session)
+    internal static void PushSessionSet(WorkflowViewModel viewModel, WorkflowShellViewModel? shell, WorkflowSession session)
     {
         if (session.Proposals == null || session.Proposals.Count == 0)
         {

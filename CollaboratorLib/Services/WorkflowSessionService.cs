@@ -5,7 +5,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using NLog.Extensions.Logging;
+using System.Net;
 using StoryCADLib.Models;
+using StoryCADLib.Services.Store;
 using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCollaborator.Models;
 using StoryCollaborator.Workflows;
@@ -13,10 +15,27 @@ using StoryCollaborator.Workflows;
 namespace StoryCollaborator.Services;
 
 /// <summary>An input the service cannot find on its own. The caller may ask the writer for it.</summary>
-/// <param name="Requirement">The input.</param>
-/// <param name="Preselect">The element that the input's reference points to, if the reference is set.</param>
-/// <param name="IsRequired">True for a required input.</param>
-public sealed record InputPrompt(ElementRequirement Requirement, Guid? Preselect, bool IsRequired);
+public sealed class InputPrompt
+{
+    internal InputPrompt(ElementRequirement requirement, Guid? preselect, bool isRequired)
+    {
+        Requirement = requirement;
+        Preselect = preselect;
+        IsRequired = isRequired;
+    }
+
+    /// <summary>The input.</summary>
+    public ElementRequirement Requirement { get; }
+
+    /// <summary>The element that the input's reference points to, if the reference is set.</summary>
+    public Guid? Preselect { get; }
+
+    /// <summary>True for a required input.</summary>
+    public bool IsRequired { get; }
+
+    /// <summary>The writer's choice. Null means they cancelled.</summary>
+    internal Guid? Answer { get; set; }
+}
 
 /// <summary>What <see cref="WorkflowSessionService.ResolveInputs"/> found.</summary>
 public sealed class InputResolution
@@ -107,9 +126,18 @@ public class WorkflowSessionService
     public InputResolution ResolveInputs(
         WorkflowSession session,
         StoryElement? element,
-        IReadOnlyDictionary<string, Guid>? given) =>
-        // With no picker nothing waits on the writer, so the task is complete when it returns.
-        ResolveInputsAsync(session, element, given, null).GetAwaiter().GetResult();
+        IReadOnlyDictionary<string, Guid>? given)
+    {
+        var result = new InputResolution();
+        session.Elements = result.Elements;
+
+        // Without a picker the steps never stop to ask, so running them to the end is the whole gather.
+        foreach (var _ in GatherSteps(session, element, given, result, interactive: false))
+        {
+        }
+
+        return result;
+    }
 
     /// <summary>
     /// As <see cref="ResolveInputs"/>, but asks <paramref name="pick"/> for an input that it cannot
@@ -125,6 +153,26 @@ public class WorkflowSessionService
     {
         var result = new InputResolution();
         session.Elements = result.Elements;
+
+        foreach (var prompt in GatherSteps(session, element, given, result, interactive: pick != null))
+            prompt.Answer = await pick!(prompt);
+
+        return result;
+    }
+
+    /// <summary>
+    /// The one gather loop. It runs to the end by itself, and stops at each input it cannot find
+    /// when <paramref name="interactive"/> is true: the caller sets <see cref="InputPrompt.Answer"/>
+    /// and asks for the next step. The next input may refer to the element that was just picked,
+    /// so the steps stay in order.
+    /// </summary>
+    private IEnumerable<InputPrompt> GatherSteps(
+        WorkflowSession session,
+        StoryElement? element,
+        IReadOnlyDictionary<string, Guid>? given,
+        InputResolution result,
+        bool interactive)
+    {
         var workflowIO = session.Workflow.GetIO();
         var state = new GatherState(element, given);
 
@@ -134,16 +182,19 @@ public class WorkflowSessionService
         // Phase 1: Gather required inputs
         foreach (var requirement in workflowIO.RequiredInputs)
         {
-            var gathered = await ResolveInputAsync(session, requirement, state, result, isRequired: true, pick);
-            if (gathered == null)
+            var outcome = new InputOutcome();
+            foreach (var prompt in ResolveInput(session, requirement, state, result, true, interactive, outcome))
+                yield return prompt;
+
+            if (outcome.Element == null)
             {
                 result.Missing.Add(requirement.ElementLabel);
                 if (!requirement.CreateIfMissing)
                 {
                     result.Cancelled = true;
                     result.StatusMessages.Add($"Cancelled: {requirement.ElementLabel} is required.");
-                    if (pick != null)
-                        return result;
+                    if (interactive)
+                        yield break;
                 }
             }
         }
@@ -155,11 +206,12 @@ public class WorkflowSessionService
             if (result.Elements.ContainsKey(requirement.ElementLabel))
                 continue;
 
-            await ResolveInputAsync(session, requirement, state, result, isRequired: false, pick);
+            foreach (var prompt in ResolveInput(session, requirement, state, result, false, interactive, new InputOutcome()))
+                yield return prompt;
         }
 
         if (result.Cancelled)
-            return result;
+            yield break;
 
         if (string.Equals(session.Workflow.Label, "SceneBuilder", StringComparison.Ordinal)
             && result.Elements.TryGetValue("Scene", out var sceneBuilderScene))
@@ -172,8 +224,6 @@ public class WorkflowSessionService
         {
             InjectStoryProblemSeatsForWorld(result);
         }
-
-        return result;
     }
 
     /// <summary>What the caller gave: the element the run is about and the named inputs.</summary>
@@ -189,19 +239,26 @@ public class WorkflowSessionService
         }
     }
 
+    /// <summary>The element that one input step found, or null.</summary>
+    private sealed class InputOutcome
+    {
+        public StoryElement? Element;
+    }
+
     /// <summary>
     /// Gathers a single element based on its requirement.
     /// Uses ElementResolver for auto-resolution (StoryOverview, referenced elements).
-    /// For required inputs: uses auto-resolved element if available, otherwise asks the picker.
-    /// For optional inputs: always asks the picker with the current selection pre-selected.
+    /// For required inputs: uses auto-resolved element if available, otherwise asks the writer.
+    /// For optional inputs: always asks the writer with the current selection pre-selected.
     /// </summary>
-    private async Task<StoryElement?> ResolveInputAsync(
+    private IEnumerable<InputPrompt> ResolveInput(
         WorkflowSession session,
         ElementRequirement requirement,
         GatherState state,
         InputResolution result,
         bool isRequired,
-        Func<InputPrompt, Task<Guid?>>? pick)
+        bool interactive,
+        InputOutcome outcome)
     {
         var gatheredElements = result.Elements;
         var statusMessages = result.StatusMessages;
@@ -226,7 +283,8 @@ public class WorkflowSessionService
         {
             gatheredElements[requirement.ElementLabel] = supplied;
             statusMessages.Add($"Using {requirement.ElementLabel}: {supplied.Name}");
-            return supplied;
+            outcome.Element = supplied;
+            yield break;
         }
 
         var resolver = new ElementResolver(_api, _loggerFactory?.CreateLogger<ElementResolver>());
@@ -239,7 +297,8 @@ public class WorkflowSessionService
             statusMessages.Add($"Using {requirement.ElementLabel}: {autoResolved.Name}");
             _logger?.LogDebug("Auto-resolved {Label} to '{Name}'",
                 requirement.ElementLabel, autoResolved.Name);
-            return autoResolved;
+            outcome.Element = autoResolved;
+            yield break;
         }
 
         // #201: StoryWorld is a singleton. Create when missing; never ElementPicker.
@@ -251,13 +310,14 @@ public class WorkflowSessionService
                 if (created != null)
                 {
                     gatheredElements[requirement.ElementLabel] = created;
-                    return created;
+                    outcome.Element = created;
+                    yield break;
                 }
             }
 
             statusMessages.Add($"{requirement.ElementLabel}: StoryWorld missing and could not be created");
             _logger?.LogWarning("StoryWorld gather failed (create={Create})", requirement.CreateIfMissing);
-            return null;
+            yield break;
         }
 
         // Try to get referenced element for pre-selection (e.g., "Problem.Protagonist")
@@ -284,7 +344,8 @@ public class WorkflowSessionService
                     {
                         ApplyStoryProblemCategory(currentElement.Uuid, statusMessages);
                     }
-                    return currentElement;
+                    outcome.Element = currentElement;
+                    yield break;
                 }
 
                 // For OPTIONAL inputs, the picker shows with pre-selection
@@ -303,19 +364,21 @@ public class WorkflowSessionService
         }
 
         // Nobody to ask: an optional input takes the element its reference points to.
-        if (pick == null)
+        if (!interactive)
         {
             if (!isRequired && currentElement != null)
             {
                 gatheredElements[requirement.ElementLabel] = currentElement;
                 statusMessages.Add($"Using {requirement.ElementLabel}: {currentElement.Name}");
-                return currentElement;
+                outcome.Element = currentElement;
             }
 
-            return null;
+            yield break;
         }
 
-        var selectedGuid = await pick(new InputPrompt(requirement, currentGuid, isRequired));
+        var prompt = new InputPrompt(requirement, currentGuid, isRequired);
+        yield return prompt;
+        var selectedGuid = prompt.Answer;
 
         if (selectedGuid == null)
         {
@@ -329,7 +392,7 @@ public class WorkflowSessionService
                 statusMessages.Add($"{requirement.ElementLabel}: not selected (optional)");
             }
             _logger?.LogDebug("User cancelled selection for {Label}", requirement.ElementLabel);
-            return null;
+            yield break;
         }
 
         // Look up the selected element
@@ -348,11 +411,11 @@ public class WorkflowSessionService
                 UpdateReferenceProperty(requirement.ReferencedElementLabel, gatheredElements, picked.Uuid, statusMessages);
             }
 
-            return picked;
+            outcome.Element = picked;
+            yield break;
         }
 
         _logger?.LogWarning("Could not find element with GUID {Guid}", selectedGuid);
-        return null;
     }
 
     /// <summary>
@@ -409,13 +472,13 @@ public class WorkflowSessionService
     internal void ApplyStoryProblemCategory(Guid problemGuid, List<string>? statusMessages = null)
     {
         var catResult = _api.UpdateElementProperty(
-            problemGuid, "ProblemCategory", Collaborator.StoryProblemCategoryListValue);
+            problemGuid, "ProblemCategory", StoryProblemCategoryListValue);
         if (catResult.IsSuccess)
         {
-            statusMessages?.Add($"  (Set Problem.ProblemCategory = {Collaborator.StoryProblemCategoryListValue})");
+            statusMessages?.Add($"  (Set Problem.ProblemCategory = {StoryProblemCategoryListValue})");
             _logger?.LogDebug(
                 "Set Problem {Guid} ProblemCategory = {Category}",
-                problemGuid, Collaborator.StoryProblemCategoryListValue);
+                problemGuid, StoryProblemCategoryListValue);
         }
         else
         {
@@ -720,10 +783,13 @@ public class WorkflowSessionService
     /// outline, and opens the proposal set and the chat. <see cref="RunAsync"/> calls this once
     /// the Worker has answered.
     /// </summary>
-    public void SetResult(WorkflowSession session, WorkflowResult result)
+    internal void SetResult(WorkflowSession session, WorkflowResult result)
     {
         var runner = EnsureRunner(session);
-        session.Result = result;
+
+        // A failed run leaves the last good run's proposals in place (design section 8).
+        if (result.Success)
+            session.Result = result;
 
         // Cost line (devdocs/collaborator_workflow_cost_display_design.md).
         // Recorded for every run, priced or not: a null Cost still advances the display
@@ -767,14 +833,14 @@ public class WorkflowSessionService
                 var protectCount = result.PendingUpdates.Count(u => u.Kind == UpdateKind.Protect);
                 // #145: clear chat, seed proposal set, unlock Send
                 BeginProposalChatSession(session, result);
-                Say(session, Collaborator.BuildSummaryMessage(
+                Say(session, BuildSummaryMessage(
                     result.PendingUpdates.Count, protectCount, result.KeptProperties));
             }
             else
             {
                 session.ChatEnabled = false;
                 session.ChatPlaceholder = "No proposals to edit in chat";
-                Say(session, Collaborator.BuildSummaryMessage(0, 0, result.KeptProperties));
+                Say(session, BuildSummaryMessage(0, 0, result.KeptProperties));
             }
         }
         else
@@ -1005,7 +1071,7 @@ public class WorkflowSessionService
     /// True when every proposal is decided and Protect rows wait on the stage. The caller then
     /// asks the writer once and gives the answer to <see cref="ApplyStagedAsync"/>.
     /// </summary>
-    public bool ShouldConfirmStaged(WorkflowSession session) =>
+    internal bool ShouldConfirmStaged(WorkflowSession session) =>
         session.Stage.ShouldConfirmStaged(session.Result?.PendingUpdates.Count ?? 0);
 
     /// <summary>
@@ -1136,7 +1202,7 @@ public class WorkflowSessionService
     /// Accept Remaining: applies the free proposals now and stages the remaining Protect
     /// proposals. The caller asks about the stage once the queue is empty (#140).
     /// </summary>
-    public Task AcceptRemainingFreeAsync(WorkflowSession session)
+    internal Task AcceptRemainingFreeAsync(WorkflowSession session)
     {
         try
         {
@@ -1232,7 +1298,7 @@ public class WorkflowSessionService
     /// Saves the story outline via the API.
     /// Bypasses StoryCAD's ViewModel flush to ensure API-applied changes persist.
     /// </summary>
-    public async Task<bool> SaveAsync(WorkflowSession? session, string? filePath)
+    public async Task<bool> SaveAsync(string? filePath)
     {
         if (string.IsNullOrEmpty(filePath))
         {
@@ -1264,14 +1330,22 @@ public class WorkflowSessionService
     /// <summary>
     /// Saves the outline file after a write, without making the caller wait: the write
     /// queues behind StoryCAD's serialization lock, which an in-flight autosave can hold for
-    /// seconds. The task is in <see cref="WorkflowSession.PendingSave"/>.
+    /// seconds. The task is in <see cref="WorkflowSession.PendingSave"/>; a new save waits for the
+    /// one before it, and a caller that must not outrun the saves awaits it.
     /// </summary>
     private void AutoSave(WorkflowSession session, string reason)
     {
         var path = session.FilePath;
+        var previous = session.PendingSave;
         session.PendingSave = Task.Run(async () =>
         {
-            var saved = await SaveAsync(session, path);
+            // One save at a time, in the order the writes happened.
+            if (previous != null)
+            {
+                try { await previous; } catch { /* that save logged its own failure */ }
+            }
+
+            var saved = await SaveAsync(path);
             if (saved)
                 _logger?.LogInformation("Auto-save completed after {Reason}", reason);
         });
@@ -1280,6 +1354,65 @@ public class WorkflowSessionService
     #endregion
 
     #region Display text
+
+    /// <summary>
+    /// The chat summary after a run. Collaborator #237 item 9: plain words, no em dash, one count.
+    /// Collaborator #272: names the properties the model kept, which the list does not show.
+    /// </summary>
+    internal static string BuildSummaryMessage(int proposalCount, int protectCount, IReadOnlyList<string> keptProperties)
+    {
+        var keptNote = keptProperties.Count switch
+        {
+            0 => string.Empty,
+            1 => $"1 field is kept as it is: {keptProperties[0]}.",
+            _ => $"{keptProperties.Count} fields are kept as they are: {string.Join(", ", keptProperties)}."
+        };
+
+        if (proposalCount == 0)
+            return keptProperties.Count == 0
+                ? "No property updates were extracted from the response."
+                : $"No property updates. {keptNote}";
+
+        var replaceNote = protectCount > 0
+            ? $" {protectCount} of them would replace text you wrote; those ask for confirmation."
+            : string.Empty;
+        var keptSentence = keptNote.Length > 0 ? " " + keptNote : string.Empty;
+        return $"Found {proposalCount} property update(s).{replaceNote}{keptSentence} " +
+               "Choose Accept All, Review Each, or Try Again. Chat can revise these proposals.";
+    }
+
+    /// <summary>
+    /// Issue #90 design section 10 "The cutoff" (ruling of 2026-07-15, step 10): the shipped chat
+    /// sidebar sends through Semantic Kernel to the Worker's /v1/chat/completions, which refuses
+    /// with 429 (before any upstream dispatch) when the caller's balance is at or below zero.
+    /// Semantic Kernel wraps a non-success HTTP response in <see cref="HttpOperationException"/>
+    /// (its <see cref="HttpOperationException.StatusCode"/> carries the code); this recognizes the
+    /// 429 shape and translates it to <see cref="OutOfCreditsException"/> so
+    /// WorkflowViewModel.SendButtonClicked's <c>ChatMessage.Error(ex.Message)</c> shows a message
+    /// naming the credits screen instead of the raw HTTP exception text. Every other exception
+    /// passes through unchanged. internal static and side-effect-free, so it is testable without a
+    /// live kernel call: construct an HttpOperationException directly (its public 4-arg
+    /// constructor takes the status code) and assert on the returned exception's type/message.
+    /// </summary>
+    internal static Exception TranslateChatException(Exception ex)
+    {
+        if (ex is not HttpOperationException { StatusCode: HttpStatusCode.TooManyRequests })
+        {
+            return ex;
+        }
+
+        var allowlist = Ioc.Default.GetService<IStoreActivationService>()?.IsAllowlistActivation == true;
+        return allowlist
+            ? new OutOfCreditsException(StoreConfig.OutOfCreditsBetaMessage)
+            : new OutOfCreditsException();
+    }
+
+    /// <summary>
+    /// Exact Lists.json ProblemCategory value when a Problem is the Overview StoryProblem.
+    /// The input gather writes it when it links the Problem.
+    /// </summary>
+    internal const string StoryProblemCategoryListValue = "Story problem";
+
 
     /// <summary>
     /// Readable text for a typed pending-update value; lists render per entry and
@@ -1467,7 +1600,7 @@ public class WorkflowSessionService
         catch (Exception ex)
         {
             _logger?.LogError(ex, "Error processing chat message");
-            throw Collaborator.TranslateChatException(ex);
+            throw TranslateChatException(ex);
         }
     }
 
@@ -1554,7 +1687,7 @@ public class WorkflowSessionService
     /// a stock sentence; Terry read that as the model not knowing how to start. The goal
     /// is what starts it, and the writer or the Worker names the goal.
     /// </summary>
-    public void StartInterview(WorkflowSession session)
+    internal void StartInterview(WorkflowSession session)
     {
         session.InterviewTranscript = new InterviewTranscript();
         session.InterviewCursor.Reset();
@@ -1841,7 +1974,7 @@ public class WorkflowSessionService
     /// asked and the answers as typed." Running the transcript through a model to produce a
     /// digest is what the first build did, and it lost both the questions and the answers.
     /// </summary>
-    public Task SaveInterviewAsync(WorkflowSession session)
+    internal Task SaveInterviewAsync(WorkflowSession session)
     {
         SaveInterview(session);
         return Task.CompletedTask;
@@ -1872,6 +2005,7 @@ public class WorkflowSessionService
         }
 
         session.CanSaveInterview = false;
+        AutoSave(session, "interview note");
         Say(session,
             $"Saved under {session.InterviewCharacterName} as \"Interview with {session.InterviewCharacterName}\", "
             + $"{transcript.Turns.Count} questions and answers.");
@@ -1885,7 +2019,7 @@ public class WorkflowSessionService
     /// than dropping it: the first build kept the exchange only in the chat pane, so closing
     /// the panel left the outline with no record that the interview had happened.
     /// </summary>
-    public void EndInterview(WorkflowSession session)
+    internal void EndInterview(WorkflowSession session)
     {
         if (session.InterviewTranscript is { IsEmpty: false } && session.InterviewHasUnsavedTurns)
         {
@@ -1912,7 +2046,7 @@ public class WorkflowSessionService
     /// Writes the transcript to this session's Notes element: created on the first write,
     /// updated in place after that, so a writer who saves early and keeps answering ends
     /// the session with one note holding everything. Returns null on success, else the
-    /// error text. A write saves the outline file.
+    /// error text. It writes the model only; the Save path saves the file.
     /// </summary>
     private string? WriteInterviewNote(WorkflowSession session)
     {
@@ -1939,7 +2073,6 @@ public class WorkflowSessionService
         }
 
         session.InterviewHasUnsavedTurns = false;
-        AutoSave(session, "interview note");
         return null;
     }
 

@@ -290,6 +290,99 @@ public class WorkflowSessionTests
 
     #endregion
 
+    #region Saves, failed runs and interviews
+
+    private static string TempOutlinePath() =>
+        Path.Combine(Path.GetTempPath(), $"session-{Guid.NewGuid():N}.stbx");
+
+    [TestMethod]
+    public async Task AcceptAsync_TwoWrites_SavesRunOneAfterAnother()
+    {
+        var rig = await ArrangeAsync(true, NoWriterText, ("Premise", ModelText), ("Concept", ModelText));
+        var path = TempOutlinePath();
+        rig.Session.FilePath = path;
+        try
+        {
+            await rig.Service.AcceptAsync(rig.Session, Key("Premise"));
+            var first = rig.Session.PendingSave;
+            await rig.Service.AcceptAsync(rig.Session, Key("Concept"));
+            var second = rig.Session.PendingSave;
+
+            Assert.IsNotNull(first);
+            await second;
+            Assert.IsTrue(first.IsCompleted, "the second save waits for the first");
+            Assert.IsTrue(File.Exists(path), "the accept saved the outline file");
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [TestMethod]
+    public async Task SetResult_FailedRunAfterGoodRun_KeepsGoodProposals()
+    {
+        var rig = await ArrangeAsync(true, NoWriterText, ("Premise", ModelText));
+
+        rig.Service.SetResult(rig.Session, WorkflowResult.Failed("Worker down"));
+        var accepted = await rig.Service.AcceptAsync(rig.Session, Key("Premise"));
+
+        Assert.IsTrue(accepted, "the last good run's proposals stay");
+        Assert.AreEqual(ModelText, Text(rig, "Premise"));
+    }
+
+    private static async Task<Rig> ArrangeInterviewAsync()
+    {
+        var rig = await ArrangeAsync(true, NoWriterText);
+        var added = rig.Api.AddElement(StoryItemType.Character, rig.Overview.Uuid.ToString(), "Mara");
+        Assert.IsTrue(added.IsSuccess);
+        rig.Session.Elements["Character"] = (StoryElement)rig.Api.GetStoryElement(added.Payload).Payload;
+        rig.Service.StartInterview(rig.Session);
+        rig.Session.InterviewTranscript.Add("Name", "Who are you?", "Mara");
+        rig.Session.InterviewHasUnsavedTurns = true;
+        return rig;
+    }
+
+    private static int InterviewNotes(Rig rig) =>
+        rig.Api.CurrentModel.StoryElements.Count(e => e.Name == "Interview with Mara");
+
+    [TestMethod]
+    public async Task EndInterview_UnsavedTurns_WritesNoteButNotTheFile()
+    {
+        var rig = await ArrangeInterviewAsync();
+        var path = TempOutlinePath();
+        rig.Session.FilePath = path;
+
+        rig.Service.EndInterview(rig.Session);
+
+        Assert.AreEqual(1, InterviewNotes(rig), "close writes the note to the model");
+        Assert.IsNull(rig.Session.PendingSave, "close does not save the outline file");
+        Assert.IsFalse(File.Exists(path));
+    }
+
+    [TestMethod]
+    public async Task SaveInterviewAsync_WritesNoteAndSavesTheFile()
+    {
+        var rig = await ArrangeInterviewAsync();
+        var path = TempOutlinePath();
+        rig.Session.FilePath = path;
+        try
+        {
+            await rig.Service.SaveInterviewAsync(rig.Session);
+
+            Assert.AreEqual(1, InterviewNotes(rig));
+            Assert.IsNotNull(rig.Session.PendingSave);
+            await rig.Session.PendingSave;
+            Assert.IsTrue(File.Exists(path));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    #endregion
+
     #region Client header
 
     [TestMethod]

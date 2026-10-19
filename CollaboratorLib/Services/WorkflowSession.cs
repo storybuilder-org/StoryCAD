@@ -6,7 +6,7 @@ using StoryCollaborator.Workflows;
 namespace StoryCollaborator.Services;
 
 /// <summary>What <see cref="WorkflowSessionService"/> wants shown, in order.</summary>
-public enum SessionMessageKind
+internal enum SessionMessageKind
 {
     /// <summary>One progress line. Consecutive lines roll up into one group in the pane.</summary>
     Status,
@@ -22,7 +22,7 @@ public enum SessionMessageKind
 }
 
 /// <summary>One line for the conversation. The text is empty for <see cref="SessionMessageKind.ClearConversation"/>.</summary>
-public sealed record SessionMessage(SessionMessageKind Kind, string Text = "");
+internal sealed record SessionMessage(SessionMessageKind Kind, string Text = "");
 
 /// <summary>
 /// Collaborator #291: the data of one Collaborator run on one outline, from the run to the
@@ -94,7 +94,7 @@ public class WorkflowSession
     internal WorkflowCostTracker CostTracker { get; set; } = new();
 
     /// <summary>The cost line to show next. The screen takes it and sets it back to null.</summary>
-    public string? PendingCostSummary { get; set; }
+    internal string? PendingCostSummary { get; set; }
 
     #region Chat
 
@@ -104,20 +104,20 @@ public class WorkflowSession
     public string ChatPlaceholder { get; set; } = "Waiting for proposals…";
 
     /// <summary>A chat patch changed the proposals. The screen takes it and sets it back to false.</summary>
-    public bool ProposalsChanged { get; set; }
+    internal bool ProposalsChanged { get; set; }
 
     #endregion
 
     #region Screen state
 
     /// <summary>A run or an interview turn is in flight.</summary>
-    public bool Busy { get; set; }
+    internal bool Busy { get; set; }
 
     /// <summary>Lines for the conversation, in order. The screen takes them and clears the list.</summary>
-    public List<SessionMessage> Messages { get; } = new();
+    internal List<SessionMessage> Messages { get; } = new();
 
     /// <summary>Raised when something changes during a long call, so a screen can show it at once.</summary>
-    public Action? Changed { get; set; }
+    internal Action? Changed { get; set; }
 
     #endregion
 
