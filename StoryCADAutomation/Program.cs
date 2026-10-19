@@ -6,6 +6,7 @@ using StoryCADAutomation.Manual;
 using StoryCADAutomation.Scripting;
 using StoryCADAutomation.Video;
 using StoryCADAutomation.Voice;
+using StoryCADAutomation.YouTube;
 
 namespace StoryCADAutomation;
 
@@ -13,8 +14,9 @@ namespace StoryCADAutomation;
 ///     Runner for #1421: `run &lt;script.scs&gt;` with results on the console, in the test profile or
 ///     the presentation profile; `check` to lint scripts without launching the app; `voice` to
 ///     make the narrator clips and `video` to make a finished .mp4 (#1421 Milestone 5); `labels`
-///     to compare bold text in manual pages with the XAML labels (#1422). Folder runs for `run`
-///     belong to #1422.
+///     to compare bold text in manual pages with the XAML labels (#1422); `youtube auth` to
+///     authorize the StoryCAD channel once and `youtube upload` to upload a video with its
+///     meta.json (#1626). Folder runs for `run` belong to #1422.
 /// </summary>
 internal static class Program
 {
@@ -42,6 +44,16 @@ internal static class Program
         if (args.Length == 6 && args[0] == "video" && args[2] == "--out" && args[4] == "--assets")
         {
             return File.Exists(args[1]) ? VideoCommand.Run(args[1], args[3], args[5]) : MissingScript(args[1]);
+        }
+
+        if (args.Length == 2 && args[0] == "youtube" && args[1] == "auth")
+        {
+            return YouTubeCommand.Auth();
+        }
+
+        if (args.Length == 5 && args[0] == "youtube" && args[1] == "upload" && args[3] == "--meta")
+        {
+            return YouTubeCommand.Upload(args[2], args[4]);
         }
 
         if (args.Length == 4 && args[0] == "voice" && args[2] == "--out")
@@ -397,6 +409,8 @@ internal static class Program
         Console.Error.WriteLine("  StoryCADAutomation labels <page.md | folder> [...]   (exit 1 lists bold text matching no XAML label)");
         Console.Error.WriteLine("  StoryCADAutomation voice <script.scs> --out <dir>");
         Console.Error.WriteLine("  StoryCADAutomation video <script.scs> --out <dir> --assets <dir>");
+        Console.Error.WriteLine(@"  StoryCADAutomation youtube auth   (once; needs %USERPROFILE%\.storycad-youtube\client_secret.json)");
+        Console.Error.WriteLine("  StoryCADAutomation youtube upload <video.mp4> --meta <meta.json>   (privacy defaults to unlisted)");
         Console.Error.WriteLine();
         Console.Error.WriteLine("Exit codes: 0 all steps passed, 1 step failure(s), 2 script parse/lint error,");
         Console.Error.WriteLine("            3 environment or launch failure.");
