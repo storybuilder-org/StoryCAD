@@ -63,3 +63,9 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - New `screenshot "Name.png" of <target> [<target> ...] [margin N]`: the image covers the named elements plus a margin in 100%-scale pixels, clipped to the window (Terry, 2026-10-18: close-ups by element name instead of pixel numbers). `Core-File-Operations.scs` uses it for `Status-Bar.png` and `File-Menu.png`. Automation tests 158 passed; lint clean.
 - VM runs are one command: `D:\VMs\Run-InVM.ps1 -Repo <worktree> -Script <name>.scs` (elevated PowerShell) stages the Debug build, runner and XAML, runs in the VM, and copies results to `D:\VMs\out\<script>`. The script lives on Brigid, not in the repo. First run: Core_File_Operations passed, 42.1 s in the VM, 97 s end to end.
 - Open: the new `Status-Bar.png` takes a thin strip of the page above the status bar (margin 8 reaches past its top edge). Fix the margin, retake both images into `docs/media`, then start the Core_Story_Elements script.
+
+### Session recovery (2026-10-19)
+
+- Merged since this branch started: #1639 (PR #1643), #1641 (PR #1642), Collaborator #197 (PR #1646, `d0b427cf`). Rebase this branch on `dev` before more work.
+- From #197: the runner no longer refuses a `.env` in the app folder, so local runs no longer need `.env` moved aside. Use `--window 1036x744` on every local run (it gives StoryCAD the focus).
+- Next on this branch: fix the `Status-Bar.png` margin (a strip of the page above shows), retake `Status-Bar.png` and `File-Menu.png` into `docs/media`, then script Core_Story_Elements (C3).
