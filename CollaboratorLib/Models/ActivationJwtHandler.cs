@@ -64,6 +64,9 @@ internal sealed class ActivationJwtHandler : DelegatingHandler
             return new HttpResponseMessage(HttpStatusCode.Unauthorized);
 
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", credential);
+        // Set on each attempt, so the 401 retry (a clone of the first request) carries it too.
+        request.Headers.Remove(KernelFactory.ClientHeader);
+        request.Headers.TryAddWithoutValidation(KernelFactory.ClientHeader, KernelFactory.ClientName);
         return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
     }
 

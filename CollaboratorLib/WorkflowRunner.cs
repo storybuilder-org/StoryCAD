@@ -3401,6 +3401,7 @@ namespace StoryCollaborator
         {
             var request = new HttpRequestMessage(HttpMethod.Post, $"{proxyBaseUrl}/workflow");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", credential);
+            request.Headers.TryAddWithoutValidation(KernelFactory.ClientHeader, KernelFactory.ClientName);
             request.Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
             return request;
         }

@@ -18,7 +18,7 @@ public class CollaboratorTests
     [TestMethod]
     public void BuildSummaryMessage_ProposalsAndKeptProperties_NamesEachKeptProperty()
     {
-        var text = StoryCollaborator.Collaborator.BuildSummaryMessage(16, 8, TenKept);
+        var text = StoryCollaborator.Services.WorkflowSessionService.BuildSummaryMessage(16, 8, TenKept);
 
         Assert.AreEqual(
             "Found 16 property update(s). 8 of them would replace text you wrote; those ask for confirmation. " +
@@ -30,7 +30,7 @@ public class CollaboratorTests
     [TestMethod]
     public void BuildSummaryMessage_NoProposalsAndKeptProperties_SaysNoUpdatesAndNamesThem()
     {
-        var text = StoryCollaborator.Collaborator.BuildSummaryMessage(0, 0, new[] { "ProtGoal", "Premise" });
+        var text = StoryCollaborator.Services.WorkflowSessionService.BuildSummaryMessage(0, 0, new[] { "ProtGoal", "Premise" });
 
         Assert.AreEqual("No property updates. 2 fields are kept as they are: ProtGoal, Premise.", text);
     }
@@ -38,7 +38,7 @@ public class CollaboratorTests
     [TestMethod]
     public void BuildSummaryMessage_OneKeptProperty_UsesSingular()
     {
-        var text = StoryCollaborator.Collaborator.BuildSummaryMessage(3, 0, new[] { "ProtGoal" });
+        var text = StoryCollaborator.Services.WorkflowSessionService.BuildSummaryMessage(3, 0, new[] { "ProtGoal" });
 
         StringAssert.Contains(text, " 1 field is kept as it is: ProtGoal. ");
     }
@@ -49,9 +49,9 @@ public class CollaboratorTests
         Assert.AreEqual(
             "Found 16 property update(s). 8 of them would replace text you wrote; those ask for confirmation. " +
             "Choose Accept All, Review Each, or Try Again. Chat can revise these proposals.",
-            StoryCollaborator.Collaborator.BuildSummaryMessage(16, 8, new string[0]));
+            StoryCollaborator.Services.WorkflowSessionService.BuildSummaryMessage(16, 8, new string[0]));
         Assert.AreEqual(
             "No property updates were extracted from the response.",
-            StoryCollaborator.Collaborator.BuildSummaryMessage(0, 0, new string[0]));
+            StoryCollaborator.Services.WorkflowSessionService.BuildSummaryMessage(0, 0, new string[0]));
     }
 }
