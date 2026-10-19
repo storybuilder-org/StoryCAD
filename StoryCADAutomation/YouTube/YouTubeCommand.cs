@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net;
+using System.Text.Json;
 
 namespace StoryCADAutomation.YouTube;
 
@@ -33,14 +34,12 @@ internal static class YouTubeCommand
             return EnvironmentFailure;
         }
 
-        var redirectUri = $"http://127.0.0.1:{YouTubeOAuth.FreePort()}/";
         var verifier = YouTubeOAuth.NewVerifier();
         var state = YouTubeOAuth.NewVerifier();
-        using var listener = new HttpListener();
-        listener.Prefixes.Add(redirectUri);
+        HttpListener? listener = null;
         try
         {
-            listener.Start();
+            listener = StartListener(YouTubeOAuth.FreePort(), out var redirectUri);
             var url = YouTubeOAuth.ConsentUrl(client, redirectUri, YouTubeOAuth.Challenge(verifier), state);
             // The address holds the client id and the PKCE challenge, neither of them secret.
             Console.WriteLine("youtube: sign in and choose the StoryCAD channel in the browser. If no browser opens, go to:");
@@ -53,10 +52,47 @@ internal static class YouTubeCommand
         }
         catch (Exception ex) when (ex is HttpListenerException or HttpRequestException or TaskCanceledException
                                        or TimeoutException or InvalidOperationException or IOException
-                                       or System.Text.Json.JsonException or KeyNotFoundException)
+                                       or JsonException or KeyNotFoundException)
         {
             Console.Error.WriteLine($"youtube auth failed: {ex.Message}");
             return EnvironmentFailure;
+        }
+        finally
+        {
+            listener?.Close();
+        }
+    }
+
+    /// <summary>Starts the redirect listener on 127.0.0.1, or on localhost when that is refused.</summary>
+    private static HttpListener StartListener(int port, out string redirectUri)
+    {
+        redirectUri = $"http://127.0.0.1:{port}/";
+        var listener = new HttpListener();
+        listener.Prefixes.Add(redirectUri);
+        try
+        {
+            listener.Start();
+            return listener;
+        }
+        catch (HttpListenerException)
+        {
+            // HTTP.sys can refuse a 127.0.0.1 prefix to a user without a URL reservation (netsh http add urlacl);
+            // it lets any user listen on localhost. Google accepts both as a Desktop client redirect.
+            listener.Close();
+        }
+
+        redirectUri = $"http://localhost:{port}/";
+        listener = new HttpListener();
+        listener.Prefixes.Add(redirectUri);
+        try
+        {
+            listener.Start();
+            return listener;
+        }
+        catch
+        {
+            listener.Close();
+            throw;
         }
     }
 
@@ -72,10 +108,21 @@ internal static class YouTubeCommand
         YouTubeOAuth.SaveRefreshToken(tokenPath, refresh);
         log($"youtube: token saved in {tokenPath}");
         // An OAuth consent screen left in "Testing" gives refresh tokens that expire after 7 days.
-        var channel = await YouTubeApi.ChannelAsync(http, access);
-        log(channel is { } c
-            ? $"youtube: authorized channel \"{c.Title}\" ({c.Id})"
-            : "youtube: this Google account has no YouTube channel; uploads will fail.");
+        try
+        {
+            var channel = await YouTubeApi.ChannelAsync(http, access);
+            log(channel is { } c
+                ? $"youtube: authorized channel \"{c.Title}\" ({c.Id})"
+                : "youtube: this Google account has no YouTube channel; uploads will fail.");
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException
+                                       or JsonException or KeyNotFoundException
+                                       or InvalidOperationException)
+        {
+            // The token is saved and good; only the channel name is unknown.
+            log($"youtube: warning: the token is saved, but the channel lookup failed: {ex.Message}");
+        }
+
         return Passed;
     }
 
@@ -122,7 +169,7 @@ internal static class YouTubeCommand
                 .GetAwaiter().GetResult();
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException
-                                       or InvalidDataException or System.Text.Json.JsonException
+                                       or InvalidDataException or JsonException
                                        or KeyNotFoundException or InvalidOperationException)
         {
             Console.Error.WriteLine($"youtube upload failed: {ex.Message}");
@@ -131,9 +178,9 @@ internal static class YouTubeCommand
     }
 
     /// <summary>
-    ///     Refreshes the access token, uploads, then runs the playlist, captions and thumbnail
-    ///     steps. A failed later step is reported and gives exit 3, but the video id still prints,
-    ///     because the video is on YouTube by then.
+    ///     Refreshes the access token, uploads, prints the video id and link, then runs the
+    ///     playlist, captions and thumbnail steps. A failed later step is reported and gives
+    ///     exit 3; the id is already printed, because the video is on YouTube by then.
     /// </summary>
     internal static async Task<int> UploadAsync(string videoPath, YouTubeMeta meta, YouTubeClient client,
         string refreshToken, HttpClient http, Action<string> log, Action<string> error)
@@ -142,13 +189,14 @@ internal static class YouTubeCommand
         var megabytes = new FileInfo(videoPath).Length / (1024.0 * 1024.0);
         log($"youtube: uploading {Path.GetFileName(videoPath)} ({megabytes:0.0} MB) as {meta.Privacy}");
         var (videoId, privacy) = await YouTubeApi.UploadVideoAsync(http, access, videoPath, meta);
+        log($"youtube: video id {videoId}");
+        log($"youtube: https://youtu.be/{videoId}");
         if (privacy is not null && privacy != meta.Privacy)
         {
             // YouTube locks videos.insert uploads to private for API projects that have not passed its audit.
             error($"youtube: YouTube set the video to {privacy}, not {meta.Privacy}; change it in YouTube Studio.");
         }
 
-        var result = Passed;
         var steps = new List<(string Name, Func<Task> Run)>();
         if (meta.PlaylistId is { } playlistId)
         {
@@ -165,6 +213,24 @@ internal static class YouTubeCommand
             steps.Add(("thumbnail", () => YouTubeApi.SetThumbnailAsync(http, access, videoId, thumbnail)));
         }
 
+        if (steps.Count == 0)
+        {
+            return Passed;
+        }
+
+        try
+        {
+            // An access token lasts about an hour, and a large upload can take longer.
+            access = await YouTubeOAuth.RefreshAsync(client, refreshToken, http);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException
+                                       or KeyNotFoundException or InvalidOperationException)
+        {
+            error($"youtube: token refresh after the upload failed, so {string.Join(", ", steps.Select(s => s.Name))} not done: {ex.Message}");
+            return EnvironmentFailure;
+        }
+
+        var result = Passed;
         foreach (var (name, run) in steps)
         {
             try
@@ -172,15 +238,14 @@ internal static class YouTubeCommand
                 await run();
                 log($"youtube: {name} done");
             }
-            catch (Exception ex) when (ex is HttpRequestException or IOException)
+            catch (Exception ex) when (ex is HttpRequestException or IOException or TaskCanceledException
+                                           or JsonException)
             {
                 error($"youtube: {name} failed: {ex.Message}");
                 result = EnvironmentFailure;
             }
         }
 
-        log($"youtube: video id {videoId}");
-        log($"youtube: https://youtu.be/{videoId}");
         return result;
     }
 
@@ -199,7 +264,7 @@ internal static class YouTubeCommand
         {
             return YouTubeOAuth.LoadClient(path);
         }
-        catch (Exception ex) when (ex is InvalidDataException or System.Text.Json.JsonException or IOException)
+        catch (Exception ex) when (ex is InvalidDataException or JsonException or IOException)
         {
             Console.Error.WriteLine($"youtube: {ex.Message}");
             return null;

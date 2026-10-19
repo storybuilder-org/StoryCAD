@@ -128,6 +128,7 @@ public class YouTubeOAuthTests
             () => YouTubeOAuth.RefreshAsync(Client, "R", new HttpClient(fake)));
 
         StringAssert.Contains(ex.Message, "invalid_grant");
+        StringAssert.Contains(ex.Message, "Run `youtube auth` again.");
     }
 
     [TestMethod]

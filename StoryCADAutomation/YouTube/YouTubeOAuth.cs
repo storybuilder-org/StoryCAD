@@ -105,8 +105,16 @@ public static class YouTubeOAuth
     public static async Task<string> RefreshAsync(YouTubeClient client, string refreshToken, HttpClient http,
         CancellationToken cancellation = default)
     {
-        using var json = await PostTokenAsync(client, RefreshForm(client, refreshToken), http, cancellation);
-        return json.RootElement.GetProperty("access_token").GetString()!;
+        try
+        {
+            using var json = await PostTokenAsync(client, RefreshForm(client, refreshToken), http, cancellation);
+            return json.RootElement.GetProperty("access_token").GetString()!;
+        }
+        catch (HttpRequestException ex) when (ex.Message.Contains("invalid_grant", StringComparison.Ordinal))
+        {
+            // invalid_grant means the saved refresh token is expired or revoked; only a new consent fixes it.
+            throw new HttpRequestException($"{ex.Message} Run `youtube auth` again.", ex, ex.StatusCode);
+        }
     }
 
     /// <summary>Writes token.json with the refresh token only.</summary>

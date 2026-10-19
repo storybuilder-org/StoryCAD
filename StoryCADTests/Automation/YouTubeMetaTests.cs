@@ -139,6 +139,41 @@ public class YouTubeMetaTests
     }
 
     [TestMethod]
+    public void Load_WithAngleBracketInDescription_ReportsBracket()
+    {
+        AssertOneError("""{ "title": "T", "description": "Use <Ctrl> S." }""", "description must not contain '<' or '>'");
+    }
+
+    [TestMethod]
+    public void Load_WithTagsOf500CountedCharacters_Accepts()
+    {
+        // 5 x 98 characters + "abcde" (5) + 5 commas = 500.
+        var tags = Enumerable.Repeat(new string('x', 98), 5).Append("abcde").ToList();
+
+        Assert.AreEqual(500, YouTubeMeta.TagsLength(tags));
+        Assert.IsNotNull(Load(TagsJson(tags), out var errors), string.Join(" | ", errors));
+    }
+
+    [TestMethod]
+    public void Load_WithTagsOver500CountedCharacters_ReportsLimit()
+    {
+        // As the 500 case, but "ab de" has a space, so its quotes add 2: 502.
+        var tags = Enumerable.Repeat(new string('x', 98), 5).Append("ab de").ToList();
+
+        Assert.AreEqual(502, YouTubeMeta.TagsLength(tags));
+        AssertOneError(TagsJson(tags), "the limit is 500");
+    }
+
+    [TestMethod]
+    public void TagsLength_WithSpaceInTag_CountsQuotesAndCommas()
+    {
+        Assert.AreEqual(3 + 1 + 5 + 2, YouTubeMeta.TagsLength(new[] { "abc", "ab cd" }));
+    }
+
+    private static string TagsJson(IEnumerable<string> tags) =>
+        $$"""{ "title": "T", "tags": {{System.Text.Json.JsonSerializer.Serialize(tags)}} }""";
+
+    [TestMethod]
     public void Load_WithTagsNotArray_ReportsTags()
     {
         AssertOneError("""{ "title": "T", "tags": "a,b" }""", "tags must be an array");

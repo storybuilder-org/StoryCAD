@@ -67,11 +67,25 @@ public static class YouTubeApi
         // Streamed from disk; a video of a few hundred MB never sits in memory.
         await using var file = new FileStream(videoPath, FileMode.Open, FileAccess.Read, FileShare.Read, 1 << 20,
             FileOptions.Asynchronous | FileOptions.SequentialScan);
-        using var put = new HttpRequestMessage(HttpMethod.Put, session);
+        using var put = Request(HttpMethod.Put, session.ToString(), accessToken);
         put.Content = new StreamContent(file, 1 << 20);
         put.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
         put.Content.Headers.ContentLength = length;
-        using var json = await SendAsync(http, put, "video upload", cancellation);
+        JsonDocument json;
+        try
+        {
+            json = await SendAsync(http, put, "video upload", cancellation);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or IOException or TaskCanceledException &&
+                                   !cancellation.IsCancellationRequested)
+        {
+            // The command has no resume (#1626); a stopped upload is sent again from the first byte.
+            throw new HttpRequestException(
+                $"the video upload stopped: {ex.Message} There is no resume; a re-run starts the upload over.", ex,
+                (ex as HttpRequestException)?.StatusCode);
+        }
+
+        using var _ = json;
         var id = json.RootElement.GetProperty("id").GetString()!;
         var privacy = json.RootElement.TryGetProperty("status", out var status) &&
                       status.TryGetProperty("privacyStatus", out var p)

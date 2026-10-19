@@ -13,6 +13,9 @@ public sealed record YouTubeMeta
     public const int MaxTitleLength = 100;
     public const int MaxDescriptionBytes = 5000;
 
+    // YouTube counts the commas between tags, and 2 more for the quotes around a tag with a space.
+    public const int MaxTagsLength = 500;
+
     // thumbnails.set accepts JPEG or PNG up to 2 MB.
     public const long MaxThumbnailBytes = 2 * 1024 * 1024;
 
@@ -113,6 +116,11 @@ public sealed record YouTubeMeta
             errors.Add($"description is {descriptionBytes} bytes in UTF-8; the limit is {MaxDescriptionBytes}.");
         }
 
+        if (description.IndexOfAny(new[] { '<', '>' }) >= 0)
+        {
+            errors.Add("description must not contain '<' or '>'.");
+        }
+
         var tags = new List<string>();
         if (root.TryGetProperty("tags", out var tagsElement))
         {
@@ -131,6 +139,11 @@ public sealed record YouTubeMeta
                     }
 
                     tags.Add(tag.GetString()!);
+                }
+
+                if (TagsLength(tags) > MaxTagsLength)
+                {
+                    errors.Add($"tags come to {TagsLength(tags)} characters as YouTube counts them; the limit is {MaxTagsLength}.");
                 }
             }
         }
@@ -204,6 +217,10 @@ public sealed record YouTubeMeta
             ThumbnailPath = thumbnail,
         };
     }
+
+    /// <summary>The tags length as YouTube counts it: commas between tags, quotes around a tag with a space.</summary>
+    internal static int TagsLength(IReadOnlyCollection<string> tags) =>
+        tags.Sum(t => t.Length + (t.Contains(' ') ? 2 : 0)) + Math.Max(0, tags.Count - 1);
 
     /// <summary>The upload content type for a thumbnail file, or null when YouTube does not take it.</summary>
     internal static string? ThumbnailContentType(string path) => Path.GetExtension(path).ToLowerInvariant() switch

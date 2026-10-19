@@ -65,6 +65,49 @@ public class YouTubeCommandTests
     }
 
     [TestMethod]
+    public async Task FinishAuthAsync_WhenChannelLookupFails_WarnsAndSucceeds()
+    {
+        var fake = new FakeGoogle { FailPath = "/channels" };
+
+        var exit = await YouTubeCommand.FinishAuthAsync(YouTubeOAuthTests.Client, "CODE", "VERIFIER",
+            "http://127.0.0.1:50000/", _folder, new HttpClient(fake), _out.Add);
+
+        Assert.AreEqual(0, exit);
+        Assert.IsTrue(File.Exists(Path.Combine(_folder, "token.json")));
+        StringAssert.Contains(_out[^1], "warning: the token is saved, but the channel lookup failed");
+        AssertNoSecretPrinted();
+    }
+
+    [TestMethod]
+    public async Task UploadAsync_WhenTokenExpiresDuringUpload_RefreshesBeforePlaylist()
+    {
+        var fake = new FakeGoogle { ExpireFirstTokenAtPut = true };
+
+        var exit = await YouTubeCommand.UploadAsync(_video, Meta(playlistId: "PL1"), YouTubeOAuthTests.Client,
+            "STORED-REFRESH", new HttpClient(fake), _out.Add, _err.Add);
+
+        Assert.AreEqual(0, exit, string.Join(" | ", _err));
+        CollectionAssert.AreEqual(
+            new[] { "/token", "/upload/youtube/v3/videos", "/upload/youtube/v3/videos", "/token", "/youtube/v3/playlistItems" },
+            fake.Requests.Select(r => new Uri(r.Url).AbsolutePath).ToArray());
+        Assert.AreEqual($"Bearer {FakeGoogle.AccessToken}-2", fake.Requests[^1].Headers["Authorization"]);
+        AssertNoSecretPrinted();
+    }
+
+    [TestMethod]
+    public async Task UploadAsync_WhenStepGetsNonJson_ReportsStepAndPrintsLinkFirst()
+    {
+        var fake = new FakeGoogle { GarbagePath = "/playlistItems" };
+
+        var exit = await YouTubeCommand.UploadAsync(_video, Meta(playlistId: "PL1"), YouTubeOAuthTests.Client,
+            "STORED-REFRESH", new HttpClient(fake), _out.Add, _err.Add);
+
+        Assert.AreEqual(3, exit);
+        StringAssert.Contains(_err.Single(), "playlist failed");
+        CollectionAssert.Contains(_out, "youtube: https://youtu.be/vid123");
+    }
+
+    [TestMethod]
     public async Task UploadAsync_Always_RefreshesUploadsAndPrintsLink()
     {
         var fake = new FakeGoogle();

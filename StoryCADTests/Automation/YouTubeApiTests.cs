@@ -26,6 +26,18 @@ internal sealed class FakeGoogle : HttpMessageHandler
     /// <summary>Paths whose request gets a 403, to test a failed later step.</summary>
     public string? FailPath { get; init; }
 
+    /// <summary>Paths whose request gets a 200 with a body that is not JSON.</summary>
+    public string? GarbagePath { get; init; }
+
+    /// <summary>The file PUT gets a 503, to test an upload that stops.</summary>
+    public bool FailPut { get; init; }
+
+    /// <summary>After the file PUT, the first access token gets a 401, as when it expires during the upload.</summary>
+    public bool ExpireFirstTokenAtPut { get; init; }
+
+    private int _tokens;
+    private bool _putSeen;
+
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var bytes = request.Content is null ? Array.Empty<byte>() : await request.Content.ReadAsByteArrayAsync(cancellationToken);
@@ -41,11 +53,18 @@ internal sealed class FakeGoogle : HttpMessageHandler
             return Json(HttpStatusCode.Forbidden, """{"error":{"code":403,"message":"The user is not allowed."}}""");
         }
 
+        if (GarbagePath is not null && url.AbsolutePath.Contains(GarbagePath, StringComparison.Ordinal))
+        {
+            return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("<html>proxy</html>") };
+        }
+
         if (url.Host == "oauth2.googleapis.com")
         {
+            // The first token is AccessToken; later ones get a number after it.
+            var token = ++_tokens == 1 ? AccessToken : $"{AccessToken}-{_tokens}";
             return TokenStatus == HttpStatusCode.OK
                 ? Json(HttpStatusCode.OK,
-                    $$"""{"access_token":"{{AccessToken}}","refresh_token":"{{RefreshToken}}","expires_in":3599,"token_type":"Bearer"}""")
+                    $$"""{"access_token":"{{token}}","refresh_token":"{{RefreshToken}}","expires_in":3599,"token_type":"Bearer"}""")
                 : Json(TokenStatus, """{"error":"invalid_grant","error_description":"Token has been expired or revoked."}""");
         }
 
@@ -56,8 +75,19 @@ internal sealed class FakeGoogle : HttpMessageHandler
             return response;
         }
 
+        if (_putSeen && ExpireFirstTokenAtPut && request.Headers.Authorization?.Parameter == AccessToken)
+        {
+            return Json(HttpStatusCode.Unauthorized, """{"error":{"code":401,"message":"Invalid Credentials"}}""");
+        }
+
         if (request.Method == HttpMethod.Put && url.ToString() == SessionUrl)
         {
+            _putSeen = true;
+            if (FailPut)
+            {
+                return Json(HttpStatusCode.ServiceUnavailable, """{"error":{"code":503,"message":"Backend Error"}}""");
+            }
+
             return Json(HttpStatusCode.OK, $$$"""{"id":"{{{VideoId}}}","status":{"privacyStatus":"{{{ReturnedPrivacy}}}"}}""");
         }
 
@@ -127,6 +157,19 @@ public class YouTubeApiTests
         Assert.AreEqual("video/mp4", put.ContentType);
         Assert.AreEqual(12345L, put.ContentLength);
         Assert.AreEqual(12345L, put.BodyBytes);
+        Assert.AreEqual("Bearer AT", put.Headers["Authorization"]);
+    }
+
+    [TestMethod]
+    public async Task UploadVideoAsync_WhenPutFails_SaysReRunStartsOver()
+    {
+        var fake = new FakeGoogle { FailPut = true };
+
+        var ex = await Assert.ThrowsExactlyAsync<HttpRequestException>(
+            () => YouTubeApi.UploadVideoAsync(new HttpClient(fake), "AT", _video, Meta()));
+
+        StringAssert.Contains(ex.Message, "Backend Error");
+        StringAssert.Contains(ex.Message, "a re-run starts the upload over");
     }
 
     [TestMethod]
