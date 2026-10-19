@@ -80,8 +80,8 @@ internal sealed class ScratchArea
             ["TimedBackup"] = false,
             ["BackupOnOpen"] = false,
 
-            // Backend isolation: no consent flags set, nothing queued for posting. The .env
-            // refusal already keeps the backend unreachable; these make intent explicit.
+            // No registration and no telemetry, even with .env present: no consent flags set,
+            // backend sync marked done, no name or email to send.
             ["ElmahConsent"] = false,
             ["NewsletterConsent"] = false,
             ["UsageStatsConsent"] = false,
@@ -92,10 +92,49 @@ internal sealed class ScratchArea
             ["Email"] = string.Empty,
             ["RecentFiles"] = Array.Empty<string>(),
         };
+        CopyCollaboratorSignIn(preferences);
 
         File.WriteAllText(
             Path.Combine(AppDataDirectory, "Preferences.json"),
             JsonSerializer.Serialize(preferences, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    private static readonly string[] SignInKeys = ["StoreUserGuid", "StoreActivationJwt", "StoreActivationJwtExpiry", "StoreActivationPath"];
+
+    /// <summary>
+    ///     Copies the machine's Collaborator sign-in from the installed StoryCAD's preferences, so
+    ///     a run can open Collaborator as that user without enrolling a new one (Collaborator
+    ///     #197). Does nothing on a machine without one (CI, the automation VM).
+    /// </summary>
+    private static void CopyCollaboratorSignIn(Dictionary<string, object> preferences)
+    {
+        // The installed (packaged) app keeps its preferences under its package folder.
+        var packages = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages");
+        var installed = Directory.Exists(packages)
+            ? Directory.GetDirectories(packages, "34432StoryBuilder.StoryBuilder_*")
+                .Select(d => Path.Combine(d, "RoamingState", "StoryCAD", "Preferences.json"))
+                .FirstOrDefault(File.Exists)
+            : null;
+        if (installed is null)
+        {
+            return;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(File.ReadAllText(installed));
+            foreach (var key in SignInKeys)
+            {
+                if (document.RootElement.TryGetProperty(key, out var value))
+                {
+                    preferences[key] = value.Clone();
+                }
+            }
+        }
+        catch (Exception ex) when (ex is IOException or JsonException)
+        {
+            // A run without the sign-in still works; only Collaborator stays closed.
+        }
     }
 
     /// <summary>
