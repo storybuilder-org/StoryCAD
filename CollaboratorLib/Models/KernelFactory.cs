@@ -41,6 +41,18 @@ namespace StoryCollaborator.Models
         public static Func<string?>? DevActivationJwtProvider { get; set; }
 
         /// <summary>
+        /// Collaborator #291: which program is calling the Worker, sent as the
+        /// <see cref="ClientHeader"/> header on every workflow and chat call. The app is
+        /// "app"; the StoryCAD MCP server sets "mcp" at start. The Worker journals the value
+        /// to count use by client. The client states this about itself, so it counts and
+        /// never prices.
+        /// </summary>
+        public static string ClientName { get; set; } = "app";
+
+        /// <summary>Collaborator #291: the request header that carries <see cref="ClientName"/>.</summary>
+        internal const string ClientHeader = "X-Collab-Client";
+
+        /// <summary>
         /// Pure config resolution — no I/O, no side effects, injectable env/JWT sources for tests.
         /// Resolution: activation JWT held (subscriber, or dev/tester on the allowlist) → Proxy
         /// path; the JWT is the sole credential (issue #90 retires the shared secret on /workflow
