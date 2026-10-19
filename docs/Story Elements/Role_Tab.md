@@ -9,7 +9,7 @@ has_toc: false
 ### Role Tab
 Role Tab
 
-![](../media/Elements/Character/CharRoleTab.png)
+![](../media/Character-Role-Tab.png)
 
 The role tab contains the information which defines the relationship between this character and the story.
 
