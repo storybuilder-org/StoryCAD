@@ -103,6 +103,7 @@ menu OpenCreateFileMenuItem
 click SampleOutlinesNavItem
 select FileOpenSamplesList "Hamlet"
 click PrimaryButton                       # "Open sample"
+expect TitleTextBox exists                # the open ends by selecting the root; a node opened before that loses its page
 open-node tree "Hamlet/Characters/Claudius"
 tab RoleTab
 screenshot "Character-Role-Tab.png"
@@ -121,6 +122,7 @@ menu OpenCreateFileMenuItem
 click SampleOutlinesNavItem
 select FileOpenSamplesList "Rocky"
 click PrimaryButton
+expect TitleTextBox exists
 open-node tree "Rocky/Scenes/Rocky shakes down Fats"
 screenshot "Scene-Scene-Tab.png"
 menu ExitMenuItem
