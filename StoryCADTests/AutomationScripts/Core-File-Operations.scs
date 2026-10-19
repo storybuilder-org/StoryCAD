@@ -24,7 +24,7 @@ press "Tab"
 expect StoryIdeaRichEdit text "A detective hunts a thief."
 # The unsaved-changes indicator is the status bar pencil turning red; scripts cannot read a color.
 focus TitleTextBox                        # moves the keyboard focus ring off the status bar
-screenshot "Status-Bar.png" of ViewSelectorCombo BackupStatusButton margin 8
+screenshot "Status-Bar.png" of ViewSelectorCombo BackupStatusButton margin 0
 
 step "CF-002: Save New Story"
 press "Primary+S"                         # no Save dialog: the file got its name and folder at creation
