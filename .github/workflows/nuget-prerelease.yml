@@ -34,6 +34,11 @@ jobs:
         with:
           global-json-file: "./global.json"
           cache: true
+          # Same as build-release.yml: StoryCAD has no packages.lock.json, so the
+          # cache keys on the project files (the first run failed without this).
+          cache-dependency-path: |
+            **/*.csproj
+            **/packages.lock.json
 
       - name: Package version
         id: version
