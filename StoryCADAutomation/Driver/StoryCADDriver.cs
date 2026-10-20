@@ -305,6 +305,14 @@ public sealed class StoryCADDriver : IUiDriver
         => _locator.VerifyAbsent(target, settle ?? _options.AbsenceSettle);
 
     /// <inheritdoc />
+    public void WaitUntilGone(ElementAddress target, TimeSpan? timeout = null)
+        => _locator.WaitUntilAbsent(target, Timeout(timeout), _options.AbsenceSettle);
+
+    /// <inheritdoc />
+    public void WaitUntilOffscreen(ElementAddress target, TimeSpan? timeout = null)
+        => _locator.WaitUntilOffscreen(target, Timeout(timeout));
+
+    /// <inheritdoc />
     public bool WaitForExit(TimeSpan timeout)
     {
         try
@@ -370,6 +378,93 @@ public sealed class StoryCADDriver : IUiDriver
     {
         // Top-left of the primary display, so the window is in the same place run to run.
         NativeMethods.PlaceWindow(_process.MainWindowHandle, 0, 0, width, height);
+        Wait.UntilInputIsProcessed();
+    }
+
+    /// <inheritdoc />
+    public void SizeMainWindow(int width, int height)
+    {
+        // A new size replaces the frame a later restore must return to.
+        _frameBeforeStateChange = null;
+        var scale = MainWindowDpi / 96.0;
+        try
+        {
+            PlaceVisibleFrame((int)Math.Round(width * scale), (int)Math.Round(height * scale));
+        }
+        catch (AutomationLaunchException ex)
+        {
+            // Here the app is running; a failed resize is a failed step, not a failed launch.
+            throw new AutomationStepException($"window size {width}x{height} failed: {ex.Message}", inner: ex);
+        }
+    }
+
+    /// <summary>The frame before the first minimize or maximize; restore must return to it.</summary>
+    private Rectangle? _frameBeforeStateChange;
+
+    /// <inheritdoc />
+    public void SetMainWindowState(WindowAction action)
+    {
+        var hwnd = _process.MainWindowHandle;
+        switch (action)
+        {
+            case WindowAction.Minimize:
+                _frameBeforeStateChange ??= NativeMethods.VisibleWindowBounds(hwnd);
+                NativeMethods.Minimize(hwnd);
+                WaitForWindowState("minimized", () => NativeMethods.IsIconic(hwnd));
+                return;
+            case WindowAction.Maximize:
+                _frameBeforeStateChange ??= NativeMethods.VisibleWindowBounds(hwnd);
+                NativeMethods.Maximize(hwnd);
+                WaitForWindowState("maximized", () => NativeMethods.IsZoomed(hwnd));
+                return;
+            case WindowAction.Restore:
+                {
+                    var before = _frameBeforeStateChange
+                                 ?? throw new AutomationStepException("window restore follows window minimize or window maximize.");
+                    NativeMethods.Restore(hwnd);
+                    WaitForWindowState("out of the taskbar", () => !NativeMethods.IsIconic(hwnd));
+
+                    // A window maximized before it was minimized comes back maximized; one more
+                    // restore returns it to its normal frame.
+                    if (NativeMethods.IsZoomed(hwnd))
+                    {
+                        NativeMethods.Restore(hwnd);
+                    }
+
+                    WaitForWindowState("restored", () => !NativeMethods.IsIconic(hwnd) && !NativeMethods.IsZoomed(hwnd));
+
+                    // Restoring from the taskbar does not always hand the app the foreground,
+                    // and real input refuses a background app.
+                    NativeMethods.ForceForeground(hwnd);
+                    Wait.UntilInputIsProcessed();
+                    var after = NativeMethods.VisibleWindowBounds(hwnd);
+                    if (after != before)
+                    {
+                        throw new AutomationStepException($"the restored window frame is {after}, not {before} as before.");
+                    }
+
+                    _frameBeforeStateChange = null;
+                    return;
+                }
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(action), action, "window size goes through SizeMainWindow.");
+        }
+    }
+
+    private void WaitForWindowState(string state, Func<bool> reached)
+    {
+        var deadline = DateTime.UtcNow + Timeout(null);
+        while (!reached())
+        {
+            if (DateTime.UtcNow >= deadline)
+            {
+                throw new AutomationStepException($"the main window was not {state} within {Timeout(null).TotalSeconds:0}s.");
+            }
+
+            Thread.Sleep(50);
+        }
+
         Wait.UntilInputIsProcessed();
     }
 

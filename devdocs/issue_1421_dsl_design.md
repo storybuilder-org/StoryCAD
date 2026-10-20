@@ -117,6 +117,15 @@ expect <target> enabled | disabled
 expect <target> expanded | collapsed   # the ExpandCollapse state of the target itself (#1422);
                                        # a child-row check cannot work, because resolving a tree
                                        # path expands every parent on the way
+expect <target> offscreen     # found, but out of view: a stacked SplitView pushes the page past
+                              # the window edge instead of removing it (#1422 Window_Management)
+expect <target> gone          # waits (implicit wait) until the target is absent: for a control an
+                              # action removes, such as a pane the hamburger button hides. UI
+                              # Automation keeps it for a moment after the app hides it, so
+                              # expect-no failed there in 2 of 5 VM runs (#1422). Passes once
+                              # the target stays absent for the 1 s settle window; a UIA read
+                              # error restarts it. expect <target> offscreen also waits, up to
+                              # the implicit wait
 expect tree contains "path"
 expect window "title"
 expect-no <target>           # asserts absence, e.g. error dialogs. Settle-then-check:
@@ -124,6 +133,21 @@ expect-no <target>           # asserts absence, e.g. error dialogs. Settle-then-
                              # the target never appears. Does not inherit the implicit
                              # wait, which would invert semantics into wait-for-the-error
 ```
+
+**Window** (added 2026-10-20, #1422 Window_Management)
+
+```
+window size 700x744          # visible frame in 100%-scale pixels at the display's top-left (the
+                             # units of --window); the app's minimum width is 520
+window minimize
+window maximize
+window restore               # fails unless the frame is back where it was before the first
+                             # minimize or maximize; gives the app the foreground again
+```
+
+The driver acts through Windows (ShowWindow), not the title bar buttons, which UI Automation does not reach in the WinAppSDK title bar.
+
+`MoreButton`, the CommandBar "..." button, is a WinUI template part, so the XAML scan never sees it; the linter accepts it by name.
 
 **Presentation**
 

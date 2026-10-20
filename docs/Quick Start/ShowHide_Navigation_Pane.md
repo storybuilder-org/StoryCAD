@@ -8,9 +8,11 @@ has_toc: false
 ---
 ## Show/Hide Navigation Pane
 
-This button toggles the Navigation Pane to either display or be hidden. Hiding the Navigation Pane makes better use of screen space on a smaller screens or when the main form is sized smaller. It also encourages focus on just the one screen.
+This button (the hamburger button, the first button after the search box) toggles the Navigation Pane to either display or be hidden. Hiding the Navigation Pane makes better use of screen space on smaller screens or when the main form is sized smaller. It also encourages focus on just the one screen. Here the Navigation Pane is hidden:
 
-![](../media/Show-and-Hide-Navigation.png)
+![](../media/Navigation-Pane-Hidden.png)
+
+When the window is narrower than 800 pixels, the button switches between the Navigation Pane and the Content Pane instead. See [Navigation and Content Panes](Navigation_and_Content_Panes.html).
 
 (Hint: StoryCAD detects and reports spelling errors on most text fields.)
 

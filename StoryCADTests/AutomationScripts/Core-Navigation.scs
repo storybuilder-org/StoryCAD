@@ -86,7 +86,7 @@ set ShellSearchBox ""                     # changing the search text clears the 
 step "CN-006: Drag and Drop Movement"
 drag tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him/Shootout" to tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"
 expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/Shootout"
-expect-no tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him/Shootout"
+expect tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him/Shootout" gone
 drag tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/Shootout" to tree "Danger Calls"
 expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/Shootout"
 

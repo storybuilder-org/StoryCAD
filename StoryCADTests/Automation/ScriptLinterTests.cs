@@ -347,5 +347,14 @@ public class ScriptLinterTests
             Assert.AreEqual(0, errors.Count, $"{script}: {string.Join("; ", errors)}");
         }
     }
+
+    // The CommandBar "..." button: a WinUI template part the XAML scan never sees (#1422).
+    [TestMethod]
+    [DataRow("click MoreButton")]
+    [DataRow("expect MoreButton gone")]
+    public void Lint_WithCommandBarMoreButton_ReportsNoError(string line)
+    {
+        Assert.AreEqual(0, LintDialogLine(line).Count);
+    }
 }
 #endif

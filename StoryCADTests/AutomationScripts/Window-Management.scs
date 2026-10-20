@@ -1,0 +1,100 @@
+# Window_Management.md as an automation script (#1422). Run with:
+#   StoryCADAutomation run StoryCADTests/AutomationScripts/Window-Management.scs --window 1036x744 --out automation-output
+# --window is the visible frame at 100% scale (the runner scales it for the display); below 800
+# wide the app shows one pane at a time. Hands off the mouse and keyboard while it runs.
+# Manual pages (docs/Quick Start/): ShowHide_Navigation_Pane.md, Navigation_and_Content_Panes.md,
+#   Story_Elements.md, Starting_and_Stopping_StoryCAD.md, Menu_Bar.md
+# Each screenshot replaces the docs/media image of the same name.
+# Not scripted: WM-004 (full screen; Windows has no full-screen command, so it is a macOS step)
+#   and WM-006 step 10 (needs a display that rotates).
+# expect ... gone waits for a control to go away; expect-no is for one that must never appear.
+# window minimize/maximize/restore act through Windows, not the title bar buttons, which
+#   UI Automation does not reach in the WinAppSDK title bar.
+script "Window Management"
+
+step "Setup: open the Danger Calls sample"
+launch
+click SampleOutlinesNavItem
+select FileOpenSamplesList "Danger Calls"
+click PrimaryButton                       # "Open sample"
+wait TitleTextBox                         # the open ends by selecting the root; wait for it
+expect tree contains "Danger Calls/Characters/Leonard Kraskin"
+
+step "WM-001: Window Resize"
+window size 1400x744                      # wider
+expect tree contains "Danger Calls/Characters/Leonard Kraskin"
+wait TitleTextBox
+window size 900x744                       # narrower, still above 800: both panes
+expect tree contains "Danger Calls/Characters/Leonard Kraskin"
+wait TitleTextBox
+expect-no MoreButton                      # the "..." button shows only below 800 wide
+window size 520x744                       # the app's minimum width (520); one pane at a time
+wait TitleTextBox                         # wait = found, enabled and on screen
+expect tree "Danger Calls" gone
+window size 1036x600                      # shorter
+wait TitleTextBox
+expect tree contains "Danger Calls/Characters/Leonard Kraskin"
+
+step "WM-002: Minimize and Restore"
+window size 1036x744
+open-node tree "Danger Calls/Characters/Leonard Kraskin"
+window minimize
+window restore                            # fails unless the frame is back where it was
+expect CharacterNameTextBox text "Leonard Kraskin"
+expect tree contains "Danger Calls/Characters/Leonard Kraskin"
+
+step "WM-003: Maximize and Restore"
+window maximize
+wait CharacterNameTextBox
+expect tree contains "Danger Calls/Characters/Leonard Kraskin"
+window restore
+expect CharacterNameTextBox text "Leonard Kraskin"
+
+step "WM-005: Command Bar Overflow at Narrow Width"
+window size 700x744
+expect ToolsMenuButton gone               # Tools no longer fits on the bar
+click MoreButton
+screenshot "Menu-Bar-Overflow.png"
+expect ToolsMenuButton exists             # the overflow menu holds it
+menu KeyQuestionsMenuItem                 # Tools > Key Questions from the overflow menu
+expect window "Key questions"
+dialog "Key questions" click CloseButton
+window size 1036x744
+expect MoreButton gone
+expect ToolsMenuButton exists             # back on the bar
+screenshot "Menu-Bar.png" of TogglePaneButton HelpButton margin 4
+
+step "WM-006: Hamburger Button and Stacked Mode at Narrow Width"
+expect tree contains "Danger Calls/Characters/Leonard Kraskin"
+wait CharacterNameTextBox                 # 1036 wide: both panes side by side
+click TogglePaneButton
+expect tree "Danger Calls" gone           # pane hidden
+wait CharacterNameTextBox
+focus CharacterNameTextBox                # the button keeps focus and shows its tooltip
+screenshot "Navigation-Pane-Hidden.png"
+click TogglePaneButton
+expect tree contains "Danger Calls/Characters/Leonard Kraskin"
+window size 700x744
+expect tree "Danger Calls" gone           # stacked: content only
+wait CharacterNameTextBox
+focus CharacterNameTextBox
+screenshot "Content-Pane-Stacked.png"
+click TogglePaneButton
+expect tree contains "Danger Calls/Characters/Leonard Kraskin"
+expect CharacterNameTextBox offscreen      # the pane covers the window; the page is pushed out of view
+focus tree "Danger Calls/Characters/Leonard Kraskin"
+screenshot "Navigation-Pane-Stacked.png"
+open-node tree "Danger Calls/Characters/Charlie Lacas"
+expect CharacterNameTextBox text "Charlie Lacas"
+click TogglePaneButton
+expect tree "Danger Calls" gone           # back to content only, not side by side
+wait CharacterNameTextBox
+click TogglePaneButton
+window size 650x744                       # narrower, still stacked
+expect tree contains "Danger Calls/Characters/Charlie Lacas"   # the pane stays open
+window size 1036x744
+expect tree contains "Danger Calls/Characters/Charlie Lacas"
+wait CharacterNameTextBox                 # side by side again
+
+step "Teardown: exit without saving the sample"
+close
