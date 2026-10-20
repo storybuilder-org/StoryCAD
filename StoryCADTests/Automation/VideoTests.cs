@@ -271,6 +271,36 @@ public class VideoTests
         Assert.IsNull(plan.MusicCredit);
     }
 
+    [TestMethod]
+    public void Plan_WithTitleCardFilesOnlyInSharedFolder_UsesTheSharedFiles()
+    {
+        var shared = Path.Combine(_folder, "shared");
+        Directory.CreateDirectory(shared);
+        File.WriteAllText(Path.Combine(shared, VideoCommand.MusicCreditFile), "Music: \"Bright Day\" by Someone\r\n");
+        File.WriteAllText(Path.Combine(shared, VideoCommand.LogoFile), "png");
+        File.WriteAllText(Path.Combine(shared, "intro-music.mp3"), "mp3");
+        var parsed = ScriptParser.Parse("script \"Cards\"\ntitle \"Intro\"\n");
+
+        var plan = VideoCommand.Plan(parsed, new PresentationProfile(1.0, () => TimeSpan.Zero, _ => { }, null),
+            TimeSpan.Zero, "rec.mkv", TimeSpan.FromSeconds(9), _folder, null, null, _folder, shared);
+
+        Assert.AreEqual("Music: \"Bright Day\" by Someone", plan.MusicCredit);
+        Assert.AreEqual(Path.Combine(shared, VideoCommand.LogoFile), plan.LogoPath);
+        Assert.AreEqual(Path.Combine(shared, "intro-music.mp3"), plan.MusicPath);
+    }
+
+    [TestMethod]
+    public void TitleCardFile_WithFileInBothFolders_ReturnsTheAssetsCopy()
+    {
+        var shared = Path.Combine(_folder, "shared");
+        Directory.CreateDirectory(shared);
+        File.WriteAllText(Path.Combine(shared, VideoCommand.LogoFile), "shared");
+        File.WriteAllText(Path.Combine(_folder, VideoCommand.LogoFile), "own");
+
+        Assert.AreEqual(Path.Combine(_folder, VideoCommand.LogoFile),
+            VideoCommand.TitleCardFile(_folder, shared, VideoCommand.LogoFile));
+    }
+
     private static string FilterOf(IReadOnlyList<string> args) => args[args.ToList().IndexOf("-filter_complex") + 1];
 
     [TestMethod]

@@ -46,6 +46,11 @@ internal static class Program
             return File.Exists(args[1]) ? VideoCommand.Run(args[1], args[3], args[5]) : MissingScript(args[1]);
         }
 
+        if (args.Length == 8 && args[0] == "video" && args[2] == "--out" && args[4] == "--assets" && args[6] == "--shared")
+        {
+            return File.Exists(args[1]) ? VideoCommand.Run(args[1], args[3], args[5], args[7]) : MissingScript(args[1]);
+        }
+
         if (args.Length == 2 && args[0] == "youtube" && args[1] == "auth")
         {
             return YouTubeCommand.Auth();
@@ -424,7 +429,8 @@ internal static class Program
         Console.Error.WriteLine("  StoryCADAutomation check <script.scs | folder>");
         Console.Error.WriteLine("  StoryCADAutomation labels <page.md | folder> [...]   (exit 1 lists bold text matching no XAML label)");
         Console.Error.WriteLine("  StoryCADAutomation voice <script.scs> --out <dir>");
-        Console.Error.WriteLine("  StoryCADAutomation video <script.scs> --out <dir> --assets <dir>");
+        Console.Error.WriteLine("  StoryCADAutomation video <script.scs> --out <dir> --assets <dir> [--shared <dir>]");
+        Console.Error.WriteLine("                        (--shared: logo.png, intro-music.*, intro-music-credit.txt for every video; the assets folder's own copy wins)");
         Console.Error.WriteLine(@"  StoryCADAutomation youtube auth   (once; needs %USERPROFILE%\.storycad-youtube\client_secret.json)");
         Console.Error.WriteLine("  StoryCADAutomation youtube upload <video.mp4> --meta <meta.json>   (privacy defaults to unlisted)");
         Console.Error.WriteLine();

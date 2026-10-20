@@ -38,7 +38,7 @@ internal static class VideoCommand
 
     private const string SegoeUi = @"C:\Windows\Fonts\segoeui.ttf";
 
-    public static int Run(string scriptPath, string outputDirectory, string assetsDirectory)
+    public static int Run(string scriptPath, string outputDirectory, string assetsDirectory, string? sharedDirectory = null)
     {
         var ffmpeg = Ffmpeg.FromEnvironment(out var problem);
         if (ffmpeg is null)
@@ -50,6 +50,12 @@ internal static class VideoCommand
         if (!Directory.Exists(assetsDirectory))
         {
             Console.Error.WriteLine($"video: the assets folder '{assetsDirectory}' does not exist.");
+            return EnvironmentFailure;
+        }
+
+        if (sharedDirectory is not null && !Directory.Exists(sharedDirectory))
+        {
+            Console.Error.WriteLine($"video: the shared folder '{sharedDirectory}' does not exist.");
             return EnvironmentFailure;
         }
 
@@ -190,7 +196,7 @@ internal static class VideoCommand
 
         var plan = Plan(parsed, profile, recorder.ClockOffset, recordingPath,
             ffmpeg.Duration(recordingPath) ?? clock.Elapsed - recorder.ClockOffset,
-            assetsDirectory, ffmpeg, voiceId, clipFolder);
+            assetsDirectory, ffmpeg, voiceId, clipFolder, sharedDirectory);
         var mp4 = Path.Combine(output, Path.GetFileNameWithoutExtension(scriptPath) + ".mp4");
         try
         {
@@ -211,6 +217,24 @@ internal static class VideoCommand
     ///     so the intro video opens Terry's filled-in copy of a sample; the shipped sample has
     ///     empty tabs (#1626, Terry, 2026-10-20).
     /// </summary>
+    /// <summary>
+    ///     The first file that matches the pattern in the assets folder, else in the shared
+    ///     folder, or null. A video's own file wins over the shared one (#1626, Terry, 2026-10-20).
+    /// </summary>
+    internal static string? TitleCardFile(string assetsDirectory, string? sharedDirectory, string pattern)
+    {
+        foreach (var folder in new[] { assetsDirectory, sharedDirectory })
+        {
+            if (folder is not null && Directory.Exists(folder) &&
+                Directory.GetFiles(folder, pattern).OrderBy(f => f, StringComparer.Ordinal).FirstOrDefault() is { } file)
+            {
+                return file;
+            }
+        }
+
+        return null;
+    }
+
     internal static IReadOnlyList<string> AssetOutlines(string assetsDirectory)
         => Directory.GetFiles(assetsDirectory, "*.stbx").OrderBy(f => f, StringComparer.Ordinal).ToList();
 
@@ -234,11 +258,12 @@ internal static class VideoCommand
     ///     all moved from the runner's clock to the recording's time. A card that starts under
     ///     <see cref="CardStartCover" /> into the recording starts at 0; nothing else moves.
     ///     A card whose next step also has a card stays up until that card has faded in, so the
-    ///     app does not show between them (#1626, Terry, 2026-10-20).
+    ///     app does not show between them (#1626, Terry, 2026-10-20). The logo, intro music and
+    ///     credit come from the assets folder, else from the shared folder that all videos use.
     /// </summary>
     internal static VideoPlan Plan(ScriptParseResult parsed, PresentationProfile profile, TimeSpan offset,
         string recordingPath, TimeSpan recordingLength, string assetsDirectory, Ffmpeg? ffmpeg,
-        string? voiceId, string clipFolder)
+        string? voiceId, string clipFolder, string? sharedDirectory = null)
     {
         var cards = new List<VideoCard>();
         var step = -1;
@@ -279,10 +304,10 @@ internal static class VideoCommand
             }
         }
 
-        var logo = Path.Combine(assetsDirectory, LogoFile);
-        var creditPath = Path.Combine(assetsDirectory, MusicCreditFile);
-        var credit = File.Exists(creditPath) ? File.ReadLines(creditPath).FirstOrDefault()?.Trim() : null;
-        var music = Directory.GetFiles(assetsDirectory, MusicFilePattern).OrderBy(f => f, StringComparer.Ordinal).FirstOrDefault();
+        var logo = TitleCardFile(assetsDirectory, sharedDirectory, LogoFile);
+        var creditPath = TitleCardFile(assetsDirectory, sharedDirectory, MusicCreditFile);
+        var credit = creditPath is null ? null : File.ReadLines(creditPath).FirstOrDefault()?.Trim();
+        var music = TitleCardFile(assetsDirectory, sharedDirectory, MusicFilePattern);
         return new VideoPlan
         {
             RecordingPath = recordingPath,
@@ -291,7 +316,7 @@ internal static class VideoCommand
             Closing = parsed.Statements.FirstOrDefault(s => s.Verb == ScriptVerb.Closing)?.Text,
             Cards = cards,
             Clips = clips,
-            LogoPath = File.Exists(logo) ? Path.GetFullPath(logo) : null,
+            LogoPath = logo is null ? null : Path.GetFullPath(logo),
             MusicPath = music is null ? null : Path.GetFullPath(music),
             MusicLength = music is null ? null : ffmpeg?.Duration(music),
             MusicCredit = string.IsNullOrEmpty(credit) ? null : credit,

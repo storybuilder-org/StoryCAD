@@ -8,6 +8,8 @@
 
 **Terry's notes on that render, fixed and re-recorded** (3:49): a card followed by a card in the next step stays opaque until the next has faded in, so the app no longer flashes between them; the story elements card has an upper-case heading and a blank line; the music credit is 28 px (was 36). A meta.json for upload holds the store links in the description; it sits with the assets, outside this repo. Video tests 73 passed.
 
+**Shared title-card files** (Terry, 2026-10-20): `video` takes `--shared <dir>` for the logo, intro music and credit that every video uses; a copy in the assets folder wins. Not built or run yet (Terry: no rebuild for this); the next build runs the two new tests.
+
 **Next:** Terry watches the new render. Remaining review items: cursor glide, zoom on the active area, music fade, burned-in captions, end-card silence.
 
 ## 2026-10-20 (later): session recovery
