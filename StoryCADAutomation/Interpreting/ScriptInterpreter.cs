@@ -369,17 +369,10 @@ public sealed class ScriptInterpreter
                 }
 
             case ScriptVerb.ExpectOffscreen:
-                {
-                    // Present but out of view: a stacked SplitView pushes the page past the
-                    // window edge instead of removing it, so expect-no cannot check it (#1422).
-                    var state = RequireDriver().WaitUntilFound(s.Target!);
-                    if (!state.IsOffscreen)
-                    {
-                        throw new AutomationStepException($"{s.Target} is on screen, expected off screen.");
-                    }
-
-                    return currentStep;
-                }
+                // Present but out of view: a stacked SplitView pushes the page past the window
+                // edge instead of removing it, so expect-no cannot check it (#1422).
+                RequireDriver().WaitUntilOffscreen(s.Target!);
+                return currentStep;
 
             case ScriptVerb.ExpectGone:
                 RequireDriver().WaitUntilGone(s.Target!);

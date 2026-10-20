@@ -115,27 +115,79 @@ internal sealed class ElementLocator
     }
 
     /// <summary>
-    ///     Waits until the target is absent: for a control that an action removes, such as a
-    ///     pane the hamburger button hides. UI Automation keeps the control for a moment after
-    ///     the app hides it, so a settle-then-check absence fails on its first poll (#1422).
+    ///     Waits until the target is absent and stays absent for <paramref name="settle" />: for a
+    ///     control that an action removes, such as a pane the hamburger button hides. UI
+    ///     Automation keeps the control for a moment after the app hides it, so a settle-then-check
+    ///     absence fails on its first poll (#1422). One empty poll proves nothing: a search also
+    ///     comes back empty while the layout rebuilds, and a read error starts the settle again.
     /// </summary>
-    public void WaitUntilAbsent(ElementAddress address, TimeSpan timeout)
+    public void WaitUntilAbsent(ElementAddress address, TimeSpan timeout, TimeSpan settle)
+    {
+        var deadline = DateTime.UtcNow + timeout + settle;
+        DateTime? absentSince = null;
+        while (true)
+        {
+            _ensureRunnable();
+            var found = TryFind(address, out var diagnosis);
+            var now = DateTime.UtcNow;
+            if (found is not null || diagnosis == TransientReadFailure)
+            {
+                absentSince = null;
+            }
+            else
+            {
+                absentSince ??= now;
+                if (now - absentSince >= settle)
+                {
+                    return;
+                }
+            }
+
+            if (now >= deadline)
+            {
+                throw new AutomationStepException(
+                    $"{address} did not stay gone for {settle.TotalSeconds:0.#}s within {(timeout + settle).TotalSeconds:0.#}s.");
+            }
+
+            Thread.Sleep(AbsencePollInterval);
+        }
+    }
+
+    /// <summary>
+    ///     Waits until the target is found and UI Automation reports it off screen. A read error
+    ///     counts as not yet, because a snapshot defaults to off screen when a read fails.
+    /// </summary>
+    public void WaitUntilOffscreen(ElementAddress address, TimeSpan timeout)
     {
         var deadline = DateTime.UtcNow + timeout;
         while (true)
         {
             _ensureRunnable();
-            if (TryFind(address, out _) is null)
+            var element = TryFind(address, out var diagnosis);
+            var state = "not found: " + diagnosis;
+            if (element is not null)
             {
-                return;
+                try
+                {
+                    if (element.Properties.IsOffscreen.Value)
+                    {
+                        return;
+                    }
+
+                    state = "on screen";
+                }
+                catch (Exception)
+                {
+                    state = TransientReadFailure;
+                }
             }
 
             if (DateTime.UtcNow >= deadline)
             {
-                throw new AutomationStepException($"{address} was still there after {timeout.TotalSeconds:0.#}s, expected gone.");
+                throw new AutomationStepException($"{address} was not off screen within {timeout.TotalSeconds:0.#}s: {state}.");
             }
 
-            Thread.Sleep(AbsencePollInterval);
+            Thread.Sleep(PollInterval);
         }
     }
 
@@ -274,10 +326,12 @@ internal sealed class ElementLocator
         {
             // Transient UIA churn: a window or element vanished between enumeration and read.
             // The caller's poll loop retries; a real absence surfaces as the wait timeout.
-            diagnosis = "UIA read failed transiently (window or element vanished mid-search)";
+            diagnosis = TransientReadFailure;
             return null;
         }
     }
+
+    private const string TransientReadFailure = "UIA read failed transiently (window or element vanished mid-search)";
 
     /// <summary>
     ///     Per-control click strategy for the known pattern-insufficient cases. Founding

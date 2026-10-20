@@ -306,7 +306,11 @@ public sealed class StoryCADDriver : IUiDriver
 
     /// <inheritdoc />
     public void WaitUntilGone(ElementAddress target, TimeSpan? timeout = null)
-        => _locator.WaitUntilAbsent(target, Timeout(timeout));
+        => _locator.WaitUntilAbsent(target, Timeout(timeout), _options.AbsenceSettle);
+
+    /// <inheritdoc />
+    public void WaitUntilOffscreen(ElementAddress target, TimeSpan? timeout = null)
+        => _locator.WaitUntilOffscreen(target, Timeout(timeout));
 
     /// <inheritdoc />
     public bool WaitForExit(TimeSpan timeout)
@@ -380,6 +384,8 @@ public sealed class StoryCADDriver : IUiDriver
     /// <inheritdoc />
     public void SizeMainWindow(int width, int height)
     {
+        // A new size replaces the frame a later restore must return to.
+        _frameBeforeStateChange = null;
         var scale = MainWindowDpi / 96.0;
         try
         {
@@ -415,8 +421,16 @@ public sealed class StoryCADDriver : IUiDriver
                 {
                     var before = _frameBeforeStateChange
                                  ?? throw new AutomationStepException("window restore follows window minimize or window maximize.");
-                    _frameBeforeStateChange = null;
                     NativeMethods.Restore(hwnd);
+                    WaitForWindowState("out of the taskbar", () => !NativeMethods.IsIconic(hwnd));
+
+                    // A window maximized before it was minimized comes back maximized; one more
+                    // restore returns it to its normal frame.
+                    if (NativeMethods.IsZoomed(hwnd))
+                    {
+                        NativeMethods.Restore(hwnd);
+                    }
+
                     WaitForWindowState("restored", () => !NativeMethods.IsIconic(hwnd) && !NativeMethods.IsZoomed(hwnd));
 
                     // Restoring from the taskbar does not always hand the app the foreground,
@@ -429,6 +443,7 @@ public sealed class StoryCADDriver : IUiDriver
                         throw new AutomationStepException($"the restored window frame is {after}, not {before} as before.");
                     }
 
+                    _frameBeforeStateChange = null;
                     return;
                 }
 

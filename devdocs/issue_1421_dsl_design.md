@@ -122,7 +122,10 @@ expect <target> offscreen     # found, but out of view: a stacked SplitView push
 expect <target> gone          # waits (implicit wait) until the target is absent: for a control an
                               # action removes, such as a pane the hamburger button hides. UI
                               # Automation keeps it for a moment after the app hides it, so
-                              # expect-no failed there in 2 of 5 VM runs (#1422)
+                              # expect-no failed there in 2 of 5 VM runs (#1422). Passes once
+                              # the target stays absent for the 1 s settle window; a UIA read
+                              # error restarts it. expect <target> offscreen also waits, up to
+                              # the implicit wait
 expect tree contains "path"
 expect window "title"
 expect-no <target>           # asserts absence, e.g. error dialogs. Settle-then-check:

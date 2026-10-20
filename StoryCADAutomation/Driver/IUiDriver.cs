@@ -35,6 +35,9 @@ public interface IUiDriver : IDisposable
     /// <summary>Waits until the target is absent (expect gone): for a control an action removes.</summary>
     void WaitUntilGone(ElementAddress target, TimeSpan? timeout = null);
 
+    /// <summary>Waits until the target is found and reported off screen (expect offscreen).</summary>
+    void WaitUntilOffscreen(ElementAddress target, TimeSpan? timeout = null);
+
     /// <summary>Waits for app process exit (the expect-exit verb).</summary>
     bool WaitForExit(TimeSpan timeout);
 
