@@ -74,11 +74,16 @@ internal static class Program
         var keepGoing = false;
         var pacing = 1.0;
         (int Width, int Height)? window = null;
+        string? assetsDirectory = null;
         for (var i = 2; i < args.Length; i++)
         {
             if (args[i] == "--app" && i + 1 < args.Length)
             {
                 appPath = args[++i];
+            }
+            else if (args[i] == "--assets" && i + 1 < args.Length)
+            {
+                assetsDirectory = args[++i];
             }
             else if (args[i] == "--out" && i + 1 < args.Length)
             {
@@ -120,6 +125,16 @@ internal static class Program
             return UsageError;
         }
 
+        if (assetsDirectory is not null && !Directory.Exists(assetsDirectory))
+        {
+            Console.Error.WriteLine($"assets folder not found: {assetsDirectory}");
+            return UsageError;
+        }
+
+        // --assets seeds {scratch}/outlines as video does, so a script that opens an outline from
+        // the assets folder can be tested before a recording is spent on it (#1626, 2026-10-20).
+        var seedOutlines = assetsDirectory is null ? Array.Empty<string>() : VideoCommand.AssetOutlines(assetsDirectory);
+
         // Lint gates every run, so no script reaches the app with an unknown id or a dialog
         // path outside {scratch}. The interpreter also checks dialog paths at run time (B1).
         var parsed = ScriptParser.ParseFile(scriptPath);
@@ -134,8 +149,8 @@ internal static class Program
         // CI keeps the scratch folder (the app's logs) so the workflow can upload it after a
         // failure; the CI machine is thrown away after the job.
         var driverOptions = ci
-            ? new DriverOptions { AppPath = appPath ?? DefaultAppPath(), SweepScratchOnTeardown = false, AllowCrashReporting = true }
-            : new DriverOptions { AppPath = appPath ?? DefaultAppPath(), RequiredDpiScalePercent = null, MinDesktopWidth = 0, MinDesktopHeight = 0 };
+            ? new DriverOptions { AppPath = appPath ?? DefaultAppPath(), SweepScratchOnTeardown = false, AllowCrashReporting = true, SeedOutlines = seedOutlines }
+            : new DriverOptions { AppPath = appPath ?? DefaultAppPath(), RequiredDpiScalePercent = null, MinDesktopWidth = 0, MinDesktopHeight = 0, SeedOutlines = seedOutlines };
         var stopwatch = Stopwatch.StartNew();
         var presentationProfile = presentation ? new PresentationProfile(pacing, stopwatch, ClipLengths(outputDirectory)) : null;
         var interpreter = new ScriptInterpreter(
@@ -405,6 +420,7 @@ internal static class Program
         Console.Error.WriteLine("  StoryCADAutomation run <script.scs> [--app <path to StoryCAD.exe>] [--out <dir>] [--ci]");
         Console.Error.WriteLine("                        [--profile test|presentation] [--pacing <factor>] [--window <WxH>]");
         Console.Error.WriteLine("                        [--keep-going]   (--window: visible frame in 100%-scale pixels; --keep-going: after a failure, run the next step)");
+        Console.Error.WriteLine("                        [--assets <dir>]   (copies the folder's .stbx files into {scratch}/outlines, as video does)");
         Console.Error.WriteLine("  StoryCADAutomation check <script.scs | folder>");
         Console.Error.WriteLine("  StoryCADAutomation labels <page.md | folder> [...]   (exit 1 lists bold text matching no XAML label)");
         Console.Error.WriteLine("  StoryCADAutomation voice <script.scs> --out <dir>");

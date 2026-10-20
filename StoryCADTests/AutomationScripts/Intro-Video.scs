@@ -5,7 +5,7 @@
 #        StoryCADAutomation video Intro-Video.scs --out <dir> --assets <dir>
 # The assets folder holds "The Old Man and the Sea.stbx", Terry's filled-in copy of the sample
 # (the shipped sample has empty tabs); video copies it to {scratch}/outlines (#1626, 2026-10-20).
-# run has no assets folder, so a test-profile run fails at the step "The outline file".
+# Test run: StoryCADAutomation run Intro-Video.scs --assets <dir>, with the same assets folder.
 script "Intro Video"
 title "A Five-Minute Introduction to StoryCAD"
 launch                                    # the recording starts here; the cards cover the app
