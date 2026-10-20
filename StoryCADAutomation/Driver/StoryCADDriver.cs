@@ -460,6 +460,58 @@ public sealed class StoryCADDriver : IUiDriver
     }
 
     /// <inheritdoc />
+    public void CaptureElements(string pngPath, IReadOnlyList<ElementAddress> targets, int margin)
+    {
+        var hwnd = _process.MainWindowHandle;
+        var frame = hwnd == IntPtr.Zero ? null : NativeMethods.VisibleWindowBounds(hwnd);
+        if (frame is null)
+        {
+            throw new AutomationStepException("the app has no main window to capture.");
+        }
+
+        var elements = new List<(ElementAddress Target, Rectangle Bounds)>();
+        foreach (var target in targets)
+        {
+            var element = _locator.WaitUntilReady(target, ReadinessRequirement.Exists, Timeout(null));
+            // An offscreen element can still report a stale rectangle; treat it as having none.
+            elements.Add((target, element.IsOffscreen ? Rectangle.Empty : element.BoundingRectangle));
+        }
+
+        Wait.UntilInputIsProcessed();
+        using var image = Capture.Rectangle(ElementArea(frame.Value, elements, margin, NativeMethods.SystemDpi()));
+        image.ToFile(pngPath);
+    }
+
+    /// <summary>
+    ///     The capture area for "screenshot ... of": the union of the elements' screen rectangles,
+    ///     grown by <paramref name="margin" /> 100%-scale pixels (scaled to the display like
+    ///     <see cref="CropArea" />) and clipped to the visible window frame.
+    /// </summary>
+    internal static Rectangle ElementArea(
+        Rectangle frame, IReadOnlyList<(ElementAddress Target, Rectangle Bounds)> elements, int margin, int dpi)
+    {
+        var union = Rectangle.Empty;
+        foreach (var (target, bounds) in elements)
+        {
+            if (bounds.Width <= 0 || bounds.Height <= 0 || !frame.IntersectsWith(bounds))
+            {
+                throw new AutomationStepException($"{target} has no area inside the window to capture.");
+            }
+
+            union = union.IsEmpty ? bounds : Rectangle.Union(union, bounds);
+        }
+
+        if (union.IsEmpty)
+        {
+            throw new AutomationStepException("screenshot ... of names no elements to capture.");
+        }
+
+        var grow = (int)Math.Round(margin * dpi / 96.0);
+        union.Inflate(grow, grow);
+        return Rectangle.Intersect(union, frame);
+    }
+
+    /// <inheritdoc />
     public void CaptureOpenDialog(string pngPath)
     {
         // A ContentDialog has no UIA element of its own: its content and buttons sit directly
@@ -664,6 +716,23 @@ public sealed class StoryCADDriver : IUiDriver
     }
 
     /// <inheritdoc />
+    public void CloseContextFlyout()
+    {
+        // Shell's CommandBarFlyout stays open, collapsed to an empty box, after an item runs by
+        // UIA Invoke (a real click outside would light-dismiss it); its entries leave the UIA
+        // tree, so the box cannot be detected. Escape closes it. A dialog the item opened (Delete
+        // asks first when other elements refer to the node) must not get that Escape (#1422).
+        Thread.Sleep(ContextFlyoutSettle);
+        Wait.UntilInputIsProcessed();
+        var dialogOpen = _automation.GetDesktop().FindFirstDescendant(cf =>
+            cf.ByProcessId(_process.Id).And(cf.ByAutomationId("PrimaryButton").Or(cf.ByAutomationId("CloseButton")))) is not null;
+        if (!dialogOpen)
+        {
+            PressChord("Escape");
+        }
+    }
+
+    /// <inheritdoc />
     public void RightClickPointer(ElementAddress target, TimeSpan? timeout = null)
     {
         // Right-click is always real pointer: context menus need it (design, Pointer verbs).
@@ -863,6 +932,9 @@ public sealed class StoryCADDriver : IUiDriver
     // A flyout's close animation can run long on a slow machine; invoking an item whose click
     // did register would run its command twice (a second Save, a second dialog).
     private static readonly TimeSpan MenuCloseWait = TimeSpan.FromMilliseconds(1500);
+
+    // Time for a context-menu item's dialog to appear before CloseContextFlyout looks for it.
+    private static readonly TimeSpan ContextFlyoutSettle = TimeSpan.FromMilliseconds(500);
 
     private static bool StillShowing(AutomationElement element)
     {

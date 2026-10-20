@@ -45,4 +45,16 @@ public sealed record ScriptStatement
     ///     the visible window's top-left corner, the same units as --window.
     /// </summary>
     public System.Drawing.Rectangle? Crop { get; init; }
+
+    /// <summary>
+    ///     Screenshot elements ("screenshot ... of target [target ...]"): the capture is the union
+    ///     of their on-screen rectangles, so a close-up follows the layout instead of fixed pixels.
+    /// </summary>
+    public IReadOnlyList<ElementAddress>? CaptureTargets { get; init; }
+
+    /// <summary>
+    ///     Screenshot margin ("... of ... margin N"): 100%-scale pixels added on every side of the
+    ///     element union; 0 when the line has no margin.
+    /// </summary>
+    public int? CaptureMargin { get; init; }
 }

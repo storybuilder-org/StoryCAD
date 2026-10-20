@@ -48,6 +48,13 @@ public interface IUiDriver : IDisposable
     /// </summary>
     void CaptureMainWindow(string pngPath, System.Drawing.Rectangle? crop = null);
 
+    /// <summary>
+    ///     Waits until each of <paramref name="targets" /> is found, then saves the union of their
+    ///     on-screen rectangles, grown by <paramref name="margin" /> 100%-scale pixels on every
+    ///     side and clipped to the main window, as a PNG at <paramref name="pngPath" />.
+    /// </summary>
+    void CaptureElements(string pngPath, IReadOnlyList<ElementAddress> targets, int margin);
+
     /// <summary>Saves an image of the open ContentDialog only as a PNG at <paramref name="pngPath" />.</summary>
     void CaptureOpenDialog(string pngPath);
 
@@ -100,6 +107,12 @@ public interface IUiDriver : IDisposable
 
     /// <summary>Real-pointer right click (context menus need real input; there is no pattern realization).</summary>
     void RightClickPointer(ElementAddress target, TimeSpan? timeout = null);
+
+    /// <summary>
+    ///     After a context-menu item runs: presses Escape unless the item opened a dialog, so a
+    ///     right-click flyout left open does not catch the next pointer input.
+    /// </summary>
+    void CloseContextFlyout();
 
     /// <summary>Real-pointer drag: press on source, eased move, release on target.</summary>
     void Drag(ElementAddress from, ElementAddress to, TimeSpan? timeout = null);

@@ -31,6 +31,57 @@ public class StoryCADDriverTests
             StoryCADDriver.CropArea(frame, new Rectangle(900, 0, 200, 100), 96));
     }
 
+    private static readonly Rectangle Window = new(0, 0, 1036, 744);
+
+    private static (ElementAddress, Rectangle) Element(string id, Rectangle bounds)
+        => (ElementAddress.FromAutomationId(id), bounds);
+
+    [TestMethod]
+    public void ElementArea_WithTwoElements_ReturnsUnion()
+    {
+        var area = StoryCADDriver.ElementArea(Window,
+            [Element("A", new Rectangle(10, 700, 200, 30)), Element("B", new Rectangle(900, 695, 40, 40))], 0, 96);
+
+        Assert.AreEqual(Rectangle.FromLTRB(10, 695, 940, 735), area);
+    }
+
+    [TestMethod]
+    public void ElementArea_WithMarginAt150Percent_GrowsByScaledMargin()
+    {
+        var frame = new Rectangle(0, 0, 1554, 1116);
+
+        var area = StoryCADDriver.ElementArea(frame, [Element("A", new Rectangle(100, 100, 50, 50))], 8, 144);
+
+        Assert.AreEqual(new Rectangle(88, 88, 74, 74), area);
+    }
+
+    [TestMethod]
+    public void ElementArea_WithMarginPastWindowEdge_ClipsToWindow()
+    {
+        var area = StoryCADDriver.ElementArea(Window, [Element("A", new Rectangle(4, 700, 1030, 40))], 12, 96);
+
+        Assert.AreEqual(Rectangle.FromLTRB(0, 688, 1036, 744), area);
+    }
+
+    [TestMethod]
+    public void ElementArea_WithEmptyRectangle_ThrowsStepExceptionNamingTarget()
+    {
+        var ex = Assert.ThrowsExactly<AutomationStepException>(() =>
+            StoryCADDriver.ElementArea(Window,
+                [Element("A", new Rectangle(10, 10, 50, 50)), Element("Hidden", Rectangle.Empty)], 0, 96));
+
+        StringAssert.Contains(ex.Message, "Hidden");
+    }
+
+    [TestMethod]
+    public void ElementArea_WithElementOutsideWindow_ThrowsStepExceptionNamingTarget()
+    {
+        var ex = Assert.ThrowsExactly<AutomationStepException>(() =>
+            StoryCADDriver.ElementArea(Window, [Element("Away", new Rectangle(2000, 10, 50, 50))], 8, 96));
+
+        StringAssert.Contains(ex.Message, "Away");
+    }
+
     [TestMethod]
     public void ChooseClickPoint_WithPointInsideRectangle_ReturnsThatPoint()
     {

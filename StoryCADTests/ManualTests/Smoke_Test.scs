@@ -36,6 +36,7 @@ expect-no tree "Smoke Test/Test Character"
 menu OpenCreateFileMenuItem
 click OpenFromFileNavItem
 open-file-dialog "{scratch}/outlines/SmokeTest.stbx"
+expect TitleTextBox text "Smoke Test"         # the open ends by selecting the root; a node opened before that loses its page
 expect tree contains "Smoke Test/Test Character"
 expect tree contains "Smoke Test/New Scene"
 

@@ -22,17 +22,17 @@ Conflict	         The protagonist has a goal or objective, but something or some
 
 Decision	         This problem pattern ends with the protagonist making a difficult and important decision.  The problem is a choice.
 
-Discovery	          The protagonist eventually makes a not too obvious discovery.  The discovery, which is the story's resolution, represents a change for him.	
+Discover	          The protagonist eventually makes a not too obvious discovery.  The discovery, which is the story's resolution, represents a change for him.	
 
 Conflict Type
 
 The nature of the antagonism between protagonist and antagonist.
 
-Human vs. Nature       The protagonist eventually makes a not too obvious discovery.  The discovery, which is the story's resolution, represents a change for him.
+Person vs. Nature       The protagonist struggles against a natural force, such as a storm, the wilderness, or an animal.
 
 Person vs. Person        The struggle may be two characters contending for the same prize, one person out to get another, or Odd Couple stories of characters with opposing traits, or ideological.
 
-Person vs. Himself      The protagonist is his or her own antagonist.  The antagonistic side may be a destructive trait or habit, such as an addiction, or two opposing traits might fight for control in one soul.
+Person vs. Self      The protagonist is his or her own antagonist.  The antagonistic side may be a destructive trait or habit, such as an addiction, or two opposing traits might fight for control in one soul.
 
 Person vs. Society       ...In the form of prejudices, taboos, or traditions.
 
@@ -42,7 +42,11 @@ Person vs. Fate            Fate (old age, death, evil, etc.) is usually personif
 
 Person vs. Machine     The Machine's role may be as a symbol (for example, of dehumanizing society).  Pinocchio and Frankenstein are the archetypes of Person vs. Machine stories.
 
-The terms 'human' and 'person' in these labels means that these roles are humanized, not that they must be humans.  The protagonist can be a dog, a wooden puppet, or a hobbit, but the reader must be able to identify with the character's humanity.  
+The term 'person' in these labels means that these roles are humanized, not that they must be humans.  The protagonist can be a dog, a wooden puppet, or a hobbit, but the reader must be able to identify with the character's humanity.  
+
+Problem Category
+
+The problem's place in the story: Story problem, Complication, Subplot, or Sequence.  You can pick a choice or type your own.
 
 Subject
 
@@ -59,13 +63,13 @@ The story question can be framed as a yes or no question in terms of the protago
 
 Consider whether the reader should know the story's outcome prior to the climax scene.  In many character-oriented stories the answer should be yes, and the story's dramatic arc deals with how things happen rather than what will happen.  If the answer should be no, the story question is the essential suspense of the story, and your plot must serve to keep the outcome in doubt.
 
-Source of Conflict
+Problem Source
 
 This control identifies the beginning or origin of the problem.
 
-Think of the story as a flow from a state of equilibrium (the way things were before the action started), through a state of change (the story itself) to a new state of equilibrium (resulting from the story's resolution.)  Source of Conflict identifies how the original equilibrium is shattered, and why a change is necessary.
+Think of the story as a flow from a state of equilibrium (the way things were before the action started), through a state of change (the story itself) to a new state of equilibrium (resulting from the story's resolution.)  Problem Source identifies how the original equilibrium is shattered, and why a change is necessary.
 
-The Source of Conflict is useful in identifying your story's point of attack, the opening scene.
+The Problem Source is useful in identifying your story's point of attack, the opening scene.
 
 The provided choices are generalized sources from which many problems spring. Be specific.  If you start with a generic source, replace it with one specific to your story and your protagonist.  Instead of  'Protagonist wants to change his situation'', say 'Joe wants to escape his poverty.'
 

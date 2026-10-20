@@ -9,7 +9,7 @@ has_toc: false
 ### Role Tab
 Role Tab
 
-![](../media/Elements/Character/CharRoleTab.png)
+![](../media/Character-Role-Tab.png)
 
 The role tab contains the information which defines the relationship between this character and the story.
 
@@ -29,7 +29,7 @@ The story role is the relative importance of the character's part  to the story'
 
 The more significant a character is to the story, the more fully developed he or she should be.  The characters in major roles should ideally be so rounded out that they 'come alive'.  Writing scenes for such a well-developed character often becomes a matter of putting him in a situation and watching how he reacts.
 
-StoryCAD assigns four levels to characters:
+The Story Role list has six choices. Protagonist and Antagonist name the two sides of the story's main conflict; both are major roles. The other four are levels of importance:
 
 Major Role
 The protagonist and antagonist are major characters.  If the story's dramatic arc hinges on other parts, they may also be major characters.  A love triangle involves three major roles: protagonist, love interest, and rival.
@@ -45,7 +45,7 @@ A service role is a walk on part.  Service role characters are created to fill a
 
 Archetype
 
-An archetype is a prototype or model from which something is based.  The character archetypes listed here derive from Joseph Campbell's The Hero with a Thousand Faces, and  are deeply rooted in the myths and legends of many cultures.  A significant character's role can often be associated with one of these archetypes.
+An archetype is a prototype or model from which something is based.  The character archetypes listed here derive from Joseph Campbell's The Hero with a Thousand Faces, and  are deeply rooted in the myths and legends of many cultures.  A significant character's role can often be associated with one of these archetypes.  The Archetype list also offers Ally and Higher Self.
 
 Hero
 The essence of the  hero is not bravery or nobility, but self-sacrifice.  The mythic hero is one who will endure separation and hardship for the sake of his clan.  The hero must pay a price to obtain his goal.  The hero's journey during a story is a path from the ego, the self, to a new identity which has grown to include the experiences of the story.  This path often consists of a separation from family or group to a new, unfamiliar and challenging world (even if it's his own back yard), and finally a return to the ordinary, but now expanded, world.  The hero must learn in order to grow.  Often the heart of a story is not the obstacles he faces, but the new wisdom he acquires, from a mentor, a lover, or even from the villain.  Other characters besides the protagonist can have heroic qualities.  This can be especially true of the antagonist.  Heroes can be willing and adventurous, or reluctant.   They may be group and family oriented, or loners.  They may change and grow themselves, or act as catalysts for others to grow and act heroic.  The hero can be an innocent, a wanderer, a martyr, a warrior, a vengeful destroyer, a ruler, or a fool.  But the essence of the hero is the sacrifice he makes to achieve his goal.
@@ -67,6 +67,7 @@ The Shadow archetype is a negative figure, representing things we don't like and
 
 Trickster
 The Trickster is a clown, a mischief maker.  He provides the comedy relief that a story often needs to offset heavy dramatic tension.  The trickster keeps things in proportion.  The trickster can be an ally or companion of the hero, or may work for the villain.  In some instances the trickster may even be the hero or villain.  In any role, the trickster usually represents the force of cunning, and is pitted against opponents who are stronger or more powerful. 
+
 Character Sketch
 
 Use these notes to provide a thumbnail picture of the character and the overall impression he makes.

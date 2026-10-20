@@ -52,6 +52,11 @@ public sealed partial class ScriptLinter
         {
             LintAddress(statement, statement.Target, findings);
             LintAddress(statement, statement.DragTarget, findings);
+            foreach (var target in statement.CaptureTargets ?? [])
+            {
+                LintAddress(statement, target, findings);
+            }
+
             switch (statement.Verb)
             {
                 case ScriptVerb.Menu when statement.Text is not null:

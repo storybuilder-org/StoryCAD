@@ -256,6 +256,7 @@ public sealed class ScriptInterpreter
                     var d = RequireDriver();
                     d.RightClickPointer(s.Target!);
                     WalkFlyoutPath(d, s.Text!.Split('/'));
+                    d.CloseContextFlyout();
                     return currentStep;
                 }
 
@@ -445,6 +446,10 @@ public sealed class ScriptInterpreter
                     if (s.Verb == ScriptVerb.ScreenshotDialog)
                     {
                         RequireDriver().CaptureOpenDialog(path);
+                    }
+                    else if (s.CaptureTargets is { } targets)
+                    {
+                        RequireDriver().CaptureElements(path, targets, s.CaptureMargin ?? 0);
                     }
                     else
                     {
