@@ -2,8 +2,11 @@ using System.Globalization;
 
 namespace StoryCADAutomation.Video;
 
-/// <summary>A card that covers the recording from Start to End: text, or an image file.</summary>
-public sealed record VideoCard(TimeSpan Start, TimeSpan End, string? Text, string? ImagePath);
+/// <summary>
+///     A card that covers the recording from Start to End: text, or an image file. A card with
+///     FadesOut false stays opaque to its end, under the next card's fade-in.
+/// </summary>
+public sealed record VideoCard(TimeSpan Start, TimeSpan End, string? Text, string? ImagePath, bool FadesOut = true);
 
 /// <summary>One voice clip and where it starts in the recording.</summary>
 public sealed record ClipPlacement(string Path, TimeSpan Start);
@@ -259,7 +262,7 @@ public static class VideoAssembler
             fades += $",fade=t=in:st={Seconds(card.Start)}:d={Seconds(fade)}:alpha=1";
         }
 
-        return fades + $",fade=t=out:st={Seconds(card.End - fade)}:d={Seconds(fade)}:alpha=1";
+        return card.FadesOut ? fades + $",fade=t=out:st={Seconds(card.End - fade)}:d={Seconds(fade)}:alpha=1" : fades;
     }
 
     private const string AudioFormat = "aformat=sample_rates=48000:channel_layouts=stereo";
@@ -274,11 +277,11 @@ public static class VideoAssembler
     /// <summary>The work file that holds the music credit for the title card.</summary>
     internal const string CreditFile = "credit.txt";
 
-    // The credit: Segoe UI, 36 px, white at 80% opacity, centered, its bottom 80 px above the
+    // The credit: Segoe UI, 28 px (Terry, 2026-10-20), white at 80% opacity, centered, its bottom 80 px above the
     // frame's bottom. It comes from a file as the title does, so quotes in it need no escaping.
     private static string DrawCredit()
         => $"drawtext=fontfile='{FontFile}':textfile={CreditFile}:expansion=none:text_align=C:" +
-           "fontsize=36:fontcolor=white@0.8:x=(w-text_w)/2:y=h-text_h-80";
+           "fontsize=28:fontcolor=white@0.8:x=(w-text_w)/2:y=h-text_h-80";
 
     private static IEnumerable<string> ColorInput(TimeSpan length)
         => new[] { "-f", "lavfi", "-i", $"color=c={Background}:s={Width}x{Height}:r=30:d={Seconds(length)}" };

@@ -17,7 +17,7 @@ show text "An outline is a plan of your story."
 
 step "Story elements"
 narrate "An outline in StoryCAD is made of story elements. The story overview describes the work as a whole. Problems are the conflicts that drive the plot. Characters, settings and scenes are what you would expect, and a scene ties together a setting, a cast and an event."
-show text "Story elements:\nStory Overview\nProblem\nCharacter\nSetting\nScene"   # \n: a new line on the card
+show text "STORY ELEMENTS\n\nStory Overview\nProblem\nCharacter\nSetting\nScene"   # \n: a new line; \n\n sets the heading apart
 
 step "The outline file"
 narrate "Each outline is a single file with the extension dot S-T-B-X, which you can copy, move or back up like any other document. StoryCAD ships with sample outlines; this one is The Old Man and the Sea."

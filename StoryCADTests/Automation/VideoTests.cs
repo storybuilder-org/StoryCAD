@@ -118,6 +118,33 @@ public class VideoTests
     }
 
     [TestMethod]
+    public void CardFades_WithFadesOutFalse_FadesInOnly()
+    {
+        var fades = VideoAssembler.CardFades(new VideoCard(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3), "Held", null, FadesOut: false));
+
+        Assert.AreEqual(",format=yuva420p,fade=t=in:st=1:d=0.3:alpha=1", fades);
+    }
+
+    [TestMethod]
+    public void Plan_WithCardStepsApart_FadesEachCardOut()
+    {
+        var now = TimeSpan.Zero;
+        var profile = new PresentationProfile(1.0, () => now, t => now += t, _ => TimeSpan.FromSeconds(3));
+        var parsed = ScriptParser.Parse(
+            "script \"Cards\"\nstep \"A\"\nnarrate \"one\"\nshow text \"First\"\n" +
+            "step \"B\"\nnarrate \"two\"\nstep \"C\"\nnarrate \"three\"\nshow text \"Third\"\n");
+        new ScriptInterpreter(() => throw new InvalidOperationException(),
+            new InterpreterOptions { Profile = profile, Log = _ => { } }).Execute(parsed);
+
+        var plan = VideoCommand.Plan(parsed, profile, TimeSpan.Zero, "rec.mkv", TimeSpan.FromSeconds(9),
+            _folder, null, null, _folder);
+
+        Assert.AreEqual(2, plan.Cards.Count);
+        Assert.IsTrue(plan.Cards[0].FadesOut);
+        Assert.AreEqual(profile.Steps[0].End, plan.Cards[0].End);
+    }
+
+    [TestMethod]
     public void CardFades_WithEmptyCard_ReturnsNoFades()
     {
         Assert.AreEqual(string.Empty,
@@ -202,7 +229,7 @@ public class VideoTests
 
         StringAssert.Contains(filter, "textfile=title.txt");
         StringAssert.Contains(filter, $"textfile={VideoAssembler.CreditFile}:expansion=none");
-        StringAssert.Contains(filter, "fontsize=36:fontcolor=white@0.8:x=(w-text_w)/2:y=h-text_h-80");
+        StringAssert.Contains(filter, "fontsize=28:fontcolor=white@0.8:x=(w-text_w)/2:y=h-text_h-80");
         // The credit uses the title's font file.
         Assert.AreEqual(2, filter.Split("fontfile='C\\:/Windows/Fonts/segoeui.ttf'").Length - 1);
     }
@@ -261,9 +288,11 @@ public class VideoTests
             _folder, null, null, _folder);
 
         Assert.AreEqual(2, plan.Cards.Count);
-        // The first card started before the recording, so it starts at 0 (#1626).
-        Assert.AreEqual((TimeSpan.Zero, TimeSpan.FromSeconds(2), "First"),
-            (plan.Cards[0].Start, plan.Cards[0].End, plan.Cards[0].Text));
+        // The first card started before the recording, so it starts at 0 (#1626). The next step
+        // has a card, so the first stays opaque until the second has faded in over it.
+        Assert.AreEqual((TimeSpan.Zero, TimeSpan.FromSeconds(2.3), "First", false),
+            (plan.Cards[0].Start, plan.Cards[0].End, plan.Cards[0].Text, plan.Cards[0].FadesOut));
+        Assert.IsTrue(plan.Cards[1].FadesOut);
         Assert.AreEqual((TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(7)), (plan.Cards[1].Start, plan.Cards[1].End));
         Assert.AreEqual(Path.Combine(_folder, "pie.png"), plan.Cards[1].ImagePath);
     }

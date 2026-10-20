@@ -233,6 +233,8 @@ internal static class VideoCommand
     ///     The plan for assembly: each show card covers its step, each clip starts at its cue,
     ///     all moved from the runner's clock to the recording's time. A card that starts under
     ///     <see cref="CardStartCover" /> into the recording starts at 0; nothing else moves.
+    ///     A card whose next step also has a card stays up until that card has faded in, so the
+    ///     app does not show between them (#1626, Terry, 2026-10-20).
     /// </summary>
     internal static VideoPlan Plan(ScriptParseResult parsed, PresentationProfile profile, TimeSpan offset,
         string recordingPath, TimeSpan recordingLength, string assetsDirectory, Ffmpeg? ffmpeg,
@@ -240,6 +242,7 @@ internal static class VideoCommand
     {
         var cards = new List<VideoCard>();
         var step = -1;
+        var lastCardStep = -2;
         foreach (var s in parsed.Statements)
         {
             if (s.Verb == ScriptVerb.Step)
@@ -250,6 +253,12 @@ internal static class VideoCommand
             {
                 var span = profile.Steps[step];
                 var start = span.Start - offset;
+                if (step == lastCardStep + 1)
+                {
+                    cards[^1] = cards[^1] with { End = start + VideoAssembler.CardFade, FadesOut = false };
+                }
+
+                lastCardStep = step;
                 cards.Add(new VideoCard(start < CardStartCover ? TimeSpan.Zero : start, span.End - offset,
                     s.Verb == ScriptVerb.ShowText ? s.Text : null,
                     s.Verb == ScriptVerb.ShowImage ? Path.GetFullPath(Path.Combine(assetsDirectory, s.Text!)) : null));

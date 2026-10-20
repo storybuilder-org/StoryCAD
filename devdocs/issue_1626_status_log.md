@@ -6,7 +6,9 @@
 
 **Done:** from an unelevated Claude Code session, `run Intro-Video.scs --assets C:\temp\intro-assets` passed (55 s). `video` recorded `C:\temp\intro-run-2\Intro-Video.mp4` (3:45, 1920x1080, 30 fps), using the 18 existing voice clips (none made). The title card shows the music credit; Santiago's Backstory tab has text.
 
-**Next:** Terry watches `C:\temp\intro-run-2\Intro-Video.mp4`. Remaining review items: cursor glide, zoom on the active area, music fade, burned-in captions, end-card silence.
+**Terry's notes on that render, fixed and re-recorded** (3:49): a card followed by a card in the next step stays opaque until the next has faded in, so the app no longer flashes between them; the story elements card has an upper-case heading and a blank line; the music credit is 28 px (was 36). A meta.json for upload holds the store links in the description; it sits with the assets, outside this repo. Video tests 73 passed.
+
+**Next:** Terry watches the new render. Remaining review items: cursor glide, zoom on the active area, music fade, burned-in captions, end-card silence.
 
 ## 2026-10-20 (later): session recovery
 
