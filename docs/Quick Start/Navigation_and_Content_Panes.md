@@ -7,7 +7,6 @@ parent: The StoryCAD User Interface
 has_toc: false
 ---
 ### Navigation and  Content Panes
-Navigation and Content Panes
 
 The Navigation Pane allows you to view, organize, and manage the parts of your story outline in a hierarchical structure.  It’s similar to the Windows File Explorer, but instead of files and folders, each node in the tree is a Story Elements  Your outline is composed of five Story Element types:
 
@@ -36,9 +35,13 @@ Clicking (or touching) a Story Element node on the Navigation Pane will display 
 
 
 
-When the StoryCAD window is narrow, there is room for only one pane, and the Content Pane fills the window. The Show/Hide Navigation button (the hamburger menu button) then switches between the Navigation Pane and the Content Pane.
+When the StoryCAD window is narrower than 800 pixels, there is room for only one pane, and the Content Pane fills the window:
 
-![](../media/Navigation-and-Content-Pane.png)
+![](../media/Content-Pane-Stacked.png)
+
+The Show/Hide Navigation button (the hamburger menu button) then switches between the Content Pane and the Navigation Pane, which also fills the window. Clicking a node opens it in the Content Pane; click the button again to see it.
+
+![](../media/Navigation-Pane-Stacked.png)
 
 
 Your outline has only one Story Overview; it’s created automatically when you open or create a new outline. The Story Overview is the root of the Navigation Pane tree, and all other Story Elements are below it. 

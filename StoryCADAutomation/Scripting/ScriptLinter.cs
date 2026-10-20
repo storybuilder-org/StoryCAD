@@ -29,6 +29,12 @@ public sealed partial class ScriptLinter
     private static readonly string[] ContentDialogButtonIds = { "PrimaryButton", "SecondaryButton", "CloseButton" };
 
     /// <summary>
+    ///     The CommandBar overflow ("...") button. Its id comes from the WinUI CommandBar template,
+    ///     not StoryCAD XAML; Shell.xaml shows it only below 800 pixels wide (Window_Management, #1422).
+    /// </summary>
+    private const string CommandBarMoreButtonId = "MoreButton";
+
+    /// <summary>
     ///     Modifier tokens that hardcode one platform. "Primary" is the logical form (Ctrl
     ///     here, Cmd on a future macOS backend); token names mirror
     ///     <see cref="KeyChord" />'s modifier table.
@@ -107,6 +113,10 @@ public sealed partial class ScriptLinter
                 else if (_facts.AutomationIds.Contains(address.Value))
                 {
                     // A StoryCAD XAML id: always valid.
+                }
+                else if (address.Value == CommandBarMoreButtonId)
+                {
+                    // A WinUI template part: valid, but the XAML scan never sees it.
                 }
                 else if (ContentDialogButtonIds.Contains(address.Value))
                 {

@@ -1,4 +1,5 @@
 #if WINDOWS10_0_22621_0_OR_GREATER
+using StoryCADAutomation.Driver;
 using StoryCADAutomation.Scripting;
 
 namespace StoryCADTests.Automation;
@@ -137,6 +138,58 @@ public class ScriptParserTests
     {
         // closing ends the last step, so it does not count as an action in that step.
         Assert.IsTrue(Parse("step \"A\"", "show text \"Hello\"", "closing \"Bye\"").Success);
+    }
+
+    // #1422 Window_Management: a stacked pane pushes the page out of view (offscreen), and a
+    // hidden pane leaves UI Automation a moment after the click (gone waits for that).
+    [TestMethod]
+    [DataRow("offscreen", ScriptVerb.ExpectOffscreen)]
+    [DataRow("gone", ScriptVerb.ExpectGone)]
+    public void Parse_ExpectVisibilityCondition_ProducesVerb(string condition, ScriptVerb expected)
+    {
+        var result = Parse($"expect tree \"Danger Calls\" {condition}");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual(expected, result.Statements[1].Verb);
+        Assert.AreEqual("Danger Calls", result.Statements[1].Target!.Value);
+    }
+
+    [TestMethod]
+    [DataRow("window minimize", WindowAction.Minimize)]
+    [DataRow("window maximize", WindowAction.Maximize)]
+    [DataRow("window restore", WindowAction.Restore)]
+    public void Parse_WindowState_ProducesWindowAction(string line, WindowAction expected)
+    {
+        var result = Parse(line);
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual(ScriptVerb.Window, result.Statements[1].Verb);
+        Assert.AreEqual(expected, result.Statements[1].WindowAction);
+        Assert.IsNull(result.Statements[1].WindowSize);
+    }
+
+    [TestMethod]
+    public void Parse_WindowSize_ProducesSize()
+    {
+        var result = Parse("window size 700x744");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual(WindowAction.Size, result.Statements[1].WindowAction);
+        Assert.AreEqual(new System.Drawing.Size(700, 744), result.Statements[1].WindowSize);
+    }
+
+    [TestMethod]
+    [DataRow("window")]
+    [DataRow("window shrink")]
+    [DataRow("window size")]
+    [DataRow("window size 700")]
+    [DataRow("window size 700x0")]
+    [DataRow("window size -700x744")]
+    [DataRow("window size 700x744x2")]
+    [DataRow("window minimize now")]
+    public void Parse_BadWindow_ReportsError(string line)
+    {
+        Assert.IsFalse(Parse(line).Success);
     }
 }
 #endif

@@ -88,12 +88,12 @@ press "Tab"                               # no text check: a script string canno
 step "CE-006: Delete and Restore"
 open-node tree "Elements Test/Research Notes"
 context-menu tree "Elements Test/Research Notes" "Delete element"   # no dialog: nothing refers to it
-expect-no tree "Elements Test/Research Notes"
+expect tree "Elements Test/Research Notes" gone
 expect tree contains "Deleted Story Elements/Research Notes"
 context-menu tree "Deleted Story Elements/Research Notes" "Restore Element"
 expect StatusMessageText text "Restored node Research Notes and all its contents"
 expect tree contains "Elements Test/Research Notes"
-expect-no tree "Deleted Story Elements/Research Notes"
+expect tree "Deleted Story Elements/Research Notes" gone
 press "Primary+S"
 expect StatusMessageText text "SaveFile command completed"
 

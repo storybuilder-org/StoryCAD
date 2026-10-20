@@ -37,6 +37,15 @@ public sealed record ScriptStatement
     /// </summary>
     public double? Seconds { get; init; }
 
+    /// <summary>Window action ("window minimize|maximize|restore|size"); null on other verbs.</summary>
+    public WindowAction? WindowAction { get; init; }
+
+    /// <summary>
+    ///     Window size ("window size WxH"): the visible frame in 100%-scale pixels, the units of
+    ///     --window.
+    /// </summary>
+    public System.Drawing.Size? WindowSize { get; init; }
+
     /// <summary>Toggle direction: true = on.</summary>
     public bool? On { get; init; }
 

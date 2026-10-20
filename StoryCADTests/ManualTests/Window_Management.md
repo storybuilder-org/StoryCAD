@@ -9,7 +9,7 @@
 |---------|---------|-------|
 | Minimize | Minimize button / Win+Down | Yellow traffic light / Cmd+M |
 | Maximize | Maximize button / Win+Up | Green traffic light (full-screen) |
-| Full-screen | F11 or maximize | Green traffic light (enters macOS full-screen space) |
+| Full-screen | None (use Maximize) | Green traffic light (enters macOS full-screen space) |
 | Snap layouts | Win+Arrow | Not available natively |
 | Window chrome | WinAppSDK title bar | macOS traffic lights |
 
@@ -32,11 +32,11 @@
 1. Drag window edge to make the window wider
    **Expected:** Content pane expands; navigation pane remains usable
 
-2. Drag to make the window narrower
-   **Expected:** Layout adapts; tab carousel arrows may appear; command bar items may overflow to "More" menu
+2. Drag to make the window narrower, still wider than 800px
+   **Expected:** Layout adapts; tab carousel arrows appear when the tabs do not fit; both panes stay side by side; no "..." (More) button yet
 
-3. Drag to make the window very narrow (~400px)
-   **Expected:** UI remains usable; no overlapping controls or cut-off text
+3. Drag to make the window as narrow as it goes (the minimum width is 520px)
+   **Expected:** One pane at a time (stacked mode, see WM-006); UI remains usable; no overlapping controls or cut-off text
 
 4. Drag vertically to make window shorter
    **Expected:** Content scrolls or adapts; no controls disappear permanently
@@ -76,17 +76,17 @@
 ---
 
 ### WM-004: Full-Screen Mode (macOS)
-**Priority:** High (macOS) / Low (Windows)
+**Priority:** High (macOS) / Not applicable (Windows: StoryCAD has no full-screen command; F11 does nothing)
 **Time:** ~1 minute
 
 **Steps:**
-1. Enter full-screen (macOS: green traffic light; Windows: F11 if supported)
+1. Enter full-screen (macOS: green traffic light)
    **Expected:** App enters full-screen; menu bar auto-hides on macOS
 
 2. Navigate the outline and edit an element
    **Expected:** All functionality works in full-screen
 
-3. Exit full-screen (macOS: hover top to reveal traffic lights; Windows: F11 or Esc)
+3. Exit full-screen (macOS: hover top to reveal traffic lights)
    **Expected:** Window returns to normal; no visual artifacts
 
 **Pass/Fail:** ______
@@ -98,13 +98,13 @@
 **Time:** ~1 minute
 
 **Steps:**
-1. Resize window to narrow width so toolbar items cannot all fit
+1. Resize the window narrower than 800px
    **Expected:** Overflow items move to a "..." (More) menu
 
 2. Click the overflow menu
-   **Expected:** Hidden toolbar items appear in the flyout
+   **Expected:** The buttons that did not fit (Tools, Reports, Preferences, Report Feedback, Help) appear in the flyout; the bar shows each button's label
 
-3. Click an overflow item (e.g., a tool command)
+3. Click an overflow item (e.g., Tools > Key Questions)
    **Expected:** Command executes normally
 
 4. Widen the window
@@ -135,7 +135,7 @@
    **Expected:** Navigation Pane appears full-width; Content Pane hidden
 
 6. Click any node in the Navigation Pane
-   **Expected:** Navigation works as in wide mode
+   **Expected:** The node opens in the Content Pane; the Navigation Pane stays in front until the next step
 
 7. Click the hamburger button again
    **Expected:** Returns to Content-only view (not side-by-side)

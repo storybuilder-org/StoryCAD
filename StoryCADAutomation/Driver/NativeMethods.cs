@@ -274,6 +274,20 @@ internal static class NativeMethods
     // --- window placement (runner --window) ----------------------------------------------
 
     private const int SW_RESTORE = 9;
+    private const int SW_MAXIMIZE = 3;
+    private const int SW_MINIMIZE = 6;
+
+    internal static void Minimize(IntPtr hwnd) => ShowWindow(hwnd, SW_MINIMIZE);
+
+    internal static void Maximize(IntPtr hwnd) => ShowWindow(hwnd, SW_MAXIMIZE);
+
+    internal static void Restore(IntPtr hwnd) => ShowWindow(hwnd, SW_RESTORE);
+
+    [DllImport("user32.dll")]
+    internal static extern bool IsIconic(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    internal static extern bool IsZoomed(IntPtr hWnd);
 
     /// <summary>Restores a maximized or minimized window, then moves and sizes it (physical pixels).</summary>
     internal static void PlaceWindow(IntPtr hwnd, int x, int y, int width, int height)

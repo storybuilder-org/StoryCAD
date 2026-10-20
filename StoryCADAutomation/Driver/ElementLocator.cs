@@ -115,6 +115,31 @@ internal sealed class ElementLocator
     }
 
     /// <summary>
+    ///     Waits until the target is absent: for a control that an action removes, such as a
+    ///     pane the hamburger button hides. UI Automation keeps the control for a moment after
+    ///     the app hides it, so a settle-then-check absence fails on its first poll (#1422).
+    /// </summary>
+    public void WaitUntilAbsent(ElementAddress address, TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+        while (true)
+        {
+            _ensureRunnable();
+            if (TryFind(address, out _) is null)
+            {
+                return;
+            }
+
+            if (DateTime.UtcNow >= deadline)
+            {
+                throw new AutomationStepException($"{address} was still there after {timeout.TotalSeconds:0.#}s, expected gone.");
+            }
+
+            Thread.Sleep(AbsencePollInterval);
+        }
+    }
+
+    /// <summary>
     ///     Settle-then-check absence: polls the bounded window and passes only if the target
     ///     never appears. Deliberately does not inherit the implicit wait, which would invert
     ///     the semantics into wait-for-the-error (design, Assertions).

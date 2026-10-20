@@ -33,7 +33,7 @@ expect window "StoryCAD - Currently editing CF002_TestSave"
 
 step "CF-003: Open Existing Story"
 menu CloseStoryMenuItem                   # not a plan step; the checks below must see a reopened file
-expect-no tree "Core Test Story"
+expect tree "Core Test Story" gone
 click FileMenuButton                      # not a plan step: the manual's File menu image, over the empty home page
 screenshot "File-Menu.png" of FileMenuButton OpenCreateFileMenuItem ExitMenuItem margin 12
 press "Escape"
@@ -67,7 +67,7 @@ expect CharacterNameTextBox exists
 open-node tree "Hamlet/Problems"            # above Characters, so still on screen
 menu CloseStoryMenuItem                   # unchanged, so no "Save changes?" dialog
 expect StatusMessageText text "Close story command completed"
-expect-no tree "Hamlet/Characters/Claudius"
+expect tree "Hamlet/Characters/Claudius" gone
 
 step "Manual image: the Create new outline page"
 menu OpenCreateFileMenuItem               # not a plan step; after the file work, because the path set

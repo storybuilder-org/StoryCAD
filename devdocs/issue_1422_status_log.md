@@ -89,3 +89,14 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - VM runs need an elevated session: `D:\VMs\Run-InVM.ps1 -Repo D:\dev\src\StoryCAD-1422 -Script <name>.scs`; results in `D:\VMs\out\<script>`. Build Debug x64 in the worktree first; after a `dev` package change, build with `-t:Restore,Build`.
 - Script facts: wait for `TitleTextBox` after opening a file before opening a node; right-click menus close themselves now (`CloseContextFlyout`); a script string cannot hold a line break.
 - The worktree has no `.env`, so `CheckDotEnvFile` and `CheckDoppler` fail in a local full-suite run there.
+
+## 2026-10-20 (PR 4, Window_Management)
+
+- `StoryCADTests/AutomationScripts/Window-Management.scs`: WM-001, WM-002, WM-003, WM-005 and WM-006 steps 1 to 9 pass in the VM, five runs in a row (18.8 to 20.3 s). Not scripted: WM-004 (Windows has no full-screen command) and WM-006 step 10 (needs a rotating display).
+- New runner pieces: `window size WxH`, `window minimize|maximize|restore` (restore fails unless the frame is back where it was); `expect <target> offscreen` (a stacked pane pushes the page out of view but UI Automation still finds it); `expect <target> gone` (waits for a control to go away); the linter accepts `MoreButton`, the CommandBar "..." button from the WinUI template.
+- `expect-no` after the hamburger click failed 2 of 5 VM runs. The app ran every toggle; UI Automation keeps the pane for a moment after the app hides it, and `expect-no` fails on its first poll. Five such checks in Core-File-Operations, Core-Navigation and Core-Story-Elements now use `gone`; each script passed one VM run after the change.
+- The hamburger button keeps keyboard focus after the click and shows its tooltip, so the script focuses another control before each screenshot.
+- Automation unit tests: 200 passed (parser tests for `window`, `offscreen`, `gone`; linter test for `MoreButton`). Lint: 8 scripts, 0 errors.
+- `Window_Management.md` corrected: minimum width 520 (not about 400); no "..." button above 800 wide; no full-screen command on Windows; the overflow holds Tools, Reports, Preferences, Report Feedback and Help; a node clicked in stacked mode opens behind the pane.
+- Manual images: `Show-and-Hide-Navigation.png`, `Navigation-and-Content-Pane.png` and `Navigation-and-Content-Pane-1.png` replaced by `Navigation-Pane-Hidden.png`, `Content-Pane-Stacked.png` and `Navigation-Pane-Stacked.png` (links fixed); `Menu-Bar.png` retaken; new `Menu-Bar-Overflow.png`.
+- Pages: ShowHide_Navigation_Pane.md, Navigation_and_Content_Panes.md, Story_Elements.md (stacked mode is one pane at a time, not one above the other; element list adds Web, Notes, StoryWorld; most forms, not every form, have a Notes tab), Menu_Bar.md (the "..." button), Starting_and_Stopping_StoryCAD.md (520 minimum, 800 one-pane rule). Label check: 0 app-label misses. Page comparison (agent): five mismatches, all fixed.
