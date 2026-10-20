@@ -1,5 +1,20 @@
 # Issue #1626 status log
 
+## 2026-10-20 (later): session recovery
+
+**Branch:** `issue-1626-youtube-upload` in worktree `D:\dev\src\StoryCAD-1626`. Local only, not pushed.
+
+**Resolved:** the Open from file failure below is bug #1652 (StoryCAD run as administrator; low priority, Terry). The session's terminal ran as administrator, so the runner and StoryCAD did too. Started without administrator rights, the script opens the outline (lines 24 to 26 pass). `Windowing.ShowFileOpenPicker` now logs the exception type and HResult (this commit).
+
+**Open problem (next session starts here):** with the runner unelevated and the terminal elevated, the run stops at line 54 (`menu OpenCreateFileMenuItem`): the foreground window is the terminal, and Windows blocks an unelevated program from taking the foreground from an elevated one. Terry is restarting Claude Code without administrator rights.
+
+Next steps:
+1. In the unelevated session, run `run StoryCADTests\AutomationScripts\Intro-Video.scs --assets C:\temp\intro-assets` with nobody typing in the terminal.
+2. When it passes, record with `video`.
+3. Then Terry's 2026-10-20 overview notes: blank tabs (Backstory for Santiago and Manolin).
+
+`Get-VM` works without administrator rights (Hyper-V Administrators group); `Run-InVM.ps1`'s `New-PSSession -VMName` is not yet tried unelevated.
+
 ## 2026-10-20: session recovery
 
 **Branch:** `issue-1626-youtube-upload` in worktree `D:\dev\src\StoryCAD-1626` (never switch branches in `D:\dev\src\StoryCAD`; other sessions use it). Local only, not pushed.

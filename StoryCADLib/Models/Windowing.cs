@@ -325,7 +325,8 @@ public class Windowing : ObservableRecipient
 	    catch (Exception e)
 	    {
 			//See below for possible exception cause.
-		    logger.Log(LogLevel.Error, $"File picker error!, ex:{e.Message} {e.StackTrace}");
+		    // WinRT picker failures often carry an empty Message; the HResult names the cause.
+		    logger.Log(LogLevel.Error, $"File picker error!, ex:{e.GetType().Name} 0x{e.HResult:X8} {e.Message} {e.StackTrace}");
 		    throw;
 	    }
 
