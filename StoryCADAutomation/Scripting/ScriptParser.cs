@@ -93,6 +93,12 @@ public static partial class ScriptParser
     public const double MaxHoldSeconds = 30;
 
     /// <summary>
+    ///     In a show text string, these two characters (backslash, n) start a new line on the
+    ///     card. No other string has an escape (#1626, Terry, 2026-10-20).
+    /// </summary>
+    public const string CardLineBreak = @"\n";
+
+    /// <summary>
     ///     The placement rules for the video statements (devdocs/issue_1421_video_design.md,
     ///     section 6.2): title first after script, closing last, narrate lines at the head of
     ///     their step, and a show step that holds only narrate lines and one show.
@@ -359,10 +365,14 @@ public static partial class ScriptParser
             return kind switch
             {
                 "image" => New(ScriptVerb.ShowImage) with { Text = TakeString(r, "image file name") },
-                "text" => New(ScriptVerb.ShowText) with { Text = TakeString(r, "card text") },
+                "text" => New(ScriptVerb.ShowText) with { Text = CardLines(TakeString(r, "card text")) },
                 _ => throw new SyntaxException($"show takes 'image' or 'text', not '{kind}'."),
             };
         }
+
+        // Only show text reads \n: other strings hold Windows paths, where \n is part of a
+        // folder name ("C:\new"). A card list puts one item on each line (#1626, Terry, 2026-10-20).
+        static string CardLines(string text) => text.Replace(CardLineBreak, "\n", StringComparison.Ordinal);
 
         ScriptStatement BuildDrag(ArgReader r)
         {

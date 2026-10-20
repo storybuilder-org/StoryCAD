@@ -65,14 +65,7 @@ public static class VideoAssembler
             parts.Add(("title.mp4", TitleLength(plan)));
         }
 
-        for (var i = 0; i < plan.Cards.Count; i++)
-        {
-            if (plan.Cards[i].Text is { } text)
-            {
-                File.WriteAllText(Path.Combine(workDirectory, $"card{i}.txt"), text);
-            }
-        }
-
+        WriteCardFiles(plan, workDirectory);
         ffmpeg.Run(BodyArguments(plan, "body.mp4"), workDirectory);
         parts.Add(("body.mp4", plan.RecordingLength));
         if (plan.Closing is not null)
@@ -83,6 +76,21 @@ public static class VideoAssembler
         }
 
         ffmpeg.Run(JoinArguments(parts, Path.GetFullPath(outputPath)), workDirectory);
+    }
+
+    /// <summary>
+    ///     Writes card&lt;i&gt;.txt for each text card. A line break in the card text stays a line
+    ///     break in the file, and drawtext draws each line centered (#1626, Terry, 2026-10-20).
+    /// </summary>
+    internal static void WriteCardFiles(VideoPlan plan, string workDirectory)
+    {
+        for (var i = 0; i < plan.Cards.Count; i++)
+        {
+            if (plan.Cards[i].Text is { } text)
+            {
+                File.WriteAllText(Path.Combine(workDirectory, $"card{i}.txt"), text);
+            }
+        }
     }
 
     /// <summary>
@@ -257,7 +265,8 @@ public static class VideoAssembler
     private const string AudioFormat = "aformat=sample_rates=48000:channel_layouts=stereo";
 
     // White Segoe UI, 64 px, centered on both axes (design section 9). The text comes from a
-    // file and expansion is off, so no character in it needs escaping.
+    // file and expansion is off, so no character in it needs escaping. text_align=C centers
+    // each line of a card with several lines (show text "\n", #1626).
     private static string DrawText(string textFile, string y)
         => $"drawtext=fontfile='{FontFile}':textfile={textFile}:expansion=none:text_align=C:" +
            $"fontsize=64:fontcolor=white:x=(w-text_w)/2:y={y}";

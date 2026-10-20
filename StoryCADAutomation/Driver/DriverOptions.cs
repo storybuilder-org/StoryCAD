@@ -69,4 +69,11 @@ public sealed class DriverOptions
     ///     #1421 D-CI-CRASH). Off by default: locally a WER dialog could outlive the run.
     /// </summary>
     public bool AllowCrashReporting { get; init; }
+
+    /// <summary>
+    ///     Outline files copied into {scratch}/outlines before StoryCAD starts, so a script can
+    ///     open them with open-file-dialog. The video command puts every .stbx file from its
+    ///     assets folder here (#1626, Terry, 2026-10-20).
+    /// </summary>
+    public IReadOnlyList<string> SeedOutlines { get; init; } = Array.Empty<string>();
 }

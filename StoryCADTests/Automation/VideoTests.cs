@@ -1,5 +1,6 @@
 #if WINDOWS10_0_22621_0_OR_GREATER
 using System.Drawing;
+using StoryCADAutomation.Driver;
 using StoryCADAutomation.Interpreting;
 using StoryCADAutomation.Scripting;
 using StoryCADAutomation.Video;
@@ -327,6 +328,60 @@ public class VideoTests
         var length = ffmpeg.Duration(mp4);
         Assert.IsNotNull(length);
         Assert.AreEqual(18, length.Value.TotalSeconds, 0.2);
+    }
+
+    // #1626 (Terry, 2026-10-20): a list card has one item on each line.
+    [TestMethod]
+    public void WriteCardFiles_WithLineBreaks_WritesOneLinePerItem()
+    {
+        var parsed = ScriptParser.Parse("script \"Cards\"\nstep \"A\"\n" + @"show text ""Story elements:\nProblem\nScene""" + "\n");
+        var plan = new VideoPlan
+        {
+            RecordingPath = "rec.mkv",
+            RecordingLength = TimeSpan.FromSeconds(9),
+            Cards = new[]
+            {
+                new VideoCard(TimeSpan.Zero, TimeSpan.FromSeconds(4), null, "a.png"),
+                new VideoCard(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(9), parsed.Statements[2].Text, null),
+            },
+        };
+
+        VideoAssembler.WriteCardFiles(plan, _folder);
+
+        // Only text cards get a file, named for the card's place in the plan.
+        Assert.IsFalse(File.Exists(Path.Combine(_folder, "card0.txt")));
+        CollectionAssert.AreEqual(new[] { "Story elements:", "Problem", "Scene" },
+            File.ReadAllLines(Path.Combine(_folder, "card1.txt")));
+    }
+
+    // #1626 (Terry, 2026-10-20): the intro video opens Terry's copy of a sample from the assets folder.
+    [TestMethod]
+    public void AssetOutlines_WithMixedAssets_ReturnsOnlyOutlineFiles()
+    {
+        File.WriteAllText(Path.Combine(_folder, "The Old Man and the Sea.stbx"), "{}");
+        File.WriteAllText(Path.Combine(_folder, "Hamlet.stbx"), "{}");
+        File.WriteAllText(Path.Combine(_folder, VideoCommand.LogoFile), "png");
+        File.WriteAllText(Path.Combine(_folder, VideoCommand.MusicCreditFile), "credit");
+
+        var outlines = VideoCommand.AssetOutlines(_folder).Select(Path.GetFileName).ToList();
+
+        CollectionAssert.AreEqual(new[] { "Hamlet.stbx", "The Old Man and the Sea.stbx" }, outlines);
+    }
+
+    [TestMethod]
+    public void CopyOutlines_WithAssetOutline_CopiesItIntoScratchOutlines()
+    {
+        var assets = Path.Combine(_folder, "assets");
+        Directory.CreateDirectory(assets);
+        var source = Path.Combine(assets, "The Old Man and the Sea.stbx");
+        File.WriteAllText(source, "{\"Name\": \"Santiago\"}");
+        var scratch = ScratchArea.Create(Path.Combine(_folder, "scratch"));
+
+        scratch.CopyOutlines(VideoCommand.AssetOutlines(assets));
+
+        var copy = Path.Combine(scratch.OutlineDirectory, "The Old Man and the Sea.stbx");
+        Assert.AreEqual(Path.Combine(scratch.Root, "outlines"), scratch.OutlineDirectory);
+        Assert.AreEqual(File.ReadAllText(source), File.ReadAllText(copy));
     }
 
     [TestMethod]

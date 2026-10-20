@@ -90,6 +90,7 @@ closing "Like and subscribe"                     # the closing card; last statem
 5. `show image` names a `.png` or `.jpg` file in the assets folder. The name has no folder part.
 6. `hold` takes a number of seconds from 0 to 30.
 7. `check` reports an error for each broken rule.
+8. In `show text`, `\n` starts a new line on the card. Use it to put one list item on each line (#1626, Terry, 2026-10-20).
 
 ### 6.3 The test profile
 
@@ -174,6 +175,7 @@ The assets folder holds these files:
 | `logo.png` | The logo on the title card |
 | `intro-music` with an audio file extension, for example `intro-music.mp3` | The intro music |
 | The files that `show image` names | The image cards |
+| Each `.stbx` file | An outline that the script opens. Before StoryCAD starts, the `video` command copies it to `{scratch}/outlines` (#1626, Terry, 2026-10-20). |
 
 The output is 1920x1080, H.264 video, AAC audio.
 

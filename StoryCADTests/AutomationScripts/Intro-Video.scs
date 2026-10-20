@@ -3,6 +3,9 @@
 # Test profile: a regression check of the steps the video shows.
 # Video: StoryCADAutomation voice Intro-Video.scs --out <dir>, then
 #        StoryCADAutomation video Intro-Video.scs --out <dir> --assets <dir>
+# The assets folder holds "The Old Man and the Sea.stbx", Terry's filled-in copy of the sample
+# (the shipped sample has empty tabs); video copies it to {scratch}/outlines (#1626, 2026-10-20).
+# run has no assets folder, so a test-profile run fails at the step "The outline file".
 script "Intro Video"
 title "A Five-Minute Introduction to StoryCAD"
 launch                                    # the recording starts here; the cards cover the app
@@ -14,13 +17,12 @@ show text "An outline is a plan of your story."
 
 step "Story elements"
 narrate "An outline in StoryCAD is made of story elements. The story overview describes the work as a whole. Problems are the conflicts that drive the plot. Characters, settings and scenes are what you would expect, and a scene ties together a setting, a cast and an event."
-show text "Story elements: Story Overview, Problem, Character, Setting, Scene"
+show text "Story elements:\nStory Overview\nProblem\nCharacter\nSetting\nScene"   # \n: a new line on the card
 
 step "The outline file"
 narrate "Each outline is a single file with the extension dot S-T-B-X, which you can copy, move or back up like any other document. StoryCAD ships with sample outlines; this one is The Old Man and the Sea."
-click SampleOutlinesNavItem
-select FileOpenSamplesList "The Old Man and the Sea"
-click PrimaryButton                       # "Open"
+click OpenFromFileNavItem                 # the Open dialog is up from launch
+open-file-dialog "{scratch}/outlines/The Old Man and the Sea.stbx"
 expect tree contains "The Old Man and the Sea"
 
 step "The navigation pane" hold 1

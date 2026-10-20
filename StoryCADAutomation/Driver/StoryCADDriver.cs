@@ -150,6 +150,7 @@ public sealed class StoryCADDriver : IUiDriver
             var libVersion = AssemblyName.GetAssemblyName(libPath).Version?.ToString()
                              ?? throw new AutomationLaunchException($"StoryCADLib.dll at {libPath} has no assembly version.");
             scratch.SeedPreferences(libVersion);
+            scratch.CopyOutlines(options.SeedOutlines);
 
             var startInfo = new ProcessStartInfo
             {

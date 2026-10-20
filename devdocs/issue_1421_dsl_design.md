@@ -24,6 +24,8 @@ No MSTest reference. The runner is the executable; CI invokes it directly.
 
 Line-oriented plain text, UTF-8, extension `.scs` (proposed; trivially changeable at review). One statement per line: a verb followed by arguments. Double quotes delimit strings; `#` starts a comment; blank lines are ignored.
 
+Strings have no escape sequences, with one exception. In the string of `show text`, the two characters `\n` start a new line on the card (#1626, Terry, 2026-10-20). Each line is centered. Other strings keep `\n` as two characters, because a Windows path can contain them (`C:\new`).
+
 **No variables, no control flow, no includes in v1.** Manual test plans are linear procedures; scripts mirror them one step per line. This is what makes an AI-assisted translation reviewable: a reviewer reads plan step and script line side by side. Data-driven repetition, if ever needed, is runner parameterization, not script logic.
 
 Two structural verbs exist for reporting, not execution:

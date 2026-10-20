@@ -105,6 +105,7 @@ internal static class VideoCommand
         var driverOptions = new DriverOptions
         {
             AppPath = Program.DefaultAppPath(), RequiredDpiScalePercent = null, MinDesktopWidth = 0, MinDesktopHeight = 0,
+            SeedOutlines = AssetOutlines(assetsDirectory),
         };
 
         ScreenRecorder? recorder = null;
@@ -204,6 +205,14 @@ internal static class VideoCommand
         Console.WriteLine($"video: {mp4}");
         return Passed;
     }
+
+    /// <summary>
+    ///     The outline files in the assets folder. The run copies them into {scratch}/outlines,
+    ///     so the intro video opens Terry's filled-in copy of a sample; the shipped sample has
+    ///     empty tabs (#1626, Terry, 2026-10-20).
+    /// </summary>
+    internal static IReadOnlyList<string> AssetOutlines(string assetsDirectory)
+        => Directory.GetFiles(assetsDirectory, "*.stbx").OrderBy(f => f, StringComparer.Ordinal).ToList();
 
     /// <summary>The window size in screen pixels that gives StoryCAD a 1920x1080 layout at this DPI.</summary>
     internal static Size CaptureSize(int dpi)

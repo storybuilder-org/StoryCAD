@@ -132,6 +132,26 @@ public class ScriptParserTests
         Assert.IsFalse(Parse("show text \"Hello\"").Success);
     }
 
+    // #1626 (Terry, 2026-10-20): a list on a card puts one item on each line.
+    [TestMethod]
+    public void Parse_ShowTextWithLineBreaks_SplitsTheCardIntoLines()
+    {
+        var result = Parse("step \"A\"", @"show text ""Story elements:\nProblem\nScene""");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual("Story elements:\nProblem\nScene", result.Statements[2].Text);
+    }
+
+    [TestMethod]
+    public void Parse_PathWithBackslashN_KeepsBothCharacters()
+    {
+        // Only show text reads \n; a Windows path keeps its folder "\new".
+        var result = Parse(@"set FileOpenProjectPathTextBox ""C:\new\Projects""");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual(@"C:\new\Projects", result.Statements[1].Text);
+    }
+
     [TestMethod]
     public void Parse_ShowStepBeforeClosing_Succeeds()
     {
