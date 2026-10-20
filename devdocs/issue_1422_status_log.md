@@ -101,3 +101,8 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - `Window_Management.md` corrected: minimum width 520 (not about 400); no "..." button above 800 wide; no full-screen command on Windows; the overflow holds Tools, Reports, Preferences, Report Feedback and Help; a node clicked in stacked mode opens behind the pane.
 - Manual images: `Show-and-Hide-Navigation.png`, `Navigation-and-Content-Pane.png` and `Navigation-and-Content-Pane-1.png` replaced by `Navigation-Pane-Hidden.png`, `Content-Pane-Stacked.png` and `Navigation-Pane-Stacked.png` (links fixed); `Menu-Bar.png` retaken; new `Menu-Bar-Overflow.png`.
 - Pages: ShowHide_Navigation_Pane.md, Navigation_and_Content_Panes.md, Story_Elements.md (stacked mode is one pane at a time, not one above the other; element list adds Web, Notes, StoryWorld; most forms, not every form, have a Notes tab), Menu_Bar.md (the "..." button), Starting_and_Stopping_StoryCAD.md (520 minimum, 800 one-pane rule). Label check: 0 app-label misses. Page comparison (agent): five mismatches, all fixed.
+
+### Session recovery (2026-10-20, PR 4 in review)
+
+- Waiting on Terry: review of PR #1653.
+- After #1653 merges: merge-cleanup (tick C4 on #1422, wiki `log.md` merge entry, ui-automation-accessibility page for `window`, `offscreen`, `gone`), then C5, the evaluation point with Terry.
