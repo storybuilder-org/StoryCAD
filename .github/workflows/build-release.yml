@@ -525,33 +525,23 @@ jobs:
       # We don't pass -p:TargetFrameworks: `dotnet pack` mistakenly applies it
       # to the singular TargetFramework too, tripping NETSDK1046. The verify
       # step below is the regression guard if the csproj is ever changed.
+      # Collaborator#291 / #1648: the package also carries CollaboratorLib.dll, which
+      # references StoryCADLib, so CollaboratorLib is built (Release) first.
+      - name: Build CollaboratorLib for the package
+        if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
+        shell: pwsh
+        run: dotnet build CollaboratorLib/CollaboratorLib.csproj -c Release --no-restore
+
       - name: Pack StoryCADLib NuGet
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
         shell: pwsh
         run: dotnet pack StoryCADLib/StoryCADLib.csproj -c Release -p:IsPackable=true -o "${{ github.workspace }}\nupkg"
 
-      # Fail loudly if either TFM is missing from the package — protects the release
-      # contract for consumers like the API-Samples Outliner.
-      - name: Verify NuGet contains both TFMs
+      # Fail loudly if either TFM or CollaboratorLib.dll is missing from the package.
+      - name: Verify NuGet contains both TFMs and CollaboratorLib
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
         shell: pwsh
-        run: |
-          $nupkg = Get-ChildItem "${{ github.workspace }}\nupkg\StoryCADLib.*.nupkg" | Select-Object -First 1
-          if (-not $nupkg) { throw "No StoryCADLib nupkg produced." }
-          Add-Type -AssemblyName System.IO.Compression.FileSystem
-          $zip = [System.IO.Compression.ZipFile]::OpenRead($nupkg.FullName)
-          try {
-            $libs = $zip.Entries | Where-Object { $_.FullName -like 'lib/*' } |
-              ForEach-Object { ($_.FullName -split '/')[1] } | Sort-Object -Unique
-          } finally { $zip.Dispose() }
-          Write-Host "Package: $($nupkg.Name)"
-          Write-Host "lib/ TFMs: $($libs -join ', ')"
-          # Prefix-match: NuGet normalizes 'net10.0-desktop' to 'net10.0-desktop1.0'
-          # and could change Windows TPV in future. Match the family, not the exact folder.
-          $hasDesktop = $libs | Where-Object { $_ -like 'net10.0-desktop*' }
-          $hasWindows = $libs | Where-Object { $_ -like 'net10.0-windows*' }
-          if (-not $hasDesktop) { throw "nupkg is missing the net10.0-desktop TFM." }
-          if (-not $hasWindows) { throw "nupkg is missing the net10.0-windows TFM." }
+        run: ./scripts/Verify-StoryCADLibPackage.ps1 -PackageDir "${{ github.workspace }}\nupkg"
 
       - name: Upload NuGet (Windows x64)
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'

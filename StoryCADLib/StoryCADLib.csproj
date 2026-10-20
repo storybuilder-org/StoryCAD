@@ -58,6 +58,15 @@
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
+  <!-- Collaborator#291 / #1648: Collaborator is part of StoryCAD, so the StoryCADLib package
+       carries CollaboratorLib.dll as well. CollaboratorLib references StoryCADLib, not the
+       reverse, so the release build compiles CollaboratorLib (Release) before it packs this
+       project. Only pack reads these items; a missing DLL fails the pack. For a pack by hand,
+       build CollaboratorLib (Release) first, or a stale DLL from an older build is packed. -->
+  <ItemGroup Condition="'$(IsPackable)'=='true'">
+    <None Include="../CollaboratorLib/bin/$(Configuration)/net10.0-desktop/CollaboratorLib.dll" Pack="true" PackagePath="lib/net10.0-desktop1.0/" Visible="false" />
+    <None Include="../CollaboratorLib/bin/$(Configuration)/net10.0-windows10.0.22621/CollaboratorLib.dll" Pack="true" PackagePath="lib/net10.0-windows10.0.22621/" Visible="false" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SemanticKernel" />
     <PackageReference Include="Microsoft.SemanticKernel.Abstractions" />
@@ -71,6 +80,12 @@
     <PackageReference Include="Octokit" />
     <PackageReference Include="SkiaSharp" />
     <PackageReference Include="Uno.Fonts.Fluent" />
+    <!-- Used by CollaboratorLib, listed here so the package's dependency list covers the
+         CollaboratorLib.dll it carries (#1648). -->
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Elmah.Io.Client" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="Services\Dialogs\Tools\StockScenesDialog.xaml">
