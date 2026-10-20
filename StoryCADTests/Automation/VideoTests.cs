@@ -189,6 +189,63 @@ public class VideoTests
     }
 
     [TestMethod]
+    public void TitleArguments_WithMusicCredit_DrawsCreditNearTheBottom()
+    {
+        var plan = new VideoPlan
+        {
+            RecordingPath = "rec.mkv", RecordingLength = TimeSpan.FromSeconds(3), Title = "Intro",
+            MusicCredit = "Music: \"Bright Day\" by Someone",
+        };
+
+        var filter = FilterOf(VideoAssembler.TitleArguments(plan, "title.mp4"));
+
+        StringAssert.Contains(filter, "textfile=title.txt");
+        StringAssert.Contains(filter, $"textfile={VideoAssembler.CreditFile}:expansion=none");
+        StringAssert.Contains(filter, "fontsize=36:fontcolor=white@0.8:x=(w-text_w)/2:y=h-text_h-80");
+        // The credit uses the title's font file.
+        Assert.AreEqual(2, filter.Split("fontfile='C\\:/Windows/Fonts/segoeui.ttf'").Length - 1);
+    }
+
+    [TestMethod]
+    public void TitleArguments_WithoutMusicCredit_DrawsTitleOnly()
+    {
+        var plan = new VideoPlan { RecordingPath = "rec.mkv", RecordingLength = TimeSpan.FromSeconds(3), Title = "Intro" };
+
+        var filter = FilterOf(VideoAssembler.TitleArguments(plan, "title.mp4"));
+
+        StringAssert.Contains(filter, "textfile=title.txt");
+        Assert.IsFalse(filter.Contains(VideoAssembler.CreditFile), filter);
+        Assert.AreEqual(1, filter.Split("drawtext=").Length - 1);
+    }
+
+    [TestMethod]
+    public void Plan_WithMusicCreditFile_ReadsTheCredit()
+    {
+        File.WriteAllText(Path.Combine(_folder, VideoCommand.MusicCreditFile), "Music: \"Bright Day\" by Someone\r\n");
+        var parsed = ScriptParser.Parse("script \"Cards\"\ntitle \"Intro\"\n");
+
+        var plan = VideoCommand.Plan(parsed, new PresentationProfile(1.0, () => TimeSpan.Zero, _ => { }, null),
+            TimeSpan.Zero, "rec.mkv", TimeSpan.FromSeconds(9), _folder, null, null, _folder);
+
+        Assert.AreEqual("Music: \"Bright Day\" by Someone", plan.MusicCredit);
+        // The credit file is not taken for the intro music.
+        Assert.IsNull(plan.MusicPath);
+    }
+
+    [TestMethod]
+    public void Plan_WithoutMusicCreditFile_HasNoCredit()
+    {
+        var parsed = ScriptParser.Parse("script \"Cards\"\ntitle \"Intro\"\n");
+
+        var plan = VideoCommand.Plan(parsed, new PresentationProfile(1.0, () => TimeSpan.Zero, _ => { }, null),
+            TimeSpan.Zero, "rec.mkv", TimeSpan.FromSeconds(9), _folder, null, null, _folder);
+
+        Assert.IsNull(plan.MusicCredit);
+    }
+
+    private static string FilterOf(IReadOnlyList<string> args) => args[args.ToList().IndexOf("-filter_complex") + 1];
+
+    [TestMethod]
     public void Plan_PutsEachCardOverItsStepInRecordingTime()
     {
         var now = TimeSpan.Zero;
@@ -260,6 +317,7 @@ public class VideoTests
             LogoPath = Path.Combine(_folder, "logo.png"),
             MusicPath = Path.Combine(_folder, "music.wav"),
             MusicLength = TimeSpan.FromSeconds(3),
+            MusicCredit = "Music: \"Bright Day\" by Someone",
         };
         var mp4 = Path.Combine(_folder, "out.mp4");
 

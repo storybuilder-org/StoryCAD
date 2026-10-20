@@ -25,6 +25,10 @@ internal static class VideoCommand
 
     internal const string MusicFilePattern = "intro-music.*";
 
+    // "intro-music.*" does not match this name: the pattern needs a dot right after "intro-music".
+    /// <summary>One line of text that credits the intro music on the title card (#1626, Terry, 2026-10-20).</summary>
+    internal const string MusicCreditFile = "intro-music-credit.txt";
+
     /// <summary>
     ///     A card that starts sooner than this into the recording starts at 0 instead, so the
     ///     viewer never sees StoryCAD start up (Terry, 2026-10-19, #1626: the intro video showed
@@ -258,6 +262,8 @@ internal static class VideoCommand
         }
 
         var logo = Path.Combine(assetsDirectory, LogoFile);
+        var creditPath = Path.Combine(assetsDirectory, MusicCreditFile);
+        var credit = File.Exists(creditPath) ? File.ReadLines(creditPath).FirstOrDefault()?.Trim() : null;
         var music = Directory.GetFiles(assetsDirectory, MusicFilePattern).OrderBy(f => f, StringComparer.Ordinal).FirstOrDefault();
         return new VideoPlan
         {
@@ -270,6 +276,7 @@ internal static class VideoCommand
             LogoPath = File.Exists(logo) ? Path.GetFullPath(logo) : null,
             MusicPath = music is null ? null : Path.GetFullPath(music),
             MusicLength = music is null ? null : ffmpeg?.Duration(music),
+            MusicCredit = string.IsNullOrEmpty(credit) ? null : credit,
         };
     }
 }

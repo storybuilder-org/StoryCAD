@@ -20,6 +20,9 @@ public sealed class VideoPlan
     public string? LogoPath { get; init; }
     public string? MusicPath { get; init; }
     public TimeSpan? MusicLength { get; init; }
+
+    /// <summary>The music credit line for the bottom of the title card, or null for none (#1626, Terry, 2026-10-20).</summary>
+    public string? MusicCredit { get; init; }
 }
 
 /// <summary>
@@ -53,6 +56,11 @@ public static class VideoAssembler
         if (plan.Title is not null)
         {
             File.WriteAllText(Path.Combine(workDirectory, "title.txt"), plan.Title);
+            if (plan.MusicCredit is not null)
+            {
+                File.WriteAllText(Path.Combine(workDirectory, CreditFile), plan.MusicCredit);
+            }
+
             ffmpeg.Run(TitleArguments(plan, "title.mp4"), workDirectory);
             parts.Add(("title.mp4", TitleLength(plan)));
         }
@@ -118,7 +126,10 @@ public static class VideoAssembler
     internal static TimeSpan TitleLength(VideoPlan plan)
         => plan.MusicPath is not null && plan.MusicLength is { } music ? music : TitleWithoutMusic;
 
-    /// <summary>The title card: the title above the logo, the intro music under it.</summary>
+    /// <summary>
+    ///     The title card: the title above the logo, the intro music under it, and the music
+    ///     credit, when there is one, in a smaller line near the bottom (#1626, Terry, 2026-10-20).
+    /// </summary>
     internal static IReadOnlyList<string> TitleArguments(VideoPlan plan, string output)
     {
         var length = TitleLength(plan);
@@ -137,7 +148,8 @@ public static class VideoAssembler
         }
 
         var textY = plan.LogoPath is null ? "(h-text_h)/2" : "(h-text_h)/2-260";
-        filter.Add($"{video}{DrawText("title.txt", textY)}[v]");
+        var credit = plan.MusicCredit is null ? string.Empty : "," + DrawCredit();
+        filter.Add($"{video}{DrawText("title.txt", textY)}{credit}[v]");
         if (plan.MusicPath is not null)
         {
             args.AddRange(new[] { "-i", plan.MusicPath });
@@ -249,6 +261,15 @@ public static class VideoAssembler
     private static string DrawText(string textFile, string y)
         => $"drawtext=fontfile='{FontFile}':textfile={textFile}:expansion=none:text_align=C:" +
            $"fontsize=64:fontcolor=white:x=(w-text_w)/2:y={y}";
+
+    /// <summary>The work file that holds the music credit for the title card.</summary>
+    internal const string CreditFile = "credit.txt";
+
+    // The credit: Segoe UI, 36 px, white at 80% opacity, centered, its bottom 80 px above the
+    // frame's bottom. It comes from a file as the title does, so quotes in it need no escaping.
+    private static string DrawCredit()
+        => $"drawtext=fontfile='{FontFile}':textfile={CreditFile}:expansion=none:text_align=C:" +
+           "fontsize=36:fontcolor=white@0.8:x=(w-text_w)/2:y=h-text_h-80";
 
     private static IEnumerable<string> ColorInput(TimeSpan length)
         => new[] { "-f", "lavfi", "-i", $"color=c={Background}:s={Width}x{Height}:r=30:d={Seconds(length)}" };
