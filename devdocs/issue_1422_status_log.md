@@ -80,3 +80,12 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - `Core_Story_Elements.md` corrected: setup creates the outline by name; menu paths are Add Elements > Add ...; "Major Role", "Person vs. Person", "New Note"; deleting an unreferenced element shows no dialog; restore is Restore Element on the node under Deleted Story Elements.
 - Images: `CharRoleTab.png` and `CharPhysTab.png` renamed to `Character-Role-Tab.png` and `Character-Physical-Tab.png` (links fixed); `Problem-Problem-Tab.png` and `Scene-Scene-Tab.png` retaken. `Setting-Setting-Tab.png` retaken. Its Locale box is blank: an editable drop-down shows a saved value only when the value is in its list (Hamlet stores "Castle"). Terry, 2026-10-19: not an app defect.
 - Label check on the five pages: 0 misses. Page comparison (agent) found mismatches on all five, all fixed: Role_Tab.md (six story roles, Ally and Higher Self archetypes), Physical_Tab.md (heading, field list, Appearance is its own tab), Problem_Tab.md ("Discover", "Person vs. Nature" with its own text, "Person vs. Self", Problem Category added, "Problem Source"), Scene_Tab.md (Date and Time are two fields, Viewpoint Character, SceneType added, Cast is its own tab), Setting_Tab.md (Setting Summary added, broken Props sentence finished).
+
+### Session recovery (2026-10-20, before a restart)
+
+- PR #1650 merged into `dev` as `9f80a06b`; merge-cleanup done (C3 ticked, wiki `log.md` entry, sync-state at `9f80a06b`).
+- Next: C4, Window_Management (`StoryCADTests/ManualTests/Window_Management.md`), on branch `issue-1422-window-management` from `9f80a06b`, in the worktree `D:\dev\src\StoryCAD-1422`. Nothing done on it yet.
+- Per plan: translate to a `.scs` script with `--window 1036x744`, run in the VM, retake the manual images it covers under the image name standard, run `labels` on the pages, have an agent compare the pages with the code, fix plan and pages, one PR.
+- VM runs need an elevated session: `D:\VMs\Run-InVM.ps1 -Repo D:\dev\src\StoryCAD-1422 -Script <name>.scs`; results in `D:\VMs\out\<script>`. Build Debug x64 in the worktree first; after a `dev` package change, build with `-t:Restore,Build`.
+- Script facts: wait for `TitleTextBox` after opening a file before opening a node; right-click menus close themselves now (`CloseContextFlyout`); a script string cannot hold a line break.
+- The worktree has no `.env`, so `CheckDotEnvFile` and `CheckDoppler` fail in a local full-suite run there.
