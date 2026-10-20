@@ -1,5 +1,7 @@
 #if WINDOWS10_0_22621_0_OR_GREATER
 using System.Diagnostics;
+using System.Reflection;
+using StoryCADAutomation.Driver;
 using StoryCADAutomation.Interpreting;
 
 namespace StoryCADTests.Automation;
@@ -7,7 +9,7 @@ namespace StoryCADTests.Automation;
 /// <summary>
 ///     Presentation profile pieces that need no app: reading time, pause
 ///     scaling, and the runner's --window parser (#1421 Milestone 4); step timing (#1421
-///     Milestone 5, video design section 7).
+///     Milestone 5, video design section 7); typing in one driver call (#1626).
 /// </summary>
 [TestClass]
 public class PresentationProfileTests
@@ -31,6 +33,30 @@ public class PresentationProfileTests
         var profile = new PresentationProfile(0.5, new Stopwatch());
 
         Assert.AreEqual(TimeSpan.FromSeconds(1), profile.ScalePause(2));
+    }
+
+    [TestMethod]
+    public void Type_WithText_TypesItInOneDriverCall()
+    {
+        var driver = DriverCalls.Create(out var calls);
+
+        new PresentationProfile(1.0, new Stopwatch()).Type(driver, "Codify a local urban legend.");
+
+        CollectionAssert.AreEqual(new[] { "TypeText(Codify a local urban legend.)" }, calls);
+    }
+
+    [TestMethod]
+    public void Set_WithValue_ClearsFocusesThenTypesValueInOneDriverCall()
+    {
+        var driver = DriverCalls.Create(out var calls);
+        var target = ElementAddress.FromAutomationId("CharacterNameTextBox");
+
+        new PresentationProfile(1.0, new Stopwatch()).Set(driver, target, "Santiago");
+
+        CollectionAssert.AreEqual(new[]
+        {
+            $"SetText({target}, , )", $"GlideTo({target}, )", $"Focus({target}, )", "TypeText(Santiago)",
+        }, calls);
     }
 
     [TestMethod]
@@ -228,6 +254,27 @@ public class PresentationProfileTests
     public void TryParseWindowSize_WithMissingHeight_ReturnsFalse()
     {
         Assert.IsFalse(StoryCADAutomation.Program.TryParseWindowSize("1920x", out _));
+    }
+}
+
+/// <summary>An <see cref="IUiDriver" /> that records each call as "Name(arg, ...)" and does nothing else.</summary>
+public class DriverCalls : DispatchProxy
+{
+    private List<string> _calls = null!;
+
+    public static IUiDriver Create(out List<string> calls)
+    {
+        var driver = Create<IUiDriver, DriverCalls>();
+        calls = new List<string>();
+        ((DriverCalls)(object)driver)._calls = calls;
+        return driver;
+    }
+
+    protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
+    {
+        _calls.Add($"{targetMethod!.Name}({string.Join(", ", args ?? Array.Empty<object?>())})");
+        var type = targetMethod.ReturnType;
+        return type.IsValueType && type != typeof(void) ? Activator.CreateInstance(type) : null;
     }
 }
 #endif
