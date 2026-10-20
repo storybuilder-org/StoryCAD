@@ -1,5 +1,13 @@
 # Issue #1626 status log
 
+## 2026-10-20 (evening): session recovery
+
+**Branch:** `issue-1626-youtube-upload` in worktree `D:\dev\src\StoryCAD-1626`. Local only, not pushed.
+
+**Done:** from an unelevated Claude Code session, `run Intro-Video.scs --assets C:\temp\intro-assets` passed (55 s). `video` recorded `C:\temp\intro-run-2\Intro-Video.mp4` (3:45, 1920x1080, 30 fps), using the 18 existing voice clips (none made). The title card shows the music credit; Santiago's Backstory tab has text.
+
+**Next:** Terry watches `C:\temp\intro-run-2\Intro-Video.mp4`. Remaining review items: cursor glide, zoom on the active area, music fade, burned-in captions, end-card silence.
+
 ## 2026-10-20 (later): session recovery
 
 **Branch:** `issue-1626-youtube-upload` in worktree `D:\dev\src\StoryCAD-1626`. Local only, not pushed.
