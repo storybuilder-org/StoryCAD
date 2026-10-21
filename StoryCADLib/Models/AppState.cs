@@ -46,10 +46,12 @@ public class AppState
     public readonly Stopwatch StartUpTimer = Stopwatch.StartNew();
 
     /// <summary>
-    ///     Environment variable that, in Debug builds only, replaces <see cref="RootDirectory" />.
+    ///     Environment variable that replaces <see cref="RootDirectory" />: in Debug builds, and
+    ///     in Release builds only when <see cref="Headless" /> is true (the headless Collaborator
+    ///     MCP keeps its own Preferences.json and logs, #291).
     ///     The UI automation runner (StoryCADAutomation) sets it to a per-run scratch folder so a
     ///     test run reads its own Preferences.json and writes its logs there, never the user's
-    ///     (#1421). Release builds ignore it.
+    ///     (#1421). A windowed Release build ignores it.
     /// </summary>
     public const string RootDirectoryOverrideVariable = "STORYCAD_ROOT_DIR";
 
@@ -67,15 +69,21 @@ public class AppState
     {
         get
         {
+            // Debug builds, or any build running headless (Terry, 2026-10-04): a shipped
+            // windowed Release build must not be redirectable by an environment variable.
+            // The automation runner uses windowed Debug builds; a headless host has no window.
+            var redirectable = Headless;
 #if DEBUG
-            // Debug builds only (Terry, 2026-10-04): a shipped Release build must not be
-            // redirectable by an environment variable. The automation runner uses Debug builds.
-            var overrideDirectory = Environment.GetEnvironmentVariable(RootDirectoryOverrideVariable);
-            if (!string.IsNullOrWhiteSpace(overrideDirectory))
-            {
-                return overrideDirectory;
-            }
+            redirectable = true;
 #endif
+            if (redirectable)
+            {
+                var overrideDirectory = Environment.GetEnvironmentVariable(RootDirectoryOverrideVariable);
+                if (!string.IsNullOrWhiteSpace(overrideDirectory))
+                {
+                    return overrideDirectory;
+                }
+            }
 
             try
             {

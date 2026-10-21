@@ -103,8 +103,11 @@ public class WorkflowSessionService
     private static void Say(WorkflowSession session, string text) =>
         session.Messages.Add(new SessionMessage(SessionMessageKind.Collaborator, text));
 
-    private static void Fail(WorkflowSession session, string text) =>
+    private static void Fail(WorkflowSession session, string text)
+    {
+        session.SetLastError(text);
         session.Messages.Add(new SessionMessage(SessionMessageKind.Error, text));
+    }
 
     private static void Changed(WorkflowSession session) => session.Changed?.Invoke();
 
@@ -751,6 +754,7 @@ public class WorkflowSessionService
     /// </summary>
     public async Task RunAsync(WorkflowSession session)
     {
+        session.SetLastError(null);
         try
         {
             Status(session, $"Running {session.Workflow.Title}...");
@@ -862,6 +866,7 @@ public class WorkflowSessionService
     /// </summary>
     public async Task TryAgainAsync(WorkflowSession session)
     {
+        session.SetLastError(null);
         try
         {
             var rejected = session.Proposals == null
@@ -1483,6 +1488,8 @@ public class WorkflowSessionService
     /// </summary>
     public Task<string> ChatAsync(WorkflowSession session, string userMessage)
     {
+        session.SetLastError(null);
+        session.LastChatCost = null;
         if (session.IsInterview)
         {
             if (session.InterviewAwaitingChoice || session.InterviewCursor.NotStarted)
@@ -1519,6 +1526,8 @@ public class WorkflowSessionService
                 response = await chatService.GetChatMessageContentAsync(session.ChatHistory!);
                 chatCost = costScope.Cost;
             }
+
+            session.LastChatCost = chatCost;
 
             var responseText = response.Content ?? "No response received.";
 
@@ -1600,7 +1609,9 @@ public class WorkflowSessionService
         catch (Exception ex)
         {
             _logger?.LogError(ex, "Error processing chat message");
-            throw TranslateChatException(ex);
+            var translated = TranslateChatException(ex);
+            session.SetLastError(translated.Message);
+            throw translated;
         }
     }
 
@@ -1687,7 +1698,7 @@ public class WorkflowSessionService
     /// a stock sentence; Terry read that as the model not knowing how to start. The goal
     /// is what starts it, and the writer or the Worker names the goal.
     /// </summary>
-    internal void StartInterview(WorkflowSession session)
+    public void StartInterview(WorkflowSession session)
     {
         session.InterviewTranscript = new InterviewTranscript();
         session.InterviewCursor.Reset();
@@ -1844,6 +1855,7 @@ public class WorkflowSessionService
             var result = await runner.RunPreparedAsync(body, session.Elements);
 
             session.PendingCostSummary = session.CostTracker.Record(result.Cost);
+            session.LastChatCost = result.Cost;
 
             if (!result.Success)
             {
