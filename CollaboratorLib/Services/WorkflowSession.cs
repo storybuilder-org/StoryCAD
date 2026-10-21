@@ -90,6 +90,21 @@ public class WorkflowSession
     /// </summary>
     public Dictionary<string, string> TouchedFields { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// The text of the last failure (a failed run, a stream that stopped, out of credits, an
+    /// interview turn that failed), or null. A run, a try again and a chat call clear it
+    /// when they start. A host with no screen reads it where the app shows an error bubble.
+    /// </summary>
+    public string? LastError { get; private set; }
+
+    internal void SetLastError(string? text) => LastError = text;
+
+    /// <summary>
+    /// The cost of the last chat call, in the unit a run reports (<see cref="WorkflowResult.Cost"/>).
+    /// Null when the call reported none. A chat call clears it when it starts.
+    /// </summary>
+    public ProxyCostInfo? LastChatCost { get; internal set; }
+
     /// <summary>Per-run cost accumulator for the cost line.</summary>
     internal WorkflowCostTracker CostTracker { get; set; } = new();
 

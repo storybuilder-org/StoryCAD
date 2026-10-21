@@ -383,6 +383,89 @@ public class WorkflowSessionTests
 
     #endregion
 
+    #region Public surface for a headless host
+
+    /// <summary>A chat service that answers at once and reports a cost the way the Worker handler does.</summary>
+    private sealed class CostReportingChatService : Microsoft.SemanticKernel.ChatCompletion.IChatCompletionService
+    {
+        public IReadOnlyDictionary<string, object> Attributes { get; } = new Dictionary<string, object>();
+
+        public Task<IReadOnlyList<Microsoft.SemanticKernel.ChatMessageContent>> GetChatMessageContentsAsync(
+            Microsoft.SemanticKernel.ChatCompletion.ChatHistory chatHistory,
+            Microsoft.SemanticKernel.PromptExecutionSettings executionSettings = null,
+            Microsoft.SemanticKernel.Kernel kernel = null,
+            CancellationToken cancellationToken = default)
+        {
+            ChatCostCapture.Record(new ProxyCostInfo(null, "test-model", 10, 20, 1500));
+            IReadOnlyList<Microsoft.SemanticKernel.ChatMessageContent> reply = new[]
+            {
+                new Microsoft.SemanticKernel.ChatMessageContent(
+                    Microsoft.SemanticKernel.ChatCompletion.AuthorRole.Assistant, "Reply")
+            };
+            return Task.FromResult(reply);
+        }
+
+        public IAsyncEnumerable<Microsoft.SemanticKernel.StreamingChatMessageContent> GetStreamingChatMessageContentsAsync(
+            Microsoft.SemanticKernel.ChatCompletion.ChatHistory chatHistory,
+            Microsoft.SemanticKernel.PromptExecutionSettings executionSettings = null,
+            Microsoft.SemanticKernel.Kernel kernel = null,
+            CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+    }
+
+    [TestMethod]
+    public async Task LastError_FailedRun_IsReadablePublicly()
+    {
+        var rig = await ArrangeAsync(true, NoWriterText, ("Premise", ModelText));
+
+        rig.Service.SetResult(rig.Session, WorkflowResult.Failed("Out of credits"));
+
+        var property = typeof(WorkflowSession).GetProperty("LastError");
+        Assert.IsNotNull(property, "WorkflowSession.LastError exists");
+        Assert.IsTrue(property.GetGetMethod()?.IsPublic == true, "LastError is public");
+        Assert.AreEqual("Out of credits", (string)property.GetValue(rig.Session));
+    }
+
+    [TestMethod]
+    public async Task LastError_NextChat_ClearsIt()
+    {
+        var rig = await ArrangeAsync(true, NoWriterText);
+        rig.Service.SetResult(rig.Session, WorkflowResult.Failed("Worker down"));
+        Assert.AreEqual("Worker down", ReadLastError(rig));
+
+        await rig.Service.ChatAsync(rig.Session, "hello");
+
+        Assert.IsNull(ReadLastError(rig), "a new chat call starts without the old error");
+    }
+
+    private static string ReadLastError(Rig rig) =>
+        (string)typeof(WorkflowSession).GetProperty("LastError")?.GetValue(rig.Session);
+
+    [TestMethod]
+    public async Task LastChatCost_ChatCall_IsReadablePublicly()
+    {
+        var rig = await ArrangeAsync(true, NoWriterText, ("Premise", ModelText));
+        rig.Session.ChatService = new CostReportingChatService();
+
+        await rig.Service.ChatAsync(rig.Session, "tighten the premise");
+
+        var property = typeof(WorkflowSession).GetProperty("LastChatCost");
+        Assert.IsNotNull(property, "WorkflowSession.LastChatCost exists");
+        Assert.IsTrue(property.GetGetMethod()?.IsPublic == true, "LastChatCost is public");
+        var cost = (ProxyCostInfo)property.GetValue(rig.Session);
+        Assert.IsNotNull(cost);
+        Assert.AreEqual(1500, cost.CostMicrodollars);
+    }
+
+    [TestMethod]
+    public void StartInterview_IsPublic()
+    {
+        var method = typeof(WorkflowSessionService).GetMethod("StartInterview");
+        Assert.IsNotNull(method, "WorkflowSessionService.StartInterview is public");
+    }
+
+    #endregion
+
     #region Client header
 
     [TestMethod]
