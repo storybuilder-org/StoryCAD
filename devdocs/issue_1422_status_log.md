@@ -106,3 +106,13 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 
 - Waiting on Terry: review of PR #1653.
 - After #1653 merges: merge-cleanup (tick C4 on #1422, wiki `log.md` merge entry, ui-automation-accessibility page for `window`, `offscreen`, `gone`), then C5, the evaluation point with Terry.
+
+## 2026-10-22 (PR 5, Tutorial, paused)
+
+- Branch `issue-1422-tutorial` from `dev` at `7f497656`. `Tutorial-Creating-a-Story.scs` (27 steps, `TC-001` to `TC-027`) passes locally with `--window 1036x744`, 358 s, 52 screenshots. Lint: `check StoryCADTests` 9 scripts, 0 errors. No runner changes. The VM run is still needed (no elevated session).
+- Plan `Tutorial_Creating_a_Story.md` written as a draft table.
+- Not done: copy the 52 images into `docs/media` (local captures are 150% scale; scale to 1036 x 744), rename to the standard, drop the old 51 and fix links in the ten pages and `Status_Bar.md`, label check, page comparison by a separate agent, page rewrites.
+- Page rewrites needed: Three Act Play is a beat sheet on the Problem Structure tab, not a Master Plot; Master Plots add one Problem; folder menus are Add Elements submenus; Concept tab has no tooltip; Problem Type and Conflict Type are editable lists; Cast is its own scene tab; "Detective" is in the Role list.
+- App findings to report: the Overview Premise tab does not show the Story Problem's premise, and a save after choosing it erased the Problem's own premise; a new character shows the previous character's Story Role; Master Plots and Stock Scenes insert under the last right-clicked node, not the selected one; selecting the last beat (Denouement) in the Three Act Play list hung the app.
+- Script facts: editable lists open with Alt+Down, and long lists need type-ahead; keep the tree short with `collapse` or its root row leaves the realized rows.
+
