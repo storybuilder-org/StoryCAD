@@ -1,0 +1,478 @@
+# Tutorial_Creating_a_Story.md as an automation script (#1422). Run with:
+#   StoryCADAutomation run StoryCADTests/AutomationScripts/Tutorial-Creating-a-Story.scs --window 1036x744 --out automation-output
+# --window is the visible frame at 100% scale (the runner scales it for the display).
+# Hands off the mouse and keyboard while it runs.
+# Manual pages (docs/Tutorial Creating a Story/): Creating_a_Story_pt_1.md to Creating_a_Story_pt_9.md
+# Each screenshot replaces the docs/media image of the same name.
+# The outline goes to {scratch}/outlines, the folder the runner's seeded preferences name.
+script "Tutorial Creating a Story"
+
+step "TC-001: Create the Danger Calls outline"
+launch
+screenshot "Danger-Calls-Open-Create-File-Page.png"
+click CreateNewOutlineNavItem
+select FileOpenTemplateCombo "Folders"
+set FileOpenProjectNameTextBox "Danger Calls"
+press "Tab"                               # the name binding updates only when focus leaves the box
+screenshot "Danger-Calls-Create-New-Outline-Dialog.png"
+click PrimaryButton                       # "Create outline" writes Danger Calls.stbx at once
+expect window "StoryCAD - Currently editing Danger Calls"
+screenshot "Danger-Calls-New-Outline.png"
+screenshot "Danger-Calls-Status-Bar-Saved.png" of ViewSelectorCombo BackupStatusButton margin 0
+screenshot "Danger-Calls-Story-Overview-Node.png" of tree "Danger Calls" margin 4
+
+step "TC-002: Story Idea tab and Save"
+click tree "Danger Calls"
+wait TitleTextBox
+screenshot "Danger-Calls-Story-Idea-Tab-Empty.png"
+focus StoryIdeaRichEdit
+type "A television news piece shows boys as young as fourteen selling drugs on the street with disposable cell phones."
+press "Tab"
+expect StoryIdeaRichEdit text "A television news piece shows boys as young as fourteen selling drugs on the street with disposable cell phones."
+focus TitleTextBox                        # moves the keyboard focus ring off the status bar
+screenshot "Danger-Calls-Changed-Indicator-Red.png" of SaveStatusButton margin 4
+click SaveStatusButton
+expect StatusMessageText text "SaveFile command completed"
+focus TitleTextBox
+screenshot "Status-Bar-Changed-Indicator.png" of SaveStatusButton margin 4
+
+step "TC-003: Structure tab"
+tab OverviewStructureTab
+select GenreCombo "Suspense"
+select OverviewTypeCombo "Short Story"
+expect GenreCombo text "Suspense"
+expect OverviewTypeCombo text "Short Story"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Structure-Tab.png"
+click SaveStatusButton
+
+step "TC-004: Close and reopen the outline"
+menu CloseStoryMenuItem
+menu OpenCreateFileMenuItem
+click RecentlyOpenedNavItem
+click name:"Danger Calls"
+click PrimaryButton                       # "Open Outline"
+wait TitleTextBox
+expect tree contains "Danger Calls/Characters"
+
+step "TC-005: Concept tab"
+tab ConceptTab
+screenshot "Danger-Calls-Concept-Tab-Empty.png"
+focus ConceptRichEdit
+type "What if a police detective uses a criminal's phone to gain time to effect a rescue, by calling the dealer at the critical moment?"
+press "Tab"
+expect ConceptRichEdit text "What if a police detective uses a criminal's phone to gain time to effect a rescue, by calling the dealer at the critical moment?"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Concept-Tab.png"
+click SaveStatusButton
+
+step "TC-006: Key Questions"
+menu KeyQuestionsMenuItem
+select KeyQuestionsElementTypeCombo "Story Overview"
+click KeyQuestionsNextButton
+click KeyQuestionsNextButton              # the third question is the first Concept question
+screenshot dialog "Danger-Calls-Key-Questions-Dialog-Concept.png"
+dialog "Key questions" click CloseButton
+
+step "TC-007: Add three characters"
+right-click tree "Danger Calls/Characters"
+screenshot "Danger-Calls-Add-Character-Menu.png"
+press "Escape"
+context-menu tree "Danger Calls/Characters" "Add Elements/Add Character"
+expect tree contains "Danger Calls/Characters/New Character"
+open-node tree "Danger Calls/Characters/New Character"
+set CharacterNameTextBox "Leonard Kraskin"
+expect tree contains "Danger Calls/Characters/Leonard Kraskin"
+focus CharacterRoleCombo
+type "Detective"
+select StoryRoleCombo "Protagonist"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Character-Role-Tab-Protagonist.png"
+context-menu tree "Danger Calls/Characters" "Add Elements/Add Character"
+open-node tree "Danger Calls/Characters/New Character"
+set CharacterNameTextBox "Charlie Lacas"
+expect tree contains "Danger Calls/Characters/Charlie Lacas"
+focus CharacterRoleCombo
+type "Drug Dealer"
+press "Tab"
+type "Antagonist"                         # type-ahead: the open list scrolls to the selected row, so select cannot reach Antagonist
+expect StoryRoleCombo text "Antagonist"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Character-Role-Tab-Antagonist.png"
+context-menu tree "Danger Calls/Characters" "Add Elements/Add Character"
+open-node tree "Danger Calls/Characters/New Character"
+set CharacterNameTextBox "Tony Irwin"
+expect tree contains "Danger Calls/Characters/Tony Irwin"
+focus CharacterRoleCombo
+type "Detective"
+press "Tab"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Characters-Added.png"
+click SaveStatusButton
+collapse tree "Danger Calls/Characters"   # the tree scrolls its root row out of reach when it grows taller than the pane
+
+step "TC-008: First problem"
+context-menu tree "Danger Calls/Problems" "Add Elements/Add Problem"
+expect tree contains "Danger Calls/Problems/New Problem"
+open-node tree "Danger Calls/Problems/New Problem"
+set ProblemNameTextBox "Catching the drug dealer Lacas"
+expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas"
+focus ProblemTypeCombo
+press "Alt+Down"                          # an editable list opens from the keyboard; a click lands in its text box
+select ProblemTypeCombo "Conflict"
+focus ConflictTypeCombo
+press "Alt+Down"
+select ConflictTypeCombo "Person vs. Person"
+focus SubjectCombo
+type "Crime"
+press "Tab"
+focus StoryQuestionRichEdit
+type "Will Leonard and Tony overcome the cellular phone advantage and find out where Charlie Lacas' next drug deal will be held, so that they can catch him?"
+press "Tab"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Problem-Tab-Drug-Dealer.png"
+
+step "TC-009: Second problem"
+context-menu tree "Danger Calls/Problems" "Add Elements/Add Problem"
+expect tree contains "Danger Calls/Problems/New Problem"
+open-node tree "Danger Calls/Problems/New Problem"
+set ProblemNameTextBox "How will Leonard and Tony get past Charlie's tech?"
+expect tree contains "Danger Calls/Problems/How will Leonard and Tony get past Charlie's tech?"
+focus ProblemTypeCombo
+press "Alt+Down"                          # an editable list opens from the keyboard; a click lands in its text box
+select ProblemTypeCombo "Conflict"
+focus ConflictTypeCombo
+press "Alt+Down"
+select ConflictTypeCombo "Person vs. Situation"
+focus StoryQuestionRichEdit
+type "How can Leonard and Tony overcome the 'cellular phone advantage' and find out where Charlie Lacas' next drug deal will be held, so that they can catch him?"
+press "Tab"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Problem-Tab-How-To-Complication.png"
+click SaveStatusButton
+
+step "TC-010: Third problem"
+context-menu tree "Danger Calls/Problems" "Add Elements/Add Problem"
+expect tree contains "Danger Calls/Problems/New Problem"
+open-node tree "Danger Calls/Problems/New Problem"
+set ProblemNameTextBox "Lacas gets the drop on Kraskin"
+expect tree contains "Danger Calls/Problems/Lacas gets the drop on Kraskin"
+focus ProblemTypeCombo
+press "Alt+Down"                          # an editable list opens from the keyboard; a click lands in its text box
+select ProblemTypeCombo "Conflict"
+focus ConflictTypeCombo
+press "Alt+Down"
+select ConflictTypeCombo "Person vs. Person"
+focus StoryQuestionRichEdit
+type "How does Lacas get the drop on Kraskin?"
+press "Tab"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Problem-Tab-Lacas-Gets-The-Drop.png"
+
+step "TC-011: Trait Builder"
+open-node tree "Danger Calls/Characters/Leonard Kraskin"
+tab OuterTraitsTab
+click TraitBuilderButton
+screenshot dialog "Danger-Calls-Trait-Builder-Dialog.png"
+select TraitCategoryCombo "Behaviors"
+screenshot dialog "Danger-Calls-Trait-Builder-Dialog-Behaviors.png"
+focus TraitExampleCombo
+type "(Behavior): Impulsive"              # type-ahead: the example list has 157 rows
+expect TraitExampleCombo text "(Behavior): Impulsive"
+click PrimaryButton                       # "Copy trait"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Character-Outer-Traits-Tab-Impulsive.png"
+
+step "TC-012: Inner traits"
+tab InnerTraitsTab
+select AdventurousnessCombo "Impulsive"
+expect AdventurousnessCombo text "Impulsive"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Character-Inner-Traits-Tab-Adventurousness.png"
+open-node tree "Danger Calls/Characters/Tony Irwin"
+tab InnerTraitsTab
+select ShrewdnessCombo "Thoughtful"
+expect ShrewdnessCombo text "Thoughtful"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Character-Inner-Traits-Tab-Thoughtful.png"
+click SaveStatusButton
+collapse tree "Danger Calls/Characters"
+
+step "TC-013: Rename the third problem and add research notes"
+open-node tree "Danger Calls/Problems/Lacas gets the drop on Kraskin"
+tab ProblemTab
+set ProblemNameTextBox "Leonard's impulsiveness lets Lacas capture him"
+expect tree contains "Danger Calls/Problems/Leonard's impulsiveness lets Lacas capture him"
+focus ConflictTypeCombo
+press "Alt+Down"
+select ConflictTypeCombo "Person vs. Self"
+focus StoryQuestionRichEdit
+press "Primary+A"
+type "Will Leonard's impulsiveness get him captured by Lacas?"
+press "Tab"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Problem-Tab-Impulsiveness-Renamed.png"
+open-node tree "Danger Calls/Problems/How will Leonard and Tony get past Charlie's tech?"
+tab ProblemNotesTab
+focus ProblemNotesRichEdit
+type "Charlie Lacas pages his handful of street dealers, and they call him back from disposable cell phones."
+press "Tab"
+click SaveStatusButton
+
+step "TC-014: Resolution and Premise"
+open-node tree "Danger Calls/Problems/Leonard's impulsiveness lets Lacas capture him"
+tab ResolutionTab
+focus ProblemPremiseRichEdit
+type "Leonard and Tony trace Charlie Lacas through the paging system. Tony thinks it is too easy, but Leonard rushes in. It is a trap, and Lacas captures Leonard. Tony frees his partner by paging Lacas and distracting him."
+press "Tab"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas"
+tab ResolutionTab
+focus ProblemPremiseRichEdit
+type "Leonard and Tony trace Charlie Lacas through the paging system. Leonard rushes in and Lacas captures him. Tony frees his partner by paging Lacas and gets the drop on the dealers."
+press "Tab"
+click SaveStatusButton
+
+step "TC-015: Story Problem on the Overview Premise tab"
+click tree "Danger Calls"
+wait TitleTextBox
+tab PremiseTab
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Overview-Premise-Tab-Empty.png"
+select StoryProblemCombo "Catching the drug dealer Lacas"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Overview-Premise-Tab.png"
+click SaveStatusButton
+
+step "TC-016: First scene"
+right-click tree "Danger Calls/Scenes"
+screenshot "Danger-Calls-Add-Scene-Menu.png"
+press "Escape"
+context-menu tree "Danger Calls/Scenes" "Add Elements/Add Scene"
+expect tree contains "Danger Calls/Scenes/New Scene"
+open-node tree "Danger Calls/Scenes/New Scene"
+set SceneNameTextBox "He's like a ghost"
+expect tree contains "Danger Calls/Scenes/He's like a ghost"
+focus SceneSketchRichEdit
+type "Leonard and Tony talk about how Lacas always seems to be one step ahead of them."
+press "Tab"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Scene-Tab-Sketch.png"
+click SaveStatusButton
+
+step "TC-017: Three Act Play beat sheet"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas"
+tab ProblemStructureTab
+select BeatSheetCombo "Three Act Play"
+screenshot "Danger-Calls-Structure-Tab-Three-Act-Play.png"
+select BeatsList "Narrative hook"
+screenshot "Danger-Calls-Structure-Tab-Narrative-Hook.png"
+
+step "TC-018: Assign the scene to the beat"
+screenshot "Danger-Calls-Structure-Tab-Assign-Scene.png"
+select ElementsList "He's like a ghost"
+click AssignBeatButton
+screenshot "Danger-Calls-Structure-Tab-Scene-Assigned.png"
+click SaveStatusButton
+
+step "TC-019: Move problems and the scene into place"
+drag tree "Danger Calls/Problems/How will Leonard and Tony get past Charlie's tech?" to tree "Danger Calls/Problems/Catching the drug dealer Lacas"
+drag tree "Danger Calls/Problems/Leonard's impulsiveness lets Lacas capture him" to tree "Danger Calls/Problems/Catching the drug dealer Lacas"
+expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"
+expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him"
+drag tree "Danger Calls/Scenes/He's like a ghost" to tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"
+expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/He's like a ghost"
+screenshot "Danger-Calls-Problems-And-Scenes-Reordered.png"
+click SaveStatusButton
+
+step "TC-020: Master Plots Escape and the climax scene"
+collapse tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"   # keeps the tree short enough to show its root row
+right-click tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him"
+press "Escape"                            # the tool inserts under the last right-clicked node, not the selected one
+menu MasterPlotsMenuItem
+screenshot dialog "Danger-Calls-Master-Plots-Dialog.png"
+select MasterPlotsCombo "Escape"
+screenshot dialog "Danger-Calls-Master-Plots-Dialog-Escape.png"
+click PrimaryButton                       # "Copy"
+expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him/Escape"
+context-menu tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him/Escape" "Convert to Scene"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him/Escape"
+set SceneNameTextBox "Tony diverts Lacas by paging him and allows Leonard to escape"
+focus SceneSketchRichEdit
+type "Tony pages Lacas on the Luhrs channel, and Lacas and Luhrs look away long enough for Tony to get the drop on them."
+press "Tab"
+tab CastTab
+toggle CastDisplayToggle on
+select CastList "Leonard Kraskin"
+press "Tab"                               # into the row's check box
+press "Space"
+select CastList "Tony Irwin"
+press "Tab"
+press "Space"
+select CastList "Charlie Lacas"
+press "Tab"
+press "Space"
+expect StatusMessageText text "New cast member Charlie Lacas added"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Scene-Cast-Tab-Climax.png"
+click SaveStatusButton
+collapse tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him"
+
+step "TC-021: Develop Charlie Lacas"
+open-node tree "Danger Calls/Characters/Charlie Lacas"
+tab RoleTab
+select ArchetypeCombo "Shadow"
+focus CharacterSketchRichEdit
+type "Young, cautious, amoral"
+press "Tab"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Character-Role-Tab-Lacas.png"
+tab PsychologicalTab
+select PersonalityTypeCombo "Observer"
+select IntelligenceCombo "Bright"
+focus ValuesCombo
+type "Wealth/Financial Security"           # type-ahead: the list item is below the visible window
+focus PsychNotesRichEdit
+type "Is a loner and doesn't form strong attachments"
+press "Tab"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Character-Psychological-Tab-Lacas.png"
+tab SocialTab
+focus EconomicRichEdit
+type "Rich, but spends flagrantly, especially on his cars, houses and clothing."
+press "Tab"
+focus EducationRichEdit
+type "High school dropout."
+press "Tab"
+focus EthnicRichEdit
+type "A Puerto Rican raised in New York City, who scorns his background."
+press "Tab"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Character-Social-Tab-Lacas.png"
+tab BackstoryTab
+focus BackstoryRichEdit
+type "Charlie's mother came as a teenager from Puerto Rico to New York City. By thirteen he was selling drugs for a gang. When he was 16 his mother moved him to Ithaca, where he became the local kingpin by supplying drugs from New York."
+press "Tab"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Character-Backstory-Tab-Lacas.png"
+click SaveStatusButton
+collapse tree "Danger Calls/Characters"
+
+step "TC-022: Opening scene Development and Conflict tabs"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/He's like a ghost"
+tab DevelopmentTab
+focus ValueExchangeCombo
+type "Challenge - Acceptance"
+expect ValueExchangeCombo text "Challenge - Acceptance"
+focus WhatHappensRichEdit
+type "Leonard and Tony, on stakeout, are stuck with no way to identify how Lacas conducts the drug deals they suspect him of."
+press "Tab"
+focus TheConsequenceRichEdit
+type "Inability to gain the information they need."
+press "Tab"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Scene-Development-Tab-Opening.png"
+tab ConflictTab
+select ProtagonistCombo "Tony Irwin"
+select AntagonistCombo "Leonard Kraskin"
+select OppositionCombo "Lack of means or influence"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Scene-Conflict-Tab-Opening.png"
+click SaveStatusButton
+collapse tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"
+
+step "TC-023: Stock Scenes and the climax"
+right-click tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him"
+press "Escape"
+menu StockScenesMenuItem
+screenshot dialog "Danger-Calls-Stock-Scenes-Dialog.png"
+select StockScenesCategoryCombo "Chase Scenes"
+select StockScenesSceneList "The chase leads into an ambush"
+screenshot dialog "Danger-Calls-Stock-Scenes-Dialog-Chase-Scenes.png"
+click PrimaryButton                       # "Add Scene"
+expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him/The chase leads into an ambush"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him/The chase leads into an ambush"
+set SceneNameTextBox "Shootout"
+tab SceneTab
+expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him/Shootout"
+focus SceneTypeCombo
+press "Alt+Down"
+select SceneTypeCombo "Climax scene"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Scene-Shootout.png"
+
+step "TC-024: Denouement"
+right-click tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him"
+press "Escape"
+context-menu tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him" "Add Elements/Add Scene"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him/New Scene"
+set SceneNameTextBox "Tony updates Leonard on the aftermath"
+context-menu tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him" "Add Elements/Add Scene"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him/New Scene"
+set SceneNameTextBox "Tony confronts Jack Chun"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Scenes-Denouement.png"
+click SaveStatusButton
+collapse tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him"
+
+step "TC-025: Joe Edwards and his scenes"
+context-menu tree "Danger Calls/Characters" "Add Elements/Add Character"
+open-node tree "Danger Calls/Characters/New Character"
+set CharacterNameTextBox "Joe Edwards"
+expect tree contains "Danger Calls/Characters/Joe Edwards"
+tab RoleTab
+focus CharacterRoleCombo
+type "Electronics shop owner"
+press "Tab"
+collapse tree "Danger Calls/Characters"
+context-menu tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?" "Add Elements/Add Scene"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/New Scene"
+set SceneNameTextBox "Kraskin threatens Edwards"
+expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/Kraskin threatens Edwards"
+tab SceneTab
+focus SceneSketchRichEdit
+type "Kraskin threatens Joe Edwards, the Peeping Tom, with arrest and exposure unless he helps the detectives."
+press "Tab"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Scene-Joe-Edwards.png"
+context-menu tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?" "Add Elements/Add Scene"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/New Scene"
+set SceneNameTextBox "Edwards sets up the listening post"
+expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/Edwards sets up the listening post"
+click SaveStatusButton
+collapse tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"
+
+step "TC-026: Stock Scenes, Twists and Turns"
+right-click tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"
+press "Escape"
+menu StockScenesMenuItem
+select StockScenesCategoryCombo "Twists and Turns"
+select StockScenesSceneList "Ally turns out to be on wrong side"
+screenshot dialog "Danger-Calls-Stock-Scenes-Dialog-Twists-And-Turns.png"
+click PrimaryButton                       # "Add Scene"
+expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/Ally turns out to be on wrong side"
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Stock-Scene-Inserted.png"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/Ally turns out to be on wrong side"
+set SceneNameTextBox "Edwards has tipped Lacas, who traps Kraskin"
+expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/Edwards has tipped Lacas, who traps Kraskin"
+context-menu tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?" "Add Elements/Add Scene"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/New Scene"
+set SceneNameTextBox "Leonard, on stake out, learns of a drug deal"
+expect tree contains "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?/Leonard, on stake out, learns of a drug deal"
+click MoveMenuButton
+click MoveUpButton                        # above the tip-off scene
+press "Escape"                            # closes the Move flyout
+click SaveStatusButton
+focus tree "Danger Calls"
+screenshot "Danger-Calls-Plotline-Reordered.png"
+
+step "TC-027: Key Questions for the story"
+menu KeyQuestionsMenuItem
+select KeyQuestionsElementTypeCombo "Character"   # a changed type restarts the list; the dialog keeps its place otherwise
+select KeyQuestionsElementTypeCombo "Story Overview"
+click KeyQuestionsNextButton
+click KeyQuestionsNextButton
+click KeyQuestionsNextButton              # the fourth question is the first Structure question, about markets
+screenshot dialog "Danger-Calls-Key-Questions-Dialog-Structure.png"
+dialog "Key questions" click CloseButton
+click SaveStatusButton
