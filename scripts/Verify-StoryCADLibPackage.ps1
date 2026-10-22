@@ -3,7 +3,7 @@
     Fails if the StoryCADLib nupkg is missing a TFM or the CollaboratorLib.dll it carries.
 .DESCRIPTION
     Protects the release contract for consumers like the API-Samples Outliner and
-    StoryCADMcp. Used by build-release.yml and nuget-prerelease.yml.
+    StoryCADMcp. Used by build-release.yml.
 .PARAMETER PackageDir
     The folder that holds StoryCADLib.*.nupkg.
 .EXAMPLE
