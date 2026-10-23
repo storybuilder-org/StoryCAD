@@ -12,7 +12,6 @@ namespace StoryCADTests.Automation;
 internal sealed class FakeGoogle : HttpMessageHandler
 {
     public const string AccessToken = "ACCESS-TOKEN-xyz";
-    public const string RefreshToken = "REFRESH-TOKEN-xyz";
     public const string SessionUrl = "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&upload_id=SESSION1";
     public const string VideoId = "vid123";
 
@@ -20,10 +19,11 @@ internal sealed class FakeGoogle : HttpMessageHandler
         long? ContentLength, string Body, long BodyBytes);
 
     public List<Seen> Requests { get; } = new();
-    public HttpStatusCode TokenStatus { get; init; } = HttpStatusCode.OK;
-
     /// <summary>The status of the revoke endpoint's answer.</summary>
     public HttpStatusCode RevokeStatus { get; init; } = HttpStatusCode.OK;
+
+    /// <summary>The revoke endpoint never answers, to test the revoke timeout.</summary>
+    public bool StallRevoke { get; init; }
     public string ReturnedPrivacy { get; init; } = "unlisted";
 
     /// <summary>Paths whose request gets a 403, to test a failed later step.</summary>
@@ -38,7 +38,6 @@ internal sealed class FakeGoogle : HttpMessageHandler
     /// <summary>After the file PUT, the first access token gets a 401, as when it expires during the upload.</summary>
     public bool ExpireFirstTokenAtPut { get; init; }
 
-    private int _tokens;
     private bool _putSeen;
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -63,6 +62,11 @@ internal sealed class FakeGoogle : HttpMessageHandler
 
         if (url.Host == "oauth2.googleapis.com" && url.AbsolutePath == "/revoke")
         {
+            if (StallRevoke)
+            {
+                await Task.Delay(Timeout.Infinite, cancellationToken);
+            }
+
             return RevokeStatus == HttpStatusCode.OK
                 ? Json(HttpStatusCode.OK, "{}")
                 : Json(RevokeStatus, """{"error":"invalid_token","error_description":"Token expired or revoked"}""");
@@ -70,12 +74,7 @@ internal sealed class FakeGoogle : HttpMessageHandler
 
         if (url.Host == "oauth2.googleapis.com")
         {
-            // The first token is AccessToken; later ones get a number after it.
-            var token = ++_tokens == 1 ? AccessToken : $"{AccessToken}-{_tokens}";
-            return TokenStatus == HttpStatusCode.OK
-                ? Json(HttpStatusCode.OK,
-                    $$"""{"access_token":"{{token}}","refresh_token":"{{RefreshToken}}","expires_in":3599,"token_type":"Bearer"}""")
-                : Json(TokenStatus, """{"error":"invalid_grant","error_description":"Token has been expired or revoked."}""");
+            return Json(HttpStatusCode.OK, $$"""{"access_token":"{{AccessToken}}","expires_in":3599,"token_type":"Bearer"}""");
         }
 
         if (request.Method == HttpMethod.Post && url.AbsolutePath == "/upload/youtube/v3/videos")

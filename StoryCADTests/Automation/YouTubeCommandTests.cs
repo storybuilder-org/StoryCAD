@@ -114,6 +114,45 @@ public class YouTubeCommandTests
     }
 
     [TestMethod]
+    public async Task UploadAsync_WhenCancelled_StillRevokesAndThrowsCancellation()
+    {
+        // Ctrl+C cancels the run's token; the revoke has its own.
+        var fake = new FakeGoogle();
+        using var stop = new CancellationTokenSource();
+        stop.Cancel();
+
+        await Assert.ThrowsAsync<OperationCanceledException>(() => YouTubeCommand.UploadAsync(_video, Meta(playlistId: "PL1"),
+            FakeGoogle.AccessToken, new HttpClient(fake), _out.Add, _err.Add, stop.Token));
+
+        // Nothing is uploaded, and the revoke comes last.
+        CollectionAssert.DoesNotContain(Paths(fake), "/upload/youtube/v3/videos");
+        Assert.AreEqual(Revoke, Paths(fake)[^1]);
+        Assert.AreEqual("youtube: sign-in revoked", _out[^1]);
+        AssertNoSecretPrinted();
+    }
+
+    [TestMethod]
+    public async Task UploadAsync_WhenRevokeStalls_GivesUpAfterTheRevokeTimeout()
+    {
+        var fake = new FakeGoogle { StallRevoke = true };
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+
+        var exit = await YouTubeCommand.UploadAsync(_video, Meta(), FakeGoogle.AccessToken, new HttpClient(fake),
+            _out.Add, _err.Add, revokeTimeout: TimeSpan.FromMilliseconds(200));
+
+        Assert.AreEqual(0, exit);
+        Assert.IsTrue(clock.Elapsed < TimeSpan.FromSeconds(10), clock.Elapsed.ToString());
+        StringAssert.Contains(_err.Single(), "the revoke failed, so the sign-in stays valid for up to an hour: no answer in 0.2 s");
+        AssertNoSecretPrinted();
+    }
+
+    [TestMethod]
+    public void RevokeTimeout_Is15Seconds()
+    {
+        Assert.AreEqual(TimeSpan.FromSeconds(15), YouTubeCommand.RevokeTimeout);
+    }
+
+    [TestMethod]
     public async Task UploadAsync_WhenTokenExpiresDuringUpload_ReportsTheStepAndRevokes()
     {
         // No refresh token exists, so a step after an upload that outlasts the token fails.

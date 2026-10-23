@@ -142,5 +142,80 @@ public class YouTubeOAuthTests
         StringAssert.Contains(ex.Message, "invalid_token");
         Assert.IsFalse(ex.Message.Contains("ACCESS-1", StringComparison.Ordinal), ex.Message);
     }
+
+    // The browser redirect (#1626 review): a real loopback listener, requests from HttpClient.
+    private static async Task<(HttpListener Listener, string Uri)> Listen()
+    {
+        var listener = YouTubeCommand.StartListener(YouTubeOAuth.FreePort(), out var uri);
+        await Task.Yield();
+        return (listener, uri);
+    }
+
+    [TestMethod]
+    public async Task WaitForCodeAsync_WithStrayRequestFirst_IgnoresItAndReturnsTheCode()
+    {
+        var (listener, uri) = await Listen();
+        using var _ = listener;
+        using var http = new HttpClient();
+        var wait = YouTubeOAuth.WaitForCodeAsync(listener, "STATE-1", TimeSpan.FromSeconds(10));
+
+        var stray = await http.GetAsync(uri + "favicon.ico");
+        var redirect = await http.GetAsync(uri + "?code=CODE-1&state=STATE-1");
+
+        Assert.AreEqual(HttpStatusCode.NotFound, stray.StatusCode);
+        Assert.AreEqual(HttpStatusCode.OK, redirect.StatusCode);
+        Assert.AreEqual("CODE-1", await wait);
+    }
+
+    [TestMethod]
+    public async Task WaitForCodeAsync_WithWrongState_RejectsTheCode()
+    {
+        var (listener, uri) = await Listen();
+        using var _ = listener;
+        using var http = new HttpClient();
+        var wait = YouTubeOAuth.WaitForCodeAsync(listener, "STATE-1", TimeSpan.FromSeconds(10));
+
+        var redirect = await http.GetAsync(uri + "?code=CODE-1&state=OTHER");
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, redirect.StatusCode);
+        var ex = await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => wait);
+        StringAssert.Contains(ex.Message, "state did not match");
+    }
+
+    [TestMethod]
+    public async Task WaitForCodeAsync_WithAccessDenied_ThrowsWithGoogleError()
+    {
+        var (listener, uri) = await Listen();
+        using var _ = listener;
+        using var http = new HttpClient();
+        var wait = YouTubeOAuth.WaitForCodeAsync(listener, "STATE-1", TimeSpan.FromSeconds(10));
+
+        var redirect = await http.GetAsync(uri + "?error=access_denied&state=STATE-1");
+
+        Assert.AreEqual(HttpStatusCode.OK, redirect.StatusCode);
+        var ex = await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => wait);
+        StringAssert.Contains(ex.Message, "access_denied");
+    }
+
+    [TestMethod]
+    public async Task WaitForCodeAsync_WithNoRedirect_TimesOut()
+    {
+        var (listener, _) = await Listen();
+        using var __ = listener;
+
+        await Assert.ThrowsExactlyAsync<TimeoutException>(
+            () => YouTubeOAuth.WaitForCodeAsync(listener, "STATE-1", TimeSpan.FromMilliseconds(200)));
+    }
+
+    [TestMethod]
+    public async Task WaitForCodeAsync_WhenCancelled_ThrowsCancellationNotTimeout()
+    {
+        var (listener, _) = await Listen();
+        using var __ = listener;
+        using var stop = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+
+        await Assert.ThrowsAsync<OperationCanceledException>(
+            () => YouTubeOAuth.WaitForCodeAsync(listener, "STATE-1", TimeSpan.FromSeconds(10), stop.Token));
+    }
 }
 #endif
