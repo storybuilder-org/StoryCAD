@@ -46,7 +46,8 @@ public static class Captions
                 .Select(c => c.End > bodyEnd ? c with { End = bodyEnd } : c));
         }
 
-        captions = Limit(captions.OrderBy(c => c.Start).ToList());
+        captions = Limit(captions.OrderBy(c => c.Start).ToList(), bodyEnd);
+        // [music] names a sound, not words to read, so the 6 s limit does not apply to it.
         if (plan.Title is not null && plan.MusicPath is not null && plan.MusicLength is not null)
         {
             var end = captions.Count > 0 && captions[0].Start < titleLength ? captions[0].Start : titleLength;
@@ -58,11 +59,18 @@ public static class Captions
 
     /// <summary>
     ///     The captions for one clip: each caption gets a share of the clip's time in proportion
-    ///     to its share of the clip's characters.
+    ///     to its share of the clip's characters. A caption too short for 1.33 s in the clip
+    ///     joins its neighbour in the clip, or takes words from it (<see cref="Balance" />).
     /// </summary>
     internal static IReadOnlyList<Caption> Time(string text, TimeSpan start, TimeSpan length)
     {
-        var parts = Split(text);
+        var parts = Split(text).ToList();
+        if (length > TimeSpan.Zero)
+        {
+            var characters = parts.Sum(p => p.Length);
+            Balance(parts, (int)Math.Ceiling(characters * MinDuration.TotalSeconds / length.TotalSeconds));
+        }
+
         double total = parts.Sum(p => p.Length);
         var captions = new List<Caption>();
         var done = 0;
@@ -77,28 +85,79 @@ public static class Captions
     }
 
     /// <summary>
-    ///     Keeps each caption from 1.33 s to 6 s on screen. A caption over 6 s ends at 6 s. A
-    ///     caption under 1.33 s stays up longer, but not past the start of the next caption.
+    ///     Gives each caption of one clip at least <paramref name="minLength" /> characters, so
+    ///     each gets at least 1.33 s of the clip. A short caption joins its neighbour (the one
+    ///     before it, else the one after) when both fit in one caption. Otherwise words move to
+    ///     it from the neighbour while the neighbour keeps the minimum and both still fit.
     /// </summary>
-    internal static List<Caption> Limit(List<Caption> captions)
+    internal static void Balance(List<string> parts, int minLength)
+    {
+        for (var i = 0; i < parts.Count && parts.Count > 1; i++)
+        {
+            if (parts[i].Length >= minLength)
+            {
+                continue;
+            }
+
+            var first = i > 0 ? i - 1 : i;
+            var left = Units(parts[first]);
+            var right = Units(parts[first + 1]);
+            if (Wrap(left.Concat(right).ToList()) is { } joined)
+            {
+                parts[first] = joined;
+                parts.RemoveAt(first + 1);
+                i = -1; // the captions changed; look at all of them again
+                continue;
+            }
+
+            // The short caption is right when it has a caption before it, else left. Words move
+            // across the line between them: from the end of left, or from the start of right.
+            var toRight = first < i;
+            var (shortSide, donor) = toRight ? (right, left) : (left, right);
+            while (donor.Count > 1 && string.Join(" ", shortSide).Length < minLength)
+            {
+                var from = toRight ? donor.Count - 1 : 0;
+                var unit = donor[from];
+                donor.RemoveAt(from);
+                shortSide.Insert(toRight ? 0 : shortSide.Count, unit);
+                if (Wrap(shortSide) is null || string.Join(" ", donor).Length < minLength)
+                {
+                    // One move too far: put the unit back and keep the captions as they are.
+                    shortSide.RemoveAt(toRight ? 0 : shortSide.Count - 1);
+                    donor.Insert(from, unit);
+                    break;
+                }
+            }
+
+            parts[first] = Wrap(left)!;
+            parts[first + 1] = Wrap(right)!;
+        }
+    }
+
+    /// <summary>
+    ///     Keeps each caption from 1.33 s to 6 s on screen. A caption over 6 s ends at 6 s. A
+    ///     caption under 1.33 s stays up longer, but not past <paramref name="recordingEnd" />.
+    ///     No caption stays up past the start of the next caption.
+    /// </summary>
+    internal static List<Caption> Limit(List<Caption> captions, TimeSpan recordingEnd)
     {
         for (var i = 0; i < captions.Count; i++)
         {
             var c = captions[i];
-            if (c.End - c.Start > MaxDuration)
+            var end = c.End - c.Start > MaxDuration ? c.Start + MaxDuration : c.End;
+            if (end - c.Start < MinDuration)
             {
-                captions[i] = c with { End = c.Start + MaxDuration };
+                var longest = c.Start + MinDuration < recordingEnd ? c.Start + MinDuration : recordingEnd;
+                end = longest > end ? longest : end;
             }
-            else if (c.End - c.Start < MinDuration)
-            {
-                var end = c.Start + MinDuration;
-                if (i + 1 < captions.Count && captions[i + 1].Start < end)
-                {
-                    end = captions[i + 1].Start > c.End ? captions[i + 1].Start : c.End;
-                }
 
-                captions[i] = c with { End = end };
+            // Two clips can overlap (a clip with a cue before the recording starts at 0).
+            if (i + 1 < captions.Count && captions[i + 1].Start > c.Start && end > captions[i + 1].Start)
+            {
+                end = captions[i + 1].Start;
             }
+
+            captions[i] = c with { End = end };
         }
 
         return captions;

@@ -193,14 +193,16 @@ If the logo or the music file is not in the assets folder, assembly makes the ti
 The `.srt` file is a SubRip file in UTF-8. The YouTube API does not set the time of a caption without a time, so each caption has a time.
 
 1. Each clip gets captions. The text is the `caption` text of its `narrate` line, or the `narrate` text. A cue without a clip gets no caption.
-2. The captions of a clip start at the start of the clip in the `.mp4` file. This time is the start time of the clip in the recording, plus the start of the recording in the `.mp4` file. If there is a title card, the recording starts at the title card length minus the 0.5 s crossfade.
+2. The captions of a clip start at the start of the clip in the `.mp4` file. This time is the start time of the clip in the recording, plus the start of the recording in the `.mp4` file. If there is a title card, the recording starts at the title card length minus the 0.5 s crossfade. If the clip starts before the recording, the clip starts at 0 in the recording, as in assembly.
 3. A caption has a maximum of 2 lines. A line has a maximum of 32 characters. These limits come from the DCMP Captioning Key.
 4. A caption breaks only between words. When the next word does not fit, the caption ends after its last sentence. If no sentence ends in the caption, the caption ends after its last clause. A break after a sentence or a clause must keep a minimum of 20 characters before it.
 5. A name of words that start with a capital letter stays on one line, if the name fits on one line.
 6. Each caption of a clip gets a part of the clip time. The part agrees with the number of characters in the caption.
-7. A caption shows for a minimum of 1.33 s and a maximum of 6 s. A longer caption stops at 6 s. A shorter caption shows for 1.33 s, but it stops before the next caption starts.
-8. If the title card has music, a `[music]` caption shows for the length of the title card.
-9. A caption after the end of the recording is not in the file.
+7. If a caption is too short for 1.33 s of its clip, it joins the caption next to it in the same clip. If the two captions do not fit in one caption, words move to the short caption from the caption next to it. Rules 3 and 4 stay true.
+8. A caption shows for a minimum of 1.33 s and a maximum of 6 s. A longer caption stops at 6 s. A shorter caption shows for 1.33 s, but it stops at the end of the recording. The `[music]` caption of rule 9 is not a caption to read, so the 6 s maximum does not apply to it.
+9. If the title card has music, a `[music]` caption shows for the length of the title card. It stops before the first caption of a clip starts.
+10. A caption stops before the next caption starts. Two clips can overlap when a clip starts before the recording.
+11. A caption after the end of the recording is not in the file. A caption that continues after the end of the recording stops at the end of the recording.
 
 ---
 
