@@ -437,3 +437,7 @@ dev.vars
 /src/macos/StoreKitShim/out/
 *.bak
 /.junie
+
+# YouTube OAuth client and token files (#1626); never commit them
+client_secret*.json
+token.json

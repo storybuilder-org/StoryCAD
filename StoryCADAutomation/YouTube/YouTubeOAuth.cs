@@ -9,14 +9,17 @@ namespace StoryCADAutomation.YouTube;
 public sealed record YouTubeClient(string ClientId, string ClientSecret, string AuthUri, string TokenUri);
 
 /// <summary>
-///     OAuth 2.0 for `youtube auth` and `youtube upload` (#1626): the installed-app loopback flow
-///     with PKCE, the code exchange, and the access-token refresh. Nothing here writes a secret
-///     or a token to the console.
+///     OAuth 2.0 for `youtube upload` (#1626): the installed-app loopback flow with PKCE, the
+///     code exchange, and the revoke at the end of the run. The access token stays in memory;
+///     nothing is saved (Terry, 2026-10-23). Nothing here writes a secret or a token to the console.
 /// </summary>
 public static class YouTubeOAuth
 {
     // force-ssl covers videos.insert, playlistItems.insert, captions.insert and thumbnails.set.
     public const string Scope = "https://www.googleapis.com/auth/youtube.force-ssl";
+
+    /// <summary>Google's token revocation endpoint.</summary>
+    public const string RevokeUri = "https://oauth2.googleapis.com/revoke";
 
     /// <summary>Reads the Desktop client file Google gives for download.</summary>
     public static YouTubeClient LoadClient(string path)
@@ -54,9 +57,10 @@ public static class YouTubeOAuth
             ["scope"] = Scope,
             ["code_challenge"] = challenge,
             ["code_challenge_method"] = "S256",
-            // offline plus consent, so Google returns a refresh token even on a second auth.
-            ["access_type"] = "offline",
-            ["prompt"] = "consent",
+            // No refresh token is wanted, so no access_type=offline. select_account shows the
+            // account and channel chooser on each run; the consent page shows because each run
+            // revokes its grant.
+            ["prompt"] = "select_account",
             ["state"] = state,
         });
         return client.AuthUri + (client.AuthUri.Contains('?') ? "&" : "?") + query;
@@ -74,67 +78,30 @@ public static class YouTubeOAuth
         ["code_verifier"] = verifier,
     };
 
-    /// <summary>The token endpoint form for an access-token refresh.</summary>
-    internal static Dictionary<string, string> RefreshForm(YouTubeClient client, string refreshToken) => new()
-    {
-        ["client_id"] = client.ClientId,
-        ["client_secret"] = client.ClientSecret,
-        ["refresh_token"] = refreshToken,
-        ["grant_type"] = "refresh_token",
-    };
-
-    /// <summary>
-    ///     Exchanges the code from the consent page. Returns the access token and the refresh
-    ///     token; throws <see cref="HttpRequestException" /> when Google gives no refresh token.
-    /// </summary>
-    public static async Task<(string AccessToken, string RefreshToken)> ExchangeCodeAsync(YouTubeClient client,
-        string code, string verifier, string redirectUri, HttpClient http, CancellationToken cancellation = default)
+    /// <summary>Exchanges the code from the consent page for an access token.</summary>
+    public static async Task<string> ExchangeCodeAsync(YouTubeClient client, string code, string verifier,
+        string redirectUri, HttpClient http, CancellationToken cancellation = default)
     {
         using var json = await PostTokenAsync(client, CodeExchangeForm(client, code, verifier, redirectUri), http,
             cancellation);
-        var access = json.RootElement.GetProperty("access_token").GetString()!;
-        if (!json.RootElement.TryGetProperty("refresh_token", out var refresh) || refresh.GetString() is not { } token)
-        {
-            throw new HttpRequestException("Google returned no refresh token.");
-        }
-
-        return (access, token);
+        return json.RootElement.GetProperty("access_token").GetString()!;
     }
 
-    /// <summary>A fresh access token from the saved refresh token.</summary>
-    public static async Task<string> RefreshAsync(YouTubeClient client, string refreshToken, HttpClient http,
-        CancellationToken cancellation = default)
+    /// <summary>
+    ///     Revokes the token at Google, so it stops working before its hour is up. Throws
+    ///     <see cref="HttpRequestException" /> with Google's error, never the token.
+    /// </summary>
+    public static async Task RevokeAsync(string token, HttpClient http, CancellationToken cancellation = default)
     {
-        try
+        using var content = new FormUrlEncodedContent(new Dictionary<string, string> { ["token"] = token });
+        using var response = await http.PostAsync(RevokeUri, content, cancellation);
+        if (!response.IsSuccessStatusCode)
         {
-            using var json = await PostTokenAsync(client, RefreshForm(client, refreshToken), http, cancellation);
-            return json.RootElement.GetProperty("access_token").GetString()!;
+            var body = await response.Content.ReadAsStringAsync(cancellation);
+            throw new HttpRequestException(
+                $"the revoke endpoint returned {(int)response.StatusCode}: {YouTubeApi.ErrorDetail(body)}", null,
+                response.StatusCode);
         }
-        catch (HttpRequestException ex) when (ex.Message.Contains("invalid_grant", StringComparison.Ordinal))
-        {
-            // invalid_grant means the saved refresh token is expired or revoked; only a new consent fixes it.
-            throw new HttpRequestException($"{ex.Message} Run `youtube auth` again.", ex, ex.StatusCode);
-        }
-    }
-
-    /// <summary>Writes token.json with the refresh token only.</summary>
-    public static void SaveRefreshToken(string path, string refreshToken)
-    {
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        // The file sits in the user's profile, which only that user (and administrators) can read.
-        File.WriteAllText(path, JsonSerializer.Serialize(new Dictionary<string, string>
-        {
-            ["refresh_token"] = refreshToken, ["scope"] = Scope,
-        }));
-    }
-
-    /// <summary>Reads the refresh token from token.json.</summary>
-    public static string LoadRefreshToken(string path)
-    {
-        using var document = JsonDocument.Parse(File.ReadAllText(path));
-        return document.RootElement.TryGetProperty("refresh_token", out var token) && token.GetString() is { Length: > 0 } value
-            ? value
-            : throw new InvalidDataException($"{path} has no refresh_token; run `youtube auth` again.");
     }
 
     /// <summary>An unused loopback port for the redirect listener.</summary>
@@ -176,17 +143,17 @@ public static class YouTubeOAuth
             // A state from another page would let that page hand us its own code.
             if (query["state"] != state)
             {
-                Respond(context, HttpStatusCode.BadRequest, "The state did not match. Run youtube auth again.");
-                throw new InvalidOperationException("the redirect's state did not match; no token saved.");
+                Respond(context, HttpStatusCode.BadRequest, "The state did not match. Run youtube upload again.");
+                throw new InvalidOperationException("the redirect's state did not match; nothing uploaded.");
             }
 
             if (error is not null)
             {
                 Respond(context, HttpStatusCode.OK, "Authorization was not given. You can close this tab.");
-                throw new InvalidOperationException($"Google returned '{error}'; no token saved.");
+                throw new InvalidOperationException($"Google returned '{error}'; nothing uploaded.");
             }
 
-            Respond(context, HttpStatusCode.OK, "StoryCAD automation is authorized. You can close this tab.");
+            Respond(context, HttpStatusCode.OK, "StoryCAD automation is signed in. You can close this tab.");
             return code!;
         }
     }

@@ -5,9 +5,11 @@ using System.Text.Json;
 namespace StoryCADAutomation.YouTube;
 
 /// <summary>
-///     `youtube auth` and `youtube upload &lt;video.mp4&gt; --meta &lt;meta.json&gt;` (#1626). The
-///     client file and the saved token live in %USERPROFILE%\.storycad-youtube\. No client
-///     secret, access token or refresh token is ever written to the console.
+///     `youtube upload &lt;video.mp4&gt; --meta &lt;meta.json&gt;` (#1626). Each run signs in through
+///     the browser, keeps the access token in memory only, and revokes it when the run ends,
+///     after a failure too. No token is saved; only the client file lives in
+///     %USERPROFILE%\.storycad-youtube\ (Terry, 2026-10-23). No client secret or access token is
+///     ever written to the console.
 /// </summary>
 internal static class YouTubeCommand
 {
@@ -17,7 +19,6 @@ internal static class YouTubeCommand
     private const int UsageError = 64;
 
     internal const string ClientFileName = "client_secret.json";
-    internal const string TokenFileName = "token.json";
 
     private static readonly TimeSpan ConsentTimeout = TimeSpan.FromMinutes(5);
 
@@ -25,11 +26,28 @@ internal static class YouTubeCommand
     internal static string DefaultFolder =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".storycad-youtube");
 
-    /// <summary>`youtube auth`: the one-time consent in the browser; saves token.json.</summary>
-    public static int Auth()
+    /// <summary>`youtube upload`: checks meta.json, signs in through the browser, then uploads the video with it.</summary>
+    public static int Upload(string videoPath, string metaPath)
     {
-        var folder = DefaultFolder;
-        if (LoadClient(folder) is not { } client)
+        // Every check runs before any network call, and all errors print together.
+        var meta = YouTubeMeta.Load(metaPath, out var errors);
+        var problems = errors.ToList();
+        if (!File.Exists(videoPath))
+        {
+            problems.Insert(0, $"video not found: {videoPath}");
+        }
+
+        if (problems.Count > 0)
+        {
+            foreach (var problem in problems)
+            {
+                Console.Error.WriteLine($"youtube: {problem}");
+            }
+
+            return UsageError;
+        }
+
+        if (LoadClient(DefaultFolder) is not { } client)
         {
             return EnvironmentFailure;
         }
@@ -46,15 +64,18 @@ internal static class YouTubeCommand
             Console.WriteLine(url);
             OpenBrowser(url);
             var code = YouTubeOAuth.WaitForCodeAsync(listener, state, ConsentTimeout).GetAwaiter().GetResult();
-            using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(2) };
-            return FinishAuthAsync(client, code, verifier, redirectUri, folder, http, Console.WriteLine)
+            listener.Close();
+            // The PUT carries the whole file, so the timeout allows for a slow uplink.
+            using var http = new HttpClient { Timeout = TimeSpan.FromHours(2) };
+            var access = YouTubeOAuth.ExchangeCodeAsync(client, code, verifier, redirectUri, http).GetAwaiter().GetResult();
+            return UploadAsync(videoPath, meta!, access, http, Console.WriteLine, Console.Error.WriteLine)
                 .GetAwaiter().GetResult();
         }
         catch (Exception ex) when (ex is HttpListenerException or HttpRequestException or TaskCanceledException
                                        or TimeoutException or InvalidOperationException or IOException
-                                       or JsonException or KeyNotFoundException)
+                                       or InvalidDataException or JsonException or KeyNotFoundException)
         {
-            Console.Error.WriteLine($"youtube auth failed: {ex.Message}");
+            Console.Error.WriteLine($"youtube upload failed: {ex.Message}");
             return EnvironmentFailure;
         }
         finally
@@ -97,95 +118,50 @@ internal static class YouTubeCommand
     }
 
     /// <summary>
-    ///     The part of `youtube auth` after the browser: exchanges the code, saves the refresh
-    ///     token, and prints the channel so the user sees which channel they authorized.
+    ///     With the signed-in access token: prints the channel, uploads, prints the video id and
+    ///     link, then runs the playlist, captions and thumbnail steps. A failed later step is
+    ///     reported and gives exit 3; the id is already printed, because the video is on YouTube
+    ///     by then. The token is revoked at the end, also when a step throws.
     /// </summary>
-    internal static async Task<int> FinishAuthAsync(YouTubeClient client, string code, string verifier,
-        string redirectUri, string folder, HttpClient http, Action<string> log)
+    internal static async Task<int> UploadAsync(string videoPath, YouTubeMeta meta, string access, HttpClient http,
+        Action<string> log, Action<string> error)
     {
-        var (access, refresh) = await YouTubeOAuth.ExchangeCodeAsync(client, code, verifier, redirectUri, http);
-        var tokenPath = Path.Combine(folder, TokenFileName);
-        YouTubeOAuth.SaveRefreshToken(tokenPath, refresh);
-        log($"youtube: token saved in {tokenPath}");
-        // An OAuth consent screen left in "Testing" gives refresh tokens that expire after 7 days.
+        try
+        {
+            return await UploadWithTokenAsync(videoPath, meta, access, http, log, error);
+        }
+        finally
+        {
+            try
+            {
+                await YouTubeOAuth.RevokeAsync(access, http);
+                log("youtube: sign-in revoked");
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+            {
+                // The upload result stands; an access token stops working by itself within an hour.
+                error($"youtube: warning: the revoke failed, so the sign-in stays valid for up to an hour: {ex.Message}");
+            }
+        }
+    }
+
+    private static async Task<int> UploadWithTokenAsync(string videoPath, YouTubeMeta meta, string access,
+        HttpClient http, Action<string> log, Action<string> error)
+    {
+        // The channel the user picked in the browser, so a wrong choice shows before the upload.
         try
         {
             var channel = await YouTubeApi.ChannelAsync(http, access);
             log(channel is { } c
-                ? $"youtube: authorized channel \"{c.Title}\" ({c.Id})"
-                : "youtube: this Google account has no YouTube channel; uploads will fail.");
+                ? $"youtube: signed in to channel \"{c.Title}\" ({c.Id})"
+                : "youtube: this Google account has no YouTube channel; the upload will fail.");
         }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException
-                                       or JsonException or KeyNotFoundException
+        catch (Exception ex) when (ex is HttpRequestException or JsonException or KeyNotFoundException
                                        or InvalidOperationException)
         {
-            // The token is saved and good; only the channel name is unknown.
-            log($"youtube: warning: the token is saved, but the channel lookup failed: {ex.Message}");
+            error($"youtube: warning: the channel lookup failed: {ex.Message}");
         }
 
-        return Passed;
-    }
-
-    /// <summary>`youtube upload`: checks meta.json, then uploads the video with it.</summary>
-    public static int Upload(string videoPath, string metaPath)
-    {
-        // Every check runs before any network call, and all errors print together.
-        var meta = YouTubeMeta.Load(metaPath, out var errors);
-        var problems = errors.ToList();
-        if (!File.Exists(videoPath))
-        {
-            problems.Insert(0, $"video not found: {videoPath}");
-        }
-
-        if (problems.Count > 0)
-        {
-            foreach (var problem in problems)
-            {
-                Console.Error.WriteLine($"youtube: {problem}");
-            }
-
-            return UsageError;
-        }
-
-        var folder = DefaultFolder;
-        if (LoadClient(folder) is not { } client)
-        {
-            return EnvironmentFailure;
-        }
-
-        var tokenPath = Path.Combine(folder, TokenFileName);
-        if (!File.Exists(tokenPath))
-        {
-            Console.Error.WriteLine($"youtube: no {tokenPath}; run `StoryCADAutomation youtube auth` first.");
-            return EnvironmentFailure;
-        }
-
-        try
-        {
-            var refreshToken = YouTubeOAuth.LoadRefreshToken(tokenPath);
-            // The PUT carries the whole file, so the timeout allows for a slow uplink.
-            using var http = new HttpClient { Timeout = TimeSpan.FromHours(2) };
-            return UploadAsync(videoPath, meta!, client, refreshToken, http, Console.WriteLine, Console.Error.WriteLine)
-                .GetAwaiter().GetResult();
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException
-                                       or InvalidDataException or JsonException
-                                       or KeyNotFoundException or InvalidOperationException)
-        {
-            Console.Error.WriteLine($"youtube upload failed: {ex.Message}");
-            return EnvironmentFailure;
-        }
-    }
-
-    /// <summary>
-    ///     Refreshes the access token, uploads, prints the video id and link, then runs the
-    ///     playlist, captions and thumbnail steps. A failed later step is reported and gives
-    ///     exit 3; the id is already printed, because the video is on YouTube by then.
-    /// </summary>
-    internal static async Task<int> UploadAsync(string videoPath, YouTubeMeta meta, YouTubeClient client,
-        string refreshToken, HttpClient http, Action<string> log, Action<string> error)
-    {
-        var access = await YouTubeOAuth.RefreshAsync(client, refreshToken, http);
         var megabytes = new FileInfo(videoPath).Length / (1024.0 * 1024.0);
         log($"youtube: uploading {Path.GetFileName(videoPath)} ({megabytes:0.0} MB) as {meta.Privacy}");
         var (videoId, privacy) = await YouTubeApi.UploadVideoAsync(http, access, videoPath, meta);
@@ -197,6 +173,8 @@ internal static class YouTubeCommand
             error($"youtube: YouTube set the video to {privacy}, not {meta.Privacy}; change it in YouTube Studio.");
         }
 
+        // An access token lasts about an hour and there is no refresh token, so a step after an
+        // upload longer than that fails with 401 and is reported like any failed step.
         var steps = new List<(string Name, Func<Task> Run)>();
         if (meta.PlaylistId is { } playlistId)
         {
@@ -211,23 +189,6 @@ internal static class YouTubeCommand
         if (meta.ThumbnailPath is { } thumbnail)
         {
             steps.Add(("thumbnail", () => YouTubeApi.SetThumbnailAsync(http, access, videoId, thumbnail)));
-        }
-
-        if (steps.Count == 0)
-        {
-            return Passed;
-        }
-
-        try
-        {
-            // An access token lasts about an hour, and a large upload can take longer.
-            access = await YouTubeOAuth.RefreshAsync(client, refreshToken, http);
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException
-                                       or KeyNotFoundException or InvalidOperationException)
-        {
-            error($"youtube: token refresh after the upload failed, so {string.Join(", ", steps.Select(s => s.Name))} not done: {ex.Message}");
-            return EnvironmentFailure;
         }
 
         var result = Passed;

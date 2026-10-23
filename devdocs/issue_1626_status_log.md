@@ -1,5 +1,13 @@
 # Issue #1626 status log
 
+## 2026-10-23: captions and sign-in per run
+
+**Branch:** `issue-1626-youtube-upload` in worktree `D:\dev\src\StoryCAD-1626`. Local only, not pushed.
+
+**Done:** `video` writes `<script name>.srt` next to the `.mp4`, from the `narrate` lines and the clip times (video design section 9.1); `narrate` takes an optional `caption "..."` clause for the written form. `youtube upload` signs in through the browser on each run, keeps the access token in memory, and revokes it when the run ends; `youtube auth` and `token.json` are gone, and only `client_secret.json` stays in `%USERPROFILE%\.storycad-youtube\`. `.gitignore` lists `client_secret*.json` and `token.json`.
+
+**Tests:** StoryCADAutomation tests 268 passed, 0 failed. `check` on `StoryCADTests/AutomationScripts/`: 0 scripts with errors. No live upload run yet with the new sign-in.
+
 ## 2026-10-20 (evening): session recovery
 
 **Branch:** `issue-1626-youtube-upload` in worktree `D:\dev\src\StoryCAD-1626`. Local only, not pushed.
