@@ -86,8 +86,9 @@ public class YouTubeOAuthTests
         Assert.AreEqual("S256", query["code_challenge_method"]);
         Assert.AreEqual("http://127.0.0.1:50123/", query["redirect_uri"]);
         Assert.AreEqual("code", query["response_type"]);
-        Assert.AreEqual("offline", query["access_type"]);
-        Assert.AreEqual("consent", query["prompt"]);
+        // No refresh token is wanted (#1626, Terry, 2026-10-23); the chooser shows on each run.
+        Assert.IsFalse(query.ContainsKey("access_type"));
+        Assert.AreEqual("select_account", query["prompt"]);
         Assert.AreEqual("STATE", query["state"]);
         Assert.AreEqual(Client.ClientId, query["client_id"]);
     }
@@ -100,46 +101,14 @@ public class YouTubeOAuthTests
     }
 
     [TestMethod]
-    public async Task RefreshAsync_Always_PostsRefreshGrantForm()
-    {
-        var fake = new FakeGoogle();
-
-        var access = await YouTubeOAuth.RefreshAsync(Client, "REFRESH-TOKEN-1", new HttpClient(fake));
-
-        Assert.AreEqual(FakeGoogle.AccessToken, access);
-        var request = fake.Requests.Single();
-        Assert.AreEqual(HttpMethod.Post, request.Method);
-        Assert.AreEqual(Client.TokenUri, request.Url);
-        Assert.AreEqual("application/x-www-form-urlencoded", request.ContentType);
-        var form = ParseQuery(request.Body.Replace('+', ' '));
-        Assert.AreEqual(4, form.Count);
-        Assert.AreEqual("refresh_token", form["grant_type"]);
-        Assert.AreEqual("REFRESH-TOKEN-1", form["refresh_token"]);
-        Assert.AreEqual(Client.ClientId, form["client_id"]);
-        Assert.AreEqual(Client.ClientSecret, form["client_secret"]);
-    }
-
-    [TestMethod]
-    public async Task RefreshAsync_WithRevokedToken_ThrowsWithGoogleError()
-    {
-        var fake = new FakeGoogle { TokenStatus = HttpStatusCode.BadRequest };
-
-        var ex = await Assert.ThrowsExactlyAsync<HttpRequestException>(
-            () => YouTubeOAuth.RefreshAsync(Client, "R", new HttpClient(fake)));
-
-        StringAssert.Contains(ex.Message, "invalid_grant");
-        StringAssert.Contains(ex.Message, "Run `youtube auth` again.");
-    }
-
-    [TestMethod]
     public async Task ExchangeCodeAsync_Always_PostsCodeVerifierAndRedirect()
     {
         var fake = new FakeGoogle();
 
-        var (access, refresh) = await YouTubeOAuth.ExchangeCodeAsync(Client, "CODE-1", "VERIFIER-1",
+        var access = await YouTubeOAuth.ExchangeCodeAsync(Client, "CODE-1", "VERIFIER-1",
             "http://127.0.0.1:50123/", new HttpClient(fake));
 
-        Assert.AreEqual((FakeGoogle.AccessToken, FakeGoogle.RefreshToken), (access, refresh));
+        Assert.AreEqual(FakeGoogle.AccessToken, access);
         var form = ParseQuery(fake.Requests.Single().Body);
         Assert.AreEqual("authorization_code", form["grant_type"]);
         Assert.AreEqual("CODE-1", form["code"]);
@@ -148,13 +117,30 @@ public class YouTubeOAuthTests
     }
 
     [TestMethod]
-    public void SaveRefreshToken_ThenLoad_ReturnsSameToken()
+    public async Task RevokeAsync_Always_PostsTheTokenToTheRevokeEndpoint()
     {
-        var path = Path.Combine(_folder, "sub", "token.json");
+        var fake = new FakeGoogle();
 
-        YouTubeOAuth.SaveRefreshToken(path, "R1");
+        await YouTubeOAuth.RevokeAsync("ACCESS-1", new HttpClient(fake));
 
-        Assert.AreEqual("R1", YouTubeOAuth.LoadRefreshToken(path));
+        var request = fake.Requests.Single();
+        Assert.AreEqual(HttpMethod.Post, request.Method);
+        Assert.AreEqual("https://oauth2.googleapis.com/revoke", request.Url);
+        Assert.AreEqual("application/x-www-form-urlencoded", request.ContentType);
+        CollectionAssert.AreEquivalent(new[] { "token" }, ParseQuery(request.Body).Keys.ToArray());
+        Assert.AreEqual("ACCESS-1", ParseQuery(request.Body)["token"]);
+    }
+
+    [TestMethod]
+    public async Task RevokeAsync_WhenGoogleRefuses_ThrowsWithGoogleErrorOnly()
+    {
+        var fake = new FakeGoogle { RevokeStatus = HttpStatusCode.BadRequest };
+
+        var ex = await Assert.ThrowsExactlyAsync<HttpRequestException>(
+            () => YouTubeOAuth.RevokeAsync("ACCESS-1", new HttpClient(fake)));
+
+        StringAssert.Contains(ex.Message, "invalid_token");
+        Assert.IsFalse(ex.Message.Contains("ACCESS-1", StringComparison.Ordinal), ex.Message);
     }
 }
 #endif

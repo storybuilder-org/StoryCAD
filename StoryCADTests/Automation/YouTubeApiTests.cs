@@ -21,6 +21,9 @@ internal sealed class FakeGoogle : HttpMessageHandler
 
     public List<Seen> Requests { get; } = new();
     public HttpStatusCode TokenStatus { get; init; } = HttpStatusCode.OK;
+
+    /// <summary>The status of the revoke endpoint's answer.</summary>
+    public HttpStatusCode RevokeStatus { get; init; } = HttpStatusCode.OK;
     public string ReturnedPrivacy { get; init; } = "unlisted";
 
     /// <summary>Paths whose request gets a 403, to test a failed later step.</summary>
@@ -56,6 +59,13 @@ internal sealed class FakeGoogle : HttpMessageHandler
         if (GarbagePath is not null && url.AbsolutePath.Contains(GarbagePath, StringComparison.Ordinal))
         {
             return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("<html>proxy</html>") };
+        }
+
+        if (url.Host == "oauth2.googleapis.com" && url.AbsolutePath == "/revoke")
+        {
+            return RevokeStatus == HttpStatusCode.OK
+                ? Json(HttpStatusCode.OK, "{}")
+                : Json(RevokeStatus, """{"error":"invalid_token","error_description":"Token expired or revoked"}""");
         }
 
         if (url.Host == "oauth2.googleapis.com")

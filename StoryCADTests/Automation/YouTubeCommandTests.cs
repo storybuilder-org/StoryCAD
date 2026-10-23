@@ -1,15 +1,19 @@
 #if WINDOWS10_0_22621_0_OR_GREATER
+using System.Net;
 using StoryCADAutomation.YouTube;
 
 namespace StoryCADTests.Automation;
 
 /// <summary>
-///     The youtube command (#1626): what it prints, and that no client secret, access token or
-///     refresh token is among it. Google is replaced by <see cref="FakeGoogle" />.
+///     The youtube command (#1626): what it prints, that no client secret or access token is
+///     among it, and that the sign-in is revoked when the run ends. Google is replaced by
+///     <see cref="FakeGoogle" />.
 /// </summary>
 [TestClass]
 public class YouTubeCommandTests
 {
+    private const string Revoke = "/revoke";
+
     private string _folder = null!;
     private string _video = null!;
     private readonly List<string> _out = new();
@@ -36,62 +40,103 @@ public class YouTubeCommandTests
     private void AssertNoSecretPrinted()
     {
         var printed = string.Join("\n", _out.Concat(_err));
-        foreach (var secret in new[]
-                 {
-                     YouTubeOAuthTests.Client.ClientSecret, FakeGoogle.AccessToken, FakeGoogle.RefreshToken, "STORED-REFRESH",
-                 })
+        foreach (var secret in new[] { YouTubeOAuthTests.Client.ClientSecret, FakeGoogle.AccessToken })
         {
             Assert.IsFalse(printed.Contains(secret, StringComparison.Ordinal), $"'{secret}' was printed:\n{printed}");
         }
     }
+
+    private static string[] Paths(FakeGoogle fake) => fake.Requests.Select(r => new Uri(r.Url).AbsolutePath).ToArray();
 
     private YouTubeMeta Meta(string? playlistId = null, string? thumbnail = null) => new()
     {
         Title = "Creating an outline", PlaylistId = playlistId, ThumbnailPath = thumbnail,
     };
 
+    private Task<int> Upload(FakeGoogle fake, YouTubeMeta meta) =>
+        YouTubeCommand.UploadAsync(_video, meta, FakeGoogle.AccessToken, new HttpClient(fake), _out.Add, _err.Add);
+
     [TestMethod]
-    public async Task FinishAuthAsync_Always_SavesTokenAndPrintsChannelOnly()
+    public async Task UploadAsync_Always_PrintsChannelUploadsAndRevokes()
     {
         var fake = new FakeGoogle();
 
-        var exit = await YouTubeCommand.FinishAuthAsync(YouTubeOAuthTests.Client, "CODE", "VERIFIER",
-            "http://127.0.0.1:50000/", _folder, new HttpClient(fake), _out.Add);
-
-        Assert.AreEqual(0, exit);
-        Assert.AreEqual(FakeGoogle.RefreshToken, YouTubeOAuth.LoadRefreshToken(Path.Combine(_folder, "token.json")));
-        Assert.IsTrue(_out.Any(line => line.Contains("\"StoryCAD\" (UC123)")), string.Join("\n", _out));
-        AssertNoSecretPrinted();
-    }
-
-    [TestMethod]
-    public async Task FinishAuthAsync_WhenChannelLookupFails_WarnsAndSucceeds()
-    {
-        var fake = new FakeGoogle { FailPath = "/channels" };
-
-        var exit = await YouTubeCommand.FinishAuthAsync(YouTubeOAuthTests.Client, "CODE", "VERIFIER",
-            "http://127.0.0.1:50000/", _folder, new HttpClient(fake), _out.Add);
-
-        Assert.AreEqual(0, exit);
-        Assert.IsTrue(File.Exists(Path.Combine(_folder, "token.json")));
-        StringAssert.Contains(_out[^1], "warning: the token is saved, but the channel lookup failed");
-        AssertNoSecretPrinted();
-    }
-
-    [TestMethod]
-    public async Task UploadAsync_WhenTokenExpiresDuringUpload_RefreshesBeforePlaylist()
-    {
-        var fake = new FakeGoogle { ExpireFirstTokenAtPut = true };
-
-        var exit = await YouTubeCommand.UploadAsync(_video, Meta(playlistId: "PL1"), YouTubeOAuthTests.Client,
-            "STORED-REFRESH", new HttpClient(fake), _out.Add, _err.Add);
+        var exit = await Upload(fake, Meta());
 
         Assert.AreEqual(0, exit, string.Join(" | ", _err));
         CollectionAssert.AreEqual(
-            new[] { "/token", "/upload/youtube/v3/videos", "/upload/youtube/v3/videos", "/token", "/youtube/v3/playlistItems" },
-            fake.Requests.Select(r => new Uri(r.Url).AbsolutePath).ToArray());
-        Assert.AreEqual($"Bearer {FakeGoogle.AccessToken}-2", fake.Requests[^1].Headers["Authorization"]);
+            new[] { "/youtube/v3/channels", "/upload/youtube/v3/videos", "/upload/youtube/v3/videos", Revoke },
+            Paths(fake));
+        Assert.AreEqual($"Bearer {FakeGoogle.AccessToken}", fake.Requests[1].Headers["Authorization"]);
+        StringAssert.Contains(fake.Requests[^1].Body, "token=" + FakeGoogle.AccessToken);
+        CollectionAssert.Contains(_out, "youtube: signed in to channel \"StoryCAD\" (UC123)");
+        CollectionAssert.Contains(_out, "youtube: https://youtu.be/vid123");
+        Assert.AreEqual("youtube: sign-in revoked", _out[^1]);
+        Assert.AreEqual(0, _err.Count, string.Join("\n", _err));
         AssertNoSecretPrinted();
+    }
+
+    [TestMethod]
+    public async Task UploadAsync_WhenUploadFails_StillRevokesAndRethrows()
+    {
+        var fake = new FakeGoogle { FailPut = true };
+
+        await Assert.ThrowsExactlyAsync<HttpRequestException>(() => Upload(fake, Meta()));
+
+        Assert.AreEqual(Revoke, Paths(fake)[^1]);
+        Assert.AreEqual("youtube: sign-in revoked", _out[^1]);
+        AssertNoSecretPrinted();
+    }
+
+    [TestMethod]
+    public async Task UploadAsync_WhenRevokeFails_WarnsAndKeepsTheUploadResult()
+    {
+        var fake = new FakeGoogle { RevokeStatus = HttpStatusCode.BadRequest };
+
+        var exit = await Upload(fake, Meta());
+
+        Assert.AreEqual(0, exit);
+        StringAssert.Contains(_err.Single(), "warning: the revoke failed");
+        CollectionAssert.Contains(_out, "youtube: https://youtu.be/vid123");
+        AssertNoSecretPrinted();
+    }
+
+    [TestMethod]
+    public async Task UploadAsync_WhenUploadAndRevokeFail_ThrowsTheUploadFailure()
+    {
+        var fake = new FakeGoogle { FailPut = true, RevokeStatus = HttpStatusCode.BadRequest };
+
+        var ex = await Assert.ThrowsExactlyAsync<HttpRequestException>(() => Upload(fake, Meta()));
+
+        StringAssert.Contains(ex.Message, "Backend Error");
+        StringAssert.Contains(_err.Single(), "warning: the revoke failed");
+        AssertNoSecretPrinted();
+    }
+
+    [TestMethod]
+    public async Task UploadAsync_WhenTokenExpiresDuringUpload_ReportsTheStepAndRevokes()
+    {
+        // No refresh token exists, so a step after an upload that outlasts the token fails.
+        var fake = new FakeGoogle { ExpireFirstTokenAtPut = true };
+
+        var exit = await Upload(fake, Meta(playlistId: "PL1"));
+
+        Assert.AreEqual(3, exit);
+        StringAssert.Contains(_err.Single(), "playlist failed");
+        Assert.AreEqual(Revoke, Paths(fake)[^1]);
+        AssertNoSecretPrinted();
+    }
+
+    [TestMethod]
+    public async Task UploadAsync_WhenChannelLookupFails_WarnsAndUploads()
+    {
+        var fake = new FakeGoogle { FailPath = "/channels" };
+
+        var exit = await Upload(fake, Meta());
+
+        Assert.AreEqual(0, exit);
+        StringAssert.Contains(_err.Single(), "warning: the channel lookup failed");
+        CollectionAssert.Contains(_out, "youtube: https://youtu.be/vid123");
     }
 
     [TestMethod]
@@ -99,8 +144,7 @@ public class YouTubeCommandTests
     {
         var fake = new FakeGoogle { GarbagePath = "/playlistItems" };
 
-        var exit = await YouTubeCommand.UploadAsync(_video, Meta(playlistId: "PL1"), YouTubeOAuthTests.Client,
-            "STORED-REFRESH", new HttpClient(fake), _out.Add, _err.Add);
+        var exit = await Upload(fake, Meta(playlistId: "PL1"));
 
         Assert.AreEqual(3, exit);
         StringAssert.Contains(_err.Single(), "playlist failed");
@@ -108,43 +152,24 @@ public class YouTubeCommandTests
     }
 
     [TestMethod]
-    public async Task UploadAsync_Always_RefreshesUploadsAndPrintsLink()
-    {
-        var fake = new FakeGoogle();
-
-        var exit = await YouTubeCommand.UploadAsync(_video, Meta(), YouTubeOAuthTests.Client, "STORED-REFRESH",
-            new HttpClient(fake), _out.Add, _err.Add);
-
-        Assert.AreEqual(0, exit);
-        CollectionAssert.AreEqual(new[] { "/token", "/upload/youtube/v3/videos", "/upload/youtube/v3/videos" },
-            fake.Requests.Select(r => new Uri(r.Url).AbsolutePath).ToArray());
-        Assert.AreEqual($"Bearer {FakeGoogle.AccessToken}", fake.Requests[1].Headers["Authorization"]);
-        Assert.AreEqual("youtube: https://youtu.be/vid123", _out[^1]);
-        Assert.AreEqual(0, _err.Count, string.Join("\n", _err));
-        AssertNoSecretPrinted();
-    }
-
-    [TestMethod]
     public async Task UploadAsync_WhenYouTubeLocksPrivate_WarnsAndSucceeds()
     {
         var fake = new FakeGoogle { ReturnedPrivacy = "private" };
 
-        var exit = await YouTubeCommand.UploadAsync(_video, Meta(), YouTubeOAuthTests.Client, "STORED-REFRESH",
-            new HttpClient(fake), _out.Add, _err.Add);
+        var exit = await Upload(fake, Meta());
 
         Assert.AreEqual(0, exit);
         StringAssert.Contains(_err.Single(), "private, not unlisted");
     }
 
     [TestMethod]
-    public async Task UploadAsync_WithPlaylist_AddsVideoAfterUpload()
+    public async Task UploadAsync_WithPlaylist_AddsVideoAfterUploadThenRevokes()
     {
         var fake = new FakeGoogle();
 
-        await YouTubeCommand.UploadAsync(_video, Meta(playlistId: "PL1"), YouTubeOAuthTests.Client, "STORED-REFRESH",
-            new HttpClient(fake), _out.Add, _err.Add);
+        await Upload(fake, Meta(playlistId: "PL1"));
 
-        Assert.AreEqual("/youtube/v3/playlistItems", new Uri(fake.Requests[^1].Url).AbsolutePath);
+        CollectionAssert.AreEqual(new[] { "/youtube/v3/playlistItems", Revoke }, Paths(fake)[^2..]);
     }
 
     [TestMethod]
@@ -154,25 +179,11 @@ public class YouTubeCommandTests
         File.WriteAllBytes(thumbnail, new byte[10]);
         var fake = new FakeGoogle { FailPath = "/thumbnails/set" };
 
-        var exit = await YouTubeCommand.UploadAsync(_video, Meta(thumbnail: thumbnail), YouTubeOAuthTests.Client,
-            "STORED-REFRESH", new HttpClient(fake), _out.Add, _err.Add);
+        var exit = await Upload(fake, Meta(thumbnail: thumbnail));
 
         Assert.AreEqual(3, exit);
         StringAssert.Contains(_err.Single(), "thumbnail failed");
-        Assert.AreEqual("youtube: https://youtu.be/vid123", _out[^1]);
-        AssertNoSecretPrinted();
-    }
-
-    [TestMethod]
-    public async Task UploadAsync_WhenRefreshRevoked_ThrowsWithoutSecret()
-    {
-        var fake = new FakeGoogle { TokenStatus = System.Net.HttpStatusCode.BadRequest };
-
-        var ex = await Assert.ThrowsExactlyAsync<HttpRequestException>(() => YouTubeCommand.UploadAsync(_video, Meta(),
-            YouTubeOAuthTests.Client, "STORED-REFRESH", new HttpClient(fake), _out.Add, _err.Add));
-
-        _err.Add(ex.Message);
-        Assert.AreEqual(1, fake.Requests.Count);
+        CollectionAssert.Contains(_out, "youtube: https://youtu.be/vid123");
         AssertNoSecretPrinted();
     }
 
@@ -186,7 +197,7 @@ public class YouTubeCommandTests
         Console.SetError(error);
         try
         {
-            // No client file or token exists in the test, so reaching the network step would print other errors.
+            // No client file exists in the test, so reaching the network step would print other errors.
             var exit = YouTubeCommand.Upload(Path.Combine(_folder, "none.mp4"), meta);
 
             Assert.AreEqual(64, exit);
