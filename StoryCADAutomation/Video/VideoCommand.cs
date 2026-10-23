@@ -144,11 +144,7 @@ internal static class VideoCommand
             },
             new InterpreterOptions
             {
-                OnStatement = outcome =>
-                {
-                    starts.Add((outcome.Statement, clock.Elapsed - outcome.Duration));
-                    Program.PrintOutcome(outcome);
-                },
+                OnStatement = RecordStarts(starts, () => clock.Elapsed, Program.PrintOutcome),
                 OutputDirectory = output,
                 MenuOpeners = facts.MenuOpeners,
                 Profile = profile,
@@ -265,18 +261,34 @@ internal static class VideoCommand
     internal static int BorderInset(int dpi) => (int)Math.Ceiling(dpi / 96.0);
 
     /// <summary>
-    ///     When StoryCAD starts to close, on the runner's clock: the start of the first close or
-    ///     expect-exit statement, or null when the script has neither. At the start of expect-exit
-    ///     the click that closes the app is done, but the window is still on screen (#1626, Terry,
-    ///     2026-10-23: the intro video showed the Windows desktop under its closing card).
+    ///     The OnStatement callback for a video run: adds each statement with its start on the
+    ///     runner's clock (the clock when it ended, minus its duration), then calls <paramref name="next" />.
     /// </summary>
-    internal static TimeSpan? AppCloseTime(IEnumerable<(ScriptStatement Statement, TimeSpan Start)> starts)
+    internal static Action<StatementOutcome> RecordStarts(List<(ScriptStatement Statement, TimeSpan Start)> starts,
+        Func<TimeSpan> elapsed, Action<StatementOutcome> next) => outcome =>
     {
-        foreach (var (statement, start) in starts)
+        starts.Add((outcome.Statement, elapsed() - outcome.Duration));
+        next(outcome);
+    };
+
+    /// <summary>
+    ///     When StoryCAD starts to close, on the runner's clock, or null when the script has no
+    ///     close or expect-exit. For expect-exit it is the start of the statement before it: that
+    ///     statement makes the click that closes the app, and StoryCAD can be gone in under 300 ms
+    ///     after the click, before expect-exit starts. For close it is the start of close, which
+    ///     comes before its own click (#1626, Terry, 2026-10-23: the intro video showed the
+    ///     Windows desktop under its closing card).
+    /// </summary>
+    internal static TimeSpan? AppCloseTime(IReadOnlyList<(ScriptStatement Statement, TimeSpan Start)> starts)
+    {
+        for (var i = 0; i < starts.Count; i++)
         {
-            if (statement.Verb is ScriptVerb.Close or ScriptVerb.ExpectExit)
+            switch (starts[i].Statement.Verb)
             {
-                return start;
+                case ScriptVerb.Close:
+                    return starts[i].Start;
+                case ScriptVerb.ExpectExit:
+                    return starts[i > 0 ? i - 1 : i].Start;
             }
         }
 
@@ -350,6 +362,13 @@ internal static class VideoCommand
             }
         }
 
+        var bodyLength = BodyLength(recordingLength, appCloseTime - offset);
+        foreach (var clip in clips.Where(c => c.Start + c.Length > bodyLength))
+        {
+            // Assembly cuts the clip at the end of the body; a pause before the closing statement fixes it.
+            Console.WriteLine($"video: warning: a clip runs past the end of the recording part and is cut: \"{clip.Caption}\"");
+        }
+
         var logo = TitleCardFile(assetsDirectory, sharedDirectory, LogoFile);
         var creditPath = TitleCardFile(assetsDirectory, sharedDirectory, MusicCreditFile);
         var credit = creditPath is null ? null : File.ReadLines(creditPath).FirstOrDefault()?.Trim();
@@ -358,7 +377,7 @@ internal static class VideoCommand
         {
             RecordingPath = recordingPath,
             // The body stops when StoryCAD starts to close, so the desktop never shows (#1626).
-            RecordingLength = BodyLength(recordingLength, appCloseTime - offset),
+            RecordingLength = bodyLength,
             Title = parsed.Statements.FirstOrDefault(s => s.Verb == ScriptVerb.Title)?.Text,
             Closing = parsed.Statements.FirstOrDefault(s => s.Verb == ScriptVerb.Closing)?.Text,
             Cards = cards,
