@@ -474,11 +474,31 @@ public class VideoTests
         Assert.AreEqual(TimeSpan.FromSeconds(expected), length);
     }
 
+    private static List<(ScriptStatement, TimeSpan)> TenSecondsApart(string script)
+        => ScriptParser.Parse(script).Statements.Select((s, i) => (s, TimeSpan.FromSeconds(i * 10))).ToList();
+
     [TestMethod]
-    public void AppCloseTime_WithExpectExit_ReturnsItsStart()
+    public void AppCloseTime_WithExpectExit_ReturnsTheStartOfTheStatementBefore()
     {
-        var parsed = ScriptParser.Parse("script \"Exit\"\nlaunch\nmenu ExitMenuItem\nexpect-exit\nclose\n");
-        var starts = parsed.Statements.Select((s, i) => (s, TimeSpan.FromSeconds(i * 10))).ToList();
+        // script 0 s, launch 10 s, menu ExitMenuItem 20 s, expect-exit 30 s: the menu click closes the app.
+        var starts = TenSecondsApart("script \"Exit\"\nlaunch\nmenu ExitMenuItem\nexpect-exit\n");
+
+        Assert.AreEqual(TimeSpan.FromSeconds(20), VideoCommand.AppCloseTime(starts));
+    }
+
+    [TestMethod]
+    public void AppCloseTime_WithDialogBeforeExpectExit_ReturnsTheDialogStart()
+    {
+        var starts = TenSecondsApart(
+            "script \"Exit\"\nlaunch\nmenu ExitMenuItem\ndialog \"Save changes?\" click SecondaryButton\nexpect-exit\n");
+
+        Assert.AreEqual(TimeSpan.FromSeconds(30), VideoCommand.AppCloseTime(starts));
+    }
+
+    [TestMethod]
+    public void AppCloseTime_WithClose_ReturnsTheStartOfClose()
+    {
+        var starts = TenSecondsApart("script \"Exit\"\nlaunch\npause 1\nclose\n");
 
         Assert.AreEqual(TimeSpan.FromSeconds(30), VideoCommand.AppCloseTime(starts));
     }
@@ -486,9 +506,23 @@ public class VideoTests
     [TestMethod]
     public void AppCloseTime_WithoutCloseOrExpectExit_ReturnsNull()
     {
-        var parsed = ScriptParser.Parse("script \"Open\"\nlaunch\nmenu ExitMenuItem\n");
+        Assert.IsNull(VideoCommand.AppCloseTime(TenSecondsApart("script \"Open\"\nlaunch\nmenu ExitMenuItem\n")));
+    }
 
-        Assert.IsNull(VideoCommand.AppCloseTime(parsed.Statements.Select(s => (s, TimeSpan.FromSeconds(5)))));
+    [TestMethod]
+    public void RecordStarts_WithOutcome_AddsClockAtEndMinusDurationThenCallsNext()
+    {
+        var statement = ScriptParser.Parse("script \"Exit\"\nlaunch\n").Statements[1];
+        var starts = new List<(ScriptStatement Statement, TimeSpan Start)>();
+        var passed = new List<StatementOutcome>();
+        var callback = VideoCommand.RecordStarts(starts, () => TimeSpan.FromSeconds(12.5), passed.Add);
+        var outcome = new StatementOutcome(statement, StatementStatus.Passed, null, DateTimeOffset.UtcNow,
+            TimeSpan.FromSeconds(2), null);
+
+        callback(outcome);
+
+        Assert.AreEqual((statement, TimeSpan.FromSeconds(10.5)), starts.Single());
+        Assert.AreSame(outcome, passed.Single());
     }
 
     [TestMethod]
