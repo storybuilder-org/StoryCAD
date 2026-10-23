@@ -461,6 +461,52 @@ public class VideoTests
         }
     }
 
+    // #1626: the body ends when StoryCAD starts to close, so the desktop does not show.
+    [TestMethod]
+    [DataRow(40.0, 30.0, 30.0)]
+    [DataRow(40.0, null, 40.0)]
+    [DataRow(40.0, 45.0, 40.0)]
+    [DataRow(40.0, -1.0, 40.0)]
+    public void BodyLength_WithAppCloseTime_EndsAtTheEarlierTime(double recorded, double? closed, double expected)
+    {
+        var length = VideoCommand.BodyLength(TimeSpan.FromSeconds(recorded), closed is null ? null : TimeSpan.FromSeconds(closed.Value));
+
+        Assert.AreEqual(TimeSpan.FromSeconds(expected), length);
+    }
+
+    [TestMethod]
+    public void AppCloseTime_WithExpectExit_ReturnsItsStart()
+    {
+        var parsed = ScriptParser.Parse("script \"Exit\"\nlaunch\nmenu ExitMenuItem\nexpect-exit\nclose\n");
+        var starts = parsed.Statements.Select((s, i) => (s, TimeSpan.FromSeconds(i * 10))).ToList();
+
+        Assert.AreEqual(TimeSpan.FromSeconds(30), VideoCommand.AppCloseTime(starts));
+    }
+
+    [TestMethod]
+    public void AppCloseTime_WithoutCloseOrExpectExit_ReturnsNull()
+    {
+        var parsed = ScriptParser.Parse("script \"Open\"\nlaunch\nmenu ExitMenuItem\n");
+
+        Assert.IsNull(VideoCommand.AppCloseTime(parsed.Statements.Select(s => (s, TimeSpan.FromSeconds(5)))));
+    }
+
+    [TestMethod]
+    [DataRow(31.0, 30.0)]
+    [DataRow(50.0, 40.0)]
+    [DataRow(null, 40.0)]
+    public void Plan_WithAppCloseTime_EndsTheBodyThereInRecordingTime(double? closedOnRunnerClock, double expected)
+    {
+        var parsed = ScriptParser.Parse("script \"Exit\"\ntitle \"Intro\"\n");
+        var closed = closedOnRunnerClock is null ? (TimeSpan?)null : TimeSpan.FromSeconds(closedOnRunnerClock.Value);
+
+        // The recording started 1 s after the runner's clock.
+        var plan = VideoCommand.Plan(parsed, new PresentationProfile(1.0, () => TimeSpan.Zero, _ => { }, null),
+            TimeSpan.FromSeconds(1), "rec.mkv", TimeSpan.FromSeconds(40), _folder, null, null, _folder, null, closed);
+
+        Assert.AreEqual(TimeSpan.FromSeconds(expected), plan.RecordingLength);
+    }
+
     private static string Filter(IReadOnlyList<string> args) => args[args.ToList().IndexOf("-filter_complex") + 1];
 }
 #endif
