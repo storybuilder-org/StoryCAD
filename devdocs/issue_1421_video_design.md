@@ -162,7 +162,7 @@ The upload command sends the `.srt` file when `meta.json` names it in `captions`
 The `.mp4` file has these parts, in this sequence:
 
 1. **Title card.** The title text above the logo. The intro music plays under the card. The card lasts as long as the music. Without a music file, the card lasts 5 s.
-2. **Recording.** Assembly puts each clip at its start time. For each `show` step, the card covers the recording for the full step.
+2. **Recording.** Assembly puts each clip at its start time. For each `show` step, the card covers the recording for the full step. The recording part stops when StoryCAD starts to close. This time is the start of the first `close` or `expect-exit` statement. Thus the Windows desktop does not show before the closing card (#1626, Terry, 2026-10-23). If the script has no `close` or `expect-exit` statement, the recording part is the full recording. Assembly cuts a clip or a card that continues after the end of the recording part. Put the last `narrate` line in a step that ends before the step that closes StoryCAD.
 3. **Closing card.** The `closing` text. The card lasts 10 s.
 
 All cards use one style:

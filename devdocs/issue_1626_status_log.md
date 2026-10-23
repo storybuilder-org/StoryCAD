@@ -4,9 +4,9 @@
 
 **Branch:** `issue-1626-youtube-upload`.
 
-**Done:** `video` writes `<script name>.srt` next to the `.mp4`, from the `narrate` lines and the clip times (video design section 9.1); `narrate` takes an optional `caption "..."` clause for the written form. `youtube upload` signs in through the browser on each run, keeps the access token in memory, and revokes it when the run ends, after Ctrl+C too, with a 15 s limit on the revoke; `youtube auth` and `token.json` are gone. `.gitignore` lists `client_secret*.json` and `token.json`.
+**Done:** `video` writes `<script name>.srt` next to the `.mp4`, from the `narrate` lines and the clip times (video design section 9.1); `narrate` takes an optional `caption "..."` clause for the written form. `youtube upload` signs in through the browser on each run, keeps the access token in memory, and revokes it when the run ends, after Ctrl+C too, with a 15 s limit on the revoke; the video body stops when StoryCAD starts to close (first `close` or `expect-exit`), so the desktop no longer shows under the closing card; `youtube auth` and `token.json` are gone. `.gitignore` lists `client_secret*.json` and `token.json`.
 
-**Tests:** StoryCADAutomation tests 276 passed, 0 failed. `check` on `StoryCADTests/AutomationScripts/`: 0 scripts with errors. No live upload run yet with the new sign-in.
+**Tests:** StoryCADAutomation tests 285 passed, 0 failed. `check` on `StoryCADTests/AutomationScripts/`: 0 scripts with errors. No live upload run yet with the new sign-in.
 
 ## 2026-10-20
 

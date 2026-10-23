@@ -116,6 +116,8 @@ internal static class VideoCommand
         };
 
         ScreenRecorder? recorder = null;
+        // When each statement started on the runner's clock, so the body can end before StoryCAD closes.
+        var starts = new List<(ScriptStatement Statement, TimeSpan Start)>();
         var interpreter = new ScriptInterpreter(
             () =>
             {
@@ -142,7 +144,11 @@ internal static class VideoCommand
             },
             new InterpreterOptions
             {
-                OnStatement = Program.PrintOutcome,
+                OnStatement = outcome =>
+                {
+                    starts.Add((outcome.Statement, clock.Elapsed - outcome.Duration));
+                    Program.PrintOutcome(outcome);
+                },
                 OutputDirectory = output,
                 MenuOpeners = facts.MenuOpeners,
                 Profile = profile,
@@ -197,7 +203,7 @@ internal static class VideoCommand
 
         var plan = Plan(parsed, profile, recorder.ClockOffset, recordingPath,
             ffmpeg.Duration(recordingPath) ?? clock.Elapsed - recorder.ClockOffset,
-            assetsDirectory, ffmpeg, voiceId, clipFolder, sharedDirectory);
+            assetsDirectory, ffmpeg, voiceId, clipFolder, sharedDirectory, AppCloseTime(starts));
         var mp4 = Path.Combine(output, Path.GetFileNameWithoutExtension(scriptPath) + ".mp4");
         try
         {
@@ -259,6 +265,33 @@ internal static class VideoCommand
     internal static int BorderInset(int dpi) => (int)Math.Ceiling(dpi / 96.0);
 
     /// <summary>
+    ///     When StoryCAD starts to close, on the runner's clock: the start of the first close or
+    ///     expect-exit statement, or null when the script has neither. At the start of expect-exit
+    ///     the click that closes the app is done, but the window is still on screen (#1626, Terry,
+    ///     2026-10-23: the intro video showed the Windows desktop under its closing card).
+    /// </summary>
+    internal static TimeSpan? AppCloseTime(IEnumerable<(ScriptStatement Statement, TimeSpan Start)> starts)
+    {
+        foreach (var (statement, start) in starts)
+        {
+            if (statement.Verb is ScriptVerb.Close or ScriptVerb.ExpectExit)
+            {
+                return start;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    ///     The length of the body in the video: the recording up to the time StoryCAD starts to
+    ///     close, in recording time, or the whole recording when that time is unknown, not
+    ///     above 0, or after the end of the recording.
+    /// </summary>
+    internal static TimeSpan BodyLength(TimeSpan recordingLength, TimeSpan? appClosed)
+        => appClosed is { } t && t > TimeSpan.Zero && t < recordingLength ? t : recordingLength;
+
+    /// <summary>
     ///     The plan for assembly: each show card covers its step, each clip starts at its cue,
     ///     all moved from the runner's clock to the recording's time. A card that starts under
     ///     <see cref="CardStartCover" /> into the recording starts at 0; nothing else moves.
@@ -268,7 +301,7 @@ internal static class VideoCommand
     /// </summary>
     internal static VideoPlan Plan(ScriptParseResult parsed, PresentationProfile profile, TimeSpan offset,
         string recordingPath, TimeSpan recordingLength, string assetsDirectory, Ffmpeg? ffmpeg,
-        string? voiceId, string clipFolder, string? sharedDirectory = null)
+        string? voiceId, string clipFolder, string? sharedDirectory = null, TimeSpan? appCloseTime = null)
     {
         var cards = new List<VideoCard>();
         var step = -1;
@@ -324,7 +357,8 @@ internal static class VideoCommand
         return new VideoPlan
         {
             RecordingPath = recordingPath,
-            RecordingLength = recordingLength,
+            // The body stops when StoryCAD starts to close, so the desktop never shows (#1626).
+            RecordingLength = BodyLength(recordingLength, appCloseTime - offset),
             Title = parsed.Statements.FirstOrDefault(s => s.Verb == ScriptVerb.Title)?.Text,
             Closing = parsed.Statements.FirstOrDefault(s => s.Verb == ScriptVerb.Closing)?.Text,
             Cards = cards,
