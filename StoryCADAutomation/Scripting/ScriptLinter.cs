@@ -6,7 +6,7 @@ namespace StoryCADAutomation.Scripting;
 ///     The `check` lint, rule for rule the design's "Script lint as a fitness function"
 ///     section (devdocs/issue_1421_dsl_design.md). Errors: bare ids missing from the XAML,
 ///     runtime-inert ids, menu text paths not in the XAML, unmatched tab text, non-{scratch}-rooted
-///     dialog paths, malformed chords. Warnings: name: outside dialog scopes, literal
+///     dialog paths, malformed chords, one narrate text with two captions. Warnings: name: outside dialog scopes, literal
 ///     platform chords, screenshot names outside the manual image standard. Stated limits, checkable only live: tree node names (runtime outline
 ///     data), native-dialog element names, and whether a statically valid id surfaces an
 ///     automation peer at runtime outside the deny-list.
@@ -80,7 +80,27 @@ public sealed partial class ScriptLinter
             }
         }
 
+        LintCaptions(statements, findings);
         return findings;
+    }
+
+    /// <summary>
+    ///     One narrate text has one clip, so it has one caption text. Two narrate lines with the
+    ///     same text and different captions are an error (#1626).
+    /// </summary>
+    private static void LintCaptions(IReadOnlyList<ScriptStatement> statements, List<ScriptDiagnostic> findings)
+    {
+        var first = new Dictionary<string, ScriptStatement>(StringComparer.Ordinal);
+        foreach (var statement in statements.Where(s => s.Verb == ScriptVerb.Narrate))
+        {
+            if (!first.TryAdd(statement.Text!, statement) &&
+                (first[statement.Text!].Caption ?? statement.Text) != (statement.Caption ?? statement.Text))
+            {
+                findings.Add(Error(statement,
+                    $"this narrate text has a different caption on line {first[statement.Text!].Line}; " +
+                    "one narrate text has one clip, so give it one caption."));
+            }
+        }
     }
 
     private void LintAddress(ScriptStatement statement, ElementAddress? address, List<ScriptDiagnostic> findings)

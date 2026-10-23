@@ -10,7 +10,8 @@ namespace StoryCADAutomation.Video;
 /// <summary>
 ///     `video &lt;script.scs&gt; --out &lt;dir&gt; --assets &lt;dir&gt;` (#1421 Milestone 5, video design
 ///     sections 8.2 and 9): runs the script in the presentation profile while ffmpeg records
-///     the StoryCAD window, then assembles &lt;out&gt;/&lt;script name&gt;.mp4.
+///     the StoryCAD window, then assembles &lt;out&gt;/&lt;script name&gt;.mp4 and writes its
+///     captions to &lt;out&gt;/&lt;script name&gt;.srt (#1626).
 /// </summary>
 internal static class VideoCommand
 {
@@ -208,7 +209,11 @@ internal static class VideoCommand
             return EnvironmentFailure;
         }
 
+        // The captions sit next to the video, for the captions entry in the upload's meta.json (#1626).
+        var srt = Path.ChangeExtension(mp4, ".srt");
+        Captions.Write(plan, srt);
         Console.WriteLine($"video: {mp4}");
+        Console.WriteLine($"video: {srt}");
         return Passed;
     }
 
@@ -290,13 +295,21 @@ internal static class VideoCommand
             }
         }
 
+        // A cue holds the spoken text; the caption clause, when there is one, gives the written form.
+        var captions = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var narrate in parsed.Statements.Where(s => s.Verb == ScriptVerb.Narrate))
+        {
+            captions.TryAdd(narrate.Text!, narrate.Caption ?? narrate.Text!);
+        }
+
         var clips = new List<ClipPlacement>();
         foreach (var cue in profile.Cues)
         {
             var path = string.IsNullOrWhiteSpace(voiceId) ? null : Path.Combine(clipFolder, VoiceClips.ClipName(voiceId, cue.Text));
             if (path is not null && File.Exists(path))
             {
-                clips.Add(new ClipPlacement(path, cue.Start - offset));
+                clips.Add(new ClipPlacement(path, cue.Start - offset, cue.End - cue.Start,
+                    captions.GetValueOrDefault(cue.Text, cue.Text)));
             }
             else
             {

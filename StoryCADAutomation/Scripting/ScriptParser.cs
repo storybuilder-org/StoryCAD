@@ -325,7 +325,7 @@ public static partial class ScriptParser
             "pause" => BuildPause(reader),
             "expect" => BuildExpect(reader),
             "expect-no" => New(ScriptVerb.ExpectNo) with { Target = TakeTarget(reader) },
-            "narrate" => New(ScriptVerb.Narrate) with { Text = TakeString(reader, "narration text") },
+            "narrate" => BuildNarrate(reader),
             "screenshot" => BuildScreenshot(reader),
             _ => throw new SyntaxException($"unknown verb '{verbWord}'; the verb set is fixed in devdocs/issue_1421_dsl_design.md."),
         };
@@ -357,6 +357,20 @@ public static partial class ScriptParser
             }
 
             return New(ScriptVerb.Step) with { Text = name, Seconds = seconds };
+        }
+
+        // narrate "spoken" caption "written": the caption text when the spoken form reads badly,
+        // for example "dot S-T-B-X" as ".stbx" (#1626, Terry, 2026-10-23).
+        ScriptStatement BuildNarrate(ArgReader r)
+        {
+            var text = TakeString(r, "narration text");
+            if (r.AtEnd)
+            {
+                return New(ScriptVerb.Narrate) with { Text = text };
+            }
+
+            TakeKeyword(r, "caption");
+            return New(ScriptVerb.Narrate) with { Text = text, Caption = TakeString(r, "caption text") };
         }
 
         ScriptStatement BuildShow(ArgReader r)

@@ -8,8 +8,11 @@ namespace StoryCADAutomation.Video;
 /// </summary>
 public sealed record VideoCard(TimeSpan Start, TimeSpan End, string? Text, string? ImagePath, bool FadesOut = true);
 
-/// <summary>One voice clip and where it starts in the recording.</summary>
-public sealed record ClipPlacement(string Path, TimeSpan Start);
+/// <summary>
+///     One voice clip, where it starts in the recording, its length, and the caption text for it
+///     (#1626: the narrate text, or its caption clause).
+/// </summary>
+public sealed record ClipPlacement(string Path, TimeSpan Start, TimeSpan Length = default, string? Caption = null);
 
 /// <summary>Everything assembly needs; all times count from the first frame of the recording.</summary>
 public sealed class VideoPlan

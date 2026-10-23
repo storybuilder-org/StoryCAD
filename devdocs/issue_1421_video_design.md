@@ -79,6 +79,7 @@ step "The main window" hold 2                    # hold: extra seconds at the en
 show image "apple-pie.png"                       # an image card from the assets folder
 show text "Free and open source"                 # a text card
 closing "Like and subscribe"                     # the closing card; last statement
+narrate "The extension dot S-T-B-X." caption "The extension .stbx."   # caption: the text for the captions
 ```
 
 ### 6.2 Rules
@@ -91,6 +92,8 @@ closing "Like and subscribe"                     # the closing card; last statem
 6. `hold` takes a number of seconds from 0 to 30.
 7. `check` reports an error for each broken rule.
 8. In `show text`, `\n` starts a new line on the card. Use it to put one list item on each line (#1626, Terry, 2026-10-20).
+9. `caption` is optional on a `narrate` line. It gives the text for the captions when the spoken text is not correct as written text. Without `caption`, the captions use the `narrate` text (#1626, Terry, 2026-10-23).
+10. Two `narrate` lines with the same text must have the same caption text. One text has one clip.
 
 ### 6.3 The test profile
 
@@ -145,8 +148,12 @@ StoryCADAutomation video <script.scs> --out <dir> --assets <dir>
 5. If a step fails, the command deletes the recording and stops with exit code 1. If the launch fails, the exit code is 3.
 6. The recording starts at `launch`. Put `narrate` and `show` statements after `launch`. If they are before `launch`, `video` stops with exit code 2.
 7. If all steps pass, assembly makes `<dir>/<script name>.mp4`.
+8. Then the command writes the captions to `<dir>/<script name>.srt`. Section 9.1 gives the rules.
 
-The command replaces the OBS recording of Milestone 4. The `.srt` output of Milestone 4 is removed. YouTube makes captions from the audio.
+The command replaces the OBS recording of Milestone 4.
+YouTube can make captions from the audio, but these captions spell names and terms incorrectly.
+The clips speak the `narrate` text, so the command makes the captions from that text (#1626, Terry, 2026-10-23).
+The upload command sends the `.srt` file when `meta.json` names it in `captions`.
 
 ---
 
@@ -181,6 +188,20 @@ The output is 1920x1080, H.264 video, AAC audio.
 
 If the logo or the music file is not in the assets folder, assembly makes the title card without it. The video command does not fail.
 
+### 9.1 Captions
+
+The `.srt` file is a SubRip file in UTF-8. The YouTube API does not set the time of a caption without a time, so each caption has a time.
+
+1. Each clip gets captions. The text is the `caption` text of its `narrate` line, or the `narrate` text. A cue without a clip gets no caption.
+2. The captions of a clip start at the start of the clip in the `.mp4` file. This time is the start time of the clip in the recording, plus the start of the recording in the `.mp4` file. If there is a title card, the recording starts at the title card length minus the 0.5 s crossfade.
+3. A caption has a maximum of 2 lines. A line has a maximum of 32 characters. These limits come from the DCMP Captioning Key.
+4. A caption breaks only between words. When the next word does not fit, the caption ends after its last sentence. If no sentence ends in the caption, the caption ends after its last clause. A break after a sentence or a clause must keep a minimum of 20 characters before it.
+5. A name of words that start with a capital letter stays on one line, if the name fits on one line.
+6. Each caption of a clip gets a part of the clip time. The part agrees with the number of characters in the caption.
+7. A caption shows for a minimum of 1.33 s and a maximum of 6 s. A longer caption stops at 6 s. A shorter caption shows for 1.33 s, but it stops before the next caption starts.
+8. If the title card has music, a `[music]` caption shows for the length of the title card.
+9. A caption after the end of the recording is not in the file.
+
 ---
 
 ## 10. Dependencies and security
@@ -203,7 +224,7 @@ Terry's time is an estimate.
 | 2 | Step timing (section 7), with unit tests for the timing rules | none |
 | 3 | `voice` command (section 8.1) | none |
 | 4 | `video` command and assembly (sections 8.2 and 9) | none |
-| 5 | Remove the `.srt` output. Change the OBS text in `issue_1421_dsl_design.md` | none |
+| 5 | Remove the `.srt` output of Milestone 4. Change the OBS text in `issue_1421_dsl_design.md`. (#1626 adds a new `.srt` output from the clip times, section 9.1.) | none |
 | 6 | Brief for the intro video, from the narration and actions in `Intro-Video.scs` | 10 min to read and approve |
 | 7 | New `Intro-Video.scs` from the brief, by an LLM session | none |
 | 8 | Done: three consecutive `video` runs pass on Brigid, and Terry approves one `.mp4` | about 4 min to watch, plus notes |
@@ -228,6 +249,5 @@ Before the narrator voice is available, items 1 to 7 use a stock ElevenLabs voic
 1. Patch of a finished video (replace, insert, or remove a step).
 2. YouTube Shorts.
 3. X.
-4. Captions. YouTube makes them.
-5. Upload, thumbnail, description, tags, and promotion.
-6. Rights to the intro music.
+4. Upload, thumbnail, description, tags, and promotion.
+5. Rights to the intro music.

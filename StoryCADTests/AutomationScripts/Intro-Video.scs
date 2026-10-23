@@ -21,7 +21,7 @@ narrate "An outline in StoryCAD is made of story elements. The story overview de
 show text "STORY ELEMENTS\n\nStory Overview\nProblem\nCharacter\nSetting\nScene"   # \n: a new line; \n\n sets the heading apart
 
 step "The outline file"
-narrate "Each outline is a single file with the extension dot S-T-B-X, which you can copy, move or back up like any other document. StoryCAD ships with sample outlines; this one is The Old Man and the Sea."
+narrate "Each outline is a single file with the extension dot S-T-B-X, which you can copy, move or back up like any other document. StoryCAD ships with sample outlines; this one is The Old Man and the Sea." caption "Each outline is a single file with the extension .stbx, which you can copy, move or back up like any other document. StoryCAD ships with sample outlines; this one is The Old Man and the Sea."
 click OpenFromFileNavItem                 # the Open dialog is up from launch
 open-file-dialog "{scratch}/outlines/The Old Man and the Sea.stbx"
 expect tree contains "The Old Man and the Sea"

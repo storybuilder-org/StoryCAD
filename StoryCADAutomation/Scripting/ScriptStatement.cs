@@ -32,6 +32,12 @@ public sealed record ScriptStatement
     public string? Text { get; init; }
 
     /// <summary>
+    ///     The written form of a narrate line for the captions ("narrate "..." caption "..."),
+    ///     or null when the caption is the narrate text (#1626).
+    /// </summary>
+    public string? Caption { get; init; }
+
+    /// <summary>
     ///     Pause duration in seconds, before profile pacing is applied; on a step line, the
     ///     optional hold seconds added at the end of the step (video design, section 6).
     /// </summary>

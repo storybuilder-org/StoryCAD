@@ -131,6 +131,10 @@ expect-no <target>           # asserts absence, e.g. error dialogs. Settle-then-
 
 ```
 narrate "Adding our first character."   # caption overlay in presentation; log line in test
+narrate "The extension dot S-T-B-X." caption "The extension .stbx."
+                                        # caption "...": the written form for the video's captions
+                                        # when the spoken form reads badly (#1626, Terry, 2026-10-23).
+                                        # Without it, the captions use the narrate text.
 ```
 
 **Capture** (added 2026-10-04, #1421 Milestone 2)
@@ -165,7 +169,7 @@ Same script, two realizations. Profile is a runner flag, never a script statemen
 | Assertions | Hard fail; script aborts | Same as test: a failed demo is recorded again |
 | Window | Whatever launch yields | `--window WxH` places the main window at the top-left of the primary display with a visible frame of W x H pixels at 100% scale; the runner multiplies by the window's display scale, so a script gives the same layout on any display (#1422). The `video` command sizes the window itself |
 
-Recording is the `video` command (`devdocs/issue_1421_video_design.md`, Milestone 5). It replaced the OBS recording and the `.srt` subtitle file of Milestone 4; YouTube makes captions from the voice track (Terry, 2026-10-07).
+Recording is the `video` command (`devdocs/issue_1421_video_design.md`, Milestone 5). It replaced the OBS recording and the `.srt` subtitle file of Milestone 4 (Terry, 2026-10-07). YouTube's captions from the voice track misspelled names and terms, so `video` again writes a `.srt` file next to the `.mp4`, from the `narrate` text (or its `caption` clause) and the clip times that assembly uses (#1626, Terry, 2026-10-23; video design section 9.1).
 
 Not glided in presentation: `press`, the flyout steps inside `context-menu`, and the text-path form of `menu`. `menu` by id clicks, as a user would, the toolbar button and any sub-menu that the XAML puts the item under (`XamlUiFacts.MenuOpeners`), then the item. It never searches the menus: the lint rejects `menu` for an id that no toolbar button owns, and a context-menu item is reached with `context-menu` (#1422). If the item has not appeared 1.5 s after the menus are opened, the menus are clicked once more (a click that lands while another flyout closes only dismisses it). If the item is still showing 1.5 s after its click, the Invoke pattern runs. `menu` needs StoryCAD in the foreground in both profiles. A UIA Invoke left the flyout holding the keyboard, so later `type` and `press` steps were lost (found in Milestone 4).
 
@@ -213,6 +217,7 @@ The child process launches with a scrubbed environment: `COLLAB_DEBUG` and `COLL
 - **Dialog-verb paths** are `{scratch}`-rooted (error).
 - **`name:` targets** outside `dialog` scopes and **literal platform chords** (`Ctrl+...`) are warnings.
 - **`screenshot` names** are plain `.png` file names (error). A name outside the manual image standard (`devdocs/automation_naming_convention.md`, Manual image names) is a warning.
+- **`narrate` captions**: two `narrate` lines with the same text and different `caption` text (or one with a caption and one without) are an error. The clip is keyed by the narrate text, so one text has one caption (#1626).
 
 CI runs `check` over all scripts on every PR, so a renamed id or menu label fails at lint time instead of in a UI run. What `check` cannot verify, stated plainly: tree node names (runtime outline data), native-dialog element names, and whether a statically valid id actually surfaces a peer at runtime outside the deny-list. Those fail only live.
 
