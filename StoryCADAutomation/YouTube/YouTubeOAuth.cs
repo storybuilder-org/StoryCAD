@@ -57,7 +57,9 @@ public static class YouTubeOAuth
             ["scope"] = Scope,
             ["code_challenge"] = challenge,
             ["code_challenge_method"] = "S256",
-            // No refresh token is wanted, so no access_type=offline. select_account shows the
+            // Google gives an installed app a refresh token whatever access_type says, so the
+            // parameter is left out. The run never keeps that refresh token, and revoking the
+            // access token revokes the refresh token linked to it. select_account shows the
             // account and channel chooser on each run; the consent page shows because each run
             // revokes its grant.
             ["prompt"] = "select_account",
@@ -117,17 +119,21 @@ public static class YouTubeOAuth
     /// <summary>
     ///     Waits for the browser's redirect and returns the code. Requests without a code or an
     ///     error (a favicon, say) are answered and ignored. Throws when the state does not match,
-    ///     the user denies consent, or the time runs out.
+    ///     the user denies consent, or the time runs out; throws <see cref="OperationCanceledException" />
+    ///     when <paramref name="cancellation" /> is cancelled (Ctrl+C).
     /// </summary>
-    public static async Task<string> WaitForCodeAsync(HttpListener listener, string state, TimeSpan timeout)
+    public static async Task<string> WaitForCodeAsync(HttpListener listener, string state, TimeSpan timeout,
+        CancellationToken cancellation = default)
     {
-        using var timer = new CancellationTokenSource(timeout);
+        using var timer = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
+        timer.CancelAfter(timeout);
         while (true)
         {
             var next = listener.GetContextAsync();
             if (await Task.WhenAny(next, Task.Delay(Timeout.Infinite, timer.Token)) != next)
             {
-                throw new TimeoutException($"no answer from the browser in {timeout.TotalMinutes:0} minutes.");
+                cancellation.ThrowIfCancellationRequested();
+                throw new TimeoutException($"no answer from the browser in {timeout.TotalSeconds:0} s.");
             }
 
             var context = await next;
