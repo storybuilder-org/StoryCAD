@@ -280,5 +280,22 @@ public class ScriptLinterTests
             Assert.AreEqual(0, errors.Count, $"{script}: {string.Join("; ", errors)}");
         }
     }
+
+    // #1626: one narrate text has one clip, so it has one caption.
+    [TestMethod]
+    [DataRow("caption \"Written A.\"", "caption \"Written B.\"", 1)]
+    [DataRow("caption \"Written A.\"", "", 1)]
+    [DataRow("caption \"Written A.\"", "caption \"Written A.\"", 0)]
+    [DataRow("", "", 0)]
+    public void Lint_WithSameNarrateTextTwice_ReportsDifferentCaptions(string first, string second, int errors)
+    {
+        var parsed = ScriptParser.Parse($"script \"Lint test\"\nnarrate \"Spoken.\" {first}\nnarrate \"Spoken.\" {second}\n");
+        Assert.IsTrue(parsed.Success, string.Join("; ", parsed.Errors));
+
+        var found = Linter.Lint(parsed.Statements).Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
+
+        Assert.AreEqual(errors, found.Count, string.Join("; ", found));
+        Assert.IsTrue(found.All(d => d.Line == 3));
+    }
 }
 #endif

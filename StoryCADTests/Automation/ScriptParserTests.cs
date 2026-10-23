@@ -158,5 +158,38 @@ public class ScriptParserTests
         // closing ends the last step, so it does not count as an action in that step.
         Assert.IsTrue(Parse("step \"A\"", "show text \"Hello\"", "closing \"Bye\"").Success);
     }
+
+    // #1626: the caption clause gives the written form of a spoken narrate line.
+    [TestMethod]
+    public void Parse_NarrateWithCaption_StoresCaption()
+    {
+        var result = Parse("narrate \"The extension dot S-T-B-X.\" caption \"The extension .stbx.\"");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual("The extension dot S-T-B-X.", result.Statements[1].Text);
+        Assert.AreEqual("The extension .stbx.", result.Statements[1].Caption);
+    }
+
+    [TestMethod]
+    public void Parse_NarrateWithoutCaption_HasNoCaption()
+    {
+        var result = Parse("narrate \"Plain words.\"");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.IsNull(result.Statements[1].Caption);
+    }
+
+    [TestMethod]
+    [DataRow("narrate \"Spoken.\" subtitle \"Written.\"")]
+    [DataRow("narrate \"Spoken.\" caption \"\"")]
+    [DataRow("narrate \"Spoken.\" caption")]
+    [DataRow("narrate \"Spoken.\" caption \"Written.\" \"Extra.\"")]
+    public void Parse_NarrateWithBadCaptionClause_ReportsError(string line)
+    {
+        var result = Parse(line);
+
+        Assert.AreEqual(1, result.Errors.Count, string.Join("; ", result.Errors));
+        Assert.AreEqual(2, result.Errors[0].Line);
+    }
 }
 #endif
