@@ -182,6 +182,7 @@ public class ScriptParserTests
     [TestMethod]
     [DataRow("narrate \"Spoken.\" subtitle \"Written.\"")]
     [DataRow("narrate \"Spoken.\" caption \"\"")]
+    [DataRow("narrate \"Spoken.\" caption \"   \"")]
     [DataRow("narrate \"Spoken.\" caption")]
     [DataRow("narrate \"Spoken.\" caption \"Written.\" \"Extra.\"")]
     public void Parse_NarrateWithBadCaptionClause_ReportsError(string line)

@@ -106,7 +106,8 @@ public class CaptionsTests
     [TestMethod]
     public void Limit_WithCaptionOver6Seconds_EndsItAt6Seconds()
     {
-        var limited = Captions.Limit(new List<Caption> { new(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(9), "Long") });
+        var limited = Captions.Limit(new List<Caption> { new(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(9), "Long") },
+            TimeSpan.FromSeconds(100));
 
         Assert.AreEqual(TimeSpan.FromSeconds(7), limited[0].End);
     }
@@ -114,16 +115,92 @@ public class CaptionsTests
     [TestMethod]
     [DataRow(5.0, 2.33)]
     [DataRow(1.8, 1.8)]
-    [DataRow(1.2, 1.5)]
+    [DataRow(1.2, 1.2)]
     public void Limit_WithCaptionUnder133Seconds_ExtendsItUpToTheNextCaption(double nextStart, double expectedEnd)
     {
         var limited = Captions.Limit(new List<Caption>
         {
             new(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1.5), "Short"),
             new(TimeSpan.FromSeconds(nextStart), TimeSpan.FromSeconds(nextStart + 2), "Next"),
-        });
+        }, TimeSpan.FromSeconds(100));
 
         Assert.AreEqual(expectedEnd, limited[0].End.TotalSeconds, 0.001);
+    }
+
+    [TestMethod]
+    public void Limit_WithCaptionCutAtTheRecordingEnd_DoesNotPassTheRecordingEnd()
+    {
+        var limited = Captions.Limit(new List<Caption> { new(TimeSpan.FromSeconds(9.7), TimeSpan.FromSeconds(10), "Late") },
+            TimeSpan.FromSeconds(10));
+
+        Assert.AreEqual(TimeSpan.FromSeconds(10), limited[0].End);
+    }
+
+    [TestMethod]
+    public void Time_WithShortLastSentence_GivesItWordsFromTheCaptionBefore()
+    {
+        // Split alone gives 63 characters and "Done.", which would get 0.29 s of the 4 s clip.
+        const string text = "The navigation pane on the left shows the outline of the story. Done.";
+
+        var captions = Captions.Time(text, TimeSpan.Zero, TimeSpan.FromSeconds(4));
+
+        Assert.AreEqual(2, captions.Count);
+        Assert.AreEqual("outline of the story. Done.", captions[1].Text.Replace('\n', ' '));
+        Assert.IsTrue(captions.All(c => c.End - c.Start >= Captions.MinDuration), string.Join(" | ", captions));
+        Assert.IsTrue(captions.All(c => c.Text.Split('\n').Length <= 2 &&
+                                        c.Text.Split('\n').All(l => l.Length <= Captions.MaxLineLength)));
+        CollectionAssert.AreEqual(text.Split(' '), captions.SelectMany(c => c.Text.Split(new[] { ' ', '\n' })).ToList());
+    }
+
+    [TestMethod]
+    public void Balance_WithShortCaptionThatFitsWithItsNeighbour_JoinsThem()
+    {
+        var parts = new List<string> { "Hello there.", "Hi." };
+
+        Captions.Balance(parts, 10);
+
+        CollectionAssert.AreEqual(new[] { "Hello there. Hi." }, parts);
+    }
+
+    [TestMethod]
+    public void ForPlan_WithClipPastTheRecordingEnd_CutsItsCaptionsAtTheEnd()
+    {
+        var plan = new VideoPlan
+        {
+            RecordingPath = "rec.mkv", RecordingLength = TimeSpan.FromSeconds(10),
+            Clips = new[]
+            {
+                new ClipPlacement("a.wav", TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(4),
+                    "StoryCAD is free and open source. It helps you build an outline of your story."),
+                new ClipPlacement("b.wav", TimeSpan.FromSeconds(11), TimeSpan.FromSeconds(2), "After the end."),
+            },
+        };
+
+        var captions = Captions.ForPlan(plan);
+
+        // The second caption is cut at 10 s; Limit does not stretch it into the closing card.
+        Assert.AreEqual(2, captions.Count);
+        Assert.AreEqual(8, captions[0].Start.TotalSeconds, 0.001);
+        Assert.AreEqual(TimeSpan.FromSeconds(10), captions[1].End);
+    }
+
+    [TestMethod]
+    public void ForPlan_WithOverlappingClips_EndsTheFirstCaptionWhereTheNextStarts()
+    {
+        var plan = new VideoPlan
+        {
+            RecordingPath = "rec.mkv", RecordingLength = TimeSpan.FromSeconds(60),
+            Clips = new[]
+            {
+                new ClipPlacement("a.wav", TimeSpan.FromSeconds(-1), TimeSpan.FromSeconds(3), "Early words here."),
+                new ClipPlacement("b.wav", TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(3), "Later words."),
+            },
+        };
+
+        var captions = Captions.ForPlan(plan);
+
+        Assert.AreEqual(new Caption(TimeSpan.Zero, TimeSpan.FromSeconds(2), "Early words here."), captions[0]);
+        Assert.AreEqual(new Caption(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(5), "Later words."), captions[1]);
     }
 
     [TestMethod]
