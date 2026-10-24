@@ -38,6 +38,12 @@ public sealed record ScriptStatement
     public string? Caption { get; init; }
 
     /// <summary>
+    ///     "wait &lt;target&gt; condense": a long wait (a Collaborator run) that the video cuts down
+    ///     to its start and end (#1626).
+    /// </summary>
+    public bool Condense { get; init; }
+
+    /// <summary>
     ///     Pause duration in seconds, before profile pacing is applied; on a step line, the
     ///     optional hold seconds added at the end of the step (video design, section 6).
     /// </summary>

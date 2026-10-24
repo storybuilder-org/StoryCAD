@@ -53,4 +53,10 @@ public interface IExecutionProfile
 
     /// <summary>Ends the open step, if any: waits for its narration, then for its hold.</summary>
     void EndStep();
+
+    /// <summary>
+    ///     Runs a condensed wait ("wait &lt;target&gt; condense"). Test just waits; presentation
+    ///     also records when the wait ran, so the video can cut it (#1626).
+    /// </summary>
+    void Condense(Action wait) => wait();
 }

@@ -320,7 +320,7 @@ public static partial class ScriptParser
             "save-file-dialog" => New(ScriptVerb.SaveFileDialog) with { Text = TakeString(reader, "file path") },
             "open-file-dialog" => New(ScriptVerb.OpenFileDialog) with { Text = TakeString(reader, "file path") },
             "dialog" => BuildDialog(reader),
-            "wait" => New(ScriptVerb.Wait) with { Target = TakeTarget(reader) },
+            "wait" => BuildWait(reader),
             "wait-window" => New(ScriptVerb.WaitWindow) with { Text = TakeString(reader, "window title") },
             "pause" => BuildPause(reader),
             "expect" => BuildExpect(reader),
@@ -357,6 +357,20 @@ public static partial class ScriptParser
             }
 
             return New(ScriptVerb.Step) with { Text = name, Seconds = seconds };
+        }
+
+        // wait <target> condense: waits up to 5 minutes, and the video keeps only the start and
+        // end of the wait (#1626, Terry, 2026-10-24).
+        ScriptStatement BuildWait(ArgReader r)
+        {
+            var target = TakeTarget(r);
+            if (r.AtEnd)
+            {
+                return New(ScriptVerb.Wait) with { Target = target };
+            }
+
+            TakeKeyword(r, "condense");
+            return New(ScriptVerb.Wait) with { Target = target, Condense = true };
         }
 
         // narrate "spoken" caption "written": the caption text when the spoken form reads badly,

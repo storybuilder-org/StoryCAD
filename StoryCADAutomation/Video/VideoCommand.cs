@@ -363,6 +363,13 @@ internal static class VideoCommand
         }
 
         var bodyLength = BodyLength(recordingLength, appCloseTime - offset);
+
+        // Condensed waits: cut each down to its two ends, then move everything into body time (#1626).
+        var cuts = Cuts.FromWaits(profile.CondensedWaits.Select(w => (w.Start - offset, w.End - offset)),
+            clips.Select(c => (c.Start, c.Start + c.Length)), bodyLength);
+        cards = cards.Select(c => c with { Start = Cuts.Map(c.Start, cuts), End = Cuts.Map(c.End, cuts) }).ToList();
+        clips = clips.Select(c => c with { Start = Cuts.Map(c.Start, cuts) }).ToList();
+        bodyLength = Cuts.Map(bodyLength, cuts);
         foreach (var clip in clips.Where(c => c.Start + c.Length > bodyLength))
         {
             // Assembly cuts the clip at the end of the body; a pause before the closing statement fixes it.
@@ -378,6 +385,7 @@ internal static class VideoCommand
             RecordingPath = recordingPath,
             // The body stops when StoryCAD starts to close, so the desktop never shows (#1626).
             RecordingLength = bodyLength,
+            Cuts = cuts,
             Title = parsed.Statements.FirstOrDefault(s => s.Verb == ScriptVerb.Title)?.Text,
             Closing = parsed.Statements.FirstOrDefault(s => s.Verb == ScriptVerb.Closing)?.Text,
             Cards = cards,

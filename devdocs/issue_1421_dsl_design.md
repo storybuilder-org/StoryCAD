@@ -106,6 +106,9 @@ Dialog-verb paths must be `{scratch}`-rooted; the linter rejects anything else a
 
 ```
 wait <target>                # explicit wait beyond the implicit one
+wait <target> condense       # a long wait, up to 5 minutes, for a Collaborator run to finish;
+                             # test just waits, and `video` cuts the wait down to its two ends
+                             # (video design section 9.2; #1626, Terry, 2026-10-24)
 wait-window "title"
 pause 1.5                    # seconds × profile pacing factor; ×0 in test mode
 ```

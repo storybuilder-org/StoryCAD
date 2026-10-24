@@ -80,6 +80,7 @@ show image "apple-pie.png"                       # an image card from the assets
 show text "Free and open source"                 # a text card
 closing "Like and subscribe"                     # the closing card; last statement
 narrate "The extension dot S-T-B-X." caption "The extension .stbx."   # caption: the text for the captions
+wait WorkflowAcceptAllButton condense            # a long wait; the video keeps only its two ends
 ```
 
 ### 6.2 Rules
@@ -94,6 +95,7 @@ narrate "The extension dot S-T-B-X." caption "The extension .stbx."   # caption:
 8. In `show text`, `\n` starts a new line on the card. Use it to put one list item on each line (#1626, Terry, 2026-10-20).
 9. `caption` is optional on a `narrate` line. It gives the text for the captions when the spoken text is not correct as written text. Without `caption`, the captions use the `narrate` text (#1626, Terry, 2026-10-23).
 10. Two `narrate` lines with the same text must have the same caption text. One text has one clip.
+11. `condense` is optional on a `wait` line. The wait continues for a maximum of 5 minutes, until the target is ready. Use it for a wait that can be long, for example a Collaborator run (#1626, Terry, 2026-10-24). Section 9.2 gives the cut.
 
 ### 6.3 The test profile
 
@@ -205,6 +207,17 @@ The `.srt` file is a SubRip file in UTF-8. The YouTube API does not set the time
 11. A caption after the end of the recording is not in the file. A caption that continues after the end of the recording stops at the end of the recording.
 
 ---
+
+### 9.2 Condensed waits
+
+A Collaborator run can take from about 10 s to about 4 minutes. The viewer does not watch all of that wait.
+
+1. The presentation profile records the start and the end of each `wait ... condense`.
+2. Assembly removes the wait from the recording part, but it keeps 1.5 s at each end of the wait. Thus the viewer sees the run start and finish.
+3. Assembly does not cut a clip. If a clip plays at the start of the cut, the cut starts when the clip stops. If a clip starts in the cut, the cut stops when the clip starts. If no time is left, assembly does not cut the wait.
+4. Assembly moves each clip, card, and caption that comes after a cut earlier by the length of the cut. The length of the recording part becomes shorter by the length of all cuts.
+5. The title card and its music do not change.
+6. Assembly does not cut after the end of the recording part (section 9, item 2).
 
 ## 10. Dependencies and security
 

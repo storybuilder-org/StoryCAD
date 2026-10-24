@@ -26,6 +26,7 @@ public sealed class PresentationProfile : IExecutionProfile
     private readonly Func<string, TimeSpan?> _clipLength;
     private readonly List<NarrationCue> _cues = new();
     private readonly List<StepSpan> _steps = new();
+    private readonly List<StepSpan> _condensed = new();
     private readonly double _pacing;
 
     // The open step: when its last clip stops, and its hold. Null when no step is open.
@@ -73,6 +74,17 @@ public sealed class PresentationProfile : IExecutionProfile
 
     /// <summary>Each step's start and end in run order, the end after its hold; a card covers its step.</summary>
     public IReadOnlyList<StepSpan> Steps => _steps;
+
+    /// <summary>Each condensed wait's start and end in run order (#1626).</summary>
+    public IReadOnlyList<StepSpan> CondensedWaits => _condensed;
+
+    /// <inheritdoc />
+    public void Condense(Action wait)
+    {
+        var start = _elapsed();
+        wait();
+        _condensed.Add(new StepSpan(start, _elapsed()));
+    }
 
     /// <inheritdoc />
     public void Click(IUiDriver driver, ElementAddress target)
@@ -180,7 +192,7 @@ public sealed class PresentationProfile : IExecutionProfile
     }
 }
 
-/// <summary>When one step ran, counted from the start of the run.</summary>
+/// <summary>When one step (or one condensed wait) ran, counted from the start of the run.</summary>
 public sealed record StepSpan(TimeSpan Start, TimeSpan End);
 
 /// <summary>One narrate line and when its clip plays, counted from the start of the run.</summary>

@@ -14,11 +14,20 @@ public sealed record VideoCard(TimeSpan Start, TimeSpan End, string? Text, strin
 /// </summary>
 public sealed record ClipPlacement(string Path, TimeSpan Start, TimeSpan Length = default, string? Caption = null);
 
-/// <summary>Everything assembly needs; all times count from the first frame of the recording.</summary>
+/// <summary>
+///     Everything assembly needs. <see cref="Cuts" /> are in recording time; all other times are
+///     body time: from the first frame of the recording, after the cuts.
+/// </summary>
 public sealed class VideoPlan
 {
     public required string RecordingPath { get; init; }
+
+    /// <summary>The length of the body: the recording up to the app close, less the cuts.</summary>
     public required TimeSpan RecordingLength { get; init; }
+
+    /// <summary>The spans of the recording that the body leaves out (condensed waits, #1626).</summary>
+    public IReadOnlyList<Cut> Cuts { get; init; } = Array.Empty<Cut>();
+
     public string? Title { get; init; }
     public string? Closing { get; init; }
     public IReadOnlyList<VideoCard> Cards { get; init; } = Array.Empty<VideoCard>();
@@ -188,7 +197,10 @@ public static class VideoAssembler
     internal static IReadOnlyList<string> BodyArguments(VideoPlan plan, string output)
     {
         var args = new List<string> { "-hide_banner", "-loglevel", "error", "-y", "-i", plan.RecordingPath };
-        var filter = new List<string> { $"[0:v]scale={Width}:{Height}:flags=lanczos,fps=30,setsar=1[v0]" };
+        var filter = new List<string>
+        {
+            $"[0:v]scale={Width}:{Height}:flags=lanczos,fps=30{Video.Cuts.SelectFilter(plan.Cuts)},setsar=1[v0]",
+        };
         var input = 1;
         for (var i = 0; i < plan.Cards.Count; i++)
         {
