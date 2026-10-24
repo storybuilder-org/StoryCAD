@@ -70,4 +70,12 @@ The Trickster is a clown, a mischief maker.  He provides the comedy relief that 
 
 Character Sketch
 
-Use these notes to provide a thumbnail picture of the character and the overall impression he makes.
+One or two sentences that say who this person is, and how that person meets the story. The other tabs hold the facts about the character; the sketch holds the person. Leave the plot to the Problems and the Scenes.
+
+Examples:
+
+*A bookkeeper who believes every mistake is hers to carry, so she works until the numbers are perfect and lets no one check them. In the story she is the ally the detective trusts last and needs most.*
+
+*A retired fisherman who measures a man by what he can do alone, and has begun to lose the strength that measure depends on. He is the mentor whose lesson the boy must outgrow.*
+
+*A charming fixer who needs to be liked more than he needs to be right, and buys affection with promises he cannot keep. He stands against the hero as the man the hero would become if he stopped telling the truth.*
