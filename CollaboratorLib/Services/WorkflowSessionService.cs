@@ -749,6 +749,22 @@ public class WorkflowSessionService
         session.Runner ??= NewRunner(session);
 
     /// <summary>
+    /// Collaborator #286: counts whole seconds while a run is in flight and tells the screen each
+    /// second, so a long run (Problem Builder took 750 s on 2026-10-23) is seen to be alive.
+    /// Ends by itself when <see cref="WorkflowSession.Busy"/> goes false.
+    /// </summary>
+    private static async Task TickWhileBusyAsync(WorkflowSession session)
+    {
+        while (session.Busy)
+        {
+            await Task.Delay(1000);
+            if (!session.Busy) break;
+            session.RunSeconds++;
+            Changed(session);
+        }
+    }
+
+    /// <summary>
     /// Runs the workflow and puts the result in the session. A failure becomes an error line;
     /// nothing is thrown.
     /// </summary>
@@ -759,10 +775,12 @@ public class WorkflowSessionService
         {
             Status(session, $"Running {session.Workflow.Title}...");
             session.Busy = true;
+            session.RunSeconds = 0;
 
             // Cost line describes the run in flight, not the previous one.
             session.PendingCostSummary = string.Empty;
             Changed(session);
+            _ = TickWhileBusyAsync(session);
 
             // Execute via WorkflowRunner
             session.Runner = NewRunner(session);

@@ -14,7 +14,11 @@ public sealed record StoryContextInput(
     IReadOnlyList<string> Gaps,
     string StoryType,
     string StoryGenre,
-    string Premise);
+    string Premise,
+    string StoryIdea = "",
+    string Concept = "",
+    string Notes = "",
+    string StoryWorld = "");
 
 /// <summary>
 /// Builds structured context strings for workflow prompts.
@@ -82,13 +86,26 @@ public class StoryContextBuilder
             .Select(g => g.ToString("D"))
             .ToList();
 
+        // Collaborator #286: the Overview's Story Idea, Concept and Notes, and the Story World's
+        // description, reach every workflow. On 2026-10-17 two models ignored the Overview Notes
+        // (the mining family that kept the sword) because no workflow received them.
         var overview = GetOverview(model);
         return new StoryContextInput(
             phase,
             gaps,
             ScalarOrEmpty(overview?.StoryType),
             ScalarOrEmpty(overview?.StoryGenre),
-            ScalarOrEmpty(overview?.Premise));
+            ScalarOrEmpty(overview?.Premise),
+            ScalarOrEmpty(overview?.Description),
+            ScalarOrEmpty(overview?.Concept),
+            ScalarOrEmpty(overview?.Notes),
+            ScalarOrEmpty(GetStoryWorld()?.Description));
+    }
+
+    private StoryWorldModel? GetStoryWorld()
+    {
+        var result = _api.GetElementsByType(StoryItemType.StoryWorld);
+        return result.IsSuccess ? result.Payload?.FirstOrDefault() as StoryWorldModel : null;
     }
 
     private static string ScalarOrEmpty(string? value) =>

@@ -372,5 +372,14 @@
                      VerticalAlignment="Bottom"
                      Height="5" IsIndeterminate="True"
                      Visibility="{x:Bind ViewModel.ProgressVisibility, Mode=TwoWay}" />
+        <!-- Collaborator #286: elapsed seconds of the run, above the bar's right end -->
+        <TextBlock x:Name="ResponseProgressText"
+                   Grid.Column="1"
+                   HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                   Margin="0,0,8,8"
+                   Style="{StaticResource CaptionTextBlockStyle}"
+                   Text="{x:Bind ViewModel.ProgressText, Mode=OneWay}"
+                   Visibility="{x:Bind ViewModel.ProgressVisibility, Mode=OneWay}"
+                   AutomationProperties.AutomationId="ResponseProgressText" />
     </Grid>
 </Page>

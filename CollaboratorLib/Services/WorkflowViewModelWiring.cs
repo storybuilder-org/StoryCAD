@@ -228,6 +228,10 @@ public static class WorkflowViewModelWiring
         viewModel.ProgressVisibility = session.Busy
             ? Microsoft.UI.Xaml.Visibility.Visible
             : Microsoft.UI.Xaml.Visibility.Collapsed;
+        // Collaborator #286: the elapsed seconds of a run, blank when nothing runs.
+        viewModel.ProgressText = session.Busy && session.RunSeconds > 0
+            ? $"{session.RunSeconds} s"
+            : string.Empty;
         viewModel.IsInterviewTurnRunning = session.InterviewTurnRunning;
         viewModel.CanSaveInterview = session.CanSaveInterview;
 

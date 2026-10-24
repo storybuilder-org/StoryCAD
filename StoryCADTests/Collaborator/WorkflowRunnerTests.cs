@@ -381,4 +381,46 @@ public class WorkflowRunnerTests
 
         Assert.AreEqual(UpdateKind.Protect, result.PendingUpdates.Single().Kind);
     }
+
+    /// <summary>
+    ///     Collaborator #286: a Character that no Problem seats has no StoryRole and no Archetype
+    ///     to propose. The template says so; on 2026-10-24 Kimi K2.6 proposed both for a name-only
+    ///     character in one run of two, so the outline decides here.
+    /// </summary>
+    [TestMethod]
+    public void ClassifyScalarUpdates_StoryRoleAndArchetypeOnCharacterWithNoProblem_AreKeptNotProposed()
+    {
+        var (_, runner, character, _) = ArrangeRelationship();
+        var result = RoleAndArchetypeResult(character);
+
+        runner.ClassifyScalarUpdates(result, null, "CharacterBuilder");
+
+        Assert.AreEqual(0, result.PendingUpdates.Count, "no proposal for StoryRole or Archetype");
+        CollectionAssert.Contains(result.KeptProperties, "StoryRole");
+        CollectionAssert.Contains(result.KeptProperties, "Archetype");
+    }
+
+    [TestMethod]
+    public void ClassifyScalarUpdates_StoryRoleAndArchetypeOnSeatedCharacter_AreProposed()
+    {
+        var (model, runner, character, _) = ArrangeRelationship();
+        var problem = new ProblemModel("Finding the light", model, null) { Protagonist = character.Uuid };
+        Assert.AreNotEqual(Guid.Empty, problem.Uuid);
+        var result = RoleAndArchetypeResult(character);
+
+        runner.ClassifyScalarUpdates(result, null, "CharacterBuilder");
+
+        Assert.AreEqual(2, result.PendingUpdates.Count);
+        Assert.IsTrue(result.PendingUpdates.All(u => u.Kind == UpdateKind.Fill));
+    }
+
+    private static WorkflowResult RoleAndArchetypeResult(CharacterModel character)
+    {
+        var result = WorkflowResult.Succeeded();
+        result.PendingUpdates.Add(new PendingUpdate("Character", character.Uuid, new PropertySpec("StoryRole"), "Protagonist"));
+        result.PendingUpdates.Add(new PendingUpdate("Character", character.Uuid, new PropertySpec("Archetype"), "Hero"));
+        result.FieldStates["StoryRole"] = OutputFieldState.Fill;
+        result.FieldStates["Archetype"] = OutputFieldState.Fill;
+        return result;
+    }
 }
