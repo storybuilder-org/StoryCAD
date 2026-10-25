@@ -146,6 +146,14 @@ public partial class WorkflowShellViewModel : ObservableRecipient
     /// </summary>
     public bool SuppressWorkflowNavigation { get; set; }
 
+    /// <summary>
+    /// True while a Collaborator ContentDialog (overwrite confirm, element picker) is open.
+    /// WinUI allows one ContentDialog per XamlRoot; a workflow invoked through automation or
+    /// the keyboard while one is up would open a second and crash the app (StoryCAD #1660).
+    /// The mouse never gets here: the dialog overlay blocks it.
+    /// </summary>
+    public bool IsDialogOpen { get; set; }
+
     /// <summary>Wired by Collaborator to the active WorkflowViewModel actions.</summary>
     public Action OnAcceptAll { get; set; }
     public Action OnReviewEach { get; set; }
@@ -250,7 +258,30 @@ public partial class WorkflowShellViewModel : ObservableRecipient
         // CurrentItem.Tag to put that highlight back after a run.
         CurrentItem = invoked;
 
-        await OnWorkflowSelected(tag);
+        await RunInvokedWorkflowAsync(tag);
+    }
+
+    /// <summary>
+    /// Runs the workflow behind <paramref name="tag"/>. Separated from the async void handler
+    /// so a failure can be tested: an exception that escapes an async void event handler ends
+    /// the process (0xC000027B) before anything logs it. StoryCAD #1660: a second ContentDialog
+    /// opened while the overwrite confirm was still up died this way.
+    /// </summary>
+    public async Task RunInvokedWorkflowAsync(object tag)
+    {
+        if (OnWorkflowSelected == null)
+            return;
+
+        try
+        {
+            await OnWorkflowSelected(tag);
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Could not start the workflow: {ex.Message}";
+            Ioc.Default.GetService<ILogService>()?.LogException(LogLevel.Error, ex,
+                "Workflow invoke failed");
+        }
     }
 
     /// <summary>
@@ -272,6 +303,10 @@ public partial class WorkflowShellViewModel : ObservableRecipient
         // A star toggle is in flight; the invoke it produced is a side effect of the click,
         // not a workflow choice.
         if (SuppressWorkflowNavigation)
+            return false;
+
+        // A dialog owns the window; the invoke slipped past its overlay.
+        if (IsDialogOpen)
             return false;
 
         return true;
