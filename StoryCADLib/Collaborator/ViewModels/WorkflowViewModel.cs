@@ -372,6 +372,14 @@ public partial class WorkflowViewModel : ObservableRecipient
         set => SetProperty(ref _progressVisibility, value);
     }
 
+    /// <summary>Collaborator #286: elapsed time of the run in flight, beside the progress bar.</summary>
+    private string _progressText = string.Empty;
+    public string ProgressText
+    {
+        get => _progressText;
+        set => SetProperty(ref _progressText, value);
+    }
+
     #endregion
 
     #region Commands

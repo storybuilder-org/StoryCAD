@@ -128,6 +128,12 @@ public class WorkflowSession
     /// <summary>A run or an interview turn is in flight.</summary>
     internal bool Busy { get; set; }
 
+    /// <summary>
+    /// Collaborator #286: whole seconds since the run started, while <see cref="Busy"/>. The
+    /// screen shows it beside the progress bar so a long run is seen to be alive.
+    /// </summary>
+    internal int RunSeconds { get; set; }
+
     /// <summary>Lines for the conversation, in order. The screen takes them and clears the list.</summary>
     internal List<SessionMessage> Messages { get; } = new();
 

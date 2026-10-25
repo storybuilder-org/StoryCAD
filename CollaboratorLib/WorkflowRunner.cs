@@ -684,6 +684,8 @@ namespace StoryCollaborator
             var protectCount = 0;
             var fillCount = 0;
             var refreshCount = 0;
+            // Collaborator #286: built once, on the first StoryRole or Archetype row.
+            ProblemCharacterIndex? problemIndex = null;
 
             _logger?.LogInformation(
                 "ClassifyScalarUpdates start: workflow={Workflow} pending={Count} sessionTouched={Touched}",
@@ -788,6 +790,18 @@ namespace StoryCollaborator
 
                 UpdateKind kind;
                 string source;
+                // Collaborator #286: a Character with no Problem has no StoryRole and no Archetype to
+                // propose; the template says so, and the model does not always hold it. The outline
+                // knows whether the character sits in a Problem, so the rule is applied here.
+                if ((string.Equals(update.Spec.Property, "StoryRole", StringComparison.Ordinal)
+                     || string.Equals(update.Spec.Property, "Archetype", StringComparison.Ordinal))
+                    && IsCharacterWithNoProblem(update.ElementUuid, ref problemIndex))
+                {
+                    result.KeptProperties.Add(update.DisplayNameOverride ?? update.Spec.Property);
+                    noOpCount++;
+                    _logger?.LogInformation("Classify {Key} kind=NoOp source=rule (a Character with no Problem keeps StoryRole and Archetype)", update.Key);
+                    continue;
+                }
                 // Collaborator #253: Ideation never changes a filled Story Idea. It is the first step;
                 // Concept and Premise may fill it when it is empty, never rewrite it.
                 if (string.Equals(workflowId, "Premise", StringComparison.Ordinal)
@@ -860,6 +874,23 @@ namespace StoryCollaborator
         {
             var key = update.Spec.JsonKey ?? update.Spec.Property;
             return result.FieldStates.TryGetValue(key, out state);
+        }
+
+        /// <summary>
+        /// Collaborator #286: true when <paramref name="elementUuid"/> is a Character that no
+        /// Problem seats as Protagonist or Antagonist. Such a character has no StoryRole and no
+        /// Archetype to propose. The index is built on first use and reused for the run.
+        /// </summary>
+        private bool IsCharacterWithNoProblem(Guid elementUuid, ref ProblemCharacterIndex? problemIndex)
+        {
+            if (!storyModel.StoryElements.StoryElementGuids.TryGetValue(elementUuid, out var element)
+                || element is not CharacterModel)
+            {
+                return false;
+            }
+
+            problemIndex ??= ProblemCharacterIndex.Build(_storyApi, storyModel);
+            return problemIndex.RelatedProblemGuids(elementUuid).Count == 0;
         }
 
         /// <summary>

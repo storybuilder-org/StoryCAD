@@ -701,7 +701,12 @@ internal static class WorkflowInputBuilder
             ["gaps"] = gaps,
             ["StoryType"] = context.StoryType,
             ["StoryGenre"] = context.StoryGenre,
-            ["Premise"] = context.Premise
+            ["Premise"] = context.Premise,
+            // Collaborator #286: the rest of the Overview, and the Story World.
+            ["StoryIdea"] = context.StoryIdea,
+            ["Concept"] = context.Concept,
+            ["Notes"] = context.Notes,
+            ["StoryWorld"] = context.StoryWorld
         };
     }
 
