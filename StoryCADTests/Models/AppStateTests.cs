@@ -398,4 +398,47 @@ public class AppStateTests
     }
 
     #endregion
+
+    [TestMethod]
+    public void RootDirectory_Headless_HonorsOverrideVariable()
+    {
+        var before = Environment.GetEnvironmentVariable(AppState.RootDirectoryOverrideVariable);
+        var folder = Path.Combine(Path.GetTempPath(), "StoryCADHeadlessRoot");
+        try
+        {
+            Environment.SetEnvironmentVariable(AppState.RootDirectoryOverrideVariable, folder);
+
+            var appState = new AppState { Headless = true };
+
+            Assert.AreEqual(folder, appState.RootDirectory);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(AppState.RootDirectoryOverrideVariable, before);
+        }
+    }
+
+    [TestMethod]
+    public void RootDirectory_NotHeadless_HonorsOverrideOnlyInDebug()
+    {
+        var before = Environment.GetEnvironmentVariable(AppState.RootDirectoryOverrideVariable);
+        var folder = Path.Combine(Path.GetTempPath(), "StoryCADWindowRoot");
+        try
+        {
+            Environment.SetEnvironmentVariable(AppState.RootDirectoryOverrideVariable, folder);
+
+            var appState = new AppState { Headless = false };
+
+#if DEBUG
+            // The UI automation runner is a windowed Debug build (#1421).
+            Assert.AreEqual(folder, appState.RootDirectory);
+#else
+            Assert.AreNotEqual(folder, appState.RootDirectory, "a shipped windowed app ignores the variable");
+#endif
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(AppState.RootDirectoryOverrideVariable, before);
+        }
+    }
 }

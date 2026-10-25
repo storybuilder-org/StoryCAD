@@ -46,7 +46,6 @@
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" />
 		<PackageReference Include="Microsoft.SemanticKernel" />
 		<PackageReference Include="Microsoft.SemanticKernel.Abstractions" />
-		<PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" />
 		<PackageReference Include="Newtonsoft.Json" />
 		<PackageReference Include="NLog" />
 		<PackageReference Include="NLog.Extensions.Logging" />

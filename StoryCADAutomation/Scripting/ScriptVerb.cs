@@ -56,9 +56,14 @@ public enum ScriptVerb
     ExpectDisabled,
     ExpectExpanded,
     ExpectCollapsed,
+    ExpectOffscreen,
+    ExpectGone,
     ExpectTreeContains,
     ExpectWindow,
     ExpectNo,
+
+    // window (#1422 Window_Management)
+    Window,
 
     // presentation
     Narrate,

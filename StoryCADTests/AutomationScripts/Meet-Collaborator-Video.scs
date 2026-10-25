@@ -51,9 +51,6 @@ click WorkflowSkipButton
 
 step "A problem"
 narrate "Here's an example. Problem Builder works on one problem and the two people on either side of it, with a goal, motivation and conflict for each: the writing craft that Debra Dixon's GMC teaches."
-click WorkflowExitButton                 # after Review Each the next picker crashes StoryCAD (0xC000027B);
-click CollaboratorButton                 # closing and reopening Collaborator avoids it (2026-10-24)
-wait-window "Story Collaborator"
 click WorkflowProblemBuilderNavItem
 click name:"How will Leonard and Tony get past Charlie's tech?"
 dialog "Select Problem" click name:"Select"

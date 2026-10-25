@@ -7,10 +7,12 @@ parent: Character Form
 has_toc: false
 ---
 ### Physical Tab
-Physical and Appearance Tabs
+Physical Tab
 
-![](../media/Elements/Character/CharPhysTab.png)
+![](../media/Character-Physical-Tab.png)
 
-These character traits describe the external physical characteristics and appearance of the character.  They are generally self-explanatory.
+These character traits describe the external physical characteristics of the character.  They are generally self-explanatory.
 
-Use the Appearance tab to round out the physical description of the character with looks, style of dress, etc.
+The tab has Age, Sex, Height, Weight, Eye Color, Hair Color, Build, Complexion, Race, Nationality, General Health and Physical Notes.  Eye Color, Hair Color, Build, Complexion, Race and Nationality are drop-down lists; you can pick a choice or type your own.
+
+Use the [Appearance tab](Appearance_Tab.html) to round out the physical description of the character with looks, style of dress, etc.

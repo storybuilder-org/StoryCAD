@@ -306,6 +306,14 @@ public sealed class StoryCADDriver : IUiDriver
         => _locator.VerifyAbsent(target, settle ?? _options.AbsenceSettle);
 
     /// <inheritdoc />
+    public void WaitUntilGone(ElementAddress target, TimeSpan? timeout = null)
+        => _locator.WaitUntilAbsent(target, Timeout(timeout), _options.AbsenceSettle);
+
+    /// <inheritdoc />
+    public void WaitUntilOffscreen(ElementAddress target, TimeSpan? timeout = null)
+        => _locator.WaitUntilOffscreen(target, Timeout(timeout));
+
+    /// <inheritdoc />
     public bool WaitForExit(TimeSpan timeout)
     {
         try
@@ -371,6 +379,93 @@ public sealed class StoryCADDriver : IUiDriver
     {
         // Top-left of the primary display, so the window is in the same place run to run.
         NativeMethods.PlaceWindow(_process.MainWindowHandle, 0, 0, width, height);
+        Wait.UntilInputIsProcessed();
+    }
+
+    /// <inheritdoc />
+    public void SizeMainWindow(int width, int height)
+    {
+        // A new size replaces the frame a later restore must return to.
+        _frameBeforeStateChange = null;
+        var scale = MainWindowDpi / 96.0;
+        try
+        {
+            PlaceVisibleFrame((int)Math.Round(width * scale), (int)Math.Round(height * scale));
+        }
+        catch (AutomationLaunchException ex)
+        {
+            // Here the app is running; a failed resize is a failed step, not a failed launch.
+            throw new AutomationStepException($"window size {width}x{height} failed: {ex.Message}", inner: ex);
+        }
+    }
+
+    /// <summary>The frame before the first minimize or maximize; restore must return to it.</summary>
+    private Rectangle? _frameBeforeStateChange;
+
+    /// <inheritdoc />
+    public void SetMainWindowState(WindowAction action)
+    {
+        var hwnd = _process.MainWindowHandle;
+        switch (action)
+        {
+            case WindowAction.Minimize:
+                _frameBeforeStateChange ??= NativeMethods.VisibleWindowBounds(hwnd);
+                NativeMethods.Minimize(hwnd);
+                WaitForWindowState("minimized", () => NativeMethods.IsIconic(hwnd));
+                return;
+            case WindowAction.Maximize:
+                _frameBeforeStateChange ??= NativeMethods.VisibleWindowBounds(hwnd);
+                NativeMethods.Maximize(hwnd);
+                WaitForWindowState("maximized", () => NativeMethods.IsZoomed(hwnd));
+                return;
+            case WindowAction.Restore:
+                {
+                    var before = _frameBeforeStateChange
+                                 ?? throw new AutomationStepException("window restore follows window minimize or window maximize.");
+                    NativeMethods.Restore(hwnd);
+                    WaitForWindowState("out of the taskbar", () => !NativeMethods.IsIconic(hwnd));
+
+                    // A window maximized before it was minimized comes back maximized; one more
+                    // restore returns it to its normal frame.
+                    if (NativeMethods.IsZoomed(hwnd))
+                    {
+                        NativeMethods.Restore(hwnd);
+                    }
+
+                    WaitForWindowState("restored", () => !NativeMethods.IsIconic(hwnd) && !NativeMethods.IsZoomed(hwnd));
+
+                    // Restoring from the taskbar does not always hand the app the foreground,
+                    // and real input refuses a background app.
+                    NativeMethods.ForceForeground(hwnd);
+                    Wait.UntilInputIsProcessed();
+                    var after = NativeMethods.VisibleWindowBounds(hwnd);
+                    if (after != before)
+                    {
+                        throw new AutomationStepException($"the restored window frame is {after}, not {before} as before.");
+                    }
+
+                    _frameBeforeStateChange = null;
+                    return;
+                }
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(action), action, "window size goes through SizeMainWindow.");
+        }
+    }
+
+    private void WaitForWindowState(string state, Func<bool> reached)
+    {
+        var deadline = DateTime.UtcNow + Timeout(null);
+        while (!reached())
+        {
+            if (DateTime.UtcNow >= deadline)
+            {
+                throw new AutomationStepException($"the main window was not {state} within {Timeout(null).TotalSeconds:0}s.");
+            }
+
+            Thread.Sleep(50);
+        }
+
         Wait.UntilInputIsProcessed();
     }
 
@@ -458,6 +553,58 @@ public sealed class StoryCADDriver : IUiDriver
         }
 
         return area;
+    }
+
+    /// <inheritdoc />
+    public void CaptureElements(string pngPath, IReadOnlyList<ElementAddress> targets, int margin)
+    {
+        var hwnd = _process.MainWindowHandle;
+        var frame = hwnd == IntPtr.Zero ? null : NativeMethods.VisibleWindowBounds(hwnd);
+        if (frame is null)
+        {
+            throw new AutomationStepException("the app has no main window to capture.");
+        }
+
+        var elements = new List<(ElementAddress Target, Rectangle Bounds)>();
+        foreach (var target in targets)
+        {
+            var element = _locator.WaitUntilReady(target, ReadinessRequirement.Exists, Timeout(null));
+            // An offscreen element can still report a stale rectangle; treat it as having none.
+            elements.Add((target, element.IsOffscreen ? Rectangle.Empty : element.BoundingRectangle));
+        }
+
+        Wait.UntilInputIsProcessed();
+        using var image = Capture.Rectangle(ElementArea(frame.Value, elements, margin, NativeMethods.SystemDpi()));
+        image.ToFile(pngPath);
+    }
+
+    /// <summary>
+    ///     The capture area for "screenshot ... of": the union of the elements' screen rectangles,
+    ///     grown by <paramref name="margin" /> 100%-scale pixels (scaled to the display like
+    ///     <see cref="CropArea" />) and clipped to the visible window frame.
+    /// </summary>
+    internal static Rectangle ElementArea(
+        Rectangle frame, IReadOnlyList<(ElementAddress Target, Rectangle Bounds)> elements, int margin, int dpi)
+    {
+        var union = Rectangle.Empty;
+        foreach (var (target, bounds) in elements)
+        {
+            if (bounds.Width <= 0 || bounds.Height <= 0 || !frame.IntersectsWith(bounds))
+            {
+                throw new AutomationStepException($"{target} has no area inside the window to capture.");
+            }
+
+            union = union.IsEmpty ? bounds : Rectangle.Union(union, bounds);
+        }
+
+        if (union.IsEmpty)
+        {
+            throw new AutomationStepException("screenshot ... of names no elements to capture.");
+        }
+
+        var grow = (int)Math.Round(margin * dpi / 96.0);
+        union.Inflate(grow, grow);
+        return Rectangle.Intersect(union, frame);
     }
 
     /// <inheritdoc />
@@ -665,6 +812,23 @@ public sealed class StoryCADDriver : IUiDriver
     }
 
     /// <inheritdoc />
+    public void CloseContextFlyout()
+    {
+        // Shell's CommandBarFlyout stays open, collapsed to an empty box, after an item runs by
+        // UIA Invoke (a real click outside would light-dismiss it); its entries leave the UIA
+        // tree, so the box cannot be detected. Escape closes it. A dialog the item opened (Delete
+        // asks first when other elements refer to the node) must not get that Escape (#1422).
+        Thread.Sleep(ContextFlyoutSettle);
+        Wait.UntilInputIsProcessed();
+        var dialogOpen = _automation.GetDesktop().FindFirstDescendant(cf =>
+            cf.ByProcessId(_process.Id).And(cf.ByAutomationId("PrimaryButton").Or(cf.ByAutomationId("CloseButton")))) is not null;
+        if (!dialogOpen)
+        {
+            PressChord("Escape");
+        }
+    }
+
+    /// <inheritdoc />
     public void RightClickPointer(ElementAddress target, TimeSpan? timeout = null)
     {
         // Right-click is always real pointer: context menus need it (design, Pointer verbs).
@@ -864,6 +1028,9 @@ public sealed class StoryCADDriver : IUiDriver
     // A flyout's close animation can run long on a slow machine; invoking an item whose click
     // did register would run its command twice (a second Save, a second dialog).
     private static readonly TimeSpan MenuCloseWait = TimeSpan.FromMilliseconds(1500);
+
+    // Time for a context-menu item's dialog to appear before CloseContextFlyout looks for it.
+    private static readonly TimeSpan ContextFlyoutSettle = TimeSpan.FromMilliseconds(500);
 
     private static bool StillShowing(AutomationElement element)
     {

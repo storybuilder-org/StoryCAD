@@ -106,10 +106,10 @@ public class StoryProblemRegistryTests
         Assert.IsTrue(string.IsNullOrEmpty(problem.ProblemCategory));
 
         var write = api.UpdateElementProperty(
-            problem.Uuid, "ProblemCategory", StoryCollaborator.Collaborator.StoryProblemCategoryListValue);
+            problem.Uuid, "ProblemCategory", StoryCollaborator.Services.WorkflowSessionService.StoryProblemCategoryListValue);
         Assert.IsTrue(write.IsSuccess);
         Assert.AreEqual("Story problem", problem.ProblemCategory);
         Assert.AreEqual(
-            StoryCollaborator.Collaborator.StoryProblemCategoryListValue, problem.ProblemCategory);
+            StoryCollaborator.Services.WorkflowSessionService.StoryProblemCategoryListValue, problem.ProblemCategory);
     }
 }

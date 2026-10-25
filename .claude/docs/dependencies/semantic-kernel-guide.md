@@ -6,7 +6,6 @@
 - **Version**: 1.41.0
 - **Additional Packages**:
   - Microsoft.SemanticKernel.Abstractions (1.41.0)
-  - Microsoft.SemanticKernel.Planners.OpenAI (1.16.0-preview)
 - **Purpose**: AI/LLM integration for StoryCAD Collaborator feature
 - **Documentation**: Use Context7 MCP for latest docs: `@context7 Microsoft.SemanticKernel` or visit [https://learn.microsoft.com/en-us/semantic-kernel/](https://learn.microsoft.com/en-us/semantic-kernel/)
 

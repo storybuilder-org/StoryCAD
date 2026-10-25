@@ -1,0 +1,129 @@
+# Core_Story_Elements.md as an automation script (#1422). Run with:
+#   StoryCADAutomation run StoryCADTests/AutomationScripts/Core-Story-Elements.scs --window 1036x744 --out automation-output
+# --window is the visible frame at 100% scale (the runner scales it for the display).
+# Hands off the mouse and keyboard while it runs.
+# Manual pages (docs/Story Elements/): Role_Tab.md, Physical_Tab.md, Problem_Tab.md, Scene_Tab.md,
+#   Setting_Tab.md
+# Each screenshot replaces the docs/media image of the same name.
+script "Core Story Elements"
+
+step "Setup: create ElementsTest"
+launch
+click CreateNewOutlineNavItem
+set FileOpenProjectNameTextBox "ElementsTest"
+press "Tab"                               # the name binding updates only when focus leaves the box
+click PrimaryButton                       # "Create outline" writes ElementsTest.stbx at once
+expect window "StoryCAD - Currently editing ElementsTest"
+set TitleTextBox "Elements Test"
+press "Tab"
+expect tree contains "Elements Test"
+
+step "CE-001: Create Character"
+context-menu tree "Elements Test" "Add Elements/Add Character"
+expect tree contains "Elements Test/New Character"
+open-node tree "Elements Test/New Character"
+set CharacterNameTextBox "Alice Smith"
+expect tree contains "Elements Test/Alice Smith"
+select StoryRoleCombo "Major Role"
+tab PhysicalTab
+set AgeTextBox "34"
+press "Tab"
+tab RoleTab                               # switch away and back: the value must survive
+expect StoryRoleCombo text "Major Role"
+tab PhysicalTab
+expect AgeTextBox text "34"
+
+step "CE-002: Create Problem"
+click tree "Elements Test"                # the toolbar Add menu adds under the selected node
+menu AddProblemMenuItem
+expect tree contains "Elements Test/New Problem"
+open-node tree "Elements Test/New Problem"
+set ProblemNameTextBox "Main Conflict"
+expect tree contains "Elements Test/Main Conflict"
+select ConflictTypeCombo "Person vs. Person"
+expect ConflictTypeCombo text "Person vs. Person"
+focus StoryQuestionRichEdit
+type "Will Alice succeed?"
+press "Tab"
+expect StoryQuestionRichEdit text "Will Alice succeed?"
+
+step "CE-003: Create Scene"
+context-menu tree "Elements Test/Main Conflict" "Add Elements/Add Scene"
+expect tree contains "Elements Test/Main Conflict/New Scene"
+open-node tree "Elements Test/Main Conflict/New Scene"
+set SceneNameTextBox "Opening Scene"
+expect tree contains "Elements Test/Main Conflict/Opening Scene"
+select ViewpointCharacterCombo "Alice Smith"
+expect ViewpointCharacterCombo text "Alice Smith"
+focus SceneSketchRichEdit
+type "Alice orders coffee and waits."
+press "Tab"
+expect SceneSketchRichEdit text "Alice orders coffee and waits."
+
+step "CE-004: Create Setting"
+context-menu tree "Elements Test" "Add Elements/Add Setting"
+expect tree contains "Elements Test/New Setting"
+open-node tree "Elements Test/New Setting"
+set SettingNameTextBox "Coffee Shop"
+expect tree contains "Elements Test/Coffee Shop"
+focus LocaleCombo                         # Locale is an editable list: any text is allowed,
+type "Downtown Seattle"                   # typed because the box takes no direct value write
+set PeriodTextBox "Present Day"
+press "Tab"
+expect LocaleCombo text "Downtown Seattle"
+expect PeriodTextBox text "Present Day"
+
+step "CE-005: Create Notes"
+context-menu tree "Elements Test" "Add Elements/Add Notes"
+expect tree contains "Elements Test/New Note"
+open-node tree "Elements Test/New Note"
+set FolderNameTextBox "Research Notes"
+expect tree contains "Elements Test/Research Notes"
+focus FolderNotesTabRichEdit              # Notes elements show the tabbed editor; folders the plain one
+type "Seattle has many coffee shops."
+press "Enter"
+type "Visit one in the morning."
+press "Tab"                               # no text check: a script string cannot hold the line break
+
+step "CE-006: Delete and Restore"
+open-node tree "Elements Test/Research Notes"
+context-menu tree "Elements Test/Research Notes" "Delete element"   # no dialog: nothing refers to it
+expect tree "Elements Test/Research Notes" gone
+expect tree contains "Deleted Story Elements/Research Notes"
+context-menu tree "Deleted Story Elements/Research Notes" "Restore Element"
+expect StatusMessageText text "Restored node Research Notes and all its contents"
+expect tree contains "Elements Test/Research Notes"
+expect tree "Deleted Story Elements/Research Notes" gone
+press "Primary+S"
+expect StatusMessageText text "SaveFile command completed"
+
+step "Manual images: Hamlet's Role, Physical, Problem and Setting tabs"
+menu CloseStoryMenuItem                   # not a plan step; the manual's images show the samples
+menu OpenCreateFileMenuItem
+click SampleOutlinesNavItem
+select FileOpenSamplesList "Hamlet"
+click PrimaryButton                       # "Open sample"
+expect TitleTextBox exists                # the open ends by selecting the root; a node opened before that loses its page
+open-node tree "Hamlet/Characters/Claudius"
+tab RoleTab
+screenshot "Character-Role-Tab.png"
+tab PhysicalTab
+screenshot "Character-Physical-Tab.png"
+open-node tree "Hamlet/Problems/Hamlet wants to avenge his father's murder"
+screenshot "Problem-Problem-Tab.png"
+collapse tree "Hamlet/Problems"           # Problems and Characters push Settings off screen
+collapse tree "Hamlet/Characters"
+open-node tree "Hamlet/Settings/Castle Elsinore battlements"
+screenshot "Setting-Setting-Tab.png"
+menu CloseStoryMenuItem
+
+step "Manual image: Rocky's Scene tab"
+menu OpenCreateFileMenuItem
+click SampleOutlinesNavItem
+select FileOpenSamplesList "Rocky"
+click PrimaryButton
+expect TitleTextBox exists
+open-node tree "Rocky/Scenes/Rocky shakes down Fats"
+screenshot "Scene-Scene-Tab.png"
+menu ExitMenuItem
+expect-exit

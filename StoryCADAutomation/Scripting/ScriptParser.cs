@@ -327,6 +327,7 @@ public static partial class ScriptParser
             "expect-no" => New(ScriptVerb.ExpectNo) with { Target = TakeTarget(reader) },
             "narrate" => BuildNarrate(reader),
             "screenshot" => BuildScreenshot(reader),
+            "window" => BuildWindow(reader),
             _ => throw new SyntaxException($"unknown verb '{verbWord}'; the verb set is fixed in devdocs/issue_1421_dsl_design.md."),
         };
 
@@ -484,7 +485,18 @@ public static partial class ScriptParser
                 return New(ScriptVerb.Screenshot) with { Text = name };
             }
 
+            if (r.Peek is { Kind: TokenKind.Word, Value: "of" })
+            {
+                r.Next();
+                return BuildScreenshotOf(r, name);
+            }
+
             // screenshot "name.png" crop x,y,w,h: a detail of the window for a close-up manual image.
+            if (r.Peek is not { Kind: TokenKind.Word, Value: "crop" })
+            {
+                throw new SyntaxException("after the png file name, expected 'crop x,y,w,h' or 'of target ...'.");
+            }
+
             TakeKeyword(r, "crop");
             var word = TakeWord(r, "crop rectangle x,y,w,h");
             var parts = word.Split(',');
@@ -497,11 +509,84 @@ public static partial class ScriptParser
                     $"crop takes x,y,width,height as whole 100%-scale pixels with width and height above 0, not '{word}'.");
             }
 
+            if (r.Peek is { Kind: TokenKind.Word, Value: "of" })
+            {
+                throw new SyntaxException("a screenshot takes crop or of, not both.");
+            }
+
             return New(ScriptVerb.Screenshot) with
             {
                 Text = name,
                 Crop = new System.Drawing.Rectangle(values[0], values[1], values[2], values[3]),
             };
+        }
+
+        // screenshot "name.png" of target [target ...] [margin N]: the union of the targets'
+        // on-screen rectangles, so the close-up follows the layout instead of fixed pixels.
+        ScriptStatement BuildScreenshotOf(ArgReader r, string name)
+        {
+            var targets = new List<ElementAddress>();
+            while (!r.AtEnd && r.Peek is not { Kind: TokenKind.Word, Value: "margin" or "crop" })
+            {
+                targets.Add(TakeTarget(r));
+            }
+
+            if (targets.Count == 0)
+            {
+                throw new SyntaxException("screenshot ... of takes at least one target.");
+            }
+
+            if (r.Peek is { Kind: TokenKind.Word, Value: "crop" })
+            {
+                throw new SyntaxException("a screenshot takes crop or of, not both.");
+            }
+
+            var margin = 0;
+            if (!r.AtEnd)
+            {
+                TakeKeyword(r, "margin");
+                var word = TakeWord(r, "margin in 100%-scale pixels");
+                if (!int.TryParse(word, NumberStyles.None, CultureInfo.InvariantCulture, out margin))
+                {
+                    throw new SyntaxException($"margin takes a whole number of 100%-scale pixels, 0 or more, not '{word}'.");
+                }
+            }
+
+            return New(ScriptVerb.Screenshot) with { Text = name, CaptureTargets = targets, CaptureMargin = margin };
+        }
+
+        ScriptStatement BuildWindow(ArgReader r)
+        {
+            var action = TakeWord(r, "'size', 'minimize', 'maximize', or 'restore'");
+            switch (action)
+            {
+                case "minimize":
+                    return New(ScriptVerb.Window) with { WindowAction = WindowAction.Minimize };
+                case "maximize":
+                    return New(ScriptVerb.Window) with { WindowAction = WindowAction.Maximize };
+                case "restore":
+                    return New(ScriptVerb.Window) with { WindowAction = WindowAction.Restore };
+                case "size":
+                    {
+                        var word = TakeWord(r, "size as WxH in 100%-scale pixels");
+                        var parts = word.Split('x');
+                        if (parts.Length != 2
+                            || !int.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var width)
+                            || !int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out var height)
+                            || width <= 0 || height <= 0)
+                        {
+                            throw new SyntaxException($"window size takes WxH in 100%-scale pixels, such as 700x744, not '{word}'.");
+                        }
+
+                        return New(ScriptVerb.Window) with
+                        {
+                            WindowAction = WindowAction.Size, WindowSize = new System.Drawing.Size(width, height),
+                        };
+                    }
+
+                default:
+                    throw new SyntaxException($"window takes size, minimize, maximize, or restore, not '{action}'.");
+            }
         }
 
         ScriptStatement BuildPause(ArgReader r)
@@ -554,7 +639,7 @@ public static partial class ScriptParser
 
             ScriptStatement WithCondition(ElementAddress target)
             {
-                var condition = TakeWord(r, "condition (exists, text \"value\", enabled, disabled, expanded, collapsed)");
+                var condition = TakeWord(r, "condition (exists, text \"value\", enabled, disabled, expanded, collapsed, offscreen, gone)");
                 return condition switch
                 {
                     "exists" => New(ScriptVerb.ExpectExists) with { Target = target },
@@ -563,7 +648,9 @@ public static partial class ScriptParser
                     "disabled" => New(ScriptVerb.ExpectDisabled) with { Target = target },
                     "expanded" => New(ScriptVerb.ExpectExpanded) with { Target = target },
                     "collapsed" => New(ScriptVerb.ExpectCollapsed) with { Target = target },
-                    _ => throw new SyntaxException($"unknown expect condition '{condition}'; use exists, text \"value\", enabled, disabled, expanded, or collapsed."),
+                    "offscreen" => New(ScriptVerb.ExpectOffscreen) with { Target = target },
+                    "gone" => New(ScriptVerb.ExpectGone) with { Target = target },
+                    _ => throw new SyntaxException($"unknown expect condition '{condition}'; use exists, text \"value\", enabled, disabled, expanded, collapsed, offscreen, or gone."),
                 };
             }
         }

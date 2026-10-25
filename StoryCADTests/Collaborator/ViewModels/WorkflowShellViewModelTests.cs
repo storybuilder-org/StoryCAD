@@ -50,6 +50,44 @@ public class WorkflowShellViewModelTests
 
     #endregion
 
+    #region Dialog and invoke guard tests (StoryCAD #1660)
+
+    [TestMethod]
+    public void ShouldRunWorkflowForSelection_WhenDialogOpen_ReturnsFalse()
+    {
+        _viewModel.OnWorkflowSelected = _ => Task.CompletedTask;
+        _viewModel.IsDialogOpen = true;
+
+        Assert.IsFalse(_viewModel.ShouldRunWorkflowForSelection("workflow"));
+
+        _viewModel.IsDialogOpen = false;
+        Assert.IsTrue(_viewModel.ShouldRunWorkflowForSelection("workflow"));
+    }
+
+    [TestMethod]
+    public async Task RunInvokedWorkflowAsync_WhenWorkflowThrows_ReportsOnStatusText()
+    {
+        _viewModel.OnWorkflowSelected = _ => throw new InvalidOperationException("second dialog");
+
+        await _viewModel.RunInvokedWorkflowAsync("workflow");
+
+        StringAssert.Contains(_viewModel.StatusText, "second dialog");
+    }
+
+    [TestMethod]
+    public async Task RunInvokedWorkflowAsync_WhenWorkflowSucceeds_LeavesStatusTextEmpty()
+    {
+        object seen = null;
+        _viewModel.OnWorkflowSelected = tag => { seen = tag; return Task.CompletedTask; };
+
+        await _viewModel.RunInvokedWorkflowAsync("workflow");
+
+        Assert.AreEqual("workflow", seen);
+        Assert.IsTrue(string.IsNullOrEmpty(_viewModel.StatusText));
+    }
+
+    #endregion
+
     #region Property Tests
 
     [TestMethod]

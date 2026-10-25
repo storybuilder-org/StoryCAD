@@ -32,6 +32,12 @@ public interface IUiDriver : IDisposable
     /// <summary>Settle-then-check absence: fails if the target appears at any point in the settle window.</summary>
     void VerifyNeverAppears(ElementAddress target, TimeSpan? settle = null);
 
+    /// <summary>Waits until the target is absent (expect gone): for a control an action removes.</summary>
+    void WaitUntilGone(ElementAddress target, TimeSpan? timeout = null);
+
+    /// <summary>Waits until the target is found and reported off screen (expect offscreen).</summary>
+    void WaitUntilOffscreen(ElementAddress target, TimeSpan? timeout = null);
+
     /// <summary>Waits for app process exit (the expect-exit verb).</summary>
     bool WaitForExit(TimeSpan timeout);
 
@@ -47,6 +53,13 @@ public interface IUiDriver : IDisposable
     ///     top-left corner).
     /// </summary>
     void CaptureMainWindow(string pngPath, System.Drawing.Rectangle? crop = null);
+
+    /// <summary>
+    ///     Waits until each of <paramref name="targets" /> is found, then saves the union of their
+    ///     on-screen rectangles, grown by <paramref name="margin" /> 100%-scale pixels on every
+    ///     side and clipped to the main window, as a PNG at <paramref name="pngPath" />.
+    /// </summary>
+    void CaptureElements(string pngPath, IReadOnlyList<ElementAddress> targets, int margin);
 
     /// <summary>Saves an image of the open ContentDialog only as a PNG at <paramref name="pngPath" />.</summary>
     void CaptureOpenDialog(string pngPath);
@@ -101,6 +114,12 @@ public interface IUiDriver : IDisposable
     /// <summary>Real-pointer right click (context menus need real input; there is no pattern realization).</summary>
     void RightClickPointer(ElementAddress target, TimeSpan? timeout = null);
 
+    /// <summary>
+    ///     After a context-menu item runs: presses Escape unless the item opened a dialog, so a
+    ///     right-click flyout left open does not catch the next pointer input.
+    /// </summary>
+    void CloseContextFlyout();
+
     /// <summary>Real-pointer drag: press on source, eased move, release on target.</summary>
     void Drag(ElementAddress from, ElementAddress to, TimeSpan? timeout = null);
 
@@ -115,6 +134,19 @@ public interface IUiDriver : IDisposable
 
     /// <summary>Restores the main window and sets its outer size in physical pixels (runner --window).</summary>
     void ResizeMainWindow(int width, int height);
+
+    /// <summary>
+    ///     Sets the main window's visible frame to <paramref name="width" /> x <paramref name="height" />
+    ///     100%-scale pixels at the top-left of the primary display (the window size verb).
+    /// </summary>
+    void SizeMainWindow(int width, int height);
+
+    /// <summary>
+    ///     Minimizes, maximizes, or restores the main window and waits until Windows reports that
+    ///     state. Restore also fails unless the visible frame is back where it was before the
+    ///     first minimize or maximize.
+    /// </summary>
+    void SetMainWindowState(WindowAction action);
 
     // --- keyboard and focus ----------------------------------------------------------------
 

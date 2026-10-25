@@ -152,7 +152,7 @@ public sealed class ScriptInterpreter
 
     private static bool IsAssertion(ScriptVerb verb) => verb is
         ScriptVerb.ExpectExists or ScriptVerb.ExpectText or ScriptVerb.ExpectEnabled or
-        ScriptVerb.ExpectDisabled or ScriptVerb.ExpectExpanded or ScriptVerb.ExpectCollapsed or ScriptVerb.ExpectTreeContains or ScriptVerb.ExpectWindow or
+        ScriptVerb.ExpectDisabled or ScriptVerb.ExpectExpanded or ScriptVerb.ExpectCollapsed or ScriptVerb.ExpectOffscreen or ScriptVerb.ExpectGone or ScriptVerb.ExpectTreeContains or ScriptVerb.ExpectWindow or
         ScriptVerb.ExpectNo or ScriptVerb.ExpectExit;
 
     /// <summary>Dispatches one statement; returns the (possibly updated) current step name.</summary>
@@ -256,6 +256,7 @@ public sealed class ScriptInterpreter
                     var d = RequireDriver();
                     d.RightClickPointer(s.Target!);
                     WalkFlyoutPath(d, s.Text!.Split('/'));
+                    d.CloseContextFlyout();
                     return currentStep;
                 }
 
@@ -372,6 +373,16 @@ public sealed class ScriptInterpreter
                     return currentStep;
                 }
 
+            case ScriptVerb.ExpectOffscreen:
+                // Present but out of view: a stacked SplitView pushes the page past the window
+                // edge instead of removing it, so expect-no cannot check it (#1422).
+                RequireDriver().WaitUntilOffscreen(s.Target!);
+                return currentStep;
+
+            case ScriptVerb.ExpectGone:
+                RequireDriver().WaitUntilGone(s.Target!);
+                return currentStep;
+
             case ScriptVerb.ExpectExpanded:
             case ScriptVerb.ExpectCollapsed:
                 {
@@ -412,6 +423,21 @@ public sealed class ScriptInterpreter
                 RequireDriver().VerifyNeverAppears(s.Target!);
                 return currentStep;
 
+            case ScriptVerb.Window:
+                {
+                    var d = RequireDriver();
+                    if (s.WindowAction == WindowAction.Size)
+                    {
+                        d.SizeMainWindow(s.WindowSize!.Value.Width, s.WindowSize.Value.Height);
+                    }
+                    else
+                    {
+                        d.SetMainWindowState(s.WindowAction!.Value);
+                    }
+
+                    return currentStep;
+                }
+
             case ScriptVerb.Narrate:
                 _options.Profile.Narrate(s.Text!, _options.Log);
                 return currentStep;
@@ -450,6 +476,10 @@ public sealed class ScriptInterpreter
                     if (s.Verb == ScriptVerb.ScreenshotDialog)
                     {
                         RequireDriver().CaptureOpenDialog(path);
+                    }
+                    else if (s.CaptureTargets is { } targets)
+                    {
+                        RequireDriver().CaptureElements(path, targets, s.CaptureMargin ?? 0);
                     }
                     else
                     {
