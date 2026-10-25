@@ -854,8 +854,27 @@ public class Collaborator : ICollaborator
             XamlRoot = xamlRoot
         };
 
-        var result = await dialog.ShowAsync();
+        var result = await ShowDialogAsync(dialog);
         return result == ContentDialogResult.Primary;
+    }
+
+    /// <summary>
+    /// Shows one Collaborator dialog with workflow navigation held off until it closes
+    /// (StoryCAD #1660: a second ContentDialog on the same window ends the process).
+    /// </summary>
+    private async Task<ContentDialogResult> ShowDialogAsync(ContentDialog dialog)
+    {
+        if (_shellViewModel != null)
+            _shellViewModel.IsDialogOpen = true;
+        try
+        {
+            return await dialog.ShowAsync();
+        }
+        finally
+        {
+            if (_shellViewModel != null)
+                _shellViewModel.IsDialogOpen = false;
+        }
     }
 
     /// <summary>
@@ -939,8 +958,19 @@ public class Collaborator : ICollaborator
 
         // Show ElementPicker - pass API so Create works; currentGuid for pre-selection
         var pickerVM = new ElementPickerVM();
-        var selectedGuid = await pickerVM.ShowPicker(_storyModel!, xamlRoot,
-            requirement.ElementType, requirement.ElementLabel, prompt.Preselect, _storyApi);
+        if (_shellViewModel != null)
+            _shellViewModel.IsDialogOpen = true;
+        string? selectedGuid;
+        try
+        {
+            selectedGuid = await pickerVM.ShowPicker(_storyModel!, xamlRoot,
+                requirement.ElementType, requirement.ElementLabel, prompt.Preselect, _storyApi);
+        }
+        finally
+        {
+            if (_shellViewModel != null)
+                _shellViewModel.IsDialogOpen = false;
+        }
 
         // WinUI: sequential ContentDialogs can swallow the next ShowAsync if the previous
         // dialog has not fully torn down. Brief yield so Problem → Protagonist → Antagonist
