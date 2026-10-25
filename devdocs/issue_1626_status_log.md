@@ -1,5 +1,15 @@
 # Issue #1626 status log
 
+## 2026-10-25: Meet Collaborator video, first recording
+
+**Branch:** `issue-1626-youtube-upload`.
+
+**Done:** `wait <target> condense` (waits up to 5 minutes; `video` cuts the wait to 1.5 s at each end). The video body ends before the app closes. `Meet-Collaborator-Video.scs` passes a full test run and recorded a first take (3:26) with captions. Workaround in the script: after Review Each, the next element picker crashes StoryCAD (0xC000027B), so the script closes and reopens Collaborator first.
+
+**Tests:** StoryCADAutomation tests 311 passed, 0 failed.
+
+**Next:** Terry reviews the first take. The Collaborator window opens smaller than the recorded area; the script should enlarge it. File the Review Each picker crash as a StoryCAD issue.
+
 ## 2026-10-23: captions and sign-in per run
 
 **Branch:** `issue-1626-youtube-upload`.
