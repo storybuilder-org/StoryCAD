@@ -10,7 +10,8 @@ namespace StoryCADAutomation.Video;
 /// <summary>
 ///     `video &lt;script.scs&gt; --out &lt;dir&gt; --assets &lt;dir&gt;` (#1421 Milestone 5, video design
 ///     sections 8.2 and 9): runs the script in the presentation profile while ffmpeg records
-///     the StoryCAD window, then assembles &lt;out&gt;/&lt;script name&gt;.mp4.
+///     the StoryCAD window, then assembles &lt;out&gt;/&lt;script name&gt;.mp4 and writes its
+///     captions to &lt;out&gt;/&lt;script name&gt;.srt (#1626).
 /// </summary>
 internal static class VideoCommand
 {
@@ -25,9 +26,20 @@ internal static class VideoCommand
 
     internal const string MusicFilePattern = "intro-music.*";
 
+    // "intro-music.*" does not match this name: the pattern needs a dot right after "intro-music".
+    /// <summary>One line of text that credits the intro music on the title card (#1626, Terry, 2026-10-20).</summary>
+    internal const string MusicCreditFile = "intro-music-credit.txt";
+
+    /// <summary>
+    ///     A card that starts sooner than this into the recording starts at 0 instead, so the
+    ///     viewer never sees StoryCAD start up (Terry, 2026-10-19, #1626: the intro video showed
+    ///     the Open dialog and the DEV BUILD title for 0.57 s before its first card).
+    /// </summary>
+    internal static readonly TimeSpan CardStartCover = TimeSpan.FromSeconds(1);
+
     private const string SegoeUi = @"C:\Windows\Fonts\segoeui.ttf";
 
-    public static int Run(string scriptPath, string outputDirectory, string assetsDirectory)
+    public static int Run(string scriptPath, string outputDirectory, string assetsDirectory, string? sharedDirectory = null)
     {
         var ffmpeg = Ffmpeg.FromEnvironment(out var problem);
         if (ffmpeg is null)
@@ -39,6 +51,12 @@ internal static class VideoCommand
         if (!Directory.Exists(assetsDirectory))
         {
             Console.Error.WriteLine($"video: the assets folder '{assetsDirectory}' does not exist.");
+            return EnvironmentFailure;
+        }
+
+        if (sharedDirectory is not null && !Directory.Exists(sharedDirectory))
+        {
+            Console.Error.WriteLine($"video: the shared folder '{sharedDirectory}' does not exist.");
             return EnvironmentFailure;
         }
 
@@ -94,9 +112,12 @@ internal static class VideoCommand
         var driverOptions = new DriverOptions
         {
             AppPath = Program.DefaultAppPath(), RequiredDpiScalePercent = null, MinDesktopWidth = 0, MinDesktopHeight = 0,
+            SeedOutlines = AssetOutlines(assetsDirectory),
         };
 
         ScreenRecorder? recorder = null;
+        // When each statement started on the runner's clock, so the body can end before StoryCAD closes.
+        var starts = new List<(ScriptStatement Statement, TimeSpan Start)>();
         var interpreter = new ScriptInterpreter(
             () =>
             {
@@ -123,7 +144,7 @@ internal static class VideoCommand
             },
             new InterpreterOptions
             {
-                OnStatement = Program.PrintOutcome,
+                OnStatement = RecordStarts(starts, () => clock.Elapsed, Program.PrintOutcome),
                 OutputDirectory = output,
                 MenuOpeners = facts.MenuOpeners,
                 Profile = profile,
@@ -178,7 +199,7 @@ internal static class VideoCommand
 
         var plan = Plan(parsed, profile, recorder.ClockOffset, recordingPath,
             ffmpeg.Duration(recordingPath) ?? clock.Elapsed - recorder.ClockOffset,
-            assetsDirectory, ffmpeg, voiceId, clipFolder);
+            assetsDirectory, ffmpeg, voiceId, clipFolder, sharedDirectory, AppCloseTime(starts));
         var mp4 = Path.Combine(output, Path.GetFileNameWithoutExtension(scriptPath) + ".mp4");
         try
         {
@@ -190,9 +211,39 @@ internal static class VideoCommand
             return EnvironmentFailure;
         }
 
+        // The captions sit next to the video, for the captions entry in the upload's meta.json (#1626).
+        var srt = Path.ChangeExtension(mp4, ".srt");
+        Captions.Write(plan, srt);
         Console.WriteLine($"video: {mp4}");
+        Console.WriteLine($"video: {srt}");
         return Passed;
     }
+
+    /// <summary>
+    ///     The outline files in the assets folder. The run copies them into {scratch}/outlines,
+    ///     so the intro video opens Terry's filled-in copy of a sample; the shipped sample has
+    ///     empty tabs (#1626, Terry, 2026-10-20).
+    /// </summary>
+    /// <summary>
+    ///     The first file that matches the pattern in the assets folder, else in the shared
+    ///     folder, or null. A video's own file wins over the shared one (#1626, Terry, 2026-10-20).
+    /// </summary>
+    internal static string? TitleCardFile(string assetsDirectory, string? sharedDirectory, string pattern)
+    {
+        foreach (var folder in new[] { assetsDirectory, sharedDirectory })
+        {
+            if (folder is not null && Directory.Exists(folder) &&
+                Directory.GetFiles(folder, pattern).OrderBy(f => f, StringComparer.Ordinal).FirstOrDefault() is { } file)
+            {
+                return file;
+            }
+        }
+
+        return null;
+    }
+
+    internal static IReadOnlyList<string> AssetOutlines(string assetsDirectory)
+        => Directory.GetFiles(assetsDirectory, "*.stbx").OrderBy(f => f, StringComparer.Ordinal).ToList();
 
     /// <summary>The window size in screen pixels that gives StoryCAD a 1920x1080 layout at this DPI.</summary>
     internal static Size CaptureSize(int dpi)
@@ -210,15 +261,63 @@ internal static class VideoCommand
     internal static int BorderInset(int dpi) => (int)Math.Ceiling(dpi / 96.0);
 
     /// <summary>
+    ///     The OnStatement callback for a video run: adds each statement with its start on the
+    ///     runner's clock (the clock when it ended, minus its duration), then calls <paramref name="next" />.
+    /// </summary>
+    internal static Action<StatementOutcome> RecordStarts(List<(ScriptStatement Statement, TimeSpan Start)> starts,
+        Func<TimeSpan> elapsed, Action<StatementOutcome> next) => outcome =>
+    {
+        starts.Add((outcome.Statement, elapsed() - outcome.Duration));
+        next(outcome);
+    };
+
+    /// <summary>
+    ///     When StoryCAD starts to close, on the runner's clock, or null when the script has no
+    ///     close or expect-exit. For expect-exit it is the start of the statement before it: that
+    ///     statement makes the click that closes the app, and StoryCAD can be gone in under 300 ms
+    ///     after the click, before expect-exit starts. For close it is the start of close, which
+    ///     comes before its own click (#1626, Terry, 2026-10-23: the intro video showed the
+    ///     Windows desktop under its closing card).
+    /// </summary>
+    internal static TimeSpan? AppCloseTime(IReadOnlyList<(ScriptStatement Statement, TimeSpan Start)> starts)
+    {
+        for (var i = 0; i < starts.Count; i++)
+        {
+            switch (starts[i].Statement.Verb)
+            {
+                case ScriptVerb.Close:
+                    return starts[i].Start;
+                case ScriptVerb.ExpectExit:
+                    return starts[i > 0 ? i - 1 : i].Start;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    ///     The length of the body in the video: the recording up to the time StoryCAD starts to
+    ///     close, in recording time, or the whole recording when that time is unknown, not
+    ///     above 0, or after the end of the recording.
+    /// </summary>
+    internal static TimeSpan BodyLength(TimeSpan recordingLength, TimeSpan? appClosed)
+        => appClosed is { } t && t > TimeSpan.Zero && t < recordingLength ? t : recordingLength;
+
+    /// <summary>
     ///     The plan for assembly: each show card covers its step, each clip starts at its cue,
-    ///     all moved from the runner's clock to the recording's time.
+    ///     all moved from the runner's clock to the recording's time. A card that starts under
+    ///     <see cref="CardStartCover" /> into the recording starts at 0; nothing else moves.
+    ///     A card whose next step also has a card stays up until that card has faded in, so the
+    ///     app does not show between them (#1626, Terry, 2026-10-20). The logo, intro music and
+    ///     credit come from the assets folder, else from the shared folder that all videos use.
     /// </summary>
     internal static VideoPlan Plan(ScriptParseResult parsed, PresentationProfile profile, TimeSpan offset,
         string recordingPath, TimeSpan recordingLength, string assetsDirectory, Ffmpeg? ffmpeg,
-        string? voiceId, string clipFolder)
+        string? voiceId, string clipFolder, string? sharedDirectory = null, TimeSpan? appCloseTime = null)
     {
         var cards = new List<VideoCard>();
         var step = -1;
+        var lastCardStep = -2;
         foreach (var s in parsed.Statements)
         {
             if (s.Verb == ScriptVerb.Step)
@@ -228,10 +327,24 @@ internal static class VideoCommand
             else if (s.Verb is ScriptVerb.ShowText or ScriptVerb.ShowImage && step < profile.Steps.Count)
             {
                 var span = profile.Steps[step];
-                cards.Add(new VideoCard(span.Start - offset, span.End - offset,
+                var start = span.Start - offset;
+                if (step == lastCardStep + 1)
+                {
+                    cards[^1] = cards[^1] with { End = start + VideoAssembler.CardFade, FadesOut = false };
+                }
+
+                lastCardStep = step;
+                cards.Add(new VideoCard(start < CardStartCover ? TimeSpan.Zero : start, span.End - offset,
                     s.Verb == ScriptVerb.ShowText ? s.Text : null,
                     s.Verb == ScriptVerb.ShowImage ? Path.GetFullPath(Path.Combine(assetsDirectory, s.Text!)) : null));
             }
+        }
+
+        // A cue holds the spoken text; the caption clause, when there is one, gives the written form.
+        var captions = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var narrate in parsed.Statements.Where(s => s.Verb == ScriptVerb.Narrate))
+        {
+            captions.TryAdd(narrate.Text!, narrate.Caption ?? narrate.Text!);
         }
 
         var clips = new List<ClipPlacement>();
@@ -240,7 +353,8 @@ internal static class VideoCommand
             var path = string.IsNullOrWhiteSpace(voiceId) ? null : Path.Combine(clipFolder, VoiceClips.ClipName(voiceId, cue.Text));
             if (path is not null && File.Exists(path))
             {
-                clips.Add(new ClipPlacement(path, cue.Start - offset));
+                clips.Add(new ClipPlacement(path, cue.Start - offset, cue.End - cue.Start,
+                    captions.GetValueOrDefault(cue.Text, cue.Text)));
             }
             else
             {
@@ -248,19 +362,38 @@ internal static class VideoCommand
             }
         }
 
-        var logo = Path.Combine(assetsDirectory, LogoFile);
-        var music = Directory.GetFiles(assetsDirectory, MusicFilePattern).OrderBy(f => f, StringComparer.Ordinal).FirstOrDefault();
+        var bodyLength = BodyLength(recordingLength, appCloseTime - offset);
+
+        // Condensed waits: cut each down to its two ends, then move everything into body time (#1626).
+        var cuts = Cuts.FromWaits(profile.CondensedWaits.Select(w => (w.Start - offset, w.End - offset)),
+            clips.Select(c => (c.Start, c.Start + c.Length)), bodyLength);
+        cards = cards.Select(c => c with { Start = Cuts.Map(c.Start, cuts), End = Cuts.Map(c.End, cuts) }).ToList();
+        clips = clips.Select(c => c with { Start = Cuts.Map(c.Start, cuts) }).ToList();
+        bodyLength = Cuts.Map(bodyLength, cuts);
+        foreach (var clip in clips.Where(c => c.Start + c.Length > bodyLength))
+        {
+            // Assembly cuts the clip at the end of the body; a pause before the closing statement fixes it.
+            Console.WriteLine($"video: warning: a clip runs past the end of the recording part and is cut: \"{clip.Caption}\"");
+        }
+
+        var logo = TitleCardFile(assetsDirectory, sharedDirectory, LogoFile);
+        var creditPath = TitleCardFile(assetsDirectory, sharedDirectory, MusicCreditFile);
+        var credit = creditPath is null ? null : File.ReadLines(creditPath).FirstOrDefault()?.Trim();
+        var music = TitleCardFile(assetsDirectory, sharedDirectory, MusicFilePattern);
         return new VideoPlan
         {
             RecordingPath = recordingPath,
-            RecordingLength = recordingLength,
+            // The body stops when StoryCAD starts to close, so the desktop never shows (#1626).
+            RecordingLength = bodyLength,
+            Cuts = cuts,
             Title = parsed.Statements.FirstOrDefault(s => s.Verb == ScriptVerb.Title)?.Text,
             Closing = parsed.Statements.FirstOrDefault(s => s.Verb == ScriptVerb.Closing)?.Text,
             Cards = cards,
             Clips = clips,
-            LogoPath = File.Exists(logo) ? Path.GetFullPath(logo) : null,
+            LogoPath = logo is null ? null : Path.GetFullPath(logo),
             MusicPath = music is null ? null : Path.GetFullPath(music),
             MusicLength = music is null ? null : ffmpeg?.Duration(music),
+            MusicCredit = string.IsNullOrEmpty(credit) ? null : credit,
         };
     }
 }

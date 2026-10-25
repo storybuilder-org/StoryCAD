@@ -23,6 +23,12 @@ public sealed class InterpreterOptions
     public TimeSpan ExitTimeout { get; init; } = TimeSpan.FromSeconds(15);
 
     /// <summary>
+    ///     How long "wait &lt;target&gt; condense" waits: a Collaborator run takes from about 10 s to
+    ///     about 4 minutes (#1626, Terry, 2026-10-24).
+    /// </summary>
+    public TimeSpan CondenseTimeout { get; init; } = TimeSpan.FromMinutes(5);
+
+    /// <summary>
     ///     Menu item id to the ids clicked to reach it, from the XAML (runner wires
     ///     <c>XamlUiFacts.MenuOpeners</c>). An id missing here must already be showing in an open flyout.
     /// </summary>

@@ -93,6 +93,12 @@ public static partial class ScriptParser
     public const double MaxHoldSeconds = 30;
 
     /// <summary>
+    ///     In a show text string, these two characters (backslash, n) start a new line on the
+    ///     card. No other string has an escape (#1626, Terry, 2026-10-20).
+    /// </summary>
+    public const string CardLineBreak = @"\n";
+
+    /// <summary>
     ///     The placement rules for the video statements (devdocs/issue_1421_video_design.md,
     ///     section 6.2): title first after script, closing last, narrate lines at the head of
     ///     their step, and a show step that holds only narrate lines and one show.
@@ -314,12 +320,12 @@ public static partial class ScriptParser
             "save-file-dialog" => New(ScriptVerb.SaveFileDialog) with { Text = TakeString(reader, "file path") },
             "open-file-dialog" => New(ScriptVerb.OpenFileDialog) with { Text = TakeString(reader, "file path") },
             "dialog" => BuildDialog(reader),
-            "wait" => New(ScriptVerb.Wait) with { Target = TakeTarget(reader) },
+            "wait" => BuildWait(reader),
             "wait-window" => New(ScriptVerb.WaitWindow) with { Text = TakeString(reader, "window title") },
             "pause" => BuildPause(reader),
             "expect" => BuildExpect(reader),
             "expect-no" => New(ScriptVerb.ExpectNo) with { Target = TakeTarget(reader) },
-            "narrate" => New(ScriptVerb.Narrate) with { Text = TakeString(reader, "narration text") },
+            "narrate" => BuildNarrate(reader),
             "screenshot" => BuildScreenshot(reader),
             "window" => BuildWindow(reader),
             _ => throw new SyntaxException($"unknown verb '{verbWord}'; the verb set is fixed in devdocs/issue_1421_dsl_design.md."),
@@ -354,16 +360,48 @@ public static partial class ScriptParser
             return New(ScriptVerb.Step) with { Text = name, Seconds = seconds };
         }
 
+        // wait <target> condense: waits up to 5 minutes, and the video keeps only the start and
+        // end of the wait (#1626, Terry, 2026-10-24).
+        ScriptStatement BuildWait(ArgReader r)
+        {
+            var target = TakeTarget(r);
+            if (r.AtEnd)
+            {
+                return New(ScriptVerb.Wait) with { Target = target };
+            }
+
+            TakeKeyword(r, "condense");
+            return New(ScriptVerb.Wait) with { Target = target, Condense = true };
+        }
+
+        // narrate "spoken" caption "written": the caption text when the spoken form reads badly,
+        // for example "dot S-T-B-X" as ".stbx" (#1626, Terry, 2026-10-23).
+        ScriptStatement BuildNarrate(ArgReader r)
+        {
+            var text = TakeString(r, "narration text");
+            if (r.AtEnd)
+            {
+                return New(ScriptVerb.Narrate) with { Text = text };
+            }
+
+            TakeKeyword(r, "caption");
+            return New(ScriptVerb.Narrate) with { Text = text, Caption = TakeString(r, "caption text") };
+        }
+
         ScriptStatement BuildShow(ArgReader r)
         {
             var kind = TakeWord(r, "'image' or 'text'");
             return kind switch
             {
                 "image" => New(ScriptVerb.ShowImage) with { Text = TakeString(r, "image file name") },
-                "text" => New(ScriptVerb.ShowText) with { Text = TakeString(r, "card text") },
+                "text" => New(ScriptVerb.ShowText) with { Text = CardLines(TakeString(r, "card text")) },
                 _ => throw new SyntaxException($"show takes 'image' or 'text', not '{kind}'."),
             };
         }
+
+        // Only show text reads \n: other strings hold Windows paths, where \n is part of a
+        // folder name ("C:\new"). A card list puts one item on each line (#1626, Terry, 2026-10-20).
+        static string CardLines(string text) => text.Replace(CardLineBreak, "\n", StringComparison.Ordinal);
 
         ScriptStatement BuildDrag(ArgReader r)
         {

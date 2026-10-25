@@ -99,6 +99,19 @@ internal sealed class ScratchArea
             JsonSerializer.Serialize(preferences, new JsonSerializerOptions { WriteIndented = true }));
     }
 
+    /// <summary>
+    ///     Copies each file into <see cref="OutlineDirectory" /> under its own name, so a script
+    ///     opens it as "{scratch}/outlines/&lt;name&gt;". The copy is the one StoryCAD changes;
+    ///     the source file is never opened by the app (#1626, Terry, 2026-10-20).
+    /// </summary>
+    public void CopyOutlines(IEnumerable<string> files)
+    {
+        foreach (var file in files)
+        {
+            File.Copy(file, Path.Combine(OutlineDirectory, Path.GetFileName(file)), overwrite: true);
+        }
+    }
+
     private static readonly string[] SignInKeys = ["StoreUserGuid", "StoreActivationJwt", "StoreActivationJwtExpiry", "StoreActivationPath"];
 
     /// <summary>

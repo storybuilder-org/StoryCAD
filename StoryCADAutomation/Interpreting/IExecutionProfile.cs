@@ -33,7 +33,7 @@ public interface IExecutionProfile
     /// <summary><see cref="Approach" /> for a target inside a named dialog window.</summary>
     void ApproachInWindow(IUiDriver driver, string windowTitle, ElementAddress target);
 
-    /// <summary>Realizes the type verb: all at once in test, one character at a time in presentation.</summary>
+    /// <summary>Realizes the type verb: real keystrokes, all in one driver call, in both profiles.</summary>
     void Type(IUiDriver driver, string text);
 
     /// <summary>Realizes the set verb: Value pattern in test, visible typing in presentation.</summary>
@@ -53,4 +53,10 @@ public interface IExecutionProfile
 
     /// <summary>Ends the open step, if any: waits for its narration, then for its hold.</summary>
     void EndStep();
+
+    /// <summary>
+    ///     Runs a condensed wait ("wait &lt;target&gt; condense"). Test just waits; presentation
+    ///     also records when the wait ran, so the video can cut it (#1626).
+    /// </summary>
+    void Condense(Action wait) => wait();
 }

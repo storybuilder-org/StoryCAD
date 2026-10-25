@@ -1,5 +1,6 @@
 #if WINDOWS10_0_22621_0_OR_GREATER
 using System.Drawing;
+using StoryCADAutomation.Driver;
 using StoryCADAutomation.Interpreting;
 using StoryCADAutomation.Scripting;
 using StoryCADAutomation.Video;
@@ -86,6 +87,126 @@ public class VideoTests
     }
 
     [TestMethod]
+    public void BodyArguments_WithCard_FadesTheCardInAndOut()
+    {
+        var plan = new VideoPlan
+        {
+            RecordingPath = "rec.mkv",
+            RecordingLength = TimeSpan.FromSeconds(20),
+            Cards = new[] { new VideoCard(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(9.5), null, "pie.png") },
+        };
+
+        var filter = Filter(VideoAssembler.BodyArguments(plan, "body.mp4"));
+
+        StringAssert.Contains(filter, "fps=30,format=yuva420p,fade=t=in:st=4:d=0.3:alpha=1,fade=t=out:st=9.2:d=0.3:alpha=1[c0]");
+    }
+
+    [TestMethod]
+    public void CardFades_WithCardShorterThanTwoFades_UsesHalfItsLengthForEach()
+    {
+        var fades = VideoAssembler.CardFades(new VideoCard(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1.4), "Short", null));
+
+        Assert.AreEqual(",format=yuva420p,fade=t=in:st=1:d=0.2:alpha=1,fade=t=out:st=1.2:d=0.2:alpha=1", fades);
+    }
+
+    [TestMethod]
+    public void CardFades_WithCardAtZero_DoesNotFadeIn()
+    {
+        var fades = VideoAssembler.CardFades(new VideoCard(TimeSpan.Zero, TimeSpan.FromSeconds(3), "First", null));
+
+        Assert.AreEqual(",format=yuva420p,fade=t=out:st=2.7:d=0.3:alpha=1", fades);
+    }
+
+    [TestMethod]
+    public void CardFades_WithFadesOutFalse_FadesInOnly()
+    {
+        var fades = VideoAssembler.CardFades(new VideoCard(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3), "Held", null, FadesOut: false));
+
+        Assert.AreEqual(",format=yuva420p,fade=t=in:st=1:d=0.3:alpha=1", fades);
+    }
+
+    [TestMethod]
+    public void Plan_WithCardStepsApart_FadesEachCardOut()
+    {
+        var now = TimeSpan.Zero;
+        var profile = new PresentationProfile(1.0, () => now, t => now += t, _ => TimeSpan.FromSeconds(3));
+        var parsed = ScriptParser.Parse(
+            "script \"Cards\"\nstep \"A\"\nnarrate \"one\"\nshow text \"First\"\n" +
+            "step \"B\"\nnarrate \"two\"\nstep \"C\"\nnarrate \"three\"\nshow text \"Third\"\n");
+        new ScriptInterpreter(() => throw new InvalidOperationException(),
+            new InterpreterOptions { Profile = profile, Log = _ => { } }).Execute(parsed);
+
+        var plan = VideoCommand.Plan(parsed, profile, TimeSpan.Zero, "rec.mkv", TimeSpan.FromSeconds(9),
+            _folder, null, null, _folder);
+
+        Assert.AreEqual(2, plan.Cards.Count);
+        Assert.IsTrue(plan.Cards[0].FadesOut);
+        Assert.AreEqual(profile.Steps[0].End, plan.Cards[0].End);
+    }
+
+    [TestMethod]
+    public void CardFades_WithEmptyCard_ReturnsNoFades()
+    {
+        Assert.AreEqual(string.Empty,
+            VideoAssembler.CardFades(new VideoCard(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2), "None", null)));
+    }
+
+    [TestMethod]
+    public void JoinArguments_WithTitleBodyAndClosing_CrossfadesAtCumulativeOffsets()
+    {
+        var parts = new[]
+        {
+            ("title.mp4", TimeSpan.FromSeconds(3)), ("body.mp4", TimeSpan.FromSeconds(6)), ("closing.mp4", TimeSpan.FromSeconds(10)),
+        };
+
+        var args = VideoAssembler.JoinArguments(parts, "out.mp4").ToList();
+
+        // The second offset is 3 + 6 - 0.5 - 0.5: the first crossfade made the joined video shorter.
+        Assert.AreEqual(
+            "[0:v][1:v]xfade=transition=fade:duration=0.5:offset=2.5[v1];[0:a][1:a]acrossfade=d=0.5[a1];" +
+            "[v1][2:v]xfade=transition=fade:duration=0.5:offset=8[v2];[a1][2:a]acrossfade=d=0.5[a2]",
+            Filter(args));
+        CollectionAssert.AreEqual(new[] { "-map", "[v2]", "-map", "[a2]" }, args.GetRange(args.IndexOf("-map"), 4));
+        Assert.AreEqual("18", args[args.IndexOf("-t") + 1]);
+        Assert.AreEqual("+faststart", args[args.IndexOf("-movflags") + 1]);
+        Assert.AreEqual("libx264", args[args.IndexOf("-c:v") + 1]);
+        Assert.AreEqual("out.mp4", args[^1]);
+        CollectionAssert.DoesNotContain(args, "concat");
+    }
+
+    [TestMethod]
+    public void JoinArguments_WithoutClosing_CrossfadesOnce()
+    {
+        var parts = new[] { ("title.mp4", TimeSpan.FromSeconds(3)), ("body.mp4", TimeSpan.FromSeconds(6)) };
+
+        var args = VideoAssembler.JoinArguments(parts, "out.mp4").ToList();
+
+        Assert.AreEqual(
+            "[0:v][1:v]xfade=transition=fade:duration=0.5:offset=2.5[v1];[0:a][1:a]acrossfade=d=0.5[a1]", Filter(args));
+        Assert.AreEqual("8.5", args[args.IndexOf("-t") + 1]);
+    }
+
+    [TestMethod]
+    public void JoinArguments_WithoutTitle_CrossfadesBodyIntoClosing()
+    {
+        var parts = new[] { ("body.mp4", TimeSpan.FromSeconds(6)), ("closing.mp4", TimeSpan.FromSeconds(10)) };
+
+        var args = VideoAssembler.JoinArguments(parts, "out.mp4").ToList();
+
+        StringAssert.Contains(Filter(args), "offset=5.5[v1]");
+        Assert.AreEqual("15.5", args[args.IndexOf("-t") + 1]);
+    }
+
+    [TestMethod]
+    public void JoinArguments_WithBodyOnly_CopiesIt()
+    {
+        var args = VideoAssembler.JoinArguments(new[] { ("body.mp4", TimeSpan.FromSeconds(6)) }, "out.mp4").ToList();
+
+        CollectionAssert.AreEqual(new[] { "-i", "body.mp4", "-c", "copy", "-movflags", "+faststart", "out.mp4" },
+            args.Skip(4).ToList());
+    }
+
+    [TestMethod]
     public void BodyArguments_WithoutClips_UsesSilence()
     {
         var plan = new VideoPlan { RecordingPath = "rec.mkv", RecordingLength = TimeSpan.FromSeconds(3) };
@@ -94,6 +215,93 @@ public class VideoTests
 
         CollectionAssert.Contains(args.ToList(), "anullsrc=r=48000:cl=stereo:d=3");
     }
+
+    [TestMethod]
+    public void TitleArguments_WithMusicCredit_DrawsCreditNearTheBottom()
+    {
+        var plan = new VideoPlan
+        {
+            RecordingPath = "rec.mkv", RecordingLength = TimeSpan.FromSeconds(3), Title = "Intro",
+            MusicCredit = "Music: \"Bright Day\" by Someone",
+        };
+
+        var filter = FilterOf(VideoAssembler.TitleArguments(plan, "title.mp4"));
+
+        StringAssert.Contains(filter, "textfile=title.txt");
+        StringAssert.Contains(filter, $"textfile={VideoAssembler.CreditFile}:expansion=none");
+        StringAssert.Contains(filter, "fontsize=28:fontcolor=white@0.8:x=(w-text_w)/2:y=h-text_h-80");
+        // The credit uses the title's font file.
+        Assert.AreEqual(2, filter.Split("fontfile='C\\:/Windows/Fonts/segoeui.ttf'").Length - 1);
+    }
+
+    [TestMethod]
+    public void TitleArguments_WithoutMusicCredit_DrawsTitleOnly()
+    {
+        var plan = new VideoPlan { RecordingPath = "rec.mkv", RecordingLength = TimeSpan.FromSeconds(3), Title = "Intro" };
+
+        var filter = FilterOf(VideoAssembler.TitleArguments(plan, "title.mp4"));
+
+        StringAssert.Contains(filter, "textfile=title.txt");
+        Assert.IsFalse(filter.Contains(VideoAssembler.CreditFile), filter);
+        Assert.AreEqual(1, filter.Split("drawtext=").Length - 1);
+    }
+
+    [TestMethod]
+    public void Plan_WithMusicCreditFile_ReadsTheCredit()
+    {
+        File.WriteAllText(Path.Combine(_folder, VideoCommand.MusicCreditFile), "Music: \"Bright Day\" by Someone\r\n");
+        var parsed = ScriptParser.Parse("script \"Cards\"\ntitle \"Intro\"\n");
+
+        var plan = VideoCommand.Plan(parsed, new PresentationProfile(1.0, () => TimeSpan.Zero, _ => { }, null),
+            TimeSpan.Zero, "rec.mkv", TimeSpan.FromSeconds(9), _folder, null, null, _folder);
+
+        Assert.AreEqual("Music: \"Bright Day\" by Someone", plan.MusicCredit);
+        // The credit file is not taken for the intro music.
+        Assert.IsNull(plan.MusicPath);
+    }
+
+    [TestMethod]
+    public void Plan_WithoutMusicCreditFile_HasNoCredit()
+    {
+        var parsed = ScriptParser.Parse("script \"Cards\"\ntitle \"Intro\"\n");
+
+        var plan = VideoCommand.Plan(parsed, new PresentationProfile(1.0, () => TimeSpan.Zero, _ => { }, null),
+            TimeSpan.Zero, "rec.mkv", TimeSpan.FromSeconds(9), _folder, null, null, _folder);
+
+        Assert.IsNull(plan.MusicCredit);
+    }
+
+    [TestMethod]
+    public void Plan_WithTitleCardFilesOnlyInSharedFolder_UsesTheSharedFiles()
+    {
+        var shared = Path.Combine(_folder, "shared");
+        Directory.CreateDirectory(shared);
+        File.WriteAllText(Path.Combine(shared, VideoCommand.MusicCreditFile), "Music: \"Bright Day\" by Someone\r\n");
+        File.WriteAllText(Path.Combine(shared, VideoCommand.LogoFile), "png");
+        File.WriteAllText(Path.Combine(shared, "intro-music.mp3"), "mp3");
+        var parsed = ScriptParser.Parse("script \"Cards\"\ntitle \"Intro\"\n");
+
+        var plan = VideoCommand.Plan(parsed, new PresentationProfile(1.0, () => TimeSpan.Zero, _ => { }, null),
+            TimeSpan.Zero, "rec.mkv", TimeSpan.FromSeconds(9), _folder, null, null, _folder, shared);
+
+        Assert.AreEqual("Music: \"Bright Day\" by Someone", plan.MusicCredit);
+        Assert.AreEqual(Path.Combine(shared, VideoCommand.LogoFile), plan.LogoPath);
+        Assert.AreEqual(Path.Combine(shared, "intro-music.mp3"), plan.MusicPath);
+    }
+
+    [TestMethod]
+    public void TitleCardFile_WithFileInBothFolders_ReturnsTheAssetsCopy()
+    {
+        var shared = Path.Combine(_folder, "shared");
+        Directory.CreateDirectory(shared);
+        File.WriteAllText(Path.Combine(shared, VideoCommand.LogoFile), "shared");
+        File.WriteAllText(Path.Combine(_folder, VideoCommand.LogoFile), "own");
+
+        Assert.AreEqual(Path.Combine(_folder, VideoCommand.LogoFile),
+            VideoCommand.TitleCardFile(_folder, shared, VideoCommand.LogoFile));
+    }
+
+    private static string FilterOf(IReadOnlyList<string> args) => args[args.ToList().IndexOf("-filter_complex") + 1];
 
     [TestMethod]
     public void Plan_PutsEachCardOverItsStepInRecordingTime()
@@ -110,10 +318,33 @@ public class VideoTests
             _folder, null, null, _folder);
 
         Assert.AreEqual(2, plan.Cards.Count);
-        Assert.AreEqual((TimeSpan.FromSeconds(-1), TimeSpan.FromSeconds(2), "First"),
-            (plan.Cards[0].Start, plan.Cards[0].End, plan.Cards[0].Text));
+        // The first card started before the recording, so it starts at 0 (#1626). The next step
+        // has a card, so the first stays opaque until the second has faded in over it.
+        Assert.AreEqual((TimeSpan.Zero, TimeSpan.FromSeconds(2.3), "First", false),
+            (plan.Cards[0].Start, plan.Cards[0].End, plan.Cards[0].Text, plan.Cards[0].FadesOut));
+        Assert.IsTrue(plan.Cards[1].FadesOut);
         Assert.AreEqual((TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(7)), (plan.Cards[1].Start, plan.Cards[1].End));
         Assert.AreEqual(Path.Combine(_folder, "pie.png"), plan.Cards[1].ImagePath);
+    }
+
+    [TestMethod]
+    [DataRow(9.43, 0.0)]
+    [DataRow(9.0, 1.0)]
+    public void Plan_WithCardStartUnderOneSecond_StartsCardAtZero(double offsetSeconds, double expectedStart)
+    {
+        // The step starts 10 s after the runner's clock starts; the offset puts it at 0.57 s or 1 s into the recording.
+        var now = TimeSpan.FromSeconds(10);
+        var profile = new PresentationProfile(1.0, () => now, t => now += t, _ => TimeSpan.FromSeconds(3));
+        var parsed = ScriptParser.Parse("script \"Cards\"\nstep \"A\"\nnarrate \"one\"\nshow text \"First\"\n");
+        new ScriptInterpreter(() => throw new InvalidOperationException(),
+            new InterpreterOptions { Profile = profile, Log = _ => { } }).Execute(parsed);
+        var offset = TimeSpan.FromSeconds(offsetSeconds);
+
+        var plan = VideoCommand.Plan(parsed, profile, offset, "rec.mkv", TimeSpan.FromSeconds(9),
+            _folder, null, null, _folder);
+
+        Assert.AreEqual(TimeSpan.FromSeconds(expectedStart), plan.Cards[0].Start);
+        Assert.AreEqual(profile.Steps[0].End - offset, plan.Cards[0].End);
     }
 
     [TestMethod]
@@ -146,15 +377,70 @@ public class VideoTests
             LogoPath = Path.Combine(_folder, "logo.png"),
             MusicPath = Path.Combine(_folder, "music.wav"),
             MusicLength = TimeSpan.FromSeconds(3),
+            MusicCredit = "Music: \"Bright Day\" by Someone",
         };
         var mp4 = Path.Combine(_folder, "out.mp4");
 
         VideoAssembler.Assemble(ffmpeg, plan, Path.Combine(_folder, "work"), mp4);
 
-        // 3 s title + 6 s recording + 10 s closing.
+        // 3 s title + 6 s recording + 10 s closing, less two 0.5 s crossfades.
         var length = ffmpeg.Duration(mp4);
         Assert.IsNotNull(length);
-        Assert.AreEqual(19, length.Value.TotalSeconds, 0.2);
+        Assert.AreEqual(18, length.Value.TotalSeconds, 0.2);
+    }
+
+    // #1626 (Terry, 2026-10-20): a list card has one item on each line.
+    [TestMethod]
+    public void WriteCardFiles_WithLineBreaks_WritesOneLinePerItem()
+    {
+        var parsed = ScriptParser.Parse("script \"Cards\"\nstep \"A\"\n" + @"show text ""Story elements:\nProblem\nScene""" + "\n");
+        var plan = new VideoPlan
+        {
+            RecordingPath = "rec.mkv",
+            RecordingLength = TimeSpan.FromSeconds(9),
+            Cards = new[]
+            {
+                new VideoCard(TimeSpan.Zero, TimeSpan.FromSeconds(4), null, "a.png"),
+                new VideoCard(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(9), parsed.Statements[2].Text, null),
+            },
+        };
+
+        VideoAssembler.WriteCardFiles(plan, _folder);
+
+        // Only text cards get a file, named for the card's place in the plan.
+        Assert.IsFalse(File.Exists(Path.Combine(_folder, "card0.txt")));
+        CollectionAssert.AreEqual(new[] { "Story elements:", "Problem", "Scene" },
+            File.ReadAllLines(Path.Combine(_folder, "card1.txt")));
+    }
+
+    // #1626 (Terry, 2026-10-20): the intro video opens Terry's copy of a sample from the assets folder.
+    [TestMethod]
+    public void AssetOutlines_WithMixedAssets_ReturnsOnlyOutlineFiles()
+    {
+        File.WriteAllText(Path.Combine(_folder, "The Old Man and the Sea.stbx"), "{}");
+        File.WriteAllText(Path.Combine(_folder, "Hamlet.stbx"), "{}");
+        File.WriteAllText(Path.Combine(_folder, VideoCommand.LogoFile), "png");
+        File.WriteAllText(Path.Combine(_folder, VideoCommand.MusicCreditFile), "credit");
+
+        var outlines = VideoCommand.AssetOutlines(_folder).Select(Path.GetFileName).ToList();
+
+        CollectionAssert.AreEqual(new[] { "Hamlet.stbx", "The Old Man and the Sea.stbx" }, outlines);
+    }
+
+    [TestMethod]
+    public void CopyOutlines_WithAssetOutline_CopiesItIntoScratchOutlines()
+    {
+        var assets = Path.Combine(_folder, "assets");
+        Directory.CreateDirectory(assets);
+        var source = Path.Combine(assets, "The Old Man and the Sea.stbx");
+        File.WriteAllText(source, "{\"Name\": \"Santiago\"}");
+        var scratch = ScratchArea.Create(Path.Combine(_folder, "scratch"));
+
+        scratch.CopyOutlines(VideoCommand.AssetOutlines(assets));
+
+        var copy = Path.Combine(scratch.OutlineDirectory, "The Old Man and the Sea.stbx");
+        Assert.AreEqual(Path.Combine(scratch.Root, "outlines"), scratch.OutlineDirectory);
+        Assert.AreEqual(File.ReadAllText(source), File.ReadAllText(copy));
     }
 
     [TestMethod]
@@ -173,6 +459,86 @@ public class VideoTests
         {
             Environment.SetEnvironmentVariable(Ffmpeg.PathVariable, saved);
         }
+    }
+
+    // #1626: the body ends when StoryCAD starts to close, so the desktop does not show.
+    [TestMethod]
+    [DataRow(40.0, 30.0, 30.0)]
+    [DataRow(40.0, null, 40.0)]
+    [DataRow(40.0, 45.0, 40.0)]
+    [DataRow(40.0, -1.0, 40.0)]
+    public void BodyLength_WithAppCloseTime_EndsAtTheEarlierTime(double recorded, double? closed, double expected)
+    {
+        var length = VideoCommand.BodyLength(TimeSpan.FromSeconds(recorded), closed is null ? null : TimeSpan.FromSeconds(closed.Value));
+
+        Assert.AreEqual(TimeSpan.FromSeconds(expected), length);
+    }
+
+    private static List<(ScriptStatement, TimeSpan)> TenSecondsApart(string script)
+        => ScriptParser.Parse(script).Statements.Select((s, i) => (s, TimeSpan.FromSeconds(i * 10))).ToList();
+
+    [TestMethod]
+    public void AppCloseTime_WithExpectExit_ReturnsTheStartOfTheStatementBefore()
+    {
+        // script 0 s, launch 10 s, menu ExitMenuItem 20 s, expect-exit 30 s: the menu click closes the app.
+        var starts = TenSecondsApart("script \"Exit\"\nlaunch\nmenu ExitMenuItem\nexpect-exit\n");
+
+        Assert.AreEqual(TimeSpan.FromSeconds(20), VideoCommand.AppCloseTime(starts));
+    }
+
+    [TestMethod]
+    public void AppCloseTime_WithDialogBeforeExpectExit_ReturnsTheDialogStart()
+    {
+        var starts = TenSecondsApart(
+            "script \"Exit\"\nlaunch\nmenu ExitMenuItem\ndialog \"Save changes?\" click SecondaryButton\nexpect-exit\n");
+
+        Assert.AreEqual(TimeSpan.FromSeconds(30), VideoCommand.AppCloseTime(starts));
+    }
+
+    [TestMethod]
+    public void AppCloseTime_WithClose_ReturnsTheStartOfClose()
+    {
+        var starts = TenSecondsApart("script \"Exit\"\nlaunch\npause 1\nclose\n");
+
+        Assert.AreEqual(TimeSpan.FromSeconds(30), VideoCommand.AppCloseTime(starts));
+    }
+
+    [TestMethod]
+    public void AppCloseTime_WithoutCloseOrExpectExit_ReturnsNull()
+    {
+        Assert.IsNull(VideoCommand.AppCloseTime(TenSecondsApart("script \"Open\"\nlaunch\nmenu ExitMenuItem\n")));
+    }
+
+    [TestMethod]
+    public void RecordStarts_WithOutcome_AddsClockAtEndMinusDurationThenCallsNext()
+    {
+        var statement = ScriptParser.Parse("script \"Exit\"\nlaunch\n").Statements[1];
+        var starts = new List<(ScriptStatement Statement, TimeSpan Start)>();
+        var passed = new List<StatementOutcome>();
+        var callback = VideoCommand.RecordStarts(starts, () => TimeSpan.FromSeconds(12.5), passed.Add);
+        var outcome = new StatementOutcome(statement, StatementStatus.Passed, null, DateTimeOffset.UtcNow,
+            TimeSpan.FromSeconds(2), null);
+
+        callback(outcome);
+
+        Assert.AreEqual((statement, TimeSpan.FromSeconds(10.5)), starts.Single());
+        Assert.AreSame(outcome, passed.Single());
+    }
+
+    [TestMethod]
+    [DataRow(31.0, 30.0)]
+    [DataRow(50.0, 40.0)]
+    [DataRow(null, 40.0)]
+    public void Plan_WithAppCloseTime_EndsTheBodyThereInRecordingTime(double? closedOnRunnerClock, double expected)
+    {
+        var parsed = ScriptParser.Parse("script \"Exit\"\ntitle \"Intro\"\n");
+        var closed = closedOnRunnerClock is null ? (TimeSpan?)null : TimeSpan.FromSeconds(closedOnRunnerClock.Value);
+
+        // The recording started 1 s after the runner's clock.
+        var plan = VideoCommand.Plan(parsed, new PresentationProfile(1.0, () => TimeSpan.Zero, _ => { }, null),
+            TimeSpan.FromSeconds(1), "rec.mkv", TimeSpan.FromSeconds(40), _folder, null, null, _folder, null, closed);
+
+        Assert.AreEqual(TimeSpan.FromSeconds(expected), plan.RecordingLength);
     }
 
     private static string Filter(IReadOnlyList<string> args) => args[args.ToList().IndexOf("-filter_complex") + 1];

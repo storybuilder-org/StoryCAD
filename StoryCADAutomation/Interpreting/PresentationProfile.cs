@@ -6,8 +6,8 @@ namespace StoryCADAutomation.Interpreting;
 /// <summary>
 ///     The presentation realization for recording a demo (#1421 Milestone 4): the cursor glides
 ///     to each target before the verb acts, pauses run at full length times the pacing factor,
-///     and text is typed one character at a time. Failed assertions abort as in test mode; a
-///     failed demo is recorded again (Terry, 2026-10-05).
+///     and text is typed as real keystrokes in one go. Failed assertions abort as in test mode;
+///     a failed demo is recorded again (Terry, 2026-10-05).
 ///     Step timing (#1421 Milestone 5, video design section 7): a step's clips play one after
 ///     the other from the step start while its actions run; the step ends when both are
 ///     complete, then waits for its hold. The runner does not play the clips; it records when
@@ -15,9 +15,6 @@ namespace StoryCADAutomation.Interpreting;
 /// </summary>
 public sealed class PresentationProfile : IExecutionProfile
 {
-    // Typing speed at pacing 1.0. About 15 characters a second reads as a quick typist.
-    private static readonly TimeSpan BaseKeystrokeDelay = TimeSpan.FromMilliseconds(65);
-
     // Stand-in clip length when no clip exists: about 150 words a minute, at least 2 seconds.
     private static readonly TimeSpan PerWord = TimeSpan.FromMilliseconds(400);
     private static readonly TimeSpan MinimumCue = TimeSpan.FromSeconds(2);
@@ -29,6 +26,7 @@ public sealed class PresentationProfile : IExecutionProfile
     private readonly Func<string, TimeSpan?> _clipLength;
     private readonly List<NarrationCue> _cues = new();
     private readonly List<StepSpan> _steps = new();
+    private readonly List<StepSpan> _condensed = new();
     private readonly double _pacing;
 
     // The open step: when its last clip stops, and its hold. Null when no step is open.
@@ -36,7 +34,7 @@ public sealed class PresentationProfile : IExecutionProfile
     private TimeSpan _hold;
     private TimeSpan _stepStart;
 
-    /// <param name="pacing">Multiplier for pauses and typing delay; 1.0 is the script's own timing.</param>
+    /// <param name="pacing">Multiplier for pauses; 1.0 is the script's own timing.</param>
     /// <param name="clock">
     ///     Clip times count from this clock. The runner starts it when the run starts, so the
     ///     times line up with a recording started just before the runner.
@@ -77,6 +75,17 @@ public sealed class PresentationProfile : IExecutionProfile
     /// <summary>Each step's start and end in run order, the end after its hold; a card covers its step.</summary>
     public IReadOnlyList<StepSpan> Steps => _steps;
 
+    /// <summary>Each condensed wait's start and end in run order (#1626).</summary>
+    public IReadOnlyList<StepSpan> CondensedWaits => _condensed;
+
+    /// <inheritdoc />
+    public void Condense(Action wait)
+    {
+        var start = _elapsed();
+        wait();
+        _condensed.Add(new StepSpan(start, _elapsed()));
+    }
+
     /// <inheritdoc />
     public void Click(IUiDriver driver, ElementAddress target)
     {
@@ -91,15 +100,16 @@ public sealed class PresentationProfile : IExecutionProfile
     public void ApproachInWindow(IUiDriver driver, string windowTitle, ElementAddress target)
         => driver.GlideToInWindow(windowTitle, target);
 
-    /// <inheritdoc />
+    /// <summary>
+    ///     Types the whole text in one driver call: real keystrokes, so StoryCAD gets the same
+    ///     change events as from a user, with no wait between characters. One character per call
+    ///     cost at least 0.565 s a character (a 65 ms delay plus the 500 ms settle wait) and left
+    ///     about 2 minutes of dead air in the 5:47 intro video (#1626, Terry, 2026-10-20).
+    /// </summary>
     public void Type(IUiDriver driver, string text)
     {
-        var delay = TimeSpan.FromTicks((long)(BaseKeystrokeDelay.Ticks * _pacing));
-        foreach (var character in text)
-        {
-            driver.TypeText(character.ToString());
-            Thread.Sleep(delay);
-        }
+        // One call only: each TypeText call ends with a 500 ms settle wait (#1634).
+        driver.TypeText(text);
     }
 
     /// <inheritdoc />
@@ -182,7 +192,7 @@ public sealed class PresentationProfile : IExecutionProfile
     }
 }
 
-/// <summary>When one step ran, counted from the start of the run.</summary>
+/// <summary>When one step (or one condensed wait) ran, counted from the start of the run.</summary>
 public sealed record StepSpan(TimeSpan Start, TimeSpan End);
 
 /// <summary>One narrate line and when its clip plays, counted from the start of the run.</summary>

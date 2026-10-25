@@ -1,0 +1,91 @@
+# "Meet Collaborator" (#1626), from the outline Terry approved on 2026-10-24
+# (storybuilder-miscellaneous youtube/Meet Collaborator Video/outline.md). One step per outline section.
+# Video: StoryCADAutomation voice Meet-Collaborator-Video.scs --out <dir>, then
+#        StoryCADAutomation video Meet-Collaborator-Video.scs --out <dir> --assets <dir> --shared <dir>
+# The assets folder (youtube/Meet Collaborator Video/assets) holds a copy of Danger Calls and
+# join-dialog.png (the manual's Collaborator-Join-Dialog.png): a run opens Collaborator with the
+# machine's sign-in (ScratchArea), so the Join dialog never appears live.
+# Collaborator runs call the AI for real: the suggested text differs on every run, so the narration
+# describes the kind of result, never its words (Terry, 2026-10-24). Each run's wait is condensed.
+script "Meet Collaborator Video"
+title "Meet Collaborator"
+launch                                    # the recording starts here; the cards cover the app
+expect FileOpenNav exists
+
+step "The hard part"
+narrate "Getting from a story idea to a finished outline is the hard part. StoryCAD keeps the pieces organized. Collaborator, its optional AI assistant, helps you build them, and you stay in charge."
+show text "From story idea to finished outline"
+
+step "Danger Calls" hold 1
+click OpenFromFileNavItem                 # the Open dialog is up from launch
+open-file-dialog "{scratch}/outlines/Danger Calls.stbx"
+expect tree contains "Danger Calls"
+
+step "What Collaborator is"
+narrate "Collaborator is an add-on to StoryCAD, our free, open source outliner for fiction writers. It's available in StoryCAD release 4.3 and later, on Windows and Mac. There's nothing to download, and Collaborator is entirely optional. To use it, you click the Collaborator button on the StoryCAD menu bar and pick a workflow: one craft job, such as idea to premise, or a character's flaw and backstory. It reads the story elements that job needs and suggests text for their fields."
+pause 3
+click CollaboratorButton
+wait-window "Story Collaborator"
+
+step "Structure, not prose"
+narrate "Structure, not prose: Collaborator never writes chapters, scenes or dialogue."
+show text "Structure, not prose"
+
+step "The window"
+narrate "The available workflows are listed on the left, six of them starred, one for each stage of outlining. The workflow and its suggestions are in the center, and a chat session is on the right. There are twelve workflows, covering the major story element types: the overview, problems, characters, settings, scenes and the story world."
+pause 4
+
+step "Ideation"
+narrate "Ideation works from the story idea to a what-if concept and a concise premise."
+click WorkflowPremiseNavItem
+wait WorkflowAcceptAllButton condense      # the run's wait is cut from the video
+
+step "Your words are protected"
+narrate "Danger Calls already has some of that, so those rows are marked Has your text: Collaborator asks before it replaces your words. Review Each shows your original text beside the proposal, and you accept or skip. Collaborator will never change your outline without your express permission."
+pause 2
+click WorkflowReviewEachButton
+pause 3
+click WorkflowAcceptButton
+pause 2
+click WorkflowSkipButton
+
+step "A problem"
+narrate "Here's an example. Problem Builder works on one problem and the two people on either side of it, with a goal, motivation and conflict for each: the writing craft that Debra Dixon's GMC teaches."
+click WorkflowProblemBuilderNavItem
+click name:"How will Leonard and Tony get past Charlie's tech?"
+dialog "Select Problem" click name:"Select"
+wait WorkflowAcceptAllButton condense
+pause 3
+click WorkflowAcceptAllButton
+dialog "Replace existing content?" click name:"Cancel"   # keeps the Has your text fields
+
+step "Building out"
+narrate "The same run picks a beat sheet and places scenes on it. Outline gaps shows what the outline still needs, and which workflow helps. Flaw and Backstory gives the antagonist the wound and history that drive him."
+click WorkflowOutlineGapsNavItem
+pause 4
+click WorkflowGroupCharacterNavItem
+click WorkflowFlawBackstoryNavItem
+click name:"Charlie Lacas"
+dialog "Select Character" click name:"Select"
+wait WorkflowAcceptAllButton condense
+pause 3
+
+step "You stay in charge"
+narrate "Nothing goes into the outline until you accept it. A field that holds your words is marked Has your text, and it is never replaced without asking. Try Again gives you a fresh set. Close Collaborator, and anything you did not accept is gone. Your outline stays yours: it is not stored, and it is not used for training."
+pause 4
+click WorkflowExitButton
+
+step "Join the beta"                       # swappable: the Subscribe version replaces this step
+narrate "The beta is free; the Foundation pays for the AI. It's open to about twenty-five testers, first come, first served. Click Collaborator and choose Join: no code, and no waiting for an email. You need StoryCAD 4.3 or later and an internet connection. Then tell us what helped and what missed."
+show image "join-dialog.png"
+
+step "Learn more"
+narrate "To learn more, read the StoryCAD Collaborator chapter of the user manual. It walks through a session on the Danger Calls sample."
+show text "User manual: StoryCAD Collaborator\n\nAI Usage Policy: storybuilder.org\n\nDiscord"
+
+step "Exit" hold 1
+menu ExitMenuItem
+dialog "Save changes?" click name:"No"
+expect-exit
+
+closing "Like and subscribe"

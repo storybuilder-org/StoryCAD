@@ -294,6 +294,11 @@ public sealed class ScriptInterpreter
                     return currentStep;
                 }
 
+            case ScriptVerb.Wait when s.Condense:
+                // A long wait; the presentation profile records it so the video can cut it (#1626).
+                _options.Profile.Condense(() =>
+                    RequireDriver().WaitUntilReady(s.Target!, ReadinessRequirement.Interactive, _options.CondenseTimeout));
+                return currentStep;
             case ScriptVerb.Wait:
                 // Explicit wait beyond the implicit one; same readiness bar, no pattern demand.
                 RequireDriver().WaitUntilReady(s.Target!, ReadinessRequirement.Interactive);

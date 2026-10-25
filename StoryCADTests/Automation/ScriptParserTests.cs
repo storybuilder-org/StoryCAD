@@ -133,11 +133,65 @@ public class ScriptParserTests
         Assert.IsFalse(Parse("show text \"Hello\"").Success);
     }
 
+    // #1626 (Terry, 2026-10-20): a list on a card puts one item on each line.
+    [TestMethod]
+    public void Parse_ShowTextWithLineBreaks_SplitsTheCardIntoLines()
+    {
+        var result = Parse("step \"A\"", @"show text ""Story elements:\nProblem\nScene""");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual("Story elements:\nProblem\nScene", result.Statements[2].Text);
+    }
+
+    [TestMethod]
+    public void Parse_PathWithBackslashN_KeepsBothCharacters()
+    {
+        // Only show text reads \n; a Windows path keeps its folder "\new".
+        var result = Parse(@"set FileOpenProjectPathTextBox ""C:\new\Projects""");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual(@"C:\new\Projects", result.Statements[1].Text);
+    }
+
     [TestMethod]
     public void Parse_ShowStepBeforeClosing_Succeeds()
     {
         // closing ends the last step, so it does not count as an action in that step.
         Assert.IsTrue(Parse("step \"A\"", "show text \"Hello\"", "closing \"Bye\"").Success);
+    }
+
+    // #1626: the caption clause gives the written form of a spoken narrate line.
+    [TestMethod]
+    public void Parse_NarrateWithCaption_StoresCaption()
+    {
+        var result = Parse("narrate \"The extension dot S-T-B-X.\" caption \"The extension .stbx.\"");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual("The extension dot S-T-B-X.", result.Statements[1].Text);
+        Assert.AreEqual("The extension .stbx.", result.Statements[1].Caption);
+    }
+
+    [TestMethod]
+    public void Parse_NarrateWithoutCaption_HasNoCaption()
+    {
+        var result = Parse("narrate \"Plain words.\"");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.IsNull(result.Statements[1].Caption);
+    }
+
+    [TestMethod]
+    [DataRow("narrate \"Spoken.\" subtitle \"Written.\"")]
+    [DataRow("narrate \"Spoken.\" caption \"\"")]
+    [DataRow("narrate \"Spoken.\" caption \"   \"")]
+    [DataRow("narrate \"Spoken.\" caption")]
+    [DataRow("narrate \"Spoken.\" caption \"Written.\" \"Extra.\"")]
+    public void Parse_NarrateWithBadCaptionClause_ReportsError(string line)
+    {
+        var result = Parse(line);
+
+        Assert.AreEqual(1, result.Errors.Count, string.Join("; ", result.Errors));
+        Assert.AreEqual(2, result.Errors[0].Line);
     }
 
     // #1422 Window_Management: a stacked pane pushes the page out of view (offscreen), and a
