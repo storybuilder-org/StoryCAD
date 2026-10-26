@@ -1,5 +1,13 @@
 # Issue #1626 status log
 
+## 2026-10-26: youtube update
+
+**Branch:** `issue-1626-youtube-update`.
+
+**Done:** `youtube update <video id> --meta <meta.json>` replaces an uploaded video's title, description, tags and category (videos.update, part=snippet). Privacy, playlists, captions and thumbnail stay as they are. Sign-in and revoke are the same as `youtube upload`.
+
+**Tests:** YouTube tests 77 passed, 0 failed.
+
 ## 2026-10-25: Meet Collaborator video, first recording
 
 **Branch:** `issue-1626-youtube-upload`.

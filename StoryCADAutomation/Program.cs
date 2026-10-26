@@ -15,8 +15,8 @@ namespace StoryCADAutomation;
 ///     the presentation profile; `check` to lint scripts without launching the app; `voice` to
 ///     make the narrator clips and `video` to make a finished .mp4 (#1421 Milestone 5); `labels`
 ///     to compare bold text in manual pages with the XAML labels (#1422); `youtube upload`
-///     to sign in through the browser, upload a video with its meta.json, and revoke the sign-in
-///     (#1626). Folder runs for `run` belong to #1422.
+///     to sign in through the browser, upload a video with its meta.json, and revoke the sign-in,
+///     and `youtube update` to replace an uploaded video's title, description and tags (#1626). Folder runs for `run` belong to #1422.
 /// </summary>
 internal static class Program
 {
@@ -54,6 +54,11 @@ internal static class Program
         if (args.Length == 5 && args[0] == "youtube" && args[1] == "upload" && args[3] == "--meta")
         {
             return YouTubeCommand.Upload(args[2], args[4]);
+        }
+
+        if (args.Length == 5 && args[0] == "youtube" && args[1] == "update" && args[3] == "--meta")
+        {
+            return YouTubeCommand.Update(args[2], args[4]);
         }
 
         if (args.Length == 4 && args[0] == "voice" && args[2] == "--out")
@@ -427,7 +432,8 @@ internal static class Program
         Console.Error.WriteLine("  StoryCADAutomation video <script.scs> --out <dir> --assets <dir> [--shared <dir>]");
         Console.Error.WriteLine("                        (--shared: logo.png, intro-music.*, intro-music-credit.txt for every video; the assets folder's own copy wins)");
         Console.Error.WriteLine("  StoryCADAutomation youtube upload <video.mp4> --meta <meta.json>   (privacy defaults to unlisted)");
-        Console.Error.WriteLine(@"                        (signs in through the browser on each run and revokes the sign-in at the end;");
+        Console.Error.WriteLine("  StoryCADAutomation youtube update <video id> --meta <meta.json>   (title, description, tags, category only)");
+        Console.Error.WriteLine(@"                        (both sign in through the browser on each run and revoke the sign-in at the end;");
         Console.Error.WriteLine(@"                         needs %USERPROFILE%\.storycad-youtube\client_secret.json; no token is saved)");
         Console.Error.WriteLine();
         Console.Error.WriteLine("Exit codes: 0 all steps passed, 1 step failure(s), 2 script parse/lint error,");

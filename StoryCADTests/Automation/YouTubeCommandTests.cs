@@ -250,5 +250,87 @@ public class YouTubeCommandTests
         Assert.AreEqual(3, lines.Length, error.ToString());
         StringAssert.Contains(lines[0], "video not found");
     }
+
+    [TestMethod]
+    public async Task UpdateAsync_Always_PutsSnippetOnlyAndRevokes()
+    {
+        var fake = new FakeGoogle();
+        var meta = new YouTubeMeta
+        {
+            Title = "StoryCAD: free story outlining software", Description = "Outline a novel.",
+            Tags = new[] { "StoryCAD", "story outlining software" }, PlaylistId = "PL1", Privacy = "public",
+        };
+
+        var exit = await YouTubeCommand.UpdateAsync("oBOXeBVRNRE", meta, FakeGoogle.AccessToken, new HttpClient(fake),
+            _out.Add, _err.Add);
+
+        Assert.AreEqual(0, exit, string.Join(" | ", _err));
+        CollectionAssert.AreEqual(new[] { "/youtube/v3/channels", "/youtube/v3/videos", Revoke }, Paths(fake));
+        var put = fake.Requests[1];
+        Assert.AreEqual(HttpMethod.Put, put.Method);
+        Assert.AreEqual("https://www.googleapis.com/youtube/v3/videos?part=snippet", put.Url);
+        using var body = System.Text.Json.JsonDocument.Parse(put.Body);
+        var root = body.RootElement;
+        Assert.AreEqual("oBOXeBVRNRE", root.GetProperty("id").GetString());
+        var snippet = root.GetProperty("snippet");
+        Assert.AreEqual("StoryCAD: free story outlining software", snippet.GetProperty("title").GetString());
+        Assert.AreEqual("Outline a novel.", snippet.GetProperty("description").GetString());
+        Assert.AreEqual("story outlining software", snippet.GetProperty("tags")[1].GetString());
+        Assert.AreEqual(YouTubeMeta.DefaultCategoryId, snippet.GetProperty("categoryId").GetString());
+        // Privacy and playlist stay as they are on YouTube: no status part, no playlist call.
+        Assert.IsFalse(root.TryGetProperty("status", out _));
+        CollectionAssert.Contains(_out, "youtube: updated title, description, tags and category of https://youtu.be/oBOXeBVRNRE");
+        Assert.AreEqual("youtube: sign-in revoked", _out[^1]);
+        AssertNoSecretPrinted();
+    }
+
+    [TestMethod]
+    public async Task UpdateAsync_WhenUpdateFails_StillRevokesAndRethrows()
+    {
+        var fake = new FakeGoogle { FailPath = "/youtube/v3/videos" };
+
+        await Assert.ThrowsExactlyAsync<HttpRequestException>(() => YouTubeCommand.UpdateAsync("oBOXeBVRNRE", Meta(),
+            FakeGoogle.AccessToken, new HttpClient(fake), _out.Add, _err.Add));
+
+        Assert.AreEqual(Revoke, Paths(fake)[^1]);
+        Assert.AreEqual("youtube: sign-in revoked", _out[^1]);
+        AssertNoSecretPrinted();
+    }
+
+    [TestMethod]
+    [DataRow("oBOXeBVRNRE", true)]
+    [DataRow("-2j-Bgflv7A", true)]
+    [DataRow("https://youtu.be/oBOXeBVRNRE", false)]
+    [DataRow("oBOXeBVRNR", false)]
+    [DataRow("oBOXeBVRNR!", false)]
+    public void IsVideoId_ForValue_MatchesYouTubeIdShape(string value, bool expected)
+    {
+        Assert.AreEqual(expected, YouTubeCommand.IsVideoId(value));
+    }
+
+    [TestMethod]
+    public void Update_WithLinkInsteadOfIdAndBadMeta_ReturnsUsageErrorBeforeNetwork()
+    {
+        var meta = Path.Combine(_folder, "meta.json");
+        File.WriteAllText(meta, """{ "privacy": "friends" }""");
+        var error = new StringWriter();
+        var original = Console.Error;
+        Console.SetError(error);
+        try
+        {
+            // No client file exists in the test, so reaching the network step would print other errors.
+            var exit = YouTubeCommand.Update("https://youtu.be/oBOXeBVRNRE", meta);
+
+            Assert.AreEqual(64, exit);
+        }
+        finally
+        {
+            Console.SetError(original);
+        }
+
+        var lines = error.ToString().Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+        StringAssert.Contains(lines[0], "is not a video id");
+        Assert.IsTrue(lines.Length > 1, error.ToString());
+    }
 }
 #endif
