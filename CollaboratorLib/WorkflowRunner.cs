@@ -3538,41 +3538,37 @@ namespace StoryCollaborator
 
         /// <summary>
         /// Collaborator #239: names an answer that mostly breaks the field_states contract, or
-        /// returns null when the answer is usable. Two shapes count as a fault on a scalar
-        /// output: Fill with no text, and Unchanged on a property that has no text to keep.
+        /// returns null when the answer is usable. One shape counts as a fault on a scalar
+        /// output: Fill with no text.
         /// Measured on DefineCharacter with gpt-5.4-nano (2026-09-08, 73 live runs): a sound
         /// run has at most one or two of these (a gated step), a broken run has most of its
         /// thirty. The bar is three faults and a quarter of the scalar outputs, so one bad
         /// property on a small workflow does not buy a second billed call.
+        /// Unchanged on a property with no text no longer counts (Terry, 2026-10-26,
+        /// Collaborator #302). It is the model leaving a property empty on purpose: a Scene
+        /// with no antagonist leaves AntagGoal, AntagEmotion and the Antagonist seat empty; a
+        /// story world with no magic system leaves the System properties empty. With the
+        /// Worker's step mechanism a correct Scene Builder or Define Story World answer often
+        /// has five to twelve of these, and counting them sent the whole workflow again.
         /// </summary>
         internal string? DescribeContractFault(WorkflowResult result)
         {
             var scalars = 0;
             var emptyFills = 0;
-            var unchangedOnEmpty = 0;
             foreach (var update in result.PendingUpdates)
             {
                 if (update.Spec.WriteVia != WriteVia.Scalar) continue;
                 scalars++;
                 if (!TryGetFieldState(result, update, out var state)) continue;
 
-                var proposedEmpty = string.IsNullOrEmpty(NormalizeCompareText(FormatDisplayValue(update)));
-                var currentEmpty = string.IsNullOrEmpty(
-                    NormalizeCompareText(ReadCurrentScalarDisplay(update.ElementUuid, update.Spec.Property)));
-
-                if (state == OutputFieldState.Fill && proposedEmpty)
+                if (state == OutputFieldState.Fill
+                    && string.IsNullOrEmpty(NormalizeCompareText(FormatDisplayValue(update))))
                     emptyFills++;
-                else if (state == OutputFieldState.Unchanged && currentEmpty)
-                    unchangedOnEmpty++;
             }
 
-            var faults = emptyFills + unchangedOnEmpty;
-            if (faults < 3 || faults * 4 < scalars) return null;
+            if (emptyFills < 3 || emptyFills * 4 < scalars) return null;
 
-            var parts = new List<string>();
-            if (emptyFills > 0) parts.Add($"{emptyFills} Fill with no text");
-            if (unchangedOnEmpty > 0) parts.Add($"{unchangedOnEmpty} Unchanged on an empty property");
-            return $"{faults} of {scalars} outputs broke the field_states contract ({string.Join(", ", parts)})";
+            return $"{emptyFills} of {scalars} outputs broke the field_states contract ({emptyFills} Fill with no text)";
         }
 
         /// <summary>
