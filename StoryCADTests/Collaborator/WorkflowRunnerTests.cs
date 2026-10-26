@@ -423,4 +423,55 @@ public class WorkflowRunnerTests
         result.FieldStates["Archetype"] = OutputFieldState.Fill;
         return result;
     }
+
+    private static readonly string[] ProblemScalars =
+        { "ProtGoal", "ProtMotive", "ProtConflict", "AntagGoal", "AntagMotive", "AntagConflict", "Outcome", "Method" };
+
+    /// <summary>
+    ///     Builds an answer on an empty Problem: the first <paramref name="faultCount"/> scalars
+    ///     carry <paramref name="faultState"/> with no text, the rest carry Fill with text.
+    /// </summary>
+    private static (WorkflowRunner Runner, WorkflowResult Result) ArrangeContractAnswer(
+        OutputFieldState faultState, int faultCount)
+    {
+        var (runner, problem) = ArrangeProblem("");
+        var result = WorkflowResult.Succeeded();
+        for (var i = 0; i < ProblemScalars.Length; i++)
+        {
+            var isFault = i < faultCount;
+            result.PendingUpdates.Add(new PendingUpdate("Problem", problem.Uuid,
+                new PropertySpec(ProblemScalars[i]), isFault ? "" : "Francis wants the outing to go well"));
+            result.FieldStates[ProblemScalars[i]] = isFault ? faultState : OutputFieldState.Fill;
+        }
+        return (runner, result);
+    }
+
+    /// <summary>
+    ///     Collaborator #302 (Terry, 2026-10-26): Unchanged on an empty property is the model
+    ///     leaving it empty on purpose, so it does not trigger the contract retry.
+    /// </summary>
+    [TestMethod]
+    public void DescribeContractFault_ManyUnchangedOnEmptyAndNoEmptyFill_ReturnsNull()
+    {
+        var (runner, result) = ArrangeContractAnswer(OutputFieldState.Unchanged, 6);
+
+        Assert.IsNull(runner.DescribeContractFault(result));
+    }
+
+    [TestMethod]
+    public void DescribeContractFault_EnoughEmptyFills_ReturnsFault()
+    {
+        var (runner, result) = ArrangeContractAnswer(OutputFieldState.Fill, 3);
+
+        Assert.AreEqual("3 of 8 outputs broke the field_states contract (3 Fill with no text)",
+            runner.DescribeContractFault(result));
+    }
+
+    [TestMethod]
+    public void DescribeContractFault_TwoEmptyFills_ReturnsNull()
+    {
+        var (runner, result) = ArrangeContractAnswer(OutputFieldState.Fill, 2);
+
+        Assert.IsNull(runner.DescribeContractFault(result), "below the bar of three faults");
+    }
 }
