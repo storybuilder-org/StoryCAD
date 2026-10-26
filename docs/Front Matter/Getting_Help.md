@@ -9,6 +9,8 @@ has_toc: false
 ## Getting Help
 We suggest you first use this manual to try to find the information you’re looking for.
 
+Short videos on the [StoryCAD YouTube channel](https://www.youtube.com/@StoryCAD) show StoryCAD and Collaborator at work.
+
 [The StoryBuilder Discord Server](https://discord.gg/bpCyAQnWCa) contains a ‘frequently-asked-questions’ channel, and a ‘writers-chat’ channel.
 
 Currently StoryCAD’s only direct support mechanism is to email support@storybuilder.org.
