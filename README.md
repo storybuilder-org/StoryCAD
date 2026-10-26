@@ -116,4 +116,4 @@ We are most grateful for all of them especially those who toil in the arena:
 [25]:https://manual.storybuilder.org/docs/For%20Developers/Changelog.html
 [26]:https://StoryBuilder.org/
 [27]:https://apps.microsoft.com/store/detail/StoryCAD/9PLBNHZV1XM2?hl=en-us&gl=us
-[28]:https://www.youtube.com/watch?v=Oi7G9TEKsro
+[28]:https://www.youtube.com/@StoryCAD
