@@ -6,7 +6,7 @@ namespace StoryCADAutomation.YouTube;
 
 /// <summary>
 ///     The YouTube Data API v3 calls for #1626: the signed-in channel, the resumable video
-///     upload, and the playlist, captions and thumbnail steps after it.
+///     upload, the playlist, captions and thumbnail steps after it, and the snippet update.
 /// </summary>
 public static class YouTubeApi
 {
@@ -92,6 +92,24 @@ public static class YouTubeApi
             ? p.GetString()
             : null;
         return (id, privacy);
+    }
+
+    /// <summary>
+    ///     videos.update with part=snippet: replaces the title, description, tags and category of
+    ///     an uploaded video. The video keeps its id, link, views, privacy and playlists.
+    /// </summary>
+    public static async Task UpdateSnippetAsync(HttpClient http, string accessToken, string videoId, YouTubeMeta meta,
+        CancellationToken cancellation = default)
+    {
+        // The whole snippet is replaced: a snippet field this body leaves out, such as
+        // defaultLanguage, is cleared on the video.
+        using var request = Request(HttpMethod.Put, ApiBase + "videos?part=snippet", accessToken);
+        request.Content = JsonContent.Create(new
+        {
+            id = videoId,
+            snippet = new { title = meta.Title, description = meta.Description, tags = meta.Tags, categoryId = meta.CategoryId },
+        });
+        using var _ = await SendAsync(http, request, "videos.update", cancellation);
     }
 
     /// <summary>playlistItems.insert: adds the video to the end of a playlist.</summary>

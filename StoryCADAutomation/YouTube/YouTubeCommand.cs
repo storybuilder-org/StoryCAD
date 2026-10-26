@@ -5,7 +5,8 @@ using System.Text.Json;
 namespace StoryCADAutomation.YouTube;
 
 /// <summary>
-///     `youtube upload &lt;video.mp4&gt; --meta &lt;meta.json&gt;` (#1626). Each run signs in through
+///     `youtube upload &lt;video.mp4&gt; --meta &lt;meta.json&gt;` and
+///     `youtube update &lt;video id&gt; --meta &lt;meta.json&gt;` (#1626). Each run signs in through
 ///     the browser, keeps the access token in memory only, and revokes it when the run ends,
 ///     after a failure too. No token is saved; only the client file lives in
 ///     %USERPROFILE%\.storycad-youtube\ (Terry, 2026-10-23). No client secret or access token is
@@ -50,6 +51,50 @@ internal static class YouTubeCommand
             return UsageError;
         }
 
+        // The PUT carries the whole file, so the timeout allows for a slow uplink.
+        return RunSignedIn("upload", TimeSpan.FromHours(2), (access, http, stop) =>
+            UploadAsync(videoPath, meta!, access, http, Console.WriteLine, Console.Error.WriteLine, stop));
+    }
+
+    /// <summary>
+    ///     `youtube update`: checks the video id and meta.json, signs in through the browser,
+    ///     then replaces the video's title, description, tags and category with meta.json's.
+    /// </summary>
+    public static int Update(string videoId, string metaPath)
+    {
+        var meta = YouTubeMeta.Load(metaPath, out var errors);
+        var problems = errors.ToList();
+        if (!IsVideoId(videoId))
+        {
+            problems.Insert(0, $"'{videoId}' is not a video id; give the 11 characters after youtu.be/");
+        }
+
+        if (problems.Count > 0)
+        {
+            foreach (var problem in problems)
+            {
+                Console.Error.WriteLine($"youtube: {problem}");
+            }
+
+            return UsageError;
+        }
+
+        return RunSignedIn("update", TimeSpan.FromMinutes(2), (access, http, stop) =>
+            UpdateAsync(videoId, meta!, access, http, Console.WriteLine, Console.Error.WriteLine, stop));
+    }
+
+    /// <summary>A YouTube video id: 11 letters, digits, '-' or '_'.</summary>
+    internal static bool IsVideoId(string value) =>
+        value.Length == 11 && value.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_');
+
+    /// <summary>
+    ///     Signs in through the browser, then runs <paramref name="work" /> with the access token.
+    ///     Ctrl+C cancels the run instead of ending the process, so the revoke inside the work
+    ///     still runs.
+    /// </summary>
+    private static int RunSignedIn(string verb, TimeSpan httpTimeout,
+        Func<string, HttpClient, CancellationToken, Task<int>> work)
+    {
         if (LoadClient(DefaultFolder) is not { } client)
         {
             return EnvironmentFailure;
@@ -76,23 +121,21 @@ internal static class YouTubeCommand
             OpenBrowser(url);
             var code = YouTubeOAuth.WaitForCodeAsync(listener, state, ConsentTimeout, stop.Token).GetAwaiter().GetResult();
             listener.Close();
-            // The PUT carries the whole file, so the timeout allows for a slow uplink.
-            using var http = new HttpClient { Timeout = TimeSpan.FromHours(2) };
+            using var http = new HttpClient { Timeout = httpTimeout };
             var access = YouTubeOAuth.ExchangeCodeAsync(client, code, verifier, redirectUri, http, stop.Token)
                 .GetAwaiter().GetResult();
-            return UploadAsync(videoPath, meta!, access, http, Console.WriteLine, Console.Error.WriteLine, stop.Token)
-                .GetAwaiter().GetResult();
+            return work(access, http, stop.Token).GetAwaiter().GetResult();
         }
         catch (OperationCanceledException) when (stop.IsCancellationRequested)
         {
-            Console.Error.WriteLine("youtube upload stopped by Ctrl+C; steps not yet done were not run.");
+            Console.Error.WriteLine($"youtube {verb} stopped by Ctrl+C; steps not yet done were not run.");
             return EnvironmentFailure;
         }
         catch (Exception ex) when (ex is HttpListenerException or HttpRequestException or TaskCanceledException
                                        or TimeoutException or InvalidOperationException or IOException
                                        or InvalidDataException or JsonException or KeyNotFoundException)
         {
-            Console.Error.WriteLine($"youtube upload failed: {ex.Message}");
+            Console.Error.WriteLine($"youtube {verb} failed: {ex.Message}");
             return EnvironmentFailure;
         }
         finally
@@ -142,12 +185,34 @@ internal static class YouTubeCommand
     ///     by then. The token is revoked at the end, also when a step throws or the run is
     ///     cancelled; the revoke has its own <see cref="RevokeTimeout" />.
     /// </summary>
-    internal static async Task<int> UploadAsync(string videoPath, YouTubeMeta meta, string access, HttpClient http,
-        Action<string> log, Action<string> error, CancellationToken cancellation = default, TimeSpan? revokeTimeout = null)
+    internal static Task<int> UploadAsync(string videoPath, YouTubeMeta meta, string access, HttpClient http,
+        Action<string> log, Action<string> error, CancellationToken cancellation = default, TimeSpan? revokeTimeout = null) =>
+        WithRevokeAsync(access, http, log, error, revokeTimeout,
+            () => UploadWithTokenAsync(videoPath, meta, access, http, log, error, cancellation));
+
+    /// <summary>
+    ///     With the signed-in access token: prints the channel, replaces the video's snippet, and
+    ///     revokes the token at the end, as <see cref="UploadAsync" /> does.
+    /// </summary>
+    internal static Task<int> UpdateAsync(string videoId, YouTubeMeta meta, string access, HttpClient http,
+        Action<string> log, Action<string> error, CancellationToken cancellation = default, TimeSpan? revokeTimeout = null) =>
+        WithRevokeAsync(access, http, log, error, revokeTimeout, async () =>
+        {
+            await LogChannelAsync(http, access, log, error, cancellation);
+            cancellation.ThrowIfCancellationRequested();
+            await YouTubeApi.UpdateSnippetAsync(http, access, videoId, meta, cancellation);
+            log($"youtube: updated title, description, tags and category of https://youtu.be/{videoId}");
+            log("youtube: privacy, playlist, captions and thumbnail are not changed by update");
+            return Passed;
+        });
+
+    /// <summary>Runs <paramref name="work" />, then revokes the token, also when the work throws or is cancelled.</summary>
+    private static async Task<int> WithRevokeAsync(string access, HttpClient http, Action<string> log,
+        Action<string> error, TimeSpan? revokeTimeout, Func<Task<int>> work)
     {
         try
         {
-            return await UploadWithTokenAsync(videoPath, meta, access, http, log, error, cancellation);
+            return await work();
         }
         finally
         {
@@ -171,21 +236,7 @@ internal static class YouTubeCommand
     private static async Task<int> UploadWithTokenAsync(string videoPath, YouTubeMeta meta, string access,
         HttpClient http, Action<string> log, Action<string> error, CancellationToken cancellation)
     {
-        cancellation.ThrowIfCancellationRequested();
-        // The channel the user picked in the browser, so a wrong choice shows before the upload.
-        try
-        {
-            var channel = await YouTubeApi.ChannelAsync(http, access, cancellation);
-            log(channel is { } c
-                ? $"youtube: signed in to channel \"{c.Title}\" ({c.Id})"
-                : "youtube: this Google account has no YouTube channel; the upload will fail.");
-        }
-        catch (Exception ex) when ((ex is HttpRequestException or JsonException or KeyNotFoundException
-                                        or InvalidOperationException) && !cancellation.IsCancellationRequested)
-        {
-            error($"youtube: warning: the channel lookup failed: {ex.Message}");
-        }
-
+        await LogChannelAsync(http, access, log, error, cancellation);
         cancellation.ThrowIfCancellationRequested();
         var megabytes = new FileInfo(videoPath).Length / (1024.0 * 1024.0);
         log($"youtube: uploading {Path.GetFileName(videoPath)} ({megabytes:0.0} MB) as {meta.Privacy}");
@@ -234,6 +285,25 @@ internal static class YouTubeCommand
         }
 
         return result;
+    }
+
+    /// <summary>Prints the channel the user picked in the browser, so a wrong choice shows before any change.</summary>
+    private static async Task LogChannelAsync(HttpClient http, string access, Action<string> log, Action<string> error,
+        CancellationToken cancellation)
+    {
+        cancellation.ThrowIfCancellationRequested();
+        try
+        {
+            var channel = await YouTubeApi.ChannelAsync(http, access, cancellation);
+            log(channel is { } c
+                ? $"youtube: signed in to channel \"{c.Title}\" ({c.Id})"
+                : "youtube: this Google account has no YouTube channel; the next step will fail.");
+        }
+        catch (Exception ex) when ((ex is HttpRequestException or JsonException or KeyNotFoundException
+                                        or InvalidOperationException) && !cancellation.IsCancellationRequested)
+        {
+            error($"youtube: warning: the channel lookup failed: {ex.Message}");
+        }
     }
 
     /// <summary>The OAuth client from client_secret.json, or null after printing why not.</summary>
