@@ -1,4 +1,4 @@
-FROM mysql:8.0
+FROM mysql:26.7
 
 # Flattened schema file: tables, procedures, and migrations through V002
 COPY STORYBUILDER_CURRENT_SCHEMA.sql /docker-entrypoint-initdb.d/01_schema.sql
