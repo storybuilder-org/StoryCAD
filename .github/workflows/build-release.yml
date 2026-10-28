@@ -39,7 +39,7 @@ jobs:
     outputs:
       changelog_b64: ${{ steps.gen.outputs.changelog_b64 }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Generate changelog
         id: gen
@@ -209,7 +209,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 1
 
@@ -273,7 +273,7 @@ jobs:
           fi
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           global-json-file: "./global.json"
           cache: true
@@ -411,7 +411,7 @@ jobs:
       # 10 ─ Setup MSBuild (Windows only)
       - name: Setup MSBuild
         if: matrix.os == 'windows-latest'
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@v3
 
       # 11 ─ Build MSIX package (Windows only)
       - name: Create MSIX package
@@ -514,7 +514,7 @@ jobs:
 
       - name: Upload MSIX (Windows)
         if: matrix.os == 'windows-latest' && steps.secrets.outputs.signing == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: storycad-msix-${{ matrix.art }}
           path: storycad-msix-${{ matrix.art }}.zip
@@ -545,7 +545,7 @@ jobs:
 
       - name: Upload NuGet (Windows x64)
         if: matrix.os == 'windows-latest' && matrix.platform == 'x64'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: storycad-nupkg
           path: ${{ github.workspace }}\nupkg\*.nupkg
@@ -553,7 +553,7 @@ jobs:
 
       - name: Upload PKG (macOS)
         if: matrix.os == 'macos-latest' && steps.secrets.outputs.signing == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: storycad-${{ matrix.art }}
           path: storycad-${{ matrix.art }}.pkg
@@ -580,12 +580,12 @@ jobs:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 1
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           global-json-file: "./global.json"
           cache: true
@@ -596,7 +596,7 @@ jobs:
             global.json
 
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@v3
 
       - name: Build (Debug x64, both heads)
         run: msbuild StoryCAD.sln -t:Restore,Build -p:Configuration=Debug -p:Platform=x64 -m -v:minimal
@@ -677,7 +677,7 @@ jobs:
 
       - name: Upload smoke logs
         if: failure() && steps.smoke.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ui-smoke-logs
           path: smoke-scratch/**/logs/**
@@ -706,10 +706,10 @@ jobs:
         shell: bash
         working-directory: StoryCADLib/bindings/python
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           global-json-file: "./global.json"
           cache: true
@@ -720,7 +720,7 @@ jobs:
             global.json
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -758,7 +758,7 @@ jobs:
         run: python -m pytest tests/test_pure.py tests/test_api.py -v
 
       - name: Upload wheel
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: storycad-pypi-wheel-${{ matrix.rid }}
           path: StoryCADLib/bindings/python/dist/*.whl
@@ -783,10 +783,10 @@ jobs:
           echo "CHANGELOG_EOF" >> $GITHUB_OUTPUT
 
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.build.outputs.tag_version }}
           name: Release ${{ needs.build.outputs.tag_version }}
