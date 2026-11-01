@@ -86,7 +86,7 @@
                                   ItemsSource="{x:Bind SceneVm.Settings, Mode=OneWay}"
                                   AutomationProperties.AutomationId="SceneSettingCombo" />
                         <TextBlock Grid.Column="1" MinWidth="50" />
-                        <ComboBox IsEditable="True" Header="SceneType" Grid.Column="2" MinWidth="200"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Scene Type" Grid.Column="2" MinWidth="200"
                                   ItemsSource="{x:Bind SceneVm.SceneTypeList}"
                                   Text="{x:Bind SceneVm.SceneType, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind SceneVm.SceneType, Mode=TwoWay}"
@@ -154,36 +154,57 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" HorizontalAlignment="Left">
+                    <!-- All nine purposes show at once in three columns, so none is cut off at the
+                         manual's 1036 x 744 window. The CheckBox carries its own label, which keeps
+                         box and text on one line. -->
+                    <Grid Grid.Row="0" RowSpacing="4" Margin="0,0,0,4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="5*" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="5*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <ListView MinWidth="300" Height="125" x:Name="ScenePurpose" x:FieldModifier="public"
-                                  SelectionMode="Single" Header="Purpose of Scene"
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Purpose of Scene"
+                                   VerticalAlignment="Center" />
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Value Exchange" VerticalAlignment="Center" />
+                            <ComboBox IsEditable="False" MinWidth="250"
+                                      ItemsSource="{x:Bind SceneVm.ValueExchangeList}"
+                                      SelectedValue="{x:Bind SceneVm.ValueExchange, Mode=TwoWay, Converter={StaticResource EmptyStringToNull}}"
+                                      PlaceholderText="What changes for your scene's protagonist?"
+                                      AutomationProperties.Name="Value Exchange"
+                                      AutomationProperties.AutomationId="ValueExchangeCombo" />
+                        </StackPanel>
+                        <ListView Grid.Row="1" Grid.ColumnSpan="2" x:Name="ScenePurpose" x:FieldModifier="public"
+                                  SelectionMode="None"
                                   ItemsSource="{x:Bind SceneVm.ScenePurposes, Mode=TwoWay}"
+                                  AutomationProperties.Name="Purpose of Scene"
                                   AutomationProperties.AutomationId="ScenePurposeList">
+                            <ListView.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3"
+                                                   ItemWidth="230" />
+                                </ItemsPanelTemplate>
+                            </ListView.ItemsPanel>
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="Padding" Value="4,0" />
+                                    <Setter Property="MinHeight" Value="32" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="models:StringSelection">
                                     <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). -->
-                                    <StackPanel Orientation="Horizontal" Spacing="2"
-                                                AutomationProperties.Name="{x:Bind StringName, Mode=OneWay}">
-                                        <CheckBox Margin="0"
-                                                  Checked="ScenePurpose_Checked" Unchecked="ScenePurpose_Unchecked"
-                                                  IsChecked="{x:Bind Selection,Mode=OneWay}" />
-                                        <TextBlock MinWidth="250"
-                                                   Text="{x:Bind StringName, Mode=OneWay}" />
-                                    </StackPanel>
+                                    <CheckBox Margin="0" VerticalAlignment="Center"
+                                              Content="{x:Bind StringName, Mode=OneWay}"
+                                              AutomationProperties.Name="{x:Bind StringName, Mode=OneWay}"
+                                              Checked="ScenePurpose_Checked" Unchecked="ScenePurpose_Unchecked"
+                                              IsChecked="{x:Bind Selection,Mode=OneWay}" />
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
-                        <TextBlock Grid.Column="1" MinWidth="50" />
-                        <ComboBox Header="Value Exchange" Grid.Column="2" IsEditable="False" MinWidth="250"
-                                  ItemsSource="{x:Bind SceneVm.ValueExchangeList}"
-                                  SelectedValue="{x:Bind SceneVm.ValueExchange, Mode=TwoWay, Converter={StaticResource EmptyStringToNull}}"
-                                  PlaceholderText="What changes for your scene's protagonist?."
-                                  AutomationProperties.AutomationId="ValueExchangeCombo" />
                     </Grid>
                     <usercontrols:RichEditBoxExtended Header="What Happens" Grid.Row="1"
                                                       RtfText="{x:Bind SceneVm.Events, Mode=TwoWay}"
@@ -244,20 +265,20 @@
                                   ItemsSource="{x:Bind SceneVm.Characters, Mode=OneWay}"
                                   AutomationProperties.AutomationId="ProtagonistCombo" />
                         <TextBlock Grid.Column="1" MinWidth="50" />
-                        <ComboBox IsEditable="True" Header="Feelings" Grid.Column="2" MinWidth="200"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Feelings" Grid.Column="2" MinWidth="200"
                                   ItemsSource="{x:Bind SceneVm.EmotionList}"
                                   Text="{x:Bind SceneVm.ProtagEmotion, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind SceneVm.ProtagEmotion, Mode=TwoWay}"
                                   SelectedItem="{x:Bind SceneVm.ProtagEmotion, Mode=OneWay}"
                                   AutomationProperties.AutomationId="ProtagonistFeelingsCombo" />
                     </Grid>
-                    <ComboBox IsEditable="True" Header="Protagonist's Goal" Grid.Row="1" MinWidth="300"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Protagonist's Goal" Grid.Row="1" MinWidth="300"
                               ItemsSource="{x:Bind SceneVm.GoalList}"
                               Text="{x:Bind SceneVm.ProtagGoal, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.ProtagGoal, Mode=TwoWay}"
                               SelectedItem="{x:Bind SceneVm.ProtagGoal, Mode=OneWay}"
                               AutomationProperties.AutomationId="ProtagonistGoalCombo" />
-                    <ComboBox IsEditable="True" Header="Opposition" Grid.Row="2" Width="400"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Opposition" Grid.Row="2" Width="400"
                               ItemsSource="{x:Bind SceneVm.OppositionList}"
                               Text="{x:Bind SceneVm.Opposition, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.Opposition, Mode=TwoWay}"
@@ -276,21 +297,21 @@
                                   ItemsSource="{x:Bind SceneVm.Characters, Mode=OneWay}"
                                   AutomationProperties.AutomationId="AntagonistCombo" />
                         <TextBlock Grid.Column="1" MinWidth="50" />
-                        <ComboBox IsEditable="True" Header="Feelings" Grid.Column="2" MinWidth="200"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Feelings" Grid.Column="2" MinWidth="200"
                                   ItemsSource="{x:Bind SceneVm.EmotionList}"
                                   Text="{x:Bind SceneVm.AntagEmotion, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind SceneVm.AntagEmotion, Mode=TwoWay}"
                                   SelectedItem="{x:Bind SceneVm.AntagEmotion, Mode=OneWay}"
                                   AutomationProperties.AutomationId="AntagonistFeelingsCombo" />
                     </Grid>
-                    <ComboBox IsEditable="True" Header="Antagonist's Goal" Grid.Row="4" MinWidth="300"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Antagonist's Goal" Grid.Row="4" MinWidth="300"
                               ItemsSource="{x:Bind SceneVm.GoalList}"
                               Text="{x:Bind SceneVm.AntagGoal, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.AntagGoal, Mode=TwoWay}"
                               SelectedItem="{x:Bind SceneVm.AntagGoal, Mode=OneWay}"
                               AutomationProperties.AutomationId="AntagonistGoalCombo" />
                     <TextBlock Grid.Row="5" Text=" " />
-                    <ComboBox IsEditable="True" Header="Outcome" Grid.Row="5" Width="400"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Outcome" Grid.Row="5" Width="400"
                               ItemsSource="{x:Bind SceneVm.OutcomeList}"
                               Text="{x:Bind SceneVm.Outcome, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.Outcome, Mode=TwoWay}"
@@ -309,7 +330,7 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <ComboBox IsEditable="True" Header="Emotional Response" Grid.Row="0" MinWidth="200"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Emotional Response" Grid.Row="0" MinWidth="200"
                               ItemsSource="{x:Bind SceneVm.EmotionList}"
                               Text="{x:Bind SceneVm.Emotion, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.Emotion, Mode=TwoWay}"
@@ -322,7 +343,7 @@
                                                       VerticalAlignment="Stretch"
                                                       AutomationProperties.AutomationId="ReviewAndThoughtRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
-                    <ComboBox IsEditable="True" Header="New Goal" Grid.Row="2" MinWidth="400"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="New Goal" Grid.Row="2" MinWidth="400"
                               ItemsSource="{x:Bind SceneVm.GoalList}"
                               Text="{x:Bind SceneVm.NewGoal, Mode=TwoWay}"
                               PlaceholderText="{x:Bind SceneVm.NewGoal, Mode=TwoWay}"
