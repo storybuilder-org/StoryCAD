@@ -245,6 +245,13 @@ public class ShellViewModel : ObservableRecipient
 
     public void ViewChanged()
     {
+        // The startup binding raises a selection change that changes nothing; without this
+        // check it warned "load a story first" at every launch (#1422, 2026-11-01).
+        if (SelectedView == null || SelectedView.Equals(CurrentView))
+        {
+            return;
+        }
+
         if (appState.CurrentDocument?.Model?.CurrentView == null || appState.CurrentDocument.Model.CurrentView.Count == 0)
         {
             Messenger.Send(

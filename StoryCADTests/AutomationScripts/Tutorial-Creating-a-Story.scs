@@ -65,6 +65,8 @@ expect tree contains "Danger Calls/Characters"
 
 step "TC-005: Concept tab"
 tab ConceptTab
+focus TitleTextBox                        # a tab with keyboard focus shows its tooltip
+press "End"
 screenshot "Danger-Calls-Concept-Tab-Empty.png"
 focus ConceptRichEdit
 type "What if a police detective uses a criminal's phone to gain time to effect a rescue, by calling the dealer at the critical moment?"

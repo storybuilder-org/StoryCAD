@@ -1997,4 +1997,27 @@ public class ShellViewModelTests
 
         Assert.AreEqual(0, messages.Count, string.Join("; ", messages));
     }
+
+    [TestMethod]
+    public void ViewChanged_SameViewWithNoStory_PostsNoStatusMessage()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var savedDocument = appState.CurrentDocument;
+        appState.CurrentDocument = null;
+        shell.SelectedView = shell.CurrentView;
+        var messages = new List<string>();
+        WeakReferenceMessenger.Default.Register<StatusChangedMessage>(this, (_, m) => messages.Add(m.Value.Status));
+        try
+        {
+            shell.ViewChanged();
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(this);
+            appState.CurrentDocument = savedDocument;
+        }
+
+        Assert.AreEqual(0, messages.Count, string.Join("; ", messages));
+    }
 }

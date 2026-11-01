@@ -861,6 +861,21 @@ public sealed class StoryCADDriver : IUiDriver
         {
             PressChord("Escape");
         }
+
+        ParkAfterPointerVerb();
+    }
+
+    /// <summary>
+    ///     Moves the pointer off the row a right-click or a drag left it on, as a user moves the
+    ///     mouse away. Left on the row, a drop-down that later opened and closed under it put
+    ///     the row back in its hover shade, and manual images showed two grey rows (#1422).
+    /// </summary>
+    private void ParkAfterPointerVerb()
+    {
+        if (_process.MainWindowHandle != IntPtr.Zero && NativeMethods.VisibleWindowBounds(_process.MainWindowHandle) is { } frame)
+        {
+            ParkPointer(frame);
+        }
     }
 
     /// <inheritdoc />
@@ -902,6 +917,7 @@ public sealed class StoryCADDriver : IUiDriver
         }
 
         Wait.UntilInputIsProcessed();
+        ParkAfterPointerVerb();
     }
 
     // --- keyboard and focus ------------------------------------------------------------------
@@ -1356,7 +1372,7 @@ public sealed class StoryCADDriver : IUiDriver
     ///     back after the capture: a right-click that started from the parked spot failed to open
     ///     its menu in 2 of 5 VM probes (2026-11-01).
     /// </remarks>
-    private static Point? ParkPointer(Rectangle frame)
+    private Point? ParkPointer(Rectangle frame)
     {
         var titleBar = (int)Math.Round(32 * NativeMethods.SystemDpi() / 96.0);
         var at = Mouse.Position;
@@ -1368,7 +1384,9 @@ public sealed class StoryCADDriver : IUiDriver
         // An empty spot on the status bar, inside the app's content: a move onto the title bar
         // never reached the content, so the row under the pointer kept its hover shade.
         var statusBar = (int)Math.Round(26 * NativeMethods.SystemDpi() / 96.0);
-        Mouse.Position = new Point(frame.X + frame.Width * 3 / 5, frame.Bottom - statusBar);
+        // Real input moves: the glide places the cursor without input events, so the row under
+        // the pointer never heard it leave and kept its hover shade (2026-11-01 VM runs).
+        InputMoveTo(at, new Point(frame.X + frame.Width * 3 / 5, frame.Bottom - statusBar));
         Wait.UntilInputIsProcessed();
         Thread.Sleep(500); // the hover shade and any tooltip fade out
         return at;
