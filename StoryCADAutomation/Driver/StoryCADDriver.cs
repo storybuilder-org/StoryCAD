@@ -528,10 +528,11 @@ public sealed class StoryCADDriver : IUiDriver
         // The visible frame only: the UIA bounds include the invisible resize border, which
         // captured a strip of whatever was behind the window (seen on Brigid, 2026-10-04).
         var frame = NativeMethods.VisibleWindowBounds(hwnd) ?? window.BoundingRectangle;
-        ParkPointer(frame);
+        var parked = ParkPointer(frame);
         Wait.UntilInputIsProcessed();
         using var image = Capture.Rectangle(crop is { } c ? CropArea(frame, c, NativeMethods.SystemDpi()) : frame);
         image.ToFile(pngPath);
+        RestorePointer(parked);
     }
 
     /// <summary>
@@ -574,10 +575,11 @@ public sealed class StoryCADDriver : IUiDriver
             elements.Add((target, element.IsOffscreen ? Rectangle.Empty : element.BoundingRectangle));
         }
 
-        ParkPointer(frame.Value);
+        var parked = ParkPointer(frame.Value);
         Wait.UntilInputIsProcessed();
         using var image = Capture.Rectangle(ElementArea(frame.Value, elements, margin, NativeMethods.SystemDpi()));
         image.ToFile(pngPath);
+        RestorePointer(parked);
     }
 
     /// <summary>
@@ -629,14 +631,16 @@ public sealed class StoryCADDriver : IUiDriver
         }
 
         bounds.Height += (int)Math.Round(24 * NativeMethods.SystemDpi() / 96.0);
+        Point? parked = null;
         if (_process.MainWindowHandle != IntPtr.Zero && NativeMethods.VisibleWindowBounds(_process.MainWindowHandle) is { } mainFrame)
         {
-            ParkPointer(mainFrame);
+            parked = ParkPointer(mainFrame);
         }
 
         Wait.UntilInputIsProcessed();
         using var image = Capture.Rectangle(bounds);
         image.ToFile(pngPath);
+        RestorePointer(parked);
     }
 
     /// <inheritdoc />
@@ -1347,18 +1351,33 @@ public sealed class StoryCADDriver : IUiDriver
     ///     button shows its hover shade in a screenshot. A real right-click or drag leaves the
     ///     pointer on a tree row, and the tree drew that row grey in manual images (#1422).
     /// </summary>
-    private static void ParkPointer(Rectangle frame)
+    /// <remarks>
+    ///     Returns the pointer's old position, or null when it did not move. The caller puts it
+    ///     back after the capture: a right-click that started from the parked spot failed to open
+    ///     its menu in 2 of 5 VM probes (2026-11-01).
+    /// </remarks>
+    private static Point? ParkPointer(Rectangle frame)
     {
         var titleBar = (int)Math.Round(32 * NativeMethods.SystemDpi() / 96.0);
         var at = Mouse.Position;
         if (!frame.Contains(at) || at.Y < frame.Y + titleBar)
         {
-            return;
+            return null;
         }
 
         Mouse.Position = new Point(frame.X + frame.Width / 2, frame.Y + titleBar / 2);
         Wait.UntilInputIsProcessed();
         Thread.Sleep(250); // the hover shade fades out
+        return at;
+    }
+
+    private static void RestorePointer(Point? at)
+    {
+        if (at is { } p)
+        {
+            Mouse.Position = p;
+            Wait.UntilInputIsProcessed();
+        }
     }
 
     private Point ReadyClickPoint(ElementAddress target, TimeSpan? timeout)
