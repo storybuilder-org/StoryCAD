@@ -128,13 +128,15 @@
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="models:StoryElement">
                                     <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). -->
-                                    <StackPanel Orientation="Horizontal" Spacing="5"
+                                    <!-- The CheckBox carries the name as its own label. A separate TextBlock sat after
+                                         the CheckBox's 120 px MinWidth and top-aligned, so the name floated off the box. -->
+                                    <StackPanel Orientation="Horizontal"
                                                 AutomationProperties.Name="{x:Bind Name, Mode=OneWay}">
                                         <CheckBox
-                                            Margin="0"
+                                            Margin="0" VerticalAlignment="Center" MinWidth="250"
+                                            Content="{x:Bind Name, Mode=OneWay}"
                                             IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
                                             Checked="CastMember_Checked" Unchecked="CastMember_Unchecked" />
-                                        <TextBlock Text="{x:Bind Name, Mode=OneWay}" MinWidth="250" />
                                     </StackPanel>
                                 </DataTemplate>
                             </ListView.ItemTemplate>

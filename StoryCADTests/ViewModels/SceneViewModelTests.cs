@@ -1272,6 +1272,20 @@ public class SceneViewModelTests
     }
 
     [TestMethod]
+    public void ScenePurposes_ExcludeBlankComboBoxPlaceholder()
+    {
+        // ListData inserts " " at index 0 of every list for ComboBox binding.
+        // The Purpose of Scene check boxes must not show it as an unlabelled box.
+        _viewModel.Activate(_sceneModel); // LoadModel rebuilds ScenePurposes from ScenePurposeList
+        var viewModel = _viewModel;
+
+        Assert.IsFalse(viewModel.ScenePurposes.Any(p => string.IsNullOrWhiteSpace(p.StringName)),
+            "ScenePurposes must not contain a blank entry");
+        Assert.AreEqual(viewModel.ScenePurposeList.Count(p => !string.IsNullOrWhiteSpace(p)),
+            viewModel.ScenePurposes.Count);
+    }
+
+    [TestMethod]
     public void Constructor_LoadsComboBoxLists()
     {
         // Arrange & Act - Create new ViewModel using IoC (constructor loads lists)

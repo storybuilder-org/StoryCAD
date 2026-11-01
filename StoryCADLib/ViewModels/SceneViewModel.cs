@@ -51,7 +51,8 @@ public class SceneViewModel : ElementViewModelBase, INavigable, ISaveable, IRelo
             ViewpointList = _lists["Viewpoint"];
             SceneTypeList = _lists["SceneType"];
             ScenePurposeList = _lists["ScenePurpose"];
-            foreach (var purpose in ScenePurposeList)
+            // ListData puts a blank " " first for ComboBox binding; a check box list must skip it.
+            foreach (var purpose in ScenePurposeList.Where(p => !string.IsNullOrWhiteSpace(p)))
             {
                 ScenePurposes.Add(new StringSelection(purpose));
             }
@@ -556,7 +557,7 @@ public class SceneViewModel : ElementViewModelBase, INavigable, ISaveable, IRelo
         // this Scene.
         // If a purpose is saved in the model, set it as selected.
         ScenePurposes.Clear();
-        foreach (var purpose in ScenePurposeList)
+        foreach (var purpose in ScenePurposeList.Where(p => !string.IsNullOrWhiteSpace(p)))
         {
             if (Model.ScenePurpose.Contains(purpose))
             {
