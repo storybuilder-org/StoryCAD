@@ -305,9 +305,12 @@ public class BeatSheetsViewModel : ObservableObject
         SelectedBeat = null;
         SelectedBeatIndex = -1;
 
-        // Populate element sources
-        Problems = storyModel.StoryElements.Problems;
-        Scenes = storyModel.StoryElements.Scenes;
+        // Populate element sources. The model collections start with a "(none)"
+        // placeholder (Guid.Empty) for drop-downs; it is not an element to assign.
+        Problems = new ObservableCollection<StoryElement>(
+            storyModel.StoryElements.Problems.Where(e => e.Uuid != Guid.Empty));
+        Scenes = new ObservableCollection<StoryElement>(
+            storyModel.StoryElements.Scenes.Where(e => e.Uuid != Guid.Empty));
         CurrentElementSource = Scenes;
         _isLoading = false;
     }

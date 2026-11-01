@@ -524,7 +524,10 @@ public class SceneViewModel : ElementViewModelBase, INavigable, ISaveable, IRelo
         var appState = Ioc.Default.GetRequiredService<AppState>();
         Characters = _appState.CurrentDocument!.Model.StoryElements.Characters;
         Settings = _appState.CurrentDocument.Model.StoryElements.Settings;
-        CharacterList = _appState.CurrentDocument.Model.StoryElements.Characters; // Populate CharacterList here
+        // The cast list leaves out the "(none)" drop-down placeholder (Guid.Empty):
+        // it is not a character and must not get a cast check box.
+        CharacterList = new ObservableCollection<StoryElement>(
+            Characters.Where(c => c.Uuid != Guid.Empty));
 
         Uuid = Model.Uuid;
         Name = Model.Name;

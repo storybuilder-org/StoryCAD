@@ -548,7 +548,7 @@ public class SceneViewModelTests
     {
         // Arrange
         _viewModel.Activate(_sceneModel);
-        var totalCharacters = _storyModel.StoryElements.Characters.Count;
+        var totalCharacters = _storyModel.StoryElements.Characters.Count(c => c.Uuid != Guid.Empty);
 
         // Act
         _viewModel.AllCharacters = true;
@@ -582,6 +582,21 @@ public class SceneViewModelTests
 
         Assert.AreEqual(0, messages.Count, string.Join("; ", messages));
         Assert.AreEqual(_viewModel.CastList, _viewModel.CastSource);
+    }
+
+    [TestMethod]
+    public void CharacterList_AfterActivate_OmitsNonePlaceholder()
+    {
+        // Arrange
+        _storyModel.StoryElements.Characters.Add(CreateTestCharacter("Real Character"));
+
+        // Act
+        _viewModel.Activate(_sceneModel);
+
+        // Assert - the model list has the "(none)" placeholder; the cast list does not
+        Assert.IsTrue(_storyModel.StoryElements.Characters.Any(c => c.Uuid == Guid.Empty));
+        Assert.IsFalse(_viewModel.CharacterList.Any(c => c.Uuid == Guid.Empty || c.Name == "(none)"));
+        Assert.IsTrue(_viewModel.CharacterList.Any(c => c.Name == "Real Character"));
     }
 
     [TestMethod]

@@ -637,6 +637,22 @@ public class BeatSheetsViewModelTests
     }
 
     [TestMethod]
+    public void LoadBeats_ElementLists_OmitNonePlaceholder()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+
+        // The model lists start with a "(none)" placeholder (Guid.Empty) for drop-downs
+        Assert.IsTrue(_storyModel.StoryElements.Scenes.Any(e => e.Uuid == Guid.Empty));
+        Assert.IsTrue(_storyModel.StoryElements.Problems.Any(e => e.Uuid == Guid.Empty));
+
+        Assert.IsFalse(_beatEditor.Scenes.Any(e => e.Uuid == Guid.Empty));
+        Assert.IsFalse(_beatEditor.Problems.Any(e => e.Uuid == Guid.Empty));
+        Assert.IsTrue(_beatEditor.Scenes.Any(e => e.Name == "Test Scene"));
+        Assert.IsTrue(_beatEditor.Problems.Any(e => e.Name == "Test Story Problem"));
+        Assert.IsFalse(_beatEditor.CurrentElementSource.Any(e => e.Name == "(none)"));
+    }
+
+    [TestMethod]
     public void SelectedElementSource_WhenChanged_DoesNotNotifyDirty()
     {
         _beatEditor.LoadBeats(_problemModel, _storyModel);
