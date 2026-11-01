@@ -525,10 +525,11 @@ public sealed class StoryCADDriver : IUiDriver
             throw new AutomationStepException("the app has no main window to capture.");
         }
 
-        Wait.UntilInputIsProcessed();
         // The visible frame only: the UIA bounds include the invisible resize border, which
         // captured a strip of whatever was behind the window (seen on Brigid, 2026-10-04).
         var frame = NativeMethods.VisibleWindowBounds(hwnd) ?? window.BoundingRectangle;
+        ParkPointer(frame);
+        Wait.UntilInputIsProcessed();
         using var image = Capture.Rectangle(crop is { } c ? CropArea(frame, c, NativeMethods.SystemDpi()) : frame);
         image.ToFile(pngPath);
     }
@@ -573,6 +574,7 @@ public sealed class StoryCADDriver : IUiDriver
             elements.Add((target, element.IsOffscreen ? Rectangle.Empty : element.BoundingRectangle));
         }
 
+        ParkPointer(frame.Value);
         Wait.UntilInputIsProcessed();
         using var image = Capture.Rectangle(ElementArea(frame.Value, elements, margin, NativeMethods.SystemDpi()));
         image.ToFile(pngPath);
@@ -627,6 +629,11 @@ public sealed class StoryCADDriver : IUiDriver
         }
 
         bounds.Height += (int)Math.Round(24 * NativeMethods.SystemDpi() / 96.0);
+        if (_process.MainWindowHandle != IntPtr.Zero && NativeMethods.VisibleWindowBounds(_process.MainWindowHandle) is { } mainFrame)
+        {
+            ParkPointer(mainFrame);
+        }
+
         Wait.UntilInputIsProcessed();
         using var image = Capture.Rectangle(bounds);
         image.ToFile(pngPath);
@@ -857,6 +864,18 @@ public sealed class StoryCADDriver : IUiDriver
     {
         // Right-click is always real pointer: context menus need it (design, Pointer verbs).
         var point = ReadyClickPoint(target, timeout);
+        if (target.Kind == ElementAddressKind.TreePath)
+        {
+            // Near the row's right end: the menu opens at the pointer, and from the row's
+            // centre it covered the row's name in manual images (#1422).
+            var row = _locator.WaitUntilReady(target, ReadinessRequirement.ClickablePoint, Timeout(timeout)).BoundingRectangle;
+            var inset = (int)Math.Round(12 * NativeMethods.SystemDpi() / 96.0);
+            if (row.Width > 4 * inset)
+            {
+                point = new Point(row.Right - inset, point.Y);
+            }
+        }
+
         EnsureAppForeground($"right-click {target}");
         EasedMoveTo(point);
         Mouse.Click(MouseButton.Right);
@@ -1333,6 +1352,25 @@ public sealed class StoryCADDriver : IUiDriver
                 $"Refusing real input ({action}): the foreground window belongs to process {foregroundPid}, " +
                 $"not StoryCAD ({_process.Id}).");
         }
+    }
+
+    /// <summary>
+    ///     Moves a pointer that rests on the window's content to the title bar, so no row or
+    ///     button shows its hover shade in a screenshot. A real right-click or drag leaves the
+    ///     pointer on a tree row, and the tree drew that row grey in manual images (#1422).
+    /// </summary>
+    private static void ParkPointer(Rectangle frame)
+    {
+        var titleBar = (int)Math.Round(32 * NativeMethods.SystemDpi() / 96.0);
+        var at = Mouse.Position;
+        if (!frame.Contains(at) || at.Y < frame.Y + titleBar)
+        {
+            return;
+        }
+
+        Mouse.Position = new Point(frame.X + frame.Width / 2, frame.Y + titleBar / 2);
+        Wait.UntilInputIsProcessed();
+        Thread.Sleep(250); // the hover shade fades out
     }
 
     private Point ReadyClickPoint(ElementAddress target, TimeSpan? timeout)
