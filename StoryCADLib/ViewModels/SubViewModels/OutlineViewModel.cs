@@ -917,7 +917,8 @@ public class OutlineViewModel : ObservableRecipient
                     {
                         foreach (var scene in scenes)
                         {
-                            SceneModel child = new(appState.CurrentDocument.Model, appState.RightTappedNode)
+                            // The plot's scenes belong under its new Problem, not beside it.
+                            SceneModel child = new(appState.CurrentDocument.Model, problem.Node)
                                 { Name = scene.SceneTitle, Description = "See Notes.", Notes = scene.Notes };
 
                             child.Node.IsSelected = true;

@@ -343,6 +343,30 @@ public class OutlineViewModelTests
     }
 
     [TestMethod]
+    public async Task MasterPlotTool_MultiScenePlot_AddsScenesUnderProblem()
+    {
+        Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("MasterPlotScenes", "StoryBuilder", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
+        var root = model.ExplorerView[0];
+        appState.RightTappedNode = root;
+        var master = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
+        var plotName = master.PlotPatternNames.First(n => master.MasterPlots[n].PlotPatternScenes.Count > 1);
+        var sceneCount = master.MasterPlots[plotName].PlotPatternScenes.Count;
+        master.PlotPatternName = plotName;
+
+        await outlineVM.MasterPlotTool();
+
+        var problemNode = root.Children.Single(n => n.Name == plotName);
+        Assert.AreEqual(sceneCount, problemNode.Children.Count(n => n.Type == StoryItemType.Scene),
+            "The plot's scenes should be children of the new Problem");
+        Assert.IsFalse(root.Children.Any(n => n.Type == StoryItemType.Scene),
+            "No plot scene should sit beside the Problem");
+    }
+
+    [TestMethod]
     public async Task MasterPlotTool_AddsSingleProblem()
     {
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
