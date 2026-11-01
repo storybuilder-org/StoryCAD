@@ -667,7 +667,7 @@ public class WorkflowInputBuilderTests
     }
 
     [TestMethod]
-    public async Task BuildWorkflowRequestBody_ProblemBuilder_StructureBeatsResolveBoundElement()
+    public async Task BuildWorkflowRequestBody_ProblemBeats_StructureBeatsResolveBoundElement()
     {
         var api = await NewOutline();
         var problem = AddProblem(api, "The Trial");
@@ -684,14 +684,14 @@ public class WorkflowInputBuilderTests
         var create2 = api.CreateBeat(problem.Uuid, "Empty Beat", "Nothing yet");
         Assert.IsTrue(create2.IsSuccess, create2.ErrorMessage);
 
-        var body = Runner(api, "ProblemBuilder").BuildWorkflowRequestBody(
+        var body = Runner(api, "ProblemBeats").BuildWorkflowRequestBody(
             new Dictionary<string, StoryElement>
             {
                 ["Problem"] = problem, ["Overview"] = overview,
                 ["Protagonist"] = character, ["Antagonist"] = character
             });
 
-        Assert.IsNotNull(body.Input, "ProblemBuilder declares a JsonInput property list; input must be built");
+        Assert.IsNotNull(body.Input, "ProblemBeats declares a JsonInput property list; input must be built");
         CollectionAssert.AreEquivalent(
             new[] { "problem", "sceneChoices", "problemChoices", "characterChoices", "lists", "storyContext" },
             body.Input.Select(p => p.Key).ToList());
@@ -710,16 +710,75 @@ public class WorkflowInputBuilderTests
     }
 
     [TestMethod]
-    public async Task BuildWorkflowRequestBody_ProblemBuilder_NoSheet_StructureBeatsIsEmptyArray()
+    public async Task BuildWorkflowRequestBody_ProblemBeats_NoSheet_StructureBeatsIsEmptyArray()
     {
         var api = await NewOutline();
         var problem = AddProblem(api, "Untouched Problem");
 
-        var body = Runner(api, "ProblemBuilder").BuildWorkflowRequestBody(
+        var body = Runner(api, "ProblemBeats").BuildWorkflowRequestBody(
             new Dictionary<string, StoryElement> { ["Problem"] = problem });
 
         var beats = body.Input["problem"].AsObject()["StructureBeats"].AsArray();
         Assert.AreEqual(0, beats.Count);
+    }
+
+    [TestMethod]
+    public async Task BuildProblemBeatsInput_SceneChoices_NarrativeOrderPlacedOnAndTrash()
+    {
+        var api = await NewOutline();
+        var model = api.CurrentModel;
+        var problem = AddProblem(api, "The Trial");
+        var other = AddProblem(api, "The Appeal");
+        var character = AddCharacter(api, "Defendant");
+        problem.Protagonist = character.Uuid;
+        problem.Antagonist = character.Uuid;
+        var overview = Overview(api);
+
+        var first = AddScene(api, "First");
+        var second = AddScene(api, "Second");
+        var inSection = AddScene(api, "In Section");
+        var outside = AddScene(api, "Outside");
+        var trashed = AddScene(api, "Trashed");
+
+        // Narrative view: Second, then a Section holding In Section, then First.
+        var narrative = model.NarratorView[0];
+        _ = new StoryNodeItem(second, narrative);
+        var section = new FolderModel("Act One", model, StoryItemType.Section, narrative);
+        _ = new StoryNodeItem(inSection, section.Node);
+        _ = new StoryNodeItem(first, narrative);
+
+        // Outside sits on the Appeal's sheet; Trashed goes to the trash.
+        other.StructureBeats.Add(new StructureBeat("Row", "") { Guid = outside.Uuid });
+        other.StructureBeats.Add(new StructureBeat("Row", "") { Guid = second.Uuid });
+        var delete = await api.DeleteElement(trashed.Uuid);
+        Assert.IsTrue(delete.IsSuccess, delete.ErrorMessage);
+
+        var body = Runner(api, "ProblemBeats").BuildWorkflowRequestBody(
+            new Dictionary<string, StoryElement>
+            {
+                ["Problem"] = problem, ["Overview"] = overview,
+                ["Protagonist"] = character, ["Antagonist"] = character
+            });
+
+        CollectionAssert.AreEquivalent(
+            new[] { "problem", "sceneChoices", "problemChoices", "characterChoices", "lists", "storyContext" },
+            body.Input.Select(p => p.Key).ToList());
+
+        var choices = body.Input["sceneChoices"].AsArray().Select(n => n.AsObject()).ToList();
+        CollectionAssert.AreEqual(
+            new[] { "Second", "In Section", "First", "Outside" },
+            choices.Select(c => c["Name"].GetValue<string>()).ToList(),
+            "Narrative order first (a Section's scene at its depth), the rest after; the trashed Scene is absent");
+        CollectionAssert.AreEqual(
+            new[] { true, true, true, false },
+            choices.Select(c => c["inNarrativeView"].GetValue<bool>()).ToList());
+
+        CollectionAssert.AreEqual(new[] { "The Appeal" },
+            choices[0]["placedOn"].AsArray().Select(n => n.GetValue<string>()).ToList());
+        Assert.AreEqual(0, choices[1]["placedOn"].AsArray().Count, "a Scene on no sheet has an empty array");
+        CollectionAssert.AreEqual(new[] { "The Appeal" },
+            choices[3]["placedOn"].AsArray().Select(n => n.GetValue<string>()).ToList());
+        Assert.IsTrue(choices.All(c => c.ContainsKey("GUID") && c.ContainsKey("Description")));
     }
 
     [TestMethod]

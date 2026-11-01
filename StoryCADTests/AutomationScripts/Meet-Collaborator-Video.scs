@@ -60,7 +60,7 @@ click WorkflowAcceptAllButton
 dialog "Replace existing content?" click name:"Cancel"   # keeps the Has your text fields
 
 step "Building out"
-narrate "The same run picks a beat sheet and places scenes on it. Outline gaps shows what the outline still needs, and which workflow helps. Flaw and Backstory gives the antagonist the wound and history that drive him."
+narrate "Problem Beats, a workflow of its own, picks a beat sheet and places scenes on it. Outline gaps shows what the outline still needs, and which workflow helps. Flaw and Backstory gives the antagonist the wound and history that drive him."
 click WorkflowOutlineGapsNavItem
 pause 4
 click WorkflowGroupCharacterNavItem

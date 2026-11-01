@@ -31,7 +31,7 @@ public class BeatSheetCatalogInjectionTests
         var model = new StoryModel();
         var api = CreateApi();
         api.CurrentModel = model;
-        var workflow = new Workflow("ProblemBuilder", "Problem Builder", "test", StoryItemType.Problem);
+        var workflow = new Workflow("ProblemBeats", "Problem Beats", "test", StoryItemType.Problem);
         var args = new Dictionary<string, string>();
         new WorkflowRunner(model, workflow, api).EnrichWithBeatSheets(args);
         return args["BeatSheets"];

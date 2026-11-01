@@ -32,7 +32,7 @@ public class CurrentBeatsInjectionTests
         var model = new StoryModel();
         var api = CreateApi();
         api.CurrentModel = model;
-        workflow ??= new Workflow("ProblemBuilder", "Problem Builder", "test", StoryItemType.Problem);
+        workflow ??= new Workflow("ProblemBeats", "Problem Beats", "test", StoryItemType.Problem);
         return (model, new WorkflowRunner(model, workflow, api));
     }
 
@@ -79,23 +79,23 @@ public class CurrentBeatsInjectionTests
     }
 
     [TestMethod]
-    public void ApplyDeclaredInjections_RegisteredProblemBuilder_InjectsCurrentBeatsForTheGatheredProblem()
+    public void ApplyDeclaredInjections_RegisteredProblemBeats_InjectsCurrentBeatsForTheGatheredProblem()
     {
-        var registered = WorkflowRegistry.All.Single(w => w.Label == "ProblemBuilder");
+        var registered = WorkflowRegistry.All.Single(w => w.Label == "ProblemBeats");
         var (model, runner) = Arrange(registered);
         var problem = new ProblemModel("Subplot", model, null);
         var args = new Dictionary<string, string>();
 
         runner.ApplyDeclaredInjections(args, new Dictionary<string, StoryElement> { ["Problem"] = problem });
 
-        Assert.IsTrue(registered.InjectsCurrentBeats, "ProblemBuilder declares the injection");
+        Assert.IsTrue(registered.InjectsCurrentBeats, "ProblemBeats declares the injection");
         Assert.AreEqual("none", args["CurrentBeats"]);
     }
 
     [TestMethod]
     public void ApplyDeclaredInjections_NoGatheredProblem_SkipsCurrentBeats()
     {
-        var registered = WorkflowRegistry.All.Single(w => w.Label == "ProblemBuilder");
+        var registered = WorkflowRegistry.All.Single(w => w.Label == "ProblemBeats");
         var (_, runner) = Arrange(registered);
         var args = new Dictionary<string, string>();
 

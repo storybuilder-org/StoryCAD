@@ -82,6 +82,12 @@ namespace StoryCollaborator.Workflows
         public bool InjectsCurrentBeats { get; set; }
 
         /// <summary>
+        /// Collaborator #302: when true, the Scene candidates for a beat sheet are every Scene not
+        /// in the trash, placed or not. Problem candidates are unchanged (#217 rule 5).
+        /// </summary>
+        public bool OffersPlacedScenes { get; init; }
+
+        /// <summary>
         /// Conversational workflows return prose rather than a property JSON object, so
         /// WorkflowRunner must not run ExtractOutputs against the reply (#119).
         /// </summary>

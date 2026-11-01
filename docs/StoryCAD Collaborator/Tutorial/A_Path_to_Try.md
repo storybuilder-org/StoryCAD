@@ -26,7 +26,9 @@ Treat it as a starting point, not a rule. As you learn which workflows your writ
 
 3. Story Problem (Premise => Problem + Characters). Turn the premise into a main problem with a protagonist and an antagonist, each created as a character if you do not have them yet. Craft: [Defining Problems](../../Writing%20with%20StoryCAD/Defining_Problems.html).
 
-4. Problem Builder. Goal, motivation, and conflict for both sides of that problem, then a beat sheet that fits it. Scenes and problems that sit on no beat sheet yet fill its empty beats, and scene stubs fill the rest. Set Problem Category, Protagonist, and Antagonist on the Problem first; Problem Builder reads all three, and a blank category stops the run before it starts. Craft: [Defining Problems](../../Writing%20with%20StoryCAD/Defining_Problems.html) for goal, motivation, and conflict, and [Plotting with StoryCAD](../../Writing%20with%20StoryCAD/Plotting_with_StoryCAD.html) for structure.
+4. Problem Builder. Goal, motivation, and conflict for both sides of that problem, and its outcome. Set Problem Category, Protagonist, and Antagonist on the Problem first; Problem Builder reads all three, and a blank category stops the run before it starts. Craft: [Defining Problems](../../Writing%20with%20StoryCAD/Defining_Problems.html).
+
+   Then Problem Beats on the same problem, for a beat sheet that fits it. Your scenes, and problems that sit on no beat sheet yet, fill its empty beats, and scene stubs fill the rest. Craft: [Plotting with StoryCAD](../../Writing%20with%20StoryCAD/Plotting_with_StoryCAD.html).
 
 5. Inner and Outer Problems. The protagonist's outer want against their inner need, as a second Problem built from the first. Craft: the outer and inner problems section of Defining Problems.
 
