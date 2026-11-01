@@ -5,7 +5,7 @@
 ## Setup
 Launch StoryCAD. The tutorial builds one outline, "Danger Calls", from the Folders template. Each step lists the manual page it covers and the script step in `StoryCADTests/AutomationScripts/Tutorial-Creating-a-Story.scs`.
 
-Not scripted: the tutorial has no Collaborator steps. Draft status: the manual pages are not yet compared with the app (see the status log).
+Not scripted: the tutorial has no Collaborator steps.
 
 ---
 
@@ -23,7 +23,7 @@ Not scripted: the tutorial has no Collaborator steps. Draft status: the manual p
 | TC-012 | pt 4 | Inner Traits: Leonard Adventurousness Impulsive; Tony Shrewdness Thoughtful | Values show |
 | TC-013 | pt 4 | Rename the third problem, set Person vs. Self, add research notes to the second | Tree shows the new name |
 | TC-014 | pt 4, pt 5 | Resolution tab Premise on the first and third problems | Text stays |
-| TC-015 | pt 5 | Overview Premise tab: Story Problem = first problem | Possible defect: the Premise tab stays empty and a save erases the Problem's own Premise |
+| TC-015 | pt 5 | Overview Premise tab: Story Problem = first problem | Premise box shows the first problem's Premise |
 | TC-016 | pt 5 | Scenes folder > Add Scene "He's like a ghost" with a sketch | Scene under Scenes |
 | TC-017, TC-018 | pt 5, pt 6 | First problem, Structure tab: beat sheet Three Act Play; assign the scene to "Narrative hook" | Beat shows the scene (Three Act Play is a beat sheet in 4.x, not a Master Plot) |
 | TC-019 | pt 6 | Drag problems under the first problem; drag the scene under the second | Tree shows the nesting |

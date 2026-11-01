@@ -22,27 +22,27 @@ To do so in StoryCAD, launch the program. The first time you launch the program,
 
 Back to our story idea. Use the File menu’s  Open/Create file option:
 
-![](../media/File-Open-Dialog-1.png)
+![](../media/Danger-Calls-Open-Create-File-Page.png)
 
-Click on Create New Story to start a new outline:
+Click on Create new outline to start a new outline:
 
-![](../media/Create-New-Story-Dialog.png)
+![](../media/Danger-Calls-Create-New-Outline-Dialog.png)
 
-Select ‘Folders’ for the Template. If it’s not already there, change the Project path to the folder you’d like to save your outline in (usually the Preferences location) using the Browse button. And finally, assign a Project Name. This will be the file name of the story outline file. In our case, use ‘Danger Calls’. Click on Create project, and you’ll have created your first story outline:
+Select ‘Folders’ for the Template. If it’s not already there, change the Project path to the folder you’d like to save your outline in (usually the Preferences location) using the Browse button. And finally, assign a Project Name. This will be the file name of the story outline file. In our case, use ‘Danger Calls’. Click on Create outline, and you’ll have created your first story outline:
 
-![](../media/Danger-Calls-New-Story-Outline.png)
+![](../media/Danger-Calls-New-Outline.png)
 
 Note the green pencil on the Status Bar at the bottom of the page. The green indicates that the story outline has been saved to disk:
 
-![](../media/Tutorial/Tutorial-1-Danger-Calls-on-Disk.png)
+![](../media/Danger-Calls-Status-Bar-Saved.png)
 
 Click on the  Story Overview node in the navigation pane:
 
-![](../media/Tutorial/Tutorial-1-Story-Overvew-Node.png)
+![](../media/Danger-Calls-Story-Overview-Node.png)
 
 The content pane will show this node’s (empty) tabs and be sitting on the empty Story Idea tab:
 
-![](../media/Tutorial/Tutorial-1-Empty-Story-Idea-Tab.png)
+![](../media/Danger-Calls-Story-Idea-Tab-Empty.png)
 
 You can click on any of the tabs to display that tab’s contents.
 
@@ -50,13 +50,13 @@ You'll notice that the Author, Date Created and Last Changed fields are already 
 
 Key whatever notes you like regarding your idea. While we're here, we might as well fill out a few other items. 
 
-At the moment, the story outline for "Danger Calls" exists only in your computer's memory, but isn’t saved to disk.  Let's save what we've done so far.  We recommend you save your work frequently, and provide a number of ways to do so.  The simplest is to click on the status bar’s Changed Indicator:
+StoryCAD wrote "Danger Calls" to disk when you created it, but the notes you just keyed exist only in your computer's memory.  Let's save what we've done so far.  We recommend you save your work frequently, and provide a number of ways to do so.  The simplest is to click on the status bar’s Changed Indicator:
 
-![](../media/Tutorial/Tutorial-1-Changed-Indicator-Red.png)
+![](../media/Danger-Calls-Changed-Indicator-Red.png)
 
 The indicator will change from red to green, indicating that all changes have been saved to disk.
 
-![](../media/Changed-Indicator.png)
+![](../media/Status-Bar-Changed-Indicator.png)
 
 Alternatively, from the File menu, you can select Save Story, or enter the Ctrl+S shortcut keys.  Remember to save your work periodically.
 
@@ -66,7 +66,7 @@ This is a good place to talk about workflow. Workflow is discussed more fully in
 
 Click on the Danger Calls node’s Structure tab. As is described in the Quick Start, this tab is concerned with constraints on the order and form you place on your story, and contains a number of user interface controls for this purpose. Our story idea’s about crime and criminals, so let’s pick a genre for that. Clicking on the down-arrow key on the Genre ComboBox will display a list of choices; we’ll choose Suspense.  Set Type to Short Story (to keep our example brief.) StoryCAD has many drop-down lists. Not all lists are editable, but for the most part they’re not exhaustive, and  are editable: you can enter values other than the provided options. The lists are examples, suggestions; they’re not there to limit your creativity, but to encourage it. 
 
-![](../media/Tutorial/Tutorial-1-Empty-Struture-Tab.png)
+![](../media/Danger-Calls-Structure-Tab.png)
 
 The Structure tab on the Story Overview is important not necessarily at the moment of conception, but early in story development, because it constrains other choices. Type affects story length and complexity, and Genre sets reader expectations: to be amused for a humor piece, to have a mystery to solve in a mystery, etc.
 
