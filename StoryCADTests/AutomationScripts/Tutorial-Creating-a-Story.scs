@@ -9,7 +9,6 @@ script "Tutorial Creating a Story"
 
 step "TC-001: Create the Danger Calls outline"
 launch
-pause 31                                  # a build without backend keys shows "Connection not established" for 30 s
 screenshot "Danger-Calls-Open-Create-File-Page.png"
 click CreateNewOutlineNavItem
 select FileOpenTemplateCombo "Folders"
@@ -98,7 +97,7 @@ expect tree contains "Danger Calls/Characters/Charlie Lacas"
 focus CharacterRoleCombo
 type "Drug Dealer"
 press "Tab"
-type "Antagonist"                         # type-ahead: the open list scrolls to the selected row, so select cannot reach Antagonist
+select StoryRoleCombo "Antagonist"
 expect StoryRoleCombo text "Antagonist"
 focus CharacterNameTextBox
 screenshot "Danger-Calls-Character-Role-Tab-Antagonist.png"
@@ -109,6 +108,7 @@ expect tree contains "Danger Calls/Characters/Tony Irwin"
 focus CharacterRoleCombo
 type "Detective"
 press "Tab"
+expect StoryRoleCombo text ""             # a new character starts with no Story Role
 focus CharacterNameTextBox
 screenshot "Danger-Calls-Characters-Added.png"
 click SaveStatusButton
@@ -244,6 +244,7 @@ tab PremiseTab
 focus TitleTextBox
 screenshot "Danger-Calls-Overview-Premise-Tab-Empty.png"
 select StoryProblemCombo "Catching the drug dealer Lacas"
+expect OverviewPremiseRichEdit text "Leonard and Tony trace Charlie Lacas through the paging system. Leonard rushes in and Lacas captures him. Tony frees his partner by paging Lacas and gets the drop on the dealers."   # the chosen Problem's Premise shows here
 focus TitleTextBox
 screenshot "Danger-Calls-Overview-Premise-Tab.png"
 click SaveStatusButton
@@ -295,8 +296,7 @@ click SaveStatusButton
 
 step "TC-020: Master Plots Escape and the climax scene"
 collapse tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"   # keeps the tree short enough to show its root row
-right-click tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him"
-press "Escape"                            # the tool inserts under the last right-clicked node, not the selected one
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him"                  # a Tools menu tool adds under the selected node
 menu MasterPlotsMenuItem
 screenshot dialog "Danger-Calls-Master-Plots-Dialog.png"
 select MasterPlotsCombo "Escape"
@@ -390,8 +390,7 @@ click SaveStatusButton
 collapse tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"
 
 step "TC-023: Stock Scenes and the climax"
-right-click tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him"
-press "Escape"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him"                  # a Tools menu tool adds under the selected node
 menu StockScenesMenuItem
 screenshot dialog "Danger-Calls-Stock-Scenes-Dialog.png"
 select StockScenesCategoryCombo "Chase Scenes"
@@ -410,8 +409,6 @@ focus SceneNameTextBox
 screenshot "Danger-Calls-Scene-Shootout.png"
 
 step "TC-024: Denouement"
-right-click tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him"
-press "Escape"
 context-menu tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him" "Add Elements/Add Scene"
 open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him/New Scene"
 set SceneNameTextBox "Tony updates Leonard on the aftermath"
@@ -456,8 +453,7 @@ click SaveStatusButton
 collapse tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"
 
 step "TC-026: Stock Scenes, Twists and Turns"
-right-click tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"
-press "Escape"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"                  # a Tools menu tool adds under the selected node
 menu StockScenesMenuItem
 select StockScenesCategoryCombo "Twists and Turns"
 select StockScenesSceneList "Ally turns out to be on wrong side"

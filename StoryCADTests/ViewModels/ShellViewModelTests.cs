@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Messaging;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
+using StoryCADLib.Services.Messages;
 using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.ViewModels;
@@ -1920,5 +1922,27 @@ public class ShellViewModelTests
         shell.ClearSearch();
 
         Assert.AreEqual("SaveFile command completed", shell.StatusMessage);
+    }
+
+    [TestMethod]
+    public void ShowConnectionStatus_WithoutErrorReportingConsent_PostsNoStatusMessage()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var preferences = Ioc.Default.GetRequiredService<PreferenceService>();
+        var saved = preferences.Model.ErrorCollectionConsent;
+        preferences.Model.ErrorCollectionConsent = false;
+        var messages = new List<string>();
+        WeakReferenceMessenger.Default.Register<StatusChangedMessage>(this, (_, m) => messages.Add(m.Value.Status));
+        try
+        {
+            shell.ShowConnectionStatus();
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(this);
+            preferences.Model.ErrorCollectionConsent = saved;
+        }
+
+        Assert.AreEqual(0, messages.Count, string.Join("; ", messages));
     }
 }

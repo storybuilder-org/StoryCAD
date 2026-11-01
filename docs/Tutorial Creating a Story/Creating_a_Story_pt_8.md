@@ -27,7 +27,7 @@ There are other tools to help you plot- for example, Stock Scenes, on the Tools 
 
 ![](../media/Danger-Calls-Stock-Scenes-Dialog.png)
 
-Pick a category, then a scene, and click Add Scene. Like Master Plots, it adds under the node you last right-clicked:
+Pick a category, then a scene, and click Add Scene. Like Master Plots, it adds under the selected node:
 
 ![](../media/Danger-Calls-Stock-Scenes-Dialog-Chase-Scenes.png)
 

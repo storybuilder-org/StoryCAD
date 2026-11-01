@@ -23,7 +23,7 @@ Each beat describes one function, but it’s wrong to think that a real scene on
 
 The two sub-problems have been moved under the main problem, and our one scene so far (‘He’s like a ghost’) has been moved under the problem it’s a part of.  You move a node by dragging it onto its new parent.
 
-Back when we worked on our story idea we already had an idea of what our climax scene would be. The Master Plots tool, on the Tools menu under Plotting Aids (or Ctrl+M), offers patterns of action that recur in fiction. Right-click on the ‘Leonard's impulsiveness lets Lacas capture him’ problem, then open Master Plots:
+Back when we worked on our story idea we already had an idea of what our climax scene would be. The Master Plots tool, on the Tools menu under Plotting Aids (or Ctrl+M), offers patterns of action that recur in fiction. Select the ‘Leonard's impulsiveness lets Lacas capture him’ problem, then open Master Plots:
 
 ![](../media/Danger-Calls-Master-Plots-Dialog.png)
 
@@ -31,7 +31,7 @@ Pick Escape and click Copy:
 
 ![](../media/Danger-Calls-Master-Plots-Dialog-Escape.png)
 
-Master Plots adds the plot under the node you last right-clicked. Escape is one plot point, so it arrives as a Problem named Escape. Right-click on it and click Convert to Scene. We can make it our own by renaming it to 'Tony diverts Lacas by paging him and allows Leonard to escape’ and using our story Premise description. To add the cast, open the scene’s Cast tab, switch Cast Display to All Characters, and check each character in the scene.
+Master Plots adds the plot under the selected node. Escape is one plot point, so it arrives as a Problem named Escape. Right-click on it and click Convert to Scene. We can make it our own by renaming it to 'Tony diverts Lacas by paging him and allows Leonard to escape’ and using our story Premise description. To add the cast, open the scene’s Cast tab, switch Cast Display to All Characters, and check each character in the scene.
 
 ![](../media/Danger-Calls-Scene-Cast-Tab-Climax.png)
 

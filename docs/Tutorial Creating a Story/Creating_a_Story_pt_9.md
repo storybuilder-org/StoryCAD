@@ -31,7 +31,7 @@ Let's look for a way to get Leonard captured.  Turning once more to the Tools me
 
 2
 
-In this case the first twist listed might help us; our electronics buff ally, Joe Edwards, could be tied to Lacas in some fashion and tip him off that the two detectives are listing in on his call.   Lacas could then set the cops up.  We decide to go with this.  Right-clicking the ‘How will Leonard and Tony get past Charlie's tech?’ problem first, then clicking on the first item in the list and on the Add Scene button, adds this stock scene under that problem.
+In this case the first twist listed might help us; our electronics buff ally, Joe Edwards, could be tied to Lacas in some fashion and tip him off that the two detectives are listing in on his call.   Lacas could then set the cops up.  We decide to go with this.  With the ‘How will Leonard and Tony get past Charlie's tech?’ problem selected, clicking on the first item in the list and then on the Add Scene button adds this stock scene under that problem.
 
 
 ![](../media/Danger-Calls-Stock-Scene-Inserted.png)

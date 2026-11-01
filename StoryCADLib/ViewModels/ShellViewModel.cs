@@ -357,6 +357,13 @@ public class ShellViewModel : ObservableRecipient
 
     public void ShowConnectionStatus()
     {
+        // Error reporting is the connection this reports on. A writer who declined it has no
+        // connection to make, so a warning at every startup would be wrong (#1422, 2026-11-01).
+        if (!Preferences.Model.ErrorCollectionConsent)
+        {
+            return;
+        }
+
         StatusMessage _msg;
         if (!Doppler.DopplerConnection | !Logger.ElmahLogging)
         {

@@ -29,11 +29,11 @@ Your workflow may be different, but we recommend focusing on Problem and Charact
 
 Back when we started, we envisioned a scene in which Lacas walks out of the courtroom, a free man, talking on his cellular phone to someone, and laughing at Leonard, because of lack of evidence. That might be a good way to introduce the story, but our research suggests that with a lack of evidence, our guys wouldn’t have enough to charge Lacas; no prosecutor would charge. Maybe instead it opens with with our guys bemoaning the lack of something concrete to catch Lacas in the act with? Let’s try adding that scene.
 
-Right-clicking the Scenes folder displays a fly-out command bar.
+Right-clicking the Scenes folder displays a fly-out menu.
 
 ![](../media/Danger-Calls-Add-Scene-Menu.png)
 
-Clicking on the Add Scene icon on the fly-out bar will insert a new scene, which you can click on and rename by keying into the Name field. A sketch might also be added:
+Clicking Add Elements and then Add Scene will insert a new scene, which you can click on and rename by keying into the Name field. A sketch might also be added:
 
 ![](../media/Danger-Calls-Scene-Tab-Sketch.png)
 
