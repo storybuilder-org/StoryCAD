@@ -402,8 +402,12 @@ public sealed partial class Shell : Page
                 if (element is TreeView tree)
                 {
                     var target = current != null && TreeHolds(tree, current) ? current : null;
-                    if (!ReferenceEquals(tree.SelectedItem, target))
+                    // A moved node is removed and re-inserted: SelectedItem can still name it while
+                    // its new row is not selected, so check the row too and reassign if needed.
+                    var row = target == null ? null : tree.ContainerFromItem(target) as TreeViewItem;
+                    if (!ReferenceEquals(tree.SelectedItem, target) || (row != null && !row.IsSelected))
                     {
+                        tree.SelectedItem = null;
                         tree.SelectedItem = target;
                     }
                 }

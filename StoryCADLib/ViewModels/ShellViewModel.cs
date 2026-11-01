@@ -1263,6 +1263,8 @@ public class ShellViewModel : ObservableRecipient
         appState.CurrentNode.Parent = targetParent;
         ShowChange();
         Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} left to parent {appState.CurrentNode.Parent.Name}");
+        // Removing and re-inserting the node drops the tree selection; re-highlight it (#1422).
+        CurrentNodeChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private bool MoveLeftIsValid()
@@ -1360,6 +1362,8 @@ public class ShellViewModel : ObservableRecipient
         appState.CurrentNode.Parent = targetParent;
         ShowChange();
         Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} right to parent {appState.CurrentNode.Parent.Name}");
+        // Removing and re-inserting the node drops the tree selection; re-highlight it (#1422).
+        CurrentNodeChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private bool MoveRightIsValid()
@@ -1444,6 +1448,8 @@ public class ShellViewModel : ObservableRecipient
         appState.CurrentNode.Parent = targetParent;
         ShowChange();
         Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} up to parent {appState.CurrentNode.Parent.Name}");
+        // Removing and re-inserting the node drops the tree selection; re-highlight it (#1422).
+        CurrentNodeChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private bool MoveUpIsValid()
@@ -1515,6 +1521,8 @@ public class ShellViewModel : ObservableRecipient
 
         ShowChange();
         Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} down up to parent {appState.CurrentNode.Parent.Name}");
+        // Removing and re-inserting the node drops the tree selection; re-highlight it (#1422).
+        CurrentNodeChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public StoryNodeItem GetNextSibling(StoryNodeItem node)

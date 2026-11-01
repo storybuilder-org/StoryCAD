@@ -202,6 +202,58 @@ public class ShellViewModelTests
     /// <summary>
     ///     Helper method to create a test model with all element types
     /// </summary>
+    /// <summary>
+    ///     Move up/down/left/right removes and re-inserts the node, which drops the tree selection.
+    ///     The moved node must stay the current node, and CurrentNodeChanged must fire so the
+    ///     Shell re-highlights its row (#1422).
+    /// </summary>
+    [TestMethod]
+    public async Task MoveCommands_KeepMovedNodeCurrentAndRaiseCurrentNodeChanged()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await CreateTestModelWithAllElements();
+        var scene = model.StoryElements.First(e => e.Name == "Test Scene").Node;
+        var folder = model.StoryElements.First(e => e.Name == "Test Folder").Node;
+        shell.TreeViewNodeClicked(scene);
+
+        var raised = 0;
+        EventHandler handler = (_, _) => raised++;
+        shell.CurrentNodeChanged += handler;
+        try
+        {
+            var startIndex = scene.Parent.Children.IndexOf(scene);
+            Assert.IsTrue(startIndex > 0, "Scene needs an older sibling to move up");
+
+            shell.MoveUpCommand.Execute(null);
+            Assert.AreEqual(startIndex - 1, scene.Parent.Children.IndexOf(scene));
+            Assert.AreSame(scene, appState.CurrentNode);
+            Assert.AreEqual(1, raised);
+
+            shell.MoveDownCommand.Execute(null);
+            Assert.AreEqual(startIndex, scene.Parent.Children.IndexOf(scene));
+            Assert.AreSame(scene, appState.CurrentNode);
+            Assert.AreEqual(2, raised);
+
+            // Put the scene directly after the folder, then move right into it and left back out.
+            scene.Parent.Children.Remove(scene);
+            scene.Parent.Children.Insert(scene.Parent.Children.IndexOf(folder) + 1, scene);
+            shell.MoveRightCommand.Execute(null);
+            Assert.AreSame(folder, scene.Parent);
+            Assert.AreSame(scene, appState.CurrentNode);
+            Assert.AreEqual(3, raised);
+
+            shell.MoveLeftCommand.Execute(null);
+            Assert.AreSame(folder.Parent, scene.Parent);
+            Assert.AreSame(scene, appState.CurrentNode);
+            Assert.AreEqual(4, raised);
+        }
+        finally
+        {
+            shell.CurrentNodeChanged -= handler;
+        }
+    }
+
     private async Task<StoryModel> CreateTestModelWithAllElements()
     {
         var outlineService = Ioc.Default.GetService<OutlineService>();
