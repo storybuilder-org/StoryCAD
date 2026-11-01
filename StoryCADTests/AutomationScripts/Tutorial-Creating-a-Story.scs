@@ -18,6 +18,8 @@ focus FileOpenProjectNameTextBox          # a caret, not a focus ring on the but
 screenshot "Danger-Calls-Create-New-Outline-Dialog.png"
 click PrimaryButton                       # "Create outline" writes Danger Calls.stbx at once
 expect window "StoryCAD - Currently editing Danger Calls"
+focus TitleTextBox                        # the app leaves the caret in the search box
+press "End"
 screenshot "Danger-Calls-New-Outline.png"
 screenshot "Danger-Calls-Status-Bar-Saved.png" of ViewSelectorCombo BackupStatusButton margin 0
 
@@ -190,11 +192,9 @@ click TraitBuilderButton
 screenshot dialog "Danger-Calls-Trait-Builder-Dialog.png"
 select TraitCategoryCombo "Behaviors"
 focus TraitExampleCombo
-press "Alt+Down"                          # the page shows the list of example behaviors
-type "(Behavior): Impulsive"              # type-ahead in the open list: it has 157 rows
-screenshot "Danger-Calls-Trait-Builder-Dialog-Behaviors.png"   # whole window: the open list runs past the dialog
-press "Enter"
+type "(Behavior): Impulsive"              # type-ahead: the example list has 157 rows, and open it covers the dialog
 expect TraitExampleCombo text "(Behavior): Impulsive"
+screenshot dialog "Danger-Calls-Trait-Builder-Dialog-Behaviors.png"
 click PrimaryButton                       # "Copy trait"
 focus CharacterNameTextBox
 press "End"

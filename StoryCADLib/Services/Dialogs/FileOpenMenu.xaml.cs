@@ -26,7 +26,8 @@ public sealed partial class FileOpenMenuPage : Page
         FileOpenVM.BackupTabContentVisibility = Visibility.Collapsed;
         FileOpenVM.NewTabContentVisibility = Visibility.Collapsed;
         FileOpenVM.OutlineName = "";
-        FileOpenVM.CurrentTab = new NavigationViewItem { Tag = "Recent" };
+        // The list's own item, so the pane marks it selected; a new item matched none (#1422).
+        FileOpenVM.CurrentTab = RecentlyOpenedNavItem;
 
         //Set recent files.
         var preferences = Ioc.Default.GetRequiredService<PreferenceService>();

@@ -30,13 +30,13 @@ Click on the Lenard Kraskin node and then click on the Outer Traits tab. The Con
 
 ![](../media/Danger-Calls-Trait-Builder-Dialog.png)
 
-Clicking on Behaviors will give you a list of example behaviors: 
+Choosing Behaviors in Trait Categories fills the Examples list with example behaviors, and one of them is ‘(Behavior): Impulsive’:
 
 ![](../media/Danger-Calls-Trait-Builder-Dialog-Behaviors.png)
 
-And right there is what we’re looking for. Remember, we have no preconceptions about Leonard's character; he's a blank sheet of paper.  He can therefore easily be molded to suit the story, and giving him a character flaw by making him impulsive is a step in that direction.
+That is what we’re looking for. Remember, we have no preconceptions about Leonard's character; he's a blank sheet of paper.  He can therefore easily be molded to suit the story, and giving him a character flaw by making him impulsive is a step in that direction.
 
-Pick ‘(Behavior): Impulsive’ from the Examples list and click Copy trait to add the trait:
+With ‘(Behavior): Impulsive’ chosen in the Examples list, click Copy trait to add the trait:
 
 ![](../media/Danger-Calls-Character-Outer-Traits-Tab-Impulsive.png)
 

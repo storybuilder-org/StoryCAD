@@ -6,6 +6,8 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using StoryCADLib.Services.Messages;
 using StoryCADLib.Helpers;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services;
@@ -558,6 +560,9 @@ public sealed partial class Shell : Page
             {
                 movedItem.Parent = parent;
             }
+
+            // A drop changes the outline; the pencil turns red until it is saved (#1422).
+            WeakReferenceMessenger.Default.Send(new IsChangedMessage(true));
         }
         catch (Exception ex)
         {

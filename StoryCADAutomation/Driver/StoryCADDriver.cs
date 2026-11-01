@@ -1347,7 +1347,7 @@ public sealed class StoryCADDriver : IUiDriver
     }
 
     /// <summary>
-    ///     Moves a pointer that rests on the window's content to the title bar, so no row or
+    ///     Moves a pointer that rests on the window's content to the status bar, so no row or
     ///     button shows its hover shade in a screenshot. A real right-click or drag leaves the
     ///     pointer on a tree row, and the tree drew that row grey in manual images (#1422).
     /// </summary>
@@ -1365,7 +1365,10 @@ public sealed class StoryCADDriver : IUiDriver
             return null;
         }
 
-        Mouse.Position = new Point(frame.X + frame.Width / 2, frame.Y + titleBar / 2);
+        // An empty spot on the status bar, inside the app's content: a move onto the title bar
+        // never reached the content, so the row under the pointer kept its hover shade.
+        var statusBar = (int)Math.Round(26 * NativeMethods.SystemDpi() / 96.0);
+        Mouse.Position = new Point(frame.X + frame.Width * 3 / 5, frame.Bottom - statusBar);
         Wait.UntilInputIsProcessed();
         Thread.Sleep(250); // the hover shade fades out
         return at;
