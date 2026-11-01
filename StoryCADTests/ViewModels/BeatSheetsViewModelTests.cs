@@ -462,6 +462,27 @@ public class BeatSheetsViewModelTests
     }
 
     [TestMethod]
+    public async Task AssignBeatAsync_Scene_KeepsBeatSelectedAndShowsDescriptions()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        var beat = new StructureBeat("Opening", "The hero is stuck");
+        _beatEditor.StructureBeats.Add(beat);
+        _beatEditor.SelectedBeat = beat;
+        _beatEditor.SelectedBeatIndex = 0;
+        var scene = _storyModel.StoryElements.Scenes.First();
+        scene.Description = "Stakeout goes nowhere";
+        _beatEditor.SelectedListElement = scene;
+
+        await _beatEditor.AssignBeatAsync();
+
+        Assert.AreEqual(scene.Uuid, beat.Guid, "Beat should be bound to the scene");
+        Assert.AreSame(beat, _beatEditor.SelectedBeat, "Assigned beat should stay selected");
+        Assert.AreEqual(0, _beatEditor.SelectedBeatIndex);
+        Assert.AreEqual("The hero is stuck", _beatEditor.SelectedBeatDescription);
+        Assert.AreEqual("Stakeout goes nowhere", _beatEditor.CurrentElementDescription);
+    }
+
+    [TestMethod]
     public void ElementIcon_Scene_ReturnsWorldSymbol()
     {
         var scene = new SceneModel("Icon Test Scene", _storyModel, null);

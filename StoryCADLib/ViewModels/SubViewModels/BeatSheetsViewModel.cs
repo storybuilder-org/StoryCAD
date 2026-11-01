@@ -387,8 +387,9 @@ public class BeatSheetsViewModel : ObservableObject
             }
 
             _outlineService.AssignElementToBeat(_storyModel, _problemModel, SelectedBeatIndex, desiredBind);
-            SelectedBeat = null;
-            SelectedBeatIndex = -1;
+            // Keep the beat just assigned selected so its description stays in view, and show the
+            // assigned element's description. Clearing SelectedBeat here emptied both panes.
+            CurrentElementDescription = SelectedListElement.Description;
         }
         catch (InvalidOperationException ex)
         {

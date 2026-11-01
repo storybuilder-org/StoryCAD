@@ -5,6 +5,7 @@
       xmlns:usercontrols="using:StoryCADLib.Controls"
       xmlns:viewModels="using:StoryCADLib.ViewModels"
       xmlns:tools="using:StoryCADLib.ViewModels.Tools"
+      xmlns:models="using:StoryCADLib.Models"
       ScrollViewer.VerticalScrollBarVisibility="Disabled"
       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
     <Grid>
@@ -448,11 +449,19 @@
                           ItemsSource="{x:Bind BeatSheetsVm.CurrentElementSource, Mode=TwoWay}"
                           SelectedItem="{x:Bind BeatSheetsVm.SelectedListElement, Mode=TwoWay}"
                           SelectionMode="Single"
-                          DisplayMemberPath="Name"
                           BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                           BorderThickness="1"
                           CornerRadius="4"
-                          AutomationProperties.AutomationId="ElementsList" />
+                          AutomationProperties.AutomationId="ElementsList">
+                                    <!-- Names wrap so a long scene name is not cut off at the 1036 x 744 window. -->
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:StoryElement">
+                                            <TextBlock Text="{x:Bind Name, Mode=OneWay}" TextWrapping="Wrap"
+                                                       Margin="0,4"
+                                                       AutomationProperties.Name="{x:Bind Name, Mode=OneWay}" />
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
                             </Grid>
                         </Grid>
 
