@@ -8,6 +8,16 @@ public sealed partial class OverviewPage : Page
     {
         InitializeComponent();
         DataContext = OverviewVm;
+
+        // Equal-width tabs are sized on the first layout pass, before the page has its final
+        // width, so a new outline showed narrow tabs until the outline was reopened. Redo the
+        // tab sizing once the page has its width (#1422, 2026-11-01).
+        OverviewTabView.SizeChanged += (_, _) => DispatcherQueue.TryEnqueue(
+            Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+            {
+                OverviewTabView.TabWidthMode = TabViewWidthMode.SizeToContent;
+                OverviewTabView.TabWidthMode = TabViewWidthMode.Equal;
+            });
     }
 
     public OverviewViewModel OverviewVm => Ioc.Default.GetService<OverviewViewModel>();

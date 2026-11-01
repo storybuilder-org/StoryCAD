@@ -1370,7 +1370,7 @@ public sealed class StoryCADDriver : IUiDriver
         var statusBar = (int)Math.Round(26 * NativeMethods.SystemDpi() / 96.0);
         Mouse.Position = new Point(frame.X + frame.Width * 3 / 5, frame.Bottom - statusBar);
         Wait.UntilInputIsProcessed();
-        Thread.Sleep(250); // the hover shade fades out
+        Thread.Sleep(500); // the hover shade and any tooltip fade out
         return at;
     }
 

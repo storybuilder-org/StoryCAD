@@ -412,10 +412,25 @@ public sealed partial class Shell : Page
                         tree.SelectedItem = null;
                         tree.SelectedItem = target;
                     }
+
+                    // A right-click menu or a drop captures the pointer, so the row under it never
+                    // leaves its PointerOver state and stays grey after the menu closes or the drop
+                    // ends. Put every realized row back in its resting state (#1422, 2026-11-01).
+                    foreach (var tvi in RowContainers(tree))
+                    {
+                        var selected = target != null && ReferenceEquals(tree.ItemFromContainer(tvi), target);
+                        if (tvi.IsSelected != selected)
+                        {
+                            tvi.IsSelected = selected;
+                        }
+
+                        VisualStateManager.GoToState(tvi, selected ? "Selected" : "Normal", false);
+                    }
                 }
                 else if (element is TreeViewItem rootRow)
                 {
                     rootRow.IsSelected = current != null && ReferenceEquals(rootRow.DataContext, current);
+                    VisualStateManager.GoToState(rootRow, rootRow.IsSelected ? "Selected" : "Normal", false);
                 }
             }
             catch (Exception ex)
@@ -426,6 +441,23 @@ public sealed partial class Shell : Page
     }
 
     /// <summary>Root rows and TreeViews under the navigation pane; does not descend into a TreeView.</summary>
+    private static IEnumerable<TreeViewItem> RowContainers(DependencyObject parent)
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is TreeViewItem tvi)
+            {
+                yield return tvi;
+            }
+
+            foreach (var found in RowContainers(child))
+            {
+                yield return found;
+            }
+        }
+    }
+
     private static IEnumerable<FrameworkElement> TreeRows(DependencyObject parent)
     {
         for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)

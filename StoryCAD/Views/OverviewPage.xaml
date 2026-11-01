@@ -18,7 +18,7 @@
         </Grid.RowDefinitions>
         <TextBox Header="Title" Text="{x:Bind OverviewVm.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  AutomationProperties.AutomationId="TitleTextBox" />
-        <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
+        <TabView x:Name="OverviewTabView" Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
                  HorizontalAlignment="Stretch"
                  VerticalAlignment="Stretch"
                  HorizontalContentAlignment="Stretch"
