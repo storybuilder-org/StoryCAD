@@ -21,14 +21,14 @@
                  viewModels:TextBoxFocus.IsFocused="{x:Bind CharVm.IsTextBoxFocused, Mode=TwoWay}"
                  Margin="10,10,10,0" HorizontalAlignment="Stretch"
                  AutomationProperties.AutomationId="CharacterNameTextBox" />
-        <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
+        <TabView Grid.Row="1" TabWidthMode="SizeToContent" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
                  HorizontalAlignment="Stretch"
                  VerticalAlignment="Stretch"
                  HorizontalContentAlignment="Stretch"
                  VerticalContentAlignment="Stretch"
                  AutomationProperties.AutomationId="CharacterTabs">
             <TabView.TabItems>
-                <TabViewItem Header="Role" IsClosable="False"
+                <TabViewItem Header="Role" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="RoleTab">
@@ -61,7 +61,7 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Physical" IsClosable="False"
+                <TabViewItem Header="Physical" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="PhysicalTab">
@@ -177,7 +177,7 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Appearance" IsClosable="False"
+                <TabViewItem Header="Appearance" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="AppearanceTab">
@@ -197,7 +197,7 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Relationships" IsClosable="False"
+                <TabViewItem Header="Relationships" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="RelationshipsTab">
@@ -205,7 +205,7 @@
                     <usercontrols:RelationshipView />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Flaw" IsClosable="False"
+                <TabViewItem Header="Flaw" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="FlawTab">
@@ -228,7 +228,7 @@
                                                       PlaceholderText="The trauma, fear, lie or secret that sabotages your character." />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Backstory" IsClosable="False"
+                <TabViewItem Header="Backstory" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="BackstoryTab">
@@ -248,7 +248,7 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Social" IsClosable="False"
+                <TabViewItem Header="Social" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="SocialTab">
@@ -290,7 +290,7 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Psychological" IsClosable="False"
+                <TabViewItem Header="Psychological" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="PsychologicalTab">
@@ -360,7 +360,7 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Inner Traits" IsClosable="False"
+                <TabViewItem Header="Inner Traits" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="InnerTraitsTab">
@@ -455,7 +455,7 @@
                               AutomationProperties.AutomationId="StabilityCombo" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Outer Traits" IsClosable="False"
+                <TabViewItem Header="Outer Traits" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="OuterTraitsTab">
@@ -506,7 +506,7 @@
                     </Grid>
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Notes" IsClosable="False"
+                <TabViewItem Header="Notes" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="CharacterNotesTab">
@@ -527,7 +527,7 @@
                 </Grid>
                 </TabViewItem>
 
-                <TabViewItem Header="Images" IsClosable="False"
+                <TabViewItem Header="Images" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="CharacterImagesTab">

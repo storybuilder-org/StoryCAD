@@ -868,11 +868,21 @@ public sealed class StoryCADDriver : IUiDriver
         {
             // Near the row's right end: the menu opens at the pointer, and from the row's
             // centre it covered the row's name in manual images (#1422).
-            var row = _locator.WaitUntilReady(target, ReadinessRequirement.ClickablePoint, Timeout(timeout)).BoundingRectangle;
-            var inset = (int)Math.Round(12 * NativeMethods.SystemDpi() / 96.0);
-            if (row.Width > 4 * inset)
+            var rowElement = _locator.WaitUntilReady(target, ReadinessRequirement.ClickablePoint, Timeout(timeout));
+            var row = rowElement.BoundingRectangle;
+            // A row can be wider than the visible pane; clip it to the tree's own rectangle.
+            var walker = _automation.TreeWalkerFactory.GetControlViewWalker();
+            var tree = walker.GetParent(rowElement);
+            while (tree is not null && tree.Properties.ControlType.ValueOrDefault != ControlType.Tree)
             {
-                point = new Point(row.Right - inset, point.Y);
+                tree = walker.GetParent(tree);
+            }
+
+            var right = tree is null ? row.Right : Math.Min(row.Right, tree.BoundingRectangle.Right);
+            var inset = (int)Math.Round(24 * NativeMethods.SystemDpi() / 96.0);
+            if (right - row.Left > 4 * inset)
+            {
+                point = new Point(right - inset, point.Y);
             }
         }
 
