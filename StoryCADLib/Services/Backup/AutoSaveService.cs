@@ -141,6 +141,8 @@ public class AutoSaveService : IDisposable
                     WeakReferenceMessenger.Default.Send(new IsChangedMessage(false));
                     // Indicate autosave completed successfully
                     WeakReferenceMessenger.Default.Send(new IsAutosaveStatusMessage(true));
+                    // Show the Last Changed date the save wrote (#1422 review)
+                    Ioc.Default.GetService<OverviewViewModel>()?.RefreshDateModified();
                 });
             }
             else

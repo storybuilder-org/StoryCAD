@@ -162,6 +162,15 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable, IRe
         set
         {
             var previousProblem = _storyProblem;
+            // Premise text typed here belongs to the Problem linked so far; keep it there before
+            // the new Problem's Premise replaces the box (#1422 review).
+            if (_changeable && _syncPremise && previousProblem != Guid.Empty && _storyModel != null
+                && value?.Uuid != previousProblem
+                && StoryElement.GetByGuid(previousProblem, _storyModel) is ProblemModel previous)
+            {
+                previous.Premise = Premise ?? string.Empty;
+            }
+
             if (SetProperty(ref _selectedProblem, value))
             {
                 // Update StoryProblem GUID when SelectedProblem changes

@@ -387,6 +387,7 @@ public class OutlineViewModel : ObservableRecipient
                 Messenger.Send(new StatusChangedMessage(new StatusMessage($"{msg} executing", LogLevel.Info)));
                 _editFlushService.FlushCurrentEdits();
                 await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
+                Ioc.Default.GetService<OverviewViewModel>()?.RefreshDateModified();
                 Messenger.Send(new StatusChangedMessage(new StatusMessage($"{msg} completed", LogLevel.Info)));
                 outlineService.SetChanged(appState.CurrentDocument.Model, false);
                 shellVm.ChangeStatusColor = Colors.Green;

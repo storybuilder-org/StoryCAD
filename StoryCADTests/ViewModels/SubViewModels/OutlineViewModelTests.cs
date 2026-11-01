@@ -61,13 +61,17 @@ public class OutlineViewModelTests
         var model = await outlineService.CreateModel("TestStockScene", "StoryBuilder", 0);
         appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "TestStockScene.stbx"));
         outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
-        appState.RightTappedNode = model.ExplorerView[0];
+        var root = model.ExplorerView[0];
+        appState.RightTappedNode = null;
+        appState.CurrentNode = root;                 // a Tools menu tool adds under the selected node
         Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName = "The chase";
         model.Changed = false;
 
         await outlineVM.StockScenesTool();
 
-        Assert.IsTrue(model.StoryElements.Any(e => e.Name == "The chase"), "Scene should be inserted");
+        var scene = model.StoryElements.SingleOrDefault(e => e.Name == "The chase");
+        Assert.IsNotNull(scene, "Scene should be inserted");
+        Assert.AreSame(root, scene.Node.Parent, "Scene should be under the selected node");
         Assert.IsTrue(model.Changed, "Changed flag should be true after a stock scene insert");
     }
 

@@ -365,6 +365,11 @@ public sealed partial class Shell : Page
     private void ContextFlyout_Closed(object sender, object e)
     {
         RestoreRightTappedRow();
+        // Escape or a click outside closes the menu without a command; later Alt keys and
+        // Delete must act on the selected node, not this one. Low priority: a menu command
+        // runs first and reads its target at its start (#1422 review).
+        DispatcherQueue?.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low,
+            () => AppState.RightTappedNode = null);
         // A right-click can move the TreeView's own selection to the clicked row; put the
         // highlight back on the node the content pane shows.
         QueueTreeHighlightSync();
@@ -441,6 +446,19 @@ public sealed partial class Shell : Page
     }
 
     /// <summary>Root rows and TreeViews under the navigation pane; does not descend into a TreeView.</summary>
+    private bool TreeHasFocus()
+    {
+        for (var d = FocusManager.GetFocusedElement(XamlRoot) as DependencyObject; d != null; d = VisualTreeHelper.GetParent(d))
+        {
+            if (ReferenceEquals(d, TreePanel))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static IEnumerable<TreeViewItem> RowContainers(DependencyObject parent)
     {
         for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
@@ -734,7 +752,10 @@ public sealed partial class Shell : Page
             }
 
             // Delete key (no modifiers)
-            if (!ctrl && !shift && !alt && e.Key == VirtualKey.Delete && ShellVm.ExplorerVisibility == Visibility.Visible)
+            // Only from the tree: Delete on a check box or list in the content pane trashed the
+            // shown element once commands fell back to the selected node (#1422 review).
+            if (!ctrl && !shift && !alt && e.Key == VirtualKey.Delete && ShellVm.ExplorerVisibility == Visibility.Visible
+                && (AppState.RightTappedNode != null || TreeHasFocus()))
             {
                 ShellVm.RemoveStoryElementCommand.Execute(null);
                 e.Handled = true;

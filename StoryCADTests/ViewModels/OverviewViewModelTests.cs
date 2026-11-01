@@ -40,6 +40,23 @@ public class OverviewViewModelTests
     }
 
     [TestMethod]
+    public void SelectedProblem_SwitchAfterTypingPremise_KeepsTypedPremiseOnPreviousProblem()
+    {
+        var first = new ProblemModel("Catching the drug dealer Lacas", _storyModel, _overview.Node);
+        first.Premise = "Old";
+        var second = new ProblemModel("Leonard's impulsiveness", _storyModel, _overview.Node);
+        second.Premise = "Second premise.";
+        _viewModel.Activate(_overview);
+        _viewModel.SelectedProblem = first;
+        _viewModel.Premise = "Typed, not yet saved.";
+
+        _viewModel.SelectedProblem = second;
+
+        Assert.AreEqual("Typed, not yet saved.", first.Premise);
+        Assert.AreEqual("Second premise.", _viewModel.Premise);
+    }
+
+    [TestMethod]
     public void SaveModel_AfterPickingProblem_KeepsProblemPremise()
     {
         var problem = new ProblemModel("Catching the drug dealer Lacas", _storyModel, _overview.Node);
