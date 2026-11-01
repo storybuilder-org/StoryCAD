@@ -122,3 +122,5 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - Branch rebased on `dev` at `4570db84`; Debug x64 rebuilt.
 - `D:\VMs\Run-InVM.ps1` runs from a normal PowerShell. The account is in the Hyper-V Administrators group, so no administrator session is needed. Earlier entries that said otherwise are corrected.
 - The 2026-10-22 local captures are gone; the VM run supplies the 52 images at 1036 x 744, so no scaling step.
+- The tutorial video series (StoryCAD #1626 comment, 2026-10-24: a video or series following the manual's start-to-finish tutorial) waits on this script.
+- Terry, 2026-11-01: fix every fault the run found, app faults included. Three agents fix them in separate worktrees: premise, Story Role and changed indicator; tree highlight, tool target, folder menu, status messages and the Denouement hang; layout and tool-list text. Script capture fixes are mine.

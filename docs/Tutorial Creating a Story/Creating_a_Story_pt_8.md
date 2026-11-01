@@ -38,9 +38,13 @@ We didn’t call it that, of course, and in fact the capture idea we started wit
 
 We set its Scene Type to ‘Climax scene’. If we go back to the Three Act Play beat sheet, we’ll find one more piece, the Denouement:
 
+![](../media/Danger-Calls-Structure-Tab-Denouement.png)
+
+We’ve added two scenes after Shootout, ‘Tony updates Leonard on the aftermath’ and ‘Tony confronts Jack Chun’, both of which constitute the denouement for our story:
+
 ![](../media/Danger-Calls-Scenes-Denouement.png)
 
-We’ve added two scenes after Shootout, ‘Tony updates Leonard on the aftermath’ and ‘Tony confronts Jack Chun’, both of which constitute the denouement for our story. The  confrontation scene, we think, closes a plot hole, how the bad guys came to set up the ambush, namely, a double-cross by Chun. The Problem, ‘Leonard’s impulsiveness lets Lacas capture him’, turns out not to be the second problem all.  ‘Jack Chun double-crosses the detectives.’  Might be a better title, and one question to address is why the double-cross: the question of motive. 
+The  confrontation scene, we think, closes a plot hole, how the bad guys came to set up the ambush, namely, a double-cross by Chun. The Problem, ‘Leonard’s impulsiveness lets Lacas capture him’, turns out not to be the second problem all.  ‘Jack Chun double-crosses the detectives.’  Might be a better title, and one question to address is why the double-cross: the question of motive. 
 
 These changes, in the climax scene, Shootout, and a better understanding of the second sub-problem, are typical of what occurs when you’re plotting in scenes. Your story, whether a novel or a short story or an episodic television script, is a series of events which are process the problems your protagonist is trying to solve, and which are linked by cause and effect. Understanding your problems, and using story structure, are the workflow that drives your plotting process.
 
