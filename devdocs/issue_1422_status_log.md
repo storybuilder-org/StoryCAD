@@ -61,7 +61,7 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 
 - Branch `issue-1422-core-story-elements` from `dev` at `8abc5c54` (after PR #1637 merged).
 - New `screenshot "Name.png" of <target> [<target> ...] [margin N]`: the image covers the named elements plus a margin in 100%-scale pixels, clipped to the window (Terry, 2026-10-18: close-ups by element name instead of pixel numbers). `Core-File-Operations.scs` uses it for `Status-Bar.png` and `File-Menu.png`. Automation tests 158 passed; lint clean.
-- VM runs are one command: `D:\VMs\Run-InVM.ps1 -Repo <worktree> -Script <name>.scs` (elevated PowerShell) stages the Debug build, runner and XAML, runs in the VM, and copies results to `D:\VMs\out\<script>`. The script lives on Brigid, not in the repo. First run: Core_File_Operations passed, 42.1 s in the VM, 97 s end to end.
+- VM runs are one command: `D:\VMs\Run-InVM.ps1 -Repo <worktree> -Script <name>.scs` stages the Debug build, runner and XAML, runs in the VM, and copies results to `D:\VMs\out\<script>`. The script lives on Brigid, not in the repo. First run: Core_File_Operations passed, 42.1 s in the VM, 97 s end to end.
 - Open: the new `Status-Bar.png` takes a thin strip of the page above the status bar (margin 8 reaches past its top edge). Fix the margin, retake both images into `docs/media`, then start the Core_Story_Elements script.
 
 ### Session recovery (2026-10-19)
@@ -86,7 +86,7 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - PR #1650 merged into `dev` as `9f80a06b`; merge-cleanup done (C3 ticked, wiki `log.md` entry, sync-state at `9f80a06b`).
 - Next: C4, Window_Management (`StoryCADTests/ManualTests/Window_Management.md`), on branch `issue-1422-window-management` from `9f80a06b`, in the worktree `D:\dev\src\StoryCAD-1422`. Nothing done on it yet.
 - Per plan: translate to a `.scs` script with `--window 1036x744`, run in the VM, retake the manual images it covers under the image name standard, run `labels` on the pages, have an agent compare the pages with the code, fix plan and pages, one PR.
-- VM runs need an elevated session: `D:\VMs\Run-InVM.ps1 -Repo D:\dev\src\StoryCAD-1422 -Script <name>.scs`; results in `D:\VMs\out\<script>`. Build Debug x64 in the worktree first; after a `dev` package change, build with `-t:Restore,Build`.
+- VM runs: `D:\VMs\Run-InVM.ps1 -Repo D:\dev\src\StoryCAD-1422 -Script <name>.scs`; results in `D:\VMs\out\<script>`. Build Debug x64 in the worktree first; after a `dev` package change, build with `-t:Restore,Build`.
 - Script facts: wait for `TitleTextBox` after opening a file before opening a node; right-click menus close themselves now (`CloseContextFlyout`); a script string cannot hold a line break.
 - The worktree has no `.env`, so `CheckDotEnvFile` and `CheckDoppler` fail in a local full-suite run there.
 
@@ -109,10 +109,16 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 
 ## 2026-10-22 (PR 5, Tutorial, paused)
 
-- Branch `issue-1422-tutorial` from `dev` at `7f497656`. `Tutorial-Creating-a-Story.scs` (27 steps, `TC-001` to `TC-027`) passes locally with `--window 1036x744`, 358 s, 52 screenshots. Lint: `check StoryCADTests` 9 scripts, 0 errors. No runner changes. The VM run is still needed (no elevated session).
+- Branch `issue-1422-tutorial` from `dev` at `7f497656`. `Tutorial-Creating-a-Story.scs` (27 steps, `TC-001` to `TC-027`) passes locally with `--window 1036x744`, 358 s, 52 screenshots. Lint: `check StoryCADTests` 9 scripts, 0 errors. No runner changes. The VM run is still needed.
 - Plan `Tutorial_Creating_a_Story.md` written as a draft table.
 - Not done: copy the 52 images into `docs/media` (local captures are 150% scale; scale to 1036 x 744), rename to the standard, drop the old 51 and fix links in the ten pages and `Status_Bar.md`, label check, page comparison by a separate agent, page rewrites.
 - Page rewrites needed: Three Act Play is a beat sheet on the Problem Structure tab, not a Master Plot; Master Plots add one Problem; folder menus are Add Elements submenus; Concept tab has no tooltip; Problem Type and Conflict Type are editable lists; Cast is its own scene tab; "Detective" is in the Role list.
 - App findings to report: the Overview Premise tab does not show the Story Problem's premise, and a save after choosing it erased the Problem's own premise; a new character shows the previous character's Story Role; Master Plots and Stock Scenes insert under the last right-clicked node, not the selected one; selecting the last beat (Denouement) in the Three Act Play list hung the app.
 - Script facts: editable lists open with Alt+Down, and long lists need type-ahead; keep the tree short with `collapse` or its root row leaves the realized rows.
 
+
+## 2026-11-01 (PR 5, Tutorial, resumed)
+
+- Branch rebased on `dev` at `4570db84`; Debug x64 rebuilt.
+- `D:\VMs\Run-InVM.ps1` runs from a normal PowerShell. The account is in the Hyper-V Administrators group, so no administrator session is needed. Earlier entries that said otherwise are corrected.
+- The 2026-10-22 local captures are gone; the VM run supplies the 52 images at 1036 x 744, so no scaling step.
