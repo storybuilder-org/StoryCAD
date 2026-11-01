@@ -91,7 +91,7 @@
                     <AppBarButton Icon="Delete" Label="Delete element"
                                   AutomationProperties.AutomationId="DeleteElementButton"
                                   Command="{x:Bind ShellVm.RemoveStoryElementCommand, Mode=OneWay}"
-                                  Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}">
+                                  Visibility="{x:Bind ShellVm.DeleteElementVisibility, Mode=OneWay}">
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Move Story Element to Trashcan" />
                         </ToolTipService.ToolTip>
@@ -99,7 +99,7 @@
                     <AppBarButton Icon="Refresh" Label="Restore Element"
                                   AutomationProperties.AutomationId="RestoreElementButton"
                                   Command="{x:Bind ShellVm.RestoreStoryElementCommand, Mode=OneWay}"
-                                  Visibility="{x:Bind ShellVm.TrashButtonVisibility, Mode=OneWay}">
+                                  Visibility="{x:Bind ShellVm.RestoreElementVisibility, Mode=OneWay}">
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Restore Story Element from Trashcan" />
                         </ToolTipService.ToolTip>
@@ -107,7 +107,7 @@
                     <AppBarButton Icon="Switch" Label="Add to Narrative"
                                   AutomationProperties.AutomationId="AddToNarrativeButton"
                                   Command="{x:Bind ShellVm.AddToNarrativeCommand, Mode=OneWay}"
-                                  Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}">
+                                  Visibility="{x:Bind ShellVm.AddToNarrativeVisibility, Mode=OneWay}">
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Add Scene to Narrative" />
                         </ToolTipService.ToolTip>
@@ -115,7 +115,7 @@
                     <AppBarButton Icon="Switch" Label="Remove from narrative"
                                   AutomationProperties.AutomationId="RemoveFromNarrativeButton"
                                   Command="{x:Bind ShellVm.RemoveFromNarrativeCommand, Mode=OneWay}"
-                                  Visibility="{x:Bind ShellVm.NarratorVisibility, Mode=OneWay}">
+                                  Visibility="{x:Bind ShellVm.RemoveFromNarrativeVisibility, Mode=OneWay}">
                         <ToolTipService.ToolTip>
                             <ToolTip Content="Remove Scene from Narrative" />
                         </ToolTipService.ToolTip>
@@ -123,11 +123,11 @@
                     <AppBarButton Icon="Switch" Label="Convert to Scene"
                                   AutomationProperties.AutomationId="ConvertToSceneButton"
                                   Command="{x:Bind ShellVm.ConvertToSceneCommand, Mode=OneWay}"
-                                  Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}" />
+                                  Visibility="{x:Bind ShellVm.ConvertToSceneVisibility, Mode=OneWay}" />
                     <AppBarButton Icon="Switch" Label="Convert to Problem"
                                   AutomationProperties.AutomationId="ConvertToProblemButton"
                                   Command="{x:Bind ShellVm.ConvertToProblemCommand, Mode=OneWay}"
-                                  Visibility="{x:Bind ShellVm.ExplorerVisibility, Mode=OneWay}" />
+                                  Visibility="{x:Bind ShellVm.ConvertToProblemVisibility, Mode=OneWay}" />
                     <AppBarButton Icon="Print" Label="Print node"
                                   AutomationProperties.AutomationId="PrintNodeButton"
                                   Command="{x:Bind ShellVm.PrintNodeCommand, Mode=OneWay}"
@@ -543,7 +543,7 @@
             <!-- Nav tree -->
             <SplitView.Pane>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                    <StackPanel>
+                    <StackPanel x:Name="TreePanel">
                         <!-- Main Navigation Tree -->
                         <ItemsRepeater ItemsSource="{x:Bind AppState.CurrentDocument.Model.CurrentView, Mode=TwoWay}"
                                        AutomationProperties.AutomationId="NavigationTree">

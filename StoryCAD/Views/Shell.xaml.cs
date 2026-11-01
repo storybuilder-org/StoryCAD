@@ -27,6 +27,8 @@ public sealed partial class Shell : Page
     public LogService Logger;
     public PreferencesModel Preferences = Ioc.Default.GetRequiredService<PreferenceService>().Model;
     private CommandBarFlyout _contextFlyout;
+    private TreeViewItem _rightTappedRow;
+    private Brush _rightTappedRowBackground;
 #if HAS_UNO
     private bool _addElementsFlyoutIsOpen;
     private bool _pointerInSubmenu;
@@ -60,6 +62,8 @@ public sealed partial class Shell : Page
 
         ShellVm.SplitViewFrame = SplitViewFrame;
         _contextFlyout = (CommandBarFlyout)ShellPage.Resources["AddStoryElementFlyout"];
+        _contextFlyout.Closed += ContextFlyout_Closed;
+        ShellVm.CurrentNodeChanged += (_, _) => QueueTreeHighlightSync();
 #if HAS_UNO
         // Issue #1323 Part 2: Pointer-tracked submenu for diagonal mouse movement on UNO Skia.
         //
@@ -308,20 +312,14 @@ public sealed partial class Shell : Page
     {
         e.Handled = true; // Stop event propagation to prevent recursion
 
-        if (ShellVm.LastClickedTreeviewItem != null)
-        {
-            ShellVm.LastClickedTreeviewItem.Background = null;
-            ShellVm.LastClickedTreeviewItem.IsSelected = false;
-            ShellVm.LastClickedTreeviewItem.BorderBrush = null;
-        }
-
-        //Remove old right-clicked node's background
+        // Accent-mark the row the menu acts on until the menu closes (ContextFlyout_Closed).
+        RestoreRightTappedRow();
         var item = (TreeViewItem)sender;
+        _rightTappedRow = item;
+        _rightTappedRowBackground = item.Background;
         item.Background = new SolidColorBrush(new UISettings().GetColorValue(UIColorType.Accent));
 
         AppState.RightTappedNode = (StoryNodeItem)item.DataContext;
-        ShellVm.LastClickedTreeviewItem = item; //We can't set the background through RightTappedNode so
-        //we set a reference to the node itself to reset the background later
         ShellVm.ShowFlyoutButtons();
 
         // Programmatically show the flyout on the clicked item
@@ -362,16 +360,100 @@ public sealed partial class Shell : Page
         ShellVm.ClearSearch();
     }
 
-    private void TreeViewItem_Tapped(object sender, TappedRoutedEventArgs e)
+    private void ContextFlyout_Closed(object sender, object e)
     {
-        if (ShellVm.LastClickedTreeviewItem != null && ShellVm.LastClickedTreeviewItem != (TreeViewItem)sender)
+        RestoreRightTappedRow();
+        // A right-click can move the TreeView's own selection to the clicked row; put the
+        // highlight back on the node the content pane shows.
+        QueueTreeHighlightSync();
+    }
+
+    private void RestoreRightTappedRow()
+    {
+        if (_rightTappedRow != null)
         {
-            ShellVm.LastClickedTreeviewItem.Background = null;
-            ShellVm.LastClickedTreeviewItem.IsSelected = false;
-            ShellVm.LastClickedTreeviewItem.BorderBrush = null;
+            _rightTappedRow.Background = _rightTappedRowBackground;
+            _rightTappedRow = null;
+            _rightTappedRowBackground = null;
+        }
+    }
+
+    /// <summary>
+    ///     Runs SyncTreeHighlight on the UI thread after the current input has settled: the TreeView
+    ///     updates its own selection after ItemInvoked and DragItemsCompleted return, and
+    ///     TreeViewNodeClicked can be called off the UI thread.
+    /// </summary>
+    private void QueueTreeHighlightSync() => DispatcherQueue?.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, SyncTreeHighlight);
+
+    /// <summary>
+    ///     Highlights exactly one row: the node the content pane shows (AppState.CurrentNode).
+    ///     Each root row sits outside any TreeView and each root's children are a separate
+    ///     TreeView (see the drag-and-drop overview below), so clicking a root, a right-click,
+    ///     a drag, or navigation done in code (add, convert, tools, view switch) left another
+    ///     row selected (#1422). Container references are never kept: TreeView recycles them.
+    /// </summary>
+    private void SyncTreeHighlight()
+    {
+        var current = AppState.CurrentNode;
+        foreach (var element in TreeRows(TreePanel))
+        {
+            try
+            {
+                if (element is TreeView tree)
+                {
+                    var target = current != null && TreeHolds(tree, current) ? current : null;
+                    if (!ReferenceEquals(tree.SelectedItem, target))
+                    {
+                        tree.SelectedItem = target;
+                    }
+                }
+                else if (element is TreeViewItem rootRow)
+                {
+                    rootRow.IsSelected = current != null && ReferenceEquals(rootRow.DataContext, current);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(LogLevel.Warn, ex, "SyncTreeHighlight failed for one tree.");
+            }
+        }
+    }
+
+    /// <summary>Root rows and TreeViews under the navigation pane; does not descend into a TreeView.</summary>
+    private static IEnumerable<FrameworkElement> TreeRows(DependencyObject parent)
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is TreeView or TreeViewItem)
+            {
+                yield return (FrameworkElement)child;
+                continue;
+            }
+
+            foreach (var found in TreeRows(child))
+            {
+                yield return found;
+            }
+        }
+    }
+
+    private static bool TreeHolds(TreeView tree, StoryNodeItem node)
+    {
+        if (tree.ItemsSource is not IEnumerable<StoryNodeItem> items)
+        {
+            return false;
         }
 
-        ShellVm.LastClickedTreeviewItem = (TreeViewItem)sender;
+        for (var n = node; n != null; n = n.Parent)
+        {
+            if (items.Contains(n))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void ShellPage_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -476,6 +558,11 @@ public sealed partial class Shell : Page
         catch (Exception ex)
         {
             Logger.LogException(LogLevel.Error, ex, "Error during drag and drop operation.");
+        }
+        finally
+        {
+            // The drag moves the TreeView's selection to the dragged row; the content pane did not change.
+            QueueTreeHighlightSync();
         }
     }
 

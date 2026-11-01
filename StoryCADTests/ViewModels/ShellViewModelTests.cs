@@ -537,7 +537,7 @@ public class ShellViewModelTests
     #region ViewChanged Tests
 
     /// <summary>
-    ///     Tests that ViewChanged resets RightTappedNode to the new view's root
+    ///     Tests that ViewChanged clears RightTappedNode and targets the new view's root
     /// </summary>
     [TestMethod]
     public async Task ViewChanged_WhenSwitchingViews_ResetsRightTappedNode()
@@ -559,10 +559,11 @@ public class ShellViewModelTests
         shell.SelectedView = "Story Narrator View";
         shell.ViewChanged();
 
-        // Assert - RightTappedNode should now be the narrator view root
+        // Assert - the old right-click is gone and commands target the narrator view root
         var narratorRoot = appState.CurrentDocument.Model.NarratorView[0];
-        Assert.AreEqual(narratorRoot, appState.RightTappedNode,
-            "RightTappedNode should be reset to the new view's root node after switching views");
+        Assert.IsNull(appState.RightTappedNode, "The explorer view's right-clicked node must not carry over");
+        Assert.AreEqual(narratorRoot, appState.CommandTargetNode,
+            "Commands should target the new view's root node after switching views");
     }
 
     /// <summary>
@@ -784,6 +785,84 @@ public class ShellViewModelTests
         Assert.AreEqual(Visibility.Visible, shell.AddButtonVisibility); // Note: Set to Visible at end of method
         Assert.AreEqual(Visibility.Visible, shell.PrintNodeVisibility);
         Assert.AreEqual(Visibility.Collapsed, shell.TrashButtonVisibility);
+    }
+
+    /// <summary>
+    ///     #1422: right-clicking a folder showed Add to Narrative, Convert to Scene and Convert to
+    ///     Problem. Each type-specific right-click item shows only for the node types it applies to.
+    /// </summary>
+    [TestMethod]
+    public async Task ShowFlyoutButtons_ForEachNodeType_ShowsOnlyApplicableItems()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        var model = await outlineService.CreateModel("FlyoutTypes", "TestAuthor", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        var overview = model.ExplorerView[0];
+        StoryNodeItem Add(StoryItemType type) => outlineService.AddStoryElement(model, type, overview).Node;
+
+        // Expected: Delete, Add to Narrative, Convert to Scene, Convert to Problem
+        var explorer = new (StoryNodeItem Node, bool Delete, bool AddToNarrative, bool ToScene, bool ToProblem)[]
+        {
+            (overview, false, false, false, false),
+            (Add(StoryItemType.Folder), true, false, false, false),
+            (Add(StoryItemType.Problem), true, false, true, false),
+            (Add(StoryItemType.Character), true, false, false, false),
+            (Add(StoryItemType.Setting), true, false, false, false),
+            (Add(StoryItemType.Scene), true, true, false, true),
+            (Add(StoryItemType.Web), true, false, false, false),
+            (Add(StoryItemType.Notes), true, false, false, false),
+            (Add(StoryItemType.StoryWorld), true, false, false, false)
+        };
+
+        shell.SelectedView = "Story Explorer View";
+        foreach (var (node, delete, toNarrative, toScene, toProblem) in explorer)
+        {
+            appState.RightTappedNode = node;
+            shell.ShowFlyoutButtons();
+            var label = node.Type.ToString();
+            Assert.AreEqual(delete ? Visibility.Visible : Visibility.Collapsed, shell.DeleteElementVisibility, label);
+            Assert.AreEqual(toNarrative ? Visibility.Visible : Visibility.Collapsed, shell.AddToNarrativeVisibility, label);
+            Assert.AreEqual(toScene ? Visibility.Visible : Visibility.Collapsed, shell.ConvertToSceneVisibility, label);
+            Assert.AreEqual(toProblem ? Visibility.Visible : Visibility.Collapsed, shell.ConvertToProblemVisibility, label);
+            Assert.AreEqual(Visibility.Collapsed, shell.RemoveFromNarrativeVisibility, label);
+            Assert.AreEqual(Visibility.Collapsed, shell.RestoreElementVisibility, label);
+        }
+
+        // Narrator view: only a Scene copy can be removed from the narrative.
+        var scene = explorer.First(e => e.Node.Type == StoryItemType.Scene).Node;
+        scene.CopyToNarratorView(model);
+        var narratorRoot = model.NarratorView[0];
+        var section = outlineService.AddStoryElement(model, StoryItemType.Section, narratorRoot).Node;
+        var sceneCopy = narratorRoot.Children.First(n => n.Uuid == scene.Uuid);
+        shell.SelectedView = "Story Narrator View";
+        foreach (var (node, removable) in new[] { (narratorRoot, false), (section, false), (sceneCopy, true) })
+        {
+            appState.RightTappedNode = node;
+            shell.ShowFlyoutButtons();
+            Assert.AreEqual(removable ? Visibility.Visible : Visibility.Collapsed, shell.RemoveFromNarrativeVisibility,
+                node.Type.ToString());
+            Assert.AreEqual(Visibility.Collapsed, shell.DeleteElementVisibility, node.Type.ToString());
+            Assert.AreEqual(Visibility.Collapsed, shell.ConvertToSceneVisibility, node.Type.ToString());
+        }
+
+        // Trash: the trash can itself cannot be restored; an element in it can.
+        shell.SelectedView = "Story Explorer View";
+        var trashCan = model.TrashView[0];
+        appState.RightTappedNode = trashCan;
+        shell.ShowFlyoutButtons();
+        Assert.AreEqual(Visibility.Collapsed, shell.RestoreElementVisibility, "TrashCan");
+        Assert.AreEqual(Visibility.Collapsed, shell.DeleteElementVisibility, "TrashCan");
+
+        var folder = explorer.First(e => e.Node.Type == StoryItemType.Folder).Node;
+        outlineService.MoveToTrash(outlineService.GetStoryElementByGuid(model, folder.Uuid), model);
+        appState.RightTappedNode = folder;
+        shell.ShowFlyoutButtons();
+        Assert.AreEqual(Visibility.Visible, shell.RestoreElementVisibility, "Trashed folder");
+        Assert.AreEqual(Visibility.Collapsed, shell.AddToNarrativeVisibility, "Trashed folder");
+
+        appState.RightTappedNode = null;
     }
 
     /// <summary>

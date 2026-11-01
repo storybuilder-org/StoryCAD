@@ -98,8 +98,11 @@ public class ToolValidationServiceTests
         Assert.IsTrue(result);
     }
 
+    /// <summary>
+    ///     Tools act on the selected node; a right-clicked node alone does not qualify (#1422).
+    /// </summary>
     [TestMethod]
-    public void VerifyToolUse_WithNodeRequired_WhenRightTappedNodeExists_ReturnsTrue()
+    public void VerifyToolUse_WithNodeRequired_WhenOnlyRightTappedNodeExists_ReturnsFalse()
     {
         // Arrange
         _appState.CurrentNode = null;
@@ -110,7 +113,7 @@ public class ToolValidationServiceTests
             explorerViewOnly: false, nodeRequired: true);
 
         // Assert
-        Assert.IsTrue(result);
+        Assert.IsFalse(result);
     }
 
     [TestMethod]
@@ -249,7 +252,7 @@ public class ToolValidationServiceTests
     }
 
     [TestMethod]
-    public void VerifyToolUse_WithNodeRequired_WhenRightTappedNull_SetsRightTappedToCurrentNode()
+    public void VerifyToolUse_WithNodeRequired_WhenRightTappedNull_LeavesRightTappedNull()
     {
         // Arrange - RightTappedNode is null, but CurrentNode exists
         _appState.CurrentNode = _testNode;
@@ -259,9 +262,9 @@ public class ToolValidationServiceTests
         var result = _toolValidationService.VerifyToolUse(
             explorerViewOnly: false, nodeRequired: true);
 
-        // Assert
+        // Assert - #1422: copying CurrentNode into RightTappedNode leaked into later right-click commands
         Assert.IsTrue(result, "Should return true when CurrentNode exists");
-        Assert.AreSame(_testNode, _appState.RightTappedNode, "Should set RightTappedNode to CurrentNode (side effect)");
+        Assert.IsNull(_appState.RightTappedNode, "Should not change RightTappedNode");
     }
 
     [TestMethod]
