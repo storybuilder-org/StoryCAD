@@ -206,7 +206,16 @@ public sealed class ScriptInterpreter
                 }
 
             case ScriptVerb.Click:
-                _options.Profile.Click(RequireDriver(), s.Target!);
+                if (s.Pointer)
+                {
+                    _options.Profile.Approach(RequireDriver(), s.Target!);
+                    RequireDriver().ClickPointer(s.Target!);
+                }
+                else
+                {
+                    _options.Profile.Click(RequireDriver(), s.Target!);
+                }
+
                 return currentStep;
             case ScriptVerb.DoubleClick:
                 RequireDriver().DoubleClickPointer(s.Target!);

@@ -9,6 +9,7 @@ script "Tutorial Creating a Story"
 
 step "TC-001: Create the Danger Calls outline"
 launch
+click RecentlyOpenedNavItem pointer      # pointer input: no keyboard focus ring in the image
 screenshot "Danger-Calls-Open-Create-File-Page.png"
 click CreateNewOutlineNavItem
 select FileOpenTemplateCombo "Folders"
@@ -190,7 +191,7 @@ screenshot "Danger-Calls-Problem-Tab-Lacas-Gets-The-Drop.png"
 step "TC-011: Trait Builder"
 open-node tree "Danger Calls/Characters/Leonard Kraskin"
 tab OuterTraitsTab
-click TraitBuilderButton
+click TraitBuilderButton pointer         # pointer input: no keyboard focus ring in the dialog
 screenshot dialog "Danger-Calls-Trait-Builder-Dialog.png"
 select TraitCategoryCombo "Behaviors"
 focus TraitExampleCombo

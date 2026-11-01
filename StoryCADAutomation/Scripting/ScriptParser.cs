@@ -301,7 +301,7 @@ public static partial class ScriptParser
             "launch" => New(ScriptVerb.Launch),
             "close" => New(ScriptVerb.Close),
             "expect-exit" => New(ScriptVerb.ExpectExit),
-            "click" => New(ScriptVerb.Click) with { Target = TakeTarget(reader) },
+            "click" => BuildClick(reader),
             "double-click" => New(ScriptVerb.DoubleClick) with { Target = TakeTarget(reader) },
             "right-click" => New(ScriptVerb.RightClick) with { Target = TakeTarget(reader) },
             "drag" => BuildDrag(reader),
@@ -358,6 +358,19 @@ public static partial class ScriptParser
             }
 
             return New(ScriptVerb.Step) with { Text = name, Seconds = seconds };
+        }
+
+        // click <target> [pointer]: pointer forces a real pointer click (#1422).
+        ScriptStatement BuildClick(ArgReader r)
+        {
+            var target = TakeTarget(r);
+            if (r.AtEnd)
+            {
+                return New(ScriptVerb.Click) with { Target = target };
+            }
+
+            TakeKeyword(r, "pointer");
+            return New(ScriptVerb.Click) with { Target = target, Pointer = true };
         }
 
         // wait <target> condense: waits up to 5 minutes, and the video keeps only the start and

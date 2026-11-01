@@ -44,6 +44,13 @@ public sealed record ScriptStatement
     public bool Condense { get; init; }
 
     /// <summary>
+    ///     "click &lt;target&gt; pointer": a real pointer click whatever the control supports. A
+    ///     dialog opened by UIA Invoke after keyboard input drew a focus ring on its first
+    ///     control in manual images; a pointer click leaves the app in pointer mode (#1422).
+    /// </summary>
+    public bool Pointer { get; init; }
+
+    /// <summary>
     ///     Pause duration in seconds, before profile pacing is applied; on a step line, the
     ///     optional hold seconds added at the end of the step (video design, section 6).
     /// </summary>
