@@ -143,13 +143,6 @@ public class ProblemBuilderRegistryTests
     }
 
     [TestMethod]
-    public void RetiredStructureLabels_ReplaceWithProblemBeats()
-    {
-        Assert.AreEqual("ProblemBeats", WorkflowRegistry.RetiredWorkflowReplacements["Structure"]);
-        Assert.AreEqual("ProblemBeats", WorkflowRegistry.RetiredWorkflowReplacements["BeatScenes"]);
-    }
-
-    [TestMethod]
     public void ProblemBuilder_OffersProblemAndSceneChoices()
     {
         var collections = Builder().GetIO().CollectionInputs.Select(c => c.RequestName).ToList();

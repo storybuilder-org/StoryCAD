@@ -47,24 +47,7 @@ public class WorkflowStarService
     ///     The default starred set, supplied by the caller because the workflow registry lives in
     ///     CollaboratorLib and StoryCADLib does not reference it.
     /// </param>
-    /// <param name="retiredReplacements">
-    ///     Retired workflow label to the workflow that absorbed it, from the same registry and for
-    ///     the same reason. Omit to skip the migration.
-    /// </param>
-    /// <param name="migrationVersion">
-    ///     The registry's current star-migration version. When the stored version is behind it,
-    ///     retired labels are rewritten once and the stored version catches up.
-    /// </param>
-    /// <param name="addedStars">
-    ///     Labels that joined the defaults, keyed by the migration version that added them. A
-    ///     stored set behind that version gets each label appended once, when it is not already
-    ///     starred. Omit to add nothing.
-    /// </param>
-    public async Task<IReadOnlyList<string>> GetStarredAsync(
-        IEnumerable<string> defaultLabels,
-        IReadOnlyDictionary<string, string> retiredReplacements = null,
-        int migrationVersion = 0,
-        IReadOnlyDictionary<int, IReadOnlyList<string>> addedStars = null)
+    public async Task<IReadOnlyList<string>> GetStarredAsync(IEnumerable<string> defaultLabels)
     {
         var model = _preferenceService.Model;
         model.StarredCollaboratorWorkflows ??= new List<string>();
@@ -73,9 +56,6 @@ public class WorkflowStarService
         {
             model.StarredCollaboratorWorkflows = Normalize(defaultLabels);
             model.CollaboratorStarDefaultsApplied = true;
-            // A set seeded from today's defaults names no retired workflow, so it starts current
-            // rather than taking a pointless trip through the migration on the next launch.
-            model.CollaboratorStarMigrationVersion = migrationVersion;
             await PersistAsync(model);
             _log?.Log(LogLevel.Info,
                 $"Seeded {model.StarredCollaboratorWorkflows.Count} default starred Collaborator workflows.");
@@ -83,90 +63,7 @@ public class WorkflowStarService
             return model.StarredCollaboratorWorkflows.ToList();
         }
 
-        if (model.CollaboratorStarMigrationVersion < migrationVersion)
-        {
-            await MigrateRetiredStarsAsync(model, retiredReplacements, migrationVersion, addedStars);
-        }
-
         return model.StarredCollaboratorWorkflows.ToList();
-    }
-
-    /// <summary>
-    ///     Rewrites stars naming a retired workflow to the one that absorbed it, once. Without
-    ///     this a user seeded before a consolidation keeps labels that no longer resolve; the
-    ///     menu drops them silently, so a merge reads as losing stars. Runs even when it changes
-    ///     nothing, because raising the stored version is what stops it running again.
-    /// </summary>
-    private async Task MigrateRetiredStarsAsync(
-        PreferencesModel model,
-        IReadOnlyDictionary<string, string> retiredReplacements,
-        int migrationVersion,
-        IReadOnlyDictionary<int, IReadOnlyList<string>> addedStars)
-    {
-        var storedVersion = model.CollaboratorStarMigrationVersion;
-        var before = model.StarredCollaboratorWorkflows;
-        var mapped = new List<string>(before.Count);
-        var rewrote = 0;
-
-        foreach (var label in before)
-        {
-            // A retired label with no replacement listed is left alone: the menu already ignores
-            // what it cannot resolve, and inventing a destination would be worse than a no-op.
-            if (retiredReplacements != null
-                && !string.IsNullOrWhiteSpace(label)
-                && retiredReplacements.TryGetValue(label, out var replacement))
-            {
-                mapped.Add(replacement);
-                rewrote++;
-            }
-            else
-            {
-                mapped.Add(label);
-            }
-        }
-
-        // A default added after this user was seeded never reached them (the seed runs once).
-        // Append it once; Normalize drops it again when the user already starred it.
-        var added = 0;
-        if (addedStars != null)
-        {
-            foreach (var entry in addedStars.OrderBy(e => e.Key))
-            {
-                if (entry.Key <= storedVersion || entry.Key > migrationVersion || entry.Value == null)
-                {
-                    continue;
-                }
-
-                foreach (var label in entry.Value)
-                {
-                    if (!string.IsNullOrWhiteSpace(label) && !mapped.Contains(label))
-                    {
-                        mapped.Add(label);
-                        added++;
-                    }
-                }
-            }
-        }
-
-        // Normalize collapses the duplicates the mapping creates: four Problem workflows starred
-        // separately become one ProblemBuilder star, keeping first-seen order.
-        model.StarredCollaboratorWorkflows = Normalize(mapped);
-        model.CollaboratorStarMigrationVersion = migrationVersion;
-
-        if (added > 0)
-        {
-            _log?.Log(LogLevel.Info,
-                $"Added {added} newly default starred Collaborator workflow(s).");
-        }
-
-        if (rewrote > 0)
-        {
-            _log?.Log(LogLevel.Info,
-                $"Migrated {rewrote} starred Collaborator workflow label(s) to their replacements; " +
-                $"{model.StarredCollaboratorWorkflows.Count} starred after merge.");
-        }
-
-        await PersistAsync(model);
     }
 
     /// <summary>

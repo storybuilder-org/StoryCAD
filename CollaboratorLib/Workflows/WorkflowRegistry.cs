@@ -40,58 +40,6 @@ namespace StoryCollaborator.Workflows
         };
 
         /// <summary>
-        /// How far stored stars have been carried forward. Raise this, and add to
-        /// <see cref="RetiredWorkflowReplacements"/>, whenever a consolidation deletes a workflow
-        /// a user could have starred. Raise it too, and add to <see cref="StarsAddedByVersion"/>,
-        /// when a label joins <see cref="DefaultStarredLabels"/>, because the defaults seed only
-        /// once. WorkflowStarService compares it against the number in the user's preferences
-        /// and migrates once.
-        /// #224 raised this to 2 for the two Setting labels SettingBuilder absorbed.
-        /// #244 raised this to 3 for DefineCharacter and StoryFunction.
-        /// #269 raised this to 4 to star SettingBuilder for users seeded before it was a default.
-        /// </summary>
-        public const int StarMigrationVersion = 4;
-
-        /// <summary>
-        /// Labels added to <see cref="DefaultStarredLabels"/> at a migration version. A user whose
-        /// stored version is below the key gets each label appended once, if it is not already
-        /// starred. After that the user's choice wins: unstarring it keeps it off.
-        /// </summary>
-        public static readonly IReadOnlyDictionary<int, IReadOnlyList<string>> StarsAddedByVersion =
-            new Dictionary<int, IReadOnlyList<string>>
-            {
-                [4] = new[] { "SettingBuilder" }
-            };
-
-        /// <summary>
-        /// Deleted workflow label to the workflow that absorbed its job (#211). A user who
-        /// starred GMC starred the goal-motive-conflict step, and ProblemBuilder is what does
-        /// that step now, so the star moves rather than disappearing. Only used to rewrite
-        /// stored stars; nothing here is registered, and every value must be.
-        /// </summary>
-        public static readonly IReadOnlyDictionary<string, string> RetiredWorkflowReplacements =
-            new Dictionary<string, string>(StringComparer.Ordinal)
-            {
-                // #77: ProblemBuilder is the one Problem surface.
-                ["ConflictBuilder"] = "ProblemBuilder",
-                ["GMC"] = "ProblemBuilder",
-                ["Structure"] = "ProblemBeats",
-                ["BeatScenes"] = "ProblemBeats",
-                // #208: SceneBuilder is the one Scene surface.
-                ["SceneSummary"] = "SceneBuilder",
-                ["CastSceneRoles"] = "SceneBuilder",
-                ["SceneDevelopment"] = "SceneBuilder",
-                ["SceneConflict"] = "SceneBuilder",
-                ["Sequel"] = "SceneBuilder",
-                // #224: SettingBuilder is the one Setting surface.
-                ["SettingTimeSpace"] = "SettingBuilder",
-                ["Sensations"] = "SettingBuilder",
-                // #244: CharacterBuilder is the one Character fill surface.
-                ["DefineCharacter"] = "CharacterBuilder",
-                ["StoryFunction"] = "CharacterBuilder"
-            };
-
-        /// <summary>
         /// Gets a workflow by its label.
         /// </summary>
         public static Workflow? Get(string label) =>
