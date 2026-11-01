@@ -727,24 +727,19 @@ public class SceneViewModel : ElementViewModelBase, INavigable, ISaveable, IRelo
     ///     to all characters (and vice versa.) The CharactersList is used to add or
     ///     remove cast members.
     /// </summary>
-    public void SwitchCastView(object sender, RoutedEventArgs e)
+    /// <remarks>
+    ///     Posts no status message: Toggled also fires when LoadModel sets AllCharacters for a scene
+    ///     with no cast, so a message here showed on every such scene with no cast change (#1422).
+    ///     The switch's own On/Off text already shows which list is displayed.
+    /// </remarks>
+    public void SwitchCastView(object sender, RoutedEventArgs e) => SetCastView(((ToggleSwitch)sender).IsOn);
+
+    internal void SetCastView(bool allCharacters)
     {
         var _changeState = _changeable;
         _changeable = false;
-        var toggleSwitch = sender as ToggleSwitch;
-        _allCharacters = toggleSwitch.IsOn;
+        _allCharacters = allCharacters;
         InitializeCharacterList();
-        if (AllCharacters)
-        {
-            Messenger.Send(
-                new StatusChangedMessage(new StatusMessage("Add / Remove Cast Members", LogLevel.Info, true)));
-        }
-        else
-        {
-            Messenger.Send(
-                new StatusChangedMessage(new StatusMessage("Show Selected Cast Members", LogLevel.Info, true)));
-        }
-
         _changeable = _changeState;
     }
 

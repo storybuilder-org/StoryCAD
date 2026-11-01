@@ -559,6 +559,31 @@ public class SceneViewModelTests
         Assert.AreEqual(totalCharacters, _viewModel.CastSource.Count);
     }
 
+    /// <summary>
+    ///     The cast toggle's Toggled event also fires when a scene loads, so switching the
+    ///     displayed list must post no status message (#1422: "Add / Remove Cast Members" showed
+    ///     on a scene's Scene tab with no cast change).
+    /// </summary>
+    [TestMethod]
+    public void SetCastView_WhenSwitched_PostsNoStatusMessage()
+    {
+        _viewModel.Activate(_sceneModel);
+        var messages = new List<string>();
+        WeakReferenceMessenger.Default.Register<StatusChangedMessage>(this, (_, m) => messages.Add(m.Value.Status));
+        try
+        {
+            _viewModel.SetCastView(true);
+            _viewModel.SetCastView(false);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(this);
+        }
+
+        Assert.AreEqual(0, messages.Count, string.Join("; ", messages));
+        Assert.AreEqual(_viewModel.CastList, _viewModel.CastSource);
+    }
+
     [TestMethod]
     public void SwitchCastView_ToCastList_ShowsOnlyCastMembers()
     {
