@@ -47,6 +47,7 @@ internal static class WorkflowInputBuilder
             "DefineStoryWorld" => BuildDefineStoryWorldInput(workflow, gatheredElements, api, model),
             "SceneBuilder" => BuildSceneBuilderInput(workflow, gatheredElements, api, model),
             "ProblemBuilder" => BuildProblemBuilderInput(workflow, gatheredElements, api, model),
+            "ProblemBeats" => BuildProblemBeatsInput(workflow, gatheredElements, api, model),
             _ => null
         };
 
@@ -564,6 +565,92 @@ internal static class WorkflowInputBuilder
             ["lists"] = BuildLists(workflow, api),
             ["storyContext"] = BuildStoryContext(api, model)
         };
+    }
+
+    /// <summary>
+    /// Collaborator #302: ProblemBuilder's input with sceneChoices replaced by every Scene not in
+    /// the trash (the workflow sets OffersPlacedScenes). Narrative view order first, then the live
+    /// Scenes outside that view in GetElementsByType order. Each Scene carries "placedOn" (Names of
+    /// live Problems whose beats hold it) and "inNarrativeView". problemChoices are unchanged.
+    /// </summary>
+    internal static JsonObject? BuildProblemBeatsInput(
+        Workflow workflow,
+        Dictionary<string, StoryElement> gatheredElements,
+        IStoryCADAPI api,
+        StoryModel model)
+    {
+        var result = BuildProblemBuilderInput(workflow, gatheredElements, api, model);
+        if (result == null)
+            return null;
+
+        var spec = workflow.JsonInput!;
+
+        var liveScenes = new Dictionary<Guid, StoryElement>();
+        var sceneOrder = new List<Guid>();
+        var scenesResult = api.GetElementsByType(StoryItemType.Scene);
+        if (scenesResult.IsSuccess && scenesResult.Payload != null)
+        {
+            foreach (var scene in scenesResult.Payload)
+            {
+                if (IsInTrash(scene) || !liveScenes.TryAdd(scene.Uuid, scene))
+                    continue;
+                sceneOrder.Add(scene.Uuid);
+            }
+        }
+
+        // Narrative view order, depth first; scenes sit at any depth under Sections and Folders.
+        var ordered = new List<Guid>();
+        var inNarrative = new HashSet<Guid>();
+        if (model?.NarratorView != null && model.NarratorView.Count > 0)
+            CollectNarrativeScenes(model.NarratorView[0], liveScenes, inNarrative, ordered);
+        ordered.AddRange(sceneOrder.Where(g => !inNarrative.Contains(g)));
+
+        // Live Problems whose beats hold each Scene.
+        var placedOn = new Dictionary<Guid, List<string>>();
+        var problemsResult = api.GetElementsByType(StoryItemType.Problem);
+        if (problemsResult.IsSuccess && problemsResult.Payload != null)
+        {
+            foreach (var problem in problemsResult.Payload.OfType<ProblemModel>().Where(p => !IsInTrash(p)))
+            {
+                foreach (var guid in (problem.StructureBeats ?? new()).Select(b => b.Guid)
+                             .Where(g => g != Guid.Empty).Distinct())
+                {
+                    if (!placedOn.TryGetValue(guid, out var names))
+                        placedOn[guid] = names = new List<string>();
+                    names.Add(problem.Name);
+                }
+            }
+        }
+
+        var sceneChoices = new JsonArray();
+        foreach (var guid in ordered)
+        {
+            var obj = ProjectElement(liveScenes[guid], spec["SceneChoice"]);
+            var names = new JsonArray();
+            if (placedOn.TryGetValue(guid, out var held))
+                foreach (var name in held)
+                    names.Add(name);
+            obj["placedOn"] = names;
+            obj["inNarrativeView"] = inNarrative.Contains(guid);
+            sceneChoices.Add(obj);
+        }
+
+        result["sceneChoices"] = sceneChoices;
+        return result;
+    }
+
+    private static void CollectNarrativeScenes(
+        StoryNodeItem node,
+        Dictionary<Guid, StoryElement> liveScenes,
+        HashSet<Guid> seen,
+        List<Guid> ordered)
+    {
+        foreach (var child in node.Children)
+        {
+            if (child.Type == StoryItemType.Scene && liveScenes.ContainsKey(child.Uuid) && seen.Add(child.Uuid))
+                ordered.Add(child.Uuid);
+            CollectNarrativeScenes(child, liveScenes, seen, ordered);
+        }
     }
 
     /// <summary>

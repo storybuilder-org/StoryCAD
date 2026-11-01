@@ -33,7 +33,7 @@ public class ProblemStubContractTests
         parent.Antagonist = antag.Uuid;
         var api = CreateApi();
         api.CurrentModel = model;
-        var workflow = new Workflow("ProblemBuilder", "Problem Builder", "test", StoryItemType.Problem)
+        var workflow = new Workflow("ProblemBeats", "Problem Beats", "test", StoryItemType.Problem)
         {
             CreatesScenesForBeats = true,
             CreatesProblemsForBeats = true

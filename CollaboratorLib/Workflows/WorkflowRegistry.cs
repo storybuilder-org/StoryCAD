@@ -75,8 +75,8 @@ namespace StoryCollaborator.Workflows
                 // #77: ProblemBuilder is the one Problem surface.
                 ["ConflictBuilder"] = "ProblemBuilder",
                 ["GMC"] = "ProblemBuilder",
-                ["Structure"] = "ProblemBuilder",
-                ["BeatScenes"] = "ProblemBuilder",
+                ["Structure"] = "ProblemBeats",
+                ["BeatScenes"] = "ProblemBeats",
                 // #208: SceneBuilder is the one Scene surface.
                 ["SceneSummary"] = "SceneBuilder",
                 ["CastSceneRoles"] = "SceneBuilder",
@@ -439,21 +439,19 @@ namespace StoryCollaborator.Workflows
                     }
                 },
 
-                // #77 ProblemBuilder: one Problem surface. Consolidates ConflictBuilder, GMC,
-                // Structure, and BeatScenes. Writes the RequiredFieldGapScanner spine, chooses a
-                // beat sheet, fills empty beats, and creates Scene stubs for #208.
+                // #77 ProblemBuilder: one Problem surface. Consolidates ConflictBuilder and GMC.
+                // Writes the RequiredFieldGapScanner spine. The beat sheet work (Structure and
+                // BeatScenes, then folded in here) moved to ProblemBeats (Collaborator #302).
                 // ProblemCategory, Protagonist, and Antagonist are preconditions, not outputs.
                 new Workflow(
                     label: "ProblemBuilder",
                     title: "Problem Builder",
-                    description: "Fill a Problem: goal, motive, conflict, outcome, and a beat sheet " +
-                                 "with scenes for its empty beats.",
+                    description: "Fill a Problem: goal, motive, conflict, outcome, and the other Problem fields.",
                     explanation: "One pass over a Problem you selected. It writes the fields a Problem " +
-                                 "needs to be usable, chooses a beat sheet that fits the Problem Category " +
-                                 "and Conflict Type, binds free scenes and problems to empty beats, and " +
-                                 "creates scene stubs for the rest. It never changes a beat you filled and " +
-                                 "never adds beats to a sheet you already chose. Set Problem Category, " +
-                                 "Protagonist, and Antagonist before you run it.",
+                                 "needs to be usable: Problem Type, Conflict Type, Subject, Story Question, " +
+                                 "the goal, motive, and conflict for both characters, the outcome, method, " +
+                                 "and theme. Set Problem Category, Protagonist, and Antagonist before you " +
+                                 "run it.",
                     workflowIO: new WorkflowIO
                     {
                         RequiredInputs = new List<ElementRequirement>
@@ -514,7 +512,135 @@ namespace StoryCollaborator.Workflows
                                     new PropertySpec("Outcome"),
                                     new PropertySpec("Method"),
                                     new PropertySpec("Theme"),
-                                    new PropertySpec("Notes", JsonKey: "situation_sheet"),
+                                    new PropertySpec("Notes", JsonKey: "situation_sheet")
+                                }
+                            }
+                        },
+                        // Every list-backed output needs its examples, or the model invents a
+                        // value the StoryCAD dropdown cannot show (a live run returned
+                        // ProblemType "Integrity"; Lists.json allows three values).
+                        ExampleLists = new List<string>
+                        {
+                            "ProblemType", "ProblemSource", "Outcome", "Method", "Theme",
+                            "Motive", "ConflictType", "ProblemCategory",
+                            // #208 handoff: a created stub carries SceneType.
+                            "SceneType"
+                        },
+                        CollectionInputs = new List<CollectionInput>
+                        {
+                            // #217 rule 5: free elements for this Problem's sheet only.
+                            new CollectionInput
+                            {
+                                RequestName = "ProblemChoices",
+                                ElementType = StoryItemType.Problem,
+                                Projection = ElementProjection.BaseStoryElement,
+                                FreeElementsFor = "Problem"
+                            },
+                            new CollectionInput
+                            {
+                                RequestName = "SceneChoices",
+                                ElementType = StoryItemType.Scene,
+                                Projection = ElementProjection.BaseStoryElement,
+                                FreeElementsFor = "Problem"
+                            },
+                            // #208 handoff: cast on a created stub, resolved from this set.
+                            new CollectionInput
+                            {
+                                RequestName = "CharacterChoices",
+                                ElementType = StoryItemType.Character,
+                                Projection = ElementProjection.IdAndName
+                            }
+                        }
+                    })
+                {
+                    PrimaryElementType = StoryItemType.Problem,
+                    RequiresProblemCategory = true,
+                    InjectsConflictTaxonomy = true,
+                    // #260: eighth workflow to migrate to the "input" JSON object. The three
+                    // catalogs (ConflictTaxonomy, BeatSheets, StockScenes) stay fixed text in the
+                    // template (Terry's decision, spec section 8a) and are not part of this
+                    // object; the Inject*/RequiresProblemCategory flags above are unchanged.
+                    JsonInput = new WorkflowJsonInputSpec
+                    {
+                        PropertyLists = new Dictionary<string, IReadOnlyList<string>>
+                        {
+                            // StructureBeats is deliberately absent here: it is built separately
+                            // (BuildStructureBeatsWithBoundElement) so each beat can carry its
+                            // resolved "boundElement" beside BoundGUID.
+                            ["Target"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "ProblemCategory", "ProblemType", "ConflictType",
+                                "Subject", "ProblemSource", "Premise",
+                                "ProtGoal", "ProtMotive", "ProtConflict",
+                                "AntagGoal", "AntagMotive", "AntagConflict",
+                                "Outcome", "Method", "Theme", "Notes",
+                                "StructureTitle", "StructureDescription", "Protagonist", "Antagonist"
+                            },
+                            ["ResolvedCharacter"] = new List<string>
+                            {
+                                "GUID", "Name", "Description", "Role", "Flaw", "BackStory", "Values", "Focus"
+                            },
+                            ["SceneChoice"] = new List<string> { "GUID", "Name", "Description" },
+                            ["ProblemChoice"] = new List<string> { "GUID", "Name", "Description" },
+                            ["CharacterChoice"] = new List<string> { "GUID", "Name" }
+                        }
+                    }
+                },
+                new Workflow(
+                    label: "ProblemBeats",
+                    title: "Problem Beats",
+                    description: "Choose a beat sheet for a Problem and fill its empty beats with scenes " +
+                                 "and smaller problems.",
+                    explanation: "Chooses a beat sheet that fits the Problem Category and Conflict Type, " +
+                                 "binds existing scenes (including scenes already on another Problem's " +
+                                 "beats) and free problems to empty beats, and creates scene and problem " +
+                                 "stubs for the rest. It never changes a beat you filled and never adds " +
+                                 "beats to a sheet you already chose. Set Problem Category, Protagonist, " +
+                                 "and Antagonist before you run it.",
+                    workflowIO: new WorkflowIO
+                    {
+                        RequiredInputs = new List<ElementRequirement>
+                        {
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Problem,
+                                ElementLabel = "Problem",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            },
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.StoryOverview,
+                                ElementLabel = "Overview",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            },
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Character,
+                                ElementLabel = "Protagonist",
+                                ReferencedElementLabel = "Problem.Protagonist",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            },
+                            new ElementRequirement
+                            {
+                                ElementType = StoryItemType.Character,
+                                ElementLabel = "Antagonist",
+                                ReferencedElementLabel = "Problem.Antagonist",
+                                RequiredProperties = new List<PropertySpec>(),
+                                CreateIfMissing = false
+                            }
+                        },
+                        OptionalInputs = new List<ElementRequirement>(),
+                        Outputs = new List<ElementOutput>
+                        {
+                            new ElementOutput
+                            {
+                                ElementType = StoryItemType.Problem,
+                                ElementLabel = "Problem",
+                                PropertiesToUpdate = new List<PropertySpec>
+                                {
                                     new PropertySpec("StructureTitle"),
                                     new PropertySpec("StructureDescription"),
                                     new PropertySpec("StructureBeats", WriteVia.BeatSheet, JsonKey: "beats")
@@ -566,6 +692,7 @@ namespace StoryCollaborator.Workflows
                     InjectsBeatSheets = true,
                     InjectsStockScenes = true,
                     InjectsCurrentBeats = true,
+                    OffersPlacedScenes = true,
                     // #260: eighth workflow to migrate to the "input" JSON object. The three
                     // catalogs (ConflictTaxonomy, BeatSheets, StockScenes) stay fixed text in the
                     // template (Terry's decision, spec section 8a) and are not part of this

@@ -47,7 +47,7 @@ public class DeclaredInjectionWiringTests
     [TestMethod]
     public void DeclaringTaxonomy_InjectsIt()
     {
-        var workflow = new Workflow("ProblemBuilder", "PB", "t", StoryItemType.Problem)
+        var workflow = new Workflow("ProblemBeats", "PB", "t", StoryItemType.Problem)
         {
             InjectsConflictTaxonomy = true
         };
@@ -58,7 +58,7 @@ public class DeclaredInjectionWiringTests
     [TestMethod]
     public void DeclaringBeatSheets_InjectsThem()
     {
-        var workflow = new Workflow("ProblemBuilder", "PB", "t", StoryItemType.Problem)
+        var workflow = new Workflow("ProblemBeats", "PB", "t", StoryItemType.Problem)
         {
             InjectsBeatSheets = true
         };
@@ -69,7 +69,7 @@ public class DeclaredInjectionWiringTests
     [TestMethod]
     public void DeclaringStockScenes_InjectsThem()
     {
-        var workflow = new Workflow("ProblemBuilder", "PB", "t", StoryItemType.Problem)
+        var workflow = new Workflow("ProblemBeats", "PB", "t", StoryItemType.Problem)
         {
             InjectsStockScenes = true
         };
@@ -78,9 +78,9 @@ public class DeclaredInjectionWiringTests
     }
 
     [TestMethod]
-    public void RegisteredProblemBuilder_InjectsAllFour()
+    public void RegisteredProblemBeats_InjectsAllFour()
     {
-        var registered = WorkflowRegistry.All.Single(w => w.Label == "ProblemBuilder");
+        var registered = WorkflowRegistry.All.Single(w => w.Label == "ProblemBeats");
         var model = new StoryModel();
         var api = CreateApi();
         api.CurrentModel = model;
