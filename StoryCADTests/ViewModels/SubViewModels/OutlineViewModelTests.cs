@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
@@ -51,6 +51,24 @@ public class OutlineViewModelTests
         await outlineVM.RemoveStoryElement();
         Assert.IsTrue(appState.CurrentDocument.Model.StoryElements[0].Node.IsRoot &&
                       appState.CurrentDocument.Model.StoryElements[0].ElementType == StoryItemType.StoryOverview);
+    }
+
+    [TestMethod]
+    public async Task StockScenesTool_SceneInserted_SetsChangedFlag()
+    {
+        Ioc.Default.GetRequiredService<ShellViewModel>(); // receives IsChangedMessage
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("TestStockScene", "StoryBuilder", 0);
+        appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "TestStockScene.stbx"));
+        outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
+        appState.RightTappedNode = model.ExplorerView[0];
+        Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName = "The chase";
+        model.Changed = false;
+
+        await outlineVM.StockScenesTool();
+
+        Assert.IsTrue(model.StoryElements.Any(e => e.Name == "The chase"), "Scene should be inserted");
+        Assert.IsTrue(model.Changed, "Changed flag should be true after a stock scene insert");
     }
 
     /// <summary>

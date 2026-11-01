@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI;
 using StoryCADLib.DAL;
@@ -642,21 +642,10 @@ public class OutlineViewModel : ObservableRecipient
         logger.Log(LogLevel.Info, $"In WriteModel, path={appState.CurrentDocument?.FilePath}");
         try
         {
-            // Updating the last modified time
-            try
-            {
-                var overview =
-                    appState.CurrentDocument.Model.StoryElements.StoryElementGuids[
-                        appState.CurrentDocument.Model.ExplorerView[0].Uuid] as OverviewModel;
-                overview!.DateModified = DateTime.Today.ToString("yyyy-MM-dd");
-            }
-            catch
-            {
-                logger.Log(LogLevel.Warn, "Failed to update last modified date/time");
-            }
-
+            // OutlineService.WriteModel stamps the Overview's Last Changed date.
             // Use the file path if available, otherwise fallback to the old path
             await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
+            Ioc.Default.GetService<OverviewViewModel>()?.RefreshDateModified();
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -1094,6 +1083,7 @@ public class OutlineViewModel : ObservableRecipient
                         shellVm.TreeViewNodeClicked(sceneVar.Node);
                         appState.RightTappedNode.IsExpanded = true;
                         sceneVar.Node.IsSelected = true;
+                        Messenger.Send(new IsChangedMessage(true));
                         Messenger.Send(
                             new StatusChangedMessage(new StatusMessage("Stock Scenes inserted", LogLevel.Info)));
                     }
@@ -1483,6 +1473,7 @@ public class OutlineViewModel : ObservableRecipient
                 appState.RightTappedNode.Uuid);
         var scene = outlineService.ConvertProblemToScene(appState.CurrentDocument.Model, problem);
         shellVm.TreeViewNodeClicked(scene.Node, false);
+        Messenger.Send(new IsChangedMessage(true));
         Messenger.Send(new StatusChangedMessage(new StatusMessage("Converted Problem to Scene", LogLevel.Info, true)));
     }
 
@@ -1507,6 +1498,7 @@ public class OutlineViewModel : ObservableRecipient
             appState.RightTappedNode.Uuid);
         var problem = outlineService.ConvertSceneToProblem(appState.CurrentDocument.Model, scene);
         shellVm.TreeViewNodeClicked(problem.Node, false);
+        Messenger.Send(new IsChangedMessage(true));
         Messenger.Send(new StatusChangedMessage(new StatusMessage("Converted Scene to Problem", LogLevel.Info, true)));
     }
 

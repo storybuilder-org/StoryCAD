@@ -6,12 +6,14 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:models="using:StoryCADLib.Models"
       xmlns:usercontrols="using:StoryCADLib.Controls"
+      xmlns:converters="using:StoryCADLib.Converters"
       xmlns:viewModels="using:StoryCADLib.ViewModels"
       mc:Ignorable="d"
       ScrollViewer.VerticalScrollBarVisibility="Disabled"
       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
     <Page.Resources>
+        <converters:EmptyStringToNullConverter x:Key="EmptyStringToNull" />
 
         <TeachingTip x:Key="ViewpointCharacterTip"
                      x:Name="ViewpointCharacterTip"
@@ -179,7 +181,7 @@
                         <TextBlock Grid.Column="1" MinWidth="50" />
                         <ComboBox Header="Value Exchange" Grid.Column="2" IsEditable="False" MinWidth="250"
                                   ItemsSource="{x:Bind SceneVm.ValueExchangeList}"
-                                  SelectedValue="{x:Bind SceneVm.ValueExchange, Mode=TwoWay}"
+                                  SelectedValue="{x:Bind SceneVm.ValueExchange, Mode=TwoWay, Converter={StaticResource EmptyStringToNull}}"
                                   PlaceholderText="What changes for your scene's protagonist?."
                                   AutomationProperties.AutomationId="ValueExchangeCombo" />
                     </Grid>

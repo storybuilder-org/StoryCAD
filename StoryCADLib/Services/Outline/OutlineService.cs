@@ -1,4 +1,4 @@
-#pragma warning disable CS8632 // Nullable annotations used without nullable context
+﻿#pragma warning disable CS8632 // Nullable annotations used without nullable context
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using StoryCADLib.DAL;
@@ -38,9 +38,11 @@ public class OutlineService
 
         StoryModel model = new();
 
+        var today = DateTime.Today.ToString("yyyy-MM-dd");
         OverviewModel overview = new(name, model, null)
         {
-            DateCreated = DateTime.Today.ToString("yyyy-MM-dd"),
+            DateCreated = today,
+            DateModified = today, // a new outline's Last Changed is its creation date
             Author = author
         };
         model.ExplorerView.Add(overview.Node);
@@ -214,6 +216,14 @@ public class OutlineService
     internal async Task<bool> WriteModel(StoryModel model, string file)
     {
         _log.Log(LogLevel.Info, $"Writing model to {file}");
+        // Every save path (menu, auto-save, API, exit) stamps Last Changed here.
+        if (model.ExplorerView.Count > 0
+            && model.StoryElements.StoryElementGuids.TryGetValue(model.ExplorerView[0].Uuid, out var root)
+            && root is OverviewModel overview)
+        {
+            overview.DateModified = DateTime.Today.ToString("yyyy-MM-dd");
+        }
+
         var wtr = Ioc.Default.GetRequiredService<StoryIO>();
         await wtr.WriteStory(file, model);
         _log.Log(LogLevel.Info, "Model write success.");
@@ -762,6 +772,7 @@ public class OutlineService
         scene.Node.Parent.IsExpanded = true; // expand the parent node
         scene.Name = problem.Name;
         scene.Node.Name = problem.Name;
+        model.Changed = true;
         _log.Log(LogLevel.Info, $"ConvertProblemToScene completed for {scene.Uuid}.");
         return scene;
     }
@@ -828,6 +839,7 @@ public class OutlineService
         problem.Name = scene.Name;
         problem.Node.Name = scene.Name;
         scene.Node.Parent.IsExpanded = true; // expand the parent node
+        model.Changed = true;
         _log.Log(LogLevel.Info, $"ConvertSceneToProblem completed for {problem.Uuid}.");
         return problem;
     }

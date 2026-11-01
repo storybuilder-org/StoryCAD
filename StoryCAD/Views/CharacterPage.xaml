@@ -3,9 +3,14 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:usercontrols="using:StoryCADLib.Controls"
+      xmlns:converters="using:StoryCADLib.Converters"
       xmlns:viewModels="using:StoryCADLib.ViewModels"
       ScrollViewer.VerticalScrollBarVisibility="Disabled"
       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+    <Page.Resources>
+        <converters:EmptyStringToNullConverter x:Key="EmptyStringToNull" />
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -41,11 +46,11 @@
                               AutomationProperties.AutomationId="CharacterRoleCombo" />
                     <ComboBox Header="Story Role" Grid.Row="1" IsEditable="False" MinWidth="200"
                               ItemsSource="{x:Bind CharVm.StoryRoleList}"
-                              SelectedItem="{x:Bind CharVm.StoryRole, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.StoryRole, Mode=TwoWay, Converter={StaticResource EmptyStringToNull}}"
                               AutomationProperties.AutomationId="StoryRoleCombo" />
                     <ComboBox Header="Archetype" Grid.Row="2" IsEditable="False" MinWidth="200"
                               ItemsSource="{x:Bind CharVm.ArchetypeList}"
-                              SelectedItem="{x:Bind CharVm.Archetype, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.Archetype, Mode=TwoWay, Converter={StaticResource EmptyStringToNull}}"
                               AutomationProperties.AutomationId="ArchetypeCombo" />
                     <usercontrols:RichEditBoxExtended Header="Character Sketch" Grid.Row="3"
                                                       RtfText="{x:Bind CharVm.Description, Mode=TwoWay}"
@@ -299,7 +304,7 @@
                     <Grid Grid.Row="0" HorizontalAlignment="Stretch">
                         <ComboBox Header="Personality Type" IsEditable="False" Width="200"
                                   ItemsSource="{x:Bind CharVm.EnneagramList}"
-                                  SelectedValue="{x:Bind CharVm.Enneagram, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                                  SelectedValue="{x:Bind CharVm.Enneagram, Mode=TwoWay, Converter={StaticResource EmptyStringToNull}}" HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="PersonalityTypeCombo" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Stretch">
