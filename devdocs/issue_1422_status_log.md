@@ -128,3 +128,12 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - App fixes found by the run ride this PR: Overview premise, carried-over drop-downs, changed flag on tool inserts, drops and conversions, Last Changed, tool target is the selected node, per-type right-click items, scene purposes and cast layout, beat selection after Assign, tree highlight after moves, menus and drops, startup status messages, Character tabs sized to their titles, respelled list values with old-outline mapping, System.IO file writes.
 - Runner: select scrolls a list row into view; an empty field reads as empty; the pointer parks on the status bar with real input moves before a screenshot and after context-menu and drag; the linter accepts the TabView scroll buttons; seeded preferences carry a sample author name.
 - Tests: 2195 passed, 17 skipped; CheckDotEnvFile and CheckDoppler need a .env. Automation tests 355 passed. The seven other scripts pass in the VM.
+
+### Session recovery (2026-11-01, end of day)
+
+- PR #1673 (C6 Tutorial) merged into `dev` as `c31db959`; merge-cleanup done (C6 Tutorial ticked, wiki `log.md` merge entry, sync-state at `c31db959`).
+- Next: C6 item 2, Collaborator_Test_Plan (`StoryCADTests/ManualTests/Collaborator_Test_Plan.md`, manual section `docs/StoryCAD Collaborator/`). Branch `issue-1422-collaborator` from `c31db959`, in the worktree `D:\dev\src\StoryCAD-1422`. Nothing scripted yet.
+- Read first: the Collaborator item in the #1422 issue body. It lists the pages and images Problem Beats (Collaborator #302) made out of date: three Problem Builder images that show beats, the workflow list, pane and customize images, and the Scene_Workflows caption.
+- Each Collaborator run is charged to the Worker ledger. The automation VM has no Collaborator sign-in; runs that call Collaborator need Brigid (hands off), and Terry's yes before a desktop run.
+- Per plan: translate to a `.scs` script with `--window 1036x744`, run it with `D:\VMs\Run-InVM.ps1` (normal PowerShell), retake the manual images under the image name standard, run `labels` on the pages, have an agent compare the pages with the app, fix every fault the run finds, have separate agents review the images and the code, one PR.
+- Script facts: `pause` is zero in test runs; `click <target> pointer` opens a dialog without a focus ring; a tab with keyboard focus shows its tooltip, so focus a text box before a screenshot.
