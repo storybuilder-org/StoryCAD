@@ -38,7 +38,7 @@ When you click a workflow, its name appears on the top bar and a short descripti
 
 - [Outline Gaps](Outline_Gaps.html): the generated list of empty required fields, and how Collaborator judges where your outline stands.
 - [Overview Workflows](Overview_Workflows.html): Ideation (Story idea => Concept => Premise), Story Problem (Premise => Problem + Characters), and Story Form.
-- [Problem Workflows](Problem_Workflows.html): Inner and Outer Problems, and Problem Builder.
+- [Problem Workflows](Problem_Workflows.html): Inner and Outer Problems, Problem Builder, and Problem Beats.
 - [Character Workflows](Character_Workflows.html): Character Builder, Flaw and Backstory, Character Relationship, and Character Interview.
 - [World and Setting Workflows](World_and_Setting_Workflows.html): Define Story World, and Setting Builder.
 - [Scene Workflows](Scene_Workflows.html): Scene Builder.
