@@ -17,44 +17,37 @@ Most stories have more than one problem, but an important thing to keep in mind 
 
 StoryCAD acknowledges the need for a main story problem by having you pick the Problem that is your story problem, back on the Overview node. Overview’s Premise tab looks like this:
 
-![](../media/Overview-Empty-Premis-tab.png)
+![](../media/Danger-Calls-Overview-Premise-Tab-Empty.png)
 
 The Story Problem drop-down lists your outline’s Problem story elements. If you select the problem we’ve been developing you’ll see:
 
-![](../media/Danger-Calls-Story-Premise.png)
+![](../media/Danger-Calls-Overview-Premise-Tab.png)
 
-Note that the Premise here is just a read-only copy of the Premise on the Problem story node’s Resolution tab. Don’t forget to save your work- the red pencil on the Status bar is a reminder that you have unsaved work. You may want to take a look at the various backup and autosave options available in Preferences.
+Note that the Premise here is the Premise on the Problem story node’s Resolution tab; a change you make in either place changes both. Don’t forget to save your work- the red pencil on the Status bar is a reminder that you have unsaved work. You may want to take a look at the various backup and autosave options available in Preferences.
 
 Your workflow may be different, but we recommend focusing on Problem and Character story elements to the degree that you know your major characters and their problems, know how your problems relate to each other, and know which problem is your story problem. When you know these things, you’re ready to start plotting.
 
 Back when we started, we envisioned a scene in which Lacas walks out of the courtroom, a free man, talking on his cellular phone to someone, and laughing at Leonard, because of lack of evidence. That might be a good way to introduce the story, but our research suggests that with a lack of evidence, our guys wouldn’t have enough to charge Lacas; no prosecutor would charge. Maybe instead it opens with with our guys bemoaning the lack of something concrete to catch Lacas in the act with? Let’s try adding that scene.
 
-Right-clicking the Scenes folder displays a fly-out command bar.
+Right-clicking the Scenes folder displays a fly-out menu.
 
-![](../media/Danger-Calls-Add-Scene.png)
+![](../media/Danger-Calls-Add-Scene-Menu.png)
 
-Clicking on the Add Scene icon on the fly-out bar will insert a new scene, which you can click on and rename by keying into the Name field. A sketch might also be added:
+Clicking Add Elements and then Add Scene will insert a new scene, which you can click on and rename by keying into the Name field. A sketch might also be added:
 
-![](../media/Danger-Calls-First-Scene-Sketch.png)
+![](../media/Danger-Calls-Scene-Tab-Sketch.png)
 
 
 Of course, one scene isn't a plot. This scene might or might not fit. If it’s something you envision when you’re working through your story idea and concept and premise, trust your intuition and record it. Honor your muse by paying attention to those early thoughts. This goes for any story elements that suggest themselves. If they don’t fit, they can always be trashed.
 
 Let's put a skeleton of a plot together, using the problems and story premise you’ve developed.
 
-On the Tools menu there's a sub-menu with several tools to assist plotting.  One of them, Master Plots, could be useful in this situation.  The master plots available from this sub-menu suggest certain events which take place at different places in a story, and can quickly provide a skeleton plot outline which provides a shape for the plot. With the Scenes folder node selected, rather than go through the menus, let's use a shortcut and type in [Ctrl+M].  This will display the Master Plots menu:
+A story structure can quickly provide a skeleton for the plot. In StoryCAD, a structure is a beat sheet: a list of beats, each a point in the dramatic progression of a story where certain things should happen. Click on the ‘Catching the drug dealer Lacas’ problem and then on its Structure tab. From the Beat Sheet list, pick Three Act Play:
 
-![](../media/Danger-Calls-MasterPlots-menu.png)
+![](../media/Danger-Calls-Structure-Tab-Three-Act-Play.png)
 
-Not all of the master plots are true plot outlines; other master plots suggest common story types which recur in fiction.  But we're looking for an outline, and the first few master plots do just that.
+The beats appear in the Beats list. Click on one to read its description. For example, the description for 'Narrative hook' looks like this:
 
-Let's use the first one on the list, the Three Act Play.  Click on the Copy button. 
+![](../media/Danger-Calls-Structure-Tab-Narrative-Hook.png)
 
-![](../media/Danger-Calls-Three-Act-Play.png)
-
-
-The copy function populated the Scene folder with a series of plot points which suggest where in the dramatic progression of a story certain things should happen.  The Notes tabs on these plot points contain some suggestions.  For example, the Notes for 'Narrative hook' looks like this:
-
-![](../media/Danger-Calls-Narrative-Hook.png)
-
-Although these are Scene story elements, they are not scenes, but placeholders: a reminder of things that your scenes need to do,   and roughly the order they need to do them in. In short, they are the structure of your story, its spine. Since your story is centered on one of your Problems, the main Story Problem, the story’s structure is the structure of that problem.  
+Beats are not scenes. They are a reminder of things that your scenes need to do, and roughly the order they need to do them in. In short, they are the structure of your story, its spine. Since your story is centered on one of your Problems, the main Story Problem, the story’s structure is the structure of that problem.  

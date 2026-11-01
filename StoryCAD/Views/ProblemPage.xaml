@@ -5,6 +5,7 @@
       xmlns:usercontrols="using:StoryCADLib.Controls"
       xmlns:viewModels="using:StoryCADLib.ViewModels"
       xmlns:tools="using:StoryCADLib.ViewModels.Tools"
+      xmlns:models="using:StoryCADLib.Models"
       ScrollViewer.VerticalScrollBarVisibility="Disabled"
       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
     <Grid>
@@ -40,13 +41,13 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="2*" />
                             </Grid.ColumnDefinitions>
-                            <ComboBox Grid.Column="0" IsEditable="True" Header="Problem Type" Grid.Row="0" MinWidth="200"
+                            <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" Grid.Column="0" IsEditable="True" Header="Problem Type" Grid.Row="0" MinWidth="200"
                                   ItemsSource="{x:Bind ProblemVm.ProblemTypeList}"
                                   Text="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind ProblemVm.ProblemType, Mode=TwoWay}"
                                   SelectedItem="{x:Bind ProblemVm.ProblemType, Mode=OneWay}"
                                   AutomationProperties.AutomationId="ProblemTypeCombo" />
-                            <ComboBox Grid.Column="2" IsEditable="True" Header="Conflict Type" Grid.Row="0" MinWidth="200"
+                            <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" Grid.Column="2" IsEditable="True" Header="Conflict Type" Grid.Row="0" MinWidth="200"
                                   Margin="20,0,0,0"
                                   ItemsSource="{x:Bind ProblemVm.ConflictTypeList}"
                                   Text="{x:Bind ProblemVm.ConflictType, Mode=TwoWay}"
@@ -54,13 +55,13 @@
                                   SelectedItem="{x:Bind ProblemVm.ConflictType, Mode=OneWay}"
                                   AutomationProperties.AutomationId="ConflictTypeCombo" />
                         </Grid>
-                        <ComboBox IsEditable="True" Header="Problem Category" Grid.Row="1" MinWidth="300"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Problem Category" Grid.Row="1" MinWidth="300"
                               ItemsSource="{x:Bind ProblemVm.ProblemCategoryList}"
                               Text="{x:Bind ProblemVm.ProblemCategory, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.ProblemCategory, Mode=TwoWay}"
                               SelectedItem="{x:Bind ProblemVm.ProblemCategory, Mode=OneWay}"
                               AutomationProperties.AutomationId="ProblemCategoryCombo" />
-                        <ComboBox IsEditable="True" Header="Subject" Grid.Row="2" MinWidth="300"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Subject" Grid.Row="2" MinWidth="300"
                               ItemsSource="{x:Bind ProblemVm.SubjectList}"
                               Text="{x:Bind ProblemVm.Subject, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.Subject, Mode=TwoWay}"
@@ -73,7 +74,7 @@
                                                       VerticalAlignment="Stretch"
                                                       AutomationProperties.AutomationId="StoryQuestionRichEdit"
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
-                        <ComboBox IsEditable="True" Header="Problem Source" Grid.Row="4" MinWidth="300"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Problem Source" Grid.Row="4" MinWidth="300"
                               ItemsSource="{x:Bind ProblemVm.ProblemSourceList}"
                               Text="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.ProblemSource, Mode=TwoWay}"
@@ -98,13 +99,13 @@
                               SelectedItem="{x:Bind ProblemVm.SelectedProtagonist, Mode=TwoWay}"
                               ItemsSource="{x:Bind ProblemVm.Characters, Mode=OneWay}"
                               AutomationProperties.AutomationId="ProblemProtagonistCombo" />
-                        <ComboBox IsEditable="True" Header="Goal" Grid.Row="1"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Goal" Grid.Row="1"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               Text="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.ProtGoal, Mode=TwoWay}"
                               SelectedItem="{x:Bind ProblemVm.ProtGoal, Mode=OneWay}"
                               AutomationProperties.AutomationId="ProblemProtagonistGoalCombo" />
-                        <ComboBox IsEditable="True" Header="Motivation" Grid.Row="2"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Motivation" Grid.Row="2"
                               MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
                               Text="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.ProtMotive, Mode=TwoWay}"
@@ -140,13 +141,13 @@
                               SelectedValuePath="Uuid"
                               ItemsSource="{x:Bind ProblemVm.Characters, Mode=OneWay}"
                               AutomationProperties.AutomationId="ProblemAntagonistCombo" />
-                        <ComboBox IsEditable="True" Header="Goal" Grid.Row="1"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Goal" Grid.Row="1"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.GoalList}"
                               Text="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.AntagGoal, Mode=TwoWay}"
                               SelectedItem="{x:Bind ProblemVm.AntagGoal, Mode=OneWay}"
                               AutomationProperties.AutomationId="ProblemAntagonistGoalCombo" />
-                        <ComboBox IsEditable="True" Header="Motivation" Grid.Row="2"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Motivation" Grid.Row="2"
                               MinWidth="300" ItemsSource="{x:Bind ProblemVm.MotiveList}"
                               Text="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.AntagMotive, Mode=TwoWay}"
@@ -175,19 +176,19 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <ComboBox IsEditable="True" Header="Outcome" Grid.Row="0"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Outcome" Grid.Row="0"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.OutcomeList}"
                               Text="{x:Bind ProblemVm.Outcome, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.Outcome, Mode=TwoWay}"
                               SelectedItem="{x:Bind ProblemVm.Outcome, Mode=OneWay}"
                               AutomationProperties.AutomationId="ProblemOutcomeCombo" />
-                        <ComboBox IsEditable="True" Header="Method" Grid.Row="1"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Method" Grid.Row="1"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.MethodList}"
                               Text="{x:Bind ProblemVm.Method, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.Method, Mode=TwoWay}"
                               SelectedItem="{x:Bind ProblemVm.Method, Mode=OneWay}"
                               AutomationProperties.AutomationId="MethodCombo" />
-                        <ComboBox IsEditable="True" Header="Theme" Grid.Row="2"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Theme" Grid.Row="2"
                               MinWidth="400" ItemsSource="{x:Bind ProblemVm.ThemeList}"
                               Text="{x:Bind ProblemVm.Theme, Mode=TwoWay}"
                               PlaceholderText="{x:Bind ProblemVm.Theme, Mode=TwoWay}"
@@ -366,19 +367,22 @@
                             </ListView>
 
                             <!-- Command buttons -->
-                            <StackPanel Grid.Column="1" Spacing="1" Padding="0" VerticalAlignment="Center"
-                                        Margin="4,0">
+                            <!-- Two columns of buttons so all seven fit the row at the manual's 1036 x 744 window -->
+                            <Grid Grid.Column="1" VerticalAlignment="Center" Margin="4,0"
+                                  ColumnSpacing="4" RowSpacing="4"
+                                  ColumnDefinitions="Auto,Auto"
+                                  RowDefinitions="Auto,Auto,Auto,Auto,Auto">
                                 <!-- Assignment group -->
-                                <Button x:Name="AssignButton"
-                                        Width="44" Height="40"
+                                <Button x:Name="AssignButton" Grid.Row="0" Grid.Column="0"
+                                        Width="44" Height="36"
                                         Command="{x:Bind BeatSheetsVm.AssignBeatCommand}"
                                         ToolTipService.ToolTip="Assign element to beat"
                                         AutomationProperties.AutomationId="AssignBeatButton"
                                         AutomationProperties.Name="Assign Beat">
                                     <FontIcon Glyph="&#xE72B;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
-                                <Button x:Name="UnassignButton"
-                                        Width="44" Height="40"
+                                <Button x:Name="UnassignButton" Grid.Row="0" Grid.Column="1"
+                                        Width="44" Height="36"
                                         Command="{x:Bind BeatSheetsVm.UnbindElementCommand}"
                                         ToolTipService.ToolTip="Remove assignment"
                                         AutomationProperties.AutomationId="UnassignBeatButton"
@@ -387,51 +391,51 @@
                                 </Button>
 
                                 <!-- Spacer -->
-                                <Rectangle Height="1" Margin="0,4"
+                                <Rectangle Grid.Row="1" Grid.ColumnSpan="2" Height="1" Margin="0,2"
                                            Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" />
 
                                 <!-- Beat management group -->
-                                <Button x:Name="AddBeatButton"
-                                        Width="44" Height="40"
+                                <Button x:Name="AddBeatButton" Grid.Row="2" Grid.Column="0"
+                                        Width="44" Height="36"
                                         Command="{x:Bind BeatSheetsVm.CreateBeatCommand}"
                                         ToolTipService.ToolTip="Add a new beat"
                                         AutomationProperties.AutomationId="AddBeatButton"
                                         AutomationProperties.Name="Add Beat">
                                     <FontIcon Glyph="&#xE710;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
-                                <Button x:Name="DeleteBeatButton"
-                                        Width="44" Height="40"
+                                <Button x:Name="DeleteBeatButton" Grid.Row="2" Grid.Column="1"
+                                        Width="44" Height="36"
                                         Command="{x:Bind BeatSheetsVm.DeleteBeatCommand}"
                                         ToolTipService.ToolTip="Delete selected beat"
                                         AutomationProperties.AutomationId="DeleteBeatButton"
                                         AutomationProperties.Name="Delete Beat">
                                     <FontIcon Glyph="&#xE74D;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
-                                <Button x:Name="MoveUpButton"
-                                        Width="44" Height="40"
+                                <Button x:Name="MoveUpButton" Grid.Row="3" Grid.Column="0"
+                                        Width="44" Height="36"
                                         Command="{x:Bind BeatSheetsVm.MoveUpCommand}"
                                         ToolTipService.ToolTip="Move beat up"
                                         AutomationProperties.AutomationId="BeatMoveUpButton"
                                         AutomationProperties.Name="Move Beat Up">
                                     <FontIcon Glyph="&#xE70E;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
-                                <Button x:Name="MoveDownButton"
-                                        Width="44" Height="40"
+                                <Button x:Name="MoveDownButton" Grid.Row="3" Grid.Column="1"
+                                        Width="44" Height="36"
                                         Command="{x:Bind BeatSheetsVm.MoveDownCommand}"
                                         ToolTipService.ToolTip="Move beat down"
                                         AutomationProperties.AutomationId="BeatMoveDownButton"
                                         AutomationProperties.Name="Move Beat Down">
                                     <FontIcon Glyph="&#xE70D;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
-                                <Button x:Name="SaveBeatSheetButton"
-                                        Width="44" Height="40"
+                                <Button x:Name="SaveBeatSheetButton" Grid.Row="4" Grid.Column="0"
+                                        Width="44" Height="36"
                                         Command="{x:Bind BeatSheetsVm.SaveBeatSheetCommand}"
                                         ToolTipService.ToolTip="Save beat sheet to file"
                                         AutomationProperties.AutomationId="SaveBeatSheetButton"
                                         AutomationProperties.Name="Save Beat Sheet">
                                     <FontIcon Glyph="&#xE74E;" FontSize="18" FontWeight="SemiBold" />
                                 </Button>
-                            </StackPanel>
+                            </Grid>
 
                             <!-- Elements list (Scenes / Problems) -->
                             <Grid Grid.Column="2">
@@ -445,11 +449,19 @@
                           ItemsSource="{x:Bind BeatSheetsVm.CurrentElementSource, Mode=TwoWay}"
                           SelectedItem="{x:Bind BeatSheetsVm.SelectedListElement, Mode=TwoWay}"
                           SelectionMode="Single"
-                          DisplayMemberPath="Name"
                           BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                           BorderThickness="1"
                           CornerRadius="4"
-                          AutomationProperties.AutomationId="ElementsList" />
+                          AutomationProperties.AutomationId="ElementsList">
+                                    <!-- Names wrap so a long scene name is not cut off at the 1036 x 744 window. -->
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:StoryElement">
+                                            <TextBlock Text="{x:Bind Name, Mode=OneWay}" TextWrapping="Wrap"
+                                                       Margin="0,4"
+                                                       AutomationProperties.Name="{x:Bind Name, Mode=OneWay}" />
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
                             </Grid>
                         </Grid>
 

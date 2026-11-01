@@ -25,7 +25,7 @@
             </Grid.RowDefinitions>
 
             <TextBlock Text="Story Explorer View" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" />
-            <TextBlock Text="NarratorView View" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" />
+            <TextBlock Text="Story Narrator View" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" />
 
             <ScrollViewer Grid.Row="1" Grid.Column="0">
                 <TreeView ItemsSource="{x:Bind AppState.CurrentDocument.Model.ExplorerView[0].Children, Mode=OneWay}"

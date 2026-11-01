@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI;
 using StoryCADLib.DAL;
@@ -282,14 +282,10 @@ public class OutlineViewModel : ObservableRecipient
 
             using (new SerializationLock(logger))
             {
+                // BackupService sets the Backup indicator from the result; no backup, no green (#1422).
                 if (preferences.Model.BackupOnOpen)
                 {
                     await shellVm.MakeBackup();
-                    shellVm.BackupStatusColor = Colors.Green;
-                }
-                else
-                {
-                    shellVm.BackupStatusColor = Colors.Green;
                 }
 
                 shellVm.TreeViewNodeClicked(appState.CurrentDocument.Model.ExplorerView[0]);
@@ -391,6 +387,7 @@ public class OutlineViewModel : ObservableRecipient
                 Messenger.Send(new StatusChangedMessage(new StatusMessage($"{msg} executing", LogLevel.Info)));
                 _editFlushService.FlushCurrentEdits();
                 await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
+                Ioc.Default.GetService<OverviewViewModel>()?.RefreshDateModified();
                 Messenger.Send(new StatusChangedMessage(new StatusMessage($"{msg} completed", LogLevel.Info)));
                 outlineService.SetChanged(appState.CurrentDocument.Model, false);
                 shellVm.ChangeStatusColor = Colors.Green;
@@ -401,7 +398,11 @@ public class OutlineViewModel : ObservableRecipient
                 Messenger.Send(new StatusChangedMessage(new StatusMessage($"{msg} failed", LogLevel.Error)));
             }
 
-            _autoSaveService.StartAutoSave();
+            // Only with the AutoSave preference on: StartAutoSave turns the AutoSave indicator green (#1422).
+            if (preferences.Model.AutoSave)
+            {
+                _autoSaveService.StartAutoSave();
+            }
         }
     }
 
@@ -642,21 +643,10 @@ public class OutlineViewModel : ObservableRecipient
         logger.Log(LogLevel.Info, $"In WriteModel, path={appState.CurrentDocument?.FilePath}");
         try
         {
-            // Updating the last modified time
-            try
-            {
-                var overview =
-                    appState.CurrentDocument.Model.StoryElements.StoryElementGuids[
-                        appState.CurrentDocument.Model.ExplorerView[0].Uuid] as OverviewModel;
-                overview!.DateModified = DateTime.Today.ToString("yyyy-MM-dd");
-            }
-            catch
-            {
-                logger.Log(LogLevel.Warn, "Failed to update last modified date/time");
-            }
-
+            // OutlineService.WriteModel stamps the Overview's Last Changed date.
             // Use the file path if available, otherwise fallback to the old path
             await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
+            Ioc.Default.GetService<OverviewViewModel>()?.RefreshDateModified();
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -801,17 +791,19 @@ public class OutlineViewModel : ObservableRecipient
 
     public Task PrintCurrentNodeAsync()
     {
+        // The right-clicked node while its menu is in use, else the selected node (#1422).
+        var target = appState.CommandTargetNode;
         _usageTracking.FeatureUsed("Print");
         using (new SerializationLock(logger))
         {
-            if (appState.RightTappedNode == null)
+            if (target == null)
             {
-                Messenger.Send(new StatusChangedMessage(new StatusMessage("Right tap a node to print", LogLevel.Warn)));
+                Messenger.Send(new StatusChangedMessage(new StatusMessage("Select a node to print", LogLevel.Warn)));
                 logger.Log(LogLevel.Info, "Print node failed as no node is selected");
                 return Task.CompletedTask;
             }
 
-            Ioc.Default.GetRequiredService<PrintReportDialogVM>().PrintSingleNode(appState.RightTappedNode);
+            Ioc.Default.GetRequiredService<PrintReportDialogVM>().PrintSingleNode(target);
         }
 
         return Task.CompletedTask;
@@ -823,11 +815,6 @@ public class OutlineViewModel : ObservableRecipient
         logger.Log(LogLevel.Info, "Displaying KeyQuestions tool dialog");
         using (new SerializationLock(logger))
         {
-            if (appState.RightTappedNode == null)
-            {
-                appState.RightTappedNode = appState.CurrentNode;
-            }
-
             //Creates and shows dialog
             ContentDialog keyQuestionsDialog = new()
             {
@@ -849,11 +836,6 @@ public class OutlineViewModel : ObservableRecipient
         logger.Log(LogLevel.Info, "Displaying Topics tool dialog");
         using (new SerializationLock(logger))
         {
-            if (appState.RightTappedNode == null)
-            {
-                appState.RightTappedNode = appState.CurrentNode;
-            }
-
             ContentDialog dialog = new()
             {
                 Title = "Topic Information",
@@ -871,6 +853,8 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public async Task MasterPlotTool()
     {
+        // A tool from the Tools menu or its shortcut acts on the selected node, never on an earlier right-click (#1422).
+        var target = appState.CurrentNode;
         _usageTracking.FeatureUsed("MasterPlots");
         using (new SerializationLock(logger))
         {
@@ -894,14 +878,14 @@ public class OutlineViewModel : ObservableRecipient
 
                 if (result == ContentDialogResult.Primary) // Copy command
                 {
-                    if (StoryNodeItem.RootNodeType(appState.RightTappedNode) == StoryItemType.TrashCan)
+                    if (StoryNodeItem.RootNodeType(target) == StoryItemType.TrashCan)
                     {
                         Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot add to Deleted Items",
                             LogLevel.Warn, true)));
                         return;
                     }
 
-                    if (appState.RightTappedNode.IsInNarratorView(appState.CurrentDocument.Model))
+                    if (target.IsInNarratorView(appState.CurrentDocument.Model))
                     {
                         Messenger.Send(new StatusChangedMessage(new StatusMessage(
                             "Tools can only insert into the Story Explorer view",
@@ -914,9 +898,9 @@ public class OutlineViewModel : ObservableRecipient
                     var model = masterPlotsVm.MasterPlots[masterPlotName];
                     IList<PlotPatternScene> scenes = model.PlotPatternScenes;
                     var problem = new ProblemModel(masterPlotName, appState.CurrentDocument.Model,
-                        appState.RightTappedNode);
-                    // add the new ProblemModel & node to the end of the target (appState.RightTappedNode) children
-                    appState.RightTappedNode.IsExpanded = true;
+                        target);
+                    // add the new ProblemModel & node to the end of the target node children
+                    target.IsExpanded = true;
                     problem.Node.IsSelected = true;
                     problem.Node.IsExpanded = true;
                     if (scenes.Count == 1)
@@ -928,7 +912,8 @@ public class OutlineViewModel : ObservableRecipient
                     {
                         foreach (var scene in scenes)
                         {
-                            SceneModel child = new(appState.CurrentDocument.Model, appState.RightTappedNode)
+                            // The plot's scenes belong under its new Problem, not beside it.
+                            SceneModel child = new(appState.CurrentDocument.Model, problem.Node)
                                 { Name = scene.SceneTitle, Description = "See Notes.", Notes = scene.Notes };
 
                             child.Node.IsSelected = true;
@@ -946,15 +931,12 @@ public class OutlineViewModel : ObservableRecipient
 
     public async Task DramaticSituationsTool()
     {
+        // A tool from the Tools menu or its shortcut acts on the selected node, never on an earlier right-click (#1422).
+        var target = appState.CurrentNode;
         _usageTracking.FeatureUsed("DramaticSituations");
         logger.Log(LogLevel.Info, "Displaying Dramatic Situations tool dialog");
         using (new SerializationLock(logger))
         {
-            if (appState.RightTappedNode == null)
-            {
-                shellVm.ShowMessage(LogLevel.Warn, "Right tap a node to insert a dramatic situation", false);
-            }
-
             if (_toolValidationService.VerifyToolUse(true, true))
             {
                 ContentDialog dialog = null;
@@ -983,14 +965,14 @@ public class OutlineViewModel : ObservableRecipient
                     return;
                 }
 
-                if (StoryNodeItem.RootNodeType(appState.RightTappedNode) == StoryItemType.TrashCan)
+                if (StoryNodeItem.RootNodeType(target) == StoryItemType.TrashCan)
                 {
                     Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot add to Deleted Items",
                         LogLevel.Warn, true)));
                     return;
                 }
 
-                if (appState.RightTappedNode.IsInNarratorView(appState.CurrentDocument.Model))
+                if (target.IsInNarratorView(appState.CurrentDocument.Model))
                 {
                     Messenger.Send(new StatusChangedMessage(new StatusMessage(
                         "Tools can only insert into the Story Explorer view",
@@ -1003,7 +985,7 @@ public class OutlineViewModel : ObservableRecipient
                 if (result == ContentDialogResult.Primary)
                 {
                     // Create and insert the new Problem as the target's child
-                    ProblemModel problem = new(situationModel.SituationName, appState.CurrentDocument.Model, appState.RightTappedNode)
+                    ProblemModel problem = new(situationModel.SituationName, appState.CurrentDocument.Model, target)
                     {
                         Notes = situationModel.Notes
                     };
@@ -1013,7 +995,7 @@ public class OutlineViewModel : ObservableRecipient
                 else if (result == ContentDialogResult.Secondary)
                 {
                     // Create and insert the new Scene as the target's child
-                    SceneModel sceneVar = new(situationModel.SituationName, appState.CurrentDocument.Model, appState.RightTappedNode)
+                    SceneModel sceneVar = new(situationModel.SituationName, appState.CurrentDocument.Model, target)
                     {
                         Notes = situationModel.Notes
                     };
@@ -1038,6 +1020,8 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public async Task StockScenesTool()
     {
+        // A tool from the Tools menu or its shortcut acts on the selected node, never on an earlier right-click (#1422).
+        var target = appState.CurrentNode;
         _usageTracking.FeatureUsed("StockScenes");
         logger.Log(LogLevel.Info, "Displaying Stock Scenes tool dialog");
         if (_toolValidationService.VerifyToolUse(true, true))
@@ -1064,14 +1048,14 @@ public class OutlineViewModel : ObservableRecipient
 
                     if (result == ContentDialogResult.Primary) // Copy command
                     {
-                        if (StoryNodeItem.RootNodeType(appState.RightTappedNode) == StoryItemType.TrashCan)
+                        if (StoryNodeItem.RootNodeType(target) == StoryItemType.TrashCan)
                         {
                             Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot add to Deleted Items",
                                 LogLevel.Warn, true)));
                             return;
                         }
 
-                        if (appState.RightTappedNode.IsInNarratorView(appState.CurrentDocument.Model))
+                        if (target.IsInNarratorView(appState.CurrentDocument.Model))
                         {
                             Messenger.Send(new StatusChangedMessage(new StatusMessage(
                                 "Tools can only insert into the Story Explorer view",
@@ -1088,12 +1072,13 @@ public class OutlineViewModel : ObservableRecipient
                         }
 
                         SceneModel sceneVar = new(Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName,
-                            appState.CurrentDocument.Model, appState.RightTappedNode);
+                            appState.CurrentDocument.Model, target);
 
-                        shellVm._sourceChildren = appState.RightTappedNode.Children;
+                        shellVm._sourceChildren = target.Children;
                         shellVm.TreeViewNodeClicked(sceneVar.Node);
-                        appState.RightTappedNode.IsExpanded = true;
+                        target.IsExpanded = true;
                         sceneVar.Node.IsSelected = true;
+                        Messenger.Send(new IsChangedMessage(true));
                         Messenger.Send(
                             new StatusChangedMessage(new StatusMessage("Stock Scenes inserted", LogLevel.Info)));
                     }
@@ -1121,18 +1106,20 @@ public class OutlineViewModel : ObservableRecipient
     /// <param name="typeToAdd">Element type that you want to add</param>
     public void AddStoryElement(StoryItemType typeToAdd)
     {
+        // The right-clicked node while its menu is in use, else the selected node (#1422).
+        var target = appState.CommandTargetNode;
         using (new SerializationLock(logger))
         {
             logger.Log(LogLevel.Info, $"Adding StoryElement {typeToAdd}");
-            if (appState.RightTappedNode == null)
+            if (target == null)
             {
                 Messenger.Send(
-                    new StatusChangedMessage(new StatusMessage("Right tap a node to add to", LogLevel.Warn)));
+                    new StatusChangedMessage(new StatusMessage("Select a node to add to", LogLevel.Warn)));
                 logger.Log(LogLevel.Info, "Add StoryElement failed- node not selected");
                 return;
             }
 
-            if (StoryNodeItem.RootNodeType(appState.RightTappedNode) == StoryItemType.TrashCan)
+            if (StoryNodeItem.RootNodeType(target) == StoryItemType.TrashCan)
             {
                 Messenger.Send(new StatusChangedMessage(new StatusMessage("Cannot add add to Deleted Items",
                     LogLevel.Warn, true)));
@@ -1141,7 +1128,7 @@ public class OutlineViewModel : ObservableRecipient
 
             //Create new element via outline service
             var newNode =
-                outlineService.AddStoryElement(appState.CurrentDocument.Model, typeToAdd, appState.RightTappedNode);
+                outlineService.AddStoryElement(appState.CurrentDocument.Model, typeToAdd, target);
 
             // UI operations - skip in headless/test mode
             if (!appState.Headless)
@@ -1163,20 +1150,22 @@ public class OutlineViewModel : ObservableRecipient
 
     public async Task RemoveStoryElement()
     {
+        // The right-clicked node while its menu is in use, else the selected node (#1422).
+        var target = appState.CommandTargetNode;
         try
         {
-            if (appState.RightTappedNode == null)
+            if (target == null)
             {
                 Messenger.Send(
-                    new StatusChangedMessage(new StatusMessage("Right tap a node to delete", LogLevel.Warn)));
+                    new StatusChangedMessage(new StatusMessage("Select a node to delete", LogLevel.Warn)));
                 return;
             }
 
             var _delete = true;
-            var elementToDelete = appState.RightTappedNode.Uuid;
+            var elementToDelete = target.Uuid;
 
             // Collect all GUIDs (element + all children)
-            var allGuids = outlineService.CollectAllDescendantGuids(appState.RightTappedNode, appState.CurrentDocument.Model);
+            var allGuids = outlineService.CollectAllDescendantGuids(target, appState.CurrentDocument.Model);
 
             // Find references to ANY of these GUIDs
             var _foundElements = new List<StoryElement>();
@@ -1287,10 +1276,12 @@ public class OutlineViewModel : ObservableRecipient
 
     public void RestoreStoryElement()
     {
+        // The right-clicked node while its menu is in use, else the selected node (#1422).
+        var target = appState.CommandTargetNode;
         logger.Log(LogLevel.Trace, "RestoreStoryElement");
-        if (appState.RightTappedNode == null)
+        if (target == null)
         {
-            Messenger.Send(new StatusChangedMessage(new StatusMessage("Right tap a node to restore", LogLevel.Warn)));
+            Messenger.Send(new StatusChangedMessage(new StatusMessage("Select a node to restore", LogLevel.Warn)));
             return;
         }
 
@@ -1299,14 +1290,14 @@ public class OutlineViewModel : ObservableRecipient
             using (new SerializationLock(logger))
             {
                 // Use the new OutlineService method to restore from trash
-                outlineService.RestoreFromTrash(appState.RightTappedNode, appState.CurrentDocument.Model);
+                outlineService.RestoreFromTrash(target, appState.CurrentDocument.Model);
                 _usageTracking.ElementRestored();
 
                 // Mark the model as changed
                 Messenger.Send(new IsChangedMessage(true));
 
                 Messenger.Send(new StatusChangedMessage(new StatusMessage(
-                    $"Restored node {appState.RightTappedNode.Name} and all its contents", LogLevel.Info, true)));
+                    $"Restored node {target.Name} and all its contents", LogLevel.Info, true)));
             }
         }
         catch (InvalidOperationException ex)
@@ -1328,24 +1319,26 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public void CopyToNarrative()
     {
+        // The right-clicked node while its menu is in use, else the selected node (#1422).
+        var target = appState.CommandTargetNode;
         logger.Log(LogLevel.Trace, "CopyToNarrative");
-        if (appState.RightTappedNode == null)
+        if (target == null)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("Select a node to copy", LogLevel.Info)));
             return;
         }
 
-        if (appState.RightTappedNode.Type != StoryItemType.Scene)
+        if (target.Type != StoryItemType.Scene)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("You can only copy a scene", LogLevel.Warn)));
             return;
         }
 
-        if (appState.RightTappedNode.CopyToNarratorView(appState.CurrentDocument.Model))
+        if (target.CopyToNarratorView(appState.CurrentDocument.Model))
         {
             Messenger.Send(new IsChangedMessage(true));
             Messenger.Send(new StatusChangedMessage(new StatusMessage(
-                $"Copied node {appState.RightTappedNode.Name} to Narrative View", LogLevel.Info, true)));
+                $"Copied node {target.Name} to Narrative View", LogLevel.Info, true)));
         }
         else
         {
@@ -1391,7 +1384,7 @@ public class OutlineViewModel : ObservableRecipient
                     // Use the new OutlineService method to empty trash
                     outlineService.EmptyTrash(appState.CurrentDocument.Model);
 
-                    shellVm.StatusMessage = "Trash Emptied.";
+                    Messenger.Send(new StatusChangedMessage(new StatusMessage("Trash emptied", LogLevel.Info)));
                     logger.Log(LogLevel.Info, "Emptied Trash.");
 
                     // Fix error #1056 - clear selected nodes
@@ -1427,15 +1420,17 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public void RemoveFromNarrative()
     {
+        // The right-clicked node while its menu is in use, else the selected node (#1422).
+        var target = appState.CommandTargetNode;
         logger.Log(LogLevel.Trace, "RemoveFromNarrative");
 
-        if (appState.RightTappedNode == null)
+        if (target == null)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("Select a node to remove", LogLevel.Info)));
             return;
         }
 
-        if (appState.RightTappedNode.Type != StoryItemType.Scene)
+        if (target.Type != StoryItemType.Scene)
         {
             Messenger.Send(
                 new StatusChangedMessage(new StatusMessage("You can only remove a Scene copy", LogLevel.Info)));
@@ -1444,19 +1439,19 @@ public class OutlineViewModel : ObservableRecipient
 
         // Find the node in narrator view by UUID and delete it
         var nodeInNarrator = appState.CurrentDocument.Model.NarratorView[0].Children
-            .FirstOrDefault(item => item.Uuid == appState.RightTappedNode.Uuid);
+            .FirstOrDefault(item => item.Uuid == target.Uuid);
 
         if (nodeInNarrator != null)
         {
             nodeInNarrator.Delete(StoryViewType.NarratorView);
             Messenger.Send(new IsChangedMessage(true));
             Messenger.Send(new StatusChangedMessage(new StatusMessage(
-                $"Removed node {appState.RightTappedNode.Name} from Narrative View", LogLevel.Info, true)));
+                $"Removed node {target.Name} from Narrative View", LogLevel.Info, true)));
         }
         else
         {
             Messenger.Send(new StatusChangedMessage(
-                new StatusMessage($"Node {appState.RightTappedNode.Name} not in Narrative View", LogLevel.Info, true)));
+                new StatusMessage($"Node {target.Name} not in Narrative View", LogLevel.Info, true)));
         }
     }
 
@@ -1465,13 +1460,15 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public void ConvertProblemToScene()
     {
-        if (appState.RightTappedNode == null)
+        // The right-clicked node while its menu is in use, else the selected node (#1422).
+        var target = appState.CommandTargetNode;
+        if (target == null)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("Select a node to convert", LogLevel.Info)));
             return;
         }
 
-        if (appState.RightTappedNode.Type != StoryItemType.Problem)
+        if (target.Type != StoryItemType.Problem)
         {
             Messenger.Send(
                 new StatusChangedMessage(new StatusMessage("You can only convert a Problem", LogLevel.Warn)));
@@ -1480,9 +1477,10 @@ public class OutlineViewModel : ObservableRecipient
 
         var problem =
             (ProblemModel)outlineService.GetStoryElementByGuid(appState.CurrentDocument.Model,
-                appState.RightTappedNode.Uuid);
+                target.Uuid);
         var scene = outlineService.ConvertProblemToScene(appState.CurrentDocument.Model, problem);
         shellVm.TreeViewNodeClicked(scene.Node, false);
+        Messenger.Send(new IsChangedMessage(true));
         Messenger.Send(new StatusChangedMessage(new StatusMessage("Converted Problem to Scene", LogLevel.Info, true)));
     }
 
@@ -1491,22 +1489,25 @@ public class OutlineViewModel : ObservableRecipient
     /// </summary>
     public void ConvertSceneToProblem()
     {
-        if (appState.RightTappedNode == null)
+        // The right-clicked node while its menu is in use, else the selected node (#1422).
+        var target = appState.CommandTargetNode;
+        if (target == null)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("Select a node to convert", LogLevel.Info)));
             return;
         }
 
-        if (appState.RightTappedNode.Type != StoryItemType.Scene)
+        if (target.Type != StoryItemType.Scene)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("You can only convert a Scene", LogLevel.Warn)));
             return;
         }
 
         var scene = (SceneModel)outlineService.GetStoryElementByGuid(appState.CurrentDocument.Model,
-            appState.RightTappedNode.Uuid);
+            target.Uuid);
         var problem = outlineService.ConvertSceneToProblem(appState.CurrentDocument.Model, scene);
         shellVm.TreeViewNodeClicked(problem.Node, false);
+        Messenger.Send(new IsChangedMessage(true));
         Messenger.Send(new StatusChangedMessage(new StatusMessage("Converted Scene to Problem", LogLevel.Info, true)));
     }
 

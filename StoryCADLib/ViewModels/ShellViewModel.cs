@@ -61,7 +61,13 @@ public class ShellViewModel : ObservableRecipient
 
     //File opened (if StoryCAD was opened via an STBX file)
     public string FilePathToLaunch;
-    public TreeViewItem LastClickedTreeviewItem;
+
+    /// <summary>
+    ///     Raised after TreeViewNodeClicked shows a node, so the Shell can move the tree's
+    ///     highlight to it; programmatic navigation (add, convert, tools, view switch) does
+    ///     not go through the TreeView's own selection.
+    /// </summary>
+    public event EventHandler CurrentNodeChanged;
 
     //List of new nodes that have a background, these are cleared on navigation
     public List<StoryNodeItem> NewNodeHighlightCache = new();
@@ -105,6 +111,10 @@ public class ShellViewModel : ObservableRecipient
         Messenger.Register<ShellViewModel, ThemeChangedMessage>(this, static (r, m) => r.ThemeChangedMessageReceived());
 
         this.appState.CurrentDocument = new StoryDocument(new StoryModel());
+
+        // A backup belongs to one outline: a new, opened, or closed outline starts grey until
+        // BackupService reports a backup of it (#1422).
+        this.appState.CurrentDocumentChanged += (_, _) => BackupStatusColor = Colors.Gray;
 
         //Skip status timer initialization in Tests.
         if (!this.appState.Headless)
@@ -239,6 +249,13 @@ public class ShellViewModel : ObservableRecipient
 
     public void ViewChanged()
     {
+        // The startup binding raises a selection change that changes nothing; without this
+        // check it warned "load a story first" at every launch (#1422, 2026-11-01).
+        if (SelectedView == null || SelectedView.Equals(CurrentView))
+        {
+            return;
+        }
+
         if (appState.CurrentDocument?.Model?.CurrentView == null || appState.CurrentDocument.Model.CurrentView.Count == 0)
         {
             Messenger.Send(
@@ -262,7 +279,7 @@ public class ShellViewModel : ObservableRecipient
             }
 
             appState.CurrentViewType = appState.CurrentDocument.Model.CurrentViewType;
-            appState.RightTappedNode = appState.CurrentDocument.Model.CurrentView[0];
+            // Selecting the new view's root also clears the old view's right-clicked node.
             TreeViewNodeClicked(appState.CurrentDocument.Model.CurrentView[0]);
         }
     }
@@ -278,8 +295,13 @@ public class ShellViewModel : ObservableRecipient
     {
         try
         {
+            var node = appState.RightTappedNode;
+            var inTrash = StoryNodeItem.RootNodeType(node) == StoryItemType.TrashCan;
+            var inExplorer = !inTrash && SelectedView == ViewList[0];
+            var inNarrator = !inTrash && !inExplorer;
+
             //Trash Can - View Hide all buttons except Empty Trash.
-            if (StoryNodeItem.RootNodeType(appState.RightTappedNode) == StoryItemType.TrashCan)
+            if (inTrash)
             {
                 ExplorerVisibility = Visibility.Collapsed;
                 NarratorVisibility = Visibility.Collapsed;
@@ -290,7 +312,7 @@ public class ShellViewModel : ObservableRecipient
             else
             {
                 //Explorer tree, show everything but empty trash and add section
-                if (SelectedView == ViewList[0])
+                if (inExplorer)
                 {
                     ExplorerVisibility = Visibility.Visible;
                     NarratorVisibility = Visibility.Collapsed;
@@ -307,6 +329,17 @@ public class ShellViewModel : ObservableRecipient
                     TrashButtonVisibility = Visibility.Collapsed;
                 }
             }
+
+            // Right-click menu items that apply to one node type only (#1422: a folder showed
+            // Add to Narrative, Convert to Scene and Convert to Problem). The toolbar menus keep
+            // the view-wide properties above.
+            var type = node?.Type;
+            DeleteElementVisibility = ToVisibility(inExplorer && node is { IsRoot: false });
+            AddToNarrativeVisibility = ToVisibility(inExplorer && type == StoryItemType.Scene);
+            ConvertToSceneVisibility = ToVisibility(inExplorer && type == StoryItemType.Problem);
+            ConvertToProblemVisibility = ToVisibility(inExplorer && type == StoryItemType.Scene);
+            RemoveFromNarrativeVisibility = ToVisibility(inNarrator && type == StoryItemType.Scene);
+            RestoreElementVisibility = ToVisibility(inTrash && type != StoryItemType.TrashCan);
         }
         catch (Exception e) //errors (is RightTappedNode null?
         {
@@ -335,6 +368,13 @@ public class ShellViewModel : ObservableRecipient
 
     public void ShowConnectionStatus()
     {
+        // Error reporting is the connection this reports on. A writer who declined it has no
+        // connection to make, so a warning at every startup would be wrong (#1422, 2026-11-01).
+        if (!Preferences.Model.ErrorCollectionConsent)
+        {
+            return;
+        }
+
         StatusMessage _msg;
         if (!Doppler.DopplerConnection | !Logger.ElmahLogging)
         {
@@ -528,6 +568,58 @@ public class ShellViewModel : ObservableRecipient
         set => SetProperty(ref _printNodeVisibility, value);
     }
 
+    // Right-click menu items that depend on the right-clicked node's type; set by ShowFlyoutButtons.
+
+    private Visibility _deleteElementVisibility;
+
+    public Visibility DeleteElementVisibility
+    {
+        get => _deleteElementVisibility;
+        set => SetProperty(ref _deleteElementVisibility, value);
+    }
+
+    private Visibility _addToNarrativeVisibility;
+
+    public Visibility AddToNarrativeVisibility
+    {
+        get => _addToNarrativeVisibility;
+        set => SetProperty(ref _addToNarrativeVisibility, value);
+    }
+
+    private Visibility _removeFromNarrativeVisibility;
+
+    public Visibility RemoveFromNarrativeVisibility
+    {
+        get => _removeFromNarrativeVisibility;
+        set => SetProperty(ref _removeFromNarrativeVisibility, value);
+    }
+
+    private Visibility _convertToSceneVisibility;
+
+    public Visibility ConvertToSceneVisibility
+    {
+        get => _convertToSceneVisibility;
+        set => SetProperty(ref _convertToSceneVisibility, value);
+    }
+
+    private Visibility _convertToProblemVisibility;
+
+    public Visibility ConvertToProblemVisibility
+    {
+        get => _convertToProblemVisibility;
+        set => SetProperty(ref _convertToProblemVisibility, value);
+    }
+
+    private Visibility _restoreElementVisibility;
+
+    public Visibility RestoreElementVisibility
+    {
+        get => _restoreElementVisibility;
+        set => SetProperty(ref _restoreElementVisibility, value);
+    }
+
+    private static Visibility ToVisibility(bool visible) => visible ? Visibility.Visible : Visibility.Collapsed;
+
     // Status Bar properties
 
     public readonly ObservableCollection<string> ViewList = new();
@@ -706,6 +798,9 @@ public class ShellViewModel : ObservableRecipient
             if (selectedItem is StoryNodeItem node)
             {
                 appState.CurrentNode = node;
+                // A selection ends any right-click: later menu, shortcut and tool commands act
+                // on this node, not on a node right-clicked earlier (#1422).
+                appState.RightTappedNode = null;
                 var element = outlineService.GetStoryElementByGuid(appState.CurrentDocument!.Model, node.Uuid);
                 switch (element.ElementType)
                 {
@@ -756,9 +851,10 @@ public class ShellViewModel : ObservableRecipient
                 }
 
                 appState.CurrentNode.IsExpanded = true;
+                CurrentNodeChanged?.Invoke(this, EventArgs.Empty);
             }
 
-            //Clears background of new nodes on navigation as well as the last node.
+            //Clears background of new nodes on navigation.
             if (clearHighlightCache)
             {
                 foreach (var item in NewNodeHighlightCache)
@@ -766,10 +862,7 @@ public class ShellViewModel : ObservableRecipient
                     item.Background = null;
                 }
 
-                if (LastClickedTreeviewItem != null)
-                {
-                    LastClickedTreeviewItem.Background = null;
-                }
+                NewNodeHighlightCache.Clear();
             }
         }
         catch (Exception e)
@@ -1181,6 +1274,8 @@ public class ShellViewModel : ObservableRecipient
         appState.CurrentNode.Parent = targetParent;
         ShowChange();
         Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} left to parent {appState.CurrentNode.Parent.Name}");
+        // Removing and re-inserting the node drops the tree selection; re-highlight it (#1422).
+        CurrentNodeChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private bool MoveLeftIsValid()
@@ -1278,6 +1373,8 @@ public class ShellViewModel : ObservableRecipient
         appState.CurrentNode.Parent = targetParent;
         ShowChange();
         Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} right to parent {appState.CurrentNode.Parent.Name}");
+        // Removing and re-inserting the node drops the tree selection; re-highlight it (#1422).
+        CurrentNodeChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private bool MoveRightIsValid()
@@ -1362,6 +1459,8 @@ public class ShellViewModel : ObservableRecipient
         appState.CurrentNode.Parent = targetParent;
         ShowChange();
         Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} up to parent {appState.CurrentNode.Parent.Name}");
+        // Removing and re-inserting the node drops the tree selection; re-highlight it (#1422).
+        CurrentNodeChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private bool MoveUpIsValid()
@@ -1433,6 +1532,8 @@ public class ShellViewModel : ObservableRecipient
 
         ShowChange();
         Logger.Log(LogLevel.Info, $"Moving {appState.CurrentNode.Name} down up to parent {appState.CurrentNode.Parent.Name}");
+        // Removing and re-inserting the node drops the tree selection; re-highlight it (#1422).
+        CurrentNodeChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public StoryNodeItem GetNextSibling(StoryNodeItem node)

@@ -206,7 +206,16 @@ public sealed class ScriptInterpreter
                 }
 
             case ScriptVerb.Click:
-                _options.Profile.Click(RequireDriver(), s.Target!);
+                if (s.Pointer)
+                {
+                    _options.Profile.Approach(RequireDriver(), s.Target!);
+                    RequireDriver().ClickPointer(s.Target!);
+                }
+                else
+                {
+                    _options.Profile.Click(RequireDriver(), s.Target!);
+                }
+
                 return currentStep;
             case ScriptVerb.DoubleClick:
                 RequireDriver().DoubleClickPointer(s.Target!);
@@ -334,7 +343,7 @@ public sealed class ScriptInterpreter
                     while (true)
                     {
                         var state = d.WaitUntilFound(s.Target!);
-                        var actual = string.IsNullOrEmpty(state.Text) ? state.Name : state.Text;
+                        var actual = state.Text ?? state.Name; // an empty field reads empty, not as its label (#1422)
                         if (string.Equals(NormalizeText(actual), expected, StringComparison.Ordinal))
                         {
                             return currentStep;

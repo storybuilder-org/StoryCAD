@@ -51,7 +51,8 @@ public class SceneViewModel : ElementViewModelBase, INavigable, ISaveable, IRelo
             ViewpointList = _lists["Viewpoint"];
             SceneTypeList = _lists["SceneType"];
             ScenePurposeList = _lists["ScenePurpose"];
-            foreach (var purpose in ScenePurposeList)
+            // ListData puts a blank " " first for ComboBox binding; a check box list must skip it.
+            foreach (var purpose in ScenePurposeList.Where(p => !string.IsNullOrWhiteSpace(p)))
             {
                 ScenePurposes.Add(new StringSelection(purpose));
             }
@@ -524,7 +525,10 @@ public class SceneViewModel : ElementViewModelBase, INavigable, ISaveable, IRelo
         var appState = Ioc.Default.GetRequiredService<AppState>();
         Characters = _appState.CurrentDocument!.Model.StoryElements.Characters;
         Settings = _appState.CurrentDocument.Model.StoryElements.Settings;
-        CharacterList = _appState.CurrentDocument.Model.StoryElements.Characters; // Populate CharacterList here
+        // The cast list leaves out the "(none)" drop-down placeholder (Guid.Empty):
+        // it is not a character and must not get a cast check box.
+        CharacterList = new ObservableCollection<StoryElement>(
+            Characters.Where(c => c.Uuid != Guid.Empty));
 
         Uuid = Model.Uuid;
         Name = Model.Name;
@@ -553,7 +557,7 @@ public class SceneViewModel : ElementViewModelBase, INavigable, ISaveable, IRelo
         // this Scene.
         // If a purpose is saved in the model, set it as selected.
         ScenePurposes.Clear();
-        foreach (var purpose in ScenePurposeList)
+        foreach (var purpose in ScenePurposeList.Where(p => !string.IsNullOrWhiteSpace(p)))
         {
             if (Model.ScenePurpose.Contains(purpose))
             {
@@ -727,24 +731,19 @@ public class SceneViewModel : ElementViewModelBase, INavigable, ISaveable, IRelo
     ///     to all characters (and vice versa.) The CharactersList is used to add or
     ///     remove cast members.
     /// </summary>
-    public void SwitchCastView(object sender, RoutedEventArgs e)
+    /// <remarks>
+    ///     Posts no status message: Toggled also fires when LoadModel sets AllCharacters for a scene
+    ///     with no cast, so a message here showed on every such scene with no cast change (#1422).
+    ///     The switch's own On/Off text already shows which list is displayed.
+    /// </remarks>
+    public void SwitchCastView(object sender, RoutedEventArgs e) => SetCastView(((ToggleSwitch)sender).IsOn);
+
+    internal void SetCastView(bool allCharacters)
     {
         var _changeState = _changeable;
         _changeable = false;
-        var toggleSwitch = sender as ToggleSwitch;
-        _allCharacters = toggleSwitch.IsOn;
+        _allCharacters = allCharacters;
         InitializeCharacterList();
-        if (AllCharacters)
-        {
-            Messenger.Send(
-                new StatusChangedMessage(new StatusMessage("Add / Remove Cast Members", LogLevel.Info, true)));
-        }
-        else
-        {
-            Messenger.Send(
-                new StatusChangedMessage(new StatusMessage("Show Selected Cast Members", LogLevel.Info, true)));
-        }
-
         _changeable = _changeState;
     }
 

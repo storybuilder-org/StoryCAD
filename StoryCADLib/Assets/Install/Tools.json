@@ -7,8 +7,8 @@
       "An innocent man is being lynched",
       "Bar fight turns into brawl",
       "Bounty hunter pursues outlaw for reward",
-      "Calvary officer attacks innocent Indians",
-      "Calvary pursue renegade Indians",
+      "Cavalry officer attacks innocent Indians",
+      "Cavalry pursue renegade Indians",
       "Cattle are being stolen from range",
       "Character is accused as card shark",
       "Character is challenged in bar",
@@ -34,7 +34,7 @@
       "Two ranchers feud over land",
       "Westerner sets out for revenge"
     ],
-    "Suspensful Moments": [
+    "Suspenseful Moments": [
       "The murderer is hiding in the closet",
       "The heroine\u0027s doesn\u0027t know her plans are known",
       "The phone is out",
@@ -42,7 +42,7 @@
       "The rescuers won\u0027t arrive in time",
       "The hero doesn\u0027t know his ally is secretly an enemy",
       "Others know the truth that the protagonist doesn\u0027t",
-      "A person wanders unknowlingly toward a danger",
+      "A person wanders unknowingly toward a danger",
       "She doesn\u0027t know the documents are forged",
       "The enemy intercepts the hero\u0027s message"
     ],
@@ -51,7 +51,7 @@
       "The pursuer runs out of fuel",
       "A bystander (witness) interferes",
       "The pursuer hits someone and must stop",
-      "The pursuer takes the wong turn",
+      "The pursuer takes the wrong turn",
       "The road (bridge) is out"
     ],
     "Twists and Turns": [
@@ -313,11 +313,11 @@
       "Trying to keep up with a machine",
       "Trying to get rid of something",
       "Being discovered hiding",
-      "Getting cought red-handed",
+      "Getting caught red-handed",
       "Dating two people at once",
       "Trying to keep two people from meeting",
       "Having to live up to a boast",
-      "Trying to explain a past fax paux",
+      "Trying to explain a past faux pas",
       "Changing roles with someone else",
       "Living in altered circumstances",
       "Love/hate romance (Taming the Shrew)"
@@ -331,7 +331,7 @@
       "The police join the chase",
       "The pursued goes down a dead-end street (canyon)",
       "The pursuer takes the wrong road",
-      "The chase goes though someone\u0027s house (office)",
+      "The chase goes through someone\u0027s house (office)",
       "The chase leads into an ambush",
       "The chase crosses the path of a moving train (boat)"
     ],
@@ -351,14 +351,14 @@
       "The secret agent\u0027s identity will be revealed",
       "A secret will be revealed",
       "The wife (husband, child) will leave",
-      "An assisination will take place",
+      "An assassination will take place",
       "The plane (bus, boat) will leave"
     ],
     "Climactic Moments": [
       "Hero overcomes the villain in combat",
       "Hero finds the answer to the problem",
       "Hero faces her inner fears and prevails",
-      "Hero discovers openent\u0027s identity",
+      "Hero discovers opponent\u0027s identity",
       "Protagonist learns of the mistake",
       "Hero escapes captivity",
       "Hero learns of the trap set for him",
@@ -390,12 +390,12 @@
       {
         "key": "Q01",
         "topic": "Structure",
-        "question": "Do you understand the story type, it's lengths, intended effect, and potential markets?"
+        "question": "Do you understand the story type, its lengths, intended effect, and potential markets?"
       },
       {
         "key": "Q02",
         "topic": "Structure",
-        "question": "Have you given sufficient thought to Viewpoint? Point of view is the most important single structural decision of your story, the voice through which you tell your tale. Not only person, but tense, tone (ironic, bitter, etc), reliability, the POV character's sophistication or naivity- endless variations are possible. POV choice should be made early, as it can affect every scene in your story."
+        "question": "Have you given sufficient thought to Viewpoint? Point of view is the most important single structural decision of your story, the voice through which you tell your tale. Not only person, but tense, tone (ironic, bitter, etc), reliability, the POV character's sophistication or naivety- endless variations are possible. POV choice should be made early, as it can affect every scene in your story."
       },
       {
         "key": "Q03",
@@ -525,7 +525,7 @@
       },
       {
         "key": "Q01",
-        "question": "Does this scene follow causally from the preceeding scene?",
+        "question": "Does this scene follow causally from the preceding scene?",
         "topic": "Scene Tab"
       },
       {
@@ -540,7 +540,7 @@
       },
       {
         "key": "Q06",
-        "question": "Should you plan to tell the current plot point as a scene, or as foreshortened prose (narrative summary)? Scenes are generally preferable; they're more visual and dramatic, and follow the 'show, don't tell' dictim. Foreshortened prose provides lots of information and compresses action, time or space, but is easier for the reader to ignore.",
+        "question": "Should you plan to tell the current plot point as a scene, or as foreshortened prose (narrative summary)? Scenes are generally preferable; they're more visual and dramatic, and follow the 'show, don't tell' dictum. Foreshortened prose provides lots of information and compresses action, time or space, but is easier for the reader to ignore.",
         "topic": "Scene Tab"
       },
       {
@@ -560,7 +560,7 @@
       },
       {
         "key": "Q01",
-        "question": "What is the protagonist trying to accomplish in this scene? What's his goal? How does it relate to the story or prolem goal? What's the opposition? What's the antagonist trying to accomplish? Have you used GMC (Goal, Motivation, Conflict) to develop this scene?",
+        "question": "What is the protagonist trying to accomplish in this scene? What's his goal? How does it relate to the story or problem goal? What's the opposition? What's the antagonist trying to accomplish? Have you used GMC (Goal, Motivation, Conflict) to develop this scene?",
         "topic": "Conflict Tab"
       },
       {
@@ -732,7 +732,7 @@
         },
         {
           "name": "Act II -  Rising Action",
-          "notes": "The second act is, simply, the middle part which connects Act I (the question) with Act III (the answer.)  If the story problem is too easily solved,  there\u0027s nothing to entertain the reader. Therefore the rising action consists of one or more obstacles which prevent the protagonist from obtaining his story goal. Providing the obstacle is the the job of the antagonist. The number of obstacles depends on the story form."
+          "notes": "The second act is, simply, the middle part which connects Act I (the question) with Act III (the answer.)  If the story problem is too easily solved,  there\u0027s nothing to entertain the reader. Therefore the rising action consists of one or more obstacles which prevent the protagonist from obtaining his story goal. Providing the obstacle is the job of the antagonist. The number of obstacles depends on the story form."
         },
         {
           "name": "First Obstacle",
@@ -752,7 +752,7 @@
         },
         {
           "name": "Climax",
-          "notes": "This is the point in which the story problem is solved, one way or another. Either the protagonist succeeds in obtaining her goal, or she fails, or she decides that the goal isn\u0027t worth obtaining any more, or she discovers something that changes the situation- usually =something about herself. It\u0027s important that your protagonist takes her fate in her own hands and solve, or try to solve, her own problem. Having the calvary ride up at the last minute is no longer acceptable."
+          "notes": "This is the point in which the story problem is solved, one way or another. Either the protagonist succeeds in obtaining her goal, or she fails, or she decides that the goal isn\u0027t worth obtaining any more, or she discovers something that changes the situation- usually something about herself. It\u0027s important that your protagonist takes her fate in her own hands and solve, or try to solve, her own problem. Having the calvary ride up at the last minute is no longer acceptable."
         },
         {
           "name": "Denouement",
@@ -778,7 +778,7 @@
         },
         {
           "name": "Pinch I (5)",
-          "notes": "Apply pessure. Something goes wrong. Peace is destroyed. Bad guys attack. Introduce the villain."
+          "notes": "Apply pressure. Something goes wrong. Peace is destroyed. Bad guys attack. Introduce the villain."
         },
         {
           "name": "Midpoint (3)",
@@ -790,7 +790,7 @@
         },
         {
           "name": "Plot Turn II (7)",
-          "notes": "Move the story from midpoint to the end. You optain the thing you need to win- even if you don\u0027t realize it. \u0027The power is in you.\u0027"
+          "notes": "Move the story from midpoint to the end. You obtain the thing you need to win- even if you don\u0027t realize it. \u0027The power is in you.\u0027"
         },
         {
           "name": "Resolution (1)",
@@ -864,13 +864,13 @@
         }
       ],
       "name": "Save The Cat",
-      "notes": "Save the Cat is a popular story structure template created by screenwriter Blake Snyder. It consists of 15 key plot points (or \"beats\") that help writers craft engaging and well-paced stories. This structure can be applied to novels, screenplays, and other narrative forms. The percentages indicate approximately where (by wordcount) in the  narrative each beat should take place."
+      "notes": "Save the Cat is a popular story structure template created by screenwriter Blake Snyder. It consists of 15 key plot points (or \"beats\") that help writers craft engaging and well-paced stories. This structure can be applied to novels, screenplays, and other narrative forms. The percentages indicate approximately where (by wordcount) in the narrative each beat should take place."
     },
     {
       "scenes": [
         {
           "name": "Recognition of Goal (A)",
-          "notes": "A strong character finds herself in a bad situation with a\nworthwhile goal and a good reason for achieving it."
+          "notes": "A strong character finds herself in a bad situation with a worthwhile goal and a good reason for achieving it."
         },
         {
           "name": "Initial Barrier (B)",
@@ -878,7 +878,7 @@
         },
         {
           "name": "Low Point (C)",
-          "notes": "This is the protagonist\u0027s initial reaction to the barrier,\nand an emotional low point."
+          "notes": "This is the protagonist\u0027s initial reaction to the barrier, and an emotional low point."
         },
         {
           "name": "Barrier Reversal (D)",
@@ -1036,7 +1036,7 @@
         }
       ],
       "name": "Save The Cat (Mini)",
-      "notes": "This is a simplified beatsheet based on the Save the Cat beatsheet created by screenwriter Blake Snyder. It focuses on the most crucial elements, making it more suitable for subplots and complications. The percentages indicate approximately where (by wordcount) in the  narrative each beat should take place."
+      "notes": "This is a simplified beatsheet based on the Save the Cat beatsheet created by screenwriter Blake Snyder. It focuses on the most crucial elements, making it more suitable for subplots and complications. The percentages indicate approximately where (by wordcount) in the narrative each beat should take place."
     },
     {
       "scenes": [
@@ -1346,7 +1346,7 @@
         },
         {
           "name": "Magic Realism",
-          "notes": "An otherwise contemporary world in which magic is treated as an ordinary occupance, more or less like any form of engineering or science."
+          "notes": "An otherwise contemporary world in which magic is treated as an ordinary occurrence, more or less like any form of engineering or science."
         },
         {
           "name": "Ring Trilogy Homages",
@@ -1383,7 +1383,7 @@
         },
         {
           "name": "Androids",
-          "notes": "Artificial men. There are two guises for these creations (sometimes found in the same creature): Frankenstein and Pinnochio."
+          "notes": "Artificial men. There are two guises for these creations (sometimes found in the same creature): Frankenstein and Pinocchio."
         },
         {
           "name": "Ansible",
@@ -1415,7 +1415,7 @@
         },
         {
           "name": "Exponential machines",
-          "notes": "For large-scale projects, machines could self-replicate- build copies of themselves. For REALLY big projects,  Such as making artificial planets, you would make machines to make machines to make machines."
+          "notes": "For large-scale projects, machines could self-replicate- build copies of themselves. For REALLY big projects, such as making artificial planets, you would make machines to make machines to make machines."
         },
         {
           "name": "Galactic civilizations",
@@ -1447,7 +1447,7 @@
         },
         {
           "name": "Journey to a strange land",
-          "notes": "Uses the quest or trek story format to describe a SF setting. The setting may be an alien planet, our world in the distant future, a parallel world or time, a fantasy world, etc.. In any case the focus is on the fantastic landscape."
+          "notes": "Uses the quest or trek story format to describe a SF setting. The setting may be an alien planet, our world in the distant future, a parallel world or time, a fantasy world, etc. In any case the focus is on the fantastic landscape."
         },
         {
           "name": "Interstellar travel",
@@ -1518,189 +1518,189 @@
       "scenes": [
         {
           "name": "Adventure",
-          "notes": "Adventures start with the protagonist leaving the normal world\nof his home because of some motivating incident. This should\nhappen quickly.\nThe story question is usually simple: Will she find a husband?\nWill he find his missing father?  Often adventure stories\nwill include elements of romance- which is always an adventure.\nThe adventures that make up an adventure story are the\ncomplications of the middle story. It\u0027s essential to move\naround a lot in these tales, but each incident must still\nbe plausible and follow from the previous one.\nThe complications must be complications, and not just\npostcards from far-away places. The protagonist\u0027s goal should\nstill drive the plot.\nResearch is important in adventure plots; the more exotic\nthe locales and people encountered, the more the need to\nlook and sound authentic.\nThe resolution phase must answer the story question posed\nin the opening. But just as the story problem itself is often\nuncomplicated, so is there no need for complicated resolutions.\nIn adventure stories, it\u0027s the journey itself that\u0027s important."
+          "notes": "Adventures start with the protagonist leaving the normal world of his home because of some motivating incident. This should happen quickly.\nThe story question is usually simple: Will she find a husband? Will he find his missing father?  Often adventure stories will include elements of romance- which is always an adventure. The adventures that make up an adventure story are the complications of the middle story. It\u0027s essential to move around a lot in these tales, but each incident must still be plausible and follow from the previous one.\nThe complications must be complications, and not just postcards from far-away places. The protagonist\u0027s goal should still drive the plot.\nResearch is important in adventure plots; the more exotic the locales and people encountered, the more the need to look and sound authentic.\nThe resolution phase must answer the story question posed in the opening. But just as the story problem itself is often uncomplicated, so is there no need for complicated resolutions. In adventure stories, it\u0027s the journey itself that\u0027s important."
         }
       ],
       "name": "Adventure",
-      "notes": "The Adventure story is similar to the Quest, but instead of\nfocusing on the person making the journey, the focus is\non the journey itself. Adventure stories should be full of\nof strange settings, characters, and situations- of\nvicarious thrills. Adventure is never found at home, or\nif it is, home turns out to be a stranger place than first imagined.\nThe protagonist must seek adventure, or accept it when it\u0027s\nthrust upon him. Character growth is not key to this masterplot;\nwhat\u0027s important is what happens next."
+      "notes": "The Adventure story is similar to the Quest, but instead of focusing on the person making the journey, the focus is on the journey itself. Adventure stories should be full of strange settings, characters, and situations- of vicarious thrills. Adventure is never found at home, or if it is, home turns out to be a stranger place than first imagined. The protagonist must seek adventure, or accept it when it\u0027s thrust upon him. Character growth is not key to this masterplot; what\u0027s important is what happens next."
     },
     {
       "scenes": [
         {
           "name": "Ascension",
-          "notes": "The force which drives the protagonist, such as ego or ambition,\nmolds the events of the story: nothing and no one can stand in\nher way. But achieving her external goals is not enough; if\nthe protagonist doesn\u0027t tame her demons, they will overwhelm\nher."
+          "notes": "The force which drives the protagonist, such as ego or ambition, molds the events of the story: nothing and no one can stand in her way. But achieving her external goals is not enough; if the protagonist doesn\u0027t tame her demons, they will overwhelm her."
         },
         {
           "name": "Descent",
-          "notes": "The forces which motivate the protagonist, such as ego, ambition,\nor aggression, aren\u0027t changed by character growth and development.\nThey ultimately serve as the protagonist\u0027s undoing. These are\ntragedies, stories with unhappy endings. The protagonist is\neither lost, or evil, but either way, comes to a bad end.\nThe failure is at the moment of crisis."
+          "notes": "The forces which motivate the protagonist, such as ego, ambition, or aggression, aren\u0027t changed by character growth and development. They ultimately serve as the protagonist\u0027s undoing. These are tragedies, stories with unhappy endings. The protagonist is either lost, or evil, but either way, comes to a bad end.\nThe failure is at the moment of crisis."
         },
         {
           "name": "Rise and Fall",
-          "notes": "The story may combine both Ascension and Descent. The\nprotagonist\u0027s drive and determination seemingly give her\nthe goals she seeks, but the very traits which put her goals\nin her grasp also lead to her destruction, because unless\nthey\u0027re controlled, the continue to burn."
+          "notes": "The story may combine both Ascension and Descent. The protagonist\u0027s drive and determination seemingly give her the goals she seeks, but the very traits which put her goals in her grasp also lead to her destruction, because unless they\u0027re controlled, they continue to burn."
         }
       ],
       "name": "Ascent/Descent",
-      "notes": "These are stories of the protagonist\u0027s rise to power.\nThey\u0027re character based, and\nthe protagonist must be larger than life. She is at odds\nwith her environment, and wants to change it. Character\ntraits such as ambition drive these stories.\nAscent may also lead to Descent, unless the protagonist\ngrows and changes."
+      "notes": "These are stories of the protagonist\u0027s rise to power. They\u0027re character based, and the protagonist must be larger than life. She is at odds with her environment, and wants to change it. Character traits such as ambition drive these stories.\nAscent may also lead to Descent, unless the protagonist grows and changes."
     },
     {
       "scenes": [
         {
           "name": "Discovery",
-          "notes": "These are character-driven plots, and the protagonist must learn\nsomething about himself, about who he is and what matters to him.\nThis is a common plot in children\u0027s literature; all coming-of-age\nstories are Discovery plots.\nIn Discovery stories, it\u0027s important to allow the reader to\ndiscover for himself what it is the protagonist has learned.\nAvoid the urge to preach.\nOften the protagonist doesn\u0027t want to make the discovery.\nHe may think his life is fine the way it is, or the discovery\nmay be a painful one (often Discovery means facing something we\u0027ve\nknown all along.)\nThe opening story shows the protagonist prior to the\ndiscovery, but sets the forces in motion which lead to it.\nIn the middle story the protagonist is forced to confront the\nthing about himself that he needs to learn.\nThe final act begins with his learning the lesson. The\nconclusion may either show that he\u0027s made the discovery\nby some token action, or suggest his resolve to act\ndifferently (based on what he\u0027s learned) in the future."
+          "notes": "These are character-driven plots, and the protagonist must learn something about himself, about who he is and what matters to him. This is a common plot in children\u0027s literature; all coming-of-age stories are Discovery plots.\nIn Discovery stories, it\u0027s important to allow the reader to discover for himself what it is the protagonist has learned.\nAvoid the urge to preach.\nOften the protagonist doesn\u0027t want to make the discovery.\nHe may think his life is fine the way it is, or the discovery may be a painful one (often Discovery means facing something we\u0027ve known all along.)\nThe opening story shows the protagonist prior to the discovery, but sets the forces in motion which lead to it.\nIn the middle story the protagonist is forced to confront the thing about himself that he needs to learn.\nThe final act begins with his learning the lesson. The conclusion may either show that he\u0027s made the discovery by some token action, or suggest his resolve to act differently (based on what he\u0027s learned) in the future."
         }
       ],
       "name": "Discovery",
-      "notes": "The Discovery story is character based, and centers on a person\u0027s\nneed to understand herself. Typically events force a change\nupon the protagonist, whose attempts to return to the old self.\nWhen the attempts fail, she undergoes a revelation and achieves\ngreater self awareness."
+      "notes": "The Discovery story is character based, and centers on a person\u0027s need to understand herself. Typically events force a change upon the protagonist, whose attempts to return to the old self. When the attempts fail, she undergoes a revelation and achieves greater self awareness."
     },
     {
       "scenes": [
         {
           "name": "Escape",
-          "notes": "Escape plots differ from rescue plots largely in viewpoint;\nthe victim perpetrates his own escape, rather than waiting to\nto be rescued. As such, he\u0027s the protagonist.\nThe opening establishes the need for escape, by showing the\nimprisonment. The victim may be guilty or innocent, but if he\u0027s\nguilty, either the imprisonment will be shown to be\nunjustly harsh, or the story will be a test of wills between\na strong jailor and the equally strong prisoner. The story\nquestion is simple: will he escape?\nIf there is an attempt to escape in the opening phase, it\u0027s\nfeeble and is either thwarted or the victim\u0027s easily recaptured.\nEscape should be shown to not be easy.\nThe middle story deals with planning to escape. The\ncomplications are things which thwart these plans.\nThe resolution phase is the escape itself. Normally the plans\nfrom the second phase fall apart, and things are out of control.\nThis is the most physically active phase of the story."
+          "notes": "Escape plots differ from rescue plots largely in viewpoint; the victim perpetrates his own escape, rather than waiting to be rescued. As such, he\u0027s the protagonist.\nThe opening establishes the need for escape, by showing the imprisonment. The victim may be guilty or innocent, but if he\u0027s guilty, either the imprisonment will be shown to be unjustly harsh, or the story will be a test of wills between a strong jailor and the equally strong prisoner. The story question is simple: will he escape?\nIf there is an attempt to escape in the opening phase, it\u0027s feeble and is either thwarted or the victim\u0027s easily recaptured. Escape should be shown to not be easy.\nThe middle story deals with planning to escape. The complications are things which thwart these plans.\nThe resolution phase is the escape itself. Normally the plans from the second phase fall apart, and things are out of control. This is the most physically active phase of the story."
         }
       ],
       "name": "Escape",
-      "notes": "The protagonist is literally trapped, and wants out. Escape is similar\nto the Rescue masterplot, but in this plot the victim is the\ncenter of the action, and works\nto free himself. Often (but not always) the victim is unfairly\nimprisoned. Justly punished or not, the focus of Escape is on the\nescape attempt itself."
+      "notes": "The protagonist is literally trapped, and wants out. Escape is similar to the Rescue masterplot, but in this plot the victim is the center of the action, and works to free himself. Often (but not always) the victim is unfairly imprisoned. Justly punished or not, the focus of Escape is on the escape attempt itself."
     },
     {
       "scenes": [
         {
           "name": "Forbidden Love",
-          "notes": "The forbidden love may be a case of adultery, a homosexual\naffair, incest, age differences or some other type of proscribed\nromance. In any case, there must be some social force against\nthe liaison. The lovers must ignore this social pressure.\nThe opening phase defines the forbidden relationship\nas to what law or convention is violated, and how the various\nparties- the lovers and those around them- react to the outrage.\nThe middle story focuses on the results of breaking convention.\nSocial forces exert pressure on the lovers and cause problems\nfor them which may start to break them apart. The complications\nmust stem directly from the love affair.\nThe ending takes the affair to its conclusion. Many of the\nendings are unhappy, with the lovers separated, dead, or\nabandoned."
+          "notes": "The forbidden love may be a case of adultery, a homosexual affair, incest, age differences or some other type of proscribed romance. In any case, there must be some social force against the liaison. The lovers must ignore this social pressure.\nThe opening phase defines the forbidden relationship as to what law or convention is violated, and how the various parties- the lovers and those around them- react to the outrage. The middle story focuses on the results of breaking convention. Social forces exert pressure on the lovers and cause problems for them which may start to break them apart. The complications must stem directly from the love affair.\nThe ending takes the affair to its conclusion. Many of the endings are unhappy, with the lovers separated, dead, or abandoned."
         }
       ],
       "name": "Forbidden Love",
-      "notes": "Love is a powerful emotion, but not all love is acceptable to society.\nWhen lovers are confronted with social strictures for the\nsake of their love, strong stories can result. The story may\nreinforce the taboos as to when and where love is proper. Most\nimpossible loves end in tragedy. Or the story may show that love\ncan overcome any obstacle.\nForbidden love can center around any unconventional behavior,\nwith adultery the most common example."
+      "notes": "Love is a powerful emotion, but not all love is acceptable to society. When lovers are confronted with social strictures for the sake of their love, strong stories can result. The story may reinforce the taboos as to when and where love is proper. Most impossible loves end in tragedy. Or the story may show that love can overcome any obstacle.\nForbidden love can center around any unconventional behavior, with adultery the most common example."
     },
     {
       "scenes": [
         {
           "name": "Love",
-          "notes": "Unlike Forbidden Love, the lovers in a love plot will normally\nhave a happy ending. But complications must stand between them,\nand it must take dedication and perseverance to come to that\nhappy ending.\nThe characters of the lovers should be defined to provide\nsome built-in conflict. They might be from different sides of\nthe tracks, have different external goals, be physically\ndifferent, have differing degrees of education, come from\ndifferent cultural groups, etc.\nNormally one of the characters will be more aggressive about\nthe romance, and the other more passive. The role of aggressor\ncan change in  mid-romance.\nThe middle story consists of the obstacles to love. There\nare only so many of these, so the characters themselves, and\nthe emotions themselves, are more important, and must be\nstressed.\nThe ending depends on the characters. If they are worthy,\nand have endured the obstacles to romance well enough, they\nshould persevere. But a happy ending forced on the wrong\ncharacters won\u0027t work."
+          "notes": "Unlike Forbidden Love, the lovers in a love plot will normally have a happy ending. But complications must stand between them, and it must take dedication and perseverance to come to that happy ending.\nThe characters of the lovers should be defined to provide some built-in conflict. They might be from different sides of the tracks, have different external goals, be physically different, have differing degrees of education, come from different cultural groups, etc.\nNormally one of the characters will be more aggressive about the romance, and the other more passive. The role of aggressor can change in mid-romance.\nThe middle story consists of the obstacles to love. There are only so many of these, so the characters themselves, and the emotions themselves, are more important, and must be stressed.\nThe ending depends on the characters. If they are worthy, and have endured the obstacles to romance well enough, they should persevere. But a happy ending forced on the wrong characters won\u0027t work."
         }
       ],
       "name": "Love",
-      "notes": "True love is hard to find, and harder to hold on to.\nThe obstacles which\ncan keep lovers apart are the grist for this masterplot\u0027s mill.\nThe obstacle may be some incompatibility between the lovers,\na misunderstanding or situation that keeps them from consummating\ntheir affair, or it may be a rival suitor. Although the obstacles\nto love are the essence of the plot, the real key to Love stories\nis the lovers; the chemistry must be right.\nNot all Love stories have happy endings."
+      "notes": "True love is hard to find, and harder to hold on to.\nThe obstacles which can keep lovers apart are the grist for this masterplot\u0027s mill. The obstacle may be some incompatibility between the lovers, a misunderstanding or situation that keeps them from consummating their affair, or it may be a rival suitor. Although the obstacles to love are the essence of the plot, the real key to Love stories is the lovers; the chemistry must be right.\nNot all Love stories have happy endings."
     },
     {
       "scenes": [
         {
           "name": "Metamorphosis",
-          "notes": "The changeling is usually the protagonist. His story is the\nattempt to change back to human form, and the story question\nis whether or not he will succeed. If the transformation is\ncaused by evil, the protagonist must have a chance at redemption.\nIf the changeling is cast as the antagonist, there\u0027s little\nchance of redemption, but the curse may be ended by his death\n(which he may long for.)\nThe story question is then whether or not he will be defeated\nand destroyed.\nThe story is largely concerned with the nature of the metamorph,\nwith his character. The transformation is symbolic, and\nwhat he changes into is important for what it represents.\nThe transformation may have taken place earlier, but the story is\nabout the journey back to humanity, and it starts near the\nbeginning of the journey.\nThe opening phase establishes the transformation itself. The\nmetamorphosis is usually the result of a curse of some sort.\nOften the protagonist doesn\u0027t initially understand what\u0027s\nhappened to him.\nThe middle story concentrates on the struggle to return to\nhuman form. The opposition to that return is the antagonist,\nwho is also a force for change, destroying the status quo of\nthe curse (otherwise the changeling might stay transformed.)\nAt the story opening the protagonist and antagonist are far\napart, but in the middle story they move toward one another.\nWhether the changeling returns to human form or is destroyed,\npart of the story is the increased understanding of his\ntransformation.\nThe resolution either shows the changeling returned to his\noriginal state or killed."
+          "notes": "The changeling is usually the protagonist. His story is the attempt to change back to human form, and the story question is whether or not he will succeed. If the transformation is caused by evil, the protagonist must have a chance at redemption. If the changeling is cast as the antagonist, there\u0027s little chance of redemption, but the curse may be ended by his death (which he may long for.)\nThe story question is then whether or not he will be defeated and destroyed.\nThe story is largely concerned with the nature of the metamorph, with his character. The transformation is symbolic, and what he changes into is important for what it represents.\nThe transformation may have taken place earlier, but the story is about the journey back to humanity, and it starts near the beginning of the journey.\nThe opening phase establishes the transformation itself. The metamorphosis is usually the result of a curse of some sort. Often the protagonist doesn\u0027t initially understand what\u0027s happened to him.\nThe middle story concentrates on the struggle to return to human form. The opposition to that return is the antagonist, who is also a force for change, destroying the status quo of the curse (otherwise the changeling might stay transformed.)\nAt the story opening the protagonist and antagonist are far apart, but in the middle story they move toward one another. Whether the changeling returns to human form or is destroyed, part of the story is the increased understanding of his transformation.\nThe resolution either shows the changeling returned to his original state or killed."
         }
       ],
       "name": "Metamorphosis",
-      "notes": "Metamorphosis is a change in form or appearance. The change is\nfrom animal or monster to human, or vice versa,\nusually as a result of a curse. Metamorphosis connects\nus with the animal side of our natures, and\nwith the multidimensional side of our personalities. The changeling\nseeks to be whole and human; the cure is usually love."
+      "notes": "Metamorphosis is a change in form or appearance. The change is from animal or monster to human, or vice versa, usually as a result of a curse. Metamorphosis connects us with the animal side of our natures, and with the multidimensional side of our personalities. The changeling seeks to be whole and human; the cure is usually love."
     },
     {
       "scenes": [
         {
           "name": "Quest",
-          "notes": "The quest plot begins by showing the start of the odyssey.\nThe journey usually begins at home, and the story\u0027s\nopening shows the protagonist at home.\nAn event, or some inner longing, compels the protagonist to action.\nBut those first tentative steps, aren\u0027t enough.\nThe protagonist must be irrevocably committed to the quest.\nThe first incident on the quest should serve to remove all choices\nabout going back. Any doubts are eliminated. At the beginning,\nthe protagonist may have had only a vague notion of what he\nwants to do. This first incident will give him a specific idea of\nwhat he wants to accomplish. The character\u0027s initial motivation\nshould now be even stronger.\nThe protagonist may receive assistance in the form of travelling\ncompanions or a character offering support and guidance- a mentor.\nBoth of these types of allies are usually brought into the story\nlate in the first act.\nThe hero must be shown to be worthy of winning the goal. Only\nserious hurdles will test your protagonist sufficiently to change him,\nand in a quest plot, the protagonist must change for the better or worse.\nAll quests are ultimately inner journeys, and the new awareness must be\nborn in him as a result of the conflict.\nAs with Adventure plots, the quest contains built-in movement.\nThe heroine must go after the prize she seeks; it won\u0027t come to\nher. This offers opportunities for a wide range of settings.\nThe protagonist should move freely, and the middle story is where\nthis movement is played out.\nThere are three possible outcomes for quests: the protagonist\nachieves his goal, he fails to achieve it, or he abandons the\nquest. But since the Quest is really an inner journey, the\noutcome must stem from the change which occurs in the protagonist\u0027s\nnature as a result of the journey."
+          "notes": "The quest plot begins by showing the start of the odyssey.\nThe journey usually begins at home, and the story\u0027s opening shows the protagonist at home.\nAn event, or some inner longing, compels the protagonist to action.\nBut those first tentative steps, aren\u0027t enough.\nThe protagonist must be irrevocably committed to the quest.\nThe first incident on the quest should serve to remove all choices about going back. Any doubts are eliminated. At the beginning, the protagonist may have had only a vague notion of what he wants to do. This first incident will give him a specific idea of what he wants to accomplish. The character\u0027s initial motivation should now be even stronger.\nThe protagonist may receive assistance in the form of travelling companions or a character offering support and guidance- a mentor.\nBoth of these types of allies are usually brought into the story late in the first act.\nThe hero must be shown to be worthy of winning the goal. Only serious hurdles will test your protagonist sufficiently to change him, and in a quest plot, the protagonist must change for the better or worse. All quests are ultimately inner journeys, and the new awareness must be born in him as a result of the conflict.\nAs with Adventure plots, the quest contains built-in movement.\nThe heroine must go after the prize she seeks; it won\u0027t come to her. This offers opportunities for a wide range of settings.\nThe protagonist should move freely, and the middle story is where this movement is played out.\nThere are three possible outcomes for quests: the protagonist achieves his goal, he fails to achieve it, or he abandons the quest. But since the Quest is really an inner journey, the outcome must stem from the change which occurs in the protagonist\u0027s nature as a result of the journey."
         }
       ],
       "name": "Quest",
-      "notes": "The Quest plot is the protagonist\u0027s search\nfor an object. It may be a person,\na place (Shangrila), or a tangible\nor intangible thing (gold, immortality.)\nThe object of the search is perceived\nby the protagonist as vitally important.\nHe is shaped by the quest and his success or\nfailure in obtaining the object."
+      "notes": "The Quest plot is the protagonist\u0027s search for an object. It may be a person, a place (Shangrila), or a tangible or intangible thing (gold, immortality.)\nThe object of the search is perceived by the protagonist as vitally important.\nHe is shaped by the quest and his success or failure in obtaining the object."
     },
     {
       "scenes": [
         {
           "name": "Pursuit",
-          "notes": "The opening establishes who\u0027s chasing who, which one is\nthe protagonist, and what\u0027s at stake if caught (prison, death,\netc.)  As always, the contest should be balanced, so there\u0027s\na real chance of either escape or getting caught. Some motivating\nincident gets the chase started.\nThe middle story is the chase itself. Complications, setbacks,\nand reversals are the essence of the chase story. Pursuit\nplots rely on quick action and lots of it. The action must be\nunpredictable and keep the audience off balance. Confine the\ncharacters to limited territory, such as a ship, a building,\nor a train, to cut off escape routes and heighten tension.\nThe ending resolves the pursuit in one of two ways: capture\nor escape and freedom."
+          "notes": "The opening establishes who\u0027s chasing who, which one is the protagonist, and what\u0027s at stake if caught (prison, death, etc.)  As always, the contest should be balanced, so there\u0027s a real chance of either escape or getting caught. Some motivating incident gets the chase started.\nThe middle story is the chase itself. Complications, setbacks, and reversals are the essence of the chase story. Pursuit plots rely on quick action and lots of it. The action must be unpredictable and keep the audience off balance. Confine the characters to limited territory, such as a ship, a building, or a train, to cut off escape routes and heighten tension.\nThe ending resolves the pursuit in one of two ways: capture or escape and freedom."
         }
       ],
       "name": "Pursuit",
-      "notes": "There is nothing complicated about Pursuit. The pursuer chases\nthe pursued. All that\u0027s needed to get this plot rolling are\nthese two character roles, the reason for\nthe pursuit, and something at stake.\nThe good guy can chase the\nbad, or vice versa. The stakes should be suitably high.\nMost horror stories are based upon\nPursuit. The story can be told from either perspective,\nthe pursuer or the one being chased. The plot depends\nheavily on physical action."
+      "notes": "There is nothing complicated about Pursuit. The pursuer chases the pursued. All that\u0027s needed to get this plot rolling are these two character roles, the reason for the pursuit, and something at stake.\nThe good guy can chase the bad, or vice versa. The stakes should be suitably high.\nMost horror stories are based upon Pursuit. The story can be told from either perspective, the pursuer or the one being chased. The plot depends heavily on physical action."
     },
     {
       "scenes": [
         {
           "name": "Rescue",
-          "notes": "The common motivation for the rescuer is love for the victim.\nThe story line follows the hero in pursuit of the villain. This\nfrequently takes him to unfamiliar places, such as the villain\u0027s\nlair.\nThe opening deals with the issue of separation. The victim\nis abducted or placed in jeopardy. The rescuer learns of the\nsituation and makes pans for pursuit.\nThe middle story is the pursuit itself. As with pursuit\nstories, the goal is to put as many unsuspected twists and\nobstacles in the way of the rescuer as possible. This is the\nvillain\u0027s role.\nThe resolution phase involves confrontation between the\nrescuer and the antagonist. This is followed by the reunion\nof the rescuer with the victim."
+          "notes": "The common motivation for the rescuer is love for the victim. The story line follows the hero in pursuit of the villain. This frequently takes him to unfamiliar places, such as the villain\u0027s lair.\nThe opening deals with the issue of separation. The victim is abducted or placed in jeopardy. The rescuer learns of the situation and makes plans for pursuit.\nThe middle story is the pursuit itself. As with pursuit stories, the goal is to put as many unsuspected twists and obstacles in the way of the rescuer as possible. This is the villain\u0027s role.\nThe resolution phase involves confrontation between the rescuer and the antagonist. This is followed by the reunion of the rescuer with the victim."
         }
       ],
       "name": "Rescue",
-      "notes": "Rescue requires three roles: the rescuer (who is the protagonist),\nthe victim, and the antagonist. Rescue is based upon action rather\nthan the characters themselves; it\u0027s the roles that matter. The focus\nis on the protagonist\u0027s rescue attempt, and the villain\u0027s efforts to\nfoil it."
+      "notes": "Rescue requires three roles: the rescuer (who is the protagonist), the victim, and the antagonist. Rescue is based upon action rather than the characters themselves; it\u0027s the roles that matter. The focus is on the protagonist\u0027s rescue attempt, and the villain\u0027s efforts to foil it."
     },
     {
       "scenes": [
         {
           "name": "Revenge",
-          "notes": "Revenge plots deal not only with the revenge itself, but with\nthe protagonist\u0027s motives for revenge.\nThe story opens with an outrage, real or imagined. Normal forms\nof recourse, such as the law, must be shown as ineffective. The\nprotagonist has to take matters in his own hands, but the\nregular channels should be given a chance first.\nThe middle story has the protagonist making plans and pursuing\nthe antagonist. If there is only one antagonist, the plans\nand chase get the focus. If the antagonist is powerful and has\nallies or henchmen, the protagonist may confront them on his\nway to the final confrontation with the antagonist.\nThe resolution has the protagonist either abandoning his revenge,\nor taking it. In the later case the antagonist should be shown\nas still worth taking revenge against. The hero\u0027s actions should\nequal, but not exceed, the offense: an eye for an eye."
+          "notes": "Revenge plots deal not only with the revenge itself, but with the protagonist\u0027s motives for revenge.\nThe story opens with an outrage, real or imagined. Normal forms of recourse, such as the law, must be shown as ineffective. The protagonist has to take matters in his own hands, but the regular channels should be given a chance first.\nThe middle story has the protagonist making plans and pursuing the antagonist. If there is only one antagonist, the plans and chase get the focus. If the antagonist is powerful and has allies or henchmen, the protagonist may confront them on his way to the final confrontation with the antagonist.\nThe resolution has the protagonist either abandoning his revenge, or taking it. In the latter case the antagonist should be shown as still worth taking revenge against. The hero\u0027s actions should equal, but not exceed, the offense: an eye for an eye."
         }
       ],
       "name": "Revenge",
-      "notes": "The Revenge masterplot is about a protagonist who\nis forced to take matters into his own hands when\nthe law doesn\u0027t punish a transgression. The nature of\nthe victim and the crime must make us\ncry for rough justice. The story proceeds as\nthe protagonist attempts to extract retribution equal to\nthe offense."
+      "notes": "The Revenge masterplot is about a protagonist who is forced to take matters into his own hands when the law doesn\u0027t punish a transgression. The nature of the victim and the crime must make us cry for rough justice. The story proceeds as the protagonist attempts to extract retribution equal to the offense."
     },
     {
       "scenes": [
         {
           "name": "Mystery",
-          "notes": "Because the mystery story is largely a challenge to the\nReader to solve the problem, the heart of the story is the\nproblem: it must be a puzzle, whose solution is not obvious. As\nthe protagonist struggles to solve the problem, so should the\naudience.\nIt\u0027s necessary to play fairly with the readers; they must\nbe given a fair chance to solve the mystery. This means that\nthe story must contain clues which allow the solution. It\u0027s\nall right to misdirect the protagonist and reader, with false\ntrails and ambiguous clues, but the solution must be in sight,\nand you must play fairly.\nThe protagonist is the reader\u0027s agent in these stories; he\nmust ask the questions that the reader needs asked in order\nto solicit the clues. The protagonist is therefore usually\nobservant and thoughtful.\nThe opening phase must present the mystery to be solved.\nThe protagonist\u0027s motive for solving the crime should also\nbe presented. Many mysteries open with the crime itself.\nThe middle story consists of searching for clues. The\nclues should not be too obvious; the perfect clue is like\nthe purloined letter in Poe\u0027s story:  there all the time, in\nplain sight.\nThe resolution involves solving the riddle. The answer must\nfit the clues, and explain things. Often solving the riddle\ncan segue into a more physical plot, such as a chase or pursuit.\nBut the action is secondary to the mystery."
+          "notes": "Because the mystery story is largely a challenge to the Reader to solve the problem, the heart of the story is the problem: it must be a puzzle, whose solution is not obvious. As the protagonist struggles to solve the problem, so should the audience.\nIt\u0027s necessary to play fairly with the readers; they must be given a fair chance to solve the mystery. This means that the story must contain clues which allow the solution. It\u0027s all right to misdirect the protagonist and reader, with false trails and ambiguous clues, but the solution must be in sight, and you must play fairly.\nThe protagonist is the reader\u0027s agent in these stories; he must ask the questions that the reader needs asked in order to solicit the clues. The protagonist is therefore usually observant and thoughtful.\nThe opening phase must present the mystery to be solved.\nThe protagonist\u0027s motive for solving the crime should also be presented. Many mysteries open with the crime itself.\nThe middle story consists of searching for clues. The clues should not be too obvious; the perfect clue is like the purloined letter in Poe\u0027s story:  there all the time, in plain sight.\nThe resolution involves solving the riddle. The answer must fit the clues, and explain things. Often solving the riddle can segue into a more physical plot, such as a chase or pursuit. But the action is secondary to the mystery."
         }
       ],
       "name": "Mystery",
-      "notes": "The Mystery revolves around a problem that needs a solution. The\nreader is challenged to solve the puzzle. The\nevents of the story serve two purposes; they move the story\nalong, but they also are clues which must be interpreted\nto help to solve the mystery. The Mystery story succeeds\nwhen it gives the reader a fair chance to find the solution,\nbut fails when the clues are too obvious or the answer is too\neasy to unearth. Mystery is a game, and you must play\nby the rules. In this masterplot, the every event must have a reason,\nevery effect, a cause."
+      "notes": "The Mystery revolves around a problem that needs a solution. The reader is challenged to solve the puzzle. The events of the story serve two purposes; they move the story along, but they also are clues which must be interpreted to help to solve the mystery. The Mystery story succeeds when it gives the reader a fair chance to find the solution, but fails when the clues are too obvious or the answer is too easy to unearth. Mystery is a game, and you must play by the rules. In this masterplot, every event must have a reason, every effect, a cause."
     },
     {
       "scenes": [
         {
           "name": "Rivalry",
-          "notes": "The opening phase establishes the protagonist and antagonist\nas two equally powerful characters, who are after the same goal.\nEach character\u0027s relative weakness must be offset by a corresponding\nstrength: if one is faster, the other should be smarter.\nThe motives of the rivalry should also be revealed.\nThe middles story is the clash of equal forces. The contest\nshould very much be in doubt, with first one side getting the\nupper hand, then the other. Frequently the clash of wills\nleads to disadvantage for the protagonist, who slowly climbs\nback to a position of roughly equal power before the climax.\nThe resolution is determined by the relative moral positions\nof the characters. The antagonist will often cross the line\ninto immoral or reprehensible conduct during the middle story;\nthat point determines the winner.\nThe resolution is the final confrontation between the two\nrivals."
+          "notes": "The opening phase establishes the protagonist and antagonist as two equally powerful characters, who are after the same goal. Each character\u0027s relative weakness must be offset by a corresponding strength: if one is faster, the other should be smarter.\nThe motives of the rivalry should also be revealed.\nThe middle story is the clash of equal forces. The contest should very much be in doubt, with first one side getting the upper hand, then the other. Frequently the clash of wills leads to disadvantage for the protagonist, who slowly climbs back to a position of roughly equal power before the climax.\nThe resolution is determined by the relative moral positions of the characters. The antagonist will often cross the line into immoral or reprehensible conduct during the middle story; that point determines the winner.\nThe resolution is the final confrontation between the two rivals."
         }
       ],
       "name": "Rivalry",
-      "notes": "Rivalry exists whenever adversaries compete for the same\ngoal, be it wealth, love, or power. The\noutcome must be in doubt, so the adversaries should be\nevenly matched; if they\u0027re not, it\u0027s\nthe Underdog plot. While the story may be of conflict\nbetween good and evil, it may equally\nbe between two worthy characters. Whatever the goal,\nthe struggle itself is the heart of Rivalry."
+      "notes": "Rivalry exists whenever adversaries compete for the same goal, be it wealth, love, or power. The outcome must be in doubt, so the adversaries should be evenly matched; if they\u0027re not, it\u0027s the Underdog plot. While the story may be of conflict between good and evil, it may equally be between two worthy characters. Whatever the goal, the struggle itself is the heart of Rivalry."
     },
     {
       "scenes": [
         {
           "name": "Sacrifice",
-          "notes": "The sacrifice story explores the character who makes the sacrifice.\nAs such this is a \u0027plot of the head\u0027, and the character is more\nimportant than the action.\nThe story opening should show the protagonist as unlikely to\nto make the sacrifice; the sacrifice is ultimately a result\nof character growth during the story. If the decision is too\neasy there\u0027s no story. At the same time, the protagonist must\ncontain traits that make the sacrifice believable. This often\nrequires back story to explain the inner conflict.\nThe opening presents the two sides of the sacrifice as having\ngreat meaning to the protagonist. The price of the sacrifice\nmust be high, but the value of the thing sacrificed for must\nalso be high.\nThe middle story must present the protagonist with a complication\nwhich makes the choice, but not the outcome, inevitable. There\nshould be no easy way out of the dilemma: either the protagonist\navoids the sacrifice, but looses the prize, or makes the sacrifice,\nand pays for it.\nThe resolution focuses on the sacrifice itself, but, more\nimportantly, on the cost of the sacrifice. The climax should\nhang in the balance. But once the choice is made, the story\nturns its attention to what the result of the sacrifice is.\nShow whether the sacrifice has the desired effect, and show\nhow the affects the protagonist (the cost.)"
+          "notes": "The sacrifice story explores the character who makes the sacrifice. As such this is a \u0027plot of the head\u0027, and the character is more important than the action.\nThe story opening should show the protagonist as unlikely to make the sacrifice; the sacrifice is ultimately a result of character growth during the story. If the decision is too easy there\u0027s no story. At the same time, the protagonist must contain traits that make the sacrifice believable. This often requires back story to explain the inner conflict.\nThe opening presents the two sides of the sacrifice as having great meaning to the protagonist. The price of the sacrifice must be high, but the value of the thing sacrificed for must also be high.\nThe middle story must present the protagonist with a complication which makes the choice, but not the outcome, inevitable. There should be no easy way out of the dilemma: either the protagonist avoids the sacrifice, but loses the prize, or makes the sacrifice, and pays for it.\nThe resolution focuses on the sacrifice itself, but, more importantly, on the cost of the sacrifice. The climax should hang in the balance. But once the choice is made, the story turns its attention to what the result of the sacrifice is.\nShow whether the sacrifice has the desired effect, and show how it affects the protagonist (the cost.)"
         }
       ],
       "name": "Sacrifice",
-      "notes": "Sacrifice stories are based upon something we instinctively\nknow is true: things of great value\nare obtained only at great price. The thing of value\nmay be love, honor, or the greater good\nof mankind. The price may be life, or the giving up\nof a cherished belief or value, but whatever\nis sacrificed, it must matter greatly to the protagonist.\nIn Sacrifice stories the protagonist\nmust have a choice, an easy way out or the difficult\nsacrifice. The story centers around this choice\nand explores the protagonist\u0027s character under stress."
+      "notes": "Sacrifice stories are based upon something we instinctively know is true: things of great value are obtained only at great price. The thing of value may be love, honor, or the greater good of mankind. The price may be life, or the giving up of a cherished belief or value, but whatever is sacrificed, it must matter greatly to the protagonist. In Sacrifice stories the protagonist must have a choice, an easy way out or the difficult sacrifice. The story centers around this choice and explores the protagonist\u0027s character under stress."
     },
     {
       "scenes": [
         {
           "name": "Temptation",
-          "notes": "In a temptation plot the antagonist can be either the\nprotagonist himself (man against man), or can be external. If\nexternal, the antagonist/tempter is a symbol; the struggle is\nstill within the protagonist, of good vs. evil, right vs. wrong.\nThe opening should present the protagonist and his proposed\ntransgression. What is the temptation he may give into?  What\nare its rewards?  What\u0027s the cost of yielding to temptation?\nThe story question is \u0027will the protagonist yield to temptation?\u0027\nPresenting the story problem is presenting the two sides of\nthe choice.\nThe middle story will begin when the protagonist yields to the\ntemptation. You may want to show the sweet side of giving in,\nbut it\u0027s only temporary satisfaction.\nTemptation as sin (error) presents itself. The sweet side\nturns bitter, and the costly nature of the decision begins\nto be evident. This is the major complication. The protagonist\nwill try to deny and evade the punishment (further complications),\nbut to no avail.\nThe resolution has two possible outcomes. The negative\noutcome is tragic; the protagonist can\u0027t confess her sin, and\nthe punishment is final. The positive outcome has the\nprotagonist, at the climax, confess and ask forgiveness. The\nresult is the happy ending: the forgiveness is granted, and\njoy is restored."
+          "notes": "In a temptation plot the antagonist can be either the protagonist himself (man against man), or can be external. If external, the antagonist/tempter is a symbol; the struggle is still within the protagonist, of good vs. evil, right vs. wrong. The opening should present the protagonist and his proposed transgression. What is the temptation he may give into?  What are its rewards?  What\u0027s the cost of yielding to temptation?\nThe story question is \u0027will the protagonist yield to temptation?\u0027 Presenting the story problem is presenting the two sides of the choice.\nThe middle story will begin when the protagonist yields to the temptation. You may want to show the sweet side of giving in, but it\u0027s only temporary satisfaction.\nTemptation as sin (error) presents itself. The sweet side turns bitter, and the costly nature of the decision begins to be evident. This is the major complication. The protagonist will try to deny and evade the punishment (further complications), but to no avail.\nThe resolution has two possible outcomes. The negative outcome is tragic; the protagonist can\u0027t confess her sin, and the punishment is final. The positive outcome has the protagonist, at the climax, confess and ask forgiveness. The result is the happy ending: the forgiveness is granted, and joy is restored."
         }
       ],
       "name": "Temptation",
-      "notes": "Temptation is conflict: the devil on one shoulder\nbattling the angel on the other. This\ncharacter-based masterplot tells the story of the\nprice of yielding to temptation. Although the\nantagonist/tempter may appear to be another person,\nthe real adversary is the protagonist\u0027s bad side,\nthe part that yields to temptation. The story\u0027s\nresolution stems from the protagonist\u0027s guilt, anger,\nor remorse over giving in, and ends in atonement and forgiveness."
+      "notes": "Temptation is conflict: the devil on one shoulder battling the angel on the other. This character-based masterplot tells the story of the price of yielding to temptation. Although the antagonist/tempter may appear to be another person, the real adversary is the protagonist\u0027s bad side, the part that yields to temptation. The story\u0027s resolution stems from the protagonist\u0027s guilt, anger, or remorse over giving in, and ends in atonement and forgiveness."
     },
     {
       "scenes": [
         {
           "name": "Transformation",
-          "notes": "The transformation masterplot is a \u0027plot of the head\u0027, stressing\ncharacter rather than action.\nThe inciting incident is the key to the transformation plot\u0027s\nopening phase. The incident should be big enough to start a\nlife-changing process in the protagonist:  the emergence from\nchildhood to adulthood, the death of a loved one, war, etc.\nThe first act ends as the transforming incident begins to\nwork on the character of the protagonist and cause change.\nThe middle story shows the transformation affecting the\nprotagonist\u0027s perceptions. This often requires self-examination\nand inward turning, so close viewpoints are normal for these\nstories.\nThe resolution clarifies the change that the initial incident\nstarted. This usually requires another external event, to\nwhich the protagonist can react to show how he\u0027s changed. In\nmany stories, the \u0027lesson\u0027 of this final reaction is different\nthan the initial transformation suggests."
+          "notes": "The transformation masterplot is a \u0027plot of the head\u0027, stressing character rather than action.\nThe inciting incident is the key to the transformation plot\u0027s opening phase. The incident should be big enough to start a life-changing process in the protagonist:  the emergence from childhood to adulthood, the death of a loved one, war, etc.\nThe first act ends as the transforming incident begins to work on the character of the protagonist and cause change.\nThe middle story shows the transformation affecting the protagonist\u0027s perceptions. This often requires self-examination and inward turning, so close viewpoints are normal for these stories.\nThe resolution clarifies the change that the initial incident started. This usually requires another external event, to which the protagonist can react to show how he\u0027s changed. In many stories, the \u0027lesson\u0027 of this final reaction is different than the initial transformation suggests."
         }
       ],
       "name": "Transformation",
-      "notes": "In Transformation, the protagonist undergoes change,\nand is a different person at the end of the story than at\nshe was at the beginning. The change may be from\none stage of development to another, such as \u0027coming\nof age\u0027 stories. The change may begin with a\ntransforming experience such\nas a religious conversion, war, the death of a\nloved one, or the birth of a child. Or it may come from\nthe protagonist being made aware of some aspect of\nher personality or background which is unexpected and\nunwanted. Transformation stories end with the protagonist learning\nthe lesson of the change, or with an incident which\nshows the complete transformation."
+      "notes": "In Transformation, the protagonist undergoes change, and is a different person at the end of the story than she was at the beginning. The change may be from one stage of development to another, such as \u0027coming of age\u0027 stories. The change may begin with a transforming experience such as a religious conversion, war, the death of a loved one, or the birth of a child. Or it may come from the protagonist being made aware of some aspect of her personality or background which is unexpected and unwanted. Transformation stories end with the protagonist learning the lesson of the change, or with an incident which shows the complete transformation."
     },
     {
       "scenes": [
         {
           "name": "Underdog",
-          "notes": "In many underdog stories, the antagonist is society or the\nsituation or nature- some juggernaut of opposing force.\nThe protagonist should be a simple character, and is often\nless intelligent or more humble than the intended audience.\nHis strength is his tenacity and willingness to struggle.\nThe opening should put the protagonist at a disadvantage. Show\nhim loosing power and being oppressed or suppressed by the\nantagonist. The opening act should end by resistance, however,\nwith the protagonist initiating some action to prevail.\nThe middle story begins with the outcome of the protagonist\nfirst effort to assert himself. At first it may appear to\nsucceed, but the gain is offset by a setback. Subsequent\nattempts to gain the upper hand also fail. But after each\nfailure the protagonist tries again.\nThe resolution begins with the protagonist approaching a\nparity with the antagonist, so that for the first time, the\noutcome is in doubt. The protagonist now actively confronts\nthe antagonist in a showdown."
+          "notes": "In many underdog stories, the antagonist is society or the situation or nature- some juggernaut of opposing force.\nThe protagonist should be a simple character, and is often less intelligent or more humble than the intended audience. His strength is his tenacity and willingness to struggle.\nThe opening should put the protagonist at a disadvantage. Show him losing power and being oppressed or suppressed by the antagonist. The opening act should end by resistance, however, with the protagonist initiating some action to prevail.\nThe middle story begins with the outcome of the protagonist's first effort to assert himself. At first it may appear to succeed, but the gain is offset by a setback. Subsequent attempts to gain the upper hand also fail. But after each failure the protagonist tries again.\nThe resolution begins with the protagonist approaching a parity with the antagonist, so that for the first time, the outcome is in doubt. The protagonist now actively confronts the antagonist in a showdown."
         }
       ],
       "name": "Underdog",
-      "notes": "This plot is similar to Rivalry. But in Rivalry the\ntwo adversaries are evenly pitted (it\u0027s a fair contest.)\nThere\u0027s nothing fair about Underdog stories. The\nprotagonist faces a seemingly unstoppable opponent. These plots\nattract readers and viewers because we are all\nunderdogs at one time or another, and have faced\noverpowering circumstances.\nThe Underdog hero is us, working out our fantasies."
+      "notes": "This plot is similar to Rivalry. But in Rivalry the two adversaries are evenly pitted (it\u0027s a fair contest.) There\u0027s nothing fair about Underdog stories. The protagonist faces a seemingly unstoppable opponent. These plots attract readers and viewers because we are all underdogs at one time or another, and have faced overpowering circumstances.\nThe Underdog hero is us, working out our fantasies."
     },
     {
       "scenes": [
         {
           "name": "Immoderation",
-          "notes": "The immoderation plot starts with a flawed trait in the\ncharacter of the protagonist. The character defect is what leads\nhim to immoderation. This is a \u0027plot of the head\u0027, and the\ncharacter development is especially important.\nThe opening shows the character before the decline, in order\nto showcase the changes. The \u0027inciting incident\u0027 is may be\na circumstance which forces the character to act differently.\nThe middle story shows the decline itself. The decline\ntraces the ascendancy of the flawed trait over other aspects\nof the character. The loss of control should be gradual.\nFocus on the emotions, but also keep the\nprotagonist as sympathetic as possible. His decline has to be\nfelt as tragedy.\nThe third act begins at the point where the protagonist has\nlost control, and things can\u0027t get worse. There are two\npossible outcomes. The protagonist must either move toward\nrecovery and redemption, or must be utterly destroyed.\nA \u0027precipitating incident\u0027 may be the pivot on which the\nresolution changes. If the protagonist moves toward\nredemption, this is a \u0027came to realize\u0027 event, and the incident\nshows the character how far he\u0027s declined. If the ending\nis tragic, the protagonist should take some unrecoverable\naction such as murder or suicide."
+          "notes": "The immoderation plot starts with a flawed trait in the character of the protagonist. The character defect is what leads him to immoderation. This is a \u0027plot of the head\u0027, and the character development is especially important.\nThe opening shows the character before the decline, in order to showcase the changes. The \u0027inciting incident\u0027 may be a circumstance which forces the character to act differently. The middle story shows the decline itself. The decline traces the ascendancy of the flawed trait over other aspects of the character. The loss of control should be gradual.\nFocus on the emotions, but also keep the protagonist as sympathetic as possible. His decline has to be felt as tragedy.\nThe third act begins at the point where the protagonist has lost control, and things can\u0027t get worse. There are two possible outcomes. The protagonist must either move toward recovery and redemption, or must be utterly destroyed.\nA \u0027precipitating incident\u0027 may be the pivot on which the resolution changes. If the protagonist moves toward redemption, this is a \u0027came to realize\u0027 event, and the incident shows the character how far he\u0027s declined. If the ending is tragic, the protagonist should take some unrecoverable action such as murder or suicide."
         }
       ],
       "name": "Immoderation",
-      "notes": "This plot deals with a flawed but sympathetic person\nwho\u0027s been pushed to the edge, either by madness or\nby events. Placed under\nextreme circumstances, the wild animal which is\ninside each of us emerges, and the decline to  the\npit begins. The story can\nend on an upbeat note, with the protagonist moving\nback toward normalcy, or in tragedy."
+      "notes": "This plot deals with a flawed but sympathetic person who\u0027s been pushed to the edge, either by madness or by events. Placed under extreme circumstances, the wild animal which is inside each of us emerges, and the decline to the pit begins. The story can end on an upbeat note, with the protagonist moving back toward normalcy, or in tragedy."
     }
   ],
   "dramaticSituations": {
@@ -1709,7 +1709,7 @@
         "The lover",
         "The beloved"
       ],
-      "notes": "Love or sex may be forbidden by a social or moral code. The extreme case is incest, but other \u0027codes\u0027 can also be involved: considerRomeo and Juliet. The love may be intentional or accidental.",
+      "notes": "Love or sex may be forbidden by a social or moral code. The extreme case is incest, but other \u0027codes\u0027 can also be involved: consider Romeo and Juliet. The love may be intentional or accidental.",
       "descriptions": [
 
       ],
@@ -1718,16 +1718,16 @@
 
       ]
     },
-    "A Family at War (Emnity of Kinsmen)": {
+    "A Family at War (Enmity of Kinsmen)": {
       "roles": [
         "A malevolent relative",
         "A hated or equally malevolent relative"
       ],
-      "notes": "A family feud, often with dislike or rivalry escalating into hatred. The relationshipmay be any familal roles (father/son, brother/brother, etc), or \u0027family\u0027may be any other group forced into constant and close proximity (cops,soldiers, doctors, etc.)",
+      "notes": "A family feud, often with dislike or rivalry escalating into hatred. The relationship may be any familial roles (father/son, brother/brother, etc), or \u0027family\u0027 may be any other group forced into constant and close proximity (cops, soldiers, doctors, etc.)",
       "descriptions": [
 
       ],
-      "name": "A Family at War (Emnity of Kinsmen)",
+      "name": "A Family at War (Enmity of Kinsmen)",
       "examples": [
 
       ]
@@ -1752,7 +1752,7 @@
         "Preferred Kinsman",
         "Rejected Kinsman"
       ],
-      "notes": "Sibling rivalry, or rivalry between family members. The object of the rivalrychooses or is given to the preferred kinsman.",
+      "notes": "Sibling rivalry, or rivalry between family members. The object of the rivalry chooses or is given to the preferred kinsman.",
       "descriptions": [
 
       ],
@@ -1782,7 +1782,7 @@
         "The dream",
         "The Witness to the dream"
       ],
-      "notes": "In Figgis\u0027 list but not Polti\u0027s. The Dream State is a surreal sitation or eventand the rules of suspension of disbelief may be stretched. We understand thatthe situation is other-worldly and the audience accepts the part of the dreamer.",
+      "notes": "In Figgis\u0027 list but not Polti\u0027s. The Dream State is a surreal situation or event and the rules of suspension of disbelief may be stretched. We understand that the situation is other-worldly and the audience accepts the part of the dreamer.",
       "descriptions": [
 
       ],
@@ -1797,7 +1797,7 @@
         "Lover 2",
         "The obstacle"
       ],
-      "notes": "Lovers overcoming the obstacles, or the tragedy of failing to overcome.Love is not just the joining of individuals, but of their families orassociated groups, which can create conflicts.",
+      "notes": "Lovers overcoming the obstacles, or the tragedy of failing to overcome. Love is not just the joining of individuals, but of their families or associated groups, which can create conflicts.",
       "descriptions": [
 
       ],
@@ -1923,7 +1923,7 @@
         "The victim or the sin",
         "The interrogator"
       ],
-      "notes": "Regret. Resolution usually requires another situation. An internal \u0027man against himself\u0027 problem, remorse centes on motivation.",
+      "notes": "Regret. Resolution usually requires another situation. An internal \u0027man against himself\u0027 problem, remorse centers on motivation.",
       "descriptions": [
 
       ],
@@ -1937,7 +1937,7 @@
         "The interrogator",
         "The seeker"
       ],
-      "notes": "A mystery or mysterious person, situation, or object. Theinterrogator poses the problem to the seeker. Often an introductionto another situation or subplot.",
+      "notes": "A mystery or mysterious person, situation, or object. The interrogator poses the problem to the seeker. Often an introduction to another situation or subplot.",
       "descriptions": [
 
       ],
@@ -1952,7 +1952,7 @@
         "First adulterer",
         "Second adulterer"
       ],
-      "notes": "Adultery may be treated as a psychological problem, centered on theprotagonists, or may lead to another plot situation.",
+      "notes": "Adultery may be treated as a psychological problem, centered on the protagonists, or may lead to another plot situation.",
       "descriptions": [
 
       ],
@@ -1963,7 +1963,7 @@
     },
     "Disaster": {
       "roles": [
-        "The victim or vanguished",
+        "The victim or vanquished",
         "The disaster itself, or a victorious enemy"
       ],
       "notes": "Anticipation before or survival after a natural or human-inflicted disaster.",
@@ -1980,7 +1980,7 @@
         "First party to coincidence",
         "Second party"
       ],
-      "notes": "In Figgis\u0027 list but not Polti\u0027s. Being in the wrong place or at the wrong time.Coincidence must be used sparingly and mustbe set up carefully so as to seem inevitible or fated. Can be used for bothcomedic or tragic effect. Connects with many other situations as either setupor payoff.",
+      "notes": "In Figgis\u0027 list but not Polti\u0027s. Being in the wrong place or at the wrong time. Coincidence must be used sparingly and must be set up carefully so as to seem inevitable or fated. Can be used for both comedic or tragic effect. Connects with many other situations as either setup or payoff.",
       "descriptions": [
 
       ],
@@ -1995,7 +1995,7 @@
         "The beloved victim",
         "The necessity for the sacrifice"
       ],
-      "notes": "Choosing between, say, a spouse and a child, or turning in/killing acriminal family member for the protection of the rest of the family",
+      "notes": "Choosing between, say, a spouse and a child, or turning in/killing a criminal family member for the protection of the rest of the family",
       "descriptions": [
 
       ],
@@ -2025,7 +2025,7 @@
         "The Guilty One",
         "The Dishonorer"
       ],
-      "notes": "The loved one brings shame on the family through a dishonorable act. TheDishonerer is the one who discovers the crime and levies the punishment.The discovery can lead to many questions. Should the act be covered up?exposed? Punished by the family? This can lead to numerous situationsand complications. \u0027Loved one\u0027 can be expanded to include members of aclan or group, co-workers, etc.",
+      "notes": "The loved one brings shame on the family through a dishonorable act. The Dishonorer is the one who discovers the crime and levies the punishment. The discovery can lead to many questions. Should the act be covered up?exposed? Punished by the family? This can lead to numerous situations and complications. \u0027Loved one\u0027 can be expanded to include members of a clan or group, co-workers, etc.",
       "descriptions": [
 
       ],
@@ -2066,7 +2066,7 @@
         "A thing coveted",
         "Someone to thwart the ambition"
       ],
-      "notes": "Possibilities range from rags to riches to corporate greed and the consequences.The conflict can be either the obstacle to ambition, oran ascension/descension arc.",
+      "notes": "Possibilities range from rags to riches to corporate greed and the consequences. The conflict can be either the obstacle to ambition, or an ascension/descension arc.",
       "descriptions": [
 
       ],
@@ -2075,7 +2075,7 @@
         "A Christmas Carol",
         "Jayne Eyre",
         "Heart of Darkness",
-        "The GodFather",
+        "The Godfather",
         "Citizen Kane"
       ]
     },
@@ -2083,9 +2083,9 @@
       "roles": [
         "A solicitor",
         "An adversary",
-        "An arbitor"
+        "An arbiter"
       ],
-      "notes": "Obstacles faced while trying to attain something. The adversary refuses togive the solictor the object he or she seeks, or an arbitor must determinewhich of the opposing forces gets the prize.",
+      "notes": "Obstacles faced while trying to attain something. The adversary refuses to give the solicitor the object he or she seeks, or an arbiter must determine which of the opposing forces gets the prize.",
       "descriptions": [
 
       ],
@@ -2096,7 +2096,7 @@
     },
     "Revolt": {
       "roles": [
-        "The conspiritor(s)",
+        "The conspirator(s)",
         "The tyrant"
       ],
       "notes": "Overthrowing a dictator, mutiny, etc.",
@@ -2141,7 +2141,7 @@
         "A bold leader",
         "An adversary"
       ],
-      "notes": "The good old adventure story, which may involve a quest. The enterprisemust have an objective goal or perhaps a McGuffin.",
+      "notes": "The good old adventure story, which may involve a quest. The enterprise must have an objective goal or perhaps a McGuffin.",
       "descriptions": [
 
       ],
@@ -2171,7 +2171,7 @@
         "The Lover",
         "The Hater"
       ],
-      "notes": "Possibilities range from not knowing that the loved one is also the enemy,to falling for the \"bad guy\".",
+      "notes": "Possibilities range from not knowing that the loved one is also the enemy, to falling for the \"bad guy\".",
       "descriptions": [
 
       ],
@@ -2186,7 +2186,7 @@
         "The inferior rival",
         "The object"
       ],
-      "notes": "Anything from a character up against a former mentor, to a supposedlyweaker character using other abilities to defeat, or attempt todefeat, a stronger rival.",
+      "notes": "Anything from a character up against a former mentor, to a supposedly weaker character using other abilities to defeat, or attempt to defeat, a stronger rival.",
       "descriptions": [
 
       ],
@@ -2201,7 +2201,7 @@
         "The Family member",
         "The person or thing sacrificed"
       ],
-      "notes": "The hero gives up something valuable to aid a relative. As withother situations, \u0027family\u0027 can mean any close relationship. Thething sacrificed may be honor- as in breaking the law or a code toaid the relative.",
+      "notes": "The hero gives up something valuable to aid a relative. As with other situations, \u0027family\u0027 can mean any close relationship. The thing sacrificed may be honor- as in breaking the law or a code to aid the relative.",
       "descriptions": [
 
       ],
@@ -2210,17 +2210,17 @@
 
       ]
     },
-    "Crimes of Passion (Murderous Adultry)": {
+    "Crimes of Passion (Murderous Adultery)": {
       "roles": [
         "An adulterer partner",
         "The second adulterer",
         "The betrayed partner"
       ],
-      "notes": "An intense love or desire can lead to irrational behavior or madness. Thecrime must be deliberate. Note the relationship of this situation to the nearby ones.",
+      "notes": "An intense love or desire can lead to irrational behavior or madness. The crime must be deliberate. Note the relationship of this situation to the nearby ones.",
       "descriptions": [
 
       ],
-      "name": "Crimes of Passion (Murderous Adultry)",
+      "name": "Crimes of Passion (Murderous Adultery)",
       "examples": [
 
       ]

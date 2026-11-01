@@ -525,12 +525,14 @@ public sealed class StoryCADDriver : IUiDriver
             throw new AutomationStepException("the app has no main window to capture.");
         }
 
-        Wait.UntilInputIsProcessed();
         // The visible frame only: the UIA bounds include the invisible resize border, which
         // captured a strip of whatever was behind the window (seen on Brigid, 2026-10-04).
         var frame = NativeMethods.VisibleWindowBounds(hwnd) ?? window.BoundingRectangle;
+        var parked = ParkPointer(frame);
+        Wait.UntilInputIsProcessed();
         using var image = Capture.Rectangle(crop is { } c ? CropArea(frame, c, NativeMethods.SystemDpi()) : frame);
         image.ToFile(pngPath);
+        RestorePointer(parked);
     }
 
     /// <summary>
@@ -573,9 +575,11 @@ public sealed class StoryCADDriver : IUiDriver
             elements.Add((target, element.IsOffscreen ? Rectangle.Empty : element.BoundingRectangle));
         }
 
+        var parked = ParkPointer(frame.Value);
         Wait.UntilInputIsProcessed();
         using var image = Capture.Rectangle(ElementArea(frame.Value, elements, margin, NativeMethods.SystemDpi()));
         image.ToFile(pngPath);
+        RestorePointer(parked);
     }
 
     /// <summary>
@@ -627,9 +631,16 @@ public sealed class StoryCADDriver : IUiDriver
         }
 
         bounds.Height += (int)Math.Round(24 * NativeMethods.SystemDpi() / 96.0);
+        Point? parked = null;
+        if (_process.MainWindowHandle != IntPtr.Zero && NativeMethods.VisibleWindowBounds(_process.MainWindowHandle) is { } mainFrame)
+        {
+            parked = ParkPointer(mainFrame);
+        }
+
         Wait.UntilInputIsProcessed();
         using var image = Capture.Rectangle(bounds);
         image.ToFile(pngPath);
+        RestorePointer(parked);
     }
 
     /// <inheritdoc />
@@ -714,6 +725,9 @@ public sealed class StoryCADDriver : IUiDriver
 
         try
         {
+            // A list row below the visible part of a ListView is found but off-screen, and
+            // readiness refuses it; scroll it into view first, as a user scrolls (#1422).
+            ScrollItemIntoViewIfOffscreen(containerElement, windowsBefore, itemName, t);
             var item = _locator.WaitUntilReadyWithin(
                 containerElement, windowsBefore, ElementAddress.FromName(itemName),
                 ReadinessRequirement.SelectionItem, t);
@@ -737,6 +751,27 @@ public sealed class StoryCADDriver : IUiDriver
             }
 
             throw;
+        }
+    }
+
+    private void ScrollItemIntoViewIfOffscreen(AutomationElement container, IReadOnlyList<AutomationElement> windowsBefore,
+        string itemName, TimeSpan timeout)
+    {
+        AutomationElement found;
+        try
+        {
+            found = _locator.WaitUntilReadyWithin(
+                container, windowsBefore, ElementAddress.FromName(itemName), ReadinessRequirement.Exists, timeout);
+        }
+        catch (Exception)
+        {
+            return; // Not found: the SelectionItem wait that follows reports the failure.
+        }
+
+        if (found.Properties.IsOffscreen.ValueOrDefault && found.Patterns.ScrollItem.IsSupported)
+        {
+            found.Patterns.ScrollItem.Pattern.ScrollIntoView();
+            Wait.UntilInputIsProcessed();
         }
     }
 
@@ -826,6 +861,21 @@ public sealed class StoryCADDriver : IUiDriver
         {
             PressChord("Escape");
         }
+
+        ParkAfterPointerVerb();
+    }
+
+    /// <summary>
+    ///     Moves the pointer off the row a right-click or a drag left it on, as a user moves the
+    ///     mouse away. Left on the row, a drop-down that later opened and closed under it put
+    ///     the row back in its hover shade, and manual images showed two grey rows (#1422).
+    /// </summary>
+    private void ParkAfterPointerVerb()
+    {
+        if (_process.MainWindowHandle != IntPtr.Zero && NativeMethods.VisibleWindowBounds(_process.MainWindowHandle) is { } frame)
+        {
+            ParkPointer(frame);
+        }
     }
 
     /// <inheritdoc />
@@ -867,6 +917,7 @@ public sealed class StoryCADDriver : IUiDriver
         }
 
         Wait.UntilInputIsProcessed();
+        ParkAfterPointerVerb();
     }
 
     // --- keyboard and focus ------------------------------------------------------------------
@@ -1308,6 +1359,45 @@ public sealed class StoryCADDriver : IUiDriver
             throw new AutomationStepException(
                 $"Refusing real input ({action}): the foreground window belongs to process {foregroundPid}, " +
                 $"not StoryCAD ({_process.Id}).");
+        }
+    }
+
+    /// <summary>
+    ///     Moves a pointer that rests on the window's content to the status bar, so no row or
+    ///     button shows its hover shade in a screenshot. A real right-click or drag leaves the
+    ///     pointer on a tree row, and the tree drew that row grey in manual images (#1422).
+    /// </summary>
+    /// <remarks>
+    ///     Returns the pointer's old position, or null when it did not move. The caller puts it
+    ///     back after the capture: a right-click that started from the parked spot failed to open
+    ///     its menu in 2 of 5 VM probes (2026-11-01).
+    /// </remarks>
+    private Point? ParkPointer(Rectangle frame)
+    {
+        var titleBar = (int)Math.Round(32 * NativeMethods.SystemDpi() / 96.0);
+        var at = Mouse.Position;
+        if (!frame.Contains(at) || at.Y < frame.Y + titleBar)
+        {
+            return null;
+        }
+
+        // An empty spot on the status bar, inside the app's content: a move onto the title bar
+        // never reached the content, so the row under the pointer kept its hover shade.
+        var statusBar = (int)Math.Round(26 * NativeMethods.SystemDpi() / 96.0);
+        // Real input moves: the glide places the cursor without input events, so the row under
+        // the pointer never heard it leave and kept its hover shade (2026-11-01 VM runs).
+        InputMoveTo(at, new Point(frame.X + frame.Width * 3 / 5, frame.Bottom - statusBar));
+        Wait.UntilInputIsProcessed();
+        Thread.Sleep(500); // the hover shade and any tooltip fade out
+        return at;
+    }
+
+    private static void RestorePointer(Point? at)
+    {
+        if (at is { } p)
+        {
+            Mouse.Position = p;
+            Wait.UntilInputIsProcessed();
         }
     }
 

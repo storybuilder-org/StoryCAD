@@ -462,6 +462,27 @@ public class BeatSheetsViewModelTests
     }
 
     [TestMethod]
+    public async Task AssignBeatAsync_Scene_KeepsBeatSelectedAndShowsDescriptions()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        var beat = new StructureBeat("Opening", "The hero is stuck");
+        _beatEditor.StructureBeats.Add(beat);
+        _beatEditor.SelectedBeat = beat;
+        _beatEditor.SelectedBeatIndex = 0;
+        var scene = _storyModel.StoryElements.Scenes.First();
+        scene.Description = "Stakeout goes nowhere";
+        _beatEditor.SelectedListElement = scene;
+
+        await _beatEditor.AssignBeatAsync();
+
+        Assert.AreEqual(scene.Uuid, beat.Guid, "Beat should be bound to the scene");
+        Assert.AreSame(beat, _beatEditor.SelectedBeat, "Assigned beat should stay selected");
+        Assert.AreEqual(0, _beatEditor.SelectedBeatIndex);
+        Assert.AreEqual("The hero is stuck", _beatEditor.SelectedBeatDescription);
+        Assert.AreEqual("Stakeout goes nowhere", _beatEditor.CurrentElementDescription);
+    }
+
+    [TestMethod]
     public void ElementIcon_Scene_ReturnsWorldSymbol()
     {
         var scene = new SceneModel("Icon Test Scene", _storyModel, null);
@@ -637,6 +658,22 @@ public class BeatSheetsViewModelTests
     }
 
     [TestMethod]
+    public void LoadBeats_ElementLists_OmitNonePlaceholder()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+
+        // The model lists start with a "(none)" placeholder (Guid.Empty) for drop-downs
+        Assert.IsTrue(_storyModel.StoryElements.Scenes.Any(e => e.Uuid == Guid.Empty));
+        Assert.IsTrue(_storyModel.StoryElements.Problems.Any(e => e.Uuid == Guid.Empty));
+
+        Assert.IsFalse(_beatEditor.Scenes.Any(e => e.Uuid == Guid.Empty));
+        Assert.IsFalse(_beatEditor.Problems.Any(e => e.Uuid == Guid.Empty));
+        Assert.IsTrue(_beatEditor.Scenes.Any(e => e.Name == "Test Scene"));
+        Assert.IsTrue(_beatEditor.Problems.Any(e => e.Name == "Test Story Problem"));
+        Assert.IsFalse(_beatEditor.CurrentElementSource.Any(e => e.Name == "(none)"));
+    }
+
+    [TestMethod]
     public void SelectedElementSource_WhenChanged_DoesNotNotifyDirty()
     {
         _beatEditor.LoadBeats(_problemModel, _storyModel);
@@ -645,6 +682,55 @@ public class BeatSheetsViewModelTests
         _beatEditor.SelectedElementSource = "Problem";
 
         Assert.IsFalse(_dirtyNotified);
+    }
+
+    #endregion
+
+    #region Last beat selection (#1422)
+
+    /// <summary>
+    ///     #1422: selecting the last beat (Denouement) of Three Act Play hung the app. Selects the
+    ///     last beat of every built-in beat sheet in Tools.json the way the Beats list does
+    ///     (SelectedIndex and SelectedItem), then runs the commands that use the index.
+    /// </summary>
+    [TestMethod]
+    public void SelectedBeat_LastBeatOfEveryBuiltInBeatSheet_CompletesAndShowsItsDescription()
+    {
+        var sheets = Ioc.Default.GetRequiredService<StoryCADLib.Models.Tools.ToolsData>().BeatSheetSource
+            .Where(s => s.PlotPatternScenes.Count > 0)
+            .ToList();
+        Assert.IsTrue(sheets.Any(s => s.PlotPatternName == "Three Act Play"), "Three Act Play is a built-in sheet");
+
+        foreach (var sheet in sheets)
+        {
+            var name = sheet.PlotPatternName;
+            var work = Task.Run(() =>
+            {
+                var problem = CreateTestProblemModel(_storyModel);
+                var editor = new BeatSheetsViewModel(() => { });
+                editor.LoadBeats(problem, _storyModel);
+                editor.StructureModelTitle = name;
+
+                var last = editor.StructureBeats.Count - 1;
+                Assert.AreEqual(sheet.PlotPatternScenes.Count, editor.StructureBeats.Count, name);
+                var lastBeat = editor.StructureBeats[last];
+
+                editor.SelectedBeatIndex = last;
+                editor.SelectedBeat = lastBeat;
+
+                Assert.AreEqual(sheet.PlotPatternScenes[^1].SceneTitle, lastBeat.Title, name);
+                Assert.AreEqual(lastBeat.Description, editor.SelectedBeatDescription, name);
+                Assert.AreEqual("Unassigned", lastBeat.ElementName, name);
+                Assert.IsNull(editor.CurrentElementDescription, name);
+
+                editor.MoveDownCommand.Execute(null); // already last: no move
+                Assert.AreSame(lastBeat, editor.StructureBeats[last], name);
+                editor.MoveUpCommand.Execute(null);
+                Assert.AreSame(lastBeat, editor.StructureBeats[last - (last > 0 ? 1 : 0)], name);
+            });
+
+            Assert.IsTrue(work.Wait(TimeSpan.FromSeconds(10)), $"Selecting the last beat of {name} did not finish");
+        }
     }
 
     #endregion

@@ -548,7 +548,7 @@ public class SceneViewModelTests
     {
         // Arrange
         _viewModel.Activate(_sceneModel);
-        var totalCharacters = _storyModel.StoryElements.Characters.Count;
+        var totalCharacters = _storyModel.StoryElements.Characters.Count(c => c.Uuid != Guid.Empty);
 
         // Act
         _viewModel.AllCharacters = true;
@@ -557,6 +557,46 @@ public class SceneViewModelTests
         // Assert
         Assert.AreEqual(_viewModel.CharacterList, _viewModel.CastSource);
         Assert.AreEqual(totalCharacters, _viewModel.CastSource.Count);
+    }
+
+    /// <summary>
+    ///     The cast toggle's Toggled event also fires when a scene loads, so switching the
+    ///     displayed list must post no status message (#1422: "Add / Remove Cast Members" showed
+    ///     on a scene's Scene tab with no cast change).
+    /// </summary>
+    [TestMethod]
+    public void SetCastView_WhenSwitched_PostsNoStatusMessage()
+    {
+        _viewModel.Activate(_sceneModel);
+        var messages = new List<string>();
+        WeakReferenceMessenger.Default.Register<StatusChangedMessage>(this, (_, m) => messages.Add(m.Value.Status));
+        try
+        {
+            _viewModel.SetCastView(true);
+            _viewModel.SetCastView(false);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(this);
+        }
+
+        Assert.AreEqual(0, messages.Count, string.Join("; ", messages));
+        Assert.AreEqual(_viewModel.CastList, _viewModel.CastSource);
+    }
+
+    [TestMethod]
+    public void CharacterList_AfterActivate_OmitsNonePlaceholder()
+    {
+        // Arrange
+        _storyModel.StoryElements.Characters.Add(CreateTestCharacter("Real Character"));
+
+        // Act
+        _viewModel.Activate(_sceneModel);
+
+        // Assert - the model list has the "(none)" placeholder; the cast list does not
+        Assert.IsTrue(_storyModel.StoryElements.Characters.Any(c => c.Uuid == Guid.Empty));
+        Assert.IsFalse(_viewModel.CharacterList.Any(c => c.Uuid == Guid.Empty || c.Name == "(none)"));
+        Assert.IsTrue(_viewModel.CharacterList.Any(c => c.Name == "Real Character"));
     }
 
     [TestMethod]
@@ -1229,6 +1269,20 @@ public class SceneViewModelTests
         // ScenePurposes should be populated from ScenePurposeList
         Assert.IsTrue(viewModel.ScenePurposes.Count > 0,
             "ScenePurposes should be populated with items from ScenePurposeList");
+    }
+
+    [TestMethod]
+    public void ScenePurposes_ExcludeBlankComboBoxPlaceholder()
+    {
+        // ListData inserts " " at index 0 of every list for ComboBox binding.
+        // The Purpose of Scene check boxes must not show it as an unlabelled box.
+        _viewModel.Activate(_sceneModel); // LoadModel rebuilds ScenePurposes from ScenePurposeList
+        var viewModel = _viewModel;
+
+        Assert.IsFalse(viewModel.ScenePurposes.Any(p => string.IsNullOrWhiteSpace(p.StringName)),
+            "ScenePurposes must not contain a blank entry");
+        Assert.AreEqual(viewModel.ScenePurposeList.Count(p => !string.IsNullOrWhiteSpace(p)),
+            viewModel.ScenePurposes.Count);
     }
 
     [TestMethod]

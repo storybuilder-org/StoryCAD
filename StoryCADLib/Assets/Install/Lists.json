@@ -931,7 +931,7 @@
                      "Opponent wants to destroy what you\u0027ve created",
                      "Opponent has an opposing view",
                      "Opponent is attacking something you defend",
-                     "Opponent is a physical agressor",
+                     "Opponent is a physical aggressor",
                      "Opponent is a traitor",
                      "Opponent is a business competitor",
                      "Opponent seeks more power",
@@ -964,11 +964,11 @@
                  "Buccaneer",
                  "Builder",
                  "Bully",
-                 "Burgler",
+                 "Burglar",
                  "Butler",
                  "Capitalist",
                  "Captain",
-                 "CardSharp",
+                 "Card Sharp",
                  "Cartoonist",
                  "Cashier",
                  "Cattle rustler",
@@ -1671,7 +1671,7 @@
                       "First person",
                       "Limited third person",
                       "Multiple third person",
-                      "Omniscent",
+                      "Omniscient",
                       "Second person"
                   ],
     "ValueExchange":  [
@@ -1740,11 +1740,11 @@
                           "Adroitness - Ineptitude",
                           "Agility - Clumsiness",
                           "Artistic - Unskilled",
-                          "Balance - Inbalance",
+                          "Balance - Imbalance",
                           "Brilliance - Stupidity",
                           "Capability - Inability",
-                          "Carefulness - Carlessness",
-                          "Competence - Incompetance",
+                          "Carefulness - Carelessness",
+                          "Competence - Incompetence",
                           "Success - Failure",
                           "Affection - Coldness",
                           "Altruism - Meanness",
@@ -1782,7 +1782,7 @@
                           "Agency - Powerlessness",
                           "Aggressiveness - Timidity",
                           "Ambition - Apathy",
-                          "Approachability - Inaccessability",
+                          "Approachability - Inaccessibility",
                           "Assertiveness - Meekness",
                           "Assurance - Uncertainty",
                           "Confidence - Timidity",
@@ -1988,7 +1988,7 @@
                   "Obstacles to Romance",
                   "Obstacles to the Chase",
                   "Romantic Interludes",
-                  "Suspensful Moments",
+                  "Suspenseful Moments",
                   "Ticking Clocks",
                   "Twists and Turns",
                   "Western Stock Scenes"
@@ -2142,7 +2142,7 @@
                     "Reliable",
                     "One-sided",
                     "Critical",
-                    "Competative",
+                    "Competitive",
                     "Controlling"
                 ],
     "Sociability":  [
@@ -2273,7 +2273,7 @@
                     "Arguments, threats, or force succeeds"
                 ],
     "Creativity":  [
-                         "AbsentMinded",
+                         "Absent-minded",
                          "Artistic",
                          "Conventional",
                          "Creative",
@@ -2317,7 +2317,7 @@
                   "The seed of evil may grow up to be your ruin.",
                   "There is always someone worse off than yourself.",
                   "Unconditional love overcomes fear of rejection.",
-                  "We often dispise what\u0027s most useful to us.",
+                  "We often despise what\u0027s most useful to us.",
                   "You can always share the labor, but not the spoil."
               ],
     "Abnormality":  [
@@ -2385,12 +2385,12 @@
     "StoryType":  [
                       "Novel",
                       "Novella",
-                      "Novellete",
+                      "Novelette",
                       "Screenplay",
                       "Short Story",
                       "Short-Short",
                       "Stage Play",
-                      "TV Screenplan"
+                      "TV Screenplay"
                   ],
     "Locale":  [
                    "Aboard plane",
@@ -2449,7 +2449,7 @@
                    "Motion picture studio",
                    "National border",
                    "Naval base or station",
-                   "Neewspaper office",
+                   "Newspaper office",
                    "Night club",
                    "Observatory",
                    "Office building",
@@ -2458,7 +2458,7 @@
                    "Pirate\u0027s lair",
                    "Plantation",
                    "Police station",
-                   "Prarie",
+                   "Prairie",
                    "Prison",
                    "Publisher\u0027s office",
                    "Race course",
@@ -2587,7 +2587,7 @@
                    "Pleads there was a misunderstanding",
                    "Pursues and captures desired object",
                    "Renders the opponent helpless",
-                   "Sacrifices a loved one\u0027s  confidence or respect",
+                   "Sacrifices a loved one\u0027s confidence or respect",
                    "Sacrifices a valued item",
                    "Sacrifices another\u0027s life, love, health, liberty",
                    "Sacrifices his life, love, health, liberty",

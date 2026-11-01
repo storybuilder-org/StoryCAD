@@ -245,5 +245,23 @@ public class ScriptParserTests
     {
         Assert.IsFalse(Parse(line).Success);
     }
+
+    // click <target> pointer forces a real pointer click (#1422).
+    [TestMethod]
+    public void Parse_ClickWithPointer_SetsPointer()
+    {
+        var result = Parse("click TraitBuilderButton pointer", "click TraitBuilderButton");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.IsTrue(result.Statements[1].Pointer);
+        Assert.AreEqual("TraitBuilderButton", result.Statements[1].Target!.Value);
+        Assert.IsFalse(result.Statements[2].Pointer);
+    }
+
+    [TestMethod]
+    public void Parse_ClickWithUnknownWord_ReportsError()
+    {
+        Assert.IsFalse(Parse("click TraitBuilderButton gently").Success);
+    }
 }
 #endif

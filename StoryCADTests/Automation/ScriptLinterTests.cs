@@ -373,5 +373,14 @@ public class ScriptLinterTests
     {
         Assert.AreEqual(0, LintDialogLine(line).Count);
     }
+
+    // The TabView scroll arrows: WinUI template parts the XAML scan never sees (#1422).
+    [TestMethod]
+    [DataRow("click ScrollIncreaseButton")]
+    [DataRow("click ScrollDecreaseButton")]
+    public void Lint_WithTabViewScrollButton_ReportsNoError(string line)
+    {
+        Assert.AreEqual(0, LintDialogLine(line).Count);
+    }
 }
 #endif
