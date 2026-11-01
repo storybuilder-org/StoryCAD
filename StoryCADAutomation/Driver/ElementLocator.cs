@@ -396,10 +396,10 @@ internal sealed class ElementLocator
             {
                 // A non-editable ComboBox shows its selected item; its Name is only the label.
                 var selected = element.Patterns.Selection.Pattern.Selection.ValueOrDefault;
-                if (selected is { Length: > 0 })
-                {
-                    text = string.Join(", ", selected.Select(e => e.Properties.Name.ValueOrDefault));
-                }
+                // No selection reads as empty text, not as the label (#1422).
+                text = selected is { Length: > 0 }
+                    ? string.Join(", ", selected.Select(e => e.Properties.Name.ValueOrDefault))
+                    : string.Empty;
             }
 
             if (element.Patterns.ExpandCollapse.IsSupported)

@@ -714,6 +714,9 @@ public sealed class StoryCADDriver : IUiDriver
 
         try
         {
+            // A list row below the visible part of a ListView is found but off-screen, and
+            // readiness refuses it; scroll it into view first, as a user scrolls (#1422).
+            ScrollItemIntoViewIfOffscreen(containerElement, windowsBefore, itemName, t);
             var item = _locator.WaitUntilReadyWithin(
                 containerElement, windowsBefore, ElementAddress.FromName(itemName),
                 ReadinessRequirement.SelectionItem, t);
@@ -737,6 +740,27 @@ public sealed class StoryCADDriver : IUiDriver
             }
 
             throw;
+        }
+    }
+
+    private void ScrollItemIntoViewIfOffscreen(AutomationElement container, IReadOnlyList<AutomationElement> windowsBefore,
+        string itemName, TimeSpan timeout)
+    {
+        AutomationElement found;
+        try
+        {
+            found = _locator.WaitUntilReadyWithin(
+                container, windowsBefore, ElementAddress.FromName(itemName), ReadinessRequirement.Exists, timeout);
+        }
+        catch (Exception)
+        {
+            return; // Not found: the SelectionItem wait that follows reports the failure.
+        }
+
+        if (found.Properties.IsOffscreen.ValueOrDefault && found.Patterns.ScrollItem.IsSupported)
+        {
+            found.Patterns.ScrollItem.Pattern.ScrollIntoView();
+            Wait.UntilInputIsProcessed();
         }
     }
 

@@ -52,7 +52,7 @@ step "TC-004: Close and reopen the outline"
 menu CloseStoryMenuItem
 menu OpenCreateFileMenuItem
 click RecentlyOpenedNavItem
-select FileOpenRecentsList "Danger Calls"
+click name:"Danger Calls"                 # recent-file rows have no AutomationId and no SelectionItem pattern
 click PrimaryButton                       # "Open Outline"
 wait TitleTextBox
 expect tree contains "Danger Calls/Characters"
@@ -97,7 +97,7 @@ expect tree contains "Danger Calls/Characters/Charlie Lacas"
 focus CharacterRoleCombo
 type "Drug Dealer"
 press "Tab"
-select StoryRoleCombo "Antagonist"
+type "Antagonist"                         # type-ahead: the list is longer than its open view, so select cannot reach Antagonist
 expect StoryRoleCombo text "Antagonist"
 focus CharacterNameTextBox
 screenshot "Danger-Calls-Character-Role-Tab-Antagonist.png"
@@ -419,7 +419,7 @@ focus SceneNameTextBox
 screenshot "Danger-Calls-Scenes-Denouement.png"
 open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas"
 tab ProblemStructureTab
-select BeatsList "Denouement"              # hung the app on 2026-10-22; fixed in this PR
+select BeatsList "Denouement"             # the last beat; selecting it hung the app on 2026-10-22
 focus ProblemNameTextBox
 screenshot "Danger-Calls-Structure-Tab-Denouement.png"
 click SaveStatusButton

@@ -334,7 +334,7 @@ public sealed class ScriptInterpreter
                     while (true)
                     {
                         var state = d.WaitUntilFound(s.Target!);
-                        var actual = string.IsNullOrEmpty(state.Text) ? state.Name : state.Text;
+                        var actual = state.Text ?? state.Name; // an empty field reads empty, not as its label (#1422)
                         if (string.Equals(NormalizeText(actual), expected, StringComparison.Ordinal))
                         {
                             return currentStep;
