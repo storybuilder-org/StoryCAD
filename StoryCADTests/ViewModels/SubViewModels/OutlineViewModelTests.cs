@@ -352,7 +352,7 @@ public class OutlineViewModelTests
         appState.CurrentDocument = new StoryDocument(model);
         outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
         var root = model.ExplorerView[0];
-        appState.RightTappedNode = root;
+        appState.CurrentNode = root;                 // a Tools menu tool adds under the selected node
         var master = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
         var plotName = master.PlotPatternNames.First(n => master.MasterPlots[n].PlotPatternScenes.Count > 1);
         var sceneCount = master.MasterPlots[plotName].PlotPatternScenes.Count;
