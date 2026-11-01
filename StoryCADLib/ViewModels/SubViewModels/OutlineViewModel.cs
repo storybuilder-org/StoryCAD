@@ -282,14 +282,10 @@ public class OutlineViewModel : ObservableRecipient
 
             using (new SerializationLock(logger))
             {
+                // BackupService sets the Backup indicator from the result; no backup, no green (#1422).
                 if (preferences.Model.BackupOnOpen)
                 {
                     await shellVm.MakeBackup();
-                    shellVm.BackupStatusColor = Colors.Green;
-                }
-                else
-                {
-                    shellVm.BackupStatusColor = Colors.Green;
                 }
 
                 shellVm.TreeViewNodeClicked(appState.CurrentDocument.Model.ExplorerView[0]);
@@ -401,7 +397,11 @@ public class OutlineViewModel : ObservableRecipient
                 Messenger.Send(new StatusChangedMessage(new StatusMessage($"{msg} failed", LogLevel.Error)));
             }
 
-            _autoSaveService.StartAutoSave();
+            // Only with the AutoSave preference on: StartAutoSave turns the AutoSave indicator green (#1422).
+            if (preferences.Model.AutoSave)
+            {
+                _autoSaveService.StartAutoSave();
+            }
         }
     }
 

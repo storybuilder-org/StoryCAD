@@ -764,6 +764,36 @@ public class OutlineViewModelTests
     }
 
     [TestMethod]
+    public async Task SaveFile_WithAutoSaveOff_LeavesAutosaveAndBackupIndicatorsGray()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var prefs = Ioc.Default.GetRequiredService<PreferenceService>();
+        var autoSave = Ioc.Default.GetRequiredService<StoryCADLib.Services.Backup.AutoSaveService>();
+        var savedAutoSave = prefs.Model.AutoSave; // other tests may leave it on
+        prefs.Model.AutoSave = false;
+        autoSave.StopAutoSave();
+        try
+        {
+            var model = await outlineService.CreateModel("IndicatorSave", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "IndicatorSave.stbx"));
+            shell.BackupStatusColor = Microsoft.UI.Colors.Gray;
+            shell.AutosaveStatusColor = Microsoft.UI.Colors.Gray;
+
+            await outlineVM.SaveFile();
+
+            Assert.IsTrue(File.Exists(appState.CurrentDocument.FilePath), "Save did not write the file");
+            Assert.AreEqual(Microsoft.UI.Colors.Gray, shell.BackupStatusColor, "A save is not a backup");
+            Assert.AreEqual(Microsoft.UI.Colors.Gray, shell.AutosaveStatusColor, "AutoSave is off");
+            Assert.IsFalse(autoSave.IsRunning, "A save must not start AutoSave when the preference is off");
+        }
+        finally
+        {
+            prefs.Model.AutoSave = savedAutoSave;
+        }
+    }
+
+    [TestMethod]
     public async Task SaveFile_CallsEditFlushService()
     {
         // This test verifies that OutlineViewModel.SaveFile() uses EditFlushService

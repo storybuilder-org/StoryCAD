@@ -126,6 +126,41 @@ public class ShellViewModelTests
         Assert.AreEqual("Test Idea", overviewVM.Model.Description);
     }
 
+    [TestMethod]
+    public void BackupStatusColor_WhenBackupStatusMessageTrue_IsGreen()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        shell.BackupStatusColor = Microsoft.UI.Colors.Gray;
+
+        WeakReferenceMessenger.Default.Send(new IsBackupStatusMessage(true));
+
+        Assert.AreEqual(Microsoft.UI.Colors.Green, shell.BackupStatusColor);
+    }
+
+    [TestMethod]
+    public void BackupStatusColor_WhenAnotherOutlineBecomesCurrent_IsGray()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        WeakReferenceMessenger.Default.Send(new IsBackupStatusMessage(true));
+        Assert.AreEqual(Microsoft.UI.Colors.Green, shell.BackupStatusColor);
+
+        appState.CurrentDocument = new StoryDocument(new StoryModel(), "other.stbx");
+
+        Assert.AreEqual(Microsoft.UI.Colors.Gray, shell.BackupStatusColor);
+    }
+
+    [TestMethod]
+    public void BackupStatusColor_AfterResetModel_IsGray()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        WeakReferenceMessenger.Default.Send(new IsBackupStatusMessage(true));
+
+        shell.ResetModel();
+
+        Assert.AreEqual(Microsoft.UI.Colors.Gray, shell.BackupStatusColor);
+    }
+
     /// <summary>
     ///     Tests that ResetModel creates a new StoryModel
     /// </summary>

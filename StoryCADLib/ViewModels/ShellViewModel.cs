@@ -112,6 +112,10 @@ public class ShellViewModel : ObservableRecipient
 
         this.appState.CurrentDocument = new StoryDocument(new StoryModel());
 
+        // A backup belongs to one outline: a new, opened, or closed outline starts grey until
+        // BackupService reports a backup of it (#1422).
+        this.appState.CurrentDocumentChanged += (_, _) => BackupStatusColor = Colors.Gray;
+
         //Skip status timer initialization in Tests.
         if (!this.appState.Headless)
         {
