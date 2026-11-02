@@ -83,10 +83,10 @@ open-node tree "Danger Calls/Characters/Leonard Kraskin"   # step 3: the main wi
 expect CharacterNameTextBox text "Leonard Kraskin"
 
 step "TC-123: Workflow list with every group open"
-click WorkflowGroupOverviewNavItem        # Setting and Scene have no group: their one workflow is starred
-click WorkflowGroupProblemNavItem
-click WorkflowGroupCharacterNavItem
-click WorkflowGroupStoryWorldNavItem
+expand WorkflowGroupOverviewNavItem       # Setting and Scene have no group: their one workflow is starred
+expand WorkflowGroupProblemNavItem        # expand, not click: a click closes a group that is open
+expand WorkflowGroupCharacterNavItem
+expand WorkflowGroupStoryWorldNavItem
 expect WorkflowStoryFormNavItem exists
 expect WorkflowInnerOuterProblemsNavItem exists
 expect WorkflowProblemBeatsNavItem exists # Collaborator #302
@@ -149,7 +149,7 @@ expect WorkflowTryAgainButton enabled
 screenshot "Collaborator-Window-Overview.png" window "Story Collaborator"
 screenshot "Collaborator-Session-Premise.png" window "Story Collaborator"
 screenshot "Collaborator-Workflow-Premise.png" window "Story Collaborator"
-screenshot "Collaborator-Property-Updates.png" of name:"Overview.Concept" name:"Overview.Premise" WorkflowAcceptAllButton margin 36
+screenshot "Collaborator-Property-Updates.png" of WorkflowProposalsScrollViewer WorkflowAcceptAllButton margin 36   # whatever fields the model proposes
 
 step "TC-125: Hide and show the workflow list"
 click WorkflowPaneToggleButton pointer
@@ -165,22 +165,17 @@ click WorkflowSkipButton                  # one Skip: the number of proposals di
 
 step "TC-115: Story Problem, then Accept All"
 click WorkflowStoryProblemNavItem
-select CollabPickerList "Catching the drug dealer Lacas"   # the Story Problem; the picker may preselect it
-click PrimaryButton                       # "Select"
-select CollabPickerList "Leonard Kraskin" # Protagonist
-click PrimaryButton
-select CollabPickerList "Charlie Lacas"   # Antagonist
-click PrimaryButton
+pick Problem="Catching the drug dealer Lacas" Protagonist="Leonard Kraskin" Antagonist="Charlie Lacas"
 wait WorkflowAcceptAllButton condense
 screenshot "Collaborator-Workflow-Story-Problem.png" window "Story Collaborator"
 click WorkflowAcceptAllButton             # applies the New rows
 dialog "Replace existing content?" click CloseButton   # Cancel: the Has your text rows keep the sample's words and names
 
 step "TC-117: Story Form, closed without accepting"
-click WorkflowGroupOverviewNavItem        # this session's groups start closed
-click WorkflowGroupProblemNavItem
-click WorkflowGroupCharacterNavItem
-click WorkflowGroupStoryWorldNavItem
+expand WorkflowGroupOverviewNavItem       # this session's groups start closed
+expand WorkflowGroupProblemNavItem
+expand WorkflowGroupCharacterNavItem
+expand WorkflowGroupStoryWorldNavItem
 click WorkflowStoryFormNavItem            # the Overview needs no picker
 wait WorkflowAcceptAllButton condense
 screenshot "Collaborator-Workflow-Story-Form.png" window "Story Collaborator"
@@ -191,12 +186,9 @@ open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas"
 tab ProtagonistTab
 select ProblemProtagonistCombo "Leonard Kraskin"   # without it the workflow asks for a protagonist in a third picker
 click SaveStatusButton
+expand WorkflowGroupProblemNavItem
 click WorkflowInnerOuterProblemsNavItem
-select CollabPickerList "Catching the drug dealer Lacas"   # outer Problem
-click PrimaryButton
-click PrimaryButton                       # "Change Protagonist": Leonard, set above, is already chosen
-select CollabPickerList "Leonard's impulsiveness lets Lacas capture him"   # inner Problem
-click PrimaryButton                       # the protagonist comes from the outer Problem, set above
+pick OuterProblem="Catching the drug dealer Lacas" InnerProblem="Leonard's impulsiveness lets Lacas capture him" Protagonist="Leonard Kraskin"
 wait WorkflowAcceptAllButton condense
 screenshot "Collaborator-Workflow-Inner-Outer.png" window "Story Collaborator"
 step "TC-128: Problem Builder on the tech problem"
@@ -213,7 +205,7 @@ click SaveStatusButton
 click WorkflowProblemBuilderNavItem
 select CollabPickerList "How will Leonard and Tony get past Charlie's tech?"
 screenshot dialog "Collaborator-Element-Picker.png"
-click PrimaryButton                       # "Select"
+pick Problem="How will Leonard and Tony get past Charlie's tech?" Protagonist="Leonard Kraskin" Antagonist="Charlie Lacas"
 wait WorkflowAcceptAllButton condense
 screenshot "Collaborator-Updates-After-Run.png" window "Story Collaborator"
 screenshot "Collaborator-Session-Problem-Builder.png" window "Story Collaborator"
@@ -222,17 +214,16 @@ click WorkflowSkipButton                  # one row read, Yours against Proposed
 click WorkflowAcceptRemainingButton       # Accept Free Remaining: the New rows; Has your text rows wait
 
 step "TC-129: Problem Beats on the same problem"
+expand WorkflowGroupProblemNavItem
 click WorkflowProblemBeatsNavItem
-select CollabPickerList "How will Leonard and Tony get past Charlie's tech?"
-click PrimaryButton
+pick Problem="How will Leonard and Tony get past Charlie's tech?" Protagonist="Leonard Kraskin" Antagonist="Charlie Lacas"
 wait WorkflowAcceptAllButton condense
 screenshot "Collaborator-Workflow-Problem-Beats.png" window "Story Collaborator"
 click WorkflowAcceptAllButton             # beats only fill empty rows, so no Replace question
 
 step "TC-130: Character Builder on Leonard Kraskin"
 click WorkflowCharacterBuilderNavItem
-select CollabPickerList "Leonard Kraskin"
-click PrimaryButton
+pick Character="Leonard Kraskin"
 wait WorkflowAcceptAllButton condense
 screenshot "Collaborator-Workflow-Character-Builder.png" window "Story Collaborator"
 click WorkflowAcceptAllButton
@@ -242,9 +233,9 @@ step "TC-131: Outline gaps after the spine workflows"
 click WorkflowOutlineGapsNavItem
 screenshot "Collaborator-Outline-Gaps-Midway.png" window "Story Collaborator"
 step "TC-132: Flaw and Backstory on Charlie Lacas, with chat"
+expand WorkflowGroupCharacterNavItem
 click WorkflowFlawBackstoryNavItem
-select CollabPickerList "Charlie Lacas"
-click PrimaryButton
+pick Character="Charlie Lacas"
 wait WorkflowAcceptAllButton condense
 screenshot "Collaborator-Workflow-Flaw-Backstory.png" window "Story Collaborator"
 focus InputSearchBox
@@ -260,17 +251,15 @@ screenshot "Collaborator-Workflow-Flaw-Backstory-Chat.png" window "Story Collabo
 # Nothing accepted: the chat rewrites the waiting rows, and they stay proposals.
 
 step "TC-133: Character Relationship"
+expand WorkflowGroupCharacterNavItem
 click WorkflowRelationshipNavItem
-select CollabPickerList "Leonard Kraskin" # Character
-click PrimaryButton
-select CollabPickerList "Tony Irwin"      # Partner
-click PrimaryButton
+pick Character="Leonard Kraskin" Partner="Tony Irwin"
 wait WorkflowAcceptAllButton condense
 screenshot "Collaborator-Workflow-Relationship.png" window "Story Collaborator"
 step "TC-134: Character Interview on Charlie Lacas"
+expand WorkflowGroupCharacterNavItem
 click WorkflowCharacterInterviewNavItem
-select CollabPickerList "Charlie Lacas"
-click PrimaryButton
+pick Character="Charlie Lacas" Problem="Catching the drug dealer Lacas"   # Problem is an optional input with no linked field
 wait InputSearchBox                       # the choice list is local: nothing is charged yet
 focus InputSearchBox
 type "Flaw"
@@ -287,16 +276,16 @@ expect-no WorkflowAcceptAllButton         # an interview has no field proposals
 click SaveInterviewButton                 # writes the transcript as a note under Charlie
 
 step "TC-135: Define Story World"
+expand WorkflowGroupStoryWorldNavItem
 click WorkflowDefineStoryWorldNavItem     # the Story World needs no picker; one is made if missing
 wait WorkflowAcceptAllButton condense
 screenshot "Collaborator-Workflow-Story-World.png" window "Story Collaborator"
 step "TC-116: Setting Builder, accept two rows"
 click WorkflowSettingBuilderNavItem
-select CollabPickerList "Unmarked police car" # every field empty, so every row is New
-click PrimaryButton
+pick Setting="Unmarked police car"        # every field empty, so every row is New
 wait WorkflowAcceptAllButton condense
 screenshot "Collaborator-Workflow-Setting-Builder.png" window "Story Collaborator"
-screenshot "Collaborator-Row-New.png" of name:"Setting.Weather" margin 4
+screenshot "Collaborator-Row-New.png" of WorkflowProposalsScrollViewer margin 4   # the rows the model proposed, all New
 click name:"Accept update"                # the first row (rows sort by key: Description first)
 click name:"Accept update"                # the next row; an accepted row leaves the list
 expect name:"Setting.Weather" exists      # Weather is still a proposal
@@ -307,8 +296,7 @@ expect WorkflowAcceptButton exists
 screenshot "Collaborator-Review-Each.png" window "Story Collaborator"
 step "TC-137: Scene Builder"
 click WorkflowSceneBuilderNavItem
-select CollabPickerList "We have a drug deal"
-click PrimaryButton
+pick Scene="We have a drug deal"
 wait WorkflowAcceptAllButton condense
 screenshot "Collaborator-Workflow-Scene-Builder.png" window "Story Collaborator"
 step "TC-138: Exit, then check what was and was not accepted"
@@ -331,4 +319,6 @@ step "TC-120: Buy Credits button opens the dialog"
 expect BuyCreditsButton enabled
 click BuyCreditsButton pointer
 dialog "Buy Credits" click CloseButton    # "Not now": no purchase
+click tree "Danger Calls"                 # TC-138 left the Setting page in the content pane
+wait TitleTextBox
 expect TitleTextBox exists
