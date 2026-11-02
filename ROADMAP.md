@@ -8,7 +8,8 @@ Where StoryCAD is going, how the team plans new features, and how you can sugges
 
 - StoryCAD is currently at version **4.3**. The next public release is **4.4**.
 - **4.3** put **Collaborator**, StoryCAD's optional AI assistant, inside StoryCAD as a free beta for a limited group of testers.
-- **4.4** is Collaborator's production release, open to all StoryCAD users, together with StoryCAD improvements such as a Plot Board window for the beat structure. You can track it on the GitHub milestone page.
+- **4.4** is Collaborator's production release, open to all StoryCAD users. It holds what Collaborator needs before it goes on sale, and fixes to Collaborator's quality. You can track it on the GitHub milestone page.
+- **4.5** follows with StoryCAD improvements such as a Plot Board window for the beat structure.
 - All public planning lives on **GitHub**: <https://github.com/storybuilder-org/StoryCAD>.
 - Releases ship when they're ready. There is **no fixed calendar** for any version, by design.
 
@@ -21,22 +22,51 @@ Release 4.4 makes Collaborator available to everyone. It moves in two stages aft
 1. **Purchase testing.** The team buys Collaborator through the Microsoft Store and the Mac App Store, on Windows and macOS, and checks that a real purchase turns Collaborator on.
 2. **Public sale.** Collaborator is published for sale in both stores.
 
+For Release 4.4 to ship, Collaborator must work like this:
+
+1. You can buy it in the Microsoft Store and the Mac App Store.
+2. When you open Collaborator, you can subscribe, or restore a purchase made on the same store account, and then use the paid version.
+3. Its workflows run on the production service, on the AI model the team chooses.
+4. When something fails, it tells you what happened, and you are not charged.
+
 StoryCAD work in Release 4.4 (public issues):
 
 | Issue | What it does |
 |---|---|
-| [#1546](https://github.com/storybuilder-org/StoryCAD/issues/1546) | Beat structure as a tree: unplaced elements, an API for it, and a Plot Board window |
-| [#1421](https://github.com/storybuilder-org/StoryCAD/issues/1421) | Automated UI testing: a script runner, with a smoke test as the first script |
-| [#1392](https://github.com/storybuilder-org/StoryCAD/issues/1392) | Build pipeline: separate secrets for each branch |
+| [#1655](https://github.com/storybuilder-org/StoryCAD/issues/1655) | Collaborator's sign-up moves from the beta to the paid version |
+| [#1645](https://github.com/storybuilder-org/StoryCAD/issues/1645) | Edits you make while the Collaborator window is open reach Collaborator |
+| [#1638](https://github.com/storybuilder-org/StoryCAD/issues/1638) | An error opening an outline stored on Google Drive |
+| [#1546](https://github.com/storybuilder-org/StoryCAD/issues/1546) | Beat structure as a tree: the rules that protect it, and an API for it (the Plot Board window is 4.5) |
+| [#1592](https://github.com/storybuilder-org/StoryCAD/issues/1592) | The startup help dialog links to the Collaborator section of the user manual |
+| [#1656](https://github.com/storybuilder-org/StoryCAD/issues/1656) | StoryCAD tells you about Collaborator |
+| [#1422](https://github.com/storybuilder-org/StoryCAD/issues/1422) | Automated tests that follow the user manual, starting with the Collaborator pages (the rest is 4.5) |
+| [#1626](https://github.com/storybuilder-org/StoryCAD/issues/1626) | StoryCAD's YouTube channel, with an updated "Meet Collaborator" video |
 
 Collaborator work in Release 4.4 (the Collaborator repository is private, so these have no links):
 
-- Outline gaps cover Settings and the Story World.
 - Story gaps tell you which part of the story is missing and which workflow to run next.
-- Collaborator records which property values it wrote.
-- Accessibility names on the remaining Collaborator window controls.
-- Research on running Collaborator's AI on a different host.
-- Reorganized automated tests for Collaborator's code.
+- Collaborator records which property values it wrote, so a value it invented is not treated as yours.
+- Outline gaps cover Settings and the Story World.
+- Research on running Collaborator's AI on open models hosted by Cloudflare.
+- Done: when the AI model fails, Collaborator shows a plain message, says you were not charged, and gives a code to send to support.
+
+---
+
+## What's planned for 4.5
+
+StoryCAD work in Release 4.5 (public issues):
+
+| Issue | What it does |
+|---|---|
+| [#1546](https://github.com/storybuilder-org/StoryCAD/issues/1546) | A Plot Board window for the beat structure |
+| [#1636](https://github.com/storybuilder-org/StoryCAD/issues/1636) | Opening another outline asks before it saves your changes, and "Save changes?" gets a Cancel button |
+| [#1652](https://github.com/storybuilder-org/StoryCAD/issues/1652) | Open from file works when StoryCAD runs as administrator |
+| [#1452](https://github.com/storybuilder-org/StoryCAD/issues/1452) | A screen-reader name for the Notes box on Folder pages (waits on a fix in a library StoryCAD uses) |
+| [#1422](https://github.com/storybuilder-org/StoryCAD/issues/1422) | More automated tests that follow the user manual |
+| [#1647](https://github.com/storybuilder-org/StoryCAD/issues/1647) | A tool that lets the team's test scripts drive StoryCAD step by step |
+| [#1392](https://github.com/storybuilder-org/StoryCAD/issues/1392) | Build pipeline: separate secrets for each branch |
+
+Collaborator work in Release 4.5: reorganized automated tests for Collaborator's code.
 
 ---
 
@@ -52,7 +82,7 @@ To see only the issues in a specific release, use a search like:
 
 **<https://github.com/storybuilder-org/StoryCAD/issues?q=is%3Aissue+milestone%3A%22Release+4.4%22>**
 
-Replace `Release+4.4` with another release name (for example `Release+4.2` or `Release+4.3`) to see a different release.
+Replace `Release+4.4` with another release name (for example `Release+4.3` or `Release+4.5`) to see a different release.
 
 You don't need a GitHub account to read any of this; everything in the StoryCAD repository is public.
 
@@ -121,6 +151,7 @@ StoryCAD has an optional AI assistant called **Collaborator**. It is part of Sto
 | All planned releases | <https://github.com/storybuilder-org/StoryCAD/milestones> |
 | What's in 4.3 specifically | <https://github.com/storybuilder-org/StoryCAD/milestone/6> |
 | What's in 4.4 specifically | <https://github.com/storybuilder-org/StoryCAD/milestone/7> |
+| What's in 4.5 specifically | <https://github.com/storybuilder-org/StoryCAD/milestone/8> |
 | File a bug or feature request | <https://github.com/storybuilder-org/StoryCAD/issues/new> |
 | Suggest an idea informally | `#feature-requests` on Discord |
 | Read the current user manual | <https://manual.storybuilder.org/> |
