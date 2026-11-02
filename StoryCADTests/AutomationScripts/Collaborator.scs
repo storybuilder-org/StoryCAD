@@ -42,15 +42,17 @@ focus TitleTextBox                        # the app leaves the caret in the sear
 press "End"
 screenshot "Collaborator-Toolbar-Button.png" of FileMenuButton HelpButton margin 4
 click CollaboratorButton
+window "Story Collaborator" size 1036x744
 wait-window "Story Collaborator"
 click WorkflowOutlineGapsNavItem          # a page, not a run: nothing is charged
-screenshot "Collaborator-Outline-Gaps.png" of WorkflowNav WorkflowExitButton
+screenshot "Collaborator-Outline-Gaps.png" window "Story Collaborator"
 click WorkflowExitButton
 expect WorkflowNav gone
 
 step "TC-111: No document open"
 menu CloseStoryMenuItem
 click CollaboratorButton
+window "Story Collaborator" size 1036x744
 expect StatusMessageText text "No story is open. Open an outline before using Collaborator."
 expect-no WorkflowNav
 menu OpenCreateFileMenuItem               # step 2: the main window still works
@@ -69,6 +71,7 @@ screenshot "Collaborator-Session-Overview.png"
 
 step "TC-110: Open Collaborator window"
 click CollaboratorButton
+window "Story Collaborator" size 1036x744
 wait-window "Story Collaborator"
 expect WorkflowNav exists
 expect WorkflowOutlineGapsNavItem exists  # Danger Calls has empty required fields
@@ -123,6 +126,7 @@ pause 60                                  # by hand: AutoSave writes the file an
 
 step "TC-113: Timed backup paused while Collaborator is open"
 click CollaboratorButton
+window "Story Collaborator" size 1036x744
 wait-window "Story Collaborator"
 pause 90                                  # by hand: no new "Danger Calls as of ....zip" in {scratch}/backups
 click WorkflowExitButton
@@ -131,6 +135,7 @@ pause 90                                  # by hand: a new backup zip appears
 
 step "TC-119: Close and reopen Collaborator in the same session"
 click CollaboratorButton                  # TC-113 opened and closed it; this is the second open
+window "Story Collaborator" size 1036x744
 wait-window "Story Collaborator"
 expect WorkflowNav exists
 expect WorkflowPremiseNavItem exists      # step 4, a short run, is TC-114
@@ -142,14 +147,14 @@ click WorkflowPremiseNavItem              # a click runs the workflow: no Run bu
 wait WorkflowAcceptAllButton condense     # waits up to 5 minutes for the run
 expect WorkflowReviewEachButton enabled
 expect WorkflowTryAgainButton enabled
-screenshot "Collaborator-Window-Overview.png" of WorkflowNav WorkflowExitButton
-screenshot "Collaborator-Session-Premise.png" of WorkflowNav WorkflowExitButton
-screenshot "Collaborator-Workflow-Premise.png" of WorkflowNav WorkflowExitButton
+screenshot "Collaborator-Window-Overview.png" window "Story Collaborator"
+screenshot "Collaborator-Session-Premise.png" window "Story Collaborator"
+screenshot "Collaborator-Workflow-Premise.png" window "Story Collaborator"
 screenshot "Collaborator-Property-Updates.png" of name:"Overview.Concept" name:"Overview.Premise" WorkflowAcceptAllButton margin 36
 
 step "TC-125: Hide and show the workflow list"
 click WorkflowPaneToggleButton pointer
-screenshot "Collaborator-Pane-Collapsed.png" of WorkflowNav WorkflowExitButton
+screenshot "Collaborator-Pane-Collapsed.png" window "Story Collaborator"
 click WorkflowPaneToggleButton pointer
 expect WorkflowPremiseNavItem exists
 
@@ -170,7 +175,7 @@ click PrimaryButton
 select CollabPickerList "Charlie Lacas"   # Antagonist
 click PrimaryButton
 wait WorkflowAcceptAllButton condense
-screenshot "Collaborator-Workflow-Story-Problem.png" of WorkflowNav WorkflowExitButton
+screenshot "Collaborator-Workflow-Story-Problem.png" window "Story Collaborator"
 click WorkflowAcceptAllButton             # applies the New rows
 dialog "Replace existing content?" click CloseButton   # Cancel: the Has your text rows keep the sample's words and names
 
@@ -181,7 +186,7 @@ click WorkflowGroupCharacterNavItem
 click WorkflowGroupStoryWorldNavItem
 click WorkflowStoryFormNavItem            # the Overview needs no picker
 wait WorkflowAcceptAllButton condense
-screenshot "Collaborator-Workflow-Story-Form.png" of WorkflowNav WorkflowExitButton
+screenshot "Collaborator-Workflow-Story-Form.png" window "Story Collaborator"
 # Nothing accepted: the check that Genre and Type stay as they were is in the last Collaborator step.
 
 step "TC-127: Inner and Outer Problems"
@@ -191,8 +196,7 @@ click PrimaryButton
 select CollabPickerList "Leonard's impulsiveness lets Lacas capture him"   # inner Problem
 click PrimaryButton                       # the protagonist comes from the outer Problem (linked in TC-115)
 wait WorkflowAcceptAllButton condense
-screenshot "Collaborator-Workflow-Inner-Outer.png" of WorkflowNav WorkflowExitButton
-
+screenshot "Collaborator-Workflow-Inner-Outer.png" window "Story Collaborator"
 step "TC-128: Problem Builder on the tech problem"
 open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"
 tab ProblemTab
@@ -209,8 +213,8 @@ select CollabPickerList "How will Leonard and Tony get past Charlie's tech?"
 screenshot dialog "Collaborator-Element-Picker.png"
 click PrimaryButton                       # "Select"
 wait WorkflowAcceptAllButton condense
-screenshot "Collaborator-Updates-After-Run.png" of WorkflowNav WorkflowExitButton
-screenshot "Collaborator-Session-Problem-Builder.png" of WorkflowNav WorkflowExitButton
+screenshot "Collaborator-Updates-After-Run.png" window "Story Collaborator"
+screenshot "Collaborator-Session-Problem-Builder.png" window "Story Collaborator"
 click WorkflowReviewEachButton
 click WorkflowSkipButton                  # one row read, Yours against Proposed, and kept
 click WorkflowAcceptRemainingButton       # Accept Free Remaining: the New rows; Has your text rows wait
@@ -220,7 +224,7 @@ click WorkflowProblemBeatsNavItem
 select CollabPickerList "How will Leonard and Tony get past Charlie's tech?"
 click PrimaryButton
 wait WorkflowAcceptAllButton condense
-screenshot "Collaborator-Workflow-Problem-Beats.png" of WorkflowNav WorkflowExitButton
+screenshot "Collaborator-Workflow-Problem-Beats.png" window "Story Collaborator"
 click WorkflowAcceptAllButton             # beats only fill empty rows, so no Replace question
 
 step "TC-130: Character Builder on Leonard Kraskin"
@@ -228,30 +232,29 @@ click WorkflowCharacterBuilderNavItem
 select CollabPickerList "Leonard Kraskin"
 click PrimaryButton
 wait WorkflowAcceptAllButton condense
-screenshot "Collaborator-Workflow-Character-Builder.png" of WorkflowNav WorkflowExitButton
+screenshot "Collaborator-Workflow-Character-Builder.png" window "Story Collaborator"
 click WorkflowAcceptAllButton
 dialog "Replace existing content?" click CloseButton   # Cancel: Leonard keeps the sample's Role and other text
 
 step "TC-131: Outline gaps after the spine workflows"
 click WorkflowOutlineGapsNavItem
-screenshot "Collaborator-Outline-Gaps-Midway.png" of WorkflowNav WorkflowExitButton
-
+screenshot "Collaborator-Outline-Gaps-Midway.png" window "Story Collaborator"
 step "TC-132: Flaw and Backstory on Charlie Lacas, with chat"
 click WorkflowFlawBackstoryNavItem
 select CollabPickerList "Charlie Lacas"
 click PrimaryButton
 wait WorkflowAcceptAllButton condense
-screenshot "Collaborator-Workflow-Flaw-Backstory.png" of WorkflowNav WorkflowExitButton
+screenshot "Collaborator-Workflow-Flaw-Backstory.png" window "Story Collaborator"
 focus InputSearchBox
 type "Which of the story's problems does Charlie's flaw feed, and how?"
 press "Enter"
 wait InputSearchBox condense              # returns before the reply (runner gap 4)
-screenshot "Collaborator-Chat.png" of WorkflowNav WorkflowExitButton
+screenshot "Collaborator-Chat.png" window "Story Collaborator"
 focus InputSearchBox
 type "Rewrite Flaw as Charlie Lacas's major character flaw: the blind spot that can bring him down. Rewrite Backstory as the history of that flaw. Keep him a drug dealer in this story."
 press "Enter"
 wait InputSearchBox condense              # returns before the reply (runner gap 4)
-screenshot "Collaborator-Workflow-Flaw-Backstory-Chat.png" of WorkflowNav WorkflowExitButton
+screenshot "Collaborator-Workflow-Flaw-Backstory-Chat.png" window "Story Collaborator"
 # Nothing accepted: the chat rewrites the waiting rows, and they stay proposals.
 
 step "TC-133: Character Relationship"
@@ -261,8 +264,7 @@ click PrimaryButton
 select CollabPickerList "Tony Irwin"      # Partner
 click PrimaryButton
 wait WorkflowAcceptAllButton condense
-screenshot "Collaborator-Workflow-Relationship.png" of WorkflowNav WorkflowExitButton
-
+screenshot "Collaborator-Workflow-Relationship.png" window "Story Collaborator"
 step "TC-134: Character Interview on Charlie Lacas"
 click WorkflowCharacterInterviewNavItem
 select CollabPickerList "Charlie Lacas"
@@ -272,27 +274,26 @@ focus InputSearchBox
 type "Flaw"
 press "Enter"
 wait InputSearchBox condense              # the box is disabled while a turn runs
-screenshot "Collaborator-Workflow-Character-Interview.png" of WorkflowNav WorkflowExitButton
+screenshot "Collaborator-Workflow-Character-Interview.png" window "Story Collaborator"
 focus InputSearchBox
 type "Nobody gets my number twice. The man who answers first owns the street, and I answer first."
 press "Enter"
 wait InputSearchBox condense
 wait SaveInterviewButton
-screenshot "Collaborator-Workflow-Character-Interview-End.png" of WorkflowNav WorkflowExitButton
+screenshot "Collaborator-Workflow-Character-Interview-End.png" window "Story Collaborator"
 expect-no WorkflowAcceptAllButton         # an interview has no field proposals
 click SaveInterviewButton                 # writes the transcript as a note under Charlie
 
 step "TC-135: Define Story World"
 click WorkflowDefineStoryWorldNavItem     # the Story World needs no picker; one is made if missing
 wait WorkflowAcceptAllButton condense
-screenshot "Collaborator-Workflow-Story-World.png" of WorkflowNav WorkflowExitButton
-
+screenshot "Collaborator-Workflow-Story-World.png" window "Story Collaborator"
 step "TC-116: Setting Builder, accept two rows"
 click WorkflowSettingBuilderNavItem
 select CollabPickerList "Unmarked police car" # every field empty, so every row is New
 click PrimaryButton
 wait WorkflowAcceptAllButton condense
-screenshot "Collaborator-Workflow-Setting-Builder.png" of WorkflowNav WorkflowExitButton
+screenshot "Collaborator-Workflow-Setting-Builder.png" window "Story Collaborator"
 screenshot "Collaborator-Row-New.png" of name:"Setting.Weather" margin 4
 click name:"Accept update"                # the first row (rows sort by key: Description first)
 click name:"Accept update"                # the next row; an accepted row leaves the list
@@ -301,15 +302,13 @@ expect name:"Setting.Weather" exists      # Weather is still a proposal
 step "TC-136: Review Each card"
 click WorkflowReviewEachButton
 expect WorkflowAcceptButton exists
-screenshot "Collaborator-Review-Each.png" of WorkflowNav WorkflowExitButton
-
+screenshot "Collaborator-Review-Each.png" window "Story Collaborator"
 step "TC-137: Scene Builder"
 click WorkflowSceneBuilderNavItem
 select CollabPickerList "We have a drug deal"
 click PrimaryButton
 wait WorkflowAcceptAllButton condense
-screenshot "Collaborator-Workflow-Scene-Builder.png" of WorkflowNav WorkflowExitButton
-
+screenshot "Collaborator-Workflow-Scene-Builder.png" window "Story Collaborator"
 step "TC-138: Exit, then check what was and was not accepted"
 click WorkflowExitButton                  # anything not accepted is dropped
 expect WorkflowNav gone
