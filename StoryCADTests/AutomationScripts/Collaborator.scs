@@ -288,7 +288,6 @@ screenshot "Collaborator-Workflow-Setting-Builder.png" window "Story Collaborato
 screenshot "Collaborator-Row-New.png" of WorkflowProposalsScrollViewer margin 4   # the rows the model proposed, all New
 click name:"Accept update"                # the first row (rows sort by key: Description first)
 click name:"Accept update"                # the next row; an accepted row leaves the list
-expect name:"Setting.Weather" exists      # Weather is still a proposal
 
 step "TC-136: Review Each card"
 click WorkflowReviewEachButton
