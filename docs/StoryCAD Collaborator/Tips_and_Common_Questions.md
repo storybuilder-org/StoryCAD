@@ -29,13 +29,17 @@ Accept, then look at the element in StoryCAD. Two steps, and they catch surprise
 
 Collaborator needs a working network connection to run workflows, because each run goes to a service the Foundation operates. During the beta you Join from the Collaborator dialog; after Collaborator is for sale you Subscribe. There is nothing to buy during the beta. [Getting Started](Getting_Started.html) explains both.
 
+If the chat column says "The AI model is busy. Wait a minute and try again. You were not charged.", your connection reached Collaborator's service, but the AI model behind it could not take the run just then. Wait a minute and click the workflow again. A failed run, busy or error, costs you nothing.
+
 ## Where to learn the craft
 
 Collaborator is quicker to use, and its suggestions easier to judge, when you already know what a premise or a problem's goal and motivation should look like. This manual's [Writing with StoryCAD](../Writing%20with%20StoryCAD/Writing_with_StoryCAD.html) chapters teach that, and StoryBuilder's [resources](https://storybuilder.org/resources/) and [learn](https://storybuilder.org/learn/) pages go further.
 
 ## Getting help
 
-Collaborator's Help control on the top bar opens a short overview of the window, and the Open the full manual link at the foot of it brings you back to this section in your browser. For StoryCAD itself, see [Getting Help](../Front%20Matter/Getting_Help.html) in this manual. For feedback during the beta, use the route your invitation gives.
+Collaborator's Help control on the top bar opens a short overview of the window, and the Open the full manual link at the foot of it brings you back to this section in your browser. For StoryCAD itself, see [Getting Help](../Front%20Matter/Getting_Help.html) in this manual. For feedback during the beta, email support@storybuilder.org.
+
+If a run fails with "The AI model returned an error," the message ends with an eight-character code, for example ed67a22a, and it is different every time. Include that code when you email support@storybuilder.org; support uses it to find the record of that error. [Running a Workflow](Running_a_Workflow.html) shows both failure messages.
 
 ## Common questions
 

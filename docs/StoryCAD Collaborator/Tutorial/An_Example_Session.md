@@ -24,11 +24,11 @@ Open your copy of Danger Calls and select Danger Calls at the top of the Story E
 
 ## 2. Ideation (Story idea => Concept => Premise)
 
-Click the **Ideation (Story idea => Concept => Premise)** workflow in the list. Clicking runs it straight away, so wait for it to finish, then read the header above the Property Updates list. It counts the proposals, and the line above it tells you how many would replace text you wrote.
+Click the **Ideation (Story idea => Concept => Premise)** workflow in the list. Clicking runs it straight away, so wait for it to finish, then read the header above the Property Updates list, which counts the proposals. The status line in the chat column tells you how many would replace text you wrote and which fields were kept as they are.
 
 Danger Calls already has a Story Idea (a news piece about teenagers selling drugs using disposable phones) and a Concept (what if a detective uses a criminal's own phone to stage a rescue). Fields carrying that text come back marked Has your text, and **Accept All** asks before it replaces any of them. That is the point of the labels: nothing you wrote disappears unless you choose **Replace**.
 
-![The Ideation (Story idea => Concept => Premise) workflow finished on Danger Calls: three proposals headed 3: 0 free, 3 need review, each labeled Has your text](../../media/Collaborator/Collaborator-Session-Premise.png)
+![The Ideation (Story idea => Concept => Premise) workflow finished on Danger Calls: the Overview proposals, with the rows that hold the sample's text labeled Has your text](../../media/Collaborator/Collaborator-Session-Premise.png)
 
 Click **Review Each** and read one proposal properly. Compare Yours against Proposed, then Accept or Skip. Afterward, return to StoryCAD and open the Overview; anything you accepted is already there.
 
@@ -40,9 +40,9 @@ Danger Calls carries three problems, and the useful one to work on is How will L
 
 Click **Problem Builder** and choose that problem in the picker. If Collaborator needs a character it has no link to, it opens a second picker; choose an existing one, or use Create a new element if the person you want is not there yet. Cancelling a picker stops the run.
 
-Problem Builder takes four elements at once, which you can see on the Selected line: the Problem, the Overview, and both sides of the cast. It fills the problem's goal, motivation, conflict, and outcome. The beat sheet for the Structure tab is a second run, Problem Beats, on the same problem. On the sample it proposes nine updates, and eight of them already have your text, so those eight stop and ask. That is the slow path on purpose: eight replacements at once is exactly when you want to read before accepting.
+Problem Builder takes four elements at once, which you can see on the Selected line: the Problem, the Overview, and both sides of the cast. It fills the problem's goal, motivation, conflict, and outcome. The beat sheet for the Structure tab is a second run, Problem Beats, on the same problem. The sample problem is already partly filled, so many of the proposals come back marked Has your text, and those stop and ask. That is the slow path on purpose: several replacements at once is exactly when you want to read before accepting.
 
-![The Problem Builder run: nine proposals headed 9: 1 free, 8 need review, covering Description, Method, Notes, Premise, ProblemType and the StructureBeats beat sheet](../../media/Collaborator/Collaborator-Session-ProblemBuilder.png)
+![The Problem Builder run on the sample problem: proposals for the Problem's fields, the ones that hold the sample's text labeled Has your text](../../media/Collaborator/Collaborator-Session-Problem-Builder.png)
 
 Use Review Each on at least one row, reading Yours against Proposed, then Accept or Skip deliberately. Use Accept Free Remaining for anything left that does not need review. Then return to StoryCAD and open that Problem: anything you accepted is sitting in its fields. Run Problem Beats on it next, and the beat sheet you accept from that run is on the Structure tab.
 

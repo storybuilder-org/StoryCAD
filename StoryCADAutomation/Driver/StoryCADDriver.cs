@@ -993,6 +993,16 @@ public sealed class StoryCADDriver : IUiDriver
     /// <inheritdoc />
     public void Expand(ElementAddress target, TimeSpan? timeout = null)
     {
+        // A group header below the visible part of the Collaborator list is off-screen until
+        // the list scrolls (#1422).
+        try
+        {
+            ScrollIntoView(target, TimeSpan.FromSeconds(1));
+        }
+        catch (Exception)
+        {
+        }
+
         var element = _locator.WaitUntilReady(target, ReadinessRequirement.ExpandCollapse, Timeout(timeout));
         if (element.Patterns.ExpandCollapse.Pattern.ExpandCollapseState.ValueOrDefault
             != FlaUI.Core.Definitions.ExpandCollapseState.Expanded)
@@ -1160,6 +1170,18 @@ public sealed class StoryCADDriver : IUiDriver
     /// <inheritdoc />
     public void Focus(ElementAddress target, TimeSpan? timeout = null)
     {
+        // An AutoSuggestBox (Collaborator's chat box, InputSearchBox) takes no keyboard focus
+        // itself; its inner text box does, as SetText already uses (#1422).
+        var outer = _locator.TryFind(target, out _);
+        if (outer is not null && !outer.Properties.IsKeyboardFocusable.ValueOrDefault
+            && outer.FindFirstDescendant(cf => cf.ByControlType(ControlType.Edit)) is { } inner
+            && inner.Properties.IsKeyboardFocusable.ValueOrDefault)
+        {
+            inner.Focus();
+            Wait.UntilInputIsProcessed();
+            return;
+        }
+
         var element = _locator.WaitUntilReady(target, ReadinessRequirement.Focusable, Timeout(timeout));
         element.Focus();
         Wait.UntilInputIsProcessed();
