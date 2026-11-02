@@ -143,7 +143,7 @@ step "TC-114: Run Ideation on the Overview"
 click tree "Danger Calls"                 # Story Overview selected, as the plan sets up
 wait TitleTextBox
 click WorkflowPremiseNavItem              # a click runs the workflow: no Run button
-wait WorkflowAcceptAllButton condense     # waits up to 5 minutes for the run
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not     # waits up to 5 minutes for the run
 expect WorkflowReviewEachButton enabled
 expect WorkflowTryAgainButton enabled
 screenshot "Collaborator-Window-Overview.png" window "Story Collaborator"
@@ -166,7 +166,7 @@ click WorkflowSkipButton                  # one Skip: the number of proposals di
 step "TC-115: Story Problem, then Accept All"
 click WorkflowStoryProblemNavItem
 pick Problem="Catching the drug dealer Lacas" Protagonist="Leonard Kraskin" Antagonist="Charlie Lacas"
-wait WorkflowAcceptAllButton condense
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
 screenshot "Collaborator-Workflow-Story-Problem.png" window "Story Collaborator"
 click WorkflowAcceptAllButton             # applies the New rows
 dialog "Replace existing content?" click CloseButton   # Cancel: the Has your text rows keep the sample's words and names
@@ -177,7 +177,7 @@ expand WorkflowGroupProblemNavItem
 expand WorkflowGroupCharacterNavItem
 expand WorkflowGroupStoryWorldNavItem
 click WorkflowStoryFormNavItem            # the Overview needs no picker
-wait WorkflowAcceptAllButton condense
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
 screenshot "Collaborator-Workflow-Story-Form.png" window "Story Collaborator"
 # Nothing accepted: the check that Genre and Type stay as they were is in the last Collaborator step.
 
@@ -189,7 +189,7 @@ click SaveStatusButton
 expand WorkflowGroupProblemNavItem
 click WorkflowInnerOuterProblemsNavItem
 pick OuterProblem="Catching the drug dealer Lacas" InnerProblem="Leonard's impulsiveness lets Lacas capture him" Protagonist="Leonard Kraskin"
-wait WorkflowAcceptAllButton condense
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
 screenshot "Collaborator-Workflow-Inner-Outer.png" window "Story Collaborator"
 step "TC-128: Problem Builder on the tech problem"
 open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"
@@ -206,7 +206,7 @@ click WorkflowProblemBuilderNavItem
 select CollabPickerList "How will Leonard and Tony get past Charlie's tech?"
 screenshot dialog "Collaborator-Element-Picker.png"
 pick Problem="How will Leonard and Tony get past Charlie's tech?" Protagonist="Leonard Kraskin" Antagonist="Charlie Lacas"
-wait WorkflowAcceptAllButton condense
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
 screenshot "Collaborator-Updates-After-Run.png" window "Story Collaborator"
 screenshot "Collaborator-Session-Problem-Builder.png" window "Story Collaborator"
 click WorkflowReviewEachButton
@@ -217,14 +217,14 @@ step "TC-129: Problem Beats on the same problem"
 expand WorkflowGroupProblemNavItem
 click WorkflowProblemBeatsNavItem
 pick Problem="How will Leonard and Tony get past Charlie's tech?" Protagonist="Leonard Kraskin" Antagonist="Charlie Lacas"
-wait WorkflowAcceptAllButton condense
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
 screenshot "Collaborator-Workflow-Problem-Beats.png" window "Story Collaborator"
 click WorkflowAcceptAllButton             # beats only fill empty rows, so no Replace question
 
 step "TC-130: Character Builder on Leonard Kraskin"
 click WorkflowCharacterBuilderNavItem
 pick Character="Leonard Kraskin"
-wait WorkflowAcceptAllButton condense
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
 screenshot "Collaborator-Workflow-Character-Builder.png" window "Story Collaborator"
 click WorkflowAcceptAllButton
 dialog "Replace existing content?" click CloseButton   # Cancel: Leonard keeps the sample's Role and other text
@@ -236,7 +236,7 @@ step "TC-132: Flaw and Backstory on Charlie Lacas, with chat"
 expand WorkflowGroupCharacterNavItem
 click WorkflowFlawBackstoryNavItem
 pick Character="Charlie Lacas"
-wait WorkflowAcceptAllButton condense
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
 screenshot "Collaborator-Workflow-Flaw-Backstory.png" window "Story Collaborator"
 focus InputSearchBox
 type "Which of the story's problems does Charlie's flaw feed, and how?"
@@ -254,7 +254,7 @@ step "TC-133: Character Relationship"
 expand WorkflowGroupCharacterNavItem
 click WorkflowRelationshipNavItem
 pick Character="Leonard Kraskin" Partner="Tony Irwin"
-wait WorkflowAcceptAllButton condense
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
 screenshot "Collaborator-Workflow-Relationship.png" window "Story Collaborator"
 step "TC-134: Character Interview on Charlie Lacas"
 expand WorkflowGroupCharacterNavItem
@@ -272,18 +272,18 @@ press "Enter"
 wait InputSearchBox condense
 wait SaveInterviewButton
 screenshot "Collaborator-Workflow-Character-Interview-End.png" window "Story Collaborator"
-expect-no WorkflowAcceptAllButton         # an interview has no field proposals
+expect WorkflowAcceptAllButton disabled   # an interview has no field proposals
 click SaveInterviewButton                 # writes the transcript as a note under Charlie
 
 step "TC-135: Define Story World"
 expand WorkflowGroupStoryWorldNavItem
 click WorkflowDefineStoryWorldNavItem     # the Story World needs no picker; one is made if missing
-wait WorkflowAcceptAllButton condense
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
 screenshot "Collaborator-Workflow-Story-World.png" window "Story Collaborator"
 step "TC-116: Setting Builder, accept two rows"
 click WorkflowSettingBuilderNavItem
 pick Setting="Unmarked police car"        # every field empty, so every row is New
-wait WorkflowAcceptAllButton condense
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
 screenshot "Collaborator-Workflow-Setting-Builder.png" window "Story Collaborator"
 screenshot "Collaborator-Row-New.png" of WorkflowProposalsScrollViewer margin 4   # the rows the model proposed, all New
 click name:"Accept update"                # the first row (rows sort by key: Description first)
@@ -296,7 +296,7 @@ screenshot "Collaborator-Review-Each.png" window "Story Collaborator"
 step "TC-137: Scene Builder"
 click WorkflowSceneBuilderNavItem
 pick Scene="We have a drug deal"
-wait WorkflowAcceptAllButton condense
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
 screenshot "Collaborator-Workflow-Scene-Builder.png" window "Story Collaborator"
 step "TC-138: Exit, then check what was and was not accepted"
 click WorkflowExitButton                  # anything not accepted is dropped

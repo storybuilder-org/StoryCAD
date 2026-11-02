@@ -246,6 +246,20 @@ public class ScriptParserTests
         Assert.IsFalse(Parse(line).Success);
     }
 
+    // wait <target> gone [condense]: a Collaborator run ends when its progress text goes (#1422).
+    [TestMethod]
+    public void Parse_WaitGone_SetsGoneAndOptionalCondense()
+    {
+        var result = Parse("wait ResponseProgressText gone", "wait ResponseProgressText gone condense", "wait ResponseProgressText");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.IsTrue(result.Statements[1].Gone);
+        Assert.IsFalse(result.Statements[1].Condense);
+        Assert.IsTrue(result.Statements[2].Gone);
+        Assert.IsTrue(result.Statements[2].Condense);
+        Assert.IsFalse(result.Statements[3].Gone);
+    }
+
     // click <target> pointer forces a real pointer click (#1422).
     [TestMethod]
     public void Parse_ClickWithPointer_SetsPointer()

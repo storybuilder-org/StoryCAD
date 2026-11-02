@@ -332,6 +332,18 @@ public sealed class ScriptInterpreter
                 ExecutePick(s);
                 return currentStep;
 
+            case ScriptVerb.Wait when s.Gone:
+                // A run's progress text going away is its end (#1422); the long timeout covers a run.
+                if (s.Condense)
+                {
+                    _options.Profile.Condense(() => RequireDriver().WaitUntilGone(s.Target!, _options.CondenseTimeout));
+                }
+                else
+                {
+                    RequireDriver().WaitUntilGone(s.Target!, _options.CondenseTimeout);
+                }
+
+                return currentStep;
             case ScriptVerb.Wait when s.Condense:
                 // A long wait; the presentation profile records it so the video can cut it (#1626).
                 _options.Profile.Condense(() =>

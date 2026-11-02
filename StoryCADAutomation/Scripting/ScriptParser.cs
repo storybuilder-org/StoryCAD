@@ -384,8 +384,19 @@ public static partial class ScriptParser
                 return New(ScriptVerb.Wait) with { Target = target };
             }
 
+            var gone = false;
+            if (r.Peek is { Kind: TokenKind.Word } next && next.Value == "gone")
+            {
+                TakeKeyword(r, "gone");
+                gone = true;
+                if (r.AtEnd)
+                {
+                    return New(ScriptVerb.Wait) with { Target = target, Gone = true };
+                }
+            }
+
             TakeKeyword(r, "condense");
-            return New(ScriptVerb.Wait) with { Target = target, Condense = true };
+            return New(ScriptVerb.Wait) with { Target = target, Condense = true, Gone = gone };
         }
 
         // narrate "spoken" caption "written": the caption text when the spoken form reads badly,

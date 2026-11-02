@@ -44,6 +44,13 @@ public sealed record ScriptStatement
     public bool Condense { get; init; }
 
     /// <summary>
+    ///     "wait &lt;target&gt; gone [condense]": waits up to the long (condense) timeout for the
+    ///     target to go away. A Collaborator run ends when its progress text goes, whether or not
+    ///     it proposes anything, so Accept All is no signal (#1422).
+    /// </summary>
+    public bool Gone { get; init; }
+
+    /// <summary>
     ///     "click &lt;target&gt; pointer": a real pointer click whatever the control supports. A
     ///     dialog opened by UIA Invoke after keyboard input drew a focus ring on its first
     ///     control in manual images; a pointer click leaves the app in pointer mode (#1422).
