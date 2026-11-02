@@ -52,7 +52,6 @@ expect WorkflowNav gone
 step "TC-111: No document open"
 menu CloseStoryMenuItem
 click CollaboratorButton
-window "Story Collaborator" size 1036x744
 expect StatusMessageText text "No story is open. Open an outline before using Collaborator."
 expect-no WorkflowNav
 menu OpenCreateFileMenuItem               # step 2: the main window still works
@@ -190,11 +189,15 @@ screenshot "Collaborator-Workflow-Story-Form.png" window "Story Collaborator"
 # Nothing accepted: the check that Genre and Type stay as they were is in the last Collaborator step.
 
 step "TC-127: Inner and Outer Problems"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas"
+tab ProtagonistTab
+select ProblemProtagonistCombo "Leonard Kraskin"   # without it the workflow asks for a protagonist in a third picker
+click SaveStatusButton
 click WorkflowInnerOuterProblemsNavItem
 select CollabPickerList "Catching the drug dealer Lacas"   # outer Problem
 click PrimaryButton
 select CollabPickerList "Leonard's impulsiveness lets Lacas capture him"   # inner Problem
-click PrimaryButton                       # the protagonist comes from the outer Problem (linked in TC-115)
+click PrimaryButton                       # the protagonist comes from the outer Problem, set above
 wait WorkflowAcceptAllButton condense
 screenshot "Collaborator-Workflow-Inner-Outer.png" window "Story Collaborator"
 step "TC-128: Problem Builder on the tech problem"

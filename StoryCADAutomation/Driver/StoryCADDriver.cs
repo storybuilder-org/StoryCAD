@@ -787,7 +787,29 @@ public sealed class StoryCADDriver : IUiDriver
     /// <inheritdoc />
     public void SelectItem(ElementAddress container, string itemName, TimeSpan? timeout = null)
     {
+        // A dialog that replaces another with the same container id (the Collaborator picker
+        // asks for an outer, then an inner Problem) can leave the first lookup holding the
+        // closing dialog's list, whose rows are gone. Look the container up again until the
+        // item is found or the timeout ends (#1422, 2026-11-02 run).
         var t = Timeout(timeout);
+        var deadline = DateTime.UtcNow + t;
+        var attempt = TimeSpan.FromSeconds(1);
+        while (true)
+        {
+            try
+            {
+                SelectItemOnce(container, itemName, attempt);
+                return;
+            }
+            catch (AutomationException) when (DateTime.UtcNow + attempt < deadline)
+            {
+                Thread.Sleep(250);
+            }
+        }
+    }
+
+    private void SelectItemOnce(ElementAddress container, string itemName, TimeSpan t)
+    {
         var containerElement = _locator.WaitUntilReady(container, ReadinessRequirement.Interactive, t);
 
         // A ComboBox realizes its items only while its popup is open; expand first. The popup

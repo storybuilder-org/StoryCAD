@@ -206,6 +206,18 @@ public sealed class ScriptInterpreter
                 }
 
             case ScriptVerb.Click:
+                // A control below the visible part of its pane (a long Collaborator workflow list,
+                // the Review Each Skip button) is found but off-screen, and readiness refuses it;
+                // scroll it into view first, as a user scrolls (#1422). A target not found yet is
+                // left to the click's own readiness wait and message.
+                try
+                {
+                    RequireDriver().ScrollIntoView(s.Target!, TimeSpan.FromSeconds(1));
+                }
+                catch (AutomationException)
+                {
+                }
+
                 if (s.Pointer)
                 {
                     _options.Profile.Approach(RequireDriver(), s.Target!);
