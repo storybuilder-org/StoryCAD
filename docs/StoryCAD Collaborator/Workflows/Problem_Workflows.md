@@ -16,11 +16,11 @@ These three workflows work on a Problem element, and each opens a picker so you 
 
 Defining Problems distinguishes the outer problem, the external goal the protagonist pursues, from the inner problem, the flaw or wound that must change before the outer problem can truly be resolved. Writers sometimes call these the Want and the Need. StoryCAD keeps them as two Problem elements, and this workflow builds the second from the first.
 
-When you click it, the picker asks for the outer Problem, which must already exist, then for the inner Problem, which you can create on the spot, and then takes the protagonist from the outer Problem's Protagonist tab, asking you to pick one only if that tab is empty. If that character already has a Flaw or a Backstory, the workflow uses them as the source of the inner struggle. If not, it proposes a flaw that would explain it.
+When you click it, the picker asks for the outer Problem, normally one you have already developed, then for the inner Problem, which you can create on the spot, and then takes the protagonist from the outer Problem's Protagonist tab, asking you to pick one only if that tab is empty. If that character already has a Flaw or a Backstory, the workflow uses them as the source of the inner struggle. If not, it proposes a flaw that would explain it.
 
 It writes the inner Problem's form: the Story Question and Problem Type on the Problem tab, the Goal, Motivation, and Conflict on both the Protagonist and Antagonist tabs, and on the Resolution tab the Method and Theme, with its reasoning in Notes. The Conflict Type is set to Person vs. Self, and the protagonist and the antagonist of the inner Problem are the same character, because that is what an inner problem is. It also proposes a Flaw on that character's Flaw tab. Flaw and Backstory can write the same field from the character's side; whichever you accept last is what stays.
 
-![Property Updates after Inner and Outer Problems: the inner Problem's rows and the Flaw row on Sarah Osborne](../../media/Collaborator/Collaborator-Workflow-Inner-Outer.png)
+![Property Updates after Inner and Outer Problems on Leonard's impulsiveness lets Lacas capture him: the inner Problem's rows, with Leonard Kraskin as its antagonist and Person vs. Self as its Conflict Type](../../media/Collaborator/Collaborator-Workflow-Inner-Outer.png)
 
 ## Problem Builder
 

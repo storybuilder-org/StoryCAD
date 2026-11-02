@@ -26,7 +26,7 @@ A sentence at the top of the page beginning "Guess:" tells you where Collaborato
 
 | Story element | Required fields | Which workflow helps |
 |---|---|---|
-| Story Overview | Title, Story Idea, Author, Concept, Premise, Type, Genre, Story Problem | Ideation (Story idea => Concept => Premise) for Story Idea, Concept, and Premise; Story Form for Type and Genre; Story Problem (Premise => Problem + Characters) for the Story Problem. Title and Author you type in StoryCAD. |
+| Story Overview | Name (the Title on the Overview form), Story Idea, Author, Concept, Premise, Type, Genre, Story Problem | Ideation (Story idea => Concept => Premise) for Story Idea, Concept, and Premise; Story Form for Type and Genre; Story Problem (Premise => Problem + Characters) for the Story Problem. Title and Author you type in StoryCAD. |
 | Problem | Name, Story Question, Problem Category, Problem Type, Conflict Type, Subject, Premise, Protagonist, Antagonist, the Goal, Motivation, and Conflict for each of them, and Outcome | Story Problem (Premise => Problem + Characters) for the category and the two characters, and a first pass at the rest; Problem Builder for the goal, motivation, conflict, and outcome fields. Name you type in StoryCAD. |
 | Character | Name, Character Sketch, Role, Story Role, Age, Sex, Appearance, Backstory | Character Builder for Role, Age, Sex, Appearance, Story Role, and Character Sketch; Flaw and Backstory for Backstory. Name you type in StoryCAD. |
 | Setting | Name, Setting Summary | The page points Setting Summary at Setting Builder. Name you type in StoryCAD. |

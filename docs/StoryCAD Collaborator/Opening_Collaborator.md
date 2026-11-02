@@ -17,7 +17,7 @@ Collaborator works on the outline you have open in StoryCAD, so open one first. 
 
 With an outline open, click **Collaborator** on the StoryCAD toolbar. During the beta, you will initially see the options Join and Not now. After you Join, or after a paid subscription is in force, a separate window opens, titled Story Collaborator, and StoryCAD stays where it was behind it. [Getting Started](Getting_Started.html) covers Join, Subscribe, and what to do if the window does not open.
 
-![StoryCAD toolbar; the Collaborator button is the highlighted chain icon](../media/Collaborator/Collaborator-Toolbar-Button.png)
+![StoryCAD toolbar; the Collaborator button is the chain icon, fourth from the left](../media/Collaborator/Collaborator-Toolbar-Button.png)
 
 ## The Collaborator window
 
@@ -35,7 +35,7 @@ The list on the left opens short and grows only when you ask it to, because seei
 
 | Band | What it holds |
 |------|---------------|
-| Outline gaps | Required fields you have not filled in yet, with a count of the elements that have them. The row appears only when there are gaps, and it is usually the most useful thing to do next. |
+| Outline gaps | Required fields you have not filled in yet, with a count of those fields. The row appears only when there are gaps, and it is usually the most useful thing to do next. |
 | Starred | The workflows you have marked as yours. Six are starred to begin with, one for each stage of outlining: Ideation, Story Problem, Problem Builder, Character Builder, Setting Builder, and Scene Builder. |
 | Story element groups | Everything else, filed under Overview, Problem, Character, Story World, Setting, and Scene. A group appears only when it holds a workflow you haven't starred, so with the starting stars there is no Setting or Scene group. These start closed; click a group to open it. |
 
@@ -45,7 +45,7 @@ Nothing is hidden. Every workflow that is not starred is one click away in its g
 
 ## Star the workflows you use
 
-A star sits at the right of each workflow row. Click it to add that workflow to the Starred band, or click a filled star to remove it again. Starred workflows move to the top of the list, and the group they came from keeps the rest. Your stars are remembered between sessions, and they are yours alone; they do not change your outline, and they do not travel with the story file.
+A starred workflow shows a filled star at the right of its row. On any other row, the star appears when you point at the row or move to it with the keyboard. Click it to add that workflow to the Starred band, or click a filled star to remove it again. Starred workflows move to the top of the list, and the group they came from keeps the rest. Your stars are remembered between sessions, and they are yours alone; they do not change your outline, and they do not travel with the story file.
 
 To change several at once, click **Customize Workflows** on the top bar. It lists every workflow with its short description and a checkbox, grouped by story element. Check the ones you want starred and choose Save.
 
@@ -55,7 +55,7 @@ To change several at once, click **Customize Workflows** on the top bar. It list
 
 The menu control on the left of the top bar, the three stacked lines, shows or hides the workflow list. Hiding it gives the work area the full width of the window, which helps when a run has produced a long Property Updates list, and the list is still there when you want another workflow.
 
-![The same window with the workflow list hidden: the workflow purpose, Property Updates, and Accept all changes now run the full width of the window](../media/Collaborator/Collaborator-Pane-Collapsed.png)
+![The same window with the workflow list hidden: the workflow purpose, Property Updates, and Accept All now run the full width of the window](../media/Collaborator/Collaborator-Pane-Collapsed.png)
 
 ## Settings
 

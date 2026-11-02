@@ -37,7 +37,7 @@ Clicking **Collaborator** on the toolbar does not enroll you. StoryCAD shows a d
 
 2. Click **Collaborator** on the toolbar:
 
-   ![StoryCAD toolbar; the Collaborator button is the highlighted chain icon](../media/Collaborator/Collaborator-Toolbar-Button.png)
+   ![StoryCAD toolbar; the Collaborator button is the chain icon, fourth from the left](../media/Collaborator/Collaborator-Toolbar-Button.png)
 
 3. The following dialog displays: 
 
@@ -78,7 +78,7 @@ If you joined the beta earlier, you can keep using Collaborator without buying u
 
 During the beta, the Foundation grants each tester a credit allowance to pay for workflow runs. If you use it up before it renews, a run will stop and tell you to contact the StoryBuilder Foundation. Do not buy credits in the store. Contact us instead and say roughly what you were doing; heavy use is useful information for the beta and your allowance can be reset.
 
-After Collaborator is for sale, a subscriber who runs out can buy more from Collaborator's Buy Credits screen, or wait for the next monthly renewal.
+After Collaborator is for sale, a subscriber who runs out can buy more with the **Buy Credits** button on the StoryCAD toolbar, or wait for the next monthly renewal.
 
 ## Preferences that affect the manual
 
