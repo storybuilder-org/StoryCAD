@@ -602,6 +602,29 @@ public sealed class StoryCADDriver : IUiDriver
     }
 
     /// <inheritdoc />
+    public void CaptureAppWindows(string pngPath)
+    {
+        var area = Rectangle.Empty;
+        foreach (var window in _locator.TopLevelWindows())
+        {
+            var hwnd = window.Properties.NativeWindowHandle.ValueOrDefault;
+            var frame = hwnd == IntPtr.Zero ? null : NativeMethods.VisibleWindowBounds(hwnd);
+            if (frame is { IsEmpty: false } f)
+            {
+                area = area.IsEmpty ? f : Rectangle.Union(area, f);
+            }
+        }
+
+        if (area.IsEmpty)
+        {
+            throw new AutomationStepException("the app has no window to capture.");
+        }
+
+        using var image = Capture.Rectangle(area);
+        image.ToFile(pngPath);
+    }
+
+    /// <inheritdoc />
     public void CaptureWindow(string pngPath, string title)
     {
         var hwnd = _locator.WaitForTopLevelWindowHandle(title, Timeout(null));

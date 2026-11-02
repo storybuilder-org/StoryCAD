@@ -68,6 +68,12 @@ public interface IUiDriver : IDisposable
     /// </summary>
     void CaptureWindow(string pngPath, string title);
 
+    /// <summary>
+    ///     Captures the area that holds every top-level window of the app (main window,
+    ///     Collaborator window, open dialogs), for the picture the runner saves at a failed step.
+    /// </summary>
+    void CaptureAppWindows(string pngPath);
+
     /// <summary>Saves an image of the open ContentDialog only as a PNG at <paramref name="pngPath" />.</summary>
     void CaptureOpenDialog(string pngPath);
 

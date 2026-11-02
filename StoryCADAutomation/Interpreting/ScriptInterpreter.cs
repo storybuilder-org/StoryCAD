@@ -105,6 +105,7 @@ public sealed class ScriptInterpreter
             if (failure is not null)
             {
                 _options.Log($"FAIL line {statement.Line}: {statement.Source} :: {failure.Message}");
+                CaptureFailure(statement.Line);
                 aborted = !ShouldContinueAfter(statement, failure);
                 skipToNextStep = !aborted && _options.KeepGoing;
             }
@@ -606,6 +607,30 @@ public sealed class ScriptInterpreter
     /// <summary>Line endings unified and trailing whitespace dropped before text comparison.</summary>
     private static string NormalizeText(string? value)
         => (value ?? string.Empty).Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n').TrimEnd();
+
+    /// <summary>
+    ///     Saves what the app showed when a step failed, as FAIL-line-N.png in the output folder.
+    ///     A charged Collaborator run that fails should not need a second run to see why (#1422).
+    /// </summary>
+    private void CaptureFailure(int line)
+    {
+        if (Driver is not { HasExited: false } driver || string.IsNullOrEmpty(_options.OutputDirectory))
+        {
+            return;
+        }
+
+        try
+        {
+            var path = Path.Combine(Path.GetFullPath(_options.OutputDirectory), $"FAIL-line-{line}.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            driver.CaptureAppWindows(path);
+            _options.Log($"failure capture: {path}");
+        }
+        catch (Exception ex)
+        {
+            _options.Log($"failure capture skipped: {ex.Message}");
+        }
+    }
 
     private IUiDriver RequireDriver()
         => Driver ?? throw new AutomationStepException("no app is running; the launch statement must come first.");
