@@ -137,3 +137,10 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - Each Collaborator run is charged to the Worker ledger. The automation VM has no Collaborator sign-in; runs that call Collaborator need Brigid (hands off), and Terry's yes before a desktop run.
 - Per plan: translate to a `.scs` script with `--window 1036x744`, run it with `D:\VMs\Run-InVM.ps1` (normal PowerShell), retake the manual images under the image name standard, run `labels` on the pages, have an agent compare the pages with the app, fix every fault the run finds, have separate agents review the images and the code, one PR.
 - Script facts: `pause` is zero in test runs; `click <target> pointer` opens a dialog without a focus ring; a tab with keyboard focus shows its tooltip, so focus a text box before a screenshot.
+
+## 2026-11-02 (PR 6, Collaborator, started)
+
+- Draft `StoryCADTests/AutomationScripts/Collaborator.scs` and table plan `Collaborator_Test_Plan.md`: the nine plan cases plus manual-only steps TC-121 to TC-138, 32 screenshots (Join dialog not scripted: it needs a machine without activation). One full pass: 12 workflow runs, 2 chat turns, 2 interview turns, all charged. Runs happen on Brigid's desktop with Terry's yes; the VM has no Collaborator sign-in.
+- TC-112 and TC-113 (AutoSave and backup pause) stay manual: a script cannot check file times.
+- Runner work before the first run: capture and size the "Story Collaborator" window, `screenshot ... of` across app windows, a waitable chat-reply signal, an id on the Review Each card.
+- Collaborator #300 (issue comment 2026-11-02): plain model-error and model-busy messages in the chat column, from StoryCAD #1674 (draft). The error and help pages get them once #1674 is on `dev`. The #300 session reviews the Collaborator pages after the rewrite. The Meet Collaborator re-render (#1626) waits for this PR, so no AutomationId renames.

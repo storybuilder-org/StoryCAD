@@ -1,12 +1,14 @@
-# Collaborator Manual Test Plan
+# Collaborator Test Plan
+**Time**: ~45 minutes by hand (script run: not yet measured)
+**Purpose**: Test the Collaborator feature inside StoryCAD, follow the user manual section "StoryCAD Collaborator" (`docs/StoryCAD Collaborator/`), and retake its images.
 
-Tests for the AI Collaborator feature (CollaboratorLib) as used inside StoryCAD.
+**Scope:** Open/close, document gate, autosave/backup pause, run each workflow the manual shows without hang/timeout, accept/skip, Review Each, chat, interview save, credits dialog entry. Requires a document open and Collaborator already able to open for this machine (see Prerequisites).
 
-**Scope:** Open/close, document gate, autosave/backup pause, run a workflow without hang/timeout, accept/reject, credits dialog entry. Requires a document open and Collaborator already able to open for this machine (see Prerequisites).
-
-**Out of scope:** Prompt quality, workflow content debugging, Try Again behavior, element-picker memory across runs. Store purchase / paid activation paths. Administrative enrollment of a tester identity (private setup plan).
+**Out of scope:** Prompt quality, workflow content debugging, Try Again behavior, element-picker memory across runs. Store purchase / paid activation paths. Administrative enrollment of a tester identity (private setup plan). Model error messages (they need a failing model).
 
 **Related (private repo):** system setup, environment configuration, identity enrollment, and the proxy-unreachable case live in Collaborator `CollaboratorTests/ManualTests/Collaborator_System_Setup_Test_Plan.md`. Do not copy those steps into this public plan.
+
+**Cost:** each workflow run, chat turn and interview turn is charged. One full pass makes 12 workflow runs, 2 chat turns and 2 interview turns.
 
 ---
 
@@ -18,270 +20,56 @@ Complete **before** this suite. This plan does not document how.
 2. The AI proxy this build uses is reachable from your network.
 3. If Collaborator still offers Subscribe instead of the feature UI, stop here and finish the private system setup plan. Do not treat that as a TC-110 failure.
 
-## Session Setup (run once)
+## Setup
 
-1. Start StoryCAD the same way you will for the whole session (Start menu, File Explorer, or your usual installed build). A process that was already open may not see recent configuration changes.
-2. Tools > Preferences > Backup: enable autosave every **30** seconds; enable timed backups every **1** minute. Note the **Backup directory** under Save Locations (TC-113 uses that path).
-3. Save preferences.
-4. Open the sample outline **Danger Calls** (File > Open Sample Outline).
-5. Open Collaborator once and confirm the workflow list appears (not Subscribe). Close Collaborator.
+By hand: start StoryCAD the way you will for the whole session. Tools > Preferences > Backup: AutoSave every **30** seconds, timed backups every **1** minute; note the **Backup directory** under Save Locations (TC-113 uses it). Save preferences. Restore them after the suite.
 
-## Session Cleanup (after all tests)
+Script: `StoryCADTests/AutomationScripts/Collaborator.scs`. The header has the run line; four `--pref` values set the same AutoSave and backup intervals, so the script never opens the Preferences dialog. Run it on a desktop with Collaborator sign-in, hands off; the automation VM has none.
 
-1. Close Collaborator if open.
-2. Restore original autosave/backup preferences if you changed them.
-3. If you ran the private proxy-unreachable case earlier in the day, confirm normal configuration was restored (see that plan's cleanup).
-4. Close StoryCAD.
+Each step lists the manual page it covers. The script follows the pages in reading order, except where one workflow run serves several pages. Steps run in table order: later steps rely on the outline state that earlier steps leave.
 
-## Collaborator session cleanup (between cases)
-
-When a case says reset Collaborator or discard AI work:
-
-1. Do **not** Accept / Accept All unless the case requires it.
-2. **Close the Collaborator window** (ends the session; next open is a new instance).
-3. If the outline must be clean: close the outline and reopen **Danger Calls** (or revert edits).
-4. Open Collaborator again and re-select the workflow if the next case needs a run.
-
-Closing only the outline without closing Collaborator does not fully reset Collaborator UI state.
+Not scripted: `Collaborator-Join-Dialog.png` (needs a machine without activation). TC-112 and TC-113 timing and file checks stay manual: `pause` is zero in a test run.
 
 ---
 
-## Launch and Window
+| Step | Manual page | Actions | Expected | Images |
+|------|-------------|---------|----------|--------|
+| TC-121 | Getting Started; Outline Gaps | Create a new outline "My Story". Click Collaborator. Click Outline gaps. Exit | Toolbar shows Collaborator. Outline gaps page lists the Overview's empty fields and a Guess sentence | Collaborator-Toolbar-Button, Collaborator-Outline-Gaps |
+| TC-111 | | File > Close. Click Collaborator. Then File > Open/Create > Sample outlines > Danger Calls | Collaborator does **not** open. Status bar: "No story is open. Open an outline before using Collaborator." No crash. The main window opens the sample | |
+| TC-122 | An Example Session | Select Danger Calls at the top of the tree; Story Idea tab | Overview shows the Story Idea about teenagers selling drugs | Collaborator-Session-Overview |
+| TC-110 | What Collaborator Is; Opening Collaborator; A Path to Try | Click Collaborator. Then select Leonard Kraskin in the main window | Story Collaborator window opens alongside the main window. Left panel: Outline gaps row, Starred band (Ideation, Story Problem, Problem Builder, Character Builder, Setting Builder, Scene Builder), closed groups. The main window responds while Collaborator is open | Collaborator-With-StoryCAD, Collaborator-Workflow-Pane |
+| TC-123 | Workflows and Writing Craft; Workflow Reference | Open the Overview, Problem, Character and Story World groups | Every workflow is listed, Problem Beats included. No Setting or Scene group | Collaborator-Workflow-List |
+| TC-124 | Opening Collaborator | Customize Workflows, then Cancel. Star Problem Beats, then unstar it. Settings, then Cancel. Help, then Escape | Dialog lists every workflow with a checkbox. The star moves the row to Starred and back. Settings shows Response Terseness and the cost checkbox. Help shows Open the full manual | Collaborator-Customize-Workflows |
+| TC-112 | | Collaborator open. Type in the Overview Notes tab. Wait 90 s. Exit Collaborator. Wait 60 s | Changed indicator turns red. With Collaborator open, the outline file time does **not** change. After Exit, AutoSave updates the file time | |
+| TC-113 | | Open Collaborator. Wait 90 s. Exit. Wait 90 s | No **new** `Danger Calls as of ….zip` in the backup directory while open. A new zip appears after Exit | |
+| TC-119 | | Open Collaborator again (TC-113 opened and closed it) | Fresh window; workflow list available. Step 4, a short run, is TC-114 | |
+| TC-114 | Running a Workflow; Reviewing Suggestions; Overview Workflows; An Example Session | Overview selected. Click Ideation | The click runs it; no Run button. Response in under 3 minutes, no hang. Property Updates lists Story Idea, Concept and Premise, each Has your text; Accept All at the foot; Review Each and Try Again enabled. Nothing applied yet | Collaborator-Window-Overview, Collaborator-Session-Premise, Collaborator-Workflow-Premise, Collaborator-Property-Updates |
+| TC-125 | Opening Collaborator | Click the three-line control twice | The list hides and the work area runs the full width; the list comes back | Collaborator-Pane-Collapsed |
+| TC-126 | An Example Session; Reviewing Suggestions | Review Each; Skip three times | Card shows Yours and Proposed and a count. Skip keeps the sample text | |
+| TC-115 | Overview Workflows; Running a Workflow | Story Problem: pick Catching the drug dealer Lacas, Leonard Kraskin, Charlie Lacas. Accept All; Cancel at "Replace existing content?" | Three pickers in turn. Accept All writes the New rows and asks before Has your text rows; Cancel keeps them. Checked in TC-138 | Collaborator-Workflow-Story-Problem |
+| TC-117 | Overview Workflows | Open the four groups. Story Form. Accept nothing | Proposes Type and Genre. Checked in TC-138: Genre and Type unchanged | Collaborator-Workflow-Story-Form |
+| TC-127 | Problem Workflows | Inner and Outer Problems: outer Catching the drug dealer Lacas, inner Leonard's impulsiveness lets Lacas capture him | No protagonist picker (taken from the outer Problem). Rows for the inner Problem and a Flaw | Collaborator-Workflow-Inner-Outer |
+| TC-128 | Running a Workflow; An Example Session; Problem Workflows | In StoryCAD, set the tech problem's Problem Category Complication, Protagonist Leonard Kraskin, Antagonist Charlie Lacas. Problem Builder; pick the tech problem. Review Each, Skip one, Accept Free Remaining | Picker "Select Problem" lists the problems with Create a new element. Rows for the Problem fields only: no beat sheet rows (Collaborator #302) | Collaborator-Element-Picker, Collaborator-Updates-After-Run, Collaborator-Session-Problem-Builder |
+| TC-129 | Problem Workflows; A Path to Try | Problem Beats on the same problem. Accept All | One row per beat; no Replace question | Collaborator-Workflow-Problem-Beats |
+| TC-130 | Character Workflows | Character Builder on Leonard Kraskin. Accept All; Cancel | Long list of sheet fields and the Character Sketch | Collaborator-Workflow-Character-Builder |
+| TC-131 | Outline Gaps | Click Outline gaps | Guess sentence has moved past Ideation; remaining empty fields listed | Collaborator-Outline-Gaps-Midway |
+| TC-132 | Character Workflows; Chat | Flaw and Backstory on Charlie Lacas. Ask a question in chat. Then ask chat to rewrite Flaw and Backstory. Accept nothing | Rows for Flaw and BackStory. The chat answers the question. The rewrite changes the waiting rows in place | Collaborator-Workflow-Flaw-Backstory, Collaborator-Chat, Collaborator-Workflow-Flaw-Backstory-Chat |
+| TC-133 | Character Workflows | Character Relationship: Leonard Kraskin, then Tony Irwin | One relationship row | Collaborator-Workflow-Relationship |
+| TC-134 | Character Workflows | Character Interview on Charlie Lacas. Type Flaw; answer the first question; Save interview to outline | Choice list, then one question per turn. No Accept All. Save writes a note under Charlie | Collaborator-Workflow-Character-Interview, Collaborator-Workflow-Character-Interview-End |
+| TC-135 | World and Setting Workflows | Define Story World | No picker; a Story World is made if missing. Rows for World Type, description, Cultures and the live areas | Collaborator-Workflow-Story-World |
+| TC-116 | World and Setting Workflows; Reviewing Suggestions | Setting Builder on Unmarked police car. Accept the first row, then the second, with the row check marks | Every row New. Each accepted row leaves the list; the others stay pending. Weather still pending | Collaborator-Workflow-Setting-Builder, Collaborator-Row-New |
+| TC-136 | Reviewing Suggestions | Review Each | Card: field name, Yours empty, Proposed, Accept, Skip, Accept Free Remaining, a count | Collaborator-Review-Each |
+| TC-137 | Scene Workflows | Scene Builder on We have a drug deal | Rows across the Scene, Development, Conflict and Sequel tabs | Collaborator-Workflow-Scene-Builder |
+| TC-138 | Running a Workflow; Reviewing Suggestions | Exit. Open Catching the drug dealer Lacas, Protagonist tab; Overview Structure tab; Unmarked police car | TC-115: Protagonist is Leonard Kraskin, and the accepted rows show their text. TC-117: Genre Suspense, Type Short Story. TC-116: the two accepted fields hold text; Weather is empty | |
+| TC-120 | | Buy Credits (tooltip "Buy Collaborator Credits"), then Not now | Button enabled when the command bar is idle. Buy Credits dialog opens; on a sideloaded or non-store build the pack list may be empty or show a store error. Assertion is **dialog opens**, not a purchase. Not now closes it; main window responsive | |
 
-### TC-110: Open Collaborator Window
-**Priority:** Critical  
-**Time:** ~2 minutes
-
-**Setup:**
-- Session Setup done; "Danger Calls" open
-
-**Steps:**
-1. Click the Collaborator button in the toolbar (or Tools > Story Collaborator)  
-   **Expected:** Story Collaborator window opens alongside the main window
-2. Verify the workflow navigation shell loads  
-   **Expected:** Left panel lists workflows (Ideation/Premise, GMC, etc.)
-3. Verify the main StoryCAD window remains responsive  
-   **Expected:** Can click elements in the navigation pane without the app hanging
-
-**Cleanup:**
-1. Close the Collaborator window (X).
-2. Leave "Danger Calls" open for the next case.
-
----
-
-### TC-111: No Document Open
-**Priority:** High  
-**Time:** ~1 minute
-
-**Setup:**
-- Close any open outline (File > Close or equivalent) so no story is loaded
-
-**Steps:**
-1. Click the Collaborator button  
-   **Expected:** Collaborator does **not** open. Status bar shows a warning such as "No story is open. Open an outline before using Collaborator." No crash.
-2. Confirm the main window still works  
-   **Expected:** Can open a file or sample
-
-**Cleanup:**
-1. Open sample **Danger Calls** again.
-2. Collaborator stays closed until the next case opens it.
-
----
-
-## Autosave and Backup Suspension
-
-### TC-112: Autosave Paused While Collaborator Is Open
-**Priority:** High  
-**Time:** ~4 minutes
-
-**Setup:**
-- "Danger Calls" open; autosave 30 seconds (Session Setup)
-- Note the outline file's last-modified time (sample is often under a temp folder for sample outlines)
-
-**Steps:**
-1. Open Collaborator  
-   **Expected:** Window opens
-2. Make a visible edit in StoryCAD's main window (e.g. change a character name)  
-   **Expected:** Changed indicator in the status bar
-3. Wait 90 seconds without closing Collaborator  
-   **Expected:** File last-modified time does **not** change
-4. Close Collaborator  
-   **Expected:** Window closes
-5. Wait 60 seconds  
-   **Expected:** Autosave updates the file last-modified time
-
-**Cleanup:**
-1. Close Collaborator if still open.
-2. Undo or re-open **Danger Calls** so the sample is not left dirty for later cases.
-
----
-
-### TC-113: Backup Timer Paused While Collaborator Is Open
-**Priority:** High  
-**Time:** ~4 minutes
-
-**Setup:**
-- "Danger Calls" open; timed backup every 1 minute (Session Setup)
-- Note contents of the **Backup directory** from Preferences > Save Locations. Sort by date modified.
-
-**Steps:**
-1. Open Collaborator  
-   **Expected:** Window opens
-2. Wait 90 seconds  
-   **Expected:** No **new** `Danger Calls as of ….zip` in that backup directory
-3. Close Collaborator  
-   **Expected:** Window closes
-4. Wait 90 seconds  
-   **Expected:** A new backup zip appears in that directory
-
-**Cleanup:**
-1. Close Collaborator if still open.
-2. Optionally delete the zip created in step 4 from the backup directory.
-
----
-
-## Workflow Execution
-
-### TC-114: Run a Workflow
-**Priority:** Critical  
-**Time:** ~5 minutes
-
-**Scope note:** Assert run completes and UI stays usable. Do not score premise quality or prompt wording.
-
-**Setup:**
-- "Danger Calls" open; Story Overview selected
-- Collaborator open
-
-**Steps:**
-1. Select a short workflow from the list (e.g. Ideation / Premise)  
-   **Expected:** Workflow page loads; element gathering can complete
-2. Run / Execute when required  
-   **Expected:** Progress or "Running…" in the conversation list
-3. Wait for completion (up to 3 minutes)  
-   **Expected:** Response appears; Accept controls available if the workflow produces property updates; no crash or hang treated as timeout before 3 minutes
-4. Leave Accept unused  
-   **Expected:** Pending updates not applied yet
-
-**Cleanup:**
-1. Do **not** Accept All (TC-115/116 may use output, or discard below).
-2. If continuing to TC-115 with this output, leave Collaborator open.
-3. If stopping here: close Collaborator without Accept; reopen sample if the outline must stay clean.
-
----
-
-### TC-115: Accept All Workflow Changes
-**Priority:** Critical  
-**Time:** ~2 minutes
-
-**Setup:**
-- TC-114 completed with Accept controls visible
-
-**Steps:**
-1. Click **Accept All**  
-   **Expected:** Output fields write to the outline
-2. Close Collaborator  
-   **Expected:** Window closes; StoryCAD reloads the current view from the model
-3. Select Story Overview (or the element that was updated)  
-   **Expected:** Fields show Collaborator's applied text
-
-**Cleanup:**
-1. Collaborator already closed in step 2.
-2. Close outline and reopen **Danger Calls** (or revert) so later cases start from a clean sample.
-
----
-
-### TC-116: Accept Individual Property
-**Priority:** High  
-**Time:** ~3 minutes
-
-**Setup:**
-- Run a workflow (as in TC-114) so multiple Accept controls appear
-
-**Steps:**
-1. Accept **one** field only  
-   **Expected:** That field applies; others remain pending
-2. Accept a **second** field  
-   **Expected:** Second applies; first remains applied
-3. Close Collaborator without accepting the rest  
-   **Expected:** Only the accepted fields are updated in StoryCAD
-
-**Cleanup:**
-1. Collaborator closed in step 3.
-2. Close outline and reopen **Danger Calls** (or revert) for a clean sample.
-
----
-
-### TC-117: Close Without Accepting
-**Priority:** High  
-**Time:** ~2 minutes
-
-**Setup:**
-- Run a workflow to produce output; note one or two StoryCAD field values first
-
-**Steps:**
-1. Close Collaborator without any Accept  
-   **Expected:** Window closes
-2. Check those fields in StoryCAD  
-   **Expected:** Unchanged — no edits applied
-
-**Cleanup:**
-1. Collaborator already closed.
-2. No outline revert required if nothing was accepted.
-
----
-
-## Session stability
-
-### TC-119: Close and Reopen Collaborator in Same Session
-**Priority:** Medium  
-**Time:** ~3 minutes
-
-**Setup:**
-- "Danger Calls" open
-- Normal proxy configuration restored if you ran the private proxy-unreachable case earlier
-
-**Steps:**
-1. Open Collaborator  
-   **Expected:** Window opens
-2. Close Collaborator  
-   **Expected:** Window closes; autosave/backup may resume
-3. Open Collaborator again  
-   **Expected:** Fresh window; workflow list available
-4. Run a short workflow  
-   **Expected:** Completes without hang (no need to Accept)
-
-**Cleanup:**
-1. Close Collaborator without Accept (unless you want applied edits).
-2. Reopen sample only if the outline was dirtied.
-
----
-
-## Credits
-
-### TC-120: Buy Credits Button Opens the Dialog
-**Priority:** High  
-**Time:** ~2 minutes
-
-**Setup:**
-- "Danger Calls" open
-- Buy Credits toolbar button visible next to Collaborator (same visibility as Collaborator)
-
-**Steps:**
-1. Confirm the button is enabled (not stuck gray after a save/open). Tooltip: "Buy Collaborator Credits"  
-   **Expected:** Clickable when the command bar is idle
-2. Click **Buy Credits**  
-   **Expected:** Buy Credits dialog opens. On a sideloaded or non-store build, pack list may be empty or show a store error. Assertion is **dialog opens**, not a successful purchase.
-3. Click **Not now** (or equivalent)  
-   **Expected:** Dialog closes; no purchase; main window responsive
-
-**Cleanup:**
-- None (dialog already closed)
-
----
+Script line numbers: each `step "TC-nnn"` line in the script.
 
 ## Notes
 
-- Proxy responses can take up to 3 minutes. Do not treat a slow response as a hang before that.
+- Proxy responses can take up to 3 minutes. Do not treat a slow response as a hang before that. The script waits up to 5 minutes.
 - Logs: under the app's `RootDirectory` logs folder (package or unpackaged); useful if open fails after Prerequisites were believed complete.
-- Numbering: TC-118 (proxy unreachable) is intentional gap; that case is on the private system setup plan.
-- In-app product pass for Collaborator is this suite (TC-110–TC-117, TC-119–TC-120), not prompt review.
+- Numbering: TC-118 (proxy unreachable) is an intentional gap; that case is on the private system setup plan. TC-121 to TC-138 are manual-section steps added in #1422.
+- Image renames: `Collaborator-Session-ProblemBuilder.png` becomes `Collaborator-Session-Problem-Builder.png` (name standard); `Collaborator-Workflow-Problem-Builder.png` becomes `Collaborator-Workflow-Problem-Beats.png` (the image now shows a Problem Beats run).
+
+**Pass/Fail:** ______
