@@ -144,3 +144,10 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - TC-112 and TC-113 (AutoSave and backup pause) stay manual: a script cannot check file times.
 - Runner work before the first run: capture and size the "Story Collaborator" window, `screenshot ... of` across app windows, a waitable chat-reply signal, an id on the Review Each card.
 - Collaborator #300 (issue comment 2026-11-02): plain model-error and model-busy messages in the chat column, from StoryCAD #1674 (draft). The error and help pages get them once #1674 is on `dev`. The #300 session reviews the Collaborator pages after the rewrite. The Meet Collaborator re-render (#1626) waits for this PR, so no AutomationId renames.
+
+### Session recovery (2026-11-02, before a restart)
+
+- Branch `issue-1422-collaborator`, `dev` merged in, no PR. Script `StoryCADTests/AutomationScripts/Collaborator.scs`; 32 images in `docs/media/Collaborator` from pass 6 and two reruns; pages partly rewritten.
+- Runner added this branch: `window "<title>" size|minimize|maximize|restore`, `screenshot ... window "<title>"`, screenshots across app windows, `click <target> pointer`, `pick LABEL="name" ...`, idempotent `expand`, `wait <target> gone [condense]`, FAIL-line-N.png captures, click and expand scroll into view, focus into an AutoSuggestBox. Tests: 2264 passed; automation 409.
+- Desktop runs need Terry's yes each time; each workflow run is charged.
+- The next steps and the review findings are in the StoryCADWiki `log.md` note of 2026-11-02 (C6 Collaborator, paused for a session restart).
