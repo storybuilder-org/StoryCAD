@@ -29,6 +29,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="using:StoryCADLib.Collaborator.Views"
+    xmlns:controls="using:StoryCADLib.Controls"
     mc:Ignorable="d"
     VerticalAlignment="Stretch"
     HorizontalAlignment="Stretch">
@@ -229,10 +230,13 @@
                 </Grid>
             </Border>
 
-            <!-- Review Mode (Accept/Skip); Accept All sits below the table -->
-            <StackPanel Grid.Row="2"
+            <!-- Review Mode (Accept/Skip); Accept All sits below the table.
+                 AutomationGroup, not StackPanel: a panel has no automation peer, and the
+                 manual images frame this card by its id (#1422). -->
+            <controls:AutomationGroup Grid.Row="2"
                         Visibility="{x:Bind ViewModel.ReviewModeVisibility, Mode=OneWay}"
-                        Margin="0,8,0,0">
+                        Margin="0,8,0,0"
+                        AutomationProperties.AutomationId="WorkflowReviewGroup">
                 <TextBlock Text="Review Property Update" FontWeight="SemiBold" Margin="0,0,0,8" />
                 <Border Background="{ThemeResource SystemAccentColorLight2}"
                         CornerRadius="4" Padding="10" Margin="0,0,0,8">
@@ -277,7 +281,7 @@
                 <TextBlock Text="{x:Bind ViewModel.ReviewProgress, Mode=OneWay}"
                            Margin="0,8,0,0"
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-            </StackPanel>
+            </controls:AutomationGroup>
 
             <!-- Accept All: primary action for the table, at the foot of the work column.
                  Accepted updates are written to the outline immediately, so there is no

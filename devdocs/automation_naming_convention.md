@@ -37,6 +37,7 @@ Every interactive control gets `AutomationProperties.AutomationId`.
 | NavigationView | `Nav` | `FileOpenNav` *(added Unit 6)* |
 | NavigationViewItem | `NavItem` | `RecentlyOpenedNavItem` *(added Unit 6)* |
 | InfoBar | `InfoBar` | `PrintReportsSynopsisWarningInfoBar` *(added Unit 7)* |
+| AutomationGroup (StoryCADLib.Controls; a StackPanel with an automation peer) | `Group` | `WorkflowReviewGroup` *(added #1422: a plain panel has no peer, so its id never reaches UI Automation; use it only where a script must frame a panel)* |
 | TreeViewItem | `TreeItem` | *(added Unit 8, founder ruling on PR #1457; navigation automation depends on manipulating tree rows. Templated TreeViewItems — stamped from a DataTemplate, which is every current instance: Shell x3, NarrativeTool x2 — carry NO AutomationId (TemplateSafety) and instead bind the accessible name: `AutomationProperties.Name="{x:Bind Name, Mode=OneWay}"`, the pattern Shell.xaml already uses)* |
 
 - A control type not in this table gets a proposed suffix in the PR description; the table row is added when the PR merges.
