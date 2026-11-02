@@ -1,0 +1,331 @@
+# Collaborator_Test_Plan.md as an automation script (#1422). Run with:
+#   StoryCADAutomation run StoryCADTests/AutomationScripts/Collaborator.scs --window 1036x744 --keep-going --out automation-output
+# The runner has no option to set preferences, so TC-112 and TC-113 (AutoSave and backup pauses) are
+# checked by hand. Never open and save the Preferences dialog: a save posts to the backend.
+# Run it on Brigid's desktop with hands off the mouse and keyboard, not in the VM: the VM has no
+# Collaborator sign-in. Each workflow run, chat turn and interview turn is charged to the Worker
+# ledger. One full pass makes 12 workflow runs, 2 chat turns and 2 interview turns.
+# Manual pages (docs/StoryCAD Collaborator/), in reading order: Getting_Started.md, What_Collaborator_Is.md,
+#   Workflows_and_Writing_Craft.md, Opening_Collaborator.md, Running_a_Workflow.md, Reviewing_Suggestions.md,
+#   Workflows/index.md, Workflows/Outline_Gaps.md, Workflows/Overview_Workflows.md, Workflows/Problem_Workflows.md,
+#   Workflows/Character_Workflows.md, Workflows/World_and_Setting_Workflows.md, Workflows/Scene_Workflows.md,
+#   Tutorial/A_Path_to_Try.md, Tutorial/An_Example_Session.md, Chat.md, Tips_and_Common_Questions.md (no image).
+# Each screenshot replaces the docs/media/Collaborator image of the same name. Not scripted:
+#   Collaborator-Join-Dialog.png needs a machine without Collaborator activation; the runner
+#   copies this machine's sign-in into scratch, so the Join dialog never shows.
+# Renamed in the PR that first scripts them (links change in the same PR):
+#   Collaborator-Session-ProblemBuilder.png -> Collaborator-Session-Problem-Builder.png (name standard)
+#   Collaborator-Workflow-Problem-Builder.png -> Collaborator-Workflow-Problem-Beats.png (the image now shows
+#   a Problem Beats run; Collaborator #302 moved the beat sheet out of Problem Builder)
+# Runner gaps, to fix before the first run:
+#   1. screenshot ... of clips to the StoryCAD main window. The Collaborator images name controls in the
+#      Story Collaborator window, and Collaborator-With-StoryCAD.png names controls in both windows; the
+#      capture must clip to the windows that hold the targets.
+#   2. --window sizes only the main window; the Collaborator window opens at its own size.
+#   3. pause is zero in test runs, so the 90 s and 60 s waits in TC-112 and TC-113 do not happen, and no
+#      verb reads a file time or a backup folder. Those checks stay manual.
+#   4. A workflow chat reply leaves no control to wait for: the message box stays enabled.
+#   5. No hover verb, so the toolbar image has no highlight and the icon bar shows no tooltip.
+#   6. No check that a field is not empty, so accepted text is checked in the images, not by expect.
+script "Collaborator"
+
+step "TC-121: New outline, toolbar button, Outline gaps"
+launch
+click CreateNewOutlineNavItem
+set FileOpenProjectNameTextBox "My Story"
+press "Tab"                               # the name binding updates only when focus leaves the box
+click PrimaryButton                       # "Create outline"
+expect window "StoryCAD - Currently editing My Story"
+focus TitleTextBox                        # the app leaves the caret in the search box
+press "End"
+screenshot "Collaborator-Toolbar-Button.png" of FileMenuButton HelpButton margin 4
+click CollaboratorButton
+window "Story Collaborator" size 1036x744
+wait-window "Story Collaborator"
+click WorkflowOutlineGapsNavItem          # a page, not a run: nothing is charged
+screenshot "Collaborator-Outline-Gaps.png" window "Story Collaborator"
+click WorkflowExitButton
+expect WorkflowNav gone
+
+step "TC-111: No document open"
+menu CloseStoryMenuItem
+click CollaboratorButton
+expect StatusMessageText text "No story is open. Open an outline before using Collaborator."
+expect-no WorkflowNav
+menu OpenCreateFileMenuItem               # step 2: the main window still works
+click SampleOutlinesNavItem
+select FileOpenSamplesList "Danger Calls"
+click PrimaryButton                       # "Open sample"
+expect tree contains "Danger Calls/Characters/Leonard Kraskin"
+
+step "TC-122: Danger Calls with the Overview showing"
+click tree "Danger Calls"                 # the root row exposes only ExpandCollapse, so this is a pointer click
+wait TitleTextBox
+tab StoryIdeaTab
+focus TitleTextBox
+press "End"
+screenshot "Collaborator-Session-Overview.png"
+
+step "TC-110: Open Collaborator window"
+click CollaboratorButton
+window "Story Collaborator" size 1036x744
+wait-window "Story Collaborator"
+expect WorkflowNav exists
+expect WorkflowOutlineGapsNavItem exists  # Danger Calls has empty required fields
+expect WorkflowGroupStarredNavItem exists
+expect WorkflowPremiseNavItem exists      # Ideation is starred by default
+expect WorkflowSettingBuilderNavItem exists   # starred by default since Collaborator #269
+screenshot "Collaborator-With-StoryCAD.png" of TogglePaneButton BackupStatusButton WorkflowNav WorkflowExitButton
+screenshot "Collaborator-Workflow-Pane.png" of WorkflowOutlineGapsNavItem WorkflowGroupStoryWorldNavItem margin 8
+open-node tree "Danger Calls/Characters/Leonard Kraskin"   # step 3: the main window responds
+expect CharacterNameTextBox text "Leonard Kraskin"
+
+step "TC-123: Workflow list with every group open"
+expand WorkflowGroupOverviewNavItem       # Setting and Scene have no group: their one workflow is starred
+expand WorkflowGroupProblemNavItem        # expand, not click: a click closes a group that is open
+expand WorkflowGroupCharacterNavItem
+expand WorkflowGroupStoryWorldNavItem
+expect WorkflowStoryFormNavItem exists
+expect WorkflowInnerOuterProblemsNavItem exists
+expect WorkflowProblemBeatsNavItem exists # Collaborator #302
+expect WorkflowFlawBackstoryNavItem exists
+expect WorkflowRelationshipNavItem exists
+expect WorkflowCharacterInterviewNavItem exists
+expect WorkflowDefineStoryWorldNavItem exists
+window "Story Collaborator" size 1036x1100    # every group open: the list is taller than a 744-high window
+screenshot "Collaborator-Workflow-List.png" window "Story Collaborator"
+window "Story Collaborator" size 1036x744
+
+step "TC-124: Customize Workflows, stars, Settings, Help"
+click WorkflowCustomizeButton pointer     # pointer input: no keyboard focus ring in the dialog
+expect WorkflowProblemBeatsCheck exists
+screenshot dialog "Collaborator-Customize-Workflows.png"
+dialog "Customize Workflows" click CloseButton   # Cancel: the starred set stays as it was
+click WorkflowProblemBeatsStarButton      # stars Problem Beats
+click WorkflowProblemBeatsStarButton      # and takes the star off again
+click WorkflowSettingsButton pointer
+expect WorkflowSettingsTersenessCombo exists
+expect WorkflowSettingsShowCostCheck exists
+dialog "Collaborator Settings" click CloseButton  # Cancel: Save would change the stored settings
+click WorkflowHelpButton
+expect WorkflowHelpManualLinkButton exists    # not clicked: it opens the browser
+press "Escape"
+
+step "TC-112: AutoSave paused while Collaborator is open"
+click tree "Danger Calls"
+wait TitleTextBox
+tab OverviewNotesTab
+focus OverviewNotesRichEdit
+type "AutoSave check."
+press "Tab"                               # the changed indicator turns red
+pause 90                                  # zero in a test run (runner gap 3); by hand: the file time does not change
+click WorkflowExitButton
+expect WorkflowNav gone
+pause 60                                  # by hand: AutoSave writes the file and the file time changes
+
+step "TC-113: Timed backup paused while Collaborator is open"
+click CollaboratorButton
+window "Story Collaborator" size 1036x744
+wait-window "Story Collaborator"
+pause 90                                  # by hand: no new "Danger Calls as of ....zip" in {scratch}/backups
+click WorkflowExitButton
+expect WorkflowNav gone
+pause 90                                  # by hand: a new backup zip appears
+
+step "TC-119: Close and reopen Collaborator in the same session"
+click CollaboratorButton                  # TC-113 opened and closed it; this is the second open
+window "Story Collaborator" size 1036x744
+wait-window "Story Collaborator"
+expect WorkflowNav exists
+expect WorkflowPremiseNavItem exists      # step 4, a short run, is TC-114
+
+step "TC-114: Run Ideation on the Overview"
+click tree "Danger Calls"                 # Story Overview selected, as the plan sets up
+wait TitleTextBox
+click WorkflowPremiseNavItem              # a click runs the workflow: no Run button
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not     # waits up to 5 minutes for the run
+expect WorkflowReviewEachButton enabled
+expect WorkflowTryAgainButton enabled
+screenshot "Collaborator-Window-Overview.png" window "Story Collaborator"
+screenshot "Collaborator-Session-Premise.png" window "Story Collaborator"
+screenshot "Collaborator-Workflow-Premise.png" window "Story Collaborator"
+screenshot "Collaborator-Property-Updates.png" of WorkflowProposalsScrollViewer WorkflowAcceptAllButton margin 36   # whatever fields the model proposes
+
+step "TC-125: Hide and show the workflow list"
+click WorkflowPaneToggleButton pointer
+screenshot "Collaborator-Pane-Collapsed.png" window "Story Collaborator"
+click WorkflowPaneToggleButton pointer
+expect WorkflowPremiseNavItem exists
+
+step "TC-126: Review Each on the Ideation result"
+click WorkflowReviewEachButton
+expect WorkflowAcceptButton exists
+expect WorkflowAcceptRemainingButton exists
+click WorkflowSkipButton                  # one Skip: the number of proposals differs from run to run
+
+step "TC-115: Story Problem, then Accept All"
+click WorkflowStoryProblemNavItem
+pick Problem="Catching the drug dealer Lacas" Protagonist="Leonard Kraskin" Antagonist="Charlie Lacas"
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
+screenshot "Collaborator-Workflow-Story-Problem.png" window "Story Collaborator"
+click WorkflowAcceptAllButton             # applies the New rows
+dialog "Replace existing content?" click CloseButton if-shown   # Cancel: the Has your text rows keep the sample's words and names
+
+step "TC-117: Story Form, closed without accepting"
+expand WorkflowGroupOverviewNavItem       # this session's groups start closed
+expand WorkflowGroupProblemNavItem
+expand WorkflowGroupCharacterNavItem
+expand WorkflowGroupStoryWorldNavItem
+click WorkflowStoryFormNavItem            # the Overview needs no picker
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
+screenshot "Collaborator-Workflow-Story-Form.png" window "Story Collaborator"
+# Nothing accepted: the check that Genre and Type stay as they were is in the last Collaborator step.
+
+step "TC-127: Inner and Outer Problems"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas"
+tab ProtagonistTab
+select ProblemProtagonistCombo "Leonard Kraskin"   # without it the workflow asks for a protagonist in a third picker
+click SaveStatusButton
+expand WorkflowGroupProblemNavItem
+click WorkflowInnerOuterProblemsNavItem
+pick OuterProblem="Catching the drug dealer Lacas" InnerProblem="Leonard's impulsiveness lets Lacas capture him" Protagonist="Leonard Kraskin"
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
+screenshot "Collaborator-Workflow-Inner-Outer.png" window "Story Collaborator"
+step "TC-128: Problem Builder on the tech problem"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/How will Leonard and Tony get past Charlie's tech?"
+tab ProblemTab
+focus ProblemCategoryCombo
+press "Alt+Down"                          # an editable list opens from the keyboard
+select ProblemCategoryCombo "Complication"    # a blank category stops Problem Builder before it starts
+tab ProtagonistTab
+select ProblemProtagonistCombo "Leonard Kraskin"
+tab AntagonistTab
+select ProblemAntagonistCombo "Charlie Lacas"
+click SaveStatusButton
+click WorkflowProblemBuilderNavItem
+select CollabPickerList "How will Leonard and Tony get past Charlie's tech?"
+screenshot dialog "Collaborator-Element-Picker.png"
+pick Problem="How will Leonard and Tony get past Charlie's tech?" Protagonist="Leonard Kraskin" Antagonist="Charlie Lacas"
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
+screenshot "Collaborator-Updates-After-Run.png" window "Story Collaborator"
+screenshot "Collaborator-Session-Problem-Builder.png" window "Story Collaborator"
+click WorkflowReviewEachButton
+click WorkflowSkipButton                  # one row read, Yours against Proposed, and kept
+click WorkflowAcceptRemainingButton       # Accept Free Remaining: the New rows; Has your text rows wait
+dialog "Replace existing content?" click CloseButton if-shown   # asked when the queue ends; left open, it covered the Problem Beats image
+
+step "TC-129: Problem Beats on the same problem"
+expand WorkflowGroupProblemNavItem
+click WorkflowProblemBeatsNavItem
+pick Problem="How will Leonard and Tony get past Charlie's tech?" Protagonist="Leonard Kraskin" Antagonist="Charlie Lacas"
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
+screenshot "Collaborator-Workflow-Problem-Beats.png" window "Story Collaborator"
+click WorkflowAcceptAllButton             # beats only fill empty rows
+dialog "Replace existing content?" click CloseButton if-shown
+
+step "TC-130: Character Builder on Leonard Kraskin"
+click WorkflowCharacterBuilderNavItem
+pick Character="Leonard Kraskin"
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
+screenshot "Collaborator-Workflow-Character-Builder.png" window "Story Collaborator"
+click WorkflowAcceptAllButton
+dialog "Replace existing content?" click CloseButton if-shown   # Cancel: Leonard keeps the sample's Role and other text
+
+step "TC-131: Outline gaps after the spine workflows"
+click WorkflowOutlineGapsNavItem
+screenshot "Collaborator-Outline-Gaps-Midway.png" window "Story Collaborator"
+step "TC-132: Flaw and Backstory on Charlie Lacas, with chat"
+expand WorkflowGroupCharacterNavItem
+click WorkflowFlawBackstoryNavItem
+pick Character="Charlie Lacas"
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
+screenshot "Collaborator-Workflow-Flaw-Backstory.png" window "Story Collaborator"
+focus InputSearchBox
+type "Which of the story's problems does Charlie's flaw feed, and how?"
+press "Enter"
+wait InputSearchBox condense              # returns before the reply (runner gap 4)
+screenshot "Collaborator-Chat.png" window "Story Collaborator"
+focus InputSearchBox
+type "Rewrite Flaw as Charlie Lacas's major character flaw: the blind spot that can bring him down. Rewrite Backstory as the history of that flaw. Keep him a drug dealer in this story."
+press "Enter"
+wait InputSearchBox condense              # returns before the reply (runner gap 4)
+screenshot "Collaborator-Workflow-Flaw-Backstory-Chat.png" window "Story Collaborator"
+# Nothing accepted: the chat rewrites the waiting rows, and they stay proposals.
+
+step "TC-133: Character Relationship"
+expand WorkflowGroupCharacterNavItem
+click WorkflowRelationshipNavItem
+pick Character="Leonard Kraskin" Partner="Tony Irwin"
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
+screenshot "Collaborator-Workflow-Relationship.png" window "Story Collaborator"
+step "TC-134: Character Interview on Charlie Lacas"
+expand WorkflowGroupCharacterNavItem
+click WorkflowCharacterInterviewNavItem
+pick Character="Charlie Lacas" Problem="Catching the drug dealer Lacas"   # Problem is an optional input with no linked field
+wait InputSearchBox                       # the choice list is local: nothing is charged yet
+focus InputSearchBox
+type "Flaw"
+press "Enter"
+wait InputSearchBox condense              # the box is disabled while a turn runs
+screenshot "Collaborator-Workflow-Character-Interview.png" window "Story Collaborator"
+focus InputSearchBox
+type "Nobody gets my number twice. The man who answers first owns the street, and I answer first."
+press "Enter"
+wait InputSearchBox condense
+wait SaveInterviewButton
+screenshot "Collaborator-Workflow-Character-Interview-End.png" window "Story Collaborator"
+expect WorkflowAcceptAllButton disabled   # an interview has no field proposals
+click SaveInterviewButton                 # writes the transcript as a note under Charlie
+
+step "TC-135: Define Story World"
+expand WorkflowGroupStoryWorldNavItem
+click WorkflowDefineStoryWorldNavItem     # the Story World needs no picker; one is made if missing
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
+screenshot "Collaborator-Workflow-Story-World.png" window "Story Collaborator"
+step "TC-116: Setting Builder, accept two rows"
+click WorkflowSettingBuilderNavItem
+pick Setting="Unmarked police car"        # every field empty, so every row is New
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
+screenshot "Collaborator-Workflow-Setting-Builder.png" window "Story Collaborator"
+screenshot "Collaborator-Row-New.png" of WorkflowProposalsScrollViewer margin 4   # the rows the model proposed, all New
+click name:"Accept update"                # the first row (rows sort by key: Description first)
+click name:"Accept update"                # the next row; an accepted row leaves the list
+
+step "TC-136: Review Each card"
+click WorkflowReviewEachButton
+expect WorkflowAcceptButton exists
+screenshot "Collaborator-Review-Each.png" window "Story Collaborator"
+step "TC-137: Scene Builder"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him"
+tab ProblemTab
+focus ProblemCategoryCombo
+press "Alt+Down"
+select ProblemCategoryCombo "Complication"    # the scene's parent Problem has no category in the sample, and Scene Builder stops without one
+click SaveStatusButton
+click WorkflowSceneBuilderNavItem
+pick Scene="We have a drug deal"
+wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
+screenshot "Collaborator-Workflow-Scene-Builder.png" window "Story Collaborator"
+step "TC-138: Exit, then check what was and was not accepted"
+click WorkflowExitButton                  # anything not accepted is dropped
+expect WorkflowNav gone
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas"
+tab ProtagonistTab
+expect ProblemProtagonistCombo text "Leonard Kraskin"   # TC-115: the picker's link stays
+click tree "Danger Calls"
+wait TitleTextBox
+tab OverviewStructureTab
+expect GenreCombo text "Suspense"         # TC-117: Story Form was not accepted
+expect OverviewTypeCombo text "Short Story"
+collapse tree "Danger Calls/Problems"      # keeps the Settings rows inside the pane
+collapse tree "Danger Calls/Characters"
+open-node tree "Danger Calls/Settings/Unmarked police car"
+expect WeatherTextBox text ""             # TC-116: Weather was not accepted
+
+step "TC-120: Buy Credits button opens the dialog"
+expect BuyCreditsButton enabled
+click BuyCreditsButton pointer
+dialog "Buy Credits" click CloseButton    # "Not now": no purchase
+click tree "Danger Calls"                 # TC-138 left the Setting page in the content pane
+wait TitleTextBox
+expect TitleTextBox exists

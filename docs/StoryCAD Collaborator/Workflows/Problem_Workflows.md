@@ -38,4 +38,4 @@ It chooses a beat sheet that fits the Problem Category and Conflict Type, or kee
 
 Two rules protect your work. Problem Beats never changes a beat you have already filled, and it never adds beats to a sheet you have already chosen. The Scene and Problem stubs it creates are the only additional elements; everything else is a proposal until you accept it.
 
-![Property Updates after a Problem run: the Problem's fields above and one row per beat below](../../media/Collaborator/Collaborator-Workflow-Problem-Builder.png)
+![Property Updates after Problem Beats: the beat sheet's title and description, then one row per beat](../../media/Collaborator/Collaborator-Workflow-Problem-Beats.png)

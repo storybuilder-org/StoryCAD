@@ -13,9 +13,9 @@ Reading the suggested changes before you accept them is the habit that makes Col
 
 ## The Property Updates list
 
-After a run, the center of the window fills with a list headed Proposed property updates. Each row is one field on one story element, for example, the Premise on the Overview or the protagonist's Goal on a Problem, with the proposed text beside it. The header counts the rows, and the line above the list tells you how many of them would replace text you wrote. A line that reads 3 property update(s) proposed. 1 would replace text you wrote means three proposals are waiting, of which two will apply on their own when you click **Accept All** and one will not change until you confirm it.
+After a run, the center of the window fills with a list headed Proposed property updates. Each row is one field on one story element, for example, the Premise on the Overview or the protagonist's Goal on a Problem, with the proposed text beside it. The header counts the rows. The status line in the chat column, and the line above the list, tell you how many of them would replace text you wrote; the chat line also names any fields Collaborator kept as they are. If three proposals are waiting and one would replace your text, the other two apply on their own when you click **Accept All**, and that one does not change until you confirm it.
 
-![A Property Updates list headed 'Proposed property updates (3: 0 free, 3 need review)', each row showing a field name, its type, and the proposed text](../media/Collaborator/Collaborator-Property-Updates.png)
+![A Property Updates list headed Proposed property updates with the row count, each row showing a field name, its label, and the proposed text](../media/Collaborator/Collaborator-Property-Updates.png)
 
 ## What the row labels mean
 

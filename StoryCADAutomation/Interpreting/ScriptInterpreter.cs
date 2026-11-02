@@ -25,6 +25,18 @@ public sealed class ScriptInterpreter
     /// </summary>
     private const string ScratchToken = "{scratch}";
 
+    /// <summary>The Collaborator element picker's list (StoryCADLib/Collaborator/Views/ElementPicker.xaml).</summary>
+    private const string PickerListId = "CollabPickerList";
+
+    /// <summary>The ContentDialog template's primary button; on the element picker it reads "Select".</summary>
+    private const string DialogPrimaryButtonId = "PrimaryButton";
+
+    /// <summary>
+    ///     The most pickers one pick line answers. The longest gather in WorkflowRegistry asks
+    ///     four inputs; a picker that keeps coming back must fail the step, not loop forever.
+    /// </summary>
+    internal const int MaxPickers = 10;
+
     /// <summary>How long `expect ... text` waits for the expected value (the design's 5 s implicit wait).</summary>
     private static readonly TimeSpan ExpectTextTimeout = TimeSpan.FromSeconds(5);
 
@@ -105,6 +117,7 @@ public sealed class ScriptInterpreter
             if (failure is not null)
             {
                 _options.Log($"FAIL line {statement.Line}: {statement.Source} :: {failure.Message}");
+                CaptureFailure(statement.Line);
                 aborted = !ShouldContinueAfter(statement, failure);
                 skipToNextStep = !aborted && _options.KeepGoing;
             }
@@ -206,6 +219,18 @@ public sealed class ScriptInterpreter
                 }
 
             case ScriptVerb.Click:
+                // A control below the visible part of its pane (a long Collaborator workflow list,
+                // the Review Each Skip button) is found but off-screen, and readiness refuses it;
+                // scroll it into view first, as a user scrolls (#1422). A target not found yet is
+                // left to the click's own readiness wait and message.
+                try
+                {
+                    RequireDriver().ScrollIntoView(s.Target!, TimeSpan.FromSeconds(1));
+                }
+                catch (AutomationException)
+                {
+                }
+
                 if (s.Pointer)
                 {
                     _options.Profile.Approach(RequireDriver(), s.Target!);
@@ -298,11 +323,51 @@ public sealed class ScriptInterpreter
                 {
                     // Invoke inside the named dialog only (review M4); the profile only moves the cursor.
                     var d = RequireDriver();
+                    if (s.IfShown)
+                    {
+                        try
+                        {
+                            d.WaitForWindowTitle(s.Text!);
+                        }
+                        catch (AutomationException)
+                        {
+                            _options.Log($"dialog \"{s.Text}\" did not open; nothing to click.");
+                            return currentStep;
+                        }
+                    }
+
                     _options.Profile.ApproachInWindow(d, s.Text!, s.Target!);
                     d.InvokeInWindow(s.Text!, s.Target!);
                     return currentStep;
                 }
 
+            case ScriptVerb.Pick:
+                ExecutePick(s);
+                return currentStep;
+
+            case ScriptVerb.Wait when s.Gone:
+                // A run's progress text going away is its end (#1422); the long timeout covers a run.
+                // Wait for it to show first: a run that has not started yet has no progress text,
+                // and the wait would end before the run began.
+                try
+                {
+                    RequireDriver().WaitUntilFound(s.Target!);
+                }
+                catch (AutomationException)
+                {
+                    _options.Log($"wait: {s.Target} did not appear; waiting for it to be gone anyway.");
+                }
+
+                if (s.Condense)
+                {
+                    _options.Profile.Condense(() => RequireDriver().WaitUntilGone(s.Target!, _options.CondenseTimeout));
+                }
+                else
+                {
+                    RequireDriver().WaitUntilGone(s.Target!, _options.CondenseTimeout);
+                }
+
+                return currentStep;
             case ScriptVerb.Wait when s.Condense:
                 // A long wait; the presentation profile records it so the video can cut it (#1626).
                 _options.Profile.Condense(() =>
@@ -435,9 +500,17 @@ public sealed class ScriptInterpreter
             case ScriptVerb.Window:
                 {
                     var d = RequireDriver();
-                    if (s.WindowAction == WindowAction.Size)
+                    if (s.WindowAction == WindowAction.Size && s.WindowTitle is { } sizeTitle)
+                    {
+                        d.SizeWindow(sizeTitle, s.WindowSize!.Value.Width, s.WindowSize.Value.Height);
+                    }
+                    else if (s.WindowAction == WindowAction.Size)
                     {
                         d.SizeMainWindow(s.WindowSize!.Value.Width, s.WindowSize.Value.Height);
+                    }
+                    else if (s.WindowTitle is { } stateTitle)
+                    {
+                        d.SetWindowState(stateTitle, s.WindowAction!.Value);
                     }
                     else
                     {
@@ -486,6 +559,10 @@ public sealed class ScriptInterpreter
                     {
                         RequireDriver().CaptureOpenDialog(path);
                     }
+                    else if (s.WindowTitle is { } title)
+                    {
+                        RequireDriver().CaptureWindow(path, title);
+                    }
                     else if (s.CaptureTargets is { } targets)
                     {
                         RequireDriver().CaptureElements(path, targets, s.CaptureMargin ?? 0);
@@ -525,6 +602,84 @@ public sealed class ScriptInterpreter
 
         d.Expand(ElementAddress.FromName(segments[0]));
         WalkFlyoutPath(d, segments[1..]);
+    }
+
+    /// <summary>
+    ///     Answers the element pickers a Collaborator workflow shows. Which pickers appear, and in
+    ///     what order, depends on the fields earlier steps linked (WorkflowSessionService
+    ///     ResolveInputsAsync: required inputs first, then optional ones; an optional input whose
+    ///     reference is set asks "Change X" with that element chosen). So the line maps labels
+    ///     to elements, and each picker is answered by its title: a mapped label selects its
+    ///     element, an unmapped "Change X" keeps the current choice, an unmapped "Select X" fails.
+    ///     No picker within the readiness timeout ends the step; a label no picker asked for is
+    ///     logged, not an error, because the workflow may find that element itself (#1422).
+    /// </summary>
+    private void ExecutePick(ScriptStatement s)
+    {
+        var d = RequireDriver();
+        var list = ElementAddress.FromAutomationId(PickerListId);
+        var primary = ElementAddress.FromAutomationId(DialogPrimaryButtonId);
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        string? previous = null;
+        for (var answered = 0; ; answered++)
+        {
+            var dialog = d.WaitForDialogWith(list, previous);
+            if (dialog is null)
+            {
+                break;
+            }
+
+            if (answered == MaxPickers)
+            {
+                throw new AutomationStepException(
+                    $"the workflow showed more than {MaxPickers} element pickers; pick stops here.");
+            }
+
+            var (change, label) = PickerTitle(dialog.Texts) ?? throw new AutomationStepException(
+                $"the element picker has no \"Select ...\" or \"Change ...\" title; it shows: {string.Join(" | ", dialog.Texts)}.");
+            if (s.Picks!.TryGetValue(label, out var name))
+            {
+                Approach(list).SelectItem(list, name);
+                used.Add(label);
+                _options.Log($"pick: {(change ? "Change" : "Select")} {label} -> {name}");
+            }
+            else if (change)
+            {
+                _options.Log($"pick: Change {label} -> kept the current choice");
+            }
+            else
+            {
+                throw new AutomationStepException(
+                    $"the workflow asks \"Select {label}\", and the pick line names no {label}=\"...\".");
+            }
+
+            _options.Profile.Click(d, primary);
+            previous = dialog.Key;
+        }
+
+        var unused = s.Picks!.Keys.Where(k => !used.Contains(k)).ToList();
+        if (unused.Count > 0)
+        {
+            _options.Log($"pick: no picker asked for {string.Join(", ", unused)}");
+        }
+    }
+
+    /// <summary>
+    ///     The first "Select X" or "Change X" text of a picker dialog, the title ElementPickerVM
+    ///     ShowPicker builds. The bare "Select" is the button text and is skipped.
+    /// </summary>
+    internal static (bool Change, string Label)? PickerTitle(IEnumerable<string> texts)
+    {
+        foreach (var text in texts)
+        {
+            var parts = text.Trim().Split(' ', 2, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 2 && parts[0] is "Select" or "Change")
+            {
+                return (parts[0] == "Change", parts[1]);
+            }
+        }
+
+        return null;
     }
 
     private IReadOnlyList<string>? Openers(string menuItemId)
@@ -582,6 +737,30 @@ public sealed class ScriptInterpreter
     /// <summary>Line endings unified and trailing whitespace dropped before text comparison.</summary>
     private static string NormalizeText(string? value)
         => (value ?? string.Empty).Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n').TrimEnd();
+
+    /// <summary>
+    ///     Saves what the app showed when a step failed, as FAIL-line-N.png in the output folder.
+    ///     A charged Collaborator run that fails should not need a second run to see why (#1422).
+    /// </summary>
+    private void CaptureFailure(int line)
+    {
+        if (Driver is not { HasExited: false } driver || string.IsNullOrEmpty(_options.OutputDirectory))
+        {
+            return;
+        }
+
+        try
+        {
+            var path = Path.Combine(Path.GetFullPath(_options.OutputDirectory), $"FAIL-line-{line}.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            driver.CaptureAppWindows(path);
+            _options.Log($"failure capture: {path}");
+        }
+        catch (Exception ex)
+        {
+            _options.Log($"failure capture skipped: {ex.Message}");
+        }
+    }
 
     private IUiDriver RequireDriver()
         => Driver ?? throw new AutomationStepException("no app is running; the launch statement must come first.");

@@ -28,7 +28,7 @@ Treat it as a starting point, not a rule. As you learn which workflows your writ
 
 4. Problem Builder. Goal, motivation, and conflict for both sides of that problem, and its outcome. Set Problem Category, Protagonist, and Antagonist on the Problem first; Problem Builder reads all three, and a blank category stops the run before it starts. Craft: [Defining Problems](../../Writing%20with%20StoryCAD/Defining_Problems.html).
 
-   Then Problem Beats on the same problem, for a beat sheet that fits it. Your scenes, and problems that sit on no beat sheet yet, fill its empty beats, and scene stubs fill the rest. Craft: [Plotting with StoryCAD](../../Writing%20with%20StoryCAD/Plotting_with_StoryCAD.html).
+   Then Problem Beats on the same problem, for a beat sheet that fits it. Your scenes, and problems that sit on no beat sheet yet, fill its empty beats, and new scene and problem stubs fill the rest. Craft: [Plotting with StoryCAD](../../Writing%20with%20StoryCAD/Plotting_with_StoryCAD.html).
 
 5. Inner and Outer Problems. The protagonist's outer want against their inner need, as a second Problem built from the first. Craft: the outer and inner problems section of Defining Problems.
 
@@ -36,7 +36,7 @@ Treat it as a starting point, not a rule. As you learn which workflows your writ
 
 7. Setting Builder. Period, Locale, Season, Weather, Lighting, Temperature, Props, the Setting Summary, and the four senses for one place, in one pass. Run it on a Setting before the scenes that use it; Scene Builder picks a scene's Setting from the Settings you already have. Craft: [The Importance of Setting](../../Writing%20with%20StoryCAD/The_Importance_of_Setting.html).
 
-8. Scene Builder. Sketch, type, cast, development, conflict, and sequel for one scene. Select a scene you already have, such as a stub Problem Builder created, or create one in the picker. Craft: [Defining Scenes](../../Writing%20with%20StoryCAD/Defining_Scenes.html) and [Plotting in Scenes](../../Writing%20with%20StoryCAD/Plotting_in_Scenes.html).
+8. Scene Builder. Sketch, type, cast, development, conflict, and sequel for one scene. Select a scene you already have, such as a stub Problem Beats created, or create one in the picker. Craft: [Defining Scenes](../../Writing%20with%20StoryCAD/Defining_Scenes.html) and [Plotting in Scenes](../../Writing%20with%20StoryCAD/Plotting_in_Scenes.html).
 
 ![The workflow pane with the starred workflows at the top, in running order](../../media/Collaborator/Collaborator-Workflow-Pane.png)
 

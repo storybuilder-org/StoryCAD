@@ -57,9 +57,29 @@ public interface IUiDriver : IDisposable
     /// <summary>
     ///     Waits until each of <paramref name="targets" /> is found, then saves the union of their
     ///     on-screen rectangles, grown by <paramref name="margin" /> 100%-scale pixels on every
-    ///     side and clipped to the main window, as a PNG at <paramref name="pngPath" />.
+    ///     side and clipped to the union of the app windows that hold them, as a PNG at
+    ///     <paramref name="pngPath" />.
     /// </summary>
     void CaptureElements(string pngPath, IReadOnlyList<ElementAddress> targets, int margin);
+
+    /// <summary>
+    ///     Waits for the app's top-level window titled <paramref name="title" />, then saves an image
+    ///     of its visible frame as a PNG at <paramref name="pngPath" /> (the Collaborator window, #1422).
+    /// </summary>
+    void CaptureWindow(string pngPath, string title);
+
+    /// <summary>
+    ///     Captures the area that holds every top-level window of the app (main window,
+    ///     Collaborator window, open dialogs), for the picture the runner saves at a failed step.
+    /// </summary>
+    void CaptureAppWindows(string pngPath);
+
+    /// <summary>
+    ///     Waits for an open ContentDialog that holds <paramref name="content" /> and is not the
+    ///     dialog whose key is <paramref name="previousKey" /> (the one just answered, which can
+    ///     stay in the UIA tree while it closes). Returns null when none opens within the timeout.
+    /// </summary>
+    OpenDialog? WaitForDialogWith(ElementAddress content, string? previousKey, TimeSpan? timeout = null);
 
     /// <summary>Saves an image of the open ContentDialog only as a PNG at <paramref name="pngPath" />.</summary>
     void CaptureOpenDialog(string pngPath);
@@ -147,6 +167,16 @@ public interface IUiDriver : IDisposable
     ///     first minimize or maximize.
     /// </summary>
     void SetMainWindowState(WindowAction action);
+
+    /// <summary>
+    ///     Sets the visible frame of the app's top-level window titled <paramref name="title" /> to
+    ///     <paramref name="width" /> x <paramref name="height" /> 100%-scale pixels, beside the main
+    ///     window when both fit on the display, else at its top-left (window "title" size, #1422).
+    /// </summary>
+    void SizeWindow(string title, int width, int height);
+
+    /// <summary><see cref="SetMainWindowState" /> for the app's top-level window titled <paramref name="title" />.</summary>
+    void SetWindowState(string title, WindowAction action);
 
     // --- keyboard and focus ----------------------------------------------------------------
 

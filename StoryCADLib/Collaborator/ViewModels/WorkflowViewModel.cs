@@ -157,7 +157,23 @@ public partial class WorkflowViewModel : ObservableRecipient
     /// so a message sent mid-turn would sit there looking taken while the turn loop
     /// refused it. Disabling the box is the honest state.
     /// </summary>
-    public bool CanSend => IsChatEnabled && !IsInterviewTurnRunning;
+    public bool CanSend => IsChatEnabled && !IsInterviewTurnRunning && !IsReplyPending;
+
+    private bool _isReplyPending;
+    /// <summary>
+    /// A chat message is sent and its reply has not arrived. The box goes dark for the same
+    /// reason as an interview turn. It is also the one state change the page shows when a
+    /// reply lands, so an automation script waits on the box (wait InputSearchBox), #1422.
+    /// </summary>
+    public bool IsReplyPending
+    {
+        get => _isReplyPending;
+        private set
+        {
+            if (SetProperty(ref _isReplyPending, value))
+                OnPropertyChanged(nameof(CanSend));
+        }
+    }
 
     private string _chatPlaceholder = "Waiting for proposals…";
     public string ChatPlaceholder
@@ -508,6 +524,7 @@ public partial class WorkflowViewModel : ObservableRecipient
         var userMessage = InputText;
         InputText = string.Empty;
 
+        IsReplyPending = true;
         ProgressVisibility = Microsoft.UI.Xaml.Visibility.Visible;
         ConversationList.Add(ChatMessage.FromUser(userMessage));
 
@@ -533,6 +550,7 @@ public partial class WorkflowViewModel : ObservableRecipient
         finally
         {
             ProgressVisibility = Microsoft.UI.Xaml.Visibility.Collapsed;
+            IsReplyPending = false;
         }
     }
 

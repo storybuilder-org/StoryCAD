@@ -44,11 +44,25 @@ public sealed record ScriptStatement
     public bool Condense { get; init; }
 
     /// <summary>
+    ///     "wait &lt;target&gt; gone [condense]": waits up to the long (condense) timeout for the
+    ///     target to go away. A Collaborator run ends when its progress text goes, whether or not
+    ///     it proposes anything, so Accept All is no signal (#1422).
+    /// </summary>
+    public bool Gone { get; init; }
+
+    /// <summary>
     ///     "click &lt;target&gt; pointer": a real pointer click whatever the control supports. A
     ///     dialog opened by UIA Invoke after keyboard input drew a focus ring on its first
     ///     control in manual images; a pointer click leaves the app in pointer mode (#1422).
     /// </summary>
     public bool Pointer { get; init; }
+
+    /// <summary>
+    ///     "dialog "title" click &lt;target&gt; if-shown": clicks only when the dialog opens. Collaborator
+    ///     asks "Replace existing content?" only when a proposal would replace the writer's text,
+    ///     and which fields a model proposes differs from run to run (#1422).
+    /// </summary>
+    public bool IfShown { get; init; }
 
     /// <summary>
     ///     Pause duration in seconds, before profile pacing is applied; on a step line, the
@@ -64,6 +78,18 @@ public sealed record ScriptStatement
     ///     --window.
     /// </summary>
     public System.Drawing.Size? WindowSize { get; init; }
+
+    /// <summary>
+    ///     The title of the app window that "window" acts on or "screenshot ... window" captures
+    ///     (the Collaborator window, #1422); null for the main window.
+    /// </summary>
+    public string? WindowTitle { get; init; }
+
+    /// <summary>
+    ///     "pick LABEL="name" ...": picker label to element name. Labels compare without regard
+    ///     to case (the dictionary's comparer); element names compare exactly (#1422).
+    /// </summary>
+    public IReadOnlyDictionary<string, string>? Picks { get; init; }
 
     /// <summary>Toggle direction: true = on.</summary>
     public bool? On { get; init; }

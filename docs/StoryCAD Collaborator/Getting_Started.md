@@ -72,7 +72,7 @@ If you joined the beta earlier, you can keep using Collaborator without buying u
 
 ## If Collaborator does not open
 
-**Not now** will not launch Collaborator, but won’t block it from trying another time. A message that enrollment is unreachable means StoryCAD could not reach the Foundation's service; wait a few minutes and try again. If the Story Collaborator window still never opens after **Join** or after a completed purchase, restart StoryCAD. For StoryCAD help see [Getting Help](../Front%20Matter/Getting_Help.html).
+**Not now** will not launch Collaborator, but won’t block it from trying another time. The message "Collaborator enrollment is unreachable. Check the connection and try again." means StoryCAD could not reach the Foundation's service; check your network connection and try again. If the Story Collaborator window still never opens after **Join** or after a completed purchase, restart StoryCAD. For StoryCAD help see [Getting Help](../Front%20Matter/Getting_Help.html).
 
 ## If you run out of credits
 

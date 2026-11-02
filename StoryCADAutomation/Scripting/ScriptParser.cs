@@ -320,6 +320,7 @@ public static partial class ScriptParser
             "save-file-dialog" => New(ScriptVerb.SaveFileDialog) with { Text = TakeString(reader, "file path") },
             "open-file-dialog" => New(ScriptVerb.OpenFileDialog) with { Text = TakeString(reader, "file path") },
             "dialog" => BuildDialog(reader),
+            "pick" => BuildPick(reader),
             "wait" => BuildWait(reader),
             "wait-window" => New(ScriptVerb.WaitWindow) with { Text = TakeString(reader, "window title") },
             "pause" => BuildPause(reader),
@@ -383,8 +384,19 @@ public static partial class ScriptParser
                 return New(ScriptVerb.Wait) with { Target = target };
             }
 
+            var gone = false;
+            if (r.Peek is { Kind: TokenKind.Word } next && next.Value == "gone")
+            {
+                TakeKeyword(r, "gone");
+                gone = true;
+                if (r.AtEnd)
+                {
+                    return New(ScriptVerb.Wait) with { Target = target, Gone = true };
+                }
+            }
+
             TakeKeyword(r, "condense");
-            return New(ScriptVerb.Wait) with { Target = target, Condense = true };
+            return New(ScriptVerb.Wait) with { Target = target, Condense = true, Gone = gone };
         }
 
         // narrate "spoken" caption "written": the caption text when the spoken form reads badly,
@@ -480,7 +492,44 @@ public static partial class ScriptParser
         {
             var title = TakeString(r, "dialog title");
             TakeKeyword(r, "click");
-            return New(ScriptVerb.Dialog) with { Text = title, Target = TakeTarget(r) };
+            var target = TakeTarget(r);
+            if (r.AtEnd)
+            {
+                return New(ScriptVerb.Dialog) with { Text = title, Target = target };
+            }
+
+            TakeKeyword(r, "if-shown");
+            return New(ScriptVerb.Dialog) with { Text = title, Target = target, IfShown = true };
+        }
+
+        // pick LABEL="element name" [LABEL="element name" ...]: answers the Collaborator element
+        // pickers a workflow shows, whatever their number and order (#1422).
+        ScriptStatement BuildPick(ArgReader r)
+        {
+            var picks = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            while (!r.AtEnd)
+            {
+                var word = TakeWord(r, "LABEL=\"element name\"");
+                var label = word.EndsWith('=') ? word[..^1] : string.Empty;
+                if (!BareIdShape().IsMatch(label))
+                {
+                    throw new SyntaxException(
+                        $"pick takes LABEL=\"element name\" pairs, such as Protagonist=\"Leonard Kraskin\", not '{word}'.");
+                }
+
+                var name = TakeString(r, $"element name for {label}");
+                if (!picks.TryAdd(label, name))
+                {
+                    throw new SyntaxException($"pick names the label {label} twice.");
+                }
+            }
+
+            if (picks.Count == 0)
+            {
+                throw new SyntaxException("pick takes at least one LABEL=\"element name\" pair.");
+            }
+
+            return New(ScriptVerb.Pick) with { Picks = picks };
         }
 
         ScriptStatement BuildScreenshot(ArgReader r)
@@ -504,10 +553,17 @@ public static partial class ScriptParser
                 return BuildScreenshotOf(r, name);
             }
 
+            // screenshot "name.png" window "title": another app window, such as Story Collaborator (#1422).
+            if (r.Peek is { Kind: TokenKind.Word, Value: "window" })
+            {
+                r.Next();
+                return New(ScriptVerb.Screenshot) with { Text = name, WindowTitle = TakeString(r, "window title") };
+            }
+
             // screenshot "name.png" crop x,y,w,h: a detail of the window for a close-up manual image.
             if (r.Peek is not { Kind: TokenKind.Word, Value: "crop" })
             {
-                throw new SyntaxException("after the png file name, expected 'crop x,y,w,h' or 'of target ...'.");
+                throw new SyntaxException("after the png file name, expected 'crop x,y,w,h', 'of target ...', or 'window \"title\"'.");
             }
 
             TakeKeyword(r, "crop");
@@ -568,17 +624,20 @@ public static partial class ScriptParser
             return New(ScriptVerb.Screenshot) with { Text = name, CaptureTargets = targets, CaptureMargin = margin };
         }
 
+        // window ["title"] size WxH | minimize | maximize | restore: without a title, the main
+        // window; with one, the app's top-level window of that title (Story Collaborator, #1422).
         ScriptStatement BuildWindow(ArgReader r)
         {
+            string? title = r.Peek is { Kind: TokenKind.String } ? TakeString(r, "window title") : null;
             var action = TakeWord(r, "'size', 'minimize', 'maximize', or 'restore'");
             switch (action)
             {
                 case "minimize":
-                    return New(ScriptVerb.Window) with { WindowAction = WindowAction.Minimize };
+                    return New(ScriptVerb.Window) with { WindowAction = WindowAction.Minimize, WindowTitle = title };
                 case "maximize":
-                    return New(ScriptVerb.Window) with { WindowAction = WindowAction.Maximize };
+                    return New(ScriptVerb.Window) with { WindowAction = WindowAction.Maximize, WindowTitle = title };
                 case "restore":
-                    return New(ScriptVerb.Window) with { WindowAction = WindowAction.Restore };
+                    return New(ScriptVerb.Window) with { WindowAction = WindowAction.Restore, WindowTitle = title };
                 case "size":
                     {
                         var word = TakeWord(r, "size as WxH in 100%-scale pixels");
@@ -594,6 +653,7 @@ public static partial class ScriptParser
                         return New(ScriptVerb.Window) with
                         {
                             WindowAction = WindowAction.Size, WindowSize = new System.Drawing.Size(width, height),
+                            WindowTitle = title,
                         };
                     }
 

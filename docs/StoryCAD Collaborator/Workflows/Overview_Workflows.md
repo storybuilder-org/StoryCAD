@@ -20,7 +20,7 @@ This workflow takes whatever you have on those three tabs and carries it forward
 
 It is one of the six workflows starred when you first open Collaborator. When it finishes, the Property Updates list offers up to three fields on the Overview: Story Idea, Concept, and Premise. Any of them that already holds your text is marked Has your text, and **Accept All** asks before it replaces that text, so running it on a finished Overview is safe. It will simply have less to offer.
 
-![Property Updates after Ideation: Concept and Premise marked New, Description marked Has your text](../../media/Collaborator/Collaborator-Workflow-Premise.png)
+![Property Updates after Ideation: Story Idea, Concept, and Premise rows, each marked New or Has your text](../../media/Collaborator/Collaborator-Workflow-Premise.png)
 
 ## Story Problem (Premise => Problem + Characters)
 
@@ -28,7 +28,7 @@ The [Defining Problems](../../Writing%20with%20StoryCAD/Defining_Problems.html) 
 
 It needs a Premise on the Overview, so run Ideation (Story idea => Concept => Premise) first if that tab is empty. When you click it, three pickers follow in turn: a Problem, then a Protagonist, then an Antagonist. In each you can choose an existing element or create a new one, and on a fresh outline you will usually create all three. As you make each choice, Collaborator writes the links: the Problem becomes the Story Problem on the Overview's Premise tab, and the two characters are set as the Problem's Protagonist and Antagonist. Those links are made at once, before the run, and they stay even if you accept nothing afterward. The Problem Category is set for you at the same moment.
 
-The run then proposes text for most of the Problem form. On the Problem tab, the Name, Problem Type, Conflict Type, Subject, Story Question, and Source of Conflict; on the Protagonist and Antagonist tabs, a Goal, Motivation, and Conflict for each; and on the Resolution tab, the Premise, Outcome, Method, and Theme. It also proposes a Name for each of the two characters if you created them new. When you are done, you have a story problem with two named people attached to it, which is what Problem Builder, Inner and Outer Problems, and the character workflows all build on. It is one of the five starred by default.
+The run then proposes text for most of the Problem form. On the Problem tab, the Name, Problem Type, Conflict Type, Subject, Story Question, and Source of Conflict; on the Protagonist and Antagonist tabs, a Goal, Motivation, and Conflict for each; and on the Resolution tab, the Premise, Outcome, Method, and Theme. It also proposes a Name for each of the two characters if you created them new. When you are done, you have a story problem with two named people attached to it, which is what Problem Builder, Inner and Outer Problems, and the character workflows all build on. It is one of the six starred by default.
 
 ![Property Updates after Story Problem: rows for Next Inning and for Sarah Osborne and Irene Campbell](../../media/Collaborator/Collaborator-Workflow-Story-Problem.png)
 

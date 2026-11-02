@@ -29,9 +29,23 @@ Along with the elements you picked, Collaborator sends a short account of where 
 
 ## Wait for the result
 
-Collaborator runs the workflow and reports its progress in the chat column on the right. When it finishes, the chat shows a short status line saying how many property updates Collaborator found and how many of them would replace text you wrote, and the center of the window fills with the Property Updates list, one row for each field Collaborator would like to change. **Accept All** appears at the foot of that list, and Review Each and Try Again come alive on the top bar. Collaborator doesn't write anything into your outline until you tell it to.
+Collaborator runs the workflow and reports its progress in the chat column on the right. When it finishes, the chat shows a short status line saying how many property updates Collaborator found, how many of them would replace text you wrote, and which fields it kept as they are, and the center of the window fills with the Property Updates list, one row for each field Collaborator would like to change. **Accept All** appears at the foot of that list, and Review Each and Try Again come alive on the top bar. Collaborator doesn't write anything into your outline until you tell it to.
 
-![A finished Problem Builder run: 23 proposed property updates, each labeled New or Has your text, with Accept All at the foot of the list](../media/Collaborator/Collaborator-Updates-After-Run.png)
+![A finished Problem Builder run: a list of proposed property updates, each labeled New or Has your text, with Accept All at the foot of the list](../media/Collaborator/Collaborator-Updates-After-Run.png)
+
+## If a run fails
+
+Sometimes the AI model behind Collaborator cannot answer. The run stops, and the chat column shows one of two messages.
+
+When the model is busy:
+
+> The AI model is busy. Wait a minute and try again. You were not charged.
+
+When the model returns an error:
+
+> The AI model returned an error. Try again. If it happens again, email support@storybuilder.org with this code: ed67a22a. You were not charged.
+
+The eight-character code at the end is different every time. Support uses it to find the record of that error, so copy it into your email exactly as it appears. Neither failure costs you anything, and nothing is written to your outline.
 
 ## Try Again
 

@@ -271,6 +271,41 @@ public class WorkflowViewModelTests
     }
 
     [TestMethod]
+    public async Task SendButtonClicked_UntilReplyArrives_DisablesSend()
+    {
+        // The box going dark until the reply lands is the signal an automation script waits
+        // on (wait InputSearchBox, #1422); it also stops a second message racing the first.
+        _viewModel.IsChatEnabled = true;
+        _viewModel.InputText = "Hello";
+        var reply = new TaskCompletionSource<string>();
+        _viewModel.OnSendMessage = _ => reply.Task;
+
+        var sending = _viewModel.SendButtonClicked();
+
+        Assert.IsTrue(_viewModel.IsReplyPending);
+        Assert.IsFalse(_viewModel.CanSend);
+
+        reply.SetResult("Hi");
+        await sending;
+
+        Assert.IsFalse(_viewModel.IsReplyPending);
+        Assert.IsTrue(_viewModel.CanSend);
+    }
+
+    [TestMethod]
+    public async Task SendButtonClicked_WhenReplyFails_EnablesSendAgain()
+    {
+        _viewModel.IsChatEnabled = true;
+        _viewModel.InputText = "Hello";
+        _viewModel.OnSendMessage = _ => Task.FromException<string>(new InvalidOperationException("backend down"));
+
+        await _viewModel.SendButtonClicked();
+
+        Assert.IsFalse(_viewModel.IsReplyPending);
+        Assert.IsTrue(_viewModel.CanSend);
+    }
+
+    [TestMethod]
     public async Task SendButtonClicked_WithEmptyInput_DoesNotAddToConversation()
     {
         // Arrange

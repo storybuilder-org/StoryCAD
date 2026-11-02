@@ -50,6 +50,25 @@ public class ScriptParserTests
         Assert.AreEqual("Danger Calls/Settings", result.Statements[1].Target!.Value);
     }
 
+    // #1422: if-shown marks a dialog answer that is skipped when the dialog does not open.
+    [TestMethod]
+    [DataRow("dialog \"Replace existing content?\" click CloseButton if-shown", true)]
+    [DataRow("dialog \"Replace existing content?\" click CloseButton", false)]
+    public void Parse_Dialog_SetsIfShownOnlyWithTheKeyword(string line, bool ifShown)
+    {
+        var result = Parse(line);
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual(ScriptVerb.Dialog, result.Statements[1].Verb);
+        Assert.AreEqual(ifShown, result.Statements[1].IfShown);
+    }
+
+    [TestMethod]
+    public void Parse_DialogWithOtherTrailingWord_Fails()
+    {
+        Assert.IsFalse(Parse("dialog \"Replace existing content?\" click CloseButton maybe").Success);
+    }
+
     [TestMethod]
     public void Parse_StepWithHold_StoresHoldSeconds()
     {
@@ -246,6 +265,20 @@ public class ScriptParserTests
         Assert.IsFalse(Parse(line).Success);
     }
 
+    // wait <target> gone [condense]: a Collaborator run ends when its progress text goes (#1422).
+    [TestMethod]
+    public void Parse_WaitGone_SetsGoneAndOptionalCondense()
+    {
+        var result = Parse("wait ResponseProgressText gone", "wait ResponseProgressText gone condense", "wait ResponseProgressText");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.IsTrue(result.Statements[1].Gone);
+        Assert.IsFalse(result.Statements[1].Condense);
+        Assert.IsTrue(result.Statements[2].Gone);
+        Assert.IsTrue(result.Statements[2].Condense);
+        Assert.IsFalse(result.Statements[3].Gone);
+    }
+
     // click <target> pointer forces a real pointer click (#1422).
     [TestMethod]
     public void Parse_ClickWithPointer_SetsPointer()
@@ -262,6 +295,118 @@ public class ScriptParserTests
     public void Parse_ClickWithUnknownWord_ReportsError()
     {
         Assert.IsFalse(Parse("click TraitBuilderButton gently").Success);
+    }
+
+    // window "title" ...: the app's top-level window of that title, the Collaborator window (#1422).
+    [TestMethod]
+    public void Parse_WindowWithTitleSize_ProducesTitleAndSize()
+    {
+        var result = Parse("window \"Story Collaborator\" size 1036x744");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual(ScriptVerb.Window, result.Statements[1].Verb);
+        Assert.AreEqual("Story Collaborator", result.Statements[1].WindowTitle);
+        Assert.AreEqual(WindowAction.Size, result.Statements[1].WindowAction);
+        Assert.AreEqual(new System.Drawing.Size(1036, 744), result.Statements[1].WindowSize);
+    }
+
+    [TestMethod]
+    [DataRow("window \"Story Collaborator\" minimize", WindowAction.Minimize)]
+    [DataRow("window \"Story Collaborator\" maximize", WindowAction.Maximize)]
+    [DataRow("window \"Story Collaborator\" restore", WindowAction.Restore)]
+    public void Parse_WindowWithTitleState_ProducesTitleAndAction(string line, WindowAction expected)
+    {
+        var result = Parse(line);
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual("Story Collaborator", result.Statements[1].WindowTitle);
+        Assert.AreEqual(expected, result.Statements[1].WindowAction);
+    }
+
+    [TestMethod]
+    public void Parse_WindowWithoutTitle_LeavesTitleNull()
+    {
+        var result = Parse("window size 700x744");
+
+        Assert.IsNull(result.Statements[1].WindowTitle);
+    }
+
+    [TestMethod]
+    [DataRow("window \"Story Collaborator\"")]
+    [DataRow("window \"\" size 1036x744")]
+    [DataRow("window \"Story Collaborator\" size")]
+    [DataRow("window size \"Story Collaborator\" 1036x744")]
+    [DataRow("window \"Story Collaborator\" \"Other\" minimize")]
+    public void Parse_BadWindowWithTitle_ReportsError(string line)
+    {
+        Assert.IsFalse(Parse(line).Success);
+    }
+
+    [TestMethod]
+    public void Parse_ScreenshotWindow_ProducesNameAndTitle()
+    {
+        var result = Parse("screenshot \"Collaborator-Window.png\" window \"Story Collaborator\"");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        var s = result.Statements[1];
+        Assert.AreEqual(ScriptVerb.Screenshot, s.Verb);
+        Assert.AreEqual("Collaborator-Window.png", s.Text);
+        Assert.AreEqual("Story Collaborator", s.WindowTitle);
+        Assert.IsNull(s.CaptureTargets);
+        Assert.IsNull(s.Crop);
+    }
+
+    [TestMethod]
+    [DataRow("window")]
+    [DataRow("window \"\"")]
+    [DataRow("window StoryCollaborator")]
+    [DataRow("window \"Story Collaborator\" crop 0,0,10,10")]
+    [DataRow("window \"Story Collaborator\" of WorkflowAcceptAllButton")]
+    [DataRow("of WorkflowAcceptAllButton window \"Story Collaborator\"")]
+    public void Parse_BadScreenshotWindow_ReportsError(string tail)
+    {
+        Assert.IsFalse(Parse($"screenshot \"Collaborator-Window.png\" {tail}").Success);
+    }
+    // #1422: pick maps Collaborator picker labels to element names.
+    [TestMethod]
+    public void Parse_Pick_ProducesLabelMapIgnoringLabelCase()
+    {
+        var result = Parse("pick OuterProblem=\"Catching the drug dealer Lacas\" Protagonist=\"Leonard Kraskin\"");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        var s = result.Statements[1];
+        Assert.AreEqual(ScriptVerb.Pick, s.Verb);
+        Assert.AreEqual(2, s.Picks!.Count);
+        Assert.AreEqual("Catching the drug dealer Lacas", s.Picks["outerproblem"]);
+        Assert.AreEqual("Leonard Kraskin", s.Picks["Protagonist"]);
+    }
+
+    [TestMethod]
+    [DataRow("pick")]
+    [DataRow("pick Protagonist")]
+    [DataRow("pick Protagonist=")]
+    [DataRow("pick =\"Leonard Kraskin\"")]
+    [DataRow("pick Protagonist=\"\"")]
+    [DataRow("pick \"Leonard Kraskin\"")]
+    [DataRow("pick Main-Character=\"Leonard Kraskin\"")]
+    [DataRow("pick Protagonist=\"Leonard Kraskin\" protagonist=\"Tony Irwin\"")]
+    public void Parse_BadPick_ReportsError(string line)
+    {
+        Assert.IsFalse(Parse(line).Success);
+    }
+
+    // #1422: expand and collapse take any target, so a Collaborator group row works too.
+    [TestMethod]
+    [DataRow("expand", ScriptVerb.Expand)]
+    [DataRow("collapse", ScriptVerb.Collapse)]
+    public void Parse_ExpandAutomationId_ProducesIdTarget(string verb, ScriptVerb expected)
+    {
+        var result = Parse($"{verb} WorkflowGroupProblemNavItem");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual(expected, result.Statements[1].Verb);
+        Assert.AreEqual(ElementAddressKind.AutomationId, result.Statements[1].Target!.Kind);
+        Assert.AreEqual("WorkflowGroupProblemNavItem", result.Statements[1].Target!.Value);
     }
 }
 #endif

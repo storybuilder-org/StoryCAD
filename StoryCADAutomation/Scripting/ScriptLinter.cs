@@ -47,6 +47,9 @@ public sealed partial class ScriptLinter
     /// </summary>
     private static readonly string[] PlatformModifierTokens = { "CTRL", "CONTROL", "WIN", "WINDOWS" };
 
+    /// <summary>The element picker list id that pick looks for (StoryCADLib/Collaborator/Views/ElementPicker.xaml).</summary>
+    private const string PickerListId = "CollabPickerList";
+
     private readonly XamlUiFacts _facts;
 
     public ScriptLinter(XamlUiFacts facts)
@@ -93,6 +96,12 @@ public sealed partial class ScriptLinter
                     break;
                 case ScriptVerb.ShowImage:
                     LintImageName(statement, findings);
+                    break;
+                case ScriptVerb.Pick when !_facts.AutomationIds.Contains(PickerListId):
+                    // pick finds the pickers by this list id (ScriptInterpreter); a rename breaks every pick line.
+                    findings.Add(Error(statement,
+                        $"pick answers the Collaborator element picker by its list id '{PickerListId}', " +
+                        "which is not in the XAML; the picker's list was renamed or removed."));
                     break;
             }
         }

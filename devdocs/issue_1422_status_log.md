@@ -128,3 +128,33 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - App fixes found by the run ride this PR: Overview premise, carried-over drop-downs, changed flag on tool inserts, drops and conversions, Last Changed, tool target is the selected node, per-type right-click items, scene purposes and cast layout, beat selection after Assign, tree highlight after moves, menus and drops, startup status messages, Character tabs sized to their titles, respelled list values with old-outline mapping, System.IO file writes.
 - Runner: select scrolls a list row into view; an empty field reads as empty; the pointer parks on the status bar with real input moves before a screenshot and after context-menu and drag; the linter accepts the TabView scroll buttons; seeded preferences carry a sample author name.
 - Tests: 2195 passed, 17 skipped; CheckDotEnvFile and CheckDoppler need a .env. Automation tests 355 passed. The seven other scripts pass in the VM.
+
+### Session recovery (2026-11-01, end of day)
+
+- PR #1673 (C6 Tutorial) merged into `dev` as `c31db959`; merge-cleanup done (C6 Tutorial ticked, wiki `log.md` merge entry, sync-state at `c31db959`).
+- Next: C6 item 2, Collaborator_Test_Plan (`StoryCADTests/ManualTests/Collaborator_Test_Plan.md`, manual section `docs/StoryCAD Collaborator/`). Branch `issue-1422-collaborator` from `c31db959`, in the worktree `D:\dev\src\StoryCAD-1422`. Nothing scripted yet.
+- Read first: the Collaborator item in the #1422 issue body. It lists the pages and images Problem Beats (Collaborator #302) made out of date: three Problem Builder images that show beats, the workflow list, pane and customize images, and the Scene_Workflows caption.
+- Each Collaborator run is charged to the Worker ledger. The automation VM has no Collaborator sign-in; runs that call Collaborator need Brigid (hands off), and Terry's yes before a desktop run.
+- Per plan: translate to a `.scs` script with `--window 1036x744`, run it with `D:\VMs\Run-InVM.ps1` (normal PowerShell), retake the manual images under the image name standard, run `labels` on the pages, have an agent compare the pages with the app, fix every fault the run finds, have separate agents review the images and the code, one PR.
+- Script facts: `pause` is zero in test runs; `click <target> pointer` opens a dialog without a focus ring; a tab with keyboard focus shows its tooltip, so focus a text box before a screenshot.
+
+## 2026-11-02 (PR 6, Collaborator, started)
+
+- Draft `StoryCADTests/AutomationScripts/Collaborator.scs` and table plan `Collaborator_Test_Plan.md`: the nine plan cases plus manual-only steps TC-121 to TC-138, 32 screenshots (Join dialog not scripted: it needs a machine without activation). One full pass: 12 workflow runs, 2 chat turns, 2 interview turns, all charged. Runs happen on Brigid's desktop with Terry's yes; the VM has no Collaborator sign-in.
+- TC-112 and TC-113 (AutoSave and backup pause) stay manual: a script cannot check file times.
+- Runner work before the first run: capture and size the "Story Collaborator" window, `screenshot ... of` across app windows, a waitable chat-reply signal, an id on the Review Each card.
+- Collaborator #300 (issue comment 2026-11-02): plain model-error and model-busy messages in the chat column, from StoryCAD #1674 (draft). The error and help pages get them once #1674 is on `dev`. The #300 session reviews the Collaborator pages after the rewrite. The Meet Collaborator re-render (#1626) waits for this PR, so no AutomationId renames.
+
+### Session recovery (2026-11-02, before a restart)
+
+- Branch `issue-1422-collaborator`, `dev` merged in, no PR. Script `StoryCADTests/AutomationScripts/Collaborator.scs`; 32 images in `docs/media/Collaborator` from pass 6 and two reruns; pages partly rewritten.
+- Runner added this branch: `window "<title>" size|minimize|maximize|restore`, `screenshot ... window "<title>"`, screenshots across app windows, `click <target> pointer`, `pick LABEL="name" ...`, idempotent `expand`, `wait <target> gone [condense]`, FAIL-line-N.png captures, click and expand scroll into view, focus into an AutoSuggestBox. Tests: 2264 passed; automation 409.
+- Desktop runs need Terry's yes each time; each workflow run is charged.
+- The next steps and the review findings are in the StoryCADWiki `log.md` note of 2026-11-02 (C6 Collaborator, paused for a session restart).
+
+## 2026-11-02 (PR 6, Collaborator, full run passed)
+
+- `Collaborator.scs` passed one full run on Brigid's desktop in 688 s; 32 images in `docs/media/Collaborator` replaced from that run.
+- Runner: `dialog "title" click <target> if-shown` clicks only when the dialog opens; `wait <target> gone` first waits for the target to appear.
+- Script: answers "Replace existing content?" when it opens, sets the Collaborator window taller for the workflow list image, sets a Problem Category on the scene's Problem before Scene Builder.
+- Tests: 2292 run, 2273 passed, 17 skipped, 2 failed (CheckDotEnvFile and CheckDoppler need a .env). Automation tests 417 passed.
