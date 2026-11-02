@@ -21,7 +21,7 @@ public class ModelErrorExceptionTests
 {
     // The Worker's messages, as proxy/src/workers-ai.js sends them.
     private const string BusyMessage = "The AI model is busy. Wait a minute and try again. You were not charged.";
-    private const string ErrorMessage = "The AI model returned an error. Try again. If it happens again, email support@storybuilder.org with the workflow name, the time, and this message. You were not charged.";
+    private const string ErrorMessage = "The AI model returned an error. Try again. If it happens again, email support@storybuilder.org with this code: a1b2c3d4. You were not charged.";
 
     private static string WorkerBody(string code, string message) =>
         $$$"""{"error":{"message":"{{{message}}}","type":"api_error","code":"{{{code}}}","param":null}}""";
