@@ -1,9 +1,7 @@
 # Collaborator_Test_Plan.md as an automation script (#1422). Run with:
 #   StoryCADAutomation run StoryCADTests/AutomationScripts/Collaborator.scs --window 1036x744 --keep-going --out automation-output
-#     --pref Autosave=true --pref AutosaveInterval=30 --pref TimedBackup=true --pref TimedBackupInterval=1
-# The four --pref values set AutoSave every 30 s and a timed backup every 1 minute for TC-112 and TC-113
-# (JsonPropertyName keys in StoryCADLib/Models/Tools/PreferencesModel.cs). Never open and save the
-# Preferences dialog: a save posts to the backend.
+# The runner has no option to set preferences, so TC-112 and TC-113 (AutoSave and backup pauses) are
+# checked by hand. Never open and save the Preferences dialog: a save posts to the backend.
 # Run it on Brigid's desktop with hands off the mouse and keyboard, not in the VM: the VM has no
 # Collaborator sign-in. Each workflow run, chat turn and interview turn is charged to the Worker
 # ledger. One full pass makes 12 workflow runs, 2 chat turns and 2 interview turns.
