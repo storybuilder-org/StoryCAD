@@ -94,7 +94,7 @@ expect WorkflowFlawBackstoryNavItem exists
 expect WorkflowRelationshipNavItem exists
 expect WorkflowCharacterInterviewNavItem exists
 expect WorkflowDefineStoryWorldNavItem exists
-screenshot "Collaborator-Workflow-List.png" of WorkflowOutlineGapsNavItem WorkflowDefineStoryWorldNavItem margin 8
+screenshot "Collaborator-Workflow-List.png" window "Story Collaborator"   # every group open: the list is taller than the pane
 
 step "TC-124: Customize Workflows, stars, Settings, Help"
 click WorkflowCustomizeButton pointer     # pointer input: no keyboard focus ring in the dialog
@@ -161,9 +161,7 @@ step "TC-126: Review Each on the Ideation result"
 click WorkflowReviewEachButton
 expect WorkflowAcceptButton exists
 expect WorkflowAcceptRemainingButton exists
-click WorkflowSkipButton                  # Skip keeps the sample's Story Idea, Concept and Premise
-click WorkflowSkipButton
-click WorkflowSkipButton
+click WorkflowSkipButton                  # one Skip: the number of proposals differs from run to run
 
 step "TC-115: Story Problem, then Accept All"
 click WorkflowStoryProblemNavItem
@@ -196,6 +194,7 @@ click SaveStatusButton
 click WorkflowInnerOuterProblemsNavItem
 select CollabPickerList "Catching the drug dealer Lacas"   # outer Problem
 click PrimaryButton
+click PrimaryButton                       # "Change Protagonist": Leonard, set above, is already chosen
 select CollabPickerList "Leonard's impulsiveness lets Lacas capture him"   # inner Problem
 click PrimaryButton                       # the protagonist comes from the outer Problem, set above
 wait WorkflowAcceptAllButton condense
@@ -323,6 +322,8 @@ wait TitleTextBox
 tab OverviewStructureTab
 expect GenreCombo text "Suspense"         # TC-117: Story Form was not accepted
 expect OverviewTypeCombo text "Short Story"
+collapse tree "Danger Calls/Problems"      # keeps the Settings rows inside the pane
+collapse tree "Danger Calls/Characters"
 open-node tree "Danger Calls/Settings/Unmarked police car"
 expect WeatherTextBox text ""             # TC-116: Weather was not accepted
 
