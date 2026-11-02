@@ -323,6 +323,19 @@ public sealed class ScriptInterpreter
                 {
                     // Invoke inside the named dialog only (review M4); the profile only moves the cursor.
                     var d = RequireDriver();
+                    if (s.IfShown)
+                    {
+                        try
+                        {
+                            d.WaitForWindowTitle(s.Text!);
+                        }
+                        catch (AutomationException)
+                        {
+                            _options.Log($"dialog \"{s.Text}\" did not open; nothing to click.");
+                            return currentStep;
+                        }
+                    }
+
                     _options.Profile.ApproachInWindow(d, s.Text!, s.Target!);
                     d.InvokeInWindow(s.Text!, s.Target!);
                     return currentStep;
@@ -334,6 +347,17 @@ public sealed class ScriptInterpreter
 
             case ScriptVerb.Wait when s.Gone:
                 // A run's progress text going away is its end (#1422); the long timeout covers a run.
+                // Wait for it to show first: a run that has not started yet has no progress text,
+                // and the wait would end before the run began.
+                try
+                {
+                    RequireDriver().WaitUntilFound(s.Target!);
+                }
+                catch (AutomationException)
+                {
+                    _options.Log($"wait: {s.Target} did not appear; waiting for it to be gone anyway.");
+                }
+
                 if (s.Condense)
                 {
                     _options.Profile.Condense(() => RequireDriver().WaitUntilGone(s.Target!, _options.CondenseTimeout));

@@ -50,6 +50,25 @@ public class ScriptParserTests
         Assert.AreEqual("Danger Calls/Settings", result.Statements[1].Target!.Value);
     }
 
+    // #1422: if-shown marks a dialog answer that is skipped when the dialog does not open.
+    [TestMethod]
+    [DataRow("dialog \"Replace existing content?\" click CloseButton if-shown", true)]
+    [DataRow("dialog \"Replace existing content?\" click CloseButton", false)]
+    public void Parse_Dialog_SetsIfShownOnlyWithTheKeyword(string line, bool ifShown)
+    {
+        var result = Parse(line);
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual(ScriptVerb.Dialog, result.Statements[1].Verb);
+        Assert.AreEqual(ifShown, result.Statements[1].IfShown);
+    }
+
+    [TestMethod]
+    public void Parse_DialogWithOtherTrailingWord_Fails()
+    {
+        Assert.IsFalse(Parse("dialog \"Replace existing content?\" click CloseButton maybe").Success);
+    }
+
     [TestMethod]
     public void Parse_StepWithHold_StoresHoldSeconds()
     {

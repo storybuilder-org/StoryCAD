@@ -492,7 +492,14 @@ public static partial class ScriptParser
         {
             var title = TakeString(r, "dialog title");
             TakeKeyword(r, "click");
-            return New(ScriptVerb.Dialog) with { Text = title, Target = TakeTarget(r) };
+            var target = TakeTarget(r);
+            if (r.AtEnd)
+            {
+                return New(ScriptVerb.Dialog) with { Text = title, Target = target };
+            }
+
+            TakeKeyword(r, "if-shown");
+            return New(ScriptVerb.Dialog) with { Text = title, Target = target, IfShown = true };
         }
 
         // pick LABEL="element name" [LABEL="element name" ...]: answers the Collaborator element

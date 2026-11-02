@@ -58,6 +58,13 @@ public sealed record ScriptStatement
     public bool Pointer { get; init; }
 
     /// <summary>
+    ///     "dialog "title" click &lt;target&gt; if-shown": clicks only when the dialog opens. Collaborator
+    ///     asks "Replace existing content?" only when a proposal would replace the writer's text,
+    ///     and which fields a model proposes differs from run to run (#1422).
+    /// </summary>
+    public bool IfShown { get; init; }
+
+    /// <summary>
     ///     Pause duration in seconds, before profile pacing is applied; on a step line, the
     ///     optional hold seconds added at the end of the step (video design, section 6).
     /// </summary>

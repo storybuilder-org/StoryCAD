@@ -201,6 +201,70 @@ public class ScriptInterpreterTests
         Assert.IsNull(ScriptInterpreter.PickerTitle(new[] { "Select", "Cancel", "Click here to select an element type" }));
     }
 
+    // #1422: Collaborator asks "Replace existing content?" only when a proposal would replace the
+    // writer's text, so the script answers it only when it opens.
+    private static (ScriptRunResult Result, List<string> Calls, List<string> Log) RunWith(
+        string lines, params string[] failingMethods)
+    {
+        var parsed = ScriptParser.Parse($"script \"Run\"\nlaunch\n{lines}\n");
+        Assert.IsTrue(parsed.Success, string.Join("; ", parsed.Errors));
+        var driver = FailingDriver.Create(failingMethods, out var calls);
+        var log = new List<string>();
+        var interpreter = new ScriptInterpreter(() => driver, new InterpreterOptions { Log = log.Add });
+        return (interpreter.Execute(parsed), calls, log);
+    }
+
+    [TestMethod]
+    public void Execute_DialogIfShown_WhenDialogDoesNotOpen_PassesWithoutClicking()
+    {
+        var (result, calls, log) = RunWith(
+            "dialog \"Replace existing content?\" click CloseButton if-shown", nameof(IUiDriver.WaitForWindowTitle));
+
+        Assert.IsTrue(result.AllPassed);
+        Assert.IsFalse(calls.Any(c => c.StartsWith(nameof(IUiDriver.InvokeInWindow), StringComparison.Ordinal)));
+        Assert.IsTrue(log.Any(l => l.Contains("did not open", StringComparison.Ordinal)));
+    }
+
+    [TestMethod]
+    public void Execute_DialogIfShown_WhenDialogOpens_ClicksTheButton()
+    {
+        var (result, calls, _) = RunWith("dialog \"Replace existing content?\" click CloseButton if-shown");
+
+        Assert.IsTrue(result.AllPassed);
+        CollectionAssert.Contains(calls, "InvokeInWindow(Replace existing content?, CloseButton, )");
+    }
+
+    [TestMethod]
+    public void Execute_DialogWithoutIfShown_WhenDialogDoesNotOpen_Fails()
+    {
+        var (result, _, _) = RunWith(
+            "dialog \"Replace existing content?\" click CloseButton", nameof(IUiDriver.InvokeInWindow));
+
+        Assert.IsFalse(result.AllPassed);
+    }
+
+    // #1422: a run that has not started has no progress text; the wait must not end before it starts.
+    [TestMethod]
+    public void Execute_WaitGone_WaitsForTheTargetToAppearFirst()
+    {
+        var (result, calls, _) = RunWith("wait ResponseProgressText gone");
+
+        Assert.IsTrue(result.AllPassed);
+        var found = calls.FindIndex(c => c.StartsWith(nameof(IUiDriver.WaitUntilFound), StringComparison.Ordinal));
+        var gone = calls.FindIndex(c => c.StartsWith(nameof(IUiDriver.WaitUntilGone), StringComparison.Ordinal));
+        Assert.IsTrue(found >= 0 && gone > found, string.Join("; ", calls));
+    }
+
+    [TestMethod]
+    public void Execute_WaitGone_WhenTargetNeverAppears_StillWaitsForGoneAndPasses()
+    {
+        var (result, calls, log) = RunWith("wait ResponseProgressText gone", nameof(IUiDriver.WaitUntilFound));
+
+        Assert.IsTrue(result.AllPassed);
+        Assert.IsTrue(calls.Any(c => c.StartsWith(nameof(IUiDriver.WaitUntilGone), StringComparison.Ordinal)));
+        Assert.IsTrue(log.Any(l => l.Contains("did not appear", StringComparison.Ordinal)));
+    }
+
     // #1422: expand on a Collaborator group row reaches the driver's idempotent Expand.
     [TestMethod]
     public void Execute_ExpandGroupRow_CallsDriverExpand()
@@ -244,6 +308,38 @@ public class PickerDriver : DispatchProxy
         if (targetMethod.Name == nameof(IUiDriver.WaitForDialogWith))
         {
             return _dialogs.Count > 0 ? _dialogs.Dequeue() : null;
+        }
+
+        var type = targetMethod.ReturnType;
+        return type.IsValueType && type != typeof(void) ? Activator.CreateInstance(type) : null;
+    }
+}
+
+/// <summary>
+///     A <see cref="DriverCalls" /> whose named methods throw <see cref="AutomationStepException" />,
+///     as a driver wait does when its timeout ends.
+/// </summary>
+public class FailingDriver : DispatchProxy
+{
+    private List<string> _calls = null!;
+    private HashSet<string> _failing = null!;
+
+    public static IUiDriver Create(IEnumerable<string> failingMethods, out List<string> calls)
+    {
+        var driver = Create<IUiDriver, FailingDriver>();
+        calls = new List<string>();
+        var proxy = (FailingDriver)(object)driver;
+        proxy._calls = calls;
+        proxy._failing = new HashSet<string>(failingMethods, StringComparer.Ordinal);
+        return driver;
+    }
+
+    protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
+    {
+        _calls.Add($"{targetMethod!.Name}({string.Join(", ", args ?? Array.Empty<object?>())})");
+        if (_failing.Contains(targetMethod.Name))
+        {
+            throw new AutomationStepException($"{targetMethod.Name} timed out (test driver).");
         }
 
         var type = targetMethod.ReturnType;

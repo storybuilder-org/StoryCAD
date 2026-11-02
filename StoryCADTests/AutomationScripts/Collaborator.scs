@@ -94,7 +94,9 @@ expect WorkflowFlawBackstoryNavItem exists
 expect WorkflowRelationshipNavItem exists
 expect WorkflowCharacterInterviewNavItem exists
 expect WorkflowDefineStoryWorldNavItem exists
-screenshot "Collaborator-Workflow-List.png" window "Story Collaborator"   # every group open: the list is taller than the pane
+window "Story Collaborator" size 1036x1100    # every group open: the list is taller than a 744-high window
+screenshot "Collaborator-Workflow-List.png" window "Story Collaborator"
+window "Story Collaborator" size 1036x744
 
 step "TC-124: Customize Workflows, stars, Settings, Help"
 click WorkflowCustomizeButton pointer     # pointer input: no keyboard focus ring in the dialog
@@ -169,7 +171,7 @@ pick Problem="Catching the drug dealer Lacas" Protagonist="Leonard Kraskin" Anta
 wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
 screenshot "Collaborator-Workflow-Story-Problem.png" window "Story Collaborator"
 click WorkflowAcceptAllButton             # applies the New rows
-dialog "Replace existing content?" click CloseButton   # Cancel: the Has your text rows keep the sample's words and names
+dialog "Replace existing content?" click CloseButton if-shown   # Cancel: the Has your text rows keep the sample's words and names
 
 step "TC-117: Story Form, closed without accepting"
 expand WorkflowGroupOverviewNavItem       # this session's groups start closed
@@ -212,6 +214,7 @@ screenshot "Collaborator-Session-Problem-Builder.png" window "Story Collaborator
 click WorkflowReviewEachButton
 click WorkflowSkipButton                  # one row read, Yours against Proposed, and kept
 click WorkflowAcceptRemainingButton       # Accept Free Remaining: the New rows; Has your text rows wait
+dialog "Replace existing content?" click CloseButton if-shown   # asked when the queue ends; left open, it covered the Problem Beats image
 
 step "TC-129: Problem Beats on the same problem"
 expand WorkflowGroupProblemNavItem
@@ -219,7 +222,8 @@ click WorkflowProblemBeatsNavItem
 pick Problem="How will Leonard and Tony get past Charlie's tech?" Protagonist="Leonard Kraskin" Antagonist="Charlie Lacas"
 wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
 screenshot "Collaborator-Workflow-Problem-Beats.png" window "Story Collaborator"
-click WorkflowAcceptAllButton             # beats only fill empty rows, so no Replace question
+click WorkflowAcceptAllButton             # beats only fill empty rows
+dialog "Replace existing content?" click CloseButton if-shown
 
 step "TC-130: Character Builder on Leonard Kraskin"
 click WorkflowCharacterBuilderNavItem
@@ -227,7 +231,7 @@ pick Character="Leonard Kraskin"
 wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
 screenshot "Collaborator-Workflow-Character-Builder.png" window "Story Collaborator"
 click WorkflowAcceptAllButton
-dialog "Replace existing content?" click CloseButton   # Cancel: Leonard keeps the sample's Role and other text
+dialog "Replace existing content?" click CloseButton if-shown   # Cancel: Leonard keeps the sample's Role and other text
 
 step "TC-131: Outline gaps after the spine workflows"
 click WorkflowOutlineGapsNavItem
@@ -294,6 +298,12 @@ click WorkflowReviewEachButton
 expect WorkflowAcceptButton exists
 screenshot "Collaborator-Review-Each.png" window "Story Collaborator"
 step "TC-137: Scene Builder"
+open-node tree "Danger Calls/Problems/Catching the drug dealer Lacas/Leonard's impulsiveness lets Lacas capture him"
+tab ProblemTab
+focus ProblemCategoryCombo
+press "Alt+Down"
+select ProblemCategoryCombo "Complication"    # the scene's parent Problem has no category in the sample, and Scene Builder stops without one
+click SaveStatusButton
 click WorkflowSceneBuilderNavItem
 pick Scene="We have a drug deal"
 wait ResponseProgressText gone condense   # the run ends when its progress text goes, proposals or not
