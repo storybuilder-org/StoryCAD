@@ -65,6 +65,12 @@ public sealed record ScriptStatement
     /// </summary>
     public System.Drawing.Size? WindowSize { get; init; }
 
+    /// <summary>
+    ///     The title of the app window that "window" acts on or "screenshot ... window" captures
+    ///     (the Collaborator window, #1422); null for the main window.
+    /// </summary>
+    public string? WindowTitle { get; init; }
+
     /// <summary>Toggle direction: true = on.</summary>
     public bool? On { get; init; }
 

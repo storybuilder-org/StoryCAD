@@ -245,6 +245,70 @@ internal sealed class ElementLocator
         }
     }
 
+    /// <summary>
+    ///     Waits for a top-level window of the app process with this exact title (the Collaborator
+    ///     window, #1422) and returns its native handle. Unlike <see cref="WaitForWindow" />, an
+    ///     in-window dialog does not count: only a real window can be moved, sized, or captured.
+    /// </summary>
+    public IntPtr WaitForTopLevelWindowHandle(string title, TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+        while (true)
+        {
+            _ensureRunnable();
+            try
+            {
+                foreach (var window in AppWindows())
+                {
+                    if (NameOf(window) == title
+                        && window.Properties.NativeWindowHandle.ValueOrDefault is var hwnd && hwnd != IntPtr.Zero)
+                    {
+                        return hwnd;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Transient UIA churn; poll again.
+            }
+
+            if (DateTime.UtcNow >= deadline)
+            {
+                throw new AutomationStepException(
+                    $"No top-level window titled \"{title}\" appeared in the app process within {timeout.TotalSeconds:0.#}s.");
+            }
+
+            Thread.Sleep(PollInterval);
+        }
+    }
+
+    /// <summary>
+    ///     The top-level window that holds <paramref name="element" />, followed up its owner chain
+    ///     (a windowed flyout is owned by the window it opened from); zero when none is found.
+    /// </summary>
+    public IntPtr RootWindowOf(AutomationElement element)
+    {
+        try
+        {
+            var walker = _automation.TreeWalkerFactory.GetControlViewWalker();
+            var desktop = _automation.GetDesktop();
+            for (var e = element; e is not null && !IsSameElement(e, desktop); e = walker.GetParent(e))
+            {
+                var hwnd = e.Properties.NativeWindowHandle.ValueOrDefault;
+                if (hwnd != IntPtr.Zero)
+                {
+                    return NativeMethods.RootOwner(hwnd);
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // Transient UIA churn; the caller falls back to the main window.
+        }
+
+        return IntPtr.Zero;
+    }
+
     private AutomationElement? TryFindWindow(string title)
     {
         try

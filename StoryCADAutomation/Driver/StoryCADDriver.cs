@@ -386,7 +386,7 @@ public sealed class StoryCADDriver : IUiDriver
     public void SizeMainWindow(int width, int height)
     {
         // A new size replaces the frame a later restore must return to.
-        _frameBeforeStateChange = null;
+        _frameBeforeStateChange.Remove(_process.MainWindowHandle);
         var scale = MainWindowDpi / 96.0;
         try
         {
@@ -399,31 +399,40 @@ public sealed class StoryCADDriver : IUiDriver
         }
     }
 
-    /// <summary>The frame before the first minimize or maximize; restore must return to it.</summary>
-    private Rectangle? _frameBeforeStateChange;
+    /// <summary>Per window, the frame before the first minimize or maximize; restore must return to it.</summary>
+    private readonly Dictionary<IntPtr, Rectangle> _frameBeforeStateChange = new();
 
     /// <inheritdoc />
     public void SetMainWindowState(WindowAction action)
+        => SetWindowState(_process.MainWindowHandle, "the main window", action);
+
+    /// <inheritdoc />
+    public void SetWindowState(string title, WindowAction action)
+        => SetWindowState(_locator.WaitForTopLevelWindowHandle(title, Timeout(null)), $"the \"{title}\" window", action);
+
+    private void SetWindowState(IntPtr hwnd, string what, WindowAction action)
     {
-        var hwnd = _process.MainWindowHandle;
         switch (action)
         {
             case WindowAction.Minimize:
-                _frameBeforeStateChange ??= NativeMethods.VisibleWindowBounds(hwnd);
+                RememberFrame(hwnd);
                 NativeMethods.Minimize(hwnd);
-                WaitForWindowState("minimized", () => NativeMethods.IsIconic(hwnd));
+                WaitForWindowState(what, "minimized", () => NativeMethods.IsIconic(hwnd));
                 return;
             case WindowAction.Maximize:
-                _frameBeforeStateChange ??= NativeMethods.VisibleWindowBounds(hwnd);
+                RememberFrame(hwnd);
                 NativeMethods.Maximize(hwnd);
-                WaitForWindowState("maximized", () => NativeMethods.IsZoomed(hwnd));
+                WaitForWindowState(what, "maximized", () => NativeMethods.IsZoomed(hwnd));
                 return;
             case WindowAction.Restore:
                 {
-                    var before = _frameBeforeStateChange
-                                 ?? throw new AutomationStepException("window restore follows window minimize or window maximize.");
+                    if (!_frameBeforeStateChange.TryGetValue(hwnd, out var before))
+                    {
+                        throw new AutomationStepException("window restore follows window minimize or window maximize.");
+                    }
+
                     NativeMethods.Restore(hwnd);
-                    WaitForWindowState("out of the taskbar", () => !NativeMethods.IsIconic(hwnd));
+                    WaitForWindowState(what, "out of the taskbar", () => !NativeMethods.IsIconic(hwnd));
 
                     // A window maximized before it was minimized comes back maximized; one more
                     // restore returns it to its normal frame.
@@ -432,7 +441,7 @@ public sealed class StoryCADDriver : IUiDriver
                         NativeMethods.Restore(hwnd);
                     }
 
-                    WaitForWindowState("restored", () => !NativeMethods.IsIconic(hwnd) && !NativeMethods.IsZoomed(hwnd));
+                    WaitForWindowState(what, "restored", () => !NativeMethods.IsIconic(hwnd) && !NativeMethods.IsZoomed(hwnd));
 
                     // Restoring from the taskbar does not always hand the app the foreground,
                     // and real input refuses a background app.
@@ -444,23 +453,31 @@ public sealed class StoryCADDriver : IUiDriver
                         throw new AutomationStepException($"the restored window frame is {after}, not {before} as before.");
                     }
 
-                    _frameBeforeStateChange = null;
+                    _frameBeforeStateChange.Remove(hwnd);
                     return;
                 }
 
             default:
-                throw new ArgumentOutOfRangeException(nameof(action), action, "window size goes through SizeMainWindow.");
+                throw new ArgumentOutOfRangeException(nameof(action), action, "window size goes through SizeMainWindow or SizeWindow.");
         }
     }
 
-    private void WaitForWindowState(string state, Func<bool> reached)
+    private void RememberFrame(IntPtr hwnd)
+    {
+        if (!_frameBeforeStateChange.ContainsKey(hwnd) && NativeMethods.VisibleWindowBounds(hwnd) is { } frame)
+        {
+            _frameBeforeStateChange[hwnd] = frame;
+        }
+    }
+
+    private void WaitForWindowState(string what, string state, Func<bool> reached)
     {
         var deadline = DateTime.UtcNow + Timeout(null);
         while (!reached())
         {
             if (DateTime.UtcNow >= deadline)
             {
-                throw new AutomationStepException($"the main window was not {state} within {Timeout(null).TotalSeconds:0}s.");
+                throw new AutomationStepException($"{what} was not {state} within {Timeout(null).TotalSeconds:0}s.");
             }
 
             Thread.Sleep(50);
@@ -479,7 +496,6 @@ public sealed class StoryCADDriver : IUiDriver
     /// </summary>
     public Rectangle PlaceVisibleFrame(int width, int height)
     {
-        var hwnd = _process.MainWindowHandle;
         var workArea = NativeMethods.PrimaryWorkArea();
         if (!workArea.Contains(new Rectangle(0, 0, width, height)))
         {
@@ -488,23 +504,32 @@ public sealed class StoryCADDriver : IUiDriver
                 "the taskbar or the screen edge would show in the recording.");
         }
 
-        NativeMethods.PlaceWindow(hwnd, 0, 0, width, height);
+        return PlaceVisibleFrame(_process.MainWindowHandle, new Rectangle(0, 0, width, height));
+    }
+
+    /// <summary>
+    ///     Places a window so that its visible frame is exactly <paramref name="target" /> in screen
+    ///     pixels, gives it the foreground, and returns the frame.
+    /// </summary>
+    private Rectangle PlaceVisibleFrame(IntPtr hwnd, Rectangle target)
+    {
+        NativeMethods.PlaceWindow(hwnd, target.X, target.Y, target.Width, target.Height);
         Wait.UntilInputIsProcessed();
 
         // The window rectangle includes an invisible resize border; widen the window by that
-        // border so the visible part has the size asked for, and start it at the screen corner.
+        // border so the visible part has the size asked for, and start it at the target corner.
         var frame = NativeMethods.VisibleWindowBounds(hwnd)
                     ?? throw new AutomationLaunchException("Windows did not report the visible window frame.");
-        NativeMethods.PlaceWindow(hwnd, -frame.X, -frame.Y,
-            width + (width - frame.Width), height + (height - frame.Height));
+        NativeMethods.PlaceWindow(hwnd, target.X - (frame.X - target.X), target.Y - (frame.Y - target.Y),
+            target.Width + (target.Width - frame.Width), target.Height + (target.Height - frame.Height));
         Wait.UntilInputIsProcessed();
 
         frame = NativeMethods.VisibleWindowBounds(hwnd)
                 ?? throw new AutomationLaunchException("Windows did not report the visible window frame.");
-        if (frame != new Rectangle(0, 0, width, height))
+        if (frame != target)
         {
             throw new AutomationLaunchException(
-                $"the visible window frame is {frame}, not {width}x{height} at the top-left of the primary display.");
+                $"the visible window frame is {frame}, not {target.Width}x{target.Height} at {target.X},{target.Y}.");
         }
 
         // Moving the window can hand the foreground to Explorer (seen on Brigid, 2026-10-13),
@@ -513,6 +538,47 @@ public sealed class StoryCADDriver : IUiDriver
         Wait.UntilInputIsProcessed();
         EnsureAppForeground("place the window for recording");
         return frame;
+    }
+
+    /// <inheritdoc />
+    public void SizeWindow(string title, int width, int height)
+    {
+        var hwnd = _locator.WaitForTopLevelWindowHandle(title, Timeout(null));
+        _frameBeforeStateChange.Remove(hwnd);
+        var scale = NativeMethods.WindowDpi(hwnd) / 96.0;
+        var size = new Size((int)Math.Round(width * scale), (int)Math.Round(height * scale));
+        var mainFrame = _process.MainWindowHandle == IntPtr.Zero ? null : NativeMethods.VisibleWindowBounds(_process.MainWindowHandle);
+        var target = SecondWindowFrame(mainFrame, size, NativeMethods.PrimaryWorkArea())
+                     ?? throw new AutomationStepException(
+                         $"window \"{title}\" size {width}x{height} does not fit in the display's work area.");
+        try
+        {
+            PlaceVisibleFrame(hwnd, target);
+        }
+        catch (AutomationLaunchException ex)
+        {
+            throw new AutomationStepException($"window \"{title}\" size {width}x{height} failed: {ex.Message}", inner: ex);
+        }
+    }
+
+    /// <summary>
+    ///     Where a second app window goes (the window "title" size verb, #1422): beside the main
+    ///     window's right edge with the same top, so both stay in view, when that fits in the work
+    ///     area; else the top-left of the primary display; null when neither fits.
+    /// </summary>
+    internal static Rectangle? SecondWindowFrame(Rectangle? mainFrame, Size size, Rectangle workArea)
+    {
+        if (mainFrame is { } main)
+        {
+            var beside = new Rectangle(new Point(main.Right, main.Top), size);
+            if (workArea.Contains(beside))
+            {
+                return beside;
+            }
+        }
+
+        var topLeft = new Rectangle(workArea.Location, size);
+        return workArea.Contains(topLeft) ? topLeft : null;
     }
 
     /// <inheritdoc />
@@ -531,6 +597,19 @@ public sealed class StoryCADDriver : IUiDriver
         var parked = ParkPointer(frame);
         Wait.UntilInputIsProcessed();
         using var image = Capture.Rectangle(crop is { } c ? CropArea(frame, c, NativeMethods.SystemDpi()) : frame);
+        image.ToFile(pngPath);
+        RestorePointer(parked);
+    }
+
+    /// <inheritdoc />
+    public void CaptureWindow(string pngPath, string title)
+    {
+        var hwnd = _locator.WaitForTopLevelWindowHandle(title, Timeout(null));
+        var frame = NativeMethods.VisibleWindowBounds(hwnd)
+                    ?? throw new AutomationStepException($"Windows did not report the frame of the \"{title}\" window.");
+        var parked = ParkPointer(frame);
+        Wait.UntilInputIsProcessed();
+        using var image = Capture.Rectangle(frame);
         image.ToFile(pngPath);
         RestorePointer(parked);
     }
@@ -560,19 +639,27 @@ public sealed class StoryCADDriver : IUiDriver
     /// <inheritdoc />
     public void CaptureElements(string pngPath, IReadOnlyList<ElementAddress> targets, int margin)
     {
-        var hwnd = _process.MainWindowHandle;
-        var frame = hwnd == IntPtr.Zero ? null : NativeMethods.VisibleWindowBounds(hwnd);
-        if (frame is null)
-        {
-            throw new AutomationStepException("the app has no main window to capture.");
-        }
-
         var elements = new List<(ElementAddress Target, Rectangle Bounds)>();
+        Rectangle? frame = null;
         foreach (var target in targets)
         {
             var element = _locator.WaitUntilReady(target, ReadinessRequirement.Exists, Timeout(null));
             // An offscreen element can still report a stale rectangle; treat it as having none.
             elements.Add((target, element.IsOffscreen ? Rectangle.Empty : element.BoundingRectangle));
+
+            // The clip is the union of the windows that hold the targets: the main window, the
+            // Collaborator window, or both (#1422).
+            var root = _locator.RootWindowOf(element);
+            var hwnd = root == IntPtr.Zero ? _process.MainWindowHandle : root;
+            if (hwnd != IntPtr.Zero && NativeMethods.VisibleWindowBounds(hwnd) is { } windowFrame)
+            {
+                frame = frame is { } f ? Rectangle.Union(f, windowFrame) : windowFrame;
+            }
+        }
+
+        if (frame is null)
+        {
+            throw new AutomationStepException("the app has no window around the targets to capture.");
         }
 
         var parked = ParkPointer(frame.Value);
@@ -1381,12 +1468,17 @@ public sealed class StoryCADDriver : IUiDriver
             return null;
         }
 
-        // An empty spot on the status bar, inside the app's content: a move onto the title bar
-        // never reached the content, so the row under the pointer kept its hover shade.
+        // An empty spot on the main window's status bar, inside the app's content: a move onto
+        // the title bar never reached the content, so the row under the pointer kept its hover
+        // shade. The main window's, not the captured window's: the Collaborator window has no
+        // status bar, and its Accept All button sits near that spot (#1422).
+        var home = _process.MainWindowHandle != IntPtr.Zero && NativeMethods.VisibleWindowBounds(_process.MainWindowHandle) is { } main
+            ? main
+            : frame;
         var statusBar = (int)Math.Round(26 * NativeMethods.SystemDpi() / 96.0);
         // Real input moves: the glide places the cursor without input events, so the row under
         // the pointer never heard it leave and kept its hover shade (2026-11-01 VM runs).
-        InputMoveTo(at, new Point(frame.X + frame.Width * 3 / 5, frame.Bottom - statusBar));
+        InputMoveTo(at, new Point(home.X + home.Width * 3 / 5, home.Bottom - statusBar));
         Wait.UntilInputIsProcessed();
         Thread.Sleep(500); // the hover shade and any tooltip fade out
         return at;

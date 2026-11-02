@@ -504,10 +504,17 @@ public static partial class ScriptParser
                 return BuildScreenshotOf(r, name);
             }
 
+            // screenshot "name.png" window "title": another app window, such as Story Collaborator (#1422).
+            if (r.Peek is { Kind: TokenKind.Word, Value: "window" })
+            {
+                r.Next();
+                return New(ScriptVerb.Screenshot) with { Text = name, WindowTitle = TakeString(r, "window title") };
+            }
+
             // screenshot "name.png" crop x,y,w,h: a detail of the window for a close-up manual image.
             if (r.Peek is not { Kind: TokenKind.Word, Value: "crop" })
             {
-                throw new SyntaxException("after the png file name, expected 'crop x,y,w,h' or 'of target ...'.");
+                throw new SyntaxException("after the png file name, expected 'crop x,y,w,h', 'of target ...', or 'window \"title\"'.");
             }
 
             TakeKeyword(r, "crop");
@@ -568,17 +575,20 @@ public static partial class ScriptParser
             return New(ScriptVerb.Screenshot) with { Text = name, CaptureTargets = targets, CaptureMargin = margin };
         }
 
+        // window ["title"] size WxH | minimize | maximize | restore: without a title, the main
+        // window; with one, the app's top-level window of that title (Story Collaborator, #1422).
         ScriptStatement BuildWindow(ArgReader r)
         {
+            string? title = r.Peek is { Kind: TokenKind.String } ? TakeString(r, "window title") : null;
             var action = TakeWord(r, "'size', 'minimize', 'maximize', or 'restore'");
             switch (action)
             {
                 case "minimize":
-                    return New(ScriptVerb.Window) with { WindowAction = WindowAction.Minimize };
+                    return New(ScriptVerb.Window) with { WindowAction = WindowAction.Minimize, WindowTitle = title };
                 case "maximize":
-                    return New(ScriptVerb.Window) with { WindowAction = WindowAction.Maximize };
+                    return New(ScriptVerb.Window) with { WindowAction = WindowAction.Maximize, WindowTitle = title };
                 case "restore":
-                    return New(ScriptVerb.Window) with { WindowAction = WindowAction.Restore };
+                    return New(ScriptVerb.Window) with { WindowAction = WindowAction.Restore, WindowTitle = title };
                 case "size":
                     {
                         var word = TakeWord(r, "size as WxH in 100%-scale pixels");
@@ -594,6 +604,7 @@ public static partial class ScriptParser
                         return New(ScriptVerb.Window) with
                         {
                             WindowAction = WindowAction.Size, WindowSize = new System.Drawing.Size(width, height),
+                            WindowTitle = title,
                         };
                     }
 

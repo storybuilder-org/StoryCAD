@@ -83,5 +83,33 @@ public class ScriptInterpreterTests
             StatementStatus.Skipped, StatementStatus.Skipped,
         }, statuses.ToArray());
     }
+
+    // #1422: window and screenshot statements with a title reach the titled-window driver calls.
+    [TestMethod]
+    public void Execute_WithTitledWindowStatements_CallsTitledWindowDriverMethods()
+    {
+        var parsed = ScriptParser.Parse(
+            "script \"Collaborator window\"\nlaunch\n" +
+            "window \"Story Collaborator\" size 1036x744\n" +
+            "window \"Story Collaborator\" minimize\n" +
+            "window size 1036x744\n" +
+            "screenshot \"Collaborator-Window.png\" window \"Story Collaborator\"\n");
+        Assert.IsTrue(parsed.Success, string.Join("; ", parsed.Errors));
+        var driver = DriverCalls.Create(out var calls);
+        var output = Path.Combine(Path.GetTempPath(), "StoryCADAutomation", "titled-window-test");
+        var interpreter = new ScriptInterpreter(
+            () => driver, new InterpreterOptions { OutputDirectory = output, Log = static _ => { } });
+
+        var result = interpreter.Execute(parsed);
+
+        Assert.IsTrue(result.AllPassed);
+        CollectionAssert.AreEqual(new[]
+        {
+            "SizeWindow(Story Collaborator, 1036, 744)",
+            "SetWindowState(Story Collaborator, Minimize)",
+            "SizeMainWindow(1036, 744)",
+            $"CaptureWindow({Path.Combine(Path.GetFullPath(output), "Collaborator-Window.png")}, Story Collaborator)",
+        }, calls);
+    }
 }
 #endif

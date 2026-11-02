@@ -263,5 +263,76 @@ public class ScriptParserTests
     {
         Assert.IsFalse(Parse("click TraitBuilderButton gently").Success);
     }
+
+    // window "title" ...: the app's top-level window of that title, the Collaborator window (#1422).
+    [TestMethod]
+    public void Parse_WindowWithTitleSize_ProducesTitleAndSize()
+    {
+        var result = Parse("window \"Story Collaborator\" size 1036x744");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual(ScriptVerb.Window, result.Statements[1].Verb);
+        Assert.AreEqual("Story Collaborator", result.Statements[1].WindowTitle);
+        Assert.AreEqual(WindowAction.Size, result.Statements[1].WindowAction);
+        Assert.AreEqual(new System.Drawing.Size(1036, 744), result.Statements[1].WindowSize);
+    }
+
+    [TestMethod]
+    [DataRow("window \"Story Collaborator\" minimize", WindowAction.Minimize)]
+    [DataRow("window \"Story Collaborator\" maximize", WindowAction.Maximize)]
+    [DataRow("window \"Story Collaborator\" restore", WindowAction.Restore)]
+    public void Parse_WindowWithTitleState_ProducesTitleAndAction(string line, WindowAction expected)
+    {
+        var result = Parse(line);
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual("Story Collaborator", result.Statements[1].WindowTitle);
+        Assert.AreEqual(expected, result.Statements[1].WindowAction);
+    }
+
+    [TestMethod]
+    public void Parse_WindowWithoutTitle_LeavesTitleNull()
+    {
+        var result = Parse("window size 700x744");
+
+        Assert.IsNull(result.Statements[1].WindowTitle);
+    }
+
+    [TestMethod]
+    [DataRow("window \"Story Collaborator\"")]
+    [DataRow("window \"\" size 1036x744")]
+    [DataRow("window \"Story Collaborator\" size")]
+    [DataRow("window size \"Story Collaborator\" 1036x744")]
+    [DataRow("window \"Story Collaborator\" \"Other\" minimize")]
+    public void Parse_BadWindowWithTitle_ReportsError(string line)
+    {
+        Assert.IsFalse(Parse(line).Success);
+    }
+
+    [TestMethod]
+    public void Parse_ScreenshotWindow_ProducesNameAndTitle()
+    {
+        var result = Parse("screenshot \"Collaborator-Window.png\" window \"Story Collaborator\"");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        var s = result.Statements[1];
+        Assert.AreEqual(ScriptVerb.Screenshot, s.Verb);
+        Assert.AreEqual("Collaborator-Window.png", s.Text);
+        Assert.AreEqual("Story Collaborator", s.WindowTitle);
+        Assert.IsNull(s.CaptureTargets);
+        Assert.IsNull(s.Crop);
+    }
+
+    [TestMethod]
+    [DataRow("window")]
+    [DataRow("window \"\"")]
+    [DataRow("window StoryCollaborator")]
+    [DataRow("window \"Story Collaborator\" crop 0,0,10,10")]
+    [DataRow("window \"Story Collaborator\" of WorkflowAcceptAllButton")]
+    [DataRow("of WorkflowAcceptAllButton window \"Story Collaborator\"")]
+    public void Parse_BadScreenshotWindow_ReportsError(string tail)
+    {
+        Assert.IsFalse(Parse($"screenshot \"Collaborator-Window.png\" {tail}").Success);
+    }
 }
 #endif

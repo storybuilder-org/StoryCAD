@@ -435,9 +435,17 @@ public sealed class ScriptInterpreter
             case ScriptVerb.Window:
                 {
                     var d = RequireDriver();
-                    if (s.WindowAction == WindowAction.Size)
+                    if (s.WindowAction == WindowAction.Size && s.WindowTitle is { } sizeTitle)
+                    {
+                        d.SizeWindow(sizeTitle, s.WindowSize!.Value.Width, s.WindowSize.Value.Height);
+                    }
+                    else if (s.WindowAction == WindowAction.Size)
                     {
                         d.SizeMainWindow(s.WindowSize!.Value.Width, s.WindowSize.Value.Height);
+                    }
+                    else if (s.WindowTitle is { } stateTitle)
+                    {
+                        d.SetWindowState(stateTitle, s.WindowAction!.Value);
                     }
                     else
                     {
@@ -485,6 +493,10 @@ public sealed class ScriptInterpreter
                     if (s.Verb == ScriptVerb.ScreenshotDialog)
                     {
                         RequireDriver().CaptureOpenDialog(path);
+                    }
+                    else if (s.WindowTitle is { } title)
+                    {
+                        RequireDriver().CaptureWindow(path, title);
                     }
                     else if (s.CaptureTargets is { } targets)
                     {

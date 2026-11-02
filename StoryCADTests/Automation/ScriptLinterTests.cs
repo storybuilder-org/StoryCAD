@@ -382,5 +382,36 @@ public class ScriptLinterTests
     {
         Assert.AreEqual(0, LintDialogLine(line).Count);
     }
+
+    // #1422: the window forms that name the Collaborator window lint clean.
+    [TestMethod]
+    [DataRow("window \"Story Collaborator\" size 1036x744")]
+    [DataRow("window \"Story Collaborator\" minimize")]
+    [DataRow("screenshot \"Collaborator-Window.png\" window \"Story Collaborator\"")]
+    public void Lint_WithTitledWindowForms_ReportsNothing(string line)
+    {
+        var parsed = ScriptParser.Parse($"script \"Lint test\"\n{line}\n");
+        Assert.IsTrue(parsed.Success, string.Join("; ", parsed.Errors));
+
+        Assert.AreEqual(0, Linter.Lint(parsed.Statements).Count);
+    }
+
+    [TestMethod]
+    public void Lint_WithScreenshotWindowBadName_ReportsError()
+    {
+        Assert.AreEqual(1, LintDialogLine("screenshot \"../Collaborator.png\" window \"Story Collaborator\"").Count);
+    }
+
+    [TestMethod]
+    public void Lint_WithReviewGroupFromXaml_ReportsNoError()
+    {
+        // WorkflowReviewGroup is an AutomationGroup in WorkflowPage.xaml (#1422): the XAML scan
+        // must see it, or "screenshot ... of WorkflowReviewGroup" fails lint.
+        var linter = new ScriptLinter(XamlUiFacts.LoadFromXamlScan());
+        var parsed = ScriptParser.Parse(
+            "script \"Lint test\"\nscreenshot \"Collaborator-Review-Each.png\" of WorkflowReviewGroup margin 8\n");
+
+        Assert.AreEqual(0, linter.Lint(parsed.Statements).Count(d => d.Severity == DiagnosticSeverity.Error));
+    }
 }
 #endif

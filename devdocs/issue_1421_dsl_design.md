@@ -148,6 +148,13 @@ window minimize
 window maximize
 window restore               # fails unless the frame is back where it was before the first
                              # minimize or maximize; gives the app the foreground again
+window "Story Collaborator" size 1036x744   # the same verbs for the app's top-level window with
+window "Story Collaborator" minimize        # this title (#1422, the Collaborator window). size puts
+                                            # the visible frame beside the main window's right edge,
+                                            # same top, when both fit in the work area (1036x744 each
+                                            # fit side by side on 3840x2160 at 150%); else at the
+                                            # display's top-left. No such window after the implicit
+                                            # wait fails the step
 ```
 
 The driver acts through Windows (ShowWindow), not the title bar buttons, which UI Automation does not reach in the WinAppSDK title bar.
@@ -184,7 +191,17 @@ screenshot "File-Menu.png" of FileMenuButton ExitMenuItem margin 12   # captures
                                                  # 100%-scale pixels and clipped to the window. Follows
                                                  # layout changes; prefer it to crop. crop and of are
                                                  # exclusive. A target with no area in the window fails.
+                                                 # The clip is the union of the app windows that hold
+                                                 # the targets: the main window, the Collaborator
+                                                 # window, or both (#1422).
+screenshot "Collaborator-Window.png" window "Story Collaborator"   # captures the visible frame of
+                                                 # the app's top-level window with this title (#1422);
+                                                 # same name rule; no crop or of
 ```
+
+Every capture moves a pointer that rests on the captured area to the main window's status bar first, then puts it back (#1422). The Collaborator window has no status bar.
+
+A chat reply in the Collaborator window changes no control state except one: the message box (`InputSearchBox`) is disabled from the send until the reply arrives (#1422). So `wait InputSearchBox condense` after `press "Enter"` waits for the reply. The Review Each card is `WorkflowReviewGroup`, an `AutomationGroup` (a StackPanel with an automation peer), so `screenshot ... of WorkflowReviewGroup` frames it.
 
 Verbs missing during #1422 translation go into this table by PR against `StoryCADAutomation`, never as per-script workarounds (per #1422 scope).
 

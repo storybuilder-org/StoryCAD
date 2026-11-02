@@ -299,6 +299,18 @@ internal static class NativeMethods
         }
     }
 
+    /// <summary>The top of the window's parent and owner chain (GetAncestor GA_ROOTOWNER).</summary>
+    internal static IntPtr RootOwner(IntPtr hwnd)
+    {
+        var root = GetAncestor(hwnd, GaRootOwner);
+        return root == IntPtr.Zero ? hwnd : root;
+    }
+
+    private const uint GaRootOwner = 3;
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetAncestor(IntPtr hwnd, uint gaFlags);
+
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
