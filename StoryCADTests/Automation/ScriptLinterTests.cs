@@ -413,5 +413,31 @@ public class ScriptLinterTests
 
         Assert.AreEqual(0, linter.Lint(parsed.Statements).Count(d => d.Severity == DiagnosticSeverity.Error));
     }
+    // #1422: pick finds the picker by CollabPickerList, so the id must be in the XAML.
+    [TestMethod]
+    public void Lint_PickWithPickerListInXaml_ReportsNoError()
+    {
+        var linter = new ScriptLinter(XamlUiFacts.LoadFromXamlScan());
+        var parsed = ScriptParser.Parse("script \"Lint test\"\npick Character=\"Charlie Lacas\"\n");
+
+        Assert.AreEqual(0, linter.Lint(parsed.Statements).Count(d => d.Severity == DiagnosticSeverity.Error));
+    }
+
+    [TestMethod]
+    public void Lint_PickWithoutPickerListInXaml_ReportsError()
+    {
+        Assert.AreEqual(1, LintDialogLine("pick Character=\"Charlie Lacas\"").Count);
+    }
+
+    [TestMethod]
+    public void Lint_ExpandGroupRowAndProposalsFrame_ReportsNoError()
+    {
+        var linter = new ScriptLinter(XamlUiFacts.LoadFromXamlScan());
+        var parsed = ScriptParser.Parse(
+            "script \"Lint test\"\nexpand WorkflowGroupProblemNavItem\ncollapse WorkflowGroupProblemNavItem\n" +
+            "screenshot \"Collaborator-Row-New.png\" of WorkflowProposalsScrollViewer margin 4\n");
+
+        Assert.AreEqual(0, linter.Lint(parsed.Statements).Count(d => d.Severity == DiagnosticSeverity.Error));
+    }
 }
 #endif

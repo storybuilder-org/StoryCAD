@@ -83,8 +83,10 @@ toggle <target> on|off
 
 ```
 open-node tree "path"        # Invoke on the tree row; Invoke navigates, selection does not
-expand tree "path"           # ExpandCollapse pattern
-collapse tree "path"
+expand <target>              # ExpandCollapse pattern; does nothing when already expanded.
+collapse <target>            # Tree rows (tree "path") and Collaborator group rows
+                             # (expand WorkflowGroupProblemNavItem). A click toggles a group
+                             # row, so a script uses expand when it does not know the state.
 menu SaveStoryMenuItem       # AutomationId of the leaf item; the driver opens parent menus
 menu "File/New Story"        # text-path fallback where a leaf id is missing; lint checks
                              # segments against XAML Text/Header values
@@ -98,7 +100,10 @@ tab StoryIdeaTab             # id preferred; text fallback linted as with menu
 save-file-dialog "{scratch}/name.stbx"   # drives the Win32 save picker end to end
 open-file-dialog "{scratch}/name.stbx"
 dialog "Save changes" click name:"Don't Save"
+pick Problem="Catching the drug dealer Lacas" Protagonist="Leonard Kraskin"
 ```
+
+`pick` answers the Collaborator element pickers that a workflow shows after the click that starts it (#1422). The pickers depend on the outline: an input whose field is linked is not asked, and an optional input with a linked field shows "Change X" with that element chosen. So `pick` maps picker labels to element names instead of a fixed order. For each picker (a ContentDialog with `CollabPickerList`), the runner reads the title. If the title label is in the map, the runner selects that element and clicks Select. If the label is not in the map and the title is "Change X", the runner clicks Select and keeps the chosen element. If the label is not in the map and the title is "Select X", the step fails. The step ends when no picker opens within the readiness timeout. A label that no picker asks for goes to the log and is not an error. Labels compare without case; element names compare exactly. One `pick` line answers at most 10 pickers.
 
 Dialog-verb paths must be `{scratch}`-rooted; the linter rejects anything else as an error, not a warning. The runner is an auto-clicker with the operator's privileges; this rule makes "scripts never touch real user files" mechanical instead of a review convention.
 
@@ -266,6 +271,7 @@ The child process launches with a scrubbed environment: `COLLAB_DEBUG` and `COLL
 - **Menu text paths** match a whole menu path in the XAML: the owning button label, then the sub-menu labels, then the leaf, each as the Windows UIA Name (explicit `AutomationProperties.Name`, else the Windows `Text`/`Label`/`Header`). Changed for #1422 (review M3): a check of each segment alone passed `menu "File/Exit"`, but the Windows Name is `Quit`. **Tab text** matches a TabViewItem `Header`.
 - **Dialog-verb paths** are `{scratch}`-rooted (error).
 - **`name:` targets** outside `dialog` scopes and **literal platform chords** (`Ctrl+...`) are warnings.
+- **`pick`** needs the picker list id `CollabPickerList` in the XAML (error).
 - **`screenshot` names** are plain `.png` file names (error). A name outside the manual image standard (`devdocs/automation_naming_convention.md`, Manual image names) is a warning.
 - **`narrate` captions**: two `narrate` lines with the same text and different caption text are an error. A line without `caption` has the narrate text as its caption text, so a line with `caption` and a line without it differ unless the caption equals the narrate text. The clip is keyed by the narrate text, so one text has one caption (#1626).
 

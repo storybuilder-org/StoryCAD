@@ -38,6 +38,7 @@ Every interactive control gets `AutomationProperties.AutomationId`.
 | NavigationViewItem | `NavItem` | `RecentlyOpenedNavItem` *(added Unit 6)* |
 | InfoBar | `InfoBar` | `PrintReportsSynopsisWarningInfoBar` *(added Unit 7)* |
 | AutomationGroup (StoryCADLib.Controls; a StackPanel with an automation peer) | `Group` | `WorkflowReviewGroup` *(added #1422: a plain panel has no peer, so its id never reaches UI Automation; use it only where a script must frame a panel)* |
+| ScrollViewer | `ScrollViewer` | `WorkflowProposalsScrollViewer` *(added #1422: frames the Collaborator proposals list, whose rows depend on what the model proposes)* |
 | TreeViewItem | `TreeItem` | *(added Unit 8, founder ruling on PR #1457; navigation automation depends on manipulating tree rows. Templated TreeViewItems — stamped from a DataTemplate, which is every current instance: Shell x3, NarrativeTool x2 — carry NO AutomationId (TemplateSafety) and instead bind the accessible name: `AutomationProperties.Name="{x:Bind Name, Mode=OneWay}"`, the pattern Shell.xaml already uses)* |
 
 - A control type not in this table gets a proposed suffix in the PR description; the table row is added when the PR merges.
@@ -91,7 +92,7 @@ A starred workflow sits in the Starred group and keeps its row id. The other gro
 
 - Decorative icons inside an already-labeled parent (SymbolIcon, FontIcon inside a Button or MenuFlyoutItem).
 - Separators and spacers: AppBarSeparator, Border rules, filler grid columns.
-- Layout containers (Grid, StackPanel, ScrollViewer) unless one is a LabeledBy target or an items host.
+- Layout containers (Grid, StackPanel, ScrollViewer) unless one is a LabeledBy target, an items host, or the frame of a manual close-up (`WorkflowProposalsScrollViewer`, #1422).
 - TextBlocks that are content rather than labels. One exception: the Shell status-bar message carries `StatusMessageText`, because the smoke script checks save results through it (#1421, Terry's decision of 2026-09-30). The proposed suffix for a TextBlock is `Text`.
 
 ## Manual image names

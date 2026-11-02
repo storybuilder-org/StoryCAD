@@ -71,6 +71,12 @@ public sealed record ScriptStatement
     /// </summary>
     public string? WindowTitle { get; init; }
 
+    /// <summary>
+    ///     "pick LABEL="name" ...": picker label to element name. Labels compare without regard
+    ///     to case (the dictionary's comparer); element names compare exactly (#1422).
+    /// </summary>
+    public IReadOnlyDictionary<string, string>? Picks { get; init; }
+
     /// <summary>Toggle direction: true = on.</summary>
     public bool? On { get; init; }
 

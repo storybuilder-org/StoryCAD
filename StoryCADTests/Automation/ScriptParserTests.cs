@@ -334,5 +334,46 @@ public class ScriptParserTests
     {
         Assert.IsFalse(Parse($"screenshot \"Collaborator-Window.png\" {tail}").Success);
     }
+    // #1422: pick maps Collaborator picker labels to element names.
+    [TestMethod]
+    public void Parse_Pick_ProducesLabelMapIgnoringLabelCase()
+    {
+        var result = Parse("pick OuterProblem=\"Catching the drug dealer Lacas\" Protagonist=\"Leonard Kraskin\"");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        var s = result.Statements[1];
+        Assert.AreEqual(ScriptVerb.Pick, s.Verb);
+        Assert.AreEqual(2, s.Picks!.Count);
+        Assert.AreEqual("Catching the drug dealer Lacas", s.Picks["outerproblem"]);
+        Assert.AreEqual("Leonard Kraskin", s.Picks["Protagonist"]);
+    }
+
+    [TestMethod]
+    [DataRow("pick")]
+    [DataRow("pick Protagonist")]
+    [DataRow("pick Protagonist=")]
+    [DataRow("pick =\"Leonard Kraskin\"")]
+    [DataRow("pick Protagonist=\"\"")]
+    [DataRow("pick \"Leonard Kraskin\"")]
+    [DataRow("pick Main-Character=\"Leonard Kraskin\"")]
+    [DataRow("pick Protagonist=\"Leonard Kraskin\" protagonist=\"Tony Irwin\"")]
+    public void Parse_BadPick_ReportsError(string line)
+    {
+        Assert.IsFalse(Parse(line).Success);
+    }
+
+    // #1422: expand and collapse take any target, so a Collaborator group row works too.
+    [TestMethod]
+    [DataRow("expand", ScriptVerb.Expand)]
+    [DataRow("collapse", ScriptVerb.Collapse)]
+    public void Parse_ExpandAutomationId_ProducesIdTarget(string verb, ScriptVerb expected)
+    {
+        var result = Parse($"{verb} WorkflowGroupProblemNavItem");
+
+        Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+        Assert.AreEqual(expected, result.Statements[1].Verb);
+        Assert.AreEqual(ElementAddressKind.AutomationId, result.Statements[1].Target!.Kind);
+        Assert.AreEqual("WorkflowGroupProblemNavItem", result.Statements[1].Target!.Value);
+    }
 }
 #endif

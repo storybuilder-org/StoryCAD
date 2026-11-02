@@ -159,8 +159,10 @@
                       (VerticalScrollMode does not override it). Visible keeps the built-in bar
                       on screen whenever the list overflows: the scroll affordance #129 asks for.
                     -->
-                    <!-- ScrollViewer: no AutomationId (not in convention suffix table). List content is not a ListView. -->
+                    <!-- The id frames the proposals in manual close-ups whatever fields the model
+                         proposes (#1422). List content is not a ListView. -->
                     <ScrollViewer Grid.Row="2"
+                                  AutomationProperties.AutomationId="WorkflowProposalsScrollViewer"
                                   VerticalAlignment="Stretch"
                                      VerticalScrollBarVisibility="Visible"
                                   HorizontalScrollBarVisibility="Disabled">

@@ -1,4 +1,5 @@
 #if WINDOWS10_0_22621_0_OR_GREATER
+using System.Reflection;
 using StoryCADAutomation.Driver;
 using StoryCADAutomation.Interpreting;
 using StoryCADAutomation.Scripting;
@@ -110,6 +111,143 @@ public class ScriptInterpreterTests
             "SizeMainWindow(1036, 744)",
             $"CaptureWindow({Path.Combine(Path.GetFullPath(output), "Collaborator-Window.png")}, Story Collaborator)",
         }, calls);
+    }
+    // #1422: pick answers each picker by its title, whatever the order.
+    private static (ScriptRunResult Result, List<string> Calls, List<string> Log) RunPick(
+        string pickLine, params OpenDialog?[] dialogs)
+    {
+        var parsed = ScriptParser.Parse($"script \"Pick\"\nlaunch\n{pickLine}\n");
+        Assert.IsTrue(parsed.Success, string.Join("; ", parsed.Errors));
+        var driver = PickerDriver.Create(dialogs, out var calls);
+        var log = new List<string>();
+        var interpreter = new ScriptInterpreter(() => driver, new InterpreterOptions { Log = log.Add });
+        return (interpreter.Execute(parsed), calls, log);
+    }
+
+    private static OpenDialog Picker(string key, string title)
+        => new(key, new[] { title, "Click here to select an element type", "Leonard Kraskin", "Select", "Cancel" });
+
+    [TestMethod]
+    public void Execute_Pick_AnswersEachPickerByItsTitle()
+    {
+        var (result, calls, log) = RunPick(
+            "pick outerproblem=\"Catching the drug dealer Lacas\" InnerProblem=\"Leonard's impulsiveness\" Partner=\"Tony Irwin\"",
+            Picker("1", "Select OuterProblem"),
+            Picker("2", "Change Protagonist"),
+            Picker("3", "Select InnerProblem"));
+
+        Assert.IsTrue(result.AllPassed, string.Join("; ", result.Outcomes.Select(o => o.Failure?.Message)));
+        CollectionAssert.AreEqual(new[]
+        {
+            "WaitForDialogWith(CollabPickerList, , )",
+            "SelectItem(CollabPickerList, Catching the drug dealer Lacas, )",
+            "ResolveClickStrategy(PrimaryButton, )",
+            "Invoke(PrimaryButton, )",
+            "WaitForDialogWith(CollabPickerList, 1, )",
+            "ResolveClickStrategy(PrimaryButton, )",
+            "Invoke(PrimaryButton, )",
+            "WaitForDialogWith(CollabPickerList, 2, )",
+            "SelectItem(CollabPickerList, Leonard's impulsiveness, )",
+            "ResolveClickStrategy(PrimaryButton, )",
+            "Invoke(PrimaryButton, )",
+            "WaitForDialogWith(CollabPickerList, 3, )",
+        }, calls);
+        Assert.IsTrue(log.Any(l => l.Contains("no picker asked for Partner", StringComparison.Ordinal)));
+    }
+
+    [TestMethod]
+    public void Execute_PickWithUnmappedSelectTitle_FailsNamingTheLabel()
+    {
+        var (result, _, _) = RunPick("pick Problem=\"Catching the drug dealer Lacas\"", Picker("1", "Select Antagonist"));
+
+        Assert.IsFalse(result.AllPassed);
+        StringAssert.Contains(result.Outcomes.Last().Failure!.Message, "Select Antagonist");
+    }
+
+    [TestMethod]
+    public void Execute_PickWithNoPicker_Passes()
+    {
+        var (result, calls, _) = RunPick("pick Problem=\"Catching the drug dealer Lacas\"");
+
+        Assert.IsTrue(result.AllPassed);
+        CollectionAssert.AreEqual(new[] { "WaitForDialogWith(CollabPickerList, , )" }, calls);
+    }
+
+    [TestMethod]
+    public void Execute_PickWithEndlessPickers_FailsAfterTheLimit()
+    {
+        var dialogs = Enumerable.Range(1, ScriptInterpreter.MaxPickers + 1)
+            .Select(i => (OpenDialog?)Picker(i.ToString(), "Change Protagonist")).ToArray();
+
+        var (result, _, _) = RunPick("pick Problem=\"Catching the drug dealer Lacas\"", dialogs);
+
+        Assert.IsFalse(result.AllPassed);
+    }
+
+    [TestMethod]
+    [DataRow("Select OuterProblem", false, "OuterProblem")]
+    [DataRow("Change Protagonist", true, "Protagonist")]
+    [DataRow("Select Setting element", false, "Setting element")]
+    public void PickerTitle_WithTitleText_ReturnsVerbAndLabel(string title, bool change, string label)
+    {
+        var parsed = ScriptInterpreter.PickerTitle(new[] { "Select", title, "Select Leonard" });
+
+        Assert.AreEqual((change, label), parsed);
+    }
+
+    [TestMethod]
+    public void PickerTitle_WithoutTitleText_ReturnsNull()
+    {
+        Assert.IsNull(ScriptInterpreter.PickerTitle(new[] { "Select", "Cancel", "Click here to select an element type" }));
+    }
+
+    // #1422: expand on a Collaborator group row reaches the driver's idempotent Expand.
+    [TestMethod]
+    public void Execute_ExpandGroupRow_CallsDriverExpand()
+    {
+        var parsed = ScriptParser.Parse(
+            "script \"Expand\"\nlaunch\nexpand WorkflowGroupProblemNavItem\ncollapse WorkflowGroupProblemNavItem\n");
+        var driver = DriverCalls.Create(out var calls);
+        var interpreter = new ScriptInterpreter(() => driver, new InterpreterOptions { Log = static _ => { } });
+
+        Assert.IsTrue(interpreter.Execute(parsed).AllPassed);
+        CollectionAssert.AreEqual(new[]
+        {
+            "Expand(WorkflowGroupProblemNavItem, )",
+            "Collapse(WorkflowGroupProblemNavItem, )",
+        }, calls);
+    }
+}
+
+/// <summary>
+///     A <see cref="DriverCalls" /> that also returns the given dialogs, one per
+///     WaitForDialogWith call, then null (no more pickers).
+/// </summary>
+public class PickerDriver : DispatchProxy
+{
+    private List<string> _calls = null!;
+    private Queue<OpenDialog?> _dialogs = null!;
+
+    public static IUiDriver Create(IEnumerable<OpenDialog?> dialogs, out List<string> calls)
+    {
+        var driver = Create<IUiDriver, PickerDriver>();
+        calls = new List<string>();
+        var proxy = (PickerDriver)(object)driver;
+        proxy._calls = calls;
+        proxy._dialogs = new Queue<OpenDialog?>(dialogs);
+        return driver;
+    }
+
+    protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
+    {
+        _calls.Add($"{targetMethod!.Name}({string.Join(", ", args ?? Array.Empty<object?>())})");
+        if (targetMethod.Name == nameof(IUiDriver.WaitForDialogWith))
+        {
+            return _dialogs.Count > 0 ? _dialogs.Dequeue() : null;
+        }
+
+        var type = targetMethod.ReturnType;
+        return type.IsValueType && type != typeof(void) ? Activator.CreateInstance(type) : null;
     }
 }
 #endif

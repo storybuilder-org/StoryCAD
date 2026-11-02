@@ -754,6 +754,64 @@ public sealed class StoryCADDriver : IUiDriver
     }
 
     /// <inheritdoc />
+    public OpenDialog? WaitForDialogWith(ElementAddress content, string? previousKey, TimeSpan? timeout = null)
+    {
+        var t = Timeout(timeout);
+        var waiting = Stopwatch.StartNew();
+        while (true)
+        {
+            EnsureRunnable();
+            if (_locator.TryFind(content, out _) is { } found
+                && TryReadDialog(found) is { } dialog
+                && dialog.Key != previousKey)
+            {
+                return dialog;
+            }
+
+            if (waiting.Elapsed > t)
+            {
+                return null;
+            }
+
+            Thread.Sleep(200);
+        }
+    }
+
+    /// <summary>
+    ///     The dialog around <paramref name="content" />: the nearest ancestor with a PrimaryButton
+    ///     child (the ContentDialog's Popup, see <see cref="CaptureOpenDialog" />). The key is the
+    ///     content element's runtime id, new for each dialog the app builds.
+    /// </summary>
+    private OpenDialog? TryReadDialog(AutomationElement content)
+    {
+        try
+        {
+            var key = string.Join(".", content.Properties.RuntimeId.Value);
+            var walker = _automation.TreeWalkerFactory.GetControlViewWalker();
+            var node = walker.GetParent(content);
+            for (var depth = 0; node is not null && depth < 20; depth++)
+            {
+                if (node.FindFirstChild(cf => cf.ByAutomationId("PrimaryButton")) is not null)
+                {
+                    var texts = node.FindAllDescendants(cf => cf.ByControlType(ControlType.Text))
+                        .Select(e => e.Properties.Name.ValueOrDefault ?? string.Empty)
+                        .Where(name => name.Trim().Length > 0)
+                        .ToList();
+                    return new OpenDialog(key, texts);
+                }
+
+                node = walker.GetParent(node);
+            }
+        }
+        catch (Exception)
+        {
+            // The dialog closed mid-read; the caller's poll loop looks again.
+        }
+
+        return null;
+    }
+
+    /// <inheritdoc />
     public int? ExitCode
     {
         get

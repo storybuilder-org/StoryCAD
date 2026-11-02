@@ -74,6 +74,13 @@ public interface IUiDriver : IDisposable
     /// </summary>
     void CaptureAppWindows(string pngPath);
 
+    /// <summary>
+    ///     Waits for an open ContentDialog that holds <paramref name="content" /> and is not the
+    ///     dialog whose key is <paramref name="previousKey" /> (the one just answered, which can
+    ///     stay in the UIA tree while it closes). Returns null when none opens within the timeout.
+    /// </summary>
+    OpenDialog? WaitForDialogWith(ElementAddress content, string? previousKey, TimeSpan? timeout = null);
+
     /// <summary>Saves an image of the open ContentDialog only as a PNG at <paramref name="pngPath" />.</summary>
     void CaptureOpenDialog(string pngPath);
 

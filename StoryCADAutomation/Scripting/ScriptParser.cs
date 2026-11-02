@@ -320,6 +320,7 @@ public static partial class ScriptParser
             "save-file-dialog" => New(ScriptVerb.SaveFileDialog) with { Text = TakeString(reader, "file path") },
             "open-file-dialog" => New(ScriptVerb.OpenFileDialog) with { Text = TakeString(reader, "file path") },
             "dialog" => BuildDialog(reader),
+            "pick" => BuildPick(reader),
             "wait" => BuildWait(reader),
             "wait-window" => New(ScriptVerb.WaitWindow) with { Text = TakeString(reader, "window title") },
             "pause" => BuildPause(reader),
@@ -481,6 +482,36 @@ public static partial class ScriptParser
             var title = TakeString(r, "dialog title");
             TakeKeyword(r, "click");
             return New(ScriptVerb.Dialog) with { Text = title, Target = TakeTarget(r) };
+        }
+
+        // pick LABEL="element name" [LABEL="element name" ...]: answers the Collaborator element
+        // pickers a workflow shows, whatever their number and order (#1422).
+        ScriptStatement BuildPick(ArgReader r)
+        {
+            var picks = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            while (!r.AtEnd)
+            {
+                var word = TakeWord(r, "LABEL=\"element name\"");
+                var label = word.EndsWith('=') ? word[..^1] : string.Empty;
+                if (!BareIdShape().IsMatch(label))
+                {
+                    throw new SyntaxException(
+                        $"pick takes LABEL=\"element name\" pairs, such as Protagonist=\"Leonard Kraskin\", not '{word}'.");
+                }
+
+                var name = TakeString(r, $"element name for {label}");
+                if (!picks.TryAdd(label, name))
+                {
+                    throw new SyntaxException($"pick names the label {label} twice.");
+                }
+            }
+
+            if (picks.Count == 0)
+            {
+                throw new SyntaxException("pick takes at least one LABEL=\"element name\" pair.");
+            }
+
+            return New(ScriptVerb.Pick) with { Picks = picks };
         }
 
         ScriptStatement BuildScreenshot(ArgReader r)

@@ -25,6 +25,18 @@ public sealed class ScriptInterpreter
     /// </summary>
     private const string ScratchToken = "{scratch}";
 
+    /// <summary>The Collaborator element picker's list (StoryCADLib/Collaborator/Views/ElementPicker.xaml).</summary>
+    private const string PickerListId = "CollabPickerList";
+
+    /// <summary>The ContentDialog template's primary button; on the element picker it reads "Select".</summary>
+    private const string DialogPrimaryButtonId = "PrimaryButton";
+
+    /// <summary>
+    ///     The most pickers one pick line answers. The longest gather in WorkflowRegistry asks
+    ///     four inputs; a picker that keeps coming back must fail the step, not loop forever.
+    /// </summary>
+    internal const int MaxPickers = 10;
+
     /// <summary>How long `expect ... text` waits for the expected value (the design's 5 s implicit wait).</summary>
     private static readonly TimeSpan ExpectTextTimeout = TimeSpan.FromSeconds(5);
 
@@ -316,6 +328,10 @@ public sealed class ScriptInterpreter
                     return currentStep;
                 }
 
+            case ScriptVerb.Pick:
+                ExecutePick(s);
+                return currentStep;
+
             case ScriptVerb.Wait when s.Condense:
                 // A long wait; the presentation profile records it so the video can cut it (#1626).
                 _options.Profile.Condense(() =>
@@ -550,6 +566,84 @@ public sealed class ScriptInterpreter
 
         d.Expand(ElementAddress.FromName(segments[0]));
         WalkFlyoutPath(d, segments[1..]);
+    }
+
+    /// <summary>
+    ///     Answers the element pickers a Collaborator workflow shows. Which pickers appear, and in
+    ///     what order, depends on the fields earlier steps linked (WorkflowSessionService
+    ///     ResolveInputsAsync: required inputs first, then optional ones; an optional input whose
+    ///     reference is set asks "Change X" with that element chosen). So the line maps labels
+    ///     to elements, and each picker is answered by its title: a mapped label selects its
+    ///     element, an unmapped "Change X" keeps the current choice, an unmapped "Select X" fails.
+    ///     No picker within the readiness timeout ends the step; a label no picker asked for is
+    ///     logged, not an error, because the workflow may find that element itself (#1422).
+    /// </summary>
+    private void ExecutePick(ScriptStatement s)
+    {
+        var d = RequireDriver();
+        var list = ElementAddress.FromAutomationId(PickerListId);
+        var primary = ElementAddress.FromAutomationId(DialogPrimaryButtonId);
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        string? previous = null;
+        for (var answered = 0; ; answered++)
+        {
+            var dialog = d.WaitForDialogWith(list, previous);
+            if (dialog is null)
+            {
+                break;
+            }
+
+            if (answered == MaxPickers)
+            {
+                throw new AutomationStepException(
+                    $"the workflow showed more than {MaxPickers} element pickers; pick stops here.");
+            }
+
+            var (change, label) = PickerTitle(dialog.Texts) ?? throw new AutomationStepException(
+                $"the element picker has no \"Select ...\" or \"Change ...\" title; it shows: {string.Join(" | ", dialog.Texts)}.");
+            if (s.Picks!.TryGetValue(label, out var name))
+            {
+                Approach(list).SelectItem(list, name);
+                used.Add(label);
+                _options.Log($"pick: {(change ? "Change" : "Select")} {label} -> {name}");
+            }
+            else if (change)
+            {
+                _options.Log($"pick: Change {label} -> kept the current choice");
+            }
+            else
+            {
+                throw new AutomationStepException(
+                    $"the workflow asks \"Select {label}\", and the pick line names no {label}=\"...\".");
+            }
+
+            _options.Profile.Click(d, primary);
+            previous = dialog.Key;
+        }
+
+        var unused = s.Picks!.Keys.Where(k => !used.Contains(k)).ToList();
+        if (unused.Count > 0)
+        {
+            _options.Log($"pick: no picker asked for {string.Join(", ", unused)}");
+        }
+    }
+
+    /// <summary>
+    ///     The first "Select X" or "Change X" text of a picker dialog, the title ElementPickerVM
+    ///     ShowPicker builds. The bare "Select" is the button text and is skipped.
+    /// </summary>
+    internal static (bool Change, string Label)? PickerTitle(IEnumerable<string> texts)
+    {
+        foreach (var text in texts)
+        {
+            var parts = text.Trim().Split(' ', 2, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 2 && parts[0] is "Select" or "Change")
+            {
+                return (parts[0] == "Change", parts[1]);
+            }
+        }
+
+        return null;
     }
 
     private IReadOnlyList<string>? Openers(string menuItemId)
