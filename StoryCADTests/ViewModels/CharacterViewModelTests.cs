@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryCADLib.Models;
 using StoryCADLib.Services;
 using StoryCADLib.ViewModels;
 
@@ -59,5 +60,76 @@ public class CharacterViewModelTests
         // Assert
         Assert.IsNotNull(method);
         Assert.IsTrue(method.IsPublic);
+    }
+
+    private static CharacterModel CreateCharacter(string name, StoryModel model, params string[] traits)
+    {
+        var character = new CharacterModel(name, model, null);
+        character.TraitList.AddRange(traits);
+        return character;
+    }
+
+    /// <summary>
+    ///     Issue #1681: the trait selection from one character must not carry over
+    ///     to the next character, whose trait list may be shorter.
+    /// </summary>
+    [TestMethod]
+    public void RemoveTrait_AfterSwitchingToCharacterWithFewerTraits_DoesNotThrow()
+    {
+        // Arrange
+        var viewModel = Ioc.Default.GetRequiredService<CharacterViewModel>();
+        var model = new StoryModel();
+        Ioc.Default.GetRequiredService<AppState>().CurrentDocument = new StoryDocument(model);
+        var first = CreateCharacter("First", model, "Brave", "Loyal", "Stubborn");
+        var second = CreateCharacter("Second", model, "Shy");
+        viewModel.Activate(first);
+        viewModel.ExistingTraitIndex = 2;
+        viewModel.Deactivate(second);
+        viewModel.Activate(second);
+
+        // Act
+        viewModel.RemoveTraitCommand.Execute(null);
+
+        // Assert
+        CollectionAssert.AreEqual(new[] { "Shy" }, viewModel.CharacterTraits.ToArray());
+    }
+
+    /// <summary>
+    ///     Issue #1681: after the last trait is removed, the index points past the end
+    ///     of the list; a second remove must not throw.
+    /// </summary>
+    [TestMethod]
+    public void RemoveTrait_AfterLastTraitRemoved_DoesNotThrow()
+    {
+        // Arrange
+        var viewModel = Ioc.Default.GetRequiredService<CharacterViewModel>();
+        var model = new StoryModel();
+        Ioc.Default.GetRequiredService<AppState>().CurrentDocument = new StoryDocument(model);
+        viewModel.Activate(CreateCharacter("Character", model, "Brave", "Loyal"));
+        viewModel.ExistingTraitIndex = 1;
+        viewModel.RemoveTraitCommand.Execute(null);
+
+        // Act
+        viewModel.RemoveTraitCommand.Execute(null);
+
+        // Assert
+        CollectionAssert.AreEqual(new[] { "Brave" }, viewModel.CharacterTraits.ToArray());
+    }
+
+    [TestMethod]
+    public void RemoveTrait_WithTraitSelected_RemovesSelectedTrait()
+    {
+        // Arrange
+        var viewModel = Ioc.Default.GetRequiredService<CharacterViewModel>();
+        var model = new StoryModel();
+        Ioc.Default.GetRequiredService<AppState>().CurrentDocument = new StoryDocument(model);
+        viewModel.Activate(CreateCharacter("Character", model, "Brave", "Loyal", "Stubborn"));
+        viewModel.ExistingTraitIndex = 1;
+
+        // Act
+        viewModel.RemoveTraitCommand.Execute(null);
+
+        // Assert
+        CollectionAssert.AreEqual(new[] { "Brave", "Stubborn" }, viewModel.CharacterTraits.ToArray());
     }
 }
