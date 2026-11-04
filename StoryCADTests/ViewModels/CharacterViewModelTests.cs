@@ -116,6 +116,53 @@ public class CharacterViewModelTests
         CollectionAssert.AreEqual(new[] { "Brave" }, viewModel.CharacterTraits.ToArray());
     }
 
+    /// <summary>
+    ///     Issue #1681: a selection index that is valid for the next character must
+    ///     still be cleared, or Remove Trait deletes a trait the user did not pick.
+    /// </summary>
+    [TestMethod]
+    public void Activate_AfterTraitSelectedOnPreviousCharacter_ClearsTraitSelection()
+    {
+        // Arrange
+        var viewModel = Ioc.Default.GetRequiredService<CharacterViewModel>();
+        var model = new StoryModel();
+        Ioc.Default.GetRequiredService<AppState>().CurrentDocument = new StoryDocument(model);
+        var first = CreateCharacter("First", model, "Brave", "Loyal");
+        var second = CreateCharacter("Second", model, "Shy", "Kind", "Proud");
+        viewModel.Activate(first);
+        viewModel.ExistingTraitIndex = 1;
+        viewModel.Deactivate(second);
+
+        // Act
+        viewModel.Activate(second);
+        viewModel.RemoveTraitCommand.Execute(null);
+
+        // Assert
+        Assert.AreEqual(-1, viewModel.ExistingTraitIndex);
+        CollectionAssert.AreEqual(new[] { "Shy", "Kind", "Proud" }, viewModel.CharacterTraits.ToArray());
+    }
+
+    /// <summary>
+    ///     Issue #1681: index 0 on an empty trait list (the index's starting value)
+    ///     must not throw.
+    /// </summary>
+    [TestMethod]
+    public void RemoveTrait_OnCharacterWithNoTraits_DoesNotThrow()
+    {
+        // Arrange
+        var viewModel = Ioc.Default.GetRequiredService<CharacterViewModel>();
+        var model = new StoryModel();
+        Ioc.Default.GetRequiredService<AppState>().CurrentDocument = new StoryDocument(model);
+        viewModel.Activate(CreateCharacter("Character", model));
+        viewModel.ExistingTraitIndex = 0;
+
+        // Act
+        viewModel.RemoveTraitCommand.Execute(null);
+
+        // Assert
+        Assert.AreEqual(0, viewModel.CharacterTraits.Count);
+    }
+
     [TestMethod]
     public void RemoveTrait_WithTraitSelected_RemovesSelectedTrait()
     {

@@ -495,7 +495,7 @@ public class CharacterViewModel : ElementViewModelBase, INavigable, ISaveable, I
         set => SetProperty(ref _characterTraits, value);
     }
 
-    private int _existingTraitIndex;
+    private int _existingTraitIndex = -1;
 
     public int ExistingTraitIndex
     {
@@ -628,7 +628,7 @@ public class CharacterViewModel : ElementViewModelBase, INavigable, ISaveable, I
         {
             CharacterTraits.Add(_member);
         }
-        // This VM is a singleton and the page binds SelectedIndex after Activate, so a stale index would carry over to this character.
+        // Singleton VM; on the first (cached) page instance SelectedIndex binds after Activate, so a stale index would reach the list.
         ExistingTraitIndex = -1;
 
         RelationType = string.Empty;
@@ -744,7 +744,7 @@ public class CharacterViewModel : ElementViewModelBase, INavigable, ISaveable, I
 
     private void RemoveTrait()
     {
-        // The index can sit at or past the end after a removal until the ListView pushes -1 back.
+        // Out of range only without a UI (tests, API); in the app the binding writes -1 back during RemoveAt.
         if (ExistingTraitIndex < 0 || ExistingTraitIndex >= CharacterTraits.Count)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("No trait selected to delete", LogLevel.Warn)));
