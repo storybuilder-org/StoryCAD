@@ -1292,4 +1292,27 @@ public class CopyElementsDialogVMTests
             File.Delete(path);
         }
     }
+
+    [TestMethod]
+    public async Task LoadTargetFile_WithUnreadableFile_SetsErrorStatus()
+    {
+        // Arrange - a target whose content cannot be read is not a loaded target (#1682)
+        var vm = Ioc.Default.GetRequiredService<CopyElementsDialogVM>();
+        var path = Path.Combine(App.ResultsDir, $"CorruptTarget1682_{Guid.NewGuid()}.stbx");
+        await File.WriteAllTextAsync(path, "{ this is not an outline");
+
+        try
+        {
+            // Act
+            await vm.LoadTargetFileAsync(path);
+
+            // Assert
+            Assert.IsNull(vm.TargetModel);
+            StringAssert.Contains(vm.StatusMessage, "could not be read");
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
 }

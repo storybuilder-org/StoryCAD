@@ -2947,4 +2947,30 @@ public class StoryCADApiTests
             File.Delete(path);
         }
     }
+
+    [TestMethod]
+    public async Task OpenOutline_UnreadableFile_ReturnsFailureAndKeepsCurrentModel()
+    {
+        // Arrange - ReadStory returns an empty model for content it cannot read; the API must not call that a success (#1682)
+        var createResult = await _api.CreateEmptyOutline("Kept Outline", "Test", "0");
+        Assert.IsTrue(createResult.IsSuccess);
+        var keptModel = _api.CurrentModel;
+        var path = Path.Combine(App.ResultsDir, $"CorruptOutline1682_{Guid.NewGuid()}.stbx");
+        await File.WriteAllTextAsync(path, "{ this is not an outline");
+
+        try
+        {
+            // Act
+            var result = await _api.OpenOutline(path);
+
+            // Assert
+            Assert.IsFalse(result.IsSuccess);
+            StringAssert.Contains(result.ErrorMessage, "could not be read");
+            Assert.AreSame(keptModel, _api.CurrentModel);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
 }

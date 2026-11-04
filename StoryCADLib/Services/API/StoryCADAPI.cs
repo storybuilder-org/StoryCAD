@@ -891,7 +891,15 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
                 return OperationResult<bool>.Failure($"Error in OpenOutline: {StoryIO.EmptyOutlineMessage(path)}");
             }
 
-            CurrentModel = await outlineService.OpenFile(path);
+            // ReadStory returns an empty model for corrupt JSON or legacy XML; that is a failed open (#1682).
+            var model = await outlineService.OpenFile(path);
+            if (model?.StoryElements == null || model.StoryElements.Count == 0)
+            {
+                return OperationResult<bool>.Failure(
+                    $"Error in OpenOutline: {Path.GetFileName(path)} could not be read as a StoryCAD outline");
+            }
+
+            CurrentModel = model;
             return OperationResult<bool>.Success(true);
         }
         catch (Exception ex)
