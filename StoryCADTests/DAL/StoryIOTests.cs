@@ -344,6 +344,36 @@ public partial class StoryIOTests
         File.Delete(filePath);
     }
 
+    [TestMethod]
+    public async Task ReadStory_LegacyXmlFileHeadless_ShowsNoDialogAndWarns()
+    {
+        // Arrange - headless, ShowContentDialog answers "Download" unasked, which opened the browser
+        // for API callers; with no UI thread, building the dialog faulted instead (#1682)
+        Assert.IsTrue(_appState.Headless, "Precondition: tests run headless.");
+        var filePath = Path.Combine(App.ResultsDir, $"LegacyOutline1682_{Guid.NewGuid()}.stbx");
+        await File.WriteAllTextAsync(filePath, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<StoryModel />");
+        var log = new StoryCADTests.Services.Backend.TestLogService();
+        var storyIO = new StoryIO(log, _appState);
+
+        try
+        {
+            var file = await StorageFile.GetFileFromPathAsync(filePath);
+
+            // Act
+            var model = await storyIO.ReadStory(file);
+
+            // Assert
+            Assert.AreEqual(0, model.StoryElements.Count);
+            Assert.AreEqual(0, log.ErrorCount, "The legacy branch faulted: " +
+                string.Join(" | ", log.ExceptionCalls.Select(c => c.ex.GetType().Name + ": " + c.ex.Message)));
+            Assert.IsTrue(log.HasWarning("Legacy XML outline not opened"));
+        }
+        finally
+        {
+            File.Delete(filePath);
+        }
+    }
+
     #endregion
 
     #region Migration Tests

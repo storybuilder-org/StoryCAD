@@ -2973,4 +2973,26 @@ public class StoryCADApiTests
             File.Delete(path);
         }
     }
+
+    [TestMethod]
+    public async Task OpenOutline_LegacyXmlFile_ReturnsFailure()
+    {
+        // Arrange - headless, a legacy XML outline is a failure result with no dialog and no browser (#1682)
+        var path = Path.Combine(App.ResultsDir, $"LegacyOutline1682_{Guid.NewGuid()}.stbx");
+        await File.WriteAllTextAsync(path, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<StoryModel />");
+
+        try
+        {
+            // Act
+            var result = await _api.OpenOutline(path);
+
+            // Assert
+            Assert.IsFalse(result.IsSuccess);
+            StringAssert.Contains(result.ErrorMessage, "could not be read");
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
 }

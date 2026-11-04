@@ -118,6 +118,13 @@ public class StoryIO
             {
                 _logService.Log(LogLevel.Info, "File is legacy XML format");
 
+                // Headless, ShowContentDialog answers "Download" unasked and the browser opened for API callers (#1682).
+                if (_appState.Headless)
+                {
+                    _logService.Log(LogLevel.Warn, $"Legacy XML outline not opened ({StoryFile.Path})");
+                    return new StoryModel();
+                }
+
                 // Show dialog informing user about legacy format
                 var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new ContentDialog
                 {
