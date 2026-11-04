@@ -222,7 +222,8 @@ class BeatSheet:
 # ─── facade ─────────────────────────────────────────────────────────────────
 
 class StoryCAD:
-    def __init__(self, publish_dir: str | Path | None = None, headless: bool = False):
+    # Headless by default: a Python process has no StoryCAD window, and BootStrapper defaults the same way (#1682).
+    def __init__(self, publish_dir: str | Path | None = None, headless: bool = True):
         _ensure_loaded(Path(publish_dir) if publish_dir else None)
         _bootstrapper.Initialise(headless)
         self._api = _Ioc.Default.GetRequiredService[_api_type]()

@@ -50,12 +50,9 @@ That's a complete, valid StoryCAD file. Open it in the StoryCAD app to confirm.
 
 ### The `StoryCAD` object
 
-`StoryCAD()` boots the engine and gives you a single handle for everything. Pass
-`headless=True` if you're running on a server or in tests (no UI services):
-
-```python
-sc = StoryCAD(headless=True)
-```
+`StoryCAD()` boots the engine and gives you a single handle for everything. It
+runs headless (no UI services) by default, because a Python process has no
+StoryCAD window.
 
 There is one "current outline" at a time. `create_empty_outline(...)` and
 `open_outline(...)` both replace it.

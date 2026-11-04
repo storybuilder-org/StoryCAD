@@ -170,3 +170,10 @@ def test_element_summary_from_clr_handles_none_name():
     fake = _FakeElement(_FakeGuid(str(g)), None, "Scene")
     summary = ElementSummary.from_clr(fake)
     assert summary.name == ""
+
+
+def test_storycad_defaults_to_headless():
+    # A Python process has no StoryCAD window, so the binding must boot headless by default (#1682).
+    import inspect
+
+    assert inspect.signature(StoryCAD.__init__).parameters["headless"].default is True
