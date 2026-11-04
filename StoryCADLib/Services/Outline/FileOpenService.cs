@@ -49,8 +49,10 @@ public class FileOpenService
     ///     If fromPath is specified then the picker is skipped.
     /// </summary>
     /// <param name="fromPath">Path to open file from (Optional)</param>
-    public async Task OpenFile(string fromPath = "")
+    /// <returns>True when the outline opened; false when the open was cancelled or failed.</returns>
+    public async Task<bool> OpenFile(string fromPath = "")
     {
+        var opened = false;
         try
         {
             await SerializationLock.RunExclusiveAsync(async ct =>
@@ -110,11 +112,8 @@ public class FileOpenService
                     return;
                 }
 
-                // A zero-byte outline holds no story; say so instead of "No Story Elements found" (#1682).
-                if (new FileInfo(filePath).Length == 0)
+                if (await RejectEmptyOutline(filePath))
                 {
-                    Default.Send(new StatusChangedMessage(new StatusMessage(
-                        $"Unable to open {Path.GetFileName(filePath)}: the outline file is empty", LogLevel.Warn, true)));
                     return;
                 }
 
@@ -138,8 +137,16 @@ public class FileOpenService
 
                 // Successfully loaded - create StoryDocument
                 _appState.CurrentDocument = new StoryDocument(loadedModel, filePath);
+                opened = true;
 
             }, CancellationToken.None, _logger);
+
+            // A return inside the lock leaves only the lambda; stop here so a failed open does not
+            // back up, announce or re-list the outline that is still open (#1682).
+            if (!opened)
+            {
+                return false;
+            }
 
             // Take a backup of the project if the user has the 'backup on open' preference set.
             if (_preferences.Model.BackupOnOpen)
@@ -187,9 +194,32 @@ public class FileOpenService
             // Report the error to the user
             _logger.LogException(LogLevel.Error, ex, "Error in OpenFile command");
             Default.Send(new StatusChangedMessage(new StatusMessage("Open Story command failed", LogLevel.Error)));
+            return false;
         }
 
         _logger.Log(LogLevel.Info, "Open Story completed.");
+        return true;
+    }
+
+    /// <summary>
+    ///     When the outline file is empty: warns the writer, removes the file from Recent Files
+    ///     so it is not offered again, and returns true. Shared by every interactive open (#1682).
+    /// </summary>
+    internal async Task<bool> RejectEmptyOutline(string filePath)
+    {
+        if (!StoryIO.IsEmptyOutlineFile(filePath))
+        {
+            return false;
+        }
+
+        Default.Send(new StatusChangedMessage(
+            new StatusMessage(StoryIO.EmptyOutlineMessage(filePath), LogLevel.Warn, true)));
+        if (_preferences.Model.RecentFiles.Remove(filePath))
+        {
+            await new PreferencesIo().WritePreferences(_preferences.Model);
+        }
+
+        return true;
     }
 
     /// <summary>

@@ -1269,4 +1269,27 @@ public class CopyElementsDialogVMTests
     }
 
     #endregion
+
+    [TestMethod]
+    public async Task LoadTargetFile_WithEmptyFile_SetsErrorStatus()
+    {
+        // Arrange - an empty target outline is not a loaded target (#1682)
+        var vm = Ioc.Default.GetRequiredService<CopyElementsDialogVM>();
+        var path = Path.Combine(App.ResultsDir, $"EmptyTarget1682_{Guid.NewGuid()}.stbx");
+        await File.WriteAllTextAsync(path, string.Empty);
+
+        try
+        {
+            // Act
+            await vm.LoadTargetFileAsync(path);
+
+            // Assert
+            Assert.IsNull(vm.TargetModel);
+            StringAssert.Contains(vm.StatusMessage, "empty");
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
 }

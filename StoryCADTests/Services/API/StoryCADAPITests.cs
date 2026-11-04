@@ -2925,4 +2925,26 @@ public class StoryCADApiTests
     }
 
     #endregion
+
+    [TestMethod]
+    public async Task OpenOutline_EmptyFile_ReturnsFailure()
+    {
+        // Arrange - the API is external: an empty file is a failure result, not an empty model (#1682)
+        var path = Path.Combine(App.ResultsDir, $"EmptyOutline1682_{Guid.NewGuid()}.stbx");
+        await File.WriteAllTextAsync(path, string.Empty);
+
+        try
+        {
+            // Act
+            var result = await _api.OpenOutline(path);
+
+            // Assert
+            Assert.IsFalse(result.IsSuccess);
+            StringAssert.Contains(result.ErrorMessage, "empty");
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
 }

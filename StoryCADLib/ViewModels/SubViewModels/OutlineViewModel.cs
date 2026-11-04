@@ -106,10 +106,6 @@ public class OutlineViewModel : ObservableRecipient
         {
             using (new SerializationLock(logger))
             {
-                // Reset the model and show the home page
-                shellVm.ResetModel();
-                shellVm.ShowHomePage();
-
                 // Open file picker if `fromPath` is not provided or file doesn't exist at the path.
                 if (fromPath == "" || !File.Exists(fromPath))
                 {
@@ -148,6 +144,15 @@ public class OutlineViewModel : ObservableRecipient
                         new StatusChangedMessage(new StatusMessage("File Unavailable.", LogLevel.Warn, true)));
                     return;
                 }
+
+                if (await Ioc.Default.GetRequiredService<FileOpenService>().RejectEmptyOutline(filePath))
+                {
+                    return;
+                }
+
+                // Reset only after the file passes the checks above, so a bad pick leaves the open outline open (#1682).
+                shellVm.ResetModel();
+                shellVm.ShowHomePage();
 
                 //Read file
                 var loadedModel = await outlineService.OpenFile(filePath);

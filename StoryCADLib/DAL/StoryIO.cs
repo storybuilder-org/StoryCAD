@@ -85,6 +85,19 @@ public class StoryIO
     }
 
 
+    /// <summary>
+    ///     True when the outline file at <paramref name="path"/> holds no bytes. A new outline
+    ///     was once left this way until its first save (#1682).
+    /// </summary>
+    public static bool IsEmptyOutlineFile(string path) => new FileInfo(path).Length == 0;
+
+    /// <summary>
+    ///     The message a writer sees when an outline file is empty.
+    /// </summary>
+    public static string EmptyOutlineMessage(string path) =>
+        $"Unable to open {Path.GetFileName(path)}: the outline file is empty";
+
+
     public async Task<StoryModel> ReadStory(StorageFile StoryFile)
     {
         try

@@ -158,8 +158,15 @@ public class FileOpenVM : ObservableRecipient
                 if (SelectedRecentIndex != -1)
                 {
                     filePath = _preferences.Model.RecentFiles[SelectedRecentIndex];
-                    await _fileOpenService.OpenFile(filePath);
-                    NavigateToOverview();
+                    if (await _fileOpenService.OpenFile(filePath))
+                    {
+                        NavigateToOverview();
+                    }
+                    else
+                    {
+                        // A failed open must not put the file back at the top of Recent Files (#1682).
+                        filePath = null;
+                    }
                 }
                 else
                 {
@@ -219,7 +226,7 @@ public class FileOpenVM : ObservableRecipient
     {
         string warning = null;
         var name = OutlineName ?? "";
-        if (string.IsNullOrWhiteSpace(Path.GetFileNameWithoutExtension(name)))
+        if (FileCreateService.IsBlankOutlineName(name))
         {
             warning = BlankNameWarning;
         }

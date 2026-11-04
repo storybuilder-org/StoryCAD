@@ -51,6 +51,28 @@ public partial class FileOpenVMTests
 
     #region New outline validation (#1682)
 
+    private string _savedOutlineFolder;
+    private string _savedOutlineName;
+
+    // FileOpenVM is a singleton: put back what these tests change so later tests see the real values.
+    [TestInitialize]
+    public void SaveSharedState()
+    {
+        var vm = Ioc.Default.GetRequiredService<FileOpenVM>();
+        _savedOutlineFolder = vm.OutlineFolder;
+        _savedOutlineName = vm.OutlineName;
+    }
+
+    [TestCleanup]
+    public void RestoreSharedState()
+    {
+        var vm = Ioc.Default.GetRequiredService<FileOpenVM>();
+        vm.OutlineFolder = _savedOutlineFolder;
+        vm.OutlineName = _savedOutlineName;
+        vm.ShowWarning = false;
+        vm.WarningText = null;
+    }
+
     private static FileOpenVM NewOutlineVM(string folder, string name)
     {
         var vm = Ioc.Default.GetRequiredService<FileOpenVM>();
@@ -66,6 +88,8 @@ public partial class FileOpenVMTests
     [DataRow("")]
     [DataRow("   ")]
     [DataRow(".stbx")]
+    [DataRow(".STBX")]
+    [DataRow("  .stbx")]
     public void ValidateNewOutline_BlankName_ShowsNameWarning(string name)
     {
         // Arrange
@@ -78,6 +102,22 @@ public partial class FileOpenVMTests
         Assert.IsFalse(valid);
         Assert.IsTrue(vm.ShowWarning);
         Assert.AreEqual(FileOpenVM.BlankNameWarning, vm.WarningText);
+    }
+
+    [TestMethod]
+    [TestCategory("CrossPlatform")]
+    [DataRow(".45 Magnum")]
+    [DataRow(".hack")]
+    public void ValidateNewOutline_NameStartingWithDot_IsAccepted(string name)
+    {
+        // Arrange - only a trailing ".stbx" is an extension; ".hack" is a title (#1682)
+        var vm = NewOutlineVM(Path.GetTempPath(), name);
+
+        // Act
+        var valid = vm.ValidateNewOutline();
+
+        // Assert
+        Assert.IsTrue(valid, $"Warning shown: {vm.WarningText}");
     }
 
     [TestMethod]

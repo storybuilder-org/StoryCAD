@@ -1,3 +1,5 @@
+using StoryCADLib.Services.Messages;
+using CommunityToolkit.Mvvm.Messaging;
 using System.Reflection;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
@@ -789,5 +791,38 @@ public class OutlineViewModelTests
         // Cleanup
         if (File.Exists(filePath))
             File.Delete(filePath);
+    }
+
+    [TestMethod]
+    public async Task OpenFile_EmptyFileWithOutlineOpen_KeepsOutlineAndWarnsEmpty()
+    {
+        // Arrange - File > Open, launch and Finder use this path; an empty file must not close outline A (#1682)
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var preferences = Ioc.Default.GetRequiredService<PreferenceService>();
+        var modelA = await outlineService.CreateModel("Outline A", "Test", 0);
+        var documentA = new StoryDocument(modelA, Path.Combine(App.ResultsDir, "OutlineA1682.stbx"));
+        appState.CurrentDocument = documentA;
+        var emptyPath = Path.Combine(App.ResultsDir, $"EmptyOutline1682_{Guid.NewGuid()}.stbx");
+        await File.WriteAllTextAsync(emptyPath, string.Empty);
+        preferences.Model.RecentFiles.Insert(0, emptyPath);
+        var messages = new List<StatusMessage>();
+        WeakReferenceMessenger.Default.Register<StatusChangedMessage>(this, (_, m) => messages.Add(m.Value));
+
+        try
+        {
+            // Act
+            await outlineVM.OpenFile(emptyPath);
+
+            // Assert
+            Assert.AreSame(documentA, appState.CurrentDocument, "The open outline was closed.");
+            Assert.IsTrue(messages.Any(m => m.Level == LogLevel.Warn && m.Status.Contains("is empty")),
+                "Got: " + string.Join(" | ", messages.Select(m => m.Status)));
+            CollectionAssert.DoesNotContain(preferences.Model.RecentFiles, emptyPath);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(this);
+            File.Delete(emptyPath);
+        }
     }
 }

@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
+using StoryCADLib.DAL;
 using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.Collaborator.Contracts;
 using StoryCADLib.Services.Outline;
@@ -882,6 +883,12 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
             if (string.IsNullOrWhiteSpace(path) | !Path.Exists(path))
             {
                 throw new ArgumentException("Invalid path");
+            }
+
+            // The API is external: report an empty file as a failure, not as an empty outline (#1682).
+            if (StoryIO.IsEmptyOutlineFile(path))
+            {
+                return OperationResult<bool>.Failure($"Error in OpenOutline: {StoryIO.EmptyOutlineMessage(path)}");
             }
 
             CurrentModel = await outlineService.OpenFile(path);

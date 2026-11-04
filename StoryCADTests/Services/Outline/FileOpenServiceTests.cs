@@ -248,4 +248,82 @@ public class FileOpenServiceTests
             File.Delete(filePath);
         }
     }
+
+    [TestMethod]
+    public async Task OpenFile_EmptyFileWithOutlineOpen_StopsOpenAndKeepsOutline()
+    {
+        // Arrange - outline A is open; the empty file must not finish A's open steps (#1682)
+        var modelA = await _outlineService.CreateModel("Outline A", "Test", 0);
+        var pathA = Path.Combine(Path.GetTempPath(), $"OutlineA1682_{Guid.NewGuid()}.stbx");
+        var documentA = new StoryDocument(modelA, pathA);
+        _appState.CurrentDocument = documentA;
+        var emptyPath = Path.Combine(Path.GetTempPath(), $"EmptyOutline1682_{Guid.NewGuid()}.stbx");
+        await File.WriteAllTextAsync(emptyPath, string.Empty);
+        var messages = new List<StatusMessage>();
+        WeakReferenceMessenger.Default.Register<StatusChangedMessage>(this, (_, m) => messages.Add(m.Value));
+
+        try
+        {
+            // Act
+            var opened = await _fileOpenService.OpenFile(emptyPath);
+
+            // Assert
+            Assert.IsFalse(opened);
+            Assert.AreSame(documentA, _appState.CurrentDocument);
+            Assert.IsTrue(messages.Last().Status.Contains("is empty"),
+                "The empty-file warning must be the last status. Got: " +
+                string.Join(" | ", messages.Select(m => m.Status)));
+            CollectionAssert.DoesNotContain(_preferences.Model.RecentFiles, pathA);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(this);
+            File.Delete(emptyPath);
+        }
+    }
+
+    [TestMethod]
+    public async Task OpenFile_EmptyFile_RemovesItFromRecentFiles()
+    {
+        // Arrange - an empty file in Recent Files invites the writer to retry it (#1682)
+        var emptyPath = Path.Combine(Path.GetTempPath(), $"EmptyOutline1682_{Guid.NewGuid()}.stbx");
+        await File.WriteAllTextAsync(emptyPath, string.Empty);
+        await _fileOpenService.UpdateRecents(emptyPath);
+
+        try
+        {
+            // Act
+            await _fileOpenService.OpenFile(emptyPath);
+
+            // Assert
+            CollectionAssert.DoesNotContain(_preferences.Model.RecentFiles, emptyPath);
+        }
+        finally
+        {
+            File.Delete(emptyPath);
+        }
+    }
+
+    [TestMethod]
+    public async Task OpenFile_ValidFile_ReturnsTrue()
+    {
+        // Arrange
+        var path = Path.Combine(Path.GetTempPath(), $"ValidOutline1682_{Guid.NewGuid()}.stbx");
+        var model = await _outlineService.CreateModel("Valid", "Test", 0);
+        await _outlineService.WriteModel(model, path);
+
+        try
+        {
+            // Act
+            var opened = await _fileOpenService.OpenFile(path);
+
+            // Assert
+            Assert.IsTrue(opened);
+            Assert.AreEqual(path, _appState.CurrentDocument.FilePath);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
 }
