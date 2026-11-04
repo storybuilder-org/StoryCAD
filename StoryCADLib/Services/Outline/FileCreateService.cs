@@ -66,6 +66,15 @@ public class FileCreateService
             Default.Send(new StatusChangedMessage(new StatusMessage("New project command executing", LogLevel.Info)),
                 true);
 
+            // A blank name became a file named ".stbx" (#1682).
+            if (string.IsNullOrWhiteSpace(Path.GetFileNameWithoutExtension(outlineName ?? "")))
+            {
+                _logger.Log(LogLevel.Warn, "New outline name is blank");
+                Default.Send(new StatusChangedMessage(new StatusMessage("Enter a name for the new outline",
+                    LogLevel.Warn)));
+                return null;
+            }
+
             // Validate and adjust file name
             if (!Path.GetExtension(outlineName)!.Equals(".stbx"))
             {
@@ -97,10 +106,9 @@ public class FileCreateService
 
             using (var serializationLock = new SerializationLock(_logger))
             {
-                // Create the new outline's file. System.IO, not StorageFolder: the folder box is free
+                // Pick the new outline's path. System.IO, not StorageFolder: the folder box is free
                 // text, and StorageFolder rejects paths .NET accepts, such as '/' separators (#1615).
                 var storyModelFile = UniqueFilePath(Path.GetFullPath(outlineFolder), outlineName);
-                await using (new FileStream(storyModelFile, FileMode.CreateNew)) { }
 
                 // Create the StoryModel
                 var name = Path.GetFileNameWithoutExtension(storyModelFile);
@@ -108,6 +116,10 @@ public class FileCreateService
 
                 // Create the new project
                 var newModel = await _outlineService.CreateModel(name, author, template);
+
+                // Write the outline now: a new model is unchanged, so no save, prompt or auto-save
+                // runs until an edit, and an empty file left on disk could not be opened (#1682).
+                await _outlineService.WriteModel(newModel, storyModelFile);
                 _appState.CurrentDocument = new StoryDocument(newModel, storyModelFile);
 
                 // Track outline open for usage statistics
