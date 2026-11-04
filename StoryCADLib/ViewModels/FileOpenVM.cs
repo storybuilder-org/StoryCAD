@@ -134,7 +134,7 @@ public class FileOpenVM : ObservableRecipient
             catch
             {
                 //No perms, force user to pick different folder
-                ShowWarning = false;
+                ShowWarning = true;
                 WarningText = "You can't save outlines to that folder";
                 OutlineFolder = "";
                 return;
