@@ -63,8 +63,8 @@ public class FileCreateService
 
         try
         {
-            Default.Send(new StatusChangedMessage(new StatusMessage("New project command executing", LogLevel.Info)),
-                true);
+            // No messenger token on status sends: ShellViewModel registers without one and drops tokened sends (#1682).
+            Default.Send(new StatusChangedMessage(new StatusMessage("New project command executing", LogLevel.Info)));
 
             // A blank name became a file named ".stbx" (#1682).
             if (string.IsNullOrWhiteSpace(Path.GetFileNameWithoutExtension(outlineName ?? "")))
@@ -86,7 +86,7 @@ public class FileCreateService
             if (!StoryIO.IsValidPath(newFilePath))
             {
                 _logger.Log(LogLevel.Warn, $"Invalid file path {newFilePath}");
-                Default.Send(new StatusChangedMessage(new StatusMessage("Invalid file path", LogLevel.Error)), true);
+                Default.Send(new StatusChangedMessage(new StatusMessage("Invalid file path", LogLevel.Error)));
                 return null;
             }
 

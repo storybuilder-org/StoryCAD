@@ -139,6 +139,29 @@ public class FileCreateServiceTests
     }
 
     [TestMethod]
+    public async Task CreateFile_WithInvalidCharacters_SendsInvalidPathStatusToUntokenedListener()
+    {
+        // Arrange - ShellViewModel registers without a token; a tokened send never reaches it (#1682)
+        var invalidFileName = OperatingSystem.IsWindows() ? "Test<>Story|?.stbx" : "Test\0Story.stbx";
+        var statuses = new List<string>();
+        WeakReferenceMessenger.Default.Register<StatusChangedMessage>(this, (_, m) => statuses.Add(m.Value.Status));
+
+        try
+        {
+            // Act
+            await _fileCreateService.CreateFile(_testFolder, invalidFileName, 0);
+
+            // Assert
+            CollectionAssert.Contains(statuses, "New project command executing");
+            CollectionAssert.Contains(statuses, "Invalid file path");
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(this);
+        }
+    }
+
+    [TestMethod]
     public async Task CreateFile_WithoutExtension_AddsStbxExtension()
     {
         // Arrange
