@@ -128,6 +128,7 @@ public class FileCreateServiceTests
     [DataRow("")]
     [DataRow("   ")]
     [DataRow(".stbx")]
+    [DataRow(".STBX")]
     public async Task CreateFile_WithBlankName_ReturnsNullAndCreatesNoFile(string fileName)
     {
         // Act - a blank name produced a file named ".stbx" in production (#1682)
@@ -139,12 +140,25 @@ public class FileCreateServiceTests
     }
 
     [TestMethod]
+    [DataRow(".45 Magnum")]
+    [DataRow(".hack")]
+    public async Task CreateFile_WithNameStartingWithDot_CreatesFile(string fileName)
+    {
+        // Act - only a trailing ".stbx" is an extension; ".hack" is a title (#1682)
+        var result = await _fileCreateService.CreateFile(_testFolder, fileName, 0);
+
+        // Assert
+        Assert.AreEqual(Path.Combine(_testFolder, fileName + ".stbx"), result);
+        Assert.IsTrue(File.Exists(result));
+    }
+
+    [TestMethod]
     public async Task CreateFile_WithInvalidCharacters_SendsInvalidPathStatusToUntokenedListener()
     {
         // Arrange - ShellViewModel registers without a token; a tokened send never reaches it (#1682)
         var invalidFileName = OperatingSystem.IsWindows() ? "Test<>Story|?.stbx" : "Test\0Story.stbx";
-        var statuses = new List<string>();
-        WeakReferenceMessenger.Default.Register<StatusChangedMessage>(this, (_, m) => statuses.Add(m.Value.Status));
+        var statuses = new List<StatusMessage>();
+        WeakReferenceMessenger.Default.Register<StatusChangedMessage>(this, (_, m) => statuses.Add(m.Value));
 
         try
         {
@@ -152,8 +166,9 @@ public class FileCreateServiceTests
             await _fileCreateService.CreateFile(_testFolder, invalidFileName, 0);
 
             // Assert
-            CollectionAssert.Contains(statuses, "New project command executing");
-            CollectionAssert.Contains(statuses, "Invalid file path");
+            Assert.IsTrue(statuses.Any(m => m.Status == "New project command executing"));
+            // Warn, not Error: ShellViewModel logs status messages at their level, and Error reaches elmah.io
+            Assert.IsTrue(statuses.Any(m => m.Status == "Invalid file path" && m.Level == LogLevel.Warn));
         }
         finally
         {

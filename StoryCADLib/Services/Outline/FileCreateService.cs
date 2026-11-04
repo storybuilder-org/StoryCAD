@@ -67,7 +67,7 @@ public class FileCreateService
             Default.Send(new StatusChangedMessage(new StatusMessage("New project command executing", LogLevel.Info)));
 
             // A blank name became a file named ".stbx" (#1682).
-            if (string.IsNullOrWhiteSpace(Path.GetFileNameWithoutExtension(outlineName ?? "")))
+            if (IsBlankOutlineName(outlineName))
             {
                 _logger.Log(LogLevel.Warn, "New outline name is blank");
                 Default.Send(new StatusChangedMessage(new StatusMessage("Enter a name for the new outline",
@@ -86,7 +86,7 @@ public class FileCreateService
             if (!StoryIO.IsValidPath(newFilePath))
             {
                 _logger.Log(LogLevel.Warn, $"Invalid file path {newFilePath}");
-                Default.Send(new StatusChangedMessage(new StatusMessage("Invalid file path", LogLevel.Error)));
+                Default.Send(new StatusChangedMessage(new StatusMessage("Invalid file path", LogLevel.Warn)));
                 return null;
             }
 
@@ -117,9 +117,21 @@ public class FileCreateService
                 // Create the new project
                 var newModel = await _outlineService.CreateModel(name, author, template);
 
+                // CreateNew claims the name, so a file that appeared after UniqueFilePath is not overwritten.
+                await using (new FileStream(storyModelFile, FileMode.CreateNew)) { }
+
                 // Write the outline now: a new model is unchanged, so no save, prompt or auto-save
                 // runs until an edit, and an empty file left on disk could not be opened (#1682).
-                await _outlineService.WriteModel(newModel, storyModelFile);
+                try
+                {
+                    await _outlineService.WriteModel(newModel, storyModelFile);
+                }
+                catch
+                {
+                    // The claimed file is still empty; do not leave it behind (#1682).
+                    File.Delete(storyModelFile);
+                    throw;
+                }
                 _appState.CurrentDocument = new StoryDocument(newModel, storyModelFile);
 
                 // Track outline open for usage statistics
@@ -170,6 +182,21 @@ public class FileCreateService
             Default.Send(new StatusChangedMessage(new StatusMessage("New project command failed", LogLevel.Error)));
             return null;
         }
+    }
+
+    /// <summary>
+    ///     True when the outline name is blank once a trailing ".stbx" is removed. Only that
+    ///     extension counts: ".hack" and ".45 Magnum" are titles, not blank names (#1682).
+    /// </summary>
+    public static bool IsBlankOutlineName(string outlineName)
+    {
+        var name = outlineName ?? "";
+        if (name.EndsWith(".stbx", StringComparison.OrdinalIgnoreCase))
+        {
+            name = name[..^".stbx".Length];
+        }
+
+        return string.IsNullOrWhiteSpace(name);
     }
 
     /// <summary>
