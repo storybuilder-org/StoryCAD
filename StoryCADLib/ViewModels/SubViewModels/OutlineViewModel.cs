@@ -334,7 +334,17 @@ public class OutlineViewModel : ObservableRecipient
                 CloseButtonText = "Close",
                 BorderThickness = new Thickness(0)
             };
-            shellVm._contentDialog.PrimaryButtonClick += (_, _) => fileOpenVM.ConfirmClicked();
+            shellVm._contentDialog.PrimaryButtonClick += (_, args) =>
+            {
+                // Validate before returning: the dialog closes when this handler returns unless Cancel is set (#1682).
+                if (Equals(fileOpenVM.CurrentTab?.Tag, "New") && !fileOpenVM.ValidateNewOutline())
+                {
+                    args.Cancel = true;
+                    return;
+                }
+
+                fileOpenVM.ConfirmClicked();
+            };
             fileOpenVM.PropertyChanged += (_, args) =>
             {
                 if (args.PropertyName == nameof(FileOpenVM.ConfirmButtonText))

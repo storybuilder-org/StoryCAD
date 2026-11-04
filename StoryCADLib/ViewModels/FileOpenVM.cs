@@ -172,9 +172,8 @@ public class FileOpenVM : ObservableRecipient
                 filePath = await CreateFile();
                 if (filePath == "")
                 {
-                    //Show warning if we have a bad file name
-                    ShowWarning = true;
-                    WarningText = "Your outline name or folder has disallowed characters";
+                    // Name and folder faults were caught before the dialog closed; FileCreateService
+                    // reports any later failure on the status bar.
                     return;
                 }
 
@@ -208,18 +207,48 @@ public class FileOpenVM : ObservableRecipient
         Close(); //Stop more dialog clicks
     }
 
-    public async Task<string> CreateFile()
+    public const string BlankNameWarning = "Enter a name for the outline";
+    public const string DisallowedCharactersWarning = "Your outline name has characters a file name can't use";
+    public const string InvalidFolderWarning = "StoryCAD can't create an outline in that folder";
+
+    /// <summary>
+    ///     Checks the New tab's name and folder, and shows a warning when either is unusable.
+    ///     Synchronous so the dialog's Create button handler can cancel the close before it returns.
+    /// </summary>
+    public bool ValidateNewOutline()
     {
-        var filePath = Path.Combine(OutlineFolder, OutlineName);
-        if (StoryIO.IsValidPath(filePath))
+        string warning = null;
+        var name = OutlineName ?? "";
+        if (string.IsNullOrWhiteSpace(Path.GetFileNameWithoutExtension(name)))
         {
-            _preferences.Model.LastSelectedTemplate = SelectedTemplateIndex;
-            var createdPath = await _fileCreateService.CreateFile(OutlineFolder, OutlineName,
-                (OutlineTemplate)SelectedTemplateIndex);
-            return createdPath ?? "";
+            warning = BlankNameWarning;
+        }
+        else if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+        {
+            warning = DisallowedCharactersWarning;
+        }
+        else if (string.IsNullOrWhiteSpace(OutlineFolder) ||
+                 !StoryIO.IsValidPath(Path.Combine(OutlineFolder, name)))
+        {
+            warning = InvalidFolderWarning;
         }
 
-        return "";
+        WarningText = warning;
+        ShowWarning = warning != null;
+        return warning == null;
+    }
+
+    public async Task<string> CreateFile()
+    {
+        if (!ValidateNewOutline())
+        {
+            return "";
+        }
+
+        _preferences.Model.LastSelectedTemplate = SelectedTemplateIndex;
+        var createdPath = await _fileCreateService.CreateFile(OutlineFolder, OutlineName,
+            (OutlineTemplate)SelectedTemplateIndex);
+        return createdPath ?? "";
     }
 
     public void Close() => Ioc.Default.GetRequiredService<Windowing>().CloseContentDialog();

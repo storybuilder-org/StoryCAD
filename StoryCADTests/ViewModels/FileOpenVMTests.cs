@@ -48,4 +48,112 @@ public partial class FileOpenVMTests
         Assert.AreEqual("Protagonist and Antagonist", fileOpenVM.ProjectTemplateNames[4]);
         Assert.AreEqual("Problems and Characters", fileOpenVM.ProjectTemplateNames[5]);
     }
+
+    #region New outline validation (#1682)
+
+    private static FileOpenVM NewOutlineVM(string folder, string name)
+    {
+        var vm = Ioc.Default.GetRequiredService<FileOpenVM>();
+        vm.OutlineFolder = folder;
+        vm.OutlineName = name;
+        vm.ShowWarning = false;
+        vm.WarningText = null;
+        return vm;
+    }
+
+    [TestMethod]
+    [TestCategory("CrossPlatform")]
+    [DataRow("")]
+    [DataRow("   ")]
+    [DataRow(".stbx")]
+    public void ValidateNewOutline_BlankName_ShowsNameWarning(string name)
+    {
+        // Arrange
+        var vm = NewOutlineVM(Path.GetTempPath(), name);
+
+        // Act
+        var valid = vm.ValidateNewOutline();
+
+        // Assert
+        Assert.IsFalse(valid);
+        Assert.IsTrue(vm.ShowWarning);
+        Assert.AreEqual(FileOpenVM.BlankNameWarning, vm.WarningText);
+    }
+
+    [TestMethod]
+    [TestCategory("CrossPlatform")]
+    public void ValidateNewOutline_DisallowedCharacterInName_ShowsCharacterWarning()
+    {
+        // Arrange - '/' is not allowed in a file name on any platform
+        var vm = NewOutlineVM(Path.GetTempPath(), "Bad/Name");
+
+        // Act
+        var valid = vm.ValidateNewOutline();
+
+        // Assert
+        Assert.IsFalse(valid);
+        Assert.IsTrue(vm.ShowWarning);
+        Assert.AreEqual(FileOpenVM.DisallowedCharactersWarning, vm.WarningText);
+    }
+
+    [TestMethod]
+    [TestCategory("CrossPlatform")]
+    [DataRow("")]
+    [DataRow("Invalid\0Folder")]
+    public void ValidateNewOutline_InvalidFolder_ShowsFolderWarning(string folder)
+    {
+        // Arrange
+        var vm = NewOutlineVM(folder, "Good Name");
+
+        // Act
+        var valid = vm.ValidateNewOutline();
+
+        // Assert
+        Assert.IsFalse(valid);
+        Assert.IsTrue(vm.ShowWarning);
+        Assert.AreEqual(FileOpenVM.InvalidFolderWarning, vm.WarningText);
+    }
+
+    [TestMethod]
+    [TestCategory("CrossPlatform")]
+    public void ValidateNewOutline_ValidNameAndFolder_ReturnsTrueAndHidesWarning()
+    {
+        // Arrange
+        var vm = NewOutlineVM(Path.GetTempPath(), "Good Name");
+        vm.ShowWarning = true;
+
+        // Act
+        var valid = vm.ValidateNewOutline();
+
+        // Assert
+        Assert.IsTrue(valid);
+        Assert.IsFalse(vm.ShowWarning);
+    }
+
+    [TestMethod]
+    [TestCategory("CrossPlatform")]
+    public async Task CreateFile_BlankName_ReturnsEmptyAndShowsNameWarning()
+    {
+        // Arrange
+        var folder = Path.Combine(Path.GetTempPath(), $"StoryCADTest_{Guid.NewGuid()}");
+        Directory.CreateDirectory(folder);
+        var vm = NewOutlineVM(folder, "");
+
+        try
+        {
+            // Act
+            var result = await vm.CreateFile();
+
+            // Assert
+            Assert.AreEqual("", result);
+            Assert.AreEqual(FileOpenVM.BlankNameWarning, vm.WarningText);
+            Assert.AreEqual(0, Directory.GetFiles(folder).Length);
+        }
+        finally
+        {
+            Directory.Delete(folder, true);
+        }
+    }
+
+    #endregion
 }
