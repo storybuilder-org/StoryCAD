@@ -93,6 +93,13 @@ public class StoryIO
             _logService.Log(LogLevel.Info, $"Reading Model from disk ({StoryFile.Path})");
             var JSON = await FileIO.ReadTextAsync(StoryFile);
 
+            // An empty file is a user-file condition, not a code fault: Warn keeps it out of elmah.io (#1682).
+            if (string.IsNullOrWhiteSpace(JSON))
+            {
+                _logService.Log(LogLevel.Warn, $"Outline file is empty ({StoryFile.Path})");
+                return new StoryModel();
+            }
+
             //Check if file is legacy
             if (JSON.Split("\n")[0].Contains("<?xml version=\"1.0\" encoding=\"utf-8\"?>"))
             {

@@ -321,6 +321,31 @@ public partial class StoryIOTests
 
     #endregion
 
+    #region Empty File Tests (#1682)
+
+    [TestMethod]
+    public async Task ReadStory_EmptyFile_LogsWarningNotError()
+    {
+        // Arrange - a zero-byte outline, as production showed for "Projects\.stbx" (#1682)
+        var filePath = Path.Combine(App.ResultsDir, "EmptyOutline1682.stbx");
+        await File.WriteAllTextAsync(filePath, string.Empty);
+        var log = new StoryCADTests.Services.Backend.TestLogService();
+        var storyIO = new StoryIO(log, _appState);
+        var file = await StorageFile.GetFileFromPathAsync(filePath);
+
+        // Act
+        var model = await storyIO.ReadStory(file);
+
+        // Assert
+        Assert.AreEqual(0, model.StoryElements.Count);
+        Assert.AreEqual(0, log.ErrorCount, "An empty user file is not a code fault; it must not reach elmah.io.");
+        Assert.IsTrue(log.HasWarning("empty"), "The empty file should be logged as a warning.");
+
+        File.Delete(filePath);
+    }
+
+    #endregion
+
     #region Migration Tests
 
     [TestMethod]

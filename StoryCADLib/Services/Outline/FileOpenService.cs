@@ -110,6 +110,14 @@ public class FileOpenService
                     return;
                 }
 
+                // A zero-byte outline holds no story; say so instead of "No Story Elements found" (#1682).
+                if (new FileInfo(filePath).Length == 0)
+                {
+                    Default.Send(new StatusChangedMessage(new StatusMessage(
+                        $"Unable to open {Path.GetFileName(filePath)}: the outline file is empty", LogLevel.Warn, true)));
+                    return;
+                }
+
                 //Read file
                 var loadedModel = await _outlineService.OpenFile(filePath);
 

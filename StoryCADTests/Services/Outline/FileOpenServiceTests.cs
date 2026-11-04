@@ -221,4 +221,31 @@ public class FileOpenServiceTests
 
         // Test passes if no exception thrown
     }
+
+    [TestMethod]
+    public async Task OpenFile_EmptyFile_TellsWriterTheFileIsEmpty()
+    {
+        // Arrange - a zero-byte outline (#1682)
+        var filePath = Path.Combine(Path.GetTempPath(), $"EmptyOutline1682_{Guid.NewGuid()}.stbx");
+        await File.WriteAllTextAsync(filePath, string.Empty);
+        var messages = new List<StatusMessage>();
+        WeakReferenceMessenger.Default.Register<StatusChangedMessage>(this, (_, m) => messages.Add(m.Value));
+
+        try
+        {
+            // Act
+            await _fileOpenService.OpenFile(filePath);
+
+            // Assert
+            Assert.IsTrue(messages.Any(m => m.Level == LogLevel.Warn && m.Status.Contains("is empty")),
+                "Expected a warning that the outline file is empty. Got: " +
+                string.Join(" | ", messages.Select(m => m.Status)));
+            Assert.IsNull(_appState.CurrentDocument);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(this);
+            File.Delete(filePath);
+        }
+    }
 }
