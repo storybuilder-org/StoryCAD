@@ -128,8 +128,17 @@ public class FileCreateService
                 }
                 catch
                 {
-                    // The claimed file is still empty; do not leave it behind (#1682).
-                    File.Delete(storyModelFile);
+                    // The claimed file is still empty; do not leave it behind (#1682). A failed delete
+                    // is only logged, so the write's exception is the one reported.
+                    try
+                    {
+                        File.Delete(storyModelFile);
+                    }
+                    catch (Exception deleteEx)
+                    {
+                        _logger.Log(LogLevel.Warn, $"Could not delete empty new outline {storyModelFile}: {deleteEx.Message}");
+                    }
+
                     throw;
                 }
                 _appState.CurrentDocument = new StoryDocument(newModel, storyModelFile);

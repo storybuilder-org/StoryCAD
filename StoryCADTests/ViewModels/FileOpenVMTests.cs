@@ -51,8 +51,8 @@ public partial class FileOpenVMTests
 
     #region New outline validation (#1682)
 
-    private string _savedOutlineFolder;
-    private string _savedOutlineName;
+    private string? _savedOutlineFolder;
+    private string? _savedOutlineName;
 
     // FileOpenVM is a singleton: put back what these tests change so later tests see the real values.
     [TestInitialize]
