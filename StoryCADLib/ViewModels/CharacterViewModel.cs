@@ -628,6 +628,8 @@ public class CharacterViewModel : ElementViewModelBase, INavigable, ISaveable, I
         {
             CharacterTraits.Add(_member);
         }
+        // This VM is a singleton and the page binds SelectedIndex after Activate, so a stale index would carry over to this character.
+        ExistingTraitIndex = -1;
 
         RelationType = string.Empty;
         RelationshipTrait = string.Empty;
@@ -742,7 +744,8 @@ public class CharacterViewModel : ElementViewModelBase, INavigable, ISaveable, I
 
     private void RemoveTrait()
     {
-        if (ExistingTraitIndex == -1)
+        // The index can sit at or past the end after a removal until the ListView pushes -1 back.
+        if (ExistingTraitIndex < 0 || ExistingTraitIndex >= CharacterTraits.Count)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("No trait selected to delete", LogLevel.Warn)));
             return;
