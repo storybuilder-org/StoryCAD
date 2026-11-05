@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
+using StoryCADLib.Models;
 using StoryCADLib.Services;
 using StoryCADLib.ViewModels;
 
@@ -59,5 +60,26 @@ public class CharacterViewModelTests
         // Assert
         Assert.IsNotNull(method);
         Assert.IsTrue(method.IsPublic);
+    }
+
+    /// <summary>
+    ///     Issue #1681: production crashed with ArgumentOutOfRangeException when the
+    ///     selected trait number was outside the trait list.
+    /// </summary>
+    [TestMethod]
+    public void RemoveTrait_WithSelectionOutsideTraitList_DoesNotThrow()
+    {
+        // Arrange
+        var viewModel = Ioc.Default.GetRequiredService<CharacterViewModel>();
+        var model = new StoryModel();
+        Ioc.Default.GetRequiredService<AppState>().CurrentDocument = new StoryDocument(model);
+        viewModel.Activate(new CharacterModel("Character", model, null));
+        viewModel.ExistingTraitIndex = 0;
+
+        // Act
+        viewModel.RemoveTraitCommand.Execute(null);
+
+        // Assert
+        Assert.AreEqual(0, viewModel.CharacterTraits.Count);
     }
 }
