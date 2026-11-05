@@ -158,3 +158,14 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - Runner: `dialog "title" click <target> if-shown` clicks only when the dialog opens; `wait <target> gone` first waits for the target to appear.
 - Script: answers "Replace existing content?" when it opens, sets the Collaborator window taller for the workflow list image, sets a Problem Category on the scene's Problem before Scene Builder.
 - Tests: 2292 run, 2273 passed, 17 skipped, 2 failed (CheckDotEnvFile and CheckDoppler need a .env). Automation tests 417 passed.
+
+## 2026-11-02 (Collaborator manual pages)
+
+- Branch `issue-1422-collaborator-pages` from `dev` at `c88c3a66`. Twelve pages under `docs/StoryCAD Collaborator/`: captions and examples now describe the Danger Calls images from the PR #1677 run, and the text matches the app (Buy Credits on the StoryCAD toolbar, gaps count is fields, star on hover, per-row buttons, one Replace question for held rows, "Error:" before model errors, chat opens after proposals, interview picker and saving, picker Create).
+- Label check: 22 pages, 30 bold labels not in XAML, all dialog buttons built in code (Replace, Cancel, Join, Not now, Subscribe, Restore purchases) or workflow names.
+
+### Session recovery (2026-11-03, before a reboot)
+
+- PR #1677 (Collaborator script and 32 images) merged into `dev` as `c88c3a66`; merge-cleanup done. Issue #1422 is on the Release 4.5 milestone and Project 14.
+- PR #1679 (Collaborator manual pages) is open on branch `issue-1422-collaborator-pages`, CI green, waiting for Terry's merge. After it merges: wiki `log.md` merge entry, sync-state, delete the branch.
+- Next after that: the Release 4.5 plans in C6 (Tools with Copy_Elements, StoryWorld, Preferences with Usage_Statistics, Reports, Beat_Sheet).

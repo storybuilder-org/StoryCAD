@@ -20,7 +20,7 @@ This workflow takes whatever you have on those three tabs and carries it forward
 
 It is one of the six workflows starred when you first open Collaborator. When it finishes, the Property Updates list offers up to three fields on the Overview: Story Idea, Concept, and Premise. Any of them that already holds your text is marked Has your text, and **Accept All** asks before it replaces that text, so running it on a finished Overview is safe. It will simply have less to offer.
 
-![Property Updates after Ideation: Story Idea, Concept, and Premise rows, each marked New or Has your text](../../media/Collaborator/Collaborator-Workflow-Premise.png)
+![Property Updates after Ideation on Danger Calls: Concept and Premise rows, both marked Has your text; the Story Idea is kept as it is](../../media/Collaborator/Collaborator-Workflow-Premise.png)
 
 ## Story Problem (Premise => Problem + Characters)
 
@@ -30,12 +30,12 @@ It needs a Premise on the Overview, so run Ideation (Story idea => Concept => Pr
 
 The run then proposes text for most of the Problem form. On the Problem tab, the Name, Problem Type, Conflict Type, Subject, Story Question, and Source of Conflict; on the Protagonist and Antagonist tabs, a Goal, Motivation, and Conflict for each; and on the Resolution tab, the Premise, Outcome, Method, and Theme. It also proposes a Name for each of the two characters if you created them new. When you are done, you have a story problem with two named people attached to it, which is what Problem Builder, Inner and Outer Problems, and the character workflows all build on. It is one of the six starred by default.
 
-![Property Updates after Story Problem: rows for Next Inning and for Sarah Osborne and Irene Campbell](../../media/Collaborator/Collaborator-Workflow-Story-Problem.png)
+![Property Updates after Story Problem on Catching the drug dealer Lacas, with Leonard Kraskin as protagonist and Charlie Lacas as antagonist: 13 rows, the first two for the antagonist's Conflict and Goal](../../media/Collaborator/Collaborator-Workflow-Story-Problem.png)
 
 ## Story Form
 
 The Structure tab of the Story Overview holds two fields that say what kind of thing you are writing. Type is the form: a novel, a novella, a short story, a screenplay. Genre names the tradition the story sits in and the expectations readers bring to it. Both are drop-down lists in StoryCAD.
 
-Story Form proposes values for those two fields from what is on the Overview, choosing from the same lists you would otherwise choose from. It reads the Overview only. It is most useful once a Premise exists and you have a sense of the story's size; there is no need to run it before then, and if you already know the answers the two fields take a moment to set by hand. Type and Genre are two of the fields the [Outline Gaps](Outline_Gaps.html) page counts, and they are part of how Collaborator judges that an outline has moved past Ideation.
+Story Form proposes values for those two fields from what is on the Overview, choosing from the same lists you would otherwise choose from. It reads the Overview only. When both fields are already set, as they are in Danger Calls, it proposes nothing and says so in the chat. It is most useful once a Premise exists and you have a sense of the story's size; there is no need to run it before then, and if you already know the answers the two fields take a moment to set by hand. Type and Genre are two of the fields the [Outline Gaps](Outline_Gaps.html) page counts, and they are part of how Collaborator judges that an outline has moved past Ideation.
 
-![Property Updates after Story Form: StoryGenre Suspense and StoryType Novel](../../media/Collaborator/Collaborator-Workflow-Story-Form.png)
+![Story Form on Danger Calls: no proposals, and the chat says Genre and Type are kept as they are](../../media/Collaborator/Collaborator-Workflow-Story-Form.png)

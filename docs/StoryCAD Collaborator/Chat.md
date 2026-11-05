@@ -9,7 +9,7 @@ has_toc: false
 
 # Chat
 
-The right-hand column of the Story Collaborator window is the chat. While a workflow runs, Collaborator posts its progress there, and when the run finishes it posts a status line saying what finished and how many updates are waiting. Once a run has finished, you can also type into the column and ask about what you have just been shown.
+The right-hand column of the Story Collaborator window is the chat. While a workflow runs, Collaborator posts its progress there, and when the run finishes it posts a status line saying what finished and how many updates are waiting. Once a run has left proposals in the Property Updates list, you can also type into the column and ask about them. Before that, the chat box is closed.
 
 ## What chat is good for
 
@@ -17,7 +17,7 @@ Chat is for exploring a result before you decide about it. You might ask for thr
 
 What chat cannot do is put text into your outline. A chat answer, however good, does not go into a field by itself. If you want new wording in a field, ask chat to change the proposal, and it rewrites that row in the Property Updates list for you to accept, or copy the wording into StoryCAD yourself. This is deliberate: the Property Updates list, with its labels and its Accept and Skip choices, is the one path by which Collaborator writes a workflow's proposals to your outline, and keeping chat outside that path means a conversation can never change a field you did not mean to change.
 
-![The chat column after Flaw and Backstory on Nora Helmer: a typed question about which problem her flaw contributes to, and Collaborator's answer](../media/Collaborator/Collaborator-Chat.png)
+![The chat column after Flaw and Backstory on Charlie Lacas: the end of Collaborator's answer to a typed question about which of the story's problems his flaw feeds](../media/Collaborator/Collaborator-Chat.png)
 
 ## When to use a workflow instead
 

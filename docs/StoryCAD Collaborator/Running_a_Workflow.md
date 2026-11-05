@@ -31,11 +31,11 @@ Along with the elements you picked, Collaborator sends a short account of where 
 
 Collaborator runs the workflow and reports its progress in the chat column on the right. When it finishes, the chat shows a short status line saying how many property updates Collaborator found, how many of them would replace text you wrote, and which fields it kept as they are, and the center of the window fills with the Property Updates list, one row for each field Collaborator would like to change. **Accept All** appears at the foot of that list, and Review Each and Try Again come alive on the top bar. Collaborator doesn't write anything into your outline until you tell it to.
 
-![A finished Problem Builder run: a list of proposed property updates, each labeled New or Has your text, with Accept All at the foot of the list](../media/Collaborator/Collaborator-Updates-After-Run.png)
+![A finished Problem Builder run on a Problem the sample had already filled: ten proposed property updates, each labeled Has your text, with Accept All at the foot of the list](../media/Collaborator/Collaborator-Updates-After-Run.png)
 
 ## If a run fails
 
-Sometimes the AI model behind Collaborator cannot answer. The run stops, and the chat column shows one of two messages.
+Sometimes the AI model behind Collaborator cannot answer. The run stops, and the chat column shows one of two messages, after the word "Error:".
 
 When the model is busy:
 
