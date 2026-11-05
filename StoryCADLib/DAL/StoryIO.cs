@@ -93,6 +93,14 @@ public class StoryIO
             _logService.Log(LogLevel.Info, $"Reading Model from disk ({StoryFile.Path})");
             var JSON = await FileIO.ReadTextAsync(StoryFile);
 
+            // StoryCAD writes an outline when it creates it, so an empty file means something went wrong:
+            // report it to elmah.io in plain words instead of as a JSON parser failure (#1682).
+            if (string.IsNullOrWhiteSpace(JSON))
+            {
+                _logService.Log(LogLevel.Error, $"Outline file is empty ({StoryFile.Path})");
+                return new StoryModel();
+            }
+
             //Check if file is legacy
             if (JSON.Split("\n")[0].Contains("<?xml version=\"1.0\" encoding=\"utf-8\"?>"))
             {
