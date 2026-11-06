@@ -16,7 +16,7 @@
 | What is this file? | The design and the implementation recipe for #1692. |
 | What language? | ASD-STE100 for this design. |
 | What does this issue change? | One new preference. When the writer clears it, StoryCAD hides each Collaborator entry point. |
-| What does this issue not change? | The Collaborator code in the build. The store activation at startup. A Collaborator window that is open. |
+| What does this issue not change? | The documentation about Collaborator: the startup help dialog, its Meet Collaborator video link, and the user manual. The Collaborator code in the build. The store activation at startup. A Collaborator window that is open. |
 
 ---
 
@@ -26,8 +26,7 @@ Some markets do not accept work from a writer who uses AI.
 A writer for these markets sees Collaborator in StoryCAD.  
 StoryCAD shows the Collaborator button and the Buy Credits button on the command bar.  
 On macOS, StoryCAD also shows a Collaborator item in the Tools menu.  
-The startup help dialog has a link to the Meet Collaborator video.  
-StoryCAD has no preference that removes these items.  
+StoryCAD has no preference that hides these items.  
 On 2026-11-05, support told a writer that this preference will come.
 
 ---
@@ -39,6 +38,9 @@ StoryCAD then hides each Collaborator entry point.
 The change occurs when the writer clicks Save. The writer does not restart StoryCAD.  
 The writer can set the check box again. StoryCAD then shows the entry points again.
 
+The preference hides access to Collaborator. It does not hide the fact that Collaborator exists.  
+StoryCAD keeps all documentation about Collaborator. This includes the Meet Collaborator video link in the startup help dialog and the user manual.
+
 ---
 
 ## 4. Terms
@@ -46,10 +48,10 @@ The writer can set the check box again. StoryCAD then shows the entry points aga
 | Term | Meaning |
 |------|---------|
 | **Show Collaborator** | The new preference. A check box on the Other tab of the Preferences dialog. The default value is set (true). |
-| **Collaborator entry point** | A control that starts Collaborator, or that tells the writer about Collaborator. Section 5 gives the list. |
+| **Collaborator entry point** | A control that opens Collaborator, or that starts a purchase for Collaborator. Section 5 gives the list. A link to documentation is not an entry point. |
 | **Collaborator build** | A build of StoryCAD that contains CollaboratorLib. In this build, `CollaboratorService.HasCollaborator` is true. |
 | **Entry point rule** | The rule that decides if StoryCAD shows the entry points. Section 6 gives the rule. |
-| **Startup help dialog** | The dialog with the title "Need help getting started?". `HelpPage` is its content. |
+| **Startup help dialog** | The dialog with the title "Need help getting started?". `HelpPage` is its content. This issue does not change it. |
 | **TDD** | Test-driven development. Write a test that fails, then write the code that makes the test pass. |
 
 ---
@@ -61,7 +63,6 @@ The writer can set the check box again. StoryCAD then shows the entry points aga
 | Collaborator button | `StoryCAD/Views/Shell.xaml` | `CollaboratorButton` |
 | Buy Credits button | `StoryCAD/Views/Shell.xaml` | `BuyCreditsButton` |
 | Collaborator menu item and its separator (macOS) | `StoryCADLib/Services/MacMenuBar/MacMenuBarService.cs` | `_collaboratorItem`, `_collaboratorSeparator` |
-| Meet Collaborator video link | `StoryCADLib/Services/Dialogs/HelpPage.xaml` | `HelpCollaboratorVideoButton` |
 
 The two buttons and the macOS menu item use one property: `ShellViewModel.CollaboratorVisibility`.  
 The macOS menu bar monitors this property. It does not need a change.
@@ -93,7 +94,6 @@ A new entry point must also use this property. A code comment on the property gi
 6. The writer clicks Save.
 7. `OpenPreferences` saves the preferences, then calls `UpdateCollaboratorVisibility`.
 8. StoryCAD hides the entry points immediately.
-9. When StoryCAD shows the startup help dialog, `HelpPageViewModel` reads `ShowEntryPoints`. The video link shows only when the rule is true.
 
 If the writer clicks Cancel in Preferences, StoryCAD does not change the entry points.
 
@@ -109,8 +109,6 @@ If the writer clicks Cancel in Preferences, StoryCAD does not change the entry p
 | `StoryCADLib/Services/Collaborator/CollaboratorService.cs` | Add `ShowEntryPoints`: `HasCollaborator && _preferenceService.Model.ShowCollaborator`. |
 | `StoryCADLib/ViewModels/ShellViewModel.cs` | Add `UpdateCollaboratorVisibility`. Call it in `OpenPreferences` after `SaveAsync`. |
 | `StoryCAD/Views/Shell.xaml.cs` | In `Shell_Loaded`, replace the `HasCollaborator` test with a call to `UpdateCollaboratorVisibility`. |
-| `StoryCADLib/ViewModels/HelpPageViewModel.cs` | Add `CollaboratorVideoVisibility` from `ShowEntryPoints`. |
-| `StoryCADLib/Services/Dialogs/HelpPage.xaml` | Bind the `Visibility` of `HelpCollaboratorVideoButton` to `ViewModel.CollaboratorVideoVisibility`. |
 
 The check box shows in all builds.  
 In a build without CollaboratorLib, the check box has no effect, because rule condition 1 is false.
@@ -125,7 +123,7 @@ The names obey `.claude/docs/architecture/coding-standards.md`:
 
 | Kind | Rule | Names in this issue |
 |------|------|---------------------|
-| Property | PascalCase noun or noun phrase | `ShowCollaborator`, `ShowEntryPoints`, `CollaboratorVideoVisibility` |
+| Property | PascalCase noun or noun phrase | `ShowCollaborator`, `ShowEntryPoints` |
 | Method | PascalCase verb phrase | `UpdateCollaboratorVisibility` |
 | Private field | `_camelCase` | `_showCollaborator` |
 | JSON property | Same as the C# property | `ShowCollaborator` |
@@ -163,9 +161,8 @@ A test that changes `PreferenceService.Model.ShowCollaborator` must set the valu
 | `Services/Collaborator/CollaboratorServiceTests.cs` | `ShowEntryPoints_WithFactoryAndPreferenceCleared_ReturnsFalse` |
 | `Services/Collaborator/CollaboratorServiceTests.cs` | `ShowEntryPoints_NoFactoryAndPreferenceSet_ReturnsFalse` |
 | `ViewModels/ShellViewModelTests.cs` | `UpdateCollaboratorVisibility_PreferenceCleared_SetsCollapsed` |
-| `ViewModels/HelpPageViewModelTests.cs` | `CollaboratorVideoVisibility_PreferenceCleared_ReturnsCollapsed` |
 
-The test project registers no Collaborator factory. Thus the `ShellViewModel` and `HelpPageViewModel` tests can examine only the `Collapsed` result.  
+The test project registers no Collaborator factory. Thus the `ShellViewModel` test can examine only the `Collapsed` result.  
 The `CollaboratorService` tests examine the full rule, because they give the service a factory.
 
 The current tests must continue to pass:
@@ -189,7 +186,7 @@ PF-009 steps:
 3. Make sure that the Collaborator button and the Buy Credits button are not on the command bar.
 4. On macOS, make sure that the Tools menu has no Collaborator item.
 5. Set Show startup page. Restart StoryCAD.
-6. Make sure that the startup help dialog has no Meet Collaborator link.
+6. Make sure that the startup help dialog still has the Meet Collaborator (Video) link.
 7. Make sure that the Collaborator button is not on the command bar after the restart.
 8. Open Preferences. Set Show Collaborator. Click Save.
 9. Make sure that the Collaborator button and the Buy Credits button are on the command bar again.
@@ -205,7 +202,9 @@ The manual uses its own voice (usermanual ADR-001), not ASD-STE100.
 |------|--------|
 | `docs/Preferences/Preferences.md` | Add Show Collaborator to the Other tab text. Make the Other tab text agree with the tab. The current text names items that are on other tabs (Send error logs, Send newsletters, Automatically Save). |
 | `docs/media/Preferences-Other-tab.png` | Replace with a new image of the Other tab. Terry must approve a run of StoryCAD on the screen, or supply the image. |
-| `docs/StoryCAD Collaborator/Opening_Collaborator.md` | Add a short paragraph: the writer can hide Collaborator with Show Collaborator on the Other tab of Preferences. |
+| `docs/StoryCAD Collaborator/Opening_Collaborator.md` | Add a short paragraph: the writer can hide the Collaborator buttons with Show Collaborator on the Other tab of Preferences. Do not remove or change other text. |
+
+These changes add text about the new preference. They do not remove documentation about Collaborator.
 
 ---
 
@@ -224,7 +223,6 @@ The manual uses its own voice (usermanual ADR-001), not ASD-STE100.
 
 | Item | Instruction |
 |------|-------------|
-| #1592 (Collaborator link in the startup help dialog) | Bind the new link to `ShowEntryPoints`. Add a comment to #1592 with this instruction. |
 | #1656 (in-app advertising for Collaborator) | Each advertisement uses `ShowEntryPoints`. Add a comment to #1656 with this instruction. |
 
 ---
