@@ -38,6 +38,7 @@ StoryCAD then hides each Collaborator entry point.
 The change occurs when the writer clicks Save. The writer does not restart StoryCAD.  
 The writer can set the check box again. StoryCAD then shows the entry points again.
 
+With the check box clear, the writer uses StoryCAD as before StoryCAD had Collaborator.  
 The preference hides access to Collaborator. It does not hide the fact that Collaborator exists.  
 StoryCAD keeps all documentation about Collaborator. This includes the Meet Collaborator video link in the startup help dialog and the user manual.
 
