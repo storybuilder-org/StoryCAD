@@ -120,16 +120,8 @@ public sealed partial class Shell : Page
         Windowing.XamlRoot = XamlRoot;
         Ioc.Default.GetService<AppState>()!.StartUpTimer.Stop();
 
-        // Collaborator is compiled in (and a factory registered) → show its entry point.
-        // Absent (public/free build) → hidden. Instance is created per-session in OpenCollaborator.
-        if (Ioc.Default.GetService<CollaboratorService>()!.HasCollaborator)
-        {
-            ShellVm.CollaboratorVisibility = Visibility.Visible;
-        }
-        else
-        {
-            ShellVm.CollaboratorVisibility = Visibility.Collapsed;
-        }
+        // Entry points show only in a Collaborator build with Show Collaborator set (#1692).
+        ShellVm.UpdateCollaboratorVisibility();
 
         // Initialize native macOS menu bar (no-op on Windows)
         Ioc.Default.GetRequiredService<MacMenuBarService>().Initialize();

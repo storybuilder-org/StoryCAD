@@ -55,6 +55,15 @@ public class CollaboratorService
     /// </summary>
     public bool HasCollaborator => _collaboratorFactory != null;
 
+    /// <summary>
+    ///     Gets whether StoryCAD shows the Collaborator entry points: true only in a Collaborator
+    ///     build and when the writer has not cleared Show Collaborator in Preferences (#1692).
+    ///     Every Collaborator entry point (a control that opens Collaborator or starts a purchase
+    ///     for it, including future in-app advertising, #1656) gets its visibility from this
+    ///     property. Documentation links are not entry points.
+    /// </summary>
+    public bool ShowEntryPoints => HasCollaborator && _preferenceService.Model.ShowCollaborator;
+
 
     /// <summary>
     ///     Opens the Collaborator window with the current story context.

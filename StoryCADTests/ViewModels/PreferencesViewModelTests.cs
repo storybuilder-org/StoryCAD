@@ -124,6 +124,31 @@ public class PreferencesViewModelTests
         Assert.IsTrue(vm.UseBetaDocumentation);
     }
 
+    [TestMethod]
+    public void LoadModel_ShowCollaboratorFalse_CopiesShowCollaborator()
+    {
+        // Arrange
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var vm = Ioc.Default.GetRequiredService<PreferencesViewModel>();
+        var original = preferenceService.Model.ShowCollaborator;
+        try
+        {
+            preferenceService.Model.ShowCollaborator = false;
+            vm.ShowCollaborator = true;
+            vm.CurrentModel = preferenceService.Model;
+
+            // Act
+            vm.LoadModel();
+
+            // Assert
+            Assert.IsFalse(vm.ShowCollaborator);
+        }
+        finally
+        {
+            preferenceService.Model.ShowCollaborator = original;
+        }
+    }
+
     #endregion
 
     #region A2: SaveModel Tests
@@ -166,6 +191,32 @@ public class PreferencesViewModelTests
         // Assert
         Assert.IsTrue(preferenceService.Model.ErrorCollectionConsent);
         Assert.IsFalse(preferenceService.Model.Newsletter);
+    }
+
+    [TestMethod]
+    public void SaveModel_ShowCollaboratorCleared_WritesShowCollaboratorToModel()
+    {
+        // Arrange
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var vm = Ioc.Default.GetRequiredService<PreferencesViewModel>();
+        var original = preferenceService.Model.ShowCollaborator;
+        try
+        {
+            preferenceService.Model.ShowCollaborator = true;
+            vm.CurrentModel = preferenceService.Model;
+            vm.LoadModel();
+            vm.ShowCollaborator = false;
+
+            // Act
+            vm.SaveModel();
+
+            // Assert
+            Assert.IsFalse(preferenceService.Model.ShowCollaborator);
+        }
+        finally
+        {
+            preferenceService.Model.ShowCollaborator = original;
+        }
     }
 
     [TestMethod]
