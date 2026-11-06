@@ -15,7 +15,7 @@ effort.
 
 Sharing this information is **entirely optional**. StoryCAD works exactly the
 same whether you opt in or not. If you don't want to share anything, simply
-leave the checkbox unchecked — either during first-run setup or on the *Other*
+leave the checkbox unchecked — either during first-run setup or on the *Privacy*
 tab of the Preferences dialog.
 
 ### What we collect
@@ -72,8 +72,9 @@ linked together.
 You'll be asked about usage statistics the first time you run StoryCAD. You
 can change your answer at any time:
 
-1. Click **Preferences** on the menu bar.
-2. Select the **Other** tab.
+1. Click **Preferences** on the command bar (on a Mac, choose **Preferences...**
+   from the StoryCAD menu).
+2. Select the **Privacy** tab.
 3. Check or uncheck **Send anonymous usage statistics**.
 4. Click **Save**.
 
