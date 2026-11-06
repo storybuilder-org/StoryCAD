@@ -742,7 +742,8 @@ public class CharacterViewModel : ElementViewModelBase, INavigable, ISaveable, I
 
     private void RemoveTrait()
     {
-        if (ExistingTraitIndex == -1)
+        // The selected trait number can fall outside the list; RemoveAt then crashed StoryCAD (#1681).
+        if (ExistingTraitIndex < 0 || ExistingTraitIndex >= CharacterTraits.Count)
         {
             Messenger.Send(new StatusChangedMessage(new StatusMessage("No trait selected to delete", LogLevel.Warn)));
             return;
