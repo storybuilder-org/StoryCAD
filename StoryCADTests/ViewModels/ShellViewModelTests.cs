@@ -2055,4 +2055,35 @@ public class ShellViewModelTests
 
         Assert.AreEqual(0, messages.Count, string.Join("; ", messages));
     }
+
+    /// <summary>
+    ///     #1692: with Show Collaborator cleared, UpdateCollaboratorVisibility hides the
+    ///     Collaborator entry points. (The test project registers no Collaborator factory,
+    ///     so only the Collapsed result can be examined here.)
+    /// </summary>
+    [TestMethod]
+    public void UpdateCollaboratorVisibility_PreferenceCleared_SetsCollapsed()
+    {
+        // Arrange
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var originalPreference = preferenceService.Model.ShowCollaborator;
+        var originalVisibility = shell.CollaboratorVisibility;
+        try
+        {
+            preferenceService.Model.ShowCollaborator = false;
+            shell.CollaboratorVisibility = Microsoft.UI.Xaml.Visibility.Visible;
+
+            // Act
+            shell.UpdateCollaboratorVisibility();
+
+            // Assert
+            Assert.AreEqual(Microsoft.UI.Xaml.Visibility.Collapsed, shell.CollaboratorVisibility);
+        }
+        finally
+        {
+            preferenceService.Model.ShowCollaborator = originalPreference;
+            shell.CollaboratorVisibility = originalVisibility;
+        }
+    }
 }

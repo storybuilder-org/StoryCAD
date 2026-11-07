@@ -19,6 +19,8 @@ With an outline open, click **Collaborator** on the StoryCAD toolbar. During the
 
 ![StoryCAD toolbar; the Collaborator button is the chain icon, fourth from the left](../media/Collaborator/Collaborator-Toolbar-Button.png)
 
+If you would rather not see Collaborator, open [Preferences](../Preferences/Preferences.html), go to the Other tab, and clear **Show Collaborator**. When you click Save, StoryCAD hides the Collaborator and Buy Credits buttons. Check the box again and click Save to bring them back.
+
 ## The Collaborator window
 
 The window has three areas side by side. The left is the list of workflows, where you pick the one to run. The center shows the purpose of the workflow you picked and, after a run, the Property Updates list of suggested field changes. The right is the chat column, which carries status messages during a run and lets you ask questions afterward.

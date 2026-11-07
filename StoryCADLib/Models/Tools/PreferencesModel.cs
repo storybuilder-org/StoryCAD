@@ -49,6 +49,7 @@ public class PreferencesModel : ObservableObject
         HideKeyFileWarning = false;
         LastReviewDate = DateTime.MinValue;
         ShowStartupDialog = true;
+        ShowCollaborator = true;
         ShowFilePickerOnStartup = true;
         UseBetaDocumentation = AppState.IsBetaDistribution;
         HideShellCommandBarOnMac = false;
@@ -330,6 +331,15 @@ public class PreferencesModel : ObservableObject
     [JsonInclude]
     [JsonPropertyName("ShowStartupDialog")]
     public bool ShowStartupDialog { get; set; }
+
+    /// <summary>
+    ///     Should StoryCAD show the Collaborator entry points (the Collaborator and Buy Credits
+    ///     buttons, and the Collaborator item in the macOS Tools menu). True by default.
+    ///     Clearing it hides them for writers who do not want AI in their tools (#1692).
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("ShowCollaborator")]
+    public bool ShowCollaborator { get; set; }
 
     /// <summary>
     ///     Do we want to log more in depth

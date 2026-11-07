@@ -55,6 +55,15 @@ public class CollaboratorService
     /// </summary>
     public bool HasCollaborator => _collaboratorFactory != null;
 
+    /// <summary>
+    ///     Gets whether StoryCAD shows the Collaborator entry points: true only in a Collaborator
+    ///     build and when the writer has not cleared Show Collaborator in Preferences (#1692).
+    ///     Every Collaborator entry point (a control that opens Collaborator or starts a purchase
+    ///     for it, including future in-app advertising, #1656) gets its visibility from this
+    ///     property. Documentation links are not entry points.
+    /// </summary>
+    public bool ShowEntryPoints => HasCollaborator && _preferenceService.Model.ShowCollaborator;
+
 
     /// <summary>
     ///     Opens the Collaborator window with the current story context.
@@ -154,8 +163,7 @@ public class CollaboratorService
 
     // Gate (issue #30): Collaborator opens only when the store-activation service holds a valid
     // Worker JWT. This is a client-side, open-time check; attaching CurrentJwt to each Collaborator
-    // Worker call (the per-call enforcement in the activation contract, "JWT"; see
-    // StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md) is the
+    // Worker call (the per-call enforcement in the activation contract, "JWT") is the
     // remaining #30 wiring in the CollaboratorLib/Worker track. Resolved on demand to avoid
     // widening the constructor.
     private static bool IsPurchaseVerified() =>

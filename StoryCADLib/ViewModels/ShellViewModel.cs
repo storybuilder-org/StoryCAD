@@ -440,6 +440,17 @@ public class ShellViewModel : ObservableRecipient
     public RelayCommand PreferencesCommand { get; }
     public RelayCommand ReportFeedbackCommand { get; }
 
+    /// <summary>
+    ///     Shows or hides the Collaborator entry points (command bar buttons and the macOS menu
+    ///     item) from <see cref="CollaboratorService.ShowEntryPoints" />.
+    /// </summary>
+    public void UpdateCollaboratorVisibility()
+    {
+        CollaboratorVisibility = Ioc.Default.GetRequiredService<CollaboratorService>().ShowEntryPoints
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
+
     private Visibility _collaboratorVisibility;
 
     public Visibility CollaboratorVisibility
@@ -1136,6 +1147,7 @@ public class ShellViewModel : ObservableRecipient
                 prefsVm.SaveModel();
                 Ioc.Default.GetService<IUsageTrackingService>()?.FeatureUsed("PreferencesSaved");
                 await prefsVm.SaveAsync();
+                UpdateCollaboratorVisibility();
 
                 // Notify user if theme changed
                 if (prefsVm.ThemeChanged)
