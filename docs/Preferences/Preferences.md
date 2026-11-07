@@ -14,7 +14,7 @@ The Preferences Dialog contains many options. It’s divided into a series of ta
 
 Account tab:
 
-![](../media/Preferences-General-tab.png)
+![](../media/Preferences-Account-Tab.png)
 
 The name fields are used as the default Author on the Story Overview form on new outlines.
 
@@ -24,6 +24,8 @@ Delete My Data permanently deletes your account, your error reporting preference
 
 Save Locations tab:
 
+![](../media/Preferences-Save-Locations-Tab.png)
+
 The project directory is the default directory for new story outlines.
 
 The backup directory is the folder which will hold your backups. It holds a subfolder for each outline (.stbx file) you’ve backed up; the subfolder has the individual backups of your outline:
@@ -32,7 +34,7 @@ The backup directory is the folder which will hold your backups. It holds a subf
 
 Backup tab:
 
-![](../media/Preferences-Backup-tab.png)
+![](../media/Preferences-Backup-Tab.png)
 
 StoryCAD backups are  zip files containing your .stbx outline. 
 
@@ -46,6 +48,8 @@ How often should backups be made? - How often a timed backup should be made in m
 
 Privacy tab:
 
+![](../media/Preferences-Privacy-Tab.png)
+
 Send error logs - This option uses a service, elmah.io, which collects error data and provides us with a log which gives us an idea of what happened. This information includes your email so that we can follow up for more information if needed. Your outline data is not retained or forwarded and no information is shared with anyone outside of Team StoryCAD.
 
 Send anonymous usage statistics - Sends the StoryCAD team a small anonymous record of how you use StoryCAD each time you close it. It never includes the content of your outlines. The ? button beside it opens an explanation of what is collected, and [Usage Statistics](Usage_Statistics.html) lists it in full. The change takes effect for your next session.
@@ -56,7 +60,7 @@ Advanced logging - Makes StoryCAD write much more detail to its daily log files,
 
 Other tab:
 
-![](../media/Preferences-Other-tab.png)
+![](../media/Preferences-Other-Tab.png)
 
 Wrap node names - Wraps node names in the Story Explorer and Narrator treeviews, if the Name is longer than the treeview’s display width.
 
@@ -76,7 +80,7 @@ Preferred Search Engine - This is the search engine that will be used within web
 
 About tab:
 
-![](../media/Preferences-About-tab.png)
+![](../media/Preferences-About-Tab.png)
 
 This tab identifies the current version and has links to keep up with StoryCAD on Social Media. You can also review StoryCAD here; additionally, you will also be prompted to review StoryCAD roughly once every six months.
 

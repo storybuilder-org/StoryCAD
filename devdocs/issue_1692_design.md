@@ -202,7 +202,7 @@ The manual uses its own instructional voice, not ASD-STE100.
 | Page | Change |
 |------|--------|
 | `docs/Preferences/Preferences.md` | Add Show Collaborator to the Other tab text. Make the Other tab text agree with the tab. The current text names items that are on other tabs (Send error logs, Send newsletters, Automatically Save). |
-| `docs/media/Preferences-Other-tab.png` | Replace with a new image of the Other tab. Terry must approve a run of StoryCAD on the screen, or supply the image. |
+| `docs/media/Preferences-*-Tab.png` | New images of the Account, Save Locations, Backup, Privacy, Other and About tabs, taken in the automation VM. The names obey the manual image name standard. The old `Preferences-*-tab.png` files are removed. |
 | `docs/StoryCAD Collaborator/Opening_Collaborator.md` | Add a short paragraph: the writer can hide the Collaborator buttons with Show Collaborator on the Other tab of Preferences. Do not remove or change other text. |
 
 These changes add text about the new preference. They do not remove documentation about Collaborator.
