@@ -16,4 +16,8 @@ Branch `issue-1692-hide-collaborator`, worktree `../StoryCAD-1692`, based on `de
 - Manual: `Preferences.md` tabs now match the app; `Usage_Statistics.md` names the Privacy tab; `Opening_Collaborator.md` describes Show Collaborator.
 - Separate review done; fixes applied. PR #1693.
 - Preferences tab images retaken in the automation VM and renamed to the manual image name standard. What's new keeps its old image (a development build shows no changelog).
-- Open: PF-009 run by hand.
+
+## 2026-11-07
+
+- PF-009 passed on Windows (Terry). Step 4 (macOS) not run.
+- CI green on PR #1693 at `8f2998ac`.
