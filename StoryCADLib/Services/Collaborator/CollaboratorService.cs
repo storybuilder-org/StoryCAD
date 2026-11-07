@@ -163,8 +163,7 @@ public class CollaboratorService
 
     // Gate (issue #30): Collaborator opens only when the store-activation service holds a valid
     // Worker JWT. This is a client-side, open-time check; attaching CurrentJwt to each Collaborator
-    // Worker call (the per-call enforcement in the activation contract, "JWT"; see
-    // StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md) is the
+    // Worker call (the per-call enforcement in the activation contract, "JWT") is the
     // remaining #30 wiring in the CollaboratorLib/Worker track. Resolved on demand to avoid
     // widening the constructor.
     private static bool IsPurchaseVerified() =>
