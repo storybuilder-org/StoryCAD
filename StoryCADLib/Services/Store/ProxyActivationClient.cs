@@ -6,8 +6,7 @@ using System.Threading;
 
 namespace StoryCADLib.Services.Store;
 
-// Wire body for POST /activate (activation contract in
-// StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md; do not rename members).
+// Wire body for POST /activate (the activation contract; do not rename members).
 // Source-generated like StoreKitJsonContext so the desktop head stays trimming-friendly.
 internal sealed class ActivationRequest
 {
