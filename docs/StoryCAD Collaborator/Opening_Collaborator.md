@@ -17,9 +17,9 @@ Collaborator works on the outline you have open in StoryCAD, so open one first. 
 
 With an outline open, click **Collaborator** on the StoryCAD toolbar. During the beta, you will initially see the options Join and Not now. After you Join, or after a paid subscription is in force, a separate window opens, titled Story Collaborator, and StoryCAD stays where it was behind it. [Getting Started](Getting_Started.html) covers Join, Subscribe, and what to do if the window does not open.
 
-If you would rather not see Collaborator, open [Preferences](../Preferences/Preferences.html), go to the Other tab, and clear **Show Collaborator**. When you click Save, StoryCAD hides the Collaborator and Buy Credits buttons. Check the box again and click Save to bring them back.
-
 ![StoryCAD toolbar; the Collaborator button is the chain icon, fourth from the left](../media/Collaborator/Collaborator-Toolbar-Button.png)
+
+If you would rather not see Collaborator, open [Preferences](../Preferences/Preferences.html), go to the Other tab, and clear **Show Collaborator**. When you click Save, StoryCAD hides the Collaborator and Buy Credits buttons. Check the box again and click Save to bring them back.
 
 ## The Collaborator window
 

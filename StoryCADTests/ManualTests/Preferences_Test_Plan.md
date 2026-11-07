@@ -204,6 +204,8 @@
 **Priority:** Medium
 **Time:** ~3 minutes
 
+**Precondition:** A StoryCAD build that includes Collaborator (the Collaborator button is on the command bar). On macOS, Hide in-window toolbar is cleared.
+
 **Steps:**
 1. Open Preferences, select the Other tab, and make sure Show Collaborator is checked
    **Expected:** Show Collaborator is checked

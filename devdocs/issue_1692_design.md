@@ -197,7 +197,7 @@ PF-009 steps:
 
 ## 12. User manual
 
-The manual uses its own voice (usermanual ADR-001), not ASD-STE100.
+The manual uses its own instructional voice, not ASD-STE100.
 
 | Page | Change |
 |------|--------|
@@ -230,7 +230,7 @@ These changes add text about the new preference. They do not remove documentatio
 
 ## 15. Design review
 
-Result of `wiki/checklists/design/design-review.md`:
+Result of the StoryBuilder design review checklist:
 
 | Item | Result |
 |------|--------|
@@ -243,7 +243,7 @@ Result of `wiki/checklists/design/design-review.md`:
 | 6. Security | No new input, network call or secret. |
 | 7. Dependencies | None. |
 | 8. Cross-platform | The macOS menu item uses the same property. PF-009 step 4 examines it. |
-| 9. Fitness function | The `CollaboratorService` tests fail if the rule ignores the preference. `AutomationConventionTests` checks the new check box. |
+| 9. Fitness function | The `CollaboratorService` tests fail if the rule ignores the preference. `AutomationConventionTests` checks the new check box. No unit test examines the call to `UpdateCollaboratorVisibility` after Save, because the test project has no Collaborator build. PF-009 examines it. |
 | 10. API surface | No change to `IStoryCADAPI` or `StoryCADApi`. |
 | 11. Wrong or trade-off | Trade-off: the check box shows in builds without CollaboratorLib. This is simpler than a second visibility rule. |
 | 12. Work to come | Section 14. |
