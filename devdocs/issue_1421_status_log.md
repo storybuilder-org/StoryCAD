@@ -24,7 +24,7 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 
 - Added `check`, `--ci`, `--out` and the `screenshot` verb; CI job `ui-smoke` for PRs (not run yet; first run comes with the PR).
 - WinAppSDK tests 1763 passed, 15 skipped. `check StoryCADTests`: 2 scripts, 0 errors. `Smoke_Test.scs` and `SaveDialog.scs` pass.
-- Next: the manual screenshot script once D-SCREENSHOT is answered on StoryCADWiki #7.
+- Next: the manual screenshot script once D-SCREENSHOT is answered.
 
 ## 2026-10-05 (Milestone 4)
 
