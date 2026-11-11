@@ -35,6 +35,9 @@
                 <HyperlinkButton Content="User manual"
                                  NavigateUri="{x:Bind ViewModel.ManualUri, Mode=OneTime}"
                                  AutomationProperties.AutomationId="HelpUserManualButton" />
+                <HyperlinkButton Content="StoryCAD Collaborator"
+                                 NavigateUri="{x:Bind ViewModel.CollaboratorUri, Mode=OneTime}"
+                                 AutomationProperties.AutomationId="HelpCollaboratorButton" />
                 <HyperlinkButton Content="Events" NavigateUri="https://storybuilder.org/events/"
                                  AutomationProperties.AutomationId="HelpEventsButton" />
             </StackPanel>
