@@ -28,7 +28,7 @@ Script: `StoryCADTests/AutomationScripts/Collaborator.scs`. The header has the r
 
 Each step lists the manual page it covers. The script follows the pages in reading order, except where one workflow run serves several pages. Steps run in table order: later steps rely on the outline state that earlier steps leave.
 
-Not scripted: `Collaborator-Join-Dialog.png` (needs a machine without activation). TC-112 and TC-113 timing and file checks stay manual: `pause` is zero in a test run.
+Not scripted: `Collaborator-Join-Dialog.png` (needs a machine without activation); TC-139 (added for #1645; a script step comes with the #1422 work). TC-112 and TC-113 timing and file checks stay manual: `pause` is zero in a test run.
 
 ---
 
@@ -48,6 +48,7 @@ Not scripted: `Collaborator-Join-Dialog.png` (needs a machine without activation
 | TC-126 | An Example Session; Reviewing Suggestions | Review Each; Skip three times | Card shows Yours and Proposed and a count. Skip keeps the sample text | |
 | TC-115 | Overview Workflows; Running a Workflow | Story Problem: pick Catching the drug dealer Lacas, Leonard Kraskin, Charlie Lacas. Accept All; Cancel at "Replace existing content?" | Three pickers in turn. Accept All writes the New rows and asks before Has your text rows; Cancel keeps them. Checked in TC-138 | Collaborator-Workflow-Story-Problem |
 | TC-117 | Overview Workflows | Open the four groups. Story Form. Accept nothing | Proposes Type and Genre. Checked in TC-138: Genre and Type unchanged | Collaborator-Workflow-Story-Form |
+| TC-139 | Overview Workflows | Collaborator is open. In the main window, select the Overview. On the Story Overview page, change Genre to Western. Do not select a different element. In the Collaborator window, select Story Form. Select Review Each. Select Skip for each card. In the main window, change Genre to Suspense | The Genre card shows Western in Yours. Collaborator reads a change that the writer makes in the main window while Collaborator is open (#1645). TC-138 finds Genre Suspense | |
 | TC-127 | Problem Workflows | Inner and Outer Problems: outer Catching the drug dealer Lacas, inner Leonard's impulsiveness lets Lacas capture him | No protagonist picker (taken from the outer Problem). Rows for the inner Problem and a Flaw | Collaborator-Workflow-Inner-Outer |
 | TC-128 | Running a Workflow; An Example Session; Problem Workflows | In StoryCAD, set the tech problem's Problem Category Complication, Protagonist Leonard Kraskin, Antagonist Charlie Lacas. Problem Builder; pick the tech problem. Review Each, Skip one, Accept Free Remaining | Picker "Select Problem" lists the problems with Create a new element. Rows for the Problem fields only: no beat sheet rows (Collaborator #302) | Collaborator-Element-Picker, Collaborator-Updates-After-Run, Collaborator-Session-Problem-Builder |
 | TC-129 | Problem Workflows; A Path to Try | Problem Beats on the same problem. Accept All | One row per beat; no Replace question | Collaborator-Workflow-Problem-Beats |
