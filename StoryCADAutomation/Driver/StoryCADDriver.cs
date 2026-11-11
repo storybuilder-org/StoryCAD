@@ -1062,20 +1062,8 @@ public sealed class StoryCADDriver : IUiDriver
             PressChord("Escape");
         }
 
-        ParkAfterPointerVerb();
-    }
-
-    /// <summary>
-    ///     Moves the pointer off the row a right-click or a drag left it on, as a user moves the
-    ///     mouse away. Left on the row, a drop-down that later opened and closed under it put
-    ///     the row back in its hover shade, and manual images showed two grey rows (#1422).
-    /// </summary>
-    private void ParkAfterPointerVerb()
-    {
-        if (_process.MainWindowHandle != IntPtr.Zero && NativeMethods.VisibleWindowBounds(_process.MainWindowHandle) is { } frame)
-        {
-            ParkPointer(frame);
-        }
+        // Do not park the pointer here. Parking belongs to the screenshot verbs, which move the
+        // pointer away and put it back; parking here moved it for every later step of every script (#1626).
     }
 
     /// <inheritdoc />
@@ -1117,7 +1105,6 @@ public sealed class StoryCADDriver : IUiDriver
         }
 
         Wait.UntilInputIsProcessed();
-        ParkAfterPointerVerb();
     }
 
     // --- keyboard and focus ------------------------------------------------------------------
