@@ -1,6 +1,6 @@
 # Tutorial video brief
 
-The brief for the Danger Calls tutorial video (#1626, Release 4.4). Draft, 2026-11-11; not approved. Change the brief first, then the script.
+The brief for the Danger Calls tutorial video (#1626, Release 4.4). Approved by Terry, 2026-11-11. Change the brief first, then the script.
 
 ## Document kind
 
@@ -37,7 +37,7 @@ Terry, 2026-11-11: one video. A text card between sections reminds the viewer th
 | 2 | pt 3, pt 4, pt 5 | TC-008 to TC-017 | Problems, the story problem, and a beat sheet |
 | 3 | pt 6 to pt 9 | TC-018 to TC-027 | Plotting with scenes and tools |
 
-The narration is 1,325 words (section 1: 440, section 2: 436, section 3: 449). At the runner's estimate of 0.4 s for each word, that is 530 s of voice. The actions alone took 358 s on Brigid and about 250 s in the VM for the full test run (#1422 status log). A step lasts as long as the longer of its voice and its actions. With a 25 s title card and the 10 s closing card, the video runs about 9.4 minutes, plus the steps where the actions run longer than the voice. A timed run of `Tutorial-Creating-a-Story.scs` gives the action time of each step.
+The narration is 1,364 words (section 1: 440, section 2: 475, section 3: 449). At the runner's estimate of 0.4 s for each word, that is 546 s of voice. The actions alone took 358 s on Brigid and about 250 s in the VM for the full test run (#1422 status log). A step lasts as long as the longer of its voice and its actions. With a 25 s title card and the 10 s closing card, the video runs about 9.7 minutes, plus the steps where the actions run longer than the voice. A timed run of `Tutorial-Creating-a-Story.scs` gives the action time of each step.
 
 ## Section 1: From idea to concept and characters
 
@@ -49,7 +49,7 @@ The narration is 1,325 words (section 1: 440, section 2: 436, section 3: 449). A
 | 1.4 | Type a sentence on the "Story Idea" tab. Then click the "Changed" indicator on the status bar (TC-002). | Select the story overview at the top of the tree. Its first tab, Story Idea, is where the idea goes. The author and dates are already filled in, from your preferences and your computer's clock. When you type, the pencil on the status bar turns red: there are unsaved changes. Click it to save, and it turns green. |
 | 1.5 | Select "Suspense" in "Genre" and "Short Story" in "Type" on the "Structure" tab (TC-003). | The Structure tab sets limits on the story's form. Danger Calls is about crime, so the genre is Suspense, and the type is Short Story, to keep the example brief. Most drop-down lists in StoryCAD are suggestions. You can type a value that isn't on the list. |
 | 1.6 | Close the outline. Then open it again from the list on the File Open page (TC-004). | After a break, we come back to the outline. StoryCAD opens on the File Open page, which lists the outlines you worked on last. Select Danger Calls and open it. |
-| 1.7 | Type the concept on the "Concept" tab (TC-005). | The next step turns the idea into a concept. Larry Brooks, in his book Story Engineering, defines it this way: "A concept is an idea that asks a question that implies conflict." What if is a good way in. The answer to the question is your story. |
+| 1.7 | Type the concept on the "Concept" tab (TC-005). | The next step turns the idea into a concept. Larry Brooks, in his book Story Engineering, defines it this way: "A concept is an idea that asks a question that implies conflict." 'What if?' is a good way in. The answer to the question is your story. |
 | 1.8 | Open "Key Questions" for the Story Overview and go to the first concept question (TC-006). | Questions can also test a concept. The Key Questions tool, on the Tools menu, has questions for each kind of story element. With Story Overview selected, Next Question steps through them to the first question about the concept. |
 | 1.9 | Add three characters: Leonard Kraskin, Charlie Lacas and Tony Irwin (TC-007). | A cops and robbers story has two obvious characters, a cop and a criminal. Right-click the Characters folder to add a character. Leonard Kraskin is a detective and the protagonist. Charlie Lacas is a drug dealer and the antagonist. Drug Dealer isn't on the role list, so we type it in. Tony Irwin, a second detective, is Leonard's partner, which gives Leonard someone to talk to. |
 
@@ -58,7 +58,7 @@ The narration is 1,325 words (section 1: 440, section 2: 436, section 3: 449). A
 | # | Action on screen | Narration |
 |---|---|---|
 | 2.1 | Text card: "Section 2: Problems. You do not need to make an outline in one session." | You don't have to build an outline in one sitting. Save your work, close StoryCAD, and come back when you're ready. So far, Danger Calls has an idea, a concept and three characters. Next, the characters get problems, which are the heart of plotted fiction. |
-| 2.2 | Add the problem "Catching the drug dealer Lacas". Then fill in its type, conflict, subject and story question (TC-008). | A concept points toward a premise: the answer to the concept's question, the story told in a sentence or two. In StoryCAD, a Problem holds most of the premise. Leonard's basic problem is to catch Charlie. That makes the problem type Conflict, the conflict type Person versus Person, and the subject Crime. The story question is what the reader reads on to find out. |
+| 2.2 | Add the problem "Catching the drug dealer Lacas". Then fill in its type, conflict, subject and story question (TC-008). | A concept points toward a premise: the answer to the concept's question, which is also the story told in a sentence or two. In StoryCAD, a Problem story element holds most of the premise. Leonard's basic problem is to catch Charlie. That makes the problem type Conflict, the conflict type Person versus Person, and the subject Crime. The story question is what the reader wants an answer to. It's why the reader will turn pages. |
 | 2.3 | Add the problem "How will Leonard and Tony get past Charlie's tech?" (TC-009). | One question leads to another: how do the detectives get past Charlie's technology? That's a complication, so it becomes a second problem, with a how question instead of a yes or no question. Its conflict type is Person versus Situation. |
 | 2.4 | Add the problem "Lacas gets the drop on Kraskin" (TC-010). | The concept mentions a rescue. A rescue from what? Perhaps Lacas gets the drop on one of the detectives, so that the other can rescue him. That's a third problem. |
 | 2.5 | Use "Trait Builder" to put "(Behavior): Impulsive" on the "Outer Traits" tab of Leonard (TC-011). | The heart of a story is a character with a problem. To balance an outer, physical problem with an inner one, we give Leonard a flaw. On his Outer Traits tab, Trait Builder lists example behaviors, and we copy Impulsive. |
@@ -67,7 +67,7 @@ The narration is 1,325 words (section 1: 440, section 2: 436, section 3: 449). A
 | 2.8 | Type the premise on the "Resolution" tab of two problems (TC-014). | A problem's Resolution tab holds its premise. Leonard rushes into a trap and Lacas captures him. Tony frees him by paging Lacas. The first problem's premise adds the last piece: Tony gets the drop on the dealers. |
 | 2.9 | Select "Catching the drug dealer Lacas" in "Story Problem" on the "Premise" tab of the Story Overview (TC-015). | Only one problem is the story problem: when it's resolved, the story is over. You pick it on the overview's Premise tab, and its premise shows there. A change in either place changes both. |
 | 2.10 | Add the scene "He's like a ghost" with a sketch (TC-016). | With the characters and problems known, plotting can start. We open with Leonard and Tony talking about how Lacas always seems one step ahead of them. Right-click the Scenes folder to add the scene. |
-| 2.11 | Select the "Three Act Play" beat sheet on the "Structure" tab of the story problem. Then select the "Narrative hook" beat (TC-017). | A story structure gives the plot a skeleton. In StoryCAD, a structure is a beat sheet: a list of points where certain things should happen. Beats are not scenes. They remind you what your scenes need to do, and in roughly what order. |
+| 2.11 | Select the "Three Act Play" beat sheet on the "Structure" tab of the story problem. Then select the "Narrative hook" beat (TC-017). | A story structure gives the plot a skeleton. In StoryCAD, a structure is a beat sheet: a list of points where certain things should happen. Beats are not scenes. They remind you what your scenes need to do, and in roughly what order. A scene can do more than one thing, and it can encompass more than one beat, or even play a part in more than one problem story element. |
 
 ## Section 3: Plotting with scenes and tools
 
