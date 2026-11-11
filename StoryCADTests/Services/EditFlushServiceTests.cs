@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
+using StoryCADLib.Services.Locking;
 using StoryCADLib.Services.Logging;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.ViewModels;
@@ -83,6 +84,24 @@ public class EditFlushServiceTests
         _service.OnMainWindowActivationChanged(WindowActivationState.CodeActivated);
 
         Assert.AreEqual("Mystery", overview.StoryGenre, "Activation should not copy page edits");
+    }
+
+    /// <summary>
+    ///     Issue #1645 review: AutoSave and Backup copy page edits and write the file under
+    ///     SerializationLock. A deactivation while the lock is held must not change the model the
+    ///     writer is serializing; it is skipped, as RunExclusiveAsync skips UI work while busy.
+    /// </summary>
+    [TestMethod]
+    public async Task OnMainWindowActivationChanged_DeactivatedWhileSaving_LeavesModelUnchanged()
+    {
+        var (overview, _) = await OverviewWithPendingEdit();
+
+        using (new SerializationLock())
+        {
+            _service.OnMainWindowActivationChanged(WindowActivationState.Deactivated);
+        }
+
+        Assert.AreEqual("Mystery", overview.StoryGenre, "No copy while a save holds the lock");
     }
 
     /// <summary>A real outline and the Story Overview page's view model, with an edit not yet in the model.</summary>

@@ -1,3 +1,5 @@
+using StoryCADLib.Services.Locking;
+
 namespace StoryCADLib.Services;
 
 /// <summary>
@@ -38,10 +40,13 @@ public class EditFlushService
     ///     The state is an enum because its type differs by head: Microsoft.UI.Xaml.WindowActivationState
     ///     on Windows, Windows.UI.Core.CoreWindowActivationState on the Uno desktop head. Both name the
     ///     value Deactivated.
+    ///     Skipped while SerializationLock is held: AutoSave and Backup copy the edits and write the
+    ///     file under it, and a copy now could change the model mid-write (as RunExclusiveAsync skips
+    ///     UI work while busy).
     /// </summary>
     public void OnMainWindowActivationChanged(Enum state)
     {
-        if (state?.ToString() == "Deactivated")
+        if (state?.ToString() == "Deactivated" && SerializationLock.IsIdle)
         {
             FlushCurrentEdits();
         }
