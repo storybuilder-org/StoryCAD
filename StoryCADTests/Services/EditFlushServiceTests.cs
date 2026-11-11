@@ -1,7 +1,10 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.UI.Xaml;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
 using StoryCADLib.Services.Logging;
+using StoryCADLib.Services.Outline;
+using StoryCADLib.ViewModels;
 
 #nullable disable
 
@@ -54,6 +57,49 @@ public class EditFlushServiceTests
 
         // Act & Assert - should not throw even though SaveModel throws
         _service.FlushCurrentEdits();
+    }
+
+    /// <summary>
+    ///     Issue #1645: the Collaborator window is not modal. A click in it makes the main window
+    ///     inactive, and the open page's edit must reach the model then, so the next workflow run
+    ///     reads it.
+    /// </summary>
+    [TestMethod]
+    public async Task OnMainWindowActivationChanged_Deactivated_FlushesPendingPageEditToModel()
+    {
+        var (overview, _) = await OverviewWithPendingEdit();
+
+        _service.OnMainWindowActivationChanged(WindowActivationState.Deactivated);
+
+        Assert.AreEqual("Western", overview.StoryGenre, "The page edit should reach the model when the main window goes inactive");
+    }
+
+    /// <summary>Issue #1645: activation is not a reason to copy page edits.</summary>
+    [TestMethod]
+    public async Task OnMainWindowActivationChanged_CodeActivated_LeavesModelUnchanged()
+    {
+        var (overview, _) = await OverviewWithPendingEdit();
+
+        _service.OnMainWindowActivationChanged(WindowActivationState.CodeActivated);
+
+        Assert.AreEqual("Mystery", overview.StoryGenre, "Activation should not copy page edits");
+    }
+
+    /// <summary>A real outline and the Story Overview page's view model, with an edit not yet in the model.</summary>
+    private async Task<(OverviewModel overview, OverviewViewModel vm)> OverviewWithPendingEdit()
+    {
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        var model = await outlineService.CreateModel("Flush Test", "Test Author", 0);
+        var overview = model.StoryElements.OfType<OverviewModel>().First();
+        overview.StoryGenre = "Mystery";
+        _appState.CurrentDocument = new StoryDocument(model, "test.stbx");
+
+        var vm = new OverviewViewModel(Ioc.Default.GetRequiredService<ILogService>(), _appState);
+        vm.Activate(overview);
+        vm.StoryGenre = "Western";
+        _appState.CurrentSaveable = vm;
+        Assert.AreEqual("Mystery", overview.StoryGenre, "Precondition: the model still holds the old value");
+        return (overview, vm);
     }
 
     private class TestSaveable : ISaveable
