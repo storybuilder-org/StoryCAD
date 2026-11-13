@@ -24,7 +24,7 @@ StoryCAD is a free, open-source outlining application for fiction writers, relea
 | CollaboratorLib | The AI Collaborator, compiled into the application |
 | StoryCADTests | MSTest tests, manual test plans, automation scripts |
 | StoryCADAutomation | The runner for the `.scs` automation scripts |
-| StoryCADXamlScan | Static scan of XAML used by the tests |
+| StoryCADXamlScan | Static scan of XAML, used by the tests and by the automation runner |
 
 ## Targets
 
@@ -35,13 +35,10 @@ StoryCAD is a free, open-source outlining application for fiction writers, relea
 
 A Windows machine builds both targets. A Mac builds `net10.0-desktop` only. The .NET SDK and Uno.Sdk versions are pinned in `global.json`.
 
-Write shared code first. Put code that needs one platform's API inside a conditional block, so that the other platform's build leaves it out:
+Write shared code first. Where code must differ by platform, follow what the code base already does:
 
-```csharp
-#if __MACOS__
-using AppKit;  // compiles on a Mac only
-#endif
-```
+- For macOS against Windows on the desktop head, use a run-time check: `OperatingSystem.IsMacOS()`. The desktop head is one build for both systems, so a compile-time symbol cannot separate them.
+- For the WinAppSDK head against the desktop head, use the compile-time symbols `HAS_UNO` and `WINDOWS`, for example `#if HAS_UNO`.
 
 Use paths and keyboard shortcuts that work on both platforms. A change that touches platform-specific code needs a test on that platform before it is merged.
 
@@ -60,7 +57,9 @@ Windows (PowerShell):
 & "C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe" "StoryCADTests\bin\x64\Debug\net10.0-windows10.0.22621\StoryCADTests.dll" /Tests:StoryModelTests
 ```
 
-macOS:
+Release build: the same build command with `-p:Configuration=Release`.
+
+Run on macOS, from the `StoryCAD/` project folder:
 
 ```bash
 dotnet run -f net10.0-desktop
@@ -72,7 +71,7 @@ A debugger on Windows cannot attach to the app on a Mac. Debug Mac problems on t
 
 - Test file: `[SourceFileName]Tests.cs`, one test class for each source class.
 - Test method: `MethodName_Scenario_ExpectedResult`, for example `OpenFile_WhenFileNotFound_ThrowsException`.
-- Arrange, Act, Assert inside each test. `[TestInitialize]` for setup, `[TestCleanup]` for teardown, `[UITestMethod]` for a test that needs the UI thread.
+- Arrange, Act, Assert inside each test. `[TestInitialize]` for setup, `[TestCleanup]` for teardown.
 - Get services from the container with `Ioc.Default.GetRequiredService<T>()`. Do not build them by hand.
 - Use `Assert.ThrowsExactly`, not `Assert.ThrowsException`.
 - Use real implementations. A mock needs explicit approval for the case.
@@ -82,7 +81,7 @@ A debugger on Windows cannot attach to the app on a Mac. Debug Mac problems on t
 
 ## The API has outside users
 
-`StoryCADLib` is published, and other programs call its API. A change to a public API signature can break a program that the maintainers cannot see. Keep existing signatures; add, do not change.
+`StoryCADLib` is published, and other programs call its API. A change to a public API signature can break a program that the maintainers cannot see. Keep existing signatures; add, do not change. The contracts between the application and the Collaborator are in `StoryCADLib/Services/Collaborator/Contracts/` (`ICollaborator`, `IStoryCADAPI`).
 
 ## User manual
 
@@ -90,7 +89,7 @@ The manual's source is in `docs/` (Jekyll, Just the Docs theme). It is published
 
 ## Older notes
 
-`.claude/docs/` holds older reference notes on architecture, dependencies and examples. They are not kept current. Where one disagrees with the code, the code is right.
+`.claude/docs/` holds older reference notes: architecture, dependencies, examples, templates and troubleshooting. They are not kept current. Where one disagrees with the code, the code is right.
 
 ## Keep private material out of this repo
 
