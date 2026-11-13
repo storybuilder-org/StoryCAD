@@ -21,7 +21,7 @@
     <PackageVersion Include="NLog.Extensions.Logging" Version="6.3.0" />
     <PackageVersion Include="NRTFTree-Async" Version="1.0.1" />
     <PackageVersion Include="Octokit" Version="14.0.0" />
-    <PackageVersion Include="SkiaSharp" Version="4.155.0" />
+    <PackageVersion Include="SkiaSharp" Version="4.156.0" />
     <PackageVersion Include="Uno.Fonts.Fluent" Version="2.10.1" />
     <!-- UI-automation driver for the StoryCADAutomation runner (issue #1421). Dev/CI-only:
          referenced solely by StoryCADAutomation, never shipped to users. MIT-licensed; upstream
@@ -29,8 +29,8 @@
          deliberately alongside a smoke-script re-run, not in bulk package updates. Pinned 2026-07-13. -->
     <PackageVersion Include="FlaUI.Core" Version="5.0.0" />
     <PackageVersion Include="FlaUI.UIA3" Version="5.0.0" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="4.5.2" />
-    <PackageVersion Include="MSTest.TestFramework" Version="4.5.2" />
-    <PackageVersion Include="Microsoft.TestPlatform.TestHost" Version="18.11.1" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="4.5.3" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.5.3" />
+    <PackageVersion Include="Microsoft.TestPlatform.TestHost" Version="18.12.0" />
   </ItemGroup>
 </Project>
