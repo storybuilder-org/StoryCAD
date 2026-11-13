@@ -26,7 +26,7 @@ assignees: ''
 <!-- If applicable, add screenshots to help explain your problem. -->
 
 ## Environment
-**StoryCAD Version:** [e.g. 4.3.3]
+**StoryCAD Version:** [e.g. 4.3.3.0]
 **OS:** [e.g. Windows 11]
 **Additional context:** [Any other context about the problem]
 
