@@ -15,6 +15,10 @@ public partial class RichEditBoxExtended : RichEditBox
 
     public RichEditBoxExtended()
     {
+        // Use RichEditBox's default style. WinUI's RichEditBox already keys itself that way, but
+        // Uno 7's leaves DefaultStyleKey at typeof(Control), and the Fluent TargetType="RichEditBox"
+        // style doesn't match a subclass, so on Skia this control got no template and drew nothing.
+        DefaultStyleKey = typeof(RichEditBox);
         TextChanged += RichEditBoxExtended_TextChanged;
         TextAlignment = TextAlignment.Left;
         CornerRadius = new CornerRadius(5);
@@ -56,9 +60,13 @@ public partial class RichEditBoxExtended : RichEditBox
     {
         var theme = ActualTheme;
         var format = Document.GetDefaultCharacterFormat();
+        // Uno 7 still marks the ITextCharacterFormat members NotImplemented (uno#25341), but on
+        // Skia the format is an UnoTextCharacterFormat that implements ForegroundColor.
+#pragma warning disable Uno0001
         format.ForegroundColor = theme == ElementTheme.Dark
             ? Colors.White
             : Colors.Black;
+#pragma warning restore Uno0001
         Document.SetDefaultCharacterFormat(format);
     }
 
