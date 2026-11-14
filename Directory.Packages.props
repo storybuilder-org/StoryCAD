@@ -21,7 +21,7 @@
     <PackageVersion Include="NLog.Extensions.Logging" Version="6.3.0" />
     <PackageVersion Include="NRTFTree-Async" Version="1.0.1" />
     <PackageVersion Include="Octokit" Version="14.0.0" />
-    <PackageVersion Include="SkiaSharp" Version="4.155.0" />
+    <PackageVersion Include="SkiaSharp" Version="4.156.0" />
     <PackageVersion Include="Uno.Fonts.Fluent" Version="2.10.1" />
     <!-- UI-automation driver for the StoryCADAutomation runner (issue #1421). Dev/CI-only:
          referenced solely by StoryCADAutomation, never shipped to users. MIT-licensed; upstream
