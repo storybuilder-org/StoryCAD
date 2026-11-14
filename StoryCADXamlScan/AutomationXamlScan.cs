@@ -203,7 +203,7 @@ public static class AutomationXamlScan
     ///     Every user-visible label attribute across all scope files, for the script linter's
     ///     tab text check (devdocs/issue_1421_dsl_design.md "Script lint as a fitness function")
     ///     and the manual label check (#1422). Unlike <see cref="GetAttributeValue" />, conditional
-    ///     variants (win:Text, skia:Text) ARE included: they are the per-platform runtime labels,
+    ///     variants (win:Text, not_win:Text) ARE included: they are the per-platform runtime labels,
     ///     and a label that matches either platform's label is valid. Values that are bindings or
     ///     markup extensions ({x:Bind ...}) are skipped as not statically checkable; so are
     ///     labels set via nested property elements rather than attributes.
@@ -344,7 +344,7 @@ public static class AutomationXamlScan
 
     /// <summary>
     ///     The label UIA reports as Name on Windows: an explicit AutomationProperties.Name, else
-    ///     the first unconditional or win: Text, Label, Header, or Content. skia: and the other
+    ///     the first unconditional or win: Text, Label, Header, or Content. not_win: and the other
     ///     platform variants are not the Windows label. Null when the label is bound or absent.
     /// </summary>
     public static string? WindowsLabel(XElement element)

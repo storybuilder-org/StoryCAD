@@ -1,4 +1,6 @@
-﻿#if HAS_UNO_WINUI
+﻿// Real WinAppSDK head only: HAS_UNO_WINUI is also defined on the desktop head, where the Store
+// members are Uno "not implemented" stubs. Same guard as WindowsStoreContextAdapter.
+#if WINDOWS && !HAS_UNO
 using Windows.Services.Store;
 using WinRT.Interop;
 #endif
@@ -116,7 +118,7 @@ public class RatingService
         }
         else if (OperatingSystem.IsWindows())
         {
-#if HAS_UNO_WINUI
+#if WINDOWS && !HAS_UNO
             // Windows: Use Windows Store API for in-app rating prompt
             try
             {
