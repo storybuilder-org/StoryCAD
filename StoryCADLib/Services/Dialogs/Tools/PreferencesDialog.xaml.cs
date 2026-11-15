@@ -169,7 +169,7 @@ public sealed partial class PreferencesDialog : Page
                 URL.FileName = "https://twitter.com/StoryCAD";
                 break;
             case "Youtube":
-                URL.FileName = "https://www.youtube.com/channel/UCoRI7Q8r-_T5O1jKrEJsvDg";
+                URL.FileName = "https://www.youtube.com/@StoryCAD";
                 break;
             case "Website":
                 URL.FileName = "https://storybuilder.org/";
