@@ -37,7 +37,7 @@ Terry, 2026-11-11: one video. A text card between sections reminds the viewer th
 | 2 | pt 3, pt 4, pt 5 | TC-008 to TC-017 | Problems, the story problem, and a beat sheet |
 | 3 | pt 6 to pt 9 | TC-018 to TC-027 | Plotting with scenes and tools |
 
-The narration is 1,364 words (section 1: 440, section 2: 475, section 3: 449). At the runner's estimate of 0.4 s for each word, that is 546 s of voice. The actions alone took 358 s on Brigid and about 250 s in the VM for the full test run (#1422 status log). A step lasts as long as the longer of its voice and its actions. With a 25 s title card and the 10 s closing card, the video runs about 9.7 minutes, plus the steps where the actions run longer than the voice. A timed run of `Tutorial-Creating-a-Story.scs` gives the action time of each step.
+The narration is 1,364 words (section 1: 440, section 2: 475, section 3: 449); the voice clips run 468 s. A test run of `Tutorial-Video.scs` took 377 s. The recorded video runs 13:31.
 
 ## Section 1: From idea to concept and characters
 
