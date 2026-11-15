@@ -196,6 +196,9 @@
 3. Click the store review link (if safe to do so)
    **Expected:** Opens appropriate store (Microsoft Store on Windows, Mac App Store on macOS)
 
+4. Click the YouTube button
+   **Expected:** The browser opens the StoryCAD channel, https://www.youtube.com/@StoryCAD
+
 **Pass/Fail:** ______
 
 ---

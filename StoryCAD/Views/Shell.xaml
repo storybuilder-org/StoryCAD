@@ -584,8 +584,9 @@
                                             <muxc:TreeView.ItemTemplate>
                                                 <DataTemplate x:DataType="viewmodels:StoryNodeItem">
                                                     <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). -->
+                                                    <!-- TargetNullValue=Transparent: a null Background makes the blank part of the row ignore the pointer, so a right-click right of the name opened no menu (#1626). -->
                                                     <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
-                                                                       Background="{x:Bind Background, Mode=OneWay}"
+                                                                       Background="{x:Bind Background, Mode=OneWay, TargetNullValue=Transparent}"
                                                                        BorderBrush="{x:Bind boarderBrush, Mode=OneWay}"
                                                                        BorderThickness="1"
                                                                        RightTapped="TreeViewItem_RightTapped"

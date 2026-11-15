@@ -1,0 +1,37 @@
+# Regression test for #1626: right-click on the blank part of a tree row opens the row's menu.
+# A row with no highlight had a null Background, so only its arrow, icon and name took the
+# pointer; the runner right-clicks the row's centre, which for "Problems" lies right of the word.
+# Before the fix in Shell.xaml every "Add Problem" below opened no menu. Run with:
+#   StoryCADAutomation run StoryCADTests/AutomationScripts/Tree-Row-Right-Click.scs --window 1036x744 --out automation-output
+# Hands off the mouse and keyboard while it runs.
+script "Tree Row Right Click"
+
+step "Create an outline"
+launch
+click CreateNewOutlineNavItem
+select FileOpenTemplateCombo "Folders"
+set FileOpenProjectNameTextBox "Right Click Test"
+press "Tab"                               # the name binding updates only when focus leaves the box
+click PrimaryButton                       # "Create outline"
+expect window "StoryCAD - Currently editing Right Click Test"
+focus TitleTextBox                        # keyboard focus in the content pane, not the tree
+
+step "Add a problem from the Problems row"
+context-menu tree "Right Click Test/Problems" "Add Elements/Add Problem"
+expect tree contains "Right Click Test/Problems/New Problem"
+open-node tree "Right Click Test/Problems/New Problem"
+set ProblemNameTextBox "First problem"
+expect tree contains "Right Click Test/Problems/First problem"
+focus ProblemNameTextBox
+
+step "Add a second problem"
+context-menu tree "Right Click Test/Problems" "Add Elements/Add Problem"
+expect tree contains "Right Click Test/Problems/New Problem"
+open-node tree "Right Click Test/Problems/New Problem"
+set ProblemNameTextBox "Second problem"
+expect tree contains "Right Click Test/Problems/Second problem"
+focus ProblemNameTextBox
+
+step "Add a third problem"
+context-menu tree "Right Click Test/Problems" "Add Elements/Add Problem"
+expect tree contains "Right Click Test/Problems/New Problem"
