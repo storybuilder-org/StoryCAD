@@ -20,6 +20,9 @@ The brief for the Danger Calls tutorial video (#1626, Release 4.4). Approved by 
 | TC-NNN | A step in `Tutorial-Creating-a-Story.scs`. The video script uses the actions of that step. |
 | Story Overview, problem, character, scene, story problem, premise, concept, beat sheet, beat | StoryCAD story elements and structure items, as in the user manual |
 | Key Questions, Trait Builder, Master Plots, Stock Scenes | StoryCAD tools on the Tools menu or in a form |
+| status bar | The bar at the bottom of the StoryCAD window |
+| title card, text card, closing card | A full-screen image that the video shows instead of StoryCAD |
+| logo, music | The StoryCAD logo and the intro music on the title card |
 
 ## Sources
 
@@ -77,8 +80,8 @@ The narration is 1,364 words (section 1: 440, section 2: 475, section 3: 449); t
 | 3.2 | Click "Assign" to attach "He's like a ghost" to the "Narrative hook" beat (TC-018). | He's like a ghost is our narrative hook. With the beat selected, the Structure tab lists the scenes and problems you can assign to it. Select the scene and click Assign. |
 | 3.3 | Drag the two other problems below the story problem. Then drag the scene below the problem "How will Leonard and Tony get past Charlie's tech?" (TC-019). | The two smaller problems belong under the story problem, and the scene belongs under the problem it's part of. To move a node, drag it onto its new parent. |
 | 3.4 | Use "Master Plots" to add "Escape". Then click "Convert to Scene" and give the scene a name, a sketch and a cast (TC-020). | We already had a climax in mind. Master Plots, on the Tools menu, offers patterns of action that recur in fiction. Escape arrives as a problem under the selected node. We convert it to a scene, give it our premise, and add Leonard, Tony and Charlie to its cast. |
-| 3.5 | Fill in the "Role", "Psychological", "Social" and "Backstory" tabs of Charlie Lacas (TC-021). | Now the characters get some flesh, starting with Charlie Lacas. He grew up in New York City and deals drugs in a smaller city upstate, supplied through his New York contacts. He's bright, which makes him a worthy opponent. A few details on each tab make him someone you can picture. |
-| 3.6 | Fill in the "Development" and "Conflict" tabs of the scene "He's like a ghost" (TC-022). | Scenes are miniature stories too. The opening scene's value exchange is Challenge and Acceptance: the detectives choose to look for an answer instead of giving up. Lacas isn't in the scene, so its conflict is between the two who are, Tony and Leonard. |
+| 3.5 | Complete the "Role", "Psychological", "Social" and "Backstory" tabs of Charlie Lacas (TC-021). | Now the characters get some flesh, starting with Charlie Lacas. He grew up in New York City and deals drugs in a smaller city upstate, supplied through his New York contacts. He's bright, which makes him a worthy opponent. A few details on each tab make him someone you can picture. |
+| 3.6 | Complete the "Development" and "Conflict" tabs of the scene "He's like a ghost" (TC-022). | Scenes are miniature stories too. The opening scene's value exchange is Challenge and Acceptance: the detectives choose to look for an answer instead of giving up. Lacas isn't in the scene, so its conflict is between the two who are, Tony and Leonard. |
 | 3.7 | Use "Stock Scenes" to add "The chase leads into an ambush". Then give it the name "Shootout". Then select "Climax scene" in "Scene Type" (TC-023). | Stock Scenes, also on the Tools menu, lists scenes readers recognize at once. The chase leads into an ambush becomes our climax scene, named Shootout. |
 | 3.8 | Add two scenes after "Shootout". Then select the "Denouement" beat (TC-024). | The Three Act Play ends with the denouement. Two scenes after Shootout fill it: Tony updates Leonard on the aftermath, and Tony confronts Jack Chun. |
 | 3.9 | Add the character "Joe Edwards". Then add two scenes below the problem "How will Leonard and Tony get past Charlie's tech?" (TC-025). | The middle of the story needs a way to find the next drug deal. Joe Edwards owns an electronics shop, and he's a Peeping Tom. Leonard threatens to arrest and expose him unless he sets up a listening post. |
@@ -89,6 +92,3 @@ The narration is 1,364 words (section 1: 440, section 2: 475, section 3: 449); t
 
 Words in quotation marks in the "Action on screen" column are StoryCAD labels, list values, or element names.
 
-## Open points for Terry
-
-1. The video title.
