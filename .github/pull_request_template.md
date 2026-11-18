@@ -1,3 +1,6 @@
+Issue: #
+Design: <!-- The location of the design for the issue. -->
+
 ## What changed
 <!-- One short paragraph. -->
 

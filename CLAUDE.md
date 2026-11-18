@@ -1,6 +1,6 @@
 # StoryCAD Development Guide
 
-Project-specific guidance for AI coding sessions in the StoryCAD repo. On a maintainer's machine, the shared StoryBuilder standards load from the `CLAUDE.md` in the folder above this repo; this file adds what is particular to StoryCAD.
+The facts about the StoryCAD repo for an AI coding session: its parts, the rules for its code, and the commands that build and test it. The development process is not in this file.
 
 ## About StoryCAD
 

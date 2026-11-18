@@ -38,6 +38,11 @@ Paste error logs here
 
 ---
 
+## Approvals
+<!-- For a maintainer only. If you are reporting, leave these empty. -->
+- [ ] The issue is accepted.
+- [ ] The design is approved.
+
 ## Tasks
 <!-- For whoever works the issue: a short list of the work, ticked off as it is done. If you are reporting, leave this empty. -->
 - [ ]
