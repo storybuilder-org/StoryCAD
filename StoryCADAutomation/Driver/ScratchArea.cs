@@ -81,14 +81,16 @@ internal sealed class ScratchArea
             ["BackupOnOpen"] = false,
 
             // No registration and no telemetry, even with .env present: no consent flags set,
-            // backend sync marked done, no name or email to send.
+            // backend sync marked done, no email to send. The sample name fills Author on a new
+            // outline for manual images; a script must never save Preferences, which posts the
+            // name to the backend (PreferencesViewModel.SaveAsync) (#1422, 2026-11-01).
             ["ElmahConsent"] = false,
             ["NewsletterConsent"] = false,
             ["UsageStatsConsent"] = false,
             ["RecordPreferencesStatus"] = true, // marks backend sync as already done
             ["RecordVersionStatus"] = true,
-            ["FirstName"] = string.Empty,
-            ["LastName"] = string.Empty,
+            ["FirstName"] = "Jane",
+            ["LastName"] = "Writer",
             ["Email"] = string.Empty,
             ["RecentFiles"] = Array.Empty<string>(),
         };

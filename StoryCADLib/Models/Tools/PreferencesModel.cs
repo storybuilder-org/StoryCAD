@@ -49,6 +49,7 @@ public class PreferencesModel : ObservableObject
         HideKeyFileWarning = false;
         LastReviewDate = DateTime.MinValue;
         ShowStartupDialog = true;
+        ShowCollaborator = true;
         ShowFilePickerOnStartup = true;
         UseBetaDocumentation = AppState.IsBetaDistribution;
         HideShellCommandBarOnMac = false;
@@ -58,7 +59,6 @@ public class PreferencesModel : ObservableObject
         StoreActivationPath = string.Empty;
         StarredCollaboratorWorkflows = new List<string>();
         CollaboratorStarDefaultsApplied = false;
-        CollaboratorStarMigrationVersion = 0;
         CollaboratorTerseness = TersenessLevel.Balanced;
     }
 
@@ -333,6 +333,15 @@ public class PreferencesModel : ObservableObject
     public bool ShowStartupDialog { get; set; }
 
     /// <summary>
+    ///     Should StoryCAD show the Collaborator entry points (the Collaborator and Buy Credits
+    ///     buttons, and the Collaborator item in the macOS Tools menu). True by default.
+    ///     Clearing it hides them for writers who do not want AI in their tools (#1692).
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("ShowCollaborator")]
+    public bool ShowCollaborator { get; set; }
+
+    /// <summary>
     ///     Do we want to log more in depth
     /// </summary>
     [JsonInclude]
@@ -392,20 +401,6 @@ public class PreferencesModel : ObservableObject
     [JsonInclude]
     [JsonPropertyName("CollaboratorStarDefaultsApplied")]
     public bool CollaboratorStarDefaultsApplied { get; set; }
-
-    /// <summary>
-    ///     How far the stored stars have been carried forward across workflow consolidations.
-    ///     Seeding happens once (<see cref="CollaboratorStarDefaultsApplied" />) and the stored
-    ///     list wins afterwards, so a user seeded before a consolidation keeps stars naming
-    ///     workflows that were later merged away. Those labels stop resolving and their rows
-    ///     simply vanish from the band, which reads as losing stars rather than as the merge it
-    ///     was. Collaborator #211: when this is below the registry's migration version, each
-    ///     retired label is rewritten to the workflow that absorbed it, once, and this is raised.
-    ///     Zero for every file written before that migration existed.
-    /// </summary>
-    [JsonInclude]
-    [JsonPropertyName("CollaboratorStarMigrationVersion")]
-    public int CollaboratorStarMigrationVersion { get; set; }
 
     #endregion
 }

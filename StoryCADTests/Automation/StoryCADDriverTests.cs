@@ -146,5 +146,52 @@ public class StoryCADDriverTests
 
         Assert.AreEqual(0, pauses);
     }
+
+    // #1422: window "Story Collaborator" size puts the Collaborator window beside the main one.
+    private static readonly Rectangle WorkArea = new(0, 0, 3840, 2088);
+
+    [TestMethod]
+    public void SecondWindowFrame_WhenBothFit_PlacesBesideMainWindow()
+    {
+        var main = new Rectangle(0, 0, 1554, 1116); // 1036x744 at 150%
+
+        var frame = StoryCADDriver.SecondWindowFrame(main, new Size(1554, 1116), WorkArea);
+
+        Assert.AreEqual(new Rectangle(1554, 0, 1554, 1116), frame);
+    }
+
+    [TestMethod]
+    public void SecondWindowFrame_WhenBesideDoesNotFit_PlacesAtTopLeft()
+    {
+        var main = new Rectangle(0, 0, 2500, 1116);
+
+        var frame = StoryCADDriver.SecondWindowFrame(main, new Size(1554, 1116), WorkArea);
+
+        Assert.AreEqual(new Rectangle(0, 0, 1554, 1116), frame);
+    }
+
+    [TestMethod]
+    public void SecondWindowFrame_WithNoMainWindow_PlacesAtTopLeft()
+    {
+        Assert.AreEqual(new Rectangle(0, 0, 800, 600), StoryCADDriver.SecondWindowFrame(null, new Size(800, 600), WorkArea));
+    }
+
+    [TestMethod]
+    public void SecondWindowFrame_LargerThanWorkArea_ReturnsNull()
+    {
+        Assert.IsNull(StoryCADDriver.SecondWindowFrame(null, new Size(4000, 600), WorkArea));
+    }
+
+    [TestMethod]
+    public void ElementArea_WithTargetsInTwoWindows_ClipsToUnionOfWindows()
+    {
+        var main = new Rectangle(0, 0, 1036, 744);
+        var collaborator = new Rectangle(1036, 0, 1036, 744);
+
+        var area = StoryCADDriver.ElementArea(Rectangle.Union(main, collaborator),
+            [Element("A", new Rectangle(900, 100, 50, 50)), Element("B", new Rectangle(1100, 200, 50, 50))], 0, 96);
+
+        Assert.AreEqual(Rectangle.FromLTRB(900, 100, 1150, 250), area);
+    }
 }
 #endif

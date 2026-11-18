@@ -305,9 +305,12 @@ public class BeatSheetsViewModel : ObservableObject
         SelectedBeat = null;
         SelectedBeatIndex = -1;
 
-        // Populate element sources
-        Problems = storyModel.StoryElements.Problems;
-        Scenes = storyModel.StoryElements.Scenes;
+        // Populate element sources. The model collections start with a "(none)"
+        // placeholder (Guid.Empty) for drop-downs; it is not an element to assign.
+        Problems = new ObservableCollection<StoryElement>(
+            storyModel.StoryElements.Problems.Where(e => e.Uuid != Guid.Empty));
+        Scenes = new ObservableCollection<StoryElement>(
+            storyModel.StoryElements.Scenes.Where(e => e.Uuid != Guid.Empty));
         CurrentElementSource = Scenes;
         _isLoading = false;
     }
@@ -384,8 +387,9 @@ public class BeatSheetsViewModel : ObservableObject
             }
 
             _outlineService.AssignElementToBeat(_storyModel, _problemModel, SelectedBeatIndex, desiredBind);
-            SelectedBeat = null;
-            SelectedBeatIndex = -1;
+            // Keep the beat just assigned selected so its description stays in view, and show the
+            // assigned element's description. Clearing SelectedBeat here emptied both panes.
+            CurrentElementDescription = SelectedListElement.Description;
         }
         catch (InvalidOperationException ex)
         {

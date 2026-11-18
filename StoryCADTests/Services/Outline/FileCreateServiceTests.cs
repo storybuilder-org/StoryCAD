@@ -109,6 +109,45 @@ public class FileCreateServiceTests
     }
 
     [TestMethod]
+    public async Task CreateFile_WithValidParameters_WritesOutlineToFile()
+    {
+        // Arrange - a new outline sat on disk as an empty file until its first save (#1682)
+        var fileName = "WrittenStory.stbx";
+
+        // Act
+        var result = await _fileCreateService.CreateFile(_testFolder, fileName, 0);
+
+        // Assert
+        Assert.IsTrue(new FileInfo(result).Length > 0, "New outline file is empty.");
+    }
+
+    [TestMethod]
+    [DataRow("")]
+    [DataRow("   ")]
+    [DataRow(".stbx")]
+    [DataRow(".STBX")]
+    public async Task CreateFile_WithBlankName_CreatesNoFile(string fileName)
+    {
+        // Act - a blank name produced a file named ".stbx" in production (#1682)
+        await _fileCreateService.CreateFile(_testFolder, fileName, 0);
+
+        // Assert
+        Assert.AreEqual(0, Directory.GetFiles(_testFolder).Length);
+    }
+
+    [TestMethod]
+    [DataRow(".45 Magnum")]
+    [DataRow(".hack")]
+    public async Task CreateFile_WithNameStartingWithDot_CreatesFile(string fileName)
+    {
+        // Act - a title that starts with a dot is not a blank name (#1682)
+        var result = await _fileCreateService.CreateFile(_testFolder, fileName, 0);
+
+        // Assert
+        Assert.IsTrue(File.Exists(result));
+    }
+
+    [TestMethod]
     public async Task CreateFile_WithoutExtension_AddsStbxExtension()
     {
         // Arrange

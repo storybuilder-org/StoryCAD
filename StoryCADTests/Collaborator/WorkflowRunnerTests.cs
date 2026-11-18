@@ -52,7 +52,7 @@ public class WorkflowRunnerTests
             Ioc.Default.GetRequiredService<ControlData>(),
             Ioc.Default.GetRequiredService<ToolsData>());
         api.CurrentModel = model;
-        var workflow = new Workflow("ProblemBuilder", "Problem Builder", "test", StoryItemType.Problem)
+        var workflow = new Workflow("ProblemBeats", "Problem Beats", "test", StoryItemType.Problem)
         {
             CreatesScenesForBeats = true,
             CreatesProblemsForBeats = true

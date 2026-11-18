@@ -19,7 +19,8 @@ namespace StoryCADTests.Collaborator;
 ///     Collaborator #217 rule 5: ProblemBuilder offers free elements only. Free means on no
 ///     sheet and not in the trash. The target, the Story Problem, and the target's ancestors
 ///     are never Problem candidates. Rule 2 (a Scene may sit on many sheets) stays a hand
-///     operation on the Structure tab; this run never offers the second placement.
+///     operation on the Structure tab; a ProblemBuilder run never offers the second placement.
+///     Collaborator #302: a workflow with OffersPlacedScenes (ProblemBeats) offers every live Scene.
 /// </summary>
 [TestClass]
 public class CandidateSetTests
@@ -81,6 +82,66 @@ public class CandidateSetTests
 
         Assert.IsFalse(candidates.Scenes.Contains(placed.Uuid),
             "a Scene on another Problem's sheet is placed; the second placement is a hand operation (rule 2)");
+    }
+
+    [TestMethod]
+    public void GetCandidates_IncludePlacedScenes_OffersPlacedSceneButNotTrashedScene()
+    {
+        var (model, api, _) = Arrange();
+        var target = new ProblemModel("Target", model, null);
+        var other = new ProblemModel("Other", model, null);
+        var placed = new SceneModel("Placed", model, null);
+        var free = new SceneModel("Free", model, null);
+        var trash = new TrashCanModel(model, null);
+        var deleted = new SceneModel("Deleted", model, trash.Node);
+        Place(other, placed);
+        Place(other, deleted);
+
+        var candidates = WorkflowRunner.GetCandidates(api, target.Uuid, includePlacedScenes: true);
+
+        Assert.IsTrue(candidates.Scenes.Contains(placed.Uuid), "a Scene on another sheet is offered (rule 2)");
+        Assert.IsTrue(candidates.Scenes.Contains(free.Uuid));
+        Assert.IsFalse(candidates.Scenes.Contains(deleted.Uuid), "a trashed Scene is never offered");
+        Assert.IsTrue(candidates.Problems.Contains(other.Uuid), "a free Problem is still offered");
+    }
+
+    [TestMethod]
+    public void GetCandidates_IncludePlacedScenes_ProblemRulesAreUnchanged()
+    {
+        var (model, api, _) = Arrange();
+        var a = new ProblemModel("A", model, null);
+        var b = new ProblemModel("B", model, null);
+        var c = new ProblemModel("C", model, null);
+        var free = new ProblemModel("Free", model, null);
+        Place(a, b);
+        Place(b, c);
+
+        var candidates = WorkflowRunner.GetCandidates(api, c.Uuid, includePlacedScenes: true);
+
+        Assert.IsFalse(candidates.Problems.Contains(c.Uuid), "the target");
+        Assert.IsFalse(candidates.Problems.Contains(b.Uuid), "a placed Problem");
+        Assert.IsFalse(candidates.Problems.Contains(a.Uuid), "an ancestor");
+        Assert.IsTrue(candidates.Problems.Contains(free.Uuid));
+    }
+
+    [TestMethod]
+    public void GetCandidates_ProblemBeatsRunner_UsesTheWorkflowFlag()
+    {
+        var model = new StoryModel();
+        var api = CreateApi();
+        api.CurrentModel = model;
+        var runner = new WorkflowRunner(model, WorkflowRegistry.Get("ProblemBeats"), api);
+        var target = new ProblemModel("Target", model, null);
+        var other = new ProblemModel("Other", model, null);
+        var placed = new SceneModel("Placed", model, null);
+        Place(other, placed);
+
+        Assert.IsTrue(runner.GetCandidates(target.Uuid).Scenes.Contains(placed.Uuid));
+
+        var body = runner.BuildWorkflowRequestBody(
+            new Dictionary<string, StoryElement> { ["Problem"] = target });
+        CollectionAssert.Contains(OfferedGuids(body, "SceneChoices"), placed.Uuid,
+            "the request offers the placed Scene too");
     }
 
     [TestMethod]

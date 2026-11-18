@@ -307,6 +307,15 @@ namespace StoryCollaborator
                 result = await ExecuteWithContractRetryAsync(AttemptAsync, DescribeContractFault);
                 return result;
             }
+            catch (ModelErrorException ex)
+            {
+                // Collaborator #300: the Worker's own message (busy, or an error; not charged),
+                // shown as-is like the out-of-credits message.
+                _logger?.LogWarning("Workflow model error {Code} ({Workflow})", ex.Code, workflowModel.Title);
+                _auditLogger?.LogException(StoryCADLib.Services.Logging.LogLevel.Warn, ex,
+                    $"Workflow model error: {workflowModel.Title}");
+                return WorkflowResult.Failed(ex.Message);
+            }
             catch (StoryCADLib.Services.Store.OutOfCreditsException ex)
             {
                 // Issue #90 design section 10 (step 10): shown as-is, not wrapped in
@@ -1213,6 +1222,15 @@ namespace StoryCollaborator
                 result.Cost = cost;
                 result.RawResponse = content;
                 return result;
+            }
+            catch (ModelErrorException ex)
+            {
+                // Collaborator #300: the Worker's own message (busy, or an error; not charged),
+                // shown as-is like the out-of-credits message.
+                _logger?.LogWarning("Workflow model error {Code} ({Workflow})", ex.Code, workflowModel.Title);
+                _auditLogger?.LogException(StoryCADLib.Services.Logging.LogLevel.Warn, ex,
+                    $"Workflow model error: {workflowModel.Title}");
+                return WorkflowResult.Failed(ex.Message);
             }
             catch (StoryCADLib.Services.Store.OutOfCreditsException ex)
             {
@@ -2834,19 +2852,22 @@ namespace StoryCollaborator
         }
 
         /// <summary>
-        /// Collaborator #217 rule 5: the elements ProblemBuilder may offer for the target
-        /// Problem's beats. Free means on no sheet and not in the trash. Rule 2 (a Scene may sit
-        /// on many sheets) still holds by hand on the Structure tab; this run never offers the
-        /// second placement.
+        /// Collaborator #217 rule 5: the elements a beat-sheet workflow may offer for the target
+        /// Problem's beats. A free Problem is on no sheet and not in the trash. Scenes are the same
+        /// unless the workflow sets <see cref="Workflow.OffersPlacedScenes"/> (#302), which offers
+        /// every live Scene. Rule 2 (a Scene may sit on many sheets) holds by hand on the Structure
+        /// tab; a run never binds one Scene twice on the same sheet.
         /// </summary>
-        internal CandidateSet GetCandidates(Guid targetProblem) => GetCandidates(_storyApi, targetProblem);
+        internal CandidateSet GetCandidates(Guid targetProblem) =>
+            GetCandidates(_storyApi, targetProblem, workflowModel?.OffersPlacedScenes == true);
 
         /// <summary>
         /// Static core of <see cref="GetCandidates(Guid)"/>, issue #260: takes the API directly
         /// so <see cref="WorkflowInputBuilder"/> (a static class, no WorkflowRunner instance) can
-        /// build ProblemBuilder's sceneChoices/problemChoices from the same candidate rule.
+        /// build the choice lists from the same candidate rule. With
+        /// <paramref name="includePlacedScenes"/> every live Scene is a candidate (#302).
         /// </summary>
-        internal static CandidateSet GetCandidates(IStoryCADAPI api, Guid targetProblem)
+        internal static CandidateSet GetCandidates(IStoryCADAPI api, Guid targetProblem, bool includePlacedScenes = false)
         {
             var scenes = GetLiveElements(api, StoryItemType.Scene);
             var problems = GetLiveElements(api, StoryItemType.Problem);
@@ -2864,7 +2885,8 @@ namespace StoryCollaborator
                 }
             }
 
-            var sceneSet = new HashSet<Guid>(scenes.Select(s => s.Uuid).Where(g => !placed.Contains(g)));
+            var sceneSet = new HashSet<Guid>(scenes.Select(s => s.Uuid)
+                .Where(g => includePlacedScenes || !placed.Contains(g)));
             var problemSet = new HashSet<Guid>(problems.Select(p => p.Uuid).Where(g => !placed.Contains(g)));
 
             // Self: OutlineService refuses a Problem on its own beat.
@@ -3345,6 +3367,7 @@ namespace StoryCollaborator
             }
 
             EnsureNotOutOfCredits(response);
+            await ThrowIfModelErrorAsync(response);
             response.EnsureSuccessStatusCode();
 
             string? templateHash = null;
@@ -3425,6 +3448,22 @@ namespace StoryCollaborator
         }
 
         /// <summary>
+        /// Collaborator #300: a 502 or 503 whose body is the Worker's model error
+        /// (<c>model_busy</c> or <c>upstream_error</c>) becomes a <see cref="ModelErrorException"/>
+        /// carrying the Worker's message. Any other response is left for
+        /// EnsureSuccessStatusCode, as before. internal static and testable without a live HTTP
+        /// transport, like <see cref="EnsureNotOutOfCredits"/>.
+        /// </summary>
+        internal static async Task ThrowIfModelErrorAsync(HttpResponseMessage response)
+        {
+            if (response.StatusCode is not (System.Net.HttpStatusCode.BadGateway or System.Net.HttpStatusCode.ServiceUnavailable))
+                return;
+            var error = ModelErrorException.FromBody(await response.Content.ReadAsStringAsync());
+            if (error != null)
+                throw error;
+        }
+
+        /// <summary>
         /// Builds the /workflow POST with the resolved Bearer credential attached. The
         /// activation contract requires the credential on every Collaborator call.
         /// </summary>
@@ -3460,6 +3499,13 @@ namespace StoryCollaborator
                 try
                 {
                     using var doc = JsonDocument.Parse(data);
+                    // Collaborator #300 (design 6.4): the Worker's main model call failed after
+                    // the stream opened. The event carries the message for the writer; the
+                    // exception skips the truncation retry, because the Worker already tried.
+                    // Not a JsonException, so the catch below does not take it.
+                    if (doc.RootElement.TryGetProperty("error", out var errorEvent)
+                        && ModelErrorException.FromErrorElement(errorEvent) is { } modelError)
+                        throw modelError;
                     if (doc.RootElement.TryGetProperty("choices", out var choices) &&
                         choices.GetArrayLength() > 0 &&
                         choices[0].TryGetProperty("delta", out var delta) &&
@@ -3586,7 +3632,19 @@ namespace StoryCollaborator
             var reason = describeFault(first);
             if (reason == null) return first;
 
-            var second = await attempt();
+            WorkflowResult second;
+            try
+            {
+                second = await attempt();
+            }
+            catch (ModelErrorException ex)
+            {
+                // Collaborator #300: the first answer was complete and charged. A model error on
+                // the send-again must not throw it away, and the Worker's "not charged" message
+                // would be untrue for the first call. Show the first answer with the reason.
+                first.StatusMessages.Add($"Contract retry: the first answer had {reason}; the send-again failed ({ex.Code}), so it is shown");
+                return first;
+            }
             second.StatusMessages.Insert(0, $"Contract retry: the first answer had {reason}; asked once more");
             if (second.Success)
             {

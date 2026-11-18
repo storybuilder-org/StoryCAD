@@ -43,4 +43,4 @@ The policy also explains how Collaborator works with your information, in more d
 
 Type yourself when you already know what you want in a field, or when you are brainstorming free-form notes; a workflow adds nothing to a decision you have already made. Open Collaborator when you are stuck on a craft problem, when you want a structured pass over the empty fields of an element, or when you want a second take on wording that you can still refuse.
 
-![StoryCAD and the Story Collaborator window side by side, the outline visible in both](../media/Collaborator/Collaborator-With-StoryCAD.png)
+![StoryCAD with the Danger Calls Overview at left and the Story Collaborator window at right, side by side](../media/Collaborator/Collaborator-With-StoryCAD.png)

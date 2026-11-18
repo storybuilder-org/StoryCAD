@@ -29,7 +29,7 @@ public class HandoffContractTests
         Ioc.Default.GetRequiredService<ToolsData>());
 
     private static Workflow Builder() => new(
-        "ProblemBuilder", "Problem Builder", "test", StoryItemType.Problem)
+        "ProblemBeats", "Problem Beats", "test", StoryItemType.Problem)
     {
         CreatesScenesForBeats = true
     };

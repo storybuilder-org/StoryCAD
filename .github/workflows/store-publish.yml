@@ -459,6 +459,12 @@ jobs:
   nuget-publish:
     if: github.event_name == 'release' || inputs.publish_nuget
     runs-on: ubuntu-latest
+    # Trusted Publishing (OIDC): nuget.org policy "StoryCAD store-publish" (owner
+    # StoryBuilderFoundation, package StoryCADLib) trusts this workflow file.
+    # NuGet API keys now last at most 30 days (longer keys expired 2026-11-01); this needs no stored key.
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Resolve tag
         id: tag
@@ -479,9 +485,16 @@ jobs:
             --dir .
           ls -la *.nupkg
 
+      # The key it returns is valid for one hour, so log in just before the push.
+      - name: NuGet login (OIDC to temporary API key)
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: TerryCox
+
       - name: Push to nuget.org
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         run: |
           dotnet nuget push '*.nupkg' \
             --source https://api.nuget.org/v3/index.json \

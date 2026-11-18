@@ -232,6 +232,15 @@ public class PreferencesViewModel : ObservableValidator
         set => SetProperty(ref _hideKeyFileWarning, value);
     }
 
+    // Show Collaborator entry points (#1692).
+    private bool _showCollaborator;
+
+    public bool ShowCollaborator
+    {
+        get => _showCollaborator;
+        set => SetProperty(ref _showCollaborator, value);
+    }
+
     // Show startup page.
     private bool _ShowStartupPage;
 
@@ -324,6 +333,7 @@ public class PreferencesViewModel : ObservableValidator
         AdvancedLogging = CurrentModel.AdvancedLogging;
         HideKeyFileWarning = CurrentModel.HideKeyFileWarning;
         ShowStartupPage = CurrentModel.ShowStartupDialog;
+        ShowCollaborator = CurrentModel.ShowCollaborator;
         ShowFilePickerOnStartup = CurrentModel.ShowFilePickerOnStartup;
         UseBetaDocumentation = CurrentModel.UseBetaDocumentation;
         HideShellCommandBarOnMac = CurrentModel.HideShellCommandBarOnMac;
@@ -363,6 +373,7 @@ public class PreferencesViewModel : ObservableValidator
         // Update preference
         CurrentModel.ThemePreference = PreferedTheme;
         CurrentModel.ShowStartupDialog = ShowStartupPage;
+        CurrentModel.ShowCollaborator = ShowCollaborator;
         CurrentModel.ShowFilePickerOnStartup = ShowFilePickerOnStartup;
         CurrentModel.UseBetaDocumentation = UseBetaDocumentation;
         CurrentModel.HideShellCommandBarOnMac = HideShellCommandBarOnMac;

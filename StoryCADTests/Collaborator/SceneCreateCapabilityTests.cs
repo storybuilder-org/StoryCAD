@@ -46,7 +46,7 @@ public class SceneCreateCapabilityTests
     [TestMethod]
     public void ApplyBeatSheetMerge_WorkflowThatCreatesScenes_CreatesTheScene()
     {
-        var (model, problem, runner) = Arrange(SceneCreatingWorkflow("ProblemBuilder"));
+        var (model, problem, runner) = Arrange(SceneCreatingWorkflow("ProblemBeats"));
 
         runner.ApplyBeatSheetMerge(
             problem.Uuid,
@@ -75,13 +75,13 @@ public class SceneCreateCapabilityTests
     }
 
     [TestMethod]
-    public void RegisteredProblemBuilder_DeclaresTheCapability()
+    public void RegisteredProblemBeats_DeclaresTheCapability()
     {
-        var problemBuilder = WorkflowRegistry.All
-            .FirstOrDefault(w => w.Label == "ProblemBuilder");
+        var problemBeats = WorkflowRegistry.All
+            .FirstOrDefault(w => w.Label == "ProblemBeats");
 
-        Assert.IsNotNull(problemBuilder, "ProblemBuilder is the surviving Problem surface");
-        Assert.IsTrue(problemBuilder.CreatesScenesForBeats,
-            "#211 deleted BeatScenes; ProblemBuilder carries scene creation on the flag");
+        Assert.IsNotNull(problemBeats, "ProblemBeats is the beat sheet surface (#302)");
+        Assert.IsTrue(problemBeats.CreatesScenesForBeats,
+            "ProblemBeats carries scene creation on the flag");
     }
 }

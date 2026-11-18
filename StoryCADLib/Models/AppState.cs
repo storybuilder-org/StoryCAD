@@ -261,11 +261,18 @@ public class AppState
 
     /// <summary>
     ///     The node that was right-clicked to open a context menu.
-    ///     Set by Shell.xaml.cs right-click handler.
-    ///     Used by tools that operate on the right-clicked node.
-    ///     Null when no node has been right-clicked.
+    ///     Set by Shell.xaml.cs right-click handler; cleared when a node is selected
+    ///     (ShellViewModel.TreeViewNodeClicked), so an old right-click does not leak into later commands.
+    ///     Null when no right-click menu is in use.
     /// </summary>
     public StoryNodeItem? RightTappedNode { get; set; }
+
+    /// <summary>
+    ///     The node a tree command (add, delete, restore, convert, print, narrative copy) acts on:
+    ///     the right-clicked node while its menu is in use, else the selected node (#1422).
+    ///     The Tools menu tools always use CurrentNode.
+    /// </summary>
+    public StoryNodeItem? CommandTargetNode => RightTappedNode ?? CurrentNode;
 
     #endregion
 

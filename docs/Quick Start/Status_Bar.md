@@ -28,7 +28,7 @@ The Status Message displays feedback information from the program to you. Inform
 
 Changed Indicator
 
-![](../media/Changed-Indicator.png)
+![](../media/Status-Bar-Changed-Indicator.png)
 
 The Changed Indicator, a pencil icon, displays red if any editing has been done to the outline and green if not. It’s a reminder to save your work. It’s also a command button which will save your outline if you click it.
 
@@ -38,4 +38,4 @@ The AutoSave Indicator is green when AutoSave is turned on and working.
 
 Backup Indicator
 
-The Backup Indicator is green when you or StoryCAD have made a backup of your outline recently. Click it to make a backup now.
+The Backup Indicator is green when you or StoryCAD have made a backup of your outline recently. Click it to open the Create backup now dialog, then click Create Backup.

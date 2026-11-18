@@ -21,7 +21,7 @@
             </NavigationViewItem>
 
             <!-- Recents button -->
-            <NavigationViewItem Content="Recently opened" Tag="Recent"
+            <NavigationViewItem x:Name="RecentlyOpenedNavItem" Content="Recently opened" Tag="Recent"
                                 AutomationProperties.AutomationId="RecentlyOpenedNavItem">
                 <NavigationViewItem.Icon>
                     <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xEC92;" />

@@ -61,7 +61,7 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 
 - Branch `issue-1422-core-story-elements` from `dev` at `8abc5c54` (after PR #1637 merged).
 - New `screenshot "Name.png" of <target> [<target> ...] [margin N]`: the image covers the named elements plus a margin in 100%-scale pixels, clipped to the window (Terry, 2026-10-18: close-ups by element name instead of pixel numbers). `Core-File-Operations.scs` uses it for `Status-Bar.png` and `File-Menu.png`. Automation tests 158 passed; lint clean.
-- VM runs are one command: `D:\VMs\Run-InVM.ps1 -Repo <worktree> -Script <name>.scs` (elevated PowerShell) stages the Debug build, runner and XAML, runs in the VM, and copies results to `D:\VMs\out\<script>`. The script lives on Brigid, not in the repo. First run: Core_File_Operations passed, 42.1 s in the VM, 97 s end to end.
+- VM runs are one command: `D:\VMs\Run-InVM.ps1 -Repo <worktree> -Script <name>.scs` stages the Debug build, runner and XAML, runs in the VM, and copies results to `D:\VMs\out\<script>`. The script lives on Brigid, not in the repo. First run: Core_File_Operations passed, 42.1 s in the VM, 97 s end to end.
 - Open: the new `Status-Bar.png` takes a thin strip of the page above the status bar (margin 8 reaches past its top edge). Fix the margin, retake both images into `docs/media`, then start the Core_Story_Elements script.
 
 ### Session recovery (2026-10-19)
@@ -86,7 +86,7 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 - PR #1650 merged into `dev` as `9f80a06b`; merge-cleanup done (C3 ticked, wiki `log.md` entry, sync-state at `9f80a06b`).
 - Next: C4, Window_Management (`StoryCADTests/ManualTests/Window_Management.md`), on branch `issue-1422-window-management` from `9f80a06b`, in the worktree `D:\dev\src\StoryCAD-1422`. Nothing done on it yet.
 - Per plan: translate to a `.scs` script with `--window 1036x744`, run in the VM, retake the manual images it covers under the image name standard, run `labels` on the pages, have an agent compare the pages with the code, fix plan and pages, one PR.
-- VM runs need an elevated session: `D:\VMs\Run-InVM.ps1 -Repo D:\dev\src\StoryCAD-1422 -Script <name>.scs`; results in `D:\VMs\out\<script>`. Build Debug x64 in the worktree first; after a `dev` package change, build with `-t:Restore,Build`.
+- VM runs: `D:\VMs\Run-InVM.ps1 -Repo D:\dev\src\StoryCAD-1422 -Script <name>.scs`; results in `D:\VMs\out\<script>`. Build Debug x64 in the worktree first; after a `dev` package change, build with `-t:Restore,Build`.
 - Script facts: wait for `TitleTextBox` after opening a file before opening a node; right-click menus close themselves now (`CloseContextFlyout`); a script string cannot hold a line break.
 - The worktree has no `.env`, so `CheckDotEnvFile` and `CheckDoppler` fail in a local full-suite run there.
 
@@ -106,3 +106,66 @@ How to run locally: build Debug x64, move `StoryCAD/bin/x64/Debug/net10.0-window
 
 - Waiting on Terry: review of PR #1653.
 - After #1653 merges: merge-cleanup (tick C4 on #1422, wiki `log.md` merge entry, ui-automation-accessibility page for `window`, `offscreen`, `gone`), then C5, the evaluation point with Terry.
+
+## 2026-10-22 (PR 5, Tutorial, paused)
+
+- Branch `issue-1422-tutorial` from `dev` at `7f497656`. `Tutorial-Creating-a-Story.scs` (27 steps, `TC-001` to `TC-027`) passes locally with `--window 1036x744`, 358 s, 52 screenshots. Lint: `check StoryCADTests` 9 scripts, 0 errors. No runner changes. The VM run is still needed.
+- Plan `Tutorial_Creating_a_Story.md` written as a draft table.
+- Not done: copy the 52 images into `docs/media` (local captures are 150% scale; scale to 1036 x 744), rename to the standard, drop the old 51 and fix links in the ten pages and `Status_Bar.md`, label check, page comparison by a separate agent, page rewrites.
+- Page rewrites needed: Three Act Play is a beat sheet on the Problem Structure tab, not a Master Plot; Master Plots add one Problem; folder menus are Add Elements submenus; Concept tab has no tooltip; Problem Type and Conflict Type are editable lists; Cast is its own scene tab; "Detective" is in the Role list.
+- App findings to report: the Overview Premise tab does not show the Story Problem's premise, and a save after choosing it erased the Problem's own premise; a new character shows the previous character's Story Role; Master Plots and Stock Scenes insert under the last right-clicked node, not the selected one; selecting the last beat (Denouement) in the Three Act Play list hung the app.
+- Script facts: editable lists open with Alt+Down, and long lists need type-ahead; keep the tree short with `collapse` or its root row leaves the realized rows.
+
+
+## 2026-11-01 (PR 5, Tutorial, resumed)
+
+- Branch rebased on `dev` at `4570db84`; Debug x64 rebuilt.
+- `D:\VMs\Run-InVM.ps1` runs from a normal PowerShell. The account is in the Hyper-V Administrators group, so no administrator session is needed. Earlier entries that said otherwise are corrected.
+- The 2026-10-22 local captures are gone; the VM run supplies the 52 images at 1036 x 744, so no scaling step.
+- The tutorial video series (StoryCAD #1626 comment, 2026-10-24: a video or series following the manual's start-to-finish tutorial) waits on this script.
+- Terry, 2026-11-01: fix every fault the run found, app faults included. Three agents fix them in separate worktrees: premise, Story Role and changed indicator; tree highlight, tool target, folder menu, status messages and the Denouement hang; layout and tool-list text. Script capture fixes are mine.
+- Tutorial script passes in the VM (about 250 s, 53 images at 1036 x 744). The ten tutorial pages, Status_Bar.md and Tabs.md match the app; 52 images replaced 51, plus a new Denouement beat image.
+- App fixes found by the run ride this PR: Overview premise, carried-over drop-downs, changed flag on tool inserts, drops and conversions, Last Changed, tool target is the selected node, per-type right-click items, scene purposes and cast layout, beat selection after Assign, tree highlight after moves, menus and drops, startup status messages, Character tabs sized to their titles, respelled list values with old-outline mapping, System.IO file writes.
+- Runner: select scrolls a list row into view; an empty field reads as empty; the pointer parks on the status bar with real input moves before a screenshot and after context-menu and drag; the linter accepts the TabView scroll buttons; seeded preferences carry a sample author name.
+- Tests: 2195 passed, 17 skipped; CheckDotEnvFile and CheckDoppler need a .env. Automation tests 355 passed. The seven other scripts pass in the VM.
+
+### Session recovery (2026-11-01, end of day)
+
+- PR #1673 (C6 Tutorial) merged into `dev` as `c31db959`; merge-cleanup done (C6 Tutorial ticked, wiki `log.md` merge entry, sync-state at `c31db959`).
+- Next: C6 item 2, Collaborator_Test_Plan (`StoryCADTests/ManualTests/Collaborator_Test_Plan.md`, manual section `docs/StoryCAD Collaborator/`). Branch `issue-1422-collaborator` from `c31db959`, in the worktree `D:\dev\src\StoryCAD-1422`. Nothing scripted yet.
+- Read first: the Collaborator item in the #1422 issue body. It lists the pages and images Problem Beats (Collaborator #302) made out of date: three Problem Builder images that show beats, the workflow list, pane and customize images, and the Scene_Workflows caption.
+- Each Collaborator run is charged to the Worker ledger. The automation VM has no Collaborator sign-in; runs that call Collaborator need Brigid (hands off), and Terry's yes before a desktop run.
+- Per plan: translate to a `.scs` script with `--window 1036x744`, run it with `D:\VMs\Run-InVM.ps1` (normal PowerShell), retake the manual images under the image name standard, run `labels` on the pages, have an agent compare the pages with the app, fix every fault the run finds, have separate agents review the images and the code, one PR.
+- Script facts: `pause` is zero in test runs; `click <target> pointer` opens a dialog without a focus ring; a tab with keyboard focus shows its tooltip, so focus a text box before a screenshot.
+
+## 2026-11-02 (PR 6, Collaborator, started)
+
+- Draft `StoryCADTests/AutomationScripts/Collaborator.scs` and table plan `Collaborator_Test_Plan.md`: the nine plan cases plus manual-only steps TC-121 to TC-138, 32 screenshots (Join dialog not scripted: it needs a machine without activation). One full pass: 12 workflow runs, 2 chat turns, 2 interview turns, all charged. Runs happen on Brigid's desktop with Terry's yes; the VM has no Collaborator sign-in.
+- TC-112 and TC-113 (AutoSave and backup pause) stay manual: a script cannot check file times.
+- Runner work before the first run: capture and size the "Story Collaborator" window, `screenshot ... of` across app windows, a waitable chat-reply signal, an id on the Review Each card.
+- Collaborator #300 (issue comment 2026-11-02): plain model-error and model-busy messages in the chat column, from StoryCAD #1674 (draft). The error and help pages get them once #1674 is on `dev`. The #300 session reviews the Collaborator pages after the rewrite. The Meet Collaborator re-render (#1626) waits for this PR, so no AutomationId renames.
+
+### Session recovery (2026-11-02, before a restart)
+
+- Branch `issue-1422-collaborator`, `dev` merged in, no PR. Script `StoryCADTests/AutomationScripts/Collaborator.scs`; 32 images in `docs/media/Collaborator` from pass 6 and two reruns; pages partly rewritten.
+- Runner added this branch: `window "<title>" size|minimize|maximize|restore`, `screenshot ... window "<title>"`, screenshots across app windows, `click <target> pointer`, `pick LABEL="name" ...`, idempotent `expand`, `wait <target> gone [condense]`, FAIL-line-N.png captures, click and expand scroll into view, focus into an AutoSuggestBox. Tests: 2264 passed; automation 409.
+- Desktop runs need Terry's yes each time; each workflow run is charged.
+- The next steps and the review findings are in a private project note of 2026-11-02 (C6 Collaborator, paused for a session restart).
+
+## 2026-11-02 (PR 6, Collaborator, full run passed)
+
+- `Collaborator.scs` passed one full run on Brigid's desktop in 688 s; 32 images in `docs/media/Collaborator` replaced from that run.
+- Runner: `dialog "title" click <target> if-shown` clicks only when the dialog opens; `wait <target> gone` first waits for the target to appear.
+- Script: answers "Replace existing content?" when it opens, sets the Collaborator window taller for the workflow list image, sets a Problem Category on the scene's Problem before Scene Builder.
+- Tests: 2292 run, 2273 passed, 17 skipped, 2 failed (CheckDotEnvFile and CheckDoppler need a .env). Automation tests 417 passed.
+
+## 2026-11-02 (Collaborator manual pages)
+
+- Branch `issue-1422-collaborator-pages` from `dev` at `c88c3a66`. Twelve pages under `docs/StoryCAD Collaborator/`: captions and examples now describe the Danger Calls images from the PR #1677 run, and the text matches the app (Buy Credits on the StoryCAD toolbar, gaps count is fields, star on hover, per-row buttons, one Replace question for held rows, "Error:" before model errors, chat opens after proposals, interview picker and saving, picker Create).
+- Label check: 22 pages, 30 bold labels not in XAML, all dialog buttons built in code (Replace, Cancel, Join, Not now, Subscribe, Restore purchases) or workflow names.
+
+### Session recovery (2026-11-03, before a reboot)
+
+- PR #1677 (Collaborator script and 32 images) merged into `dev` as `c88c3a66`; merge-cleanup done. Issue #1422 is on the Release 4.5 milestone and Project 14.
+- PR #1679 (Collaborator manual pages) is open on branch `issue-1422-collaborator-pages`, CI green, waiting for Terry's merge. After it merges: wiki `log.md` merge entry, sync-state, delete the branch.
+- Next after that: the Release 4.5 plans in C6 (Tools with Copy_Elements, StoryWorld, Preferences with Usage_Statistics, Reports, Beat_Sheet).

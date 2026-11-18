@@ -32,11 +32,15 @@ public class ProblemBuilderRegistryTests
     {
         var workflow = Builder();
 
-        Assert.IsTrue(workflow.CreatesScenesForBeats, "it creates Scene stubs for empty beats");
-        Assert.IsTrue(workflow.CreatesProblemsForBeats, "it creates Problem stubs for empty beats");
-        Assert.IsTrue(workflow.RequiresProblemCategory, "the category picks the beat sheet class");
+        Assert.IsTrue(workflow.RequiresProblemCategory, "the category feeds the conflict fields");
         Assert.IsTrue(workflow.InjectsConflictTaxonomy, "the #483 taxonomy feeds the conflict fields");
-        Assert.IsTrue(workflow.InjectsBeatSheets, "the model picks from the built-in sheets");
+        // Collaborator #302: the beat work moved to ProblemBeats.
+        Assert.IsFalse(workflow.CreatesScenesForBeats);
+        Assert.IsFalse(workflow.CreatesProblemsForBeats);
+        Assert.IsFalse(workflow.InjectsBeatSheets);
+        Assert.IsFalse(workflow.InjectsStockScenes);
+        Assert.IsFalse(workflow.InjectsCurrentBeats);
+        Assert.IsFalse(workflow.OffersPlacedScenes);
     }
 
     [TestMethod]
@@ -91,13 +95,51 @@ public class ProblemBuilderRegistryTests
     }
 
     [TestMethod]
-    public void ProblemBuilder_WritesBeatsViaTheBeatSheetPath()
+    public void ProblemBuilder_WritesNoStructureOutputs()
     {
-        var beats = Builder().GetIO().Outputs
+        var written = Builder().GetIO().Outputs
             .Single(o => o.ElementLabel == "Problem")
-            .PropertiesToUpdate.Single(p => p.Property == "StructureBeats");
+            .PropertiesToUpdate.Select(p => p.Property).ToList();
 
-        Assert.AreEqual(WriteVia.BeatSheet, beats.WriteVia);
+        CollectionAssert.DoesNotContain(written, "StructureTitle");
+        CollectionAssert.DoesNotContain(written, "StructureDescription");
+        CollectionAssert.DoesNotContain(written, "StructureBeats");
+    }
+
+    [TestMethod]
+    public void ProblemBeats_IsRegisteredAfterProblemBuilder_WithTheThreeStructureOutputs()
+    {
+        var all = WorkflowRegistry.All.ToList();
+        var beats = all.SingleOrDefault(w => w.Label == "ProblemBeats");
+
+        Assert.IsNotNull(beats, "ProblemBeats must be registered");
+        Assert.AreEqual("Problem Beats", beats.Title);
+        Assert.AreEqual(StoryItemType.Problem, beats.PrimaryElementType);
+        Assert.AreEqual(all.FindIndex(w => w.Label == "ProblemBuilder") + 1, all.IndexOf(beats),
+            "listed right after ProblemBuilder");
+
+        var written = beats.GetIO().Outputs.Single(o => o.ElementLabel == "Problem").PropertiesToUpdate;
+        CollectionAssert.AreEqual(
+            new[] { "StructureTitle", "StructureDescription", "StructureBeats" },
+            written.Select(p => p.Property).ToList());
+        Assert.AreEqual(WriteVia.BeatSheet, written.Single(p => p.Property == "StructureBeats").WriteVia);
+        Assert.AreEqual("beats", written.Single(p => p.Property == "StructureBeats").JsonKey);
+
+        Assert.IsTrue(beats.OffersPlacedScenes);
+        Assert.IsTrue(beats.CreatesScenesForBeats);
+        Assert.IsTrue(beats.CreatesProblemsForBeats);
+        Assert.IsTrue(beats.RequiresProblemCategory);
+        Assert.IsTrue(beats.InjectsConflictTaxonomy);
+        Assert.IsTrue(beats.InjectsBeatSheets);
+        Assert.IsTrue(beats.InjectsStockScenes);
+        Assert.IsTrue(beats.InjectsCurrentBeats);
+        Assert.IsNotNull(beats.JsonInput, "ProblemBeats sends the input object");
+    }
+
+    [TestMethod]
+    public void ProblemBeats_IsNotStarredByDefault()
+    {
+        CollectionAssert.DoesNotContain(WorkflowRegistry.DefaultStarredLabels.ToList(), "ProblemBeats");
     }
 
     [TestMethod]

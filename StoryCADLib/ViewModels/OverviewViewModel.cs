@@ -161,10 +161,26 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable, IRe
         get => _selectedProblem;
         set
         {
+            var previousProblem = _storyProblem;
+            // Premise text typed here belongs to the Problem linked so far; keep it there before
+            // the new Problem's Premise replaces the box (#1422 review).
+            if (_changeable && _syncPremise && previousProblem != Guid.Empty && _storyModel != null
+                && value?.Uuid != previousProblem
+                && StoryElement.GetByGuid(previousProblem, _storyModel) is ProblemModel previous)
+            {
+                previous.Premise = Premise ?? string.Empty;
+            }
+
             if (SetProperty(ref _selectedProblem, value))
             {
                 // Update StoryProblem GUID when SelectedProblem changes
                 StoryProblem = _selectedProblem?.Uuid ?? Guid.Empty;
+                // A user pick shows the chosen Problem's Premise; SaveModel would
+                // otherwise copy the old Overview text over it (#1422).
+                if (_changeable && _storyProblem != previousProblem)
+                {
+                    TakePremiseFromStoryProblem(previousProblem != Guid.Empty);
+                }
             }
         }
     }
@@ -362,7 +378,40 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable, IRe
         _changeable = false;
         SelectedViewpointCharacter = Characters.FirstOrDefault(p => p.Uuid == ViewpointCharacter);
         SelectedProblem = Problems.FirstOrDefault(p => p.Uuid == StoryProblem);
+        TakePremiseFromStoryProblem(false);
         _changeable = wasChangeable;
+    }
+
+    /// <summary>
+    /// The linked Story Problem owns the Premise. Show its text. When it has none,
+    /// keep the Overview text only if no other Problem was linked before, so SaveModel
+    /// moves that text into the Problem instead of erasing it.
+    /// </summary>
+    private void TakePremiseFromStoryProblem(bool hadPreviousProblem)
+    {
+        if (!_syncPremise || StoryProblem == Guid.Empty || _storyModel == null)
+            return;
+        if (StoryElement.GetByGuid(StoryProblem, _storyModel) is not ProblemModel problem)
+            return;
+
+        if (!string.IsNullOrEmpty(problem.Premise) || hadPreviousProblem)
+        {
+            Premise = problem.Premise ?? string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Show the Last Changed date a save wrote to the model, without marking the outline changed.
+    /// </summary>
+    public void RefreshDateModified()
+    {
+        if (Model == null)
+            return;
+
+        var was = _changeable;
+        _changeable = false;
+        DateModified = Model.DateModified;
+        _changeable = was;
     }
 
     public void SaveModel()
@@ -376,7 +425,8 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable, IRe
                 IsTextBoxFocused = false;
                 Model.DateCreated = DateCreated ?? "";
                 Model.Author = Author ?? "";
-                Model.DateModified = DateModified;
+                // DateModified is not written back: only a save sets Last Changed.
+                // A stale page value would otherwise undo the save's date.
                 Model.StoryType = StoryType ?? "";
                 Model.StoryGenre = StoryGenre ?? "";
                 Model.Viewpoint = Viewpoint ?? "";

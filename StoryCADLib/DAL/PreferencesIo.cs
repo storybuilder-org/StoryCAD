@@ -149,7 +149,7 @@ public class PreferencesIo
 
                 //Log and write.
                 _log.Log(LogLevel.Debug, $"Serialised preferences as {MaskUserGuidForLog(_newPreferences)}");
-                await FileIO.WriteTextAsync(_preferencesFile, _newPreferences); //Writes file to disk
+                await File.WriteAllTextAsync(_preferencesFile.Path, _newPreferences); // System.IO: WinRT FileIO.WriteTextAsync fails when another process holds the file (#1422)
                 _log.Log(LogLevel.Info, "Preferences write complete.");
             }, CancellationToken.None, _log);
         }

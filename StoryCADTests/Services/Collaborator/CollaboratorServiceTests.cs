@@ -67,6 +67,69 @@ public class CollaboratorServiceTests
     }
 
     /// <summary>
+    ///     #1692: a Collaborator build with Show Collaborator set shows the entry points.
+    /// </summary>
+    [TestMethod]
+    public void ShowEntryPoints_WithFactoryAndPreferenceSet_ReturnsTrue()
+    {
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var original = preferenceService.Model.ShowCollaborator;
+        try
+        {
+            preferenceService.Model.ShowCollaborator = true;
+            var service = CreateService(factory: () => null);
+
+            Assert.IsTrue(service.ShowEntryPoints);
+        }
+        finally
+        {
+            preferenceService.Model.ShowCollaborator = original;
+        }
+    }
+
+    /// <summary>
+    ///     #1692: clearing Show Collaborator hides the entry points even in a Collaborator build.
+    /// </summary>
+    [TestMethod]
+    public void ShowEntryPoints_WithFactoryAndPreferenceCleared_ReturnsFalse()
+    {
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var original = preferenceService.Model.ShowCollaborator;
+        try
+        {
+            preferenceService.Model.ShowCollaborator = false;
+            var service = CreateService(factory: () => null);
+
+            Assert.IsFalse(service.ShowEntryPoints);
+        }
+        finally
+        {
+            preferenceService.Model.ShowCollaborator = original;
+        }
+    }
+
+    /// <summary>
+    ///     #1692: a build without Collaborator hides the entry points whatever the preference says.
+    /// </summary>
+    [TestMethod]
+    public void ShowEntryPoints_NoFactoryAndPreferenceSet_ReturnsFalse()
+    {
+        var preferenceService = Ioc.Default.GetRequiredService<PreferenceService>();
+        var original = preferenceService.Model.ShowCollaborator;
+        try
+        {
+            preferenceService.Model.ShowCollaborator = true;
+            var service = CreateService(factory: null);
+
+            Assert.IsFalse(service.ShowEntryPoints);
+        }
+        finally
+        {
+            preferenceService.Model.ShowCollaborator = original;
+        }
+    }
+
+    /// <summary>
     ///     Issue #1639: edits typed on the open page live in its view model until SaveModel runs.
     ///     OpenCollaborator must flush them to the model before it hands the model to Collaborator.
     /// </summary>

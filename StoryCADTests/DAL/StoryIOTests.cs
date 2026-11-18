@@ -321,6 +321,35 @@ public partial class StoryIOTests
 
     #endregion
 
+    #region Empty File Tests (#1682)
+
+    [TestMethod]
+    public async Task ReadStory_EmptyFile_LogsErrorSayingFileIsEmpty()
+    {
+        // Arrange - StoryCAD no longer creates empty outlines, so one found later is reported (#1682)
+        var filePath = Path.Combine(App.ResultsDir, $"EmptyOutline1682_{Guid.NewGuid()}.stbx");
+        await File.WriteAllTextAsync(filePath, string.Empty);
+        var log = new StoryCADTests.Services.Backend.TestLogService();
+        var storyIO = new StoryIO(log, _appState);
+
+        try
+        {
+            var file = await StorageFile.GetFileFromPathAsync(filePath);
+
+            // Act
+            await storyIO.ReadStory(file);
+
+            // Assert
+            Assert.IsTrue(log.HasError("Outline file is empty"));
+        }
+        finally
+        {
+            File.Delete(filePath);
+        }
+    }
+
+    #endregion
+
     #region Migration Tests
 
     [TestMethod]

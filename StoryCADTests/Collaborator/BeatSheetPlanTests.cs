@@ -28,14 +28,15 @@ public class BeatSheetPlanTests
         Ioc.Default.GetRequiredService<ControlData>(),
         Ioc.Default.GetRequiredService<ToolsData>());
 
-    private static (StoryModel Model, WorkflowRunner Runner) Arrange()
+    private static (StoryModel Model, WorkflowRunner Runner) Arrange(bool offersPlacedScenes = false)
     {
         var model = new StoryModel();
         var api = CreateApi();
         api.CurrentModel = model;
-        var workflow = new Workflow("ProblemBuilder", "Problem Builder", "test", StoryItemType.Problem)
+        var workflow = new Workflow("ProblemBeats", "Problem Beats", "test", StoryItemType.Problem)
         {
-            CreatesScenesForBeats = true
+            CreatesScenesForBeats = true,
+            OffersPlacedScenes = offersPlacedScenes
         };
         return (model, new WorkflowRunner(model, workflow, api));
     }
@@ -102,6 +103,45 @@ public class BeatSheetPlanTests
         Assert.AreEqual(4, model.StoryElements.OfType<SceneModel>().Count(), "one Scene was created, no other");
         Assert.AreEqual(placed.Uuid, model.StoryElements.OfType<ProblemModel>().Single(p => p.Name == "Other").StructureBeats[0].Guid,
             "the other sheet keeps its Scene");
+    }
+
+    [TestMethod]
+    public void PlanBeatSheetMerge_OffersPlacedScenes_BindsSceneOnAnotherSheet()
+    {
+        var (model, runner) = Arrange(offersPlacedScenes: true);
+        var (target, _, _, placed, proposal) = EveryOutcome(model);
+
+        var plan = runner.PlanBeatSheetMerge(target.Uuid, proposal);
+
+        Assert.AreEqual(BeatRowOutcome.Bind, plan[3].Outcome, "the Scene on the other sheet is bound");
+        Assert.AreEqual(placed.Uuid, plan[3].ElementGuid);
+
+        runner.ApplyBeatSheetMerge(target.Uuid, proposal, new WorkflowResult());
+        Assert.AreEqual(placed.Uuid, target.StructureBeats[3].Guid);
+        Assert.AreEqual(placed.Uuid, model.StoryElements.OfType<ProblemModel>().Single(p => p.Name == "Other").StructureBeats[0].Guid,
+            "the other sheet keeps it");
+    }
+
+    [TestMethod]
+    public void PlanBeatSheetMerge_OffersPlacedScenes_StillOnePlacementPerSheet()
+    {
+        var (model, runner) = Arrange(offersPlacedScenes: true);
+        var target = new ProblemModel("Target", model, null);
+        var other = new ProblemModel("Other", model, null);
+        var placed = new SceneModel("Placed", model, null);
+        other.StructureBeats.Add(new StructureBeat("Row", "") { Guid = placed.Uuid });
+        target.StructureBeats.Add(new StructureBeat("One", ""));
+        target.StructureBeats.Add(new StructureBeat("Two", ""));
+        var proposal = new List<BeatInfo>
+        {
+            new("One", "", AssignedElement: placed.Uuid),
+            new("Two", "", AssignedElement: placed.Uuid)
+        };
+
+        var plan = runner.PlanBeatSheetMerge(target.Uuid, proposal);
+
+        Assert.AreEqual(BeatRowOutcome.Bind, plan[0].Outcome);
+        Assert.AreNotEqual(BeatRowOutcome.Bind, plan[1].Outcome, "the same Scene is not bound twice on one sheet");
     }
 
     [TestMethod]

@@ -66,6 +66,22 @@ public class FileCreateService
             Default.Send(new StatusChangedMessage(new StatusMessage("New project command executing", LogLevel.Info)),
                 true);
 
+            // A blank name became a file named ".stbx" (#1682). Only a trailing ".stbx" is stripped:
+            // ".45 Magnum" is a title, not a blank name.
+            var baseName = outlineName ?? "";
+            if (baseName.EndsWith(".stbx", StringComparison.OrdinalIgnoreCase))
+            {
+                baseName = baseName[..^".stbx".Length];
+            }
+
+            if (string.IsNullOrWhiteSpace(baseName))
+            {
+                _logger.Log(LogLevel.Warn, "New outline name is blank");
+                Default.Send(new StatusChangedMessage(new StatusMessage("Enter a name for the new outline",
+                    LogLevel.Warn)));
+                return null;
+            }
+
             // Validate and adjust file name
             if (!Path.GetExtension(outlineName)!.Equals(".stbx"))
             {
@@ -108,6 +124,10 @@ public class FileCreateService
 
                 // Create the new project
                 var newModel = await _outlineService.CreateModel(name, author, template);
+
+                // Write the outline now: a new model is unchanged, so nothing saves it until an edit,
+                // and the empty file left on disk could not be opened (#1682).
+                await _outlineService.WriteModel(newModel, storyModelFile);
                 _appState.CurrentDocument = new StoryDocument(newModel, storyModelFile);
 
                 // Track outline open for usage statistics

@@ -35,11 +35,20 @@ public sealed partial class ScriptLinter
     private const string CommandBarMoreButtonId = "MoreButton";
 
     /// <summary>
+    ///     The TabView strip's scroll arrows. Their ids come from the WinUI TabView template
+    ///     (x:Name), not StoryCAD XAML; the Character page needs them at 1036 x 744 (#1422).
+    /// </summary>
+    private static readonly HashSet<string> TabViewScrollButtonIds = ["ScrollIncreaseButton", "ScrollDecreaseButton"];
+
+    /// <summary>
     ///     Modifier tokens that hardcode one platform. "Primary" is the logical form (Ctrl
     ///     here, Cmd on a future macOS backend); token names mirror
     ///     <see cref="KeyChord" />'s modifier table.
     /// </summary>
     private static readonly string[] PlatformModifierTokens = { "CTRL", "CONTROL", "WIN", "WINDOWS" };
+
+    /// <summary>The element picker list id that pick looks for (StoryCADLib/Collaborator/Views/ElementPicker.xaml).</summary>
+    private const string PickerListId = "CollabPickerList";
 
     private readonly XamlUiFacts _facts;
 
@@ -88,6 +97,12 @@ public sealed partial class ScriptLinter
                 case ScriptVerb.ShowImage:
                     LintImageName(statement, findings);
                     break;
+                case ScriptVerb.Pick when !_facts.AutomationIds.Contains(PickerListId):
+                    // pick finds the pickers by this list id (ScriptInterpreter); a rename breaks every pick line.
+                    findings.Add(Error(statement,
+                        $"pick answers the Collaborator element picker by its list id '{PickerListId}', " +
+                        "which is not in the XAML; the picker's list was renamed or removed."));
+                    break;
             }
         }
 
@@ -134,7 +149,7 @@ public sealed partial class ScriptLinter
                 {
                     // A StoryCAD XAML id: always valid.
                 }
-                else if (address.Value == CommandBarMoreButtonId)
+                else if (address.Value == CommandBarMoreButtonId || TabViewScrollButtonIds.Contains(address.Value))
                 {
                     // A WinUI template part: valid, but the XAML scan never sees it.
                 }

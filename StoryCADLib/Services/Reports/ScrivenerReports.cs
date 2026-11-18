@@ -407,7 +407,9 @@ public class ScrivenerReports
         var rtf = await _formatter.FormatStoryOverviewReport();
 
         // Write the report
-        await FileIO.WriteTextAsync(contents, rtf);
+        // System.IO, not WinRT FileIO: FileIO writes through a temp file and a replace, which fails
+        // with a COMException when Defender or the indexer holds the new file (#1422, 2026-11-01).
+        await File.WriteAllTextAsync(contents.Path, rtf);
     }
 
     private async Task GenerateStoryWorldReport(BinderItem node, StoryElement element)
@@ -419,7 +421,7 @@ public class ScrivenerReports
         var rtf = await _formatter.FormatStoryWorldReport();
 
         // Write the report
-        await FileIO.WriteTextAsync(contents, rtf);
+        await File.WriteAllTextAsync(contents.Path, rtf);
     }
 
     private async Task GenerateProblemListReport(BinderItem node)
@@ -429,7 +431,7 @@ public class ScrivenerReports
         var contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
         var rtf = _formatter.FormatListReport(StoryItemType.Problem);
         // Write the report
-        await FileIO.WriteTextAsync(contents, rtf);
+        await File.WriteAllTextAsync(contents.Path, rtf);
     }
 
     private async Task GenerateProblemReport(BinderItem node, StoryElement element)
@@ -441,7 +443,7 @@ public class ScrivenerReports
         var rtf = await _formatter.FormatProblemReport(element);
 
         // Write the report
-        await FileIO.WriteTextAsync(contents, rtf);
+        await File.WriteAllTextAsync(contents.Path, rtf);
     }
 
     private async Task GenerateCharacterListReport(BinderItem node)
@@ -451,7 +453,7 @@ public class ScrivenerReports
         var contents = await di.CreateFileAsync("content.rtf", CreationCollisionOption.ReplaceExisting);
         var rtf = _formatter.FormatListReport(StoryItemType.Character);
         // Write the report
-        await FileIO.WriteTextAsync(contents, rtf);
+        await File.WriteAllTextAsync(contents.Path, rtf);
     }
 
     private async Task GenerateCharacterReport(BinderItem node, StoryElement element)
@@ -463,7 +465,7 @@ public class ScrivenerReports
         var rtf = await _formatter.FormatCharacterReport(element);
 
         // Write the report
-        await FileIO.WriteTextAsync(contents, rtf);
+        await File.WriteAllTextAsync(contents.Path, rtf);
     }
 
     private async Task GenerateSettingListReport(BinderItem node)
@@ -475,7 +477,7 @@ public class ScrivenerReports
         var rtf = _formatter.FormatListReport(StoryItemType.Setting);
 
         // Write the report
-        await FileIO.WriteTextAsync(contents, rtf);
+        await File.WriteAllTextAsync(contents.Path, rtf);
     }
 
     private async Task GenerateSettingReport(BinderItem node, StoryElement element)
@@ -487,7 +489,7 @@ public class ScrivenerReports
         var rtf = await _formatter.FormatSettingReport(element);
 
         // Write the report
-        await FileIO.WriteTextAsync(contents, rtf);
+        await File.WriteAllTextAsync(contents.Path, rtf);
     }
 
     private async Task GenerateSceneListReport(BinderItem node)
@@ -499,7 +501,7 @@ public class ScrivenerReports
         var rtf = _formatter.FormatListReport(StoryItemType.Scene);
 
         // Write the report
-        await FileIO.WriteTextAsync(contents, rtf);
+        await File.WriteAllTextAsync(contents.Path, rtf);
     }
 
     private async Task GenerateSceneReport(BinderItem node, StoryElement element)
@@ -511,7 +513,7 @@ public class ScrivenerReports
         var rtf = await _formatter.FormatSceneReport(element);
 
         // Write the report
-        await FileIO.WriteTextAsync(contents, rtf);
+        await File.WriteAllTextAsync(contents.Path, rtf);
     }
 
     private async Task GenerateFolderReport(BinderItem node, StoryElement element)
@@ -523,7 +525,7 @@ public class ScrivenerReports
         var rtf = await _formatter.FormatFolderReport(element);
 
         // Write the report
-        await FileIO.WriteTextAsync(contents, rtf);
+        await File.WriteAllTextAsync(contents.Path, rtf);
     }
 
     private async Task GenerateSectionReport(BinderItem node, StoryElement element)
@@ -535,7 +537,7 @@ public class ScrivenerReports
         var rtf = await _formatter.FormatSectionReport(element);
 
         // Write the report
-        await FileIO.WriteTextAsync(contents, rtf);
+        await File.WriteAllTextAsync(contents.Path, rtf);
     }
 
     private async Task GenerateSynopsisReport(BinderItem node)
@@ -547,7 +549,7 @@ public class ScrivenerReports
         var rtf = await _formatter.FormatSynopsisReport();
 
         // Write the report
-        await FileIO.WriteTextAsync(contents, rtf);
+        await File.WriteAllTextAsync(contents.Path, rtf);
     }
 
 

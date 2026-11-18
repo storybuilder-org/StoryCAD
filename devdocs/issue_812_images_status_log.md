@@ -42,4 +42,3 @@
   - Tests: 9 new files, naming convention compliant; gaps in legacy-file deserialization, non-Setting VM wiring, `GatherAppendixImages` Setting/Scene branches, API path.
 - Sizing: items 3-5 are ~100-150 lines of service code plus similar tests; rework risk limited to the two mutation call sites in `ImageGalleryControl.xaml.cs` and (if live mutation wins) `ElementImageGallery.Load`/`ToModelList`.
 - Terry decided all remaining work stays under this issue/PR rather than a follow-up issue; posted handoff comment on PR #1435.
-- Wiki pages consulted: `wiki/checklists/code-test/pr-review.md`, `wiki/repos/StoryCAD/concepts/patterns-overview.md`, `wiki/repos/StoryCAD/architecture/relationships-and-cast.md`, `wiki/repos/StoryCAD/entities/StoryCADApi.md`.

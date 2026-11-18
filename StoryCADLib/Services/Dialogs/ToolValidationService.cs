@@ -7,7 +7,7 @@ namespace StoryCADLib.Services.Dialogs;
 
 /// <summary>
 ///     Service for validating tool usage prerequisites.
-///     Reads navigation state (CurrentViewType, CurrentNode, RightTappedNode) from AppState.
+///     Reads navigation state (CurrentViewType, CurrentNode) from AppState.
 ///     Issue #1146: Properties moved from ShellViewModel to AppState for service-layer access.
 /// </summary>
 public class ToolValidationService
@@ -23,9 +23,7 @@ public class ToolValidationService
 
     /// <summary>
     ///     Verifies that prerequisites are met for tool usage.
-    ///     Reads CurrentViewType, CurrentNode, and RightTappedNode from AppState.
-    ///     When nodeRequired is true and RightTappedNode is null but CurrentNode exists,
-    ///     sets RightTappedNode = CurrentNode as a fallback (side effect).
+    ///     Reads CurrentViewType and CurrentNode from AppState. Changes no state.
     /// </summary>
     /// <param name="explorerViewOnly">If true, tool can only be used in Explorer view</param>
     /// <param name="nodeRequired">If true, a node must be selected</param>
@@ -74,24 +72,13 @@ public class ToolValidationService
                 }
             }
 
-            // Check if a node is required and selected
-            if (nodeRequired)
+            // Tools run from the Tools menu or a shortcut and act on the selected node,
+            // never on an earlier right-click (#1422).
+            if (nodeRequired && _appState.CurrentNode == null)
             {
-                if (_appState.RightTappedNode == null)
-                {
-                    if (_appState.CurrentNode != null)
-                    {
-                        // Fallback: use selected node as the target (side effect)
-                        _appState.RightTappedNode = _appState.CurrentNode;
-                    }
-                    else
-                    {
-                        // Both null - validation failure
-                        Default.Send(
-                            new StatusChangedMessage(new StatusMessage("You need to select a node first", LogLevel.Warn)));
-                        return false;
-                    }
-                }
+                Default.Send(
+                    new StatusChangedMessage(new StatusMessage("You need to select a node first", LogLevel.Warn)));
+                return false;
             }
 
             return true;

@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
 using StoryCADLib.Services.Outline;
@@ -2054,6 +2054,54 @@ public class OutlineServiceTests
     #endregion
 
     #region ConvertProblemToScene Tests
+
+    [TestMethod]
+    public async Task ConvertProblemToScene_UnchangedModel_MarksModelChanged()
+    {
+        var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+        var problem = (ProblemModel)_outlineService.AddStoryElement(model, StoryItemType.Problem, overview.Node);
+        model.Changed = false;
+
+        _outlineService.ConvertProblemToScene(model, problem);
+
+        Assert.IsTrue(model.Changed);
+    }
+
+    [TestMethod]
+    public async Task ConvertSceneToProblem_UnchangedModel_MarksModelChanged()
+    {
+        var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+        var overview = model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+        var scene = (SceneModel)_outlineService.AddStoryElement(model, StoryItemType.Scene, overview.Node);
+        model.Changed = false;
+
+        _outlineService.ConvertSceneToProblem(model, scene);
+
+        Assert.IsTrue(model.Changed);
+    }
+
+    [TestMethod]
+    public async Task CreateModel_NewOutline_SetsDateModifiedToToday()
+    {
+        var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+        var overview = (OverviewModel)model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+
+        Assert.AreEqual(DateTime.Today.ToString("yyyy-MM-dd"), overview.DateModified);
+    }
+
+    [TestMethod]
+    public async Task WriteModel_OldDateModified_StampsToday()
+    {
+        var model = await _outlineService.CreateModel("Test Story", "Test Author", 0);
+        var overview = (OverviewModel)model.StoryElements.First(e => e.ElementType == StoryItemType.StoryOverview);
+        overview.DateModified = "2000-01-01";
+        var file = Path.Combine(testOutputPath, "WriteModel_StampsToday.stbx");
+
+        await _outlineService.WriteModel(model, file);
+
+        Assert.AreEqual(DateTime.Today.ToString("yyyy-MM-dd"), overview.DateModified);
+    }
 
     [TestMethod]
     public async Task ConvertProblemToScene_BasicConversion_Success()

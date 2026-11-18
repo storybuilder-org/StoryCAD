@@ -1419,6 +1419,14 @@ public class WorkflowSessionService
     /// </summary>
     internal static Exception TranslateChatException(Exception ex)
     {
+        // Collaborator #300: the Worker's model error on chat (502 or 503 with its own message)
+        // reaches the writer as that message, not as the raw HTTP exception text.
+        if (ex is HttpOperationException { StatusCode: HttpStatusCode.BadGateway or HttpStatusCode.ServiceUnavailable } http
+            && ModelErrorException.FromBody(http.ResponseContent) is { } modelError)
+        {
+            return modelError;
+        }
+
         if (ex is not HttpOperationException { StatusCode: HttpStatusCode.TooManyRequests })
         {
             return ex;

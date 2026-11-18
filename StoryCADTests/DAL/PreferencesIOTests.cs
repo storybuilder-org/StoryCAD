@@ -78,6 +78,37 @@ public class PreferencesIOTests
     }
 
     /// <summary>
+    ///     #1692: the Show Collaborator choice survives a restart.
+    /// </summary>
+    [TestMethod]
+    public async Task WritePreferences_RoundTripsShowCollaborator()
+    {
+        var prefsIo = new PreferencesIo();
+        var expectedModel = new PreferencesModel { ShowCollaborator = false };
+
+        await prefsIo.WritePreferences(expectedModel);
+
+        var filePath = Path.Combine(Ioc.Default.GetRequiredService<AppState>().RootDirectory, "Preferences.json");
+        var actual = JsonSerializer.Deserialize<PreferencesModel>(File.ReadAllText(filePath));
+
+        Assert.IsNotNull(actual);
+        Assert.IsFalse(actual.ShowCollaborator);
+    }
+
+    /// <summary>
+    ///     #1692: a Preferences.json written before this preference has no ShowCollaborator
+    ///     key. The constructor default (true) must win, not bool zero (false).
+    /// </summary>
+    [TestMethod]
+    public void PreferencesModel_WhenJsonLacksShowCollaborator_DefaultsToTrue()
+    {
+        var actual = JsonSerializer.Deserialize<PreferencesModel>("{}");
+
+        Assert.IsNotNull(actual);
+        Assert.IsTrue(actual.ShowCollaborator);
+    }
+
+    /// <summary>
     ///     Tests that ReadPreferences loads values from an existing Preferences.json.
     ///     Note that if PreferencesIo still calls Ioc.Default.GetRequiredService
     ///     <T>

@@ -74,20 +74,20 @@ public class StoryElementCollection : ObservableCollection<StoryElement>
             case NotifyCollectionChangedAction.Remove:
                 element = (StoryElement)e.OldItems![0];
                 StoryElementGuids.Remove(element!.Uuid);
-                int i;
+                // Every type the Add case files into a derivative list must be removed here.
                 switch (element.ElementType)
                 {
                     case StoryItemType.Character:
-                        i = Characters.IndexOf(element);
-                        Characters.RemoveAt(i);
+                        Characters.Remove(element);
                         break;
                     case StoryItemType.Setting:
-                        i = Settings.IndexOf(element);
-                        Settings.RemoveAt(i);
+                        Settings.Remove(element);
                         break;
                     case StoryItemType.Problem:
-                        i = Problems.IndexOf(element);
-                        Problems.RemoveAt(i);
+                        Problems.Remove(element);
+                        break;
+                    case StoryItemType.Scene:
+                        Scenes.Remove(element);
                         break;
                 }
 

@@ -49,7 +49,7 @@ public class BeatSheetMergeGuardTests
         api.CurrentModel = model;
 
         var workflow = new Workflow(
-            "ProblemBuilder", "Problem Builder", "test", StoryItemType.Problem);
+            "ProblemBeats", "Problem Beats", "test", StoryItemType.Problem);
         var runner = new WorkflowRunner(model, workflow, api);
 
         return (api, problem, runner);
@@ -111,7 +111,7 @@ public class BeatSheetMergeGuardTests
         api.CurrentModel = model;
 
         var workflow = new Workflow(
-            "ProblemBuilder", "Problem Builder", "test", StoryItemType.Problem);
+            "ProblemBeats", "Problem Beats", "test", StoryItemType.Problem);
         var runner = new WorkflowRunner(model, workflow, api);
 
         runner.ApplyBeatSheetMerge(

@@ -168,6 +168,10 @@
                               HorizontalAlignment="Left"
                               IsChecked="{x:Bind PreferencesVm.UseBetaDocumentation, Mode=TwoWay}"
                               AutomationProperties.AutomationId="PreferencesUseBetaDocsCheck" />
+                    <CheckBox Grid.Row="2" Grid.Column="0" Content="Show Collaborator" Margin="8"
+                              HorizontalAlignment="Left"
+                              IsChecked="{x:Bind PreferencesVm.ShowCollaborator, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="PreferencesShowCollaboratorCheck" />
 
                     <CheckBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"
                               Content="Hide in-window toolbar"

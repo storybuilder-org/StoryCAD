@@ -26,7 +26,7 @@ assignees: ''
 <!-- If applicable, add screenshots to help explain your problem. -->
 
 ## Environment
-**StoryCAD Version:** [e.g. 2.6.0]
+**StoryCAD Version:** [e.g. 4.3.3.0]
 **OS:** [e.g. Windows 11]
 **Additional context:** [Any other context about the problem]
 
@@ -38,37 +38,6 @@ Paste error logs here
 
 ---
 
-## Lifecycle
-
-### Design / sign-off
-- [ ] Plan this section
-- [ ] Human approves plan
-<!-- AI inserts investigation and analysis tasks here -->
-- [ ] Human final approval
-
-### Implementation (TDD) / sign-off
-- [ ] Plan this section
-- [ ] Human approves plan
-<!-- AI inserts TDD cycles here, example format:
-- [ ] TDD Cycle 1: [Bug Fix Component]
-  - [ ] Write failing test that reproduces the bug
-  - [ ] Run test, verify it fails as expected
-  - [ ] Implement fix to make test pass
-  - [ ] Run test, verify bug is fixed
-  - [ ] Run all tests to ensure no regression
-  - [ ] Refactor if needed
--->
-- [ ] Human final approval
-
-### Integration & Manual Testing / sign-off
-- [ ] Plan this section
-- [ ] Human approves plan
-<!-- AI inserts verification tasks here -->
-- [ ] Human final approval
-
-### Final sign-off
-- [ ] All tests passing in CI/CD
-- [ ] Bug no longer reproducible
-- [ ] No regression in related functionality
-- [ ] PR ready for review
-- [ ] Human final approval
+## Tasks
+<!-- For whoever works the issue: a short list of the work, ticked off as it is done. If you are reporting, leave this empty. -->
+- [ ]

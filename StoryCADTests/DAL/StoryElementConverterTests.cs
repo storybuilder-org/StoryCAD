@@ -33,6 +33,45 @@ public class StoryElementConverterTests
         };
     }
 
+    #region Respelled list values (#1422)
+
+    [TestMethod]
+    public void Read_SceneWithOldValueExchangeSpelling_LoadsNewSpelling()
+    {
+        var model = new StoryModel();
+        var scene = new SceneModel("Old scene", model, null) { ValueExchange = "Balance - Inbalance" };
+        var json = JsonSerializer.Serialize<StoryElement>(scene, _serializerOptions);
+
+        var loaded = (SceneModel)JsonSerializer.Deserialize<StoryElement>(json, _serializerOptions);
+
+        Assert.AreEqual("Balance - Imbalance", loaded.ValueExchange);
+    }
+
+    [TestMethod]
+    public void Read_CharacterWithOldRoleSpelling_LoadsNewSpellingAndKeepsName()
+    {
+        var model = new StoryModel();
+        var character = new CharacterModel("Burgler", model, null) { Role = "Burgler" };
+        var json = JsonSerializer.Serialize<StoryElement>(character, _serializerOptions);
+
+        var loaded = (CharacterModel)JsonSerializer.Deserialize<StoryElement>(json, _serializerOptions);
+
+        Assert.AreEqual("Burglar", loaded.Role);
+        Assert.AreEqual("Burgler", loaded.Name, "The element name is user text and must not change");
+    }
+
+    [TestMethod]
+    public void ListValueMigration_EveryNewSpelling_IsInListsJson()
+    {
+        var lists = Ioc.Default.GetRequiredService<ListData>().ListControlSource;
+        foreach (var newValue in ListValueMigration.Renamed.Values)
+        {
+            Assert.IsTrue(lists.Values.Any(l => l.Contains(newValue)), $"'{newValue}' is not in Lists.json");
+        }
+    }
+
+    #endregion
+
     #region StoryWorld Serialization Tests
 
     [TestMethod]

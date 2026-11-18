@@ -13,18 +13,18 @@ Let's start with Charlie Lacas.  We know a few things about him.  He's young, he
 
 Going to his Character form, we can start creating some of this, starting with the Role tab:
 
-![](../media/Lacas-Role.png)
+![](../media/Danger-Calls-Character-Role-Tab-Lacas.png)
 
 
 We then turn to Psychological considerations:
 
-![](../media/Lacas-Psychological.png)
+![](../media/Danger-Calls-Character-Psychological-Tab-Lacas.png)
 
 Personality Type is based on the theory of enneagrams (see "Personality Type" under "Psychology Tab" in the "Characters" chapter  of this manual for more about enneagrams.)   A stereotype such as this can suggest how the character might react in certain situations.  
 
 Let's also define some Social tab factors:
 
-![](../media/Lacas-Social.png)
+![](../media/Danger-Calls-Character-Social-Tab-Lacas.png)
 
 The goal of all of this is to create a fully rounded human being, one who is believable and who you can visualize talking and acting in your story. 
 
@@ -32,6 +32,6 @@ The other major consideration is that the character should support the role you'
 
 We'll look at one last tab, the Backstory tab:
 
-![](../media/Lacas-Backstory.png)
+![](../media/Danger-Calls-Character-Backstory-Tab-Lacas.png)
 
 There's always a question of how much detail to provide, for characters, problems, settings, etc.  The answer will vary from story to story.  For example, this is an action-oriented story, so the characterizations aren't quite as important.  Whether or not they make it to your writing, the more you know about your characters the better.

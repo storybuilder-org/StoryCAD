@@ -3,9 +3,14 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:usercontrols="using:StoryCADLib.Controls"
+      xmlns:converters="using:StoryCADLib.Converters"
       xmlns:viewModels="using:StoryCADLib.ViewModels"
       ScrollViewer.VerticalScrollBarVisibility="Disabled"
       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+    <Page.Resources>
+        <converters:EmptyStringToNullConverter x:Key="EmptyStringToNull" />
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -16,14 +21,14 @@
                  viewModels:TextBoxFocus.IsFocused="{x:Bind CharVm.IsTextBoxFocused, Mode=TwoWay}"
                  Margin="10,10,10,0" HorizontalAlignment="Stretch"
                  AutomationProperties.AutomationId="CharacterNameTextBox" />
-        <TabView Grid.Row="1" TabWidthMode="Equal" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
+        <TabView Grid.Row="1" TabWidthMode="SizeToContent" CanDragTabs="False" CanReorderTabs="False" IsAddTabButtonVisible="False"
                  HorizontalAlignment="Stretch"
                  VerticalAlignment="Stretch"
                  HorizontalContentAlignment="Stretch"
                  VerticalContentAlignment="Stretch"
                  AutomationProperties.AutomationId="CharacterTabs">
             <TabView.TabItems>
-                <TabViewItem Header="Role" IsClosable="False"
+                <TabViewItem Header="Role" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="RoleTab">
@@ -34,18 +39,18 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <ComboBox IsEditable="True" Header="Role" Grid.Row="0" MinWidth="200"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Role" Grid.Row="0" MinWidth="200"
                               ItemsSource="{x:Bind CharVm.RoleList}" Text="{x:Bind CharVm.Role, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Role, Mode=TwoWay}"
                               SelectedItem="{x:Bind CharVm.Role, Mode=OneWay}"
                               AutomationProperties.AutomationId="CharacterRoleCombo" />
                     <ComboBox Header="Story Role" Grid.Row="1" IsEditable="False" MinWidth="200"
                               ItemsSource="{x:Bind CharVm.StoryRoleList}"
-                              SelectedItem="{x:Bind CharVm.StoryRole, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.StoryRole, Mode=TwoWay, Converter={StaticResource EmptyStringToNull}}"
                               AutomationProperties.AutomationId="StoryRoleCombo" />
                     <ComboBox Header="Archetype" Grid.Row="2" IsEditable="False" MinWidth="200"
                               ItemsSource="{x:Bind CharVm.ArchetypeList}"
-                              SelectedItem="{x:Bind CharVm.Archetype, Mode=TwoWay}"
+                              SelectedItem="{x:Bind CharVm.Archetype, Mode=TwoWay, Converter={StaticResource EmptyStringToNull}}"
                               AutomationProperties.AutomationId="ArchetypeCombo" />
                     <usercontrols:RichEditBoxExtended Header="Character Sketch" Grid.Row="3"
                                                       RtfText="{x:Bind CharVm.Description, Mode=TwoWay}"
@@ -56,7 +61,7 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Physical" IsClosable="False"
+                <TabViewItem Header="Physical" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="PhysicalTab">
@@ -72,11 +77,11 @@
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Age" Grid.Column="0" MinWidth="0" Margin="0,0,12,0"
+                        <TextBox Header="Age" Grid.Column="0" MinWidth="0"
                                  Text="{x:Bind CharVm.Age, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  HorizontalAlignment="Stretch"
                                  AutomationProperties.AutomationId="AgeTextBox" />
@@ -87,11 +92,11 @@
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Height" Grid.Column="0" MinWidth="0" Margin="0,0,12,0"
+                        <TextBox Header="Height" Grid.Column="0" MinWidth="0"
                                  Text="{x:Bind CharVm.CharHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  HorizontalAlignment="Stretch"
                                  AutomationProperties.AutomationId="HeightTextBox" />
@@ -102,17 +107,17 @@
                     </Grid>
                     <Grid Grid.Row="2" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Eye Color" Grid.Column="0" MinWidth="0" Margin="0,0,12,0"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Eye Color" Grid.Column="0" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.EyesList}"
                                   Text="{x:Bind CharVm.Eyes, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Eyes, Mode=TwoWay}"
                                   SelectedItem="{x:Bind CharVm.Eyes, Mode=OneWay}" HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="EyeColorCombo" />
-                        <ComboBox IsEditable="True" Header="Hair Color" Grid.Column="2" MinWidth="0"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Hair Color" Grid.Column="2" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.HairList}"
                                   Text="{x:Bind CharVm.Hair, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Hair, Mode=TwoWay}"
@@ -121,17 +126,17 @@
                     </Grid>
                     <Grid Grid.Row="3" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Build" Grid.Column="0" MinWidth="0" Margin="0,0,12,0"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Build" Grid.Column="0" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.BuildList}"
                                   Text="{x:Bind CharVm.Build, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Build, Mode=TwoWay}"
                                   SelectedItem="{x:Bind CharVm.Build, Mode=OneWay}" HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="BuildCombo" />
-                        <ComboBox IsEditable="True" Header="Complexion" Grid.Column="2" MinWidth="0"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Complexion" Grid.Column="2" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.SkinList}"
                                   Text="{x:Bind CharVm.Complexion, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Complexion, Mode=TwoWay}"
@@ -141,21 +146,22 @@
                     </Grid>
                     <Grid Grid.Row="4" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Race" Grid.Column="0" MinWidth="0" Margin="0,0,12,0"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Race" Grid.Column="0" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.RaceList}"
                                   Text="{x:Bind CharVm.Race, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Race, Mode=TwoWay}"
                                   SelectedItem="{x:Bind CharVm.Race, Mode=OneWay}" HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="RaceCombo" />
-                        <ComboBox IsEditable="True" Header="Nationality" Grid.Column="2" MinWidth="0"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Nationality" Grid.Column="2" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.NationalityList}"
                                   Text="{x:Bind CharVm.Nationality, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Nationality, Mode=TwoWay}"
                                   SelectedItem="{x:Bind CharVm.Nationality, Mode=OneWay}"
+                                  HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="NationalityCombo" />
                     </Grid>
                     <TextBox Header="General Health" Grid.Row="5"
@@ -171,7 +177,7 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Appearance" IsClosable="False"
+                <TabViewItem Header="Appearance" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="AppearanceTab">
@@ -191,7 +197,7 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Relationships" IsClosable="False"
+                <TabViewItem Header="Relationships" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="RelationshipsTab">
@@ -199,7 +205,7 @@
                     <usercontrols:RelationshipView />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Flaw" IsClosable="False"
+                <TabViewItem Header="Flaw" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="FlawTab">
@@ -222,7 +228,7 @@
                                                       PlaceholderText="The trauma, fear, lie or secret that sabotages your character." />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Backstory" IsClosable="False"
+                <TabViewItem Header="Backstory" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="BackstoryTab">
@@ -242,7 +248,7 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Social" IsClosable="False"
+                <TabViewItem Header="Social" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="SocialTab">
@@ -284,7 +290,7 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Psychological" IsClosable="False"
+                <TabViewItem Header="Psychological" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="PsychologicalTab">
@@ -299,22 +305,25 @@
                     <Grid Grid.Row="0" HorizontalAlignment="Stretch">
                         <ComboBox Header="Personality Type" IsEditable="False" Width="200"
                                   ItemsSource="{x:Bind CharVm.EnneagramList}"
-                                  SelectedValue="{x:Bind CharVm.Enneagram, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                                  SelectedValue="{x:Bind CharVm.Enneagram, Mode=TwoWay, Converter={StaticResource EmptyStringToNull}}" HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="PersonalityTypeCombo" />
                     </Grid>
                     <Grid Grid.Row="1" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Intelligence" Grid.Column="0" Width="200" Margin="0,0,12,0"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Intelligence" Grid.Column="0" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.IntelligenceList}"
                                   Text="{x:Bind CharVm.Intelligence, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Intelligence, Mode=TwoWay}"
                                   SelectedItem="{x:Bind CharVm.Intelligence, Mode=OneWay}"
+                                  HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="IntelligenceCombo" />
-                        <ComboBox IsEditable="True" Header="Values" Grid.Column="2" Width="200"
+                        <!-- Equal halves with a 24 px gutter: the right column fits the longest Values
+                             and Nationality entries (about 330 px) at the 1036 x 744 window. -->
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Values" Grid.Column="2" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.ValuesList}"
                                   Text="{x:Bind CharVm.Values, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Values, Mode=TwoWay}"
@@ -323,17 +332,18 @@
                     </Grid>
                     <Grid Grid.Row="2" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Header="Focus" Grid.Column="0" Width="200" Margin="0,0,12,0"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Focus" Grid.Column="0" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.FocusList}"
                                   Text="{x:Bind CharVm.Focus, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Focus, Mode=TwoWay}"
                                   SelectedItem="{x:Bind CharVm.Focus, Mode=OneWay}"
+                                  HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="FocusCombo" />
-                        <ComboBox IsEditable="True" Header="Abnormality" Grid.Column="2" Width="200"
+                        <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Abnormality" Grid.Column="2" MinWidth="0"
                                   ItemsSource="{x:Bind CharVm.AbnormalityList}"
                                   Text="{x:Bind CharVm.Abnormality, Mode=TwoWay}"
                                   PlaceholderText="{x:Bind CharVm.Abnormality, Mode=TwoWay}"
@@ -350,15 +360,15 @@
                                                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Inner Traits" IsClosable="False"
+                <TabViewItem Header="Inner Traits" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="InnerTraitsTab">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="24" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -368,76 +378,76 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <ComboBox IsEditable="True" Header="Adventurousness" Grid.Column="0" Grid.Row="0" MinWidth="0"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Adventurousness" Grid.Column="0" Grid.Row="0" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.AdventurousnessList}"
                               Text="{x:Bind CharVm.Adventurousness, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Adventurousness, Mode=TwoWay}"
                               SelectedItem="{x:Bind CharVm.Adventurousness, Mode=OneWay}"
                               HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="AdventurousnessCombo" />
-                    <ComboBox IsEditable="True" Header="Confidence" Grid.Column="0" Grid.Row="1" MinWidth="0"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Confidence" Grid.Column="0" Grid.Row="1" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.ConfidenceList}"
                               Text="{x:Bind CharVm.Confidence, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Confidence, Mode=TwoWay}"
                               SelectedItem="{x:Bind CharVm.Confidence, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="ConfidenceCombo" />
-                    <ComboBox IsEditable="True" Header="Creativity" Grid.Column="0" Grid.Row="2" MinWidth="0"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Creativity" Grid.Column="0" Grid.Row="2" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.CreativityList}"
                               Text="{x:Bind CharVm.Creativity, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Creativity, Mode=TwoWay}"
                               SelectedItem="{x:Bind CharVm.Creativity, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="CreativityCombo" />
-                    <ComboBox IsEditable="True" Header="Enthusiasm" Grid.Column="0" Grid.Row="3" MinWidth="0"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Enthusiasm" Grid.Column="0" Grid.Row="3" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.EnthusiasmList}"
                               Text="{x:Bind CharVm.Enthusiasm, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Enthusiasm, Mode=TwoWay}"
                               SelectedItem="{x:Bind CharVm.Enthusiasm, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="EnthusiasmCombo" />
-                    <ComboBox IsEditable="True" Header="Sensitivity" Grid.Column="0" Grid.Row="4" MinWidth="0"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Sensitivity" Grid.Column="0" Grid.Row="4" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.SensitivityList}"
                               Text="{x:Bind CharVm.Sensitivity, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Sensitivity, Mode=TwoWay}"
                               SelectedItem="{x:Bind CharVm.Sensitivity, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="SensitivityCombo" />
-                    <ComboBox IsEditable="True" Header="Sociability" Grid.Column="0" Grid.Row="5" MinWidth="0"
-                              Margin="0,0,12,0"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Sociability" Grid.Column="0" Grid.Row="5" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.SociabilityList}"
                               Text="{x:Bind CharVm.Sociability, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Sociability, Mode=TwoWay}"
                               SelectedItem="{x:Bind CharVm.Sociability, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="SociabilityCombo" />
-                    <ComboBox IsEditable="True" Header="Aggression" Grid.Column="2" Grid.Row="0" MinWidth="0"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Aggression" Grid.Column="2" Grid.Row="0" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.AggressionList}"
                               Text="{x:Bind CharVm.Aggression, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Aggression, Mode=TwoWay}"
                               SelectedItem="{x:Bind CharVm.Aggression, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="AggressionCombo" />
-                    <ComboBox IsEditable="True" Header="Conscientiousness" Grid.Column="2" Grid.Row="1" MinWidth="0"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Conscientiousness" Grid.Column="2" Grid.Row="1" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.ConscientiousnessList}"
                               Text="{x:Bind CharVm.Conscientiousness, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Conscientiousness, Mode=TwoWay}"
                               SelectedItem="{x:Bind CharVm.Conscientiousness, Mode=OneWay}"
                               HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="ConscientiousnessCombo" />
-                    <ComboBox IsEditable="True" Header="Dominance" Grid.Column="2" Grid.Row="2" MinWidth="0"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Dominance" Grid.Column="2" Grid.Row="2" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.DominanceList}"
                               Text="{x:Bind CharVm.Dominance, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Dominance, Mode=TwoWay}"
                               SelectedItem="{x:Bind CharVm.Dominance, Mode=OneWay}"
+                              HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="DominanceCombo" />
-                    <ComboBox IsEditable="True" Header="Self Assurance" Grid.Column="2" Grid.Row="3" MinWidth="0"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Self Assurance" Grid.Column="2" Grid.Row="3" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.AssuranceList}"
                               Text="{x:Bind CharVm.Assurance, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Assurance, Mode=TwoWay}"
                               SelectedItem="{x:Bind CharVm.Assurance, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="SelfAssuranceCombo" />
-                    <ComboBox IsEditable="True" Header="Shrewdness" Grid.Column="2" Grid.Row="4" MinWidth="0"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Shrewdness" Grid.Column="2" Grid.Row="4" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.ShrewdnessList}"
                               Text="{x:Bind CharVm.Shrewdness, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Shrewdness, Mode=TwoWay}"
                               SelectedItem="{x:Bind CharVm.Shrewdness, Mode=OneWay}" HorizontalAlignment="Stretch"
                               AutomationProperties.AutomationId="ShrewdnessCombo" />
-                    <ComboBox IsEditable="True" Header="Stability" Grid.Column="2" Grid.Row="5" MinWidth="0"
+                    <ComboBox usercontrols:ComboBoxValueText.IsEnabled="True" IsEditable="True" Header="Stability" Grid.Column="2" Grid.Row="5" MinWidth="0"
                               ItemsSource="{x:Bind CharVm.StabilityList}"
                               Text="{x:Bind CharVm.Stability, Mode=TwoWay}"
                               PlaceholderText="{x:Bind CharVm.Stability, Mode=TwoWay}"
@@ -445,7 +455,7 @@
                               AutomationProperties.AutomationId="StabilityCombo" />
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Outer Traits" IsClosable="False"
+                <TabViewItem Header="Outer Traits" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="OuterTraitsTab">
@@ -463,19 +473,20 @@
                               ItemsSource="{x:Bind CharVm.CharacterTraits, Mode=TwoWay}"
                               SelectedIndex="{x:Bind CharVm.ExistingTraitIndex, Mode=TwoWay}"
                               AutomationProperties.AutomationId="TraitsList" />
-                    <Grid Grid.Row="2" HorizontalAlignment="Stretch">
+                    <!-- Text box stretches; the + and - buttons sit right after it with equal gaps,
+                         bottom-aligned with the text box (not with its header). -->
+                    <Grid Grid.Row="2" HorizontalAlignment="Stretch" ColumnSpacing="8" Margin="0,8,0,0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="2*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox Header="Other Trait:" Grid.Column="0" MinWidth="0" Margin="0,0,12,0"
+                        <TextBox Header="Other Trait:" Grid.Column="0" MinWidth="0"
                                  Text="{x:Bind CharVm.NewTrait, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  HorizontalAlignment="Stretch"
                                  AutomationProperties.AutomationId="OtherTraitTextBox" />
-                        <Button Grid.Column="2" FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE710;" Margin="0,0,12,0"
+                        <Button Grid.Column="1" FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE710;"
+                                VerticalAlignment="Bottom"
                                 Command="{x:Bind CharVm.AddTraitCommand, Mode=OneWay}"
                                 AutomationProperties.AutomationId="AddTraitButton"
                                 AutomationProperties.Name="Add Trait">
@@ -483,7 +494,8 @@
                                 <ToolTip Content="Add Trait" />
                             </ToolTipService.ToolTip>
                         </Button>
-                        <Button Grid.Column="4" FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE738;"
+                        <Button Grid.Column="2" FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE738;"
+                                VerticalAlignment="Bottom"
                                 Command="{x:Bind CharVm.RemoveTraitCommand, Mode=OneWay}"
                                 AutomationProperties.AutomationId="RemoveTraitButton"
                                 AutomationProperties.Name="Remove Trait">
@@ -494,7 +506,7 @@
                     </Grid>
                 </Grid>
                 </TabViewItem>
-                <TabViewItem Header="Notes" IsClosable="False"
+                <TabViewItem Header="Notes" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="CharacterNotesTab">
@@ -515,7 +527,7 @@
                 </Grid>
                 </TabViewItem>
 
-                <TabViewItem Header="Images" IsClosable="False"
+                <TabViewItem Header="Images" IsClosable="False" MinWidth="0"
                              HorizontalContentAlignment="Stretch"
                              VerticalContentAlignment="Stretch"
                              AutomationProperties.AutomationId="CharacterImagesTab">

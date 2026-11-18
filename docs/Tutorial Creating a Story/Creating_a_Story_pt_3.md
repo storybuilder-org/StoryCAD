@@ -17,9 +17,9 @@ A character in a situation [genre, setting] wants something, which brings him i
 
 In StoryCAD, one story element type, Problem,  contains most of the elements of the Premise, and, in fact, the Problem form’s Resolution tab contains a Premise sub-element. Your story can (and usually will) contain more than one Problem, and every Problem has its own Premise. StoryCAD is centered around Problems; they’re the heart of plotted fiction.
 
-Our immediate focus is to identify a specific protagonist with a specific problem. We have a protagonist, Leonard, and we can take a stab at a Problem. Right click on the empty Problems folder and click the ‘Add Problem’ button (the question mark.) 
+Our immediate focus is to identify a specific protagonist with a specific problem. We have a protagonist, Leonard, and we can take a stab at a Problem. Right click on the empty Problems folder, click Add Elements, and then click Add Problem (the question mark.) 
 
-Since this is a 'cops and robbers' story, and these are often action-oriented.  Let's stick to that approach; Leonard's basic problem is to catch Charlie.  This defines the Problem Type as Conflict  and the Conflict Type as Person vs. Person, so we can select these values from their drop-down lists. We said that most drop-down lists allow  you to enter new values. That’s not true for Problem Type and Conflict Type: there are only so many of those.
+Since this is a 'cops and robbers' story, and these are often action-oriented.  Let's stick to that approach; Leonard's basic problem is to catch Charlie.  This defines the Problem Type as Conflict  and the Conflict Type as Person vs. Person, so we can select these values from their drop-down lists. Both lists accept a value you key in yourself, but the values in the list cover most stories.
 
 The basic idea for this story was a situation or subject, so we know that, too (Crime), and we can enter it as Subject. If our original idea had been a character or setting, nailing down the problem subject would be a priority, and the list of Subject values might suggest something we don’t already know. Or we might have started with a Goal for the Protagonist and found a Subject which interfered with that Goal (more on that in a bit.)
 
@@ -28,12 +28,12 @@ The primary reason your reader reads your story is to find out how it comes out,
 Consider whether the reader should know the story’s outcome prior to the climax scene. In many character-oriented stories the answer should be yes, and the story’s dramatic arc deals with how things happen rather than what will happen. If the answer should be no, the story question is the essential suspense of the story, and your plot must serve to keep the outcome in doubt.
 Focusing on our original idea again, let's say that Charlie is highly mobile, conducting his deals all over town, and that he uses a combination of pagers (yes, I know, old tech) and cellular phones to arrange the deals. Our suspenseful question might be ‘Will Leonard and Tony overcome the cellular phone advantage’ and find out where Charlie Lacas’ next drug deal will be held, so that they can catch him?’:
 
-![](../media/Tutorial/Tutorial-3-Catching-the-drug-dealer.png)
+![](../media/Danger-Calls-Problem-Tab-Drug-Dealer.png)
 
 As is often the case, one question leads to another. We’re also faced with the question of how the detectives overcome Charlie’s tech. 
 
 We can treat this issue of overcoming the advantage of the cellular phones as a complication, by rewording the problem  not as a yes or no (suspense) question but as a ‘how do they overcome?’  Story Question. Your story can (and usually will) contain more than one Problem, and every Problem has its own Premise. Let’s add our ‘how to’ question as a second problem:
 
-![](../media/Tutorial/Tutorial-3-The-how-to-complication.png)
+![](../media/Danger-Calls-Problem-Tab-How-To-Complication.png)
 
 Neither of these problems are fleshed out, but we’ll work on that in a minute.

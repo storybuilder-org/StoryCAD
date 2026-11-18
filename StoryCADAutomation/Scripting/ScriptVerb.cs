@@ -43,6 +43,7 @@ public enum ScriptVerb
     SaveFileDialog,
     OpenFileDialog,
     Dialog,
+    Pick,
 
     // waits and pacing
     Wait,

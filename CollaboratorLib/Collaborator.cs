@@ -425,11 +425,7 @@ public class Collaborator : ICollaborator
             if (starService != null)
             {
                 _starredWorkflows =
-                    (await starService.GetStarredAsync(
-                        WorkflowRegistry.DefaultStarredLabels,
-                        WorkflowRegistry.RetiredWorkflowReplacements,
-                        WorkflowRegistry.StarMigrationVersion,
-                        WorkflowRegistry.StarsAddedByVersion)).ToList();
+                    (await starService.GetStarredAsync(WorkflowRegistry.DefaultStarredLabels)).ToList();
                 return;
             }
         }

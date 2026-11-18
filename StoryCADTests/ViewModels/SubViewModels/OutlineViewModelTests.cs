@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
@@ -51,6 +51,28 @@ public class OutlineViewModelTests
         await outlineVM.RemoveStoryElement();
         Assert.IsTrue(appState.CurrentDocument.Model.StoryElements[0].Node.IsRoot &&
                       appState.CurrentDocument.Model.StoryElements[0].ElementType == StoryItemType.StoryOverview);
+    }
+
+    [TestMethod]
+    public async Task StockScenesTool_SceneInserted_SetsChangedFlag()
+    {
+        Ioc.Default.GetRequiredService<ShellViewModel>(); // receives IsChangedMessage
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("TestStockScene", "StoryBuilder", 0);
+        appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "TestStockScene.stbx"));
+        outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
+        var root = model.ExplorerView[0];
+        appState.RightTappedNode = null;
+        appState.CurrentNode = root;                 // a Tools menu tool adds under the selected node
+        Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName = "The chase";
+        model.Changed = false;
+
+        await outlineVM.StockScenesTool();
+
+        var scene = model.StoryElements.SingleOrDefault(e => e.Name == "The chase");
+        Assert.IsNotNull(scene, "Scene should be inserted");
+        Assert.AreSame(root, scene.Node.Parent, "Scene should be under the selected node");
+        Assert.IsTrue(model.Changed, "Changed flag should be true after a stock scene insert");
     }
 
     /// <summary>
@@ -130,6 +152,7 @@ public class OutlineViewModelTests
         appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "NullDelete.stbx"));
 
         appState.RightTappedNode = null;
+        appState.CurrentNode = null;
         var before = appState.CurrentDocument.Model.StoryElements.Count;
         await outlineVM.RemoveStoryElement();
         Assert.AreEqual(before, appState.CurrentDocument.Model.StoryElements.Count);
@@ -312,7 +335,7 @@ public class OutlineViewModelTests
         var model = await outlineService.CreateModel("Test-Masterplots", "StoryBuilder", 0);
         appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "Masterplots.stbx"));
         outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
-        appState.RightTappedNode = appState.CurrentDocument.Model.StoryElements[0].Node;
+        appState.CurrentNode = appState.CurrentDocument.Model.StoryElements[0].Node;
 
 
         //Setup plot vm
@@ -325,6 +348,30 @@ public class OutlineViewModelTests
     }
 
     [TestMethod]
+    public async Task MasterPlotTool_MultiScenePlot_AddsScenesUnderProblem()
+    {
+        Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("MasterPlotScenes", "StoryBuilder", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
+        var root = model.ExplorerView[0];
+        appState.CurrentNode = root;                 // a Tools menu tool adds under the selected node
+        var master = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
+        var plotName = master.PlotPatternNames.First(n => master.MasterPlots[n].PlotPatternScenes.Count > 1);
+        var sceneCount = master.MasterPlots[plotName].PlotPatternScenes.Count;
+        master.PlotPatternName = plotName;
+
+        await outlineVM.MasterPlotTool();
+
+        var problemNode = root.Children.Single(n => n.Name == plotName);
+        Assert.AreEqual(sceneCount, problemNode.Children.Count(n => n.Type == StoryItemType.Scene),
+            "The plot's scenes should be children of the new Problem");
+        Assert.IsFalse(root.Children.Any(n => n.Type == StoryItemType.Scene),
+            "No plot scene should sit beside the Problem");
+    }
+
+    [TestMethod]
     public async Task MasterPlotTool_AddsSingleProblem()
     {
         var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
@@ -332,12 +379,78 @@ public class OutlineViewModelTests
         var model = await outlineService.CreateModel("MasterPlot", "StoryBuilder", 0);
         appState.CurrentDocument = new StoryDocument(model);
         outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
-        appState.RightTappedNode = appState.CurrentDocument.Model.StoryElements[0].Node;
+        appState.CurrentNode = appState.CurrentDocument.Model.StoryElements[0].Node;
         var master = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
         master.PlotPatternName = master.PlotPatternNames[0];
         await outlineVM.MasterPlotTool();
         var count = appState.CurrentDocument.Model.StoryElements.Count(e => e.Name == master.PlotPatternNames[0]);
         Assert.AreEqual(1, count, "MasterPlot created duplicate elements");
+    }
+
+    /// <summary>
+    ///     #1422: a tool from the Tools menu inserted under a node right-clicked long before.
+    ///     It must insert under the selected node.
+    /// </summary>
+    [TestMethod]
+    public async Task MasterPlotTool_AfterEarlierRightClick_InsertsUnderSelectedNode()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("MasterPlotTarget", "StoryBuilder", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
+        var rightClicked = outlineService.AddStoryElement(model, StoryItemType.Folder, model.ExplorerView[0]);
+        var selected = outlineService.AddStoryElement(model, StoryItemType.Problem, model.ExplorerView[0]);
+
+        appState.RightTappedNode = rightClicked.Node; // right-click, menu dismissed
+        shell.TreeViewNodeClicked(selected.Node);     // then the user selects another node
+
+        var master = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
+        master.PlotPatternName = master.PlotPatternNames[0];
+        await outlineVM.MasterPlotTool();
+
+        Assert.IsNull(appState.RightTappedNode, "Selecting a node clears the earlier right-click");
+        Assert.IsTrue(selected.Node.Children.Any(n => n.Name == master.PlotPatternNames[0]),
+            "Master plot should be inserted under the selected node");
+        Assert.AreEqual(0, rightClicked.Node.Children.Count, "Nothing should go under the old right-clicked node");
+    }
+
+    [TestMethod]
+    public async Task StockScenesTool_WithStaleRightTappedNode_InsertsUnderSelectedNode()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("StockTarget", "StoryBuilder", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
+        var rightClicked = outlineService.AddStoryElement(model, StoryItemType.Folder, model.ExplorerView[0]);
+        var selected = outlineService.AddStoryElement(model, StoryItemType.Problem, model.ExplorerView[0]);
+        appState.RightTappedNode = rightClicked.Node;
+        appState.CurrentNode = selected.Node;
+
+        Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName = "The police join the chase";
+        await outlineVM.StockScenesTool();
+
+        Assert.IsTrue(selected.Node.Children.Any(n => n.Name == "The police join the chase"));
+        Assert.AreEqual(0, rightClicked.Node.Children.Count);
+    }
+
+    /// <summary>
+    ///     With no right-click in use, the toolbar Add menu and its Alt shortcuts add under the selected node.
+    /// </summary>
+    [TestMethod]
+    public async Task AddStoryElement_WithNoRightClick_AddsUnderSelectedNode()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var model = await outlineService.CreateModel("AddTarget", "StoryBuilder", 0);
+        appState.CurrentDocument = new StoryDocument(model);
+        outlineService.SetCurrentView(model, StoryViewType.ExplorerView);
+        var folder = outlineService.AddStoryElement(model, StoryItemType.Folder, model.ExplorerView[0]);
+        appState.RightTappedNode = null;
+        appState.CurrentNode = folder.Node;
+
+        outlineVM.AddStoryElement(StoryItemType.Character);
+
+        Assert.AreEqual(1, folder.Node.Children.Count(n => n.Type == StoryItemType.Character));
     }
 
     [TestMethod]
@@ -353,7 +466,7 @@ public class OutlineViewModelTests
         var trashCanNode = appState.CurrentDocument.Model.TrashView
             .FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
         Assert.IsNotNull(trashCanNode, "TrashCan node should exist");
-        appState.RightTappedNode = trashCanNode;
+        appState.CurrentNode = trashCanNode;
 
         // Configure tool with valid selection
         var masterPlotsVM = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
@@ -384,8 +497,8 @@ public class OutlineViewModelTests
             appState.CurrentDocument.Model.ExplorerView[0]);
         scene.Node.CopyToNarratorView(appState.CurrentDocument.Model);
 
-        // Set RightTappedNode to the narrative view root (simulating stale state after view switch)
-        appState.RightTappedNode = appState.CurrentDocument.Model.NarratorView[0];
+        // Select the narrative view root (simulating stale state after view switch)
+        appState.CurrentNode = appState.CurrentDocument.Model.NarratorView[0];
 
         // Configure tool with valid selection
         var masterPlotsVM = Ioc.Default.GetRequiredService<MasterPlotsViewModel>();
@@ -414,7 +527,7 @@ public class OutlineViewModelTests
 
         //Set view
         outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
-        appState.RightTappedNode = appState.CurrentDocument.Model.StoryElements[0].Node;
+        appState.CurrentNode = appState.CurrentDocument.Model.StoryElements[0].Node;
 
         //Run scenario
         Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().SituationName = "Abduction";
@@ -430,7 +543,7 @@ public class OutlineViewModelTests
         var model = await outlineService.CreateModel("Dramatic", "StoryBuilder", 0);
         appState.CurrentDocument = new StoryDocument(model);
         outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
-        appState.RightTappedNode = appState.CurrentDocument.Model.StoryElements[0].Node;
+        appState.CurrentNode = appState.CurrentDocument.Model.StoryElements[0].Node;
         var vm = Ioc.Default.GetRequiredService<DramaticSituationsViewModel>();
         vm.SituationName = "Abduction";
         await outlineVM.DramaticSituationsTool();
@@ -446,7 +559,7 @@ public class OutlineViewModelTests
         var model = await outlineService.CreateModel("NullSituation", "StoryBuilder", 0);
         appState.CurrentDocument = new StoryDocument(model);
         outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
-        appState.RightTappedNode = appState.CurrentDocument.Model.StoryElements[0].Node;
+        appState.CurrentNode = appState.CurrentDocument.Model.StoryElements[0].Node;
 
         var vm = Ioc.Default.GetRequiredService<DramaticSituationsViewModel>();
         vm.Situation = null; // Set Situation directly to null, not SituationName
@@ -471,7 +584,7 @@ public class OutlineViewModelTests
         var trashCanNode = appState.CurrentDocument.Model.TrashView
             .FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
         Assert.IsNotNull(trashCanNode, "TrashCan node should exist");
-        appState.RightTappedNode = trashCanNode;
+        appState.CurrentNode = trashCanNode;
 
         // Configure tool with valid selection
         Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().SituationName = "Abduction";
@@ -501,8 +614,8 @@ public class OutlineViewModelTests
             appState.CurrentDocument.Model.ExplorerView[0]);
         scene.Node.CopyToNarratorView(appState.CurrentDocument.Model);
 
-        // Set RightTappedNode to the narrative view root
-        appState.RightTappedNode = appState.CurrentDocument.Model.NarratorView[0];
+        // Select the narrative view root
+        appState.CurrentNode = appState.CurrentDocument.Model.NarratorView[0];
 
         // Configure tool with valid selection
         Ioc.Default.GetRequiredService<DramaticSituationsViewModel>().SituationName = "Abduction";
@@ -529,7 +642,7 @@ public class OutlineViewModelTests
 
         //Set view
         outlineService.SetCurrentView(appState.CurrentDocument.Model, StoryViewType.ExplorerView);
-        appState.RightTappedNode = appState.CurrentDocument.Model.StoryElements[0].Node;
+        appState.CurrentNode = appState.CurrentDocument.Model.StoryElements[0].Node;
 
         //run scenario
         var stockVM = Ioc.Default.GetRequiredService<StockScenesViewModel>();
@@ -554,7 +667,7 @@ public class OutlineViewModelTests
         var trashCanNode = appState.CurrentDocument.Model.TrashView
             .FirstOrDefault(n => n.Type == StoryItemType.TrashCan);
         Assert.IsNotNull(trashCanNode, "TrashCan node should exist");
-        appState.RightTappedNode = trashCanNode;
+        appState.CurrentNode = trashCanNode;
 
         // Configure tool with valid selection
         Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName = "The police join the chase";
@@ -584,8 +697,8 @@ public class OutlineViewModelTests
             appState.CurrentDocument.Model.ExplorerView[0]);
         scene.Node.CopyToNarratorView(appState.CurrentDocument.Model);
 
-        // Set RightTappedNode to the narrative view root
-        appState.RightTappedNode = appState.CurrentDocument.Model.NarratorView[0];
+        // Select the narrative view root
+        appState.CurrentNode = appState.CurrentDocument.Model.NarratorView[0];
 
         // Configure tool with valid selection
         Ioc.Default.GetRequiredService<StockScenesViewModel>().SceneName = "The police join the chase";
@@ -652,6 +765,36 @@ public class OutlineViewModelTests
         var ovm = (appState.CurrentDocument.Model.StoryElements.First(o =>
             o.ElementType == StoryItemType.StoryOverview) as OverviewModel).StoryProblem;
         Assert.IsTrue(ovm != Guid.Empty);
+    }
+
+    [TestMethod]
+    public async Task SaveFile_WithAutoSaveOff_LeavesAutosaveAndBackupIndicatorsGray()
+    {
+        var shell = Ioc.Default.GetRequiredService<ShellViewModel>();
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var prefs = Ioc.Default.GetRequiredService<PreferenceService>();
+        var autoSave = Ioc.Default.GetRequiredService<StoryCADLib.Services.Backup.AutoSaveService>();
+        var savedAutoSave = prefs.Model.AutoSave; // other tests may leave it on
+        prefs.Model.AutoSave = false;
+        autoSave.StopAutoSave();
+        try
+        {
+            var model = await outlineService.CreateModel("IndicatorSave", "StoryBuilder", 0);
+            appState.CurrentDocument = new StoryDocument(model, Path.Combine(App.ResultsDir, "IndicatorSave.stbx"));
+            shell.BackupStatusColor = Microsoft.UI.Colors.Gray;
+            shell.AutosaveStatusColor = Microsoft.UI.Colors.Gray;
+
+            await outlineVM.SaveFile();
+
+            Assert.IsTrue(File.Exists(appState.CurrentDocument.FilePath), "Save did not write the file");
+            Assert.AreEqual(Microsoft.UI.Colors.Gray, shell.BackupStatusColor, "A save is not a backup");
+            Assert.AreEqual(Microsoft.UI.Colors.Gray, shell.AutosaveStatusColor, "AutoSave is off");
+            Assert.IsFalse(autoSave.IsRunning, "A save must not start AutoSave when the preference is off");
+        }
+        finally
+        {
+            prefs.Model.AutoSave = savedAutoSave;
+        }
     }
 
     [TestMethod]

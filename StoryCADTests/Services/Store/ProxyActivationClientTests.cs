@@ -14,8 +14,7 @@ using StoryCADLib.Services.Store;
 namespace StoryCADTests.Services.Store;
 
 /// <summary>
-///     Exercises <see cref="ProxyActivationClient" /> against the activation contract
-///     (StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md) with a fake
+///     Exercises <see cref="ProxyActivationClient" /> against the activation contract with a fake
 ///     <see cref="HttpMessageHandler" />, so no network is touched. Covers the 200-with-token,
 ///     403-per-refusal-reason, unexpected-status, unparseable-body, missing-expiresAt, transport
 ///     failure, and cancellation paths — the "do not rename members" wire logic.

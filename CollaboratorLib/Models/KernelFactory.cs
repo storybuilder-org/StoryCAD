@@ -78,7 +78,7 @@ namespace StoryCollaborator.Models
         /// The Bearer credential for Collaborator proxy calls: the Worker-issued activation JWT
         /// when the user is activated, else null (callers must refuse to call the proxy rather
         /// than send an unauthenticated request). The activation contract requires the JWT on
-        /// every Collaborator call (StoryCADWiki: wiki/repos/Collaborator/sources/iap-billing-docs.md).
+        /// every Collaborator call.
         /// </summary>
         internal static string? ResolveWorkflowCredential(Func<string?>? getActivationJwt = null)
         {

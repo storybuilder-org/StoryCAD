@@ -475,7 +475,7 @@ public class BackendService
             var tempFile =
                 await tempFolder.CreateFileAsync("StoryCAD.pem", CreationCollisionOption.ReplaceExisting);
             var caFile = keys.CAFILE;
-            await FileIO.WriteTextAsync(tempFile, caFile);
+            await File.WriteAllTextAsync(tempFile.Path, caFile); // System.IO: see PreferencesIo (#1422)
             _sslCaPath = tempFile.Path;
             var sslCa = $"SslCa={_sslCaPath};";
 

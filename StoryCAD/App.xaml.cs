@@ -330,6 +330,10 @@ public partial class App : Application
 // Preserve both the Window and its Handle for future use
         window.MainWindow = MainWindow;
 
+// Issue #1645: copy page edits into the model whenever the main window goes inactive
+        var editFlush = Ioc.Default.GetRequiredService<EditFlushService>();
+        MainWindow.Activated += (_, e) => editFlush.OnMainWindowActivationChanged(e.WindowActivationState);
+
 // Configure SerializationLock to properly detect UI thread
         SerializationLock.ConfigureUi(() => window.GlobalDispatcher?.HasThreadAccess == true);
 

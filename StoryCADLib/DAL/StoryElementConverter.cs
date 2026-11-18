@@ -87,6 +87,9 @@ public class StoryElementConverter : JsonConverter<StoryElement>
                     }
                 }
 
+                // List values respelled in Lists.json (#1422): load the new spelling.
+                ListValueMigration.Apply(element);
+
                 return element;
             }
 
