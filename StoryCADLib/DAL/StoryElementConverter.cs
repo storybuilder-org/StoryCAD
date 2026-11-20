@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using StoryCADLib.Services.Rtf;
 using LogLevel = StoryCADLib.Services.Logging.LogLevel;
 
 namespace StoryCADLib.DAL;
@@ -60,7 +61,8 @@ public class StoryElementConverter : JsonConverter<StoryElement>
                 // The "Remarks" case handles even older Scene files.
                 if (element != null && string.IsNullOrEmpty(element.Description))
                 {
-                    string migratedDescription =
+                    // The JSON converter does not see these old field values (#1675).
+                    string migratedDescription = RtfThemeColor.RemoveThemeColors(
                         typeDiscriminator switch
                     {
                         "StoryOverview" when jsonObject.TryGetProperty("StoryIdea", out var prop)
@@ -79,7 +81,7 @@ public class StoryElementConverter : JsonConverter<StoryElement>
                         "Scene" when jsonObject.TryGetProperty("Remarks", out var prop)
                             => prop.GetString(),
                         _ => null
-                    };
+                    });
 
                     if (!string.IsNullOrEmpty(migratedDescription))
                     {

@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.DAL;
 using StoryCADLib.Models;
@@ -8,6 +9,7 @@ using StoryCADLib.Models.Tools;
 using StoryCADLib.Models.StoryWorld;
 using StoryCADLib.ViewModels;
 using StoryCADLib.ViewModels.SubViewModels;
+using StoryCADTests.Services.Rtf;
 
 #nullable disable
 
@@ -551,6 +553,85 @@ public partial class StoryIOTests
 
         // Cleanup
         if (File.Exists(filePath)) File.Delete(filePath);
+    }
+
+    #endregion
+
+    #region Theme Color Tests (#1675)
+
+    [TestMethod]
+    public async Task ReadFile_WhenNotesHasThemeColor_ReturnsCf0()
+    {
+        // Arrange
+        var (filePath, sceneId) = await WriteOutlineWithScene(scene =>
+            scene["Notes"] = RtfThemeColorTests.Issue370Rtf);
+
+        try
+        {
+            var file = await StorageFile.GetFileFromPathAsync(filePath);
+
+            // Act
+            var model = await _storyIO.ReadStory(file);
+
+            // Assert
+            var scene = (SceneModel)model.StoryElements.First(e => e.Uuid == sceneId);
+            StringAssert.Contains(scene.Notes, @"\cf0");
+            Assert.IsFalse(scene.Notes.Contains(@"\cf1"));
+        }
+        finally
+        {
+            File.Delete(filePath);
+        }
+    }
+
+    [TestMethod]
+    public async Task ReadFile_WhenOldDescriptionKeyHasThemeColor_ReturnsCf0()
+    {
+        // Arrange - "Description" is the Scene field name before #1367
+        var (filePath, sceneId) = await WriteOutlineWithScene(scene =>
+        {
+            scene["ElementDescription"] = string.Empty;
+            scene["Description"] = RtfThemeColorTests.Issue370Rtf;
+        });
+
+        try
+        {
+            var file = await StorageFile.GetFileFromPathAsync(filePath);
+
+            // Act
+            var model = await _storyIO.ReadStory(file);
+
+            // Assert
+            var scene = model.StoryElements.First(e => e.Uuid == sceneId);
+            StringAssert.Contains(scene.Description, @"\cf0");
+            Assert.IsFalse(scene.Description.Contains(@"\cf1"));
+        }
+        finally
+        {
+            File.Delete(filePath);
+        }
+    }
+
+    /// <summary>
+    ///     Writes an outline file with one Scene. The Scene's JSON is changed by
+    ///     <paramref name="editScene" /> and written with JsonNode, so no StoryCAD
+    ///     converter touches the changed values.
+    /// </summary>
+    private static async Task<(string FilePath, Guid SceneId)> WriteOutlineWithScene(Action<JsonObject> editScene)
+    {
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        var model = await outlineService.CreateModel("Theme Color", "StoryCAD Tests", 0);
+        var sceneId = outlineService.AddStoryElement(model, StoryItemType.Scene, model.ExplorerView[0]).Uuid;
+
+        var root = JsonNode.Parse(model.Serialize())!.AsObject();
+        var sceneJson = root["Elements"]!.AsArray()
+            .Select(n => n!.AsObject())
+            .First(o => (string)o["GUID"] == sceneId.ToString());
+        editScene(sceneJson);
+
+        var filePath = Path.Combine(App.ResultsDir, $"ThemeColor1675_{Guid.NewGuid()}.stbx");
+        await File.WriteAllTextAsync(filePath, root.ToJsonString());
+        return (filePath, sceneId);
     }
 
     #endregion

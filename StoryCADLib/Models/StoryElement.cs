@@ -162,6 +162,7 @@ public class StoryElement : ObservableObject
             {
                 new EmptyGuidConverter(),
                 new StoryElementConverter(),
+                new RtfThemeColorConverter(),
                 new JsonStringEnumConverter()
             }
         });
@@ -179,6 +180,7 @@ public class StoryElement : ObservableObject
             {
                 new EmptyGuidConverter(),
                 new StoryElementConverter(),
+                new RtfThemeColorConverter(),
                 new JsonStringEnumConverter()
             }
         });
