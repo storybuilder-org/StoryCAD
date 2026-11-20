@@ -18,7 +18,9 @@ public partial class RichEditBoxExtended : RichEditBox
         // Use RichEditBox's default style. WinUI's RichEditBox already keys itself that way, but
         // Uno 7's leaves DefaultStyleKey at typeof(Control), and the Fluent TargetType="RichEditBox"
         // style doesn't match a subclass, so on Skia this control got no template and drew nothing.
+#if HAS_UNO
         DefaultStyleKey = typeof(RichEditBox);
+#endif
         TextChanged += RichEditBoxExtended_TextChanged;
         TextAlignment = TextAlignment.Left;
         CornerRadius = new CornerRadius(5);
