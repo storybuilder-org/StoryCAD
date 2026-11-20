@@ -8,7 +8,7 @@ has_toc: false
 ---
 ## Platform Differences
 
-StoryCAD is available on Windows and macOS. All outlining and story planning features work identically across platforms, with differences only in text editing capabilities.
+StoryCAD is available on Windows and macOS. All outlining and story planning features work the same on both platforms.
 
 ### Menu Bar
 
@@ -18,33 +18,20 @@ On macOS, StoryCAD provides a native menu bar at the top of the screen covering 
 
 | Feature | Windows | macOS |
 |---------|---------|-------|
-| Rich text formatting (bold, italic, underline) | Yes | No |
-| Font and color changes | Yes | No |
-| Formatting toolbar | Yes | No |
-| Right-click formatting menu | Yes | No |
-| Spell checking | Yes | No |
+| Rich text formatting (bold, italic, underline) | Yes | Yes |
+| Right-click formatting menu | Yes | Yes |
+| Spell checking | Yes | Yes |
 
-**Windows** supports rich text formatting (RTF) with a formatting toolbar. You can apply bold, italic, underline, change fonts and colors, adjust paragraph alignment, and create lists. Right-clicking in text fields displays a formatting menu:
+On both Windows and macOS, you format text from the right-click menu. Select the text, right-click it, and choose **Bold**, **Italic** or **Underline**:
 
 ![Right-click formatting menu on Windows](../media/RichEditBlockExtended_edit_menu.png)
 
-Windows includes spell checking across all text entry controls. Misspelled words display red underlines, and right-clicking offers spelling suggestions.
+Both platforms check your spelling as you type. A misspelled word gets a red underline; right-click the word to see suggested spellings. On Windows, StoryCAD uses the Windows spell checker. On macOS, StoryCAD uses its own spell checker with a US English dictionary.
 
-**macOS** uses plain text editing only. Text formatting features, right-click formatting menus, and spell checking are not available.
+On both platforms, text takes the text color of the theme you pick in [Preferences](../Preferences/Preferences.html): black in the light theme, light in the dark theme. Text you type in one theme stays readable after you change to the other.
 
 ### File Compatibility
 
-StoryCAD .stbx outline files are fully compatible between Windows and macOS. You can create an outline on one platform and open it on the other. Your story content, structure, and all story elements transfer seamlessly.
+StoryCAD .stbx outline files work on both Windows and macOS. You can create an outline on one platform and open it on the other. Your story content, structure, and all story elements transfer.
 
-**Important**: Text formatting applied on Windows will be permanently removed when a file is opened and saved on macOS. The text content is preserved, but formatting (bold, italic, fonts, colors) is stripped and cannot be recovered.
-
-### Cross-Platform Recommendations
-
-If you work on both platforms:
-
-- **Keep formatting minimal** if regularly moving files between platforms
-- **Maintain separate copies** - Windows copy for formatted content, macOS copy for plain text
-- **Use Windows exclusively** for outlines that need text formatting
-- **Use external formatting** - Keep formatted versions in Word or Google Docs for reference
-
-The macOS text editing limitation is due to platform constraints, not a design choice.
+Bold, italic and underline also transfer. Text you format on Windows keeps its formatting when you open and save the outline on macOS, and the reverse.

@@ -173,8 +173,14 @@
 5. Save the outline. Close the outline. Open the outline.
    **Expected:** Each word shows its format.
 
-6. Type "recieve" and a space.
-   **Expected:** A red line shows below the word.
+6. In Windows Settings, open Time & language > Typing. Set "Autocorrect misspelled words" to Off. Make sure that "Highlight misspelled words" is On.
+   **Expected:** Windows does not change a misspelled word.
+
+7. In the rich text field, type "recieve" and a space.
+   **Expected:** A red line shows below the word. The word stays "recieve".
+
+8. Set "Autocorrect misspelled words" to its initial value.
+   **Expected:** The setting has its initial value.
 
 **Pass/Fail:** ______
 
