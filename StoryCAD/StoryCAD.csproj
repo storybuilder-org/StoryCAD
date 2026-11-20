@@ -97,9 +97,8 @@
         <PublishReadyToRun Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">false</PublishReadyToRun>
 
         <UnoFeatures>
-            SkiaRenderer;
-            Lottie;
             Toolkit;
+            SpellChecking;
         </UnoFeatures>
 
         <Platforms>x64;arm64;x86</Platforms>
@@ -145,6 +144,13 @@
 
     <PropertyGroup>
         <DefineConstants>$(DefineConstants);COLLABORATOR</DefineConstants>
+    </PropertyGroup>
+    <!-- #1675: Hot Design is off for builds on a Mac. Jake saw a Debug window that did not update. -->
+    <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+        <UnoDisableHotDesign>true</UnoDisableHotDesign>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(UnoDisableHotDesign)' == 'true'">
+        <DefineConstants>$(DefineConstants);NO_HOTDESIGN</DefineConstants>
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\CollaboratorLib\CollaboratorLib.csproj" />

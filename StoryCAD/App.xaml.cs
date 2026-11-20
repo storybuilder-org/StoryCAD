@@ -242,7 +242,7 @@ public partial class App : Application
             .InitializeAsync());
 
         MainWindow = new Window();
-#if DEBUG
+#if DEBUG && !NO_HOTDESIGN
         MainWindow.UseStudio();
 #endif
 

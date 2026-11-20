@@ -47,7 +47,7 @@ Every interactive control gets `AutomationProperties.AutomationId`.
   - Prefix with the page name where a function repeats across pages: `OverviewNotesRichEdit`, `CharacterNotesRichEdit`.
   - Dialog-internal controls prefer the dialog-name prefix (`SaveAsCancelButton`) even though only one dialog opens at a time.
 - Where an existing `x:Name` already fits this style, the AutomationId reuses the same string. Never rename an `x:Name` (code-behind references it), and never add a new `x:Name` just for automation; AutomationId does not need one.
-- AutomationProperties attributes are set unconditionally: no `win:`/`skia:` prefixes, so Windows and macOS expose the same identifiers (ADR-001 constraint).
+- AutomationProperties attributes are set unconditionally: no `win:`/`not_win:` prefixes, so Windows and macOS expose the same identifiers (ADR-001 constraint).
 
 ## Name vs LabeledBy
 
@@ -55,7 +55,7 @@ Every interactive control gets `AutomationProperties.AutomationId`.
 - Set `AutomationProperties.Name` where no clean visible label exists:
   - icon-only buttons (the Shell status bar save, autosave, and backup buttons; the four Move flyout arrow buttons);
   - a Button whose `Content` is a panel rather than plain text or a `Header`: WinUI 3 does not aggregate inner TextBlock text into the UIA Name (verified live 2026-07-04, StoryWorldPage Add/Remove buttons announced blank), so the visible text is duplicated as an explicit Name;
-  - every MenuFlyoutItem whose `Text` embeds a padded keyboard shortcut (`"Save Story                      Ctrl+S"`): Name carries the clean command text (`Save Story`), set once and unconditionally so the `win:`/`skia:` text variants share one accessible name;
+  - every MenuFlyoutItem whose `Text` embeds a padded keyboard shortcut (`"Save Story                      Ctrl+S"`): Name carries the clean command text (`Save Story`), set once and unconditionally so the `win:`/`not_win:` text variants share one accessible name;
   - AutoSuggestBox with only `PlaceholderText` (the Shell search box);
   - a field whose visible label is a sibling `Expander.Header` TextBlock rather than a `Header` property (StoryWorldPage's #782 Expander layout, where the header doubles as a bold-when-filled content indicator): mirror the header text as a literal Name. Founder ruling 2026-07-04 on PR #1451: literal Name, not `LabeledBy`, so no `x:Name` gets added to label TextBlocks for automation; a reworded header means updating the Name with it, since the static tests cannot catch drift. *(added Unit 4)*
   - custom controls whose `Header` does not reach the automation peer. PR 1 verifies `RichEditBoxExtended` and `BrowseTextBox` with Accessibility Insights. If Header is not exposed: `BrowseTextBox` gets the Name once inside its own XAML; `RichEditBoxExtended` has no XAML (partial classes only), so the Name is set once in its C# constructor via `AutomationProperties.SetName` *(plan-stage addition: the C# path; the approved design assumed control XAML)*.
