@@ -244,7 +244,58 @@
 
 ---
 
-## PREFERENCES RESULT: _____ / 9 Passed
+### PF-010: Text Color After a Theme Change
+**Priority:** High
+**Time:** ~4 minutes
+**Platform:** Do this test on Windows and on macOS.
+
+A theme change applies after a restart of StoryCAD.
+
+**Steps:**
+1. In Preferences, set Preferred Theme to Dark Theme. Restart StoryCAD.
+   **Expected:** StoryCAD shows the dark theme.
+
+2. Type text in a rich text field. Save the outline.
+   **Expected:** The text is light.
+
+3. Set Preferred Theme to Light Theme. Restart StoryCAD. Open the outline.
+   **Expected:** The text is black.
+
+4. Type more text in the same field. Save the outline.
+   **Expected:** The new text is black.
+
+5. Set Preferred Theme to Dark Theme. Restart StoryCAD. Open the outline.
+   **Expected:** All the text in the field is light.
+
+**Pass/Fail:** ______
+
+---
+
+### PF-011: Outline from a Previous Version
+**Priority:** High
+**Time:** ~4 minutes
+**Platform:** Windows
+
+**Precondition:** A release of StoryCAD that does not have the repair for #1675, and the build that you test.
+
+**Steps:**
+1. Open the previous release. Set Preferred Theme to Dark Theme. Restart StoryCAD.
+   **Expected:** StoryCAD shows the dark theme.
+
+2. Type text in a rich text field. Save the outline. Close StoryCAD.
+   **Expected:** StoryCAD saves the file.
+
+3. Open the build that you test. Set Preferred Theme to Light Theme. Restart StoryCAD.
+   **Expected:** StoryCAD shows the light theme.
+
+4. Open the outline of step 2.
+   **Expected:** The text is black.
+
+**Pass/Fail:** ______
+
+---
+
+## PREFERENCES RESULT: _____ / 11 Passed
 
 **Critical Issues**: ________________
 

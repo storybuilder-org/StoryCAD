@@ -266,7 +266,36 @@ This is the high-risk case: StoryWorld is a new element type that 3.4 does not r
 
 ---
 
-## CROSS-PLATFORM RESULT: _____ / 8 Passed
+### XP-009: Formatted Text in the Two Directions
+**Priority:** High
+**Time:** ~3 minutes
+
+**Steps (Windows):**
+1. Open an outline. Select a Scene.
+   **Expected:** The Scene form shows.
+
+2. In the Notes field, type three words. Make the first word bold, the second word italic and the third word underlined.
+   **Expected:** Each word shows its format.
+
+3. Save the outline to the shared location.
+   **Expected:** StoryCAD saves the file.
+
+**Steps (macOS):**
+4. Open the outline. Select the Scene.
+   **Expected:** The first word is bold. The second word is italic. The third word is underlined.
+
+5. Add a word to the Notes field. Save the outline.
+   **Expected:** StoryCAD saves the file.
+
+**Steps (Windows):**
+6. Open the outline. Select the Scene.
+   **Expected:** The Notes field shows the three formats and the new word.
+
+**Pass/Fail:** ______
+
+---
+
+## CROSS-PLATFORM RESULT: _____ / 9 Passed
 
 **Critical Issues**: ________________
 

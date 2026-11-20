@@ -152,7 +152,59 @@
 
 ---
 
-## CORE ELEMENTS RESULT: _____ / 6 Passed
+### CE-007: Rich Text on Windows
+**Priority:** High
+**Time:** ~2 minutes
+**Platform:** Windows
+
+**Steps:**
+1. In a rich text field, type three words.
+   **Expected:** The words show.
+
+2. Select the first word. Right-click the word. Click Bold.
+   **Expected:** The first word is bold.
+
+3. Select the second word. Right-click the word. Click Italic.
+   **Expected:** The second word is italic.
+
+4. Select the third word. Right-click the word. Click Underline.
+   **Expected:** The third word is underlined.
+
+5. Save the outline. Close the outline. Open the outline.
+   **Expected:** Each word shows its format.
+
+6. Type "recieve" and a space.
+   **Expected:** A red line shows below the word.
+
+**Pass/Fail:** ______
+
+---
+
+### CE-008: Pictures on Windows
+**Priority:** Medium
+**Time:** ~2 minutes
+**Platform:** Windows
+
+This test examines the pictures on the Windows head after the change to `UnoFeatures` (#1675).
+
+**Steps:**
+1. Select a Notes element. Click the Images tab.
+   **Expected:** The Images tab shows.
+
+2. Click Add Picture. Select a PNG file.
+   **Expected:** The picture shows.
+
+3. Save the outline. Close the outline. Open the outline.
+   **Expected:** StoryCAD opens the outline.
+
+4. Select the Notes element. Click the Images tab.
+   **Expected:** The picture shows.
+
+**Pass/Fail:** ______
+
+---
+
+## CORE ELEMENTS RESULT: _____ / 8 Passed
 
 **Critical Issues**: ________________
 

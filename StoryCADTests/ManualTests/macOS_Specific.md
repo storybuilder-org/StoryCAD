@@ -317,7 +317,90 @@
 
 ---
 
-## macOS SPECIFIC RESULT: _____ / 10 Passed
+### MAC-011: Formats from Windows
+**Priority:** High
+**Time:** ~1 minute
+
+**Steps:**
+1. Open an outline from Windows that has bold, italic and underlined text in a rich text field. XP-009 makes this type of outline.
+   **Expected:** The outline opens with no error.
+
+2. Select the element that has the formatted text.
+   **Expected:** The bold text, the italic text and the underlined text each show their format.
+
+**Pass/Fail:** ______
+
+---
+
+### MAC-012: Format Menu
+**Priority:** High
+**Time:** ~1 minute
+
+**Steps:**
+1. In a rich text field, type a word. Select the word.
+   **Expected:** The word shows as selected.
+
+2. Right-click the word.
+   **Expected:** A menu opens. The menu has Bold, Italic and Underline.
+
+3. Click Bold.
+   **Expected:** The word is bold.
+
+4. Right-click the word. Click Italic.
+   **Expected:** The word is bold and italic.
+
+5. Right-click the word. Click Underline.
+   **Expected:** The word is bold, italic and underlined.
+
+**Pass/Fail:** ______
+
+---
+
+### MAC-013: Spell Checking
+**Priority:** Medium
+**Time:** ~2 minutes
+
+**Steps:**
+1. In a rich text field, type "recieve" and a space.
+   **Expected:** A red line shows below the word.
+
+2. Select a Character. In the Name field, type "recieve" and a space.
+   **Expected:** A red line shows below the word.
+
+3. Right-click the word in the rich text field.
+   **Expected:** The menu shows "receive".
+
+4. Select a Problem. On the Structure tab, open the Beat Sheet area. In the field Beat Sheet Description, type "recieve" and a space.
+   **Expected:** No red line shows. This field turns off spell checking (`IsSpellCheckEnabled="False"`).
+
+**Pass/Fail:** ______
+
+---
+
+### MAC-014: Debug Build
+**Priority:** Medium
+**Time:** ~3 minutes
+
+**Precondition:** The StoryCAD source code on the Mac. A Debug build has a problem that a Release build does not have (#1675). Do this test with a Debug build.
+
+**Steps:**
+1. From the `StoryCAD` folder, run `dotnet run -f net10.0-desktop`.
+   **Expected:** The StoryCAD window opens.
+
+2. Open an outline. Type text in three fields.
+   **Expected:** The window shows each character immediately.
+
+3. Click five items in the navigation tree, one item at a time.
+   **Expected:** The window shows the form of each item immediately.
+
+4. If the window does not show a change, stop StoryCAD. Run `dotnet run -f net10.0-desktop -c Release`. Do steps 2 and 3 again.
+   **Expected:** Write the result of the Release build in Critical Issues.
+
+**Pass/Fail:** ______
+
+---
+
+## macOS SPECIFIC RESULT: _____ / 14 Passed
 
 **Critical Issues**: ________________
 
