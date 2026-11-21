@@ -79,6 +79,7 @@ public class StoryModel : ObservableObject
             {
                 new EmptyGuidConverter(),
                 new StoryElementConverter(),
+                new RtfThemeColorConverter(),
                 new JsonStringEnumConverter()
             }
         });

@@ -578,8 +578,12 @@ public class Windowing : ObservableRecipient
         try
         {
             var di = Windows.Graphics.Display.DisplayInformation.GetForCurrentView();
+            // Uno 7's reference assembly flags these Uno0001, but the Skia runtime implements them
+            // (Uno.WinRT DisplayInformation.skia.cs reads IDisplayInformationExtension).
+#pragma warning disable Uno0001
             int w = (int)di.ScreenWidthInRawPixels;
             int h = (int)di.ScreenHeightInRawPixels;
+#pragma warning restore Uno0001
             logger.Log(LogLevel.Trace, $"GetMaxWindowSize (Uno): screen = {w}x{h}");
             return (w, h);
         }
@@ -608,7 +612,9 @@ public class Windowing : ObservableRecipient
         try
         {
             var displayInfo = Windows.Graphics.Display.DisplayInformation.GetForCurrentView();
+#pragma warning disable Uno0001 // implemented on Skia; see GetMaxWindowSize
             double scaleFactor = displayInfo.RawPixelsPerViewPixel;
+#pragma warning restore Uno0001
             logger.Log(LogLevel.Trace, $"Scale factor from DisplayInformation: {scaleFactor:F2}");
             return scaleFactor;
         }
@@ -868,9 +874,11 @@ public class Windowing : ObservableRecipient
             {
                 // Get screen size in physical pixels (no DisplayArea API on UNO)
                 var di = Windows.Graphics.Display.DisplayInformation.GetForCurrentView();
+#pragma warning disable Uno0001 // implemented on Skia; see GetMaxWindowSize
                 var scale = di.RawPixelsPerViewPixel; // e.g., 1.5 for 150%
                 int screenWpx = (int)di.ScreenWidthInRawPixels;   // Physical pixels
                 int screenHpx = (int)di.ScreenHeightInRawPixels;  // Physical pixels
+#pragma warning restore Uno0001
 
                 // AppWindow.Size is in physical pixels on Uno/Skia (same as WinAppSDK)
                 int w = appWin.Size.Width;   // Physical pixels

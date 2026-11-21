@@ -186,7 +186,28 @@
 
 ---
 
-## REPORTS RESULT: _____ / 8 Passed
+### RP-009: PDF on Windows
+**Priority:** High
+**Time:** ~2 minutes
+**Platform:** Windows
+
+This test examines the PDF report on the Windows head after the change to `UnoFeatures` (#1675).
+
+**Steps:**
+1. Open the sample outline "Danger Calls". Open the Print Reports dialog.
+   **Expected:** The dialog opens.
+
+2. Select Story Overview and List of Characters. Make a PDF file.
+   **Expected:** StoryCAD makes the PDF file.
+
+3. Open the PDF file.
+   **Expected:** The PDF shows the text of the two reports.
+
+**Pass/Fail:** ______
+
+---
+
+## REPORTS RESULT: _____ / 9 Passed
 
 **Critical Issues**: ________________
 

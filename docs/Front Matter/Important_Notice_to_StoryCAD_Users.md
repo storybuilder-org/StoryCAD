@@ -16,7 +16,7 @@ While StoryCAD supports RTF (rich field text) for detailed note-taking and outli
 
 **Platform-Specific Features:**
 
-StoryCAD is available on Windows and macOS. All outlining features work identically, but text editing capabilities differ. Windows supports rich text formatting with a toolbar and spell checking, while macOS uses plain text only. For complete details, see [Platform Differences](Platform_Differences.html).
+StoryCAD is available on Windows and macOS. All outlining features work the same on both. Both platforms give you bold, italic, underline and spell checking. For complete details, see [Platform Differences](Platform_Differences.html).
 
 **Recommended Word Processing Integration:**
 

@@ -142,6 +142,7 @@ public class StoryIO
                 {
                     new EmptyGuidConverter(),
                     new StoryElementConverter(),
+                    new RtfThemeColorConverter(),
                     new JsonStringEnumConverter()
                 }
             });

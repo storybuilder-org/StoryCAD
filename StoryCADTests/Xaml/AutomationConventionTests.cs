@@ -185,7 +185,7 @@ public class AutomationConventionTests
     }
 
     /// <summary>
-    ///     AutomationProperties attributes must be unconditional (ADR-001): no win:/skia:/other
+    ///     AutomationProperties attributes must be unconditional (ADR-001): no win:/not_win:/other
     ///     namespace prefix on any AutomationProperties.* attribute in any scope file. A prefixed
     ///     attribute would give Windows and macOS different identifiers and slip past the
     ///     namespace-filtered lookup the scan's attribute getter uses.

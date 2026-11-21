@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
+using StoryCADLib.Services.Outline;
 using StoryCADLib.ViewModels;
+using StoryCADTests.Services.Rtf;
 
 #nullable disable
 
@@ -391,6 +393,27 @@ public class StoryModelTests
         //    - Restore from trash: Use context menu "Restore" command
 
         // Test documents expected XAML constraints - passes if comment is accurate
+    }
+
+    #endregion
+
+    #region Theme Color Tests (#1675)
+
+    [TestMethod]
+    public async Task Serialize_WhenSceneNotesHasThemeColor_WritesCf0()
+    {
+        // Arrange
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        var model = await outlineService.CreateModel("Theme Color", "StoryCAD Tests", 0);
+        var scene = (SceneModel)outlineService.AddStoryElement(model, StoryItemType.Scene, model.ExplorerView[0]);
+        scene.Notes = RtfThemeColorTests.Issue370Rtf;
+
+        // Act
+        var json = model.Serialize();
+
+        // Assert
+        StringAssert.Contains(json, @"\\cf0");
+        Assert.IsFalse(json.Contains(@"\\cf1"));
     }
 
     #endregion

@@ -40,14 +40,14 @@ This document originally outlined a strategy to enable cross-platform testing fo
 
 | File | Issue | Impact |
 |------|-------|--------|
-| `RichEditBoxExtendedTests.cs` | All tests wrapped in `#if WINDOWS10_0_18362_0_OR_GREATER` | No control tests run on macOS/Linux |
+| `RichEditBoxExtendedTests.cs` | All tests wrapped in `#if WINDOWS10_0_18362_0_OR_GREATER` | No control tests run on macOS/Linux. Removed in #1675; `Xaml/RichEditBoxExtendedXamlTests.cs` replaces it and runs on both heads |
 | `WindowingTests.cs` | Mixed Windows/macOS tests with platform conditionals | Partial coverage only |
 | `CollaboratorInterfaceTests.cs` | Some Windows-specific sections | Reduced test coverage |
 | `App.xaml.cs` | Windows-specific test app initialization | Test host may not initialize properly |
 
 #### 3. UI Control Dependencies
 Despite testing ViewModels, some tests still instantiate UI controls:
-- `RichEditBoxExtended` control creation in tests
+- `RichEditBoxExtended` control creation in tests (removed in #1675)
 - UI thread requirements for control initialization
 - Windows-specific control behaviors being tested
 
@@ -65,7 +65,7 @@ Missing macOS and Linux runtime identifiers prevent proper compilation and execu
 - **StoryDocumentTests.cs** (2 instances) - `@"C:\Stories\MyStory.stbx"` patterns
 - **OutlineViewModelTests.cs** (1 instance) - `@"C:\test.stbx"` pattern
 - **AppStateTests.cs** (1 instance) - `@"C:\test.stbx"` pattern
-- **RichEditBoxExtendedTests.cs** (1 false positive - RTF content, not a path)
+- **RichEditBoxExtendedTests.cs** (1 false positive - RTF content, not a path; file removed in #1675)
 
 All paths must use `Path.Combine()` for cross-platform compatibility.
 
@@ -146,38 +146,27 @@ Audit existing tests and refactor to follow one of two approaches:
 #### Step 3.2: Use Partial Classes for Platform-Specific Tests
 Following StoryCAD test naming standards (ClassNameTests.cs), use partial classes for platform differences:
 
-**Example: RichEditBoxExtendedTests**
-- `RichEditBoxExtendedTests.cs` - Shared cross-platform tests (ViewModel logic, no controls)
-- `RichEditBoxExtendedTests.Windows.cs` - Windows-only control tests wrapped in `#if WINDOWS_HEAD`
-- `RichEditBoxExtendedTests.Desktop.cs` - macOS/Linux tests (if needed) wrapped in `#if DESKTOP_HEAD`
+**Example: StoryIOTests**
+- `DAL/StoryIOTests.cs` - Shared cross-platform tests
+- `DAL/StoryIOTests.Windows.cs` - Windows-only path validation, wrapped in `#if WINDOWS10_0_22621_0_OR_GREATER`
 
 ```csharp
-// RichEditBoxExtendedTests.cs (shared)
+// StoryIOTests.cs (shared)
 [TestClass]
-public partial class RichEditBoxExtendedTests
+public partial class StoryIOTests
 {
-    [TestMethod]
-    public void RtfText_PropertyBinding_Works()
-    {
-        // Tests ViewModel/binding logic WITHOUT creating controls
-        var viewModel = new TestViewModel();
-        Assert.IsNotNull(viewModel);
-        // ... test ViewModel behavior only
-    }
+    // Tests that run on both heads
 }
 
-// RichEditBoxExtendedTests.Windows.cs (Windows-only)
-#if WINDOWS_HEAD
-[TestClass]
-public partial class RichEditBoxExtendedTests
+// StoryIOTests.Windows.cs (Windows-only)
+#if WINDOWS10_0_22621_0_OR_GREATER
+public partial class StoryIOTests
 {
     [TestMethod]
-    public void Control_RichEditBox_Initialization()
+    [TestCategory("Windows")]
+    public void IsValidPath_WithInvalidPath_ReturnsFalse()
     {
-        // Windows-specific UI control test
-        var control = new RichEditBox();
-        Assert.IsNotNull(control);
-        // ... Windows-specific behavior
+        // Windows does not allow < > : | ? in file names
     }
 }
 #endif
@@ -309,7 +298,7 @@ Track progress with these metrics:
 - Partial class pattern established (FileOpenVMTests, StoryIOTests)
 - Removed broken `#if __MACOS__` test (doesn't work with Skia desktop)
 - Platform-specific code properly isolated:
-  - RichEditBoxExtendedTests: Windows-only (RTF implementation differs on Skia)
+  - RichEditBoxExtendedTests: removed in #1675. Its three tests were all `[Ignore]`d because a unit test cannot create the control. `Xaml/RichEditBoxExtendedXamlTests.cs` now checks the control's XAML attributes on both heads
   - WindowingTests: Windows-specific Win32 P/Invoke tests isolated
   - StoryIOTests.Windows.cs: Windows-specific path validation
   - FileOpenVMTests.Windows.cs: Uses UNO controls (could run on Skia but kept separate)

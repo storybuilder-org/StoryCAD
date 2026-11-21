@@ -76,6 +76,8 @@ Hide in-window toolbar - This box appears only on a Mac. It hides the search and
 
 Preferred Theme - This is the theme that StoryCAD will use. You can select between Light Theme, Dark Theme or to Use System theme, which will match the theme you have set within windows.
 
+A theme change takes effect the next time you start StoryCAD. Text in your outline takes the text color of the theme: black in the light theme, light in the dark theme. The outline file does not store a text color for the theme, so text you typed in the dark theme stays readable in the light theme, and the reverse. Earlier versions of StoryCAD could save white text that disappeared on a white background after a theme change; StoryCAD corrects that text when you open the outline.
+
 Preferred Search Engine - This is the search engine that will be used within web nodes. You can choose DuckDuckGo, Google, Bing or Yahoo.
 
 About tab:
