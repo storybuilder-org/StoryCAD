@@ -172,6 +172,7 @@ public static class BootStrapper
         Services.AddSingleton<StockScenesViewModel>();
         Services.AddSingleton<DramaticSituationsViewModel>();
         Services.AddSingleton<SaveAsViewModel>();
+        Services.AddSingleton<FileUnavailableViewModel>();
         Services.AddSingleton<PreferencesViewModel>();
         Services.AddSingleton<FlawViewModel>();
         Services.AddSingleton<TraitsViewModel>();

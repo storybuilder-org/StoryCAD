@@ -16,7 +16,6 @@ public class LogService : ILogService
 {
     private static readonly Logger Logger;
     private static readonly string logFilePath;
-    private static Exception exceptionHelper;
     private static readonly AppState State;
     private static readonly PreferenceService PreferenceService;
     public static NLog.LogLevel MinLogLevel = NLog.LogLevel.Info;
@@ -97,90 +96,13 @@ public class LogService : ILogService
             // create elmah.io target
             ElmahIoTarget elmahIoTarget = new();
 
-            elmahIoTarget.OnMessage += msg =>
-            {
-                // Platform-suffixed so exception reports are filterable by OS (#1428).
-                msg.Version = State.VersionWithPlatform;
-
-                try
-                {
-                    msg.Detail = exceptionHelper?.ToString();
-                }
-                catch (Exception e)
-                {
-                    msg.Detail = $"Error trying to obtain StackTrace helper Error: {e.Message}";
-                }
-
-                var baseException = exceptionHelper?.GetBaseException();
-
-                msg.Type = baseException?.GetType().FullName;
-                msg.Data = baseException?.ToDataList() ?? new();
-                msg.Source = baseException?.Source;
-                msg.Hostname = Hostname();
-                msg.ServerVariables = new List<Item>
-                {
-                    new("User-Agent",
-                        $"X-ELMAHIO-APPLICATION; OS={Environment.OSVersion.Platform};" +
-                        $" OSVERSION={Environment.OSVersion.Version}; ENGINE=UNO")
-                };
-
-                try
-                {
-                    var LogString = string.Empty;
-
-                    try
-                    {
-                        msg.Data.Add(new Item("SystemInfo", SystemInfo()));
-                    }
-                    catch (Exception ex)
-                    {
-                        msg.Data.Add(new Item("Line " + 0, $"failed getting system info ({ex.Message})"));
-                    }
-
-                    using (var stream =
-                           File.Open(
-                               Path.Combine(State.RootDirectory, "logs",
-                                   $"StoryCAD.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open,
-                               FileAccess.Read, FileShare.ReadWrite))
-                    {
-                        using (StreamReader reader = new(stream))
-                        {
-                            LogString = reader.ReadToEnd();
-                        }
-                    }
-
-                    var ln = 0;
-                    if (LogString.Split("\n").Length > 250)
-                    {
-                        foreach (var line in LogString.Split("\n").TakeLast(250))
-                        {
-                            msg.Data.Add(new Item("Line " + ln, line));
-                            ln++;
-                        }
-                    }
-                    else
-                    {
-                        foreach (var line in LogString.Split("\n").TakeLast(250))
-                        {
-                            msg.Data.Add(new Item("Line ", line));
-                            ln++;
-                        }
-                    }
-
-                    msg.Data.Add(new Item("Log ", "end"));
-                }
-                catch (Exception e)
-                {
-                    msg.Data.Add(new Item("Error",
-                        $"There was an error attempting to obtain the log, Error: {e.Message}"));
-                }
-            };
+            elmahIoTarget.OnMessage += DecorateMessage;
 
             elmahIoTarget.Name = "elmahio";
             elmahIoTarget.ApiKey = apiKey;
             elmahIoTarget.LogId = logID;
             LogManager.Configuration.AddTarget(elmahIoTarget);
-            LogManager.Configuration.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, elmahIoTarget);
+            AddReportRule(LogManager.Configuration, elmahIoTarget);
             LogManager.ReconfigExistingLoggers();
             ElmahLogging = true;
             return true;
@@ -189,6 +111,83 @@ public class LogService : ILogService
         {
             LogException(LogLevel.Error, ex, ex.Message);
             return false;
+        }
+    }
+
+    /// <summary>
+    ///     Only Error and Fatal entries become elmah.io reports; Warn stays in the log file (#1638).
+    /// </summary>
+    internal static void AddReportRule(LoggingConfiguration config, Target target)
+    {
+        config.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, target);
+    }
+
+    internal void DecorateMessage(CreateMessage msg)
+    {
+        // Platform-suffixed so exception reports are filterable by OS (#1428).
+        msg.Version = State.VersionWithPlatform;
+
+        // Detail, Type, Source and the exception items in Data come from the entry's own
+        // exception; ElmahIoTarget fills them before this handler runs (#1638).
+        msg.Hostname = Hostname();
+        msg.ServerVariables = new List<Item>
+        {
+            new("User-Agent",
+                $"X-ELMAHIO-APPLICATION; OS={Environment.OSVersion.Platform};" +
+                $" OSVERSION={Environment.OSVersion.Version}; ENGINE=UNO")
+        };
+
+        msg.Data ??= new List<Item>();
+
+        try
+        {
+            var LogString = string.Empty;
+
+            try
+            {
+                msg.Data.Add(new Item("SystemInfo", SystemInfo()));
+            }
+            catch (Exception ex)
+            {
+                msg.Data.Add(new Item("Line " + 0, $"failed getting system info ({ex.Message})"));
+            }
+
+            using (var stream =
+                   File.Open(
+                       Path.Combine(State.RootDirectory, "logs",
+                           $"StoryCAD.{DateTime.Now.ToString("yyyy-MM-dd")}.log"), FileMode.Open,
+                       FileAccess.Read, FileShare.ReadWrite))
+            {
+                using (StreamReader reader = new(stream))
+                {
+                    LogString = reader.ReadToEnd();
+                }
+            }
+
+            var ln = 0;
+            if (LogString.Split("\n").Length > 250)
+            {
+                foreach (var line in LogString.Split("\n").TakeLast(250))
+                {
+                    msg.Data.Add(new Item("Line " + ln, line));
+                    ln++;
+                }
+            }
+            else
+            {
+                foreach (var line in LogString.Split("\n").TakeLast(250))
+                {
+                    msg.Data.Add(new Item("Line ", line));
+                    ln++;
+                }
+            }
+
+            msg.Data.Add(new Item("Log ", "end"));
+        }
+        catch (Exception e)
+        {
+            msg.Data.Add(new Item("Error",
+                $"There was an error attempting to obtain the log, Error: {e.Message}"));
         }
     }
 
@@ -231,11 +230,9 @@ public class LogService : ILogService
             case LogLevel.Error:
                 // One event only: each Error/Fatal event is a separate elmah.io report, and the
                 // file layout already writes the stack trace (#1615).
-                exceptionHelper = exception;
                 Logger.Error(exception, message);
                 break;
             case LogLevel.Fatal:
-                exceptionHelper = exception;
                 Logger.Fatal(exception, message);
                 break;
         }

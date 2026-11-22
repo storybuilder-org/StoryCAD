@@ -12,9 +12,11 @@
     <PackageVersion Include="Microsoft.SemanticKernel" Version="1.82.0" />
     <PackageVersion Include="Microsoft.SemanticKernel.Abstractions" Version="1.82.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
+    <!-- Before an update: in MessagesClient.cs, OnMessage must operate before the client sends the message. ToDataList() must give the exception data (#1638). -->
     <PackageVersion Include="Elmah.Io.Client" Version="5.3.131" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageVersion Include="dotenv.net" Version="4.2.0" />
+    <!-- Before an update: in ElmahIoTarget.cs, Type(), Source() and PropertiesToData() must fill the exception fields from logEvent.Exception, and EnsureClient() must connect OnMessage (#1638). -->
     <PackageVersion Include="Elmah.Io.NLog" Version="5.4.80" />
     <PackageVersion Include="MySql.Data" Version="26.10.0" />
     <PackageVersion Include="NLog" Version="6.2.2" />
