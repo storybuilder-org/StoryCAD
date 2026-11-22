@@ -5,6 +5,9 @@ using StoryCADLib.Models.Tools;
 using StoryCADLib.Services.API;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.ViewModels;
+using StoryCADLib.Services;
+using StoryCADTests.Services.Outline;
+using static StoryCADTests.Services.Outline.StoryRoleRuleTests;
 
 #nullable disable
 
@@ -2925,4 +2928,36 @@ public class StoryCADApiTests
     }
 
     #endregion
+
+
+    [TestMethod]
+    public async Task UpdateElementProperty_Protagonist_SetsMajorRole()
+    {
+        var (api, _) = await OutlineWithStoryProblem();
+        var subplot = AddProblem(api, "Banquo's line");
+        var character = AddCharacter(api, "Fleance");
+
+        var result = api.UpdateElementProperty(subplot.Uuid, nameof(ProblemModel.Protagonist), character.Uuid);
+
+        Assert.IsTrue(result.IsSuccess, result.ErrorMessage);
+        Assert.AreEqual("Major Role", character.StoryRole);
+    }
+
+    [TestMethod]
+    public async Task UpdateElementProperty_StoryProblem_SetsSeatRoles()
+    {
+        var api = CreateApi();
+        Assert.IsTrue((await api.CreateEmptyOutline("Roles", "Author", "0")).IsSuccess);
+        var problem = AddProblem(api, "Crown");
+        var protagonist = AddCharacter(api, "Macbeth");
+        var antagonist = AddCharacter(api, "Macduff");
+        problem.Protagonist = protagonist.Uuid;
+        problem.Antagonist = antagonist.Uuid;
+
+        var result = api.UpdateElementProperty(Overview(api).Uuid, nameof(OverviewModel.StoryProblem), problem.Uuid);
+
+        Assert.IsTrue(result.IsSuccess, result.ErrorMessage);
+        Assert.AreEqual("Protagonist", protagonist.StoryRole);
+        Assert.AreEqual("Antagonist", antagonist.StoryRole);
+    }
 }

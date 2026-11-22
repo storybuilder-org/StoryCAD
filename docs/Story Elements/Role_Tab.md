@@ -43,6 +43,8 @@ The character in a minor role appears briefly in the story, but has a story purp
 Service Role
 A service role is a walk on part.  Service role characters are created to fill a specific plot requirement but are otherwise not a part of the story.  A taxicab driver, needed to get the hero to the airport, is a service role. 
 
+When you make a character the Protagonist or Antagonist of a Problem, StoryCAD sets the Story Role for you if it is empty or lower than the seat calls for. A character on the Story Problem becomes Protagonist or Antagonist, to match; a character on any other Problem becomes Major Role. This happens on the Problem form, when you choose a Story Problem on the Overview, and when Collaborator or another program puts the character in place. StoryCAD never replaces a Story Role of Protagonist or Antagonist, and taking a character out of a Problem leaves its Story Role as it was.
+
 Archetype
 
 An archetype is a prototype or model from which something is based.  The character archetypes listed here derive from Joseph Campbell's The Hero with a Thousand Faces, and  are deeply rooted in the myths and legends of many cultures.  A significant character's role can often be associated with one of these archetypes.  The Archetype list also offers Ally and Higher Self.

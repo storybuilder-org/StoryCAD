@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using StoryCADLib.Services;
 using StoryCADLib.Services.Messages;
 using StoryCADLib.Services.Navigation;
+using StoryCADLib.Services.Outline;
 
 namespace StoryCADLib.ViewModels;
 
@@ -427,6 +428,7 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable, IRe
                 Model.Author = Author ?? "";
                 // DateModified is not written back: only a save sets Last Changed.
                 // A stale page value would otherwise undo the save's date.
+                var previousStoryProblem = Model.StoryProblem;
                 Model.StoryType = StoryType ?? "";
                 Model.StoryGenre = StoryGenre ?? "";
                 Model.Viewpoint = Viewpoint ?? "";
@@ -463,6 +465,15 @@ public class OverviewViewModel : ObservableRecipient, INavigable, ISaveable, IRe
 
                 Model.StructureNotes = StructureNotes ?? "";
                 Model.Notes = Notes ?? "";
+
+                // Collaborator #261: a new Story Problem gives its seated Characters their Story Role.
+                if (Model.StoryProblem != previousStoryProblem
+                    && _storyModel?.StoryElements?.StoryElementGuids != null
+                    && _storyModel.StoryElements.StoryElementGuids.TryGetValue(Model.StoryProblem, out var newSpine)
+                    && newSpine is ProblemModel newStoryProblem)
+                {
+                    StoryRoleRule.ApplySeats(_storyModel, newStoryProblem);
+                }
             }
         }
         catch (Exception ex)

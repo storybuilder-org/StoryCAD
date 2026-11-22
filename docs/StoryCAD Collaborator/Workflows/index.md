@@ -16,7 +16,7 @@ A workflow is one job of story development that Collaborator can do with you: tu
 
 The workflow list occupies the left side of the Story Collaborator window. It opens short and grows only when you ask, because a long menu is not much help when you want to run one job. From the top, you will see up to three bands.
 
-Outline gaps appears first, and only when your outline has empty required fields. It is not a workflow in the usual sense but a page that lists what is missing and where to go to fill it. [Outline Gaps](Outline_Gaps.html) explains it.
+Outline gaps appears first, and only when your outline has empty required fields or missing pieces, such as a Problem with no scene. It is not a workflow in the usual sense but a page that lists what is missing and where to go to fill it. [Outline Gaps](Outline_Gaps.html) explains it.
 
 Starred comes next and holds the workflows you have marked with a star. When you first open Collaborator, six are starred for you, one for each stage of outlining: Ideation (Story idea => Concept => Premise), Story Problem (Premise => Problem + Characters), Problem Builder, Character Builder, Setting Builder, and Scene Builder. You can change that set at any time; [Opening Collaborator](../Opening_Collaborator.html) shows how.
 
@@ -36,7 +36,7 @@ When you click a workflow, its name appears on the top bar and a short descripti
 
 ## The workflows
 
-- [Outline Gaps](Outline_Gaps.html): the generated list of empty required fields, and how Collaborator judges where your outline stands.
+- [Outline Gaps](Outline_Gaps.html): the generated list of empty required fields and missing pieces, and how Collaborator judges where your outline stands.
 - [Overview Workflows](Overview_Workflows.html): Ideation (Story idea => Concept => Premise), Story Problem (Premise => Problem + Characters), and Story Form.
 - [Problem Workflows](Problem_Workflows.html): Inner and Outer Problems, Problem Builder, and Problem Beats.
 - [Character Workflows](Character_Workflows.html): Character Builder, Flaw and Backstory, Character Relationship, and Character Interview.

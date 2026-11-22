@@ -20,6 +20,33 @@
                        Text="{x:Bind ViewModel.EmptyMessage, Mode=OneWay}"
                        FontStyle="Italic" />
 
+            <!-- Collaborator #261: missing pieces, above the element groups. -->
+            <TextBlock x:Name="MissingPiecesHeading"
+                       Text="Missing pieces"
+                       FontWeight="SemiBold" FontSize="15" />
+
+            <ItemsControl x:Name="MissingPiecesList"
+                          ItemsSource="{x:Bind ViewModel.MissingPieces, Mode=OneWay}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:GapMissingPieceLink">
+                        <!-- Template root: no AutomationId (TemplateSafety). -->
+                        <StackPanel Spacing="2" Margin="0,0,0,8">
+                            <HyperlinkButton Content="{x:Bind ElementName}"
+                                             Click="MissingPieceElementLink_Click"
+                                             Tag="{x:Bind ElementGuid}"
+                                             Padding="0"
+                                             FontWeight="SemiBold" />
+                            <TextBlock Text="{x:Bind Text}" TextWrapping="Wrap" Opacity="0.9" />
+                            <HyperlinkButton Content="{x:Bind ActionHint}"
+                                             Click="MissingPieceWorkflowLink_Click"
+                                             Tag="{x:Bind}"
+                                             Padding="0"
+                                             FontSize="12" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
             <ItemsControl x:Name="GroupsList"
                           ItemsSource="{x:Bind ViewModel.Groups, Mode=OneWay}">
                 <ItemsControl.ItemTemplate>

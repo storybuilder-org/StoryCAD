@@ -463,6 +463,10 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
         try
         {
             IsTextBoxFocused = false;
+            // Collaborator #261: keep the seats and the Story Problem as they were before this save.
+            var previousProtagonist = Model.Protagonist;
+            var previousAntagonist = Model.Antagonist;
+            var wasStoryProblem = _overviewModel != null && _overviewModel.StoryProblem == Model.Uuid;
             Model.Name = Name;
             Model.ProblemType = ProblemType;
             Model.ConflictType = ConflictType;
@@ -493,6 +497,16 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
 
             // Delegate beat-related saving to BeatSheetsViewModel
             BeatSheetsVm.SaveBeats(Model);
+
+            // Collaborator #261: a new seat, or this Problem becoming the Story Problem, sets the
+            // Story Role of the seated Characters. Last, so a failure here loses no other field.
+            var isStoryProblem = _overviewModel != null && _overviewModel.StoryProblem == Model.Uuid;
+            if (Model.Protagonist != previousProtagonist
+                || Model.Antagonist != previousAntagonist
+                || (isStoryProblem && !wasStoryProblem))
+            {
+                StoryRoleRule.ApplySeats(_storyModel, Model);
+            }
         }
         catch (Exception ex)
         {

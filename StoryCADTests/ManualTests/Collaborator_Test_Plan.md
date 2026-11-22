@@ -28,13 +28,13 @@ Script: `StoryCADTests/AutomationScripts/Collaborator.scs`. The header has the r
 
 Each step lists the manual page it covers. The script follows the pages in reading order, except where one workflow run serves several pages. Steps run in table order: later steps rely on the outline state that earlier steps leave.
 
-Not scripted: `Collaborator-Join-Dialog.png` (needs a machine without activation); TC-139 (added for #1645; a script step comes with the #1422 work). TC-112 and TC-113 timing and file checks stay manual: `pause` is zero in a test run.
+Not scripted: `Collaborator-Join-Dialog.png` (needs a machine without activation); TC-139 (added for #1645; a script step comes with the #1422 work); TC-140 (added for Collaborator #261). TC-112 and TC-113 timing and file checks stay manual: `pause` is zero in a test run.
 
 ---
 
 | Step | Manual page | Actions | Expected | Images |
 |------|-------------|---------|----------|--------|
-| TC-121 | Getting Started; Outline Gaps | Create a new outline "My Story". Click Collaborator. Click Outline gaps. Exit | Toolbar shows Collaborator. Outline gaps page lists the Overview's empty fields and a Guess sentence | Collaborator-Toolbar-Button, Collaborator-Outline-Gaps |
+| TC-121 | Getting Started; Outline Gaps | Create a new outline "My Story". Click Collaborator. Click Outline gaps. Exit | Toolbar shows Collaborator. Outline gaps page lists the Overview's empty fields and a Guess sentence. The page shows no missing pieces. | Collaborator-Toolbar-Button, Collaborator-Outline-Gaps |
 | TC-111 | | File > Close. Click Collaborator. Then File > Open/Create > Sample outlines > Danger Calls | Collaborator does **not** open. Status bar: "No story is open. Open an outline before using Collaborator." No crash. The main window opens the sample | |
 | TC-122 | An Example Session | Select Danger Calls at the top of the tree; Story Idea tab | Overview shows the Story Idea about teenagers selling drugs | Collaborator-Session-Overview |
 | TC-110 | What Collaborator Is; Opening Collaborator; A Path to Try | Click Collaborator. Then select Leonard Kraskin in the main window | Story Collaborator window opens alongside the main window. Left panel: Outline gaps row, Starred band (Ideation, Story Problem, Problem Builder, Character Builder, Setting Builder, Scene Builder), closed groups. The main window responds while Collaborator is open | Collaborator-With-StoryCAD, Collaborator-Workflow-Pane |
@@ -53,7 +53,7 @@ Not scripted: `Collaborator-Join-Dialog.png` (needs a machine without activation
 | TC-128 | Running a Workflow; An Example Session; Problem Workflows | In StoryCAD, set the tech problem's Problem Category Complication, Protagonist Leonard Kraskin, Antagonist Charlie Lacas. Problem Builder; pick the tech problem. Review Each, Skip one, Accept Free Remaining | Picker "Select Problem" lists the problems with Create a new element. Rows for the Problem fields only: no beat sheet rows (Collaborator #302) | Collaborator-Element-Picker, Collaborator-Updates-After-Run, Collaborator-Session-Problem-Builder |
 | TC-129 | Problem Workflows; A Path to Try | Problem Beats on the same problem. Accept All | One row per beat; no Replace question | Collaborator-Workflow-Problem-Beats |
 | TC-130 | Character Workflows | Character Builder on Leonard Kraskin. Accept All; Cancel | Long list of sheet fields and the Character Sketch | Collaborator-Workflow-Character-Builder |
-| TC-131 | Outline Gaps | Click Outline gaps | Guess sentence has moved past Ideation; remaining empty fields listed | Collaborator-Outline-Gaps-Midway |
+| TC-131 | Outline Gaps | Click Outline gaps | Guess sentence has moved past Ideation; remaining empty fields listed. The list of missing pieces shows each Character that no Problem has as Protagonist or Antagonist. The list does not show Leonard Kraskin or Charlie Lacas. The list can show Problems that `TC-129` made with no Scene. | Collaborator-Outline-Gaps-Midway |
 | TC-132 | Character Workflows; Chat | Flaw and Backstory on Charlie Lacas. Ask a question in chat. Then ask chat to rewrite Flaw and Backstory. Accept nothing | Rows for Flaw and BackStory. The chat answers the question. The rewrite changes the waiting rows in place | Collaborator-Workflow-Flaw-Backstory, Collaborator-Chat, Collaborator-Workflow-Flaw-Backstory-Chat |
 | TC-133 | Character Workflows | Character Relationship: Leonard Kraskin, then Tony Irwin | One relationship row | Collaborator-Workflow-Relationship |
 | TC-134 | Character Workflows | Character Interview on Charlie Lacas. Type Flaw; answer the first question; Save interview to outline | Choice list, then one question per turn. No Accept All. Save writes a note under Charlie | Collaborator-Workflow-Character-Interview, Collaborator-Workflow-Character-Interview-End |
@@ -63,6 +63,7 @@ Not scripted: `Collaborator-Join-Dialog.png` (needs a machine without activation
 | TC-137 | Scene Workflows | Scene Builder on We have a drug deal | Rows across the Scene, Development, Conflict and Sequel tabs | Collaborator-Workflow-Scene-Builder |
 | TC-138 | Running a Workflow; Reviewing Suggestions | Exit. Open Catching the drug dealer Lacas, Protagonist tab; Overview Structure tab; Unmarked police car | TC-115: Protagonist is Leonard Kraskin, and the accepted rows show their text. TC-117: Genre Suspense, Type Short Story. TC-116: the two accepted fields hold text; Weather is empty | |
 | TC-120 | | Buy Credits (tooltip "Buy Collaborator Credits"), then Not now | Button enabled when the command bar is idle. Buy Credits dialog opens; on a sideloaded or non-store build the pack list may be empty or show a store error. Assertion is **dialog opens**, not a purchase. Not now closes it; main window responsive | |
+| TC-140 | Outline Gaps | Make a new outline. Add a Problem, a Character, a Setting and a Story World. Select the Collaborator button. Select the nav row. | The page shows the heading "Missing pieces". The list shows the Problem with a link to Problem Beats. The list shows the Character with a link to Problem Builder. The Setting group shows Locale and Period with links to Setting Builder. The group "Story World" shows World Type with a link to Define Story World. The gap number is the sum of the field gaps and the missing pieces. | |
 
 Script line numbers: each `step "TC-nnn"` line in the script.
 
