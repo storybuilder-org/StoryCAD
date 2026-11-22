@@ -497,14 +497,22 @@ public sealed class StoryCADDriver : IUiDriver
     public Rectangle PlaceVisibleFrame(int width, int height)
     {
         var workArea = NativeMethods.PrimaryWorkArea();
-        if (!workArea.Contains(new Rectangle(0, 0, width, height)))
-        {
-            throw new AutomationLaunchException(
-                $"a {width}x{height} window at the top-left does not fit in the display's work area {workArea}; " +
-                "the taskbar or the screen edge would show in the recording.");
-        }
+        var target = MainWindowFrame(new Size(width, height), workArea)
+                     ?? throw new AutomationLaunchException(
+                         $"a {width}x{height} window at the top-left does not fit in the display's work area {workArea}; " +
+                         "the taskbar or the screen edge would show in the recording.");
 
-        return PlaceVisibleFrame(_process.MainWindowHandle, new Rectangle(0, 0, width, height));
+        return PlaceVisibleFrame(_process.MainWindowHandle, target);
+    }
+
+    /// <summary>
+    ///     Where the main window goes: the top-left of the work area, so a taskbar at the top or the
+    ///     left of the screen does not cover it (Collaborator #261); null when it does not fit.
+    /// </summary>
+    internal static Rectangle? MainWindowFrame(Size size, Rectangle workArea)
+    {
+        var target = new Rectangle(workArea.Location, size);
+        return workArea.Contains(target) ? target : null;
     }
 
     /// <summary>

@@ -182,6 +182,39 @@ public class StoryCADDriverTests
         Assert.IsNull(StoryCADDriver.SecondWindowFrame(null, new Size(4000, 600), WorkArea));
     }
 
+    // Collaborator #261: a taskbar at the top of the screen moves the work area down; the main
+    // window goes to the work area's top-left, not the screen's (0, 0).
+    private static readonly Rectangle WorkAreaBelowTopTaskbar = new(0, 60, 3840, 2028);
+
+    [TestMethod]
+    public void MainWindowFrame_TaskbarAtTop_PlacesAtWorkAreaTopLeft()
+    {
+        var frame = StoryCADDriver.MainWindowFrame(new Size(1554, 1116), WorkAreaBelowTopTaskbar);
+
+        Assert.AreEqual(new Rectangle(0, 60, 1554, 1116), frame);
+    }
+
+    [TestMethod]
+    public void MainWindowFrame_TaskbarAtBottom_PlacesAtScreenTopLeft()
+    {
+        var frame = StoryCADDriver.MainWindowFrame(new Size(1554, 1116), WorkArea);
+
+        Assert.AreEqual(new Rectangle(0, 0, 1554, 1116), frame);
+    }
+
+    [TestMethod]
+    public void MainWindowFrame_LargerThanWorkArea_ReturnsNull()
+    {
+        Assert.IsNull(StoryCADDriver.MainWindowFrame(new Size(1554, 2100), WorkAreaBelowTopTaskbar));
+    }
+
+    [TestMethod]
+    public void SecondWindowFrame_TaskbarAtTopNoMainWindow_PlacesAtWorkAreaTopLeft()
+    {
+        Assert.AreEqual(new Rectangle(0, 60, 800, 600),
+            StoryCADDriver.SecondWindowFrame(null, new Size(800, 600), WorkAreaBelowTopTaskbar));
+    }
+
     [TestMethod]
     public void ElementArea_WithTargetsInTwoWindows_ClipsToUnionOfWindows()
     {
