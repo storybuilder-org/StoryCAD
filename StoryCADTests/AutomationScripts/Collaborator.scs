@@ -133,6 +133,13 @@ expect WorkflowNav gone
 pause 90                                  # by hand: a new backup zip appears
 
 step "TC-119: Close and reopen Collaborator in the same session"
+click tree "Danger Calls"                 # TC-114 setup: an empty Premise gives Ideation a field to propose
+wait TitleTextBox
+tab PremiseTab
+focus OverviewPremiseRichEdit
+press "Primary+A"
+press "Delete"
+press "Tab"
 click CollaboratorButton                  # TC-113 opened and closed it; this is the second open
 window "Story Collaborator" size 1036x744
 wait-window "Story Collaborator"

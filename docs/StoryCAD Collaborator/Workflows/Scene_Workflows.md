@@ -20,4 +20,4 @@ Scene Builder fills a scene; it works best on one that already has a name and a 
 
 The characters in your outline determine your choices for the Cast, the Viewpoint character, and the two roles on the Conflict tab; Like Character Builder, this is a long list of proposals, and Review Each is the comfortable way through it. It is one of the six starred by default.
 
-![Property Updates after Scene Builder on We have a drug deal, a scene under the Problem Leonard's impulsiveness lets Lacas capture him: 16 rows, starting with the Cast](../../media/Collaborator/Collaborator-Workflow-Scene-Builder.png)
+![Property Updates after Scene Builder on We have a drug deal, a scene on a beat of the Problem How will Leonard and Tony get past Charlie's tech?: 15 rows, starting with the Cast](../../media/Collaborator/Collaborator-Workflow-Scene-Builder.png)

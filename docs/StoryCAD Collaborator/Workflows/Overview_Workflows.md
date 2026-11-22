@@ -20,7 +20,7 @@ This workflow takes whatever you have on those three tabs and carries it forward
 
 It is one of the six workflows starred when you first open Collaborator. When it finishes, the Property Updates list offers up to three fields on the Overview: Story Idea, Concept, and Premise. Any of them that already holds your text is marked Has your text, and **Accept All** asks before it replaces that text, so running it on a finished Overview is safe. It will simply have less to offer.
 
-![Property Updates after Ideation on Danger Calls: Concept and Premise rows, both marked Has your text; the Story Idea is kept as it is](../../media/Collaborator/Collaborator-Workflow-Premise.png)
+![Property Updates after Ideation on Danger Calls with its Premise cleared first: one Premise row, marked New; the Story Idea and Concept are kept as they are](../../media/Collaborator/Collaborator-Workflow-Premise.png)
 
 ## Story Problem (Premise => Problem + Characters)
 
@@ -30,7 +30,7 @@ It needs a Premise on the Overview, so run Ideation (Story idea => Concept => Pr
 
 The run then proposes text for most of the Problem form. On the Problem tab, the Name, Problem Type, Conflict Type, Subject, Story Question, and Source of Conflict; on the Protagonist and Antagonist tabs, a Goal, Motivation, and Conflict for each; and on the Resolution tab, the Premise, Outcome, Method, and Theme. It also proposes a Name for each of the two characters if you created them new. When you are done, you have a story problem with two named people attached to it, which is what Problem Builder, Inner and Outer Problems, and the character workflows all build on. It is one of the six starred by default.
 
-![Property Updates after Story Problem on Catching the drug dealer Lacas, with Leonard Kraskin as protagonist and Charlie Lacas as antagonist: 13 rows, the first two for the antagonist's Conflict and Goal](../../media/Collaborator/Collaborator-Workflow-Story-Problem.png)
+![Property Updates after Story Problem on Catching the drug dealer Lacas, with Leonard Kraskin as protagonist and Charlie Lacas as antagonist: 15 rows, starting with the antagonist's Name, Conflict, and Goal](../../media/Collaborator/Collaborator-Workflow-Story-Problem.png)
 
 ## Story Form
 
