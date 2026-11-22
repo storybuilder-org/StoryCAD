@@ -19,6 +19,7 @@ public partial class GapWorkflowViewModel : ObservableRecipient
         Groups = new ObservableCollection<GapElementGroup>();
         OpenElementCommand = new RelayCommand<Guid>(guid => OnOpenElement?.Invoke(guid));
         OpenFieldCommand = new AsyncRelayCommand<GapFieldLink>(OpenFieldAsync);
+        OpenMissingPieceCommand = new AsyncRelayCommand<GapMissingPieceLink>(OpenMissingPieceAsync);
     }
 
     public string Title { get; set; } = "Outline gaps";
@@ -43,6 +44,24 @@ public partial class GapWorkflowViewModel : ObservableRecipient
     public RelayCommand<Guid> OpenElementCommand { get; }
     public IAsyncRelayCommand<GapFieldLink> OpenFieldCommand { get; }
 
+    /// <summary>Collaborator #261: missing pieces, shown above the element groups.</summary>
+    public ObservableCollection<GapMissingPieceLink> MissingPieces { get; } = new();
+
+    public bool HasMissingPieces => MissingPieces.Count > 0;
+
+    /// <summary>The "No required-field gaps." line shows only when there are neither field gaps nor missing pieces.</summary>
+    public bool ShowEmptyMessage => !HasGroups && !HasMissingPieces;
+
+    public IAsyncRelayCommand<GapMissingPieceLink> OpenMissingPieceCommand { get; }
+
+    private async Task OpenMissingPieceAsync(GapMissingPieceLink piece)
+    {
+        if (piece == null || string.IsNullOrEmpty(piece.WorkflowLabel) || OnOpenWorkflow == null)
+            return;
+
+        await OnOpenWorkflow(piece.WorkflowLabel);
+    }
+
     public void Load(GapWorkflowPayload payload)
     {
         Groups.Clear();
@@ -51,9 +70,17 @@ public partial class GapWorkflowViewModel : ObservableRecipient
             foreach (var g in payload.Groups)
                 Groups.Add(g);
         }
+        MissingPieces.Clear();
+        if (payload?.MissingPieces != null)
+        {
+            foreach (var piece in payload.MissingPieces)
+                MissingPieces.Add(piece);
+        }
         GuessSentence = payload?.GuessSentence ?? string.Empty;
         OnPropertyChanged(nameof(HasGroups));
         OnPropertyChanged(nameof(GuessSentence));
+        OnPropertyChanged(nameof(HasMissingPieces));
+        OnPropertyChanged(nameof(ShowEmptyMessage));
     }
 
     private async Task OpenFieldAsync(GapFieldLink field)

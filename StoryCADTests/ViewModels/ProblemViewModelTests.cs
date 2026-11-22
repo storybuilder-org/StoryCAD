@@ -10,7 +10,7 @@ using StoryCADLib.ViewModels.Tools;
 namespace StoryCADTests.ViewModels;
 
 [TestClass]
-public class ProblemViewModelTests
+public partial class ProblemViewModelTests
 {
     private ProblemModel _problemModel;
     private StoryModel _storyModel;

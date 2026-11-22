@@ -55,6 +55,11 @@ public static class GapWorkflowOwnership
             // #224: SettingBuilder absorbed SettingTimeSpace and Sensations.
             (StoryItemType.Setting, "Description") => new[] { "SettingBuilder" },
             (StoryItemType.Setting, "Name") => Array.Empty<string>(),
+            // #261: place fields and the Story World (#198).
+            (StoryItemType.Setting, "Locale") => new[] { "SettingBuilder" },
+            (StoryItemType.Setting, "Period") => new[] { "SettingBuilder" },
+            (StoryItemType.StoryWorld, "WorldType") => new[] { "DefineStoryWorld" },
+            (StoryItemType.StoryWorld, "Description") => new[] { "DefineStoryWorld" },
 
             (StoryItemType.Scene, "Description") => new[] { "SceneBuilder" },
             (StoryItemType.Scene, "CastMembers") => new[] { "SceneBuilder" },
@@ -66,6 +71,13 @@ public static class GapWorkflowOwnership
             _ => Array.Empty<string>()
         };
     }
+
+    /// <summary>
+    /// Collaborator #261: the type label on an Outline gaps group. The enum name, except the
+    /// Story World, which the page shows with a space.
+    /// </summary>
+    public static string GroupLabel(StoryItemType elementType) =>
+        elementType == StoryItemType.StoryWorld ? "Story World" : elementType.ToString();
 
     public static string DisplayLabel(StoryItemType elementType, string propertyName)
     {
@@ -86,6 +98,8 @@ public static class GapWorkflowOwnership
             (StoryItemType.Problem, "ConflictType") => "Conflict Type",
             (StoryItemType.Problem, "Subject") => "Subject",
             (StoryItemType.Scene, "CastMembers") => "Cast",
+            (StoryItemType.StoryWorld, "WorldType") => "World Type",
+            (StoryItemType.StoryWorld, "Description") => "World tell",
             _ => propertyName
         };
     }

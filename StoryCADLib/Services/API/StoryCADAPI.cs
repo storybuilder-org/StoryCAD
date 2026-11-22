@@ -667,6 +667,34 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
         }
     }
 
+    /// <summary>
+    /// Collaborator #261: after a seat or the Overview's Story Problem is written, the seated
+    /// Characters get their Story Role. A failure is logged; the property write still succeeds.
+    /// </summary>
+    private void ApplyStoryRoleRule(StoryElement element, string propertyName)
+    {
+        try
+        {
+            if (element is ProblemModel problem
+                && propertyName is nameof(ProblemModel.Protagonist) or nameof(ProblemModel.Antagonist))
+            {
+                StoryRoleRule.ApplySeats(CurrentModel, problem);
+            }
+            else if (element is OverviewModel overview
+                     && propertyName == nameof(OverviewModel.StoryProblem)
+                     && CurrentModel.StoryElements.StoryElementGuids.TryGetValue(overview.StoryProblem, out var spine)
+                     && spine is ProblemModel storyProblem)
+            {
+                StoryRoleRule.ApplySeats(CurrentModel, storyProblem);
+            }
+        }
+        catch (Exception ex)
+        {
+            Ioc.Default.GetService<ILogService>()?.LogException(LogLevel.Error, ex,
+                $"Story Role rule failed after writing {propertyName}");
+        }
+    }
+
     public OperationResult<StoryElement> UpdateElementProperty(Guid elementUuid, string propertyName, object value)
     {
         // Ensure we have a current StoryModel.
@@ -725,6 +753,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
             // Update the property value.
             property.SetValue(element, value);
             CurrentModel.Changed = true;
+            ApplyStoryRoleRule(element, propertyName);
 
             return OperationResult<StoryElement>.Success(element);
         }

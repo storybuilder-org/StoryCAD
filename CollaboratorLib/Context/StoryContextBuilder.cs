@@ -121,6 +121,7 @@ public class StoryContextBuilder
         Ideation,              // No overview or empty Type/Genre/Premise
         ProblemDevelopment,    // Premise present; no Story Problem, or seats empty
         CharacterDevelopment,  // Essential Character fields empty on seated people
+        PlaceAndWorld,         // Collaborator #261: a Setting or the Story World has a field gap
         StructureBuilding,     // After Character Development; no Scene on any beat
         SceneWork              // Scenes assigned to beats
     }
@@ -155,8 +156,11 @@ public class StoryContextBuilder
             return MakeGuess(DevelopmentPhase.ProblemDevelopment, DevelopmentPhase.ProblemDevelopment);
 
         var seats = ProblemCharacterIndex.Build(_api, model).EdgesForProblem(storyProblem.Uuid);
+        // Collaborator #261: a Character in the trash does not hold a seat.
         var unseated = seats.Count == 0 ||
-                       seats.Any(s => s.Status != ProblemCharacterLinkStatus.Linked);
+                       seats.Any(s => s.Status != ProblemCharacterLinkStatus.Linked) ||
+                       seats.Any(s => model.StoryElements.StoryElementGuids.TryGetValue(s.CharacterGuid, out var c)
+                                      && RequiredFieldGapScanner.IsInTrash(c));
         if (unseated)
         {
             return MakeGuess(
@@ -180,6 +184,9 @@ public class StoryContextBuilder
             }
         }
 
+        if (HasPlaceOrWorldGap(model))
+            return MakeGuess(DevelopmentPhase.PlaceAndWorld, DevelopmentPhase.PlaceAndWorld);
+
         if (HasSceneAssignments(storyProblem, model))
             return MakeGuess(DevelopmentPhase.SceneWork, DevelopmentPhase.SceneWork);
 
@@ -190,6 +197,16 @@ public class StoryContextBuilder
     /// Detect the current development phase by examining the StoryModel
     /// </summary>
     private DevelopmentPhase DetectDevelopmentPhase(StoryModel model) => Classify(model).Earliest;
+
+    /// <summary>
+    /// Collaborator #261: an available Setting or Story World has a field gap (Name,
+    /// Description, Locale, Period, WorldType).
+    /// </summary>
+    private bool HasPlaceOrWorldGap(StoryModel model) =>
+        model.StoryElements
+            .Where(e => e is SettingModel or StoryWorldModel)
+            .Any(e => !RequiredFieldGapScanner.IsInTrash(e)
+                      && RequiredFieldGapScanner.GetMissingProperties(_api, e).Count > 0);
 
     private bool HasEssentialCharacterGap(StoryElement person)
     {
@@ -219,6 +236,8 @@ public class StoryContextBuilder
             "Problem development - building the Story Problem",
         DevelopmentPhase.CharacterDevelopment =>
             "Character development - filling essential Character fields",
+        DevelopmentPhase.PlaceAndWorld =>
+            "Place and world development - Setting and Story World fields are empty",
         DevelopmentPhase.StructureBuilding =>
             "Structure building - organizing problems into beat sheet",
         DevelopmentPhase.SceneWork =>
@@ -246,6 +265,8 @@ public class StoryContextBuilder
                     "Guess: the outline is in Problem Development.",
                 DevelopmentPhase.CharacterDevelopment =>
                     "Guess: the outline is in Character Development. Essential Character fields are empty on the Story Problem cast.",
+                DevelopmentPhase.PlaceAndWorld =>
+                    "Guess: the outline is in Place and World Development. Setting or Story World fields are empty.",
                 DevelopmentPhase.StructureBuilding =>
                     "Guess: the outline is in Structure Building.",
                 DevelopmentPhase.SceneWork =>
@@ -258,32 +279,11 @@ public class StoryContextBuilder
     }
 
     /// <summary>
-    /// Check if any beats in the hierarchy have scenes assigned
+    /// Check if any beats in the hierarchy have scenes assigned. Collaborator #261: the scanner's
+    /// walk skips the trash and reads each Problem once, so a loop of Problems on beats ends.
     /// </summary>
-    private bool HasSceneAssignments(ProblemModel problem, StoryModel model)
-    {
-        if (problem.StructureBeats == null)
-            return false;
-
-        foreach (var beat in problem.StructureBeats)
-        {
-            if (beat.Guid == Guid.Empty)
-                continue;
-
-            var element = ResolveElement(beat.Guid, model);
-            if (element == null)
-                continue;
-
-            if (element.ElementType == StoryItemType.Scene)
-                return true;
-
-            // Recursively check sub-problems
-            if (element is ProblemModel subProblem && HasSceneAssignments(subProblem, model))
-                return true;
-        }
-
-        return false;
-    }
+    private static bool HasSceneAssignments(ProblemModel problem, StoryModel model) =>
+        RequiredFieldGapScanner.HasSceneOnBeats(problem, model);
 
     private void AppendPhaseContext(StringBuilder sb, string promptLine)
     {
@@ -374,12 +374,14 @@ public class StoryContextBuilder
     /// </summary>
     /// <returns>True if found, path contains the route to it</returns>
     private bool FindProblemInHierarchy(ProblemModel currentProblem, Guid targetGuid, StoryModel model,
-        List<(ProblemModel Problem, int BeatIndex, string BeatTitle)> path)
+        List<(ProblemModel Problem, int BeatIndex, string BeatTitle)> path, HashSet<Guid>? read = null)
     {
         if (currentProblem.Uuid == targetGuid)
             return true;
 
-        if (currentProblem.StructureBeats == null)
+        // Collaborator #261: read each Problem once, so a loop of Problems on beats ends.
+        read ??= new HashSet<Guid>();
+        if (currentProblem.StructureBeats == null || !read.Add(currentProblem.Uuid))
             return false;
 
         for (int i = 0; i < currentProblem.StructureBeats.Count; i++)
@@ -398,7 +400,7 @@ public class StoryContextBuilder
             if (element is ProblemModel subProblem)
             {
                 path.Add((currentProblem, i, beat.Title));
-                if (FindProblemInHierarchy(subProblem, targetGuid, model, path))
+                if (FindProblemInHierarchy(subProblem, targetGuid, model, path, read))
                     return true;
                 path.RemoveAt(path.Count - 1);
             }
@@ -410,9 +412,12 @@ public class StoryContextBuilder
     /// <summary>
     /// Append beat list with hierarchy visualization
     /// </summary>
-    private void AppendBeatList(StringBuilder sb, ProblemModel problem, Guid targetGuid, StoryModel model, int depth)
+    private void AppendBeatList(StringBuilder sb, ProblemModel problem, Guid targetGuid, StoryModel model, int depth,
+        HashSet<Guid>? read = null)
     {
-        if (problem.StructureBeats == null)
+        // Collaborator #261: read each Problem once, so a loop of Problems on beats ends.
+        read ??= new HashSet<Guid>();
+        if (problem.StructureBeats == null || !read.Add(problem.Uuid))
             return;
 
         var indent = new string(' ', depth * 2);
@@ -442,7 +447,7 @@ public class StoryContextBuilder
             // Recursively show sub-problem's beats if it has them
             if (subProblem != null && subProblem.StructureBeats != null && subProblem.StructureBeats.Count > 0)
             {
-                AppendBeatList(sb, subProblem, targetGuid, model, depth + 1);
+                AppendBeatList(sb, subProblem, targetGuid, model, depth + 1, read);
             }
         }
     }
@@ -557,9 +562,11 @@ public class StoryContextBuilder
     /// Collect all assigned elements in narrative order by traversing beat sheets
     /// </summary>
     private void CollectElementsInOrder(ProblemModel problem, StoryModel model,
-        List<(Guid Guid, string Name, string Type)> elements)
+        List<(Guid Guid, string Name, string Type)> elements, HashSet<Guid>? read = null)
     {
-        if (problem.StructureBeats == null)
+        // Collaborator #261: read each Problem once, so a loop of Problems on beats ends.
+        read ??= new HashSet<Guid>();
+        if (problem.StructureBeats == null || !read.Add(problem.Uuid))
             return;
 
         foreach (var beat in problem.StructureBeats)
@@ -576,7 +583,7 @@ public class StoryContextBuilder
             // Recursively collect from sub-problems
             if (element is ProblemModel subProblem)
             {
-                CollectElementsInOrder(subProblem, model, elements);
+                CollectElementsInOrder(subProblem, model, elements, read);
             }
         }
     }

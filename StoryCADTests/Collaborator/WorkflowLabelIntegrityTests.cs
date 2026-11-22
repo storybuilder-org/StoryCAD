@@ -19,7 +19,7 @@ namespace StoryCADTests.Collaborator;
 ///     pointing at something the Worker will reject. These are the guards that fail instead.
 /// </summary>
 [TestClass]
-public class WorkflowLabelIntegrityTests
+public partial class WorkflowLabelIntegrityTests
 {
     private static StoryCADApi CreateApi() => new(
         Ioc.Default.GetRequiredService<OutlineService>(),

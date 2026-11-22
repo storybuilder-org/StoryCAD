@@ -24,7 +24,7 @@ namespace StoryCADTests.Services.Outline;
 ///     </list>
 /// </summary>
 [TestClass]
-public class OutlineServiceTests
+public partial class OutlineServiceTests
 {
     private OutlineService _outlineService;
     private string testOutputPath;

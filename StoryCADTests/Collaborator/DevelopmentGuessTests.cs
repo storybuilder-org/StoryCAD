@@ -13,7 +13,7 @@ namespace StoryCADTests.Collaborator;
 /// Collaborator #107: Guess classifier and Problem prompt line.
 /// </summary>
 [TestClass]
-public class DevelopmentGuessTests
+public partial class DevelopmentGuessTests
 {
     private static StoryCADApi CreateApi() => new(
         Ioc.Default.GetRequiredService<OutlineService>(),

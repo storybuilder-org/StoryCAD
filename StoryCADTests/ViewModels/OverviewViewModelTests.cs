@@ -8,7 +8,7 @@ using StoryCADLib.ViewModels;
 namespace StoryCADTests.ViewModels;
 
 [TestClass]
-public class OverviewViewModelTests
+public partial class OverviewViewModelTests
 {
     private StoryModel _storyModel;
     private OverviewModel _overview;

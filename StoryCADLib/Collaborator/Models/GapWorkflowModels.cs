@@ -12,6 +12,25 @@ public sealed class GapWorkflowPayload
     public IReadOnlyList<GapElementGroup> Groups { get; set; } = Array.Empty<GapElementGroup>();
 
     public string GuessSentence { get; set; } = string.Empty;
+
+    /// <summary>Collaborator #261: missing pieces, listed above the element groups.</summary>
+    public IReadOnlyList<GapMissingPieceLink> MissingPieces { get; set; } = Array.Empty<GapMissingPieceLink>();
+}
+
+/// <summary>
+/// Collaborator #261: one missing piece on the Outline gaps page. The element name opens the
+/// element in StoryCAD; the workflow link opens the workflow that closes the gap.
+/// </summary>
+public sealed class GapMissingPieceLink
+{
+    public Guid ElementGuid { get; set; }
+    public string ElementName { get; set; } = string.Empty;
+    public string Text { get; set; } = string.Empty;
+    public string WorkflowLabel { get; set; } = string.Empty;
+    public string WorkflowTitle { get; set; } = string.Empty;
+
+    /// <summary>Shown as the workflow link, as for a field gap: "via Problem Beats".</summary>
+    public string ActionHint => string.IsNullOrEmpty(WorkflowTitle) ? WorkflowLabel : $"via {WorkflowTitle}";
 }
 
 public sealed class GapElementGroup

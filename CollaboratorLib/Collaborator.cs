@@ -355,13 +355,15 @@ public class Collaborator : ICollaborator
         if (_storyApi != null && _storyModel != null)
         {
             var gapDetails = RequiredFieldGapScanner.FindGapDetails(_storyApi, _storyModel);
-            if (gapDetails.Count > 0)
+            var missingPieces = RequiredFieldGapScanner.FindMissingPieces(_storyModel);
+            var gapCount = RequiredFieldGapScanner.GapCount(gapDetails, missingPieces);
+            if (gapCount > 0)
             {
                 // Collaborator #237 item 10: the count is the number of missing fields, which is
                 // what the page lists. It used to count elements, so an Overview with five
-                // empty fields read as "(1)".
+                // empty fields read as "(1)". Collaborator #261: missing pieces count too.
                 viewModel.MenuItems.Add(WrappingNavItem(
-                    $"{GapWorkflowOwnership.OutlineGapsNavTitle} ({RequiredFieldGapScanner.MissingFieldCount(gapDetails)})",
+                    $"{GapWorkflowOwnership.OutlineGapsNavTitle} ({gapCount})",
                     GapWorkflowOwnership.OutlineGapsTag,
                     CollaboratorAutomationIds.OutlineGapsNavItem));
             }
@@ -689,10 +691,22 @@ public class Collaborator : ICollaborator
             {
                 ElementGuid = d.ElementGuid,
                 ElementName = d.ElementName,
-                ElementTypeLabel = d.ElementType.ToString(),
+                ElementTypeLabel = GapWorkflowOwnership.GroupLabel(d.ElementType),
                 MissingFields = fields
             };
         }).ToList();
+
+        // Collaborator #261: missing pieces, listed above the element groups.
+        var missingPieces = RequiredFieldGapScanner.FindMissingPieces(_storyModel)
+            .Select(p => new GapMissingPieceLink
+            {
+                ElementGuid = p.ElementGuid,
+                ElementName = p.ElementName,
+                Text = p.Text,
+                WorkflowLabel = p.WorkflowLabel,
+                WorkflowTitle = WorkflowRegistry.Get(p.WorkflowLabel)?.Title ?? p.WorkflowLabel
+            })
+            .ToList();
 
         var guess = new StoryContextBuilder(_storyApi).Classify(_storyModel);
         _logger?.LogDebug(
@@ -706,7 +720,8 @@ public class Collaborator : ICollaborator
             page.ViewModel.Load(new GapWorkflowPayload
             {
                 Groups = groups,
-                GuessSentence = guess.GapsSentence
+                GuessSentence = guess.GapsSentence,
+                MissingPieces = missingPieces
             });
             page.ViewModel.OnOpenElement = guid =>
             {

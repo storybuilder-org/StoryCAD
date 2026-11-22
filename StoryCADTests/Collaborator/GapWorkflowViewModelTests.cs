@@ -7,7 +7,7 @@ namespace StoryCADTests.Collaborator;
 /// Collaborator #107: Outline gaps page copies the Guess sentence.
 /// </summary>
 [TestClass]
-public class GapWorkflowViewModelTests
+public partial class GapWorkflowViewModelTests
 {
     [TestMethod]
     public void Load_CopiesGuessSentence_AndRaisesPropertyChanged()

@@ -200,6 +200,13 @@ public class OutlineService
                 throw new ArgumentOutOfRangeException(nameof(template));
         }
 
+        // Collaborator #261: the template's seated Characters get their Story Role.
+        foreach (var seatedProblem in model.StoryElements.OfType<ProblemModel>().ToList())
+        {
+            if (seatedProblem.Protagonist != Guid.Empty || seatedProblem.Antagonist != Guid.Empty)
+                StoryRoleRule.ApplySeats(model, seatedProblem);
+        }
+
         // Reset Changed flag after template creation
         // Template creation adds nodes which trigger change events, but a newly created model shouldn't be marked as changed
         model.Changed = false;
@@ -821,6 +828,9 @@ public class OutlineService
         problem.ProtConflict = scene.Opposition;
         problem.Outcome = scene.Outcome;
         problem.Notes = scene.Notes;
+
+        // Collaborator #261: the copied seats give their Characters a Story Role.
+        StoryRoleRule.ApplySeats(model, problem);
 
         // clean up model references
         model.StoryElements.Remove(scene);

@@ -11,7 +11,7 @@ using StoryCADLib.ViewModels;
 namespace StoryCADTests.Services.API;
 
 [TestClass]
-public class StoryCADApiTests
+public partial class StoryCADApiTests
 {
     private readonly StoryCADApi _api = new(Ioc.Default.GetRequiredService<OutlineService>(), Ioc.Default.GetRequiredService<ListData>(), Ioc.Default.GetRequiredService<ControlData>(), Ioc.Default.GetRequiredService<ToolsData>());
 

@@ -37,7 +37,7 @@ The list on the left opens short and grows only when you ask it to, because seei
 
 | Band | What it holds |
 |------|---------------|
-| Outline gaps | Required fields you have not filled in yet, with a count of those fields. The row appears only when there are gaps, and it is usually the most useful thing to do next. |
+| Outline gaps | Required fields you have not filled in yet, and missing pieces of the story such as a Problem with no scene, with a count of both together. The row appears only when there are gaps, and it is usually the most useful thing to do next. |
 | Starred | The workflows you have marked as yours. Six are starred to begin with, one for each stage of outlining: Ideation, Story Problem, Problem Builder, Character Builder, Setting Builder, and Scene Builder. |
 | Story element groups | Everything else, filed under Overview, Problem, Character, Story World, Setting, and Scene. A group appears only when it holds a workflow you haven't starred, so with the starting stars there is no Setting or Scene group. These start closed; click a group to open it. |
 

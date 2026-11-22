@@ -14,7 +14,7 @@ namespace StoryCADTests.Collaborator;
 /// Flaw is not gap-required.
 /// </summary>
 [TestClass]
-public class RequiredFieldGapScannerTests
+public partial class RequiredFieldGapScannerTests
 {
     private static StoryCADApi CreateApi() => new(
         Ioc.Default.GetRequiredService<OutlineService>(),
