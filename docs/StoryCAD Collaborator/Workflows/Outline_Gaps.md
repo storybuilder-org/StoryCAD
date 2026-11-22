@@ -27,7 +27,9 @@ A sentence at the top of the page beginning "Guess:" tells you where Collaborato
 A field can be filled while a piece of the story is still missing. The Missing pieces list, at the top of the page, names two kinds:
 
 - **A Problem with no Scene.** No scene sits on the Problem's beats, or on the beats of any Problem placed on those beats. The link opens Problem Beats, which chooses a beat sheet and fills the empty beats with scenes. Problem Beats never changes a beat you have filled, so a Problem whose beats hold only other Problems stays listed until one of those Problems gets a scene; those Problems are listed too.
-- **A Character in no Problem.** No Problem names the character as its Protagonist or Antagonist. The link opens Problem Builder. Choose or create a Problem in its picker; if that Problem's Protagonist or Antagonist is empty, a second picker asks for a character and puts your choice there. A character can only go into an empty seat. If you cancel a picker, the workflow stops.
+- **A Character in no Problem.** No Problem names the character as its Protagonist or Antagonist. The link opens Problem Builder. Choose or create a Problem in its picker; if that Problem's Protagonist or Antagonist is empty, a second picker asks for a character and puts your choice there. A character can only go into an empty seat, so if you choose a Problem whose Protagonist and Antagonist are both filled, the character stays on the list. If both seats are empty, Problem Builder asks for both; if you cancel the second picker, the workflow stops, but the character you chose for the first seat stays in place.
+
+The pickers also offer elements that are in the trash. A character you put into a Problem that is in the trash stays on the list, because Collaborator does not count Problems in the trash.
 
 A character whose Story Role is Supporting Role, Minor Role, or Service Role is not listed. Those characters aren't meant to carry a Problem. A Scene that sits on no beat isn't listed either, because nothing says which Problem it belongs to.
 
@@ -41,7 +43,7 @@ As with a field, the link opens the workflow, and you choose the element in its 
 | Problem | Name, Story Question, Problem Category, Problem Type, Conflict Type, Subject, Premise, Protagonist, Antagonist, the Goal, Motivation, and Conflict for each of them, and Outcome | Story Problem (Premise => Problem + Characters) for the category and the two characters, and a first pass at the rest; Problem Builder for the goal, motivation, conflict, and outcome fields. Name you type in StoryCAD. |
 | Character | Name, Character Sketch, Role, Story Role, Age, Sex, Appearance, Backstory | Character Builder for Role, Age, Sex, Appearance, Story Role, and Character Sketch; Flaw and Backstory for Backstory. Name you type in StoryCAD. |
 | Setting | Name, Setting Summary, Locale, Period | Setting Builder for Setting Summary, Locale, and Period. Name you type in StoryCAD. |
-| Story World | Name, World Type, World tell | Define Story World for World Type and World tell. Checked only when your outline has a Story World. Name you type in StoryCAD. |
+| Story World | Name, World Type, World tell | Define Story World for World Type and World tell. Checked only when your outline has a Story World outside the trash. A Story World in the trash is not checked, but StoryCAD still counts it and will not add a second one. Name you type in StoryCAD. |
 | Scene | Name, Scene Sketch, Setting, Cast | Scene Builder for all three. Name you type in StoryCAD. |
 
 ## Where your outline stands

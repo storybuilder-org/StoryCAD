@@ -2,13 +2,16 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
 using StoryCADLib.ViewModels;
+using StoryCADLib.Services.Outline;
+using StoryCADTests.Services.Outline;
+using static StoryCADTests.Services.Outline.StoryRoleRuleTests;
 
 #nullable disable
 
 namespace StoryCADTests.ViewModels;
 
 [TestClass]
-public partial class OverviewViewModelTests
+public class OverviewViewModelTests
 {
     private StoryModel _storyModel;
     private OverviewModel _overview;
@@ -112,5 +115,29 @@ public partial class OverviewViewModelTests
         _viewModel.Deactivate(null);
 
         Assert.AreEqual("Overview text", problem.Premise);
+    }
+
+
+    [TestMethod]
+    public void SaveModel_SaveModelWithNewStoryProblem_SetsSeatRoles()
+    {
+        var model = new StoryModel();
+        var overview = new OverviewModel("Roles", model, null);
+        model.ExplorerView.Add(overview.Node);
+        overview.StoryProblem = Guid.Empty;
+        var problem = new ProblemModel("Crown", model, overview.Node);
+        var protagonist = new CharacterModel("Macbeth", model, overview.Node);
+        var antagonist = new CharacterModel("Macduff", model, overview.Node);
+        problem.Protagonist = protagonist.Uuid;
+        problem.Antagonist = antagonist.Uuid;
+        Ioc.Default.GetRequiredService<AppState>().CurrentDocument = new StoryDocument(model);
+        var vm = Ioc.Default.GetRequiredService<OverviewViewModel>();
+        vm.Activate(overview);
+
+        vm.SelectedProblem = problem;
+        vm.Deactivate(null);
+
+        Assert.AreEqual("Protagonist", protagonist.StoryRole);
+        Assert.AreEqual("Antagonist", antagonist.StoryRole);
     }
 }

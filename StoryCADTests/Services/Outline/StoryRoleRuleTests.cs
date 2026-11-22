@@ -126,17 +126,19 @@ public class StoryRoleRuleTests
     }
 
     [TestMethod]
-    public async Task ApplySeats_SeatHoldsSetting_MakesNoChange()
+    public async Task ApplySeats_SeatHoldsSetting_SkipsThatSeat()
     {
+        // The Setting in the Protagonist seat is skipped; the Antagonist seat still gets its role.
         var (api, storyProblem) = await OutlineWithStoryProblem();
         var add = api.AddElement(StoryItemType.Setting, Overview(api).Uuid.ToString(), "Inverness");
         var setting = (SettingModel)api.GetStoryElement(add.Payload).Payload!;
-        var before = setting.Description;
+        var antagonist = AddCharacter(api, "Macduff");
         storyProblem.Protagonist = setting.Uuid;
+        storyProblem.Antagonist = antagonist.Uuid;
 
         StoryRoleRule.ApplySeats(api.CurrentModel!, storyProblem);
 
-        Assert.AreEqual(before, setting.Description);
+        Assert.AreEqual("Antagonist", antagonist.StoryRole);
     }
 
     [TestMethod]
