@@ -412,31 +412,30 @@ public class StoryIO
         // If file exists but is not available, show error dialog (cloud storage scenario)
         if (!isAvailable)
         {
-            _logService.Log(LogLevel.Error, $"File {filePath} is unavailable.");
+            // Warn, not Error: an unsynced cloud file is the user's to fix, so it stays in the
+            // log file and does not become an elmah.io report (#1638).
+            _logService.Log(LogLevel.Warn, $"File {filePath} is unavailable.");
 
-            // Show warning so user knows their file isn't lost and is just on cloud storage
-            var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(new ContentDialog
+            // Show warning so user knows their file isn't lost and is just on cloud storage.
+            // As in OutlineViewModel.SaveFileAs, the dialog is built only when there is a UI;
+            // headless, ShowContentDialog answers without it.
+            var dialogVm = Ioc.Default.GetRequiredService<FileUnavailableViewModel>();
+            dialogVm.Initialize(filePath);
+
+            ContentDialog dialog = null;
+            if (!_appState.Headless)
             {
-                Title = "File unavailable.",
-                Content = """
-                          The story outline you are trying to open is stored on a cloud service, and isn't available currently.
-                          Try going online and syncing the file, then try again.
-
-                          Click show help article for more information.
-                          """,
-                PrimaryButtonText = "Show help article",
-                SecondaryButtonText = "Close"
-            }, true);
-
-            // Open help article in default browser
-            if (result == ContentDialogResult.Primary)
-            {
-                Process.Start(new ProcessStartInfo
+                dialog = new ContentDialog
                 {
-                    FileName = new Uri(new Uri(_appState.ManualBaseUrl), "docs/Miscellaneous/Troubleshooting_Cloud_Storage_Providers.html").ToString(),
-                    UseShellExecute = true
-                });
+                    Title = dialogVm.Title,
+                    Content = dialogVm.Message,
+                    PrimaryButtonText = dialogVm.PrimaryButtonText,
+                    SecondaryButtonText = dialogVm.SecondaryButtonText
+                };
             }
+
+            var result = await Ioc.Default.GetRequiredService<Windowing>().ShowContentDialog(dialog, true);
+            dialogVm.HandleResult(result);
         }
 
         return isAvailable;

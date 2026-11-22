@@ -1,5 +1,7 @@
 using System.Text.Json.Nodes;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using NLog;
+using NLog.Targets;
 using StoryCADLib.DAL;
 using StoryCADLib.Models;
 using StoryCADLib.Services.API;
@@ -274,6 +276,40 @@ public partial class StoryIOTests
 
         // Assert
         Assert.IsFalse(result, "Expected whitespace path to return false.");
+    }
+
+    [TestMethod]
+    public async Task CheckFileAvailability_WhenFileIsLocked_LogsWarningAndUsesViewModel()
+    {
+        // Arrange - an unsynced cloud file is a Warn for the log file, not an elmah.io report,
+        // and the dialog goes through its view model (#1638)
+        var filePath = Path.Combine(App.ResultsDir, $"Unavailable1638_{Guid.NewGuid()}.stbx");
+        var target = new MemoryTarget("StoryIOTests") { Layout = "${level}|${message}" };
+        LogManager.Configuration.AddRule(NLog.LogLevel.Warn, NLog.LogLevel.Fatal, target);
+        LogManager.ReconfigExistingLoggers();
+        var vm = Ioc.Default.GetRequiredService<FileUnavailableViewModel>();
+        vm.Initialize("other.stbx");
+        var holder = LockFile(filePath);
+
+        try
+        {
+            // Act
+            var result = await _storyIO.CheckFileAvailability(filePath);
+
+            // Assert
+            Assert.IsFalse(result);
+            Assert.AreEqual(1, target.Logs.Count(l => l.StartsWith("Warn|") && l.Contains(filePath)));
+            Assert.IsFalse(target.Logs.Any(l => l.StartsWith("Error|") && l.Contains(filePath)));
+            Assert.AreEqual(filePath, vm.FilePath, "The file check did not reach the dialog step.");
+            Assert.IsTrue(vm.HelpArticleRequested, "The dialog result did not reach the view model.");
+        }
+        finally
+        {
+            holder.Dispose();
+            File.Delete(filePath);
+            LogManager.Configuration.RemoveTarget(target.Name);
+            LogManager.ReconfigExistingLoggers();
+        }
     }
 
     #region Write Retry Tests
