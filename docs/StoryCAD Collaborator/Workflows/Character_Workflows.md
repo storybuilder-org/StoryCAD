@@ -38,7 +38,7 @@ On Charlie, that chat was:
 
 Rewrite Flaw as Charlie Lacas's major character flaw: the blind spot that can bring him down. Rewrite Backstory as the history of that flaw. Keep him a drug dealer in this story.
 
-Collaborator answered "Changed Flaw, BackStory," and the list updated in place. The new Backstory is the history of the flaw: Charlie watched his mother wear herself out for wages that kept them poor, learned that depending on anyone leaves you powerless, and found money and status as a lookout and street seller in East Harlem.
+Collaborator answered "Changed Flaw, BackStory," and the list updated in place. The new Backstory starts with Charlie's mother: she came from Puerto Rico as a teenager, his father left before he was born, and she raised him alone in East Harlem on a sales clerk's wages.
 
 ![Proposal chat and the rewritten Backstory row on Charlie Lacas](../../media/Collaborator/Collaborator-Workflow-Flaw-Backstory-Chat.png)
 
@@ -48,7 +48,7 @@ The [Relationships Tab](../../Story%20Elements/Relationships_Tab.html) page desc
 
 Accepting writes a relationship entry on both characters' Relationships tabs: the relationship type, the field the tab labels "is a," together with a Trait, an Attitude, and Notes. The Relationships Tab page explains each of those fields and how to edit the entry afterward. The two sides of a relationship seldom match. If the Notes on both people are the same paragraph, or the type is wrong for the story, that is a template problem, not something to paper over in the chat for a first pass. Edit the entries in StoryCAD after you accept.
 
-On Leonard Kraskin and Tony Irwin, the run typed Tony as Partner and wrote notes about Leonard's impulsiveness: Tony has to pull him back from rash decisions, and rescues him when he rushes into the trap at Lacas's house.
+On Leonard Kraskin and Tony Irwin, the run typed Tony as Partner and wrote notes about Leonard's impulsiveness: Leonard acts first and leans on Tony to cover the gaps, and the friction comes from pulling Tony into risks he did not choose.
 
 ![Property Updates after Character Relationship: one RelationshipList row, Tony Irwin typed Partner](../../media/Collaborator/Collaborator-Workflow-Relationship.png)
 
