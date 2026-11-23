@@ -33,5 +33,6 @@ assignees: ''
 - [ ] The design is approved.
 
 ## Tasks
+StoryCADBot keeps this list.
 <!-- For whoever works the issue: a short list of the work, ticked off as it is done. If you are reporting, leave this empty. -->
 - [ ]
