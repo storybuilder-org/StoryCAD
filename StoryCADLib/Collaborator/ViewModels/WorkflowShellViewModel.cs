@@ -115,7 +115,7 @@ public partial class WorkflowShellViewModel : ObservableRecipient
     }
 
     /// <summary>
-    /// Workflow list pane shown (bound to NavigationView.IsPaneVisible, Collaborator #261).
+    /// Workflow list pane open (bound to NavigationView.IsPaneOpen).
     /// Toggled by the top-bar hamburger; built-in NavView toggle is hidden.
     /// </summary>
     private bool _isPaneOpen = true;
