@@ -28,7 +28,7 @@ Click the **Ideation (Story idea => Concept => Premise)** workflow in the list. 
 
 Danger Calls already has a Story Idea (a news piece about teenagers selling drugs using disposable phones) and a Concept (what if a detective uses a criminal's own phone to stage a rescue). Fields carrying that text come back marked Has your text, and **Accept All** asks before it replaces any of them. That is the point of the labels: nothing you wrote disappears unless you choose **Replace**.
 
-![The Ideation (Story idea => Concept => Premise) workflow finished on Danger Calls: the Overview proposals, with the rows that hold the sample's text labeled Has your text](../../media/Collaborator/Collaborator-Session-Premise.png)
+![The Ideation (Story idea => Concept => Premise) workflow finished on Danger Calls with its Premise cleared first: one proposal, the Premise, labeled New](../../media/Collaborator/Collaborator-Session-Premise.png)
 
 Click **Review Each** and read one proposal properly. Compare Yours against Proposed, then Accept or Skip. Afterward, return to StoryCAD and open the Overview; anything you accepted is already there.
 
