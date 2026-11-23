@@ -24,7 +24,7 @@ Open your copy of Danger Calls and select Danger Calls at the top of the Story E
 
 ## 2. Ideation (Story idea => Concept => Premise)
 
-Click the **Ideation (Story idea => Concept => Premise)** workflow in the list. Clicking runs it straight away, so wait for it to finish, then read the header above the Property Updates list, which counts the proposals. The status line in the chat column tells you how many would replace text you wrote and which fields were kept as they are.
+Danger Calls is a finished sample, so give Ideation a field to fill first: in StoryCAD, open the Overview's Premise tab and delete the text. Then click the **Ideation (Story idea => Concept => Premise)** workflow in the list. Clicking runs it straight away, so wait for it to finish, then read the header above the Property Updates list, which counts the proposals. The status line in the chat column tells you how many would replace text you wrote and which fields were kept as they are.
 
 Danger Calls already has a Story Idea (a news piece about teenagers selling drugs using disposable phones) and a Concept (what if a detective uses a criminal's own phone to stage a rescue). Fields carrying that text come back marked Has your text, and **Accept All** asks before it replaces any of them. That is the point of the labels: nothing you wrote disappears unless you choose **Replace**.
 

@@ -148,13 +148,17 @@
              labels with no Icon set, so the default 48px strip rendered clipped text
              ("Outli ne gaps (25)", "Starr", "Over") instead of hiding. Zero width keeps the
              open state pushing the work column across, which LeftMinimal would have changed
-             to an overlay. -->
+             to an overlay.
+
+             The hamburger sets IsPaneVisible, not IsPaneOpen (Collaborator #261). A closed
+             pane in Left mode is the compact state: after a window resize, reopening it left
+             every group closed and opened a group as a flyout. -->
 
         <NavigationView x:Name="NavView"
                         Grid.Row="1"
                         IsBackButtonVisible="Collapsed"
                         IsPaneToggleButtonVisible="False"
-                        IsPaneOpen="{x:Bind ShellViewModel.IsPaneOpen, Mode=TwoWay}"
+                        IsPaneVisible="{x:Bind ShellViewModel.IsPaneOpen, Mode=OneWay}"
                         MenuItemsSource="{x:Bind ShellViewModel.MenuItems, Mode=OneWay}"
                         SelectedItem="{x:Bind ShellViewModel.CurrentItem, Mode=TwoWay}"
                         IsSettingsVisible="False"

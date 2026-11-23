@@ -168,7 +168,7 @@ step "TC-126: Review Each on the Ideation result"
 click WorkflowReviewEachButton
 expect WorkflowAcceptButton exists
 expect WorkflowAcceptRemainingButton exists
-click WorkflowSkipButton                  # one Skip: the number of proposals differs from run to run
+click WorkflowAcceptButton                # writes the Premise back: TC-115 and TC-131 need it
 
 step "TC-115: Story Problem, then Accept All"
 click WorkflowStoryProblemNavItem
