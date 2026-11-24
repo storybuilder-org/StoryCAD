@@ -12,10 +12,14 @@ namespace StoryCADLib.Services.Outline;
 /// </summary>
 public class FileOpenService
 {
+    /// <summary>
+    ///     Status message when an open is cancelled, at "Save changes?" or later.
+    /// </summary>
+    internal const string OpenCancelledMessage = "Open Story command cancelled";
+
     private readonly AppState _appState;
     private readonly AutoSaveService _autoSaveService;
     private readonly BackupService _backupService;
-    private readonly EditFlushService _editFlushService;
     private readonly ILogService _logger;
     private readonly OutlineService _outlineService;
     private readonly PreferenceService _preferences;
@@ -36,7 +40,6 @@ public class FileOpenService
         _logger = logger;
         _outlineService = outlineService;
         _appState = appState;
-        _editFlushService = editFlushService;
         _preferences = preferences;
         _windowing = windowing;
         _backupService = backupService;
@@ -53,27 +56,16 @@ public class FileOpenService
     {
         try
         {
+            // True once the file is the current document. A cancelled or failed open must not
+            // run the steps after the lock on the outline that is still open (issue #1636).
+            var opened = false;
+
             await SerializationLock.RunExclusiveAsync(async ct =>
             {
                 _logger.Log(LogLevel.Info, "Executing OpenFile command");
 
-                // Check if current StoryModel has been changed, if so, save and write the model.
-                // Fix for issue #1153: Only save if FilePath is not null (ResetModel creates document with null path)
-                if (_appState.CurrentDocument?.Model?.Changed ?? false)
-                {
-                    if (!string.IsNullOrEmpty(_appState.CurrentDocument.FilePath))
-                    {
-                        _editFlushService.FlushCurrentEdits();
-                        await _outlineService.WriteModel(_appState.CurrentDocument.Model, _appState.CurrentDocument.FilePath);
-                    }
-                }
-
-                // Reset the model and show the home page
-                // Note: These UI operations should be handled via messaging
-                // For now, we'll send status messages and rely on the caller to handle UI updates
-                Default.Send(new StatusChangedMessage(new StatusMessage("Resetting model", LogLevel.Info)));
-
                 // Open file picker if `fromPath` is not provided or file doesn't exist at the path.
+                // The picker comes before "Save changes?", so cancelling it asks and writes nothing.
                 if (fromPath == "" || !File.Exists(fromPath))
                 {
                     _logger.Log(LogLevel.Info, "Opening file picker as story wasn't able to be found");
@@ -87,12 +79,25 @@ public class FileOpenService
                     fromPath = projectFile.Path;
                 }
 
+                // Ask before the open outline is replaced. The service skips a document with no
+                // file path (issue #1153: ResetModel creates one).
+                if (!await Ioc.Default.GetRequiredService<SaveChangesService>()
+                        .ConfirmLeaveAsync(OpenCancelledMessage))
+                {
+                    return;
+                }
+
+                // Reset the model and show the home page
+                // Note: These UI operations should be handled via messaging
+                // For now, we'll send status messages and rely on the caller to handle UI updates
+                Default.Send(new StatusChangedMessage(new StatusMessage("Resetting model", LogLevel.Info)));
+
                 var filePath = fromPath;
                 if (string.IsNullOrEmpty(filePath))
                 {
                     _logger.Log(LogLevel.Warn, "Open File command failed: StoryModel.ProjectFile is null.");
                     Default.Send(
-                        new StatusChangedMessage(new StatusMessage("Open Story command cancelled", LogLevel.Info)));
+                        new StatusChangedMessage(new StatusMessage(OpenCancelledMessage, LogLevel.Info)));
                     return;
                 }
 
@@ -130,8 +135,14 @@ public class FileOpenService
 
                 // Successfully loaded - create StoryDocument
                 _appState.CurrentDocument = new StoryDocument(loadedModel, filePath);
+                opened = true;
 
             }, CancellationToken.None, _logger);
+
+            if (!opened)
+            {
+                return;
+            }
 
             // Take a backup of the project if the user has the 'backup on open' preference set.
             if (_preferences.Model.BackupOnOpen)

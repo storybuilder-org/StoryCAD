@@ -86,9 +86,7 @@ public class FileOpenVM : ObservableRecipient
         await File.WriteAllTextAsync(filePath, content);
 
         //Open sample
-        await _fileOpenService.OpenFile(filePath);
-        NavigateToOverview();
-        return filePath;
+        return await OpenOutline(filePath) ? filePath : null;
     }
 
 
@@ -98,8 +96,26 @@ public class FileOpenVM : ObservableRecipient
     public async void LoadStoryFromFile()
     {
         Close();
-        await _fileOpenService.OpenFile();
+        await OpenOutline("");
+    }
+
+    /// <summary>
+    ///     Opens an outline and shows its Overview. Returns false when no outline opened: the
+    ///     writer answered Cancel to "Save changes?" or to the file picker, or the open failed.
+    ///     The outline that was open then stays as it is (issue #1636).
+    /// </summary>
+    private async Task<bool> OpenOutline(string path)
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var before = appState.CurrentDocument;
+        await _fileOpenService.OpenFile(path);
+        if (ReferenceEquals(before, appState.CurrentDocument))
+        {
+            return false;
+        }
+
         NavigateToOverview();
+        return true;
     }
 
 
@@ -158,8 +174,11 @@ public class FileOpenVM : ObservableRecipient
                 if (SelectedRecentIndex != -1)
                 {
                     filePath = _preferences.Model.RecentFiles[SelectedRecentIndex];
-                    await _fileOpenService.OpenFile(filePath);
-                    NavigateToOverview();
+                    if (!await OpenOutline(filePath))
+                    {
+                        Close();
+                        return;
+                    }
                 }
                 else
                 {
@@ -170,6 +189,13 @@ public class FileOpenVM : ObservableRecipient
 
             case "New":
                 filePath = await CreateFile();
+                if (filePath == "" && _fileCreateService.CreateCancelled)
+                {
+                    // Stopped at "Save changes?": not a bad name, so no warning.
+                    Close();
+                    return;
+                }
+
                 if (filePath == "")
                 {
                     //Show warning if we have a bad file name
@@ -188,7 +214,11 @@ public class FileOpenVM : ObservableRecipient
                 if (SelectedBackupIndex != -1)
                 {
                     filePath = BackupPaths[SelectedBackupIndex];
-                    OpenBackup(filePath);
+                    if (!await OpenBackup(filePath))
+                    {
+                        Close();
+                        return;
+                    }
                 }
                 else
                 {
@@ -242,7 +272,7 @@ public class FileOpenVM : ObservableRecipient
         }
     }
 
-    private async void OpenBackup(string zipPath)
+    private async Task<bool> OpenBackup(string zipPath)
     {
         // make a timestamped temp folder
         var tempRoot = Path.GetTempPath();
@@ -267,12 +297,11 @@ public class FileOpenVM : ObservableRecipient
                     Messenger.Send(new StatusChangedMessage(new StatusMessage(
                         "Backup archive is invalid or contains multiple files.",
                         LogLevel.Warn))));
-                return;
+                return false;
             }
 
             //Open backup
-            await _fileOpenService.OpenFile(files[0]);
-            NavigateToOverview();
+            return await OpenOutline(files[0]);
         }
         catch (Exception ex)
         {
@@ -281,6 +310,7 @@ public class FileOpenVM : ObservableRecipient
                     "Failed to open backup. The file may be corrupt.",
                     LogLevel.Error))));
             _logger.LogException(LogLevel.Error, ex, $"Error opening backup {zipPath}");
+            return false;
         }
     }
 

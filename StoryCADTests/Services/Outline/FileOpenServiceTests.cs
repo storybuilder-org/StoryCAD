@@ -221,4 +221,115 @@ public class FileOpenServiceTests
 
         // Test passes if no exception thrown
     }
+
+    #region Save changes? (issue #1636)
+
+    [TestCleanup]
+    public void Cleanup()
+    {
+        Ioc.Default.GetRequiredService<SaveChangesService>().HeadlessAnswer = SaveChangesAnswer.No;
+        _autoSaveService.StopAutoSave();
+        _appState.CurrentDocument = null;
+    }
+
+    /// <summary>
+    ///     Writes the outline to open, then makes a changed outline the current document.
+    ///     Returns the two file paths.
+    /// </summary>
+    private static async Task<(string firstPath, string targetPath)> ArrangeChangedOutlineAndTarget(string name)
+    {
+        var targetPath = await SaveChangesTestOutline.OpenAsync(name + "_Target", changed: false);
+        var firstPath = await SaveChangesTestOutline.OpenAsync(name + "_First");
+        return (firstPath, targetPath);
+    }
+
+    private static void SetAnswer(SaveChangesAnswer answer) =>
+        Ioc.Default.GetRequiredService<SaveChangesService>().HeadlessAnswer = answer;
+
+    [TestMethod]
+    public async Task OpenFile_AnswerYes_SavesThenOpens()
+    {
+        var (firstPath, targetPath) = await ArrangeChangedOutlineAndTarget("OpenFile_Yes");
+        SetAnswer(SaveChangesAnswer.Yes);
+
+        await _fileOpenService.OpenFile(targetPath);
+
+        Assert.AreEqual(targetPath, _appState.CurrentDocument.FilePath);
+        Assert.AreEqual(SaveChangesTestOutline.ChangedAuthor,
+            await SaveChangesTestOutline.AuthorOnDiskAsync(firstPath));
+    }
+
+    [TestMethod]
+    public async Task OpenFile_AnswerNo_OpensAndFirstFileUnchanged()
+    {
+        var (firstPath, targetPath) = await ArrangeChangedOutlineAndTarget("OpenFile_No");
+        SetAnswer(SaveChangesAnswer.No);
+
+        await _fileOpenService.OpenFile(targetPath);
+
+        Assert.AreEqual(targetPath, _appState.CurrentDocument.FilePath);
+        Assert.AreEqual(SaveChangesTestOutline.SavedAuthor,
+            await SaveChangesTestOutline.AuthorOnDiskAsync(firstPath));
+    }
+
+    [TestMethod]
+    public async Task OpenFile_AnswerCancel_KeepsFirstOutline()
+    {
+        var (firstPath, targetPath) = await ArrangeChangedOutlineAndTarget("OpenFile_Cancel");
+        var firstDocument = _appState.CurrentDocument;
+        SetAnswer(SaveChangesAnswer.Cancel);
+
+        await _fileOpenService.OpenFile(targetPath);
+
+        Assert.AreSame(firstDocument, _appState.CurrentDocument);
+        Assert.IsTrue(_appState.CurrentDocument.Model.Changed);
+        Assert.AreEqual(SaveChangesTestOutline.SavedAuthor,
+            await SaveChangesTestOutline.AuthorOnDiskAsync(firstPath));
+    }
+
+    [TestMethod]
+    public async Task OpenFile_AnswerCancel_KeepsRecentFiles()
+    {
+        var (_, targetPath) = await ArrangeChangedOutlineAndTarget("OpenFile_CancelRecents");
+        _preferences.Model.RecentFiles.Clear();
+        _preferences.Model.RecentFiles.Add(Path.Combine(Path.GetTempPath(), "test", "file.stbx"));
+        var before = _preferences.Model.RecentFiles.ToList();
+        SetAnswer(SaveChangesAnswer.Cancel);
+
+        await _fileOpenService.OpenFile(targetPath);
+
+        CollectionAssert.AreEqual(before, _preferences.Model.RecentFiles);
+    }
+
+    [TestMethod]
+    public async Task OpenFile_PickerGivesNoFile_WritesNothing()
+    {
+        var firstPath = await SaveChangesTestOutline.OpenAsync("OpenFile_NoFilePicked");
+        var firstDocument = _appState.CurrentDocument;
+        SetAnswer(SaveChangesAnswer.Yes);
+
+        // No path: the file picker comes first, and in a test it gives no file.
+        await _fileOpenService.OpenFile();
+
+        Assert.AreSame(firstDocument, _appState.CurrentDocument);
+        Assert.IsTrue(_appState.CurrentDocument.Model.Changed);
+        Assert.AreEqual(SaveChangesTestOutline.SavedAuthor,
+            await SaveChangesTestOutline.AuthorOnDiskAsync(firstPath));
+    }
+
+    [TestMethod]
+    public async Task OpenFile_Unchanged_OpensWithoutSave()
+    {
+        var targetPath = await SaveChangesTestOutline.OpenAsync("OpenFile_Unchanged_Target", changed: false);
+        var firstPath = await SaveChangesTestOutline.OpenAsync("OpenFile_Unchanged_First", changed: false);
+        var writtenAt = File.GetLastWriteTimeUtc(firstPath);
+        SetAnswer(SaveChangesAnswer.Cancel);
+
+        await _fileOpenService.OpenFile(targetPath);
+
+        Assert.AreEqual(targetPath, _appState.CurrentDocument.FilePath);
+        Assert.AreEqual(writtenAt, File.GetLastWriteTimeUtc(firstPath));
+    }
+
+    #endregion
 }

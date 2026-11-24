@@ -221,6 +221,7 @@ public sealed partial class Shell : Page
     }
 
     private bool _closingHandled;
+    private bool _closeQuestionOpen;
 
     /// <summary>
     ///     Displays unread admin-to-user messages on launch as sequential
@@ -263,6 +264,28 @@ public sealed partial class Shell : Page
         if (_closingHandled) return;
 
         args.Cancel = true;
+
+        // Ask "Save changes?" before any cleanup starts. On Cancel the window stays open
+        // (issue #1636). A second click on Close while the question shows does nothing.
+        if (_closeQuestionOpen) return;
+        _closeQuestionOpen = true;
+        bool exit;
+        try
+        {
+            exit = await ShellVm.OutlineManager.ConfirmExitAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogException(LogLevel.Error, ex, "Error asking Save changes? on window close");
+            exit = false;
+        }
+        finally
+        {
+            _closeQuestionOpen = false;
+        }
+
+        if (!exit) return;
+
         try
         {
             await ShellVm.OnApplicationClosing();

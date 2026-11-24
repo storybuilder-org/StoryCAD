@@ -34,7 +34,7 @@ You can leave StoryCAD at any time by either:
 - Selecting **Exit** from the File Menu
 - Pressing the main window's **Close (X)** button
 
-If you have unsaved changes, StoryCAD will prompt you to save before exiting.
+If you have unsaved changes, StoryCAD asks whether to save them. Click Yes to save and exit, No to exit without saving, or Cancel to keep working.
 
 ### Window Management
 

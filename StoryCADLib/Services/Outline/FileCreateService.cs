@@ -43,6 +43,12 @@ public class FileCreateService
     }
 
     /// <summary>
+    ///     True when the last CreateFile call stopped at "Save changes?": the writer answered
+    ///     Cancel, or answered Yes and the save failed (issue #1636).
+    /// </summary>
+    internal bool CreateCancelled { get; private set; }
+
+    /// <summary>
     ///     Creates a new story file.
     /// </summary>
     /// <param name="outlineFolder">Folder to create the file in</param>
@@ -60,6 +66,7 @@ public class FileCreateService
     public async Task<string> CreateFile(string outlineFolder, string outlineName, OutlineTemplate template)
     {
         _logger.Log(LogLevel.Info, "FileCreateService - Creating new file");
+        CreateCancelled = false;
 
         try
         {
@@ -97,22 +104,22 @@ public class FileCreateService
                 return null;
             }
 
+            // One lock from "Save changes?" until the new outline is the current document. An
+            // AutoSave that waits behind the question then writes the new outline, not the
+            // changes the writer answered No to (issue #1636).
             using (var serializationLock = new SerializationLock(_logger))
             {
-                // If the current project needs saved, do so
-                if (_appState.CurrentDocument?.Model?.Changed == true && _appState.CurrentDocument?.FilePath != null)
+                if (!await Ioc.Default.GetRequiredService<SaveChangesService>()
+                        .ConfirmLeaveAsync("New project command cancelled"))
                 {
-                    await _outlineService.WriteModel(_appState.CurrentDocument.Model,
-                        _appState.CurrentDocument.FilePath);
+                    CreateCancelled = true;
+                    return null;
                 }
-            }
 
-            // Note: UI operations should be handled by the caller
-            // We'll send a status message to indicate progress
-            Default.Send(new StatusChangedMessage(new StatusMessage("Creating new project", LogLevel.Info)));
+                // Note: UI operations should be handled by the caller
+                // We'll send a status message to indicate progress
+                Default.Send(new StatusChangedMessage(new StatusMessage("Creating new project", LogLevel.Info)));
 
-            using (var serializationLock = new SerializationLock(_logger))
-            {
                 // Create the new outline's file. System.IO, not StorageFolder: the folder box is free
                 // text, and StorageFolder rejects paths .NET accepts, such as '/' separators (#1615).
                 var storyModelFile = UniqueFilePath(Path.GetFullPath(outlineFolder), outlineName);

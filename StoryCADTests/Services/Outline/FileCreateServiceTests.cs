@@ -60,6 +60,10 @@ public class FileCreateServiceTests
     [TestCleanup]
     public void Cleanup()
     {
+        Ioc.Default.GetRequiredService<SaveChangesService>().HeadlessAnswer = SaveChangesAnswer.No;
+        _autoSaveService.StopAutoSave();
+        _appState.CurrentDocument = null;
+
         // Clean up test folder
         if (Directory.Exists(_testFolder))
         {
@@ -261,6 +265,8 @@ public class FileCreateServiceTests
 
         var fileName = "NewStory.stbx";
         var templateIndex = 0;
+        // "Save changes?" answered Yes (issue #1636)
+        Ioc.Default.GetRequiredService<SaveChangesService>().HeadlessAnswer = SaveChangesAnswer.Yes;
 
         // Act
         var result = await _fileCreateService.CreateFile(_testFolder, fileName, templateIndex);
@@ -269,6 +275,56 @@ public class FileCreateServiceTests
         Assert.IsNotNull(result);
         Assert.AreNotEqual(initialDoc.FilePath, result);
         Assert.AreEqual(result, _appState.CurrentDocument.FilePath);
+        Assert.IsTrue(File.Exists(initialDoc.FilePath), "Yes saves the first outline");
+    }
+
+    [TestMethod]
+    public async Task CreateFile_AnswerNo_CreatesAndFirstFileUnchanged()
+    {
+        var firstPath = await SaveChangesTestOutline.OpenAsync("CreateFile_No_First");
+        Ioc.Default.GetRequiredService<SaveChangesService>().HeadlessAnswer = SaveChangesAnswer.No;
+
+        var result = await _fileCreateService.CreateFile(_testFolder, "CreatedAfterNo.stbx", 0);
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(result, _appState.CurrentDocument.FilePath);
+        Assert.IsFalse(_fileCreateService.CreateCancelled);
+        Assert.AreEqual(SaveChangesTestOutline.SavedAuthor,
+            await SaveChangesTestOutline.AuthorOnDiskAsync(firstPath));
+    }
+
+    [TestMethod]
+    public async Task CreateFile_AnswerCancel_ReturnsNullAndSetsCreateCancelled()
+    {
+        var firstPath = await SaveChangesTestOutline.OpenAsync("CreateFile_Cancel_First");
+        var firstDocument = _appState.CurrentDocument;
+        Ioc.Default.GetRequiredService<SaveChangesService>().HeadlessAnswer = SaveChangesAnswer.Cancel;
+
+        var result = await _fileCreateService.CreateFile(_testFolder, "NotCreated.stbx", 0);
+
+        Assert.IsNull(result);
+        Assert.IsTrue(_fileCreateService.CreateCancelled);
+        Assert.AreSame(firstDocument, _appState.CurrentDocument);
+        Assert.IsTrue(_appState.CurrentDocument.Model.Changed);
+        Assert.AreEqual(0, Directory.GetFiles(_testFolder).Length, "Cancel creates no file");
+        Assert.AreEqual(SaveChangesTestOutline.SavedAuthor,
+            await SaveChangesTestOutline.AuthorOnDiskAsync(firstPath));
+    }
+
+    [TestMethod]
+    public async Task CreateFile_AfterCancel_ResetsCreateCancelled()
+    {
+        await SaveChangesTestOutline.OpenAsync("CreateFile_AfterCancel_First");
+        var saveChanges = Ioc.Default.GetRequiredService<SaveChangesService>();
+        saveChanges.HeadlessAnswer = SaveChangesAnswer.Cancel;
+        await _fileCreateService.CreateFile(_testFolder, "NotCreated.stbx", 0);
+        Assert.IsTrue(_fileCreateService.CreateCancelled);
+
+        saveChanges.HeadlessAnswer = SaveChangesAnswer.No;
+        var result = await _fileCreateService.CreateFile(_testFolder, "Created.stbx", 0);
+
+        Assert.IsNotNull(result);
+        Assert.IsFalse(_fileCreateService.CreateCancelled);
     }
 
     [TestMethod]
