@@ -193,7 +193,7 @@
 **Priority:** Critical  
 **Time:** ~5 minutes
 
-The automation script does not do these steps. Do them on Windows and on macOS.
+The automation script does not do these steps. Do CF-006, CF-007 and CF-008 on Windows and on macOS.
 
 **Steps:**
 1. Open a story and make a change. Click the main window's Close (X) button  

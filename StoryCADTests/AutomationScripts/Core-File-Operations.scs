@@ -110,14 +110,19 @@ set TitleTextBox "Core Test Story"        # put the title back for CF-006
 press "Tab"
 press "Primary+S"
 expect StatusMessageText text "SaveFile command completed"
+menu OpenCreateFileMenuItem               # a recent file with no changes in the outline: no question
+click RecentlyOpenedNavItem
+click name:"CF004_SaveAs"                 # by name: a recent file row has no AutomationId (lint warns)
+click PrimaryButton
+expect window "StoryCAD - Currently editing CF004_SaveAs"
 set TitleTextBox "Core Test Story edited"
 press "Tab"
 menu OpenCreateFileMenuItem               # a recent file, answered Cancel
 click RecentlyOpenedNavItem
-click name:"CF004_SaveAs"                 # by name: a recent file row has no AutomationId (lint warns)
+click name:"CF002_TestSave"
 click PrimaryButton
 dialog "Save changes?" click name:"Cancel"
-expect window "StoryCAD - Currently editing CF002_TestSave"
+expect window "StoryCAD - Currently editing CF004_SaveAs"
 expect tree contains "Core Test Story edited"
 menu OpenCreateFileMenuItem               # Create new outline, answered Cancel: no file is created
 click CreateNewOutlineNavItem
@@ -126,7 +131,7 @@ press "Tab"
 click PrimaryButton
 dialog "Save changes?" click name:"Cancel"
 expect StatusMessageText text "New project command cancelled"
-expect window "StoryCAD - Currently editing CF002_TestSave"
+expect window "StoryCAD - Currently editing CF004_SaveAs"
 menu CloseStoryMenuItem
 dialog "Save changes?" click name:"No"
 expect StatusMessageText text "Close story command completed"
