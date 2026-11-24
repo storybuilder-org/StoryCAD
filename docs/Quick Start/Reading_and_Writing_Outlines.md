@@ -17,7 +17,7 @@ A StoryCAD outline is a single file with a file extension of .stbx: for instance
 
 StoryCAD .stbx files are fully compatible across Windows and macOS. See [Platform Differences](../Front%20Matter/Platform_Differences.html) for details on text formatting differences between platforms.
 
-**Open/Create file** opens the dialog below, where you open an outline or start a new one. **Save Story** saves the outline under the name and folder it already has; a new outline gets those when you create it, so Save Story never asks for a file name. **Save Story As** opens a Save as dialog with a **New project Name** and a **Parent Folder Path**, to save a copy under a new name or in a new folder; StoryCAD then works on the copy. **Create Backup** makes a backup copy now. **Close Story** closes the outline and asks whether to save changes if there are any.
+**Open/Create file** opens the dialog below, where you open an outline or start a new one. **Save Story** saves the outline under the name and folder it already has; a new outline gets those when you create it, so Save Story never asks for a file name. **Save Story As** opens a Save as dialog with a **New project Name** and a **Parent Folder Path**, to save a copy under a new name or in a new folder; StoryCAD then works on the copy. **Create Backup** makes a backup copy now. **Close Story** closes the outline. If it has unsaved changes, StoryCAD asks whether to save them: Yes saves, No closes without saving, and Cancel leaves the outline open.
 
 File Open displays the following open dialog:
 
@@ -36,5 +36,5 @@ Create new outline displays this page:
 
 ![](../media/Create-New-Outline-Dialog.png)
  
-Only one story outline can be open at a time.  If you open another outline while the current one has unsaved changes, StoryCAD saves the current outline first, without asking.
+Only one story outline can be open at a time. If you open or create another outline while the current one has unsaved changes, StoryCAD asks whether to save them. Click Yes to save, No to go on without saving, or Cancel to stay in the current outline.
 

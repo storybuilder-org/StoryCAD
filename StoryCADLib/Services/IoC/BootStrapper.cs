@@ -112,6 +112,7 @@ public static class BootStrapper
         Services.AddSingleton<ImageService>();
         Services.AddSingleton<FileOpenService>();
         Services.AddSingleton<FileCreateService>();
+        Services.AddSingleton<SaveChangesService>();
         Services.AddSingleton<ToolValidationService>();
         Services.AddSingleton<RatingService>();
         // Store billing (issue #30). NullStoreService is the default so a binary runs unchanged

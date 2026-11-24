@@ -1,5 +1,5 @@
 # Core File Operations Test Plan
-**Time**: ~10 minutes  
+**Time**: ~20 minutes  
 **Purpose**: Verify essential file operations work correctly
 
 ## Platform Notes
@@ -132,19 +132,102 @@
    **Expected:** The pencil icon turns red
 
 2. Click File > Exit  
-   **Expected:** "Save changes?" dialog with Yes and No
+   **Expected:** "Save changes?" dialog with Yes, No and Cancel
 
-3. Click No  
+3. Click Cancel  
+   **Expected:** StoryCAD stays open. The change is in the outline. The pencil icon is red
+
+4. Click File > Exit, then press Escape  
+   **Expected:** The same result as step 3
+
+5. Click File > Exit, then click No  
    **Expected:** Exits without saving
 
-4. Start StoryCAD and reopen the file  
+6. Start StoryCAD and reopen the file  
    **Expected:** Changes not present
 
 **Pass/Fail:** ______
 
 ---
 
-## CORE FILE OPS RESULT: _____ / 6 Passed
+### CF-007: Open Another Outline With Unsaved Changes
+**Priority:** Critical  
+**Time:** ~5 minutes
+
+**Steps:**
+1. Open a story and make a change. Open File > Open/Create file, select a recent file, and click Open Outline  
+   **Expected:** "Save changes?" dialog with Yes, No and Cancel
+
+2. Click Cancel  
+   **Expected:** The first story stays open. The change is in the outline. The pencil icon is red
+
+3. Do steps 1 and 2 again with a sample outline  
+   **Expected:** The same results
+
+4. Do steps 1 and 2 again with a backup  
+   **Expected:** The same results
+
+5. Do steps 1 and 2 again with Create new outline  
+   **Expected:** The same results. No new outline file is in the folder
+
+6. Select a sample outline again, then click No  
+   **Expected:** The sample opens
+
+7. Open the first story  
+   **Expected:** Changes not present
+
+8. Make a change. Select a sample outline, then click Yes  
+   **Expected:** The sample opens
+
+9. Open the first story  
+   **Expected:** Changes present
+
+10. With no change in the story, select a sample outline  
+    **Expected:** The sample opens. No "Save changes?" dialog
+
+**Pass/Fail:** ______
+
+---
+
+### CF-008: Unsaved Changes on the Paths With No Script
+**Priority:** Critical  
+**Time:** ~5 minutes
+
+The automation script does not do these steps. Do CF-006, CF-007 and CF-008 on Windows and on macOS.
+
+**Steps:**
+1. Open a story and make a change. Click the main window's Close (X) button  
+   **Expected:** "Save changes?" dialog with Yes, No and Cancel
+
+2. Click Cancel  
+   **Expected:** StoryCAD stays open. The change is in the outline
+
+3. Click the main window's Close (X) button, then click No  
+   **Expected:** StoryCAD exits
+
+4. Start StoryCAD and reopen the file  
+   **Expected:** Changes not present
+
+5. Make a change. Open File > Open/Create file, click Open from file, and cancel the file picker  
+   **Expected:** No "Save changes?" dialog. The story stays open. The pencil icon is red
+
+6. Click Open from file again and pick a different outline file  
+   **Expected:** "Save changes?" dialog appears after the file picker closes
+
+7. Click Cancel. With StoryCAD still open, double-click a different .stbx file in Explorer (Finder on macOS)  
+   **Expected:** "Save changes?" dialog in StoryCAD
+
+8. Click Cancel  
+   **Expected:** The first story stays open. The change is in the outline
+
+9. macOS only: select StoryCAD > Quit StoryCAD on the menu bar, then click Cancel  
+   **Expected:** StoryCAD stays open. The change is in the outline
+
+**Pass/Fail:** ______
+
+---
+
+## CORE FILE OPS RESULT: _____ / 8 Passed
 
 **Critical Issues**: ________________
 

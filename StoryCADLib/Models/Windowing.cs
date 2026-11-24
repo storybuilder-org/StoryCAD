@@ -167,6 +167,17 @@ public class Windowing : ObservableRecipient
     private ContentDialog OpenDialog;
 
     /// <summary>
+    /// The ShowAsync call of the open dialog. A forced dialog waits on it, so that the
+    /// first dialog is gone before the next one shows (issue #1636).
+    /// </summary>
+    private Task<ContentDialogResult> _openDialogTask;
+
+    /// <summary>
+    /// The longest a forced dialog waits for the dialog it closed.
+    /// </summary>
+    private static readonly TimeSpan ForcedCloseTimeout = TimeSpan.FromSeconds(5);
+
+    /// <summary>
     /// This takes a ContentDialog and shows it to the user
     /// It will handle theming, XAMLRoot and showing the dialog.
     /// </summary>
@@ -191,12 +202,21 @@ public class Windowing : ObservableRecipient
 		if (force && _isContentDialogOpen && OpenDialog != null)
 	    {
 		    logger.Log(LogLevel.Info, $"Force closing open content dialog: ({OpenDialog.Title})");
+			var closedTitle = OpenDialog.Title;
+			var closing = _openDialogTask;
 			OpenDialog.Hide();
 
-			//This will be unset eventually but because we have called
-			//Hide() already we can unset this early.
+			//Wait until the first dialog is gone: two dialogs cannot be open at once.
+			//The time limit keeps the app running if that dialog never reports its close.
+			if (closing != null && await Task.WhenAny(closing, Task.Delay(ForcedCloseTimeout)) != closing)
+			{
+				logger.Log(LogLevel.Warn, $"Content dialog ({closedTitle}) did not close in {ForcedCloseTimeout.TotalSeconds} seconds");
+			}
+
+			//The first call may not have run its cleanup yet, so clear the fields here.
 			_isContentDialogOpen = false;
-			logger.Log(LogLevel.Info, $"Closed content dialog: ({OpenDialog.Title})");
+			OpenDialog = null;
+			logger.Log(LogLevel.Info, $"Closed content dialog: ({closedTitle})");
 		}
 
 		//Checks a content dialog isn't already open
@@ -215,7 +235,8 @@ public class Windowing : ObservableRecipient
             _isContentDialogOpen = true;
 
 			//Show and log result.
-            ContentDialogResult Result = await OpenDialog.ShowAsync();
+            _openDialogTask = OpenDialog.ShowAsync().AsTask();
+            ContentDialogResult Result = await _openDialogTask;
             switch (Result)
             {
 	            case ContentDialogResult.None:
@@ -228,8 +249,13 @@ public class Windowing : ObservableRecipient
 		            logger.Log(LogLevel.Info, $"User selected secondary option {Dialog.SecondaryButtonText}");
 					break;
             }
-			_isContentDialogOpen = false;
-            OpenDialog = null;
+			//A forced dialog may have replaced this one: its fields are not ours to clear.
+			if (ReferenceEquals(OpenDialog, Dialog))
+			{
+				_isContentDialogOpen = false;
+				OpenDialog = null;
+				_openDialogTask = null;
+			}
             return Result;
         }
         return ContentDialogResult.None;

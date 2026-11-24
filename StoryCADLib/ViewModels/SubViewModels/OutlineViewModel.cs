@@ -83,6 +83,20 @@ public class OutlineViewModel : ObservableRecipient
     // StoryModel and StoryModelFile moved to AppState.CurrentDocument
     // Access via appState.CurrentDocument?.Model and appState.CurrentDocument?.FilePath
 
+    private static SaveChangesService SaveChanges => Ioc.Default.GetRequiredService<SaveChangesService>();
+
+    /// <summary>
+    ///     Starts AutoSave again after the writer answers Cancel to "Save changes?" and stays
+    ///     in the outline (issue #1636).
+    /// </summary>
+    private void RestartAutoSaveForOpenOutline()
+    {
+        if (preferences.Model.AutoSave && !string.IsNullOrEmpty(appState.CurrentDocument?.FilePath))
+        {
+            _autoSaveService.StartAutoSave();
+        }
+    }
+
     /// <summary>
     ///     Opens a file picker to let the user chose a .stbx file and loads said file
     ///     If fromPath is specified then the picker is skipped.
@@ -90,13 +104,17 @@ public class OutlineViewModel : ObservableRecipient
     /// <param name="fromPath">Path to open file from (Optional)</param>
     public async Task OpenFile(string fromPath = "")
     {
+        // Stopped before the lock is taken, so that no AutoSave waits behind "Save changes?"
+        // and then writes the changes the writer answered No to (issue #1636).
+        await _autoSaveService.StopAutoSaveAndWaitAsync();
+
         using (new SerializationLock(logger))
         {
-            // Check if current StoryModel has been changed, if so, save and write the model.
-            if (appState.CurrentDocument?.Model?.Changed ?? false)
+            // Ask before the open outline is replaced.
+            if (!await SaveChanges.ConfirmLeaveAsync(FileOpenService.OpenCancelledMessage))
             {
-                _editFlushService.FlushCurrentEdits();
-                await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
+                RestartAutoSaveForOpenOutline();
+                return;
             }
 
             logger.Log(LogLevel.Info, "Executing OpenFile command");
@@ -538,23 +556,11 @@ public class OutlineViewModel : ObservableRecipient
             // Stop auto-save and wait for any in-progress save to complete
             await _autoSaveService.StopAutoSaveAndWaitAsync();
 
-            if (appState.CurrentDocument?.Model?.Changed == true && !appState.Headless)
+            // Cancel: the outline stays open (issue #1636).
+            if (!await SaveChanges.ConfirmLeaveAsync("Close story command cancelled"))
             {
-                ContentDialog warning = new()
-                {
-                    Title = "Save changes?",
-                    PrimaryButtonText = "Yes",
-                    SecondaryButtonText = "No"
-                };
-                if (await window.ShowContentDialog(warning) == ContentDialogResult.Primary)
-                {
-                    _editFlushService.FlushCurrentEdits();
-                    await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
-
-                    // Mark the model as saved and update UI
-                    outlineService.SetChanged(appState.CurrentDocument.Model, false);
-                    Messenger.Send(new IsChangedMessage(false));
-                }
+                RestartAutoSaveForOpenOutline();
+                return;
             }
 
             // Fix for issue #1154: Navigate to home page BEFORE resetting model
@@ -583,29 +589,47 @@ public class OutlineViewModel : ObservableRecipient
     }
 
     /// <summary>
+    ///     Asks "Save changes?" before the app exits (issue #1636). Returns false when the writer
+    ///     answers Cancel: the app stays open.
+    /// </summary>
+    internal async Task<bool> ConfirmExitAsync()
+    {
+        // Stopped before the lock is taken: see OpenFile.
+        await _autoSaveService.StopAutoSaveAndWaitAsync();
+
+        using (new SerializationLock(logger))
+        {
+            if (!await SaveChanges.ConfirmLeaveAsync("Exit command cancelled"))
+            {
+                RestartAutoSaveForOpenOutline();
+                return false;
+            }
+
+            // The writer answered No and the app exits. Clear the flag so that the shutdown
+            // code (CloseFile) does not ask a second time.
+            if (appState.CurrentDocument?.Model?.Changed == true)
+            {
+                outlineService.SetChanged(appState.CurrentDocument.Model, false);
+            }
+
+            return true;
+        }
+    }
+
+    /// <summary>
     ///     Quits the app.
     /// </summary>
     public async Task ExitApp()
     {
+        if (!await ConfirmExitAsync())
+        {
+            return;
+        }
+
         using (new SerializationLock(logger))
         {
             Messenger.Send(
                 new StatusChangedMessage(new StatusMessage("Executing Exit project command", LogLevel.Info, true)));
-
-            if (appState.CurrentDocument?.Model?.Changed == true)
-            {
-                ContentDialog warning = new()
-                {
-                    Title = "Save changes?",
-                    PrimaryButtonText = "Yes",
-                    SecondaryButtonText = "No"
-                };
-                if (await window.ShowContentDialog(warning) == ContentDialogResult.Primary)
-                {
-                    _editFlushService.FlushCurrentEdits();
-                    await outlineService.WriteModel(appState.CurrentDocument.Model, appState.CurrentDocument.FilePath);
-                }
-            }
 
             // Flush telemetry here for menu-Exit (on UNO/macOS, Application.Current.Exit
             // doesn't fire AppWindow.Closing, so OnApplicationClosing wouldn't run).

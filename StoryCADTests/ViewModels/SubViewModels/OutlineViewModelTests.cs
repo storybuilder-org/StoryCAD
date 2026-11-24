@@ -2,11 +2,13 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
+using StoryCADLib.Services.Backup;
 using StoryCADLib.Services.Logging;
 using StoryCADLib.Services.Outline;
 using StoryCADLib.ViewModels;
 using StoryCADLib.ViewModels.SubViewModels;
 using StoryCADLib.ViewModels.Tools;
+using StoryCADTests.Services.Outline;
 
 #nullable disable
 
@@ -933,4 +935,185 @@ public class OutlineViewModelTests
         if (File.Exists(filePath))
             File.Delete(filePath);
     }
+
+    #region Save changes? (issue #1636)
+
+    private bool? _autoSavePreference;
+
+    [TestCleanup]
+    public void Cleanup()
+    {
+        Ioc.Default.GetRequiredService<SaveChangesService>().HeadlessAnswer = SaveChangesAnswer.No;
+        Ioc.Default.GetRequiredService<AutoSaveService>().StopAutoSave();
+        if (_autoSavePreference.HasValue)
+        {
+            Ioc.Default.GetRequiredService<PreferenceService>().Model.AutoSave = _autoSavePreference.Value;
+            _autoSavePreference = null;
+        }
+
+        Ioc.Default.GetRequiredService<AppState>().CurrentDocument = null;
+    }
+
+    private static void SetAnswer(SaveChangesAnswer answer) =>
+        Ioc.Default.GetRequiredService<SaveChangesService>().HeadlessAnswer = answer;
+
+    /// <summary>
+    ///     Turns the AutoSave preference on for one test, with the timer stopped.
+    /// </summary>
+    private AutoSaveService ArrangeAutoSavePreferenceOn()
+    {
+        var preferences = Ioc.Default.GetRequiredService<PreferenceService>();
+        _autoSavePreference = preferences.Model.AutoSave;
+        preferences.Model.AutoSave = true;
+        var autoSave = Ioc.Default.GetRequiredService<AutoSaveService>();
+        autoSave.StopAutoSave();
+        return autoSave;
+    }
+
+    [TestMethod]
+    public async Task OpenFile_AnswerCancel_KeepsFirstOutline()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var targetPath = await SaveChangesTestOutline.OpenAsync("VmOpenFile_Cancel_Target", changed: false);
+        var firstPath = await SaveChangesTestOutline.OpenAsync("VmOpenFile_Cancel_First");
+        var firstDocument = appState.CurrentDocument;
+        SetAnswer(SaveChangesAnswer.Cancel);
+
+        await outlineVM.OpenFile(targetPath);
+
+        Assert.AreSame(firstDocument, appState.CurrentDocument);
+        Assert.IsTrue(appState.CurrentDocument.Model.Changed);
+        Assert.AreEqual(SaveChangesTestOutline.SavedAuthor,
+            await SaveChangesTestOutline.AuthorOnDiskAsync(firstPath));
+    }
+
+    [TestMethod]
+    public async Task OpenFile_AnswerYes_SavesThenOpens()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var targetPath = await SaveChangesTestOutline.OpenAsync("VmOpenFile_Yes_Target", changed: false);
+        var firstPath = await SaveChangesTestOutline.OpenAsync("VmOpenFile_Yes_First");
+        SetAnswer(SaveChangesAnswer.Yes);
+
+        await outlineVM.OpenFile(targetPath);
+
+        Assert.AreEqual(targetPath, appState.CurrentDocument.FilePath);
+        Assert.AreEqual(SaveChangesTestOutline.ChangedAuthor,
+            await SaveChangesTestOutline.AuthorOnDiskAsync(firstPath));
+    }
+
+    [TestMethod]
+    public async Task CloseFile_AnswerYes_Saves()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var filePath = await SaveChangesTestOutline.OpenAsync("VmCloseFile_Yes");
+        SetAnswer(SaveChangesAnswer.Yes);
+
+        await outlineVM.CloseFile();
+
+        Assert.IsNull(appState.CurrentDocument.FilePath, "The outline is closed");
+        Assert.AreEqual(SaveChangesTestOutline.ChangedAuthor,
+            await SaveChangesTestOutline.AuthorOnDiskAsync(filePath));
+    }
+
+    [TestMethod]
+    public async Task CloseFile_AnswerCancel_KeepsOutlineOpen()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var filePath = await SaveChangesTestOutline.OpenAsync("VmCloseFile_Cancel");
+        var firstDocument = appState.CurrentDocument;
+        SetAnswer(SaveChangesAnswer.Cancel);
+
+        await outlineVM.CloseFile();
+
+        Assert.AreSame(firstDocument, appState.CurrentDocument);
+        Assert.AreEqual(filePath, appState.CurrentDocument.FilePath);
+        Assert.IsTrue(appState.CurrentDocument.Model.Changed);
+        Assert.AreEqual(SaveChangesTestOutline.SavedAuthor,
+            await SaveChangesTestOutline.AuthorOnDiskAsync(filePath));
+    }
+
+    [TestMethod]
+    public async Task CloseFile_AnswerCancel_StartsAutoSave()
+    {
+        await SaveChangesTestOutline.OpenAsync("VmCloseFile_CancelAutoSave");
+        var autoSave = ArrangeAutoSavePreferenceOn();
+        SetAnswer(SaveChangesAnswer.Cancel);
+
+        await outlineVM.CloseFile();
+
+        Assert.IsTrue(autoSave.IsRunning, "Cancel leaves the outline open, so AutoSave runs again");
+    }
+
+    [TestMethod]
+    public async Task ExitApp_AnswerCancel_KeepsOutlineOpen()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var filePath = await SaveChangesTestOutline.OpenAsync("VmExitApp_Cancel");
+        var firstDocument = appState.CurrentDocument;
+        SetAnswer(SaveChangesAnswer.Cancel);
+
+        // Returns before Application.Current.Exit().
+        await outlineVM.ExitApp();
+
+        Assert.AreSame(firstDocument, appState.CurrentDocument);
+        Assert.IsTrue(appState.CurrentDocument.Model.Changed);
+        Assert.AreEqual(SaveChangesTestOutline.SavedAuthor,
+            await SaveChangesTestOutline.AuthorOnDiskAsync(filePath));
+    }
+
+    [TestMethod]
+    public async Task ConfirmExitAsync_AnswerCancel_ReturnsFalse()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        await SaveChangesTestOutline.OpenAsync("VmConfirmExit_Cancel");
+        SetAnswer(SaveChangesAnswer.Cancel);
+
+        var result = await outlineVM.ConfirmExitAsync();
+
+        Assert.IsFalse(result);
+        Assert.IsTrue(appState.CurrentDocument.Model.Changed);
+    }
+
+    [TestMethod]
+    public async Task ConfirmExitAsync_AnswerCancel_StartsAutoSave()
+    {
+        await SaveChangesTestOutline.OpenAsync("VmConfirmExit_CancelAutoSave");
+        var autoSave = ArrangeAutoSavePreferenceOn();
+        SetAnswer(SaveChangesAnswer.Cancel);
+
+        await outlineVM.ConfirmExitAsync();
+
+        Assert.IsTrue(autoSave.IsRunning, "Cancel leaves the outline open, so AutoSave runs again");
+    }
+
+    [TestMethod]
+    public async Task ConfirmExitAsync_AnswerNo_ReturnsTrueAndClearsChanged()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var filePath = await SaveChangesTestOutline.OpenAsync("VmConfirmExit_No");
+        SetAnswer(SaveChangesAnswer.No);
+
+        var result = await outlineVM.ConfirmExitAsync();
+
+        Assert.IsTrue(result);
+        Assert.IsFalse(appState.CurrentDocument.Model.Changed, "CloseFile must not ask again during shutdown");
+        Assert.AreEqual(SaveChangesTestOutline.SavedAuthor,
+            await SaveChangesTestOutline.AuthorOnDiskAsync(filePath));
+    }
+
+    [TestMethod]
+    public async Task ConfirmExitAsync_AnswerYes_Saves()
+    {
+        var filePath = await SaveChangesTestOutline.OpenAsync("VmConfirmExit_Yes");
+        SetAnswer(SaveChangesAnswer.Yes);
+
+        var result = await outlineVM.ConfirmExitAsync();
+
+        Assert.IsTrue(result);
+        Assert.AreEqual(SaveChangesTestOutline.ChangedAuthor,
+            await SaveChangesTestOutline.AuthorOnDiskAsync(filePath));
+    }
+
+    #endregion
 }

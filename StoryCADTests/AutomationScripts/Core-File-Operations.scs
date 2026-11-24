@@ -69,6 +69,73 @@ menu CloseStoryMenuItem                   # unchanged, so no "Save changes?" dia
 expect StatusMessageText text "Close story command completed"
 expect tree "Hamlet/Characters/Claudius" gone
 
+step "CF-007: Open Another Outline With Unsaved Changes"
+menu OpenCreateFileMenuItem
+click OpenFromFileNavItem
+open-file-dialog "{scratch}/outlines/CF002_TestSave.stbx"
+set TitleTextBox "Core Test Story edited"
+press "Tab"
+expect tree contains "Core Test Story edited"
+menu OpenCreateFileMenuItem               # a sample, answered Cancel: the outline stays, still changed
+click SampleOutlinesNavItem
+select FileOpenSamplesList "Hamlet"
+click PrimaryButton
+dialog "Save changes?" click name:"Cancel"
+expect StatusMessageText text "Open Story command cancelled"
+expect tree contains "Core Test Story edited"
+menu OpenCreateFileMenuItem               # a sample, answered No: the sample opens, nothing is saved
+click SampleOutlinesNavItem
+select FileOpenSamplesList "Hamlet"
+click PrimaryButton
+dialog "Save changes?" click name:"No"
+expect tree contains "Hamlet/Characters/Claudius"
+menu OpenCreateFileMenuItem               # the sample is unchanged, so no question here
+click OpenFromFileNavItem
+open-file-dialog "{scratch}/outlines/CF002_TestSave.stbx"
+expect tree contains "Core Test Story"
+expect-no tree "Core Test Story edited"
+set TitleTextBox "Core Test Story edited"
+press "Tab"
+menu OpenCreateFileMenuItem               # a sample, answered Yes: saved, then the sample opens
+click SampleOutlinesNavItem
+select FileOpenSamplesList "Hamlet"
+click PrimaryButton
+dialog "Save changes?" click name:"Yes"
+expect tree contains "Hamlet/Characters/Claudius"
+menu OpenCreateFileMenuItem
+click OpenFromFileNavItem
+open-file-dialog "{scratch}/outlines/CF002_TestSave.stbx"
+expect tree contains "Core Test Story edited"
+set TitleTextBox "Core Test Story"        # put the title back for CF-006
+press "Tab"
+press "Primary+S"
+expect StatusMessageText text "SaveFile command completed"
+menu OpenCreateFileMenuItem               # a recent file with no changes in the outline: no question
+click RecentlyOpenedNavItem
+click name:"CF004_SaveAs"                 # by name: a recent file row has no AutomationId (lint warns)
+click PrimaryButton
+expect window "StoryCAD - Currently editing CF004_SaveAs"
+set TitleTextBox "Core Test Story edited"
+press "Tab"
+menu OpenCreateFileMenuItem               # a recent file, answered Cancel
+click RecentlyOpenedNavItem
+click name:"CF002_TestSave"
+click PrimaryButton
+dialog "Save changes?" click name:"Cancel"
+expect window "StoryCAD - Currently editing CF004_SaveAs"
+expect tree contains "Core Test Story edited"
+menu OpenCreateFileMenuItem               # Create new outline, answered Cancel: no file is created
+click CreateNewOutlineNavItem
+set FileOpenProjectNameTextBox "CF007_New"
+press "Tab"
+click PrimaryButton
+dialog "Save changes?" click name:"Cancel"
+expect StatusMessageText text "New project command cancelled"
+expect window "StoryCAD - Currently editing CF004_SaveAs"
+menu CloseStoryMenuItem
+dialog "Save changes?" click name:"No"
+expect StatusMessageText text "Close story command completed"
+
 step "Manual image: the Create new outline page"
 menu OpenCreateFileMenuItem               # not a plan step; after the file work, because the path set
 click CreateNewOutlineNavItem             # here stays for the rest of the run
@@ -85,8 +152,22 @@ open-file-dialog "{scratch}/outlines/CF002_TestSave.stbx"
 set TitleTextBox "Core Test Story changed"
 press "Tab"
 expect tree contains "Core Test Story changed"
-menu CloseStoryMenuItem                   # Close asks the same question as Exit; Exit would end the run
-dialog "Save changes?" click name:"No"    # the dialog has Yes and No, no Cancel
+menu CloseStoryMenuItem                   # Cancel: the outline stays open, still changed
+dialog "Save changes?" click name:"Cancel"
+expect StatusMessageText text "Close story command cancelled"
+expect tree contains "Core Test Story changed"
+menu CloseStoryMenuItem                   # Escape is the same as Cancel
+wait name:"Cancel"                        # by name: wait does not take the dialog's button ids (lint warns)
+press "Escape"
+wait name:"Cancel" gone
+expect StatusMessageText text "Close story command cancelled"
+expect tree contains "Core Test Story changed"
+menu ExitMenuItem                         # Cancel on Exit: StoryCAD keeps running
+dialog "Save changes?" click name:"Cancel"
+expect StatusMessageText text "Exit command cancelled"
+expect tree contains "Core Test Story changed"
+menu CloseStoryMenuItem                   # No: closes without saving
+dialog "Save changes?" click name:"No"
 expect StatusMessageText text "Close story command completed"
 menu OpenCreateFileMenuItem
 click OpenFromFileNavItem
