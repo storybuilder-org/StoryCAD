@@ -61,7 +61,7 @@ StoryCAD work in Release 4.5 (public issues):
 | [#1546](https://github.com/storybuilder-org/StoryCAD/issues/1546) | A Plot Board window for the beat structure |
 | [#1636](https://github.com/storybuilder-org/StoryCAD/issues/1636) | Opening another outline asks before it saves your changes, and "Save changes?" gets a Cancel button |
 | [#1652](https://github.com/storybuilder-org/StoryCAD/issues/1652) | Open from file works when StoryCAD runs as administrator |
-| [#1452](https://github.com/storybuilder-org/StoryCAD/issues/1452) | A screen-reader name for the Notes box on Folder pages (waits on a fix in a library StoryCAD uses) |
+| [#1452](https://github.com/storybuilder-org/StoryCAD/issues/1452) | A screen-reader name for the Notes box on Folder pages |
 | [#1422](https://github.com/storybuilder-org/StoryCAD/issues/1422) | More automated tests that follow the user manual |
 | [#1647](https://github.com/storybuilder-org/StoryCAD/issues/1647) | A tool that lets the team's test scripts drive StoryCAD step by step |
 | [#1392](https://github.com/storybuilder-org/StoryCAD/issues/1392) | Build pipeline: separate secrets for each branch |
