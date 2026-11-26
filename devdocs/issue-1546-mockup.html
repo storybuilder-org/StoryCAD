@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beat tree mock-up (StoryCAD issue 1546)</title>
+<style>
+  :root { --bg:#f4f4f2; --panel:#ffffff; --line:#c9c9c4; --text:#1c1c1a; --dim:#6c6c66; --sel:#1c1c1a; --drop:#e9e9e4; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#1e1e1e; --panel:#2a2a2a; --line:#4a4a4a; --text:#ececec; --dim:#a0a0a0; --sel:#ececec; --drop:#383838; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; height:100vh; display:flex; flex-direction:column; background:var(--bg); color:var(--text);
+         font:14px/1.35 "Segoe UI", system-ui, sans-serif; }
+  button, select { font:inherit; color:inherit; background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:4px 8px; }
+  button[aria-pressed="true"] { border:2px solid var(--sel); font-weight:600; }
+  #top { display:flex; gap:8px; align-items:center; padding:8px 12px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  #top h1 { font-size:15px; margin:0 12px 0 0; }
+  #main { flex:1; display:flex; min-height:0; }
+  #board { flex:1; overflow:auto; position:relative; padding:12px; }
+  #cols { display:flex; gap:48px; align-items:flex-start; width:max-content; }
+  #lines { position:absolute; top:0; left:0; pointer-events:none; }
+  #lines path { fill:none; stroke:var(--dim); stroke-width:1.5; }
+  #lines circle { fill:var(--dim); }
+  .col { width:230px; background:var(--panel); border:1px solid var(--line); border-radius:6px; }
+  .col header { padding:8px; border-bottom:1px solid var(--line); }
+  .pt { font-weight:600; }
+  .cat { color:var(--dim); margin-bottom:6px; }
+  .col select { width:100%; }
+  .cards { padding:8px; display:flex; flex-direction:column; gap:6px; }
+  .card { border:1px solid var(--line); border-radius:4px; padding:6px; min-height:58px; }
+  .bt { font-size:12px; color:var(--dim); margin-bottom:4px; }
+  .bd { font-size:12px; margin-bottom:6px; }
+  body.tab #board { flex:none; }
+  body.tab .col { width:320px; }
+  body.tab #panel { border-right:1px solid var(--line); }
+  .empty { color:var(--dim); font-style:italic; }
+  .loose { margin:0 8px 8px; padding:6px; border:1px dashed var(--line); border-radius:4px; min-height:48px; }
+  .lh { font-size:12px; color:var(--dim); margin-bottom:4px; }
+  .sel { outline:2px solid var(--sel); outline-offset:1px; }
+  .over { background:var(--drop); }
+  .part { display:flex; align-items:center; gap:6px; padding:3px 4px; border:1px solid var(--line); border-radius:4px;
+          background:var(--bg); cursor:grab; margin-bottom:3px; }
+  .tag { font-size:10px; border:1px solid var(--dim); border-radius:3px; padding:0 3px; color:var(--dim); flex:none; }
+  .nm { flex:1; }
+  .x { border:none; background:none; padding:0 4px; cursor:pointer; color:var(--dim); }
+  #mid { width:54px; display:flex; flex-direction:column; gap:8px; align-items:center; padding-top:60px; border-left:1px solid var(--line); }
+  #mid button { width:38px; height:34px; padding:0; font-size:16px; }
+  #panel { width:270px; border-left:1px solid var(--line); background:var(--panel); display:flex; flex-direction:column; min-height:0; }
+  #panel h2 { font-size:13px; margin:8px 8px 4px; }
+  #kind { padding:0 8px 6px; display:flex; gap:12px; }
+  #plist { flex:1; overflow:auto; padding:0 8px 8px; }
+  .used .nm { color:var(--dim); font-style:italic; }
+  .cnt { font-size:12px; color:var(--dim); flex:none; }
+  #legend { font-size:12px; color:var(--dim); padding:6px 8px; border-top:1px solid var(--line); }
+  #status { padding:6px 12px; border-top:1px solid var(--line); min-height:30px; color:var(--dim); }
+  dialog { border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--text); max-width:420px; }
+  dialog h3 { margin:0 0 8px; font-size:15px; }
+  #dbtn { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; }
+</style>
+</head>
+<body>
+
+<div id="top">
+  <h1>Beat tree mock-up, StoryCAD issue 1546</h1>
+  <button id="vTree" aria-pressed="true">Beat tree window</button>
+  <button id="vTab" aria-pressed="false">Structure tab</button>
+  <label id="tabPick" hidden>Problem form for: <select id="tabSel"></select></label>
+  <button id="desc" aria-pressed="false">Beat descriptions</button>
+  <span style="flex:1"></span>
+  <button id="reset">Reset the outline</button>
+</div>
+
+<div id="main">
+  <div id="board"><svg id="lines"></svg><div id="cols"></div></div>
+  <div id="mid">
+    <button id="assign" title="Assign the selected Scene or Problem to the selected card or column" aria-label="Assign">&#9664;</button>
+    <button id="unassign" title="Take the Scene or Problem off the selected card" aria-label="Unassign">&#9654;</button>
+    <button id="up" title="Move the selected beat up" aria-label="Move up">&#9650;</button>
+    <button id="down" title="Move the selected beat down" aria-label="Move down">&#9660;</button>
+  </div>
+  <aside id="panel">
+    <h2>All Scenes and Problems</h2>
+    <div id="kind">
+      <label><input type="radio" name="kind" value="s" checked> Scene</label>
+      <label><input type="radio" name="kind" value="p"> Problem</label>
+    </div>
+    <div id="plist"></div>
+    <div id="legend">Italic with a count: already used. Drag a part onto a card or onto "On no beat". Or select a card, select a part, and press the left arrow.</div>
+  </aside>
+</div>
+<div id="status" role="status"></div>
+
+<dialog id="dlg"><h3 id="dt"></h3><div id="dx"></div><div id="dbtn"></div></dialog>
+
+<script>
+// The beat sheets offered in the dropdown. The beat titles are copied from StoryCAD's Tools.json.
+const SHEETS = {
+ "Seven Point Story Structure": [
+  {
+   "t": "Ice Monster (8)",
+   "d": "An optional prolog, since the Hook is often a point of weakness. It's used before the conflict is introduced, to grab your Reader's attention."
+  },
+  {
+   "t": "Hook (2)",
+   "d": "The starting state. This to Resolution forces an arc. It's the equilibrium that needs upset."
+  },
+  {
+   "t": "Plot Turn I (4)",
+   "d": "Move from the hook to Midpoint. Introduce the conflict. New people, new secrets. Follow the white rabbit. Call to adventure."
+  },
+  {
+   "t": "Pinch I (5)",
+   "d": "Apply pressure. Something goes wrong. Peace is destroyed. Bad guys attack. Introduce the villain."
+  },
+  {
+   "t": "Midpoint (3)",
+   "d": "Protagonist moves from reaction to action. This is the Mirror Moment- character is forced to look at himself."
+  },
+  {
+   "t": "Pinch II (6)",
+   "d": "Apply more pressure, until the situation seems hopeless. The bad guys seem to win. These are the jaws of defeat from which your hero snatches victory. Make sure the teeth are sharp."
+  },
+  {
+   "t": "Plot Turn II (7)",
+   "d": "Move the story from midpoint to the end. You obtain the thing you need to win- even if you don't realize it. 'The power is in you.'"
+  },
+  {
+   "t": "Resolution (1)",
+   "d": "Not the falling action, but the climax. A disaster/bad ending for many middle story problems. Or a solution may lead to a subsequent problem. The major story problem resolution ends story."
+  }
+ ],
+ "Subplot/Complication Beat Sheet (Mini)": [
+  {
+   "t": "Introduction",
+   "d": "Establish the subplot or complication, introducing key characters or the central issue."
+  },
+  {
+   "t": "Development",
+   "d": "Expand on the subplot or complication, showing its relevance to the main story or characters."
+  },
+  {
+   "t": "First Attempt",
+   "d": "Characters make an initial effort to address the subplot issue or overcome the complication."
+  },
+  {
+   "t": "Complication",
+   "d": "Introduce new obstacles or raise the stakes, making the subplot or complication more challenging."
+  },
+  {
+   "t": "Escalation",
+   "d": "Increase tension or difficulty, potentially intertwining the subplot more closely with the main plot."
+  },
+  {
+   "t": "Pivot",
+   "d": "A turning point where characters gain new insight or change their approach to the subplot or complication."
+  },
+  {
+   "t": "Climax",
+   "d": "The highest point of tension in the subplot, often coinciding with or supporting the main plot's climax."
+  },
+  {
+   "t": "Resolution",
+   "d": "Wrap up the subplot or complication, showing its impact on characters or the overall story."
+  }
+ ],
+ "Save The Cat (Mini)": [
+  {
+   "t": "Opening Image",
+   "d": "The story begins by painting a picture of the protagonist's world before the adventure starts. This scene sets the tone, mood, and style of the story, offering a glimpse into the protagonist's current state of mind and foreshadowing her story arc."
+  },
+  {
+   "t": "Setup",
+   "d": "This section introduces the protagonist's world in more detail, revealing their daily life, relationships, and any existing problems. It establishes the status quo and often hints at the protagonist's flaws or areas for growth. Supporting characters are introduced, and the stage is set for the upcoming adventure."
+  },
+  {
+   "t": "Catalyst",
+   "d": "Also known as the inciting incident. A significant event disrupts the protagonist's world. This forces the character out of their comfort zone and sets the main story in motion. It could be a breakup, a death, an invitation, or any event that significantly alters the protagonist's course."
+  },
+  {
+   "t": "Break into Two",
+   "d": "This marks the end of Act I and the beginning of Act II. The protagonist makes the choice to embark on their journey or face the challenge presented. They commit to a new goal or course of action, even if the path ahead is uncertain and fraught with obstacles."
+  },
+  {
+   "t": "Midpoint",
+   "d": "The midpoint marks a significant turning point in the story. It often involves a major event that raises the stakes and changes the direction of the narrative."
+  },
+  {
+   "t": "Bad Guys Close In: 50-75%",
+   "d": "The antagonistic forces (which could be literal bad guys, internal conflicts, or challenging circumstances) gain ground. The protagonist faces increasing pressure and obstacles as they approach the climax of the story."
+  },
+  {
+   "t": "All Is Lost",
+   "d": "At this point in the story, the protagonist experiences a major setback or loss. It's their lowest moment, where everything seems to have fallen apart. This beat represents the greatest challenge to the protagonist's goal or mission."
+  },
+  {
+   "t": "Final Image",
+   "d": "The story concludes with a scene that mirrors or contrasts with the opening image. This final snapshot demonstrates how much the protagonist and their world have changed as a result of the journey, bringing the subplot full circle."
+  }
+ ]
+};
+
+// The outline is the sample "The Old Man and the Sea" that ships with StoryCAD, read from its .stbx file on 2026-11-25.
+const SAMPLE = {
+ "story": "p1",
+ "scenes": [
+  {
+   "id": "s1",
+   "title": "The boy wants to go out with the old man"
+  },
+  {
+   "id": "s2",
+   "title": "The old man and the boy reminisce"
+  },
+  {
+   "id": "s3",
+   "title": "Manolin accompanies Santiago to his shack"
+  },
+  {
+   "id": "s4",
+   "title": "The boy brings food for the old man"
+  },
+  {
+   "id": "s5",
+   "title": "Santiago sleeps"
+  },
+  {
+   "id": "s6",
+   "title": "In the early morning they launch the skiff"
+  },
+  {
+   "id": "s7",
+   "title": "He rows far out into the Gulf"
+  },
+  {
+   "id": "s8",
+   "title": "Santiago follows a man-of-war"
+  },
+  {
+   "id": "s9",
+   "title": "He catches a small albacore tuna"
+  },
+  {
+   "id": "s10",
+   "title": "The old man hooks the giant marlin"
+  },
+  {
+   "id": "s11",
+   "title": "The marlin tows the boat all day and night"
+  },
+  {
+   "id": "s12",
+   "title": "Santiago pities the great marlin"
+  },
+  {
+   "id": "s13",
+   "title": "He hooks a fish on another line"
+  },
+  {
+   "id": "s14",
+   "title": "A small, tired bird lands on the boat"
+  },
+  {
+   "id": "s15",
+   "title": "Santiago forces himself to eat"
+  },
+  {
+   "id": "s16",
+   "title": "No man is alone on the sea"
+  },
+  {
+   "id": "s17",
+   "title": "The marlin rises to the surface"
+  },
+  {
+   "id": "s18",
+   "title": "Santiago prays"
+  },
+  {
+   "id": "s19",
+   "title": "Santiago prepares for the long haul"
+  },
+  {
+   "id": "s20",
+   "title": "He remembers his arm wrestling triumph"
+  },
+  {
+   "id": "s21",
+   "title": "The old man catches a dolphin"
+  },
+  {
+   "id": "s22",
+   "title": "Night falls; Santiago eats and rests"
+  },
+  {
+   "id": "s23",
+   "title": "The fish surfacing wakes Santiago"
+  },
+  {
+   "id": "s24",
+   "title": "The fish begins to tire"
+  },
+  {
+   "id": "s25",
+   "title": "On the third morning the fish starts to circle"
+  },
+  {
+   "id": "s26",
+   "title": "On the third turn the old man sees the fish"
+  },
+  {
+   "id": "s27",
+   "title": "Santiago kills the marlin"
+  },
+  {
+   "id": "s28",
+   "title": "The old man lashes the fish to the side of the boa"
+  },
+  {
+   "id": "s29",
+   "title": "Santiago sails southwest toward Cuba."
+  },
+  {
+   "id": "s30",
+   "title": "The first shark is attracted to the kill"
+  },
+  {
+   "id": "s31",
+   "title": "Santiago faces the attack"
+  },
+  {
+   "id": "s32",
+   "title": "Man is not made for defeat"
+  },
+  {
+   "id": "s33",
+   "title": "Is it a sin not to hope?"
+  },
+  {
+   "id": "s34",
+   "title": "The galanos attack next"
+  },
+  {
+   "id": "s35",
+   "title": "Santiago continues to battle the sharks"
+  },
+  {
+   "id": "s36",
+   "title": "Santiago has only a club"
+  },
+  {
+   "id": "s37",
+   "title": "At the edge of the gulf stream, the pack attacks"
+  },
+  {
+   "id": "s38",
+   "title": "He breaks the boat's tiller across the last shark"
+  },
+  {
+   "id": "s39",
+   "title": "He sails homeward"
+  },
+  {
+   "id": "s40",
+   "title": "In the sleeping harbour he beaches his boat"
+  },
+  {
+   "id": "s41",
+   "title": "Manolin sees the old man's hands and weeps"
+  },
+  {
+   "id": "s42",
+   "title": "Manolin will stay with the old man"
+  },
+  {
+   "id": "s43",
+   "title": "The old man dreams of lions"
+  }
+ ],
+ "problems": [
+  {
+   "id": "p1",
+   "title": "The old man hasn't cought a fish in 84 days",
+   "category": "",
+   "sheet": "Seven Point Story Structure",
+   "beats": [
+    {
+     "t": "Ice Monster (8)",
+     "part": null,
+     "d": "An optional prolog, since the Hook is often a point of weakness. It's used before the conflict is introduced, to grab your Reader's attention."
+    },
+    {
+     "t": "Hook (2)",
+     "part": "p4",
+     "d": "The starting state. This to Resolution forces an arc. It's the equilibrium that needs upset."
+    },
+    {
+     "t": "Plot Turn I (4)",
+     "part": "p2",
+     "d": "Move from the hook to Midpoint. Introduce the conflict. New people, new secrets. Follow the white rabbit. Call to adventure."
+    },
+    {
+     "t": "Pinch I (5)",
+     "part": "p5",
+     "d": "Apply pessure. Something goes wrong. Peace is destroyed. Bad guys attack. Introduce the villain."
+    },
+    {
+     "t": "Midpoint (3)",
+     "part": "s32",
+     "d": "Protagonist moves from reaction to action. This is the Mirror Moment- character is forced to look at himself."
+    },
+    {
+     "t": "Pinch II (6)",
+     "part": "p3",
+     "d": "Apply more pressure, until the situation seems hopeless. The bad guys seem to win. These are the jaws of defeat from which your hero snatches victory. Make sure the teeth are sharp."
+    },
+    {
+     "t": "Plot Turn II (7)",
+     "part": "s39",
+     "d": "Move the story from midpoint to the end. You optain the thing you need to win- even if you don't realize it. 'The power is in you.'"
+    },
+    {
+     "t": "Resolution (1)",
+     "part": "s42",
+     "d": "Not the falling action, but the climax. A disaster/bad ending for many middle story problems. Or a solution may lead to a subsequent problem. The major story problem resolution ends story."
+    }
+   ],
+   "loose": []
+  },
+  {
+   "id": "p2",
+   "title": "Santiago hooks a marlin bigger than his boat",
+   "category": "",
+   "sheet": "Subplot/Complication Beat Sheet (Mini)",
+   "beats": [
+    {
+     "t": "Introduction",
+     "part": "s10",
+     "d": "Establish the subplot or complication, introducing key characters or the central issue."
+    },
+    {
+     "t": "Development",
+     "part": "s11",
+     "d": "Expand on the subplot or complication, showing its relevance to the main story or characters."
+    },
+    {
+     "t": "First Attempt",
+     "part": "s12",
+     "d": "Characters make an initial effort to address the subplot issue or overcome the complication."
+    },
+    {
+     "t": "Complication",
+     "part": "s17",
+     "d": "Introduce new obstacles or raise the stakes, making the subplot or complication more challenging."
+    },
+    {
+     "t": "Escalation",
+     "part": "s24",
+     "d": "Increase tension or difficulty, potentially intertwining the subplot more closely with the main plot."
+    },
+    {
+     "t": "Pivot",
+     "part": "s25",
+     "d": "A turning point where characters gain new insight or change their approach to the subplot or complication."
+    },
+    {
+     "t": "Climax",
+     "part": "s27",
+     "d": "The highest point of tension in the subplot, often coinciding with or supporting the main plot's climax."
+    },
+    {
+     "t": "Resolution",
+     "part": "s28",
+     "d": "Wrap up the subplot or complication, showing its impact on characters or the overall story."
+    }
+   ],
+   "loose": []
+  },
+  {
+   "id": "p3",
+   "title": "Sharks are attracted to the fish",
+   "category": "",
+   "sheet": "Subplot/Complication Beat Sheet (Mini)",
+   "beats": [
+    {
+     "t": "Introduction",
+     "part": "s30",
+     "d": "Establish the subplot or complication, introducing key characters or the central issue."
+    },
+    {
+     "t": "Development",
+     "part": "s31",
+     "d": "Expand on the subplot or complication, showing its relevance to the main story or characters."
+    },
+    {
+     "t": "First Attempt",
+     "part": "s34",
+     "d": "Characters make an initial effort to address the subplot issue or overcome the complication."
+    },
+    {
+     "t": "Complication",
+     "part": "s35",
+     "d": "Introduce new obstacles or raise the stakes, making the subplot or complication more challenging."
+    },
+    {
+     "t": "Escalation",
+     "part": "s36",
+     "d": "Increase tension or difficulty, potentially intertwining the subplot more closely with the main plot."
+    },
+    {
+     "t": "Pivot",
+     "part": "s37",
+     "d": "A turning point where characters gain new insight or change their approach to the subplot or complication."
+    },
+    {
+     "t": "Climax",
+     "part": "s38",
+     "d": "The highest point of tension in the subplot, often coinciding with or supporting the main plot's climax."
+    },
+    {
+     "t": "Resolution",
+     "part": "s39",
+     "d": "Wrap up the subplot or complication, showing its impact on characters or the overall story."
+    }
+   ],
+   "loose": []
+  },
+  {
+   "id": "p4",
+   "title": "Manolin must abandon his jinxed mentor",
+   "category": "",
+   "sheet": "Subplot/Complication Beat Sheet (Mini)",
+   "beats": [
+    {
+     "t": "Introduction",
+     "part": "s1",
+     "d": "Establish the subplot or complication, introducing key characters or the central issue."
+    },
+    {
+     "t": "Development",
+     "part": "s2",
+     "d": "Expand on the subplot or complication, showing its relevance to the main story or characters."
+    },
+    {
+     "t": "First Attempt",
+     "part": "s3",
+     "d": "Characters make an initial effort to address the subplot issue or overcome the complication."
+    },
+    {
+     "t": "Complication",
+     "part": "s4",
+     "d": "Introduce new obstacles or raise the stakes, making the subplot or complication more challenging."
+    },
+    {
+     "t": "Escalation",
+     "part": null,
+     "d": "Increase tension or difficulty, potentially intertwining the subplot more closely with the main plot."
+    },
+    {
+     "t": "Pivot",
+     "part": "s41",
+     "d": "A turning point where characters gain new insight or change their approach to the subplot or complication."
+    },
+    {
+     "t": "Climax",
+     "part": "s42",
+     "d": "The highest point of tension in the subplot, often coinciding with or supporting the main plot's climax."
+    },
+    {
+     "t": "Resolution",
+     "part": "s43",
+     "d": "Wrap up the subplot or complication, showing its impact on characters or the overall story."
+    }
+   ],
+   "loose": []
+  },
+  {
+   "id": "p5",
+   "title": "Santiago battles and kills the giant marlin",
+   "category": "",
+   "sheet": "Subplot/Complication Beat Sheet (Mini)",
+   "beats": [
+    {
+     "t": "Introduction",
+     "part": "s13",
+     "d": "Establish the subplot or complication, introducing key characters or the central issue."
+    },
+    {
+     "t": "Development",
+     "part": "s24",
+     "d": "Expand on the subplot or complication, showing its relevance to the main story or characters."
+    },
+    {
+     "t": "First Attempt",
+     "part": "s25",
+     "d": "Characters make an initial effort to address the subplot issue or overcome the complication."
+    },
+    {
+     "t": "Complication",
+     "part": "s26",
+     "d": "Introduce new obstacles or raise the stakes, making the subplot or complication more challenging."
+    },
+    {
+     "t": "Escalation",
+     "part": null,
+     "d": "Increase tension or difficulty, potentially intertwining the subplot more closely with the main plot."
+    },
+    {
+     "t": "Pivot",
+     "part": "s27",
+     "d": "A turning point where characters gain new insight or change their approach to the subplot or complication."
+    },
+    {
+     "t": "Climax",
+     "part": "s28",
+     "d": "The highest point of tension in the subplot, often coinciding with or supporting the main plot's climax."
+    },
+    {
+     "t": "Resolution",
+     "part": "s30",
+     "d": "Wrap up the subplot or complication, showing its impact on characters or the overall story."
+    }
+   ],
+   "loose": []
+  }
+ ]
+};
+function fresh() { return JSON.parse(JSON.stringify(SAMPLE)); }
+
+let S = fresh();
+let view = "tree", tabProblem = SAMPLE.story, kind = "s";
+let showDesc = false;
+let sel = null;      // selected target: { P, i }  (i = -1 means the column's "On no beat" group)
+let selPart = null;  // selected part in the right-hand list
+let drag = null;     // { id, from: { P, i } | null }
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+const isProblem = id => id[0] === "p";
+const prob = id => S.problems.find(p => p.id === id);
+const nameOf = id => (isProblem(id) ? prob(id) : S.scenes.find(s => s.id === id)).title;
+const holds = (P, id) => P.loose.includes(id) || P.beats.some(b => b.part === id);
+const owner = id => S.problems.find(P => holds(P, id)) || null;          // for a Problem: the one Problem it belongs to
+const uses = id => S.problems.reduce((n, P) => n + P.beats.filter(b => b.part === id).length + (P.loose.includes(id) ? 1 : 0), 0);
+const say = msg => { $("status").textContent = msg || ""; };
+
+function isBelow(a, b) {            // true when Problem a is b, or is below b in the tree
+  for (let x = a; x; x = (owner(x) || {}).id) if (x === b) return true;
+  return false;
+}
+function removeFrom(P, id) {
+  P.beats.forEach(b => { if (b.part === id) b.part = null; });
+  P.loose = P.loose.filter(x => x !== id);
+}
+function addLoose(P, id) { if (!holds(P, id)) P.loose.push(id); }
+
+function ask(title, text, labels) {
+  return new Promise(done => {
+    $("dt").textContent = title; $("dx").textContent = text;
+    $("dbtn").innerHTML = "";
+    labels.forEach((label, n) => {
+      const b = document.createElement("button");
+      b.textContent = label;
+      b.onclick = () => { $("dlg").close(); done(n); };
+      $("dbtn").appendChild(b);
+    });
+    $("dlg").oncancel = () => done(labels.length - 1);
+    $("dlg").showModal();
+  });
+}
+
+// ---- The actions. The screen and an AI would both call these. ----
+
+async function place(Pid, i, id, from) {
+  const P = prob(Pid);
+  say("");
+  if (i >= 0 && P.beats[i].part === id) return;
+  if (i >= 0 && P.beats[i].part) return say(`That card already holds "${nameOf(P.beats[i].part)}". Take it off first.`);
+
+  if (isProblem(id)) {
+    if (id === S.story) return say("The Story Problem is the root of the tree. It cannot be put in another column.");
+    if (isBelow(Pid, id)) return say(`"${nameOf(id)}" cannot be put in its own column, or in the column of a Problem below it.`);
+    const o = owner(id);
+    if (o && o.id !== Pid) {
+      const r = await ask("Already assigned!",
+        `This problem is already assigned to a different structure (${o.title}). Would you like to assign it here instead?`,
+        ["Assign here", "Cancel"]);
+      if (r !== 0) return;
+    }
+    if (o) removeFrom(o, id);
+    if (i >= 0) P.beats[i].part = id; else P.loose.push(id);
+  } else {
+    const fromCardHere = from && from.P === Pid && from.i >= 0;
+    const on = P.beats.map((b, k) => (b.part === id ? k : -1)).filter(k => k >= 0);
+    if (i >= 0) {
+      if (on.length) {
+        const r = await ask("Already on a card",
+          `"${nameOf(id)}" is already on the card "${P.beats[on[0]].t}" in this column.`,
+          ["Move it here", "Put it here as well", "Cancel"]);
+        if (r === 2) return;
+        if (r === 0) { if (fromCardHere) P.beats[from.i].part = null; else on.forEach(k => { P.beats[k].part = null; }); }
+      }
+      P.loose = P.loose.filter(x => x !== id);
+      P.beats[i].part = id;
+    } else if (fromCardHere) {
+      P.beats[from.i].part = null; addLoose(P, id);
+    } else if (holds(P, id)) {
+      return say(`"${nameOf(id)}" is already in this column.`);
+    } else {
+      P.loose.push(id);
+    }
+  }
+  render();
+}
+
+function takeOff(Pid, i) {           // off the card; the part stays in the column, on no beat
+  const P = prob(Pid), id = P.beats[i].part;
+  if (!id) return;
+  P.beats[i].part = null;
+  addLoose(P, id);
+  render();
+}
+
+function moveBeat(Pid, i, step) {     // as on the Structure tab today: the beat moves, with what it holds
+  const P = prob(Pid), j = i + step;
+  if (j < 0 || j >= P.beats.length) return;
+  [P.beats[i], P.beats[j]] = [P.beats[j], P.beats[i]];
+  sel = { P: Pid, i: j };
+  render();
+}
+
+function removeFromProblem(Pid, id) { // the part no longer belongs to this Problem
+  removeFrom(prob(Pid), id);
+  render();
+}
+
+function changeSheet(Pid, name) {     // the parts stay in the column, on no beat, in the order they had
+  const P = prob(Pid);
+  P.beats.forEach(b => { if (b.part && !P.loose.includes(b.part)) P.loose.push(b.part); });
+  P.sheet = name;
+  P.beats = name ? SHEETS[name].map(b => ({ t: b.t, d: b.d, part: null })) : [];
+  if (sel && sel.P === Pid) sel = null;
+  render();
+}
+
+// ---- Drawing ----
+
+function partHtml(id, P, i, withRemove) {
+  return `<div class="part" draggable="true" data-part="${id}" data-fp="${P}" data-fi="${i}">` +
+    `<span class="tag">${isProblem(id) ? "Problem" : "Scene"}</span><span class="nm">${esc(nameOf(id))}</span>` +
+    (withRemove ? `<button class="x" data-x="${id}" data-xp="${P}" title="Remove from this Problem" aria-label="Remove from this Problem">&#10005;</button>` : "") +
+    `</div>`;
+}
+
+function colHtml(P) {
+  const isSel = i => (sel && sel.P === P.id && sel.i === i ? " sel" : "");
+  const opts = ["", ...Object.keys(SHEETS)].map(n =>
+    `<option value="${esc(n)}"${n === P.sheet ? " selected" : ""}>${n ? esc(n) : "(no beat sheet)"}</option>`).join("");
+  const cards = P.beats.map((b, i) =>
+    `<div class="card${isSel(i)}" data-p="${P.id}" data-i="${i}"><div class="bt">${esc(b.t)}</div>` +
+    (showDesc && b.d ? `<div class="bd">${esc(b.d)}</div>` : "") +
+    (b.part ? partHtml(b.part, P.id, i, false) : `<div class="empty">Empty</div>`) + `</div>`).join("");
+  const loose = P.loose.map(id => partHtml(id, P.id, -1, true)).join("") || `<div class="empty">None</div>`;
+  return `<section class="col" data-col="${P.id}"><header><div class="pt">${esc(P.title)}</div>` +
+    `<div class="cat">${esc(P.category || "(no category set)")}</div><select data-sheet="${P.id}" aria-label="Beat sheet">${opts}</select></header>` +
+    (P.beats.length ? `<div class="cards">${cards}</div>` : "") +
+    `<div class="loose${isSel(-1)}" data-p="${P.id}" data-i="-1"><div class="lh">On no beat</div>${loose}</div></section>`;
+}
+
+function treeOrder() {               // the Story Problem first, then each Problem after the Problem that holds it
+  const out = [];
+  (function walk(P) {
+    out.push(P);
+    [...P.beats.map(b => b.part), ...P.loose].filter(id => id && isProblem(id)).forEach(id => walk(prob(id)));
+  })(prob(S.story));
+  return out;
+}
+
+function render() {
+  const cols = view === "tree" ? treeOrder() : [prob(tabProblem)];
+  $("cols").innerHTML = cols.map(colHtml).join("");
+  $("tabSel").innerHTML = S.problems.map(p => `<option value="${p.id}"${p.id === tabProblem ? " selected" : ""}>${esc(p.title)}</option>`).join("");
+  $("tabPick").hidden = view !== "tab";
+  $("vTree").setAttribute("aria-pressed", view === "tree");
+  $("vTab").setAttribute("aria-pressed", view === "tab");
+  $("desc").setAttribute("aria-pressed", showDesc);
+  document.body.classList.toggle("tab", view === "tab");
+
+  const items = kind === "s" ? S.scenes : S.problems.filter(p => p.id !== S.story);
+  $("plist").innerHTML = items.map(it => {
+    const n = uses(it.id);
+    const where = S.problems.filter(P => holds(P, it.id)).map(P => P.title).join(", ");
+    return `<div class="part${n ? " used" : ""}${selPart === it.id ? " sel" : ""}" draggable="true" data-part="${it.id}" data-pick="1"` +
+      ` title="${n ? "Used in: " + esc(where) : "Not used"}"><span class="tag">${kind === "s" ? "Scene" : "Problem"}</span>` +
+      `<span class="nm">${esc(it.title)}</span>${n ? `<span class="cnt">used ${n}</span>` : ""}</div>`;
+  }).join("");
+  drawLines();
+}
+
+function drawLines() {
+  const svg = $("lines"), board = $("board");
+  svg.innerHTML = "";
+  svg.setAttribute("width", 0); svg.setAttribute("height", 0);   // so the old size does not hold the scroll area open
+  svg.setAttribute("width", board.scrollWidth); svg.setAttribute("height", board.scrollHeight);
+  if (view !== "tree") return;
+  const base = board.getBoundingClientRect();
+  const at = r => ({ l: r.left - base.left + board.scrollLeft, r: r.right - base.left + board.scrollLeft, m: r.top - base.top + board.scrollTop + r.height / 2 });
+  treeOrder().slice(1).forEach(P => {
+    const from = document.querySelector(`[data-col="${owner(P.id).id}"] [data-part="${P.id}"]`);
+    const to = document.querySelector(`[data-col="${P.id}"] header`);
+    if (!from || !to) return;
+    const a = at(from.getBoundingClientRect()), b = at(to.getBoundingClientRect());
+    const mid = (a.r + b.l) / 2;
+    svg.innerHTML += `<circle cx="${a.r}" cy="${a.m}" r="4"/><path d="M${a.r},${a.m} C${mid},${a.m} ${mid},${b.m} ${b.l},${b.m}"/>`;
+  });
+}
+
+// ---- Mouse, keyboard and drag and drop ----
+
+document.addEventListener("click", e => {
+  const x = e.target.closest("[data-x]");
+  if (x) return removeFromProblem(x.dataset.xp, x.dataset.x);
+  const pick = e.target.closest("[data-pick]");
+  if (pick) { selPart = pick.dataset.part; return render(); }
+  const target = e.target.closest(".card, .loose");
+  if (target && !e.target.closest("select")) { sel = { P: target.dataset.p, i: +target.dataset.i }; render(); }
+});
+
+document.addEventListener("change", e => {
+  if (e.target.dataset.sheet) changeSheet(e.target.dataset.sheet, e.target.value);
+  else if (e.target.name === "kind") { kind = e.target.value; selPart = null; render(); }
+  else if (e.target.id === "tabSel") { tabProblem = e.target.value; sel = null; render(); }
+});
+
+$("assign").onclick = () => {
+  if (!sel) return say("Select a card, or the \"On no beat\" group of a column.");
+  if (!selPart) return say("Select a Scene or a Problem in the list on the right.");
+  place(sel.P, sel.i, selPart, null);
+};
+$("unassign").onclick = () => {
+  if (!sel || sel.i < 0 || !prob(sel.P).beats[sel.i].part) return say("Select a card that holds a Scene or a Problem.");
+  takeOff(sel.P, sel.i);
+};
+$("up").onclick = () => { if (!sel || sel.i < 0) return say("Select a card."); moveBeat(sel.P, sel.i, -1); };
+$("down").onclick = () => { if (!sel || sel.i < 0) return say("Select a card."); moveBeat(sel.P, sel.i, 1); };
+$("desc").onclick = () => { showDesc = !showDesc; render(); };
+$("vTree").onclick = () => { view = "tree"; sel = null; render(); };
+$("vTab").onclick = () => { view = "tab"; sel = null; render(); };
+$("reset").onclick = () => { S = fresh(); sel = null; selPart = null; say(""); render(); };
+
+document.addEventListener("dragstart", e => {
+  const el = e.target.closest("[draggable]");
+  if (!el) return;
+  drag = { id: el.dataset.part, from: el.dataset.fp ? { P: el.dataset.fp, i: +el.dataset.fi } : null };
+  e.dataTransfer.setData("text/plain", drag.id);
+});
+const dropZone = e => e.target.closest(".card, .loose, #plist");
+document.addEventListener("dragover", e => { const z = dropZone(e); if (z && drag) { e.preventDefault(); z.classList.add("over"); } });
+document.addEventListener("dragleave", e => { const z = dropZone(e); if (z) z.classList.remove("over"); });
+document.addEventListener("drop", e => {
+  const z = dropZone(e);
+  if (!z || !drag) return;
+  e.preventDefault(); z.classList.remove("over");
+  const d = drag; drag = null;
+  if (z.id === "plist") { if (d.from) removeFromProblem(d.from.P, d.id); }
+  else place(z.dataset.p, +z.dataset.i, d.id, d.from);
+});
+
+window.addEventListener("resize", drawLines);
+render();
+</script>
+</body>
+</html>
