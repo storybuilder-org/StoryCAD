@@ -234,6 +234,8 @@ Terry tried the mock-up on 2026-11-26. Drag and drop works and the overall look 
 - Terry expects that keeping the element may cause problems, and said they relate to "used". The issue now tells three states apart: not used, used and on a beat, and used but on no beat. The list on the right and the Unassigned Elements report both show the third state. Whether this covers the problems Terry has in mind is not confirmed.
 - The review corrected one claim in these notes: the code does keep the two markers of the Story Problem in step, in three places, but not fully.
 - The issue says "element" where these notes say "part".
+- Terry accepted the issue on 2026-11-26 and ticked the box on GitHub.
+- The Collaborator issue is not written yet. Terry, 2026-11-26: written now, it would likely need changing after the StoryCAD screen of issue 1546 is up. It waits for that screen.
 
 ### For the design
 
