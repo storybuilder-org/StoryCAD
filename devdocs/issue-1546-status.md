@@ -1,30 +1,25 @@
 # StoryCAD issue 1546: status of the work
 
-Written 2026-11-28, after a power loss on 2026-11-26. A new session can start from this file. Keep it current: change it when a step below is done.
+Written 2026-11-28, after a power loss on 2026-11-26. Last changed on 2026-11-28, after the design was approved. A new session can start from this file. Keep it current: change it when a step below is done.
 
 ## Where the work stands
 
-Issue 1546 is at step 2 of the process, the design. The design is written and reviewed one time. It waits for the maintainer.
+Issue 1546 is at step 3 of the process, the build. The design is approved. No StoryCAD code is written yet.
 
 | Step | State |
 |------|-------|
-| 1. Issue | Done. Rewritten and posted on 2026-11-26. Reviewed. Terry ticked "The issue is accepted." on GitHub. |
-| 2. Design | Revision 2 is written. A reviewer read revision 1. No reviewer has read revision 2. "The design is approved." is not ticked. |
-| 3. Build | Not started. No StoryCAD code is written. |
+| 1. Issue | Done. Rewritten and posted on 2026-11-26. Reviewed, with answers. Terry ticked "The issue is accepted." |
+| 2. Design | Done. Terry ticked "The design is approved." on 2026-11-28, for revision 2. Revision 3, of the same day, brings the text to the ASD-STE100 rules of process pull request 10; the design itself is the same. A comment on the issue lists what changed. A reviewer read revision 1 only. |
+| 3. Build | Not started. The next action is task 1 of part 23 of the design. |
 | 4. Pull request | Not started. |
 
 ## The next action
 
-Terry reads the summary at the top of the design and the review report, then does one of these:
+Start the build of pull request 1, at task 1 of part 23 of the design. Before the first test, load the skill `test`. Before the first code, load the skill `code`. Write each test before its code. The commands to build and to run the tests are in `CLAUDE.md` of the StoryCAD repo.
 
-1. Ticks "The design is approved." on the issue in the browser. Then the build of pull request 1 starts, at task 1 of part 23 of the design.
-2. Asks for a change to the design. Five choices and three differences from the issue are listed in the design's summary for this purpose.
-3. Asks for a second review, of revision 2, before he decides.
+The design leaves the look of the screens open. Part 19 lists those items; Terry settles each one on the branch, and the session records the value there.
 
-Two questions are also waiting for Terry:
-
-- Which branch of `storybuilder-miscellaneous` the five `issue-1546` files go on. They are not committed.
-- Whether the summary of the design, about 60 lines, is too long. The process asks for one screen.
+The issue's Tasks section holds the list of the large steps. Tick each one when it is done.
 
 ## Where each thing is
 
@@ -38,16 +33,16 @@ In the StoryCAD repo, worktree `D:\dev\src\StoryCAD-1546`, branch `issue-1546-be
 | `issue-1546-rewrite-draft.md` | The text of the issue as posted. The issue on GitHub is the true copy; it has one more line that names the design. |
 | `issue-1546-original-body.md` | The issue body that the rewrite replaced. |
 
-In the repo `storybuilder-miscellaneous`, folder `D:\dev\src\storybuilder-miscellaneous\devdocs`, **not committed**:
+In the repo `storybuilder-miscellaneous`, folder `D:\dev\src\storybuilder-miscellaneous\devdocs`, branch `november-2026-filing`, committed and pushed (commit `229e10c`):
 
 | File | What it is |
 |------|------------|
-| `issue-1546-design.md` | The design, revision 2. A plain English summary, then parts 1 to 23 in ASD-STE100, then Appendix A with the text for the manual page. |
-| `issue-1546-design-review.md` | The reviewer's whole report on revision 1, with what the reviewer was given. |
-| `issue-1546-issue-review.md` | The reviewer's whole report on the issue. |
+| `issue-1546-design.md` | The design, revision 3. A plain English summary, then parts 1 to 23 in ASD-STE100, then Appendix A with the text for the manual page. |
+| `issue-1546-design-review.md` | The reviewer's whole report on revision 1, with what the reviewer was given, and the answers. |
+| `issue-1546-issue-review.md` | The reviewer's whole report on the issue, and the answers. |
 | `issue-1546-design-glossary.yaml` | The word list that the ASD-STE100 checker uses for the design. |
 | `issue-1546-design-check.json` | The checker's result: compliant, 0 findings. |
-| `issue-1546-glossary-build.py` | The script that builds the word list and runs the checker. Run it again after any change to parts 1 to 23 of the design. |
+| `issue-1546-glossary-build.py` | The script that builds the word list and runs the checker with the shared word list of the process. Run it again after any change to the design, then commit, so the result file matches the committed design. |
 
 On GitHub: StoryCAD issue 1546. Milestone Release 4.4. The body names the mock-up, the notes, the issue review, the design and the design review.
 
@@ -69,10 +64,10 @@ On GitHub: StoryCAD issue 1546. Milestone Release 4.4. The body names the mock-u
 - Keep it as simple as possible. The work grows if allowed to.
 - Listen. Do not take charge of the conversation.
 - A session never ticks an approval box, and never unticks one. When the issue body is edited, start from the body as it stands on GitHub, so the tick on "The issue is accepted." is kept.
-- Wording in the design moves to ASD-STE100. The issue says "element" for a Scene or a Problem. The notes say "part".
+- Wording in the design is ASD-STE100, under the rules in `rules/writing-standards.md` of the process repo. The issue says "element" for a Scene or a Problem. The notes say "part". The design says "structure element", "beat column", "structure parent" and "structure child", because the shared word list fixes the meaning of "element", "column" and "parent".
+- A change to the design after its approval needs a comment on the issue that says what changed.
 
 ## Things a new session must check before it acts
 
 - That "The issue is accepted." is still ticked, and whether "The design is approved." is ticked: `gh issue view 1546 --repo storybuilder-org/StoryCAD`.
-- That the five files in `storybuilder-miscellaneous\devdocs` are still there. They exist only on this computer.
 - That the StoryCAD `dev` branch has not moved in the files the design names. The design's facts are checked against commit `70890daf`.
