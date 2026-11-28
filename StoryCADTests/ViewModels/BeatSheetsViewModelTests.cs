@@ -444,6 +444,7 @@ public class BeatSheetsViewModelTests
         var problemB = new ProblemModel("Problem B", _storyModel, null);
         var beatOnA = new StructureBeat("Beat on A", "Desc") { Guid = problemB.Uuid };
         problemA.StructureBeats.Add(beatOnA);
+        problemA.StructureElements.Add(problemB.Uuid);
         problemB.BoundStructure = problemA.Uuid;
 
         // Our test problem (_problemModel) has a beat we want to assign B to

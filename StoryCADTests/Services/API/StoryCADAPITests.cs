@@ -2525,7 +2525,7 @@ public class StoryCADApiTests
     /// Fixed in issue #1339 — OutlineService now manages BoundStructure.
     /// </summary>
     [TestMethod]
-    public async Task ClearBeatAssignment_Problem_ClearsBoundStructure()
+    public async Task ClearBeatAssignment_Problem_StaysInParentOnNoBeat()
     {
         // Arrange
         await _api.CreateEmptyOutline("Test Story", "Test Author", "0");
@@ -2544,10 +2544,13 @@ public class StoryCADApiTests
         // Act
         _api.ClearBeatAssignment(problem1Guid, 0);
 
-        // Assert - BoundStructure IS cleared (fixed behavior)
+        // Assert - since issue #1546 the child stays in its parent, on no beat
         problem2 = (ProblemModel)_api.CurrentModel.StoryElements.StoryElementGuids[problem2Guid];
-        Assert.AreEqual(Guid.Empty, problem2.BoundStructure,
-            "BoundStructure should be cleared after unassignment");
+        var problem1 = (ProblemModel)_api.CurrentModel.StoryElements.StoryElementGuids[problem1Guid];
+        Assert.AreEqual(Guid.Empty, problem1.StructureBeats[0].Guid, "The beat should be empty");
+        Assert.AreEqual(problem1Guid, problem2.BoundStructure,
+            "The child keeps its parent after it is taken off the beat");
+        CollectionAssert.Contains(problem1.StructureElements, problem2Guid);
     }
 
     /// <summary>

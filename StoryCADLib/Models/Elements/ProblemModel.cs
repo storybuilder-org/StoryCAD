@@ -240,6 +240,7 @@ public class ProblemModel : StoryElement
     [JsonIgnore] private Guid _boundStructure;
 
     /// <summary>
+    ///     The Problem that has this Problem as a structure element, on a beat or on no beat.
     ///     A problem cannot be bound to more than one structure
     /// </summary>
     [JsonInclude]
@@ -248,6 +249,20 @@ public class ProblemModel : StoryElement
     {
         get => _boundStructure;
         set => _boundStructure = value;
+    }
+
+    [JsonIgnore] private List<Guid> _structureElements = new List<Guid>();
+
+    /// <summary>
+    ///     The Scenes and Problems that belong to this Problem, on a beat or on no beat (#1546).
+    ///     OutlineService keeps this list. An element on a beat is always in the list.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("StructureElements")]
+    public List<Guid> StructureElements
+    {
+        get => _structureElements;
+        set => _structureElements = value;
     }
 
     #endregion

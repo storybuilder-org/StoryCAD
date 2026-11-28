@@ -2542,13 +2542,15 @@ public class OutlineServiceTests
             new("B2", "D2")
         };
 
+        var collection = problem.StructureBeats;
+
         _outlineService.SetBeatSheet(model, problem, "Desc", "Title", newBeats);
 
         Assert.AreEqual("Title", problem.StructureTitle);
         Assert.AreEqual("Desc", problem.StructureDescription);
         Assert.AreEqual(2, problem.StructureBeats.Count);
         Assert.AreEqual("B1", problem.StructureBeats[0].Title);
-        Assert.AreSame(newBeats, problem.StructureBeats);
+        Assert.AreSame(collection, problem.StructureBeats);
     }
 
     [TestMethod]
@@ -2571,6 +2573,458 @@ public class OutlineServiceTests
         Assert.AreEqual(beats.Count, loaded.Beats.Count);
         Assert.AreEqual("Intro", loaded.Beats[0].Title);
         Assert.AreEqual(Guid.Empty, loaded.Beats[0].Guid);
+    }
+
+    // ----- Structure elements (issue #1546) -----
+
+    private async Task<(StoryModel model, ProblemModel problem, OverviewModel overview)> CreateModelWithStoryProblem()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var overview = model.StoryElements.OfType<OverviewModel>().First();
+        overview.StoryProblem = problem.Uuid;
+        return (model, problem, overview);
+    }
+
+    [TestMethod]
+    public async Task AddStructureElement_NoBeatSheet_SurvivesSaveAndOpen()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var scene = new SceneModel("Scene", model, problem.Node);
+        var child = new ProblemModel("Child", model, problem.Node);
+
+        _outlineService.AddStructureElement(model, problem, scene.Uuid);
+        _outlineService.AddStructureElement(model, problem, child.Uuid);
+
+        var filePath = Path.Combine(testOutputPath, "StructureElements.stbx");
+        await _outlineService.WriteModel(model, filePath);
+        var loaded = await _outlineService.OpenFile(filePath);
+        var loadedProblem = (ProblemModel)loaded.StoryElements.StoryElementGuids[problem.Uuid];
+        var loadedChild = (ProblemModel)loaded.StoryElements.StoryElementGuids[child.Uuid];
+
+        CollectionAssert.AreEqual(new[] { scene.Uuid, child.Uuid }, loadedProblem.StructureElements);
+        Assert.AreEqual(0, loadedProblem.StructureBeats.Count);
+        Assert.AreEqual(problem.Uuid, loadedChild.BoundStructure);
+    }
+
+    [TestMethod]
+    public async Task AddStructureElement_AlreadyAMember_DoesNotAddTwice()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var scene = new SceneModel("Scene", model, problem.Node);
+
+        _outlineService.AddStructureElement(model, problem, scene.Uuid);
+        _outlineService.AddStructureElement(model, problem, scene.Uuid);
+
+        CollectionAssert.AreEqual(new[] { scene.Uuid }, problem.StructureElements);
+    }
+
+    [TestMethod]
+    public async Task AddStructureElement_ProblemWithOtherParent_MovesIt()
+    {
+        var (model, problemA) = await CreateModelWithProblem();
+        var problemB = new ProblemModel("B", model, problemA.Node);
+        var child = new ProblemModel("Child", model, problemA.Node);
+        _outlineService.CreateBeat(problemA, "Beat", "Desc");
+        _outlineService.AssignElementToBeat(model, problemA, 0, child.Uuid);
+
+        _outlineService.AddStructureElement(model, problemB, child.Uuid);
+
+        Assert.AreEqual(Guid.Empty, problemA.StructureBeats[0].Guid);
+        Assert.IsFalse(problemA.StructureElements.Contains(child.Uuid));
+        CollectionAssert.AreEqual(new[] { child.Uuid }, problemB.StructureElements);
+        Assert.AreEqual(problemB.Uuid, child.BoundStructure);
+    }
+
+    [TestMethod]
+    public async Task AddStructureElement_NotSceneOrProblem_Throws()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var overview = model.ExplorerView.First();
+        var character = _outlineService.AddStoryElement(model, StoryItemType.Character, overview);
+
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
+            _outlineService.AddStructureElement(model, problem, character.Uuid));
+    }
+
+    [TestMethod]
+    public async Task AddStructureElement_Itself_Throws()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
+            _outlineService.AddStructureElement(model, problem, problem.Uuid));
+    }
+
+    [TestMethod]
+    public async Task AddStructureElement_StoryProblem_Throws()
+    {
+        var (model, storyProblem, _) = await CreateModelWithStoryProblem();
+        var other = new ProblemModel("Other", model, storyProblem.Node);
+
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
+            _outlineService.AddStructureElement(model, other, storyProblem.Uuid));
+    }
+
+    [TestMethod]
+    public async Task AssignElementToBeat_StoryProblem_Throws()
+    {
+        var (model, storyProblem, _) = await CreateModelWithStoryProblem();
+        var other = new ProblemModel("Other", model, storyProblem.Node);
+        _outlineService.CreateBeat(other, "Beat", "Desc");
+
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
+            _outlineService.AssignElementToBeat(model, other, 0, storyProblem.Uuid));
+    }
+
+    [TestMethod]
+    public async Task AssignElementToBeat_NewElement_BecomesMember()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var scene = new SceneModel("Scene", model, problem.Node);
+        _outlineService.CreateBeat(problem, "Beat", "Desc");
+
+        _outlineService.AssignElementToBeat(model, problem, 0, scene.Uuid);
+
+        CollectionAssert.AreEqual(new[] { scene.Uuid }, problem.StructureElements);
+        Assert.AreEqual(0, _outlineService.GetElementsOnNoBeat(problem).Count);
+    }
+
+    [TestMethod]
+    public async Task AssignElementToBeat_FilledBeat_KeepsOldElementOnNoBeat()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var first = new SceneModel("First", model, problem.Node);
+        var second = new SceneModel("Second", model, problem.Node);
+        _outlineService.CreateBeat(problem, "Beat", "Desc");
+        _outlineService.AssignElementToBeat(model, problem, 0, first.Uuid);
+
+        _outlineService.AssignElementToBeat(model, problem, 0, second.Uuid);
+
+        Assert.AreEqual(second.Uuid, problem.StructureBeats[0].Guid);
+        CollectionAssert.AreEqual(new[] { first.Uuid }, _outlineService.GetElementsOnNoBeat(problem).ToList());
+    }
+
+    [TestMethod]
+    public async Task AssignElementToBeat_ProblemOnAnotherBeatOfSameParent_MovesIt()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var child = new ProblemModel("Child", model, problem.Node);
+        _outlineService.CreateBeat(problem, "One", "Desc");
+        _outlineService.CreateBeat(problem, "Two", "Desc");
+        _outlineService.AssignElementToBeat(model, problem, 0, child.Uuid);
+
+        _outlineService.AssignElementToBeat(model, problem, 1, child.Uuid);
+
+        Assert.AreEqual(Guid.Empty, problem.StructureBeats[0].Guid);
+        Assert.AreEqual(child.Uuid, problem.StructureBeats[1].Guid);
+        CollectionAssert.AreEqual(new[] { child.Uuid }, problem.StructureElements);
+        Assert.AreEqual(problem.Uuid, child.BoundStructure);
+    }
+
+    [TestMethod]
+    public async Task UnasignBeat_KeepsMember()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var scene = new SceneModel("Scene", model, problem.Node);
+        var child = new ProblemModel("Child", model, problem.Node);
+        _outlineService.CreateBeat(problem, "One", "Desc");
+        _outlineService.CreateBeat(problem, "Two", "Desc");
+        _outlineService.AssignElementToBeat(model, problem, 0, scene.Uuid);
+        _outlineService.AssignElementToBeat(model, problem, 1, child.Uuid);
+
+        _outlineService.UnasignBeat(model, problem, 1);
+        _outlineService.UnasignBeat(model, problem, 0);
+
+        Assert.AreEqual(Guid.Empty, problem.StructureBeats[0].Guid);
+        Assert.AreEqual(Guid.Empty, problem.StructureBeats[1].Guid);
+        CollectionAssert.AreEqual(new[] { child.Uuid, scene.Uuid }, _outlineService.GetElementsOnNoBeat(problem).ToList());
+        Assert.AreEqual(problem.Uuid, child.BoundStructure, "A child Problem on no beat keeps its parent");
+    }
+
+    [TestMethod]
+    public async Task RemoveStructureElement_ClearsEachBeat()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var scene = new SceneModel("Scene", model, problem.Node);
+        var child = new ProblemModel("Child", model, problem.Node);
+        _outlineService.CreateBeat(problem, "One", "Desc");
+        _outlineService.CreateBeat(problem, "Two", "Desc");
+        _outlineService.CreateBeat(problem, "Three", "Desc");
+        _outlineService.AssignElementToBeat(model, problem, 0, scene.Uuid);
+        _outlineService.AssignElementToBeat(model, problem, 2, scene.Uuid);
+        _outlineService.AssignElementToBeat(model, problem, 1, child.Uuid);
+
+        _outlineService.RemoveStructureElement(model, problem, scene.Uuid);
+        _outlineService.RemoveStructureElement(model, problem, child.Uuid);
+
+        Assert.IsTrue(problem.StructureBeats.All(b => b.Guid == Guid.Empty));
+        Assert.AreEqual(0, problem.StructureElements.Count);
+        Assert.AreEqual(Guid.Empty, child.BoundStructure);
+    }
+
+    [TestMethod]
+    public async Task RemoveStructureElement_NotMember_KeepsParent()
+    {
+        var (model, problemP) = await CreateModelWithProblem();
+        var problemQ = new ProblemModel("Q", model, problemP.Node);
+        var child = new ProblemModel("Child", model, problemP.Node);
+        _outlineService.AddStructureElement(model, problemQ, child.Uuid);
+
+        _outlineService.RemoveStructureElement(model, problemP, child.Uuid);
+
+        Assert.AreEqual(problemQ.Uuid, child.BoundStructure);
+        CollectionAssert.AreEqual(new[] { child.Uuid }, problemQ.StructureElements);
+    }
+
+    [TestMethod]
+    public async Task MoveBeatElement_ToFilledBeat_MovesAndKeepsOldOnNoBeat()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var moved = new SceneModel("Moved", model, problem.Node);
+        var old = new SceneModel("Old", model, problem.Node);
+        _outlineService.CreateBeat(problem, "One", "Desc");
+        _outlineService.CreateBeat(problem, "Two", "Desc");
+        _outlineService.AssignElementToBeat(model, problem, 0, moved.Uuid);
+        _outlineService.AssignElementToBeat(model, problem, 1, old.Uuid);
+
+        _outlineService.MoveBeatElement(model, problem, 0, 1);
+
+        Assert.AreEqual(Guid.Empty, problem.StructureBeats[0].Guid);
+        Assert.AreEqual(moved.Uuid, problem.StructureBeats[1].Guid);
+        CollectionAssert.AreEqual(new[] { old.Uuid }, _outlineService.GetElementsOnNoBeat(problem).ToList());
+    }
+
+    [TestMethod]
+    public async Task MoveBeatElement_BadIndex_Throws()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        _outlineService.CreateBeat(problem, "One", "Desc");
+
+        Assert.ThrowsExactly<InvalidOperationException>(() => _outlineService.MoveBeatElement(model, problem, 0, 5));
+    }
+
+    [TestMethod]
+    public async Task DeleteBeat_KeepElement_KeepsMember()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var scene = new SceneModel("Scene", model, problem.Node);
+        var child = new ProblemModel("Child", model, problem.Node);
+        _outlineService.CreateBeat(problem, "One", "Desc");
+        _outlineService.CreateBeat(problem, "Two", "Desc");
+        _outlineService.AssignElementToBeat(model, problem, 0, scene.Uuid);
+        _outlineService.AssignElementToBeat(model, problem, 1, child.Uuid);
+
+        _outlineService.DeleteBeat(model, problem, 1);
+        _outlineService.DeleteBeat(model, problem, 0);
+
+        Assert.AreEqual(0, problem.StructureBeats.Count);
+        CollectionAssert.AreEqual(new[] { child.Uuid, scene.Uuid }, _outlineService.GetElementsOnNoBeat(problem).ToList());
+        Assert.AreEqual(problem.Uuid, child.BoundStructure);
+    }
+
+    [TestMethod]
+    public async Task DeleteBeat_RemoveElement_RemovesMember()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var child = new ProblemModel("Child", model, problem.Node);
+        _outlineService.CreateBeat(problem, "One", "Desc");
+        _outlineService.AssignElementToBeat(model, problem, 0, child.Uuid);
+
+        _outlineService.DeleteBeat(model, problem, 0, false);
+
+        Assert.AreEqual(0, problem.StructureBeats.Count);
+        Assert.AreEqual(0, problem.StructureElements.Count);
+        Assert.AreEqual(Guid.Empty, child.BoundStructure);
+    }
+
+    [TestMethod]
+    public async Task DeleteBeat_RemoveElement_SceneOnAnotherBeat_StaysMember()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var scene = new SceneModel("Scene", model, problem.Node);
+        _outlineService.CreateBeat(problem, "One", "Desc");
+        _outlineService.CreateBeat(problem, "Two", "Desc");
+        _outlineService.AssignElementToBeat(model, problem, 0, scene.Uuid);
+        _outlineService.AssignElementToBeat(model, problem, 1, scene.Uuid);
+
+        _outlineService.DeleteBeat(model, problem, 0, false);
+
+        Assert.AreEqual(scene.Uuid, problem.StructureBeats[0].Guid);
+        CollectionAssert.AreEqual(new[] { scene.Uuid }, problem.StructureElements);
+    }
+
+    [TestMethod]
+    public async Task SetBeatSheet_MovesMembersToEndOnce()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var waiting = new SceneModel("Waiting", model, problem.Node);
+        var first = new SceneModel("First", model, problem.Node);
+        var second = new SceneModel("Second", model, problem.Node);
+        var child = new ProblemModel("Child", model, problem.Node);
+        _outlineService.CreateBeat(problem, "One", "Desc");
+        _outlineService.CreateBeat(problem, "Two", "Desc");
+        _outlineService.CreateBeat(problem, "Three", "Desc");
+        _outlineService.CreateBeat(problem, "Four", "Desc");
+        _outlineService.AddStructureElement(model, problem, waiting.Uuid);
+        _outlineService.AssignElementToBeat(model, problem, 3, child.Uuid);
+        _outlineService.AssignElementToBeat(model, problem, 1, second.Uuid);
+        _outlineService.AssignElementToBeat(model, problem, 0, first.Uuid);
+        _outlineService.AssignElementToBeat(model, problem, 2, first.Uuid);
+        var collection = problem.StructureBeats;
+
+        _outlineService.SetBeatSheet(model, problem, "Desc", "Title",
+            new ObservableCollection<StructureBeat> { new("B1", "D1") { Guid = Guid.NewGuid() } });
+
+        Assert.AreSame(collection, problem.StructureBeats, "The collection object stays, so each screen keeps its binding");
+        Assert.AreEqual(1, problem.StructureBeats.Count);
+        Assert.AreEqual(Guid.Empty, problem.StructureBeats[0].Guid, "A new beat starts empty");
+        CollectionAssert.AreEqual(new[] { waiting.Uuid, first.Uuid, second.Uuid, child.Uuid }, problem.StructureElements);
+        Assert.AreEqual(problem.Uuid, child.BoundStructure);
+    }
+
+    [TestMethod]
+    public async Task SetBeatSheet_NullBeats_LeavesNoBeats()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        _outlineService.CreateBeat(problem, "One", "Desc");
+
+        _outlineService.SetBeatSheet(model, problem, "Desc", "Title");
+
+        Assert.AreEqual(0, problem.StructureBeats.Count);
+    }
+
+    [TestMethod]
+    public async Task GetStructureUse_ThreeConditions()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var notUsed = new SceneModel("Not used", model, problem.Node);
+        var onNoBeat = new SceneModel("On no beat", model, problem.Node);
+        var onBeat = new SceneModel("On a beat", model, problem.Node);
+        _outlineService.CreateBeat(problem, "One", "Desc");
+        _outlineService.AddStructureElement(model, problem, onNoBeat.Uuid);
+        _outlineService.AssignElementToBeat(model, problem, 0, onBeat.Uuid);
+
+        Assert.AreEqual(StructureUse.NotUsed, _outlineService.GetStructureUse(model, notUsed.Uuid));
+        Assert.AreEqual(StructureUse.OnNoBeat, _outlineService.GetStructureUse(model, onNoBeat.Uuid));
+        Assert.AreEqual(StructureUse.OnBeat, _outlineService.GetStructureUse(model, onBeat.Uuid));
+    }
+
+    [TestMethod]
+    public async Task GetStructureUse_ProblemInTrash_DoesNotCount()
+    {
+        var model = await _outlineService.CreateModel("Trash Use", "Author", 0);
+        var overview = model.ExplorerView.First();
+        var problem = (ProblemModel)_outlineService.AddStoryElement(model, StoryItemType.Problem, overview);
+        var scene = (SceneModel)_outlineService.AddStoryElement(model, StoryItemType.Scene, overview);
+        _outlineService.CreateBeat(problem, "One", "Desc");
+        _outlineService.AssignElementToBeat(model, problem, 0, scene.Uuid);
+
+        _outlineService.MoveToTrash(problem, model);
+
+        Assert.AreEqual(StructureUse.NotUsed, _outlineService.GetStructureUse(model, scene.Uuid));
+    }
+
+    [TestMethod]
+    public async Task NormalizeStructure_OldFile_FillsMembers()
+    {
+        // The shipped sample was saved before StructureElements existed.
+        var filePath = Path.Combine(App.InputDir, "The Old Man and the Sea.stbx");
+
+        var model = await _outlineService.OpenFile(filePath);
+
+        var overview = model.StoryElements.OfType<OverviewModel>().First();
+        var storyProblem = (ProblemModel)model.StoryElements.StoryElementGuids[overview.StoryProblem];
+        var problems = model.StoryElements.OfType<ProblemModel>().Where(p => p.StructureBeats.Count > 0).ToList();
+        Assert.AreEqual(5, problems.Count);
+        foreach (var problem in problems)
+        {
+            var onBeats = problem.StructureBeats.Select(b => b.Guid).Where(g => g != Guid.Empty).Distinct().ToList();
+            CollectionAssert.AreEqual(onBeats, problem.StructureElements, $"{problem.Name}: the members are the elements on the beats, in beat order");
+            if (problem != storyProblem)
+            {
+                Assert.AreEqual(storyProblem.Uuid, problem.BoundStructure);
+            }
+        }
+
+        Assert.AreEqual(7, storyProblem.StructureElements.Count);
+        Assert.AreEqual(Guid.Empty, storyProblem.BoundStructure);
+    }
+
+    [TestMethod]
+    public async Task NormalizeStructure_DoesNotSetChanged()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var scene = new SceneModel("Scene", model, problem.Node);
+        _outlineService.CreateBeat(problem, "One", "Desc");
+        problem.StructureBeats[0].Guid = scene.Uuid; // the shape of a file from before #1546
+        model.Changed = false;
+
+        _outlineService.NormalizeStructure(model);
+
+        CollectionAssert.AreEqual(new[] { scene.Uuid }, problem.StructureElements);
+        Assert.AreEqual(scene.Uuid, problem.StructureBeats[0].Guid);
+        Assert.IsFalse(model.Changed);
+    }
+
+    [TestMethod]
+    public async Task NormalizeStructure_ParentWithoutMember_ClearsParent()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var child = new ProblemModel("Child", model, problem.Node);
+        child.BoundStructure = problem.Uuid; // a record that a beat sheet change left behind
+
+        _outlineService.NormalizeStructure(model);
+
+        Assert.AreEqual(Guid.Empty, child.BoundStructure);
+    }
+
+    [TestMethod]
+    public async Task NormalizeStructure_UnknownAndRepeatedGuids_AreRemoved()
+    {
+        var (model, problem) = await CreateModelWithProblem();
+        var scene = new SceneModel("Scene", model, problem.Node);
+        problem.StructureElements.AddRange(new[] { scene.Uuid, Guid.NewGuid(), scene.Uuid });
+
+        _outlineService.NormalizeStructure(model);
+
+        CollectionAssert.AreEqual(new[] { scene.Uuid }, problem.StructureElements);
+    }
+
+    [TestMethod]
+    public async Task MoveToTrash_Problem_ClearsParent()
+    {
+        var model = await _outlineService.CreateModel("Trash Child", "Author", 0);
+        var overview = model.ExplorerView.First();
+        var parent = (ProblemModel)_outlineService.AddStoryElement(model, StoryItemType.Problem, overview);
+        var child = (ProblemModel)_outlineService.AddStoryElement(model, StoryItemType.Problem, overview);
+        _outlineService.CreateBeat(parent, "One", "Desc");
+        _outlineService.AssignElementToBeat(model, parent, 0, child.Uuid);
+
+        _outlineService.MoveToTrash(child, model);
+
+        Assert.AreEqual(Guid.Empty, child.BoundStructure);
+        Assert.AreEqual(Guid.Empty, parent.StructureBeats[0].Guid);
+        Assert.IsFalse(parent.StructureElements.Contains(child.Uuid));
+    }
+
+    [TestMethod]
+    public async Task MoveToTrash_Parent_ReleasesChildProblems()
+    {
+        var model = await _outlineService.CreateModel("Trash Parent", "Author", 0);
+        var overview = model.ExplorerView.First();
+        var parent = (ProblemModel)_outlineService.AddStoryElement(model, StoryItemType.Problem, overview);
+        var child = (ProblemModel)_outlineService.AddStoryElement(model, StoryItemType.Problem, overview);
+        var scene = (SceneModel)_outlineService.AddStoryElement(model, StoryItemType.Scene, overview);
+        _outlineService.CreateBeat(parent, "One", "Desc");
+        _outlineService.CreateBeat(parent, "Two", "Desc");
+        _outlineService.AssignElementToBeat(model, parent, 0, child.Uuid);
+        _outlineService.AssignElementToBeat(model, parent, 1, scene.Uuid);
+
+        _outlineService.MoveToTrash(parent, model);
+
+        Assert.AreEqual(Guid.Empty, child.BoundStructure);
+        Assert.AreEqual(Guid.Empty, parent.StructureBeats[0].Guid, "The trashed Problem lets go of its child Problem");
+        CollectionAssert.AreEqual(new[] { scene.Uuid }, parent.StructureElements, "The trashed Problem keeps its Scenes");
     }
 
     #endregion

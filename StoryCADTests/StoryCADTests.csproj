@@ -80,6 +80,10 @@
         <None Update="TestInputs\StructureTests.stbx">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <!-- A shipped sample from before StructureElements, for the NormalizeStructure test (#1546) -->
+        <None Include="..\StoryCADLib\Assets\Install\samples\The Old Man and the Sea.stbx" Link="TestInputs\The Old Man and the Sea.stbx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <!-- The automation runner is Windows-only (FlaUI/UIA3); its unit tests compile only on this target. -->

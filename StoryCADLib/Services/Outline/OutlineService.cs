@@ -255,6 +255,16 @@ public class OutlineService
         var storyIO = Ioc.Default.GetRequiredService<StoryIO>();
         var model = await storyIO.ReadStory(file);
         _log.Log(LogLevel.Info, $"Opened model contains {model.StoryElements.Count} elements.");
+        try
+        {
+            NormalizeStructure(model);
+        }
+        catch (Exception ex)
+        {
+            // The outline still opens; the structure lists stay as the file gave them.
+            _log.LogException(LogLevel.Error, ex, "NormalizeStructure failed");
+        }
+
         return model;
     }
 
@@ -898,52 +908,60 @@ public class OutlineService
             throw new InvalidOperationException("You can only bind Scene or Problem Elements.");
         }
 
-        //For Problems, enforce one-parent rule and manage BoundStructure
+        //Checks for a Problem: not itself, not the Story Problem
+        ProblemModel boundProblem = null;
         if (DesiredBindElement.ElementType == StoryItemType.Problem)
         {
-            var problem = (ProblemModel)DesiredBindElement;
+            boundProblem = (ProblemModel)DesiredBindElement;
 
             //Cannot assign a problem to itself
-            if (problem.Uuid == Parent.Uuid)
+            if (boundProblem.Uuid == Parent.Uuid)
             {
                 throw new InvalidOperationException("Cannot assign a Problem as a beat on itself.");
             }
 
             //Cannot assign the Story Problem to any beat
             var overview = Model.StoryElements.OfType<OverviewModel>().FirstOrDefault();
-            if (overview != null && problem.Uuid == overview.StoryProblem)
+            if (overview != null && boundProblem.Uuid == overview.StoryProblem)
             {
                 throw new InvalidOperationException("Cannot assign the Story Problem to a beat.");
             }
+        }
 
-            //Clear old beat if problem is already assigned elsewhere or on a different beat in the same sheet
-            if (problem.BoundStructure != Guid.Empty)
+        var old = Parent.StructureBeats[Index].Guid;
+        if (old == DesiredBind)
+        {
+            return;
+        }
+
+        //A Problem belongs to one Problem and is on one beat.
+        //A Scene has no such check: it can be on many beats and in many Problems.
+        if (boundProblem != null)
+        {
+            RemoveFromOtherProblems(Model, Parent, DesiredBind);
+            foreach (var beat in Parent.StructureBeats.Where(b => b.Guid == DesiredBind))
             {
-                ProblemModel oldProblem = null;
-                if (problem.BoundStructure == Parent.Uuid)
-                {
-                    oldProblem = Parent;
-                }
-                else if (Model.StoryElements.StoryElementGuids.TryGetValue(problem.BoundStructure, out var oldParent) &&
-                         oldParent is ProblemModel op)
-                {
-                    oldProblem = op;
-                }
-
-                if (oldProblem != null)
-                {
-                    var oldBeat = oldProblem.StructureBeats.FirstOrDefault(b => b.Guid == problem.Uuid);
-                    if (oldBeat != null)
-                        oldBeat.Guid = Guid.Empty;
-                }
+                beat.Guid = Guid.Empty;
             }
-
-            //Set BoundStructure reverse pointer
-            problem.BoundStructure = Parent.Uuid;
         }
 
         //Bind
         Parent.StructureBeats[Index].Guid = DesiredBind;
+        if (!Parent.StructureElements.Contains(DesiredBind))
+        {
+            Parent.StructureElements.Add(DesiredBind);
+        }
+
+        if (boundProblem != null)
+        {
+            boundProblem.BoundStructure = Parent.Uuid;
+        }
+
+        //The element that the beat had stays in the Problem, on no beat
+        if (old != Guid.Empty)
+        {
+            LeaveBeat(Parent, old);
+        }
     }
 
     /// <summary>
@@ -969,7 +987,7 @@ public class OutlineService
     }
 
     /// <summary>
-    ///     Removes bound element.
+    ///     Takes the element off a beat. The element stays a structure element of the Problem, on no beat.
     /// </summary>
     /// <param name="Model">Story model</param>
     /// <param name="Parent">Problem Element with beatsheet</param>
@@ -993,17 +1011,13 @@ public class OutlineService
             throw new InvalidOperationException("Index is out of bounds.");
         }
 
-        //Clear BoundStructure on Problem elements
-        var beatGuid = Parent.StructureBeats[Index].Guid;
-        if (beatGuid != Guid.Empty &&
-            Model.StoryElements.StoryElementGuids.TryGetValue(beatGuid, out var element) &&
-            element is ProblemModel problem)
-        {
-            problem.BoundStructure = Guid.Empty;
-        }
-
-        //unbind
+        //unbind. The element stays in the Problem, on no beat.
+        var old = Parent.StructureBeats[Index].Guid;
         Parent.StructureBeats[Index].Guid = Guid.Empty;
+        if (old != Guid.Empty)
+        {
+            LeaveBeat(Parent, old);
+        }
     }
 
     /// <summary>
@@ -1025,12 +1039,16 @@ public class OutlineService
     }
 
     /// <summary>
-    ///     Deletes a beat and unbinds elements if necessary.
+    ///     Deletes a beat.
     /// </summary>
     /// <param name="Model">The story model containing the elements.</param>
     /// <param name="Parent">The problem model containing the beat.</param>
     /// <param name="Index">The index of the beat to delete.</param>
-    internal void DeleteBeat(StoryModel Model, ProblemModel Parent, int Index)
+    /// <param name="keepElement">
+    ///     True: the element of the beat stays in the Problem, on no beat.
+    ///     False: the element leaves the Problem, unless another beat of the Problem has it.
+    /// </param>
+    internal void DeleteBeat(StoryModel Model, ProblemModel Parent, int Index, bool keepElement = true)
     {
         if (Model == null)
         {
@@ -1047,38 +1065,27 @@ public class OutlineService
             throw new ArgumentOutOfRangeException("Index is invalid");
         }
 
-        // Index is valid, proceed with deletion
-        // No bound beat
-        if (Parent.StructureBeats[Index].Guid == Guid.Empty)
-        {
-            Parent.StructureBeats.RemoveAt(Index);
-            return;
-        }
-
-        StoryElement? BoundElement;
-        Model.StoryElements.StoryElementGuids.TryGetValue(Parent.StructureBeats[Index].Guid, out BoundElement);
-
-        //An element is bound that doesn't exist
-        if (BoundElement == null)
-        {
-            Parent.StructureBeats.RemoveAt(Index);
-            return;
-        }
-
-        //For Problem elements we MUST unassign first or StoryCAD will have issues
-        //when trying to assign that element to a beat in the future.
-        //Scenes are not limited and can be assigned to multiple
-        if (BoundElement.ElementType == StoryItemType.Problem)
-        {
-            UnasignBeat(Model, Parent, Index);
-        }
-
+        var old = Parent.StructureBeats[Index].Guid;
         Parent.StructureBeats.RemoveAt(Index);
+        if (old == Guid.Empty)
+        {
+            return;
+        }
+
+        if (keepElement)
+        {
+            LeaveBeat(Parent, old);
+        }
+        else if (Parent.StructureBeats.All(b => b.Guid != old))
+        {
+            RemoveMember(Model, Parent, old);
+        }
     }
 
     /// <summary>
     ///     Sets basic information about the beat sheet/creates a new one.
-    ///     If one exists, it will be overwritten and any beats in it will be unbound.
+    ///     If one exists, its beats are replaced. The elements that were on the beats
+    ///     stay in the Problem, on no beat, in the sequence of the beats.
     /// </summary>
     /// <param name="Model">The story model containing the elements.</param>
     /// <param name="Parent">Problem element you are trying to add the beat sheet to.</param>
@@ -1087,22 +1094,300 @@ public class OutlineService
     ///     This is the title of your beat sheet.
     ///     If it is not "Custom Beat Sheet" it will not be editable within the StoryCAD app.
     /// </param>
-    /// <param name="Beats">Beats that this sheet will contain, can be added later.</param>
+    /// <param name="Beats">Beats that this sheet will contain, can be added later. Each beat starts empty.</param>
     public void SetBeatSheet(StoryModel Model, ProblemModel Parent, string Description,
         string Title, ObservableCollection<StructureBeat> Beats = null)
     {
+        var onBeats = Parent.StructureBeats
+            .Select(b => b.Guid)
+            .Where(g => g != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        //Keep the collection object: each screen that shows this Problem has it.
+        Parent.StructureBeats.Clear();
+        foreach (var guid in onBeats)
+        {
+            LeaveBeat(Parent, guid);
+        }
+
         Parent.StructureTitle = Title;
         Parent.StructureDescription = Description;
 
-        //Unbind/Delete Beats first.
-        for (var i = Parent.StructureBeats.Count - 1; i >= 0; i--)
+        if (Beats == null)
         {
-            DeleteBeat(Model, Parent, i);
+            return;
         }
 
-        //Create/Add beats.
-        Parent.StructureBeats = Beats ?? new ObservableCollection<StructureBeat>();
+        foreach (var beat in Beats.ToList())
+        {
+            beat.Guid = Guid.Empty;
+            Parent.StructureBeats.Add(beat);
+        }
     }
+
+    #region Structure elements (issue #1546)
+
+    /// <summary>
+    ///     True when the element is in the trash.
+    /// </summary>
+    internal bool IsInTrash(StoryElement element) =>
+        element?.Node != null && StoryNodeItem.RootNodeType(element.Node) == StoryItemType.TrashCan;
+
+    /// <summary>
+    ///     Called when an element is taken off a beat. If no beat of the Problem has the element,
+    ///     the element moves to the end of the list, so the newest element on no beat is last.
+    /// </summary>
+    private static void LeaveBeat(ProblemModel parent, Guid element)
+    {
+        if (parent.StructureBeats.Any(b => b.Guid == element))
+        {
+            return;
+        }
+
+        if (parent.StructureElements.Remove(element))
+        {
+            parent.StructureElements.Add(element);
+        }
+    }
+
+    /// <summary>
+    ///     Takes an element out of a Problem: off each beat and out of the list.
+    /// </summary>
+    private static void RemoveMember(StoryModel model, ProblemModel parent, Guid element)
+    {
+        foreach (var beat in parent.StructureBeats.Where(b => b.Guid == element))
+        {
+            beat.Guid = Guid.Empty;
+        }
+
+        if (!parent.StructureElements.Remove(element))
+        {
+            return;
+        }
+
+        if (model.StoryElements.StoryElementGuids.TryGetValue(element, out var removed) &&
+            removed is ProblemModel problem)
+        {
+            problem.BoundStructure = Guid.Empty;
+        }
+    }
+
+    /// <summary>
+    ///     Takes a Problem out of each Problem but one. The search reads the lists and not BoundStructure,
+    ///     because the trash clears BoundStructure of the children of a trashed Problem.
+    /// </summary>
+    private static void RemoveFromOtherProblems(StoryModel model, ProblemModel parent, Guid element)
+    {
+        foreach (var other in model.StoryElements.OfType<ProblemModel>().ToList())
+        {
+            if (other.Uuid != parent.Uuid && other.StructureElements != null &&
+                other.StructureElements.Contains(element))
+            {
+                RemoveMember(model, other, element);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Gives a Scene or a Problem to a Problem, on no beat.
+    /// </summary>
+    /// <param name="Model">The story model containing the elements.</param>
+    /// <param name="Parent">The Problem that gets the element.</param>
+    /// <param name="Element">The GUID of a Scene or a Problem.</param>
+    internal void AddStructureElement(StoryModel Model, ProblemModel Parent, Guid Element)
+    {
+        if (Model == null)
+        {
+            throw new ArgumentNullException(nameof(Model));
+        }
+
+        if (Parent == null)
+        {
+            throw new ArgumentNullException(nameof(Parent));
+        }
+
+        if (!Model.StoryElements.StoryElementGuids.TryGetValue(Element, out var element))
+        {
+            throw new NullReferenceException($"GUID: {Element} does not exist within StoryModel");
+        }
+
+        if (element.ElementType != StoryItemType.Problem && element.ElementType != StoryItemType.Scene)
+        {
+            throw new InvalidOperationException("You can only bind Scene or Problem Elements.");
+        }
+
+        if (Element == Parent.Uuid)
+        {
+            throw new InvalidOperationException("Cannot assign a Problem as a beat on itself.");
+        }
+
+        var overview = Model.StoryElements.OfType<OverviewModel>().FirstOrDefault();
+        if (overview != null && Element == overview.StoryProblem)
+        {
+            throw new InvalidOperationException("Cannot assign the Story Problem to a beat.");
+        }
+
+        if (Parent.StructureElements.Contains(Element))
+        {
+            return;
+        }
+
+        if (element is ProblemModel problem)
+        {
+            RemoveFromOtherProblems(Model, Parent, Element);
+            Parent.StructureElements.Add(Element);
+            problem.BoundStructure = Parent.Uuid;
+            return;
+        }
+
+        Parent.StructureElements.Add(Element);
+    }
+
+    /// <summary>
+    ///     Takes a Scene or a Problem out of a Problem, and off each beat of that Problem.
+    /// </summary>
+    internal void RemoveStructureElement(StoryModel Model, ProblemModel Parent, Guid Element)
+    {
+        if (Model == null)
+        {
+            throw new ArgumentNullException(nameof(Model));
+        }
+
+        if (Parent == null)
+        {
+            throw new ArgumentNullException(nameof(Parent));
+        }
+
+        RemoveMember(Model, Parent, Element);
+    }
+
+    /// <summary>
+    ///     Moves the element of one beat to another beat of the same Problem.
+    ///     The element that the other beat had stays in the Problem, on no beat.
+    /// </summary>
+    internal void MoveBeatElement(StoryModel Model, ProblemModel Parent, int FromIndex, int ToIndex)
+    {
+        if (Model == null)
+        {
+            throw new ArgumentNullException(nameof(Model));
+        }
+
+        if (Parent == null)
+        {
+            throw new ArgumentNullException(nameof(Parent));
+        }
+
+        if (FromIndex < 0 || FromIndex >= Parent.StructureBeats.Count ||
+            ToIndex < 0 || ToIndex >= Parent.StructureBeats.Count)
+        {
+            throw new InvalidOperationException("Index is out of bounds.");
+        }
+
+        var moved = Parent.StructureBeats[FromIndex].Guid;
+        if (FromIndex == ToIndex || moved == Guid.Empty)
+        {
+            return;
+        }
+
+        var old = Parent.StructureBeats[ToIndex].Guid;
+        Parent.StructureBeats[FromIndex].Guid = Guid.Empty;
+        Parent.StructureBeats[ToIndex].Guid = moved;
+        if (old != Guid.Empty && old != moved)
+        {
+            LeaveBeat(Parent, old);
+        }
+    }
+
+    /// <summary>
+    ///     The structure elements of a Problem that none of its beats has, in the sequence of the list.
+    /// </summary>
+    internal IReadOnlyList<Guid> GetElementsOnNoBeat(ProblemModel Parent)
+    {
+        var onBeats = new HashSet<Guid>(Parent.StructureBeats.Select(b => b.Guid));
+        return Parent.StructureElements.Where(g => !onBeats.Contains(g)).ToList();
+    }
+
+    /// <summary>
+    ///     Tells how the structure uses an element. A Problem in the trash does not count.
+    /// </summary>
+    internal StructureUse GetStructureUse(StoryModel Model, Guid Element)
+    {
+        var used = false;
+        foreach (var problem in Model.StoryElements.OfType<ProblemModel>())
+        {
+            if (IsInTrash(problem))
+            {
+                continue;
+            }
+
+            if (problem.StructureBeats != null && problem.StructureBeats.Any(b => b.Guid == Element))
+            {
+                return StructureUse.OnBeat;
+            }
+
+            if (problem.StructureElements != null && problem.StructureElements.Contains(Element))
+            {
+                used = true;
+            }
+        }
+
+        return used ? StructureUse.OnNoBeat : StructureUse.NotUsed;
+    }
+
+    /// <summary>
+    ///     Makes the structure lists of an outline agree with its beats. OpenFile calls it.
+    ///     A file from before issue #1546 has no lists: each Problem gets the elements that are on its beats.
+    ///     It does not set Changed, and it does not change a beat or a beat sheet.
+    /// </summary>
+    internal void NormalizeStructure(StoryModel Model)
+    {
+        var problems = Model.StoryElements.OfType<ProblemModel>().ToList();
+        foreach (var problem in problems)
+        {
+            problem.StructureElements ??= new List<Guid>();
+            problem.StructureBeats ??= new ObservableCollection<StructureBeat>();
+
+            var kept = new List<Guid>();
+            foreach (var guid in problem.StructureElements)
+            {
+                if (!kept.Contains(guid) &&
+                    Model.StoryElements.StoryElementGuids.TryGetValue(guid, out var element) &&
+                    (element.ElementType == StoryItemType.Scene || element.ElementType == StoryItemType.Problem))
+                {
+                    kept.Add(guid);
+                }
+            }
+
+            foreach (var beat in problem.StructureBeats)
+            {
+                if (beat.Guid != Guid.Empty && !kept.Contains(beat.Guid))
+                {
+                    kept.Add(beat.Guid);
+                }
+            }
+
+            problem.StructureElements.Clear();
+            problem.StructureElements.AddRange(kept);
+        }
+
+        foreach (var child in problems)
+        {
+            var holders = problems
+                .Where(p => p.Uuid != child.Uuid && !IsInTrash(p) && p.StructureElements.Contains(child.Uuid))
+                .ToList();
+            if (holders.Count == 0)
+            {
+                child.BoundStructure = Guid.Empty;
+            }
+            else if (holders.All(p => p.Uuid != child.BoundStructure))
+            {
+                child.BoundStructure = holders[0].Uuid;
+            }
+        }
+    }
+
+    #endregion
 
     /// <summary>
     ///     Saves a beatsheet to a file
@@ -1636,6 +1921,27 @@ public class OutlineService
             foreach (var guid in allGuids)
             {
                 RemoveReferenceToElement(guid, model);
+            }
+
+            // A Problem in the trash belongs to no Problem, and has no Problems as structure elements.
+            // It keeps its Scenes, which come back with it when it is restored (#1546).
+            foreach (var guid in allGuids)
+            {
+                if (!model.StoryElements.StoryElementGuids.TryGetValue(guid, out var trashed) ||
+                    trashed is not ProblemModel trashedProblem)
+                {
+                    continue;
+                }
+
+                trashedProblem.BoundStructure = Guid.Empty;
+                foreach (var held in trashedProblem.StructureElements.ToList())
+                {
+                    if (model.StoryElements.StoryElementGuids.TryGetValue(held, out var heldElement) &&
+                        heldElement is ProblemModel)
+                    {
+                        RemoveMember(model, trashedProblem, held);
+                    }
+                }
             }
 
             // NOTE: We do NOT remove elements from StoryElements collection

@@ -4,18 +4,20 @@ Written 2026-11-28, after a power loss on 2026-11-26. Last changed on 2026-11-28
 
 ## Where the work stands
 
-Issue 1546 is at step 3 of the process, the build. The design is approved. No StoryCAD code is written yet.
+Issue 1546 is at step 3 of the process, the build. The design is approved, and the build has started.
 
 | Step | State |
 |------|-------|
 | 1. Issue | Done. Rewritten and posted on 2026-11-26. Reviewed, with answers. Terry ticked "The issue is accepted." |
 | 2. Design | Done. Terry ticked "The design is approved." on 2026-11-28, for revision 2. Revision 3, of the same day, brings the text to the ASD-STE100 rules of process pull request 10; the design itself is the same. A comment on the issue lists what changed. A reviewer read revision 1 only. |
-| 3. Build | Not started. The next action is task 1 of part 23 of the design. |
+| 3. Build | Started 2026-11-28. Pull request 1: tasks 1 to 3 of part 23 are done and committed (the data, the methods of the service, the open and the trash). The next action is task 4. |
 | 4. Pull request | Not started. |
 
 ## The next action
 
-Start the build of pull request 1, at task 1 of part 23 of the design. Before the first test, load the skill `test`. Before the first code, load the skill `code`. Write each test before its code. The commands to build and to run the tests are in `CLAUDE.md` of the StoryCAD repo.
+Continue the build of pull request 1, at task 4 of part 23 of the design: `StructureChangedMessage`, `StructureElementItem` and `StructureElementListViewModel`. Then task 5, the changes to `BeatSheetsViewModel`.
+
+Build notes: build with `-restore -nr:false`, because MSBuild gave internal errors on this computer without them. Two tests fail in this worktree for a reason that is not this work: `CheckDotEnvFile` and `CheckDoppler` need the file `StoryCADTests/.env`, which is not in the worktree. Before the first test, load the skill `test`. Before the first code, load the skill `code`. Write each test before its code. The commands to build and to run the tests are in `CLAUDE.md` of the StoryCAD repo.
 
 The design leaves the look of the screens open. Part 19 lists those items; Terry settles each one on the branch, and the session records the value there.
 
