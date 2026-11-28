@@ -33,7 +33,7 @@ public class ProblemViewModel : ObservableRecipient, INavigable, ISaveable, IRel
                 _changed = true;
                 ShellViewModel.ShowChange();
             }
-        });
+        }, new StructureElementListViewModel());
 
         ProblemType = string.Empty;
         ConflictType = string.Empty;

@@ -187,7 +187,23 @@ public class Windowing : ObservableRecipient
     /// </param>
     /// <remarks>This will return primary if running under headless mode</remarks>
     /// <returns>A ContentDialogResult value</returns>
-    public async Task<ContentDialogResult> ShowContentDialog(ContentDialog Dialog, bool force=false)
+    public Task<ContentDialogResult> ShowContentDialog(ContentDialog Dialog, bool force=false)
+    {
+        return ShowContentDialog(Dialog, XamlRoot, force);
+    }
+
+    /// <summary>
+    /// Shows a content dialog on a given window (issue #1546: the beat tree window).
+    /// </summary>
+    /// <param name="Dialog">Content dialog to show</param>
+    /// <param name="root">The XamlRoot of the window that shows the dialog. Null gives the main window.</param>
+    /// <param name="force">Force show content dialog, will close currently open dialog if one
+    /// is already open
+    /// </param>
+    /// <remarks>This will return primary if running under headless mode.
+    /// One dialog shows at a time, for all windows together.</remarks>
+    /// <returns>A ContentDialogResult value</returns>
+    public async Task<ContentDialogResult> ShowContentDialog(ContentDialog Dialog, XamlRoot root, bool force=false)
     {
 	    ILogService logger = _logService;
 
@@ -226,7 +242,7 @@ public class Windowing : ObservableRecipient
 			OpenDialog = Dialog;
 
 			//Set XAML root and correct theme.
-			OpenDialog.XamlRoot = XamlRoot;
+			OpenDialog.XamlRoot = root ?? XamlRoot;
 			OpenDialog.RequestedTheme = RequestedTheme;
 
             OpenDialog.Resources["ContentDialogMaxWidth"] = 1080;

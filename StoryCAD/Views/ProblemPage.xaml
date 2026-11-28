@@ -257,8 +257,8 @@
                                    VerticalAlignment="Center"
                                    Margin="0,0,8,0" />
                                         <RadioButtons
-                                            ItemsSource="{x:Bind BeatSheetsVm.ElementSource}"
-                                            SelectedItem="{x:Bind BeatSheetsVm.SelectedElementSource, Mode=TwoWay}"
+                                            ItemsSource="{x:Bind BeatSheetsVm.ElementList.ElementSource}"
+                                            SelectedItem="{x:Bind BeatSheetsVm.ElementList.SelectedElementSource, Mode=TwoWay}"
                                             MaxColumns="2"
                                             VerticalAlignment="Center"
                                             AutomationProperties.AutomationId="StructureElementsRadios"
@@ -446,8 +446,8 @@
                                 <!-- Dynamic Elements List (Scenes or Problems based on RadioButtons) -->
                                 <ListView x:Name="ElementsList"
                           Grid.Row="0"
-                          ItemsSource="{x:Bind BeatSheetsVm.CurrentElementSource, Mode=TwoWay}"
-                          SelectedItem="{x:Bind BeatSheetsVm.SelectedListElement, Mode=TwoWay}"
+                          ItemsSource="{x:Bind BeatSheetsVm.ElementList.CurrentElementSource, Mode=OneWay}"
+                          SelectedItem="{x:Bind BeatSheetsVm.ElementList.SelectedListElement, Mode=TwoWay}"
                           SelectionMode="Single"
                           BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                           BorderThickness="1"
@@ -455,7 +455,7 @@
                           AutomationProperties.AutomationId="ElementsList">
                                     <!-- Names wrap so a long scene name is not cut off at the 1036 x 744 window. -->
                                     <ListView.ItemTemplate>
-                                        <DataTemplate x:DataType="models:StoryElement">
+                                        <DataTemplate x:DataType="tools:StructureElementItem">
                                             <TextBlock Text="{x:Bind Name, Mode=OneWay}" TextWrapping="Wrap"
                                                        Margin="0,4"
                                                        AutomationProperties.Name="{x:Bind Name, Mode=OneWay}" />

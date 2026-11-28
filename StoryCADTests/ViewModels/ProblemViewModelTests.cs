@@ -305,8 +305,8 @@ public class ProblemViewModelTests
         _viewModel.Activate(_problemModel);
 
         // Assert
-        Assert.IsNotNull(_viewModel.BeatSheetsVm.CurrentElementSource);
-        Assert.AreSame(_viewModel.BeatSheetsVm.Scenes, _viewModel.BeatSheetsVm.CurrentElementSource);
+        Assert.IsNotNull(_viewModel.BeatSheetsVm.ElementList.CurrentElementSource);
+        Assert.AreSame(_viewModel.BeatSheetsVm.ElementList.Scenes, _viewModel.BeatSheetsVm.ElementList.CurrentElementSource);
     }
 
     [TestMethod]
@@ -487,10 +487,10 @@ public class ProblemViewModelTests
         _viewModel.Activate(_problemModel);
 
         // Act
-        _viewModel.BeatSheetsVm.SelectedElementSource = "Scene";
+        _viewModel.BeatSheetsVm.ElementList.SelectedElementSource = "Scene";
 
         // Assert
-        Assert.AreSame(_viewModel.BeatSheetsVm.Scenes, _viewModel.BeatSheetsVm.CurrentElementSource);
+        Assert.AreSame(_viewModel.BeatSheetsVm.ElementList.Scenes, _viewModel.BeatSheetsVm.ElementList.CurrentElementSource);
     }
 
     [TestMethod]
@@ -500,17 +500,17 @@ public class ProblemViewModelTests
         _viewModel.Activate(_problemModel);
 
         // Verify initial state
-        Assert.AreEqual("Scene", _viewModel.BeatSheetsVm.SelectedElementSource, "Initial SelectedElementSource should be 'Scene'");
-        Assert.IsNotNull(_viewModel.BeatSheetsVm.Problems, "Problems should not be null");
-        Assert.IsNotNull(_viewModel.BeatSheetsVm.Scenes, "Scenes should not be null");
-        Assert.AreSame(_viewModel.BeatSheetsVm.Scenes, _viewModel.BeatSheetsVm.CurrentElementSource, "Initial CurrentElementSource should be Scenes");
+        Assert.AreEqual("Scene", _viewModel.BeatSheetsVm.ElementList.SelectedElementSource, "Initial SelectedElementSource should be 'Scene'");
+        Assert.IsNotNull(_viewModel.BeatSheetsVm.ElementList.Problems, "Problems should not be null");
+        Assert.IsNotNull(_viewModel.BeatSheetsVm.ElementList.Scenes, "Scenes should not be null");
+        Assert.AreSame(_viewModel.BeatSheetsVm.ElementList.Scenes, _viewModel.BeatSheetsVm.ElementList.CurrentElementSource, "Initial CurrentElementSource should be Scenes");
 
         // Act
-        _viewModel.BeatSheetsVm.SelectedElementSource = "Problem";
+        _viewModel.BeatSheetsVm.ElementList.SelectedElementSource = "Problem";
 
         // Assert
-        Assert.AreEqual("Problem", _viewModel.BeatSheetsVm.SelectedElementSource, "SelectedElementSource should be 'Problem'");
-        Assert.AreSame(_viewModel.BeatSheetsVm.Problems, _viewModel.BeatSheetsVm.CurrentElementSource);
+        Assert.AreEqual("Problem", _viewModel.BeatSheetsVm.ElementList.SelectedElementSource, "SelectedElementSource should be 'Problem'");
+        Assert.AreSame(_viewModel.BeatSheetsVm.ElementList.Problems, _viewModel.BeatSheetsVm.ElementList.CurrentElementSource);
     }
 
     [TestMethod]
@@ -520,19 +520,19 @@ public class ProblemViewModelTests
         _viewModel.Activate(_problemModel);
 
         // Ensure we start from a known state (Scene) since singleton may have stale state
-        _viewModel.BeatSheetsVm.SelectedElementSource = "Scene";
+        _viewModel.BeatSheetsVm.ElementList.SelectedElementSource = "Scene";
 
         var propertyChangedFired = false;
-        _viewModel.BeatSheetsVm.PropertyChanged += (sender, e) =>
+        _viewModel.BeatSheetsVm.ElementList.PropertyChanged += (sender, e) =>
         {
-            if (e.PropertyName == nameof(_viewModel.BeatSheetsVm.CurrentElementSource))
+            if (e.PropertyName == nameof(_viewModel.BeatSheetsVm.ElementList.CurrentElementSource))
             {
                 propertyChangedFired = true;
             }
         };
 
         // Act - Toggle from Scene to Problem
-        _viewModel.BeatSheetsVm.SelectedElementSource = "Problem";
+        _viewModel.BeatSheetsVm.ElementList.SelectedElementSource = "Problem";
 
         // Assert
         Assert.IsTrue(propertyChangedFired);
@@ -577,7 +577,7 @@ public class ProblemViewModelTests
         var scene = _storyModel.StoryElements.Scenes.First();
 
         // Act
-        _viewModel.BeatSheetsVm.SelectedListElement = scene;
+        _viewModel.BeatSheetsVm.ElementList.SelectedListElement = new StructureElementItem(scene);
 
         // Assert
         Assert.AreEqual(scene.Description, _viewModel.BeatSheetsVm.CurrentElementDescription);
@@ -589,14 +589,14 @@ public class ProblemViewModelTests
         // Arrange
         _viewModel.Activate(_problemModel);
         var propertyChangedFired = false;
-        _viewModel.BeatSheetsVm.PropertyChanged += (sender, e) =>
+        _viewModel.BeatSheetsVm.ElementList.PropertyChanged += (sender, e) =>
         {
-            if (e.PropertyName == nameof(_viewModel.BeatSheetsVm.SelectedListElement))
+            if (e.PropertyName == nameof(_viewModel.BeatSheetsVm.ElementList.SelectedListElement))
                 propertyChangedFired = true;
         };
 
         // Act
-        _viewModel.BeatSheetsVm.SelectedListElement = _storyModel.StoryElements.Scenes.First();
+        _viewModel.BeatSheetsVm.ElementList.SelectedListElement = new StructureElementItem(_storyModel.StoryElements.Scenes.First());
 
         // Assert
         Assert.IsTrue(propertyChangedFired);

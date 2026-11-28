@@ -1,7 +1,10 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Messaging;
+using StoryCADLib.Services.Messages;
 using StoryCADLib.Models;
 using StoryCADLib.Services;
+using StoryCADLib.Services.Outline;
 using StoryCADLib.ViewModels;
 using StoryCADLib.ViewModels.SubViewModels;
 using StoryCADLib.ViewModels.Tools;
@@ -47,16 +50,16 @@ public class BeatSheetsViewModelTests
     [TestMethod]
     public void Constructor_ShouldSetDefaultElementSource()
     {
-        Assert.AreEqual("Scene", _beatEditor.SelectedElementSource);
+        Assert.AreEqual("Scene", _beatEditor.ElementList.SelectedElementSource);
     }
 
     [TestMethod]
     public void Constructor_ShouldExposeElementSourceList()
     {
-        Assert.IsNotNull(_beatEditor.ElementSource);
-        Assert.AreEqual(2, _beatEditor.ElementSource.Count);
-        Assert.IsTrue(_beatEditor.ElementSource.Contains("Scene"));
-        Assert.IsTrue(_beatEditor.ElementSource.Contains("Problem"));
+        Assert.IsNotNull(_beatEditor.ElementList.ElementSource);
+        Assert.AreEqual(2, _beatEditor.ElementList.ElementSource.Count);
+        Assert.IsTrue(_beatEditor.ElementList.ElementSource.Contains("Scene"));
+        Assert.IsTrue(_beatEditor.ElementList.ElementSource.Contains("Problem"));
     }
 
     #endregion
@@ -199,29 +202,27 @@ public class BeatSheetsViewModelTests
     public void SelectedElementSource_WhenSetToScene_SetsCurrentElementSourceToScenes()
     {
         // Arrange — need Scenes populated
-        _beatEditor.Scenes = _storyModel.StoryElements.Scenes;
-        _beatEditor.Problems = _storyModel.StoryElements.Problems;
-        _beatEditor.SelectedElementSource = "Problem"; // start from Problem
+        _beatEditor.ElementList.Load(_storyModel);
+        _beatEditor.ElementList.SelectedElementSource = "Problem"; // start from Problem
 
         // Act
-        _beatEditor.SelectedElementSource = "Scene";
+        _beatEditor.ElementList.SelectedElementSource = "Scene";
 
         // Assert
-        Assert.AreSame(_beatEditor.Scenes, _beatEditor.CurrentElementSource);
+        Assert.AreSame(_beatEditor.ElementList.Scenes, _beatEditor.ElementList.CurrentElementSource);
     }
 
     [TestMethod]
     public void SelectedElementSource_WhenSetToProblem_SetsCurrentElementSourceToProblems()
     {
         // Arrange
-        _beatEditor.Scenes = _storyModel.StoryElements.Scenes;
-        _beatEditor.Problems = _storyModel.StoryElements.Problems;
+        _beatEditor.ElementList.Load(_storyModel);
 
         // Act
-        _beatEditor.SelectedElementSource = "Problem";
+        _beatEditor.ElementList.SelectedElementSource = "Problem";
 
         // Assert
-        Assert.AreSame(_beatEditor.Problems, _beatEditor.CurrentElementSource);
+        Assert.AreSame(_beatEditor.ElementList.Problems, _beatEditor.ElementList.CurrentElementSource);
     }
 
     [TestMethod]
@@ -275,7 +276,7 @@ public class BeatSheetsViewModelTests
         scene.Description = "A test scene description";
 
         // Act
-        _beatEditor.SelectedListElement = scene;
+        _beatEditor.ElementList.SelectedListElement = new StructureElementItem(scene);
 
         // Assert
         Assert.AreEqual("A test scene description", _beatEditor.CurrentElementDescription);
@@ -358,19 +359,6 @@ public class BeatSheetsViewModelTests
         Assert.AreEqual(1, _problemModel.StructureBeats.Count);
     }
 
-    [TestMethod]
-    public void SaveBeats_ShouldWriteBoundStructure()
-    {
-        _problemModel.StructureBeats = new ObservableCollection<StructureBeat>();
-        _beatEditor.LoadBeats(_problemModel, _storyModel);
-        var testGuid = Guid.NewGuid();
-        _beatEditor.BoundStructure = testGuid;
-
-        _beatEditor.SaveBeats(_problemModel);
-
-        Assert.AreEqual(testGuid, _problemModel.BoundStructure);
-    }
-
     #endregion
 
     #region Beat Assignment and Element Resolution Tests
@@ -429,7 +417,7 @@ public class BeatSheetsViewModelTests
         var beat = CreateTestBeat("Test Beat");
         _beatEditor.StructureBeats.Add(beat);
         _beatEditor.SelectedBeat = beat;
-        _beatEditor.SelectedListElement = _problemModel;
+        _beatEditor.ElementList.SelectedListElement = new StructureElementItem(_problemModel);
 
         await _beatEditor.AssignBeatAsync();
 
@@ -453,7 +441,7 @@ public class BeatSheetsViewModelTests
         _beatEditor.StructureBeats.Add(beat);
         _beatEditor.SelectedBeat = beat;
         _beatEditor.SelectedBeatIndex = 0;
-        _beatEditor.SelectedListElement = problemB;
+        _beatEditor.ElementList.SelectedListElement = new StructureElementItem(problemB);
 
         await _beatEditor.AssignBeatAsync();
 
@@ -472,7 +460,7 @@ public class BeatSheetsViewModelTests
         _beatEditor.SelectedBeatIndex = 0;
         var scene = _storyModel.StoryElements.Scenes.First();
         scene.Description = "Stakeout goes nowhere";
-        _beatEditor.SelectedListElement = scene;
+        _beatEditor.ElementList.SelectedListElement = new StructureElementItem(scene);
 
         await _beatEditor.AssignBeatAsync();
 
@@ -530,8 +518,7 @@ public class BeatSheetsViewModelTests
         _beatEditor.UnbindElement();
 
         Assert.AreEqual(Guid.Empty, beat.Guid);
-        Assert.IsNull(_beatEditor.SelectedBeat);
-        Assert.AreEqual(-1, _beatEditor.SelectedBeatIndex);
+        Assert.AreSame(beat, _beatEditor.SelectedBeat, "The beat stays selected (issue #1546)");
     }
 
     [TestMethod]
@@ -599,17 +586,6 @@ public class BeatSheetsViewModelTests
     }
 
     [TestMethod]
-    public void BoundStructure_WhenChanged_NotifiesDirty()
-    {
-        _beatEditor.LoadBeats(_problemModel, _storyModel);
-        _dirtyNotified = false;
-
-        _beatEditor.BoundStructure = Guid.NewGuid();
-
-        Assert.IsTrue(_dirtyNotified);
-    }
-
-    [TestMethod]
     public void SelectedBeatDescription_WhenEdited_NotifiesDirty()
     {
         _beatEditor.LoadBeats(_problemModel, _storyModel);
@@ -653,7 +629,7 @@ public class BeatSheetsViewModelTests
         var scene = _storyModel.StoryElements.Scenes.First();
         _dirtyNotified = false;
 
-        _beatEditor.SelectedListElement = scene;
+        _beatEditor.ElementList.SelectedListElement = new StructureElementItem(scene);
 
         Assert.IsFalse(_dirtyNotified);
     }
@@ -667,11 +643,11 @@ public class BeatSheetsViewModelTests
         Assert.IsTrue(_storyModel.StoryElements.Scenes.Any(e => e.Uuid == Guid.Empty));
         Assert.IsTrue(_storyModel.StoryElements.Problems.Any(e => e.Uuid == Guid.Empty));
 
-        Assert.IsFalse(_beatEditor.Scenes.Any(e => e.Uuid == Guid.Empty));
-        Assert.IsFalse(_beatEditor.Problems.Any(e => e.Uuid == Guid.Empty));
-        Assert.IsTrue(_beatEditor.Scenes.Any(e => e.Name == "Test Scene"));
-        Assert.IsTrue(_beatEditor.Problems.Any(e => e.Name == "Test Story Problem"));
-        Assert.IsFalse(_beatEditor.CurrentElementSource.Any(e => e.Name == "(none)"));
+        Assert.IsFalse(_beatEditor.ElementList.Scenes.Any(e => e.Element.Uuid == Guid.Empty));
+        Assert.IsFalse(_beatEditor.ElementList.Problems.Any(e => e.Element.Uuid == Guid.Empty));
+        Assert.IsTrue(_beatEditor.ElementList.Scenes.Any(e => e.Name == "Test Scene"));
+        Assert.IsTrue(_beatEditor.ElementList.Problems.Any(e => e.Name == "Test Story Problem"));
+        Assert.IsFalse(_beatEditor.ElementList.CurrentElementSource.Any(e => e.Name == "(none)"));
     }
 
     [TestMethod]
@@ -680,7 +656,7 @@ public class BeatSheetsViewModelTests
         _beatEditor.LoadBeats(_problemModel, _storyModel);
         _dirtyNotified = false;
 
-        _beatEditor.SelectedElementSource = "Problem";
+        _beatEditor.ElementList.SelectedElementSource = "Problem";
 
         Assert.IsFalse(_dirtyNotified);
     }
@@ -732,6 +708,281 @@ public class BeatSheetsViewModelTests
 
             Assert.IsTrue(work.Wait(TimeSpan.FromSeconds(10)), $"Selecting the last beat of {name} did not finish");
         }
+    }
+
+    #endregion
+
+    #region Structure elements (issue #1546)
+
+    private SceneModel AddScene(string name)
+    {
+        return new SceneModel(name, _storyModel, null); // the constructor adds it to the model
+    }
+
+    private ProblemModel AddProblem(string name)
+    {
+        return new ProblemModel(name, _storyModel, null);
+    }
+
+    private OutlineService Outline => Ioc.Default.GetRequiredService<OutlineService>();
+
+    [TestMethod]
+    public void LoadBeats_FillsHeaderAndNoBeatList()
+    {
+        var scene = AddScene("Waiting scene");
+        _problemModel.ProblemCategory = "Subplot";
+        Outline.AddStructureElement(_storyModel, _problemModel, scene.Uuid);
+
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+
+        Assert.AreEqual("Test Problem", _beatEditor.ProblemName);
+        Assert.AreEqual("Subplot", _beatEditor.ProblemCategory);
+        CollectionAssert.AreEqual(new[] { scene }, _beatEditor.ElementsOnNoBeat);
+        Assert.AreSame(_problemModel.StructureBeats, _beatEditor.StructureBeats);
+    }
+
+    [TestMethod]
+    public void ApplyBeatSheet_KeepsMembersInBeatSequence()
+    {
+        var first = AddScene("First");
+        var second = AddScene("Second");
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.StructureModelTitle = "Save The Cat";
+        var collection = _problemModel.StructureBeats;
+        Outline.AssignElementToBeat(_storyModel, _problemModel, 3, second.Uuid);
+        Outline.AssignElementToBeat(_storyModel, _problemModel, 1, first.Uuid);
+
+        _beatEditor.StructureModelTitle = "Hero's Journey";
+
+        Assert.AreEqual("Hero's Journey", _problemModel.StructureTitle);
+        Assert.AreSame(collection, _problemModel.StructureBeats);
+        Assert.AreSame(collection, _beatEditor.StructureBeats);
+        Assert.AreEqual(12, _beatEditor.StructureBeats.Count);
+        Assert.IsTrue(_beatEditor.StructureBeats.All(b => b.Guid == Guid.Empty));
+        CollectionAssert.AreEqual(new[] { first, second }, _beatEditor.ElementsOnNoBeat);
+    }
+
+    [TestMethod]
+    public void ApplyBeatSheet_ChildProblemKeepsParent()
+    {
+        var child = AddProblem("Child");
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.StructureModelTitle = "Save The Cat";
+        Outline.AssignElementToBeat(_storyModel, _problemModel, 0, child.Uuid);
+
+        _beatEditor.StructureModelTitle = "Hero's Journey";
+
+        Assert.AreEqual(_problemModel.Uuid, child.BoundStructure);
+        CollectionAssert.Contains(_problemModel.StructureElements, child.Uuid);
+    }
+
+    [TestMethod]
+    public void LoadBeatSheet_KeepsMembers()
+    {
+        var scene = AddScene("Scene");
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.StructureModelTitle = "Save The Cat";
+        Outline.AssignElementToBeat(_storyModel, _problemModel, 0, scene.Uuid);
+        var saved = new SavedBeatsheet
+        {
+            Description = "From a file",
+            Beats = new List<StructureBeat> { new("File beat 1", "D1"), new("File beat 2", "D2") }
+        };
+
+        _beatEditor.ApplyLoadedBeatSheet(saved);
+
+        Assert.AreEqual("Custom Beat Sheet", _problemModel.StructureTitle);
+        Assert.AreEqual("From a file", _problemModel.StructureDescription);
+        Assert.AreEqual(2, _problemModel.StructureBeats.Count);
+        CollectionAssert.AreEqual(new[] { scene }, _beatEditor.ElementsOnNoBeat);
+    }
+
+    [TestMethod]
+    public void LoadBeatSheet_ChildProblemKeepsParent()
+    {
+        var child = AddProblem("Child");
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.StructureModelTitle = "Save The Cat";
+        Outline.AssignElementToBeat(_storyModel, _problemModel, 0, child.Uuid);
+
+        _beatEditor.ApplyLoadedBeatSheet(new SavedBeatsheet
+        {
+            Description = "From a file",
+            Beats = new List<StructureBeat> { new("File beat", "D") }
+        });
+
+        Assert.AreEqual(_problemModel.Uuid, child.BoundStructure);
+        CollectionAssert.AreEqual(new StoryElement[] { child }, _beatEditor.ElementsOnNoBeat);
+    }
+
+    [TestMethod]
+    public void AddElementCommand_AddsMember()
+    {
+        var scene = AddScene("Scene");
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.ElementList.SelectedListElement = new StructureElementItem(scene);
+        _dirtyNotified = false;
+
+        _beatEditor.AddElementCommand.Execute(null);
+
+        CollectionAssert.AreEqual(new[] { scene.Uuid }, _problemModel.StructureElements);
+        CollectionAssert.AreEqual(new[] { scene }, _beatEditor.ElementsOnNoBeat);
+        Assert.IsTrue(_dirtyNotified);
+    }
+
+    [TestMethod]
+    public void RemoveElementCommand_RemovesMember()
+    {
+        var scene = AddScene("Scene");
+        Outline.AddStructureElement(_storyModel, _problemModel, scene.Uuid);
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.SelectedNoBeatElement = scene;
+
+        _beatEditor.RemoveElementCommand.Execute(null);
+
+        Assert.AreEqual(0, _problemModel.StructureElements.Count);
+        Assert.AreEqual(0, _beatEditor.ElementsOnNoBeat.Count);
+    }
+
+    [TestMethod]
+    public async Task PlaceOnBeatAsync_FromBeat_Moves()
+    {
+        var child = AddProblem("Child");
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.StructureModelTitle = "Save The Cat";
+        await _beatEditor.PlaceOnBeatAsync(child.Uuid, 0, -1);
+
+        await _beatEditor.PlaceOnBeatAsync(child.Uuid, 2, 0);
+
+        Assert.AreEqual(Guid.Empty, _beatEditor.StructureBeats[0].Guid);
+        Assert.AreEqual(child.Uuid, _beatEditor.StructureBeats[2].Guid);
+        Assert.AreEqual(0, _beatEditor.ElementsOnNoBeat.Count);
+    }
+
+    [TestMethod]
+    public async Task PlaceOnBeatAsync_SceneOnSecondBeatHeadless_IsOnBothBeats()
+    {
+        var scene = AddScene("Scene");
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.StructureModelTitle = "Save The Cat";
+        await _beatEditor.PlaceOnBeatAsync(scene.Uuid, 0, -1);
+
+        await _beatEditor.PlaceOnBeatAsync(scene.Uuid, 2, -1);
+
+        Assert.AreEqual(scene.Uuid, _beatEditor.StructureBeats[0].Guid);
+        Assert.AreEqual(scene.Uuid, _beatEditor.StructureBeats[2].Guid);
+    }
+
+    [TestMethod]
+    public async Task UnbindElement_KeepsElementOnNoBeatAndKeepsTheBeatSelected()
+    {
+        var scene = AddScene("Scene");
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.StructureModelTitle = "Save The Cat";
+        await _beatEditor.PlaceOnBeatAsync(scene.Uuid, 1, -1);
+        var beat = _beatEditor.StructureBeats[1];
+        _beatEditor.SelectedBeat = beat;
+        _beatEditor.SelectedBeatIndex = 1;
+
+        _beatEditor.UnbindElement();
+
+        Assert.AreEqual(Guid.Empty, beat.Guid);
+        Assert.AreSame(beat, _beatEditor.SelectedBeat);
+        CollectionAssert.AreEqual(new[] { scene }, _beatEditor.ElementsOnNoBeat);
+    }
+
+    [TestMethod]
+    public async Task DeleteBeatCommand_Headless_KeepsElementOnNoBeat()
+    {
+        var scene = AddScene("Scene");
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.StructureModelTitle = "Save The Cat";
+        await _beatEditor.PlaceOnBeatAsync(scene.Uuid, 0, -1);
+        _beatEditor.SelectedBeat = _beatEditor.StructureBeats[0];
+        _beatEditor.SelectedBeatIndex = 0;
+
+        _beatEditor.DeleteBeatCommand.Execute(null);
+
+        Assert.AreEqual(14, _beatEditor.StructureBeats.Count);
+        CollectionAssert.AreEqual(new[] { scene }, _beatEditor.ElementsOnNoBeat);
+    }
+
+    [TestMethod]
+    public void SelectedNoBeatElement_WhenSet_ClearsSelectedBeat()
+    {
+        var scene = AddScene("Scene");
+        Outline.AddStructureElement(_storyModel, _problemModel, scene.Uuid);
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.StructureModelTitle = "Save The Cat";
+        _beatEditor.SelectedBeat = _beatEditor.StructureBeats[0];
+
+        _beatEditor.SelectedNoBeatElement = scene;
+
+        Assert.IsNull(_beatEditor.SelectedBeat);
+
+        _beatEditor.SelectedBeat = _beatEditor.StructureBeats[0];
+
+        Assert.IsNull(_beatEditor.SelectedNoBeatElement);
+    }
+
+    [TestMethod]
+    public async Task StructureChangedMessage_OtherSource_Refreshes()
+    {
+        var scene = AddScene("Scene");
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        var other = new BeatSheetsViewModel(() => { });
+        other.LoadBeats(_problemModel, _storyModel);
+        _dirtyNotified = false;
+
+        await other.AddElementAsync(scene.Uuid);
+        other.StructureModelTitle = "Save The Cat";
+
+        CollectionAssert.AreEqual(new[] { scene }, _beatEditor.ElementsOnNoBeat);
+        Assert.AreEqual("Save The Cat", _beatEditor.StructureModelTitle);
+        Assert.AreEqual(15, _beatEditor.StructureBeats.Count);
+        Assert.IsFalse(_dirtyNotified, "A refresh from another screen is not an edit of this screen");
+    }
+
+    [TestMethod]
+    public void Refresh_DoesNotSendMessage()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        var recipient = new object();
+        var received = 0;
+        WeakReferenceMessenger.Default.Register<StructureChangedMessage>(recipient, (_, _) => received++);
+        _dirtyNotified = false;
+
+        _problemModel.StructureDescription = "Changed by another screen";
+        _beatEditor.Refresh();
+
+        WeakReferenceMessenger.Default.UnregisterAll(recipient);
+        Assert.AreEqual("Changed by another screen", _beatEditor.StructureDescription);
+        Assert.AreEqual(0, received);
+        Assert.IsFalse(_dirtyNotified);
+    }
+
+    [TestMethod]
+    public void SaveBeats_DoesNotWriteBeatsOrParent()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        var modelBeats = _problemModel.StructureBeats;
+        var parent = Guid.NewGuid();
+        _problemModel.BoundStructure = parent; // set by another screen after this one loaded
+
+        _beatEditor.SaveBeats(_problemModel);
+
+        Assert.AreEqual(parent, _problemModel.BoundStructure);
+        Assert.AreSame(modelBeats, _problemModel.StructureBeats);
+    }
+
+    [TestMethod]
+    public void StructureDescription_WhenEdited_IsWrittenToTheModelAtOnce()
+    {
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+
+        _beatEditor.StructureDescription = "Typed on this screen";
+
+        Assert.AreEqual("Typed on this screen", _problemModel.StructureDescription);
     }
 
     #endregion
