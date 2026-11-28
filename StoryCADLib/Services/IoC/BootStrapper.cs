@@ -108,6 +108,7 @@ public static class BootStrapper
         Services.AddSingleton<ControlData>();
         Services.AddSingleton<AppState>();
         Services.AddSingleton<EditFlushService>();
+        Services.AddSingleton<StoryCADLib.Services.BeatTree.BeatTreeWindowService>();
         Services.AddSingleton<Windowing>();
         Services.AddSingleton<ImageService>();
         Services.AddSingleton<FileOpenService>();

@@ -453,6 +453,10 @@
                                             AutomationProperties.AutomationId="KeyQuestionsMenuItem"
                                             AutomationProperties.Name="Key Questions">
                             </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Beat Tree"
+                                            Command="{x:Bind ShellVm.BeatTreeCommand, Mode=OneWay}"
+                                            AutomationProperties.AutomationId="BeatTreeMenuItem"
+                                            ToolTipService.ToolTip="Opens a window that shows the beats of every problem" />
                             <MenuFlyoutItem Text="Topic Information"
                                             Command="{x:Bind ShellVm.TopicsCommand, Mode=OneWay}"
                                             AutomationProperties.AutomationId="TopicInformationMenuItem" />

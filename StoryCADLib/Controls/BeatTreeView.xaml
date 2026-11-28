@@ -1,0 +1,65 @@
+﻿<UserControl
+    x:Class="StoryCADLib.Controls.BeatTreeView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:StoryCADLib.Controls"
+    xmlns:sub="using:StoryCADLib.ViewModels.SubViewModels">
+
+    <!-- The contents of the beat tree window (issue #1546): one beat column for each Problem of the
+         beat tree, the buttons, and the list of Scenes and Problems. -->
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+          Padding="12" ColumnSpacing="12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="280" />
+        </Grid.ColumnDefinitions>
+
+        <!-- The beat columns move left and right. Each beat column moves its own lists up and down. -->
+        <ScrollViewer x:Name="ColumnsScroll" Grid.Column="0"
+                      HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled"
+                      AutomationProperties.AutomationId="BeatTreeColumnsScrollViewer"
+                      AutomationProperties.Name="Beat columns">
+            <Grid x:Name="ColumnsHost" Margin="0,0,0,12">
+                <ItemsControl x:Name="ColumnsItems"
+                              ItemsSource="{x:Bind ViewModel.Columns, Mode=OneWay}"
+                              IsTabStop="False">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="48" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="sub:BeatSheetsViewModel">
+                            <local:BeatColumnControl Width="230"
+                                                     ViewModel="{x:Bind}"
+                                                     ShowHeader="True"
+                                                     Loaded="Column_Loaded"
+                                                     Unloaded="Column_Unloaded" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- The connectors, over the beat columns. They get no input from the pointer. -->
+                <Canvas x:Name="ConnectorCanvas" IsHitTestVisible="False" />
+
+                <TextBlock Text="{x:Bind ViewModel.EmptyText, Mode=OneWay}"
+                           TextWrapping="Wrap" MaxWidth="420"
+                           HorizontalAlignment="Left" VerticalAlignment="Top" />
+            </Grid>
+        </ScrollViewer>
+
+        <!-- The buttons act on the beat column that has the selection. -->
+        <StackPanel Grid.Column="1" Spacing="16" VerticalAlignment="Center">
+            <local:StructureCommandsControl ViewModel="{x:Bind ViewModel.ActiveColumn, Mode=OneWay}" />
+            <ToggleSwitch Header="Beat descriptions"
+                          IsOn="{x:Bind ViewModel.ShowBeatDescriptions, Mode=TwoWay}"
+                          MinWidth="0"
+                          AutomationProperties.AutomationId="BeatTreeDescriptionsToggle" />
+        </StackPanel>
+
+        <local:StructureElementListControl Grid.Column="2"
+                                           ViewModel="{x:Bind ViewModel.ElementList, Mode=OneWay}" />
+    </Grid>
+</UserControl>

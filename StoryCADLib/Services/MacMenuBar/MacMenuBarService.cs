@@ -340,6 +340,10 @@ public class MacMenuBarService
         AddActionItem(toolsMenu, "Key Questions", "keyQuestions:", "k",
             NSEventModifierFlagCommand, () => _shellVm.KeyQuestionsCommand.Execute(null));
 
+        // Beat Tree
+        AddActionItem(toolsMenu, "Beat Tree", "beatTree:", "",
+            0, () => _shellVm.BeatTreeCommand.Execute(null));
+
         // Topic Information
         AddActionItem(toolsMenu, "Topic Information", "topicInfo:", "",
             0, () => _shellVm.TopicsCommand.Execute(null));

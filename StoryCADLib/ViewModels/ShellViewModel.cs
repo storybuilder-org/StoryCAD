@@ -159,6 +159,9 @@ public class ShellViewModel : ObservableRecipient
         // Tools commands
         KeyQuestionsCommand = new RelayCommand(async () => await OutlineManager.KeyQuestionsTool(),
             SerializationLock.CanExecuteCommands);
+        BeatTreeCommand = new RelayCommand(
+            () => Ioc.Default.GetRequiredService<StoryCADLib.Services.BeatTree.BeatTreeWindowService>().Open(),
+            SerializationLock.CanExecuteCommands);
         TopicsCommand = new RelayCommand(async () => await OutlineManager.TopicsTool(),
             SerializationLock.CanExecuteCommands);
         MasterPlotsCommand = new RelayCommand(async () => await OutlineManager.MasterPlotTool(),
@@ -430,6 +433,7 @@ public class ShellViewModel : ObservableRecipient
 
     // Tools MenuFlyOut Commands
     public RelayCommand KeyQuestionsCommand { get; }
+    public RelayCommand BeatTreeCommand { get; }
     public RelayCommand TopicsCommand { get; }
     public RelayCommand MasterPlotsCommand { get; }
     public RelayCommand DramaticSituationsCommand { get; }
@@ -1079,6 +1083,7 @@ public class ShellViewModel : ObservableRecipient
         // or the toolbar button stays stuck disabled after a serialization-lock cycle.
         BuyCreditsCommand.NotifyCanExecuteChanged();
         KeyQuestionsCommand.NotifyCanExecuteChanged();
+        BeatTreeCommand.NotifyCanExecuteChanged();
         TopicsCommand.NotifyCanExecuteChanged();
         MasterPlotsCommand.NotifyCanExecuteChanged();
         DramaticSituationsCommand.NotifyCanExecuteChanged();
@@ -1753,6 +1758,16 @@ public class ShellViewModel : ObservableRecipient
             {
                 _statusTimer.Stop();
                 Logger.Log(LogLevel.Debug, "Status timer stopped");
+            }
+
+            // The beat tree window shows the outline that is about to close.
+            try
+            {
+                Ioc.Default.GetRequiredService<StoryCADLib.Services.BeatTree.BeatTreeWindowService>().Close();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(LogLevel.Warn, ex, "Error closing the beat tree window");
             }
 
             // 4. Destroy Collaborator service
