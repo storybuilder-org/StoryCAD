@@ -307,6 +307,98 @@ public class ReportFormatterTests
 
     #endregion
 
+    #region Elements on no beat (issue #1546)
+
+    private static (AppState appState, StoryModel model, ProblemModel story, OutlineService outline) NewStoryWithProblem()
+    {
+        var appState = Ioc.Default.GetRequiredService<AppState>();
+        var storyModel = new StoryModel();
+        var overview = new OverviewModel("Test Story", storyModel, null);
+        storyModel.ExplorerView.Add(overview.Node);
+        appState.CurrentDocument = new StoryDocument(storyModel);
+        var story = new ProblemModel("Main Conflict", storyModel, null);
+        overview.StoryProblem = story.Uuid;
+        return (appState, storyModel, story, Ioc.Default.GetRequiredService<OutlineService>());
+    }
+
+    [TestMethod]
+    public void FormatUnassignedElementsReport_OnNoBeat_ListsApart()
+    {
+        var (appState, model, story, outline) = NewStoryWithProblem();
+        var orphan = new SceneModel("Orphan Scene", model, null);
+        var waitingScene = new SceneModel("Waiting Scene", model, null);
+        var waitingProblem = new ProblemModel("Waiting Problem", model, null);
+        var placed = new SceneModel("Placed Scene", model, null);
+        outline.CreateBeat(story, "Beat", "Desc");
+        outline.AddStructureElement(model, story, waitingScene.Uuid);
+        outline.AddStructureElement(model, story, waitingProblem.Uuid);
+        outline.AssignElementToBeat(model, story, 0, placed.Uuid);
+
+        var result = new ReportFormatter(appState).FormatUnassignedElementsReport();
+
+        var unassignedScenes = result.IndexOf("Unassigned Scenes", StringComparison.Ordinal);
+        var problemsOnNoBeat = result.IndexOf("Problems On No Beat", StringComparison.Ordinal);
+        var scenesOnNoBeat = result.IndexOf("Scenes On No Beat", StringComparison.Ordinal);
+        Assert.IsTrue(unassignedScenes >= 0 && problemsOnNoBeat > unassignedScenes && scenesOnNoBeat > problemsOnNoBeat);
+        var orphanAt = result.IndexOf("Orphan Scene", StringComparison.Ordinal);
+        Assert.IsTrue(orphanAt > unassignedScenes && orphanAt < problemsOnNoBeat, "A scene in no problem is unassigned");
+        var waitingProblemAt = result.IndexOf("Waiting Problem", StringComparison.Ordinal);
+        Assert.IsTrue(waitingProblemAt > problemsOnNoBeat && waitingProblemAt < scenesOnNoBeat);
+        Assert.IsTrue(result.IndexOf("Waiting Scene", StringComparison.Ordinal) > scenesOnNoBeat);
+        Assert.AreEqual(result.IndexOf("Waiting Scene", StringComparison.Ordinal),
+            result.LastIndexOf("Waiting Scene", StringComparison.Ordinal), "A scene on no beat is not also unassigned");
+        Assert.IsFalse(result.Contains("Placed Scene"), "A scene on a beat is in neither list");
+    }
+
+    [TestMethod]
+    public void FormatStoryProblemStructureReport_ElementOnNoBeat_IsInItsGroup()
+    {
+        var (appState, model, story, outline) = NewStoryWithProblem();
+        var waitingProblem = new ProblemModel("Waiting Problem", model, null);
+        var inside = new SceneModel("Scene Inside", model, null);
+        outline.CreateBeat(waitingProblem, "Inner Beat", "Desc");
+        outline.AssignElementToBeat(model, waitingProblem, 0, inside.Uuid);
+        outline.AddStructureElement(model, story, waitingProblem.Uuid);
+
+        var result = new ReportFormatter(appState).FormatStoryProblemStructureReport();
+
+        var group = result.IndexOf("On no beat:", StringComparison.Ordinal);
+        Assert.IsTrue(group >= 0, "The report has the group");
+        Assert.IsTrue(result.IndexOf("Waiting Problem", StringComparison.Ordinal) > group);
+        Assert.IsTrue(result.IndexOf("Scene Inside", StringComparison.Ordinal) > group,
+            "The report goes into a problem on no beat");
+    }
+
+    [TestMethod]
+    public void FormatStoryProblemStructureReport_NothingOnNoBeat_HasNoGroup()
+    {
+        var (appState, model, story, outline) = NewStoryWithProblem();
+        outline.CreateBeat(story, "Beat", "Desc");
+        outline.AssignElementToBeat(model, story, 0, new SceneModel("Placed Scene", model, null).Uuid);
+
+        var result = new ReportFormatter(appState).FormatStoryProblemStructureReport();
+
+        Assert.IsFalse(result.Contains("On no beat:"));
+    }
+
+    [TestMethod]
+    public void FormatPlotStructureDiagram_ChildOnNoBeat_IsShown()
+    {
+        var (appState, model, story, outline) = NewStoryWithProblem();
+        var waiting = new ProblemModel("Waiting Problem", model, null);
+        var deeper = new ProblemModel("Deeper Problem", model, null);
+        outline.CreateBeat(waiting, "Inner Beat", "Desc");
+        outline.AssignElementToBeat(model, waiting, 0, deeper.Uuid);
+        outline.AddStructureElement(model, story, waiting.Uuid);
+
+        var result = new ReportFormatter(appState).FormatPlotStructureDiagram();
+
+        Assert.IsTrue(result.Contains("(on no beat) \u2192 Waiting Problem"));
+        Assert.IsTrue(result.Contains("Inner Beat \u2192 Deeper Problem"), "The diagram goes into a problem on no beat");
+    }
+
+    #endregion
+
     #region Phase 4c: FormatPlotStructureDiagram Tests
 
     [TestMethod]

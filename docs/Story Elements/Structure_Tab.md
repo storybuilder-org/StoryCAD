@@ -54,18 +54,26 @@ To assign an element to a beat:
 3. Select the element you want to assign.
 4. Click the **Assign** button (left chevron) between the two lists.
 
-The beat now shows the assigned element's name and icon. To remove an assignment, select the beat and click the **Unassign** button (right chevron).
+The beat now shows the assigned element's name and icon. You can also drag an element from the right list onto a beat.
+
+To take an element off a beat, select the beat and click the **Unassign** button (right chevron). The element stays with the problem, in the **On no beat** list. To remove it from the problem altogether, select it and click **Remove from problem**.
+
+An element can belong to a problem without being on a beat. Below the beats is a list named **On no beat**. To put an element there, select it in the right list and click **Add to problem**, or drag it onto the list. Use this when you know a scene belongs to a problem but have not decided where, or when the problem has no beat sheet yet.
+
+The right list shows whether each scene or problem is on a beat, on no beat, or not used anywhere.
 
 **Comparing descriptions:** The bottom of the tab shows two description panels side by side. The left panel displays the selected beat's description (what this moment in the story needs). The right panel displays the selected element's description (what the scene or problem contains). Compare the two to decide whether the assignment makes sense.
 
 ### Button Reference
 
-Seven buttons sit between the two lists. Each button displays a tooltip when you hover over it:
+Nine buttons sit between the two lists. Each button displays a tooltip when you hover over it:
 
 | Button | Icon | What it does |
 |--------|------|--------------|
 | Assign | Left chevron | Assign the selected element to the selected beat |
-| Unassign | Right chevron | Remove the assignment from the selected beat |
+| Unassign | Right chevron | Take the element off the selected beat. It stays with the problem, on no beat |
+| Add to problem | Circled plus | Add the selected element to this problem, on no beat |
+| Remove from problem | Circled minus | Remove the selected element from this problem and from all its beats |
 | Add | Plus sign | Add a new beat to the beat sheet |
 | Delete | Trash can | Delete the selected beat (asks for confirmation) |
 | Move Up | Up arrow | Move the selected beat up in the list |
@@ -82,19 +90,25 @@ Every beat sheet is an editable starting point. When you load Save the Cat, you 
 - **Reorder** beats using the Move Up and Move Down buttons to match your story's flow.
 - **Save** your modified beat sheet to a file so you can reuse it on other projects.
 
-The original template is never modified. Selecting Save the Cat from the dropdown again restores the original beats -- but be aware that reloading a template clears all your existing beat assignments for that problem.
+The original template is never modified. If you choose a different beat sheet, or choose the same one again, your scenes and sub-problems stay with the problem. They move to the **On no beat** list, in the order they had, ready to be placed on the new beats. Edits you made to the old beats are lost.
+
+When you delete a beat that holds an element, StoryCAD asks whether to keep the element with the problem or remove it.
 
 ### Beat Sheet Rules
 
 Keep these guidelines in mind as you work:
 
-- **Scenes can appear in multiple beats.** A scene can and should accomplish more than one thing (see the Purpose of Scene on the Scene form's Development tab). You can also assign a scene to beats on different problems, tying those problems together.
+- **Scenes can appear in multiple beats.** A scene can and should accomplish more than one thing (see the Purpose of Scene on the Scene form's Development tab). You can also assign a scene to beats on different problems, tying those problems together. When you put a scene on a second beat of the same problem, StoryCAD asks whether to move it or put it on both.
 
 - **Sub-problems can only appear once.** You can assign a sub-problem to one beat in one parent problem. When you assign a sub-problem, you are making a promise to yourself to plot that problem into scenes as well, using its own Structure tab.
 
 - **Not every beat needs to be filled.** When reviewing your outline, you may find that a plot hole corresponds to a beat you left empty. Beat sheets also help diagnose other plotting issues: lack of structure, pacing problems, weak character arcs, subplot integration, and weak endings.
 
 - **A beat sheet is a pattern, not a cage.** Once you choose a beat sheet, you are shaping an aspect of your story's structure. Edit the beats freely to make the template serve your story rather than the other way around.
+
+### The Beat Tree
+
+**Tools > Beat Tree** opens a window that shows your whole plot at once. Each problem is a column. The Story Problem is first. Each beat is a card, and a line joins a card that holds a sub-problem to that sub-problem's column. Everything you can do on the Structure tab you can do here, in any column, and the two stay in step.
 
 ### Reports
 
@@ -104,7 +118,7 @@ The Generate Reports dialog includes a **Story Problem Structure** checkbox. Whe
 
 - **Plot Structure Diagram:** A problems-only tree showing how sub-problems connect through beat sheets, starting from the Story Problem. Scenes are excluded -- this is purely the structural skeleton of your plot. Use it to see the big picture of how subplots and complications relate to the main story.
 
-- **Unassigned Elements:** Lists problems and scenes that are not assigned to any beat sheet. Use this to find "orphan" story elements that may have been forgotten or need to be integrated into your plot structure.
+- **Unassigned Elements:** Lists problems and scenes that belong to no problem, and separately those that belong to a problem but are on no beat. Use this to find "orphan" story elements that may have been forgotten or need to be integrated into your plot structure.
 
 If you have not set a Story Problem on the Story Overview form, these reports will be blank.
 

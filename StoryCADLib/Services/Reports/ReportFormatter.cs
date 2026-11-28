@@ -625,7 +625,54 @@ public class ReportFormatter
             ProcessBeat(beat, output, _storyModel, 1, processedElements);
         }
 
+        ProcessElementsOnNoBeat(storyProblem, output, _storyModel, 1, processedElements);
+
         return output.ToString();
+    }
+
+    /// <summary>
+    ///     Adds the group "On no beat:" for one Problem: the Scenes and Problems that belong to
+    ///     the Problem and are on none of its beats (issue #1546). The report goes into a Problem
+    ///     of the group as it does for a Problem on a beat. A Problem with no such element gets no group.
+    /// </summary>
+    private void ProcessElementsOnNoBeat(ProblemModel problem, StringBuilder output, StoryModel storyModel,
+        int indentLevel, HashSet<Guid> processedElements)
+    {
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        var elements = new List<StoryElement>();
+        foreach (var guid in outlineService.GetElementsOnNoBeat(problem))
+        {
+            if (!processedElements.Contains(guid) &&
+                storyModel.StoryElements.StoryElementGuids.TryGetValue(guid, out var element) &&
+                !outlineService.IsInTrash(element))
+            {
+                elements.Add(element);
+            }
+        }
+
+        if (elements.Count == 0)
+        {
+            return;
+        }
+
+        var indent = new string('\t', indentLevel);
+        output.AppendLine($"{indent}On no beat:");
+        foreach (var element in elements)
+        {
+            processedElements.Add(element.Uuid);
+            output.AppendLine($"{indent}   {element.Name}");
+            if (element is ProblemModel child)
+            {
+                foreach (var subBeat in child.StructureBeats)
+                {
+                    ProcessBeat(subBeat, output, storyModel, indentLevel + 1, processedElements);
+                }
+
+                ProcessElementsOnNoBeat(child, output, storyModel, indentLevel + 1, processedElements);
+            }
+        }
+
+        output.AppendLine($"{indent}\t-------------");
     }
 
     private void ProcessBeat(StructureBeat beat, StringBuilder output, StoryModel storyModel, int indentLevel,
@@ -667,6 +714,8 @@ public class ReportFormatter
                             ProcessBeat(subBeat, output, storyModel, indentLevel + 1, processedElements);
                         }
                     }
+
+                    ProcessElementsOnNoBeat(problemElement, output, storyModel, indentLevel + 1, processedElements);
                 }
 
                 // Append separator with proper indentation
@@ -768,10 +817,7 @@ public class ReportFormatter
         var indent = new string('\t', indentLevel);
         output.AppendLine($"{indent}{problem.Name}");
 
-        if (problem.StructureBeats == null || !problem.StructureBeats.Any())
-            return;
-
-        foreach (var beat in problem.StructureBeats)
+        foreach (var beat in problem.StructureBeats ?? new System.Collections.ObjectModel.ObservableCollection<StructureBeat>())
         {
             if (beat.Guid == Guid.Empty)
                 continue;
@@ -782,6 +828,19 @@ public class ReportFormatter
             {
                 output.AppendLine($"{indent}\t{beat.Title} \u2192 {subProblem.Name}");
                 BuildPlotDiagram(subProblem, output, indentLevel + 2, processedElements);
+            }
+        }
+
+        // The child Problems that belong to this Problem on no beat (issue #1546)
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
+        foreach (var guid in outlineService.GetElementsOnNoBeat(problem))
+        {
+            if (!processedElements.Contains(guid) &&
+                _storyModel.StoryElements.StoryElementGuids.TryGetValue(guid, out var element) &&
+                element is ProblemModel waiting && !outlineService.IsInTrash(waiting))
+            {
+                output.AppendLine($"{indent}\t(on no beat) \u2192 {waiting.Name}");
+                BuildPlotDiagram(waiting, output, indentLevel + 2, processedElements);
             }
         }
     }
@@ -795,23 +854,7 @@ public class ReportFormatter
         output.AppendLine("StoryCAD - Unassigned Elements Report");
         output.AppendLine();
 
-        // Collect all scene GUIDs that are referenced in any beat sheet
-        var assignedSceneGuids = new HashSet<Guid>();
-        foreach (var element in _storyModel.StoryElements)
-        {
-            if (element is ProblemModel problem)
-            {
-                foreach (var beat in problem.StructureBeats)
-                {
-                    if (beat.Guid != Guid.Empty)
-                    {
-                        assignedSceneGuids.Add(beat.Guid);
-                    }
-                }
-            }
-        }
-
-        // Unassigned Problems (not bound as a beat in any other problem's beat sheet)
+        // Unassigned Problems (in no other Problem: not on a beat, and not on no beat)
         output.AppendLine("============== Unassigned Problems =============");
         var unassignedProblems = _storyModel.StoryElements
             .OfType<ProblemModel>()
@@ -841,11 +884,12 @@ public class ReportFormatter
 
         output.AppendLine();
 
-        // Unassigned Scenes (not referenced by any beat in any problem)
+        // Unassigned Scenes (in no Problem: not on a beat, and not on no beat)
+        var outlineService = Ioc.Default.GetRequiredService<OutlineService>();
         output.AppendLine("============== Unassigned Scenes =============");
         var unassignedScenes = _storyModel.StoryElements
             .OfType<SceneModel>()
-            .Where(s => !assignedSceneGuids.Contains(s.Uuid))
+            .Where(s => outlineService.GetStructureUse(_storyModel, s.Uuid) == StructureUse.NotUsed)
             .ToList();
 
         if (unassignedScenes.Any())
@@ -860,7 +904,33 @@ public class ReportFormatter
             output.AppendLine("  None");
         }
 
+        // The elements that belong to a Problem and are on no beat (issue #1546).
+        // They are apart from the unassigned elements, so that a writer finds each one that still needs a beat.
+        AppendOnNoBeat(output, outlineService, "Problems On No Beat", _storyModel.StoryElements.OfType<ProblemModel>());
+        AppendOnNoBeat(output, outlineService, "Scenes On No Beat", _storyModel.StoryElements.OfType<SceneModel>());
+
         return output.ToString();
+    }
+
+    private void AppendOnNoBeat(StringBuilder output, OutlineService outlineService, string heading,
+        IEnumerable<StoryElement> elements)
+    {
+        output.AppendLine();
+        output.AppendLine($"============== {heading} =============");
+        var onNoBeat = elements
+            .Where(e => !outlineService.IsInTrash(e) &&
+                        outlineService.GetStructureUse(_storyModel, e.Uuid) == StructureUse.OnNoBeat)
+            .ToList();
+        if (onNoBeat.Count == 0)
+        {
+            output.AppendLine("  None");
+            return;
+        }
+
+        foreach (var element in onNoBeat)
+        {
+            output.AppendLine($"  {element.Name}");
+        }
     }
 
     /// <summary>

@@ -65,10 +65,10 @@
    **Expected:** Dropdown opens.
 
 3. Select "Hero's Journey".
-   **Expected:** A confirmation dialog appears. Dialog text warns that switching templates will clear existing beat assignments. Dialog has at minimum a confirm and a cancel button.
+   **Expected:** A confirmation dialog appears, titled "Change the beat sheet?". Dialog has a Confirm and a Cancel button.
 
 4. Note the exact dialog text.
-   **Expected:** Dialog mentions that existing assignments will be lost (wording may vary but must communicate data loss risk).
+   **Expected:** Dialog says that the scenes and problems stay in the problem, on no beat, and that changes to the beats are lost (issue #1546).
 
 **Pass/Fail:** ______
 
@@ -88,7 +88,7 @@
 
 ---
 
-### BS-004: Confirm the template switch — assignments cleared
+### BS-004: Confirm the template switch — elements kept on no beat
 **Priority:** Critical
 **Time:** ~1 minute
 
@@ -96,7 +96,7 @@
 
 **Steps:**
 1. Click Confirm (OK or equivalent) on the confirmation dialog.
-   **Expected:** Beat sheet switches to "Hero's Journey". The beats list now shows Hero's Journey beats. The previously assigned beat is gone. No assignments carry over from Save the Cat.
+   **Expected:** Beat sheet switches to "Hero's Journey". The beats list now shows Hero's Journey beats, and none of them has an element. The "On no beat" list below the beats shows "Opening Scene": the element stays with the problem (issue #1546).
 
 **Pass/Fail:** ______
 
@@ -116,7 +116,7 @@
    **Expected:** Dialog closes. The beat sheet dropdown reflects the loaded file name or "Custom". The beats list populates with the beats from the file.
 
 3. Verify beat count and titles match what was saved.
-   **Expected:** Beats are identical to what was in the file.
+   **Expected:** Beats are identical to what was in the file. Any element that was on a beat before the load is in the "On no beat" list (issue #1546).
 
 **Pass/Fail:** ______
 
@@ -334,13 +334,13 @@
    **Expected:** Beat is highlighted. The beat shows "Opening Scene" and the scene icon.
 
 2. Click the Unassign button (right chevron).
-   **Expected:** "Opening Image" returns to showing the beat title only with the neutral bullet icon. "Unassigned" appears in the description area (or the description area shows the beat's own description only). No confirmation dialog is required for unassign.
+   **Expected:** "Opening Image" returns to showing the beat title only with the neutral bullet icon, and stays selected. "Opening Scene" appears in the "On no beat" list: it stays with the problem (issue #1546). No confirmation dialog is required for unassign.
 
 **Pass/Fail:** ______
 
 ---
 
-### BU-002: Unassign a problem — BoundStructure reference cleared
+### BU-002: Unassign a problem — it stays with its parent, on no beat
 **Priority:** Critical
 **Time:** ~1 minute
 
@@ -351,10 +351,10 @@
    **Expected:** Beat is highlighted showing "Sub-Problem A".
 
 2. Click the Unassign button.
-   **Expected:** "Midpoint" returns to bullet icon (unassigned). "Sub-Problem A" becomes available again in the Problem elements list for reassignment to any beat.
+   **Expected:** "Midpoint" returns to bullet icon (unassigned). "Sub-Problem A" appears in the "On no beat" list: it still belongs to this problem (issue #1546).
 
-3. Switch to the Problem radio and verify "Sub-Problem A" is available (not grayed out or hidden) as if it were never assigned.
-   **Expected:** "Sub-Problem A" appears normally in the elements list.
+3. Switch to the Problem radio and find "Sub-Problem A" in the elements list.
+   **Expected:** "Sub-Problem A" is in the elements list, marked "on no beat". Assigning it to a beat of this problem asks no question. To free it for another problem, select it in "On no beat" and click Remove from problem.
 
 **Pass/Fail:** ______
 
@@ -430,7 +430,7 @@
 
 ---
 
-### BE-005: Delete an assigned beat — assignment also removed
+### BE-005: Delete an assigned beat — keep or remove its element
 **Priority:** High
 **Time:** ~2 minutes
 
@@ -441,10 +441,10 @@
    **Expected:** Beat is highlighted showing the assignment.
 
 2. Click Delete. Review the confirmation dialog text.
-   **Expected:** Dialog text mentions that the beat's assignment will also be removed (e.g., "Delete beat 'Opening Image'? This will also remove its scene/problem assignment.").
+   **Expected:** Dialog names the beat and its element, and has three buttons: "Keep in the Problem", "Remove from the Problem" and "Cancel" (issue #1546).
 
-3. Click Confirm.
-   **Expected:** "Opening Image" is removed. "Opening Scene" is no longer assigned to any beat on this problem. The scene is available for reassignment.
+3. Click "Keep in the Problem".
+   **Expected:** "Opening Image" is removed. "Opening Scene" is in the "On no beat" list. (With "Remove from the Problem", the scene leaves the problem and the elements list shows it with no mark.)
 
 **Pass/Fail:** ______
 
@@ -1066,7 +1066,7 @@
 
 **Steps:**
 1. Find the Unassigned Elements section of the report.
-   **Expected:** The section is present and has two sub-sections: "Unassigned Problems" and "Unassigned Scenes".
+   **Expected:** The section is present and has four sub-sections: "Unassigned Problems", "Unassigned Scenes", "Problems On No Beat" and "Scenes On No Beat" (issue #1546).
 
 2. Verify "New Test Scene" appears in the "Unassigned Scenes" section.
    **Expected:** The scene is listed.
@@ -1076,6 +1076,9 @@
 
 4. Verify that "Sub-Problem A" does NOT appear in Unassigned Problems if it is currently assigned to a beat.
    **Expected:** Assigned problems are excluded from Unassigned Problems.
+
+5. Take a scene off its beat with the Unassign button, regenerate the reports, and find the scene.
+   **Expected:** The scene is under "Scenes On No Beat", and not under "Unassigned Scenes".
 
 **Pass/Fail:** ______
 

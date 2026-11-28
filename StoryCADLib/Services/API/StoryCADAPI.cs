@@ -1784,7 +1784,11 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
                  elementGuid MUST be the GUID of a Scene or Problem element.
                  To find Scenes/Problems: Call GetAllElements and filter by ElementType,
                  or call SearchForText to find elements by name.
-                 Use ClearBeatAssignment to remove an assignment.
+                 The element then belongs to the Problem. A Scene can be on more than one beat
+                 and in more than one Problem. A Problem belongs to one Problem and is on one beat:
+                 assigning it moves it from where it was.
+                 If the beat already has an element, that element stays in the Problem, on no beat.
+                 Use ClearBeatAssignment to take an element off a beat.
                  """)]
     public OperationResult<bool> AssignElementToBeat(Guid problemGuid, int beatIndex, Guid elementGuid)
     {
@@ -1826,6 +1830,7 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
                  problemGuid MUST be the GUID of a Problem element with beats.
                  beatIndex is 0-based (first beat is index 0).
                  After clearing, the beat remains but has no linked Scene/Problem.
+                 The element still belongs to the Problem, on no beat.
                  Use AssignElementToBeat to assign a new element.
                  """)]
     public OperationResult<bool> ClearBeatAssignment(Guid problemGuid, int beatIndex)
@@ -1909,7 +1914,8 @@ public class StoryCADApi(OutlineService outlineService, ListData listData, Contr
                  Deletes a beat from the Problem's structure.
                  problemGuid MUST be the GUID of a Problem element with beats.
                  beatIndex is 0-based (first beat is index 0).
-                 This is a destructive action - the beat and any assignment are removed.
+                 This is a destructive action - the beat is removed.
+                 An element that was on the beat still belongs to the Problem, on no beat.
                  Remaining beats shift down to fill the gap.
                  """)]
     public OperationResult<bool> DeleteBeat(Guid problemGuid, int beatIndex)
