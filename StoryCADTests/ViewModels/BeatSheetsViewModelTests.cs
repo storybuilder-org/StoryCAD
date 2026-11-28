@@ -962,6 +962,39 @@ public class BeatSheetsViewModelTests
     }
 
     [TestMethod]
+    public void ElementSummary_SceneWithRichText_IsPlainText()
+    {
+        var scene = AddScene("Scene");
+        scene.Description = @"{\rtf1\ansi{\fonttbl{\f0 Segoe UI;}}\f0\fs20 The marlin takes the bait.\par}";
+        var beat = new StructureBeat("Beat", "What the beat needs");
+
+        Assert.AreEqual(string.Empty, beat.ElementSummary, "A beat with no element has no summary");
+
+        beat.Guid = scene.Uuid;
+
+        Assert.AreEqual("The marlin takes the bait.", beat.ElementSummary);
+    }
+
+    [TestMethod]
+    public void Refresh_ElementRenamedOnAnotherForm_CardReadsItAgain()
+    {
+        var scene = AddScene("Old name");
+        _beatEditor.LoadBeats(_problemModel, _storyModel);
+        _beatEditor.StructureModelTitle = "Save The Cat";
+        Outline.AssignElementToBeat(_storyModel, _problemModel, 0, scene.Uuid);
+        var beat = _beatEditor.StructureBeats[0];
+        var raised = new List<string>();
+        beat.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+        scene.Name = "New name";
+        _beatEditor.Refresh();
+
+        CollectionAssert.Contains(raised, nameof(StructureBeat.ElementName));
+        CollectionAssert.Contains(raised, nameof(StructureBeat.ElementSummary));
+        Assert.AreEqual("New name", beat.ElementName);
+    }
+
+    [TestMethod]
     public void SaveBeats_DoesNotWriteBeatsOrParent()
     {
         _beatEditor.LoadBeats(_problemModel, _storyModel);

@@ -22,6 +22,10 @@ public sealed partial class BeatColumnControl : UserControl
         nameof(ShowBeatDescriptions), typeof(bool), typeof(BeatColumnControl),
         new PropertyMetadata(false, (d, _) => ((BeatColumnControl)d).ApplyVisibility()));
 
+    public static readonly DependencyProperty ShowElementDescriptionsProperty = DependencyProperty.Register(
+        nameof(ShowElementDescriptions), typeof(bool), typeof(BeatColumnControl),
+        new PropertyMetadata(false, (d, _) => ((BeatColumnControl)d).ApplyVisibility()));
+
     public BeatColumnControl()
     {
         InitializeComponent();
@@ -49,6 +53,13 @@ public sealed partial class BeatColumnControl : UserControl
         set => SetValue(ShowBeatDescriptionsProperty, value);
     }
 
+    /// <summary>True shows the description of the Scene or Problem on each card and in the list "On no beat".</summary>
+    public bool ShowElementDescriptions
+    {
+        get => (bool)GetValue(ShowElementDescriptionsProperty);
+        set => SetValue(ShowElementDescriptionsProperty, value);
+    }
+
     /// <summary>Raised when one of the two lists gets the focus. The beat tree window uses it.</summary>
     public event EventHandler<BeatSheetsViewModel> Activated;
 
@@ -71,6 +82,8 @@ public sealed partial class BeatColumnControl : UserControl
         HeaderPanel.Visibility = ShowHeader ? Visibility.Visible : Visibility.Collapsed;
         ((VisibilityHolder)Resources["DescriptionVisibility"]).Value =
             ShowBeatDescriptions ? Visibility.Visible : Visibility.Collapsed;
+        ((VisibilityHolder)Resources["ElementDescriptionVisibility"]).Value =
+            ShowElementDescriptions ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void List_GotFocus(object sender, RoutedEventArgs e)

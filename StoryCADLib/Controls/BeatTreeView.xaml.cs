@@ -57,6 +57,13 @@ public sealed partial class BeatTreeView : UserControl
                 column.ShowBeatDescriptions = ViewModel.ShowBeatDescriptions;
             }
         }
+        else if (e.PropertyName == nameof(BeatTreeViewModel.ShowElementDescriptions))
+        {
+            foreach (var column in _columns)
+            {
+                column.ShowElementDescriptions = ViewModel.ShowElementDescriptions;
+            }
+        }
         else if (e.PropertyName == nameof(BeatTreeViewModel.Connectors))
         {
             _drawnKey = string.Empty;
@@ -74,6 +81,7 @@ public sealed partial class BeatTreeView : UserControl
 
         _columns.Add(column);
         column.ShowBeatDescriptions = ViewModel?.ShowBeatDescriptions ?? false;
+        column.ShowElementDescriptions = ViewModel?.ShowElementDescriptions ?? false;
         column.Activated += Column_Activated;
         Watch(column.BeatsList);
         Watch(column.NoBeatList);

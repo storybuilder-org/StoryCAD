@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:StoryCADLib.Controls"
+    xmlns:converters="using:StoryCADLib.Converters"
     xmlns:models="using:StoryCADLib.Models"
     xmlns:tools="using:StoryCADLib.ViewModels.Tools">
 
@@ -10,6 +11,8 @@
          The Structure tab uses it with no header. The beat tree window uses one for each Problem. -->
     <UserControl.Resources>
         <local:VisibilityHolder x:Key="DescriptionVisibility" Value="Collapsed" />
+        <local:VisibilityHolder x:Key="ElementDescriptionVisibility" Value="Collapsed" />
+        <converters:RtfToPlainTextConverter x:Key="RtfToPlainText" />
     </UserControl.Resources>
 
     <Grid x:Name="ColumnRoot" RowSpacing="6"
@@ -72,7 +75,7 @@
                     <Grid ColumnDefinitions="Auto,*"
                           VerticalAlignment="Center"
                           Margin="8,8,8,8"
-                          RowDefinitions="Auto,Auto,Auto"
+                          RowDefinitions="Auto,Auto,Auto,Auto"
                           Background="Transparent"
                           AllowDrop="True"
                           DragOver="Target_DragOver"
@@ -80,7 +83,7 @@
                           AutomationProperties.Name="{x:Bind Title, Mode=OneWay}">
                         <!-- Icon spans the rows -->
                         <SymbolIcon Grid.Column="0"
-                                    Grid.RowSpan="3"
+                                    Grid.RowSpan="4"
                                     Symbol="{x:Bind ElementIcon, Mode=OneWay}"
                                     Margin="0,0,12,0"
                                     VerticalAlignment="Center" />
@@ -109,6 +112,17 @@
                                    TextWrapping="Wrap"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    FontSize="13" />
+
+                        <!-- Description of the Scene or Problem, when its switch is on -->
+                        <TextBlock Grid.Column="1"
+                                   Grid.Row="3"
+                                   Text="{x:Bind ElementSummary, Mode=OneWay}"
+                                   Visibility="{Binding Value, Source={StaticResource ElementDescriptionVisibility}}"
+                                   TextWrapping="Wrap"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxLines="6"
+                                   FontSize="12"
+                                   Margin="0,4,0,0" />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
@@ -136,9 +150,16 @@
                   AutomationProperties.Name="On no beat">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:StoryElement">
-                    <TextBlock Text="{x:Bind Name, Mode=OneWay}" TextWrapping="Wrap"
-                               Margin="0,4"
-                               AutomationProperties.Name="{x:Bind Name, Mode=OneWay}" />
+                    <StackPanel Margin="0,4" AutomationProperties.Name="{x:Bind Name, Mode=OneWay}">
+                        <TextBlock Text="{x:Bind Name, Mode=OneWay}" TextWrapping="Wrap" />
+                        <TextBlock Text="{x:Bind Description, Mode=OneWay, Converter={StaticResource RtfToPlainText}}"
+                                   Visibility="{Binding Value, Source={StaticResource ElementDescriptionVisibility}}"
+                                   TextWrapping="Wrap"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxLines="6"
+                                   FontSize="12"
+                                   Margin="0,4,0,0" />
+                    </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

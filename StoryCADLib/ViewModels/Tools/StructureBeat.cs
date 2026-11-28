@@ -69,9 +69,29 @@ public class StructureBeat : ObservableObject
             OnPropertyChanged(nameof(Element));
             OnPropertyChanged(nameof(ElementName));
             OnPropertyChanged(nameof(ElementDescription));
+            OnPropertyChanged(nameof(ElementSummary));
             OnPropertyChanged(nameof(ElementIcon));
         }
     }
+
+    /// <summary>
+    ///     Tells each screen to read the element of this beat again. The name or the description
+    ///     of the element can change on another form while a card shows it (issue #1546).
+    /// </summary>
+    public void RefreshElement()
+    {
+        OnPropertyChanged(nameof(Element));
+        OnPropertyChanged(nameof(ElementName));
+        OnPropertyChanged(nameof(ElementDescription));
+        OnPropertyChanged(nameof(ElementSummary));
+        OnPropertyChanged(nameof(ElementIcon));
+    }
+
+    /// <summary>
+    ///     The description of the element as plain text, for a card. Empty when the beat has no element.
+    /// </summary>
+    [JsonIgnore]
+    public string ElementSummary => StoryCADLib.Converters.RtfToPlainTextConverter.ToPlainText(ElementDescription);
 
     /// <summary>
     ///     Link to element (resolved lazily via service lookup)

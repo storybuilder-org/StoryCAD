@@ -57,6 +57,10 @@
                           IsOn="{x:Bind ViewModel.ShowBeatDescriptions, Mode=TwoWay}"
                           MinWidth="0"
                           AutomationProperties.AutomationId="BeatTreeDescriptionsToggle" />
+            <ToggleSwitch Header="Scene descriptions"
+                          IsOn="{x:Bind ViewModel.ShowElementDescriptions, Mode=TwoWay}"
+                          MinWidth="0"
+                          AutomationProperties.AutomationId="BeatTreeElementDescriptionsToggle" />
         </StackPanel>
 
         <local:StructureElementListControl Grid.Column="2"

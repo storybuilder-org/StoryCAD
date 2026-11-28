@@ -67,6 +67,15 @@ public class BeatTreeViewModel : ObservableRecipient
         set => SetProperty(ref _showBeatDescriptions, value);
     }
 
+    private bool _showElementDescriptions;
+
+    /// <summary>True shows the description of the Scene or Problem on each card and in each list "On no beat".</summary>
+    public bool ShowElementDescriptions
+    {
+        get => _showElementDescriptions;
+        set => SetProperty(ref _showElementDescriptions, value);
+    }
+
     private string _emptyText = string.Empty;
 
     /// <summary>The text for an outline with no Story Problem. If not, an empty string.</summary>

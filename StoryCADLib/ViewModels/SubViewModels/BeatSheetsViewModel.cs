@@ -357,6 +357,11 @@ public class BeatSheetsViewModel : ObservableObject
 
         ProblemName = _problemModel.Name;
         ProblemCategory = _problemModel.ProblemCategory;
+        foreach (var beat in StructureBeats)
+        {
+            beat.RefreshElement();
+        }
+
         FillElementsOnNoBeat();
         _isLoading = false;
     }
