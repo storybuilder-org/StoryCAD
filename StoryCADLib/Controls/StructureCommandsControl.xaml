@@ -1,0 +1,92 @@
+﻿<UserControl
+    x:Class="StoryCADLib.Controls.StructureCommandsControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- The buttons for one Problem (issue #1546). Each action of the drag operation has a button here. -->
+    <!-- Two columns of buttons so all nine fit the row at the 1036 x 744 window of the manual -->
+    <Grid VerticalAlignment="Center" Margin="4,0"
+          ColumnSpacing="4" RowSpacing="4"
+          ColumnDefinitions="Auto,Auto"
+          RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+        <!-- Assignment group -->
+        <Button x:Name="AssignButton" Grid.Row="0" Grid.Column="0"
+                Width="44" Height="36"
+                Command="{x:Bind ViewModel.AssignBeatCommand, Mode=OneWay}"
+                ToolTipService.ToolTip="Assign element to beat"
+                AutomationProperties.AutomationId="AssignBeatButton"
+                AutomationProperties.Name="Assign Beat">
+            <FontIcon Glyph="&#xE72B;" FontSize="18" FontWeight="SemiBold" />
+        </Button>
+        <Button x:Name="UnassignButton" Grid.Row="0" Grid.Column="1"
+                Width="44" Height="36"
+                Command="{x:Bind ViewModel.UnbindElementCommand, Mode=OneWay}"
+                ToolTipService.ToolTip="Take element off the beat"
+                AutomationProperties.AutomationId="UnassignBeatButton"
+                AutomationProperties.Name="Unassign Beat">
+            <FontIcon Glyph="&#xE72A;" FontSize="18" FontWeight="SemiBold" />
+        </Button>
+        <Button x:Name="AddElementButton" Grid.Row="1" Grid.Column="0"
+                Width="44" Height="36"
+                Command="{x:Bind ViewModel.AddElementCommand, Mode=OneWay}"
+                ToolTipService.ToolTip="Add element to problem, on no beat"
+                AutomationProperties.AutomationId="AddStructureElementButton"
+                AutomationProperties.Name="Add to problem">
+            <FontIcon Glyph="&#xECC8;" FontSize="18" FontWeight="SemiBold" />
+        </Button>
+        <Button x:Name="RemoveElementButton" Grid.Row="1" Grid.Column="1"
+                Width="44" Height="36"
+                Command="{x:Bind ViewModel.RemoveElementCommand, Mode=OneWay}"
+                ToolTipService.ToolTip="Remove element from problem"
+                AutomationProperties.AutomationId="RemoveStructureElementButton"
+                AutomationProperties.Name="Remove from problem">
+            <FontIcon Glyph="&#xECC9;" FontSize="18" FontWeight="SemiBold" />
+        </Button>
+
+        <!-- Spacer -->
+        <Rectangle Grid.Row="2" Grid.ColumnSpan="2" Height="1" Margin="0,2"
+                   Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" />
+
+        <!-- Beat management group -->
+        <Button x:Name="AddBeatButton" Grid.Row="3" Grid.Column="0"
+                Width="44" Height="36"
+                Command="{x:Bind ViewModel.CreateBeatCommand, Mode=OneWay}"
+                ToolTipService.ToolTip="Add a new beat"
+                AutomationProperties.AutomationId="AddBeatButton"
+                AutomationProperties.Name="Add Beat">
+            <FontIcon Glyph="&#xE710;" FontSize="18" FontWeight="SemiBold" />
+        </Button>
+        <Button x:Name="DeleteBeatButton" Grid.Row="3" Grid.Column="1"
+                Width="44" Height="36"
+                Command="{x:Bind ViewModel.DeleteBeatCommand, Mode=OneWay}"
+                ToolTipService.ToolTip="Delete selected beat"
+                AutomationProperties.AutomationId="DeleteBeatButton"
+                AutomationProperties.Name="Delete Beat">
+            <FontIcon Glyph="&#xE74D;" FontSize="18" FontWeight="SemiBold" />
+        </Button>
+        <Button x:Name="MoveUpButton" Grid.Row="4" Grid.Column="0"
+                Width="44" Height="36"
+                Command="{x:Bind ViewModel.MoveUpCommand, Mode=OneWay}"
+                ToolTipService.ToolTip="Move beat up"
+                AutomationProperties.AutomationId="BeatMoveUpButton"
+                AutomationProperties.Name="Move Beat Up">
+            <FontIcon Glyph="&#xE70E;" FontSize="18" FontWeight="SemiBold" />
+        </Button>
+        <Button x:Name="MoveDownButton" Grid.Row="4" Grid.Column="1"
+                Width="44" Height="36"
+                Command="{x:Bind ViewModel.MoveDownCommand, Mode=OneWay}"
+                ToolTipService.ToolTip="Move beat down"
+                AutomationProperties.AutomationId="BeatMoveDownButton"
+                AutomationProperties.Name="Move Beat Down">
+            <FontIcon Glyph="&#xE70D;" FontSize="18" FontWeight="SemiBold" />
+        </Button>
+        <Button x:Name="SaveBeatSheetButton" Grid.Row="5" Grid.Column="0"
+                Width="44" Height="36"
+                Command="{x:Bind ViewModel.SaveBeatSheetCommand, Mode=OneWay}"
+                ToolTipService.ToolTip="Save beat sheet to file"
+                AutomationProperties.AutomationId="SaveBeatSheetButton"
+                AutomationProperties.Name="Save Beat Sheet">
+            <FontIcon Glyph="&#xE74E;" FontSize="18" FontWeight="SemiBold" />
+        </Button>
+    </Grid>
+</UserControl>

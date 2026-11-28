@@ -248,24 +248,6 @@
                                VerticalAlignment="Center"
                                Margin="0,0,0,4" />
 
-                                    <!-- Row 0, Col 1: Elements label + horizontal radios -->
-                                    <StackPanel Grid.Row="0"
-                                Grid.Column="1"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center">
-                                        <TextBlock Text="Elements"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,8,0" />
-                                        <RadioButtons
-                                            ItemsSource="{x:Bind BeatSheetsVm.ElementList.ElementSource}"
-                                            SelectedItem="{x:Bind BeatSheetsVm.ElementList.SelectedElementSource, Mode=TwoWay}"
-                                            MaxColumns="2"
-                                            VerticalAlignment="Center"
-                                            AutomationProperties.AutomationId="StructureElementsRadios"
-                                            AutomationProperties.Name="Elements">
-                                        </RadioButtons>
-                                    </StackPanel>
-
                                     <!-- Row 1, Col 0: Beat Sheet ComboBox (bindings unchanged) -->
                                     <ComboBox Grid.Row="1"
                               Grid.Column="0"
@@ -306,163 +288,20 @@
                                 <!-- elements list -->
                             </Grid.ColumnDefinitions>
 
-                            <!-- Beats list -->
-                            <ListView Grid.Column="0"
-                      ItemsSource="{x:Bind BeatSheetsVm.StructureBeats, Mode=TwoWay}"
-                      SelectedItem="{x:Bind BeatSheetsVm.SelectedBeat, Mode=TwoWay}"
-                      SelectedIndex="{x:Bind BeatSheetsVm.SelectedBeatIndex, Mode=TwoWay}"
-                      SelectionMode="Single"
-                      BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                      BorderThickness="1"
-                      CornerRadius="4"
-                      HorizontalAlignment="Stretch"
-                      AutomationProperties.AutomationId="BeatsList">
-                                <ListView.ItemContainerStyle>
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="HorizontalContentAlignment"
-                                                Value="Stretch" />
-                                        <Setter Property="BorderBrush"
-                                                Value="{ThemeResource DividerStrokeColorDefaultBrush}" />
-                                        <Setter Property="BorderThickness"
-                                                Value="0,0,0,1" />
-                                        <Setter Property="Padding"
-                                                Value="8,4,8,4" />
-                                    </Style>
-                                </ListView.ItemContainerStyle>
-
-                                <ListView.ItemTemplate>
-                                    <DataTemplate x:DataType="tools:StructureBeat">
-                                        <!-- Accessible name must bind inline here: WinUI 3 silently ignores bindings in Style Setters (Setter.Value docs; unoplatform/uno#4826). -->
-                                        <Grid ColumnDefinitions="Auto,*"
-                              VerticalAlignment="Center"
-                              Margin="8,8,8,8"
-                              RowDefinitions="Auto,Auto"
-                              Background="Transparent"
-                              AutomationProperties.Name="{x:Bind Title, Mode=OneWay}">
-                                            <!-- Icon spans both rows -->
-                                            <SymbolIcon Grid.Column="0"
-                                        Grid.RowSpan="2"
-                                        Symbol="{x:Bind ElementIcon, Mode=OneWay}"
-                                        Margin="0,0,12,0"
-                                        VerticalAlignment="Center" />
-
-                                            <!-- Beat Title on top row -->
-                                            <TextBlock Grid.Column="1"
-                                       Grid.Row="0"
-                                       Text="{x:Bind Title, Mode=OneWay}"
-                                       TextWrapping="Wrap"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,4" />
-
-                                            <!-- Element Name on bottom row -->
-                                            <TextBlock Grid.Column="1"
-                                       Grid.Row="1"
-                                       Text="{x:Bind ElementName, Mode=OneWay}"
-                                       TextWrapping="Wrap"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                       FontSize="13" />
-                                        </Grid>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
+                            <!-- The beats and the elements on no beat (issue #1546).
+                                 The beat tree window shows the same control for each Problem. -->
+                            <usercontrols:BeatColumnControl Grid.Column="0"
+                                                            ViewModel="{x:Bind BeatSheetsVm}"
+                                                            ShowHeader="False" />
 
                             <!-- Command buttons -->
-                            <!-- Two columns of buttons so all seven fit the row at the manual's 1036 x 744 window -->
-                            <Grid Grid.Column="1" VerticalAlignment="Center" Margin="4,0"
-                                  ColumnSpacing="4" RowSpacing="4"
-                                  ColumnDefinitions="Auto,Auto"
-                                  RowDefinitions="Auto,Auto,Auto,Auto,Auto">
-                                <!-- Assignment group -->
-                                <Button x:Name="AssignButton" Grid.Row="0" Grid.Column="0"
-                                        Width="44" Height="36"
-                                        Command="{x:Bind BeatSheetsVm.AssignBeatCommand}"
-                                        ToolTipService.ToolTip="Assign element to beat"
-                                        AutomationProperties.AutomationId="AssignBeatButton"
-                                        AutomationProperties.Name="Assign Beat">
-                                    <FontIcon Glyph="&#xE72B;" FontSize="18" FontWeight="SemiBold" />
-                                </Button>
-                                <Button x:Name="UnassignButton" Grid.Row="0" Grid.Column="1"
-                                        Width="44" Height="36"
-                                        Command="{x:Bind BeatSheetsVm.UnbindElementCommand}"
-                                        ToolTipService.ToolTip="Remove assignment"
-                                        AutomationProperties.AutomationId="UnassignBeatButton"
-                                        AutomationProperties.Name="Unassign Beat">
-                                    <FontIcon Glyph="&#xE72A;" FontSize="18" FontWeight="SemiBold" />
-                                </Button>
-
-                                <!-- Spacer -->
-                                <Rectangle Grid.Row="1" Grid.ColumnSpan="2" Height="1" Margin="0,2"
-                                           Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" />
-
-                                <!-- Beat management group -->
-                                <Button x:Name="AddBeatButton" Grid.Row="2" Grid.Column="0"
-                                        Width="44" Height="36"
-                                        Command="{x:Bind BeatSheetsVm.CreateBeatCommand}"
-                                        ToolTipService.ToolTip="Add a new beat"
-                                        AutomationProperties.AutomationId="AddBeatButton"
-                                        AutomationProperties.Name="Add Beat">
-                                    <FontIcon Glyph="&#xE710;" FontSize="18" FontWeight="SemiBold" />
-                                </Button>
-                                <Button x:Name="DeleteBeatButton" Grid.Row="2" Grid.Column="1"
-                                        Width="44" Height="36"
-                                        Command="{x:Bind BeatSheetsVm.DeleteBeatCommand}"
-                                        ToolTipService.ToolTip="Delete selected beat"
-                                        AutomationProperties.AutomationId="DeleteBeatButton"
-                                        AutomationProperties.Name="Delete Beat">
-                                    <FontIcon Glyph="&#xE74D;" FontSize="18" FontWeight="SemiBold" />
-                                </Button>
-                                <Button x:Name="MoveUpButton" Grid.Row="3" Grid.Column="0"
-                                        Width="44" Height="36"
-                                        Command="{x:Bind BeatSheetsVm.MoveUpCommand}"
-                                        ToolTipService.ToolTip="Move beat up"
-                                        AutomationProperties.AutomationId="BeatMoveUpButton"
-                                        AutomationProperties.Name="Move Beat Up">
-                                    <FontIcon Glyph="&#xE70E;" FontSize="18" FontWeight="SemiBold" />
-                                </Button>
-                                <Button x:Name="MoveDownButton" Grid.Row="3" Grid.Column="1"
-                                        Width="44" Height="36"
-                                        Command="{x:Bind BeatSheetsVm.MoveDownCommand}"
-                                        ToolTipService.ToolTip="Move beat down"
-                                        AutomationProperties.AutomationId="BeatMoveDownButton"
-                                        AutomationProperties.Name="Move Beat Down">
-                                    <FontIcon Glyph="&#xE70D;" FontSize="18" FontWeight="SemiBold" />
-                                </Button>
-                                <Button x:Name="SaveBeatSheetButton" Grid.Row="4" Grid.Column="0"
-                                        Width="44" Height="36"
-                                        Command="{x:Bind BeatSheetsVm.SaveBeatSheetCommand}"
-                                        ToolTipService.ToolTip="Save beat sheet to file"
-                                        AutomationProperties.AutomationId="SaveBeatSheetButton"
-                                        AutomationProperties.Name="Save Beat Sheet">
-                                    <FontIcon Glyph="&#xE74E;" FontSize="18" FontWeight="SemiBold" />
-                                </Button>
-                            </Grid>
+                            <usercontrols:StructureCommandsControl Grid.Column="1"
+                                                                   VerticalAlignment="Center"
+                                                                   ViewModel="{x:Bind BeatSheetsVm}" />
 
                             <!-- Elements list (Scenes / Problems) -->
-                            <Grid Grid.Column="2">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
-
-                                <!-- Dynamic Elements List (Scenes or Problems based on RadioButtons) -->
-                                <ListView x:Name="ElementsList"
-                          Grid.Row="0"
-                          ItemsSource="{x:Bind BeatSheetsVm.ElementList.CurrentElementSource, Mode=OneWay}"
-                          SelectedItem="{x:Bind BeatSheetsVm.ElementList.SelectedListElement, Mode=TwoWay}"
-                          SelectionMode="Single"
-                          BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                          BorderThickness="1"
-                          CornerRadius="4"
-                          AutomationProperties.AutomationId="ElementsList">
-                                    <!-- Names wrap so a long scene name is not cut off at the 1036 x 744 window. -->
-                                    <ListView.ItemTemplate>
-                                        <DataTemplate x:DataType="tools:StructureElementItem">
-                                            <TextBlock Text="{x:Bind Name, Mode=OneWay}" TextWrapping="Wrap"
-                                                       Margin="0,4"
-                                                       AutomationProperties.Name="{x:Bind Name, Mode=OneWay}" />
-                                        </DataTemplate>
-                                    </ListView.ItemTemplate>
-                                </ListView>
-                            </Grid>
+                            <usercontrols:StructureElementListControl Grid.Column="2"
+                                                                      ViewModel="{x:Bind BeatSheetsVm.ElementList}" />
                         </Grid>
 
                         <!-- ===== ROW 2 : BEAT + ELEMENT DESCRIPTIONS ===== -->
